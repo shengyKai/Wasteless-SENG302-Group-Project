@@ -1,4 +1,4 @@
-# Seng302 Example Project
+# Seng302 Wasteless
 
 Basic project template using `gradle`, `npm`, `Spring Boot`, `Vue.js` and `Gitlab CI`.
 
@@ -48,7 +48,11 @@ Running on: http://localhost:9499/ by default
 
 ## Contributors
 
-- SENG302 teaching team
+- SENG302 Team 17
+    - Sheng-He Phua
+    - Ben Smith
+    - Nathan Smithies
+    - Edward Wong
 
 ## References
 
