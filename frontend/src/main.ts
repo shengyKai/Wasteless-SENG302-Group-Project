@@ -26,28 +26,30 @@
  */
 
 /**
- * Declare all available services here
+ * Main entry point for your Vue app
  */
-import axios from 'axios'  
-  
-const SERVER_URL = process.env.VUE_APP_SERVER_ADD;
+import Vue from 'vue'
+import App from './App.vue'
 
-const instance = axios.create({  
-  baseURL: SERVER_URL,
-  timeout: 1000  
-});  
-  
-export default {  
-  // (C)reate  
-  createNew: (firstName, lastName) => instance.post('students', {firstName, lastName}),  
-  // (R)ead  
-  getAll: () => instance.get('students', {  
-    transformResponse: [function (data) {  
-      return data? JSON.parse(data)._embedded.students : data;  
-    }]  
-  }),  
-  // (U)pdate  
-  updateForId: (id, firstName, lastName) => instance.put('students/'+id, {firstName, lastName}), 
-  // (D)elete  
-  removeForId: (id) => instance.delete('students/'+id)  
-}
+Vue.config.productionTip = false
+
+import VueLogger from 'vuejs-logger';
+
+const options = {
+  isEnabled: true,
+  logLevel : 'debug',
+  stringifyArguments : false,
+  showLogLevel : true,
+  showMethodName : false,
+  separator: '|',
+  showConsoleColors: true
+};
+
+Vue.use(VueLogger as any /* Hackish fix for now */ , options);
+
+/* eslint-disable no-new */
+new Vue({
+  el: '#app',
+  components: { App },
+  template: '<App/>'
+});
