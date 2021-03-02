@@ -27,9 +27,14 @@
 
 // See https://cli.vuejs.org/config/#vue-config-js
 module.exports = {
-  // allows to define reusable templates instead of simple views
-  // see https://vuejs.org/v2/guide/installation.html#Runtime-Compiler-vs-Runtime-only
-  runtimeCompiler: true,
-  // because of nginx inner routing and http-server, must set public path to empty
-  publicPath:''
+ // allows to define reusable templates instead of simple views
+ // see https://vuejs.org/v2/guide/installation.html#Runtime-Compiler-vs-Runtime-only
+ runtimeCompiler: true,
+
+ // because of nginx inner routing and http-server, must set public path to empty
+ publicPath:'',
+
+ transpileDependencies: [
+   'vuetify'
+ ]
 };
