@@ -1,14 +1,24 @@
 <template>
   <div id="app">
-    <Students />
+    <!-- IF: Logged In -->
+    <div v-if="loggedIn">
+      <Students />
+    </div>
+
+    <!-- IF: Logged Out -->
+    <div v-else>
+      <Auth />
+    </div>
+
     <footer class="info">
-      <h4>Seng302 template project</h4>
+      <h4>Wasteless</h4>
     </footer>
   </div>
 </template>
 
 <script>
 import Students from "./components/Students";
+import Auth from "./components/Auth";
 // Vue app instance
 // it is declared as a reusable component in this case.
 // For global instance https://vuejs.org/v2/guide/instance.html
@@ -18,13 +28,14 @@ const app = {
   components: {
     // list your components here to register them (located under 'components' folder)
     // https://vuejs.org/v2/guide/components-registration.html
-    Students,
+    Auth,
+    Students
   },
   // app initial state
   // https://vuejs.org/v2/guide/instance.html#Data-and-Methods
-  data: () => {
-    return {};
-  },
+  data: () => ({
+    loggedIn: false
+  })
 };
 
 // make the 'app' available
