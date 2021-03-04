@@ -3,7 +3,7 @@
     <v-card class="body">
       <div>
         <div class="profile-img">
-          <v-avatar size="200px">
+          <v-avatar size="200px" color="indigo">
             <img src="https://edit.co.uk/uploads/2016/12/Image-1-Alternatives-to-stock-photography-Thinkstock.jpg"/>
           </v-avatar>
         </div>

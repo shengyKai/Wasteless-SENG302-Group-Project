@@ -14,7 +14,7 @@
 </template>
 
 <script>
-import RegistrationPage from "./components/RegistrationPage.vue";
+import RegistrationPage from "./components/ProfilePage.vue";
 // Vue app instance
 // it is declared as a reusable component in this case.
 // For global instance https://vuejs.org/v2/guide/instance.html
