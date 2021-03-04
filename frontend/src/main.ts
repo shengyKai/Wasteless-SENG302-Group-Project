@@ -35,6 +35,11 @@ Vue.config.productionTip = false
 
 import VueLogger from 'vuejs-logger';
 
+// Import Plugins
+import vuetify from './plugins/vuetify';
+import './plugins/vue-router';
+import './plugins/vuex';
+
 const options = {
   isEnabled: true,
   logLevel : 'debug',
@@ -51,5 +56,6 @@ Vue.use(VueLogger as any /* Hackish fix for now */ , options);
 new Vue({
   el: '#app',
   components: { App },
+  vuetify,
   template: '<App/>'
 });

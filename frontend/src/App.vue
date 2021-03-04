@@ -1,14 +1,20 @@
 <template>
   <div id="app">
-    <Students />
-    <footer class="info">
-      <h4>Seng302 template project</h4>
-    </footer>
+    <!-- Sizes your content based upon application components -->
+    <RegistrationPage 
+    fullName="Tim Tam" 
+    nickname="Timmy" 
+    bio="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
+    email="tim.tam@hotmail.com"
+    dateOfBirth="1/1/1900"
+    phoneNo="0800 83 83 83"
+    address="10 Downing Street"
+    />
   </div>
 </template>
 
 <script>
-import Students from "./components/Students";
+import RegistrationPage from "./components/RegistrationPage.vue";
 // Vue app instance
 // it is declared as a reusable component in this case.
 // For global instance https://vuejs.org/v2/guide/instance.html
@@ -18,7 +24,7 @@ const app = {
   components: {
     // list your components here to register them (located under 'components' folder)
     // https://vuejs.org/v2/guide/components-registration.html
-    Students,
+    RegistrationPage,
   },
   // app initial state
   // https://vuejs.org/v2/guide/instance.html#Data-and-Methods
