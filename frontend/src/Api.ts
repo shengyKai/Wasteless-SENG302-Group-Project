@@ -67,7 +67,7 @@ function isUser(obj: any): obj is User {
   if (typeof obj.homeAddress !== 'string') return false;
   if (obj.created !== undefined && typeof obj.created !== 'string') return false;
   if (!['user', 'globalApplicationAdmin', 'defaultGlobalApplicationAdmin'].includes(obj.role)) return false;
-  if (!isNumberArray(obj.businessesAdministered)) return false;
+  if (obj.businessesAdministered !== undefined && !isNumberArray(obj.businessesAdministered)) return false;
 
   return true;
 }
