@@ -25,13 +25,13 @@
         outlined
       />
 
-      <v-text-field
+      <v-textarea
         v-model="bio"
         label="Bio"
         outlined
       />
 
-      <v-text-field
+      <v-date-picker
         v-model="dob"
         label="Date of Birth"
         outlined
@@ -49,12 +49,11 @@
         outlined
       />
 
-      <div class="button-row">
-        <v-btn @click="showLogin">
-          LOGIN
-        </v-btn>
+      <p @click="showLogin">Already have an account? Login.</p>
 
-        <v-btn type="submit">
+      <div class="button-row">
+
+        <v-btn type="submit" color="primary">
           REGISTER
         </v-btn>
       </div>

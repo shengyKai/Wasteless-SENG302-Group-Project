@@ -1,6 +1,8 @@
 <template>
   <div id="app">
-    <!-- Sizes your content based upon application components -->
+    <v-app>
+      <v-main>
+        <h1>Register</h1>
     <!--<RegistrationPage 
     fullName="Tim Tam" 
     nickname="Timmy" 
@@ -10,19 +12,22 @@
     phoneNo="0800 83 83 83"
     address="10 Downing Street"
     />-->
-    <!-- IF: Logged In -->
-    <div v-if="loggedIn">
-      <Students />
-    </div>
 
-    <!-- IF: Logged Out -->
-    <div v-else>
-      <Auth />
-    </div>
+        <!-- IF: Logged In -->
+        <div v-if="loggedIn">
+          <Students />
+        </div>
 
-    <footer class="info">
-      <h4>Wasteless</h4>
-    </footer>
+        <!-- IF: Logged Out -->
+        <div v-else>
+          <Auth />
+        </div>
+      </v-main>
+
+      <v-footer>
+        <h4>Wasteless</h4>
+      </v-footer>
+    </v-app>
   </div>
 </template>
 
