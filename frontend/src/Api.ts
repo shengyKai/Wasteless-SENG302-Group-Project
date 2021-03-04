@@ -34,20 +34,77 @@ const SERVER_URL = process.env.VUE_APP_SERVER_ADD;
 
 const instance = axios.create({  
   baseURL: SERVER_URL,
-  timeout: 1000  
+  timeout: 2000  
 });  
+
+type MaybeError<T> = T | string;
+
+type User = {
+  id: number,
+  firstName: string,
+  lastName: string,
+  middleName?: string,
+  nickname?: string,
+  bio?: string,
+  email: string,
+  dateOfBirth: string,
+  phoneNumber?: string,
+  homeAddress: string,
+  created?: string,
+  role: "user" | "globalApplicationAdmin" | "defaultGlobalApplicationAdmin",
+};
+
+function isUser(obj: any): obj is User {
+  if (typeof obj.id !== 'number') return false;
+  if (typeof obj.firstName !== 'string') return false;
+  if (typeof obj.lastName !== 'string') return false;
+  if (obj.middleName !== undefined && typeof obj.middleName !== 'string') return false;
+  if (obj.nickname !== undefined && typeof obj.nickname !== 'string') return false;
+  if (obj.bio !== undefined && typeof obj.bio !== 'string') return false;
+  if (typeof obj.email !== 'string') return false;
+  if (typeof obj.dateOfBirth !== 'string') return false;
+  if (obj.phoneNumber !== undefined && typeof obj.phoneNumber !== 'string') return false;
+  if (typeof obj.homeAddress !== 'string') return false;
+  if (obj.created !== undefined && typeof obj.created !== 'string') return false;
+  if (!['user', 'globalApplicationAdmin', 'defaultGlobalApplicationAdmin'].includes(obj.role)) return false;
+  if (!isNumberArray(obj.businessesAdministered)) return false;
+
+  return true;
+}
+
+function isNumberArray(obj: any): obj is number[] {
+  if (!Array.isArray(obj)) return false;
+  for (let elem of obj) {
+    if (typeof elem !== 'number') return false;
+  }
+  return true;
+}
+
+function isUserArray(obj: any): obj is User[] {
+  if (!Array.isArray(obj)) return false;
+  for (let elem of obj) {
+    if (!isUser(elem)) return false;
+  }
+  return true;
+}
   
 export default {  
-  // (C)reate  
-  createNew: (firstName: string, lastName: string) => instance.post('students', {firstName, lastName}),  
-  // (R)ead  
-  getAll: () => instance.get('students', {  
-    transformResponse: [function (data) {  
-      return data? JSON.parse(data)._embedded.students : data;  
-    }]  
-  }),  
-  // (U)pdate  
-  updateForId: (id: string, firstName: string, lastName: string) => instance.put('students/'+id, {firstName, lastName}), 
-  // (D)elete  
-  removeForId: (id: string) => instance.delete('students/'+id)  
+  async search(query: string): Promise<MaybeError<User[]>> {
+    let response;
+    try {
+      response = await instance.get('/users/search', {
+        params: {
+          'searchQuery': query,
+        }
+      });
+    } catch (error) {
+      return 'Request failed';
+    }
+
+    if (!isUserArray(response.data)) {
+      return 'Response is not user';
+    }
+
+    return response.data;
+  }
 }
