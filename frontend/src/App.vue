@@ -2,7 +2,6 @@
   <div id="app">
     <v-app>
       <v-main>
-        <h1>Register</h1>
         <!--<ProfilePage 
         fullName="Tim Tam" 
         nickname="Timmy" 

@@ -420,7 +420,10 @@ body {
   padding-top: 100px;
 }
 
-.logout-link {
-  font-size: 18px;
-  text-decoration: underline;
+.link {
+  cursor: pointer;
+}
+
+.link:hover {
+  opacity: 0.6;
 }

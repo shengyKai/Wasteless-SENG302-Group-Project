@@ -1,11 +1,14 @@
 <template>
-  <div v-if="login">
-    <Login @showRegister="togglePage" />
-  </div>
-  <div v-else>
-    <Register @showLogin="togglePage" />
+  <div class="container">
+    <div v-if="login">
+      <Login @showRegister="togglePage" />
+    </div>
+    <div v-else>
+      <Register @showLogin="togglePage" />
+    </div>
   </div>
 </template>
+
 
 <script>
 import Register from './Register';
@@ -29,3 +32,11 @@ export default {
   }
 }
 </script>
+
+
+<style scoped>
+.container {
+  max-width: 600px;
+  text-align: center;
+}
+</style>
