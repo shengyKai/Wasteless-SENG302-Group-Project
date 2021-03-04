@@ -14,7 +14,7 @@
           label="Password"
           :rules="passwordRules"
       ></v-text-field>
-      <v-btn @click="showProfile" color="primary" :disabled="!valid">Log in</v-btn>
+      <v-btn id="login-button" @click="showProfile" color="primary" :disabled="!valid">Log in</v-btn>
       <v-btn id="register-button" @click="showRegister" color="primary">Register</v-btn>
     </v-form>
   </v-container>
@@ -53,8 +53,8 @@ export default {
 .button-row {
   text-align: center;
 }
-.button-row button {
-  margin-right: 20px
+#login-button {
+  float: left
 }
 #register-button {
   float: right
