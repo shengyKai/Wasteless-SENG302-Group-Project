@@ -1,41 +1,49 @@
 <template>
-  <v-form @submit="register" v-on:submit.prevent>
+  <v-form @submit="register" v-model="valid">
     <h1>Register</h1>
 
     <v-container>
-      <!-- INPUT: Username -->
-      <v-text-field
-        v-model="username"
-        label="Username"
-        outlined
-      />
-
       <!-- INPUT: Email -->
       <v-text-field
+        class="required"
         v-model="email"
         label="Email"
+        :rules="mandatoryRules.concat(emailRules)"
         outlined
       />
 
       <!-- INPUT: Password -->
       <v-text-field
+        class="required"
         v-model="password"
         label="Password"
+        :rules="mandatoryRules"
         outlined
       />
 
       <!-- INPUT: Confirm Password -->
       <v-text-field
+        class="required"
         v-model="confirmPassword"
         label="Confirm Password"
+        :rules="mandatoryRules.concat(passwordConfirmationRule)"
         outlined
       />
 
       <!-- INPUT: Name -->
       <v-text-field
+        class="required"
         v-model="name"
         label="Name"
+        :rules="mandatoryRules"
         outlined
+      />
+
+      <!-- INPUT: Nickname -->
+      <v-text-field
+          v-model="nickname"
+          label="Nickname"
+          outlined
       />
 
       <!-- INPUT: Bio -->
@@ -56,8 +64,10 @@
       >
         <template v-slot:activator="{ on, attrs }">
           <v-text-field
+            class="required"
             v-model="dob"
             label="Date of Birth"
+            :rules="mandatoryRules"
             prepend-inner-icon="mdi-calendar"
             readonly
             v-bind="attrs"
@@ -96,8 +106,10 @@
 
       <!-- INPUT: Address -->
       <v-text-field
+        class="required"
         v-model="address"
         label="Address"
+        :rules="mandatoryRules"
         outlined
       />
 
@@ -111,9 +123,13 @@
       </p>
 
       <!-- Register -->
-      <v-btn type="submit" color="primary">
+      <v-btn
+          type="submit"
+          color="primary"
+          :disabled="!valid">
         REGISTER
       </v-btn>
+
     </v-container>
   </v-form>
 </template>
@@ -124,15 +140,22 @@ export default {
   name: 'Register',
   data() {
     return {
-      username: '',
+      valid: false,
       email: '',
       password: '',
       confirmPassword: '',
       name: '',
+      nickname: '',
       bio: '',
       dob: new Date().toISOString().substr(0, 10),
       phone: '',
       address: '',
+      emailRules: [
+        email => /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(email) || 'E-mail must be valid'
+      ],
+      mandatoryRules: [
+        field =>  !!field || 'Field is required'
+      ],
 
       modal: false
     }
@@ -144,13 +167,28 @@ export default {
     },
     // Complete registration with API
     register() {
-      console.log(this);
-      alert('TODO');
+      alert("TODO");
     },
     // Close the date picker modal
     closeDatePicker() {
       this.modal = false;
     }
+  },
+  computed: {
+    //The computed property below is dependent on two user input fields, password and password confirmation.
+    //Upon every change on
+    passwordConfirmationRule() {
+      return () =>
+          this.password === this.confirmPassword || "Passwords must match";
+    }
   }
 }
 </script>
+
+<style>
+/* Mandatory fields are accompanied with a * after it's respective labels*/
+.required label::after {
+  content: "*";
+  color: red;
+}
+</style>
