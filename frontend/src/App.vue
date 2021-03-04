@@ -21,9 +21,7 @@
         </div>
       </v-main>
 
-      <v-footer>
-        <h4>Wasteless</h4>
-      </v-footer>
+      <Footer/>
     </v-app>
   </div>
 </template>
@@ -31,6 +29,7 @@
 <script>
 import ProfilePage from "./components/ProfilePage.vue";
 import Auth from "./components/Auth";
+import Footer from './components/Footer';
 // Vue app instance
 // it is declared as a reusable component in this case.
 // For global instance https://vuejs.org/v2/guide/instance.html
@@ -42,6 +41,7 @@ const app = {
     // https://vuejs.org/v2/guide/components-registration.html
     ProfilePage,
     Auth,
+    Footer,
   },
   // app initial state
   // https://vuejs.org/v2/guide/instance.html#Data-and-Methods
