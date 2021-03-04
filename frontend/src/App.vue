@@ -28,7 +28,6 @@
 
 <script>
 import RegistrationPage from "./components/ProfilePage.vue";
-import Students from "./components/Students";
 import Auth from "./components/Auth";
 // Vue app instance
 // it is declared as a reusable component in this case.
@@ -41,7 +40,6 @@ const app = {
     // https://vuejs.org/v2/guide/components-registration.html
     RegistrationPage,
     Auth,
-    Students
   },
   // app initial state
   // https://vuejs.org/v2/guide/instance.html#Data-and-Methods
