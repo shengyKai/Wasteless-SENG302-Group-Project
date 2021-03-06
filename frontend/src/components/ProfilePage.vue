@@ -59,13 +59,8 @@
   </v-main>
 </template>
 
-<script lang="ts">
-
-// app Vue instance
-const RegistrationPage = {
-  name: "RegistrationPage",
-
-  // app initial state
+<script>
+export default {
   data: function () {
     return {
     };
@@ -73,32 +68,8 @@ const RegistrationPage = {
 
   mounted() {
   },
-
   props: ['fullName', 'nickname', 'bio', 'email', 'dateOfBirth', 'phoneNo', 'address'], 
-  // props: ['id'], 
-  // TODO fetch properties from the store instead
-
-  // computed properties
-  // http://vuejs.org/guide/computed.html
-  computed: {
-  },
-
-  filters: {
-  },
-
-  // methods that implement data logic.
-  // note there's no DOM manipulation here at all.
-  methods: {
-  },
-
-  // a custom directive to wait for the DOM to be updated
-  // before focusing on the input field.
-  // http://vuejs.org/guide/custom-directive.html
-  directives: {
-  },
 };
-
-export default RegistrationPage;
 </script>
 
 <style scoped>
