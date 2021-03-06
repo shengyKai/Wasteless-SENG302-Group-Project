@@ -1,9 +1,9 @@
 import Vue from 'vue';
 import VueRouter from 'vue-router';
 
-import Auth from "../components/Auth";
-import ProfilePage from "../components/ProfilePage";
-import Search from '../components/Search';
+import Auth from "../components/Auth/index.vue";
+import ProfilePage from "../components/ProfilePage.vue";
+import Search from '../components/Search.vue';
 
 Vue.use(VueRouter);
 

@@ -1,75 +1,71 @@
 <template>
-  <v-main>
-    <v-card class="body">
-      <div>
-        <div class="profile-img">
-          <v-avatar size="200px" color="indigo">
-            <img src="https://edit.co.uk/uploads/2016/12/Image-1-Alternatives-to-stock-photography-Thinkstock.jpg"/>
-          </v-avatar>
-        </div>
-        <div class="names">
-          <h1>
-            {{ fullName }}
-          </h1>
-          <h2><i>
-            {{ nickname }}
-          </i></h2>
-        </div>
+  <v-card class="body">
+    <div>
+      <div class="profile-img">
+        <v-avatar size="200px" color="indigo">
+          <img src="https://edit.co.uk/uploads/2016/12/Image-1-Alternatives-to-stock-photography-Thinkstock.jpg"/>
+        </v-avatar>
       </div>
+      <div class="names">
+        <h1>
+          {{ user.firstName }} {{ user.lastName }}
+        </h1>
+        <h2><i>
+          {{ user.nickname }}
+        </i></h2>
+      </div>
+    </div>
 
-      <div class="fields">
-        <v-simple-table>
-          <tbody>
-            <tr>
-              <td>
-                Email
-              </td>
-              <td>
-                {{ email }}
-              </td>
-              <td>
-                Date of Birth
-              </td>
-              <td>
-                {{ dateOfBirth }}
-              </td>
-            </tr>
-            <tr>
-              <td>
-                Phone Number
-              </td>
-              <td>
-                {{ phoneNo }}
-              </td>
-              <td>
-                Home Address
-              </td>
-              <td>
-                {{ address }}
-              </td>
-            </tr>
-            </tbody>
-        </v-simple-table>
-      </div>
+    <div class="fields">
+      <v-simple-table>
+        <tbody>
+          <tr>
+            <td>
+              Email
+            </td>
+            <td>
+              {{ user.email }}
+            </td>
+            <td>
+              Date of Birth
+            </td>
+            <td>
+              {{ user.dateOfBirth }}
+            </td>
+          </tr>
+          <tr>
+            <td>
+              Phone Number
+            </td>
+            <td>
+              {{ user.phoneNumber }}
+            </td>
+            <td>
+              Home Address
+            </td>
+            <td>
+              {{ user.homeAddress }}
+            </td>
+          </tr>
+          </tbody>
+      </v-simple-table>
+    </div>
 
-      <div>
-        {{ bio }}
-      </div>
-    </v-card>
-  </v-main>
+    <div>
+      {{ user.bio }}
+    </div>
+  </v-card>
 </template>
 
 <script>
 export default {
-  data: function () {
-    return {
-    };
-  },
-
-  mounted() {
-  },
-  props: ['fullName', 'nickname', 'bio', 'email', 'dateOfBirth', 'phoneNo', 'address'], 
-};
+  name: 'ProfilePage',
+  computed: {
+    user() {
+      return this.$store.state.user;
+    }
+  }
+}
 </script>
 
 <style scoped>
@@ -82,6 +78,7 @@ export default {
 .body {
   padding: 16px;
   width: 100%;
+  margin-top: 140px;
 }
 
 .names {

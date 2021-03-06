@@ -1,17 +1,30 @@
 <template>
   <v-app>
-    <AppBar />
-    
-    <div class="container-outer">
-      <div class="container-inner">
-        <!-- All content (except AppBar & Footer) should be a child of 'v-main'. -->
-        <v-main>
-          <router-view />
-        </v-main>
-      </div>
+    <div v-if="loggedIn">
+      <AppBar />
+
+      <v-main>
+        <div class="container-outer">
+          <div class="container-inner">
+            <!-- All content (except AppBar & Footer) should be a child of 'v-main'. -->
+              <ProfilePage />
+          </div>
+        </div>
+      </v-main>
     </div>
 
-    <Footer/>
+    <div v-else>
+      <v-main>
+        <div class="container-outer">
+          <div class="container-inner">
+            <!-- All content (except AppBar & Footer) should be a child of 'v-main'. -->
+              <Auth />
+          </div>
+        </div>
+      </v-main>
+    </div>
+
+    <Footer />
   </v-app>
 </template>
 
@@ -20,11 +33,20 @@ import ProfilePage from "./components/ProfilePage.vue";
 import Auth from "./components/Auth";
 import AppBar from "./components/AppBar";
 import Footer from './components/Footer';
+import store from './store';
+import router from './plugins/vue-router';
+
+// function setCookie(name) {
+//   const date = new Date();
+//   date.setFullYear(date.getFullYear() + 1);
+//   document.cookie = `name=${name}`;
+// }
+
 // Vue app instance
 // it is declared as a reusable component in this case.
 // For global instance https://vuejs.org/v2/guide/instance.html
 // For comparison: https://stackoverflow.com/questions/48727863/vue-export-default-vs-new-vue
-const app = {
+export default {
   name: "app",
   components: {
     // list your components here to register them (located under 'components' folder)
@@ -34,15 +56,14 @@ const app = {
     AppBar,
     Footer
   },
-  // app initial state
-  // https://vuejs.org/v2/guide/instance.html#Data-and-Methods
-  data: () => ({
-    loggedIn: false
-  })
+  store,
+  router,
+  computed: {
+    loggedIn() {
+      return this.$store.getters.isLoggedIn
+    }
+  }
 };
-
-// make the 'app' available
-export default app;
 </script>
 
 <style>

@@ -29,16 +29,18 @@
  * Main entry point for your Vue app
  */
 import Vue from 'vue'
-import App from './App.vue'
-
-Vue.config.productionTip = false
-
-import VueLogger from 'vuejs-logger';
 
 // Import Plugins
 import vuetify from './plugins/vuetify';
 import router from './plugins/vue-router';
 import './plugins/vuex';
+
+// Import App
+import App from './App.vue'
+
+Vue.config.productionTip = false
+
+import VueLogger from 'vuejs-logger';
 
 const options = {
   isEnabled: true,

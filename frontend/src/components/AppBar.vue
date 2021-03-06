@@ -5,5 +5,56 @@
         <h1>WASTELESS</h1>
       </div>
     </div>
+
+    <div class="text-center">
+      <v-menu offset-y>
+        <template v-slot:activator="{ on, attrs }">
+          <v-btn
+            icon
+            v-bind="attrs"
+            v-on="on"
+          >
+            <v-avatar>
+              <v-icon>
+                mdi-account-circle
+              </v-icon>
+            </v-avatar>
+          </v-btn>
+        </template>
+        <v-list>
+          <v-list-item>
+            <v-list-item-title
+              class="link"
+              @click="viewProfile"
+            >
+              Profile
+            </v-list-item-title>
+          </v-list-item>
+          <v-list-item>
+            <v-list-item-title
+              class="link"
+              @click="logout"
+            >
+              Logout
+            </v-list-item-title>
+          </v-list-item>
+        </v-list>
+      </v-menu>
+    </div>
   </v-app-bar>
 </template>
+
+<script>
+export default {
+  name: 'AppBar',
+  methods: {
+    viewProfile() {
+      this.$router.push('/profile');
+    },
+    logout() {
+      this.$store.commit('logoutUser');
+      this.$router.push('/');
+    }
+  }
+}
+</script>
