@@ -62,7 +62,7 @@ export default {
       if (this.$route.path === '/login') this.$router.push('/profile');
       this.loading = false;
     } else {
-      if (this.$route.path !== '/login') this.$router.push('/profile');
+      if (this.$route.path !== '/login') this.$router.push('/login');
     }
   },
   store,
