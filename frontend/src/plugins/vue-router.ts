@@ -12,6 +12,10 @@ const NotFound = {
     template: '<h1> 404 Not Found - {{ $route.path }} </h1>'
 };
 
+const ProfileNotFound = {
+    template: '<h1> 404 - Profile Not Found  </h1>'
+};
+
 const routes = [
     { path: '/', redirect: '/login'}, // TODO handle case when already logged in
 
@@ -19,7 +23,7 @@ const routes = [
     {   
         // for access path /profile -- or can direct to error page when ID not provided
         path: '/profile', 
-        component: ProfilePage, 
+        component: ProfileNotFound, 
         name: 'profile', 
 
         // for access path /profile/:id
