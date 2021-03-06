@@ -23,7 +23,7 @@ const routes = [
     {   
         // for access path /profile -- or can direct to error page when ID not provided
         path: '/profile', 
-        component: ProfileNotFound, 
+        component: ProfilePage, 
         name: 'profile', 
 
         // for access path /profile/:id
