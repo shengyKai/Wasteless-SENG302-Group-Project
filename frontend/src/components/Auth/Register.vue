@@ -113,11 +113,16 @@
       />
 
       <!-- INPUT: Address -->
-      <v-text-field
+      <v-autocomplete
         class="required"
         v-model="address"
         label="Address"
         :rules="mandatoryRules"
+        :items="items"
+        :loading="isLoading"
+        :search-input.sync="search"
+        item-text="name"
+        item-value="symbol"
         outlined
       />
 
@@ -171,10 +176,33 @@ export default {
         //if it does not follow the format, display error message
         field =>  !!field || 'Field is required'
       ],
-
-      modal: false
+      modal: false,
+      items: [],
+      isLoading: false,
+      search: null,
     }
   },
+
+
+  watch: {
+    search () {
+      // Items have already been loaded
+      if (this.items.length > 0) return
+      this.isLoading = true
+      // Lazily load input items
+      fetch('https://api.coingecko.com/api/v3/coins/list')
+          .then(res => res.clone().json())
+          .then(res => {
+            this.items = res
+          })
+          .catch(err => {
+            console.log(err)
+          })
+          .finally(() => (this.isLoading = false))
+    },
+  },
+
+  
   methods: {
     // Show login screen
     showLogin() {
@@ -199,6 +227,16 @@ export default {
     //it refers to the confirmPassword field)to revalidate itself upon any changes in the password field.
     passwordChange() {
       this.$refs.confirmPassword.validate();
+    },
+    querySelections (v) {
+      this.loading = true
+      // Simulated ajax query
+      setTimeout(() => {
+        this.items = this.states.filter(e => {
+          return (e || '').toLowerCase().indexOf((v || '').toLowerCase()) > -1
+        })
+        this.loading = false
+      }, 500)
     }
   },
   computed: {
@@ -213,6 +251,7 @@ export default {
     }
   }
 }
+
 </script>
 
 <style>
