@@ -1,41 +1,57 @@
 <template>
-  <v-form @submit="register" v-on:submit.prevent>
+  <v-form @submit="register" v-model="valid">
     <h1>Register</h1>
 
     <v-container>
-      <!-- INPUT: Username -->
-      <v-text-field
-        v-model="username"
-        label="Username"
-        outlined
-      />
-
       <!-- INPUT: Email -->
       <v-text-field
+        class="required"
         v-model="email"
         label="Email"
+        :rules="mandatoryRules.concat(emailRules)"
         outlined
       />
 
       <!-- INPUT: Password -->
       <v-text-field
+        class="required"
         v-model="password"
         label="Password"
+        @keyup="passwordChange"
+        :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
+        :type="showPassword ? 'text' : 'password'"
+        @click:append="showPassword = !showPassword"
+        :rules="mandatoryRules"
         outlined
       />
 
       <!-- INPUT: Confirm Password -->
       <v-text-field
+        ref="confirmPassword"
+        class="required"
         v-model="confirmPassword"
         label="Confirm Password"
+        :append-icon="showConfirmPassword ? 'mdi-eye' : 'mdi-eye-off'"
+        :type="showConfirmPassword ? 'text' : 'password'"
+        @click:append="showConfirmPassword = !showConfirmPassword"
+        :rules="mandatoryRules.concat(passwordConfirmationRule)"
         outlined
       />
 
       <!-- INPUT: Name -->
       <v-text-field
+        class="required"
         v-model="name"
         label="Name"
+        :rules="mandatoryRules"
         outlined
+      />
+
+      <!-- INPUT: Nickname -->
+      <v-text-field
+          v-model="nickname"
+          label="Nickname"
+          outlined
       />
 
       <!-- INPUT: Bio -->
@@ -56,8 +72,10 @@
       >
         <template v-slot:activator="{ on, attrs }">
           <v-text-field
+            class="required"
             v-model="dob"
             label="Date of Birth"
+            :rules="mandatoryRules"
             prepend-inner-icon="mdi-calendar"
             readonly
             v-bind="attrs"
@@ -96,8 +114,10 @@
 
       <!-- INPUT: Address -->
       <v-text-field
+        class="required"
         v-model="address"
         label="Address"
+        :rules="mandatoryRules"
         outlined
       />
 
@@ -111,9 +131,13 @@
       </p>
 
       <!-- Register -->
-      <v-btn type="submit" color="primary">
+      <v-btn
+          type="submit"
+          color="primary"
+          :disabled="!valid">
         REGISTER
       </v-btn>
+
     </v-container>
   </v-form>
 </template>
@@ -124,15 +148,29 @@ export default {
   name: 'Register',
   data() {
     return {
-      username: '',
+      showPassword: false,
+      showConfirmPassword: false,
+      valid: false,
       email: '',
       password: '',
       confirmPassword: '',
       name: '',
+      nickname: '',
       bio: '',
       dob: new Date().toISOString().substr(0, 10),
       phone: '',
       address: '',
+      emailRules: [
+        //regex rules for emails, example format is as such:
+        //"blah@hotmail.co
+        //if it does not follow the format, display error message
+        email => /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(email) || 'E-mail must be valid'
+      ],
+      mandatoryRules: [
+        //All fields with the class "required" will go through this ruleset to ensure the field is not empty.
+        //if it does not follow the format, display error message
+        field =>  !!field || 'Field is required'
+      ],
 
       modal: false
     }
@@ -144,13 +182,43 @@ export default {
     },
     // Complete registration with API
     register() {
-      console.log(this);
-      alert('TODO');
+      alert("TODO");
     },
     // Close the date picker modal
     closeDatePicker() {
       this.modal = false;
+    },
+    //Feature bug:
+    //After the user has successfully typed in the same values in the password and confirmPassword, if the user decides
+    //to change the password field value again first without editing the confirmPassword field after, because it has
+    //been validated once before, the form would recognize both fields to be valid. That is not what is wanted from
+    //this form validation.
+    //Feature fix:
+    //The bottom method solves that issue by observing the password field. That means the @keyup attribute in the
+    //password field observes every finished keystroke in there and calls the ref with "confirmPassword" (in this case
+    //it refers to the confirmPassword field)to revalidate itself upon any changes in the password field.
+    passwordChange() {
+      this.$refs.confirmPassword.validate();
+    }
+  },
+  computed: {
+    //The computed property below is dependent on two user input fields, password and password confirmation.
+    //After the user has typed in the password field, the confirmPassword field would check this rule for each
+    //change(in this case, each keystroke), and compare it with the password field. If they are not the same,
+    //the error message "Passwords must match" will show up at the bottom of the confirmPassword field, until it
+    //is the same.
+    passwordConfirmationRule() {
+      return () =>
+          this.password === this.confirmPassword || "Passwords must match";
     }
   }
 }
 </script>
+
+<style>
+/* Mandatory fields are accompanied with a * after it's respective labels*/
+.required label::after {
+  content: "*";
+  color: red;
+}
+</style>

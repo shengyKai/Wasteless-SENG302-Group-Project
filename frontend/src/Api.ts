@@ -52,9 +52,11 @@ type User = {
   homeAddress: string,
   created?: string,
   role: "user" | "globalApplicationAdmin" | "defaultGlobalApplicationAdmin",
+  businessesAdministered?: number[],
 };
 
 function isUser(obj: any): obj is User {
+  if (typeof obj !== 'object') return false;
   if (typeof obj.id !== 'number') return false;
   if (typeof obj.firstName !== 'string') return false;
   if (typeof obj.lastName !== 'string') return false;

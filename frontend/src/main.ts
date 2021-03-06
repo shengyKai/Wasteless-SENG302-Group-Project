@@ -37,7 +37,7 @@ import VueLogger from 'vuejs-logger';
 
 // Import Plugins
 import vuetify from './plugins/vuetify';
-import './plugins/vue-router';
+import router from './plugins/vue-router';
 import './plugins/vuex';
 
 const options = {
@@ -57,5 +57,6 @@ new Vue({
   el: '#app',
   components: { App },
   vuetify,
+  router,
   template: '<App/>'
 });
