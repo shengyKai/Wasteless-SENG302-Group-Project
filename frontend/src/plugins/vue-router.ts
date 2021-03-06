@@ -16,7 +16,22 @@ const routes = [
     { path: '/', redirect: '/login'}, // TODO handle case when already logged in
 
     { path: '/login',   component: Auth },
-    { path: '/profile', component: ProfilePage, name: 'profile' },
+    {   
+        // for access path /profile -- or can direct to error page when ID not provided
+        path: '/profile', 
+        component: ProfilePage, 
+        name: 'profile', 
+
+        // for access path /profile/:id
+        children: [
+            {
+            path: ':id',
+            name: 'profileData',
+            component: ProfilePage
+            },
+        ], 
+    },
+    
     { path: '/search',  component: SearchResults },
     { path: '*',        component: NotFound },
 ];
