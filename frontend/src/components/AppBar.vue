@@ -53,7 +53,7 @@ export default {
     },
     logout() {
       this.$store.commit('logoutUser');
-      this.$router.push('/');
+      this.$router.push('/login');
     }
   }
 }

@@ -1,30 +1,35 @@
 <template>
   <v-app>
-    <div v-if="loggedIn">
-      <AppBar />
-
-      <v-main>
-        <div class="container-outer">
-          <div class="container-inner">
-            <!-- All content (except AppBar & Footer) should be a child of 'v-main'. -->
-            <router-view />
-          </div>
-        </div>
-      </v-main>
+    <div v-if="loading">
+      <v-progress-circular color="primary" />
     </div>
-
     <div v-else>
-      <v-main>
-        <div class="container-outer">
-          <div class="container-inner">
-            <!-- All content (except AppBar & Footer) should be a child of 'v-main'. -->
-              <Auth />
-          </div>
-        </div>
-      </v-main>
-    </div>
+      <div v-if="loggedIn">
+        <AppBar />
 
-    <Footer />
+        <v-main>
+          <div class="container-outer">
+            <div class="container-inner">
+              <!-- All content (except AppBar & Footer) should be a child of 'v-main'. -->
+              <router-view />
+            </div>
+          </div>
+        </v-main>
+      </div>
+
+      <div v-else>
+        <v-main>
+          <div class="container-outer">
+            <div class="container-inner">
+              <!-- All content (except AppBar & Footer) should be a child of 'v-main'. -->
+                <Auth />
+            </div>
+          </div>
+        </v-main>
+      </div>
+
+      <Footer />
+    </div>
   </v-app>
 </template>
 
@@ -34,12 +39,7 @@ import AppBar from "./components/AppBar";
 import Footer from './components/Footer';
 import store from './store';
 import router from './plugins/vue-router';
-
-// function setCookie(name) {
-//   const date = new Date();
-//   date.setFullYear(date.getFullYear() + 1);
-//   document.cookie = `name=${name}`;
-// }
+import { COOKIE, getCookie } from './utils';
 
 // Vue app instance
 // it is declared as a reusable component in this case.
@@ -54,8 +54,24 @@ export default {
     AppBar,
     Footer
   },
+  async created() {
+    const cookie = getCookie(COOKIE.USER);
+    if (cookie) {
+      this.loading = true;
+      await this.$store.dispatch('getUser', cookie.split('=')[1]);
+      if (this.$route.path === '/login') this.$router.push('/profile');
+      this.loading = false;
+    } else {
+      if (this.$route.path !== '/login') this.$router.push('/profile');
+    }
+  },
   store,
   router,
+  data() {
+    return {
+      loading: false
+    }
+  },
   computed: {
     loggedIn() {
       return this.$store.getters.isLoggedIn

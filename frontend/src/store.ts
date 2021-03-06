@@ -1,5 +1,6 @@
 import axios from 'axios';
 import Vuex from 'vuex';
+import { COOKIE, deleteCookie, setCookie } from './utils';
 
 export interface User {
   id: number|null;
@@ -40,9 +41,11 @@ const store = new Vuex.Store({
   mutations: {
     setUser (state, payload: User) {
       state.user = payload;
+      if (payload.id) setCookie(COOKIE.USER, payload.id)
     },
     logoutUser (state) {
       state.user = user;
+      deleteCookie(COOKIE.USER);
     }
   },
   getters: {
