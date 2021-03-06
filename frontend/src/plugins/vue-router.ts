@@ -3,7 +3,7 @@ import VueRouter from 'vue-router';
 
 import Auth from "../components/Auth/index.vue";
 import ProfilePage from "../components/ProfilePage.vue";
-import Search from '../components/Search.vue';
+import SearchResults from '../components/SearchResults.vue';
 
 Vue.use(VueRouter);
 
