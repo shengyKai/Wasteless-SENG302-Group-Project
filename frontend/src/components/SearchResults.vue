@@ -1,28 +1,64 @@
 <template>
     <div>
-
-        <!-- Temporary stand in for search bar component -->
-        <v-text-field v-model="searchQuery"></v-text-field>
+        <v-toolbar
+            dark
+            color="primary"
+            class="mb-1"
+          > 
+            <!-- Temporary stand in for search bar component -->
+            <v-text-field
+              clearable
+              flat
+              solo-inverted
+              hide-details
+              v-model="searchQuery"
+              prepend-inner-icon="mdi-magnify"
+              label="Search"
+            />
+            <v-spacer />
+            <v-select
+            v-model="sortByKey"
+            flat
+            solo-inverted
+            hide-details
+            :items="Object.keys(comparators)"
+            prepend-inner-icon="mdi-sort-variant"
+            label="Sort by"
+            />
+            <v-btn-toggle
+            class="toggle"
+            v-model="isSortDescending"
+            mandatory
+            >
+                <v-btn
+                    depressed
+                    color="primary"
+                    :value="false"
+                >
+                    <v-icon>mdi-arrow-up</v-icon>
+                </v-btn>
+                <v-btn
+                    depressed
+                    color="primary"
+                    :value="true"
+                >
+                    <v-icon>mdi-arrow-down</v-icon>
+                </v-btn>
+            </v-btn-toggle>
+          </v-toolbar>
 
         <v-alert v-if="error !== undefined" type="error"> {{ error }} </v-alert>
         <v-list v-if="users !== undefined" three-line>
             <template v-for="(user, index) in sortedUsers">
-                <v-divider v-if="user === undefined" :key="index"/>
-                <v-list-item v-else :key="user.id">
-                    <v-list-item-avatar color="primary" class="white--text headline">
-                        {{ user.firstName[0].toUpperCase() }}{{ user.lastName[0].toUpperCase() }}
-                    </v-list-item-avatar>
-                    <v-list-item-content>
-                        <v-list-item-title> {{ user.firstName }} {{ user.lastName }} </v-list-item-title>
-                        <v-list-item-subtitle> {{ user.email }} </v-list-item-subtitle>
-                    </v-list-item-content>
-                </v-list-item>
+                <v-divider v-if="user === undefined" :key="'divider-'+index"/>
+                <SearchResultItem v-else :key="user.id" :user="user" />
             </template>
         </v-list>
     </div>
 </template>
 
 <script>
+import SearchResultItem from './SearchResultItem';
 import Api from '../Api';
 import util from '../util';
 
@@ -36,22 +72,34 @@ const MOCK_USERS = [
     },
     {
         id: 1,
+        firstName: 'Tim',
+        lastName: 'Lame',
+        email: 'tim.lame@hotmail.com',
+    },
+    {
+        id: 2,
         firstName: 'Rick',
         lastName: 'Mayo',
         email: 'rick.mayo@hotmail.com',
     },
     {
-        id: 2,
+        id: 3,
         firstName: 'Danny',
         lastName: 'Blast',
         email: 'danny.blast@gmail.com',
     },
     {
-        id: 3,
+        id: 4,
         firstName: 'Barack',
         lastName: 'Obama',
         email: 'barack.obama@gmail.com',
-    }
+    },
+    {
+        id: 5,
+        firstName: 'Jeff',
+        lastName: 'Obama',
+        email: 'barack.obama@gmail.com',
+    },
 ];
 
 function addSeparators(array, separator) {
@@ -64,25 +112,27 @@ function addSeparators(array, separator) {
     return result;
 }
 
-
-const FIRST_NAME_COMPARATOR = (a, b) => a.firstName.localeCompare(b.firstName);
-//const LAST_NAME_COMPARATOR  = (a, b) => a.lastName.localeCompare(b.lastName);
+const USER_COMPARATORS = { // If first comparison results in a == b then fallback to other comparator.
+    'First Name' : (a, b) => a.firstName.localeCompare(b.firstName) || a.lastName.localeCompare(b.lastName),
+    'Last Name'  : (a, b) => a.lastName.localeCompare(b.lastName) || a.firstName.localeCompare(b.firstName)
+};
 
 export default {
     data: function () {
         return {
             searchQuery: '',
             users: MOCK_USERS,
+            comparators: USER_COMPARATORS,
             error: undefined,
-            comparator: FIRST_NAME_COMPARATOR,
             isSortDescending: false,
+            sortByKey: 'First Name',
         };
     },
 
     computed: {
         sortedUsers() {
             if (this.users === undefined) return undefined;
-            let result = Array.from(this.users).sort(this.comparator);
+            let result = Array.from(this.users).sort(this.comparators[this.sortByKey]);
             if (this.isSortDescending) result.reverse();
             return addSeparators(result, undefined);
         }
@@ -106,6 +156,16 @@ export default {
         searchQuery() {
             this.debouncedDoQuery();
         }
-    }
+    },
+
+    components: {
+        SearchResultItem,
+    },
 }
 </script>
+
+<style scoped>
+.toggle {
+    margin-left: 10px;
+}
+</style>
