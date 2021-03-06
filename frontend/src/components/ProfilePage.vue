@@ -10,9 +10,10 @@
         <h1>
           {{ user.firstName }} {{ user.lastName }}
         </h1>
-        <h2><i>
-          {{ user.nickname }}
-        </i></h2>
+        <h2>
+          <i>{{ user.nickname }}</i>
+        </h2>
+        <p><b>Member Since:</b> {{ user.createdMsg }}</p>
       </div>
     </div>
 
@@ -62,7 +63,16 @@ export default {
   name: 'ProfilePage',
   computed: {
     user() {
-      return this.$store.state.user;
+      const user = this.$store.state.user;
+      const now = new Date();
+      const createdAt = new Date(user.created);
+      const parts = createdAt.toDateString().split(' ');
+      
+      const diffTime = now - createdAt;
+      const diffMonths = Math.ceil(diffTime / (1000 * 60 * 60 * 24 * 30));
+
+      user.createdMsg = `${parts[2]} ${parts[1]} ${parts[3]} (${diffMonths} months ago)`;
+      return user;
     }
   }
 }
