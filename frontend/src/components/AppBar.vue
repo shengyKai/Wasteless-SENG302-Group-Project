@@ -50,5 +50,14 @@ export default {
             this.$router.push("/");
         },
     },
+<<<<<<< HEAD
 };
+=======
+    logout() {
+      this.$store.commit('logoutUser');
+      this.$router.push('/login');
+    }
+  }
+}
+>>>>>>> 5ab54c97a5570c58798389e4088714566916fe6f
 </script>
