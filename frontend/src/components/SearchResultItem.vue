@@ -5,10 +5,9 @@
         </v-list-item-avatar>
         <v-list-item-content>
             <v-list-item-title>
-                <!--TODO Wait for vue-router to be set up correctly -->
-                <!--<router-link :to="{ name: 'profile', params: { 'id': user.id }}"> -->
+                <router-link :to="{ name: 'profile', params: { 'id': user.id }}" class="link">
                     {{ user.firstName }} {{ user.lastName }} 
-                <!-- </router-link> -->
+                </router-link>
             </v-list-item-title>
             <v-list-item-subtitle> {{ user.email }} </v-list-item-subtitle>
             <v-list-item-subtitle> {{ user.homeAddress }} </v-list-item-subtitle>
@@ -21,3 +20,15 @@ export default {
     props: ['user'],
 }
 </script>
+
+<style scoped>
+.link {
+    color: black;
+    text-decoration: none;
+}
+
+.link:hover {
+    text-decoration: underline;
+}
+
+</style>
