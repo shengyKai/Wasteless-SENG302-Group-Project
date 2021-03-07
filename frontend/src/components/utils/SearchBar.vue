@@ -1,9 +1,6 @@
 <template>
     <v-toolbar dense floating>
-        <v-text-field
-            hide-details
-            single-line
-        ></v-text-field>
+        <v-text-field hide-details single-line></v-text-field>
 
         <v-btn icon @click="clickSearch">
             <v-icon>mdi-magnify</v-icon>
@@ -16,7 +13,7 @@ export default {
     name: "SearchBar",
     methods: {
         clickSearch() {
-            this.$router.push('/search');
+            this.$router.push("/search");
         },
     },
 };
