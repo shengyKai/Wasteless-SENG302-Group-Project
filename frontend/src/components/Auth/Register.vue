@@ -123,6 +123,7 @@
         :search-input.sync="search"
         item-text="name"
         item-value="symbol"
+        no-filter
         outlined
       />
 
@@ -183,22 +184,28 @@ export default {
     }
   },
 
-
   watch: {
-    search () {
-      // Items have already been loaded
-      if (this.items.length > 0) return
-      this.isLoading = true
-      // Lazily load input items
-      fetch('https://api.coingecko.com/api/v3/coins/list')
-          .then(res => res.clone().json())
-          .then(res => {
-            this.items = res
-          })
-          .catch(err => {
-            console.log(err)
-          })
-          .finally(() => (this.isLoading = false))
+    search (val) {
+      if (val.length > 2) {
+        this.isLoading = true
+        let url = "https://photon.komoot.io/api/?q=" + val;
+
+        fetch(url)
+            .then(res => res.json())
+            .then(res => {
+              let country = [];
+              res.features.forEach(feature => {
+                country.push(feature.properties.country)
+              })
+              country.push(val)
+              this.items = country;
+              console.log(this.items);
+            })
+            .catch(err => {
+              console.log(err)
+            })
+            .finally(() => (this.isLoading = false))
+      }
     },
   },
 
