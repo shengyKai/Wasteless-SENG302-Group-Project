@@ -1,4 +1,5 @@
 <template>
+<<<<<<< HEAD
     <v-card class="body">
         <div>
             <div class="profile-img">
@@ -17,6 +18,25 @@
                 </h2>
             </div>
         </div>
+=======
+  <v-card class="body">
+    <div>
+      <div class="profile-img">
+        <v-avatar size="200px" color="indigo">
+          <img src="https://edit.co.uk/uploads/2016/12/Image-1-Alternatives-to-stock-photography-Thinkstock.jpg"/>
+        </v-avatar>
+      </div>
+      <div class="names">
+        <h1>
+          {{ user.firstName }} {{ user.lastName }}
+        </h1>
+        <h2>
+          <i>{{ user.nickname }}</i>
+        </h2>
+        <p><b>Member Since:</b> {{ user.createdMsg }}</p>
+      </div>
+    </div>
+>>>>>>> ff81c4c35f99798c33b27f9eab68817f21cea37e
 
         <div class="fields">
             <v-simple-table>
@@ -61,6 +81,7 @@
 
 <script>
 export default {
+<<<<<<< HEAD
     name: "ProfilePage",
     computed: {
         user() {
@@ -68,6 +89,24 @@ export default {
         },
     },
 };
+=======
+  name: 'ProfilePage',
+  computed: {
+    user() {
+      const user = this.$store.state.user;
+      const now = new Date();
+      const createdAt = new Date(user.created);
+      const parts = createdAt.toDateString().split(' ');
+      
+      const diffTime = now - createdAt;
+      const diffMonths = Math.ceil(diffTime / (1000 * 60 * 60 * 24 * 30));
+
+      user.createdMsg = `${parts[2]} ${parts[1]} ${parts[3]} (${diffMonths} months ago)`;
+      return user;
+    }
+  }
+}
+>>>>>>> ff81c4c35f99798c33b27f9eab68817f21cea37e
 </script>
 
 <style scoped>

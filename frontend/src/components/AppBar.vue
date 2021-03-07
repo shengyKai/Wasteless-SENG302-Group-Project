@@ -36,6 +36,7 @@
 
 <script>
 import SearchBar from "./utils/SearchBar";
+
 export default {
     name: "AppBar",
     components: {
@@ -47,7 +48,7 @@ export default {
         },
         logout() {
             this.$store.commit("logoutUser");
-            this.$router.push("/");
+            this.$router.push("/login");
         },
     },
 };
