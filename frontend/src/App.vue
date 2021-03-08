@@ -28,7 +28,7 @@
         </v-main>
       </div>
 
-      <Footer />
+      <AppFooter />
     </div>
   </v-app>
 </template>
@@ -36,7 +36,7 @@
 <script>
 import Auth from "./components/Auth";
 import AppBar from "./components/AppBar";
-import Footer from "./components/Footer";
+import AppFooter from "./components/AppFooter";
 import store from "./store";
 import router from "./plugins/vue-router";
 
@@ -58,7 +58,7 @@ export default {
     // https://vuejs.org/v2/guide/components-registration.html
     Auth,
     AppBar,
-    Footer,
+    AppFooter,
   },
   async created() {
     const cookie = getCookie(COOKIE.USER);
