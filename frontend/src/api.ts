@@ -55,7 +55,7 @@ export type User = {
 };
 
 function isUser(obj: any): obj is User {
-  if (typeof obj !== 'object') return false;
+  if (obj === null || typeof obj !== 'object') return false;
   if (typeof obj.id !== 'number') return false;
   if (typeof obj.firstName !== 'string') return false;
   if (typeof obj.lastName !== 'string') return false;
@@ -104,7 +104,7 @@ export async function search(query: string): Promise<MaybeError<User[]>> {
       }
     });
   } catch (error) {
-    return 'Request failed';
+    return `Request failed: ${error.response.status}`;
   }
 
   if (!isUserArray(response.data)) {
@@ -127,12 +127,102 @@ export async function getUser(id?: number): Promise<MaybeError<User>> {
   try {
     response = await instance.get('/users/' + id);
   } catch (error) {
-    return 'Request failed'
+    return `Request failed: ${error.response.status}`;
   }
 
   if (!isUser(response.data)) {
-    return 'Response is not user'
+    return 'Response is not user';
   }
 
   return response.data;
+}
+
+/**
+ * Logs in to the given user account by setting the authentication cookie.
+ * 
+ * @param email User email
+ * @param password User password
+ */
+export async function login(email: string, password: string): Promise<MaybeError<undefined>> {
+  try {
+    await instance.post('/users/login', {
+      email: email,
+      password: password,
+    });
+  } catch (error) {
+    let status: number = error.response.status;
+
+    if (status === 400) return 'Invalid credentials';
+    return 'Request failed: ' + status;
+  }
+}
+
+export type CreateUser = {
+  firstName: string,
+  lastName: string,
+  middleName?: string,
+  nickname?: string,
+  bio?: string,
+  email: string,
+  dateOfBirth: string,
+  phoneNumber?: string,
+  homeAddress: string,
+  password: string,
+};
+
+/**
+ * Creates a user with the given properties. 
+ * Note: This doesn't automatically log the user in.
+ * 
+ * @param user Initial user properties
+ */
+export async function createUser(user: CreateUser): Promise<MaybeError<undefined>> {
+  try {
+    await instance.post('/users', user);
+  } catch (error) {
+    let status: number = error.response.status;
+
+    if (status === 409) return 'Email in use';
+    return 'Request failed: ' + status;
+  }
+
+  return undefined;
+}
+
+/**
+ * Makes the given user a GAA, if the current user is a DGAA.
+ * 
+ * @param userId User to make GAA
+ */
+export async function makeAdmin(userId: number): Promise<MaybeError<undefined>> {
+  try {
+    await instance.post(`/users/${userId}/makeAdmin`);
+  } catch (error) {
+    let status: number = error.response.status;
+    if (status === 401) return 'Missing/Invalid access token';
+    if (status === 403) return 'Operation not permitted';
+    if (status === 406) return 'User does not exist';
+
+    return 'Request failed: ' + status;
+  }
+  return undefined;
+}
+
+/**
+ * Revokes the given user's admin rights
+ * 
+ * @param userId User to revoke permissions
+ */
+export async function revokeAdmin(userId: number): Promise<MaybeError<undefined>> {
+  try {
+    await instance.post(`/users/${userId}/revokeAdmin`);
+  } catch (error) {
+    let status: number = error.response.status;
+    if (status === 401) return 'Missing/Invalid access token';
+    if (status === 403) return 'Operation not permitted';
+    if (status === 406) return 'User does not exist';
+
+    return 'Request failed: ' + status;
+  }
+  return undefined;
 }
