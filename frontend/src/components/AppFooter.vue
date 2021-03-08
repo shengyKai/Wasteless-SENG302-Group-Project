@@ -11,8 +11,6 @@
 
 <script>
 export default {
-  name: "footer",
-
   methods: {
       about() {
           alert('TODO');

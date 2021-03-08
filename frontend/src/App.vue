@@ -1,35 +1,37 @@
 <template>
   <v-app>
-    <div v-if="loading">
+    <template v-if="loading">
       <v-progress-circular color="primary" />
-    </div>
-    <div v-else>
-      <div v-if="loggedIn">
-        <AppBar />
+    </template>
+    <template v-else>
+      <div class="notfooter">
+        <div v-if="loggedIn">
+          <AppBar />
 
-        <v-main>
-          <div class="container-outer">
-            <div class="container-inner">
-              <!-- All content (except AppBar & Footer) should be a child of 'v-main'. -->
-              <router-view />
+          <v-main>
+            <div class="container-outer">
+              <div class="container-inner">
+                <!-- All content (except AppBar & Footer) should be a child of 'v-main'. -->
+                <router-view />
+              </div>
             </div>
-          </div>
-        </v-main>
-      </div>
+          </v-main>
+        </div>
 
-      <div v-else>
-        <v-main>
-          <div class="container-outer">
-            <div class="container-inner">
-              <!-- All content (except AppBar & Footer) should be a child of 'v-main'. -->
-                <Auth />
+        <div v-else>
+          <v-main>
+            <div class="container-outer">
+              <div class="container-inner">
+                <!-- All content (except AppBar & Footer) should be a child of 'v-main'. -->
+                  <Auth />
+              </div>
             </div>
-          </div>
-        </v-main>
+          </v-main>
+        </div>
+        <div class="clear"/>
       </div>
-
-      <AppFooter />
-    </div>
+      <AppFooter class="foot"/>
+    </template>
   </v-app>
 </template>
 
@@ -86,8 +88,23 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
 [v-cloak] {
     display: none;
 }
+
+.notfooter {
+  min-height: 100%;
+  margin-bottom: -50px;
+}
+
+.clear {
+  height: 50px;
+}
+
+.foot {
+  height: 50px;
+  clear: both;
+}
+
 </style>
