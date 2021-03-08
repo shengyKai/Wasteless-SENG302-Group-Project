@@ -5,7 +5,7 @@
         </v-list-item-avatar>
         <v-list-item-content>
             <v-list-item-title>
-                <router-link :to="{ name: 'profile', params: { 'id': user.id }}" class="link">
+                <router-link :to="'profile/' + user.id" class="link">
                     {{ user.firstName }} {{ user.lastName }} 
                 </router-link>
             </v-list-item-title>

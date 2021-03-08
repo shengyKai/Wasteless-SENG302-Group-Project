@@ -13,7 +13,7 @@
         <h2>
           <i>{{ user.nickname }}</i>
         </h2>
-        <p><b>Member Since:</b> {{ user.createdMsg }}</p>
+        <p><b>Member Since:</b> {{ createdMsg }}</p>
       </div>
     </div>
 
@@ -59,20 +59,43 @@
 </template>
 
 <script>
+import { getUser } from '../api';
+
 export default {
   name: 'ProfilePage',
+  
+  data() {
+      return {
+          user: {}
+      };
+  },
+
+  mounted() {
+    let id = this.$route.params.id;
+    if (id === undefined || id == this.$store.state.user?.id) {
+      this.user = this.$store.state.user;
+    } else {
+      getUser(id).then((value) => {
+        if (typeof value === 'string') {
+          // TODO Handle error properly
+          console.warn(value);
+        } else {
+          this.user = value;
+        }
+      });
+    }
+  },
+
   computed: {
-    user() {
-      const user = this.$store.state.user;
+    createdMsg() {
       const now = new Date();
-      const createdAt = new Date(user.created);
+      const createdAt = new Date(this.user.created);
       const parts = createdAt.toDateString().split(' ');
       
       const diffTime = now - createdAt;
       const diffMonths = Math.ceil(diffTime / (1000 * 60 * 60 * 24 * 30));
 
-      user.createdMsg = `${parts[2]} ${parts[1]} ${parts[3]} (${diffMonths} months ago)`;
-      return user;
+      return `${parts[2]} ${parts[1]} ${parts[3]} (${diffMonths} months ago)`;
     }
   }
 }
