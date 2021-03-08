@@ -113,11 +113,18 @@
       />
 
       <!-- INPUT: Address -->
-      <v-text-field
+      <v-combobox
         class="required"
         v-model="address"
         label="Address"
         :rules="mandatoryRules"
+        :items="items"
+        :loading="isLoading"
+        :search-input.sync="search"
+        item-text="name"
+        item-value="symbol"
+        no-filter
+        clearable
         outlined
       />
 
@@ -160,6 +167,10 @@ export default {
       dob: new Date().toISOString().substr(0, 10),
       phone: '',
       address: '',
+      modal: false,
+      items: [],
+      isLoading: false,
+      search: null,
       emailRules: [
         //regex rules for emails, example format is as such:
         //"blah@hotmail.co
@@ -172,9 +183,64 @@ export default {
         field =>  !!field || 'Field is required'
       ],
 
-      modal: false
     }
   },
+
+  watch: {
+    search (val) {
+      let address = '';
+      this.items = [];
+      let addressList = [];
+
+      if (val && val.length > 2) {
+        this.isLoading = true
+        let url = "https://photon.komoot.io/api/?q=" + val;
+
+        fetch(url)
+            .then(res => res.json())
+            .then(res => {
+              //Address order/format to be presented on Address textfield
+              //Street, City area/District, City/Town/Village, County, Postal code, Country
+
+              //reset addressList for each value changed in the textbox
+              addressList = [];
+
+              //for each address received from the api, extract out the properties of that address
+              res.features.forEach(feature => {
+                if (feature.properties.name !== undefined) {
+                  address += feature.properties.name + ", ";
+                }
+                if (feature.properties.district !== undefined) {
+                  address += feature.properties.district + ", ";
+                }
+                if (feature.properties.city !== undefined) {
+                  address += feature.properties.city + ", ";
+                }
+                if (feature.properties.county !== undefined) {
+                  address += feature.properties.county + ", ";
+                }
+                if (feature.properties.postcode !== undefined) {
+                  address += feature.properties.postcode + ", ";
+                }
+                if (feature.properties.country !== undefined) {
+                  address += feature.properties.country + ", ";
+                }
+                addressList.push(address.substring(0, address.length-2))
+                //reset address
+                address = '';
+              })
+              //set the items in the combobox
+              this.items = addressList;
+            })
+            .catch(err => {
+              console.log(err)
+            })
+            .finally(() => (this.isLoading = false))
+      }
+    },
+  },
+
+  
   methods: {
     // Show login screen
     showLogin() {
@@ -199,6 +265,16 @@ export default {
     //it refers to the confirmPassword field)to revalidate itself upon any changes in the password field.
     passwordChange() {
       this.$refs.confirmPassword.validate();
+    },
+    querySelections (v) {
+      this.loading = true
+      // Simulated ajax query
+      setTimeout(() => {
+        this.items = this.states.filter(e => {
+          return (e || '').toLowerCase().indexOf((v || '').toLowerCase()) > -1
+        })
+        this.loading = false
+      }, 500)
     }
   },
   computed: {
@@ -213,6 +289,7 @@ export default {
     }
   }
 }
+
 </script>
 
 <style>
