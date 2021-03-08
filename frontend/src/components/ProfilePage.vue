@@ -88,6 +88,8 @@ export default {
 
   computed: {
     createdMsg() {
+      if (this.user.created === undefined) return '';
+
       const now = new Date();
       const createdAt = new Date(this.user.created);
       const parts = createdAt.toDateString().split(' ');
