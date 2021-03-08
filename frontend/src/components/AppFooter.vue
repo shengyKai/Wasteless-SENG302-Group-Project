@@ -3,24 +3,11 @@
         <v-divider/>
         <v-row justify="center" align="center" no-gutters>
             <div class="item">© 2021 - BENK</div>
-            <div class="item clickable" @click=about>About</div>
-            <div class="item clickable" @click=contact>Contact</div>
+            <router-link class="item link" to="about">About</router-link>
+            <router-link class="item link" to="contact">Contact</router-link>
         </v-row>
     </div>
 </template>
-
-<script>
-export default {
-  methods: {
-      about() {
-          alert('TODO');
-      },
-      contact() {
-          alert('TODO');
-      }
-  }
-};
-</script>
 
 <style scoped >
 
@@ -29,8 +16,13 @@ export default {
     user-select: none;
 }
 
-.clickable {
-    cursor: pointer;
+.link {
+    color: black;
+    text-decoration: none;
+}
+
+.link:hover {
+    text-decoration: underline;
 }
 
 </style>
