@@ -59,8 +59,8 @@
 
 <script>
 import SearchResultItem from './SearchResultItem';
-import Api from '../Api';
-import util from '../util';
+import { search } from '../api';
+import { debounce } from '../utils';
 
 // TODO Delete this
 const MOCK_USERS = [
@@ -139,8 +139,8 @@ export default {
     },
 
     created() {
-        this.debouncedDoQuery = util.debounce(() => {
-            Api.search(this.searchQuery).then((value) => {
+        this.debouncedDoQuery = debounce(() => {
+            search(this.searchQuery).then((value) => {
                 if (typeof value === 'string') {
                     this.users = undefined;
                     this.error = value;

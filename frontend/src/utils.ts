@@ -5,8 +5,8 @@ export function setCookie(name: string, value: string|number) {
 }
 
 export function getCookie(name: string) {
-  var cookies = document.cookie.split(';');
-  var target = null;
+  let cookies = document.cookie.split(';');
+  let target = null;
   cookies.forEach(cookie => {
     if (cookie.startsWith(`${name}=`)) target = cookie;
   });
@@ -19,4 +19,22 @@ export function deleteCookie(name: string) {
 
 export const COOKIE = {
   USER: 'USER'
+}
+
+/**
+ * Rate limits the input function by waiting a given amount of time calling the inner function. 
+ * If interrupted with another call then this wait is reset.
+ * 
+ * @param func Function to rate limit
+ * @param wait Time (ms) to wait before calling the function
+ */
+export function debounce(func: (() => void), wait: number) {
+  let timeout: number | undefined;
+  function debounced() {
+      if (timeout !== undefined) {
+          clearTimeout(timeout);
+      }
+      timeout = setTimeout(func, wait);
+  }
+  return debounced;
 }

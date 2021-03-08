@@ -1,42 +1,14 @@
-import axios from 'axios';
+import { User, getUser } from './api';
 import Vuex from 'vuex';
 import { COOKIE, deleteCookie, setCookie } from './utils';
 
-export interface User {
-  id: number|null;
-  firstName: string|null;
-  lastName: string|null;
-  middleName: string|null;
-  nickname: string|null;
-  bio: string|null;
-  email: string|null;
-  dateOfBirth: string|null;
-  phoneNumber: string|null;
-  homeAddress: string|null;
-  created: string|null;
-  role: string|null;
-  businessesAdministered: number[]|null;
-}
+type StoreData = {
+  user: User | null,
+};
 
-var user: User = {
-  id: null,
-  firstName: null,
-  lastName: null,
-  middleName: null,
-  nickname: null,
-  bio: null,
-  email: null,
-  dateOfBirth: null,
-  phoneNumber: null,
-  homeAddress: null,
-  created: null,
-  role: null,
-  businessesAdministered: null
-}
-
-const store = new Vuex.Store({
+const store = new Vuex.Store<StoreData>({
   state: {
-    user
+    user: null,
   },
   mutations: {
     setUser (state, payload: User) {
@@ -44,20 +16,24 @@ const store = new Vuex.Store({
       if (payload.id) setCookie(COOKIE.USER, payload.id)
     },
     logoutUser (state) {
-      state.user = user;
+      state.user = null;
       deleteCookie(COOKIE.USER);
     }
   },
   getters: {
     isLoggedIn (state) {
-      return state.user.id !== null;
+      return state.user !== null;
     }
   },
   actions: {
     getUser (context) {
-      return axios.get('https://virtserver.swaggerhub.com/matthewminish/seng302-2021-api-spec/1.0.0/users/1')
-        .then(res => context.commit('setUser', res.data))
-        .catch(err => console.warn(err));
+      return getUser().then((response) => {
+        if (typeof response === 'string') {
+          console.warn(response);
+          return;
+        }
+        context.commit('setUser', response);
+      });
     }
   }
 });

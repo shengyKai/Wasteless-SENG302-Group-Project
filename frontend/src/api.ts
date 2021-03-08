@@ -29,7 +29,6 @@
  * Declare all available services here
  */
 import axios from 'axios'  
-  
 const SERVER_URL = process.env.VUE_APP_SERVER_ADD;
 
 const instance = axios.create({  
@@ -39,7 +38,7 @@ const instance = axios.create({
 
 type MaybeError<T> = T | string;
 
-type User = {
+export type User = {
   id: number,
   firstName: string,
   lastName: string,
@@ -90,23 +89,50 @@ function isUserArray(obj: any): obj is User[] {
   return true;
 }
   
-export default {  
-  async search(query: string): Promise<MaybeError<User[]>> {
-    let response;
-    try {
-      response = await instance.get('/users/search', {
-        params: {
-          'searchQuery': query,
-        }
-      });
-    } catch (error) {
-      return 'Request failed';
-    }
-
-    if (!isUserArray(response.data)) {
-      return 'Response is not user';
-    }
-
-    return response.data;
+/**
+ * Sends a search query to the backend and returns a list of users or an error string.
+ * 
+ * @param query Query string to search for
+ * @returns List of user infos or an error message
+ */
+export async function search(query: string): Promise<MaybeError<User[]>> {
+  let response;
+  try {
+    response = await instance.get('/users/search', {
+      params: {
+        'searchQuery': query,
+      }
+    });
+  } catch (error) {
+    return 'Request failed';
   }
+
+  if (!isUserArray(response.data)) {
+    return 'Response is not user array';
+  }
+
+  return response.data;
+}
+
+/**
+ * Queries the backend for a specific user by their id.
+ * 
+ * @param id User id, if ommitted then fetch the logged in user's info
+ * @returns User info for the given id or an error message
+ */
+export async function getUser(id?: number): Promise<MaybeError<User>> {
+  if (id === undefined) id = 0;
+
+  let response;
+  try {
+    response = await instance.get('/users/' + id);
+  } catch (error) {
+    return 'Request failed'
+  }
+
+  if (!isUser(response.data)) {
+    return 'Response is not user'
+  }
+
+  return response.data;
 }
