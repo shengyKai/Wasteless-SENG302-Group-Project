@@ -1,60 +1,55 @@
 <template>
-  <v-app-bar max-height="64px">
-    <div class="container-outer">
-      <div class="container-inner">
-        <h1>WASTELESS</h1>
-      </div>
-    </div>
-
-    <div class="text-center">
-      <v-menu offset-y>
-        <template v-slot:activator="{ on, attrs }">
-          <v-btn
-            icon
-            v-bind="attrs"
-            v-on="on"
-          >
-            <v-avatar>
-              <v-icon>
-                mdi-account-circle
-              </v-icon>
-            </v-avatar>
-          </v-btn>
-        </template>
-        <v-list>
-          <v-list-item>
-            <v-list-item-title
-              class="link"
-              @click="viewProfile"
-            >
-              Profile
-            </v-list-item-title>
-          </v-list-item>
-          <v-list-item>
-            <v-list-item-title
-              class="link"
-              @click="logout"
-            >
-              Logout
-            </v-list-item-title>
-          </v-list-item>
-        </v-list>
-      </v-menu>
-    </div>
-  </v-app-bar>
+    <v-app-bar max-height="64px">
+        <div class="container-outer">
+            <div class="container-inner">
+                <h1>WASTELESS</h1>
+            </div>
+        </div>
+        <SearchBar />
+        <div class="text-center">
+            <v-menu offset-y>
+                <template v-slot:activator="{ on, attrs }">
+                    <v-btn icon v-bind="attrs" v-on="on">
+                        <v-avatar>
+                            <v-icon>
+                                mdi-account-circle
+                            </v-icon>
+                        </v-avatar>
+                    </v-btn>
+                </template>
+                <v-list>
+                    <v-list-item>
+                        <v-list-item-title class="link" @click="viewProfile">
+                            Profile
+                        </v-list-item-title>
+                    </v-list-item>
+                    <v-list-item>
+                        <v-list-item-title class="link" @click="logout">
+                            Logout
+                        </v-list-item-title>
+                    </v-list-item>
+                </v-list>
+            </v-menu>
+        </div>
+    </v-app-bar>
 </template>
 
 <script>
+import SearchBar from "./utils/SearchBar";
+
 export default {
-  name: 'AppBar',
-  methods: {
-    viewProfile() {
-      this.$router.push('/profile');
+    name: "AppBar",
+    components: {
+        SearchBar,
     },
-    logout() {
-      this.$store.commit('logoutUser');
-      this.$router.push('/');
-    }
-  }
-}
+    methods: {
+        viewProfile() {
+            this.$router.push("/profile");
+        },
+        logout() {
+            this.$store.commit("logoutUser");
+            this.$router.push("/login");
+        },
+    },
+};
 </script>

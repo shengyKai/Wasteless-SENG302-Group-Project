@@ -1,45 +1,53 @@
 <template>
   <v-app>
-    <div v-if="loggedIn">
-      <AppBar />
+    <template v-if="loading">
+      <v-progress-circular color="primary" />
+    </template>
+    <template v-else>
+      <div class="notfooter">
+        <div v-if="loggedIn">
+          <AppBar />
 
-      <v-main>
-        <div class="container-outer">
-          <div class="container-inner">
-            <!-- All content (except AppBar & Footer) should be a child of 'v-main'. -->
-            <router-view />
-          </div>
+          <v-main>
+            <div class="container-outer">
+              <div class="container-inner">
+                <!-- All content (except AppBar & Footer) should be a child of 'v-main'. -->
+                <router-view />
+              </div>
+            </div>
+          </v-main>
         </div>
-      </v-main>
-    </div>
 
-    <div v-else>
-      <v-main>
-        <div class="container-outer">
-          <div class="container-inner">
-            <!-- All content (except AppBar & Footer) should be a child of 'v-main'. -->
-              <Auth />
-          </div>
+        <div v-else>
+          <v-main>
+            <div class="container-outer">
+              <div class="container-inner">
+                <!-- All content (except AppBar & Footer) should be a child of 'v-main'. -->
+                  <Auth />
+              </div>
+            </div>
+          </v-main>
         </div>
-      </v-main>
-    </div>
-
-    <Footer />
+        <div class="clear"/>
+      </div>
+      <AppFooter class="foot"/>
+    </template>
   </v-app>
 </template>
 
 <script>
 import Auth from "./components/Auth";
 import AppBar from "./components/AppBar";
-import Footer from './components/Footer';
-import store from './store';
-import router from './plugins/vue-router';
+import AppFooter from "./components/AppFooter";
+import store from "./store";
+import router from "./plugins/vue-router";
 
 // function setCookie(name) {
 //   const date = new Date();
 //   date.setFullYear(date.getFullYear() + 1);
 //   document.cookie = `name=${name}`;
 // }
+import { COOKIE, getCookie } from './utils';
 
 // Vue app instance
 // it is declared as a reusable component in this case.
@@ -52,10 +60,26 @@ export default {
     // https://vuejs.org/v2/guide/components-registration.html
     Auth,
     AppBar,
-    Footer
+    AppFooter,
+  },
+  async created() {
+    const cookie = getCookie(COOKIE.USER);
+    if (cookie) {
+      this.loading = true;
+      await this.$store.dispatch('getUser', cookie.split('=')[1]);
+      if (this.$route.path === '/login') this.$router.push('/profile');
+      this.loading = false;
+    } else {
+      if (this.$route.path !== '/login') this.$router.push('/login');
+    }
   },
   store,
   router,
+  data() {
+    return {
+      loading: false
+    }
+  },
   computed: {
     loggedIn() {
       return this.$store.getters.isLoggedIn
@@ -64,8 +88,23 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
 [v-cloak] {
-  display: none;
+    display: none;
 }
+
+.notfooter {
+  min-height: 100%;
+  margin-bottom: -50px;
+}
+
+.clear {
+  height: 50px;
+}
+
+.foot {
+  height: 50px;
+  clear: both;
+}
+
 </style>
