@@ -1,24 +1,4 @@
 <template>
-<<<<<<< HEAD
-    <v-card class="body">
-        <div>
-            <div class="profile-img">
-                <v-avatar size="200px" color="indigo">
-                    <img
-                        src="https://edit.co.uk/uploads/2016/12/Image-1-Alternatives-to-stock-photography-Thinkstock.jpg"
-                    />
-                </v-avatar>
-            </div>
-            <div class="names">
-                <h1>{{ user.firstName }} {{ user.lastName }}</h1>
-                <h2>
-                    <i>
-                        {{ user.nickname }}
-                    </i>
-                </h2>
-            </div>
-        </div>
-=======
   <v-card class="body">
     <div>
       <div class="profile-img">
@@ -36,7 +16,6 @@
         <p><b>Member Since:</b> {{ user.createdMsg }}</p>
       </div>
     </div>
->>>>>>> ff81c4c35f99798c33b27f9eab68817f21cea37e
 
         <div class="fields">
             <v-simple-table>
@@ -81,15 +60,6 @@
 
 <script>
 export default {
-<<<<<<< HEAD
-    name: "ProfilePage",
-    computed: {
-        user() {
-            return this.$store.state.user;
-        },
-    },
-};
-=======
   name: 'ProfilePage',
   computed: {
     user() {
@@ -106,7 +76,6 @@ export default {
     }
   }
 }
->>>>>>> ff81c4c35f99798c33b27f9eab68817f21cea37e
 </script>
 
 <style scoped>
