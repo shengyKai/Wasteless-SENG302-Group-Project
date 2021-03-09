@@ -5,7 +5,7 @@
                 <h1>WASTELESS</h1>
             </div>
         </div>
-        <SearchBar />
+        <SearchBar v-if="$route.path !== '/search'" />
         <div class="text-center">
             <v-menu offset-y>
                 <template v-slot:activator="{ on, attrs }">
