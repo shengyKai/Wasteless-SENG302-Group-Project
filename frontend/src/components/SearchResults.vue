@@ -10,6 +10,7 @@
         v-model="searchQuery"
         prepend-inner-icon="mdi-magnify"
         label="Search"
+        autofocus
       />
       <v-spacer />
       <v-select
