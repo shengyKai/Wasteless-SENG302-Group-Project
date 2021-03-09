@@ -143,9 +143,10 @@ export async function getUser(id?: number): Promise<MaybeError<User>> {
  * @param email User email
  * @param password User password
  */
-export async function login(email: string, password: string): Promise<MaybeError<undefined>> {
+export async function login(email: string, password: string): Promise<MaybeError<number>> {
+  let response;
   try {
-    await instance.post('/users/login', {
+    response = await instance.post('/users/login', {
       email: email,
       password: password,
     });
@@ -155,6 +156,10 @@ export async function login(email: string, password: string): Promise<MaybeError
     if (status === 400) return 'Invalid credentials';
     return 'Request failed: ' + status;
   }
+  let id = response.data.userId;
+  if (typeof id !== 'number') return 'Invalid response';
+  
+  return id;
 }
 
 export type CreateUser = {
