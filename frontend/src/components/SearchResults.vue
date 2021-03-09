@@ -49,11 +49,24 @@
 
         <v-alert v-if="error !== undefined" type="error"> {{ error }} </v-alert>
         <v-list v-if="users !== undefined" three-line>
-            <template v-for="(user, index) in sortedUsers">
+            <!--visiblePages would produce the results for each page, and then it will show each result with
+            SearchResultItem-->
+            <template v-for="(user, index) in visiblePages">
                 <v-divider v-if="user === undefined" :key="'divider-'+index"/>
-                <SearchResultItem v-else :key="user.id" :user="user" />
+                <SearchResultItem v-else :key="user.id" :user="user"/>
             </template>
         </v-list>
+        <!--paginate results-->
+        <v-pagination
+            v-model="currentPage"
+            :length="Math.ceil(users.length/resultsPerPage)"
+            circle
+        ></v-pagination>
+        <!--Text to display range of results out of total number of results-->
+        <v-row justify="center" no-gutters>
+          Displaying {{ (currentPage - 1) * resultsPerPage + 1 }} - {{ this.currentPage * this.resultsPerPage }} of
+          {{ users.length }} results
+        </v-row>
     </div>
 </template>
 
@@ -126,6 +139,8 @@ export default {
             error: undefined,
             isSortDescending: false,
             sortByKey: 'First Name',
+            currentPage: 1,
+            resultsPerPage: 3,
         };
     },
 
@@ -135,6 +150,11 @@ export default {
             let result = Array.from(this.users).sort(this.comparators[this.sortByKey]);
             if (this.isSortDescending) result.reverse();
             return addSeparators(result, undefined);
+        },
+        //Formula in method slices the results based on the number of results per page and which page the user is
+        //currently at, so that it will show the proper sets of results per page
+        visiblePages () {
+          return this.users.slice((this.currentPage - 1)* this.resultsPerPage, this.currentPage* this.resultsPerPage)
         }
     },
 
@@ -161,6 +181,7 @@ export default {
     components: {
         SearchResultItem,
     },
+
 }
 </script>
 
