@@ -1,7 +1,9 @@
+import { makeAdmin } from '@/api';
 import Vue from 'vue';
 import VueRouter from 'vue-router';
 
 import Auth from "../components/Auth/index.vue";
+import admin from "../components/Admin.vue";
 import ProfilePage from "../components/ProfilePage.vue";
 import SearchResults from '../components/SearchResults.vue';
 
@@ -23,7 +25,7 @@ const routes = [
 
     { path: '/profile/:id', component: ProfilePage },
     { path: '/profile', component: ProfilePage },
-    
+    { path: '/admin', component: admin},
     { path: '/search',  component: SearchResults },
     { path: '*',        component: NotFound },
 ];
