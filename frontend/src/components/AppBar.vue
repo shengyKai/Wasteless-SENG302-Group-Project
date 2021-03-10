@@ -28,6 +28,11 @@
                             Logout
                         </v-list-item-title>
                     </v-list-item>
+                    <v-list-item>
+                        <v-list-item-title class="link" @click="viewAdmin">
+                            Test-Admin
+                        </v-list-item-title>
+                    </v-list-item>
                 </v-list>
             </v-menu>
         </div>
@@ -45,6 +50,9 @@ export default {
     methods: {
         viewProfile() {
             this.$router.push("/profile");
+        },
+        viewAdmin() {
+            this.$router.push("/admin");
         },
         logout() {
             this.$store.commit("logoutUser");

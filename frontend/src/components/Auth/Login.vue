@@ -8,12 +8,12 @@
           label="Email"
           :rules="usernameRules"
       ></v-text-field>
-      <v-text-field
+      <v-text-fieldgit
           v-model="password"
           type="password"
           label="Password"
           :rules="passwordRules"
-      ></v-text-field>
+      ></v-text-fieldgit>
       <v-btn id="login-button" @click="showProfile" color="primary">Log in</v-btn>    <!--- :disabled="!valid" -->
       <!-- Add in if-else check in ^^^ button-->
       <!-- redirect to profile page -->
