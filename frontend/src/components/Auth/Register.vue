@@ -197,45 +197,45 @@ export default {
         let url = "https://photon.komoot.io/api/?q=" + val;
 
         fetch(url)
-            .then(res => res.json())
-            .then(res => {
-              //Address order/format to be presented on Address textfield
-              //Street, City area/District, City/Town/Village, County, Postal code, Country
+          .then(res => res.json())
+          .then(res => {
+            //Address order/format to be presented on Address textfield
+            //Street, City area/District, City/Town/Village, County, Postal code, Country
 
-              //reset addressList for each value changed in the textbox
-              addressList = [];
+            //reset addressList for each value changed in the textbox
+            addressList = [];
 
-              //for each address received from the api, extract out the properties of that address
-              res.features.forEach(feature => {
-                if (feature.properties.name !== undefined) {
-                  address += feature.properties.name + ", ";
-                }
-                if (feature.properties.district !== undefined) {
-                  address += feature.properties.district + ", ";
-                }
-                if (feature.properties.city !== undefined) {
-                  address += feature.properties.city + ", ";
-                }
-                if (feature.properties.county !== undefined) {
-                  address += feature.properties.county + ", ";
-                }
-                if (feature.properties.postcode !== undefined) {
-                  address += feature.properties.postcode + ", ";
-                }
-                if (feature.properties.country !== undefined) {
-                  address += feature.properties.country + ", ";
-                }
-                addressList.push(address.substring(0, address.length-2))
-                //reset address
-                address = '';
-              })
-              //set the items in the combobox
-              this.items = addressList;
+            //for each address received from the api, extract out the properties of that address
+            res.features.forEach(feature => {
+              if (feature.properties.name !== undefined) {
+                address += feature.properties.name + ", ";
+              }
+              if (feature.properties.district !== undefined) {
+                address += feature.properties.district + ", ";
+              }
+              if (feature.properties.city !== undefined) {
+                address += feature.properties.city + ", ";
+              }
+              if (feature.properties.county !== undefined) {
+                address += feature.properties.county + ", ";
+              }
+              if (feature.properties.postcode !== undefined) {
+                address += feature.properties.postcode + ", ";
+              }
+              if (feature.properties.country !== undefined) {
+                address += feature.properties.country + ", ";
+              }
+              addressList.push(address.substring(0, address.length-2))
+              //reset address
+              address = '';
             })
-            .catch(err => {
-              console.log(err)
-            })
-            .finally(() => (this.isLoading = false))
+            //set the items in the combobox
+            this.items = addressList;
+          })
+          .catch(err => {
+            console.log(err)
+          })
+          .finally(() => (this.isLoading = false))
       }
     },
   },
@@ -285,7 +285,7 @@ export default {
     //is the same.
     passwordConfirmationRule() {
       return () =>
-          this.password === this.confirmPassword || "Passwords must match";
+        this.password === this.confirmPassword || "Passwords must match";
     }
   }
 }

@@ -113,10 +113,10 @@ function addSeparators(array, separator) {
 const USER_COMPARATORS = {
   // If first comparison results in a == b then fallback to other comparator.
   "First Name": (a, b) =>
-      a.firstName.localeCompare(b.firstName) ||
+    a.firstName.localeCompare(b.firstName) ||
       a.lastName.localeCompare(b.lastName),
   "Last Name": (a, b) =>
-      a.lastName.localeCompare(b.lastName) ||
+    a.lastName.localeCompare(b.lastName) ||
       a.firstName.localeCompare(b.firstName),
 };
 
@@ -138,7 +138,7 @@ export default {
     sortedUsers() {
       if (this.users === undefined) return undefined;
       let result = Array.from(this.users).sort(
-          this.comparators[this.sortByKey]
+        this.comparators[this.sortByKey]
       );
       if (this.isSortDescending) result.reverse();
       return addSeparators(result, undefined);

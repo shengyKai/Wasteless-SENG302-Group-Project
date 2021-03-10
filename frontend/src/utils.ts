@@ -63,10 +63,10 @@ export const USER_ROLES = {
 export function debounce(func: (() => void), wait: number) {
   let timeout: number | undefined;
   function debounced() {
-      if (timeout !== undefined) {
-          clearTimeout(timeout);
-      }
-      timeout = setTimeout(func, wait);
+    if (timeout !== undefined) {
+      clearTimeout(timeout);
+    }
+    timeout = setTimeout(func, wait);
   }
   return debounced;
 }

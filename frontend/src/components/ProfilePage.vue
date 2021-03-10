@@ -65,9 +65,9 @@ export default {
   name: 'ProfilePage',
   
   data() {
-      return {
-          user: {}
-      };
+    return {
+      user: {}
+    };
   },
 
   mounted() {

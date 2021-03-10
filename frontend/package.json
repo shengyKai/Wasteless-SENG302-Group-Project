@@ -58,7 +58,9 @@
     "parserOptions": {
       "parser": "@typescript-eslint/parser"
     },
-    "rules": {}
+    "rules": {
+      "indent": ["error", 2]
+    }
   },
   "browserslist": [
     "> 1%",
