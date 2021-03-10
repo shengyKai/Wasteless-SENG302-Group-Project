@@ -41,12 +41,6 @@ import AppBar from "./components/AppBar";
 import AppFooter from "./components/AppFooter";
 import store from "./store";
 import router from "./plugins/vue-router";
-
-// function setCookie(name) {
-//   const date = new Date();
-//   date.setFullYear(date.getFullYear() + 1);
-//   document.cookie = `name=${name}`;
-// }
 import { COOKIE, getCookie } from './utils';
 
 // Vue app instance

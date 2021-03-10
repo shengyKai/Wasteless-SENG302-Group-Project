@@ -13,7 +13,12 @@ const store = new Vuex.Store<StoreData>({
   mutations: {
     setUser (state, payload: User) {
       state.user = payload;
-      if (payload.id) setCookie(COOKIE.USER, payload.id)
+      // If the payload contains a user ID, user is now logged in. Set their session cookie.
+      if (payload.id) {
+        deleteCookie(COOKIE.USER.toUpperCase());
+        deleteCookie(COOKIE.USER.toLowerCase());
+        setCookie(COOKIE.USER, payload.id)
+      }
     },
     logoutUser (state) {
       state.user = null;
@@ -23,6 +28,9 @@ const store = new Vuex.Store<StoreData>({
   getters: {
     isLoggedIn (state) {
       return state.user !== null;
+    },
+    role (state) {
+      return state.user?.role;
     }
   },
   actions: {
