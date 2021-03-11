@@ -49,8 +49,7 @@
     ></v-pagination>
     <!--Text to display range of results out of total number of results-->
     <v-row justify="center" no-gutters>
-      Displaying {{ (currentPage - 1) * resultsPerPage + 1 }} - {{ this.currentPage * this.resultsPerPage }} of
-      {{ users.length }} results
+      {{ resultsMessage }}
     </v-row>
   </div>
 </template>
@@ -130,7 +129,8 @@ export default {
       isSortDescending: false,
       sortByKey: 'First Name',
       currentPage: 1,
-      resultsPerPage: 3,
+      resultsPerPage: 4,
+      resultsMessage: ''
     };
   },
 
@@ -171,13 +171,33 @@ export default {
         this.users = value;
         this.error = undefined;
       }
-    },
+    }
   },
 
   watch: {
     searchQuery() {
       this.debouncedDoQuery();
     },
+    visiblePages: {
+      immediate: true,
+      handler() {
+        if (this.users.length === 0) {
+          this.resultsMessage = "There are no results to show"
+        } else if (this.users.length <= this.resultsPerPage) {
+          this.resultsMessage = "Displaying " + (((this.currentPage - 1) * this.resultsPerPage) + 1) + " - "  +
+              this.users.length + " of " + this.users.length + " results"
+        } else {
+          if (Math.floor(this.users.length / (this.currentPage * this.resultsPerPage)) === 0){
+            this.resultsMessage = "Displaying " + (((this.currentPage - 1) * this.resultsPerPage) + 1) + " - "  +
+                this.users.length + " of " + this.users.length + " results"
+          } else {
+            this.resultsMessage = "Displaying " + (((this.currentPage - 1) * this.resultsPerPage) + 1) + " - "  +
+                this.currentPage * this.resultsPerPage + " of " + this.users.length + " results"
+          }
+        }
+      }
+    }
+
   },
 
   components: {
