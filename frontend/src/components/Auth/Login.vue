@@ -6,13 +6,13 @@
           v-model="email"
           type="email"
           label="Email"
-          :rules="usernameRules"
+          :rules="mandatoryRules.concat(emailRules)"
       ></v-text-field>
       <v-text-field
           v-model="password"
           type="password"
           label="Password"
-          :rules="passwordRules"
+          :rules="mandatoryRules"
       ></v-text-field>
       <v-btn id="login-button" @click="showProfile" color="primary">Log in</v-btn>    <!--- :disabled="!valid" -->
       <!-- Add in if-else check in ^^^ button-->
@@ -35,13 +35,13 @@ export default {
       valid: false,
       email: '',
       password: '',
-      usernameRules: [
-
-        email => !!email || 'Email is required',
-        email => !!email || /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(email) || 'E-mail must be valid'
+      emailRules: [
+        email => /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(email) || 'E-mail must be valid'
       ],
-      passwordRules: [
-        password => !!password || 'Password is required'
+      mandatoryRules: [
+        //All fields with the class "required" will go through this ruleset to ensure the field is not empty.
+        //if it does not follow the format, display error message
+        field =>  !!field || 'Field is required'
       ]
     }
   },
