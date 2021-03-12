@@ -71,15 +71,18 @@ export default {
   },
 
   mounted() {
-    const id = this.$route.params?.id;
+    if (this.$route.params.id === undefined) {
+      this.user = this.$store.state.user;
+      return;
+    }
 
-    if (id === undefined || id === this.$store.state.user?.id) {
+    const id = parseInt(this.$route.params.id);
+    if (isNaN(id)) return;
+    
+    if (id === this.$store.state.user?.id) {
       this.user = this.$store.state.user;
     } else {
-      const idNum = parseInt(id);
-      if (isNaN(idNum)) return;
-
-      getUser(idNum).then((value) => {
+      getUser(id).then((value) => {
         if (typeof value === 'string') {
           // TODO Handle error properly
           console.warn(value);
