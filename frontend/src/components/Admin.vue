@@ -17,7 +17,7 @@
   <v-card
     height="310"
     width="256"
-    color="grey lighten-5"
+    color="white"
   >
   <!--     class="mx-auto"      -->
 
@@ -34,7 +34,7 @@
         </v-list-item-content>
       </v-list-item>
             <v-list dense nav>
-                        <v-card>
+                        <v-card color="grey lighten-5">
         <v-list-item v-for="item in items" :key="item.title" link>
           <v-list-item-icon>
             <v-icon>{{ item.icon }}</v-icon>

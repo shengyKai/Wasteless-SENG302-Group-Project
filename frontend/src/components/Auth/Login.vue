@@ -53,7 +53,7 @@ export default {
     },
     showProfile() { //hereeeeeeeeee
       this.$store.dispatch('getUser');
-      this.$router.push('/profile/50'); //For dev testing with user_code=50
+      this.$router.push('/profile'); //For dev testing with user_code=50
       // WE will need the line below after we start using cookies and token session / user id  
       //this.$router.push({ path: `/profile/${userId}` })
       // //alert('TODO');
