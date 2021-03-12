@@ -1,31 +1,44 @@
 <template>
   <v-container>
-    <v-form v-model="valid" class="login">
+    <v-form @submit.prevent="login" v-model="valid">
       <h1>Sign in</h1>
       <v-text-field
-          v-model="email"
-          type="email"
-          label="Email"
-          :rules="usernameRules"
-      ></v-text-field>
+        v-model="email"
+        type="email"
+        label="Email"
+        outlined
+        :rules="usernameRules"
+      />
       <v-text-field
-          v-model="password"
-          type="password"
-          label="Password"
-          :rules="passwordRules"
-      ></v-text-field>
-      <v-btn id="login-button" @click="showProfile" color="primary">Log in</v-btn>    <!--- :disabled="!valid" -->
-      <!-- Add in if-else check in ^^^ button-->
-      <!-- redirect to profile page -->
+        v-model="password"
+        type="password"
+        label="Password"
+        outlined
+        :rules="passwordRules"
+      />
 
+      <!-- Login button if user already has an account. -->
+      <p
+        class="link"
+        @click="showRegister"
+      >
+        Don't have an account? Register.
+      </p>
 
-      <v-btn id="register-button" @click="showRegister" color="primary">Register</v-btn>
+      <!-- Login -->
+      <v-btn
+        type="submit"
+        color="primary"
+        :disabled="!valid"
+      >
+        LOGIN
+      </v-btn>
     </v-form>
   </v-container>
 </template>
 
-<script>
 
+<script>
 export default {
 
   loggedIn: true,
@@ -43,36 +56,18 @@ export default {
       passwordRules: [
         password => !!password || 'Password is required'
       ]
-    }
+    };
   },
 
-  
+
   methods: {
     showRegister() {
       this.$emit('showRegister');
     },
-    showProfile() { //hereeeeeeeeee
+    login() {
       this.$store.dispatch('getUser');
-      this.$router.push('/profile'); //For dev testing with user_code=50
-      // WE will need the line below after we start using cookies and token session / user id  
-      //this.$router.push({ path: `/profile/${userId}` })
-      // //alert('TODO');
-
-      
+      this.$router.push('/profile');
     }
   }
-}
+};
 </script>
-
-
-<style scoped>
-.button-row {
-  text-align: center;
-}
-#login-button {
-  float: left
-}
-#register-button {
-  float: right
-}
-</style>
