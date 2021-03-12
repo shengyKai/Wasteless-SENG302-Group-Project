@@ -71,8 +71,9 @@ export default {
   },
 
   mounted() {
-    let id = this.$route.params.id;
-    if (id === undefined || id == this.$store.state.user?.id) {
+    let id = parseInt(this.$route.params.id);
+    if (isNaN(id)) return;
+    if (id === undefined || id === this.$store.state.user?.id) {
       this.user = this.$store.state.user;
     } else {
       getUser(id).then((value) => {

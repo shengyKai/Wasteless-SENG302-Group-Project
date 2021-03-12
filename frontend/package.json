@@ -59,7 +59,23 @@
       "parser": "@typescript-eslint/parser"
     },
     "rules": {
-      "indent": ["error", 2]
+      "indent": ["error", 2],
+      "no-var": ["error"],
+      "semi": ["error"],
+      "semi-spacing": ["error"],
+      "comma-style": ["error", "last"],
+      "eqeqeq": ["error"],
+      "default-case-last": ["error"],
+      "default-param-last": ["error"],
+      "consistent-return": ["error"],
+      "no-trailing-spaces": ["error"],
+      "no-whitespace-before-property": ["error"],
+
+      "vue/html-indent": ["error", 2],
+      "vue/no-parsing-error": ["error"],
+      "vue/html-self-closing": ["error"],
+      "vue/prop-name-casing": ["error", "camelCase"],
+      "vue/component-definition-name-casing": ["error", "PascalCase"]
     }
   },
   "browserslist": [
