@@ -129,7 +129,7 @@ export default {
       isSortDescending: false,
       sortByKey: 'First Name',
       currentPage: 1,
-      resultsPerPage: 4,
+      resultsPerPage: 3,
       resultsMessage: ''
     };
   },
@@ -183,17 +183,12 @@ export default {
       handler() {
         if (this.users.length === 0) {
           this.resultsMessage = "There are no results to show"
-        } else if (this.users.length <= this.resultsPerPage) {
+        } else if (Math.floor(this.users.length / (this.currentPage * this.resultsPerPage)) === 0){
           this.resultsMessage = "Displaying " + (((this.currentPage - 1) * this.resultsPerPage) + 1) + " - "  +
               this.users.length + " of " + this.users.length + " results"
         } else {
-          if (Math.floor(this.users.length / (this.currentPage * this.resultsPerPage)) === 0){
-            this.resultsMessage = "Displaying " + (((this.currentPage - 1) * this.resultsPerPage) + 1) + " - "  +
-                this.users.length + " of " + this.users.length + " results"
-          } else {
-            this.resultsMessage = "Displaying " + (((this.currentPage - 1) * this.resultsPerPage) + 1) + " - "  +
-                this.currentPage * this.resultsPerPage + " of " + this.users.length + " results"
-          }
+          this.resultsMessage = "Displaying " + (((this.currentPage - 1) * this.resultsPerPage) + 1) + " - "  +
+              this.currentPage * this.resultsPerPage + " of " + this.users.length + " results"
         }
       }
     }
