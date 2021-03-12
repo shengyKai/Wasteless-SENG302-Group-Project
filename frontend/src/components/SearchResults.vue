@@ -99,16 +99,6 @@ const MOCK_USERS = [
   },
 ];
 
-function addSeparators(array, separator) {
-  let result = [];
-  for (let elem of array) {
-    result.push(elem);
-    result.push(separator);
-  }
-  result.pop();
-  return result;
-}
-
 const USER_COMPARATORS = {
   // If first comparison results in a == b then fallback to other comparator.
   "First Name": (a, b) =>
@@ -141,12 +131,12 @@ export default {
         this.comparators[this.sortByKey]
       );
       if (this.isSortDescending) result.reverse();
-      return addSeparators(result, undefined);
+      return result;
     },
     //Formula in method slices the results based on the number of results per page and which page the user is
     //currently at, so that it will show the proper sets of results per page
     visiblePages() {
-      return this.users.slice((this.currentPage - 1) * this.resultsPerPage, this.currentPage * this.resultsPerPage)
+      return this.sortedUsers.slice((this.currentPage - 1) * this.resultsPerPage, this.currentPage * this.resultsPerPage)
     },
   },
 

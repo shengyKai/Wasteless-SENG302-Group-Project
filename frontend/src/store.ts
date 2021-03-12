@@ -17,7 +17,7 @@ const store = new Vuex.Store<StoreData>({
       if (payload.id) {
         deleteCookie(COOKIE.USER.toUpperCase());
         deleteCookie(COOKIE.USER.toLowerCase());
-        setCookie(COOKIE.USER, payload.id)
+        setCookie(COOKIE.USER, payload.id);
       }
     },
     logoutUser (state) {

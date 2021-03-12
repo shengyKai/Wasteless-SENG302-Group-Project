@@ -3,7 +3,7 @@
     <div>
       <div class="profile-img">
         <v-avatar size="200px" color="indigo">
-          <img src="https://edit.co.uk/uploads/2016/12/Image-1-Alternatives-to-stock-photography-Thinkstock.jpg"/>
+          <img src="https://edit.co.uk/uploads/2016/12/Image-1-Alternatives-to-stock-photography-Thinkstock.jpg">
         </v-avatar>
       </div>
       <div class="names">
@@ -17,45 +17,45 @@
       </div>
     </div>
 
-        <div class="fields">
-            <v-simple-table>
-                <tbody>
-                    <tr>
-                        <td>
-                            Email
-                        </td>
-                        <td>
-                            {{ user.email }}
-                        </td>
-                        <td>
-                            Date of Birth
-                        </td>
-                        <td>
-                            {{ user.dateOfBirth }}
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            Phone Number
-                        </td>
-                        <td>
-                            {{ user.phoneNumber }}
-                        </td>
-                        <td>
-                            Home Address
-                        </td>
-                        <td>
-                            {{ user.homeAddress }}
-                        </td>
-                    </tr>
-                </tbody>
-            </v-simple-table>
-        </div>
+    <div class="fields">
+      <v-simple-table>
+        <tbody>
+          <tr>
+            <td>
+              Email
+            </td>
+            <td>
+              {{ user.email }}
+            </td>
+            <td>
+              Date of Birth
+            </td>
+            <td>
+              {{ user.dateOfBirth }}
+            </td>
+          </tr>
+          <tr>
+            <td>
+              Phone Number
+            </td>
+            <td>
+              {{ user.phoneNumber }}
+            </td>
+            <td>
+              Home Address
+            </td>
+            <td>
+              {{ user.homeAddress }}
+            </td>
+          </tr>
+        </tbody>
+      </v-simple-table>
+    </div>
 
-        <div>
-            {{ user.bio }}
-        </div>
-    </v-card>
+    <div>
+      {{ user.bio }}
+    </div>
+  </v-card>
 </template>
 
 <script>
@@ -63,7 +63,7 @@ import { getUser } from '../api';
 
 export default {
   name: 'ProfilePage',
-  
+
   data() {
     return {
       user: {}
@@ -71,11 +71,15 @@ export default {
   },
 
   mounted() {
-    let id = this.$route.params.id;
-    if (id === undefined || id == this.$store.state.user?.id) {
+    const id = this.$route.params?.id;
+
+    if (id === undefined || id === this.$store.state.user?.id) {
       this.user = this.$store.state.user;
     } else {
-      getUser(id).then((value) => {
+      const idNum = parseInt(id);
+      if (isNaN(idNum)) return;
+
+      getUser(idNum).then((value) => {
         if (typeof value === 'string') {
           // TODO Handle error properly
           console.warn(value);
@@ -93,14 +97,14 @@ export default {
       const now = new Date();
       const createdAt = new Date(this.user.created);
       const parts = createdAt.toDateString().split(' ');
-      
+
       const diffTime = now - createdAt;
       const diffMonths = Math.ceil(diffTime / (1000 * 60 * 60 * 24 * 30));
 
       return `${parts[2]} ${parts[1]} ${parts[3]} (${diffMonths} months ago)`;
     }
   }
-}
+};
 </script>
 
 <style scoped>
