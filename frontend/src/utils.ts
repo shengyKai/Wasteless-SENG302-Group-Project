@@ -36,7 +36,7 @@ export function deleteCookie(name: string) {
  */
 export const COOKIE = {
   USER: 'user'
-}
+};
 
 
 
@@ -48,15 +48,15 @@ export const USER_ROLES = {
   USER: 'user',
   GAA: 'globalApplicationAdmin',
   DGAA: 'defaultGlobalApplicationAdmin'
-}
+};
 
 
 
 
 /**
- * Rate limits the input function by waiting a given amount of time calling the inner function. 
+ * Rate limits the input function by waiting a given amount of time calling the inner function.
  * If interrupted with another call then this wait is reset.
- * 
+ *
  * @param func Function to rate limit
  * @param wait Time (ms) to wait before calling the function
  */

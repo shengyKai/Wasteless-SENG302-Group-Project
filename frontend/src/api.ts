@@ -28,13 +28,13 @@
 /**
  * Declare all available services here
  */
-import axios from 'axios'  
+import axios from 'axios';
 const SERVER_URL = process.env.VUE_APP_SERVER_ADD;
 
-const instance = axios.create({  
+const instance = axios.create({
   baseURL: SERVER_URL,
-  timeout: 2000  
-});  
+  timeout: 2000
+});
 
 type MaybeError<T> = T | string;
 
@@ -88,10 +88,10 @@ function isUserArray(obj: any): obj is User[] {
   }
   return true;
 }
-  
+
 /**
  * Sends a search query to the backend and returns a list of users or an error string.
- * 
+ *
  * @param query Query string to search for
  * @returns List of user infos or an error message
  */
@@ -116,7 +116,7 @@ export async function search(query: string): Promise<MaybeError<User[]>> {
 
 /**
  * Queries the backend for a specific user by their id.
- * 
+ *
  * @param id User id, if ommitted then fetch the logged in user's info
  * @returns User info for the given id or an error message
  */
@@ -139,7 +139,7 @@ export async function getUser(id?: number): Promise<MaybeError<User>> {
 
 /**
  * Logs in to the given user account by setting the authentication cookie.
- * 
+ *
  * @param email User email
  * @param password User password
  */
@@ -158,7 +158,7 @@ export async function login(email: string, password: string): Promise<MaybeError
   }
   let id = response.data.userId;
   if (typeof id !== 'number') return 'Invalid response';
-  
+
   return id;
 }
 
@@ -176,9 +176,9 @@ export type CreateUser = {
 };
 
 /**
- * Creates a user with the given properties. 
+ * Creates a user with the given properties.
  * Note: This doesn't automatically log the user in.
- * 
+ *
  * @param user Initial user properties
  */
 export async function createUser(user: CreateUser): Promise<MaybeError<undefined>> {
@@ -196,7 +196,7 @@ export async function createUser(user: CreateUser): Promise<MaybeError<undefined
 
 /**
  * Makes the given user a GAA, if the current user is a DGAA.
- * 
+ *
  * @param userId User to make GAA
  */
 export async function makeAdmin(userId: number): Promise<MaybeError<undefined>> {
@@ -215,7 +215,7 @@ export async function makeAdmin(userId: number): Promise<MaybeError<undefined>> 
 
 /**
  * Revokes the given user's admin rights
- * 
+ *
  * @param userId User to revoke permissions
  */
 export async function revokeAdmin(userId: number): Promise<MaybeError<undefined>> {
