@@ -113,95 +113,47 @@
           outlined
       />
 
-      <!-- INPUT: Address -->
-      <v-combobox
+      <!-- INPUT: Street/Company -->
+      <v-text-field
           class="required"
-          v-model="address"
-          label="Address"
+          v-model="street1"
+          label="Street Address, Company Name"
           :rules="mandatoryRules"
-          :items="items"
-          :loading="isLoading"
-          :search-input.sync="search"
-          no-filter
-          clearable
           outlined
       />
 
-      <v-combobox
-          class="required"
-          v-model="country"
-          label="Country"
-          :rules="mandatoryRules"
-          :items="countryItems"
-          :loading="isLoading"
-          :search-input.sync="search"
-          no-filter
-          clearable
+      <!-- INPUT: Apartment, Suite, Unit, Building or Floor -->
+      <v-text-field
+          v-model="street2"
+          label="Apartment, Suite, Unit, Building, Floor"
           outlined
       />
 
-      <v-combobox
-          class="required"
-          v-model="state"
-          label="State"
+      <!-- INPUT: City -->
+      <CityAutocomplete
           :rules="mandatoryRules"
-          :items="items"
-          :loading="isLoading"
-          :search-input.sync="search"
-          no-filter
-          clearable
-          outlined
+          class="required"
       />
 
-      <v-combobox
+      <!-- INPUT: State -->
+      <StateAutocomplete
           class="required"
-          v-model="city"
-          label="City"
-          :rules="mandatoryRules"
-          :items="items"
-          :loading="isLoading"
-          :search-input.sync="search"
-          no-filter
-          clearable
-          outlined
       />
 
-      <v-combobox
+      <!-- INPUT: District/Region/Province -->
+      <DistrictAutocomplete/>
+
+      <!-- INPUT: Country -->
+      <CountryAutocomplete
           class="required"
-          v-model="houseOrBlockNumber"
-          label="House/Block Number"
-          :rules="mandatoryRules"
-          :items="items"
-          :loading="isLoading"
-          :search-input.sync="search"
-          no-filter
-          clearable
-          outlined
       />
 
-      <v-combobox
-          class="required"
-          v-model="street"
-          label="Street"
-          :rules="mandatoryRules"
-          :items="items"
-          :loading="isLoading"
-          :search-input.sync="search"
-          no-filter
-          clearable
-          outlined
-      />
-
-      <v-combobox
+      <!-- INPUT: Postcode -->
+      <v-text-field
           class="required"
           v-model="postcode"
           label="Postcode"
           :rules="mandatoryRules"
-          :items="items"
-          :loading="isLoading"
-          :search-input.sync="search"
-          no-filter
-          clearable
           outlined
       />
 
@@ -227,8 +179,19 @@
 
 
 <script>
+import CountryAutocomplete from '@/components/utils/CountryAutocomplete'
+import DistrictAutocomplete from '@/components/utils/DistrictAutocomplete'
+import CityAutocomplete from '@/components/utils/CityAutocomplete'
+import StateAutocomplete from '@/components/utils/StateAutocomplete'
+
 export default {
   name: 'Register',
+  components: {
+    CountryAutocomplete,
+    DistrictAutocomplete,
+    CityAutocomplete,
+    StateAutocomplete
+  },
   data () {
     return {
       showPassword: false,
@@ -242,19 +205,13 @@ export default {
       bio: '',
       dob: new Date().toISOString().substr(0, 10),
       phone: '',
-      address: '',
+      street1: '',
+      street2: '',
+      country: '',
+      postcode: '',
       modal: false,
       items: [],
       isLoading: false,
-      search: null,
-      country: '',
-      countryItems: [],
-      state: '',
-      city: '',
-      houseOrBlockNumber: '',
-      street: '',
-      postcode: '',
-      currentFocus: '',
       currentDate: new Date().toISOString().slice(0, 10),
       emailRules: [
         //regex rules for emails, example format is as such:
@@ -266,33 +223,7 @@ export default {
         //All fields with the class "required" will go through this ruleset to ensure the field is not empty.
         //if it does not follow the format, display error message
         field => !!field || 'Field is required'
-      ],
-
-    }
-  },
-
-  watch: {
-    search (val) {
-      if (val && val.length > 2) {
-        this.isLoading = true
-        let url = 'https://photon.komoot.io/api/?q=' + val
-
-        fetch(url).then(res => res.json()).then(res => {
-          if (this.currentFocus === 'country') {
-            this.countryItems = []
-            res.features.forEach(feature => {
-              if (feature.properties.country !== undefined) {
-                this.countryItems.push(feature.properties.country)
-              }
-            })
-          }
-        }).catch(err => {
-          console.log(err)
-        }).finally(() => (this.isLoading = false))
-      }
-    },
-    country: function() {
-      this.currentFocus = 'country'
+      ]
     }
   },
 
@@ -342,7 +273,7 @@ export default {
       return () =>
         this.password === this.confirmPassword || 'Passwords must match'
     }
-  }
+  },
 }
 
 </script>
