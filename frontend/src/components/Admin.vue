@@ -62,8 +62,10 @@ export default {
     return {
       items: [
         { title: "Dashboard", icon: "mdi-view-dashboard" },
-        { title: "Photos", icon: "mdi-image" },
-        { title: "About", icon: "mdi-help-box" },
+        { title: "Remove GAA", icon: "mdi-plus" },
+        { title: "Remove GAA", icon: "mdi-minus" },
+        { title: "Gallery", icon: "mdi-image" },
+        { title: "Admin Guide", icon: "mdi-help-box" },
       ],
       right: null,
     };
