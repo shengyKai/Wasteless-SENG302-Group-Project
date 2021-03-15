@@ -49,8 +49,7 @@
     ></v-pagination>
     <!--Text to display range of results out of total number of results-->
     <v-row justify="center" no-gutters>
-      Displaying {{ (currentPage - 1) * resultsPerPage + 1 }} - {{ this.currentPage * this.resultsPerPage }} of
-      {{ users.length }} results
+      {{ resultsMessage }}
     </v-row>
   </div>
 </template>
@@ -100,23 +99,13 @@ const MOCK_USERS = [
   },
 ];
 
-function addSeparators(array, separator) {
-  let result = [];
-  for (let elem of array) {
-    result.push(elem);
-    result.push(separator);
-  }
-  result.pop();
-  return result;
-}
-
 const USER_COMPARATORS = {
   // If first comparison results in a == b then fallback to other comparator.
   "First Name": (a, b) =>
-      a.firstName.localeCompare(b.firstName) ||
+    a.firstName.localeCompare(b.firstName) ||
       a.lastName.localeCompare(b.lastName),
   "Last Name": (a, b) =>
-      a.lastName.localeCompare(b.lastName) ||
+    a.lastName.localeCompare(b.lastName) ||
       a.firstName.localeCompare(b.firstName),
 };
 
@@ -131,6 +120,7 @@ export default {
       sortByKey: 'First Name',
       currentPage: 1,
       resultsPerPage: 3,
+      resultsMessage: ''
     };
   },
 
@@ -138,15 +128,15 @@ export default {
     sortedUsers() {
       if (this.users === undefined) return undefined;
       let result = Array.from(this.users).sort(
-          this.comparators[this.sortByKey]
+        this.comparators[this.sortByKey]
       );
       if (this.isSortDescending) result.reverse();
-      return addSeparators(result, undefined);
+      return result;
     },
     //Formula in method slices the results based on the number of results per page and which page the user is
     //currently at, so that it will show the proper sets of results per page
     visiblePages() {
-      return this.users.slice((this.currentPage - 1) * this.resultsPerPage, this.currentPage * this.resultsPerPage)
+      return this.sortedUsers.slice((this.currentPage - 1) * this.resultsPerPage, this.currentPage * this.resultsPerPage)
     },
   },
 
@@ -171,13 +161,28 @@ export default {
         this.users = value;
         this.error = undefined;
       }
-    },
+    }
   },
 
   watch: {
     searchQuery() {
       this.debouncedDoQuery();
     },
+    visiblePages: {
+      immediate: true,
+      handler() {
+        if (this.users.length === 0) {
+          this.resultsMessage = "There are no results to show"
+        } else if (Math.floor(this.users.length / (this.currentPage * this.resultsPerPage)) === 0){
+          this.resultsMessage = "Displaying " + (((this.currentPage - 1) * this.resultsPerPage) + 1) + " - "  +
+              this.users.length + " of " + this.users.length + " results"
+        } else {
+          this.resultsMessage = "Displaying " + (((this.currentPage - 1) * this.resultsPerPage) + 1) + " - "  +
+              this.currentPage * this.resultsPerPage + " of " + this.users.length + " results"
+        }
+      }
+    }
+
   },
 
   components: {

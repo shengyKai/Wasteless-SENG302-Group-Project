@@ -23,14 +23,14 @@ export default {
   data() {
     return {
       login: false
-    }
+    };
   },
   methods: {
     togglePage() {
       this.login = !this.login;
     }
   }
-}
+};
 </script>
 
 

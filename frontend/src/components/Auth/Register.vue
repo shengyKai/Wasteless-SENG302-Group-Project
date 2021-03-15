@@ -5,46 +5,46 @@
     <v-container>
       <!-- INPUT: Email -->
       <v-text-field
-        class="required"
-        v-model="email"
-        label="Email"
-        :rules="mandatoryRules.concat(emailRules)"
-        outlined
+          class="required"
+          v-model="email"
+          label="Email"
+          :rules="mandatoryRules.concat(emailRules)"
+          outlined
       />
 
       <!-- INPUT: Password -->
       <v-text-field
-        class="required"
-        v-model="password"
-        label="Password"
-        @keyup="passwordChange"
-        :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
-        :type="showPassword ? 'text' : 'password'"
-        @click:append="showPassword = !showPassword"
-        :rules="mandatoryRules"
-        outlined
+          class="required"
+          v-model="password"
+          label="Password"
+          @keyup="passwordChange"
+          :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
+          :type="showPassword ? 'text' : 'password'"
+          @click:append="showPassword = !showPassword"
+          :rules="mandatoryRules"
+          outlined
       />
 
       <!-- INPUT: Confirm Password -->
       <v-text-field
-        ref="confirmPassword"
-        class="required"
-        v-model="confirmPassword"
-        label="Confirm Password"
-        :append-icon="showConfirmPassword ? 'mdi-eye' : 'mdi-eye-off'"
-        :type="showConfirmPassword ? 'text' : 'password'"
-        @click:append="showConfirmPassword = !showConfirmPassword"
-        :rules="mandatoryRules.concat(passwordConfirmationRule)"
-        outlined
+          ref="confirmPassword"
+          class="required"
+          v-model="confirmPassword"
+          label="Confirm Password"
+          :append-icon="showConfirmPassword ? 'mdi-eye' : 'mdi-eye-off'"
+          :type="showConfirmPassword ? 'text' : 'password'"
+          @click:append="showConfirmPassword = !showConfirmPassword"
+          :rules="mandatoryRules.concat(passwordConfirmationRule)"
+          outlined
       />
 
       <!-- INPUT: Name -->
       <v-text-field
-        class="required"
-        v-model="name"
-        label="Name"
-        :rules="mandatoryRules"
-        outlined
+          class="required"
+          v-model="name"
+          label="Name"
+          :rules="mandatoryRules"
+          outlined
       />
 
       <!-- INPUT: Nickname -->
@@ -56,49 +56,50 @@
 
       <!-- INPUT: Bio -->
       <v-textarea
-        v-model="bio"
-        label="Bio"
-        rows="3"
-        outlined
+          v-model="bio"
+          label="Bio"
+          rows="3"
+          outlined
       />
 
       <!-- INPUT: Date of Birth -->
       <v-dialog
-        ref="dialog"
-        v-model="modal"
-        :return-value.sync="dob"
-        width="300px"
-        persistent
+          ref="dialog"
+          v-model="modal"
+          :return-value.sync="dob"
+          width="300px"
+          persistent
       >
         <template v-slot:activator="{ on, attrs }">
           <v-text-field
-            class="required"
-            v-model="dob"
-            label="Date of Birth"
-            :rules="mandatoryRules"
-            prepend-inner-icon="mdi-calendar"
-            readonly
-            v-bind="attrs"
-            v-on="on"
-            outlined
+              class="required"
+              v-model="dob"
+              label="Date of Birth"
+              :rules="mandatoryRules"
+              prepend-inner-icon="mdi-calendar"
+              readonly
+              v-bind="attrs"
+              v-on="on"
+              outlined
           />
         </template>
         <v-date-picker
-          v-model="dob"
-          scrollable
+            v-model="dob"
+            :max="currentDate"
+            scrollable
         >
           <v-spacer></v-spacer>
           <v-btn
-            text
-            color="primary"
-            @click="closeDatePicker"
+              text
+              color="primary"
+              @click="closeDatePicker"
           >
             Cancel
           </v-btn>
           <v-btn
-            text
-            color="primary"
-            @click="$refs.dialog.save(dob)"
+              text
+              color="primary"
+              @click="$refs.dialog.save(dob)"
           >
             OK
           </v-btn>
@@ -107,32 +108,59 @@
 
       <!-- INPUT: Phone -->
       <v-text-field
-        v-model="phone"
-        label="Phone"
-        outlined
+          v-model="phone"
+          label="Phone"
+          outlined
       />
 
-      <!-- INPUT: Address -->
-      <v-combobox
-        class="required"
-        v-model="address"
-        label="Address"
-        :rules="mandatoryRules"
-        :items="items"
-        :loading="isLoading"
-        :search-input.sync="search"
-        item-text="name"
-        item-value="symbol"
-        no-filter
-        clearable
-        outlined
+      <!-- INPUT: Street/Company -->
+      <v-text-field
+          class="required"
+          v-model="street1"
+          label="Street Address, Company Name"
+          :rules="mandatoryRules"
+          outlined
       />
 
+      <!-- INPUT: Apartment, Suite, Unit, Building or Floor -->
+      <v-text-field
+          v-model="street2"
+          label="Apartment, Suite, Unit, Building, Floor"
+          outlined
+      />
+
+      <!-- INPUT: City -->
+      <CityAutocomplete
+          :rules="mandatoryRules"
+          class="required"
+      />
+
+      <!-- INPUT: State -->
+      <StateAutocomplete
+          class="required"
+      />
+
+      <!-- INPUT: District/Region/Province -->
+      <DistrictAutocomplete/>
+
+      <!-- INPUT: Country -->
+      <CountryAutocomplete
+          class="required"
+      />
+
+      <!-- INPUT: Postcode -->
+      <v-text-field
+          class="required"
+          v-model="postcode"
+          label="Postcode"
+          :rules="mandatoryRules"
+          outlined
+      />
 
       <!-- Login button if user already has an account. -->
       <p
-        class="link"
-        @click="showLogin"
+          class="link"
+          @click="showLogin"
       >
         Already have an account? Login.
       </p>
@@ -151,9 +179,20 @@
 
 
 <script>
+import CountryAutocomplete from '@/components/utils/CountryAutocomplete'
+import DistrictAutocomplete from '@/components/utils/DistrictAutocomplete'
+import CityAutocomplete from '@/components/utils/CityAutocomplete'
+import StateAutocomplete from '@/components/utils/StateAutocomplete'
+
 export default {
   name: 'Register',
-  data() {
+  components: {
+    CountryAutocomplete,
+    DistrictAutocomplete,
+    CityAutocomplete,
+    StateAutocomplete
+  },
+  data () {
     return {
       showPassword: false,
       showConfirmPassword: false,
@@ -166,11 +205,14 @@ export default {
       bio: '',
       dob: new Date().toISOString().substr(0, 10),
       phone: '',
-      address: '',
+      street1: '',
+      street2: '',
+      country: '',
+      postcode: '',
       modal: false,
       items: [],
       isLoading: false,
-      search: null,
+      currentDate: new Date().toISOString().slice(0, 10),
       emailRules: [
         //regex rules for emails, example format is as such:
         //"blah@hotmail.co
@@ -180,79 +222,23 @@ export default {
       mandatoryRules: [
         //All fields with the class "required" will go through this ruleset to ensure the field is not empty.
         //if it does not follow the format, display error message
-        field =>  !!field || 'Field is required'
-      ],
-
+        field => !!field || 'Field is required'
+      ]
     }
   },
 
-  watch: {
-    search (val) {
-      let address = '';
-      this.items = [];
-      let addressList = [];
-
-      if (val && val.length > 2) {
-        this.isLoading = true
-        let url = "https://photon.komoot.io/api/?q=" + val;
-
-        fetch(url)
-            .then(res => res.json())
-            .then(res => {
-              //Address order/format to be presented on Address textfield
-              //Street, City area/District, City/Town/Village, County, Postal code, Country
-
-              //reset addressList for each value changed in the textbox
-              addressList = [];
-
-              //for each address received from the api, extract out the properties of that address
-              res.features.forEach(feature => {
-                if (feature.properties.name !== undefined) {
-                  address += feature.properties.name + ", ";
-                }
-                if (feature.properties.district !== undefined) {
-                  address += feature.properties.district + ", ";
-                }
-                if (feature.properties.city !== undefined) {
-                  address += feature.properties.city + ", ";
-                }
-                if (feature.properties.county !== undefined) {
-                  address += feature.properties.county + ", ";
-                }
-                if (feature.properties.postcode !== undefined) {
-                  address += feature.properties.postcode + ", ";
-                }
-                if (feature.properties.country !== undefined) {
-                  address += feature.properties.country + ", ";
-                }
-                addressList.push(address.substring(0, address.length-2))
-                //reset address
-                address = '';
-              })
-              //set the items in the combobox
-              this.items = addressList;
-            })
-            .catch(err => {
-              console.log(err)
-            })
-            .finally(() => (this.isLoading = false))
-      }
-    },
-  },
-
-  
   methods: {
     // Show login screen
-    showLogin() {
-      this.$emit('showLogin');
+    showLogin () {
+      this.$emit('showLogin')
     },
     // Complete registration with API
-    register() {
-      alert("TODO");
+    register () {
+      alert('TODO')
     },
     // Close the date picker modal
-    closeDatePicker() {
-      this.modal = false;
+    closeDatePicker () {
+      this.modal = false
     },
     //Feature bug:
     //After the user has successfully typed in the same values in the password and confirmPassword, if the user decides
@@ -263,8 +249,8 @@ export default {
     //The bottom method solves that issue by observing the password field. That means the @keyup attribute in the
     //password field observes every finished keystroke in there and calls the ref with "confirmPassword" (in this case
     //it refers to the confirmPassword field)to revalidate itself upon any changes in the password field.
-    passwordChange() {
-      this.$refs.confirmPassword.validate();
+    passwordChange () {
+      this.$refs.confirmPassword.validate()
     },
     querySelections (v) {
       this.loading = true
@@ -283,11 +269,11 @@ export default {
     //change(in this case, each keystroke), and compare it with the password field. If they are not the same,
     //the error message "Passwords must match" will show up at the bottom of the confirmPassword field, until it
     //is the same.
-    passwordConfirmationRule() {
+    passwordConfirmationRule () {
       return () =>
-          this.password === this.confirmPassword || "Passwords must match";
+        this.password === this.confirmPassword || 'Passwords must match'
     }
-  }
+  },
 }
 
 </script>

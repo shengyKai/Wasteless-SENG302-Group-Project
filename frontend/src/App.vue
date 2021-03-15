@@ -23,7 +23,7 @@
             <div class="container-outer">
               <div class="container-inner">
                 <!-- All content (except AppBar & Footer) should be a child of 'v-main'. -->
-                  <Auth />
+                <Auth />
               </div>
             </div>
           </v-main>
@@ -41,12 +41,6 @@ import AppBar from "./components/AppBar";
 import AppFooter from "./components/AppFooter";
 import store from "./store";
 import router from "./plugins/vue-router";
-
-// function setCookie(name) {
-//   const date = new Date();
-//   date.setFullYear(date.getFullYear() + 1);
-//   document.cookie = `name=${name}`;
-// }
 import { COOKIE, getCookie } from './utils';
 
 // Vue app instance
@@ -54,7 +48,7 @@ import { COOKIE, getCookie } from './utils';
 // For global instance https://vuejs.org/v2/guide/instance.html
 // For comparison: https://stackoverflow.com/questions/48727863/vue-export-default-vs-new-vue
 export default {
-  name: "app",
+  name: "App",
   components: {
     // list your components here to register them (located under 'components' folder)
     // https://vuejs.org/v2/guide/components-registration.html
@@ -78,11 +72,11 @@ export default {
   data() {
     return {
       loading: false
-    }
+    };
   },
   computed: {
     loggedIn() {
-      return this.$store.getters.isLoggedIn
+      return this.$store.getters.isLoggedIn;
     }
   }
 };
