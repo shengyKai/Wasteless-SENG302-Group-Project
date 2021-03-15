@@ -1,14 +1,14 @@
 <template>
   <v-combobox
-      v-model="state"
-      label="State/Province/Region"
-      :items="stateItems"
-      :loading="isLoading"
-      :search-input.sync="stateSearch"
-      :rules="mandatoryRules"
-      no-filter
-      clearable
-      outlined
+    v-model="state"
+    label="State/Province/Region"
+    :items="stateItems"
+    :loading="isLoading"
+    :search-input.sync="stateSearch"
+    :rules="mandatoryRules"
+    no-filter
+    clearable
+    outlined
   />
 </template>
 
@@ -26,19 +26,19 @@ export default {
         //if it does not follow the format, display error message
         field => !!field || 'Field is required'
       ]
-    }
+    };
   },
 
   watch: {
     stateSearch (val) {
-      this.stateItems = []
+      this.stateItems = [];
 
       //if input length exists, and has a length more than 2
       if (val && val.length > 2) {
         //show loading animation
-        this.isLoading = true
+        this.isLoading = true;
         //append to the api url the input the user has entered
-        let url = 'https://photon.komoot.io/api/?q=' + val
+        let url = 'https://photon.komoot.io/api/?q=' + val;
 
         fetch(url).then(res => res.json()).then(res => {
           res.features.forEach(feature => {
@@ -46,21 +46,21 @@ export default {
             //state, province, region
             //it will add that result into the autocomplete suggestion
             if (feature.properties.state !== undefined) {
-              this.stateItems.push(feature.properties.state)
+              this.stateItems.push(feature.properties.state);
             }
             if (feature.properties.province !== undefined) {
-              this.stateItems.push(feature.properties.province)
+              this.stateItems.push(feature.properties.province);
             }
             if (feature.properties.region !== undefined) {
-              this.stateItems.push(feature.properties.region)
+              this.stateItems.push(feature.properties.region);
             }
-          })
+          });
         }).catch(err => {
-          console.log(err)
+          console.log(err);
           //after everything is shown, the loading animation will stop
-        }).finally(() => (this.isLoading = false))
+        }).finally(() => (this.isLoading = false));
       }
     },
   }
-}
+};
 </script>

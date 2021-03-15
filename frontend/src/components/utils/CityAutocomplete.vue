@@ -1,14 +1,14 @@
 <template>
   <v-combobox
-      v-model="city"
-      label="City"
-      :items="cityItems"
-      :loading="isLoading"
-      :search-input.sync="citySearch"
-      :rules="mandatoryRules"
-      no-filter
-      clearable
-      outlined
+    v-model="city"
+    label="City"
+    :items="cityItems"
+    :loading="isLoading"
+    :search-input.sync="citySearch"
+    :rules="mandatoryRules"
+    no-filter
+    clearable
+    outlined
   />
 </template>
 
@@ -26,19 +26,19 @@ export default {
         //if it does not follow the format, display error message
         field => !!field || 'Field is required'
       ]
-    }
+    };
   },
 
   watch: {
     citySearch (val) {
-      this.cityItems = []
+      this.cityItems = [];
 
       //if input length exists, and has a length more than 2
       if (val && val.length > 2) {
         //show loading animation
-        this.isLoading = true
+        this.isLoading = true;
         //append to the api url the input the user has entered
-        let url = 'https://photon.komoot.io/api/?q=' + val
+        let url = 'https://photon.komoot.io/api/?q=' + val;
 
         fetch(url).then(res => res.json()).then(res => {
           res.features.forEach(feature => {
@@ -46,15 +46,15 @@ export default {
             //city
             //it will add that result into the autocomplete suggestion
             if (feature.properties.city !== undefined) {
-              this.cityItems.push(feature.properties.city)
+              this.cityItems.push(feature.properties.city);
             }
-          })
+          });
         }).catch(err => {
-          console.log(err)
+          console.log(err);
           //after everything is shown, the loading animation will stop
-        }).finally(() => (this.isLoading = false))
+        }).finally(() => (this.isLoading = false));
       }
     },
   }
-}
+};
 </script>
