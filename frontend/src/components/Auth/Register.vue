@@ -5,101 +5,101 @@
     <v-container>
       <!-- INPUT: Email -->
       <v-text-field
-          class="required"
-          v-model="email"
-          label="Email"
-          :rules="mandatoryRules.concat(emailRules)"
-          outlined
+        class="required"
+        v-model="email"
+        label="Email"
+        :rules="mandatoryRules.concat(emailRules)"
+        outlined
       />
 
       <!-- INPUT: Password -->
       <v-text-field
-          class="required"
-          v-model="password"
-          label="Password"
-          @keyup="passwordChange"
-          :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
-          :type="showPassword ? 'text' : 'password'"
-          @click:append="showPassword = !showPassword"
-          :rules="mandatoryRules"
-          outlined
+        class="required"
+        v-model="password"
+        label="Password"
+        @keyup="passwordChange"
+        :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
+        :type="showPassword ? 'text' : 'password'"
+        @click:append="showPassword = !showPassword"
+        :rules="mandatoryRules.concat(passwordRules)"
+        outlined
       />
 
       <!-- INPUT: Confirm Password -->
       <v-text-field
-          ref="confirmPassword"
-          class="required"
-          v-model="confirmPassword"
-          label="Confirm Password"
-          :append-icon="showConfirmPassword ? 'mdi-eye' : 'mdi-eye-off'"
-          :type="showConfirmPassword ? 'text' : 'password'"
-          @click:append="showConfirmPassword = !showConfirmPassword"
-          :rules="mandatoryRules.concat(passwordConfirmationRule)"
-          outlined
+        ref="confirmPassword"
+        class="required"
+        v-model="confirmPassword"
+        label="Confirm Password"
+        :append-icon="showConfirmPassword ? 'mdi-eye' : 'mdi-eye-off'"
+        :type="showConfirmPassword ? 'text' : 'password'"
+        @click:append="showConfirmPassword = !showConfirmPassword"
+        :rules="mandatoryRules.concat(passwordConfirmationRule)"
+        outlined
       />
 
       <!-- INPUT: Name -->
       <v-text-field
-          class="required"
-          v-model="name"
-          label="Name"
-          :rules="mandatoryRules"
-          outlined
+        class="required"
+        v-model="name"
+        label="Name"
+        :rules="mandatoryRules"
+        outlined
       />
 
       <!-- INPUT: Nickname -->
       <v-text-field
-          v-model="nickname"
-          label="Nickname"
-          outlined
+        v-model="nickname"
+        label="Nickname"
+        outlined
       />
 
       <!-- INPUT: Bio -->
       <v-textarea
-          v-model="bio"
-          label="Bio"
-          rows="3"
-          outlined
+        v-model="bio"
+        label="Bio"
+        rows="3"
+        outlined
       />
 
       <!-- INPUT: Date of Birth -->
       <v-dialog
-          ref="dialog"
-          v-model="modal"
-          :return-value.sync="dob"
-          width="300px"
-          persistent
+        ref="dialog"
+        v-model="modal"
+        :return-value.sync="dob"
+        width="300px"
+        persistent
       >
         <template v-slot:activator="{ on, attrs }">
           <v-text-field
-              class="required"
-              v-model="dob"
-              label="Date of Birth"
-              :rules="mandatoryRules"
-              prepend-inner-icon="mdi-calendar"
-              readonly
-              v-bind="attrs"
-              v-on="on"
-              outlined
+            class="required"
+            v-model="dob"
+            label="Date of Birth"
+            :rules="mandatoryRules"
+            prepend-inner-icon="mdi-calendar"
+            readonly
+            v-bind="attrs"
+            v-on="on"
+            outlined
           />
         </template>
         <v-date-picker
-            v-model="dob"
-            :max="currentDate"
-            scrollable
+          v-model="dob"
+          :max="maxDate"
+          scrollable
         >
-          <v-spacer></v-spacer>
+          <v-spacer/>
           <v-btn
-              text
-              color="primary"
-              @click="closeDatePicker"
+            text
+            color="primary"
+            @click="closeDatePicker"
           >
             Cancel
           </v-btn>
           <v-btn
-              text
-              color="primary"
-              @click="$refs.dialog.save(dob)"
+            text
+            color="primary"
+            @click="$refs.dialog.save(dob)"
           >
             OK
           </v-btn>
@@ -108,36 +108,36 @@
 
       <!-- INPUT: Phone -->
       <v-text-field
-          v-model="phone"
-          label="Phone"
-          outlined
+        v-model="phone"
+        label="Phone"
+        outlined
       />
 
       <!-- INPUT: Street/Company -->
       <v-text-field
-          class="required"
-          v-model="street1"
-          label="Street Address, Company Name"
-          :rules="mandatoryRules"
-          outlined
+        class="required"
+        v-model="street1"
+        label="Street Address, Company Name"
+        :rules="mandatoryRules"
+        outlined
       />
 
       <!-- INPUT: Apartment, Suite, Unit, Building or Floor -->
       <v-text-field
-          v-model="street2"
-          label="Apartment, Suite, Unit, Building, Floor"
-          outlined
+        v-model="street2"
+        label="Apartment, Suite, Unit, Building, Floor"
+        outlined
       />
 
       <!-- INPUT: City -->
       <CityAutocomplete
-          :rules="mandatoryRules"
-          class="required"
+        :rules="mandatoryRules"
+        class="required"
       />
 
       <!-- INPUT: State -->
       <StateAutocomplete
-          class="required"
+        class="required"
       />
 
       <!-- INPUT: District/Region/Province -->
@@ -145,31 +145,31 @@
 
       <!-- INPUT: Country -->
       <CountryAutocomplete
-          class="required"
+        class="required"
       />
 
       <!-- INPUT: Postcode -->
       <v-text-field
-          class="required"
-          v-model="postcode"
-          label="Postcode"
-          :rules="mandatoryRules"
-          outlined
+        class="required"
+        v-model="postcode"
+        label="Postcode"
+        :rules="mandatoryRules"
+        outlined
       />
 
       <!-- Login button if user already has an account. -->
       <p
-          class="link"
-          @click="showLogin"
+        class="link"
+        @click="showLogin"
       >
         Already have an account? Login.
       </p>
 
       <!-- Register -->
       <v-btn
-          type="submit"
-          color="primary"
-          :disabled="!valid">
+        type="submit"
+        color="primary"
+        :disabled="!valid">
         REGISTER
       </v-btn>
 
@@ -179,10 +179,10 @@
 
 
 <script>
-import CountryAutocomplete from '@/components/utils/CountryAutocomplete'
-import DistrictAutocomplete from '@/components/utils/DistrictAutocomplete'
-import CityAutocomplete from '@/components/utils/CityAutocomplete'
-import StateAutocomplete from '@/components/utils/StateAutocomplete'
+import CountryAutocomplete from '@/components/utils/CountryAutocomplete';
+import DistrictAutocomplete from '@/components/utils/DistrictAutocomplete';
+import CityAutocomplete from '@/components/utils/CityAutocomplete';
+import StateAutocomplete from '@/components/utils/StateAutocomplete';
 
 export default {
   name: 'Register',
@@ -203,7 +203,7 @@ export default {
       name: '',
       nickname: '',
       bio: '',
-      dob: new Date().toISOString().substr(0, 10),
+      dob: '',
       phone: '',
       street1: '',
       street2: '',
@@ -212,7 +212,7 @@ export default {
       modal: false,
       items: [],
       isLoading: false,
-      currentDate: new Date().toISOString().slice(0, 10),
+      maxDate: '',
       emailRules: [
         //regex rules for emails, example format is as such:
         //"blah@hotmail.co
@@ -223,22 +223,26 @@ export default {
         //All fields with the class "required" will go through this ruleset to ensure the field is not empty.
         //if it does not follow the format, display error message
         field => !!field || 'Field is required'
+      ],
+      passwordRules: [
+        field => (field && field.length >= 7) || 'Password must have 7+ characters',
+        field => /(?=.*\d)/.test(field) || 'Must have one number'
       ]
-    }
+    };
   },
 
   methods: {
     // Show login screen
     showLogin () {
-      this.$emit('showLogin')
+      this.$emit('showLogin');
     },
     // Complete registration with API
     register () {
-      alert('TODO')
+      alert('TODO');
     },
     // Close the date picker modal
     closeDatePicker () {
-      this.modal = false
+      this.modal = false;
     },
     //Feature bug:
     //After the user has successfully typed in the same values in the password and confirmPassword, if the user decides
@@ -250,17 +254,25 @@ export default {
     //password field observes every finished keystroke in there and calls the ref with "confirmPassword" (in this case
     //it refers to the confirmPassword field)to revalidate itself upon any changes in the password field.
     passwordChange () {
-      this.$refs.confirmPassword.validate()
+      this.$refs.confirmPassword.validate();
     },
     querySelections (v) {
-      this.loading = true
+      this.loading = true;
       // Simulated ajax query
       setTimeout(() => {
         this.items = this.states.filter(e => {
-          return (e || '').toLowerCase().indexOf((v || '').toLowerCase()) > -1
-        })
-        this.loading = false
-      }, 500)
+          return (e || '').toLowerCase().indexOf((v || '').toLowerCase()) > -1;
+        });
+        this.loading = false;
+      }, 500);
+    },
+    minimumDateOfBirth() {
+      //minimum age of a user must be 13
+      let today = new Date();
+      let year = today.getFullYear();
+      let month = today.getMonth();
+      let day = today.getDate();
+      return new Date(year - 13, month, day + 1);
     }
   },
   computed: {
@@ -271,10 +283,16 @@ export default {
     //is the same.
     passwordConfirmationRule () {
       return () =>
-        this.password === this.confirmPassword || 'Passwords must match'
+        this.password === this.confirmPassword || 'Passwords must match';
     }
   },
-}
+  //as any components are added to the dom, mounted() will be called
+  mounted() {
+    //sets maxDate and date of birth value
+    this.maxDate = this.minimumDateOfBirth().toISOString().slice(0, 10);
+    this.dob = this.minimumDateOfBirth().toISOString().slice(0, 10);
+  }
+};
 
 </script>
 
