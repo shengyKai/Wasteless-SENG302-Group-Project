@@ -38,16 +38,14 @@ export default {
         //show loading animation
         this.isLoading = true;
         //append to the api url the input the user has entered
-        let url = 'https://photon.komoot.io/api/?q=' + val;
+        let url = `https://photon.komoot.io/api/?q=${encodeURIComponent(val)}&osm_tag=place:country`;
 
         fetch(url).then(res => res.json()).then(res => {
           res.features.forEach(feature => {
             //If the returned GEOJSON has any of these key(s):
             //country
             //it will add that result into the autocomplete suggestion
-            if (feature.properties.country !== undefined) {
-              this.countryItems.push(feature.properties.country);
-            }
+            this.countryItems.push(feature.properties.name);
           });
         }).catch(err => {
           console.log(err);
