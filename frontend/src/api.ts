@@ -272,7 +272,7 @@ export async function revokeAdmin(userId: number): Promise<MaybeError<undefined>
 
 /**
  * Creates a business
- * 
+ *
  * @param business The properties to create the business with
  * @returns undefined if operation is successful, otherwise a string error.
  */
@@ -291,7 +291,7 @@ export async function createBusiness(business: CreateBusiness): Promise<MaybeErr
 
 /**
  * Fetches a business with the given id.
- * 
+ *
  * @param businessId Business id to fetch
  * @returns The requested business if operation is successful, otherwise a string error.
  */
