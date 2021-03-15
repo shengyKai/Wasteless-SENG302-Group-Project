@@ -129,6 +129,9 @@
         outlined
       />
 
+      <!-- INPUT: District/Region/Province -->
+      <DistrictAutocomplete/>
+
       <!-- INPUT: City -->
       <CityAutocomplete
         :rules="mandatoryRules"
@@ -139,9 +142,6 @@
       <StateAutocomplete
         class="required"
       />
-
-      <!-- INPUT: District/Region/Province -->
-      <DistrictAutocomplete/>
 
       <!-- INPUT: Country -->
       <CountryAutocomplete

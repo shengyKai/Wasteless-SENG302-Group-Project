@@ -38,22 +38,14 @@ export default {
         //show loading animation
         this.isLoading = true;
         //append to the api url the input the user has entered
-        let url = 'https://photon.komoot.io/api/?q=' + val;
+        let url = `https://photon.komoot.io/api/?q=${encodeURIComponent(val)}&osm_tag=place:state&osm_tag=place:region&osm_tag=place:province`;
 
         fetch(url).then(res => res.json()).then(res => {
           res.features.forEach(feature => {
             //If the returned GEOJSON has any of these key(s):
             //state, province, region
             //it will add that result into the autocomplete suggestion
-            if (feature.properties.state !== undefined) {
-              this.stateItems.push(feature.properties.state);
-            }
-            if (feature.properties.province !== undefined) {
-              this.stateItems.push(feature.properties.province);
-            }
-            if (feature.properties.region !== undefined) {
-              this.stateItems.push(feature.properties.region);
-            }
+            this.stateItems.push(feature.properties.name);
           });
         }).catch(err => {
           console.log(err);
