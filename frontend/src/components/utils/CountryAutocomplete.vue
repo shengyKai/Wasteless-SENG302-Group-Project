@@ -5,7 +5,7 @@
     :items="countryItems"
     :loading="isLoading"
     :search-input.sync="countrySearch"
-    :rules="mandatoryRules"
+    :rules="mandatoryRules.concat(maxCharRule)"
     no-filter
     clearable
     outlined
@@ -25,6 +25,9 @@ export default {
         //All fields with the class "required" will go through this ruleset to ensure the field is not empty.
         //if it does not follow the format, display error message
         field => !!field || 'Field is required'
+      ],
+      maxCharRule: [
+        field => (field.length <= 100) || 'Reached max character limit: 100'
       ]
     };
   },

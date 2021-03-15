@@ -5,6 +5,7 @@
     :items="districtItems"
     :loading="isLoading"
     :search-input.sync="districtSearch"
+    :rules="maxCharRule"
     no-filter
     clearable
     outlined
@@ -19,7 +20,10 @@ export default {
       district: '',
       districtItems: [],
       isLoading: false,
-      districtSearch: null
+      districtSearch: null,
+      maxCharRule: [
+        field => (field.length <= 100) || 'Reached max character limit: 100'
+      ]
     };
   },
 

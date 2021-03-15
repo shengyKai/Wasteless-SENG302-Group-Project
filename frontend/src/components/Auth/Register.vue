@@ -8,7 +8,7 @@
         class="required"
         v-model="email"
         label="Email"
-        :rules="mandatoryRules.concat(emailRules)"
+        :rules="mandatoryRules.concat(emailRules).concat(maxCharRule)"
         outlined
       />
 
@@ -21,7 +21,7 @@
         :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
         :type="showPassword ? 'text' : 'password'"
         @click:append="showPassword = !showPassword"
-        :rules="mandatoryRules.concat(passwordRules)"
+        :rules="mandatoryRules.concat(passwordRules).concat(maxCharRule)"
         outlined
       />
 
@@ -34,7 +34,7 @@
         :append-icon="showConfirmPassword ? 'mdi-eye' : 'mdi-eye-off'"
         :type="showConfirmPassword ? 'text' : 'password'"
         @click:append="showConfirmPassword = !showConfirmPassword"
-        :rules="mandatoryRules.concat(passwordConfirmationRule)"
+        :rules="mandatoryRules.concat(passwordConfirmationRule).concat(maxCharRule)"
         outlined
       />
 
@@ -43,7 +43,7 @@
         class="required"
         v-model="name"
         label="Name"
-        :rules="mandatoryRules"
+        :rules="mandatoryRules.concat(nameRules).concat(maxCharRule)"
         outlined
       />
 
@@ -51,6 +51,7 @@
       <v-text-field
         v-model="nickname"
         label="Nickname"
+        :rules="nameRules.concat(maxCharRule)"
         outlined
       />
 
@@ -59,6 +60,7 @@
         v-model="bio"
         label="Bio"
         rows="3"
+        :rules="maxCharBioRule"
         outlined
       />
 
@@ -106,19 +108,37 @@
         </v-date-picker>
       </v-dialog>
 
-      <!-- INPUT: Phone -->
-      <v-text-field
-        v-model="phone"
-        label="Phone"
-        outlined
-      />
+      <v-row>
+        <v-col
+          cols="12"
+          sm="4"
+        >
+          <v-text-field
+            v-model="countryCode"
+            label="Country Code"
+            outlined
+          />
+        </v-col>
+        <v-col
+          cols="12"
+          sm="8">
+          <!-- INPUT: Phone -->
+          <v-text-field
+            v-model="phone"
+            label="Phone"
+            :rules="numberRules.concat(maxCharRule)"
+            outlined
+          />
+        </v-col>
+
+      </v-row>
 
       <!-- INPUT: Street/Company -->
       <v-text-field
         class="required"
         v-model="street1"
         label="Street Address, Company Name"
-        :rules="mandatoryRules"
+        :rules="mandatoryRules.concat(maxCharRule)"
         outlined
       />
 
@@ -126,6 +146,7 @@
       <v-text-field
         v-model="street2"
         label="Apartment, Suite, Unit, Building, Floor"
+        :rules="maxCharRule"
         outlined
       />
 
@@ -134,7 +155,6 @@
 
       <!-- INPUT: City -->
       <CityAutocomplete
-        :rules="mandatoryRules"
         class="required"
       />
 
@@ -153,7 +173,7 @@
         class="required"
         v-model="postcode"
         label="Postcode"
-        :rules="mandatoryRules"
+        :rules="mandatoryRules.concat(maxCharRule)"
         outlined
       />
 
@@ -204,6 +224,7 @@ export default {
       nickname: '',
       bio: '',
       dob: '',
+      countryCode: '',
       phone: '',
       street1: '',
       street2: '',
@@ -227,6 +248,18 @@ export default {
       passwordRules: [
         field => (field && field.length >= 7) || 'Password must have 7+ characters',
         field => /(?=.*\d)/.test(field) || 'Must have one number'
+      ],
+      numberRules: [
+        field => /(^[0-9]*$)/.test(field) || 'Must contain numbers only'
+      ],
+      nameRules: [
+        field => /^[a-zA-Z ,.'-]+$/i.test(field) || 'Naming must be valid'
+      ],
+      maxCharRule: [
+        field => (field.length <= 100) || 'Reached max character limit: 100'
+      ],
+      maxCharBioRule: [
+        field => (field.length <= 200) || 'Reached max character limit: 200'
       ]
     };
   },
@@ -266,7 +299,7 @@ export default {
         this.loading = false;
       }, 500);
     },
-    minimumDateOfBirth() {
+    minimumDateOfBirth () {
       //minimum age of a user must be 13
       let today = new Date();
       let year = today.getFullYear();
@@ -287,7 +320,7 @@ export default {
     }
   },
   //as any components are added to the dom, mounted() will be called
-  mounted() {
+  mounted () {
     //sets maxDate and date of birth value
     this.maxDate = this.minimumDateOfBirth().toISOString().slice(0, 10);
     this.dob = this.minimumDateOfBirth().toISOString().slice(0, 10);
