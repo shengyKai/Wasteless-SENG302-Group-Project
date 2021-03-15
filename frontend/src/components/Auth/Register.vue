@@ -21,7 +21,7 @@
         :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
         :type="showPassword ? 'text' : 'password'"
         @click:append="showPassword = !showPassword"
-        :rules="mandatoryRules"
+        :rules="mandatoryRules.concat(passwordRules)"
         outlined
       />
 
@@ -85,7 +85,7 @@
         </template>
         <v-date-picker
           v-model="dob"
-          :max="currentDate"
+          :max="maxDate"
           scrollable
         >
           <v-spacer/>
@@ -203,7 +203,7 @@ export default {
       name: '',
       nickname: '',
       bio: '',
-      dob: new Date().toISOString().substr(0, 10),
+      dob: '',
       phone: '',
       street1: '',
       street2: '',
@@ -212,7 +212,7 @@ export default {
       modal: false,
       items: [],
       isLoading: false,
-      currentDate: new Date().toISOString().slice(0, 10),
+      maxDate: '',
       emailRules: [
         //regex rules for emails, example format is as such:
         //"blah@hotmail.co
@@ -223,6 +223,10 @@ export default {
         //All fields with the class "required" will go through this ruleset to ensure the field is not empty.
         //if it does not follow the format, display error message
         field => !!field || 'Field is required'
+      ],
+      passwordRules: [
+        field => (field && field.length >= 7) || 'Password must have 7+ characters',
+        field => /(?=.*\d)/.test(field) || 'Must have one number'
       ]
     };
   },
@@ -261,6 +265,14 @@ export default {
         });
         this.loading = false;
       }, 500);
+    },
+    minimumDateOfBirth() {
+      //minimum age of a user must be 13
+      let today = new Date();
+      let year = today.getFullYear();
+      let month = today.getMonth();
+      let day = today.getDate();
+      return new Date(year - 13, month, day + 1);
     }
   },
   computed: {
@@ -274,6 +286,12 @@ export default {
         this.password === this.confirmPassword || 'Passwords must match';
     }
   },
+  //as any components are added to the dom, mounted() will be called
+  mounted() {
+    //sets maxDate and date of birth value
+    this.maxDate = this.minimumDateOfBirth().toISOString().slice(0, 10);
+    this.dob = this.minimumDateOfBirth().toISOString().slice(0, 10);
+  }
 };
 
 </script>

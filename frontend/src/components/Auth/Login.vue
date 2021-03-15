@@ -14,7 +14,7 @@
         type="password"
         label="Password"
         outlined
-        :rules="mandatoryRules"
+        :rules="mandatoryRules.concat(passwordRules)"
       />
 
       <!-- Login button if user already has an account. -->
@@ -55,6 +55,10 @@ export default {
         //All fields with the class "required" will go through this ruleset to ensure the field is not empty.
         //if it does not follow the format, display error message
         field =>  !!field || 'Field is required'
+      ],
+      passwordRules: [
+        field => (field && field.length >= 7) || 'Password must have 7+ characters',
+        field => /(?=.*\d)/.test(field) || 'Must have one number'
       ]
     };
   },

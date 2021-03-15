@@ -3,7 +3,7 @@
     <!-- Red block to show this is the admin dashbaord/ panel -->
     <v-card height="400px" color="grey lighten-3">
       <v-footer v-bind="localAttrs" :padless="padless">
-        <v-card height = "70px" rounded width="100%" color="primary" class=" text-center font-weight-bold ">
+        <v-card height="70px" rounded width="100%" color="primary" class=" text-center font-weight-bold ">
           <v-divider/>
 
           <v-card-text class="white--text">
@@ -21,10 +21,11 @@
       >
         <!--     class="mx-auto"      -->
 
-        <v-list-item flat tile  color="background">
+
+        <v-list-item flat tile color="background">
           <v-list-item-content>
 
-            <v-list-item-title class="title" >
+            <v-list-item-title class="title">
               Admin Action
             </v-list-item-title>
             <v-list-item-subtitle>
@@ -58,7 +59,7 @@
 
 <script>
 export default {
-  data() {
+  data () {
     return {
       items: [
         { title: "Dashboard", icon: "mdi-view-dashboard" },
