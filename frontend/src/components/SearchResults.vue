@@ -3,24 +3,24 @@
     <v-toolbar dark color="primary" class="mb-1">
       <!-- Temporary stand in for search bar component -->
       <v-text-field
-          clearable
-          flat
-          solo-inverted
-          hide-details
-          v-model="searchQuery"
-          prepend-inner-icon="mdi-magnify"
-          label="Search"
-          autofocus
+        clearable
+        flat
+        solo-inverted
+        hide-details
+        v-model="searchQuery"
+        prepend-inner-icon="mdi-magnify"
+        label="Search"
+        autofocus
       />
       <v-spacer/>
       <v-select
-          v-model="sortByKey"
-          flat
-          solo-inverted
-          hide-details
-          :items="Object.keys(comparators)"
-          prepend-inner-icon="mdi-sort-variant"
-          label="Sort by"
+        v-model="sortByKey"
+        flat
+        solo-inverted
+        hide-details
+        :items="Object.keys(comparators)"
+        prepend-inner-icon="mdi-sort-variant"
+        label="Sort by"
       />
       <v-btn-toggle class="toggle" v-model="isSortDescending" mandatory>
         <v-btn depressed color="primary" :value="false">
@@ -43,10 +43,10 @@
     </v-list>
     <!--paginate results-->
     <v-pagination
-        v-model="currentPage"
-        :length="Math.ceil(users.length/resultsPerPage)"
-        circle
-    ></v-pagination>
+      v-model="currentPage"
+      :length="Math.ceil(users.length/resultsPerPage)"
+      circle
+    />
     <!--Text to display range of results out of total number of results-->
     <v-row justify="center" no-gutters>
       {{ resultsMessage }}
@@ -136,7 +136,7 @@ export default {
     //Formula in method slices the results based on the number of results per page and which page the user is
     //currently at, so that it will show the proper sets of results per page
     visiblePages() {
-      return this.sortedUsers.slice((this.currentPage - 1) * this.resultsPerPage, this.currentPage * this.resultsPerPage)
+      return this.sortedUsers.slice((this.currentPage - 1) * this.resultsPerPage, this.currentPage * this.resultsPerPage);
     },
   },
 
@@ -172,13 +172,13 @@ export default {
       immediate: true,
       handler() {
         if (this.users.length === 0) {
-          this.resultsMessage = "There are no results to show"
+          this.resultsMessage = "There are no results to show";
         } else if (Math.floor(this.users.length / (this.currentPage * this.resultsPerPage)) === 0){
           this.resultsMessage = "Displaying " + (((this.currentPage - 1) * this.resultsPerPage) + 1) + " - "  +
-              this.users.length + " of " + this.users.length + " results"
+              this.users.length + " of " + this.users.length + " results";
         } else {
           this.resultsMessage = "Displaying " + (((this.currentPage - 1) * this.resultsPerPage) + 1) + " - "  +
-              this.currentPage * this.resultsPerPage + " of " + this.users.length + " results"
+              this.currentPage * this.resultsPerPage + " of " + this.users.length + " results";
         }
       }
     }
