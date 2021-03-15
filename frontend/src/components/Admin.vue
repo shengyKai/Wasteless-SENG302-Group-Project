@@ -20,8 +20,6 @@
         color="white"
       >
         <!--     class="mx-auto"      -->
-
-
         <v-list-item flat tile color="background">
           <v-list-item-content>
 
@@ -63,7 +61,7 @@ export default {
     return {
       items: [
         { title: "Dashboard", icon: "mdi-view-dashboard" },
-        { title: "Remove GAA", icon: "mdi-plus" },
+        { title: "Add GAA", icon: "mdi-plus" },
         { title: "Remove GAA", icon: "mdi-minus" },
         { title: "Gallery", icon: "mdi-image" },
         { title: "Admin Guide", icon: "mdi-help-box" },
