@@ -33,15 +33,10 @@
               <v-col cols="12">
                 <v-autocomplete
                   :items="[
-                    'Skiing',
-                    'Ice hockey',
-                    'Soccer',
-                    'Basketball',
-                    'Hockey',
-                    'Reading',
-                    'Writing',
-                    'Coding',
-                    'Basejump',
+                    'Accommodation and Food Services',
+                    'Retail Trade',
+                    'Charitable organization',
+                    'Non-profit organization',
                   ]"
                   label="Business Type"
                   multiple
