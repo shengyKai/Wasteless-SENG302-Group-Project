@@ -54,6 +54,40 @@ export type User = {
   businessesAdministered?: number[],
 };
 
+export type CreateUser = {
+  firstName: string,
+  lastName: string,
+  middleName?: string,
+  nickname?: string,
+  bio?: string,
+  email: string,
+  dateOfBirth: string,
+  phoneNumber?: string,
+  homeAddress: string,
+  password: string,
+};
+
+export type BusinessType = 'Accommodation and Food Services' | 'Retail Trade' | 'Charitable organisation' | 'Non-profit organisation';
+
+export const BUSINESS_TYPES: BusinessType[] = ['Accommodation and Food Services', 'Retail Trade', 'Charitable organisation', 'Non-profit organisation'];
+
+export type Business = {
+  id: number,
+  administrators?: User[],
+  name: string,
+  description?: string,
+  address: string,
+  businessType: BusinessType,
+  created?: string,
+};
+
+export type CreateBusiness = {
+  name: string,
+  description?: string,
+  address: string,
+  businessType: BusinessType,
+};
+
 function isUser(obj: any): obj is User {
   if (obj === null || typeof obj !== 'object') return false;
   if (typeof obj.id !== 'number') return false;
@@ -69,6 +103,19 @@ function isUser(obj: any): obj is User {
   if (obj.created !== undefined && typeof obj.created !== 'string') return false;
   if (!['user', 'globalApplicationAdmin', 'defaultGlobalApplicationAdmin'].includes(obj.role)) return false;
   if (obj.businessesAdministered !== undefined && !isNumberArray(obj.businessesAdministered)) return false;
+
+  return true;
+}
+
+function isBusiness(obj: any): obj is Business {
+  if (obj === null || typeof obj !== 'object') return false;
+  if (typeof obj.id !== 'number') return false;
+  if (obj.administrators !== undefined && !isUserArray(obj.administrators)) return false;
+  if (typeof obj.name !== 'string') return false;
+  if (obj.description !== undefined && typeof obj.description !== 'string') return false;
+  if (typeof obj.address !== 'string') return false;
+  if (!BUSINESS_TYPES.includes(obj.businessType)) return false;
+  if (obj.created !== undefined && typeof obj.created !== 'string') return false;
 
   return true;
 }
@@ -142,6 +189,7 @@ export async function getUser(id?: number): Promise<MaybeError<User>> {
  *
  * @param email User email
  * @param password User password
+ * @returns The now logged in user ID if operation is successful, otherwise a string error.
  */
 export async function login(email: string, password: string): Promise<MaybeError<number>> {
   let response;
@@ -162,24 +210,12 @@ export async function login(email: string, password: string): Promise<MaybeError
   return id;
 }
 
-export type CreateUser = {
-  firstName: string,
-  lastName: string,
-  middleName?: string,
-  nickname?: string,
-  bio?: string,
-  email: string,
-  dateOfBirth: string,
-  phoneNumber?: string,
-  homeAddress: string,
-  password: string,
-};
-
 /**
  * Creates a user with the given properties.
  * Note: This doesn't automatically log the user in.
  *
  * @param user Initial user properties
+ * @returns undefined if operation is successful, otherwise a string error.
  */
 export async function createUser(user: CreateUser): Promise<MaybeError<undefined>> {
   try {
@@ -198,6 +234,7 @@ export async function createUser(user: CreateUser): Promise<MaybeError<undefined
  * Makes the given user a GAA, if the current user is a DGAA.
  *
  * @param userId User to make GAA
+ * @returns undefined if operation is successful, otherwise a string error.
  */
 export async function makeAdmin(userId: number): Promise<MaybeError<undefined>> {
   try {
@@ -217,6 +254,7 @@ export async function makeAdmin(userId: number): Promise<MaybeError<undefined>> 
  * Revokes the given user's admin rights
  *
  * @param userId User to revoke permissions
+ * @returns undefined if operation is successful, otherwise a string error.
  */
 export async function revokeAdmin(userId: number): Promise<MaybeError<undefined>> {
   try {
@@ -230,4 +268,48 @@ export async function revokeAdmin(userId: number): Promise<MaybeError<undefined>
     return 'Request failed: ' + status;
   }
   return undefined;
+}
+
+/**
+ * Creates a business
+ *
+ * @param business The properties to create the business with
+ * @returns undefined if operation is successful, otherwise a string error.
+ */
+export async function createBusiness(business: CreateBusiness): Promise<MaybeError<undefined>> {
+  try {
+    await instance.post('/businesses', business);
+  } catch (error) {
+    let status: number = error.response.status;
+    if (status === 401) return 'Missing/Invalid access token';
+
+    return 'Request failed: ' + status;
+  }
+
+  return undefined;
+}
+
+/**
+ * Fetches a business with the given id.
+ *
+ * @param businessId Business id to fetch
+ * @returns The requested business if operation is successful, otherwise a string error.
+ */
+export async function getBusiness(businessId: number): Promise<MaybeError<Business>> {
+  let response;
+  try {
+    response = await instance.get(`/businesses/${businessId}`);
+  } catch (error) {
+    let status: number = error.response.status;
+    if (status === 401) return 'Missing/Invalid access token';
+    if (status === 406) return 'Business not found';
+
+    return 'Request failed: ' + status;
+  }
+
+  if (!isBusiness(response.data)) {
+    return 'Invalid response type';
+  }
+
+  return response.data;
 }
