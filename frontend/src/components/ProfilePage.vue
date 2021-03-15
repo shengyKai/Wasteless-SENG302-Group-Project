@@ -1,12 +1,13 @@
 <template>
   <v-card class="body">
-    <div>
+    <div class="top-section">
       <div class="profile-img">
         <v-avatar size="200px" color="indigo">
           <img src="https://edit.co.uk/uploads/2016/12/Image-1-Alternatives-to-stock-photography-Thinkstock.jpg">
         </v-avatar>
       </div>
-      <div class="names">
+
+      <div>
         <h1>
           {{ user.firstName }} {{ user.lastName }}
         </h1>
@@ -17,44 +18,33 @@
       </div>
     </div>
 
-    <div class="fields">
-      <v-simple-table>
-        <tbody>
-          <tr>
-            <td>
-              Email
-            </td>
-            <td>
-              {{ user.email }}
-            </td>
-            <td>
-              Date of Birth
-            </td>
-            <td>
-              {{ user.dateOfBirth }}
-            </td>
-          </tr>
-          <tr>
-            <td>
-              Phone Number
-            </td>
-            <td>
-              {{ user.phoneNumber }}
-            </td>
-            <td>
-              Home Address
-            </td>
-            <td>
-              {{ user.homeAddress }}
-            </td>
-          </tr>
-        </tbody>
-      </v-simple-table>
-    </div>
+    <v-container fluid>
+      <v-row>
+        <v-col cols="12" sm="6">
+          <h4>Email</h4>
+          {{ user.email }}
+        </v-col>
+        <v-col cols="12" sm="6">
+          <h4>Date of Birth</h4>
+          {{ user.dateOfBirth }}
+        </v-col>
 
-    <div>
-      {{ user.bio }}
-    </div>
+        <v-col cols="12" sm="6">
+          <h4>Phone Number</h4>
+          {{ user.phoneNumber }}
+        </v-col>
+        <v-col cols="12" sm="6">
+          <h4>Home Address</h4>
+          {{ user.homeAddress }}
+        </v-col>
+
+        <v-col cols="12">
+          <h4>Bio</h4>
+          {{ user.bio }}
+        </v-col>
+      </v-row>
+    </v-container>
+
   </v-card>
 </template>
 
@@ -71,15 +61,18 @@ export default {
   },
 
   mounted() {
-    const id = this.$route.params?.id;
+    if (this.$route.params.id === undefined) {
+      this.user = this.$store.state.user;
+      return;
+    }
 
-    if (id === undefined || id === this.$store.state.user?.id) {
+    const id = parseInt(this.$route.params.id);
+    if (isNaN(id)) return;
+
+    if (id === this.$store.state.user?.id) {
       this.user = this.$store.state.user;
     } else {
-      const idNum = parseInt(id);
-      if (isNaN(idNum)) return;
-
-      getUser(idNum).then((value) => {
+      getUser(id).then((value) => {
         if (typeof value === 'string') {
           // TODO Handle error properly
           console.warn(value);
@@ -109,7 +102,7 @@ export default {
 
 <style scoped>
 .profile-img {
-    float: left;
+    width: 200px;
     margin-top: -116px;
     margin-right: 16px;
 }
@@ -118,24 +111,12 @@ export default {
     padding: 16px;
     width: 100%;
     margin-top: 140px;
+    /* text-align: center; */
 }
 
-.names {
-    margin-left: auto;
-    margin-right: auto;
-}
-
-.fields {
-    clear: both;
-}
-
-td:nth-child(1),
-td:nth-child(3) {
-    font-weight: bold;
-    text-align: right;
-}
-
-tbody tr:hover {
-    background-color: transparent !important;
+.top-section {
+  display: flex;
+  flex-wrap: wrap;
+  /* justify-content: center; */
 }
 </style>

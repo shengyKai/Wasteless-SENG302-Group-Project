@@ -135,7 +135,8 @@ export default {
     },
     //Formula in method slices the results based on the number of results per page and which page the user is
     //currently at, so that it will show the proper sets of results per page
-    visiblePages () {
+
+    visiblePages() {
       return this.sortedUsers.slice((this.currentPage - 1) * this.resultsPerPage, this.currentPage * this.resultsPerPage);
     },
   },
@@ -172,13 +173,14 @@ export default {
       immediate: true,
       handler () {
         if (this.users.length === 0) {
-          this.resultsMessage = 'There are no results to show';
-        } else if (Math.floor(this.users.length / (this.currentPage * this.resultsPerPage)) === 0) {
-          this.resultsMessage = 'Displaying ' + (((this.currentPage - 1) * this.resultsPerPage) + 1) + ' - ' +
-            this.users.length + ' of ' + this.users.length + ' results';
+          this.resultsMessage = "There are no results to show";
+        } else if (Math.floor(this.users.length / (this.currentPage * this.resultsPerPage)) === 0){
+          this.resultsMessage = "Displaying " + (((this.currentPage - 1) * this.resultsPerPage) + 1) + " - "  +
+              this.users.length + " of " + this.users.length + " results";
         } else {
-          this.resultsMessage = 'Displaying ' + (((this.currentPage - 1) * this.resultsPerPage) + 1) + ' - ' +
-            this.currentPage * this.resultsPerPage + ' of ' + this.users.length + ' results';
+          this.resultsMessage = "Displaying " + (((this.currentPage - 1) * this.resultsPerPage) + 1) + " - "  +
+              this.currentPage * this.resultsPerPage + " of " + this.users.length + " results";
+
         }
       }
     }
