@@ -33,6 +33,11 @@
               Test-Admin
             </v-list-item-title>
           </v-list-item>
+          <v-list-item>
+            <v-list-item-title class="link" @click="viewCheckBusiness">
+              Create-Business
+            </v-list-item-title>
+          </v-list-item>
         </v-list>
       </v-menu>
     </div>
@@ -51,13 +56,17 @@ export default {
     viewProfile() {
       this.$router.push("/profile");
     },
-    viewAdmin() {
-      this.$router.push("/admin");
-    },
+
     logout() {
       this.$store.commit("logoutUser");
       this.$router.push("/login");
-    }
-  }
+    },
+    viewAdmin() {
+      this.$router.push("/admin");
+    },
+    viewCheckBusiness() {
+      this.$router.push("/create_business");
+    },
+  },
 };
 </script>
