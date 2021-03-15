@@ -5,7 +5,7 @@
     :items="stateItems"
     :loading="isLoading"
     :search-input.sync="stateSearch"
-    :rules="mandatoryRules"
+    :rules="mandatoryRules.concat(maxCharRule)"
     no-filter
     clearable
     outlined
@@ -25,6 +25,9 @@ export default {
         //All fields with the class "required" will go through this ruleset to ensure the field is not empty.
         //if it does not follow the format, display error message
         field => !!field || 'Field is required'
+      ],
+      maxCharRule: [
+        field => (field.length <= 100) || 'Reached max character limit: 100'
       ]
     };
   },
@@ -38,7 +41,7 @@ export default {
         //show loading animation
         this.isLoading = true;
         //append to the api url the input the user has entered
-        let url = `https://photon.komoot.io/api/?q=${encodeURIComponent(val)}&osm_tag=place:state&osm_tag=place:region&osm_tag=place:province`;
+        let url = `https://photon.komoot.io/api/?q=${encodeURIComponent(val)}&osm_tag=place`;
 
         fetch(url).then(res => res.json()).then(res => {
           res.features.forEach(feature => {
