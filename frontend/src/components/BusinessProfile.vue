@@ -24,6 +24,14 @@
           <h4>Description</h4>
           {{ business.description }}
         </v-col>
+        <v-col cols="12">
+          <h4>Administrators</h4>
+          <span v-for="admin in administrators" :key="admin.id">
+            <router-link :to="'/profile/' + admin.id">
+              <v-chip class="link-chip" color="primary"> {{ admin.firstName }} {{ admin.lastName }} </v-chip>
+            </router-link>
+          </span>
+        </v-col>
       </v-row>
     </v-container>
 
@@ -31,14 +39,15 @@
 </template>
 
 <script>
-import { getBusiness } from '../api';
+import { getBusiness, getUser } from '../api';
 
 export default {
   name: 'BusinessProfile',
 
   data() {
     return {
-      business: {}
+      business: {},
+      administrators: [],
     };
   },
 
@@ -69,6 +78,22 @@ export default {
 
       return `${parts[2]} ${parts[1]} ${parts[3]} (${diffMonths} months ago)`;
     }
+  },
+
+  watch: {
+    business() {
+      this.administrators = [];
+      for (let id of this.business.administrators || []) {
+        getUser(id).then((value) => {
+          if (typeof value === 'string') {
+            // TODO Handle error properly
+            console.warn(value);
+          } else {
+            this.administrators.push(value);
+          }
+        });
+      }
+    }
   }
 };
 </script>
@@ -85,5 +110,9 @@ export default {
   display: flex;
   flex-wrap: wrap;
   /* justify-content: center; */
+}
+
+.link-chip {
+  margin-right: 4px;
 }
 </style>
