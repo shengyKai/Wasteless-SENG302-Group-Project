@@ -42,21 +42,30 @@
           <h4>Bio</h4>
           {{ user.bio }}
         </v-col>
+        <v-col cols="12">
+          <h4>Businesses</h4>
+          <span v-for="business in businesses" :key="business.id">
+            <router-link :to="'business/' + business.id" class="link">
+              <v-chip> {{ business.name }} </v-chip>
+            </router-link>
+          </span>
+        </v-col>
       </v-row>
-    </v-container>
 
+    </v-container>
   </v-card>
 </template>
 
 <script>
-import { getUser } from '../api';
+import { getBusiness, getUser } from '../api';
 
 export default {
   name: 'ProfilePage',
 
   data() {
     return {
-      user: {}
+      user: {},
+      businesses: [],
     };
   },
 
@@ -96,6 +105,20 @@ export default {
 
       return `${parts[2]} ${parts[1]} ${parts[3]} (${diffMonths} months ago)`;
     }
+  },
+  watch: {
+    user() {
+      this.businesses = [];
+      for (let id of this.user.businessesAdministered || []) {
+        getBusiness(id).then((value) => {
+          if (typeof value === 'string') {
+            console.warn('Failed to fetch business: ' + value);
+          } else {
+            this.businesses.push(value);
+          }
+        });
+      }
+    },
   }
 };
 </script>
@@ -118,5 +141,9 @@ export default {
   display: flex;
   flex-wrap: wrap;
   /* justify-content: center; */
+}
+
+.link {
+  text-decoration: none;
 }
 </style>
