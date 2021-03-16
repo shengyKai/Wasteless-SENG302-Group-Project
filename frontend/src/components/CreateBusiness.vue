@@ -1,17 +1,17 @@
 <template>
-  <v-form v-model="valid" ref="form">
-    <v-row justify="center">
-      <v-dialog v-model="dialog"
-                persistent
-                max-width="600px">
-        <template v-slot:activator="{ on, attrs }">
-          <v-btn color="primary"
-                 dark
-                 v-bind="attrs"
-                 v-on="on">
-            Create Now
-          </v-btn>
-        </template>
+  <v-row justify="center">
+    <v-dialog v-model="dialog"
+              persistent
+              max-width="600px">
+      <template v-slot:activator="{ on, attrs }">
+        <v-btn color="primary"
+               dark
+               v-bind="attrs"
+               v-on="on">
+          Create Now
+        </v-btn>
+      </template>
+      <v-form v-model="valid" ref="form">
         <v-card>
           <v-card-title>
             <span class="headline">Create Business</span>
@@ -55,7 +55,7 @@
                     v-model="street1"
                     label="Company Street Address"
                     :rules="mandatoryRules"
-                    outlined />
+                    outlined/>
                 </v-col>
                 <v-col cols="12">
                   <v-text-field
@@ -92,13 +92,13 @@
                     v-model="postcode"
                     label="Postcode"
                     :rules="mandatoryRules.concat(maxCharRules)"
-                    outlined />
+                    outlined/>
                 </v-col>
               </v-row>
             </v-container>
           </v-card-text>
           <v-card-actions>
-            <v-spacer />
+            <v-spacer/>
             <v-btn
               color="primary"
               text
@@ -114,9 +114,9 @@
             </v-btn>
           </v-card-actions>
         </v-card>
-      </v-dialog>
-    </v-row>
-  </v-form>
+      </v-form>
+    </v-dialog>
+  </v-row>
 </template>
 
 <script>
@@ -133,7 +133,7 @@ export default {
     CityAutocomplete,
     StateAutocomplete
   },
-  data () {
+  data() {
     return {
       dialog: false,
       business: '',
@@ -168,10 +168,9 @@ export default {
   },
   methods: {
     createBusiness() {
-      this.$router.push("/business/1");
-      this.$refs.form.reset();
+      this.$router.push('/business/1');
       this.dialog = false;
-      // this.$destroy();
+      this.$ref.form.destroy();
     }
   }
 };
