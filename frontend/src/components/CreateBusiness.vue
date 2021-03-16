@@ -1,9 +1,14 @@
 <template>
-  <v-form v-model="valid">
+  <v-form v-model="valid" ref="form">
     <v-row justify="center">
-      <v-dialog v-model="dialog" persistent max-width="600px">
+      <v-dialog v-model="dialog"
+                persistent
+                max-width="600px">
         <template v-slot:activator="{ on, attrs }">
-          <v-btn color="primary" dark v-bind="attrs" v-on="on">
+          <v-btn color="primary"
+                 dark
+                 v-bind="attrs"
+                 v-on="on">
             Create Now
           </v-btn>
         </template>
@@ -44,7 +49,7 @@
                     outlined
                   />
                 </v-col>
-                <v-col cols="12" sm="6" md="12">
+                <v-col cols="12">
                   <v-text-field
                     class="required"
                     v-model="street1"
@@ -59,29 +64,29 @@
                     outlined
                   />
                 </v-col>
-                <v-col cols="12" sm="6" md="6">
+                <v-col cols="12">
                   <DistrictAutocomplete
                     v-model="district"/>
                 </v-col>
-                <v-col cols="12" sm="6" md="6">
+                <v-col cols="12">
                   <CityAutocomplete
                     class="required"
                     v-model="city"
                   />
                 </v-col>
-                <v-col cols="12" sm="6" md="6">
+                <v-col cols="12">
                   <StateAutocomplete
                     class="required"
                     v-model="state"
                   />
                 </v-col>
-                <v-col cols="12" sm="6" md="6">
+                <v-col cols="12">
                   <CountryAutocomplete
                     class="required"
                     v-model="country"
                   />
                 </v-col>
-                <v-col cols="12" sm="6" md="6">
+                <v-col cols="12">
                   <v-text-field
                     class="required"
                     v-model="postcode"
@@ -94,7 +99,10 @@
           </v-card-text>
           <v-card-actions>
             <v-spacer />
-            <v-btn color="primary" text @click="dialog = false">
+            <v-btn
+              color="primary"
+              text
+              @click="dialog=false">
               Close
             </v-btn>
             <v-btn
@@ -102,7 +110,7 @@
               color="primary"
               :disabled="!valid"
               @click="createBusiness">
-              Save
+              Create
             </v-btn>
           </v-card-actions>
         </v-card>
@@ -161,6 +169,9 @@ export default {
   methods: {
     createBusiness() {
       this.$router.push("/business/1");
+      this.$refs.form.reset();
+      this.dialog = false;
+      // this.$destroy();
     }
   }
 };
