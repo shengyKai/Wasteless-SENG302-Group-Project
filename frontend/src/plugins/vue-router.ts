@@ -1,10 +1,10 @@
-import { createBusiness, makeAdmin } from "@/api";
 import Vue from "vue";
 import VueRouter from "vue-router";
 
 import Auth from "../components/Auth/index.vue";
 import admin from "../components/Admin.vue";
 import ProfilePage from "../components/ProfilePage.vue";
+import BusinessProfile from "../components/BusinessProfile.vue";
 import SearchResults from "../components/SearchResults.vue";
 import CreateBusiness from "../components/CreateBusiness.vue";
 
@@ -25,6 +25,7 @@ const routes = [
   { path: "/login",       component: Auth },
   { path: "/profile/:id", component: ProfilePage },
   { path: "/create_business", component: CreateBusiness },
+  { path: "/business/:id", component: BusinessProfile },
   { path: "/profile",     component: ProfilePage },
   { path: "/admin",       component: admin },
   { path: "/search",      component: SearchResults },
