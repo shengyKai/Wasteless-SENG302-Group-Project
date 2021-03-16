@@ -152,24 +152,28 @@
       <!-- INPUT: District/Region/Province -->
       <DistrictAutocomplete
         v-model="district"
+        :rules="maxCharRules"
       />
 
       <!-- INPUT: City -->
       <CityAutocomplete
         class="required"
         v-model="city"
+        :rules="maxCharRules"
       />
 
       <!-- INPUT: State -->
       <StateAutocomplete
         class="required"
         v-model="state"
+        :rules="maxCharRules"
       />
 
       <!-- INPUT: Country -->
       <CountryAutocomplete
         class="required"
         v-model="country"
+        :rules="maxCharRules"
       />
 
       <!-- INPUT: Postcode -->
@@ -260,7 +264,7 @@ export default {
         field => /(^[0-9]*$)/.test(field) || 'Must contain numbers only'
       ],
       nameRules: [
-        field => /^[a-zA-Z ,.'-]+$/i.test(field) || 'Naming must be valid'
+        field =>  (field.length === 0 || (/^[a-z ,.'-]+$/i).test(field)) || 'Naming must be valid'
       ],
       maxCharRules: [
         field => (field.length <= 100) || 'Reached max character limit: 100'
