@@ -92,6 +92,7 @@
 
 <script>
 export default {
+  name: 'CreateBusiness',
   data: () => ({
     dialog: false,
   }),
