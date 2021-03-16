@@ -8,7 +8,7 @@
         class="required"
         v-model="email"
         label="Email"
-        :rules="mandatoryRules.concat(emailRules).concat(maxCharRule)"
+        :rules="mandatoryRules.concat(emailRules).concat(maxCharRules)"
         outlined
       />
 
@@ -21,7 +21,7 @@
         :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
         :type="showPassword ? 'text' : 'password'"
         @click:append="showPassword = !showPassword"
-        :rules="mandatoryRules.concat(passwordRules).concat(maxCharRule)"
+        :rules="mandatoryRules.concat(passwordRules).concat(maxCharRules)"
         outlined
       />
 
@@ -34,7 +34,7 @@
         :append-icon="showConfirmPassword ? 'mdi-eye' : 'mdi-eye-off'"
         :type="showConfirmPassword ? 'text' : 'password'"
         @click:append="showConfirmPassword = !showConfirmPassword"
-        :rules="mandatoryRules.concat(passwordConfirmationRule).concat(maxCharRule)"
+        :rules="mandatoryRules.concat(passwordConfirmationRule).concat(maxCharRules)"
         outlined
       />
 
@@ -43,7 +43,7 @@
         class="required"
         v-model="name"
         label="Name"
-        :rules="mandatoryRules.concat(nameRules).concat(maxCharRule)"
+        :rules="mandatoryRules.concat(nameRules).concat(maxCharRules)"
         outlined
       />
 
@@ -51,7 +51,7 @@
       <v-text-field
         v-model="nickname"
         label="Nickname"
-        :rules="nameRules.concat(maxCharRule)"
+        :rules="nameRules.concat(maxCharRules)"
         outlined
       />
 
@@ -60,7 +60,7 @@
         v-model="bio"
         label="Bio"
         rows="3"
-        :rules="maxCharBioRule"
+        :rules="maxCharBioRules"
         outlined
       />
 
@@ -126,7 +126,7 @@
           <v-text-field
             v-model="phone"
             label="Phone"
-            :rules="numberRules.concat(maxCharRule)"
+            :rules="numberRules.concat(maxCharRules)"
             outlined
           />
         </v-col>
@@ -138,7 +138,7 @@
         class="required"
         v-model="street1"
         label="Street Address, Company Name"
-        :rules="mandatoryRules.concat(maxCharRule)"
+        :rules="mandatoryRules"
         outlined
       />
 
@@ -146,26 +146,30 @@
       <v-text-field
         v-model="street2"
         label="Apartment, Suite, Unit, Building, Floor"
-        :rules="maxCharRule"
         outlined
       />
 
       <!-- INPUT: District/Region/Province -->
-      <DistrictAutocomplete/>
+      <DistrictAutocomplete
+        v-model="district"
+      />
 
       <!-- INPUT: City -->
       <CityAutocomplete
         class="required"
+        v-model="city"
       />
 
       <!-- INPUT: State -->
       <StateAutocomplete
         class="required"
+        v-model="state"
       />
 
       <!-- INPUT: Country -->
       <CountryAutocomplete
         class="required"
+        v-model="country"
       />
 
       <!-- INPUT: Postcode -->
@@ -173,7 +177,7 @@
         class="required"
         v-model="postcode"
         label="Postcode"
-        :rules="mandatoryRules.concat(maxCharRule)"
+        :rules="mandatoryRules.concat(maxCharRules)"
         outlined
       />
 
@@ -228,6 +232,9 @@ export default {
       phone: '',
       street1: '',
       street2: '',
+      district: '',
+      state: '',
+      city: '',
       country: '',
       postcode: '',
       modal: false,
@@ -247,7 +254,7 @@ export default {
       ],
       passwordRules: [
         field => (field && field.length >= 7) || 'Password must have 7+ characters',
-        field => /(?=.*\d)/.test(field) || 'Must have one number'
+        field => /^(?=.*[0-9])(?=.*[a-zA-Z])([a-zA-Z0-9]+)$/.test(field) || 'Must have at least one number and one alphabet'
       ],
       numberRules: [
         field => /(^[0-9]*$)/.test(field) || 'Must contain numbers only'
@@ -255,10 +262,10 @@ export default {
       nameRules: [
         field => /^[a-zA-Z ,.'-]+$/i.test(field) || 'Naming must be valid'
       ],
-      maxCharRule: [
+      maxCharRules: [
         field => (field.length <= 100) || 'Reached max character limit: 100'
       ],
-      maxCharBioRule: [
+      maxCharBioRules: [
         field => (field.length <= 200) || 'Reached max character limit: 200'
       ]
     };

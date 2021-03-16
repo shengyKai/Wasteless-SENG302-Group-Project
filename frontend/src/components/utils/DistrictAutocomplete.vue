@@ -1,6 +1,5 @@
 <template>
   <v-combobox
-    v-model="district"
     label="District/City Area"
     :items="districtItems"
     :loading="isLoading"
@@ -17,7 +16,6 @@ export default {
   name: 'DistrictAutocomplete',
   data () {
     return {
-      district: '',
       districtItems: [],
       isLoading: false,
       districtSearch: null,

@@ -1,6 +1,5 @@
 <template>
   <v-combobox
-    v-model="state"
     label="State/Province/Region"
     :items="stateItems"
     :loading="isLoading"
@@ -17,7 +16,6 @@ export default {
   name: 'StateAutocomplete',
   data () {
     return {
-      state: '',
       stateItems: [],
       isLoading: false,
       stateSearch: null,

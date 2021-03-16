@@ -1,6 +1,5 @@
 <template>
   <v-combobox
-    v-model="city"
     label="City"
     :items="cityItems"
     :loading="isLoading"
@@ -17,7 +16,6 @@ export default {
   name: 'CityAutocomplete',
   data () {
     return {
-      city: '',
       cityItems: [],
       isLoading: false,
       citySearch: null,

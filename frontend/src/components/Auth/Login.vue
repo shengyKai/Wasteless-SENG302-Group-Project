@@ -7,14 +7,14 @@
         type="email"
         label="Email"
         outlined
-        :rules="mandatoryRules.concat(emailRules).concat(maxCharRule)"
+        :rules="mandatoryRules.concat(emailRules).concat(maxCharRules)"
       />
       <v-text-field
         v-model="password"
         type="password"
         label="Password"
         outlined
-        :rules="mandatoryRules.concat(passwordRules).concat(maxCharRule)"
+        :rules="mandatoryRules.concat(passwordRules).concat(maxCharRules)"
       />
 
       <!-- Login button if user already has an account. -->
@@ -50,11 +50,10 @@ export default {
         (field) => !!field || "Field is required",
       ],
       passwordRules: [
-        (field) =>
-          (field && field.length >= 7) || "Password must have 7+ characters",
-        (field) => /(?=.*\d)/.test(field) || "Must have one number",
+        field => (field && field.length >= 7) || 'Password must have 7+ characters',
+        field => /^(?=.*[0-9])(?=.*[a-zA-Z])([a-zA-Z0-9]+)$/.test(field) || 'Must have at least one number and one alphabet'
       ],
-      maxCharRule: [
+      maxCharRules: [
         (field) => field.length <= 100 || "Reached max character limit: 100",
       ],
     };

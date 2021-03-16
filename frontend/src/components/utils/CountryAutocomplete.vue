@@ -1,6 +1,5 @@
 <template>
   <v-combobox
-    v-model="country"
     label="Country"
     :items="countryItems"
     :loading="isLoading"
@@ -17,7 +16,6 @@ export default {
   name: 'CountryAutocomplete',
   data () {
     return {
-      country: '',
       countryItems: [],
       isLoading: false,
       countrySearch: null,
