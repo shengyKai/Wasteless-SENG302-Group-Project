@@ -101,7 +101,7 @@
               type="submit"
               color="primary"
               :disabled="!valid"
-              @click="dialog = false">
+              @click="createBusiness">
               Save
             </v-btn>
           </v-card-actions>
@@ -157,6 +157,11 @@ export default {
         field => !!field || 'Field is required'
       ]
     };
+  },
+  methods: {
+    createBusiness() {
+      this.$router.push("/business/1");
+    }
   }
 };
 </script>
