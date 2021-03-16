@@ -34,9 +34,9 @@
 
     <v-alert v-if="error !== undefined" type="error"> {{ error }}</v-alert>
     <v-list v-if="users !== undefined" three-line>
-      <!--visiblePages would produce the results for each page, and then it will show each result with
+      <!--visibleUsers would produce the results for each page, and then it will show each result with
       SearchResultItem-->
-      <template v-for="(user, index) in visiblePages">
+      <template v-for="(user, index) in visibleUsers">
         <v-divider v-if="user === undefined" :key="'divider-'+index"/>
         <SearchResultItem v-else :key="user.id" :user="user"/>
       </template>
@@ -44,7 +44,7 @@
     <!--paginate results-->
     <v-pagination
       v-model="currentPage"
-      :length="Math.ceil(users.length/resultsPerPage)"
+      :length="totalPages"
       circle
     />
     <!--Text to display range of results out of total number of results-->
@@ -101,6 +101,7 @@ const MOCK_USERS = [
 
 const USER_COMPARATORS = {
   // If first comparison results in a == b then fallback to other comparator.
+  'Relevance': null,
   'First Name': (a, b) =>
     a.firstName.localeCompare(b.firstName) ||
     a.lastName.localeCompare(b.lastName),
@@ -110,14 +111,14 @@ const USER_COMPARATORS = {
 };
 
 export default {
-  data: function () {
+  data: function() {
     return {
       searchQuery: this.$route.query.query || '',
       users: MOCK_USERS,
       comparators: USER_COMPARATORS,
       error: undefined,
-      isSortDescending: false,
-      sortByKey: 'First Name',
+      isSortDescending: true,
+      sortByKey: Object.keys(USER_COMPARATORS)[0],
       currentPage: 1,
       resultsPerPage: 3,
       resultsMessage: ''
@@ -125,18 +126,31 @@ export default {
   },
 
   computed: {
-    sortedUsers () {
+    totalPages() {
+      return Math.ceil(this.users.length / this.resultsPerPage);
+    },
+
+    sortedUsers() {
       if (this.users === undefined) return undefined;
-      let result = Array.from(this.users).sort(
-        this.comparators[this.sortByKey]
-      );
-      if (this.isSortDescending) result.reverse();
+
+      const comparator = this.comparators[this.sortByKey];
+      let result = Array.from(this.users);
+
+      if (comparator) {
+        result.sort(comparator);
+      }
+
+      let shouldReverse = this.isSortDescending;
+      // If there is no comparator then we should be sorting by relevance and we need to flip the list around
+      if (!comparator) shouldReverse = !shouldReverse;
+
+      if (shouldReverse) result.reverse();
       return result;
     },
     //Formula in method slices the results based on the number of results per page and which page the user is
     //currently at, so that it will show the proper sets of results per page
 
-    visiblePages() {
+    visibleUsers() {
       return this.sortedUsers.slice((this.currentPage - 1) * this.resultsPerPage, this.currentPage * this.resultsPerPage);
     },
   },
@@ -166,25 +180,25 @@ export default {
   },
 
   watch: {
-    searchQuery () {
+    searchQuery() {
       this.debouncedDoQuery();
     },
-    visiblePages: {
+    visibleUsers: {
       immediate: true,
-      handler () {
-        if (this.users.length === 0) {
-          this.resultsMessage = "There are no results to show";
-        } else if (Math.floor(this.users.length / (this.currentPage * this.resultsPerPage)) === 0){
-          this.resultsMessage = "Displaying " + (((this.currentPage - 1) * this.resultsPerPage) + 1) + " - "  +
-              this.users.length + " of " + this.users.length + " results";
-        } else {
-          this.resultsMessage = "Displaying " + (((this.currentPage - 1) * this.resultsPerPage) + 1) + " - "  +
-              this.currentPage * this.resultsPerPage + " of " + this.users.length + " results";
+      handler() {
+        const pageStartIndex = (this.currentPage - 1) * this.resultsPerPage;
+        const pageEndIndex = pageStartIndex + this.visibleUsers.length;
 
+        if (pageStartIndex === pageEndIndex) {
+          this.resultsMessage = 'There are no results to show';
+        } else {
+          this.resultsMessage = `Displaying ${pageStartIndex + 1} - ${pageEndIndex} of ${this.users.length} results`;
         }
       }
+    },
+    totalPages() {
+      this.currentPage = Math.min(this.currentPage, this.totalPages);
     }
-
   },
 
   components: {
