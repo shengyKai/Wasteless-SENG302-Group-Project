@@ -45,8 +45,8 @@
         <v-col cols="12">
           <h4>Businesses</h4>
           <span v-for="business in businesses" :key="business.id">
-            <router-link :to="'business/' + business.id" class="link">
-              <v-chip> {{ business.name }} </v-chip>
+            <router-link :to="'/business/' + business.id">
+              <v-chip color="primary" class="link-chip"> {{ business.name }} </v-chip>
             </router-link>
           </span>
         </v-col>
@@ -143,7 +143,7 @@ export default {
   /* justify-content: center; */
 }
 
-.link {
-  text-decoration: none;
+.link-chip {
+  margin-right: 4px;
 }
 </style>
