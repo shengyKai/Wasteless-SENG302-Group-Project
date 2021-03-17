@@ -39,9 +39,11 @@
 import Auth from "./components/Auth";
 import AppBar from "./components/AppBar";
 import AppFooter from "./components/AppFooter";
-import store from "./store";
+import createStore from "./store";
 import router from "./plugins/vue-router";
 import { COOKIE, getCookie } from './utils';
+
+const store = createStore();
 
 // Vue app instance
 // it is declared as a reusable component in this case.
