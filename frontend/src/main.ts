@@ -28,10 +28,17 @@
 /**
  * Main entry point for your Vue app
  */
-import Vue from 'vue'
-import App from './App.vue'
+import Vue from 'vue';
 
-Vue.config.productionTip = false
+// Import Plugins
+import vuetify from './plugins/vuetify';
+import router from './plugins/vue-router';
+import './plugins/vuex';
+
+// Import App
+import App from './App.vue';
+
+Vue.config.productionTip = false;
 
 import VueLogger from 'vuejs-logger';
 
@@ -51,5 +58,7 @@ Vue.use(VueLogger as any /* Hackish fix for now */ , options);
 new Vue({
   el: '#app',
   components: { App },
+  vuetify,
+  router,
   template: '<App/>'
 });
