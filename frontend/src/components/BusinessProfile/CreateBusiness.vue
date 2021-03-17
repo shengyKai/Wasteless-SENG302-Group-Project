@@ -1,17 +1,11 @@
 <template>
   <v-row justify="center">
-    <v-dialog v-model="dialog"
-              persistent
-              max-width="600px">
-      <template v-slot:activator="{ on, attrs }">
-        <v-btn color="primary"
-               dark
-               v-bind="attrs"
-               v-on="on">
-          Create Now
-        </v-btn>
-      </template>
-      <v-form v-model="valid" ref="form">
+    <v-dialog
+      v-model="dialog"
+      persistent
+      max-width="600px"
+    >
+      <v-form v-model="valid">
         <v-card>
           <v-card-title>
             <span class="headline">Create Business</span>
@@ -90,7 +84,8 @@
                     v-model="postcode"
                     label="Postcode"
                     :rules="mandatoryRules.concat(maxCharRules)"
-                    outlined/>
+                    outlined
+                  />
                 </v-col>
               </v-row>
             </v-container>
@@ -100,7 +95,7 @@
             <v-btn
               color="primary"
               text
-              @click="dialog=false">
+              @click="closeDialog">
               Close
             </v-btn>
             <v-btn
@@ -133,7 +128,7 @@ export default {
   },
   data() {
     return {
-      dialog: false,
+      dialog: true,
       business: '',
       description: '',
       businessType: [],
@@ -167,8 +162,10 @@ export default {
   methods: {
     createBusiness() {
       this.$router.push('/business/1');
-      this.dialog = false;
-      this.$ref.form.destroy();
+      this.closeDialog();
+    },
+    closeDialog() {
+      this.$emit('closeDialog');
     }
   }
 };

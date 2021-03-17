@@ -6,6 +6,10 @@
       </div>
     </div>
 
+    <div v-if="showBusinessDialog">
+      <CreateBusiness @closeDialog="showBusinessDialog = false" />
+    </div>
+
     <!-- Search Bar component to perform search and show result -->
     <SearchBar v-if="$route.path !== '/search'" />
     <div class="text-center">
@@ -32,15 +36,13 @@
           </v-list-item>
           <v-list-item>
             <v-list-item-title class="link" @click="viewAdmin">
-              Test-Admin
+              Admin
             </v-list-item-title>
           </v-list-item>
           <v-list-item>
-
-            <!-- Button to Create/Own Business, will pop up dialog (business register form) when clicked. -->
-            <CreateBusiness/>
-            <!-- Business creating button end here -->
-
+            <v-list-item-title class="link" @click="viewCreateBusiness">
+              Create Business
+            </v-list-item-title>
           </v-list-item>
         </v-list>
       </v-menu>
@@ -58,11 +60,15 @@ export default {
     SearchBar,
     CreateBusiness
   },
+  data() {
+    return {
+      showBusinessDialog: false
+    };
+  },
   methods: {
     viewProfile() {
       this.$router.push("/profile");
     },
-
     logout() {
       this.$store.commit("logoutUser");
       this.$router.push("/login");
@@ -73,9 +79,9 @@ export default {
     viewCheckBusiness() {
       this.$router.push("/create_business");
     },
-  },
-  data: () => ({
-    dialog: false,
-  }),
+    viewCreateBusiness() {
+      this.showBusinessDialog = true;
+    }
+  }
 };
 </script>
