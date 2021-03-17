@@ -8,7 +8,7 @@
       <v-form v-model="valid">
         <v-card>
           <v-card-title>
-            <span class="headline">Create Business</span>
+            <span class="headline create-business">Create Business</span>
           </v-card-title>
           <v-card-text>
             <v-container>
@@ -141,9 +141,9 @@ export default {
       postcode: '',
       businessTypes: [
         'Accommodation and Food Services',
-        'Retail Trade',
         'Charitable organization',
         'Non-profit organization',
+        'Retail Trade',
       ],
       valid: false,
       maxCharRules: [
@@ -176,5 +176,10 @@ export default {
 .required label::after {
   content: "*";
   color: red;
+}
+
+.create-business {
+  color: #558b2f; /* TODO Set this to primary colour variable */
+  font-weight: bolder;
 }
 </style>
