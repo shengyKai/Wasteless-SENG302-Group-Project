@@ -44,8 +44,6 @@
                     :items="businessTypes"
                     label="Business Type"
                     :rules="mandatoryRules.concat(maxCharRules)"
-                    chips
-                    multiple
                     outlined
                   />
                 </v-col>
