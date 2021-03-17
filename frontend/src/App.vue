@@ -3,6 +3,7 @@
     <template v-if="loading">
       <v-progress-circular color="primary" />
     </template>
+
     <template v-else>
       <div class="notfooter">
         <div v-if="loggedIn">
@@ -61,11 +62,11 @@ export default {
   async created() {
     const cookie = getCookie(COOKIE.USER);
     if (cookie) {
-      this.loading = true;
       await this.$store.dispatch('getUser', cookie.split('=')[1]);
       if (this.$route.path === '/login') this.$router.push('/profile');
       this.loading = false;
     } else {
+      this.loading = false;
       if (this.$route.path !== '/login') this.$router.push('/login');
     }
   },
@@ -73,7 +74,7 @@ export default {
   router,
   data() {
     return {
-      loading: false
+      loading: true
     };
   },
   computed: {

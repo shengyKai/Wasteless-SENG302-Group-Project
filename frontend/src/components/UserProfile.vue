@@ -1,5 +1,5 @@
 <template>
-  <v-card class="body">
+  <v-card class="body" v-if="user">
     <div class="top-section">
       <div class="profile-img">
         <v-avatar size="200px" color="primary" class="white--text headline avatar-text">
@@ -64,12 +64,12 @@ export default {
 
   data() {
     return {
-      user: {},
+      user: null,
       businesses: [],
     };
   },
 
-  mounted() {
+  created() {
     if (this.$route.params.id === undefined) {
       this.user = this.$store.state.user;
       return;
@@ -78,7 +78,7 @@ export default {
     const id = parseInt(this.$route.params.id);
     if (isNaN(id)) return;
 
-    if (id === this.$store.state.user?.id) {
+    if (id !== this.$store.state.user?.id) {
       this.user = this.$store.state.user;
     } else {
       getUser(id).then((value) => {
