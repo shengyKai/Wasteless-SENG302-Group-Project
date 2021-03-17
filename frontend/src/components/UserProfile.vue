@@ -2,8 +2,8 @@
   <v-card class="body">
     <div class="top-section">
       <div class="profile-img">
-        <v-avatar size="200px" color="indigo">
-          <img src="https://edit.co.uk/uploads/2016/12/Image-1-Alternatives-to-stock-photography-Thinkstock.jpg">
+        <v-avatar size="200px" color="primary" class="white--text headline avatar-text">
+          {{ user.firstName[0].toUpperCase() }}{{ user.lastName[0].toUpperCase() }}
         </v-avatar>
       </div>
 
@@ -157,5 +157,9 @@ export default {
 
 .link-chip {
   margin-right: 4px;
+}
+
+.avatar-text {
+  font-size: 100px !important;
 }
 </style>
