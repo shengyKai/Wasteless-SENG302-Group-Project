@@ -28,7 +28,7 @@
           <h4>Administrators</h4>
           <span v-for="admin in administrators" :key="admin.id">
             <router-link :to="'/profile/' + admin.id">
-              <v-chip class="link-chip" color="primary"> {{ admin.firstName }} {{ admin.lastName }} </v-chip>
+              <v-chip class="link-chip link" color="primary"> {{ admin.firstName }} {{ admin.lastName }} </v-chip>
             </router-link>
           </span>
         </v-col>
@@ -39,7 +39,7 @@
 </template>
 
 <script>
-import { getBusiness, getUser } from '../api';
+import { getBusiness, getUser } from '../../api';
 
 export default {
   name: 'BusinessProfile',

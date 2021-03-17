@@ -50,7 +50,7 @@
 
 <script>
 import SearchBar from "./utils/SearchBar";
-import CreateBusiness from "./CreateBusiness";
+import CreateBusiness from "./BusinessProfile/CreateBusiness";
 
 export default {
   name: "AppBar",

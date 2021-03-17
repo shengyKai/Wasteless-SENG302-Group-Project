@@ -46,7 +46,7 @@
           <h4>Businesses</h4>
           <span v-for="business in businesses" :key="business.id">
             <router-link :to="'/business/' + business.id">
-              <v-chip color="primary" class="link-chip"> {{ business.name }} </v-chip>
+              <v-chip color="primary" class="link-chip link"> {{ business.name }} </v-chip>
             </router-link>
           </span>
         </v-col>
@@ -107,34 +107,46 @@ export default {
     }
   },
   watch: {
-    user() {
+    async user() {
       this.businesses = [];
-      for (let id of this.user.businessesAdministered || []) {
-        getBusiness(id).then((value) => {
-          if (typeof value === 'string') {
-            console.warn('Failed to fetch business: ' + value);
-          } else {
-            this.businesses.push(value);
-          }
+      const admins = this.user.businessesAdministered;
+
+      if (!admins) return;
+
+      const promises = admins.map(id => {
+        return new Promise((resolve, reject) => {
+          getBusiness(id)
+            .then(val => {
+              if (typeof val === 'string') reject(val);
+              else resolve(val);
+            })
+            .catch(err => reject(err));
         });
-      }
-    },
+      });
+
+      const data = await Promise.all(promises);
+
+      this.businesses = data.reduce((acc, cur) => {
+        if (cur) acc.push(cur);
+        return acc;
+      }, []);
+    }
   }
 };
 </script>
 
 <style scoped>
 .profile-img {
-    width: 200px;
-    margin-top: -116px;
-    margin-right: 16px;
+  width: 200px;
+  margin-top: -116px;
+  margin-right: 16px;
 }
 
 .body {
-    padding: 16px;
-    width: 100%;
-    margin-top: 140px;
-    /* text-align: center; */
+  padding: 16px;
+  width: 100%;
+  margin-top: 140px;
+  /* text-align: center; */
 }
 
 .top-section {
