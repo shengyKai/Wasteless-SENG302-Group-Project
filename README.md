@@ -53,6 +53,10 @@ Running on: http://localhost:9499/ by default
     - Ben Smith
     - Nathan Smithies
     - Edward Wong
+    - Connor Hitchcock
+    - Ella Johnson
+    - Henry Barrett
+    - Josh ??
 
 ## References
 
