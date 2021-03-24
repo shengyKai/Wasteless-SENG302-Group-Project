@@ -48,15 +48,15 @@ Running on: http://localhost:9499/ by default
 
 ## Contributors
 
-- SENG302 Team 17
-    - Sheng-He Phua
+- SENG302 Team 500
     - Ben Smith
-    - Nathan Smithies
-    - Edward Wong
     - Connor Hitchcock
+    - Edward Wong
     - Ella Johnson
     - Henry Barrett
-    - Josh ??
+    - Josh Egan
+    - Nathan Smithies
+    - Sheng-He Phua
 
 ## References
 
