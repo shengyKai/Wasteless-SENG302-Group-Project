@@ -23,9 +23,6 @@ public class Location {
     @Column(name = "city")
     private  String city;
 
-    @Column(name="suburb")
-    private String suburb;
-
     @Column(name="region")
     private String region;
 
@@ -48,9 +45,6 @@ public class Location {
             return false;
         }
         if (!checkValidStreetName(location.getStreetName())) {
-            return false;
-        }
-        if (!checkValidSuburb(location.getSuburb())) {
             return false;
         }
         if (!checkValidCity(location.getCity())) {
@@ -91,22 +85,6 @@ public class Location {
      */
     public boolean checkValidStreetName(String streetName) {
         if (streetName != null && streetName.length() < 100 && streetName.length() > 0 && streetName.matches("[ a-zA-Z]+")) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    /**
-     * Checks the name of the suburb is valid
-     * Realistically no suburb name will be over 50 characters, they are also generally a single word. Therefore, the
-     * suburb name must be below 50 characters and have at least one character. Additionally, foreign addresses are
-     * expected to be put in the English version, thus, the suburb must only contain letters.
-     * @param suburb the suburb of the location
-     * @return true if the suburb name is valid, false otherwise
-     */
-    public boolean checkValidSuburb(String suburb) {
-        if (suburb != null && suburb.length() < 50 && suburb.length() > 0 && suburb.matches("[ a-zA-Z]+")) {
             return true;
         } else {
             return false;
@@ -189,10 +167,6 @@ public class Location {
         return city;
     }
 
-    public String getSuburb() {
-        return suburb;
-    }
-
     public String getRegion() {
         return region;
     }
@@ -226,14 +200,6 @@ public class Location {
             this.city = city;
         } else {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "The city must not be empty, be less then 50 characters, and only contain letters.");
-        }
-    }
-
-    public void setSuburb(String suburb) {
-        if (checkValidSuburb(suburb)) {
-            this.suburb = suburb;
-        } else {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "The suburb must not be empty, be less then 50 characters, and only contain letters.");
         }
     }
 
@@ -362,7 +328,6 @@ public class Location {
             location.setCity(this.city);
             location.setRegion(this.region);
             location.setCity(this.city);
-            location.setSuburb(this.suburb);
             location.setStreetName(this.streetName);
             location.setStreetNumber(this.streetNumber);
             location.setZipCode(this.zipCode);

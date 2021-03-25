@@ -125,63 +125,6 @@ public class LocationTests {
   }
 
   /**
-   * Checks several names pass return true when passed into the checkValidSuburb method
-   */
-  @Test
-  public void checkValidSuburbLetters() {
-    String[] suburbs = new String[]{ "Addington", "Beckenham", "Casebrook", "Dallington", "Edgeware", "Fendalton",
-                                      "Halswell", "Ilam", "Kainga", "Linwood" };
-    for (String suburb : suburbs) {
-      assertTrue(testLocation.checkValidSuburb(suburb));
-    }
-  }
-
-  /**
-   * Checks several names with numbers in them fail when passed into the checkValidSuburb method
-   */
-  @Test
-  public void checkValidSuburbNumbers() {
-    String[] suburbs = new String[]{ "Add1ngt0n", "B3ck3nham", "Cas3br00k", "Dall1ngt0n", "3dg3war3", "F3ndalt0n",
-                                      "Halsw3ll", "1lam", "Ka1nga", "L1nw00d" };
-    for (String suburb : suburbs) {
-      assertFalse(testLocation.checkValidSuburb(suburb));
-    }
-  }
-
-  /**
-   * Checks several names with characters in them fail when passed into the checkValidSuburb method
-   */
-  @Test
-  public void checkValidSuburbCharacters() {
-    String[] suburbs = new String[]{ "@dd!ngton", "Bec&enh@m", "C@$ebroo&", "D@ll!ngton", "Edgew@re", "Fend@lton",
-                                      "H@lswell", "!l@m", "K@!ng@", "L!nwood" };
-    for (String suburb : suburbs) {
-      assertFalse(testLocation.checkValidSuburb(suburb));
-    }
-  }
-
-  /**
-   * Checks several names with over 50 characters fail when passed into the checkValidSuburb method
-   */
-  @Test
-  public void checkValidSuburbOverFifty() {
-    String[] suburbs = new String[]{ "new old oldie new old old oldie oldie oldie old old",
-                                      "helpppppppppppppppppppppppppppppppppppppppppppppppppppppp",
-                                      "this suburb name is exactly fifty characters longg"};
-    for (String suburb : suburbs) {
-      assertFalse(testLocation.checkValidSuburb(suburb));
-    }
-  }
-
-  /**
-   * Check an empty string fail when passed into the checkValidSuburb method
-   */
-  @Test
-  public void checkValidSuburbEmpty() {
-    assertFalse(testLocation.checkValidSuburb(""));
-  }
-
-  /**
    * Checks several names pass return true when passed into the checkValidCity method
    */
   @Test
@@ -631,16 +574,6 @@ public class LocationTests {
   public void buildStreetNameTest() {
     Location location = locationBuilder.build();
     assertEquals("Elizabeth Street", location.getStreetName());
-  }
-
-  /**
-   * Verify that when Location.Builder.build() is called with all parameters set, the suburb of the resulting
-   * location is the same as value set for the builder.
-   */
-  @Test
-  public void buildSuburbTest() {
-    Location location = locationBuilder.build();
-    assertEquals("Riccarton", location.getSuburb());
   }
 
   /**
