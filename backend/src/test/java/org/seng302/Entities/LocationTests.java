@@ -21,7 +21,7 @@ public class LocationTests {
 
   @BeforeEach
   public void setUp() {
-    locationBuilder = new Location.Builder().atStreetNumber(1).onStreet("Elizabeth Street").inSuburb("Riccarton").inCity("Christchurch")
+    locationBuilder = new Location.Builder().atStreetNumber("1").onStreet("Elizabeth Street").inSuburb("Riccarton").inCity("Christchurch")
             .inRegion("Canterbury").inCountry("New Zealand").withZipCode("8041");
   }
 
@@ -31,7 +31,29 @@ public class LocationTests {
   @Test
   public void checkValidStreetNumberValidNumbers() {
     for (int i = 1; i <= 999; i++) {
-      assertTrue(testLocation.checkValidStreetNumber(i));
+      assertTrue(testLocation.checkValidStreetNumber(Integer.toString(i)));
+    }
+  }
+
+  /**
+   * Checks several street numbers with a single slash return true when passed into the checkValidStreetNumber method
+   */
+  @Test
+  public void checkValidStreetNumberWithSlash() {
+    String[] streetNumbers = new String[]{ "1/1", "2/2", "6/9", "11/11", "1/111", "111/1", "111/111", "9999/9999" };
+    for (String streetNumber : streetNumbers) {
+      assertTrue(testLocation.checkValidStreetNumber(streetNumber));
+    }
+  }
+
+  /**
+   * Checks several street numbers with two forward slashes return false when passed into the checkValidStreetNumber method
+   */
+  @Test
+  public void checkInvalidStreetNumberWithDoubleSlash() {
+    String[] streetNumbers = new String[]{ "1//1", "/1/", "//", "111/1/111", "1111//111" };
+    for (String streetNumber : streetNumbers) {
+      assertFalse(testLocation.checkValidStreetNumber(streetNumber));
     }
   }
 
@@ -39,32 +61,23 @@ public class LocationTests {
    * Checks several large integers above 999 return false when passed into the checkValidStreetNumber method
    */
   @Test
-  public void checkValidStreetNumberTooLargeNumbers() {
-    int[] streetNumbers = new int[]{ 1000, 1001, 1002, 1003, 2000, 3000, 4000, 5000, 12345, 123456, 1234567, 12345678,
-                                      123456789, 1234567890 };
+  public void checkInvalidStreetNumberTooLargeNumbers() {
+    int[] streetNumbers = new int[]{ 1000000000, 1000000001, 1000000002, 1000000003, 2000000000, 1234500000, 1234560000,
+            1234567000, 1234567890 };
     for (int streetNumber : streetNumbers) {
-      assertFalse(testLocation.checkValidStreetNumber(streetNumber));
+      assertFalse(testLocation.checkValidStreetNumber(Integer.toString(streetNumber)));
     }
-  }
-
-  /**
-   * Checks the integer zero fails when passed into the checkValidStreetNumber method
-   */
-  @Test
-  public void checkValidStreetNumberZero() {
-    int streetNumber = 0;
-    assertFalse(testLocation.checkValidStreetNumber(streetNumber));
   }
 
   /**
    * Checks negative integers fail when passed into the checkValidStreetNumber method
    */
   @Test
-  public void checkValidStreetNumberNegativeNumbers() {
-    int[] streetNumbers = new int[]{ -1000, -1001, -1002, -1003, -2000, -3000, -4000, -5000, -12345, -123456, -1234567,
-                                      -12345678, -123456789, -1234567890 };
+  public void checkInvalidStreetNumberNegativeNumbers() {
+    int[] streetNumbers = new int[]{ -1, -2, -3, -1001, -1002, -1003, -2000, -3000, -4000, -5000, -12345, -123456,
+            -1234567, -12345678, -123456789, -1234567890 };
     for (int streetNumber : streetNumbers) {
-      assertFalse(testLocation.checkValidStreetNumber(streetNumber));
+      assertFalse(testLocation.checkValidStreetNumber(Integer.toString(streetNumber)));
     }
   }
 
@@ -356,7 +369,7 @@ public class LocationTests {
    */
   @Test
   public void checkValidAllLocationParametersEverythingValid() {
-    Location location = new Location.Builder().atStreetNumber(1).onStreet("Elizabeth Street").inSuburb("Riccarton").inCity("Christchurch")
+    Location location = new Location.Builder().atStreetNumber("1").onStreet("Elizabeth Street").inCity("Christchurch")
                                       .inRegion("Canterbury").inCountry("New Zealand").withZipCode("8041").build();
     assertTrue(testLocation.checkValidAllLocationParameters(location));
   }
@@ -368,7 +381,7 @@ public class LocationTests {
   @Test
   public void checkValidAllLocationParametersStreetNumberInvalid() {
     assertThrows(ResponseStatusException.class, () -> {
-      Location location = new Location.Builder().atStreetNumber(12345).onStreet("Elizabeth Street").inSuburb("Riccarton").inCity("Christchurch")
+      Location location = new Location.Builder().atStreetNumber("1234567890").onStreet("Elizabeth Street").inCity("Christchurch")
                       .inRegion("Canterbury").inCountry("New Zealand").withZipCode("8041").build();
     });
   }
@@ -380,20 +393,8 @@ public class LocationTests {
   @Test
   public void checkValidAllLocationParametersStreetNameInvalid() {
     assertThrows(ResponseStatusException.class, () -> {
-      Location location = new Location.Builder().atStreetNumber(1).onStreet("Eliz@beth Str33t").inSuburb("Riccarton").inCity("Christchurch")
+      Location location = new Location.Builder().atStreetNumber("1").onStreet("Eliz@beth Str33t").inCity("Christchurch")
             .inRegion("Canterbury").inCountry("New Zealand").withZipCode("8041").build();
-    });
-  }
-
-  /**
-   * Checks a Location object with an invalid suburb parameter fails when passed into the
-   * checkValidAllLocationParameters method
-   */
-  @Test
-  public void checkValidAllLocationParametersSuburbInvalid() {
-    assertThrows(ResponseStatusException.class, () -> {
-      Location location = new Location.Builder().atStreetNumber(1).onStreet("Elizabeth Street").inSuburb("R!cc@rton").inCity("Christchurch")
-              .inRegion("Canterbury").inCountry("New Zealand").withZipCode("8041").build();
     });
   }
 
@@ -404,7 +405,7 @@ public class LocationTests {
   @Test
   public void checkValidAllLocationParametersCityInvalid() {
     assertThrows(ResponseStatusException.class, () -> {
-      Location location = new Location.Builder().atStreetNumber(1).onStreet("Elizabeth Street").inSuburb("Riccarton").inCity("Chr!$stchurch")
+      Location location = new Location.Builder().atStreetNumber("1").onStreet("Elizabeth Street").inCity("Chr!$stchurch")
               .inRegion("Canterbury").inCountry("New Zealand").withZipCode("8041").build();
     });
   }
@@ -416,7 +417,7 @@ public class LocationTests {
   @Test
   public void checkValidAllLocationParametersRegionInvalid() {
     assertThrows(ResponseStatusException.class, () -> {
-      Location location = new Location.Builder().atStreetNumber(1).onStreet("Elizabeth Street").inSuburb("Riccarton").inCity("Christchurch")
+      Location location = new Location.Builder().atStreetNumber("1").onStreet("Elizabeth Street").inCity("Christchurch")
               .inRegion("C@nt3rbury").inCountry("New Zealand").withZipCode("8041").build();
     });
   }
@@ -428,7 +429,7 @@ public class LocationTests {
   @Test
   public void checkValidAllLocationParametersCountryInvalid() {
     assertThrows(ResponseStatusException.class, () -> {
-      Location location = new Location.Builder().atStreetNumber(1).onStreet("Elizabeth Street").inSuburb("Riccarton").inCity("Christchurch")
+      Location location = new Location.Builder().atStreetNumber("1").onStreet("Elizabeth Street").inCity("Christchurch")
               .inRegion("Canterbury").inCountry("N3w Z3@l@nd").withZipCode("8041").build();
     });
   }
@@ -440,7 +441,7 @@ public class LocationTests {
   @Test
   public void checkValidAllLocationParametersZipCodeInvalid() {
     assertThrows(ResponseStatusException.class, () -> {
-      Location location = new Location.Builder().atStreetNumber(1).onStreet("Elizabeth Street").inSuburb("Riccarton").inCity("Christchurch")
+      Location location = new Location.Builder().atStreetNumber("1").onStreet("Elizabeth Street").inCity("Christchurch")
                       .inRegion("Canterbury").inCountry("New Zealand").withZipCode("80999999999999941").build();
     });
   }
@@ -468,24 +469,8 @@ public class LocationTests {
   @Test
   public void buildWithoutStreetNameTest() {
     Location.Builder locationBuilder = new Location.Builder()
-            .atStreetNumber(1)
+            .atStreetNumber("1")
             .inSuburb("Riccarton")
-            .inCity("Christchurch")
-            .inRegion("Canterbury")
-            .inCountry("New Zealand")
-            .withZipCode("8041");
-    assertThrows(ResponseStatusException.class, locationBuilder::build);
-  }
-
-  /**
-   * Verify that Location.Builder.build() throws a ResponseStatusException when it is called before suburb has
-   * been set.
-   */
-  @Test
-  public void buildWithoutSuburbTest() {
-    Location.Builder locationBuilder = new Location.Builder()
-            .atStreetNumber(1)
-            .onStreet("Elizabeth Street")
             .inCity("Christchurch")
             .inRegion("Canterbury")
             .inCountry("New Zealand")
@@ -499,7 +484,7 @@ public class LocationTests {
   @Test
   public void buildWithoutCityTest() {
     Location.Builder locationBuilder = new Location.Builder()
-            .atStreetNumber(1)
+            .atStreetNumber("1")
             .onStreet("Elizabeth Street")
             .inSuburb("Riccarton")
             .inRegion("Canterbury")
@@ -515,7 +500,7 @@ public class LocationTests {
   @Test
   public void buildWithoutRegionTest() {
     Location.Builder locationBuilder = new Location.Builder()
-            .atStreetNumber(1)
+            .atStreetNumber("1")
             .onStreet("Elizabeth Street")
             .inSuburb("Riccarton")
             .inCity("Christchurch")
@@ -531,7 +516,7 @@ public class LocationTests {
   @Test
   public void buildWithoutCountryTest() {
     Location.Builder locationBuilder = new Location.Builder()
-            .atStreetNumber(1)
+            .atStreetNumber("1")
             .onStreet("Elizabeth Street")
             .inSuburb("Riccarton")
             .inCity("Christchurch")
@@ -547,7 +532,7 @@ public class LocationTests {
   @Test
   public void buildWithoutZipCodeTest() {
     Location.Builder locationBuilder = new Location.Builder()
-            .atStreetNumber(1)
+            .atStreetNumber("1")
             .onStreet("Elizabeth Street")
             .inSuburb("Riccarton")
             .inCity("Christchurch")
@@ -563,7 +548,7 @@ public class LocationTests {
   @Test
   public void buildStreetNumberTest() {
     Location location = locationBuilder.build();
-    assertEquals(1, location.getStreetNumber());
+    assertEquals("1", location.getStreetNumber());
   }
 
   /**

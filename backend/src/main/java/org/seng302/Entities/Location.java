@@ -30,7 +30,7 @@ public class Location {
     private String streetName;
 
     @Column(name="street_number")
-    private Integer streetNumber;
+    private String streetNumber;
 
     @Column(name="zip_code")
     private String zipCode;
@@ -61,13 +61,15 @@ public class Location {
 
     /**
      * Checks the street number is valid.
-     * The current highest number street in the world is 304, therefore no street should have more than 3 digits.
-     * Additionally, the street number should not be negative or zero.
+     * The current highest number street in the world is 304, however, certain addresses can have / in them such as
+     * 130/2 to refer to sub-units. Therefore we wil assume that there will never be more than 9999 houses on an
+     * individual street and that there will not be any more than 9999 sub-units. It will also contain less of equal to
+     * one backslash. Thus, the max length will be 9 characters long.
      * @param streetNumber The street number of the location
      * @return true if the street number is valid, false otherwise
      */
-    public boolean checkValidStreetNumber(Integer streetNumber) {
-        if (streetNumber != null && streetNumber > 0 && streetNumber <= 999) {
+    public boolean checkValidStreetNumber(String streetNumber) {
+        if (streetNumber != null && streetNumber.length() > 0 && streetNumber.length() <= 9 && streetNumber.matches("[0-9]+|[0-9]+\\/[0-9]+")) {
             return true;
         } else {
             return false;
@@ -175,7 +177,7 @@ public class Location {
         return streetName;
     }
 
-    public Integer getStreetNumber() {
+    public String getStreetNumber() {
         return streetNumber;
     }
 
@@ -219,7 +221,7 @@ public class Location {
         }
     }
 
-    public void setStreetNumber(Integer streetNumber) {
+    public void setStreetNumber(String streetNumber) {
         if (checkValidStreetNumber(streetNumber)) {
             this.streetNumber = streetNumber;
         } else {
@@ -245,7 +247,7 @@ public class Location {
         private String suburb;
         private String region;
         private String streetName;
-        private Integer streetNumber;
+        private String streetNumber;
         private String zipCode;
 
         /**
@@ -303,7 +305,7 @@ public class Location {
          * @param streetNumber An integer representing a street number.
          * @return Builder with street number parameter set.
          */
-        public Builder atStreetNumber(Integer streetNumber) {
+        public Builder atStreetNumber(String streetNumber) {
             this.streetNumber = streetNumber;
             return this;
         }
