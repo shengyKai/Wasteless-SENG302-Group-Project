@@ -18,7 +18,7 @@ const router = new VueRouter();
 
 describe('UserProfile.vue', () => {
   // Container for the UserProfile under test
-  let wrapper: Wrapper<CombinedVueInstance<UserProfile, object, object, object, Record<never, any>>>;
+  let wrapper: Wrapper<any>;
 
   /**
    * Sets up the test UserProfile instance and populates it with test data.
@@ -53,54 +53,54 @@ describe('UserProfile.vue', () => {
       vuetify,
       store
     });
-  })
+  });
 
   /**
    * Tests that the UserProfile has the user's first name somewhere in the page
    */
   it('Renders firstname', () => {
-    expect(wrapper.text()).toContain('test_first_name')
+    expect(wrapper.text()).toContain('test_first_name');
   });
 
   /**
    * Tests that the UserProfile has the user's last name somewhere in the page
    */
   it('Renders lastname', () => {
-    expect(wrapper.text()).toContain('test_last_name')
+    expect(wrapper.text()).toContain('test_last_name');
   });
 
   /**
    * Tests that the UserProfile has the user's nickname somewhere in the page
    */
   it('Renders nickname', () => {
-    expect(wrapper.text()).toContain('test_nickname')
+    expect(wrapper.text()).toContain('test_nickname');
   });
 
   /**
    * Tests that the UserProfile has the user's biography somewhere in the page
    */
   it('Renders bio', () => {
-    expect(wrapper.text()).toContain('test_biography')
+    expect(wrapper.text()).toContain('test_biography');
   });
 
   /**
    * Tests that the UserProfile has the user's email somewhere in the page
    */
   it('Renders email', () => {
-    expect(wrapper.text()).toContain('test_email_address')
+    expect(wrapper.text()).toContain('test_email_address');
   });
 
   /**
    * Tests that the UserProfile has the user's phone number somewhere in the page
    */
   it('Renders phone number', () => {
-    expect(wrapper.text()).toContain('test_phone_number')
+    expect(wrapper.text()).toContain('test_phone_number');
   });
 
   /**
    * Tests that the UserProfile has the user's home address somewhere in the page
    */
   it('Renders home address', () => {
-    expect(wrapper.text()).toContain('test_home_address')
+    expect(wrapper.text()).toContain('test_home_address');
   });
-})
+});
