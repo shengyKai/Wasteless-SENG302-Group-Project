@@ -418,7 +418,7 @@ public class UserSearchHelper {
      * @param userRepository The repository containing all the User entities.
      * @return
      */
-    public static List<User> getSearchResultsOrderedByRelevance(String originalSearchQuery, UserRepository userRepository) {
+    public static List<User> getSearchResultsOrderedByRelevance(String originalSearchQuery, UserRepository userRepository, String reverse) {
         Sort idSort = getSort("userID", "false");
 
         String fullMatchSomeTermsQuery = getFullMatchesQueryString(originalSearchQuery);
@@ -437,6 +437,10 @@ public class UserSearchHelper {
         addNewToList(matchList, addedIds, fullMatchesAllTerms);
         addNewToList(matchList, addedIds, fullMatchesSomeTerms);
         addNewToList(matchList, addedIds, partialMatchesSomeTerms);
+
+        if (Boolean.parseBoolean(reverse) == true) {
+            Collections.reverse(matchList);
+        }
 
         return matchList;
     }
