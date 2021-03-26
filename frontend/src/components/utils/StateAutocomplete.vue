@@ -12,6 +12,8 @@
 </template>
 
 <script>
+import {insertResultsFromAPI} from './Methods/autocomplete.ts';
+
 export default {
   name: 'StateAutocomplete',
   data () {
@@ -30,25 +32,17 @@ export default {
   watch: {
     stateSearch (val) {
       this.stateItems = [];
-
       //if input length exists, and has a length more than 2
       if (val && val.length > 2) {
         //show loading animation
         this.isLoading = true;
         //append to the api url the input the user has entered
-        let url = `https://photon.komoot.io/api/?q=${encodeURIComponent(val)}&osm_tag=place`;
-
-        fetch(url).then(res => res.json()).then(res => {
-          res.features.forEach(feature => {
-            //If the returned GEOJSON has any of these key(s):
-            //state, province, region
-            //it will add that result into the autocomplete suggestion
-            this.stateItems.push(feature.properties.name);
-          });
-        }).catch(err => {
-          console.log(err);
+        //added option for api that only produces english results
+        let url = `https://photon.komoot.io/api/?lang=en&q=${encodeURIComponent(val)}&osm_tag=place`;
+        insertResultsFromAPI(url, this.stateItems).then(() => {
           //after everything is shown, the loading animation will stop
-        }).finally(() => (this.isLoading = false));
+          this.isLoading = false;
+        });
       }
     },
   }
