@@ -27,7 +27,7 @@ public class AuthenticationTokenManager {
      * @param request The HTTP request packet.
      * @param response The HTTP response packet.
      */
-    public static String setAuthenticationToken(HttpServletRequest request, HttpServletResponse response) {
+    public static String setAuthenticationToken(HttpServletRequest request, HttpServletResponse response, Long accountId) {
         String authString = generateAuthenticationString();
 
         // Cookie currently not being used
@@ -39,6 +39,11 @@ public class AuthenticationTokenManager {
 
         HttpSession session = request.getSession(true);
         session.setAttribute(authTokenName, authString);
+        // Tag session with account ID (if it isnt null (dgaa)
+        if (accountId != null) {
+            session.setAttribute("accountId", accountId);
+        }
+
 
         // Sends auth token to be sent in the response body
         String authJSONString = "{\"authToken\": \"" + authString + "\"}";
@@ -93,7 +98,7 @@ public class AuthenticationTokenManager {
     public static void setAuthenticationTokenDGAA(HttpServletRequest request) {
 
         HttpSession session = request.getSession(true);
-        session.setAttribute("dgaa", true);
+        session.setAttribute("role", "dgaa");
     }
 
     /**
@@ -102,8 +107,8 @@ public class AuthenticationTokenManager {
      */
     public static void checkAuthenticationTokenDGAA(HttpServletRequest request) {
         HttpSession session = request.getSession();
-
-        if (session.getAttribute("dgaa") != null) {
+        String sessionRole = (String)session.getAttribute("role");
+        if (sessionRole != null && sessionRole == "dgaa") {
             return;
         } else {
             InsufficientPermissionException insufficientPermissionException = new InsufficientPermissionException("The user does not have permission to perform the requested action");
@@ -112,5 +117,27 @@ public class AuthenticationTokenManager {
         }
 
     }
+
+    /**
+     * Given a HTTP request, and a given account ID, this method determines if the currently logged in account can see the private info of the given ID
+     * When an account has role "admin" or "dgaa" then permission is granted
+     * @param request The HTTP request packet
+     * @param accountId The account Id to compare
+     * @return True if accountId matches session
+     */
+    public static boolean sessionCanSeePrivate(HttpServletRequest request, Long accountId) {
+        HttpSession session = request.getSession();
+        Long sessionAccountId = (Long)session.getAttribute("accountId");
+        String sessionRole = (String)session.getAttribute("role");
+        if (sessionAccountId != null && sessionAccountId == accountId) {
+            return true;
+        } else if (sessionRole == "admin" || sessionRole == "dgaa") {
+            return true;
+        }
+        return false;
+    }
+
+
+
 
 }
