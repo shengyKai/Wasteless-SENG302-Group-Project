@@ -58,14 +58,14 @@ describe('UserProfile.vue', () => {
   /**
    * Tests that the UserProfile has the user's first name somewhere in the page
    */
-  it('Renders firstname', () => {
+  it('Renders first name', () => {
     expect(wrapper.text()).toContain('test_first_name');
   });
 
   /**
    * Tests that the UserProfile has the user's last name somewhere in the page
    */
-  it('Renders lastname', () => {
+  it('Renders last name', () => {
     expect(wrapper.text()).toContain('test_last_name');
   });
 
@@ -102,5 +102,27 @@ describe('UserProfile.vue', () => {
    */
   it('Renders home address', () => {
     expect(wrapper.text()).toContain('test_home_address');
+  });
+
+  /**
+   * Tests that the UserProfile has the user's birthday somewhere in the page
+   * and that the birthday is in the correct format dd/mm/yyyy.
+   */
+  it('Renders birthday', () => {
+    expect(wrapper.text()).toContain('1/1/1900');
+  });
+
+  /**
+   * Tests that the UserProfile contains a creation message somewhere in the page
+   */
+  it('Renders computed creation message', () => {
+    expect(wrapper.text()).toContain(wrapper.vm.createdMsg);
+  });
+
+  /**
+   * Tests that the UserProfile has a creation message in the format "dd mmm yyyy (x months ago)"
+   */
+  it('Creation message is in valid format', () => {
+    expect(wrapper.vm.createdMsg).toMatch(/[0-9]{1,2} [A-Z][a-z]{2} [0-9]+ \([0-9]+ months ago\)/);
   });
 });
