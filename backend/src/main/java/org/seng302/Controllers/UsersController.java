@@ -43,6 +43,7 @@ public class UsersController {
      */
     @PostMapping("/users")
     public void register(@RequestBody JSONObject userinfo, HttpServletRequest request, HttpServletResponse response) {
+        logger.info("Register");
         try {
             User.checkEmailUniqueness(userinfo.getAsString("email"), userRepository);
         } catch (EmailInUseException inUseException) {
@@ -92,6 +93,7 @@ public class UsersController {
      */
     @GetMapping("/users/{id}")
     JSONObject getUserById(@PathVariable Long id, HttpServletRequest session) {
+        logger.info("Get user by id");
         AuthenticationTokenManager.checkAuthenticationToken(session);
 
         logger.info(String.format("Retrieving user with ID %d.", id));

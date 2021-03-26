@@ -57,28 +57,28 @@ describe('ProfilePage.vue', () => {
       vuetify,
       store
     });
-  })
+  });
 
   it('Renders firstname', () => {
-    expect(wrapper.text()).toContain('firstname')
+    expect(wrapper.text()).toContain('firstname');
   });
   it('Renders lastname', () => {
-    expect(wrapper.text()).toContain('lastname')
+    expect(wrapper.text()).toContain('lastname');
   });
   it('Renders nickname', () => {
-    expect(wrapper.text()).toContain('nickname')
+    expect(wrapper.text()).toContain('nickname');
   });
   it('Renders bio', () => {
-    expect(wrapper.text()).toContain('biography')
+    expect(wrapper.text()).toContain('biography');
   });
   it('Renders email', () => {
-    expect(wrapper.text()).toContain('email_address')
+    expect(wrapper.text()).toContain('email_address');
   });
   it('Renders phone number', () => {
-    expect(wrapper.text()).toContain('phone_number')
+    expect(wrapper.text()).toContain('phone_number');
   });
   it('Renders home address', () => {
-    expect(wrapper.text()).toContain('home_address')
+    expect(wrapper.text()).toContain('home_address');
   });
 
-})
+});

@@ -1,6 +1,9 @@
 <template>
   <v-container>
-    <v-form @submit.prevent="login" v-model="valid">
+    <!-- @submit.prevent="login"
+    @click="login(email, password)"
+    -->
+    <v-form  v-model="valid">
       <h1>Sign in</h1>
       <v-text-field
         v-model="email"
@@ -28,6 +31,15 @@
       </v-btn>
     </v-form>
   </v-container>
+
+  <!--
+  //TODO 0. connect to DB
+  1. login change GET to POST in API
+  2. How to put param into the login()
+  3. Change store.dispatach from user to login
+  4. We need 2 request, a = Post to login, B=Get to show profile
+
+  -->
 </template>
 
 <script>
@@ -64,9 +76,14 @@ export default {
       this.$emit("showRegister");
     },
     login() {
+      // this.$store.dispatch("login");
       this.$store.dispatch("getUser");
       this.$router.push("/profile");
     },
   },
 };
+
+
 </script>
+
+
