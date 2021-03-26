@@ -51,7 +51,7 @@ class AuthenticationTokenManagerTest {
     public void setAuthenticationTokenCookieAddedTest() {
         when(request.getSession(true)).thenAnswer(
                 (Answer) invocation -> session);
-        AuthenticationTokenManager.setAuthenticationToken(request, response, null);
+        AuthenticationTokenManager.setAuthenticationToken(request, response);
         Mockito.verify(response).addCookie(cookieArgumentCaptor.capture());
         Cookie responseCookie = cookieArgumentCaptor.getValue();
         assertEquals("AUTHTOKEN", responseCookie.getName());
@@ -64,7 +64,7 @@ class AuthenticationTokenManagerTest {
     public void setAuthenticationTokenCookieValueTest() {
         when(request.getSession(true)).thenAnswer(
                 (Answer) invocation -> session);
-        AuthenticationTokenManager.setAuthenticationToken(request, response, null);
+        AuthenticationTokenManager.setAuthenticationToken(request, response);
         Mockito.verify(response).addCookie(cookieArgumentCaptor.capture());
         Cookie responseCookie = cookieArgumentCaptor.getValue();
         assertTrue(responseCookie.getValue().matches("[abcdef\\d]{32}"));
@@ -77,7 +77,7 @@ class AuthenticationTokenManagerTest {
     public void setAuthenticationTokenCookieExpiryTest() {
         when(request.getSession(true)).thenAnswer(
                 (Answer) invocation -> session);
-        AuthenticationTokenManager.setAuthenticationToken(request, response, null);
+        AuthenticationTokenManager.setAuthenticationToken(request, response);
         Mockito.verify(response).addCookie(cookieArgumentCaptor.capture());
         Cookie responseCookie = cookieArgumentCaptor.getValue();
         assertEquals(30 * 60, responseCookie.getMaxAge());
@@ -91,7 +91,7 @@ class AuthenticationTokenManagerTest {
     public void setAuthenticationTokenSessionAttributeAddedTest() {
         when(request.getSession(true)).thenAnswer(
                 (Answer) invocation -> session);
-        AuthenticationTokenManager.setAuthenticationToken(request, response, null);
+        AuthenticationTokenManager.setAuthenticationToken(request, response);
         Mockito.verify(session).setAttribute(nameArgumentCaptor.capture(), valueArgumentCaptor.capture());
         String attributeName = nameArgumentCaptor.getValue();
         assertEquals("AUTHTOKEN", attributeName);
@@ -105,7 +105,7 @@ class AuthenticationTokenManagerTest {
     public void setAuthenticationTokenSessionAttributeCookieMatchTest() {
         when(request.getSession(true)).thenAnswer(
                 (Answer) invocation -> session);
-        AuthenticationTokenManager.setAuthenticationToken(request, response, null);
+        AuthenticationTokenManager.setAuthenticationToken(request, response);
         Mockito.verify(response).addCookie(cookieArgumentCaptor.capture());
         Cookie responseCookie = cookieArgumentCaptor.getValue();
         Mockito.verify(session).setAttribute(nameArgumentCaptor.capture(), valueArgumentCaptor.capture());

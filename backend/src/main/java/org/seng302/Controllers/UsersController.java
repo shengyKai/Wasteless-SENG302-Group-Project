@@ -63,7 +63,7 @@ public class UsersController {
                     .withPassword(userinfo.getAsString("password"))
                     .build();
             User newUser = userRepository.save(user);
-            AuthenticationTokenManager.setAuthenticationToken(request, response, newUser.getUserID());
+            AuthenticationTokenManager.setAuthenticationToken(request, response, newUser);
             response.setStatus(201);
             logger.info("User has been registered.");
         } catch (ResponseStatusException responseError) {

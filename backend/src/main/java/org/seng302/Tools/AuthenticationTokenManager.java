@@ -2,6 +2,7 @@ package org.seng302.Tools;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.seng302.Entities.User;
 import org.seng302.Exceptions.AccessTokenException;
 import org.seng302.Exceptions.InsufficientPermissionException;
 
@@ -26,8 +27,9 @@ public class AuthenticationTokenManager {
      * token which will be attached to the HTTP response.
      * @param request The HTTP request packet.
      * @param response The HTTP response packet.
+     * @param user the user associated with the login
      */
-    public static String setAuthenticationToken(HttpServletRequest request, HttpServletResponse response, Long accountId) {
+    public static String setAuthenticationToken(HttpServletRequest request, HttpServletResponse response, User user) {
         String authString = generateAuthenticationString();
 
         // Cookie currently not being used
@@ -40,14 +42,22 @@ public class AuthenticationTokenManager {
         HttpSession session = request.getSession(true);
         session.setAttribute(authTokenName, authString);
         // Tag session with account ID (if it isnt null (dgaa)
-        if (accountId != null) {
-            session.setAttribute("accountId", accountId);
+        if (user != null) {
+            session.setAttribute("accountId", user.getUserID());
+            session.setAttribute("role", user.getRole());
         }
-
-
         // Sends auth token to be sent in the response body
         String authJSONString = "{\"authToken\": \"" + authString + "\"}";
         return authJSONString;
+    }
+
+    /**
+     * Overload
+     * @param request The HTTP request packet.
+     * @param response The HTTP response packet.
+     */
+    public static String setAuthenticationToken(HttpServletRequest request, HttpServletResponse response) {
+        return setAuthenticationToken(request, response, null);
     }
 
     /**
@@ -129,7 +139,7 @@ public class AuthenticationTokenManager {
         HttpSession session = request.getSession();
         Long sessionAccountId = (Long)session.getAttribute("accountId");
         String sessionRole = (String)session.getAttribute("role");
-        if (sessionAccountId != null && sessionAccountId == accountId) {
+        if (sessionAccountId == accountId) {
             return true;
         } else if (sessionRole == "admin" || sessionRole == "dgaa") {
             return true;
