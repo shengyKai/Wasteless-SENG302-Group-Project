@@ -7,6 +7,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.persistence.*;
+import java.util.Arrays;
+import java.util.List;
 
 @Data // generate setters and getters for all fields (lombok pre-processor)
 @NoArgsConstructor // generate a no-args constructor needed by JPA (lombok pre-processor)
@@ -32,8 +34,31 @@ public class Location {
     @Column(name="street_number")
     private String streetNumber;
 
-    @Column(name="zip_code")
-    private String zipCode;
+    @Column(name="post_code")
+    private String postCode;
+
+    /**
+     * Converts the address string into a location object
+     * @param address
+     * @return
+     */
+    public static Location covertAddressStringToLocation(String address) {
+        List<String> addressComponents = Arrays.asList(address.split(","));
+        try {
+            String streetNumber = addressComponents.get(0);
+            String streetName = addressComponents.get(1);
+            String city = addressComponents.get(2);
+            String country = addressComponents.get(3);
+            String region = addressComponents.get(4);
+            String postCode = addressComponents.get(5);
+            Location.Builder locationBuilder = new Location.Builder().atStreetNumber(streetNumber).onStreet(streetName)
+                    .inCity(city).inRegion(region).inCountry(country).withPostCode(postCode);
+            Location location = locationBuilder.build();
+            return location;
+        } catch (Exception e) {
+            throw e;
+        }
+    }
 
     /**
      * Checks all the parameters of the location are valid
@@ -56,7 +81,7 @@ public class Location {
         if (!checkValidCountry(location.getCountry())) {
             return false;
         }
-        return checkValidZipCode(location.getZipCode());
+        return checkValidPostCode(location.getPostCode());
     }
 
     /**
@@ -142,15 +167,15 @@ public class Location {
     }
 
     /**
-     * Checks the zip code number is valid
-     * America has the largest zip codes which include 9 digits and some countries like Canada use letters within there
-     * zip codes. Therefore, the zip code must contain less or equal to 9 characters and above 0. Additionally, the
-     * zip code must be alphanumberic.
-     * @param zipCode the zip code of the location
-     * @return true if the zip code number is valid, false otherwise
+     * Checks the post code number is valid
+     * America has the largest post codes which include 9 digits and some countries like Canada use letters within there
+     * post codes. Therefore, the post code must contain less or equal to 9 characters and above 0. Additionally, the
+     * post code must be alphanumberic.
+     * @param postCode the post code of the location
+     * @return true if the post code number is valid, false otherwise
      */
-    public boolean checkValidZipCode(String zipCode) {
-        if (zipCode != null && zipCode.length() <= 9 && zipCode.length() > 0 && zipCode.matches("[a-zA-Z0-9]+")) {
+    public boolean checkValidPostCode(String postCode) {
+        if (postCode != null && postCode.length() <= 9 && postCode.length() > 0 && postCode.matches("[a-zA-Z0-9]+")) {
             return true;
         } else {
             return false;
@@ -181,8 +206,8 @@ public class Location {
         return streetNumber;
     }
 
-    public String getZipCode() {
-        return zipCode;
+    public String getPostCode() {
+        return postCode;
     }
 
     public void setId(Long id) {
@@ -229,11 +254,12 @@ public class Location {
         }
     }
 
-    public void setZipCode(String zipCode) {
-        if (checkValidZipCode(zipCode)) {
-            this.zipCode = zipCode;
+    public void setPostCode(String postCode) {
+        if (checkValidPostCode(postCode)) {
+            this.postCode = postCode;
         } else {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "The zip code must be a letter or number, be less than 10 characters long, and at least one character long.");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "The post code must be a letter or number, be " +
+                    "less than 10 characters long, and at least one character long.");
         }
     }
 
@@ -242,13 +268,13 @@ public class Location {
      */
     public static class Builder {
 
-        private  String country;
-        private  String city;
+        private String country;
+        private String city;
         private String suburb;
         private String region;
         private String streetName;
         private String streetNumber;
-        private String zipCode;
+        private String postCode;
 
         /**
          * Set the builder's country.
@@ -311,12 +337,12 @@ public class Location {
         }
 
         /**
-         * Set the builder's zip code.
-         * @param zipCode A string representing a zip code.
-         * @return Builder with zip code parameter set.
+         * Set the builder's post code.
+         * @param postCode A string representing a post code.
+         * @return Builder with post code parameter set.
          */
-        public Builder withZipCode(String zipCode)  {
-            this.zipCode = zipCode;
+        public Builder withPostCode(String postCode)  {
+            this.postCode = postCode;
             return this;
         }
 
@@ -329,10 +355,9 @@ public class Location {
             location.setCountry(this.country);
             location.setCity(this.city);
             location.setRegion(this.region);
-            location.setCity(this.city);
             location.setStreetName(this.streetName);
             location.setStreetNumber(this.streetNumber);
-            location.setZipCode(this.zipCode);
+            location.setPostCode(this.postCode);
             return location;
         }
 

@@ -9,6 +9,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.OneToOne;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -26,7 +27,7 @@ public class User extends Account {
     private String bio;
     private Date dob;
     private String phNum;
-    private String address;
+    private Location address;
     private Date created;
     private String role;
 
@@ -202,24 +203,38 @@ public class User extends Account {
      * Gets the users country, city, street, house number etc as string
      * @return address
      */
+    @OneToOne
     @Column(nullable = false)
-    public String getAddress() {
+    public Location getAddress() {
     return this.address;
     }
 
     /**
      * Sets the users home address
      * Not Null
-     * @param address where the user lives/provides items from
+     * @param address where the user lives/provides items from as a location object
+     */
+    public void setAddress(Location address) {
+        this.address = address;
+    }
+
+    /**
+     * Sets the users home address.
+     * Not Null
+     * @param address where the user lives/provides items from as a string
      */
     public void setAddress(String address) {
-        if (address != null && address.length() > 0 && address.length() <= 255) {
-            this.address = address;
-        } else {
+        try {
+            if (address != null && address.length() > 0 && address.length() <= 255) {
+                this.address = Location.covertAddressStringToLocation(address);
+            } else {
+                throw new Exception("Address not entered correctly.");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Your address has been entered incorrectly");
         }
     }
-
 
     /**
      * Date the account was created
@@ -285,7 +300,7 @@ public class User extends Account {
         attributeMap.put("email", getEmail());
         attributeMap.put("bio", bio);
         attributeMap.put("created", created.toString());
-        attributeMap.put("homeAddress", getAddress());
+        attributeMap.put("homeAddress", getAddress().toString());
         return new JSONObject(attributeMap);
     }
 
@@ -302,7 +317,7 @@ public class User extends Account {
         private String bio;
         private Date dob;
         private String phNum;
-        private String address;
+        private Location address;
         private String password;
 
         /**
@@ -391,7 +406,7 @@ public class User extends Account {
          * @param address a string representing the user's address.
          * @return Builder with address set.
          */
-        public Builder withAddress(String address) {
+        public Builder withAddress(Location address) {
             this.address = address;
             return this;
         }

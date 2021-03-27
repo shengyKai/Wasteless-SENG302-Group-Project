@@ -21,8 +21,8 @@ public class LocationTests {
 
   @BeforeEach
   public void setUp() {
-    locationBuilder = new Location.Builder().atStreetNumber("1").onStreet("Elizabeth Street").inSuburb("Riccarton").inCity("Christchurch")
-            .inRegion("Canterbury").inCountry("New Zealand").withZipCode("8041");
+    locationBuilder = new Location.Builder().atStreetNumber("1").onStreet("Elizabeth Street").inCity("Christchurch")
+            .inRegion("Canterbury").inCountry("New Zealand").withPostCode("8041");
   }
 
   /**
@@ -316,7 +316,7 @@ public class LocationTests {
     String[] zipcodes = new String[]{ "1", "2", "3", "4", "5", "10", "20", "30", "40", "100", "1000", "12345", "123456",
                                       "1234567", "12345678", "123456789" };
     for (String zipcode : zipcodes) {
-      assertTrue(testLocation.checkValidZipCode(zipcode));
+      assertTrue(testLocation.checkValidPostCode(zipcode));
     }
   }
 
@@ -328,7 +328,7 @@ public class LocationTests {
     String[] zipcodes = new String[]{ "a1", "b2", "c3", "d4", "e5", "f10", "g20", "h30", "i40", "j100", "k1000",
                                       "l12345", "m123456", "o1234567", "p12345678", "q12345678" };
     for (String zipcode : zipcodes) {
-      assertTrue(testLocation.checkValidZipCode(zipcode));
+      assertTrue(testLocation.checkValidPostCode(zipcode));
     }
   }
 
@@ -340,7 +340,7 @@ public class LocationTests {
     String[] zipcodes = new String[]{ "!1", "@2", "#3", "$4", "%5", "^10", "&20", "*30", "(40", ")100", "=1000",
                                       "_12345", "[123456", "]1234567", "{12345678", "}123456789" };
     for (String zipcode : zipcodes) {
-      assertFalse(testLocation.checkValidZipCode(zipcode));
+      assertFalse(testLocation.checkValidPostCode(zipcode));
     }
   }
 
@@ -351,7 +351,7 @@ public class LocationTests {
   public void checkValidZipCodeOverTen() {
     String[] zipcodes = new String[]{ "1234567890", "123456789123456789", "123456789000000" };
     for (String zipcode : zipcodes) {
-      assertFalse(testLocation.checkValidZipCode(zipcode));
+      assertFalse(testLocation.checkValidPostCode(zipcode));
     }
   }
 
@@ -360,7 +360,7 @@ public class LocationTests {
    */
   @Test
   public void checkValidZipCodeEmpty() {
-    assertFalse(testLocation.checkValidZipCode(""));
+    assertFalse(testLocation.checkValidPostCode(""));
   }
 
   /**
@@ -370,7 +370,7 @@ public class LocationTests {
   @Test
   public void checkValidAllLocationParametersEverythingValid() {
     Location location = new Location.Builder().atStreetNumber("1").onStreet("Elizabeth Street").inCity("Christchurch")
-                                      .inRegion("Canterbury").inCountry("New Zealand").withZipCode("8041").build();
+                                      .inRegion("Canterbury").inCountry("New Zealand").withPostCode("8041").build();
     assertTrue(testLocation.checkValidAllLocationParameters(location));
   }
 
@@ -382,7 +382,7 @@ public class LocationTests {
   public void checkValidAllLocationParametersStreetNumberInvalid() {
     assertThrows(ResponseStatusException.class, () -> {
       Location location = new Location.Builder().atStreetNumber("1234567890").onStreet("Elizabeth Street").inCity("Christchurch")
-                      .inRegion("Canterbury").inCountry("New Zealand").withZipCode("8041").build();
+                      .inRegion("Canterbury").inCountry("New Zealand").withPostCode("8041").build();
     });
   }
 
@@ -394,7 +394,7 @@ public class LocationTests {
   public void checkValidAllLocationParametersStreetNameInvalid() {
     assertThrows(ResponseStatusException.class, () -> {
       Location location = new Location.Builder().atStreetNumber("1").onStreet("Eliz@beth Str33t").inCity("Christchurch")
-            .inRegion("Canterbury").inCountry("New Zealand").withZipCode("8041").build();
+            .inRegion("Canterbury").inCountry("New Zealand").withPostCode("8041").build();
     });
   }
 
@@ -406,7 +406,7 @@ public class LocationTests {
   public void checkValidAllLocationParametersCityInvalid() {
     assertThrows(ResponseStatusException.class, () -> {
       Location location = new Location.Builder().atStreetNumber("1").onStreet("Elizabeth Street").inCity("Chr!$stchurch")
-              .inRegion("Canterbury").inCountry("New Zealand").withZipCode("8041").build();
+              .inRegion("Canterbury").inCountry("New Zealand").withPostCode("8041").build();
     });
   }
 
@@ -418,7 +418,7 @@ public class LocationTests {
   public void checkValidAllLocationParametersRegionInvalid() {
     assertThrows(ResponseStatusException.class, () -> {
       Location location = new Location.Builder().atStreetNumber("1").onStreet("Elizabeth Street").inCity("Christchurch")
-              .inRegion("C@nt3rbury").inCountry("New Zealand").withZipCode("8041").build();
+              .inRegion("C@nt3rbury").inCountry("New Zealand").withPostCode("8041").build();
     });
   }
 
@@ -430,7 +430,7 @@ public class LocationTests {
   public void checkValidAllLocationParametersCountryInvalid() {
     assertThrows(ResponseStatusException.class, () -> {
       Location location = new Location.Builder().atStreetNumber("1").onStreet("Elizabeth Street").inCity("Christchurch")
-              .inRegion("Canterbury").inCountry("N3w Z3@l@nd").withZipCode("8041").build();
+              .inRegion("Canterbury").inCountry("N3w Z3@l@nd").withPostCode("8041").build();
     });
   }
 
@@ -442,7 +442,7 @@ public class LocationTests {
   public void checkValidAllLocationParametersZipCodeInvalid() {
     assertThrows(ResponseStatusException.class, () -> {
       Location location = new Location.Builder().atStreetNumber("1").onStreet("Elizabeth Street").inCity("Christchurch")
-                      .inRegion("Canterbury").inCountry("New Zealand").withZipCode("80999999999999941").build();
+                      .inRegion("Canterbury").inCountry("New Zealand").withPostCode("80999999999999941").build();
     });
   }
 
@@ -458,7 +458,7 @@ public class LocationTests {
             .inCity("Christchurch")
             .inRegion("Canterbury")
             .inCountry("New Zealand")
-            .withZipCode("8041");
+            .withPostCode("8041");
     assertThrows(ResponseStatusException.class, locationBuilder::build);
   }
 
@@ -474,7 +474,7 @@ public class LocationTests {
             .inCity("Christchurch")
             .inRegion("Canterbury")
             .inCountry("New Zealand")
-            .withZipCode("8041");
+            .withPostCode("8041");
     assertThrows(ResponseStatusException.class, locationBuilder::build);
   }
 
@@ -489,7 +489,7 @@ public class LocationTests {
             .inSuburb("Riccarton")
             .inRegion("Canterbury")
             .inCountry("New Zealand")
-            .withZipCode("8041");
+            .withPostCode("8041");
     assertThrows(ResponseStatusException.class, locationBuilder::build);
   }
 
@@ -505,7 +505,7 @@ public class LocationTests {
             .inSuburb("Riccarton")
             .inCity("Christchurch")
             .inCountry("New Zealand")
-            .withZipCode("8041");
+            .withPostCode("8041");
     assertThrows(ResponseStatusException.class, locationBuilder::build);
   }
 
@@ -521,7 +521,7 @@ public class LocationTests {
             .inSuburb("Riccarton")
             .inCity("Christchurch")
             .inRegion("Canterbury")
-            .withZipCode("8041");
+            .withPostCode("8041");
     assertThrows(ResponseStatusException.class, locationBuilder::build);
   }
 
