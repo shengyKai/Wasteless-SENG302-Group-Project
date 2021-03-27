@@ -827,6 +827,7 @@ public class UsersControllerTest {
                 .andReturn();
 
         org.json.JSONObject json = new org.json.JSONObject(result.getResponse().getContentAsString());
+        // Result should contain role and DOB
         assertTrue(json.has("dateOfBirth"));
         assertTrue(json.has("role"));
     }
