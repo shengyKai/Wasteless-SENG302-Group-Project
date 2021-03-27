@@ -45,7 +45,8 @@ public class UserTests {
                 .withBio("g")
                 .withDob("2021-03-11")
                 .withPhoneNumber("123-456-7890")
-                .withAddress("Address")
+                .withAddress(Location.covertAddressStringToLocation("4, Rountree Street, Christchurch, New Zealand, " +
+                        "Canterbury, 8041"))
                 .build();
         testBuilder = new User.Builder()
                 .withFirstName("Joe")
@@ -57,7 +58,8 @@ public class UserTests {
                 .withBio("Likes long walks on the beach")
                 .withDob("2021-03-11")
                 .withPhoneNumber("+64 3 555 0129")
-                .withAddress("4 Rountree Street, Upper Riccarton");
+                .withAddress(Location.covertAddressStringToLocation("4, Rountree Street, Christchurch, New Zealand, " +
+                        "Canterbury, 8041"));
         MockitoAnnotations.openMocks(this);
     }
 
@@ -649,7 +651,8 @@ public class UserTests {
                 .withBio("Likes long walks on the beach")
                 .withDob("2021-03-11")
                 .withPhoneNumber("+64 3 555 0129")
-                .withAddress("4 Rountree Street, Upper Riccarton")
+                .withAddress(Location.covertAddressStringToLocation("4, Rountree Street, Christchurch, New Zealand, " +
+                        "Canterbury, 8041"))
                 .build();
         when(userRepository.findByEmail(testEmail)).thenAnswer(
                 (Answer) invocation -> testUser);
@@ -682,7 +685,8 @@ public class UserTests {
                 .withBio("Likes long walks on the beach")
                 .withDob("2021-03-11")
                 .withPhoneNumber("+64 3 555 0129")
-                .withAddress("4 Rountree Street, Upper Riccarton");
+                .withAddress(Location.covertAddressStringToLocation("4, Rountree Street, Christchurch, New Zealand, " +
+                        "Canterbury, 8041"));
         assertThrows(ResponseStatusException.class, testBuilder::build);
     }
 
@@ -700,7 +704,8 @@ public class UserTests {
                 .withBio("Likes long walks on the beach")
                 .withDob("2021-03-11")
                 .withPhoneNumber("+64 3 555 0129")
-                .withAddress("4 Rountree Street, Upper Riccarton");
+                .withAddress(Location.covertAddressStringToLocation("4, Rountree Street, Christchurch, New Zealand, " +
+                        "Canterbury, 8041"));
         assertThrows(ResponseStatusException.class, testBuilder::build);
     }
 
@@ -718,7 +723,8 @@ public class UserTests {
                 .withBio("Likes long walks on the beach")
                 .withDob("2021-03-11")
                 .withPhoneNumber("+64 3 555 0129")
-                .withAddress("4 Rountree Street, Upper Riccarton");
+                .withAddress(Location.covertAddressStringToLocation("4, Rountree Street, Christchurch, New Zealand, " +
+                        "Canterbury, 8041"));
         assertThrows(ResponseStatusException.class, testBuilder::build);
     }
 
@@ -736,7 +742,8 @@ public class UserTests {
                 .withBio("Likes long walks on the beach")
                 .withDob("2021-03-11")
                 .withPhoneNumber("+64 3 555 0129")
-                .withAddress("4 Rountree Street, Upper Riccarton");
+                .withAddress(Location.covertAddressStringToLocation("4, Rountree Street, Christchurch, New Zealand, " +
+                        "Canterbury, 8041"));
         assertThrows(ResponseStatusException.class, testBuilder::build);
     }
 
@@ -772,7 +779,8 @@ public class UserTests {
                 .withPassword("1337-H%nt3r2")
                 .withBio("Likes long walks on the beach")
                 .withPhoneNumber("+64 3 555 0129")
-                .withAddress("4 Rountree Street, Upper Riccarton");
+                .withAddress(Location.covertAddressStringToLocation("4, Rountree Street, Christchurch, New Zealand, " +
+                        "Canterbury, 8041"));
         assertThrows(ResponseStatusException.class, testBuilder::build);
     }
 
@@ -791,7 +799,8 @@ public class UserTests {
                 .withBio("Likes long walks on the beach")
                 .withDob("2021-03-11")
                 .withPhoneNumber("+64 3 555 0129")
-                .withAddress("4 Rountree Street, Upper Riccarton");
+                .withAddress(Location.covertAddressStringToLocation("4, Rountree Street, Christchurch, New Zealand, " +
+                        "Canterbury, 8041"));
         User testUser = testBuilder.build();
         assertNull(testUser.getMiddleName());
     }
@@ -811,7 +820,8 @@ public class UserTests {
                 .withBio("Likes long walks on the beach")
                 .withDob("2021-03-11")
                 .withPhoneNumber("+64 3 555 0129")
-                .withAddress("4 Rountree Street, Upper Riccarton");
+                .withAddress(Location.covertAddressStringToLocation("4, Rountree Street, Christchurch, New Zealand, " +
+                        "Canterbury, 8041"));
         User testUser = testBuilder.build();
         assertNull(testUser.getNickname());
     }
@@ -830,7 +840,8 @@ public class UserTests {
                 .withPassword("1337-H%nt3r2")
                 .withDob("2021-03-11")
                 .withPhoneNumber("+64 3 555 0129")
-                .withAddress("4 Rountree Street, Upper Riccarton");
+                .withAddress(Location.covertAddressStringToLocation("4, Rountree Street, Christchurch, New Zealand, " +
+                        "Canterbury, 8041"));
         User testUser = testBuilder.build();
         assertNull(testUser.getBio());
     }
@@ -850,7 +861,8 @@ public class UserTests {
                 .withPassword("1337-H%nt3r2")
                 .withBio("Likes long walks on the beach")
                 .withDob("2021-03-11")
-                .withAddress("4 Rountree Street, Upper Riccarton");
+                .withAddress(Location.covertAddressStringToLocation("4, Rountree Street, Christchurch, New Zealand, " +
+                        "Canterbury, 8041"));
         User testUser = testBuilder.build();
         assertNull(testUser.getPhNum());
     }

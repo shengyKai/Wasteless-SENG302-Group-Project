@@ -3,6 +3,7 @@ package org.seng302;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.seng302.Controllers.DGAAController;
+import org.seng302.Entities.Location;
 import org.seng302.Entities.User;
 import org.seng302.Persistence.DGAARepository;
 import org.seng302.Persistence.UserRepository;
@@ -68,7 +69,7 @@ public class MainApplicationRunner implements ApplicationRunner {
             try {
                 String[] userData = row.split(";");
                 User user = new User.Builder().withFirstName(userData[0]).withMiddleName(userData[1]).withLastName(userData[2]).withNickName(userData[3])
-                        .withEmail(userData[4]).withPassword(userData[5]).withAddress(userData[6]).withDob(userData[7]).build();
+                        .withEmail(userData[4]).withPassword(userData[5]).withAddress(Location.covertAddressStringToLocation(userData[6])).withDob(userData[7]).build();
                 userList.add(user);
             } catch (Exception e) {
 

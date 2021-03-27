@@ -4,6 +4,7 @@ import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.seng302.Entities.Location;
 import org.seng302.Entities.User;
 import org.seng302.Exceptions.EmailInUseException;
 import org.seng302.Exceptions.FailedRegisterException;
@@ -56,7 +57,7 @@ public class UsersController {
                     .withLastName(userinfo.getAsString("lastName"))
                     .withNickName(userinfo.getAsString("nickname"))
                     .withBio(userinfo.getAsString("bio"))
-                    .withAddress(userinfo.getAsString("homeAddress"))
+                    .withAddress(Location.covertAddressStringToLocation(userinfo.getAsString("homeAddress")))
                     .withPhoneNumber(userinfo.getAsString("phoneNumber"))
                     .withDob(userinfo.getAsString("dateOfBirth"))
                     .withEmail(userinfo.getAsString("email"))
