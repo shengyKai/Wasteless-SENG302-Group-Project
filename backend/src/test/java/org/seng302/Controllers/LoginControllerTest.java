@@ -73,7 +73,6 @@ class LoginControllerTest {
                 .content(loginBody))
                 .andExpect(status().isOk())
                 .andReturn();
-        //String authToken = JsonPath.read(result.getResponse().getContentAsString(), "$.authToken");
         String authToken = result.getResponse().getCookie("AUTHTOKEN").getValue();
         assertTrue(authToken.length() == 32);
         // Might change to cookies within the future
