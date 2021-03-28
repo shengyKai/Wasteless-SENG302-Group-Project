@@ -1,13 +1,11 @@
 package org.seng302.Entities;
 
+import net.bytebuddy.implementation.bytecode.Throw;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 @Entity
 public class Business {
@@ -28,8 +26,17 @@ public class Business {
     @Column
     private Date created;
 
-    @ManyToOne(optional = false)
+    @ManyToOne
+    @JoinColumn(name = "owner_id")
     private User primaryOwner;
+
+    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @JoinTable(
+            name="business_admins",
+            joinColumns = {@JoinColumn(name="business_id")},
+            inverseJoinColumns = {@JoinColumn(name="user_id")}
+    )
+    private Set<User> administrators = new HashSet<>();
 
 
     /**
@@ -143,6 +150,22 @@ public class Business {
      */
     public User getPrimaryOwner() {
         return this.primaryOwner;
+    }
+
+    /**
+     * Gets the set of Users who are an admin of this business
+     * @return Business admins
+     */
+    public Set<User> getAdministrators() {
+        return this.administrators;
+    }
+
+    public void addAdmin(User newAdmin) {
+        if (this.administrators.contains(newAdmin)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "This user is already a registered admin of this business");
+        } else {
+            this.administrators.add(newAdmin);
+        }
     }
 
 
