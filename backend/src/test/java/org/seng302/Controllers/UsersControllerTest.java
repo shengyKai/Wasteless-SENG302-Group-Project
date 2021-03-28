@@ -10,6 +10,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.seng302.Entities.User;
+import org.seng302.Persistence.BusinessRepository;
 import org.seng302.Persistence.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -41,6 +42,9 @@ public class UsersControllerTest {
     private MockMvc mockMvc;
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private BusinessRepository businessRepository;
 
     private final HashMap<String, Object> sessionAuthToken = new HashMap<>();
     private Cookie authCookie;
@@ -106,6 +110,7 @@ public class UsersControllerTest {
                 .withPhoneNumber("+64 3 555 0129")
                 .withAddress("4 Rountree Street, Upper Riccarton")
                 .build();
+        businessRepository.deleteAll();
         userRepository.deleteAll();
         userRepository.save(testUser);
     }
