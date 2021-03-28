@@ -234,7 +234,11 @@ public class User extends Account {
      * @param address where the user lives/provides items from as a location object
      */
     public void setAddress(Location address) {
-        this.address = address;
+        if (address != null) {
+            this.address = address;
+        } else {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Your address has been entered incorrectly");
+        }
     }
 
     /**

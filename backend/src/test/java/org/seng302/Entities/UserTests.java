@@ -945,7 +945,7 @@ public class UserTests {
     @Test
     public void buildWithAddressTest() {
         User user = testBuilder.build();
-        assertEquals("4 Rountree Street, Upper Riccarton", user.getAddress());
+        assertEquals(Location.covertAddressStringToLocation("4,Rountree Street,Christchurch,New Zealand,Canterbury,8041"), user.getAddress());
     }
 
     /**
