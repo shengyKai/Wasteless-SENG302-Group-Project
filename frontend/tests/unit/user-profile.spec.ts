@@ -2,7 +2,6 @@ import Vue from 'vue';
 import VueRouter from 'vue-router';
 import Vuetify from 'vuetify';
 import Vuex from 'vuex';
-import { CombinedVueInstance } from 'vue/types/vue';
 import { shallowMount, createLocalVue, Wrapper } from '@vue/test-utils';
 
 import { createOptions } from '@/store';
@@ -25,7 +24,7 @@ describe('UserProfile.vue', () => {
    */
   beforeEach(() => {
     localVue.use(Vuex);
-    let options = createOptions();
+    const options = createOptions();
     options.state = {
       user: {
         id: 1,
@@ -43,7 +42,7 @@ describe('UserProfile.vue', () => {
         businessesAdministered: [],
       }
     };
-    let store = new Vuex.Store(options);
+    const store = new Vuex.Store(options);
 
     const vuetify = new Vuetify();
 

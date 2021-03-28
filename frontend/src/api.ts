@@ -122,7 +122,7 @@ function isBusiness(obj: any): obj is Business {
 
 function isNumberArray(obj: any): obj is number[] {
   if (!Array.isArray(obj)) return false;
-  for (let elem of obj) {
+  for (const elem of obj) {
     if (typeof elem !== 'number') return false;
   }
   return true;
@@ -130,7 +130,7 @@ function isNumberArray(obj: any): obj is number[] {
 
 function isUserArray(obj: any): obj is User[] {
   if (!Array.isArray(obj)) return false;
-  for (let elem of obj) {
+  for (const elem of obj) {
     if (!isUser(elem)) return false;
   }
   return true;
@@ -151,7 +151,7 @@ export async function search(query: string): Promise<MaybeError<User[]>> {
       }
     });
   } catch (error) {
-    let status: number | undefined = error.response?.status;
+    const status: number | undefined = error.response?.status;
 
     if (status === undefined) return 'Failed to reach backend';
     return `Request failed: ${status}`;
@@ -177,7 +177,7 @@ export async function getUser(id?: number): Promise<MaybeError<User>> {
   try {
     response = await instance.get('/users/' + id);
   } catch (error) {
-    let status: number | undefined = error.response?.status;
+    const status: number | undefined = error.response?.status;
 
     if (status === undefined) return 'Failed to reach backend';
     return `Request failed: ${status}`;
@@ -205,13 +205,13 @@ export async function login(email: string, password: string): Promise<MaybeError
       password: password,
     });
   } catch (error) {
-    let status: number | undefined = error.response?.status;
+    const status: number | undefined = error.response?.status;
 
     if (status === undefined) return 'Failed to reach backend';
     if (status === 400) return 'Invalid credentials';
     return 'Request failed: ' + status;
   }
-  let id = response.data.userId;
+  const id = response.data.userId;
   if (typeof id !== 'number') return 'Invalid response';
 
   return id;
@@ -228,7 +228,7 @@ export async function createUser(user: CreateUser): Promise<MaybeError<undefined
   try {
     await instance.post('/users', user);
   } catch (error) {
-    let status: number | undefined = error.response?.status;
+    const status: number | undefined = error.response?.status;
 
     if (status === undefined) return 'Failed to reach backend';
     if (status === 409) return 'Email in use';
@@ -248,7 +248,7 @@ export async function makeAdmin(userId: number): Promise<MaybeError<undefined>> 
   try {
     await instance.post(`/users/${userId}/makeAdmin`);
   } catch (error) {
-    let status: number | undefined = error.response?.status;
+    const status: number | undefined = error.response?.status;
 
     if (status === undefined) return 'Failed to reach backend';
     if (status === 401) return 'Missing/Invalid access token';
@@ -270,7 +270,7 @@ export async function revokeAdmin(userId: number): Promise<MaybeError<undefined>
   try {
     await instance.post(`/users/${userId}/revokeAdmin`);
   } catch (error) {
-    let status: number | undefined = error.response?.status;
+    const status: number | undefined = error.response?.status;
     if (status === 401) return 'Missing/Invalid access token';
     if (status === 403) return 'Operation not permitted';
     if (status === 406) return 'User does not exist';
@@ -290,7 +290,7 @@ export async function createBusiness(business: CreateBusiness): Promise<MaybeErr
   try {
     await instance.post('/businesses', business);
   } catch (error) {
-    let status: number | undefined = error.response?.status;
+    const status: number | undefined = error.response?.status;
     if (status === undefined) return 'Failed to reach backend';
     if (status === 401) return 'Missing/Invalid access token';
 
@@ -311,7 +311,7 @@ export async function getBusiness(businessId: number): Promise<MaybeError<Busine
   try {
     response = await instance.get(`/businesses/${businessId}`);
   } catch (error) {
-    let status: number | undefined = error.response?.status;
+    const status: number | undefined = error.response?.status;
     if (status === undefined) return 'Failed to reach backend';
     if (status === 401) return 'Missing/Invalid access token';
     if (status === 406) return 'Business not found';
