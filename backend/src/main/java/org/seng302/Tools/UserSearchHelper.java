@@ -438,7 +438,7 @@ public class UserSearchHelper {
         addNewToList(matchList, addedIds, fullMatchesSomeTerms);
         addNewToList(matchList, addedIds, partialMatchesSomeTerms);
 
-        if (Boolean.parseBoolean(reverse) == true) {
+        if (Boolean.parseBoolean(reverse)) {
             Collections.reverse(matchList);
         }
 
