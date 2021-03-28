@@ -204,7 +204,7 @@ public class User extends Account {
      * @return address
      */
     @OneToOne
-    @Column(nullable = false)
+    //@Column(nullable = false)
     public Location getAddress() {
     return this.address;
     }

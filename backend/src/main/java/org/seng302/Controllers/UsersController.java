@@ -25,10 +25,6 @@ import java.util.Optional;
 
 @RestController
 public class UsersController {
-
-
-
-
     private final UserRepository userRepository;
     private static final Logger logger = LogManager.getLogger(UsersController.class.getName());
 
