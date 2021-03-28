@@ -110,7 +110,7 @@ public class UsersControllerTest {
         BufferedReader csvReader = new BufferedReader(new FileReader(filename));
         while ((row = csvReader.readLine()) != null) {
             try {
-                String[] userData = row.split("|");
+                String[] userData = row.split("\\|");
                 User user = new User.Builder().withFirstName(userData[0]).withMiddleName(userData[1]).withLastName(userData[2]).withNickName(userData[3])
                         .withEmail(userData[4]).withPassword(userData[5]).withAddress(Location.covertAddressStringToLocation(userData[6])).withDob(userData[7]).build();
                 userList.add(user);
