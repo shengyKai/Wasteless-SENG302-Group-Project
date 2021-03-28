@@ -453,12 +453,13 @@ public class UserTests {
      */
     @Test
     public void checkValidAddress() {
-        String[] validAddresses = { "20 Elizabeth Street, Riccarton, Christchurch, 8041, New Zealand",
-                "10 Made Up Street, Fakeland, Los Angeles, 99999, United States of Not Real",
-                "49 You Would Not, Believe, Your Eyes, 1" };
+        String[] validAddresses = { "20,Elizabeth Street,Christchurch,New Zealand,Canterbury,8041",
+                "10,Made Up Street,Los Angeles,United States of Not Real,Fakeland,99999",
+                "49,You Would Not,Believe,Your,Eyes,11111" };
         for (String address : validAddresses) {
             testUser.setAddress(address);
-            assertEquals(testUser.getAddress(), address);
+            Location location = Location.covertAddressStringToLocation(address);
+            assertEquals(testUser.getAddress(), location);
         }
     }
 
