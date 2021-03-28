@@ -4,6 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.seng302.Entities.User;
 import org.seng302.Exceptions.SearchFormatException;
+import org.seng302.Persistence.BusinessRepository;
 import org.seng302.Persistence.UserRepository;
 import org.seng302.Persistence.UserSpecificationsBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,6 +40,8 @@ class UserSearchHelperTest {
      */
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private BusinessRepository businessRepository;
     /**
      * Speification for repository queries.
      */
@@ -61,6 +64,7 @@ class UserSearchHelperTest {
         pagingUserList = readUserFile("src//test//testFiles//UserSearchHelperTestData1.csv");
         savedUserList = readUserFile("src//test//testFiles//UserSearchHelperTestData2.csv");
 
+        businessRepository.deleteAll();
         userRepository.deleteAll();
         for (User user : savedUserList) {
             userRepository.save(user);

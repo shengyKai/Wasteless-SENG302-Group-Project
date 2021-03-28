@@ -29,7 +29,6 @@ public class Business {
     private Date created;
 
     @ManyToOne(optional = false)
-    @PrimaryKeyJoinColumn
     private User primaryOwner;
 
 
