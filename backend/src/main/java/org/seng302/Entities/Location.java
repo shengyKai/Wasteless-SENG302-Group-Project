@@ -51,6 +51,7 @@ public class Location {
             String country = addressComponents.get(3);
             String region = addressComponents.get(4);
             String postCode = addressComponents.get(5);
+            System.out.println(addressComponents);
             Location.Builder locationBuilder = new Location.Builder().atStreetNumber(streetNumber).onStreet(streetName)
                     .inCity(city).inRegion(region).inCountry(country).withPostCode(postCode);
             Location location = locationBuilder.build();
