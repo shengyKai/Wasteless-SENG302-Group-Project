@@ -7,6 +7,7 @@ import org.junit.runner.RunWith;
 import org.seng302.Entities.Account;
 import org.seng302.Persistence.AccountRepository;
 import org.seng302.Entities.User;
+import org.seng302.Persistence.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -14,6 +15,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+
+import javax.servlet.http.HttpSession;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -31,6 +34,9 @@ class LoginControllerTest {
     private MockMvc mockMvc;
     @Autowired
     private AccountRepository accountRepository;
+
+    @Autowired
+    private UserRepository userRepository;
 
     @BeforeEach
     public void setUp() throws ParseException {
@@ -67,7 +73,7 @@ class LoginControllerTest {
                 .content(loginBody))
                 .andExpect(status().isOk())
                 .andReturn();
-        String authToken = JsonPath.read(result.getResponse().getContentAsString(), "$.authToken");
+        String authToken = result.getResponse().getCookie("AUTHTOKEN").getValue();
         assertTrue(authToken.length() == 32);
         // Might change to cookies within the future
     }
@@ -102,5 +108,63 @@ class LoginControllerTest {
                 .content(loginBody))
                 .andExpect(status().isBadRequest())
                 .andExpect(status().reason("There is no account associated with this email"));
+    }
+
+    /**
+     * Verify that the session of a logged in account contains the role "user" when the logged in account
+     * is a default user
+     * @throws Exception
+     */
+    @Test
+    public void loginWithDefaultUserSessionRoleIsUser() throws Exception {
+        String loginBody = "{\"email\": \"johnsmith99@gmail.com\", \"password\": \"1337-H%nt3r2\"}";
+
+        MvcResult result = mockMvc.perform(post("/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(loginBody))
+                .andExpect(status().isOk())
+                .andReturn();
+        HttpSession session = result.getRequest().getSession();
+        assertEquals("user", session.getAttribute("role"));
+        // Might change to cookies within the future
+    }
+
+    /**
+     * Verify that the session contains the logged in account's ID
+     * @throws Exception
+     */
+    @Test
+    public void loginWithDefaultUserSessionIdIsUserId() throws Exception {
+        String loginBody = "{\"email\": \"johnsmith99@gmail.com\", \"password\": \"1337-H%nt3r2\"}";
+        Account user = accountRepository.findByEmail("johnsmith99@gmail.com");
+        MvcResult result = mockMvc.perform(post("/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(loginBody))
+                .andExpect(status().isOk())
+                .andReturn();
+        HttpSession session = result.getRequest().getSession();
+        assertEquals(user.getUserID(), session.getAttribute("accountId"));
+        // Might change to cookies within the future
+    }
+
+    /**
+     * Verify that when logging in as a user with role "admin", the session role is "admin"
+     * @throws Exception
+     */
+    @Test
+    public void loginWithAdminUserSessionRoleIsAdmin() throws Exception {
+        String loginBody = "{\"email\": \"johnsmith99@gmail.com\", \"password\": \"1337-H%nt3r2\"}";
+        User user = userRepository.findByEmail("johnsmith99@gmail.com");
+        user.setRole("admin");
+        userRepository.save(user);
+
+        MvcResult result = mockMvc.perform(post("/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(loginBody))
+                .andExpect(status().isOk())
+                .andReturn();
+        HttpSession session = result.getRequest().getSession();
+        assertEquals("admin", session.getAttribute("role"));
+        // Might change to cookies within the future
     }
 }
