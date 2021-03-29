@@ -1,11 +1,11 @@
 <template>
   <v-combobox
-    v-model="internalValue"
     :label="label"
     :items="autocompleteItems"
     :loading="isLoading"
     :search-input.sync="search"
     :rules="rules"
+    :value="value"
     no-filter
     clearable
     outlined
@@ -44,7 +44,6 @@ export default {
       autocompleteItems: [],
       isLoading: false,
       search: '',
-      internalValue: this.value,
     };
   },
 
