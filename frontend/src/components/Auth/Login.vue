@@ -1,9 +1,7 @@
 <template>
   <v-container>
-    <!-- @submit.prevent="login"
-    @click="login(email, password)"
-    -->
-    <v-form  v-model="valid">
+    <!-- @submit.prevent="login"-->
+    <v-form @submit="login" v-model="valid">
       <h1>Sign in</h1>
       <v-text-field
         v-model="email"
@@ -76,7 +74,7 @@ export default {
       this.$emit("showRegister");
     },
     login() {
-      // this.$store.dispatch("login");
+      this.$store.dispatch("login", { email : this.email, password : this.password });
       this.$store.dispatch("getUser");
       this.$router.push("/profile");
     },

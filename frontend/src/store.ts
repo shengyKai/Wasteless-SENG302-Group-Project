@@ -1,4 +1,4 @@
-import { User, getUser } from './api';
+import {User, getUser, login} from './api';
 import Vuex, { Store, StoreOptions } from 'vuex';
 import { COOKIE, deleteCookie, setCookie } from './utils';
 
@@ -42,6 +42,14 @@ export function createOptions(): StoreOptions<StoreData> {
             return;
           }
           context.commit('setUser', response);
+        });
+      },
+      login (context, {email, password}) {
+        return login(email, password).then((response) => {
+          if (typeof response === 'string') {
+            console.warn(response);
+            return;
+          }
         });
       }
     }
