@@ -1,7 +1,7 @@
 <template>
   <v-list-item>
     <v-list-item-avatar>
-      <UserAvatar :user="user" size="small" />
+      <UserAvatar :user="user" size="medium" />
     </v-list-item-avatar>
     <v-list-item-content>
       <v-list-item-title>

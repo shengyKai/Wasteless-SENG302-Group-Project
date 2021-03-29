@@ -29,9 +29,9 @@ export default{
     sizeInPixels() {
       switch (this.size) {
       case "small":
-        return 40;
+        return 30;
       case "medium":
-        return 100;
+        return 40;
       case "large":
         return 200;
       default:

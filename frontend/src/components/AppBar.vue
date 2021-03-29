@@ -47,18 +47,27 @@
         </v-list>
       </v-menu>
     </div>
+
+    <v-chip v-if="user">
+      <UserAvatar :user="user" size="small"/>
+      <div class="name">
+        {{ user.firstName }}
+      </div>
+    </v-chip>
   </v-app-bar>
 </template>
 
 <script>
 import SearchBar from "./utils/SearchBar";
+import UserAvatar from './utils/UserAvatar';
 import CreateBusiness from "./BusinessProfile/CreateBusiness";
 
 export default {
   name: "AppBar",
   components: {
     SearchBar,
-    CreateBusiness
+    CreateBusiness,
+    UserAvatar
   },
   data() {
     return {
@@ -82,6 +91,19 @@ export default {
     viewCreateBusiness() {
       this.showBusinessDialog = true;
     }
+  },
+
+  computed: {
+    user() {
+      return this.$store.state.user;
+    }
   }
 };
 </script>
+
+<style scoped>
+.name {
+  margin-left: 5px;
+  color: var(--v-primary-base); /* Not sure why this doesn't set the colour to green */
+}
+</style>
