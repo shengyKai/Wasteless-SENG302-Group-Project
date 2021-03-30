@@ -307,6 +307,22 @@ public class User extends Account {
     }
 
     /**
+     * This method constructs a JSON representation of the user's private details.
+     * @return JSONObject with attribute name as key and attribute value as value.
+     */
+    // Todo: Once businesses are done, add businessesAdministered
+    public JSONObject constructPrivateJson() {
+        //Map<String, String> attributeMap = constructPublicJson();
+        JSONObject json = constructPublicJson();
+        json.appendField("dateOfBirth", dob.toString());
+        json.appendField("phoneNumber", phNum);
+        json.appendField("role", role);
+        //json.appendField("businessesAdministered", businessesAdministered);
+        return json;
+    }
+
+
+    /**
      * This class uses the builder pattern to construct an instance of the User class
      */
     public static class Builder {

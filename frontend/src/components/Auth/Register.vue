@@ -150,27 +150,31 @@
       />
 
       <!-- INPUT: District/Region/Province -->
-      <DistrictAutocomplete
+      <LocationAutocomplete
+        type="district"
         v-model="district"
         :rules="maxCharRules"
       />
 
       <!-- INPUT: City -->
-      <CityAutocomplete
+      <LocationAutocomplete
+        type="city"
         class="required"
         v-model="city"
         :rules="maxCharRules"
       />
 
       <!-- INPUT: State -->
-      <StateAutocomplete
+      <LocationAutocomplete
+        type="state"
         class="required"
         v-model="state"
         :rules="maxCharRules"
       />
 
       <!-- INPUT: Country -->
-      <CountryAutocomplete
+      <LocationAutocomplete
+        type="country"
         class="required"
         v-model="country"
         :rules="maxCharRules"
@@ -207,18 +211,12 @@
 
 
 <script>
-import CountryAutocomplete from '@/components/utils/CountryAutocomplete';
-import DistrictAutocomplete from '@/components/utils/DistrictAutocomplete';
-import CityAutocomplete from '@/components/utils/CityAutocomplete';
-import StateAutocomplete from '@/components/utils/StateAutocomplete';
+import LocationAutocomplete from '@/components/utils/LocationAutocomplete';
 
 export default {
   name: 'Register',
   components: {
-    CountryAutocomplete,
-    DistrictAutocomplete,
-    CityAutocomplete,
-    StateAutocomplete
+    LocationAutocomplete
   },
   data () {
     return {

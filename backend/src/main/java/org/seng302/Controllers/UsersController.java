@@ -62,8 +62,8 @@ public class UsersController {
                     .withEmail(userinfo.getAsString("email"))
                     .withPassword(userinfo.getAsString("password"))
                     .build();
-            userRepository.save(user);
-            AuthenticationTokenManager.setAuthenticationToken(request, response);
+            User newUser = userRepository.save(user);
+            AuthenticationTokenManager.setAuthenticationToken(request, response, newUser);
             response.setStatus(201);
             logger.info("User has been registered.");
         } catch (ResponseStatusException responseError) {
@@ -101,7 +101,12 @@ public class UsersController {
             logger.error(notFound.getMessage());
             throw notFound;
         } else {
-            return user.get().constructPublicJson();
+            if (AuthenticationTokenManager.sessionCanSeePrivate(session, user.get().getUserID())) {
+                return user.get().constructPrivateJson();
+            } else {
+                return user.get().constructPublicJson();
+            }
+
         }
     };
 
@@ -136,7 +141,11 @@ public class UsersController {
         List<User> pageInResults = UserSearchHelper.getPageInResults(queryResults, page, resultsPerPage);
         JSONArray publicResults = new JSONArray();
         for (User user : pageInResults) {
-            publicResults.appendElement(user.constructPublicJson());
+            if (AuthenticationTokenManager.sessionCanSeePrivate(session, user.getUserID())) {
+                publicResults.appendElement(user.constructPrivateJson());
+            } else {
+                publicResults.appendElement(user.constructPublicJson());
+            }
         }
         return publicResults;
     }
@@ -195,7 +204,7 @@ public class UsersController {
      */
     @GetMapping("/dev/session")
     void experimentalGetSession(HttpServletRequest request, HttpServletResponse response) {
-        AuthenticationTokenManager.setAuthenticationToken(request, response);
+        AuthenticationTokenManager.setAuthenticationToken(request, response, null);
         AuthenticationTokenManager.setAuthenticationTokenDGAA(request);
     }
 }
