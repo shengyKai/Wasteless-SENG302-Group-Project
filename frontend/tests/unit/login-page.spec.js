@@ -13,6 +13,7 @@ import Register from '@/components/Auth/Register.vue';
 describe('index.vue', () => {
   const localVue = createLocalVue();
   let vuetify;
+  const methodInvoked = jest.spyOn(Login.methods, 'login');
   beforeEach(() => {
     vuetify = new Vuetify();
   });
@@ -44,155 +45,7 @@ describe('index.vue', () => {
     expect(wrapper.findComponent(Login).exists()).toBeFalsy();
     expect(wrapper.findComponent(Register).exists()).toBeTruthy();
   });
-});
 
-describe('Login.vue', () => {
-  const localVue = createLocalVue();
-  let vuetify;
-
-  beforeEach(() => {
-    vuetify = new Vuetify();
-  });
-  it("Testing out the inputs for the email and password, such that the user can only press the login button " +
-    "after inputting valid formats for both fields", async () => {
-    const wrapper = mount(Login, {
-      localVue,
-      vuetify
-    });
-
-    //find the login button by the component
-    const loginButton = wrapper.find(".v-btn");
-    //initial value of disabled should be true, since both fields are empty
-    expect(loginButton.props().disabled).toBeTruthy();
-
-    //find the email input by the type
-    const emailInput = wrapper.find('input[type="email"]');
-    //set a valid input for the email
-    await emailInput.setValue('someemail@gmail.com');
-
-    //find the password input by the type
-    const passwordInput = wrapper.find('input[type="password"]');
-    //set a valid input for the password
-    await passwordInput.setValue('hello123');
-
-    //Docs from the vue api:
-    //nextTick() Defers the callback to be executed after the next DOM update cycle.
-    //Use it immediately after you’ve changed some data to wait for the DOM update.
-    //In this case, we just changed some data on the email and password field, so we need to call nextTick for a DOM
-    //update.
-    await Vue.nextTick(() => {
-      expect(loginButton.props().disabled).toBeFalsy();
-    });
-  });
-
-  it("Testing out the inputs for the email and password, such that the user will be unable to press the login " +
-    "button if the input is invalid", async () => {
-    const wrapper = mount(Login, {
-      localVue,
-      vuetify
-    });
-
-    const loginButton = wrapper.find(".v-btn");
-    expect(loginButton.props().disabled).toBeTruthy();
-
-    //wrong email format, with less than two characters after each "."
-    let emailInput = wrapper.find('input[type="email"]');
-    await emailInput.setValue('someemail@gmail.c');
-    let passwordInput = wrapper.find('input[type="password"]');
-    await passwordInput.setValue('hello123');
-    await Vue.nextTick(() => {
-      expect(loginButton.props().disabled).toBeTruthy();
-    });
-
-    //wrong email format, with no "@"
-    await emailInput.setValue('someemail');
-    await passwordInput.setValue('hello123');
-    await Vue.nextTick(() => {
-      expect(loginButton.props().disabled).toBeTruthy();
-    });
-
-    //wrong email format, with no characters before "@"
-    await emailInput.setValue('@gmail.com');
-    await passwordInput.setValue('hello123');
-    await Vue.nextTick(() => {
-      expect(loginButton.props().disabled).toBeTruthy();
-    });
-
-    //wrong email format, with no "."
-    await emailInput.setValue('fsefsgr@gmailcom');
-    await passwordInput.setValue('hello123');
-    await Vue.nextTick(() => {
-      expect(loginButton.props().disabled).toBeTruthy();
-    });
-
-    //empty email field
-    await emailInput.setValue('');
-    await passwordInput.setValue('hello123');
-    await Vue.nextTick(() => {
-      expect(loginButton.props().disabled).toBeTruthy();
-    });
-
-    //!!!NOTICE!!!
-    // this test lags the whole application, so is commented out for the moment
-    // Too many characters for email field
-    // await emailInput.setValue(
-    //   'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
-    // );
-    // await passwordInput.setValue('hello123');
-    // await Vue.nextTick(() => {
-    //   expect(loginButton.props().disabled).toBeTruthy();
-    // });
-
-
-    //wrong password format, with no numbers
-    await emailInput.setValue('someemail@gmail.com');
-    await passwordInput.setValue('hello');
-    await Vue.nextTick(() => {
-      expect(loginButton.props().disabled).toBeTruthy();
-    });
-
-    //wrong password format, with no alphabets
-    await emailInput.setValue('someemail@gmail.com');
-    await passwordInput.setValue('123455678');
-    await Vue.nextTick(() => {
-      expect(loginButton.props().disabled).toBeTruthy();
-    });
-
-    //wrong password format, with less than 7 characters
-    await emailInput.setValue('someemail@gmail.com');
-    await passwordInput.setValue('abcd1');
-    await Vue.nextTick(() => {
-      expect(loginButton.props().disabled).toBeTruthy();
-    });
-
-    //empty password field
-    await emailInput.setValue('someemail@gmail.com');
-    await passwordInput.setValue('');
-    await Vue.nextTick(() => {
-      expect(loginButton.props().disabled).toBeTruthy();
-    });
-
-    //!!!NOTICE!!!
-    ///this test lags the whole application, so is commented out for the moment
-    //Too many characters for password field
-    // await emailInput.setValue('someemail@gmail.com');
-    // await passwordInput.setValue(
-    //   'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
-    // );
-    // setTimeout(function(){
-    //   expect(loginButton.props().disabled).toBeTruthy();
-    // }, 100);
-  });
-});
-
-
-describe('index.vue', () => {
-  const localVue = createLocalVue();
-  let vuetify;
-  const methodInvoked = jest.spyOn(Login.methods, 'login');
-  beforeEach(() => {
-    vuetify = new Vuetify();
-  });
   it("Testing out the log in page button, should call function login which redirects to Profile Page from " +
     "Login Page", async () => {
     const wrapper = mount(Index, {
@@ -236,4 +89,242 @@ describe('index.vue', () => {
     //but for the purpose of this test, that does not matter.
     expect(methodInvoked).toBeCalled();
   });
+});
+
+describe('Login.vue', () => {
+  const localVue = createLocalVue();
+  let vuetify;
+
+  beforeEach(() => {
+    vuetify = new Vuetify();
+  });
+
+  it("Testing out the inputs for the email and password, such that the user can only press the login button " +
+    "after inputting valid formats for both fields", async () => {
+    const wrapper = mount(Login, {
+      localVue,
+      vuetify
+    });
+
+    //find the login button by the component
+    const loginButton = wrapper.find(".v-btn");
+    //initial value of disabled should be true, since both fields are empty
+    expect(loginButton.props().disabled).toBeTruthy();
+
+    //find the email input by the type
+    const emailInput = wrapper.find('input[type="email"]');
+    //set a valid input for the email
+    await emailInput.setValue('someemail@gmail.com');
+
+    //find the password input by the type
+    const passwordInput = wrapper.find('input[type="password"]');
+    //set a valid input for the password
+    await passwordInput.setValue('hello123');
+
+    //Docs from the vue api:
+    //nextTick() Defers the callback to be executed after the next DOM update cycle.
+    //Use it immediately after you’ve changed some data to wait for the DOM update.
+    //In this case, we just changed some data on the email and password field, so we need to call nextTick for a DOM
+    //update.
+    await Vue.nextTick(() => {
+      expect(loginButton.props().disabled).toBeFalsy();
+    });
+  });
+
+  it("Testing for invalid email format, with less than two characters after each '.'", async () => {
+    const wrapper = mount(Login, {
+      localVue,
+      vuetify
+    });
+    const loginButton = wrapper.find(".v-btn");
+    expect(loginButton.props().disabled).toBeTruthy();
+
+    let emailInput = wrapper.find('input[type="email"]');
+    await emailInput.setValue('someemail@gmail.c');
+    let passwordInput = wrapper.find('input[type="password"]');
+    await passwordInput.setValue('hello123');
+    await Vue.nextTick(() => {
+      expect(loginButton.props().disabled).toBeTruthy();
+    });
+  });
+
+  it("Testing for invalid email format,with no '@'", async () => {
+    const wrapper = mount(Login, {
+      localVue,
+      vuetify
+    });
+    const loginButton = wrapper.find(".v-btn");
+    expect(loginButton.props().disabled).toBeTruthy();
+
+    let emailInput = wrapper.find('input[type="email"]');
+    await emailInput.setValue('someemail.com');
+    let passwordInput = wrapper.find('input[type="password"]');
+    await passwordInput.setValue('hello123');
+    await Vue.nextTick(() => {
+      expect(loginButton.props().disabled).toBeTruthy();
+    });
+  });
+
+  it("Testing for invalid email format, with no characters before '@'", async () => {
+    const wrapper = mount(Login, {
+      localVue,
+      vuetify
+    });
+    const loginButton = wrapper.find(".v-btn");
+    expect(loginButton.props().disabled).toBeTruthy();
+
+    let emailInput = wrapper.find('input[type="email"]');
+    await emailInput.setValue('@gmail.com');
+    let passwordInput = wrapper.find('input[type="password"]');
+    await passwordInput.setValue('hello123');
+    await Vue.nextTick(() => {
+      expect(loginButton.props().disabled).toBeTruthy();
+    });
+  });
+
+  it("Testing for invalid email format, with no '.'", async () => {
+    const wrapper = mount(Login, {
+      localVue,
+      vuetify
+    });
+    const loginButton = wrapper.find(".v-btn");
+    expect(loginButton.props().disabled).toBeTruthy();
+
+    //wrong email format, with no "."
+    let emailInput = wrapper.find('input[type="email"]');
+    await emailInput.setValue('fsefsgr@gmailcom');
+    let passwordInput = wrapper.find('input[type="password"]');
+    await passwordInput.setValue('hello123');
+    await Vue.nextTick(() => {
+      expect(loginButton.props().disabled).toBeTruthy();
+    });
+  });
+
+  it("Testing for invalid email format, empty email field", async () => {
+    const wrapper = mount(Login, {
+      localVue,
+      vuetify
+    });
+    const loginButton = wrapper.find(".v-btn");
+    expect(loginButton.props().disabled).toBeTruthy();
+
+    let emailInput = wrapper.find('input[type="email"]');
+    let passwordInput = wrapper.find('input[type="password"]');
+    await emailInput.setValue('');
+    await passwordInput.setValue('hello123');
+    await Vue.nextTick(() => {
+      expect(loginButton.props().disabled).toBeTruthy();
+    });
+  });
+
+  // !!!NOTICE!!!
+  // this test lags the whole application, so is commented out for the moment
+  // it("Testing for invalid email format, over character limit", async () => {
+  //   const wrapper = mount(Login, {
+  //     localVue,
+  //     vuetify
+  //   });
+  //   const loginButton = wrapper.find(".v-btn");
+  //   expect(loginButton.props().disabled).toBeTruthy();
+  //
+  //   let emailInput = wrapper.find('input[type="email"]');
+  //   let passwordInput = wrapper.find('input[type="password"]');
+  //   await emailInput.setValue(
+  //     'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
+  //   );
+  //   await passwordInput.setValue('hello123');
+  //   await Vue.nextTick(() => {
+  //     expect(loginButton.props().disabled).toBeTruthy();
+  //   });
+  // });
+
+  it("Testing for invalid password format, with no numbers", async () => {
+    const wrapper = mount(Login, {
+      localVue,
+      vuetify
+    });
+    const loginButton = wrapper.find(".v-btn");
+    expect(loginButton.props().disabled).toBeTruthy();
+
+    let emailInput = wrapper.find('input[type="email"]');
+    let passwordInput = wrapper.find('input[type="password"]');
+    await emailInput.setValue('someemail@gmail.com');
+    await passwordInput.setValue('hello');
+    await Vue.nextTick(() => {
+      expect(loginButton.props().disabled).toBeTruthy();
+    });
+  });
+
+  it("Testing for invalid password format, with no alphabets", async () => {
+    const wrapper = mount(Login, {
+      localVue,
+      vuetify
+    });
+    const loginButton = wrapper.find(".v-btn");
+    expect(loginButton.props().disabled).toBeTruthy();
+
+    let emailInput = wrapper.find('input[type="email"]');
+    let passwordInput = wrapper.find('input[type="password"]');
+    await emailInput.setValue('someemail@gmail.com');
+    await passwordInput.setValue('123455678');
+    await Vue.nextTick(() => {
+      expect(loginButton.props().disabled).toBeTruthy();
+    });
+  });
+
+  it("Testing for invalid password format, with less than 7 characters", async () => {
+    const wrapper = mount(Login, {
+      localVue,
+      vuetify
+    });
+    const loginButton = wrapper.find(".v-btn");
+    expect(loginButton.props().disabled).toBeTruthy();
+
+    let emailInput = wrapper.find('input[type="email"]');
+    let passwordInput = wrapper.find('input[type="password"]');
+    await emailInput.setValue('someemail@gmail.com');
+    await passwordInput.setValue('abcd1');
+    await Vue.nextTick(() => {
+      expect(loginButton.props().disabled).toBeTruthy();
+    });
+  });
+
+  it("Testing for invalid password format, empty password field", async () => {
+    const wrapper = mount(Login, {
+      localVue,
+      vuetify
+    });
+    const loginButton = wrapper.find(".v-btn");
+    expect(loginButton.props().disabled).toBeTruthy();
+
+    let emailInput = wrapper.find('input[type="email"]');
+    let passwordInput = wrapper.find('input[type="password"]');
+    await emailInput.setValue('someemail@gmail.com');
+    await passwordInput.setValue('');
+    await Vue.nextTick(() => {
+      expect(loginButton.props().disabled).toBeTruthy();
+    });
+  });
+
+  // !!!NOTICE!!!
+  // this test lags the whole application, so is commented out for the moment
+  // it("Testing for invalid password format, over character limit", async () => {
+  //   const wrapper = mount(Login, {
+  //     localVue,
+  //     vuetify
+  //   });
+  //   const loginButton = wrapper.find(".v-btn");
+  //   expect(loginButton.props().disabled).toBeTruthy();
+  //
+  //   let emailInput = wrapper.find('input[type="email"]');
+  //   let passwordInput = wrapper.find('input[type="password"]');
+  //
+  //   await emailInput.setValue('someemail@gmail.com');
+  //   await passwordInput.setValue(
+  //     'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
+  //   );
+  //   await Vue.nextTick(() => {
+  //     expect(loginButton.props().disabled).toBeTruthy();
+  //   });
+  // });
 });
