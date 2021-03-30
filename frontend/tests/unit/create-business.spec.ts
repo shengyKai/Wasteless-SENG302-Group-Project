@@ -6,7 +6,6 @@ import { createLocalVue, Wrapper, mount } from '@vue/test-utils';
 
 import { createOptions } from '@/store';
 import CreateBusiness from '@/components/BusinessProfile/CreateBusiness.vue';
-//import LocationAutocomplete from '@/components/utils/LocationAutocomplete.vue';
 
 Vue.use(Vuetify);
 
@@ -28,11 +27,14 @@ describe('CreateBusiness.vue', () => {
     const store = new Vuex.Store(createOptions());
     const vuetify = new Vuetify();
 
+    // Creating wrapper around CreateBusiness with data-app to appease vuetify
     const App = localVue.component('App', {
       components: { CreateBusiness },
       template: '<div data-app><CreateBusiness/></div>',
     });
 
+    // Put the CreateBusiness component inside a div in the global document,
+    // this seems to make vuetify work correctly
     const elem = document.createElement('div');
     document.body.appendChild(elem);
 
@@ -45,12 +47,37 @@ describe('CreateBusiness.vue', () => {
     });
 
     wrapper = appWrapper.getComponent(CreateBusiness);
+
+    // The jsdom test runner doesn't declare the fetch function,
+    // hence we need to implement it ourselves to make LocationAutocomplete not crash
+    globalThis.fetch = async () => {
+      return {
+        json() {
+          return {
+            features: [],
+          };
+        }
+      } as any;
+    };
   });
 
   afterEach(() => {
+    // Makes sure that the CreateBusiness component is removed from the global document
     wrapper.destroy();
   });
 
+  /**
+   * Adds all the fields that are required for the create business form to be valid
+   *
+   * These are:
+   * - Business name
+   * - Business type
+   * - Street address line 1
+   * - City
+   * - State
+   * - Country
+   * - Postcode
+   */
   function populateRequiredFields() {
     wrapper.setData({
       business: 'Business Name',
