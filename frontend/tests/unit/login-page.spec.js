@@ -4,7 +4,6 @@ import { createLocalVue, mount } from '@vue/test-utils';
 import VueRouter from 'vue-router';
 
 Vue.use(Vuetify);
-Vue.use(VueRouter);
 
 import Index from '@/components/Auth/index.vue';
 import Login from '@/components/Auth/Login.vue';
@@ -20,8 +19,6 @@ describe('index.vue', () => {
     vuetify = new Vuetify();
   });
   it("Testing out the log in page link, should redirect to Register Page from Login Page", async () => {
-    //mount Index because Index is the file in charged of toggling between pages, and we need both Login and Register
-    //components to test the link, so its a full mount(not shallow mount)
     const wrapper = mount(Index, {
       localVue,
       vuetify,
@@ -54,6 +51,7 @@ describe('index.vue', () => {
 describe('Login.vue', () => {
   const localVue = createLocalVue();
   let vuetify;
+
   beforeEach(() => {
     vuetify = new Vuetify();
   });
@@ -79,12 +77,14 @@ describe('Login.vue', () => {
     //set a valid input for the password
     await passwordInput.setValue('hello123');
 
-    //the disabled value does not change immediately as it will check the form first, then change the value
-    //so a small timeout is set, and then the value for disabled will be checked
-    setTimeout(function(){
+    //Docs from the vue api:
+    //nextTick() Defers the callback to be executed after the next DOM update cycle.
+    //Use it immediately after you’ve changed some data to wait for the DOM update.
+    //In this case, we just changed some data on the email and password field, so we need to call nextTick for a DOM
+    //update.
+    await Vue.nextTick(() => {
       expect(loginButton.props().disabled).toBeFalsy();
-    }, 100);
-
+    });
   });
 
   it("Testing out the inputs for the email and password, such that the user will be unable to press the login " +
@@ -102,75 +102,80 @@ describe('Login.vue', () => {
     await emailInput.setValue('someemail@gmail.c');
     let passwordInput = wrapper.find('input[type="password"]');
     await passwordInput.setValue('hello123');
-    setTimeout(function(){
+    await Vue.nextTick(() => {
       expect(loginButton.props().disabled).toBeTruthy();
-    }, 100);
+    });
 
     //wrong email format, with no "@"
     await emailInput.setValue('someemail');
     await passwordInput.setValue('hello123');
-    setTimeout(function(){
+    await Vue.nextTick(() => {
       expect(loginButton.props().disabled).toBeTruthy();
-    }, 100);
+    });
 
     //wrong email format, with no characters before "@"
     await emailInput.setValue('@gmail.com');
     await passwordInput.setValue('hello123');
-    setTimeout(function(){
+    await Vue.nextTick(() => {
       expect(loginButton.props().disabled).toBeTruthy();
-    }, 100);
+    });
 
     //wrong email format, with no "."
     await emailInput.setValue('fsefsgr@gmailcom');
     await passwordInput.setValue('hello123');
-    setTimeout(function(){
+    await Vue.nextTick(() => {
       expect(loginButton.props().disabled).toBeTruthy();
-    }, 100);
+    });
 
     //empty email field
     await emailInput.setValue('');
     await passwordInput.setValue('hello123');
-    setTimeout(function(){
+    await Vue.nextTick(() => {
       expect(loginButton.props().disabled).toBeTruthy();
-    }, 100);
+    });
 
-    //Too many characters for email field
+    //!!!NOTICE!!!
+    // this test lags the whole application, so is commented out for the moment
+    // Too many characters for email field
     // await emailInput.setValue(
     //   'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
     // );
     // await passwordInput.setValue('hello123');
-    // setTimeout(function(){
+    // await Vue.nextTick(() => {
     //   expect(loginButton.props().disabled).toBeTruthy();
-    // }, 100);
+    // });
+
 
     //wrong password format, with no numbers
     await emailInput.setValue('someemail@gmail.com');
     await passwordInput.setValue('hello');
-    setTimeout(function(){
+    await Vue.nextTick(() => {
       expect(loginButton.props().disabled).toBeTruthy();
-    }, 100);
+    });
 
     //wrong password format, with no alphabets
     await emailInput.setValue('someemail@gmail.com');
     await passwordInput.setValue('123455678');
-    setTimeout(function(){
+    await Vue.nextTick(() => {
       expect(loginButton.props().disabled).toBeTruthy();
-    }, 100);
+    });
 
     //wrong password format, with less than 7 characters
     await emailInput.setValue('someemail@gmail.com');
     await passwordInput.setValue('abcd1');
-    setTimeout(function(){
+    await Vue.nextTick(() => {
       expect(loginButton.props().disabled).toBeTruthy();
-    }, 100);
+    });
 
     //empty password field
     await emailInput.setValue('someemail@gmail.com');
     await passwordInput.setValue('');
-    setTimeout(function(){
+    await Vue.nextTick(() => {
       expect(loginButton.props().disabled).toBeTruthy();
-    }, 100);
+    });
 
+    //!!!NOTICE!!!
+    ///this test lags the whole application, so is commented out for the moment
     //Too many characters for password field
     // await emailInput.setValue('someemail@gmail.com');
     // await passwordInput.setValue(
@@ -182,49 +187,53 @@ describe('Login.vue', () => {
   });
 });
 
-//not sure how to insert vuerouter
-describe('Login.vue', () => {
+
+describe('index.vue', () => {
   const localVue = createLocalVue();
   let vuetify;
-  let vueRouter;
+  localVue.use(VueRouter);
   beforeEach(() => {
     vuetify = new Vuetify();
   });
   it("Testing out the log in page button, should redirect to Profile Page from Login Page", async () => {
-    const wrapper = mount(Login, {
+    const wrapper = mount(Index, {
       localVue,
       vuetify,
-      data() {
-        return {
-          //override values for email and password, so that button is enabled right away
-          email: "someemail@gmail.com",
-          password: "hello123"
-        };
-      },
       components: {
+        Login,
         UserProfile
       },
-      mocks: {
-        $router
+      data() {
+        return {
+          //override value for login to true, meaning the current page is at Login page
+          login: true
+        };
       }
-
     });
 
-    const loginButton = wrapper.find(".v-btn");
-    setTimeout(function(){
+    //initially wrapper should not be able to find UserProfile page as its in the Login page
+    //checking Login page existence
+    expect(wrapper.findComponent(Login).exists()).toBeTruthy();
+    //checking Profile page existence
+    expect(wrapper.findComponent(UserProfile).exists()).toBeFalsy();
+
+    const loginPage = wrapper.findComponent(Login);
+    //enter proper, valid inputs for both email and password fields
+    const emailInput = loginPage.find('input[type="email"]');
+    await emailInput.setValue('someemail@gmail.com');
+    const passwordInput = loginPage.find('input[type="password"]');
+    await passwordInput.setValue('hello123');
+
+    const loginButton = wrapper.findComponent(Login).find(".v-btn");
+    //should be disabled at first because DOM is still not updated
+    expect(loginButton.props().disabled).toBeTruthy();
+
+    await Vue.nextTick(() => {
       expect(loginButton.props().disabled).toBeFalsy();
-    }, 100);
+    });
+
     await loginButton.trigger('click');
 
-
-    //
-    // //find the link which toggles between pages
-    // const link = wrapper.findComponent(Login).find('.link');
-    // //click on the link to change the login value
-    // await link.trigger('click');
-    //
-    // //if login is false, the Register component should exist and the Login component should not exist
-    // expect(wrapper.findComponent(Login).exists()).toBeFalsy();
-    // expect(wrapper.findComponent(Register).exists()).toBeTruthy();
+    expect(window.location.href).toBe('/profile');
   });
 });
