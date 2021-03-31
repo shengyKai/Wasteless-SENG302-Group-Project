@@ -3,8 +3,11 @@ package org.seng302;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.seng302.Controllers.DGAAController;
+import org.seng302.Entities.Business;
+import org.seng302.Entities.Location;
 import org.seng302.Entities.Location;
 import org.seng302.Entities.User;
+import org.seng302.Persistence.BusinessRepository;
 import org.seng302.Persistence.DGAARepository;
 import org.seng302.Persistence.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,12 +31,14 @@ public class MainApplicationRunner implements ApplicationRunner {
 
     private UserRepository _userRepository;
     private DGAARepository _dgaaRepository;
+    private BusinessRepository _businessRepository;
     private static final Logger logger = LogManager.getLogger(MainApplicationRunner.class.getName());
 
     @Autowired
-    public MainApplicationRunner(UserRepository userRepository, DGAARepository dgaaRepository) {
+    public MainApplicationRunner(UserRepository userRepository, DGAARepository dgaaRepository, BusinessRepository businessRepository) {
         this._userRepository = userRepository;
         this._dgaaRepository = dgaaRepository;
+        this._businessRepository = businessRepository;
     }
 
 
@@ -59,6 +64,17 @@ public class MainApplicationRunner implements ApplicationRunner {
 
         DGAAController.checkDGAA(_dgaaRepository);
 
+        User user = _userRepository.findByEmail("123andyelliot@gmail.com");
+        Business business = new Business.Builder()
+                .withBusinessType("Accommodation and Food Services")
+                .withDescription("DESCRIPTION")
+                .withName("BUSINESS_NAME")
+                .withAddress(new Location())
+                .withPrimaryOwner(user)
+                .build();
+
+        _businessRepository.save(business);
+
     }
 
     private List<User> readUserFile(String filepath) throws IOException {
@@ -75,6 +91,8 @@ public class MainApplicationRunner implements ApplicationRunner {
 
             }
         }
+
+
         csvReader.close();
         return userList;
     }

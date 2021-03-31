@@ -4,7 +4,9 @@ import net.minidev.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.seng302.Entities.Account;
+import org.seng302.Entities.User;
 import org.seng302.Persistence.AccountRepository;
+import org.seng302.Persistence.UserRepository;
 import org.seng302.Tools.AuthenticationTokenManager;
 import org.seng302.Tools.PasswordAuthenticator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +19,7 @@ import org.springframework.web.server.ResponseStatusException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Optional;
 
 /**
  * This class handles requests from the appliation's login page.
@@ -25,11 +28,13 @@ import java.io.IOException;
 public class LoginController {
 
     private final AccountRepository accountRepository;
+    private final UserRepository userRepository;
     private static final Logger logger = LogManager.getLogger(LoginController.class.getName());
 
     @Autowired
-    public LoginController(AccountRepository accountRepository) {
+    public LoginController(AccountRepository accountRepository, UserRepository userRepository) {
         this.accountRepository = accountRepository;
+        this.userRepository = userRepository;
     }
 
     /**
@@ -51,18 +56,17 @@ public class LoginController {
             } catch (ResponseStatusException responseError) {
                 throw responseError;
             }
+
+            // If they are a DGAA, set their permissions
             if (matchingAccount.isIsDGAA()) {
+                AuthenticationTokenManager.setAuthenticationToken(request, response);
                 AuthenticationTokenManager.setAuthenticationTokenDGAA(request);
+            } else {
+                // Must be a user
+                Optional<User> accountAsUser = userRepository.findById(matchingAccount.getUserID());
+                AuthenticationTokenManager.setAuthenticationToken(request, response, accountAsUser.get());
             }
-            try {
-                response.setStatus(200);
-                response.setContentType("application/json");
-                String authToken = AuthenticationTokenManager.setAuthenticationToken(request, response);
-                response.getWriter().write(authToken);
-                response.getWriter().flush();
-            } catch (IOException e) {
-                e.getMessage();
-            }
+
         }
     }
 }
