@@ -116,6 +116,7 @@
           <v-text-field
             v-model="countryCode"
             label="Country Code"
+            :rules="countryCodeRules"
             outlined
           />
         </v-col>
@@ -271,7 +272,10 @@ export default {
         field => (field.length <= 200) || 'Reached max character limit: 200'
       ],
       phoneNumberRules: [
-        field => /^(\+\d{1,2}\s)?\(?\d{1,3}\)?[\s.-]?\d{3,4}[\s.-]?\d{4,5}$/.test(field) || 'Must be a valid NZ phone number'
+        field => /^\(?\d{1,3}\)?[\s.-]?\d{3,4}[\s.-]?\d{4,5}$/.test(field) || 'Must be a valid phone number'
+      ],
+      countryCodeRules: [
+        field => /^(\d{1,2}-)?\d{2,3}$/.test(field) || 'Must be a valid country code. Do not include +'
       ],
     };
   },
