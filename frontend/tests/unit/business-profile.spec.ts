@@ -9,6 +9,7 @@ Vue.use(Vuetify);
 describe('index.vue', () => {
   let wrapper: Wrapper<any>;
   let vuetify: Vuetify;
+  let date = new Date();
 
   beforeEach(() => {
     const localVue = createLocalVue();
@@ -29,7 +30,7 @@ describe('index.vue', () => {
             address: "1 Some Street Name",
             businessType: "Some Business Type",
             description: "Some Description",
-            created: new Date()
+            created: date
           },
           administrators: [
             {
@@ -65,9 +66,8 @@ describe('index.vue', () => {
   });
 
   it("Must contain the business created date", async() => {
-    let date = new Date();
-    expect(wrapper.text()).toContain(`${date.getDate()} ` +
-    `${date.toLocaleString('default', {month: 'short'})} ${date.getFullYear()} (0 months ago)`);
+    expect(wrapper.text()).toContain(`${("0" + date.getDate()).slice(-2)} ` +
+    `${date.toLocaleString('default', {month: 'short'})} ${date.getFullYear()} (1 months ago)`);
   });
 
   it("Must contain the business administrator first name and last name", async() => {
