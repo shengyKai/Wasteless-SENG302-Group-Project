@@ -126,7 +126,7 @@
           <v-text-field
             v-model="phone"
             label="Phone"
-            :rules="numberRules.concat(maxCharRules)"
+            :rules="phoneNumberRules"
             outlined
           />
         </v-col>
@@ -269,7 +269,10 @@ export default {
       ],
       maxCharBioRules: [
         field => (field.length <= 200) || 'Reached max character limit: 200'
-      ]
+      ],
+      phoneNumberRules: [
+        field => /^(\+\d{1,2}\s)?\(?\d{1,3}\)?[\s.-]?\d{3,4}[\s.-]?\d{4,5}$/.test(field) || 'Must be a valid NZ phone number'
+      ],
     };
   },
 
