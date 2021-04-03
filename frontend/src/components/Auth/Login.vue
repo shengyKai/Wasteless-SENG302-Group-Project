@@ -1,7 +1,7 @@
 <template>
   <v-container>
     <!-- @submit.prevent="login"-->
-    <v-form @submit="login" v-model="valid">
+    <v-form v-model="valid">
       <h1>Sign in</h1>
       <v-text-field
         v-model="email"
@@ -24,7 +24,7 @@
       </p>
 
       <!-- Login -->
-      <v-btn type="submit" color="primary" :disabled="!valid">
+      <v-btn @click="login" type="submit" color="primary" :disabled="!valid">
         LOGIN
       </v-btn>
     </v-form>
@@ -76,7 +76,7 @@ export default {
     login() {
       this.$store.dispatch("login", { email : this.email, password : this.password });
       this.$store.dispatch("getUser");
-      this.$router.push("/profile");
+      //this.$router.push("/profile");
     },
   },
 };

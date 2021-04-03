@@ -44,10 +44,16 @@ export function createOptions(): StoreOptions<StoreData> {
           context.commit('setUser', response);
         });
       },
-      login (context, {email, password}) {
-        return login(email, password).then((response) => {
+      login (context, payload) {
+        console.log('B');
+        return login(payload.email, payload.password).then((response) => {
+          console.log('C');
+          console.log(payload.password);
+          console.log(payload.email);
           if (typeof response === 'string') {
             console.warn(response);
+            console.log(response);
+            console.log('A');
             return;
           }
         });
