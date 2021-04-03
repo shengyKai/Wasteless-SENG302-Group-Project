@@ -33,7 +33,8 @@ const SERVER_URL = process.env.VUE_APP_SERVER_ADD;
 
 const instance = axios.create({
   baseURL: SERVER_URL,
-  timeout: 2000
+  timeout: 2000,
+  withCredentials: true,
 });
 
 type MaybeError<T> = T | string;
@@ -173,7 +174,7 @@ export async function search(query: string): Promise<MaybeError<User[]>> {
 export async function getUser(id: number): Promise<MaybeError<User>> {
   let response;
   try {
-    response = await instance.get('/users/' + id, {withCredentials: true});
+    response = await instance.get('/users/' + id);
   } catch (error) {
     let status: number | undefined = error.response?.status;
 
@@ -201,7 +202,7 @@ export async function login(email: string, password: string): Promise<MaybeError
     response = await instance.post('/login', {
       email: email,
       password: password,
-    }, {withCredentials: true});
+    });
   } catch (error) {
     let status: number | undefined = error.response?.status;
 
