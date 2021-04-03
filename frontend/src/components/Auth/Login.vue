@@ -75,7 +75,7 @@ export default {
     },
     login() {
       this.$store.dispatch("login", { email : this.email, password : this.password });
-      this.$store.dispatch("getUser");
+      // this.$store.dispatch("getUser");
       //this.$router.push("/profile");
     },
   },

@@ -38,7 +38,7 @@ export function createOptions(): StoreOptions<StoreData> {
       getUser (context) {
         return getUser().then((response) => {
           if (typeof response === 'string') {
-            console.warn(response);
+            //console.warn(response);
             return;
           }
           context.commit('setUser', response);

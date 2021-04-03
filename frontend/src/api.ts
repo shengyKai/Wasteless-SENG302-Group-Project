@@ -197,18 +197,24 @@ export async function getUser(id?: number): Promise<MaybeError<User>> {
  * @param password User password
  * @returns The now logged in user ID if operation is successful, otherwise a string error.
  */
-export async function login(email: string, password: string): Promise<MaybeError<number>> {
+export async function login(email?: string, password?: string): Promise<MaybeError<number>> {
   console.log('D');
   let response;
   try {
     console.log('E');
     console.log(email);
     console.log(password);
-    response = await instance.post('/users/login', {
+    console.log(instance);
 
-      email: email,
-      password: password,
-    });
+    response = await instance.post('/login');
+    //response = await instance.post('/login')
+    //     , {
+    //
+    //   email: email,
+    //   password: password
+    // })
+    //;
+    console.log(response);
   } catch (error) {
     console.log('F');
     console.warn(error);
@@ -216,7 +222,7 @@ export async function login(email: string, password: string): Promise<MaybeError
     console.log(status);
     if (status === undefined) return 'Failed to reach backend';
     if (status === 400) return 'Invalid credentials';
-    return 'Request failed: ' + status;
+    return `Request failed: ' + ${status}`;
   }
   let id = response.data.userId;
   if (typeof id !== 'number') return 'Invalid response';
@@ -234,6 +240,7 @@ export async function login(email: string, password: string): Promise<MaybeError
 export async function createUser(user: CreateUser): Promise<MaybeError<undefined>> {
   try {
     await instance.post('/users', user);
+    console.log('createUser called');
   } catch (error) {
     let status: number | undefined = error.response?.status;
 
