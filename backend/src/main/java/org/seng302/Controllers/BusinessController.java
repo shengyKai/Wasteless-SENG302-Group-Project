@@ -63,16 +63,17 @@ public class BusinessController {
      */
     @PostMapping("/businesses")
     public ResponseEntity register(@RequestBody JSONObject businessInfo, HttpServletRequest req) {
-        AuthenticationTokenManager.checkAuthenticationToken(req);
-        Optional<User> primaryOwner;
         try {
+            AuthenticationTokenManager.checkAuthenticationToken(req);
+
             // Make sure this is an existing user ID
-            primaryOwner = _userRepository.findById(Long.parseLong((businessInfo.getAsString("primaryAdministratorId"))));
+            Optional<User> primaryOwner = _userRepository.findById(Long.parseLong((businessInfo.getAsString("primaryAdministratorId"))));
+
             if (!primaryOwner.isPresent()) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                         "The given PrimaryBusinessOwner does not exist");
             } else if (!AuthenticationTokenManager.sessionCanSeePrivate(req, primaryOwner.get().getUserID())) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN,
                         "You don't have permission to set the provided Primary Owner");
             }
 
@@ -86,7 +87,7 @@ public class BusinessController {
                     .withAddress(address)
                     .build();
 
-            _businessRepository.save(newBusiness);
+            _businessRepository.save(newBusiness); // Save the new business
             logger.info("Business has been registered");
             return new ResponseEntity(HttpStatus.CREATED);
 

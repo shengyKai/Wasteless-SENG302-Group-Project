@@ -109,6 +109,12 @@ public class BusinessControllerTest {
         userRepository.save(owner);
     }
 
+    /**
+     * AssertEquals each property of a Business as type JSON to type Object
+     * If the two objects are equal, no error is thrown
+     * @param json The JSON representation of a business
+     * @param object The Object representation of a business
+     */
     private void assertEquivalentJsonToObject(JSONObject json, Business object) {
         assertEquals(json.getAsString("primaryAdministratorId"), object.getPrimaryOwner().getUserID().toString());
         assertEquals(json.getAsString("name"), object.getName());
@@ -123,7 +129,12 @@ public class BusinessControllerTest {
         assertEquals(address.getAsString("postcode"), object.getAddress().getZipCode());
     }
 
-
+    /**
+     * Test for registering a business in a blue sky scenario
+     * Session logged in as the given primaryAdministratorId
+     * All request values are valid
+     * @throws Exception
+     */
     @Test
     public void RegisterBusinessTest() throws Exception {
         String businessJsonString =
@@ -156,5 +167,142 @@ public class BusinessControllerTest {
         assertEquivalentJsonToObject(businessJson, newBusiness);
     }
 
+    /**
+     * Test for registering a business when the business type is not one of the expected types
+     * Session logged in as the given primaryAdministratorId
+     * Business type value is invalid
+     * @throws Exception
+     */
+    @Test
+    public void RegisterBusinessInvalidBusinessTypeTest() throws Exception {
+        String businessJsonString =
+                String.format("{\n" +
+                        "  \"primaryAdministratorId\": %s,\n" +
+                        "  \"name\": \"Lumbridge General Store\",\n" +
+                        "  \"description\": \"A one-stop shop for all your adventuring needs\",\n" +
+                        "  \"address\": {\n" +
+                        "    \"streetNumber\": \"324\",\n" +
+                        "    \"streetName\": \"Ilam Road\",\n" +
+                        "    \"city\": \"Christchurch\",\n" +
+                        "    \"region\": \"Canterbury\",\n" +
+                        "    \"country\": \"New Zealand\",\n" +
+                        "    \"postcode\": \"90210\"\n" +
+                        "  },\n" +
+                        "  \"businessType\": \"An invalid BUSINESS TYPE\"\n" +
+                        "}", owner.getUserID());
+        setCurrentUser(owner.getUserID());
+        JSONObject businessJson = (JSONObject) new JSONParser(JSONParser.MODE_JSON_SIMPLE).parse(businessJsonString);
+        mockMvc.perform(MockMvcRequestBuilders
+                .post("/businesses")
+                .content(businessJson.toJSONString())
+                .sessionAttrs(sessionAuthToken)
+                .cookie(authCookie)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
+    }
+
+    /**
+     * Test for registering a business when not logged in as a user
+     * Session not logged in
+     * All request values are valid
+     * @throws Exception
+     */
+    @Test
+    public void RegisterBusinessWhenNotLoggedIn() throws Exception {
+        String businessJsonString =
+                String.format("{\n" +
+                        "  \"primaryAdministratorId\": %s,\n" +
+                        "  \"name\": \"Lumbridge General Store\",\n" +
+                        "  \"description\": \"A one-stop shop for all your adventuring needs\",\n" +
+                        "  \"address\": {\n" +
+                        "    \"streetNumber\": \"324\",\n" +
+                        "    \"streetName\": \"Ilam Road\",\n" +
+                        "    \"city\": \"Christchurch\",\n" +
+                        "    \"region\": \"Canterbury\",\n" +
+                        "    \"country\": \"New Zealand\",\n" +
+                        "    \"postcode\": \"90210\"\n" +
+                        "  },\n" +
+                        "  \"businessType\": \"Accommodation and Food Services\"\n" +
+                        "}", owner.getUserID());
+        setCurrentUser(owner.getUserID());
+        JSONObject businessJson = (JSONObject) new JSONParser(JSONParser.MODE_JSON_SIMPLE).parse(businessJsonString);
+        mockMvc.perform(MockMvcRequestBuilders
+                .post("/businesses")
+                .content(businessJson.toJSONString())
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isUnauthorized());
+    }
+
+    /**
+     * Test for registering a business when the given primaryAdministrator doesn't exist
+     * Session logged in as the given primaryAdministratorId
+     * primaryAdministrator is invalid
+     * @throws Exception
+     */
+    @Test
+    public void RegisterBusinessInvalidIdTest() throws Exception {
+        String businessJsonString =
+                "{\n" +
+                        "  \"primaryAdministratorId\": 999,\n" +
+                        "  \"name\": \"Lumbridge General Store\",\n" +
+                        "  \"description\": \"A one-stop shop for all your adventuring needs\",\n" +
+                        "  \"address\": {\n" +
+                        "    \"streetNumber\": \"324\",\n" +
+                        "    \"streetName\": \"Ilam Road\",\n" +
+                        "    \"city\": \"Christchurch\",\n" +
+                        "    \"region\": \"Canterbury\",\n" +
+                        "    \"country\": \"New Zealand\",\n" +
+                        "    \"postcode\": \"90210\"\n" +
+                        "  },\n" +
+                        "  \"businessType\": \"Accommodation and Food Services\"\n" +
+                        "}";
+        setCurrentUser(owner.getUserID());
+        JSONObject businessJson = (JSONObject) new JSONParser(JSONParser.MODE_JSON_SIMPLE).parse(businessJsonString);
+        mockMvc.perform(MockMvcRequestBuilders
+                .post("/businesses")
+                .content(businessJson.toJSONString())
+                .sessionAttrs(sessionAuthToken)
+                .cookie(authCookie)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
+    }
+
+    /**
+     * Test for registering a business under someone else's name
+     * Session logged in as a different user than the provided primaryAdministratorId
+     * primaryAdministrator is invalid
+     * @throws Exception
+     */
+    @Test
+    public void RegisterBusinessNoPermissionTest() throws Exception {
+        String businessJsonString =
+                String.format("{\n" +
+                        "  \"primaryAdministratorId\": %s,\n" +
+                        "  \"name\": \"Lumbridge General Store\",\n" +
+                        "  \"description\": \"A one-stop shop for all your adventuring needs\",\n" +
+                        "  \"address\": {\n" +
+                        "    \"streetNumber\": \"324\",\n" +
+                        "    \"streetName\": \"Ilam Road\",\n" +
+                        "    \"city\": \"Christchurch\",\n" +
+                        "    \"region\": \"Canterbury\",\n" +
+                        "    \"country\": \"New Zealand\",\n" +
+                        "    \"postcode\": \"90210\"\n" +
+                        "  },\n" +
+                        "  \"businessType\": \"Accommodation and Food Services\"\n" +
+                        "}", owner.getUserID());
+        setCurrentUser(999L);
+        JSONObject businessJson = (JSONObject) new JSONParser(JSONParser.MODE_JSON_SIMPLE).parse(businessJsonString);
+        mockMvc.perform(MockMvcRequestBuilders
+                .post("/businesses")
+                .content(businessJson.toJSONString())
+                .sessionAttrs(sessionAuthToken)
+                .cookie(authCookie)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isForbidden());
+    }
 
 }
