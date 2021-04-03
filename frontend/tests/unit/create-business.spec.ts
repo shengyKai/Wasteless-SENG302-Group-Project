@@ -1,55 +1,27 @@
 import Vue from 'vue';
-import VueRouter from 'vue-router';
 import Vuetify from 'vuetify';
-import Vuex from 'vuex';
 import { createLocalVue, Wrapper, mount } from '@vue/test-utils';
 
-import { createOptions } from '@/store';
 import CreateBusiness from '@/components/BusinessProfile/CreateBusiness.vue';
 
 Vue.use(Vuetify);
 
 const localVue = createLocalVue();
 
-localVue.use(VueRouter);
-const router = new VueRouter();
-
-
 describe('CreateBusiness.vue', () => {
+  // Container for the wrapper around CreateBusiness
+  let appWrapper: Wrapper<any>;
+
   // Container for the CreateBusiness under test
   let wrapper: Wrapper<any>;
 
   /**
-   * Sets up the test CreateBusiness instance
+   * Executes before all the tests.
+   * 
+   * The jsdom test runner doesn't declare the fetch function, hence we need to implement it 
+   * ourselves to make LocationAutocomplete not crash.
    */
-  beforeEach(() => {
-    localVue.use(Vuex);
-    const store = new Vuex.Store(createOptions());
-    const vuetify = new Vuetify();
-
-    // Creating wrapper around CreateBusiness with data-app to appease vuetify
-    const App = localVue.component('App', {
-      components: { CreateBusiness },
-      template: '<div data-app><CreateBusiness/></div>',
-    });
-
-    // Put the CreateBusiness component inside a div in the global document,
-    // this seems to make vuetify work correctly
-    const elem = document.createElement('div');
-    document.body.appendChild(elem);
-
-    const appWrapper = mount(App, {
-      localVue,
-      router,
-      vuetify,
-      store,
-      attachTo: elem,
-    });
-
-    wrapper = appWrapper.getComponent(CreateBusiness);
-
-    // The jsdom test runner doesn't declare the fetch function,
-    // hence we need to implement it ourselves to make LocationAutocomplete not crash
+  beforeAll(() => {
     globalThis.fetch = async () => {
       return {
         json() {
@@ -61,9 +33,42 @@ describe('CreateBusiness.vue', () => {
     };
   });
 
+  /**
+   * Sets up the test CreateBusiness instance
+   * 
+   * Because the element we're testing has a v-dialog we need to take some extra sets to make it 
+   * work.
+   */
+  beforeEach(() => {
+    const vuetify = new Vuetify();
+
+    // Creating wrapper around CreateBusiness with data-app to appease vuetify
+    const App = localVue.component('App', {
+      components: { CreateBusiness },
+      template: '<div data-app><CreateBusiness/></div>',
+    });
+
+    // Put the CreateBusiness component inside a div in the global document,
+    // this seems to make vuetify work correctly, but necessitates calling appWrapper.destroy
+    const elem = document.createElement('div');
+    document.body.appendChild(elem);
+
+    appWrapper = mount(App, {
+      localVue,
+      vuetify,
+      attachTo: elem,
+    });
+
+    wrapper = appWrapper.getComponent(CreateBusiness);
+  });
+
+  /**
+   * Executes after every test case.
+   * 
+   * This function makes sure that the CreateBusiness component is removed from the global document
+   */
   afterEach(() => {
-    // Makes sure that the CreateBusiness component is removed from the global document
-    wrapper.destroy();
+    appWrapper.destroy();
   });
 
   /**
@@ -100,8 +105,6 @@ describe('CreateBusiness.vue', () => {
 
     expect(wrapper.vm.valid).toBeTruthy();
   });
-
-
 
   /**
    * Tests that the CreateBusiness is invalid if description field is too long (> 200 characters)
