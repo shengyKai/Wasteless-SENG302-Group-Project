@@ -7,6 +7,7 @@ import org.junit.runner.RunWith;
 import org.seng302.Entities.Account;
 import org.seng302.Persistence.AccountRepository;
 import org.seng302.Entities.User;
+import org.seng302.Persistence.BusinessRepository;
 import org.seng302.Persistence.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -34,12 +35,15 @@ class LoginControllerTest {
     private MockMvc mockMvc;
     @Autowired
     private AccountRepository accountRepository;
+    @Autowired
+    BusinessRepository businessRepository;
 
     @Autowired
     private UserRepository userRepository;
 
     @BeforeEach
     public void setUp() throws ParseException {
+        businessRepository.deleteAll(); // Do this to prevent table constraint issues
         User john = new User.Builder()
                 .withFirstName("John")
                 .withMiddleName("Hector")
