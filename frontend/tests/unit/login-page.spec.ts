@@ -72,8 +72,6 @@ describe('index.vue', () => {
     await loginButton.trigger('submit');
 
     await Vue.nextTick();
-    //bottom line shows an error because it calls on the actual method, which only exists in the file.
-    //but for the purpose of this test, that does not matter.
     expect(methodInvoked).toBeCalled();
   });
 });
