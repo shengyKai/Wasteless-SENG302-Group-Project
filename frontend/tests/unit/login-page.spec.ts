@@ -14,7 +14,7 @@ describe('index.vue', () => {
   let wrapper: Wrapper<any>;
   const localVue = createLocalVue();
   let vuetify: Vuetify;
-  const methodInvoked = jest.spyOn((Login as any).methods, 'login');
+  const methodInvoked = jest.spyOn((Login as any).methods, 'login').mockImplementation(() => undefined);
   beforeEach(() => {
     vuetify = new Vuetify();
     wrapper = mount(Index, {
