@@ -206,14 +206,13 @@ export async function login(email?: string, password?: string): Promise<MaybeErr
     console.log(password);
     console.log(instance);
 
-    response = await instance.post('/login');
-    //response = await instance.post('/login')
-    //     , {
-    //
-    //   email: email,
-    //   password: password
-    // })
-    //;
+    // response = await instance.post('/login');
+    response = await instance.post('/login'
+      , {
+
+        email: email,
+        password: password
+      });
     console.log(response);
   } catch (error) {
     console.log('F');

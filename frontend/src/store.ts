@@ -45,9 +45,11 @@ export function createOptions(): StoreOptions<StoreData> {
         });
       },
       login (context, payload) {
+        console.log(payload);
         console.log('B');
         return login(payload.email, payload.password).then((response) => {
           console.log('C');
+          console.log(context);
           console.log(payload.password);
           console.log(payload.email);
           if (typeof response === 'string') {
