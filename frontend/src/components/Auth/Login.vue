@@ -24,10 +24,10 @@
       </p>
 
       <!-- Login -->
-      <v-btn @click="login" type="submit" color="primary" :disabled="!valid">
-        LOGIN
-      </v-btn>
     </v-form>
+    <v-btn @click="login" type="submit" color="primary" :disabled="!valid">
+      LOGIN
+    </v-btn>
   </v-container>
 
   <!--
@@ -47,8 +47,8 @@ export default {
   data() {
     return {
       valid: false,
-      email: "",
-      password: "",
+      email: "123andyelliot@gmail.com",
+      password: "password123",
       emailRules: [
         (email) =>
           /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(email) ||
@@ -75,7 +75,7 @@ export default {
     },
     login() {
       this.$store.dispatch("login", { email : this.email, password : this.password });
-      // this.$store.dispatch("getUser");
+      //this.$store.dispatch("getUser");
       //this.$router.push("/profile");
     },
   },

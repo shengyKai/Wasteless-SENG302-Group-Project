@@ -59,7 +59,7 @@ public class LoginController {
                 response.setStatus(200);
                 response.setContentType("application/json");
                 String authToken = AuthenticationTokenManager.setAuthenticationToken(request, response);
-                response.getWriter().write(authToken);
+                response.getWriter().write("{\"userId\":" + matchingAccount.getUserID() + "}");
                 response.getWriter().flush();
             } catch (IOException e) {
                 e.getMessage();

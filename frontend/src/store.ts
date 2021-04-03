@@ -35,30 +35,18 @@ export function createOptions(): StoreOptions<StoreData> {
       }
     },
     actions: {
-      getUser (context) {
-        return getUser().then((response) => {
-          if (typeof response === 'string') {
-            //console.warn(response);
-            return;
-          }
-          context.commit('setUser', response);
-        });
-      },
-      login (context, payload) {
-        console.log(payload);
-        console.log('B');
-        return login(payload.email, payload.password).then((response) => {
-          console.log('C');
-          console.log(context);
-          console.log(payload.password);
-          console.log(payload.email);
-          if (typeof response === 'string') {
-            console.warn(response);
-            console.log(response);
-            console.log('A');
-            return;
-          }
-        });
+      async login(context, { email, password }) {
+        let userId = await login(email, password);
+        if (typeof userId === 'string') {
+          console.warn(userId);
+          return;
+        }
+        let user = await getUser(userId);
+        if (typeof user === 'string') {
+          console.error(user);
+          return;
+        }
+        context.commit('setUser', user);
       }
     }
   };

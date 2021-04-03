@@ -148,7 +148,7 @@ export async function search(query: string): Promise<MaybeError<User[]>> {
     response = await instance.get('/users/search', {
       params: {
         'searchQuery': query,
-      }
+      },
     });
   } catch (error) {
     let status: number | undefined = error.response?.status;
@@ -170,12 +170,10 @@ export async function search(query: string): Promise<MaybeError<User[]>> {
  * @param id User id, if ommitted then fetch the logged in user's info
  * @returns User info for the given id or an error message
  */
-export async function getUser(id?: number): Promise<MaybeError<User>> {
-  if (id === undefined) id = 0;
-
+export async function getUser(id: number): Promise<MaybeError<User>> {
   let response;
   try {
-    response = await instance.get('/users/' + id);
+    response = await instance.get('/users/' + id, {withCredentials: true});
   } catch (error) {
     let status: number | undefined = error.response?.status;
 
@@ -197,28 +195,16 @@ export async function getUser(id?: number): Promise<MaybeError<User>> {
  * @param password User password
  * @returns The now logged in user ID if operation is successful, otherwise a string error.
  */
-export async function login(email?: string, password?: string): Promise<MaybeError<number>> {
-  console.log('D');
+export async function login(email: string, password: string): Promise<MaybeError<number>> {
   let response;
   try {
-    console.log('E');
-    console.log(email);
-    console.log(password);
-    console.log(instance);
-
-    // response = await instance.post('/login');
-    response = await instance.post('/login'
-      , {
-
-        email: email,
-        password: password
-      });
-    console.log(response);
+    response = await instance.post('/login', {
+      email: email,
+      password: password,
+    }, {withCredentials: true});
   } catch (error) {
-    console.log('F');
-    console.warn(error);
     let status: number | undefined = error.response?.status;
-    console.log(status);
+
     if (status === undefined) return 'Failed to reach backend';
     if (status === 400) return 'Invalid credentials';
     return `Request failed: ' + ${status}`;
