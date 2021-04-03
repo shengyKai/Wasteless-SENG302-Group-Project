@@ -17,8 +17,8 @@ describe('CreateBusiness.vue', () => {
 
   /**
    * Executes before all the tests.
-   * 
-   * The jsdom test runner doesn't declare the fetch function, hence we need to implement it 
+   *
+   * The jsdom test runner doesn't declare the fetch function, hence we need to implement it
    * ourselves to make LocationAutocomplete not crash.
    */
   beforeAll(() => {
@@ -35,8 +35,8 @@ describe('CreateBusiness.vue', () => {
 
   /**
    * Sets up the test CreateBusiness instance
-   * 
-   * Because the element we're testing has a v-dialog we need to take some extra sets to make it 
+   *
+   * Because the element we're testing has a v-dialog we need to take some extra sets to make it
    * work.
    */
   beforeEach(() => {
@@ -64,7 +64,7 @@ describe('CreateBusiness.vue', () => {
 
   /**
    * Executes after every test case.
-   * 
+   *
    * This function makes sure that the CreateBusiness component is removed from the global document
    */
   afterEach(() => {
@@ -130,7 +130,7 @@ describe('CreateBusiness.vue', () => {
     });
 
     await Vue.nextTick(() => {
-        expect(wrapper.vm.valid).toBeFalsy();
+      expect(wrapper.vm.valid).toBeFalsy();
     });
   });
 
