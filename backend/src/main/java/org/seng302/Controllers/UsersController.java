@@ -132,7 +132,7 @@ public class UsersController {
         logger.info(String.format("Performing search for \"%s\"", searchQuery));
         List<User> queryResults;
         if (orderBy == null || orderBy.equals("relevance")) {
-            queryResults = UserSearchHelper.getSearchResultsOrderedByRelevance(searchQuery, userRepository);
+            queryResults = UserSearchHelper.getSearchResultsOrderedByRelevance(searchQuery, userRepository, reverse);
         } else {
             Specification<User> spec = UserSearchHelper.constructUserSpecificationFromSearchQuery(searchQuery);
             Sort userSort = UserSearchHelper.getSort(orderBy, reverse);

@@ -834,7 +834,7 @@ class UserSearchHelperTest {
         userRepository.save(lucyMcDonald);
         userRepository.save(donaldDuck);
         userRepository.save(donaldSmith);
-        List<User> result = UserSearchHelper.getSearchResultsOrderedByRelevance("Donald or Duck", userRepository);
+        List<User> result = UserSearchHelper.getSearchResultsOrderedByRelevance("Donald or Duck", userRepository, null);
 
         assertEquals("Donald", result.get(0).getFirstName());
         assertEquals("Duck", result.get(0).getLastName());
@@ -845,12 +845,39 @@ class UserSearchHelperTest {
     }
 
     /**
+     * Verify that the list of users returned by getSearchResultsOrderedByRelevance will be in the reverse relevance
+     * order if they all have different levels of relevance and reverse is set to true.
+     */
+    @Test
+    public void getSearchResultsOrderedByRelevanceCorrectRelevanceOrderReverseTrueTest() throws ParseException {
+        userRepository.deleteAll();
+        User donaldDuck = new User.Builder().withFirstName("Donald").withLastName("Duck").withAddress("1313 Webfoot Walk, Duckburg, Calisota")
+                .withDob("1934-06-09").withEmail("donald.duck@waddlemail.com").withPassword("HonkHonk").build();
+        User donaldSmith = new User.Builder().withFirstName("Donald").withLastName("Smith").withAddress("92 Clyde Road, Ilam, Christchurch")
+                .withDob("1994-03-08").withEmail("donald.smith@gmail.com").withPassword("123456789").build();
+        User lucyMcDonald = new User.Builder().withFirstName("Lucy").withLastName("McDonald").withAddress("39 Riccarton Road, Riccarton, Christchurch")
+                .withDob("2000-11-21").withEmail("lucymcdonald@hotmail.com").withPassword("password").build();
+        userRepository.save(lucyMcDonald);
+        userRepository.save(donaldDuck);
+        userRepository.save(donaldSmith);
+        List<User> result = UserSearchHelper.getSearchResultsOrderedByRelevance("Donald or Duck", userRepository, "true");
+
+        assertEquals("Lucy", result.get(0).getFirstName());
+        assertEquals("McDonald", result.get(0).getLastName());
+        assertEquals("Donald", result.get(1).getFirstName());
+        assertEquals("Smith", result.get(1).getLastName());
+        assertEquals("Donald", result.get(2).getFirstName());
+        assertEquals("Duck", result.get(2).getLastName());
+
+    }
+
+    /**
      * Verify that when getSearchResultsOrderedByRelevance is called but the users matching the search query all have
      * the same level of relevance, they are ordered by their id number.
      */
     @Test
     public void getSearchResultsOrderedByRelevanceCorrectIdOrderTest() {
-        List<User> result = UserSearchHelper.getSearchResultsOrderedByRelevance("andy", userRepository);
+        List<User> result = UserSearchHelper.getSearchResultsOrderedByRelevance("andy", userRepository, null);
         User firstUser = result.get(0);
         Long previousId = firstUser.getUserID();
         for (int i = 1; i < result.size(); i++) {
@@ -866,7 +893,7 @@ class UserSearchHelperTest {
      */
     @Test
     public void getSearchResultsOrderedByRelevanceNoDuplicationTest() {
-        List<User> result = UserSearchHelper.getSearchResultsOrderedByRelevance("a or Donna or Percy", userRepository);
+        List<User> result = UserSearchHelper.getSearchResultsOrderedByRelevance("a or Donna or Percy", userRepository, null);
         HashSet<Long> ids = new HashSet<>();
         for (User user : result) {
             assertFalse(ids.contains(user.getUserID()));

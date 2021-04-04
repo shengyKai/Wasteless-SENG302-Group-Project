@@ -23,7 +23,17 @@
             </v-avatar>
           </v-btn>
         </template>
-        <v-list>
+        <v-list class="list">
+          <v-list-item v-if="isDGAA" class="admin link" @click="viewAdmin">
+            <v-list-item-title class="admin">
+              ADMIN
+            </v-list-item-title>
+          </v-list-item>
+          <v-list-item v-else-if="isAdmin" class="admin">
+            <v-list-item-title class="admin">
+              ADMIN
+            </v-list-item-title>
+          </v-list-item>
           <v-list-item>
             <v-list-item-title class="link" @click="viewProfile">
               Profile
@@ -32,11 +42,6 @@
           <v-list-item>
             <v-list-item-title class="link" @click="logout">
               Logout
-            </v-list-item-title>
-          </v-list-item>
-          <v-list-item>
-            <v-list-item-title class="link" @click="viewAdmin">
-              Admin
             </v-list-item-title>
           </v-list-item>
           <v-list-item>
@@ -61,6 +66,7 @@
 import SearchBar from "./utils/SearchBar";
 import UserAvatar from './utils/UserAvatar';
 import CreateBusiness from "./BusinessProfile/CreateBusiness";
+import { USER_ROLES } from '../utils';
 
 export default {
   name: "AppBar",
@@ -90,13 +96,18 @@ export default {
     },
     viewCreateBusiness() {
       this.showBusinessDialog = true;
-    }
+    },
   },
-
   computed: {
+    isAdmin() {
+      return [USER_ROLES.DGAA, USER_ROLES.GAA].includes(this.$store.getters.role);
+    },
+    isDGAA() {
+      return this.$store.getters.role === USER_ROLES.DGAA;
+    },
     user() {
       return this.$store.state.user;
-    }
+    },
   }
 };
 </script>
@@ -105,5 +116,14 @@ export default {
 .name {
   margin-left: 5px;
   color: var(--v-primary-base); /* Not sure why this doesn't set the colour to green */
+}
+.admin {
+  color: rgb(255, 16, 16);
+  background-color: rgb(212, 212, 212);
+  font-weight: 500;
+}
+.list {
+  padding-top: 0;
+  padding-bottom: 0;
 }
 </style>
