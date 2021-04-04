@@ -15,7 +15,7 @@ export function setCookie(name: string, value: string|number) {
  * @returns Value of the cookie. NULL if the cookie does not exist.
  */
 export function getCookie(name: string) {
-  const cookies = document.cookie.split(';');
+  let cookies = document.cookie.split(';');
   let target = null;
   cookies.forEach(cookie => {
     if (cookie.startsWith(`${name}=`)) target = cookie;

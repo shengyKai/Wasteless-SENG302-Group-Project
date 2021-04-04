@@ -1,5 +1,5 @@
 import { User, getUser } from './api';
-import Vuex, { StoreOptions } from 'vuex';
+import Vuex, { Store, StoreOptions } from 'vuex';
 import { COOKIE, deleteCookie, setCookie } from './utils';
 
 export type StoreData = {
