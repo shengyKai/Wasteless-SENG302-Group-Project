@@ -7,10 +7,13 @@
     <div class="container-outer">
       <h1>WASTELESS</h1>
 
+      <!-- Space between the app name and the controls -->
       <div class="spacer"/>
 
-      <!-- Search Bar component to perform search and show result -->
+      <!-- Search Bar component to perform search and show result, if not on search page -->
       <SearchBar v-if="$route.path !== '/search'" />
+
+      <!-- Action menu -->
       <div class="text-center">
         <v-menu offset-y>
           <template v-slot:activator="{ on, attrs }">
@@ -45,6 +48,8 @@
           </v-list>
         </v-menu>
       </div>
+
+      <!-- User name and icon -->
       <v-chip v-if="user">
         <UserAvatar :user="user" size="small" />
         <div class="name">
@@ -108,7 +113,6 @@ export default {
 </script>
 
 <style scoped>
-
 .spacer {
   flex: 1;
   max-width: 900px;
@@ -117,15 +121,14 @@ export default {
 .name {
   align-self: center;
   margin-left: 5px;
-  color: var(
-    --v-primary-base
-  ); /* Not sure why this doesn't set the colour to green */
 }
+
 .admin {
   color: rgb(255, 16, 16);
   background-color: rgb(212, 212, 212);
   font-weight: 500;
 }
+
 .list {
   padding-top: 0;
   padding-bottom: 0;
