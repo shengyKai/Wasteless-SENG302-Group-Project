@@ -45,12 +45,29 @@
           </v-list>
         </v-menu>
       </div>
-      <v-chip v-if="user">
-        <UserAvatar :user="user" size="small" />
-        <div class="name">
-          {{ user.firstName }}
-        </div>
-      </v-chip>
+      <div class="role-menu">
+        <v-menu offset-y>
+          <template v-slot:activator="{ on, attrs }">
+            <v-chip
+              v-if="user"
+              v-bind="attrs"
+              v-on="on">
+              <UserAvatar :user="user" size="small" />
+              <div class="name">
+                {{ user.firstName }}
+              </div>
+            </v-chip>
+          </template>
+          <v-list>
+            <v-list-item
+              v-for="(role, index) in roles"
+              :key="index"
+            >
+              <v-list-item-title>{{ role.text }}</v-list-item-title>
+            </v-list-item>
+          </v-list>
+        </v-menu>
+      </div>
     </div>
   </v-app-bar>
 </template>
@@ -60,6 +77,7 @@ import SearchBar from "./utils/SearchBar";
 import UserAvatar from "./utils/UserAvatar";
 import CreateBusiness from "./BusinessProfile/CreateBusiness";
 import { USER_ROLES } from "../utils";
+import {getBusiness} from "@/api";
 
 export default {
   name: "AppBar",
@@ -71,7 +89,12 @@ export default {
   data() {
     return {
       showBusinessDialog: false,
+      roles : [],
+      user : null,
     };
+  },
+  created() {
+    this.user = this.$store.state.user;
   },
   methods: {
     viewProfile() {
@@ -100,10 +123,23 @@ export default {
     isDGAA() {
       return this.$store.getters.role === USER_ROLES.DGAA;
     },
-    user() {
-      return this.$store.state.user;
-    },
   },
+  watch : {
+    async user() {
+      this.user = this.$store.state.user;
+      this.roles = [ {text: this.user.firstName} ];
+      for (let id of this.user.businessesAdministered || []) {
+        await getBusiness(id).then((value) => {
+          if (typeof value === 'string') {
+            // TODO Handle error properly
+            console.warn(value);
+          } else {
+            this.roles.push({ text: value.name });
+          }
+        });
+      }
+    },
+  }
 };
 </script>
 
