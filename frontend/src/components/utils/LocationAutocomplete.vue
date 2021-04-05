@@ -4,7 +4,8 @@
     :items="autocompleteItems"
     :loading="isLoading"
     :search-input.sync="search"
-    :rules="mandatoryRules"
+    :rules="rules"
+    :value="value"
     no-filter
     clearable
     outlined
@@ -36,26 +37,23 @@ const AUTOCOMPLETE_TYPES = {
 
 export default {
   name: 'LocationAutocomplete',
-  props: ['type'],
+  props: ['type', 'rules', 'value'],
   data () {
     return {
       label: AUTOCOMPLETE_TYPES[this.type].label,
       autocompleteItems: [],
       isLoading: false,
-      search: null,
-      mandatoryRules: [
-        //All fields with the class "required" will go through this ruleset to ensure the field is not empty.
-        //if it does not follow the format, display error message
-        field => !!field || 'Field is required'
-      ]
+      search: '',
     };
   },
 
   watch: {
     search (val) {
+      if (val === null) val = '';
+      this.$emit('input', val);
       this.autocompleteItems = [];
       //if input length exists, and has a length more than 2
-      if (val && val.length > 2) {
+      if (val.length > 2) {
         //show loading animation
         this.isLoading = true;
         //append to the api url the input the user has entered
@@ -66,7 +64,7 @@ export default {
           this.isLoading = false;
         });
       }
-    },
+    }
   }
 };
 </script>
