@@ -26,7 +26,7 @@ public class Business {
     @Column
     private Date created;
 
-    @ManyToOne(optional = false)
+    @ManyToOne
     @JoinColumn(name = "owner_id")
     private User primaryOwner;
 
