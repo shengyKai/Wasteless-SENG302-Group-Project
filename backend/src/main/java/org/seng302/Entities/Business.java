@@ -26,7 +26,7 @@ public class Business {
     @Column
     private Date created;
 
-    @ManyToOne
+    @ManyToOne(optional = false)
     @JoinColumn(name = "owner_id")
     private User primaryOwner;
 
@@ -141,6 +141,9 @@ public class Business {
      * @param owner Owner of business
      */
     private void setPrimaryOwner(User owner) {
+        if (owner == null ) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The business must have a primary owner");
+        }
         this.primaryOwner = owner;
     }
 
