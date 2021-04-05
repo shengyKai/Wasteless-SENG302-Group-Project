@@ -59,13 +59,16 @@
                 <v-col cols="12">
                   <LocationAutocomplete
                     type="district"
-                    v-model="district"/>
+                    v-model="district"
+                    :rules="maxCharRules"
+                  />
                 </v-col>
                 <v-col cols="12">
                   <LocationAutocomplete
                     type="city"
                     class="required"
                     v-model="city"
+                    :rules="mandatoryRules.concat(maxCharRules)"
                   />
                 </v-col>
                 <v-col cols="12">
@@ -73,6 +76,7 @@
                     type="state"
                     class="required"
                     v-model="state"
+                    :rules="mandatoryRules.concat(maxCharRules)"
                   />
                 </v-col>
                 <v-col cols="12">
@@ -80,6 +84,7 @@
                     type="country"
                     class="required"
                     v-model="country"
+                    :rules="mandatoryRules.concat(maxCharRules)"
                   />
                 </v-col>
                 <v-col cols="12">
