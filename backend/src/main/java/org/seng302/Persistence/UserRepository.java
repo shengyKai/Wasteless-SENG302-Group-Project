@@ -29,6 +29,7 @@ public interface UserRepository extends CrudRepository<User, Long>, JpaSpecifica
      */
     User findByEmail(@Param("email") String email);
 
+
     /**
      * Searches for users where the query partially matches one of firstName, middleName, lastName, nickname or partially matches firstName lastName
      * @param query The search term

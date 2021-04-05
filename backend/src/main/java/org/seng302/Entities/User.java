@@ -1,19 +1,17 @@
 /* Subtype of Account for individual users */
 package org.seng302.Entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import net.minidev.json.JSONObject;
 import org.springframework.data.annotation.ReadOnlyProperty;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
+import javax.persistence.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Pattern;
 
 @Entity
@@ -29,6 +27,7 @@ public class User extends Account {
     private String address;
     private Date created;
     private String role;
+    private Set<Business> businessesAdministered = new HashSet<>();
 
     /* Matches:
     123-456-7890
@@ -252,6 +251,24 @@ public class User extends Account {
      */
     public void setRole(String role){
         this.role=role;
+    }
+
+    /**
+     * Gets the set of businesses that the user is an admin of
+     * @return Businesses administered
+     */
+    @ManyToMany(mappedBy = "administrators", fetch = FetchType.EAGER)
+    public Set<Business> getBusinessesAdministered() {
+        return this.businessesAdministered;
+    }
+
+    /**
+     * For JPA only
+     * Sets the businesses administered
+     * @param businesses Set of businesses
+     */
+    private void setBusinessesAdministered(Set<Business> businesses) {
+        this.businessesAdministered = businesses;
     }
 
     /**
