@@ -2,9 +2,7 @@
   <v-card class="body" v-if="user">
     <div class="top-section">
       <div class="profile-img">
-        <v-avatar size="200px" color="primary" class="white--text headline avatar-text">
-          {{ user.firstName[0].toUpperCase() }}{{ user.lastName[0].toUpperCase() }}
-        </v-avatar>
+        <UserAvatar :user="user" size="large" />
       </div>
 
       <div>
@@ -58,6 +56,7 @@
 
 <script>
 import { getBusiness, getUser } from '../api';
+import UserAvatar from './utils/UserAvatar';
 
 export default {
   name: 'ProfilePage',
@@ -131,13 +130,15 @@ export default {
         return acc;
       }, []);
     }
-  }
+  },
+  components: {
+    UserAvatar,
+  },
 };
 </script>
 
 <style scoped>
 .profile-img {
-  width: 200px;
   margin-top: -116px;
   margin-right: 16px;
 }
@@ -157,9 +158,5 @@ export default {
 
 .link-chip {
   margin-right: 4px;
-}
-
-.avatar-text {
-  font-size: 100px !important;
 }
 </style>
