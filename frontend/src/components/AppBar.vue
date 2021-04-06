@@ -59,12 +59,17 @@
             </v-chip>
           </template>
           <v-list>
-            <v-list-item
-              v-for="(role, index) in roles"
-              :key="index"
+            <v-list-item-group
+              v-model="selectedRole"
+              color="primary"
             >
-              <v-list-item-title>{{ role.text }}</v-list-item-title>
-            </v-list-item>
+              <v-list-item
+                v-for="(role, index) in roles"
+                :key="index"
+              >
+                <v-list-item-title>{{ role.text }}</v-list-item-title>
+              </v-list-item>
+            </v-list-item-group>
           </v-list>
         </v-menu>
       </div>
@@ -91,6 +96,7 @@ export default {
       showBusinessDialog: false,
       roles : [],
       user : null,
+      selectedRole : null,
     };
   },
   created() {
@@ -127,17 +133,20 @@ export default {
   watch : {
     async user() {
       this.user = this.$store.state.user;
-      this.roles = [ {text: this.user.firstName} ];
+      this.roles = [ { text: this.user.firstName, entity: this.user } ];
       for (let id of this.user.businessesAdministered || []) {
         await getBusiness(id).then((value) => {
           if (typeof value === 'string') {
             // TODO Handle error properly
             console.warn(value);
           } else {
-            this.roles.push({ text: value.name });
+            this.roles.push({ text: value.name, entity: value });
           }
         });
       }
+    },
+    async selectedRole() {
+      this.$store.state.activeRole = this.roles[this.selectedRole].entity;
     },
   }
 };

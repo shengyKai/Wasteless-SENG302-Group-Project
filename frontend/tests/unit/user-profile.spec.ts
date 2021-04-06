@@ -41,6 +41,21 @@ describe('UserProfile.vue', () => {
         created: "1/1/1950",
         role: "user",
         businessesAdministered: [],
+      },
+      activeRole: {
+        id: 1,
+        firstName: "test_first_name",
+        lastName: "test_last_name",
+        middleName: "test_middle_name",
+        nickname: "test_nickname",
+        bio: "test_biography",
+        email: "test_email_address",
+        dateOfBirth: "1/1/1900",
+        phoneNumber: "test_phone_number",
+        homeAddress: "test_home_address",
+        created: "1/1/1950",
+        role: "user",
+        businessesAdministered: [],
       }
     };
     let store = new Vuex.Store(options);
