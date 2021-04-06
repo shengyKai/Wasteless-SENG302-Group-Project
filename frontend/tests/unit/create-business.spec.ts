@@ -18,7 +18,7 @@ describe('CreateBusiness.vue', () => {
   /**
    * Executes before all the tests.
    *
-   * The jsdom test runner doesn't declare the fetch function, hence we need to implement it
+   * The jsdom environment doesn't declare the fetch function, hence we need to implement it
    * ourselves to make LocationAutocomplete not crash.
    */
   beforeAll(() => {
