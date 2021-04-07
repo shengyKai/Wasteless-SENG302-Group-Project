@@ -28,7 +28,8 @@ public class Business {
     @Column
     private Date created;
 
-    @ManyToOne(optional = false)
+    //TODO Need an alternative to optional = false
+    @ManyToOne(cascade = CascadeType.ALL)
     private User primaryOwner;
 
 
