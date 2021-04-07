@@ -1,21 +1,17 @@
 /* Subtype of Account for individual users */
 package org.seng302.Entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import net.minidev.json.JSONObject;
 import org.springframework.data.annotation.ReadOnlyProperty;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.OneToOne;
+import javax.persistence.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Pattern;
 
 @Entity
@@ -31,6 +27,7 @@ public class User extends Account {
     private Location address;
     private Date created;
     private String role;
+    private Set<Business> businessesAdministered = new HashSet<>();
 
     /* Matches:
     123-456-7890
@@ -45,14 +42,10 @@ public class User extends Account {
     String emailRegex = "^[A-Za-z0-9+_.-]+@(.+)$";
 
 
-    protected User() {
-    }
-
-    ;
+    protected User(){};
 
     /**
      * Returns users first name
-     *
      * @return firstName
      */
     @Column(nullable = false)
@@ -63,7 +56,6 @@ public class User extends Account {
     /**
      * Sets the users first name
      * Not Null
-     *
      * @param firstName users first name
      */
     public void setFirstName(String firstName) {
@@ -76,17 +68,13 @@ public class User extends Account {
 
     /**
      * Returns users middle name
-     *
      * @return middle name of user
      */
-    public String getMiddleName() {
-        return middleName;
-    }
+    public String getMiddleName() {return middleName;}
 
     /**
      * Sets users middle name
      * Can be null
-     *
      * @param middleName
      */
     public void setMiddleName(String middleName) {
@@ -99,7 +87,6 @@ public class User extends Account {
 
     /**
      * Returns users last name
-     *
      * @return lastName
      */
     @Column(nullable = false)
@@ -110,7 +97,6 @@ public class User extends Account {
     /**
      * Sets users last name
      * Not Null
-     *
      * @param lastName users surname
      */
     public void setLastName(String lastName) {
@@ -123,7 +109,6 @@ public class User extends Account {
 
     /**
      * Returns users preferred name
-     *
      * @return nickname
      */
     public String getNickname() {
@@ -132,7 +117,6 @@ public class User extends Account {
 
     /**
      * Sets the users preferred nickname
-     *
      * @param nickname users preferred name
      */
     public void setNickname(String nickname) {
@@ -145,7 +129,6 @@ public class User extends Account {
 
     /**
      * Returns the users biography
-     *
      * @return bio
      */
     public String getBio() {
@@ -154,7 +137,6 @@ public class User extends Account {
 
     /**
      * Sets the users biography - short text about themselves
-     *
      * @param bio brief description of user
      */
     //Todo Discuss with team about what characters should be allowed in the BIO
@@ -168,7 +150,6 @@ public class User extends Account {
 
     /**
      * Returns the users date of birth
-     *
      * @return dob
      */
     @Column(nullable = false)
@@ -180,7 +161,6 @@ public class User extends Account {
     /**
      * Sets the users date of birth
      * Not Null
-     *
      * @param dob date of birth (used to verify age)
      */
     public void setDob(Date dob) {
@@ -193,7 +173,6 @@ public class User extends Account {
 
     /**
      * Returns the users phone number
-     *
      * @return phNum
      */
     @JsonProperty("phoneNumber")
@@ -203,7 +182,6 @@ public class User extends Account {
 
     /**
      * Sets the users phone number, must be in proper ph num format
-     *
      * @param phNum users contact number
      */
     public void setPhNum(String phNum) {
@@ -217,6 +195,7 @@ public class User extends Account {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Your phone number has been entered incorrectly");
         }
     }
+
 
     /**
      * Gets the users country, city, street, house number etc as string
@@ -290,6 +269,24 @@ public class User extends Account {
      */
     public void setRole(String role){
         this.role=role;
+    }
+
+    /**
+     * Gets the set of businesses that the user is an admin of
+     * @return Businesses administered
+     */
+    @ManyToMany(mappedBy = "administrators", fetch = FetchType.EAGER)
+    public Set<Business> getBusinessesAdministered() {
+        return this.businessesAdministered;
+    }
+
+    /**
+     * For JPA only
+     * Sets the businesses administered
+     * @param businesses Set of businesses
+     */
+    private void setBusinessesAdministered(Set<Business> businesses) {
+        this.businessesAdministered = businesses;
     }
 
     /**

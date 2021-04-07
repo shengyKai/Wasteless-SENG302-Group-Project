@@ -28,9 +28,17 @@ public class Business {
     @Column
     private Date created;
 
-    //TODO Need an alternative to optional = false
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
+    @JoinColumn(name = "owner_id")
     private User primaryOwner;
+
+    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @JoinTable(
+            name="business_admins",
+            joinColumns = {@JoinColumn(name="business_id")},
+            inverseJoinColumns = {@JoinColumn(name="user_id")}
+    )
+    private Set<User> administrators = new HashSet<>();
 
 
     /**
@@ -135,6 +143,9 @@ public class Business {
      * @param owner Owner of business
      */
     private void setPrimaryOwner(User owner) {
+        if (owner == null ) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The business must have a primary owner");
+        }
         this.primaryOwner = owner;
     }
 
@@ -144,6 +155,22 @@ public class Business {
      */
     public User getPrimaryOwner() {
         return this.primaryOwner;
+    }
+
+    /**
+     * Gets the set of Users who are an admin of this business
+     * @return Business admins
+     */
+    public Set<User> getAdministrators() {
+        return this.administrators;
+    }
+
+    public void addAdmin(User newAdmin) {
+        if (this.administrators.contains(newAdmin)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "This user is already a registered admin of this business");
+        } else {
+            this.administrators.add(newAdmin);
+        }
     }
 
 
