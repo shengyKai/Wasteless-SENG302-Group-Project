@@ -10,6 +10,7 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.stubbing.Answer;
 import org.seng302.Entities.User;
 import org.seng302.Exceptions.EmailInUseException;
+import org.seng302.Persistence.BusinessRepository;
 import org.seng302.Persistence.UserRepository;
 import org.seng302.Tools.PasswordAuthenticator;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -31,6 +32,8 @@ public class UserTests {
     private User.Builder testBuilder;
     @Mock
     private UserRepository userRepository;
+    @Mock
+    private BusinessRepository businessRepository;
 
     @BeforeEach
     public void setup() throws ParseException {

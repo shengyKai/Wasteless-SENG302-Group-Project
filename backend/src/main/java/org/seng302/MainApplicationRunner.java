@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * NOTE: Use this class to setup application
@@ -72,8 +73,10 @@ public class MainApplicationRunner implements ApplicationRunner {
                 .withPrimaryOwner(user)
                 .build();
 
-        _businessRepository.save(business);
-
+        Business testBusiness = _businessRepository.save(business);
+        testBusiness.addAdmin(user);
+        _businessRepository.save(testBusiness);
+        user = _userRepository.findByEmail("123andyelliot@gmail.com");
     }
 
     private List<User> readUserFile(String filepath) throws IOException {

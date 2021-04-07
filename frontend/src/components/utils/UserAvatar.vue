@@ -18,7 +18,17 @@
 export default{
   name: 'UserAvatar',
   props: {
+    /**
+     * User to make avatar for.
+     * Could be aquired from the 'getUser' function in api.ts
+     */
     user: {},
+
+    /**
+     * The size of the avatar
+     * The small and medium sizes use the thumbnail sized avatar image, large uses full size.
+     * @values small, medium, large
+     */
     size: {
       validator: (s) => ['small', 'medium', 'large'].includes(s),
       default: 'medium',
@@ -35,7 +45,7 @@ export default{
       case "large":
         return 200;
       default:
-        return 0.0;
+        throw new Error(`Invalid size "${this.size}"`);
       }
     },
     fontSize() {

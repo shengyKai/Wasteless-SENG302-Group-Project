@@ -7,10 +7,13 @@
     <div class="container-outer">
       <h1>WASTELESS</h1>
 
+      <!-- Space between the app name and the controls -->
       <div class="spacer"/>
 
-      <!-- Search Bar component to perform search and show result -->
+      <!-- Search Bar component to perform search and show result, if not on search page -->
       <SearchBar v-if="$route.path !== '/search'" />
+
+      <!-- Action menu -->
       <div class="text-center">
         <v-menu offset-y>
           <template v-slot:activator="{ on, attrs }">
@@ -49,24 +52,22 @@
       <div class="role-menu">
         <v-menu offset-y>
           <template v-slot:activator="{ on, attrs }">
-            <v-chip
-              v-if="user"
-              v-bind="attrs"
-              v-on="on">
-              <UserAvatar :user="user" size="small" />
-              <div class="name">
-                {{ user.firstName }}
-              </div>
-            </v-chip>
+      <!-- User name and icon -->
+      <v-chip v-if="user">
+        <UserAvatar :user="user" size="small" />
+        <div class="name">
+          {{ user.firstName }}
+        </div>
+      </v-chip>
           </template>
           <v-list>
             <v-list-item-group
-              v-model="selectedRole"
-              color="primary"
+                v-model="selectedRole"
+                color="primary"
             >
               <v-list-item
-                v-for="(role, index) in roles"
-                :key="index"
+                  v-for="(role, index) in roles"
+                  :key="index"
               >
                 <v-list-item-title>{{ role.displayText }}</v-list-item-title>
               </v-list-item>
@@ -156,7 +157,6 @@ export default {
 </script>
 
 <style scoped>
-
 .spacer {
   flex: 1;
   max-width: 900px;
@@ -165,15 +165,14 @@ export default {
 .name {
   align-self: center;
   margin-left: 5px;
-  color: var(
-    --v-primary-base
-  ); /* Not sure why this doesn't set the colour to green */
 }
+
 .admin {
   color: rgb(255, 16, 16);
   background-color: rgb(212, 212, 212);
   font-weight: 500;
 }
+
 .list {
   padding-top: 0;
   padding-bottom: 0;
