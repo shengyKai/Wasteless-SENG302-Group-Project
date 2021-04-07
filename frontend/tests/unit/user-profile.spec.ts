@@ -42,7 +42,8 @@ describe('UserProfile.vue', () => {
         role: "user",
         businessesAdministered: [],
       },
-      activeRole: null,
+      activeRoleType: null,
+      activeRoleId: null,
     };
     let store = new Vuex.Store(options);
 

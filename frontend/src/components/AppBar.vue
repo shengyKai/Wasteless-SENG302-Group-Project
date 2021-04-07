@@ -52,22 +52,26 @@
       <div class="role-menu">
         <v-menu offset-y>
           <template v-slot:activator="{ on, attrs }">
-      <!-- User name and icon -->
-      <v-chip v-if="user">
-        <UserAvatar :user="user" size="small" />
-        <div class="name">
-          {{ user.firstName }}
-        </div>
-      </v-chip>
+            <!-- User name and icon -->
+            <v-chip
+              v-if="user"
+              v-bind="attrs"
+              v-on="on"
+            >
+              <UserAvatar :user="user" size="small" />
+              <div class="name">
+                {{ roles[selectedRole].displayText }}
+              </div>
+            </v-chip>
           </template>
           <v-list>
             <v-list-item-group
-                v-model="selectedRole"
-                color="primary"
+              v-model="selectedRole"
+              color="primary"
             >
               <v-list-item
-                  v-for="(role, index) in roles"
-                  :key="index"
+                v-for="(role, index) in roles"
+                :key="index"
               >
                 <v-list-item-title>{{ role.displayText }}</v-list-item-title>
               </v-list-item>
@@ -106,7 +110,17 @@ export default {
   },
   methods: {
     viewProfile() {
-      this.$router.push("/profile");
+      // Navigate to the profile page of the current active role
+      switch (this.$store.state.activeRoleType) {
+      case "user":
+        this.$router.push("/profile");
+        break;
+      case "business":
+        this.$router.push("/business/" + this.$store.state.activeRoleId);
+        break;
+      default:
+        this.$router.push("/profile");
+      }
     },
     logout() {
       this.$store.commit("logoutUser");
@@ -136,21 +150,23 @@ export default {
     async user() {
       // When the user changes, update the list of roles that the user can 'act as'
       this.user = this.$store.state.user;
-      this.roles = [ { displayText: this.user.firstName, headerText: "user-" + this.user.id.toString() } ];
+      this.roles = [ { displayText: this.user.firstName, type: "user", id: this.user.id } ];
       for (let id of this.user.businessesAdministered || []) {
         await getBusiness(id).then((value) => {
           if (typeof value === 'string') {
             // TODO Handle error properly
             console.warn(value);
           } else {
-            this.roles.push({ displayText: value.name, headerText: "business-" + value.id.toString() });
+            this.roles.push({ displayText: value.name, type: "business", id: value.id });
           }
         });
       }
     },
     async selectedRole() {
       // Set the role that the user is acting as to the role that has been selected from the list
-      this.$store.state.activeRole = this.roles[this.selectedRole].headerText;
+      const role = this.roles[this.selectedRole];
+      this.$store.state.activeRoleType = role.type;
+      this.$store.state.activeRoleId = role.id;
     },
   }
 };
