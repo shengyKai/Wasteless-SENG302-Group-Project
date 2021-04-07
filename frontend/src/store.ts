@@ -4,7 +4,7 @@ import { COOKIE, deleteCookie, setCookie } from './utils';
 
 export type StoreData = {
   user: User | null,
-  activeRole: User | Business | null,
+  activeRole: String | null,
 };
 
 export function createOptions(): StoreOptions<StoreData> {

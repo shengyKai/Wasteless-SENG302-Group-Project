@@ -45,6 +45,7 @@
           </v-list>
         </v-menu>
       </div>
+      <!-- Dropdown menu for selecting role which user is currently acting as -->
       <div class="role-menu">
         <v-menu offset-y>
           <template v-slot:activator="{ on, attrs }">
@@ -67,7 +68,7 @@
                 v-for="(role, index) in roles"
                 :key="index"
               >
-                <v-list-item-title>{{ role.text }}</v-list-item-title>
+                <v-list-item-title>{{ role.displayText }}</v-list-item-title>
               </v-list-item>
             </v-list-item-group>
           </v-list>
@@ -96,7 +97,7 @@ export default {
       showBusinessDialog: false,
       roles : [],
       user : null,
-      selectedRole : null,
+      selectedRole : 0,
     };
   },
   created() {
@@ -132,21 +133,23 @@ export default {
   },
   watch : {
     async user() {
+      // When the user changes, update the list of roles that the user can 'act as'
       this.user = this.$store.state.user;
-      this.roles = [ { text: this.user.firstName, entity: this.user } ];
+      this.roles = [ { displayText: this.user.firstName, headerText: "user-" + this.user.id.toString() } ];
       for (let id of this.user.businessesAdministered || []) {
         await getBusiness(id).then((value) => {
           if (typeof value === 'string') {
             // TODO Handle error properly
             console.warn(value);
           } else {
-            this.roles.push({ text: value.name, entity: value });
+            this.roles.push({ displayText: value.name, headerText: "business-" + value.id.toString() });
           }
         });
       }
     },
     async selectedRole() {
-      this.$store.state.activeRole = this.roles[this.selectedRole].entity;
+      // Set the role that the user is acting as to the role that has been selected from the list
+      this.$store.state.activeRole = this.roles[this.selectedRole].headerText;
     },
   }
 };
