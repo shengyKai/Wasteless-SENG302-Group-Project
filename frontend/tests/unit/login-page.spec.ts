@@ -170,17 +170,16 @@ describe('Login.vue', () => {
     });
   });
 
-  // this test hangs the system sometimes, commented out for the moment
-  // it("Testing for invalid email format, over character limit", async () => {
-  //   const loginButton = wrapper.find(".v-btn");
-  //
-  //   await wrapper.setData({
-  //     email: 'a'.repeat(101)
-  //   });
-  //   await Vue.nextTick(() => {
-  //     expect(loginButton.props().disabled).toBeTruthy();
-  //   });
-  // });
+  it("Testing for invalid email format, over character limit", async () => {
+    const loginButton = wrapper.find(".v-btn");
+
+    await wrapper.setData({
+      email: 'a'.repeat(101)
+    });
+    await Vue.nextTick(() => {
+      expect(loginButton.props().disabled).toBeTruthy();
+    });
+  });
 
   it("Testing for invalid password format, with no numbers", async () => {
     const loginButton = wrapper.find(".v-btn");
