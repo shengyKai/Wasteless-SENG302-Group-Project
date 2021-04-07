@@ -4,16 +4,14 @@ import { COOKIE, deleteCookie, setCookie } from './utils';
 
 export type StoreData = {
   user: User | null,
-  activeRoleType: String | null,
-  activeRoleId: number | null,
+  activeRole: { type: "user" | "business", id: number} | null,
 };
 
 export function createOptions(): StoreOptions<StoreData> {
   return {
     state: {
       user: null,
-      activeRoleType: null,
-      activeRoleId: null,
+      activeRole: null,
     },
     mutations: {
       setUser (state, payload: User) {

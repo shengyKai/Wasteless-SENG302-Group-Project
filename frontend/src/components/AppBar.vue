@@ -101,22 +101,18 @@ export default {
     return {
       showBusinessDialog: false,
       roles : [],
-      user : null,
       selectedRole : 0,
     };
-  },
-  created() {
-    this.user = this.$store.state.user;
   },
   methods: {
     viewProfile() {
       // Navigate to the profile page of the current active role
-      switch (this.$store.state.activeRoleType) {
+      switch (this.$store.state.activeRole.type) {
       case "user":
         this.$router.push("/profile");
         break;
       case "business":
-        this.$router.push("/business/" + this.$store.state.activeRoleId);
+        this.$router.push("/business/" + this.$store.state.activeRole.id);
         break;
       default:
         this.$router.push("/profile");
@@ -145,28 +141,38 @@ export default {
     isDGAA() {
       return this.$store.getters.role === USER_ROLES.DGAA;
     },
+    user() {
+      return this.$store.state.user;
+    }
   },
   watch : {
-    async user() {
+    user: { async handler() {
       // When the user changes, update the list of roles that the user can 'act as'
-      this.user = this.$store.state.user;
       this.roles = [ { displayText: this.user.firstName, type: "user", id: this.user.id } ];
-      for (let id of this.user.businessesAdministered || []) {
-        await getBusiness(id).then((value) => {
-          if (typeof value === 'string') {
-            // TODO Handle error properly
-            console.warn(value);
-          } else {
-            this.roles.push({ displayText: value.name, type: "business", id: value.id });
-          }
+      if (this.user.businessesAdministered === null) return;
+
+      const promises = this.user.businessesAdministered.map(id => {
+        return new Promise((resolve, reject) => {
+          getBusiness(id)
+            .then(value => {
+              if (typeof value === 'string') reject(value);
+              else resolve(value);
+            })
+            .catch(err => reject(err));
         });
+      });
+
+      const businesses = await Promise.all(promises);
+
+      for (let business of businesses || []) {
+        this.roles.push({ displayText: business.name, type: "business", id: business.id });
       }
     },
-    async selectedRole() {
+    immediate: true },
+    selectedRole() {
       // Set the role that the user is acting as to the role that has been selected from the list
       const role = this.roles[this.selectedRole];
-      this.$store.state.activeRoleType = role.type;
-      this.$store.state.activeRoleId = role.id;
+      this.$store.state.activeRole = { type: role.type, id: role.id };
     },
   }
 };
