@@ -7,6 +7,7 @@ import ProfilePage from "../components/UserProfile.vue";
 import BusinessProfile from "../components/BusinessProfile/index.vue";
 import SearchResults from "../components/SearchResults.vue";
 import CreateBusiness from "../components/BusinessProfile/CreateBusiness.vue";
+import HomePage from "../components/HomePage.vue";
 
 Vue.use(VueRouter);
 
@@ -15,21 +16,17 @@ const NotFound = {
   template: "<h1> 404 Not Found - {{ $route.path }} </h1>",
 };
 
-const ProfileNotFound = {
-  template: "<h1> 404 - Profile Not Found  </h1>",
-};
-
 const routes = [
   { path: "/", redirect: "/login" }, // TODO handle case when already logged in
-
-  { path: "/login",       component: Auth },
-  { path: "/profile/:id", component: ProfilePage },
+  { path: "/login",           component: Auth },
+  { path: "/home",            component: HomePage},
+  { path: "/profile",         component: ProfilePage },
+  { path: "/profile/:id",     component: ProfilePage },
   { path: "/create_business", component: CreateBusiness },
-  { path: "/business/:id", component: BusinessProfile },
-  { path: "/profile",     component: ProfilePage },
-  { path: "/admin",       component: admin },
-  { path: "/search",      component: SearchResults },
-  { path: "*",            component: NotFound },
+  { path: "/business/:id",    component: BusinessProfile },
+  { path: "/admin",           component: admin },
+  { path: "/search",          component: SearchResults },
+  { path: "*",                component: NotFound },
 ];
 
 export default new VueRouter({
