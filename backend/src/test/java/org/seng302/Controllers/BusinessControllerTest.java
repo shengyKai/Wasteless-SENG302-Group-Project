@@ -92,6 +92,15 @@ public class BusinessControllerTest {
      * @throws ParseException
      */
     private void setUpTestUser() throws ParseException {
+        Location userAddress = new Location.Builder()
+                .inCountry("New Zealand")
+                .inRegion("Canterbury")
+                .inCity("Christchurch")
+                .inSuburb("Ilam")
+                .atStreetNumber("123")
+                .onStreet("Ilam road")
+                .withPostCode("8041")
+                .build();
         owner = new User.Builder()
                 .withFirstName("John")
                 .withMiddleName("Hector")
@@ -102,7 +111,7 @@ public class BusinessControllerTest {
                 .withBio("Likes long walks on the beach")
                 .withDob("2021-03-11")
                 .withPhoneNumber("+64 3 555 0129")
-                .withAddress("4 Rountree Street, Upper Riccarton")
+                .withAddress(userAddress)
                 .build();
         businessRepository.deleteAll();
         userRepository.deleteAll();
@@ -126,7 +135,7 @@ public class BusinessControllerTest {
         assertEquals(address.getAsString("city"), object.getAddress().getCity());
         assertEquals(address.getAsString("region"), object.getAddress().getRegion());
         assertEquals(address.getAsString("country"), object.getAddress().getCountry());
-        assertEquals(address.getAsString("postcode"), object.getAddress().getZipCode());
+        assertEquals(address.getAsString("postcode"), object.getAddress().getPostCode());
     }
 
     /**
