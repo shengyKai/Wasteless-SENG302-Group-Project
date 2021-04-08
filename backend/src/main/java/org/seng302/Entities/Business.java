@@ -1,6 +1,5 @@
 package org.seng302.Entities;
 
-import net.bytebuddy.implementation.bytecode.Throw;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -141,7 +140,7 @@ public class Business {
      * @param owner Owner of business
      */
     private void setPrimaryOwner(User owner) {
-        if (owner == null ) {
+        if (owner == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The business must have a primary owner");
         }
         this.primaryOwner = owner;
