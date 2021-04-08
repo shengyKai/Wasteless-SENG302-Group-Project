@@ -1,7 +1,7 @@
 <template>
   <v-list-item>
-    <v-list-item-avatar color="primary" class="white--text headline">
-      {{ user.firstName[0].toUpperCase() }}{{ user.lastName[0].toUpperCase() }}
+    <v-list-item-avatar>
+      <UserAvatar :user="user" size="medium" />
     </v-list-item-avatar>
     <v-list-item-content>
       <v-list-item-title>
@@ -16,8 +16,14 @@
 </template>
 
 <script>
+import UserAvatar from './utils/UserAvatar';
+
 export default {
   props: ['user'],
+
+  components: {
+    UserAvatar,
+  }
 };
 </script>
 

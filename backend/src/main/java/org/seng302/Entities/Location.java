@@ -7,6 +7,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.persistence.*;
+import java.util.Arrays;
+import java.util.List;
 
 @Data // generate setters and getters for all fields (lombok pre-processor)
 @NoArgsConstructor // generate a no-args constructor needed by JPA (lombok pre-processor)
@@ -23,9 +25,6 @@ public class Location {
     @Column(name = "city")
     private  String city;
 
-    @Column(name="suburb")
-    private String suburb;
-
     @Column(name="region")
     private String region;
 
@@ -33,10 +32,33 @@ public class Location {
     private String streetName;
 
     @Column(name="street_number")
-    private Integer streetNumber;
+    private String streetNumber;
 
-    @Column(name="zip_code")
-    private String zipCode;
+    @Column(name="post_code")
+    private String postCode;
+
+    /**
+     * Converts the address string into a location object
+     * @param address
+     * @return
+     */
+    public static Location covertAddressStringToLocation(String address) {
+        List<String> addressComponents = Arrays.asList(address.split(","));
+        try {
+            String streetNumber = addressComponents.get(0);
+            String streetName = addressComponents.get(1);
+            String city = addressComponents.get(2);
+            String country = addressComponents.get(3);
+            String region = addressComponents.get(4);
+            String postCode = addressComponents.get(5);
+            Location.Builder locationBuilder = new Location.Builder().atStreetNumber(streetNumber).onStreet(streetName)
+                    .inCity(city).inRegion(region).inCountry(country).withPostCode(postCode);
+            Location location = locationBuilder.build();
+            return location;
+        } catch (Exception e) {
+            throw e;
+        }
+    }
 
     /**
      * Checks all the parameters of the location are valid
@@ -50,9 +72,6 @@ public class Location {
         if (!checkValidStreetName(location.getStreetName())) {
             return false;
         }
-        if (!checkValidSuburb(location.getSuburb())) {
-            return false;
-        }
         if (!checkValidCity(location.getCity())) {
             return false;
         }
@@ -62,18 +81,20 @@ public class Location {
         if (!checkValidCountry(location.getCountry())) {
             return false;
         }
-        return checkValidZipCode(location.getZipCode());
+        return checkValidPostCode(location.getPostCode());
     }
 
     /**
      * Checks the street number is valid.
-     * The current highest number street in the world is 304, therefore no street should have more than 3 digits.
-     * Additionally, the street number should not be negative or zero.
+     * The current highest number street in the world is 304, however, certain addresses can have / in them such as
+     * 130/2 to refer to sub-units. Therefore we wil assume that there will never be more than 9999 houses on an
+     * individual street and that there will not be any more than 9999 sub-units. It will also contain less of equal to
+     * one backslash. Thus, the max length will be 9 characters long.
      * @param streetNumber The street number of the location
      * @return true if the street number is valid, false otherwise
      */
-    public boolean checkValidStreetNumber(Integer streetNumber) {
-        if (streetNumber != null && streetNumber > 0 && streetNumber <= 999) {
+    public boolean checkValidStreetNumber(String streetNumber) {
+        if (streetNumber != null && streetNumber.length() > 0 && streetNumber.length() <= 9 && streetNumber.matches("[0-9]+|[0-9]+\\/[0-9]+")) {
             return true;
         } else {
             return false;
@@ -91,22 +112,6 @@ public class Location {
      */
     public boolean checkValidStreetName(String streetName) {
         if (streetName != null && streetName.length() < 100 && streetName.length() > 0 && streetName.matches("[ a-zA-Z]+")) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    /**
-     * Checks the name of the suburb is valid
-     * Realistically no suburb name will be over 50 characters, they are also generally a single word. Therefore, the
-     * suburb name must be below 50 characters and have at least one character. Additionally, foreign addresses are
-     * expected to be put in the English version, thus, the suburb must only contain letters.
-     * @param suburb the suburb of the location
-     * @return true if the suburb name is valid, false otherwise
-     */
-    public boolean checkValidSuburb(String suburb) {
-        if (suburb != null && suburb.length() < 50 && suburb.length() > 0 && suburb.matches("[ a-zA-Z]+")) {
             return true;
         } else {
             return false;
@@ -162,15 +167,15 @@ public class Location {
     }
 
     /**
-     * Checks the zip code number is valid
-     * America has the largest zip codes which include 9 digits and some countries like Canada use letters within there
-     * zip codes. Therefore, the zip code must contain less or equal to 9 characters and above 0. Additionally, the
-     * zip code must be alphanumberic.
-     * @param zipCode the zip code of the location
-     * @return true if the zip code number is valid, false otherwise
+     * Checks the post code number is valid
+     * America has the largest post codes which include 9 digits and some countries like Canada use letters within there
+     * post codes. Therefore, the post code must contain less or equal to 9 characters and above 0. Additionally, the
+     * post code must be alphanumberic.
+     * @param postCode the post code of the location
+     * @return true if the post code number is valid, false otherwise
      */
-    public boolean checkValidZipCode(String zipCode) {
-        if (zipCode != null && zipCode.length() <= 9 && zipCode.length() > 0 && zipCode.matches("[a-zA-Z0-9]+")) {
+    public boolean checkValidPostCode(String postCode) {
+        if (postCode != null && postCode.length() <= 9 && postCode.length() > 0 && postCode.matches("[a-zA-Z0-9]+")) {
             return true;
         } else {
             return false;
@@ -189,10 +194,6 @@ public class Location {
         return city;
     }
 
-    public String getSuburb() {
-        return suburb;
-    }
-
     public String getRegion() {
         return region;
     }
@@ -201,12 +202,12 @@ public class Location {
         return streetName;
     }
 
-    public Integer getStreetNumber() {
+    public String getStreetNumber() {
         return streetNumber;
     }
 
-    public String getZipCode() {
-        return zipCode;
+    public String getPostCode() {
+        return postCode;
     }
 
     public void setId(Long id) {
@@ -229,14 +230,6 @@ public class Location {
         }
     }
 
-    public void setSuburb(String suburb) {
-        if (checkValidSuburb(suburb)) {
-            this.suburb = suburb;
-        } else {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "The suburb must not be empty, be less then 50 characters, and only contain letters.");
-        }
-    }
-
     public void setRegion(String region) {
         if (checkValidRegion(region)) {
             this.region = region;
@@ -253,7 +246,7 @@ public class Location {
         }
     }
 
-    public void setStreetNumber(Integer streetNumber) {
+    public void setStreetNumber(String streetNumber) {
         if (checkValidStreetNumber(streetNumber)) {
             this.streetNumber = streetNumber;
         } else {
@@ -261,11 +254,12 @@ public class Location {
         }
     }
 
-    public void setZipCode(String zipCode) {
-        if (checkValidZipCode(zipCode)) {
-            this.zipCode = zipCode;
+    public void setPostCode(String postCode) {
+        if (checkValidPostCode(postCode)) {
+            this.postCode = postCode;
         } else {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "The zip code must be a letter or number, be less than 10 characters long, and at least one character long.");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "The post code must be a letter or number, be " +
+                    "less than 10 characters long, and at least one character long.");
         }
     }
 
@@ -274,13 +268,13 @@ public class Location {
      */
     public static class Builder {
 
-        private  String country;
-        private  String city;
+        private String country;
+        private String city;
         private String suburb;
         private String region;
         private String streetName;
-        private Integer streetNumber;
-        private String zipCode;
+        private String streetNumber;
+        private String postCode;
 
         /**
          * Set the builder's country.
@@ -337,18 +331,18 @@ public class Location {
          * @param streetNumber An integer representing a street number.
          * @return Builder with street number parameter set.
          */
-        public Builder atStreetNumber(Integer streetNumber) {
+        public Builder atStreetNumber(String streetNumber) {
             this.streetNumber = streetNumber;
             return this;
         }
 
         /**
-         * Set the builder's zip code.
-         * @param zipCode A string representing a zip code.
-         * @return Builder with zip code parameter set.
+         * Set the builder's post code.
+         * @param postCode A string representing a post code.
+         * @return Builder with post code parameter set.
          */
-        public Builder withZipCode(String zipCode)  {
-            this.zipCode = zipCode;
+        public Builder withPostCode(String postCode)  {
+            this.postCode = postCode;
             return this;
         }
 
@@ -361,11 +355,9 @@ public class Location {
             location.setCountry(this.country);
             location.setCity(this.city);
             location.setRegion(this.region);
-            location.setCity(this.city);
-            location.setSuburb(this.suburb);
             location.setStreetName(this.streetName);
             location.setStreetNumber(this.streetNumber);
-            location.setZipCode(this.zipCode);
+            location.setPostCode(this.postCode);
             return location;
         }
 
