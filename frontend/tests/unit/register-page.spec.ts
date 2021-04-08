@@ -122,7 +122,7 @@ describe('Register.vue', () => {
     await wrapper.setData({
       email: "someemail@gmail.c"
     });
-    await Vue.nextTick(() => {
+    Vue.nextTick(() => {
       expect(registerButton.props().disabled).toBeTruthy();
     });
   });
@@ -133,7 +133,7 @@ describe('Register.vue', () => {
     await wrapper.setData({
       email: "someemail.com"
     });
-    await Vue.nextTick(() => {
+    Vue.nextTick(() => {
       expect(registerButton.props().disabled).toBeTruthy();
     });
   });
@@ -144,7 +144,7 @@ describe('Register.vue', () => {
     await wrapper.setData({
       email: "@gmail.com"
     });
-    await Vue.nextTick(() => {
+    Vue.nextTick(() => {
       expect(registerButton.props().disabled).toBeTruthy();
     });
   });
@@ -155,7 +155,7 @@ describe('Register.vue', () => {
     await wrapper.setData({
       email: "fsefsgr@gmailcom"
     });
-    await Vue.nextTick(() => {
+    Vue.nextTick(() => {
       expect(registerButton.props().disabled).toBeTruthy();
     });
   });
@@ -166,7 +166,7 @@ describe('Register.vue', () => {
     await wrapper.setData({
       email: ""
     });
-    await Vue.nextTick(() => {
+    Vue.nextTick(() => {
       expect(registerButton.props().disabled).toBeTruthy();
     });
   });
@@ -178,7 +178,7 @@ describe('Register.vue', () => {
     await wrapper.setData({
       email: 'a'.repeat(101)
     });
-    await Vue.nextTick(() => {
+    Vue.nextTick(() => {
       expect(registerButton.props().disabled).toBeTruthy();
     });
   });
@@ -189,7 +189,7 @@ describe('Register.vue', () => {
     await wrapper.setData({
       password: "hello"
     });
-    await Vue.nextTick(() => {
+    Vue.nextTick(() => {
       expect(registerButton.props().disabled).toBeTruthy();
     });
   });
@@ -200,7 +200,7 @@ describe('Register.vue', () => {
     await wrapper.setData({
       password: "123455678"
     });
-    await Vue.nextTick(() => {
+    Vue.nextTick(() => {
       expect(registerButton.props().disabled).toBeTruthy();
     });
   });
@@ -211,7 +211,7 @@ describe('Register.vue', () => {
     await wrapper.setData({
       password: "abcd1"
     });
-    await Vue.nextTick(() => {
+    Vue.nextTick(() => {
       expect(registerButton.props().disabled).toBeTruthy();
     });
   });
@@ -222,7 +222,7 @@ describe('Register.vue', () => {
     await wrapper.setData({
       password: ""
     });
-    await Vue.nextTick(() => {
+    Vue.nextTick(() => {
       expect(registerButton.props().disabled).toBeTruthy();
     });
   });
@@ -233,7 +233,7 @@ describe('Register.vue', () => {
     await wrapper.setData({
       password: 'a'.repeat(101)
     });
-    await Vue.nextTick(() => {
+    Vue.nextTick(() => {
       expect(registerButton.props().disabled).toBeTruthy();
     });
   });
@@ -246,7 +246,7 @@ describe('Register.vue', () => {
     let eyeButton = showPasswordInput.findComponent({name: "v-icon"});
     //clicking on the icon would allow the user to see the password, thus making showPassword true
     eyeButton.trigger("click");
-    await Vue.nextTick(() => {
+    Vue.nextTick(() => {
       expect(wrapper.vm.showPassword).toBeTruthy();
     });
   });
@@ -258,7 +258,7 @@ describe('Register.vue', () => {
     await wrapper.setData({
       confirmPassword: "somepassword2"
     });
-    await Vue.nextTick(() => {
+    Vue.nextTick(() => {
       expect(registerButton.props().disabled).toBeTruthy();
     });
   });
@@ -269,7 +269,7 @@ describe('Register.vue', () => {
     await wrapper.setData({
       confirmPassword: ""
     });
-    await Vue.nextTick(() => {
+    Vue.nextTick(() => {
       expect(registerButton.props().disabled).toBeTruthy();
     });
   });
@@ -282,7 +282,7 @@ describe('Register.vue', () => {
     let eyeButton = showConfirmPasswordInput.findComponent({name: "v-icon"});
     //clicking on the icon would allow the user to see the password, thus making showConfirmPassword true
     eyeButton.trigger("click");
-    await Vue.nextTick(() => {
+    Vue.nextTick(() => {
       expect(wrapper.vm.showConfirmPassword).toBeTruthy();
     });
   });
@@ -293,7 +293,7 @@ describe('Register.vue', () => {
     await wrapper.setData({
       name: ""
     });
-    await Vue.nextTick(() => {
+    Vue.nextTick(() => {
       expect(registerButton.props().disabled).toBeTruthy();
     });
   });
@@ -304,7 +304,7 @@ describe('Register.vue', () => {
     await wrapper.setData({
       name: "somename1"
     });
-    await Vue.nextTick(() => {
+    Vue.nextTick(() => {
       expect(registerButton.props().disabled).toBeTruthy();
     });
   });
@@ -315,7 +315,7 @@ describe('Register.vue', () => {
     await wrapper.setData({
       name: 'a'.repeat(101)
     });
-    await Vue.nextTick(() => {
+    Vue.nextTick(() => {
       expect(registerButton.props().disabled).toBeTruthy();
     });
   });
@@ -326,7 +326,7 @@ describe('Register.vue', () => {
     await wrapper.setData({
       nickname: "somename1"
     });
-    await Vue.nextTick(() => {
+    Vue.nextTick(() => {
       expect(registerButton.props().disabled).toBeTruthy();
     });
   });
@@ -337,7 +337,7 @@ describe('Register.vue', () => {
     await wrapper.setData({
       nickname: 'a'.repeat(101)
     });
-    await Vue.nextTick(() => {
+    Vue.nextTick(() => {
       expect(registerButton.props().disabled).toBeTruthy();
     });
   });
@@ -348,7 +348,7 @@ describe('Register.vue', () => {
     await wrapper.setData({
       bio: 'a'.repeat(201)
     });
-    await Vue.nextTick(() => {
+    Vue.nextTick(() => {
       expect(registerButton.props().disabled).toBeTruthy();
     });
   });
@@ -359,7 +359,7 @@ describe('Register.vue', () => {
     await wrapper.setData({
       dob: ""
     });
-    await Vue.nextTick(() => {
+    Vue.nextTick(() => {
       expect(registerButton.props().disabled).toBeTruthy();
     });
   });
@@ -370,7 +370,7 @@ describe('Register.vue', () => {
     await wrapper.setData({
       phone: "123456789a"
     });
-    await Vue.nextTick(() => {
+    Vue.nextTick(() => {
       expect(registerButton.props().disabled).toBeTruthy();
     });
   });
@@ -381,7 +381,7 @@ describe('Register.vue', () => {
     await wrapper.setData({
       phone: '1'.repeat(101)
     });
-    await Vue.nextTick(() => {
+    Vue.nextTick(() => {
       expect(registerButton.props().disabled).toBeTruthy();
     });
   });
@@ -392,7 +392,7 @@ describe('Register.vue', () => {
     await wrapper.setData({
       street1: ""
     });
-    await Vue.nextTick(() => {
+    Vue.nextTick(() => {
       expect(registerButton.props().disabled).toBeTruthy();
     });
   });
@@ -403,7 +403,7 @@ describe('Register.vue', () => {
     await wrapper.setData({
       district: 'a'.repeat(101)
     });
-    await Vue.nextTick(() => {
+    Vue.nextTick(() => {
       expect(registerButton.props().disabled).toBeTruthy();
     });
   });
@@ -414,7 +414,7 @@ describe('Register.vue', () => {
     await wrapper.setData({
       city: ""
     });
-    await Vue.nextTick(() => {
+    Vue.nextTick(() => {
       expect(registerButton.props().disabled).toBeTruthy();
     });
   });
@@ -425,7 +425,7 @@ describe('Register.vue', () => {
     await wrapper.setData({
       city: 'a'.repeat(101)
     });
-    await Vue.nextTick(() => {
+    Vue.nextTick(() => {
       expect(registerButton.props().disabled).toBeTruthy();
     });
   });
@@ -436,7 +436,7 @@ describe('Register.vue', () => {
     await wrapper.setData({
       state: ""
     });
-    await Vue.nextTick(() => {
+    Vue.nextTick(() => {
       expect(registerButton.props().disabled).toBeTruthy();
     });
   });
@@ -447,7 +447,7 @@ describe('Register.vue', () => {
     await wrapper.setData({
       state: 'a'.repeat(101)
     });
-    await Vue.nextTick(() => {
+    Vue.nextTick(() => {
       expect(registerButton.props().disabled).toBeTruthy();
     });
   });
@@ -458,7 +458,7 @@ describe('Register.vue', () => {
     await wrapper.setData({
       country: ""
     });
-    await Vue.nextTick(() => {
+    Vue.nextTick(() => {
       expect(registerButton.props().disabled).toBeTruthy();
     });
   });
@@ -469,7 +469,7 @@ describe('Register.vue', () => {
     await wrapper.setData({
       country: 'a'.repeat(101)
     });
-    await Vue.nextTick(() => {
+    Vue.nextTick(() => {
       expect(registerButton.props().disabled).toBeTruthy();
     });
   });
