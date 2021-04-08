@@ -160,6 +160,7 @@ pre {
 }
 
 .action-pane {
+  max-height: 200px;
   margin-left: 10px;
   flex: 1;
 }
