@@ -48,8 +48,8 @@ public class BusinessController {
                 .inCity(businessLocation.getAsString("city"))
                 .inRegion(businessLocation.getAsString("region"))
                 .onStreet(businessLocation.getAsString("streetName"))
-                .atStreetNumber(businessLocation.getAsNumber("streetNumber").intValue())
-                .withZipCode(businessLocation.getAsString("postcode"))
+                .atStreetNumber(businessLocation.getAsString("streetNumber"))
+                .withPostCode(businessLocation.getAsString("postcode"))
                 .inSuburb("suburb")
                 .build();
         return address;
