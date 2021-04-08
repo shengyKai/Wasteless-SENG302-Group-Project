@@ -5,6 +5,7 @@ import org.apache.logging.log4j.Logger;
 import org.seng302.Controllers.DGAAController;
 import org.seng302.Entities.Business;
 import org.seng302.Entities.Location;
+import org.seng302.Entities.Location;
 import org.seng302.Entities.User;
 import org.seng302.Persistence.BusinessRepository;
 import org.seng302.Persistence.DGAARepository;
@@ -18,8 +19,10 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * NOTE: Use this class to setup application
@@ -72,26 +75,33 @@ public class MainApplicationRunner implements ApplicationRunner {
                 .withPrimaryOwner(user)
                 .build();
 
-        _businessRepository.save(business);
-
+        Business testBusiness = _businessRepository.save(business);
+        testBusiness.addAdmin(user);
+        _businessRepository.save(testBusiness);
+        user = _userRepository.findByEmail("123andyelliot@gmail.com");
     }
 
-    private List<User> readUserFile(String filepath) throws IOException {
+    /**
+     * Reads users from a csv to create a list of user objects
+     * @param filepath the directory of the user data csv
+     * @return A list of user objects
+     * @throws IOException
+     */
+    private List<User> readUserFile(String filepath) throws IOException, Exception {
         List<User> userList = new ArrayList<>();
         String row;
         BufferedReader csvReader = new BufferedReader(new FileReader(filepath));
         while ((row = csvReader.readLine()) != null) {
             try {
-                String[] userData = row.split(";");
+                String[] userData = row.split("\\|");
                 User user = new User.Builder().withFirstName(userData[0]).withMiddleName(userData[1]).withLastName(userData[2]).withNickName(userData[3])
-                        .withEmail(userData[4]).withPassword(userData[5]).withAddress(userData[6]).withDob(userData[7]).build();
+                        .withEmail(userData[4]).withPassword(userData[5]).withAddress(Location.covertAddressStringToLocation(userData[6])).withDob(userData[7]).build();
                 userList.add(user);
             } catch (Exception e) {
-
+                e.printStackTrace();
+                throw e;
             }
         }
-
-
         csvReader.close();
         return userList;
     }

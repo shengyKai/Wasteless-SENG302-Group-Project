@@ -162,7 +162,7 @@
         type="city"
         class="required"
         v-model="city"
-        :rules="maxCharRules"
+        :rules="maxCharRules.concat(mandatoryRules)"
       />
 
       <!-- INPUT: State -->
@@ -170,7 +170,7 @@
         type="state"
         class="required"
         v-model="state"
-        :rules="maxCharRules"
+        :rules="maxCharRules.concat(mandatoryRules)"
       />
 
       <!-- INPUT: Country -->
@@ -178,7 +178,7 @@
         type="country"
         class="required"
         v-model="country"
-        :rules="maxCharRules"
+        :rules="maxCharRules.concat(mandatoryRules)"
       />
 
       <!-- INPUT: Postcode -->

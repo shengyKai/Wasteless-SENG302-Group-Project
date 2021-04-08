@@ -5,6 +5,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.seng302.Entities.Account;
+import org.seng302.Entities.Location;
 import org.seng302.Persistence.AccountRepository;
 import org.seng302.Entities.User;
 import org.seng302.Persistence.BusinessRepository;
@@ -54,7 +55,8 @@ class LoginControllerTest {
                 .withBio("Likes long walks on the beach")
                 .withDob("2021-03-11")
                 .withPhoneNumber("+64 3 555 0129")
-                .withAddress("4 Rountree Street, Upper Riccarton")
+                .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Christchurch,New Zealand," +
+                        "Canterbury,8041"))
                 .build();
         Account sameEmailAccount = accountRepository.findByEmail("johnsmith99@gmail.com");
         if (sameEmailAccount != null) {
