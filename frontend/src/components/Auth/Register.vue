@@ -275,7 +275,7 @@ export default {
         field => /^\(?\d{1,3}\)?[\s.-]?\d{3,4}[\s.-]?\d{4,5}$/.test(field) || 'Must be a valid phone number'
       ],
       countryCodeRules: [
-        field => /^(\d{1,2}-)?\d{2,3}$/.test(field) || 'Must be a valid country code. Do not include +'
+        field => /^(\d{1,2}-)?\d{2,3}$/.test(field) || 'Must be a valid country code.'
       ],
     };
   },
