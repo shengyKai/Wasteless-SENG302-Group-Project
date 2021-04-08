@@ -48,14 +48,37 @@
           </v-list>
         </v-menu>
       </div>
-
-      <!-- User name and icon -->
-      <v-chip v-if="user">
-        <UserAvatar :user="user" size="small" />
-        <div class="name">
-          {{ user.firstName }}
-        </div>
-      </v-chip>
+      <!-- Dropdown menu for selecting role which user is currently acting as -->
+      <div class="role-menu">
+        <v-menu offset-y>
+          <template v-slot:activator="{ on, attrs }">
+            <!-- User name and icon -->
+            <v-chip
+              v-if="user"
+              v-bind="attrs"
+              v-on="on"
+            >
+              <UserAvatar :user="user" size="small" />
+              <div class="name">
+                {{ roles[selectedRole].displayText }}
+              </div>
+            </v-chip>
+          </template>
+          <v-list>
+            <v-list-item-group
+              v-model="selectedRole"
+              color="primary"
+            >
+              <v-list-item
+                v-for="(role, index) in roles"
+                :key="index"
+              >
+                <v-list-item-title>{{ role.displayText }}</v-list-item-title>
+              </v-list-item>
+            </v-list-item-group>
+          </v-list>
+        </v-menu>
+      </div>
     </div>
   </v-app-bar>
 </template>
@@ -65,6 +88,7 @@ import SearchBar from "./utils/SearchBar";
 import UserAvatar from "./utils/UserAvatar";
 import CreateBusiness from "./BusinessProfile/CreateBusiness";
 import { USER_ROLES } from "../utils";
+import {getBusiness} from "@/api";
 
 export default {
   name: "AppBar",
@@ -76,11 +100,23 @@ export default {
   data() {
     return {
       showBusinessDialog: false,
+      roles : [],
+      selectedRole : 0,
     };
   },
   methods: {
     viewProfile() {
-      this.$router.push("/profile");
+      // Navigate to the profile page of the current active role
+      switch (this.$store.state.activeRole.type) {
+      case "user":
+        this.$router.push("/profile");
+        break;
+      case "business":
+        this.$router.push("/business/" + this.$store.state.activeRole.id);
+        break;
+      default:
+        this.$router.push("/profile");
+      }
     },
     logout() {
       this.$store.commit("logoutUser");
@@ -107,8 +143,38 @@ export default {
     },
     user() {
       return this.$store.state.user;
-    },
+    }
   },
+  watch : {
+    user: { async handler() {
+      // When the user changes, update the list of roles that the user can 'act as'
+      this.roles = [ { displayText: this.user.firstName, type: "user", id: this.user.id } ];
+      if (this.user.businessesAdministered === null) return;
+
+      const promises = this.user.businessesAdministered.map(id => {
+        return new Promise((resolve, reject) => {
+          getBusiness(id)
+            .then(value => {
+              if (typeof value === 'string') reject(value);
+              else resolve(value);
+            })
+            .catch(err => reject(err));
+        });
+      });
+
+      const businesses = await Promise.all(promises);
+
+      for (let business of businesses || []) {
+        this.roles.push({ displayText: business.name, type: "business", id: business.id });
+      }
+    },
+    immediate: true },
+    selectedRole() {
+      // Set the role that the user is acting as to the role that has been selected from the list
+      const role = this.roles[this.selectedRole];
+      this.$store.state.activeRole = { type: role.type, id: role.id };
+    },
+  }
 };
 </script>
 

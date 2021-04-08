@@ -41,7 +41,8 @@ describe('UserProfile.vue', () => {
         created: "1/1/1950",
         role: "user",
         businessesAdministered: [],
-      }
+      },
+      activeRole: null,
     };
     let store = new Vuex.Store(options);
 

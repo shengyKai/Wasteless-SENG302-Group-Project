@@ -9,6 +9,7 @@ import org.junit.Ignore;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
+import org.seng302.Entities.Location;
 import org.seng302.Entities.User;
 import org.seng302.Persistence.BusinessRepository;
 import org.seng302.Persistence.UserRepository;
@@ -108,7 +109,8 @@ public class UsersControllerTest {
                 .withBio("Likes long walks on the beach")
                 .withDob("2021-03-11")
                 .withPhoneNumber("+64 3 555 0129")
-                .withAddress("4 Rountree Street, Upper Riccarton")
+                .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Christchurch,New Zealand," +
+                        "Canterbury,8041"))
                 .build();
         businessRepository.deleteAll();
         userRepository.deleteAll();
@@ -128,9 +130,9 @@ public class UsersControllerTest {
         BufferedReader csvReader = new BufferedReader(new FileReader(filename));
         while ((row = csvReader.readLine()) != null) {
             try {
-                String[] userData = row.split(",");
+                String[] userData = row.split("\\|");
                 User user = new User.Builder().withFirstName(userData[0]).withMiddleName(userData[1]).withLastName(userData[2]).withNickName(userData[3])
-                        .withEmail(userData[4]).withPassword(userData[5]).withAddress(userData[6]).withDob(userData[7]).build();
+                        .withEmail(userData[4]).withPassword(userData[5]).withAddress(Location.covertAddressStringToLocation(userData[6])).withDob(userData[7]).build();
                 userList.add(user);
             } catch (Exception e) {
 

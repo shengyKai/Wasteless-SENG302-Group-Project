@@ -24,7 +24,7 @@ public class User extends Account {
     private String bio;
     private Date dob;
     private String phNum;
-    private String address;
+    private Location address;
     private Date created;
     private String role;
     private Set<Business> businessesAdministered = new HashSet<>();
@@ -189,36 +189,54 @@ public class User extends Account {
         if (phNum == null || Pattern.matches(phoneRegex, phNum)) {
             validPhone = true;
         }
-            if (validPhone) {
-                this.phNum = phNum;
-            } else {
+        if (validPhone) {
+            this.phNum = phNum;
+        } else {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Your phone number has been entered incorrectly");
-            }
         }
+    }
 
 
     /**
      * Gets the users country, city, street, house number etc as string
      * @return address
      */
-    @Column(nullable = false)
-    public String getAddress() {
+    @OneToOne(cascade = CascadeType.ALL)
+    //@Column(nullable = false)
+    public Location getAddress() {
     return this.address;
     }
 
     /**
      * Sets the users home address
      * Not Null
-     * @param address where the user lives/provides items from
+     * @param address where the user lives/provides items from as a location object
      */
-    public void setAddress(String address) {
-        if (address != null && address.length() > 0 && address.length() <= 255) {
+    public void setAddress(Location address) {
+        if (address != null) {
             this.address = address;
         } else {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Your address has been entered incorrectly");
         }
     }
 
+    /**
+     * Sets the users home address.
+     * Not Null
+     * @param address where the user lives/provides items from as a string
+     */
+    public void setAddress(String address) {
+        try {
+            if (address != null && address.length() > 0 && address.length() <= 255) {
+                this.address = Location.covertAddressStringToLocation(address);
+            } else {
+                throw new Exception("Address not entered correctly.");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Your address has been entered incorrectly");
+        }
+    }
 
     /**
      * Date the account was created
@@ -302,7 +320,7 @@ public class User extends Account {
         attributeMap.put("email", getEmail());
         attributeMap.put("bio", bio);
         attributeMap.put("created", created.toString());
-        attributeMap.put("homeAddress", getAddress());
+        attributeMap.put("homeAddress", getAddress().toString());
         return new JSONObject(attributeMap);
     }
 
@@ -335,7 +353,7 @@ public class User extends Account {
         private String bio;
         private Date dob;
         private String phNum;
-        private String address;
+        private Location address;
         private String password;
 
         /**
@@ -424,7 +442,7 @@ public class User extends Account {
          * @param address a string representing the user's address.
          * @return Builder with address set.
          */
-        public Builder withAddress(String address) {
+        public Builder withAddress(Location address) {
             this.address = address;
             return this;
         }

@@ -1,15 +1,17 @@
-import { User, getUser } from './api';
+import {User, getUser, Business} from './api';
 import Vuex, { Store, StoreOptions } from 'vuex';
 import { COOKIE, deleteCookie, setCookie } from './utils';
 
 export type StoreData = {
   user: User | null,
+  activeRole: { type: "user" | "business", id: number} | null,
 };
 
 export function createOptions(): StoreOptions<StoreData> {
   return {
     state: {
       user: null,
+      activeRole: null,
     },
     mutations: {
       setUser (state, payload: User) {

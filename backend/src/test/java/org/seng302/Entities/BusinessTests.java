@@ -44,7 +44,8 @@ public class BusinessTests {
                 .withBio("Likes long walks on the beach")
                 .withDob("2021-03-11")
                 .withPhoneNumber("+64 3 555 0129")
-                .withAddress("4 Rountree Street, Upper Riccarton")
+                .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Christchurch,New Zealand," +
+                        "Canterbury,8041"))
                 .build();
         testUser2 = new User.Builder()
                 .withFirstName("Dave")
@@ -56,7 +57,8 @@ public class BusinessTests {
                 .withBio("Likes long walks on the beach")
                 .withDob("2021-03-11")
                 .withPhoneNumber("+64 3 555 0129")
-                .withAddress("4 Rountree Street, Upper Riccarton")
+                .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Christchurch,New Zealand," +
+                        "Canterbury,8041"))
                 .build();
         testUser1 = userRepository.save(testUser1);
         testUser2 = userRepository.save(testUser2);
