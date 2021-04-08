@@ -856,11 +856,14 @@ class UserSearchHelperTest {
     @Test
     public void getSearchResultsOrderedByRelevanceCorrectRelevanceOrderReverseTrueTest() throws ParseException {
         userRepository.deleteAll();
-        User donaldDuck = new User.Builder().withFirstName("Donald").withLastName("Duck").withAddress("1313 Webfoot Walk, Duckburg, Calisota")
+        User donaldDuck = new User.Builder().withFirstName("Donald").withLastName("Duck").withAddress(
+                Location.covertAddressStringToLocation("4,Rountree Street,Christchurch,New Zealand,Canterbury,8041"))
                 .withDob("1934-06-09").withEmail("donald.duck@waddlemail.com").withPassword("HonkHonk").build();
-        User donaldSmith = new User.Builder().withFirstName("Donald").withLastName("Smith").withAddress("92 Clyde Road, Ilam, Christchurch")
+        User donaldSmith = new User.Builder().withFirstName("Donald").withLastName("Smith").withAddress(
+                Location.covertAddressStringToLocation("4,Rountree Street,Christchurch,New Zealand,Canterbury,8041"))
                 .withDob("1994-03-08").withEmail("donald.smith@gmail.com").withPassword("123456789").build();
-        User lucyMcDonald = new User.Builder().withFirstName("Lucy").withLastName("McDonald").withAddress("39 Riccarton Road, Riccarton, Christchurch")
+        User lucyMcDonald = new User.Builder().withFirstName("Lucy").withLastName("McDonald").withAddress(
+                Location.covertAddressStringToLocation("4,Rountree Street,Christchurch,New Zealand,Canterbury,8041"))
                 .withDob("2000-11-21").withEmail("lucymcdonald@hotmail.com").withPassword("password").build();
         userRepository.save(lucyMcDonald);
         userRepository.save(donaldDuck);

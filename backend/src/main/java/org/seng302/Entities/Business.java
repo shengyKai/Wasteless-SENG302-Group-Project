@@ -4,10 +4,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 @Entity
 public class Business {
@@ -143,7 +140,7 @@ public class Business {
      * @param owner Owner of business
      */
     private void setPrimaryOwner(User owner) {
-        if (owner == null ) {
+        if (owner == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The business must have a primary owner");
         }
         this.primaryOwner = owner;
