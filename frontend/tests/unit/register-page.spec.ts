@@ -1,6 +1,6 @@
 import Vue from 'vue';
 import Vuetify from 'vuetify';
-import {createLocalVue, mount, Wrapper} from '@vue/test-utils';
+import { createLocalVue, mount, Wrapper } from '@vue/test-utils';
 
 import Index from '@/components/Auth/index.vue';
 import Login from '@/components/Auth/Login.vue';
@@ -107,14 +107,18 @@ describe('Register.vue', () => {
     };
   });
 
+  /**
+   * The series of tests here is to check if the register button is disabled when an invalid format is provided in any of the
+   * input fields.
+   */
   it("Testing out all inputs, such that the user can only press the register button " +
     "after inputting valid formats for all fields", async () => {
-    //find the register button by the component
-    const registerButton = wrapper.find(".v-btn");
-    //since the fields are all inputted with valid formats and all mandatory fields are filled, the button should not be
-    //disabled.
-    expect(registerButton.props().disabled).toBeFalsy();
-  });
+      //find the register button by the component
+      const registerButton = wrapper.find(".v-btn");
+      //since the fields are all inputted with valid formats and all mandatory fields are filled, the button should not be
+      //disabled.
+      expect(registerButton.props().disabled).toBeFalsy();
+    });
 
   it("Testing for invalid email format, with less than two characters after each '.'", async () => {
     const registerButton = wrapper.find(".v-btn");
@@ -171,7 +175,6 @@ describe('Register.vue', () => {
     });
   });
 
-  // this test hangs the system sometimes, commented out for the moment
   it("Testing for invalid email format, over character limit", async () => {
     const registerButton = wrapper.find(".v-btn");
 
@@ -238,19 +241,6 @@ describe('Register.vue', () => {
     });
   });
 
-  it("Testing the password field's mdi-eye icon to show user input", async () => {
-    //originally it should be false
-    expect(wrapper.vm.showPassword).toBeFalsy();
-
-    let showPasswordInput = wrapper.findComponent({ref: "password"});
-    let eyeButton = showPasswordInput.findComponent({name: "v-icon"});
-    //clicking on the icon would allow the user to see the password, thus making showPassword true
-    eyeButton.trigger("click");
-    Vue.nextTick(() => {
-      expect(wrapper.vm.showPassword).toBeTruthy();
-    });
-  });
-
   it("Testing for invalid confirm password format, different input value from password field", async () => {
     const registerButton = wrapper.find(".v-btn");
 
@@ -271,19 +261,6 @@ describe('Register.vue', () => {
     });
     Vue.nextTick(() => {
       expect(registerButton.props().disabled).toBeTruthy();
-    });
-  });
-
-  it("Testing the confirm password field's mdi-eye icon to show user input", async () => {
-    //originally it should be false
-    expect(wrapper.vm.showConfirmPassword).toBeFalsy();
-
-    let showConfirmPasswordInput = wrapper.findComponent({ref: "confirmPassword"});
-    let eyeButton = showConfirmPasswordInput.findComponent({name: "v-icon"});
-    //clicking on the icon would allow the user to see the password, thus making showConfirmPassword true
-    eyeButton.trigger("click");
-    Vue.nextTick(() => {
-      expect(wrapper.vm.showConfirmPassword).toBeTruthy();
     });
   });
 
@@ -471,6 +448,38 @@ describe('Register.vue', () => {
     });
     Vue.nextTick(() => {
       expect(registerButton.props().disabled).toBeTruthy();
+    });
+  });
+
+  /**
+  * Tests the show password icon works if the user clicks on it
+  */
+  it("Testing the password field's mdi-eye icon to show user input", async () => {
+    //originally it should be false
+    expect(wrapper.vm.showPassword).toBeFalsy();
+
+    let showPasswordInput = wrapper.findComponent({ ref: "password" });
+    let eyeButton = showPasswordInput.findComponent({ name: "v-icon" });
+    //clicking on the icon would allow the user to see the password, thus making showPassword true
+    eyeButton.trigger("click");
+    Vue.nextTick(() => {
+      expect(wrapper.vm.showPassword).toBeTruthy();
+    });
+  });
+
+  /**
+  * Tests the show confirm password icon works if the user clicks on it
+  */
+  it("Testing the confirm password field's mdi-eye icon to show user input", async () => {
+    //originally it should be false
+    expect(wrapper.vm.showConfirmPassword).toBeFalsy();
+
+    let showConfirmPasswordInput = wrapper.findComponent({ ref: "confirmPassword" });
+    let eyeButton = showConfirmPasswordInput.findComponent({ name: "v-icon" });
+    //clicking on the icon would allow the user to see the password, thus making showConfirmPassword true
+    eyeButton.trigger("click");
+    Vue.nextTick(() => {
+      expect(wrapper.vm.showConfirmPassword).toBeTruthy();
     });
   });
 });
