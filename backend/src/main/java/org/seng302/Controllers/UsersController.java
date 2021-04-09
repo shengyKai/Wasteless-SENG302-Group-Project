@@ -114,7 +114,7 @@ public class UsersController {
      */
     @GetMapping("/users/search/count")
     JSONObject getSearchCount(HttpServletRequest session, @RequestParam("searchQuery") String searchQuery) {
-        //AuthenticationTokenManager.checkAuthenticationToken(session);
+        AuthenticationTokenManager.checkAuthenticationToken(session);
         logger.info(String.format("Performing search for \"%s\" and getting search count", searchQuery));
         List<User> queryResults;
         queryResults = UserSearchHelper.getSearchResultsOrderedByRelevance(searchQuery, userRepository, "false");
@@ -142,7 +142,7 @@ public class UsersController {
                                 @RequestParam(required = false) String orderBy,
                                 @RequestParam(required = false) String reverse) {
 
-        //AuthenticationTokenManager.checkAuthenticationToken(session); // Check user auth
+        AuthenticationTokenManager.checkAuthenticationToken(session); // Check user auth
 
         logger.info(String.format("Performing search for \"%s\"", searchQuery));
         List<User> queryResults;
