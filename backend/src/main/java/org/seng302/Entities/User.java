@@ -314,13 +314,14 @@ public class User extends Account {
         Map<String, Object> attributeMap = new HashMap<>();
         attributeMap.put("id",          getUserID());
         attributeMap.put("firstName",   getFirstName());
-        attributeMap.put("middleName",  getMiddleName());
         attributeMap.put("lastName",    getLastName());
-        attributeMap.put("nickname",    getNickname());
         attributeMap.put("email",       getEmail());
-        attributeMap.put("bio",         getBio());
+        attributeMap.put("dateOfBirth", getDob().toString());
         attributeMap.put("created",     getCreated().toString());
         attributeMap.put("homeAddress", getAddress().toString());
+        if (getMiddleName() != null) { attributeMap.put("middleName",  getMiddleName()); }
+        if (getNickname() != null) { attributeMap.put("nickname",    getNickname()); }
+        if (getBio() != null) { attributeMap.put("bio", getBio()); }
         return new JSONObject(attributeMap);
     }
 
@@ -332,7 +333,6 @@ public class User extends Account {
     public JSONObject constructPrivateJson() {
         //Map<String, String> attributeMap = constructPublicJson();
         JSONObject json = constructPublicJson();
-        json.appendField("dateOfBirth", dob.toString());
         json.appendField("phoneNumber", phNum);
         json.appendField("role", role);
         //json.appendField("businessesAdministered", businessesAdministered);

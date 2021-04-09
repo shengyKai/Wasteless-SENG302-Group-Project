@@ -50,7 +50,7 @@ export type User = {
   phoneNumber?: string,
   homeAddress: string,
   created?: string,
-  role: "user" | "globalApplicationAdmin" | "defaultGlobalApplicationAdmin",
+  role?: "user" | "globalApplicationAdmin" | "defaultGlobalApplicationAdmin",
   businessesAdministered?: number[],
 };
 
@@ -101,7 +101,8 @@ function isUser(obj: any): obj is User {
   if (obj.phoneNumber !== undefined && typeof obj.phoneNumber !== 'string') return false;
   if (typeof obj.homeAddress !== 'string') return false;
   if (obj.created !== undefined && typeof obj.created !== 'string') return false;
-  if (!['user', 'globalApplicationAdmin', 'defaultGlobalApplicationAdmin'].includes(obj.role)) return false;
+  if (obj.role !== undefined && !['user', 'globalApplicationAdmin', 'defaultGlobalApplicationAdmin'].includes(obj.role))
+    return false;
   if (obj.businessesAdministered !== undefined && !isNumberArray(obj.businessesAdministered)) return false;
 
   return true;
