@@ -312,14 +312,14 @@ public class User extends Account {
     // Todo: Replace email with profile picture once profile pictures added.
     public JSONObject constructPublicJson() {
         Map<String, Object> attributeMap = new HashMap<>();
-        attributeMap.put("id", getUserID());
-        attributeMap.put("firstName", firstName);
-        attributeMap.put("middleName", middleName);
-        attributeMap.put("lastName", lastName);
-        attributeMap.put("nickname", nickname);
-        attributeMap.put("email", getEmail());
-        attributeMap.put("bio", bio);
-        attributeMap.put("created", created.toString());
+        attributeMap.put("id",          getUserID());
+        attributeMap.put("firstName",   getFirstName());
+        attributeMap.put("middleName",  getMiddleName());
+        attributeMap.put("lastName",    getLastName());
+        attributeMap.put("nickname",    getNickname());
+        attributeMap.put("email",       getEmail());
+        attributeMap.put("bio",         getBio());
+        attributeMap.put("created",     getCreated().toString());
         attributeMap.put("homeAddress", getAddress().toString());
         return new JSONObject(attributeMap);
     }
