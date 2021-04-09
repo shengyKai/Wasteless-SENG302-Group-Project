@@ -793,9 +793,7 @@ public class UsersControllerTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        String dob = JsonPath.read(result.getResponse().getContentAsString(), "$.dateOfBirth");
         String role = JsonPath.read(result.getResponse().getContentAsString(), "$.role");
-        assertNotNull(dob);
         assertNotNull(role);
     }
     /**
@@ -815,7 +813,6 @@ public class UsersControllerTest {
                 .andReturn();
 
         org.json.JSONObject json = new org.json.JSONObject(result.getResponse().getContentAsString());
-        assertFalse(json.has("dateOfBirth"));
         assertFalse(json.has("role"));
     }
     /**
@@ -835,7 +832,6 @@ public class UsersControllerTest {
 
         org.json.JSONObject json = new org.json.JSONObject(result.getResponse().getContentAsString());
         // Result should contain role and DOB
-        assertTrue(json.has("dateOfBirth"));
         assertTrue(json.has("role"));
     }
     //endregion
