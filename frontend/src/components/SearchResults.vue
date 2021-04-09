@@ -127,31 +127,9 @@ export default {
 
   computed: {
     totalPages() {
-      return Math.ceil(this.users.length / this.resultsPerPage);
-    },
-
-    sortedUsers() {
-      if (this.users === undefined) return undefined;
-
-      const comparator = this.comparators[this.sortByKey];
-      let result = Array.from(this.users);
-
-      if (comparator) {
-        result.sort(comparator);
-      }
-
-      let shouldReverse = this.isSortDescending;
-      // If there is no comparator then we should be sorting by relevance and we need to flip the list around
-      if (!comparator) shouldReverse = !shouldReverse;
-
-      if (shouldReverse) result.reverse();
-      return result;
-    },
-    //Formula in method slices the results based on the number of results per page and which page the user is
-    //currently at, so that it will show the proper sets of results per page
-
-    visibleUsers() {
-      return this.sortedUsers.slice((this.currentPage - 1) * this.resultsPerPage, this.currentPage * this.resultsPerPage);
+      return 10;
+      //TODO after implemented, add logic
+      //return Math.ceil(this.users.length / this.resultsPerPage);
     },
   },
 
