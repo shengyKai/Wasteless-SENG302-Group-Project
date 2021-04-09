@@ -137,18 +137,24 @@ function isUserArray(obj: any): obj is User[] {
   return true;
 }
 
+type OrderBy = 'userId' | 'relevance' | 'firstName' | 'middleName' | 'lastName' | 'nickname' | 'email' | 'address';
+
 /**
  * Sends a search query to the backend and returns a list of users or an error string.
  *
  * @param query Query string to search for
  * @returns List of user infos or an error message
  */
-export async function search(query: string): Promise<MaybeError<User[]>> {
+export async function search(query: string, pageIndex: number, resultsPerPage: number, orderBy: OrderBy, reverse: String): Promise<MaybeError<User[]>> {
   let response;
   try {
     response = await instance.get('/users/search', {
       params: {
-        'searchQuery': query,
+        searchQuery: query,
+        page: pageIndex,
+        resultsPerPage,
+        orderBy,
+        reverse
       }
     });
   } catch (error) {
