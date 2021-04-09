@@ -1,5 +1,6 @@
 package org.seng302.Controllers;
 
+import com.jayway.jsonpath.JsonPath;
 import net.minidev.json.JSONObject;
 import net.minidev.json.JSONArray;
 import net.minidev.json.parser.JSONParser;
@@ -8,7 +9,9 @@ import org.junit.Ignore;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
+import org.seng302.Entities.Location;
 import org.seng302.Entities.User;
+import org.seng302.Persistence.BusinessRepository;
 import org.seng302.Persistence.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -41,6 +44,9 @@ public class UsersControllerTest {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private BusinessRepository businessRepository;
+
     private final HashMap<String, Object> sessionAuthToken = new HashMap<>();
     private Cookie authCookie;
     private User testUser;
@@ -69,8 +75,22 @@ public class UsersControllerTest {
         authCookie = new Cookie("AUTHTOKEN", authCode);
     }
 
+    /**
+     * Tags a session as dgaa
+     */
     private void setUpDGAAAuthCode() {
-        sessionAuthToken.put("dgaa", true);
+        sessionAuthToken.put("role", "dgaa");
+    }
+
+    /**
+     * Simulates logging in as account with given accountId
+     * @param accountId ID of the account to "log-in" as
+     */
+    private void setUpSessionAccountId(Long accountId) {
+        sessionAuthToken.put("accountId", accountId);
+    }
+    private void setUpSessionAsAdmin() {
+        sessionAuthToken.put("role", "admin");
     }
 
     /**
@@ -89,8 +109,10 @@ public class UsersControllerTest {
                 .withBio("Likes long walks on the beach")
                 .withDob("2021-03-11")
                 .withPhoneNumber("+64 3 555 0129")
-                .withAddress("4 Rountree Street, Upper Riccarton")
+                .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Christchurch,New Zealand," +
+                        "Canterbury,8041"))
                 .build();
+        businessRepository.deleteAll();
         userRepository.deleteAll();
         userRepository.save(testUser);
     }
@@ -108,9 +130,9 @@ public class UsersControllerTest {
         BufferedReader csvReader = new BufferedReader(new FileReader(filename));
         while ((row = csvReader.readLine()) != null) {
             try {
-                String[] userData = row.split(",");
+                String[] userData = row.split("\\|");
                 User user = new User.Builder().withFirstName(userData[0]).withMiddleName(userData[1]).withLastName(userData[2]).withNickName(userData[3])
-                        .withEmail(userData[4]).withPassword(userData[5]).withAddress(userData[6]).withDob(userData[7]).build();
+                        .withEmail(userData[4]).withPassword(userData[5]).withAddress(Location.covertAddressStringToLocation(userData[6])).withDob(userData[7]).build();
                 userList.add(user);
             } catch (Exception e) {
 
@@ -728,7 +750,10 @@ public class UsersControllerTest {
     /**
      * For these tests, we don't need to test edge cases as they are covered by MakeAdmin tests (same function)
      */
-
+    /**
+     * Verify user's role is revoked when revoke admin is called
+     * @throws Exception
+     */
     @Test
     public void revokeAdminRevokesUserWhenValidAuth() throws Exception {
         setUpDGAAAuthCode(); // give us dgaa auth
@@ -748,5 +773,66 @@ public class UsersControllerTest {
         assertEquals( "user", newUser.getRole()); // Should be role "user"
     }
 
+    //endregion
+
+    //region User Permissions test
+
+    /**
+     * When logged in as self, assert user can see their own DOB, phNum and role
+     * @throws Exception
+     */
+    @Test
+    public void UserCanSeeOwnPrivateDetails() throws Exception {
+        User user = userRepository.findByEmail("johnsmith99@gmail.com");
+        setUpSessionAccountId(user.getUserID());
+
+        // perform
+        MvcResult result = mockMvc.perform(get(String.format("/users/%d", user.getUserID()))
+                .sessionAttrs(sessionAuthToken)
+                .cookie(authCookie))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        String role = JsonPath.read(result.getResponse().getContentAsString(), "$.role");
+        assertNotNull(role);
+    }
+    /**
+     * When logged in as self, assert user can see their own DOB, phNum and role
+     * @throws Exception
+     */
+    @Test
+    public void UserCantSeePrivateDetailsOfAnotherUser() throws Exception {
+        User user = userRepository.findByEmail("johnsmith99@gmail.com");
+
+
+        // perform
+        MvcResult result = mockMvc.perform(get(String.format("/users/%d", user.getUserID()))
+                .sessionAttrs(sessionAuthToken)
+                .cookie(authCookie))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        org.json.JSONObject json = new org.json.JSONObject(result.getResponse().getContentAsString());
+        assertFalse(json.has("role"));
+    }
+    /**
+     * When logged in as admin, assert user can see phNum and role of another user
+     * @throws Exception
+     */
+    @Test
+    public void adminCanSeePrivateDetailsOfUser() throws Exception {
+        User user = userRepository.findByEmail("johnsmith99@gmail.com");
+        setUpSessionAsAdmin();
+        // perform
+        MvcResult result = mockMvc.perform(get(String.format("/users/%d", user.getUserID()))
+                .sessionAttrs(sessionAuthToken)
+                .cookie(authCookie))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        org.json.JSONObject json = new org.json.JSONObject(result.getResponse().getContentAsString());
+        // Result should contain role and DOB
+        assertTrue(json.has("role"));
+    }
     //endregion
 }

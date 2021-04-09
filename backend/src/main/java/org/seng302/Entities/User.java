@@ -1,19 +1,17 @@
 /* Subtype of Account for individual users */
 package org.seng302.Entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import net.minidev.json.JSONObject;
 import org.springframework.data.annotation.ReadOnlyProperty;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
+import javax.persistence.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Pattern;
 
 @Entity
@@ -26,9 +24,10 @@ public class User extends Account {
     private String bio;
     private Date dob;
     private String phNum;
-    private String address;
+    private Location address;
     private Date created;
     private String role;
+    private Set<Business> businessesAdministered = new HashSet<>();
 
     /* Matches:
     123-456-7890
@@ -190,36 +189,54 @@ public class User extends Account {
         if (phNum == null || Pattern.matches(phoneRegex, phNum)) {
             validPhone = true;
         }
-            if (validPhone) {
-                this.phNum = phNum;
-            } else {
+        if (validPhone) {
+            this.phNum = phNum;
+        } else {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Your phone number has been entered incorrectly");
-            }
         }
+    }
 
 
     /**
      * Gets the users country, city, street, house number etc as string
      * @return address
      */
-    @Column(nullable = false)
-    public String getAddress() {
+    @OneToOne(cascade = CascadeType.ALL)
+    //@Column(nullable = false)
+    public Location getAddress() {
     return this.address;
     }
 
     /**
      * Sets the users home address
      * Not Null
-     * @param address where the user lives/provides items from
+     * @param address where the user lives/provides items from as a location object
      */
-    public void setAddress(String address) {
-        if (address != null && address.length() > 0 && address.length() <= 255) {
+    public void setAddress(Location address) {
+        if (address != null) {
             this.address = address;
         } else {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Your address has been entered incorrectly");
         }
     }
 
+    /**
+     * Sets the users home address.
+     * Not Null
+     * @param address where the user lives/provides items from as a string
+     */
+    public void setAddress(String address) {
+        try {
+            if (address != null && address.length() > 0 && address.length() <= 255) {
+                this.address = Location.covertAddressStringToLocation(address);
+            } else {
+                throw new Exception("Address not entered correctly.");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Your address has been entered incorrectly");
+        }
+    }
 
     /**
      * Date the account was created
@@ -255,6 +272,24 @@ public class User extends Account {
     }
 
     /**
+     * Gets the set of businesses that the user is an admin of
+     * @return Businesses administered
+     */
+    @ManyToMany(mappedBy = "administrators", fetch = FetchType.EAGER)
+    public Set<Business> getBusinessesAdministered() {
+        return this.businessesAdministered;
+    }
+
+    /**
+     * For JPA only
+     * Sets the businesses administered
+     * @param businesses Set of businesses
+     */
+    private void setBusinessesAdministered(Set<Business> businesses) {
+        this.businessesAdministered = businesses;
+    }
+
+    /**
      * ToString method override, helpful for testing
      * @return String representation of a user
      */
@@ -276,18 +311,34 @@ public class User extends Account {
     // Todo: Add city, region and country parts of address once parsing address string is done.
     // Todo: Replace email with profile picture once profile pictures added.
     public JSONObject constructPublicJson() {
-        Map<String, String> attributeMap = new HashMap<>();
-        attributeMap.put("id", getUserID().toString());
-        attributeMap.put("firstName", firstName);
-        attributeMap.put("middleName", middleName);
-        attributeMap.put("lastName", lastName);
-        attributeMap.put("nickname", nickname);
-        attributeMap.put("email", getEmail());
-        attributeMap.put("bio", bio);
-        attributeMap.put("created", created.toString());
-        attributeMap.put("homeAddress", getAddress());
+        Map<String, Object> attributeMap = new HashMap<>();
+        attributeMap.put("id",          getUserID());
+        attributeMap.put("firstName",   getFirstName());
+        attributeMap.put("lastName",    getLastName());
+        attributeMap.put("email",       getEmail());
+        attributeMap.put("dateOfBirth", getDob().toString());
+        attributeMap.put("created",     getCreated().toString());
+        attributeMap.put("homeAddress", getAddress().toString());
+        if (getMiddleName() != null) { attributeMap.put("middleName",  getMiddleName()); }
+        if (getNickname() != null) { attributeMap.put("nickname",    getNickname()); }
+        if (getBio() != null) { attributeMap.put("bio", getBio()); }
         return new JSONObject(attributeMap);
     }
+
+    /**
+     * This method constructs a JSON representation of the user's private details.
+     * @return JSONObject with attribute name as key and attribute value as value.
+     */
+    // Todo: Once businesses are done, add businessesAdministered
+    public JSONObject constructPrivateJson() {
+        //Map<String, String> attributeMap = constructPublicJson();
+        JSONObject json = constructPublicJson();
+        json.appendField("phoneNumber", phNum);
+        json.appendField("role", role);
+        //json.appendField("businessesAdministered", businessesAdministered);
+        return json;
+    }
+
 
     /**
      * This class uses the builder pattern to construct an instance of the User class
@@ -302,7 +353,7 @@ public class User extends Account {
         private String bio;
         private Date dob;
         private String phNum;
-        private String address;
+        private Location address;
         private String password;
 
         /**
@@ -391,7 +442,7 @@ public class User extends Account {
          * @param address a string representing the user's address.
          * @return Builder with address set.
          */
-        public Builder withAddress(String address) {
+        public Builder withAddress(Location address) {
             this.address = address;
             return this;
         }

@@ -78,6 +78,9 @@ dependencies {
     annotationProcessor 'org.projectlombok:lombok:1.18.16'
     testCompileOnly 'org.projectlombok:lombok:1.18.16'
     testAnnotationProcessor 'org.projectlombok:lombok:1.18.16'
+
+    // entityManagerFactory
+    implementation 'javax.xml.bind:jaxb-api:2.3.0'
 }
 
 // create a specific task to run cucumber tests

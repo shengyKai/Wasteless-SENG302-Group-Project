@@ -57,25 +57,34 @@
                   />
                 </v-col>
                 <v-col cols="12">
-                  <DistrictAutocomplete
-                    v-model="district"/>
+                  <LocationAutocomplete
+                    type="district"
+                    v-model="district"
+                    :rules="maxCharRules"
+                  />
                 </v-col>
                 <v-col cols="12">
-                  <CityAutocomplete
+                  <LocationAutocomplete
+                    type="city"
                     class="required"
                     v-model="city"
+                    :rules="mandatoryRules.concat(maxCharRules)"
                   />
                 </v-col>
                 <v-col cols="12">
-                  <StateAutocomplete
+                  <LocationAutocomplete
+                    type="state"
                     class="required"
                     v-model="state"
+                    :rules="mandatoryRules.concat(maxCharRules)"
                   />
                 </v-col>
                 <v-col cols="12">
-                  <CountryAutocomplete
+                  <LocationAutocomplete
+                    type="country"
                     class="required"
                     v-model="country"
+                    :rules="mandatoryRules.concat(maxCharRules)"
                   />
                 </v-col>
                 <v-col cols="12">
@@ -113,18 +122,12 @@
 </template>
 
 <script>
-import CountryAutocomplete from '@/components/utils/CountryAutocomplete';
-import DistrictAutocomplete from '@/components/utils/DistrictAutocomplete';
-import CityAutocomplete from '@/components/utils/CityAutocomplete';
-import StateAutocomplete from '@/components/utils/StateAutocomplete';
+import LocationAutocomplete from '@/components/utils/LocationAutocomplete';
 
 export default {
   name: 'CreateBusiness',
   components: {
-    CountryAutocomplete,
-    DistrictAutocomplete,
-    CityAutocomplete,
-    StateAutocomplete
+    LocationAutocomplete,
   },
   data() {
     return {
