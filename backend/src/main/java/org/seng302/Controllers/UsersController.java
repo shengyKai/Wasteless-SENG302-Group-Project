@@ -99,9 +99,9 @@ public class UsersController {
             throw notFound;
         } else {
             if (AuthenticationTokenManager.sessionCanSeePrivate(session, user.get().getUserID())) {
-                return user.get().constructPrivateJson();
+                return user.get().constructPrivateJson(true);
             } else {
-                return user.get().constructPublicJson();
+                return user.get().constructPublicJson(true);
             }
 
         }
@@ -139,9 +139,9 @@ public class UsersController {
         JSONArray publicResults = new JSONArray();
         for (User user : pageInResults) {
             if (AuthenticationTokenManager.sessionCanSeePrivate(session, user.getUserID())) {
-                publicResults.appendElement(user.constructPrivateJson());
+                publicResults.appendElement(user.constructPrivateJson(true));
             } else {
-                publicResults.appendElement(user.constructPublicJson());
+                publicResults.appendElement(user.constructPublicJson(true));
             }
         }
         return publicResults;

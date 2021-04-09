@@ -3,6 +3,8 @@ package org.seng302.Entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
+import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import org.springframework.data.annotation.ReadOnlyProperty;
 import org.springframework.http.HttpStatus;
@@ -305,12 +307,16 @@ public class User extends Account {
 
     /**
      * This method constructs a JSON representation of the user's public details. These are their id number,
-     * first name, middle name, last name, nickname, email, bio and date the account was created.
+     * first name, middle name, last name, nickname, email, bio, the city/region/country part of their address,
+     * the businesses they administer, and date the account was created. If fullBusienssDetails is true then 
+     * a JSON representation of each business they administer will be included, otherwise the businessesAdministered
+     * field will have the placeholder array ["string"].
+     * @param fullBusinessDetails A JSON representation of each business will be included in the businessesAdministered
+     * field if this is set to true, otherwise the field will be set to the placeholder array ["string"]
      * @return JSONObject with attribute name as key and attribute value as value.
      */
-    // Todo: Add city, region and country parts of address once parsing address string is done.
     // Todo: Replace email with profile picture once profile pictures added.
-    public JSONObject constructPublicJson() {
+    public JSONObject constructPublicJson(boolean fullBusinessDetails) {
         Map<String, Object> attributeMap = new HashMap<>();
         attributeMap.put("id", getUserID());
         attributeMap.put("firstName", firstName);
@@ -321,22 +327,60 @@ public class User extends Account {
         attributeMap.put("bio", bio);
         attributeMap.put("created", created.toString());
         attributeMap.put("homeAddress", getAddress().constructPartialJson());
+        if (fullBusinessDetails) {
+            attributeMap.put("businessesAdministered", constructBusinessJsonArray());
+        } else {
+            attributeMap.put("businessesAdministered", new String[] {"string"});
+        }
         return new JSONObject(attributeMap);
     }
 
     /**
-     * This method constructs a JSON representation of the user's private details.
+     * Override the constructPublicJson method so that it defaults to using the placeholder ["string"] for the
+     * businessesAdministered field.
+     * @return A public JSON representation of the user without information on the businesses they administer
+     */
+    public JSONObject constructPublicJson() {
+        return constructPublicJson(false);
+    }
+
+    /**
+     * This method constructs a JSON representation of the user's private details. This includes all the values from
+     * the public JSON, plus their full address, date of birth, phone number and role.
+     * @param fullBusinessDetails A JSON representation of each business will be included in the businessesAdministered
+     * field if this is set to true, otherwise the field will be set to the placeholder array ["string"]
      * @return JSONObject with attribute name as key and attribute value as value.
      */
-    // Todo: Once businesses are done, add businessesAdministered
-    public JSONObject constructPrivateJson() {
-        JSONObject json = constructPublicJson();
+    public JSONObject constructPrivateJson(boolean fullBusinessDetails) {
+        JSONObject json = constructPublicJson(fullBusinessDetails);
         json.replace("homeAddress", getAddress().constructFullJson());
         json.appendField("dateOfBirth", dob.toString());
         json.appendField("phoneNumber", phNum);
         json.appendField("role", role);
-        //json.appendField("businessesAdministered", businessesAdministered);
+        
         return json;
+    }
+
+     /**
+     * Override the constructPrivateJson method so that it defaults to using the placeholder ["string"] for the
+     * businessesAdministered field.
+     * @return A private JSON representation of the user without information on the businesses they administer
+     */
+    public JSONObject constructPrivateJson() {
+        return constructPrivateJson(false);
+    }
+
+    /**
+     * Construct an array of JSON objects representing the businesses the user administers. The 
+     * "administrators" field of the JSON object is replaced by ["string"].
+     * @return An array of JSON representations of the businesses the user administers.
+     */
+    public JSONArray constructBusinessJsonArray() {
+        JSONArray businessArray = new JSONArray();
+        for (Business business : businessesAdministered) {
+            businessArray.add(business.constructJson());
+        }
+        return businessArray;
     }
 
 

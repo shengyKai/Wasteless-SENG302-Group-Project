@@ -114,6 +114,6 @@ public class BusinessController {
             logger.error(notFoundException.getMessage());
             throw notFoundException;
         }
-        return business.get().constructJson();
+        return business.get().constructJson(true);
     };
 }

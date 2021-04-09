@@ -177,20 +177,37 @@ public class Business {
      * Construct a JSON object representing the business. The JSON object includes an array of JSON
      * representations of the users who are administrators of the business, and a JSON representation
      * of the business's address, as well as simple attributes for all the other properties of the
-     * business.
+     * business. If fullAdminDetails is true, the JSON will include a full JSON representation for each
+     * admin of the business. If fullAdminDetails is false, the administrators fields will be ["string"].
+     * This is to avoid an infinite loop of construcing a business JSON to go within a user object,
+     * then constructing a user JSON to go within the business object.
+     * @param fullAdminDetails True if a JSON object should be included for each admin, false if a placeholder
+     * array should be used instead.
      * @return A JSON representation of this business.
      */
-    public JSONObject constructJson() {
+    public JSONObject constructJson(boolean fullAdminDetails) {
         Map<String, Object> attributeMap = new HashMap<>();
         attributeMap.put("id", getId());
         attributeMap.put("name", name);
         attributeMap.put("description", description);
-        attributeMap.put("administrators", constructAdminJsonArray());
+        if (fullAdminDetails) {
+            attributeMap.put("administrators", constructAdminJsonArray());
+        } else {
+            attributeMap.put("administrators", new String[] {"string"});
+        }
         attributeMap.put("primaryAdministratorId", primaryOwner.getUserID());
         attributeMap.put("address", getAddress().constructFullJson());
         attributeMap.put("businessType", businessType);
         attributeMap.put("created", created.toString());
         return new JSONObject(attributeMap);
+    }
+
+    /**
+     * Override the constructJson method so that by default it does not include full details for the administrators.
+     * @return A JSON representation of the business with a placeholder array ["string"] for the administrators.
+     */
+    public JSONObject constructJson() {
+        return constructJson(false);
     }
 
     /**
