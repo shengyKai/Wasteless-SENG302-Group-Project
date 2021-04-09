@@ -165,6 +165,34 @@ export async function search(query: string): Promise<MaybeError<User[]>> {
 }
 
 /**
+ * Sends a query for the number of search results for a given query to the backend.
+ *
+ * @param query Query string to search for
+ * @returns Number of search results or an error message
+ */
+export async function getSearchCount(query: string): Promise<MaybeError<number>> {
+  let response;
+  try {
+    response = await instance.get('/users/search/count', {
+      params: {
+        searchQuery: query,
+      }
+    });
+  } catch (error) {
+    let status: number | undefined = error.response?.status;
+
+    if (status === undefined) return 'Failed to reach backend';
+    return `Request failed: ${status}`;
+  }
+
+  if (typeof response.data?.count !== 'number') {
+    return 'Response is not number';
+  }
+
+  return response.data.count;
+}
+
+/**
  * Queries the backend for a specific user by their id.
  *
  * @param id User id, if ommitted then fetch the logged in user's info
