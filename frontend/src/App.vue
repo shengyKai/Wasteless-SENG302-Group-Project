@@ -6,8 +6,7 @@
 
     <template v-else>
       <div class="notfooter">
-        <div v-if="true">
-          <!--<div v-if="loggedIn">-->
+        <div v-if="loggedIn">
           <AppBar />
 
           <v-main>
