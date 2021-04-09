@@ -79,7 +79,6 @@ export default {
       orderBy: 'relevance',
       currentPage: 1,
       resultsPerPage: 10,
-      resultsMessage: '',
       totalResults: undefined
     };
   },
@@ -87,6 +86,13 @@ export default {
   computed: {
     totalPages () {
       return Math.ceil(this.totalResults / this.resultsPerPage);
+    },
+    resultsMessage() {
+      if (this.users.length === 0) return 'There are no results to show';
+
+      const pageStartIndex = (this.currentPage - 1) * this.resultsPerPage;
+      const pageEndIndex = pageStartIndex + this.users.length;
+      return`Displaying ${pageStartIndex + 1} - ${pageEndIndex} of ${this.totalResults} results`;
     },
   },
 
@@ -110,9 +116,12 @@ export default {
      * This function gets called when the search query is changed.
      */
     async updateQuery() {
-      this.totalResults = await getSearchCount(this.searchQuery);
       this.searchedQuery = this.searchQuery;
-      await this.updateNotQuery();
+
+      await Promise.all([
+        getSearchCount(this.searchQuery).then(count => this.totalResults = count),
+        await this.updateNotQuery(),
+      ]);
     },
 
     /**
@@ -150,20 +159,8 @@ export default {
     currentPage() {
       this.updateNotQuery();
     },
-
-    users: {
-      immediate: true,
-      handler() {
-        // TODO move this into the template or into a computed property
-        const pageStartIndex = (this.currentPage - 1) * this.resultsPerPage;
-        const pageEndIndex = pageStartIndex + this.users.length;
-
-        if (pageStartIndex === pageEndIndex) {
-          this.resultsMessage = 'There are no results to show';
-        } else {
-          this.resultsMessage = `Displaying ${pageStartIndex + 1} - ${pageEndIndex} of ${this.totalResults} results`;
-        }
-      }
+    resultsPerPage() {
+      this.updateNotQuery();
     },
     totalPages() {
       this.currentPage = Math.max(Math.min(this.currentPage, this.totalPages), 1);
