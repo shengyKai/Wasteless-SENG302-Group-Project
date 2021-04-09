@@ -3,6 +3,9 @@ package org.seng302.Entities;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
+import net.minidev.json.JSONArray;
+import net.minidev.json.JSONObject;
+
 import javax.persistence.*;
 import java.util.*;
 
@@ -168,6 +171,39 @@ public class Business {
         } else {
             this.administrators.add(newAdmin);
         }
+    }
+
+    /**
+     * Construct a JSON object representing the business. The JSON object includes an array of JSON
+     * representations of the users who are administrators of the business, and a JSON representation
+     * of the business's address, as well as simple attributes for all the other properties of the
+     * business.
+     * @return A JSON representation of this business.
+     */
+    public JSONObject constructJson() {
+        Map<String, Object> attributeMap = new HashMap<>();
+        attributeMap.put("id", getId());
+        attributeMap.put("name", name);
+        attributeMap.put("description", description);
+        attributeMap.put("administrators", constructAdminJsonArray());
+        attributeMap.put("primaryAdministratorId", primaryOwner.getUserID());
+        attributeMap.put("address", getAddress().constructFullJson());
+        attributeMap.put("businessType", businessType);
+        attributeMap.put("created", created.toString());
+        return new JSONObject(attributeMap);
+    }
+
+    /**
+     * This method gets the public JSON representation of each User who is an admin of this Business
+     *  and adds it to a JSONArray.
+     * @return A JSONArray containing JSON respresentations of all admins of this business.
+     */
+    private JSONArray constructAdminJsonArray() {
+        JSONArray adminArray = new JSONArray();
+        for (User admin : administrators) {
+            adminArray.add(admin.constructPublicJson());
+        }
+        return adminArray;
     }
 
 

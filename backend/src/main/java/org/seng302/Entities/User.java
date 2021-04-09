@@ -311,8 +311,8 @@ public class User extends Account {
     // Todo: Add city, region and country parts of address once parsing address string is done.
     // Todo: Replace email with profile picture once profile pictures added.
     public JSONObject constructPublicJson() {
-        Map<String, String> attributeMap = new HashMap<>();
-        attributeMap.put("id", getUserID().toString());
+        Map<String, Object> attributeMap = new HashMap<>();
+        attributeMap.put("id", getUserID());
         attributeMap.put("firstName", firstName);
         attributeMap.put("middleName", middleName);
         attributeMap.put("lastName", lastName);
@@ -320,7 +320,7 @@ public class User extends Account {
         attributeMap.put("email", getEmail());
         attributeMap.put("bio", bio);
         attributeMap.put("created", created.toString());
-        attributeMap.put("homeAddress", getAddress().toString());
+        attributeMap.put("homeAddress", getAddress().constructPartialJson());
         return new JSONObject(attributeMap);
     }
 
@@ -330,8 +330,8 @@ public class User extends Account {
      */
     // Todo: Once businesses are done, add businessesAdministered
     public JSONObject constructPrivateJson() {
-        //Map<String, String> attributeMap = constructPublicJson();
         JSONObject json = constructPublicJson();
+        json.replace("homeAddress", getAddress().constructFullJson());
         json.appendField("dateOfBirth", dob.toString());
         json.appendField("phoneNumber", phNum);
         json.appendField("role", role);
