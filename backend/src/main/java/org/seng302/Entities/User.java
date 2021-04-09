@@ -311,8 +311,8 @@ public class User extends Account {
     // Todo: Add city, region and country parts of address once parsing address string is done.
     // Todo: Replace email with profile picture once profile pictures added.
     public JSONObject constructPublicJson() {
-        Map<String, String> attributeMap = new HashMap<>();
-        attributeMap.put("id", getUserID().toString());
+        Map<String, Object> attributeMap = new HashMap<>();
+        attributeMap.put("id", getUserID());
         attributeMap.put("firstName", firstName);
         attributeMap.put("middleName", middleName);
         attributeMap.put("lastName", lastName);
