@@ -18,7 +18,16 @@
         flat
         solo-inverted
         hide-details
-        :items="['userId', 'relevance', 'firstName', 'middleName', 'lastName', 'nickname', 'email', 'address']"
+        :items="[
+          {text: 'Relevance', value: 'relevance' },
+          {text: 'User Id', value: 'userId' },
+          {text: 'First Name', value: 'firstName' },
+          {text: 'Middle Name', value: 'middleName'},
+          {text: 'Last Name', value: 'lastName' },
+          {text: 'Nickname', value: 'nickname' },
+          {text: 'Email', value: 'email' },
+          {text: 'Address', value: 'address' }
+        ]"
         prepend-inner-icon="mdi-sort-variant"
         label="Sort by"
       />
@@ -63,12 +72,13 @@ export default {
   data: function() {
     return {
       searchQuery: this.$route.query.query || '',
+      searchedQuery: undefined,
       users: [],
       error: undefined,
       reverse: false,
       orderBy: 'relevance',
       currentPage: 1,
-      resultsPerPage: 3,
+      resultsPerPage: 10,
       resultsMessage: '',
       totalResults: undefined
     };
@@ -101,6 +111,7 @@ export default {
      */
     async updateQuery() {
       this.totalResults = await getSearchCount(this.searchQuery);
+      this.searchedQuery = this.searchQuery;
       await this.updateNotQuery();
     },
 
@@ -110,8 +121,8 @@ export default {
      */
     async updateNotQuery() {
       const value = await search (
-        this.searchQuery,
-        this.currentPage - 1,
+        this.searchedQuery,
+        this.currentPage,
         this.resultsPerPage,
         this.orderBy,
         this.reverse.toString()
@@ -130,9 +141,20 @@ export default {
     searchQuery() {
       this.debouncedDoQuery();
     },
+    orderBy() {
+      this.updateNotQuery();
+    },
+    reverse() {
+      this.updateNotQuery();
+    },
+    currentPage() {
+      this.updateNotQuery();
+    },
+
     users: {
       immediate: true,
       handler() {
+        // TODO move this into the template or into a computed property
         const pageStartIndex = (this.currentPage - 1) * this.resultsPerPage;
         const pageEndIndex = pageStartIndex + this.users.length;
 
