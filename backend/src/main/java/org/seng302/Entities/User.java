@@ -333,7 +333,7 @@ public class User extends Account {
     public JSONObject constructPrivateJson() {
         //Map<String, String> attributeMap = constructPublicJson();
         JSONObject json = constructPublicJson();
-        json.appendField("phoneNumber", phNum);
+        if (getPhNum() != null) { json.put("phoneNumber", getPhNum()); }
         json.appendField("role", role);
         //json.appendField("businessesAdministered", businessesAdministered);
         return json;
