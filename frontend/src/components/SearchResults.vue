@@ -19,14 +19,14 @@
         solo-inverted
         hide-details
         :items="[
-          {text: 'Relevance', value: 'relevance' },
-          {text: 'User Id', value: 'userId' },
-          {text: 'First Name', value: 'firstName' },
-          {text: 'Middle Name', value: 'middleName'},
-          {text: 'Last Name', value: 'lastName' },
-          {text: 'Nickname', value: 'nickname' },
-          {text: 'Email', value: 'email' },
-          {text: 'Address', value: 'address' }
+          { text: 'Relevance',   value: 'relevance'  },
+          { text: 'User ID',     value: 'userId'     },
+          { text: 'First Name',  value: 'firstName'  },
+          { text: 'Middle Name', value: 'middleName' },
+          { text: 'Last Name',   value: 'lastName'   },
+          { text: 'Nickname',    value: 'nickname'   },
+          { text: 'Email',       value: 'email'      },
+          { text: 'Address',     value: 'address'    },
         ]"
         prepend-inner-icon="mdi-sort-variant"
         label="Sort by"
@@ -42,7 +42,7 @@
     </v-toolbar>
 
     <v-alert v-if="error !== undefined" type="error"> {{ error }}</v-alert>
-    <v-list v-if="users !== undefined" three-line>
+    <v-list three-line>
       <!--users would produce the results for each page, and then it will show each result with
       SearchResultItem-->
       <template v-for="(user, index) in users">
@@ -69,6 +69,7 @@ import {getSearchCount, search} from '../api';
 import { debounce } from '../utils';
 
 export default {
+  name: 'SearchResults',
   data: function() {
     return {
       searchQuery: this.$route.query.query || '',
@@ -79,14 +80,22 @@ export default {
       orderBy: 'relevance',
       currentPage: 1,
       resultsPerPage: 10,
-      totalResults: undefined
+      totalResults: 0,
+      debouncedUpdateQuery: debounce(this.updateQuery, 500),
     };
   },
 
   computed: {
+    /**
+     * The total number of pages required to show all the users
+     * May be 0 if there are no results
+     */
     totalPages () {
       return Math.ceil(this.totalResults / this.resultsPerPage);
     },
+    /**
+     * The message displayed at the bottom of the page to show how many results there are
+     */
     resultsMessage() {
       if (this.users.length === 0) return 'There are no results to show';
 
@@ -95,31 +104,23 @@ export default {
       return`Displaying ${pageStartIndex + 1} - ${pageEndIndex} of ${this.totalResults} results`;
     },
   },
-
-  created () {
-    this.debouncedDoQuery = debounce(() => {
-      console.log(this.totalResults);
-      if (this.searchQuery) {
-        this.updateQuery();
-      }
-    }, 500);
-  },
-
-  mounted () {
-    let query = this.$route.query.query;
-    if (query) {
-      this.updateQuery();
-    }
-  },
   methods: {
     /**
      * This function gets called when the search query is changed.
      */
     async updateQuery() {
+      if (!this.searchQuery) return; // If the current search query is empty, do not search
+
       this.searchedQuery = this.searchQuery;
 
       await Promise.all([
-        getSearchCount(this.searchQuery).then(count => this.totalResults = count),
+        getSearchCount(this.searchQuery).then(count => {
+          if (typeof count === 'string') {
+            this.error = count;
+          } else {
+            this.totalResults = count;
+          }
+        }),
         await this.updateNotQuery(),
       ]);
     },
@@ -134,10 +135,10 @@ export default {
         this.currentPage,
         this.resultsPerPage,
         this.orderBy,
-        this.reverse.toString()
+        this.reverse
       );
       if (typeof value === 'string') {
-        this.users = undefined;
+        this.users = [];
         this.error = value;
       } else {
         this.users = value;
@@ -147,9 +148,12 @@ export default {
   },
 
   watch: {
-    searchQuery() {
-      this.debouncedDoQuery();
-    },
+    searchQuery: {
+      handler() {
+        this.debouncedUpdateQuery();
+      },
+      immediate: true,
+    } ,
     orderBy() {
       this.updateNotQuery();
     },
@@ -163,6 +167,7 @@ export default {
       this.updateNotQuery();
     },
     totalPages() {
+      // Ensures that the current page is at least 1 and less than or equal to the total number of pages.
       this.currentPage = Math.max(Math.min(this.currentPage, this.totalPages), 1);
     }
   },

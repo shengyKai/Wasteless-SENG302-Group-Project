@@ -140,12 +140,16 @@ function isUserArray(obj: any): obj is User[] {
 type OrderBy = 'userId' | 'relevance' | 'firstName' | 'middleName' | 'lastName' | 'nickname' | 'email' | 'address';
 
 /**
- * Sends a search query to the backend and returns a list of users or an error string.
+ * Sends a search query to the backend.
  *
  * @param query Query string to search for
- * @returns List of user infos or an error message
+ * @param pageIndex Index of page to start the results from (1 = first page)
+ * @param resultsPerPage Number of results to return per page
+ * @param orderBy Specifies the method used to sort the results
+ * @param reverse Specifies whether to reverse the search results (default order is descending for relevance and ascending for all other orders)
+ * @returns List of user infos for the current page or an error message
  */
-export async function search(query: string, pageIndex: number, resultsPerPage: number, orderBy: OrderBy, reverse: String): Promise<MaybeError<User[]>> {
+export async function search(query: string, pageIndex: number, resultsPerPage: number, orderBy: OrderBy, reverse: boolean): Promise<MaybeError<User[]>> {
   let response;
   try {
     response = await instance.get('/users/search', {
@@ -154,7 +158,7 @@ export async function search(query: string, pageIndex: number, resultsPerPage: n
         page: pageIndex,
         resultsPerPage,
         orderBy,
-        reverse
+        reverse: reverse.toString(),
       }
     });
   } catch (error) {
