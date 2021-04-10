@@ -7,6 +7,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.server.ResponseStatusException;
 
+import net.minidev.json.JSONObject;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -589,5 +591,86 @@ public class LocationTests {
   public void buildCountryTest() {
     Location location = locationBuilder.build();
     assertEquals("New Zealand", location.getCountry());
+  }
+
+  /**
+   * Test that the JSON produced by constructFullJson includes the street number, street name,
+   * city, region, country and postcode of the location object.
+   */
+  public void constructFullJsonIncludesAllExpectedFieldsTest() {
+    Location location = locationBuilder.build();
+    JSONObject json = location.constructFullJson();
+    assertTrue(json.containsKey("streetNumber"));
+    assertTrue(json.containsKey("streetName"));
+    assertTrue(json.containsKey("city"));
+    assertTrue(json.containsKey("region"));
+    assertTrue(json.containsKey("country"));
+    assertTrue(json.containsKey("postcode"));
+  }
+
+  /**
+   * Test that the JSON proced by constructFullJson does not include any attributes appart from street
+   * number, street name, city, region, country and postcode.
+   */
+  public void constructFullJsonOnlyIncludesExpectedFieldsTest() {
+    Location location = locationBuilder.build();
+    JSONObject json = location.constructFullJson();
+    json.remove("streetNumber");
+    json.remove("streetName");
+    json.remove("city");
+    json.remove("region");
+    json.remove("country");
+    json.remove("postcode");
+    assertTrue(json.isEmpty());
+  }
+
+  /**
+   * Test that all fields of the JSON produced by constuctFullJson have the expected value.
+   */
+  public void constructFullJsonFieldsHaveExpectedValueTest() {
+    Location location = locationBuilder.build();
+    JSONObject json = location.constructFullJson();
+    assertEquals(location.getStreetNumber(), json.getAsString("streetNumber"));
+    assertEquals(location.getStreetName(), json.getAsString("streetName"));
+    assertEquals(location.getCity(), json.getAsString("city"));
+    assertEquals(location.getRegion(), json.getAsString("region"));
+    assertEquals(location.getCountry(), json.getAsString("country"));
+    assertEquals(location.getPostCode(), json.getAsString("postcode"));
+  }
+
+    /**
+   * Test that the JSON produced by constructPartialJson includes the city, region and country
+   * of the location object.
+   */
+  public void constructPartialJsonIncludesAllExpectedFieldsTest() {
+    Location location = locationBuilder.build();
+    JSONObject json = location.constructPartialJson();
+    assertTrue(json.containsKey("city"));
+    assertTrue(json.containsKey("region"));
+    assertTrue(json.containsKey("country"));
+  }
+
+  /**
+   * Test that the JSON proced by constructPartialJson does not include any attributes apart from 
+   * city, region and country.
+   */
+  public void constructPartialJsonOnlyIncludesExpectedFieldsTest() {
+    Location location = locationBuilder.build();
+    JSONObject json = location.constructPartialJson();
+    json.remove("city");
+    json.remove("region");
+    json.remove("country");
+    assertTrue(json.isEmpty());
+  }
+
+  /**
+   * Test that all fields of the JSON produced by constuctPartialJson have the expected value.
+   */
+  public void constructPartialJsonFieldsHaveExpectedValueTest() {
+    Location location = locationBuilder.build();
+    JSONObject json = location.constructPartialJson();
+    assertEquals(location.getCity(), json.getAsString("city"));
+    assertEquals(location.getRegion(), json.getAsString("region"));
+    assertEquals(location.getCountry(), json.getAsString("country"));
   }
 }
