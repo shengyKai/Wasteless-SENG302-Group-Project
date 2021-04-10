@@ -5,6 +5,7 @@ import { COOKIE, deleteCookie, setCookie } from './utils';
 export type StoreData = {
   user: User | null,
   activeRole: { type: "user" | "business", id: number} | null,
+  createBusinessDialogShown: boolean,
 };
 
 export function createOptions(): StoreOptions<StoreData> {
@@ -12,6 +13,7 @@ export function createOptions(): StoreOptions<StoreData> {
     state: {
       user: null,
       activeRole: null,
+      createBusinessDialogShown: false,
     },
     mutations: {
       setUser (state, payload: User) {
@@ -28,9 +30,18 @@ export function createOptions(): StoreOptions<StoreData> {
           setCookie(COOKIE.USER, payload.id);
         }
       },
+
       logoutUser (state) {
         state.user = null;
         deleteCookie(COOKIE.USER);
+      },
+
+      showCreateBusiness(state) {
+        state.createBusinessDialogShown = true;
+      },
+
+      hideCreateBusiness(state) {
+        state.createBusinessDialogShown = false;
       }
     },
     getters: {

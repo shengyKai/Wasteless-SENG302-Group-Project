@@ -104,7 +104,7 @@ export default {
   },
   methods: {
     viewProfile() {
-      // TODO It would probably be quite nice to merge this with the appbar implementation, maybe by emitting something
+      // TODO It would probably be quite nice to merge this with the appbar implementation
       switch (this.role.type) {
       case "user":
         this.$router.push("/profile");
@@ -118,8 +118,7 @@ export default {
     },
 
     viewCreateBusiness() {
-      // TODO Implement
-      console.warn('Not implemented');
+      this.$store.commit('showCreateBusiness');
     }
   },
   computed: {
@@ -161,11 +160,11 @@ pre {
   width: 100%;
   margin-right: auto;
   margin-left: auto;
+  max-width: 900px;
 }
 
 @media all and (min-width: 992px) {
   .page-container {
-    max-width: 900px;
     padding: 10px;
   }
 }
@@ -174,13 +173,11 @@ pre {
   .page-container {
     padding-right: 5px;
     padding-top: 10px;
-
-    align-content: flex-start
   }
 }
 
 .newsfeed {
-  flex: 2;
+  flex: 1;
   min-width: 260px;
 }
 
@@ -200,14 +197,9 @@ pre {
 
 .action-pane {
   margin-right: 10px;
+  max-height: 200px;
 }
 
-@media all and (min-width: 992px) {
-  .action-pane {
-    max-height: 200px;
-    flex: 1;
-  }
-}
 
 @media not all and (min-width: 992px) {
   .action-pane {
