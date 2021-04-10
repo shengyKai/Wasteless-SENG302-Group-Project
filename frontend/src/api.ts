@@ -50,7 +50,7 @@ export type User = {
   phoneNumber?: string,
   homeAddress: string,
   created?: string,
-  role: "user" | "globalApplicationAdmin" | "defaultGlobalApplicationAdmin",
+  role?: "user" | "globalApplicationAdmin" | "defaultGlobalApplicationAdmin",
   businessesAdministered?: number[],
 };
 
@@ -101,7 +101,8 @@ function isUser(obj: any): obj is User {
   if (obj.phoneNumber !== undefined && typeof obj.phoneNumber !== 'string') return false;
   if (typeof obj.homeAddress !== 'string') return false;
   if (obj.created !== undefined && typeof obj.created !== 'string') return false;
-  if (!['user', 'globalApplicationAdmin', 'defaultGlobalApplicationAdmin'].includes(obj.role)) return false;
+  if (obj.role !== undefined && !['user', 'globalApplicationAdmin', 'defaultGlobalApplicationAdmin'].includes(obj.role))
+    return false;
   if (obj.businessesAdministered !== undefined && !isNumberArray(obj.businessesAdministered)) return false;
 
   return true;
@@ -136,18 +137,28 @@ function isUserArray(obj: any): obj is User[] {
   return true;
 }
 
+type OrderBy = 'userId' | 'relevance' | 'firstName' | 'middleName' | 'lastName' | 'nickname' | 'email' | 'address';
+
 /**
- * Sends a search query to the backend and returns a list of users or an error string.
+ * Sends a search query to the backend.
  *
  * @param query Query string to search for
- * @returns List of user infos or an error message
+ * @param pageIndex Index of page to start the results from (1 = first page)
+ * @param resultsPerPage Number of results to return per page
+ * @param orderBy Specifies the method used to sort the results
+ * @param reverse Specifies whether to reverse the search results (default order is descending for relevance and ascending for all other orders)
+ * @returns List of user infos for the current page or an error message
  */
-export async function search(query: string): Promise<MaybeError<User[]>> {
+export async function search(query: string, pageIndex: number, resultsPerPage: number, orderBy: OrderBy, reverse: boolean): Promise<MaybeError<User[]>> {
   let response;
   try {
     response = await instance.get('/users/search', {
       params: {
-        'searchQuery': query,
+        searchQuery: query,
+        page: pageIndex,
+        resultsPerPage,
+        orderBy,
+        reverse: reverse.toString(),
       }
     });
   } catch (error) {
@@ -162,6 +173,34 @@ export async function search(query: string): Promise<MaybeError<User[]>> {
   }
 
   return response.data;
+}
+
+/**
+ * Sends a query for the number of search results for a given query to the backend.
+ *
+ * @param query Query string to search for
+ * @returns Number of search results or an error message
+ */
+export async function getSearchCount(query: string): Promise<MaybeError<number>> {
+  let response;
+  try {
+    response = await instance.get('/users/search/count', {
+      params: {
+        searchQuery: query,
+      }
+    });
+  } catch (error) {
+    let status: number | undefined = error.response?.status;
+
+    if (status === undefined) return 'Failed to reach backend';
+    return `Request failed: ${status}`;
+  }
+
+  if (typeof response.data?.count !== 'number') {
+    return 'Response is not number';
+  }
+
+  return response.data.count;
 }
 
 /**
