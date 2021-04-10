@@ -34,3 +34,4 @@ out/
 .vscode/
 .settings/
 bin/
+/.metadata/

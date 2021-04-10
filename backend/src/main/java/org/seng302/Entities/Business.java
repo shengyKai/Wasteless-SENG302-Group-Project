@@ -11,6 +11,8 @@ import java.util.*;
 @Entity
 public class Business {
 
+    //Minimum age to create a business
+    private final int MinimumAge = 16;
     private static final List<String> businessTypes = new ArrayList<>(Arrays.asList("Accommodation and Food Services", "Retail Trade", "Charitable organisation", "Non-profit organisation"));
 
     @Id
@@ -150,7 +152,7 @@ public class Business {
         //Get the current date as of now and find the difference in years between the current date and the age of the user.
         Date currentDate = new Date();
         long differenceInYears = (currentDate.getTime() - owner.getDob().getTime()) / (1000l * 60 * 60 * 24 * 365);
-        if (differenceInYears < 16) {
+        if (differenceInYears < MinimumAge) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User is not of minimum age required to create a business");
         }
         this.primaryOwner = owner;
