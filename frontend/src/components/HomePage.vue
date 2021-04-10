@@ -1,12 +1,52 @@
 <template>
-  <div class="container">
+  <div class="page-container">
+    <!-- User actions -->
+
+    <!-- Version that is displayed if the screen is wide -->
+    <v-card
+      rounded="lg"
+      class="action-pane small-no-display"
+    >
+      <v-card-text>
+        <v-list>
+          <v-list-item-group>
+            <v-list-item @click="viewProfile">
+              <v-list-item-icon>
+                <v-icon>mdi-account-circle</v-icon>
+              </v-list-item-icon>
+              <v-list-item-content>
+                <v-list-item-title>Profile</v-list-item-title>
+              </v-list-item-content>
+            </v-list-item>
+            <v-list-item @click="viewCreateBusiness">
+              <v-list-item-icon>
+                <v-icon>mdi-briefcase-plus</v-icon>
+              </v-list-item-icon>
+              <v-list-item-content>
+                <v-list-item-title>Add Business</v-list-item-title>
+              </v-list-item-content>
+            </v-list-item>
+          </v-list-item-group>
+        </v-list>
+      </v-card-text>
+    </v-card>
+
+    <v-card class="action-pane large-no-display">
+      <v-btn icon @click="viewProfile" class="action-button">
+        <v-icon large>mdi-account-circle</v-icon>
+      </v-btn>
+      <v-btn icon @click="viewCreateBusiness" class="action-button">
+        <v-icon large>mdi-briefcase-plus</v-icon>
+      </v-btn>
+    </v-card>
+
     <div class="newsfeed">
       <!-- Inventory items -->
       <v-card
         v-if="isBusiness"
         outlined
         rounded="lg"
-        class="inventory-card"
+        class="newsfeed-item"
       >
         <v-card-title>
           Inventory
@@ -42,34 +82,6 @@
         </v-card-text>
       </v-card>
     </div>
-    <v-card
-      rounded="lg"
-      class="action-pane"
-    >
-      <!-- User actions -->
-      <v-card-text>
-        <v-list>
-          <v-list-item-group>
-            <v-list-item @click="viewProfile">
-              <v-list-item-icon>
-                <v-icon>mdi-account-circle</v-icon>
-              </v-list-item-icon>
-              <v-list-item-content>
-                <v-list-item-title>Profile</v-list-item-title>
-              </v-list-item-content>
-            </v-list-item>
-            <v-list-item @click="viewCreateBusiness">
-              <v-list-item-icon>
-                <v-icon>mdi-briefcase-plus</v-icon>
-              </v-list-item-icon>
-              <v-list-item-content>
-                <v-list-item-title>Add Business</v-list-item-title>
-              </v-list-item-content>
-            </v-list-item>
-          </v-list-item-group>
-        </v-list>
-      </v-card-text>
-    </v-card>
   </div>
 </template>
 
@@ -126,23 +138,50 @@ export default {
 </script>
 
 <style scoped>
+
+
+@media all and (min-width: 992px) {
+  .large-no-display {
+    display: none !important;
+  }
+}
+
+@media not all and (min-width: 992px) {
+  .small-no-display {
+    display: none !important;
+  }
+}
+
 pre {
   white-space: pre-wrap;
 }
 
-.container {
+.page-container {
   display: flex;
-  max-width: 900px;
-  padding: 10px;
+  width: 100%;
+  margin-right: auto;
+  margin-left: auto;
+}
+
+@media all and (min-width: 992px) {
+  .page-container {
+    max-width: 900px;
+    padding: 10px;
+  }
+}
+
+@media not all and (min-width: 992px) {
+  .page-container {
+    padding-right: 5px;
+    padding-top: 10px;
+
+    align-content: flex-start
+  }
 }
 
 .newsfeed {
   flex: 2;
   min-width: 260px;
-}
-
-.inventory-card {
-  margin-bottom: 10px;
 }
 
 .inventory-container {
@@ -160,8 +199,25 @@ pre {
 }
 
 .action-pane {
-  max-height: 200px;
-  margin-left: 10px;
-  flex: 1;
+  margin-right: 10px;
 }
+
+@media all and (min-width: 992px) {
+  .action-pane {
+    max-height: 200px;
+    flex: 1;
+  }
+}
+
+@media not all and (min-width: 992px) {
+  .action-pane {
+    display: block;
+  }
+}
+
+.action-button {
+  display: block;
+  margin: 10px;
+}
+
 </style>
