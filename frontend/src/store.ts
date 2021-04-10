@@ -36,10 +36,20 @@ export function createOptions(): StoreOptions<StoreData> {
         deleteCookie(COOKIE.USER);
       },
 
+      /**
+       * Creates a modal create business dialog
+       *
+       * @param state Current store state
+       */
       showCreateBusiness(state) {
         state.createBusinessDialogShown = true;
       },
 
+      /**
+       * Hides the create business dialog
+       *
+       * @param state Current store state
+       */
       hideCreateBusiness(state) {
         state.createBusinessDialogShown = false;
       }

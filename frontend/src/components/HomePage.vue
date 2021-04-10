@@ -1,8 +1,6 @@
 <template>
   <div class="page-container">
-    <!-- User actions -->
-
-    <!-- Version that is displayed if the screen is wide -->
+    <!-- User actions - Wide version -->
     <v-card
       rounded="lg"
       class="action-pane small-no-display"
@@ -31,6 +29,7 @@
       </v-card-text>
     </v-card>
 
+    <!-- User actions - Narrow version -->
     <v-card class="action-pane large-no-display">
       <v-btn icon @click="viewProfile" class="action-button">
         <v-icon large>mdi-account-circle</v-icon>
@@ -116,18 +115,29 @@ export default {
         this.$router.push("/profile");
       }
     },
-
+    /**
+     * Shows the create business dialog
+     */
     viewCreateBusiness() {
       this.$store.commit('showCreateBusiness');
     }
   },
   computed: {
+    /**
+     * Current active user role
+     */
     role() {
       return this.$store.state.activeRole;
     },
+    /**
+     * Is the current user acting as a business
+     */
     isBusiness() {
       return this.role?.type === "business";
     },
+    /**
+     * List of inventory items to be shown
+     */
     inventoryItems() {
       if (!this.isBusiness) return undefined;
       return [...Array(10).keys()].map(i => `Item ${i}`);
