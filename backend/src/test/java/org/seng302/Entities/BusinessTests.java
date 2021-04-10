@@ -30,14 +30,14 @@ public class BusinessTests {
     Business testBusiness1;
 
     /**
-     * Sets up 2 Users and 1 Business
+     * Sets up 3 Users and 1 Business
      * User1 is primary owner of the business
      * @throws ParseException
      */
     @BeforeEach
     public void setUp() throws ParseException {
         LocalDateTime ldt = LocalDateTime.now().minusYears(15);
-        String dobAt15 = DateTimeFormatter.ofPattern("yyyy-MM-dd", Locale.ENGLISH).format(ldt);
+        String ageBelow16 = DateTimeFormatter.ofPattern("yyyy-MM-dd", Locale.ENGLISH).format(ldt);
         businessRepository.deleteAll();
         userRepository.deleteAll();
 
@@ -75,7 +75,7 @@ public class BusinessTests {
                 .withEmail("bobbysmith99@gmail.com")
                 .withPassword("1440-H%nt3r2")
                 .withBio("Likes slow walks on the beach")
-                .withDob(dobAt15)
+                .withDob(ageBelow16)
                 .withPhoneNumber("+64 3 555 0129")
                 .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Christchurch,New Zealand," +
                         "Canterbury,8041"))
