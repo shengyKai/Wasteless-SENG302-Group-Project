@@ -114,9 +114,10 @@
           sm="4"
         >
           <v-text-field
+            ref="countryCode"
             v-model="countryCode"
             label="Country Code"
-            :rules="countryCodeRules"
+            :rules="countryCodeRules.concat(phoneRequiresCountryCodeRule)"
             outlined
           />
         </v-col>
@@ -127,6 +128,7 @@
           <v-text-field
             v-model="phone"
             label="Phone"
+            @keyup="phoneNumberChange"
             :rules="phoneNumberRules"
             outlined
           />
@@ -231,7 +233,7 @@ export default {
       nickname: '',
       bio: '',
       dob: '',
-      countryCode: '',
+      countryCode: '64',
       phone: '',
       street1: '',
       street2: '',
@@ -305,6 +307,9 @@ export default {
     passwordChange () {
       this.$refs.confirmPassword.validate();
     },
+    phoneNumberChange () {
+      this.$refs.countryCode.validate();
+    },
     querySelections (v) {
       this.loading = true;
       // Simulated ajax query
@@ -333,6 +338,10 @@ export default {
     passwordConfirmationRule () {
       return () =>
         this.password === this.confirmPassword || 'Passwords must match';
+    },
+    phoneRequiresCountryCodeRule () {
+      return () =>
+        !(this.phone.length > 0 && this.countryCode.length < 1) || 'Country code must be present';
     }
   },
   //as any components are added to the dom, mounted() will be called
