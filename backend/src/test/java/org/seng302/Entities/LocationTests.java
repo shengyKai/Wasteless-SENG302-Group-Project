@@ -597,6 +597,7 @@ public class LocationTests {
    * Test that the JSON produced by constructFullJson includes the street number, street name,
    * city, region, country and postcode of the location object.
    */
+  @Test
   public void constructFullJsonIncludesAllExpectedFieldsTest() {
     Location location = locationBuilder.build();
     JSONObject json = location.constructFullJson();
@@ -612,6 +613,7 @@ public class LocationTests {
    * Test that the JSON proced by constructFullJson does not include any attributes appart from street
    * number, street name, city, region, country and postcode.
    */
+  @Test
   public void constructFullJsonOnlyIncludesExpectedFieldsTest() {
     Location location = locationBuilder.build();
     JSONObject json = location.constructFullJson();
@@ -627,6 +629,7 @@ public class LocationTests {
   /**
    * Test that all fields of the JSON produced by constuctFullJson have the expected value.
    */
+  @Test
   public void constructFullJsonFieldsHaveExpectedValueTest() {
     Location location = locationBuilder.build();
     JSONObject json = location.constructFullJson();
@@ -642,6 +645,7 @@ public class LocationTests {
    * Test that the JSON produced by constructPartialJson includes the city, region and country
    * of the location object.
    */
+  @Test
   public void constructPartialJsonIncludesAllExpectedFieldsTest() {
     Location location = locationBuilder.build();
     JSONObject json = location.constructPartialJson();
@@ -654,6 +658,7 @@ public class LocationTests {
    * Test that the JSON proced by constructPartialJson does not include any attributes apart from 
    * city, region and country.
    */
+  @Test
   public void constructPartialJsonOnlyIncludesExpectedFieldsTest() {
     Location location = locationBuilder.build();
     JSONObject json = location.constructPartialJson();
@@ -666,6 +671,7 @@ public class LocationTests {
   /**
    * Test that all fields of the JSON produced by constuctPartialJson have the expected value.
    */
+  @Test
   public void constructPartialJsonFieldsHaveExpectedValueTest() {
     Location location = locationBuilder.build();
     JSONObject json = location.constructPartialJson();

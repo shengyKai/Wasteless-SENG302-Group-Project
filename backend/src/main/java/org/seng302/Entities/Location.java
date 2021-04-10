@@ -296,7 +296,6 @@ public class Location {
         attributeMap.put("city", city);
         attributeMap.put("region", region);
         attributeMap.put("country", country);
-        attributeMap.put("postcode", postCode);
         return new JSONObject(attributeMap);
     }
 
