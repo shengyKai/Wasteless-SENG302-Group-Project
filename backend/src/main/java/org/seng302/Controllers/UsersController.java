@@ -105,7 +105,25 @@ public class UsersController {
             }
 
         }
-    };
+    }
+
+    /**
+     * REST GET method to get the number of users from the search query
+     * @param searchQuery the search term
+     * @return the total number of users
+     */
+    @GetMapping("/users/search/count")
+    JSONObject getSearchCount(HttpServletRequest session, @RequestParam("searchQuery") String searchQuery) {
+        AuthenticationTokenManager.checkAuthenticationToken(session);
+        logger.info(String.format("Performing search for \"%s\" and getting search count", searchQuery));
+        List<User> queryResults;
+        queryResults = UserSearchHelper.getSearchResultsOrderedByRelevance(searchQuery, userRepository, "false");
+
+        JSONObject count = new JSONObject();
+        count.put("count", queryResults.size());
+        return count;
+    }
+
 
     /**
      * REST GET method to search for users matching a search query

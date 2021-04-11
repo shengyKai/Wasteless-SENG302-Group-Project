@@ -14,15 +14,24 @@
       />
       <v-spacer/>
       <v-select
-        v-model="sortByKey"
+        v-model="orderBy"
         flat
         solo-inverted
         hide-details
-        :items="Object.keys(comparators)"
+        :items="[
+          { text: 'Relevance',   value: 'relevance'  },
+          { text: 'User ID',     value: 'userId'     },
+          { text: 'First Name',  value: 'firstName'  },
+          { text: 'Middle Name', value: 'middleName' },
+          { text: 'Last Name',   value: 'lastName'   },
+          { text: 'Nickname',    value: 'nickname'   },
+          { text: 'Email',       value: 'email'      },
+          { text: 'Address',     value: 'address'    },
+        ]"
         prepend-inner-icon="mdi-sort-variant"
         label="Sort by"
       />
-      <v-btn-toggle class="toggle" v-model="isSortDescending" mandatory>
+      <v-btn-toggle class="toggle" v-model="reverse" mandatory>
         <v-btn depressed color="primary" :value="false">
           <v-icon>mdi-arrow-up</v-icon>
         </v-btn>
@@ -33,10 +42,10 @@
     </v-toolbar>
 
     <v-alert v-if="error !== undefined" type="error"> {{ error }}</v-alert>
-    <v-list v-if="users !== undefined" three-line>
-      <!--visibleUsers would produce the results for each page, and then it will show each result with
+    <v-list three-line>
+      <!--users would produce the results for each page, and then it will show each result with
       SearchResultItem-->
-      <template v-for="(user, index) in visibleUsers">
+      <template v-for="(user, index) in users">
         <v-divider v-if="user === undefined" :key="'divider-'+index"/>
         <SearchResultItem v-else :key="user.id" :user="user"/>
       </template>
@@ -56,148 +65,110 @@
 
 <script>
 import SearchResultItem from './SearchResultItem';
-import { search } from '../api';
+import {getSearchCount, search} from '../api';
 import { debounce } from '../utils';
 
-// TODO Delete this
-const MOCK_USERS = [
-  {
-    id: 0,
-    firstName: 'Tim',
-    lastName: 'Tam',
-    email: 'tim.tam@hotmail.com',
-  },
-  {
-    id: 1,
-    firstName: 'Tim',
-    lastName: 'Lame',
-    email: 'tim.lame@hotmail.com',
-  },
-  {
-    id: 2,
-    firstName: 'Rick',
-    lastName: 'Mayo',
-    email: 'rick.mayo@hotmail.com',
-  },
-  {
-    id: 3,
-    firstName: 'Danny',
-    lastName: 'Blast',
-    email: 'danny.blast@gmail.com',
-  },
-  {
-    id: 4,
-    firstName: 'Barack',
-    lastName: 'Obama',
-    email: 'barack.obama@gmail.com',
-  },
-  {
-    id: 5,
-    firstName: 'Jeff',
-    lastName: 'Obama',
-    email: 'barack.obama@gmail.com',
-  },
-];
-
-const USER_COMPARATORS = {
-  // If first comparison results in a == b then fallback to other comparator.
-  'Relevance': null,
-  'First Name': (a, b) =>
-    a.firstName.localeCompare(b.firstName) ||
-    a.lastName.localeCompare(b.lastName),
-  'Last Name': (a, b) =>
-    a.lastName.localeCompare(b.lastName) ||
-    a.firstName.localeCompare(b.firstName),
-};
-
 export default {
+  name: 'SearchResults',
   data: function() {
     return {
       searchQuery: this.$route.query.query || '',
-      users: MOCK_USERS,
-      comparators: USER_COMPARATORS,
+      searchedQuery: undefined,
+      users: [],
       error: undefined,
-      isSortDescending: true,
-      sortByKey: Object.keys(USER_COMPARATORS)[0],
+      reverse: false,
+      orderBy: 'relevance',
       currentPage: 1,
-      resultsPerPage: 3,
-      resultsMessage: ''
+      resultsPerPage: 10,
+      totalResults: 0,
+      debouncedUpdateQuery: debounce(this.updateQuery, 500),
     };
   },
 
   computed: {
-    totalPages() {
-      return Math.ceil(this.users.length / this.resultsPerPage);
+    /**
+     * The total number of pages required to show all the users
+     * May be 0 if there are no results
+     */
+    totalPages () {
+      return Math.ceil(this.totalResults / this.resultsPerPage);
     },
+    /**
+     * The message displayed at the bottom of the page to show how many results there are
+     */
+    resultsMessage() {
+      if (this.users.length === 0) return 'There are no results to show';
 
-    sortedUsers() {
-      if (this.users === undefined) return undefined;
-
-      const comparator = this.comparators[this.sortByKey];
-      let result = Array.from(this.users);
-
-      if (comparator) {
-        result.sort(comparator);
-      }
-
-      let shouldReverse = this.isSortDescending;
-      // If there is no comparator then we should be sorting by relevance and we need to flip the list around
-      if (!comparator) shouldReverse = !shouldReverse;
-
-      if (shouldReverse) result.reverse();
-      return result;
+      const pageStartIndex = (this.currentPage - 1) * this.resultsPerPage;
+      const pageEndIndex = pageStartIndex + this.users.length;
+      return`Displaying ${pageStartIndex + 1} - ${pageEndIndex} of ${this.totalResults} results`;
     },
-    //Formula in method slices the results based on the number of results per page and which page the user is
-    //currently at, so that it will show the proper sets of results per page
-
-    visibleUsers() {
-      return this.sortedUsers.slice((this.currentPage - 1) * this.resultsPerPage, this.currentPage * this.resultsPerPage);
-    },
-  },
-
-  created () {
-    this.debouncedDoQuery = debounce(() => {
-      search(this.searchQuery).then(this.setResults);
-    }, 500);
-  },
-
-  mounted () {
-    let query = this.$route.query.query;
-    if (query) {
-      search(this.searchQuery).then(this.setResults);
-    }
   },
   methods: {
-    setResults (value) {
+    /**
+     * This function gets called when the search query is changed.
+     */
+    async updateQuery() {
+      if (!this.searchQuery) return; // If the current search query is empty, do not search
+
+      this.searchedQuery = this.searchQuery;
+
+      await Promise.all([
+        getSearchCount(this.searchQuery).then(count => {
+          if (typeof count === 'string') {
+            this.error = count;
+          } else {
+            this.totalResults = count;
+          }
+        }),
+        await this.updateNotQuery(),
+      ]);
+    },
+
+    /**
+     * This function gets called when the search results need to change, but the search query has not changed.
+     * The page index, results per page, order by and reverse variables notify this function.
+     */
+    async updateNotQuery() {
+      const value = await search (
+        this.searchedQuery,
+        this.currentPage,
+        this.resultsPerPage,
+        this.orderBy,
+        this.reverse
+      );
       if (typeof value === 'string') {
-        this.users = undefined;
+        this.users = [];
         this.error = value;
       } else {
         this.users = value;
         this.error = undefined;
       }
-    }
+    },
   },
 
   watch: {
-    searchQuery() {
-      this.debouncedDoQuery();
-    },
-    visibleUsers: {
-      immediate: true,
+    searchQuery: {
       handler() {
-        const pageStartIndex = (this.currentPage - 1) * this.resultsPerPage;
-        const pageEndIndex = pageStartIndex + this.visibleUsers.length;
-
-        if (pageStartIndex === pageEndIndex) {
-          this.resultsMessage = 'There are no results to show';
-        } else {
-          this.resultsMessage = `Displaying ${pageStartIndex + 1} - ${pageEndIndex} of ${this.users.length} results`;
-        }
-      }
+        this.debouncedUpdateQuery();
+      },
+      immediate: true,
+    } ,
+    orderBy() {
+      this.updateNotQuery();
+    },
+    reverse() {
+      this.updateNotQuery();
+    },
+    currentPage() {
+      this.updateNotQuery();
+    },
+    resultsPerPage() {
+      this.updateNotQuery();
     },
     totalPages() {
-      this.currentPage = Math.min(this.currentPage, this.totalPages);
+      // Ensures that the current page is at least 1 and less than or equal to the total number of pages.
+      this.currentPage = Math.max(Math.min(this.currentPage, this.totalPages), 1);
     }
   },
 
