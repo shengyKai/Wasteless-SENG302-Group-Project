@@ -8,7 +8,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.web.server.ResponseStatusException;
 
+
 import java.text.ParseException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -22,15 +26,18 @@ public class BusinessTests {
 
     User testUser1;
     User testUser2;
-    Business testBusiness;
+    User testUser3;
+    Business testBusiness1;
 
     /**
-     * Sets up 2 Users and 1 Business
+     * Sets up 3 Users and 1 Business
      * User1 is primary owner of the business
      * @throws ParseException
      */
     @BeforeEach
     public void setUp() throws ParseException {
+        LocalDateTime ldt = LocalDateTime.now().minusYears(15);
+        String ageBelow16 = DateTimeFormatter.ofPattern("yyyy-MM-dd", Locale.ENGLISH).format(ldt);
         businessRepository.deleteAll();
         userRepository.deleteAll();
 
@@ -42,7 +49,7 @@ public class BusinessTests {
                 .withEmail("johnsmith99@gmail.com")
                 .withPassword("1337-H%nt3r2")
                 .withBio("Likes long walks on the beach")
-                .withDob("2021-03-11")
+                .withDob("2000-03-11")
                 .withPhoneNumber("+64 3 555 0129")
                 .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Christchurch,New Zealand," +
                         "Canterbury,8041"))
@@ -55,21 +62,35 @@ public class BusinessTests {
                 .withEmail("dave@gmail.com")
                 .withPassword("1337-H%nt3r2")
                 .withBio("Likes long walks on the beach")
-                .withDob("2021-03-11")
+                .withDob("2000-03-11")
+                .withPhoneNumber("+64 3 555 0129")
+                .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Christchurch,New Zealand," +
+                        "Canterbury,8041"))
+                .build();
+        testUser3 = new User.Builder()
+                .withFirstName("Bob")
+                .withMiddleName("Davidson")
+                .withLastName("Smith")
+                .withNickName("Bobby")
+                .withEmail("bobbysmith99@gmail.com")
+                .withPassword("1440-H%nt3r2")
+                .withBio("Likes slow walks on the beach")
+                .withDob(ageBelow16)
                 .withPhoneNumber("+64 3 555 0129")
                 .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Christchurch,New Zealand," +
                         "Canterbury,8041"))
                 .build();
         testUser1 = userRepository.save(testUser1);
         testUser2 = userRepository.save(testUser2);
-        testBusiness = new Business.Builder()
+        testUser3 = userRepository.save(testUser3);
+        testBusiness1 = new Business.Builder()
                 .withBusinessType("Accommodation and Food Services")
                 .withAddress(new Location())
                 .withDescription("Some description")
                 .withName("BusinessName")
                 .withPrimaryOwner(testUser1)
                 .build();
-        testBusiness = businessRepository.save(testBusiness);
+        testBusiness1 = businessRepository.save(testBusiness1);
 
     }
     /**
@@ -78,9 +99,9 @@ public class BusinessTests {
      */
     @Test
     public void getAdministratorsReturnsAdministrators() throws Exception {
-        testBusiness.addAdmin(testUser2);
-        testBusiness = businessRepository.save(testBusiness);
-        assertTrue(testBusiness.getAdministrators().stream().anyMatch(user -> user.getUserID() == testUser2.getUserID()));
+        testBusiness1.addAdmin(testUser2);
+        testBusiness1 = businessRepository.save(testBusiness1);
+        assertTrue(testBusiness1.getAdministrators().stream().anyMatch(user -> user.getUserID() == testUser2.getUserID()));
     }
 
     /**
@@ -89,7 +110,7 @@ public class BusinessTests {
      */
     @Test
     public void getPrimaryOwnerReturnsPrimaryOwner() throws Exception {
-        assertEquals(testUser1.getUserID(), testBusiness.getPrimaryOwner().getUserID());
+        assertEquals(testUser1.getUserID(), testBusiness1.getPrimaryOwner().getUserID());
     }
 
     /**
@@ -98,8 +119,8 @@ public class BusinessTests {
      */
     @Test
     public void setBusinessTypeWhenValid() throws ResponseStatusException {
-        testBusiness.setBusinessType("Retail Trade");
-        assertEquals( "Retail Trade", testBusiness.getBusinessType());
+        testBusiness1.setBusinessType("Retail Trade");
+        assertEquals( "Retail Trade", testBusiness1.getBusinessType());
     }
 
     /**
@@ -109,7 +130,7 @@ public class BusinessTests {
     @Test
     public void setBusinessTypeThrowsWhenInvalid() throws ResponseStatusException {
         try {
-            testBusiness.setBusinessType("invalid type");
+            testBusiness1.setBusinessType("invalid type");
             fail(); // shouldnt get here
         } catch (ResponseStatusException err) {
 
@@ -122,8 +143,8 @@ public class BusinessTests {
     @Test
     public void setNameSetsName() {
         String newName = "Cool Business";
-        testBusiness.setName(newName);
-        assertEquals(newName, testBusiness.getName());
+        testBusiness1.setName(newName);
+        assertEquals(newName, testBusiness1.getName());
     }
 
     /**
@@ -132,7 +153,35 @@ public class BusinessTests {
     @Test
     public void setDescriptionSetsDescription() {
         String newDesc = "Some description";
-        testBusiness.setDescription(newDesc);
-        assertEquals(newDesc, testBusiness.getDescription());
+        testBusiness1.setDescription(newDesc);
+        assertEquals(newDesc, testBusiness1.getDescription());
+    }
+
+    /**
+     * tests that if user is above or equal 16 years old, the user's data will be stored as the primary owner
+     */
+    @Test
+    public void setAboveMinimumAge() {
+        assertNotNull(testBusiness1.getPrimaryOwner());
+    }
+
+    /**
+     * tests that if user is below 16 years old, an exception will be thrown
+     */
+    @Test
+    public void setBelowMinimumAge() {
+        Exception thrown = assertThrows(ResponseStatusException.class, () -> {
+            Business testBusiness2 = new Business.Builder()
+            .withBusinessType("Accommodation and Food Services")
+            .withAddress(new Location())
+            .withDescription("Some description")
+            .withName("BusinessName")
+            .withPrimaryOwner(testUser3)
+            .build();
+            testBusiness2 = businessRepository.save(testBusiness2);
+        }, "Expected Business.builder() to throw, but it didn't" );
+
+        System.out.print(thrown);
+        assertTrue(thrown.getMessage().contains("User is not of minimum age required to create a business"));
     }
 }
