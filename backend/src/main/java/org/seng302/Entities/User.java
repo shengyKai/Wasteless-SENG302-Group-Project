@@ -342,16 +342,17 @@ public class User extends Account {
     // Todo: Add city, region and country parts of address once parsing address string is done.
     // Todo: Replace email with profile picture once profile pictures added.
     public JSONObject constructPublicJson() {
-        Map<String, String> attributeMap = new HashMap<>();
-        attributeMap.put("id", getUserID().toString());
-        attributeMap.put("firstName", firstName);
-        attributeMap.put("middleName", middleName);
-        attributeMap.put("lastName", lastName);
-        attributeMap.put("nickname", nickname);
-        attributeMap.put("email", getEmail());
-        attributeMap.put("bio", bio);
-        attributeMap.put("created", created.toString());
+        Map<String, Object> attributeMap = new HashMap<>();
+        attributeMap.put("id",          getUserID());
+        attributeMap.put("firstName",   getFirstName());
+        attributeMap.put("lastName",    getLastName());
+        attributeMap.put("email",       getEmail());
+        attributeMap.put("dateOfBirth", getDob().toString());
+        attributeMap.put("created",     getCreated().toString());
         attributeMap.put("homeAddress", getAddress().toString());
+        if (getMiddleName() != null) { attributeMap.put("middleName",  getMiddleName()); }
+        if (getNickname() != null) { attributeMap.put("nickname",    getNickname()); }
+        if (getBio() != null) { attributeMap.put("bio", getBio()); }
         return new JSONObject(attributeMap);
     }
 
@@ -363,7 +364,6 @@ public class User extends Account {
     public JSONObject constructPrivateJson() {
         //Map<String, String> attributeMap = constructPublicJson();
         JSONObject json = constructPublicJson();
-        json.appendField("dateOfBirth", dob.toString());
         json.appendField("phoneNumber", phNum);
         json.appendField("role", role);
         //json.appendField("businessesAdministered", businessesAdministered);
