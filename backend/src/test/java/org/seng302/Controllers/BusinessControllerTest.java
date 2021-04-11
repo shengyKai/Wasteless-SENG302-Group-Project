@@ -22,7 +22,10 @@ import javax.servlet.http.Cookie;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 import static org.junit.Assert.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -313,5 +316,276 @@ public class BusinessControllerTest {
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isForbidden());
     }
+
+
+    /**
+     * Assert that when the owner of a business makes another user an admin,
+     * the business is contained in the set of businessesAdministered for that user.
+     * Assumes BusinessOwner is logged in performing the action
+     * Assumes the given user is not already an admin
+     * @throws Exception
+     */
+    @Test
+    public void addAdminTest() throws Exception {
+        User testAdmin = new User.Builder()
+                .withFirstName("Bob")
+                .withMiddleName("The")
+                .withLastName("Builder")
+                .withNickName("Bobby")
+                .withEmail("bobthebuilder@gmail.com")
+                .withPassword("1337-H%nt3r2")
+                .withBio("buids things")
+                .withDob("2021-03-11")
+                .withPhoneNumber("+64 3 555 0129")
+                .withAddress(new Location())
+                .build();
+        testAdmin = userRepository.save(testAdmin);
+        String jsonString = String.format("{\"userId\": %d}", testAdmin.getUserID());
+        setCurrentUser(owner.getUserID());
+
+        mockMvc.perform(MockMvcRequestBuilders
+                .put(String.format("/businesses/%d/makeAdministrator", testBusiness.getId()))
+                .content(jsonString)
+                .sessionAttrs(sessionAuthToken)
+                .cookie(authCookie)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+
+        testAdmin = userRepository.findById(testAdmin.getUserID()).get();
+        assertTrue(testAdmin.getBusinessesAdministered().contains(testBusiness));
+    }
+
+    /**
+     * Assert that when attempting to promote a user to admin when not currently logged in
+     * as the businesses' primary Owner, a 403 is returned
+     * @throws Exception
+     */
+    @Test
+    public void addAdminWhenNotPrimaryOwnerTest() throws Exception {
+        User testAdmin = new User.Builder()
+                .withFirstName("Bob")
+                .withMiddleName("The")
+                .withLastName("Builder")
+                .withNickName("Bobby")
+                .withEmail("bobthebuilder@gmail.com")
+                .withPassword("1337-H%nt3r2")
+                .withBio("buids things")
+                .withDob("2021-03-11")
+                .withPhoneNumber("+64 3 555 0129")
+                .withAddress(new Location())
+                .build();
+        testAdmin = userRepository.save(testAdmin);
+        String jsonString = String.format("{\"userId\": %d}", testAdmin.getUserID());
+
+        setCurrentUser(999L); // LOGGED IN AS SOMEONE WHO IS NOT BUSINESS OWNER
+
+        mockMvc.perform(MockMvcRequestBuilders
+                .put(String.format("/businesses/%d/makeAdministrator", testBusiness.getId()))
+                .content(jsonString)
+                .sessionAttrs(sessionAuthToken)
+                .cookie(authCookie)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isForbidden());
+    }
+
+    /**
+     * Assert that when attempting to promote a user to admin when not logged in at all,
+     * a 401 is returned
+     * @throws Exception
+     */
+    @Test
+    public void addAdminWhenNotLoggedInTest() throws Exception {
+        User testAdmin = new User.Builder()
+                .withFirstName("Bob")
+                .withMiddleName("The")
+                .withLastName("Builder")
+                .withNickName("Bobby")
+                .withEmail("bobthebuilder@gmail.com")
+                .withPassword("1337-H%nt3r2")
+                .withBio("buids things")
+                .withDob("2021-03-11")
+                .withPhoneNumber("+64 3 555 0129")
+                .withAddress(new Location())
+                .build();
+        testAdmin = userRepository.save(testAdmin);
+        String jsonString = String.format("{\"userId\": %d}", testAdmin.getUserID());
+
+        mockMvc.perform(MockMvcRequestBuilders
+                .put(String.format("/businesses/%d/makeAdministrator", testBusiness.getId()))
+                .content(jsonString)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isUnauthorized());
+    }
+
+    /**
+     * Assert that when promoting a user to admin with a userId that does not exist,
+     * a 400 is returned
+     * @throws Exception
+     */
+    @Test
+    public void addAdminWhenUserNotExistTest() throws Exception {
+
+        String jsonString = "{\"userId\": 99}";
+        setCurrentUser(owner.getUserID());
+
+        mockMvc.perform(MockMvcRequestBuilders
+                .put(String.format("/businesses/%d/makeAdministrator", testBusiness.getId()))
+                .content(jsonString)
+                .sessionAttrs(sessionAuthToken)
+                .cookie(authCookie)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
+    }
+
+    /**
+     * Assert that when promoting a user to admin when the business does not exist,
+     * a 406 is returned
+     * @throws Exception
+     */
+    @Test
+    public void addAdminWhenBusinessNotExistTest() throws Exception {
+        User testAdmin = new User.Builder()
+                .withFirstName("Bob")
+                .withMiddleName("The")
+                .withLastName("Builder")
+                .withNickName("Bobby")
+                .withEmail("bobthebuilder@gmail.com")
+                .withPassword("1337-H%nt3r2")
+                .withBio("buids things")
+                .withDob("2021-03-11")
+                .withPhoneNumber("+64 3 555 0129")
+                .withAddress(new Location())
+                .build();
+        testAdmin = userRepository.save(testAdmin);
+        String jsonString = String.format("{\"userId\": %d}", testAdmin.getUserID());
+        setCurrentUser(owner.getUserID());
+
+        mockMvc.perform(MockMvcRequestBuilders
+                .put(String.format("/businesses/%d/makeAdministrator", 999L))
+                .content(jsonString)
+                .sessionAttrs(sessionAuthToken)
+                .cookie(authCookie)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotAcceptable());
+
+    }
+
+    /**
+     * Assert that when promoting a user to admin, who is already an admin of this business,
+     * a 400 is returned
+     * @throws Exception
+     */
+    @Test
+    public void addAdminWhenUserAlreadyAdminTest() throws Exception {
+        User testAdmin = new User.Builder()
+                .withFirstName("Bob")
+                .withMiddleName("The")
+                .withLastName("Builder")
+                .withNickName("Bobby")
+                .withEmail("bobthebuilder@gmail.com")
+                .withPassword("1337-H%nt3r2")
+                .withBio("buids things")
+                .withDob("2021-03-11")
+                .withPhoneNumber("+64 3 555 0129")
+                .withAddress(new Location())
+                .build();
+        testAdmin = userRepository.save(testAdmin);
+        testBusiness.addAdmin(testAdmin);
+        testBusiness = businessRepository.save(testBusiness);
+        String jsonString = String.format("{\"userId\": %d}", testAdmin.getUserID());
+        setCurrentUser(owner.getUserID());
+
+        mockMvc.perform(MockMvcRequestBuilders
+                .put(String.format("/businesses/%d/makeAdministrator", testBusiness.getId()))
+                .content(jsonString)
+                .sessionAttrs(sessionAuthToken)
+                .cookie(authCookie)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
+    }
+
+
+    /**
+     * Assert that when removing a user's admin rights from a business, the user is no longer admin
+     * Assumes logged in as business Primary Owner
+     * Assumes given user is an admin
+     * @throws Exception
+     */
+    @Test
+    public void removeAdminTest() throws Exception {
+        User testAdmin = new User.Builder()
+                .withFirstName("Bob")
+                .withMiddleName("The")
+                .withLastName("Builder")
+                .withNickName("Bobby")
+                .withEmail("bobthebuilder@gmail.com")
+                .withPassword("1337-H%nt3r2")
+                .withBio("buids things")
+                .withDob("2021-03-11")
+                .withPhoneNumber("+64 3 555 0129")
+                .withAddress(new Location())
+                .build();
+        testAdmin = userRepository.save(testAdmin);
+
+        testBusiness.addAdmin(testAdmin); // make user an admin
+        testBusiness = businessRepository.save(testBusiness);
+
+        String jsonString = String.format("{\"userId\": %d}", testAdmin.getUserID());
+        setCurrentUser(owner.getUserID());
+
+        mockMvc.perform(MockMvcRequestBuilders
+                .put(String.format("/businesses/%d/removeAdministrator", testBusiness.getId()))
+                .content(jsonString)
+                .sessionAttrs(sessionAuthToken)
+                .cookie(authCookie)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+
+        testAdmin = userRepository.findById(testAdmin.getUserID()).get();
+        assertFalse(testAdmin.getBusinessesAdministered().contains(testBusiness));
+    }
+
+    /**
+     * Assert that when removing a user's admin role from a business when they aren't an admin of,
+     * a 400 is returned
+     * @throws Exception
+     */
+    @Test
+    public void removeAdminWhenUserNotAdminTest() throws Exception {
+        User testAdmin = new User.Builder()
+                .withFirstName("Bob")
+                .withMiddleName("The")
+                .withLastName("Builder")
+                .withNickName("Bobby")
+                .withEmail("bobthebuilder@gmail.com")
+                .withPassword("1337-H%nt3r2")
+                .withBio("buids things")
+                .withDob("2021-03-11")
+                .withPhoneNumber("+64 3 555 0129")
+                .withAddress(new Location())
+                .build();
+        testAdmin = userRepository.save(testAdmin);
+
+        String jsonString = String.format("{\"userId\": %d}", testAdmin.getUserID());
+        setCurrentUser(owner.getUserID());
+
+        mockMvc.perform(MockMvcRequestBuilders
+                .put(String.format("/businesses/%d/removeAdministrator", testBusiness.getId()))
+                .content(jsonString)
+                .sessionAttrs(sessionAuthToken)
+                .cookie(authCookie)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
+    }
+
+
 
 }

@@ -261,4 +261,17 @@ public class Business {
         }
     }
 
+    @Override
+    public boolean equals(Object o) {
+        Business business = (Business) o;
+        return this.id == business.getId() &&
+                this.name == business.getName() &&
+                this.description == business.getDescription();
+    }
+
+    @Override
+    public int hashCode() {
+        return this.id.intValue();
+    }
+
 }
