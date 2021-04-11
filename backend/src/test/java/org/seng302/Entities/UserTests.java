@@ -630,6 +630,7 @@ public class UserTests {
         json.remove("email");
         json.remove("bio");
         json.remove("created");
+        json.remove("dateOfBirth");
         json.remove("homeAddress");
         json.remove("businessesAdministered");
         assertTrue(json.isEmpty());

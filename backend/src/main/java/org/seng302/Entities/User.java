@@ -30,6 +30,7 @@ public class User extends Account {
     private Date created;
     private String role;
     private Set<Business> businessesAdministered = new HashSet<>();
+    private Set<Business> businessesOwned = new HashSet<>();
 
     /* Matches:
     123-456-7890
@@ -274,6 +275,23 @@ public class User extends Account {
     }
 
     /**
+     * Gets the set of businesses this user is the primary owner of
+     * @return Set of businesses owned
+     */
+    @OneToMany(mappedBy = "primaryOwner", fetch = FetchType.EAGER)
+    public Set<Business> getBusinessesOwned() {
+        return this.businessesOwned;
+    }
+
+    /**
+     * Sets the set of businesses this user is the primary owner of
+     * @param owned Businesses owned
+     */
+    private void setBusinessesOwned(Set<Business> owned) {
+        this.businessesOwned = owned;
+    }
+
+    /**
      * Gets the set of businesses that the user is an admin of
      * @return Businesses administered
      */
@@ -289,6 +307,19 @@ public class User extends Account {
      */
     private void setBusinessesAdministered(Set<Business> businesses) {
         this.businessesAdministered = businesses;
+    }
+
+    /**
+     * Gets the set of businesses that the user is an admin of OR is the owner of
+     * @return Businesses administered or owned
+     */
+    @Transient
+    public Set<Business> getBusinessesAdministeredAndOwned() {
+        Set<Business> mergedSet = new HashSet<>() {{
+            addAll(getBusinessesOwned());
+            addAll(getBusinessesAdministered());
+        }};
+        return mergedSet;
     }
 
     /**
@@ -308,7 +339,7 @@ public class User extends Account {
     /**
      * This method constructs a JSON representation of the user's public details. These are their id number,
      * first name, middle name, last name, nickname, email, bio, the city/region/country part of their address,
-     * the businesses they administer, and date the account was created. If fullBusienssDetails is true then 
+     * the businesses they administer, and date the account was created. If fullBusienssDetails is true then
      * a JSON representation of each business they administer will be included, otherwise the businessesAdministered
      * field will have the placeholder array ["string"].
      * @param fullBusinessDetails A JSON representation of each business will be included in the businessesAdministered
@@ -318,14 +349,15 @@ public class User extends Account {
     // Todo: Replace email with profile picture once profile pictures added.
     public JSONObject constructPublicJson(boolean fullBusinessDetails) {
         Map<String, Object> attributeMap = new HashMap<>();
-        attributeMap.put("id", getUserID());
-        attributeMap.put("firstName", firstName);
-        attributeMap.put("middleName", middleName);
-        attributeMap.put("lastName", lastName);
-        attributeMap.put("nickname", nickname);
-        attributeMap.put("email", getEmail());
-        attributeMap.put("bio", bio);
-        attributeMap.put("created", created.toString());
+        attributeMap.put("id",          getUserID());
+        attributeMap.put("firstName",   getFirstName());
+        attributeMap.put("lastName",    getLastName());
+        attributeMap.put("email",       getEmail());
+        attributeMap.put("dateOfBirth", getDob().toString());
+        attributeMap.put("created",     getCreated().toString());
+        if (getMiddleName() != null) { attributeMap.put("middleName",  getMiddleName()); }
+        if (getNickname() != null) { attributeMap.put("nickname",    getNickname()); }
+        if (getBio() != null) { attributeMap.put("bio", getBio()); }
         attributeMap.put("homeAddress", getAddress().constructPartialJson());
         if (fullBusinessDetails) {
             attributeMap.put("businessesAdministered", constructBusinessJsonArray());
@@ -357,7 +389,7 @@ public class User extends Account {
         json.appendField("dateOfBirth", dob.toString());
         json.appendField("phoneNumber", phNum);
         json.appendField("role", role);
-        
+
         return json;
     }
 
@@ -371,7 +403,7 @@ public class User extends Account {
     }
 
     /**
-     * Construct an array of JSON objects representing the businesses the user administers. The 
+     * Construct an array of JSON objects representing the businesses the user administers. The
      * "administrators" field of the JSON object is replaced by ["string"].
      * @return An array of JSON representations of the businesses the user administers.
      */

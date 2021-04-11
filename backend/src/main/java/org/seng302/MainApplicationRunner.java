@@ -76,7 +76,7 @@ public class MainApplicationRunner implements ApplicationRunner {
                 .build();
 
         Business testBusiness = _businessRepository.save(business);
-        testBusiness.addAdmin(user);
+        //testBusiness.addAdmin(user);
         _businessRepository.save(testBusiness);
         user = _userRepository.findByEmail("123andyelliot@gmail.com");
     }
