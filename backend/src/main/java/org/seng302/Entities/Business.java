@@ -173,6 +173,10 @@ public class Business {
         }
     }
 
+    /**
+     * This method retrieves all Users who are owners or admins of this business.
+     * @return A Set containing Users who are owners or admins of the business.
+     */
     public Set<User> getOwnerAndAdministrators() {
         Set<User> ownerAdminSet = new HashSet<>();
         ownerAdminSet.addAll(administrators);
