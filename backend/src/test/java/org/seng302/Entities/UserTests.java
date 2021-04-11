@@ -92,6 +92,7 @@ public class UserTests {
         businessRepository.save(testBusiness2);
         testBusiness2.addAdmin(testUser);
         businessRepository.save(testBusiness2);
+        testUser = userRepository.findByEmail(testUser.getEmail());
     }
 
     @Test

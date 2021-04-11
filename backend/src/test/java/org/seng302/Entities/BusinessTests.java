@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.web.server.ResponseStatusException;
 
-import jdk.nashorn.internal.scripts.JS;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 
