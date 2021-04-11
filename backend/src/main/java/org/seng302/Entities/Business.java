@@ -5,7 +5,8 @@ import org.springframework.web.server.ResponseStatusException;
 
 import javax.persistence.*;
 
-import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.*;
 
 @Entity
@@ -150,9 +151,9 @@ public class Business {
         }
 
         //Get the current date as of now and find the difference in years between the current date and the age of the user.
-        Date currentDate = new Date();
-        long differenceInYears = (currentDate.getTime() - owner.getDob().getTime()) / (1000l * 60 * 60 * 24 * 365);
-        if (differenceInYears < MinimumAge) {
+        long age = java.time.temporal.ChronoUnit.YEARS.between(
+            owner.getDob().toInstant().atZone(ZoneId.systemDefault()).toLocalDate(), LocalDate.now());
+        if (age < MinimumAge) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User is not of minimum age required to create a business");
         }
         this.primaryOwner = owner;
