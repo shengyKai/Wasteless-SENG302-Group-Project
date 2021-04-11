@@ -91,13 +91,7 @@ public class UserTests {
         .withPrimaryOwner(testUser2).withDescription("Chill spot").build();
         businessRepository.save(testBusiness2);
         testBusiness2.addAdmin(testUser);
-        System.out.println(testUser.getEmail());
-        System.out.println(userRepository.findByEmail(testUser.getEmail()));
-        System.out.println(String.format("User is admin of %d businesses", testUser.getBusinessesAdministered().size()));
-        System.out.println(String.format("Business 1 has %d administrators", testBusiness1.getAdministrators().size()));
-        System.out.println(String.format("Business 2 has %d administrators", testBusiness2.getAdministrators().size()));
-        testUser = userRepository.findByEmail(testUser.getEmail());
-        System.out.println(String.format("User is admin of %d businesses", testUser.getBusinessesAdministered().size()));
+        businessRepository.save(testBusiness2);
     }
 
     @Test
@@ -785,7 +779,7 @@ public class UserTests {
     @Test
     public void constructPublicJsonBusinessesAdministeredTrueTest() {
         addBusinessesAdministeredToTestUser();
-        Set<Business> testBusinesses = testUser.getBusinessesAdministered();
+        Set<Business> testBusinesses = testUser.getBusinessesAdministeredAndOwned();
         assertEquals(2, testBusinesses.size());
         JSONObject json = testUser.constructPublicJson(true);
         JSONArray expectedBusinessArray = new JSONArray();
@@ -828,7 +822,7 @@ public class UserTests {
     @Test
     public void constructPrivateJsonBusinessesAdministeredTrueTest() {
         addBusinessesAdministeredToTestUser();
-        Set<Business> testBusinesses = testUser.getBusinessesAdministered();
+        Set<Business> testBusinesses = testUser.getBusinessesAdministeredAndOwned();
         assertEquals(2, testBusinesses.size());
         JSONObject json = testUser.constructPrivateJson(true);
         JSONArray expectedBusinessArray = new JSONArray();

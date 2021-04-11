@@ -173,6 +173,12 @@ public class Business {
         }
     }
 
+    public Set<User> getOwnerAndAdministrators() {
+        Set<User> ownerAdminSet = new HashSet<>();
+        ownerAdminSet.addAll(administrators);
+        ownerAdminSet.add(primaryOwner);
+        return ownerAdminSet;
+    }
     /**
      * Construct a JSON object representing the business. The JSON object includes an array of JSON
      * representations of the users who are administrators of the business, and a JSON representation
@@ -217,7 +223,7 @@ public class Business {
      */
     private JSONArray constructAdminJsonArray() {
         JSONArray adminArray = new JSONArray();
-        for (User admin : administrators) {
+        for (User admin : getOwnerAndAdministrators()) {
             adminArray.add(admin.constructPublicJson());
         }
         return adminArray;

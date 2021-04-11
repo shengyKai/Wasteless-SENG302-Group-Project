@@ -409,7 +409,7 @@ public class User extends Account {
      */
     public JSONArray constructBusinessJsonArray() {
         JSONArray businessArray = new JSONArray();
-        for (Business business : businessesAdministered) {
+        for (Business business : getBusinessesAdministeredAndOwned()) {
             businessArray.add(business.constructJson());
         }
         return businessArray;
