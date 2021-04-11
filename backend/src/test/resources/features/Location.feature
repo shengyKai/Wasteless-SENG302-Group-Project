@@ -1,9 +1,9 @@
 Feature: Location
 
     Scenario: Create a valid location from an address
-        Given the address "69 Riccarton Road, Christchurch, Canterbury, New Zealand, 8041" does not exist
-        When the address "69 Riccarton Road, Christchurch, Canterbury, New Zealand, 8041" is created
-        Then the address "69 Riccarton Road, Christchurch, Canterbury, New Zealand, 8041" exists
+        Given the address "69,Riccarton Road,Christchurch,New Zealand,Canterbury,8041" does not exist
+        When the address "69,Riccarton Road,Christchurch,New Zealand,Canterbury,8041" is created
+        Then the address "69,Riccarton Road,Christchurch,New Zealand,Canterbury,8041" exists
         Then the address has the street number "69"
         Then the address has the street name "Riccarton Road"
         Then the address has the city name "Christchurch"
@@ -12,9 +12,9 @@ Feature: Location
         Then the address has the post code "8041"
 
     Scenario: Create a second valid location from an address
-        Given the address "100 Ocean View Crescent, Auckland, Rakino Island, New Zealand, 1010" does not exist
-        When the address "100 Ocean View Crescent, Auckland, Rakino Island, New Zealand, 1010" is created
-        Then the address "100 Ocean View Crescent, Auckland, Rakino Island, New Zealand, 1010" exists
+        Given the address "100,Ocean View Crescent,Auckland,New Zealand,Rakino Island,1010" does not exist
+        When the address "100,Ocean View Crescent,Auckland,New Zealand,Rakino Island,1010" is created
+        Then the address "100,Ocean View Crescent,Auckland,New Zealand,Rakino Island,1010" exists
         Then the address has the street number "100"
         Then the address has the street name "Ocean View Crescent"
         Then the address has the city name "Auckland"

@@ -4,25 +4,27 @@ import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+import org.assertj.core.api.junit.jupiter.SoftAssertionsExtension;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.runner.RunWith;
+import org.junit.runners.ParentRunner;
 import org.mockito.Mock;
 import org.seng302.Entities.Location;
 import org.seng302.Entities.User;
 import org.seng302.Persistence.UserRepository;
 import org.seng302.Tools.PasswordAuthenticator;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 
-@RunWith(SpringRunner.class)
-@SpringBootTest()
 public class UserStepDefinition {
 
-    @Mock
+    @Autowired
     private UserRepository userRepository;
 
     private User theUser;
@@ -44,7 +46,8 @@ public class UserStepDefinition {
 
     @Given("the user with the email {string} does not exist")
     public void theUserWithTheEmailDoesNotExist(String email) {
-        Assert.assertEquals(userRepository.findByEmail(email), null);
+        Assert.assertNull(userRepository.findByEmail(email));
+        //Assert.assertThrows(NullPointerException.class, () -> { userRepository.findByEmail(email); });
     }
 
     @When("a user is getting created the first name is {string}")
@@ -143,7 +146,12 @@ public class UserStepDefinition {
     @Then("the user has the date of birth {string}")
     public void theUserHasTheDob(String dob) {
         User user = userRepository.findByEmail(userEmail);
-        Assert.assertEquals(user.getDob(), dob);
+        try {
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+            Assert.assertEquals(user.getDob().getTime(), dateFormat.parse(dob).getTime());
+        } catch (ParseException parseException) {
+            Assert.fail();
+        }
     }
 
     @Then("the user has the phone number {string}")
@@ -155,6 +163,8 @@ public class UserStepDefinition {
     @Then("the user has the address {string}")
     public void theUserHasTheAddress(String address) {
         User user = userRepository.findByEmail(userEmail);
-        Assert.assertSame(user.getAddress(), Location.covertAddressStringToLocation(address));
+        Location location = Location.covertAddressStringToLocation(address);
+        location.setId(user.getAddress().getId());
+        Assert.assertEquals(user.getAddress(), location);
     }
 }

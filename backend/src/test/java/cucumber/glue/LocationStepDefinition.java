@@ -12,8 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
-@RunWith(SpringRunner.class)
-@SpringBootTest()
 public class LocationStepDefinition {
 
     //@Autowired
@@ -33,7 +31,7 @@ public class LocationStepDefinition {
 
     @Then("the address {string} exists")
     public void theAddressExists(String address) {
-        Assert.assertSame(theAddress, Location.covertAddressStringToLocation(address));
+        Assert.assertEquals(theAddress, Location.covertAddressStringToLocation(address));
     }
 
     @Then("the address has the street number {string}")
@@ -53,8 +51,8 @@ public class LocationStepDefinition {
 
     @Then("the address has the region name {string}")
     public void theAddressHasTheRegionName(String region) {
-        Assert.assertEquals(theAddress.getRegion(), region);
-    }
+        System.out.println(theAddress);
+        Assert.assertEquals(theAddress.getRegion(), region); }
 
     @Then("the address has the country name {string}")
     public void theAddressHasTheCountryName(String country) {
