@@ -1,17 +1,23 @@
-package StepDefinitions;
+package cucumber.glue;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.cucumber.java.Before;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import org.junit.Assert;
 import org.junit.runner.RunWith;
 import org.seng302.Entities.Location;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest()
 public class LocationStepDefinition {
+
+    //@Autowired
+    //private ObjectMapper objectMapper;
 
     private Location theAddress;
 
