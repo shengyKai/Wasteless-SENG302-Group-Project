@@ -11,9 +11,7 @@ import org.seng302.Persistence.UserRepository;
 import org.seng302.Tools.AuthenticationTokenManager;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -95,5 +93,63 @@ public class BusinessController {
             logger.error(err.getMessage());
             throw err;
         }
+    }
+
+    private boolean loggedInUserIsOwner(HttpServletRequest req, Business business) {
+        HttpSession session = req.getSession();
+        Long userId = (Long) session.getAttribute("accountId");
+        return userId == business.getPrimaryOwner().getUserID();
+    }
+
+
+    /**
+     * PUT endpoint for making an individual an administrator of a business
+     * Only the business primary owner can do this
+     * @param userInfo The info containing the UserId for the User to make an administrator
+     * @param businessId The Id of the business
+     */
+    @PutMapping("/businesses/{id}/makeAdministrator")
+    public void makeAdmin(@RequestBody JSONObject userInfo, HttpServletRequest req, @PathVariable("id") Long businessId) {
+        try {
+            AuthenticationTokenManager.checkAuthenticationToken(req); // Ensure a user is logged in
+            // check business exists
+            Optional<Business> business = _businessRepository.findById(businessId);
+            if (!business.isPresent()) {
+                throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE,
+                        "The given business does not exist");
+            }
+
+            // Check a valid Long id is given in the request
+            Long userId = userInfo.getAsNumber("userId").longValue();
+            if (userId == null) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                        "Could not find a user id in the request");
+            }
+            // check the requested user exists
+            Optional<User> user = _userRepository.findById(userId);
+            if (!user.isPresent()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                        "The given user does not exist");
+            }
+
+            // check user is owner
+            if (!(loggedInUserIsOwner(req, business.get()) || AuthenticationTokenManager.sessionCanSeePrivate(req, null))) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                        "You do not have permission to perform this action");
+            }
+
+            if (user.get().getBusinessesAdministeredAndOwned().contains(business.get())) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                        "The given user is already an administrator of this business");
+            }
+
+            business.get().addAdmin(user.get());
+            _businessRepository.save(business.get());
+
+        } catch (Exception err) {
+            logger.error(err.getMessage());
+            throw err;
+        }
+
     }
 }
