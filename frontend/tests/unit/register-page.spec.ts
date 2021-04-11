@@ -120,7 +120,7 @@ describe('Register.vue', () => {
     });
 
   /**
-   * The series of tests here is to check if the register button is disabled when an invalid format is provided in any of the
+   * The series of tests here is to check if the register button is disabled when an INVALID format is provided in any of the
    * input fields. The fields checked are email, password, confirmPassword, name, nickname, bio, dob, countryCode, phone, street1, district, city, state,
    * country and postcode.
    */
@@ -345,28 +345,93 @@ describe('Register.vue', () => {
     });
   });
 
-  //TODO phone number and country code rules is not yet updated
-  // it("Testing for invalid phone format, alphabets in field", async () => {
-  //   const registerButton = wrapper.find(".v-btn");
+  it("Testing for invalid country code format, no country code", async () => {
+    const registerButton = wrapper.find(".v-btn");
 
-  //   await wrapper.setData({
-  //     phone: "123456789a"
-  //   });
-  //   Vue.nextTick(() => {
-  //     expect(registerButton.props().disabled).toBeTruthy();
-  //   });
-  // });
+    await wrapper.setData({
+      countryCode: ""
+    });
+    Vue.nextTick(() => {
+      expect(registerButton.props().disabled).toBeTruthy();
+    });
+  });
 
-  // it("Testing for invalid phone format, over character limit", async () => {
-  //   const registerButton = wrapper.find(".v-btn");
+  it("Testing for invalid country code format, alphabets in country code", async () => {
+    const registerButton = wrapper.find(".v-btn");
 
-  //   await wrapper.setData({
-  //     phone: '1'.repeat(101)
-  //   });
-  //   Vue.nextTick(() => {
-  //     expect(registerButton.props().disabled).toBeTruthy();
-  //   });
-  // });
+    await wrapper.setData({
+      countryCode: "a1"
+    });
+    Vue.nextTick(() => {
+      expect(registerButton.props().disabled).toBeTruthy();
+    });
+  });
+
+  it("Testing for invalid country code format, more than three numbers in country code", async () => {
+    const registerButton = wrapper.find(".v-btn");
+
+    await wrapper.setData({
+      countryCode: "1234"
+    });
+    Vue.nextTick(() => {
+      expect(registerButton.props().disabled).toBeTruthy();
+    });
+  });
+
+  it("Testing for invalid country code format, less than two numbers in country code", async () => {
+    const registerButton = wrapper.find(".v-btn");
+
+    await wrapper.setData({
+      countryCode: "1"
+    });
+    Vue.nextTick(() => {
+      expect(registerButton.props().disabled).toBeTruthy();
+    });
+  });
+
+  it("Testing for invalid phone format, alphabets in field", async () => {
+    const registerButton = wrapper.find(".v-btn");
+
+    await wrapper.setData({
+      phone: "123456789a"
+    });
+    Vue.nextTick(() => {
+      expect(registerButton.props().disabled).toBeTruthy();
+    });
+  });
+
+  it("Testing for invalid phone format, over character limit", async () => {
+    const registerButton = wrapper.find(".v-btn");
+
+    await wrapper.setData({
+      phone: '1'.repeat(101)
+    });
+    Vue.nextTick(() => {
+      expect(registerButton.props().disabled).toBeTruthy();
+    });
+  });
+
+  it("Testing for invalid phone format, spaces at the start of the phone number", async () => {
+    const registerButton = wrapper.find(".v-btn");
+
+    await wrapper.setData({
+      phone: " 1234567890"
+    });
+    Vue.nextTick(() => {
+      expect(registerButton.props().disabled).toBeTruthy();
+    });
+  });
+
+  it("Testing for invalid phone format, spaces at the end of the phone number", async () => {
+    const registerButton = wrapper.find(".v-btn");
+
+    await wrapper.setData({
+      phone: "1234567890 "
+    });
+    Vue.nextTick(() => {
+      expect(registerButton.props().disabled).toBeTruthy();
+    });
+  });
 
   it("Testing for invalid street format, empty street field", async () => {
     const registerButton = wrapper.find(".v-btn");
