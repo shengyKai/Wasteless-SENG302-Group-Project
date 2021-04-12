@@ -52,7 +52,7 @@ public class UserTests {
                 .withEmail("here@testing")
                 .withPassword("12345678")
                 .withBio("g")
-                .withDob("2021-03-11")
+                .withDob("2001-03-11")
                 .withPhoneNumber("123-456-7890")
                 .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Christchurch,New Zealand," +
                         "Canterbury,8041"))
@@ -65,7 +65,7 @@ public class UserTests {
                 .withEmail("johnsmith99@gmail.com")
                 .withPassword("1337-H%nt3r2")
                 .withBio("Likes long walks on the beach")
-                .withDob("2021-03-11")
+                .withDob("2001-03-11")
                 .withPhoneNumber("+64 3 555 0129")
                 .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Christchurch,New Zealand," +
                         "Canterbury,8041"));
@@ -827,7 +827,9 @@ public class UserTests {
     @Test
     public void constructPrivateJsonBusinessesAdministeredTrueTest() {
         addBusinessesAdministeredToTestUser();
-        Set<Business> testBusinesses = testUser.getBusinessesAdministeredAndOwned();
+        List<Business> testBusinesses = new ArrayList<>();
+        testBusinesses.addAll(testUser.getBusinessesAdministeredAndOwned());
+        Collections.sort(testBusinesses, (Business b1, Business b2) -> b1.getId().compareTo(b2.getId()));
         assertEquals(2, testBusinesses.size());
         JSONObject json = testUser.constructPrivateJson(true);
         JSONArray expectedBusinessArray = new JSONArray();
@@ -1193,7 +1195,7 @@ public class UserTests {
     @Test
     public void buildWithDobTest() throws ParseException {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        Date dob = dateFormat.parse("2021-03-11");
+        Date dob = dateFormat.parse("2001-03-11");
         User user = testBuilder.build();
         assertEquals(dob, user.getDob());
     }

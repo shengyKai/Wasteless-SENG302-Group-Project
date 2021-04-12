@@ -105,11 +105,11 @@ public class BusinessControllerTest {
                 .withPostCode("8041").build();
         owner = new User.Builder().withFirstName("John").withMiddleName("Hector").withLastName("Smith")
                 .withNickName("Jonny").withEmail("johnsmith99@gmail.com").withPassword("1337-H%nt3r2")
-                .withBio("Likes long walks on the beach").withDob("2021-03-11").withPhoneNumber("+64 3 555 0129")
+                .withBio("Likes long walks on the beach").withDob("2001-03-11").withPhoneNumber("+64 3 555 0129")
                 .withAddress(new Location()).build();
         admin = new User.Builder().withFirstName("Caroline").withMiddleName("Jane").withLastName("Smith")
                 .withNickName("Carrie").withEmail("carriesmith@hotmail.com").withPassword("h375dj82")
-                .withDob("2021-03-11").withPhoneNumber("+64 3 748 7562").withAddress(new Location()).build();
+                .withDob("2001-03-11").withPhoneNumber("+64 3 748 7562").withAddress(new Location()).build();
         otherUser = new User.Builder().withFirstName("William").withLastName("Pomeroy").withNickName("Will")
                 .withEmail("pomeroy.will@outlook.com").withPassword("569277hghrud").withDob("1981-03-11")
                 .withPhoneNumber("+64 21 099 5786").withAddress(userAddress).build();

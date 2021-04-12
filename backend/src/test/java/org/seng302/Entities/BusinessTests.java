@@ -198,9 +198,9 @@ public class BusinessTests {
      */
     private List<JSONObject> getTestJsons(Business business) {
         List<JSONObject> testJsons = new ArrayList<>();
-        testJsons.add(testBusiness.constructJson(true));
-        testJsons.add(testBusiness.constructJson(false));
-        testJsons.add(testBusiness.constructJson());
+        testJsons.add(business.constructJson(true));
+        testJsons.add(business.constructJson(false));
+        testJsons.add(business.constructJson());
         return testJsons;
     }
 
@@ -211,7 +211,7 @@ public class BusinessTests {
      */
     @Test
     public void constructJsonHasExpectedFieldsTest() {
-       List<JSONObject> testJsons = getTestJsons(testBusiness);
+       List<JSONObject> testJsons = getTestJsons(testBusiness1);
        for (JSONObject json : testJsons) {
            assertTrue(json.containsKey("name"));
            assertTrue(json.containsKey("description"));
@@ -231,7 +231,7 @@ public class BusinessTests {
      */
     @Test
     public void constructJsonDoesntHaveUnexpectedFieldsTest() {
-        List<JSONObject> testJsons = getTestJsons(testBusiness);
+        List<JSONObject> testJsons = getTestJsons(testBusiness1);
         for (JSONObject json : testJsons) {
             json.remove("name");
             json.remove("description");
@@ -252,15 +252,15 @@ public class BusinessTests {
      */
     @Test
     public void constructJsonSimpleFieldsHaveExpectedValueTest() {
-        List<JSONObject> testJsons = getTestJsons(testBusiness);
+        List<JSONObject> testJsons = getTestJsons(testBusiness1);
         for (JSONObject json : testJsons) {
-            assertEquals(testBusiness.getName(), json.getAsString("name"));
-            assertEquals(testBusiness.getDescription(), json.getAsString("description"));
-            assertEquals(testBusiness.getBusinessType(), json.getAsString("businessType"));
-            assertEquals(testBusiness.getAddress().constructFullJson().toString(), json.getAsString("address"));
-            assertEquals(testBusiness.getId().toString(), json.getAsString("id"));
-            assertEquals(testBusiness.getPrimaryOwner().getUserID().toString(), json.getAsString("primaryAdministratorId"));
-            assertEquals(testBusiness.getCreated().toString(), json.getAsString("created"));
+            assertEquals(testBusiness1.getName(), json.getAsString("name"));
+            assertEquals(testBusiness1.getDescription(), json.getAsString("description"));
+            assertEquals(testBusiness1.getBusinessType(), json.getAsString("businessType"));
+            assertEquals(testBusiness1.getAddress().constructFullJson().toString(), json.getAsString("address"));
+            assertEquals(testBusiness1.getId().toString(), json.getAsString("id"));
+            assertEquals(testBusiness1.getPrimaryOwner().getUserID().toString(), json.getAsString("primaryAdministratorId"));
+            assertEquals(testBusiness1.getCreated().toString(), json.getAsString("created"));
         }
     }
 
@@ -270,10 +270,10 @@ public class BusinessTests {
      */
     @Test
     public void constructJsonAdministratorsFullDetailsTest() {
-        testBusiness.addAdmin(testUser2);
-        assertEquals(2, testBusiness.getOwnerAndAdministrators().size());
+        testBusiness1.addAdmin(testUser2);
+        assertEquals(2, testBusiness1.getOwnerAndAdministrators().size());
         List<User> admins = new ArrayList<>();
-        admins.addAll(testBusiness.getOwnerAndAdministrators());
+        admins.addAll(testBusiness1.getOwnerAndAdministrators());
         Collections.sort(admins, (User user1, User user2) ->
            user1.getUserID().compareTo(user2.getUserID()));
         JSONArray expectedAdminArray = new JSONArray();
@@ -281,7 +281,7 @@ public class BusinessTests {
             expectedAdminArray.add(user.constructPublicJson());
         }
         String expectedAdminString = expectedAdminArray.toJSONString();
-        JSONObject testJson = testBusiness.constructJson(true);
+        JSONObject testJson = testBusiness1.constructJson(true);
         assertEquals(expectedAdminString, testJson.getAsString("administrators"));
     }
 
@@ -291,11 +291,11 @@ public class BusinessTests {
      */
     @Test
     public void constructJsonAdministratorsPlaceholderArrayTest() {
-        testBusiness.addAdmin(testUser2);
-        assertEquals(2, testBusiness.getOwnerAndAdministrators().size());
-        JSONObject falseJson = testBusiness.constructJson(false);
+        testBusiness1.addAdmin(testUser2);
+        assertEquals(2, testBusiness1.getOwnerAndAdministrators().size());
+        JSONObject falseJson = testBusiness1.constructJson(false);
         assertArrayEquals(new String[] {"string"}, (String[]) falseJson.get("administrators"));
-        JSONObject noArgJson = testBusiness.constructJson();
+        JSONObject noArgJson = testBusiness1.constructJson();
         assertArrayEquals(new String[] {"string"}, (String[]) noArgJson.get("administrators"));
     }
 
@@ -305,8 +305,8 @@ public class BusinessTests {
      */
     @Test
     public void getOwnerAndAdministratorsNoAdministratorsTest() {
-        assertEquals(1, testBusiness.getOwnerAndAdministrators().size());
-        assertTrue(testBusiness.getOwnerAndAdministrators().contains(testUser1));
+        assertEquals(1, testBusiness1.getOwnerAndAdministrators().size());
+        assertTrue(testBusiness1.getOwnerAndAdministrators().contains(testUser1));
     }
 
     /**
@@ -316,10 +316,10 @@ public class BusinessTests {
      */
     @Test
     public void getOwnerAndAdministratorsAdminsAddedTest() {
-        testBusiness.addAdmin(testUser2);
-        assertEquals(2, testBusiness.getOwnerAndAdministrators().size());
-        assertTrue(testBusiness.getOwnerAndAdministrators().contains(testUser1));
-        assertTrue(testBusiness.getOwnerAndAdministrators().contains(testUser2));
+        testBusiness1.addAdmin(testUser2);
+        assertEquals(2, testBusiness1.getOwnerAndAdministrators().size());
+        assertTrue(testBusiness1.getOwnerAndAdministrators().contains(testUser1));
+        assertTrue(testBusiness1.getOwnerAndAdministrators().contains(testUser2));
     }
 
 
