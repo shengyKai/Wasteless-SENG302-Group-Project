@@ -222,15 +222,19 @@ public class Business {
 
     /**
      * This method gets the public JSON representation of each User who is an admin of this Business
-     *  and adds it to a JSONArray.
+     *  and adds it to a JSONArray. The JSONs in the array are ordered by the id number of the user.
      * @return A JSONArray containing JSON respresentations of all admins of this business.
      */
     private JSONArray constructAdminJsonArray() {
-        JSONArray adminArray = new JSONArray();
-        for (User admin : getOwnerAndAdministrators()) {
-            adminArray.add(admin.constructPublicJson());
+        JSONArray adminJsons = new JSONArray();
+        List<User> admins = new ArrayList<>();
+        admins.addAll(getOwnerAndAdministrators());
+        Collections.sort(admins, (User user1, User user2) -> 
+            user1.getUserID().compareTo(user2.getUserID()));
+        for (User admin : admins) {
+            adminJsons.add(admin.constructPublicJson());
         }
-        return adminArray;
+        return adminJsons;
     }
 
 
