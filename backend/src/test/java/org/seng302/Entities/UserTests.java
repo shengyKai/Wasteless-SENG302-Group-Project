@@ -2,6 +2,7 @@ package org.seng302.Entities;
 
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
+import java.util.Collections;
 import org.junit.Ignore;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -780,7 +781,10 @@ public class UserTests {
     @Test
     public void constructPublicJsonBusinessesAdministeredTrueTest() {
         addBusinessesAdministeredToTestUser();
-        Set<Business> testBusinesses = testUser.getBusinessesAdministeredAndOwned();
+        List<Business> testBusinesses = new ArrayList<>();
+        testBusinesses.addAll(testUser.getBusinessesAdministeredAndOwned());
+        Collections.sort(testBusinesses, (Business b1, Business b2) ->
+                b1.getId().compareTo(b2.getId()));
         assertEquals(2, testBusinesses.size());
         JSONObject json = testUser.constructPublicJson(true);
         JSONArray expectedBusinessArray = new JSONArray();
