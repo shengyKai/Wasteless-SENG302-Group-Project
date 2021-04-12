@@ -7,11 +7,16 @@ import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 
 import javax.persistence.*;
+
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.*;
 
 @Entity
 public class Business {
 
+    //Minimum age to create a business
+    private final int MinimumAge = 16;
     private static final List<String> businessTypes = new ArrayList<>(Arrays.asList("Accommodation and Food Services", "Retail Trade", "Charitable organisation", "Non-profit organisation"));
 
     @Id
@@ -140,11 +145,19 @@ public class Business {
 
     /**
      * Sets primary owner of the business
+     * If the requested user is less than 16 years of age, a 403 forbidden status is thrown.
      * @param owner Owner of business
      */
     private void setPrimaryOwner(User owner) {
         if (owner == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The business must have a primary owner");
+        }
+
+        //Get the current date as of now and find the difference in years between the current date and the age of the user.
+        long age = java.time.temporal.ChronoUnit.YEARS.between(
+            owner.getDob().toInstant().atZone(ZoneId.systemDefault()).toLocalDate(), LocalDate.now());
+        if (age < MinimumAge) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User is not of minimum age required to create a business");
         }
         this.primaryOwner = owner;
     }
