@@ -13,6 +13,7 @@ import net.minidev.json.JSONObject;
 
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -222,8 +223,12 @@ public class BusinessTests {
     public void constructJsonAdministratorsFullDetailsTest() {
         testBusiness.addAdmin(testUser2);
         assertEquals(2, testBusiness.getOwnerAndAdministrators().size());
+        List<User> admins = new ArrayList<>();
+        admins.addAll(testBusiness.getOwnerAndAdministrators());
+        Collections.sort(admins, (User user1, User user2) -> 
+           user1.getUserID().compareTo(user2.getUserID()));
         JSONArray expectedAdminArray = new JSONArray();
-        for (User user : testBusiness.getOwnerAndAdministrators()) {
+        for (User user : admins) {
             expectedAdminArray.add(user.constructPublicJson());
         }
         String expectedAdminString = expectedAdminArray.toJSONString();

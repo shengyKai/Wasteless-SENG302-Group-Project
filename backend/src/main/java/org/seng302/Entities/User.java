@@ -408,8 +408,12 @@ public class User extends Account {
      * @return An array of JSON representations of the businesses the user administers.
      */
     public JSONArray constructBusinessJsonArray() {
+        List<Business> businesses = new ArrayList<>();
+        businesses.addAll(getBusinessesAdministeredAndOwned());
+        Collections.sort(businesses, (Business business1, Business business2) -> 
+            business1.getId().compareTo(business2.getId()));
         JSONArray businessArray = new JSONArray();
-        for (Business business : getBusinessesAdministeredAndOwned()) {
+        for (Business business : businesses) {
             businessArray.add(business.constructJson());
         }
         return businessArray;
