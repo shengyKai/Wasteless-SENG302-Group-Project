@@ -3,6 +3,7 @@ package org.seng302.Entities;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import net.minidev.json.JSONObject;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -58,6 +59,19 @@ public class Location {
         } catch (Exception e) {
             throw e;
         }
+    }
+
+    public static Location parseLocationFromJson(JSONObject json) {
+        Location address = new Builder()
+                .inCountry(json.getAsString("country"))
+                .inCity(json.getAsString("city"))
+                .inRegion(json.getAsString("region"))
+                .onStreet(json.getAsString("streetName"))
+                .atStreetNumber(json.getAsString("streetNumber"))
+                .withPostCode(json.getAsString("postcode"))
+                .inSuburb("suburb")
+                .build();
+        return address;
     }
 
     /**
