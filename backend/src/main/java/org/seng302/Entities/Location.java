@@ -61,6 +61,11 @@ public class Location {
         }
     }
 
+    /**
+     * Parses an address from JSON format into a Location object
+     * @param json JSON representation of the address
+     * @return A Location object representing the given address
+     */
     public static Location parseLocationFromJson(JSONObject json) {
         Location address = new Builder()
                 .inCountry(json.getAsString("country"))
