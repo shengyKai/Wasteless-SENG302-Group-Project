@@ -33,24 +33,14 @@ public class BusinessController {
         this._userRepository = userRepository;
     }
 
-    //TODO Could this be part of the location class for ease of use?
     /**
-     * Parses the address part of the business info and constructs a location object
+     * Parses the address part of the business info and constructs a location object using the Location class function
      * @param businessInfo Business info
      * @return A new Location object containing the business address
      */
     private Location parseLocation(JSONObject businessInfo) {
         JSONObject businessLocation = new JSONObject((Map<String, ?>) businessInfo.get("address")) ;
-
-        Location address = new Location.Builder()
-                .inCountry(businessLocation.getAsString("country"))
-                .inCity(businessLocation.getAsString("city"))
-                .inRegion(businessLocation.getAsString("region"))
-                .onStreet(businessLocation.getAsString("streetName"))
-                .atStreetNumber(businessLocation.getAsString("streetNumber"))
-                .withPostCode(businessLocation.getAsString("postcode"))
-                .inSuburb("suburb")
-                .build();
+        Location address = Location.parseLocationFromJson(businessLocation);
         return address;
     }
 

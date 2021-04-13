@@ -10,9 +10,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import javax.persistence.*;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Data // generate setters and getters for all fields (lombok pre-processor)
 @NoArgsConstructor // generate a no-args constructor needed by JPA (lombok pre-processor)
@@ -62,6 +60,24 @@ public class Location {
         } catch (Exception e) {
             throw e;
         }
+    }
+
+    /**
+     * Parses an address from JSON format into a Location object
+     * @param json JSON representation of the address
+     * @return A Location object representing the given address
+     */
+    public static Location parseLocationFromJson(JSONObject json) {
+        Location address = new Builder()
+                .inCountry(json.getAsString("country"))
+                .inCity(json.getAsString("city"))
+                .inRegion(json.getAsString("region"))
+                .onStreet(json.getAsString("streetName"))
+                .atStreetNumber(json.getAsString("streetNumber"))
+                .withPostCode(json.getAsString("postcode"))
+                .inSuburb("suburb")
+                .build();
+        return address;
     }
 
     /**
@@ -292,7 +308,7 @@ public class Location {
      */
     public JSONObject constructPartialJson() {
         Map<String, String> attributeMap = new HashMap<>();
-    
+
         attributeMap.put("city", city);
         attributeMap.put("region", region);
         attributeMap.put("country", country);
