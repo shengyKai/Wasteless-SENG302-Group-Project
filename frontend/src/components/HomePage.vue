@@ -16,7 +16,7 @@
                 <v-list-item-title>Profile</v-list-item-title>
               </v-list-item-content>
             </v-list-item>
-            <v-list-item @click="viewCreateBusiness">
+            <v-list-item v-if="!isBusiness" @click="viewCreateBusiness">
               <v-list-item-icon>
                 <v-icon>mdi-briefcase-plus</v-icon>
               </v-list-item-icon>
@@ -34,7 +34,7 @@
       <v-btn icon @click="viewProfile" class="action-button">
         <v-icon large>mdi-account-circle</v-icon>
       </v-btn>
-      <v-btn icon @click="viewCreateBusiness" class="action-button">
+      <v-btn v-if="!isBusiness" icon @click="viewCreateBusiness" class="action-button">
         <v-icon large>mdi-briefcase-plus</v-icon>
       </v-btn>
     </v-card>
