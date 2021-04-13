@@ -10,6 +10,8 @@ import org.springframework.web.server.ResponseStatusException;
 
 import javax.persistence.*;
 import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import java.util.List;
 
 @Data // generate setters and getters for all fields (lombok pre-processor)
