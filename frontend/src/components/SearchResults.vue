@@ -151,7 +151,7 @@ export default {
       if (!this.searchQuery) return; // If the current search query is empty, do not search
 
       this.searchedQuery = this.searchQuery;
-      this.currentPage = 1; // Makes sure we're start on the first page
+      this.currentPage = 1; // Makes sure we start on the first page
       await this.updateNotQuery();
 
       // Sets an initial estimate for the total number of results
