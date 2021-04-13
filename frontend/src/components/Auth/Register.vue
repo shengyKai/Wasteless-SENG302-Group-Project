@@ -114,9 +114,10 @@
           sm="4"
         >
           <v-text-field
+            ref="countryCode"
             v-model="countryCode"
             label="Country Code"
-            :rules="countryCodeRules"
+            :rules="countryCodeRules.concat(phoneRequiresCountryCodeRule)"
             outlined
           />
         </v-col>
@@ -127,6 +128,7 @@
           <v-text-field
             v-model="phone"
             label="Phone"
+            @keyup="phoneNumberChange"
             :rules="phoneNumberRules"
             outlined
           />
@@ -231,7 +233,7 @@ export default {
       nickname: '',
       bio: '',
       dob: '',
-      countryCode: '',
+      countryCode: '64',
       phone: '',
       street1: '',
       street2: '',
@@ -272,10 +274,10 @@ export default {
         field => (field.length <= 200) || 'Reached max character limit: 200'
       ],
       phoneNumberRules: [
-        field => /^\(?\d{1,3}\)?[\s.-]?\d{3,4}[\s.-]?\d{4,5}$/.test(field) || 'Must be a valid phone number'
+        field => /(^\(?\d{1,3}\)?[\s.-]?\d{3,4}[\s.-]?\d{4,5}$)|(^$)/.test(field) || 'Must be a valid phone number'
       ],
       countryCodeRules: [
-        field => /^(\d{1,2}-)?\d{2,3}$/.test(field) || 'Must be a valid country code. Do not include +'
+        field => /(^(\d{1,2}-)?\d{2,3}$)|(^$)/.test(field) || 'Must be a valid country code.'
       ],
     };
   },
@@ -305,6 +307,9 @@ export default {
     passwordChange () {
       this.$refs.confirmPassword.validate();
     },
+    phoneNumberChange () {
+      this.$refs.countryCode.validate();
+    },
     querySelections (v) {
       this.loading = true;
       // Simulated ajax query
@@ -333,6 +338,10 @@ export default {
     passwordConfirmationRule () {
       return () =>
         this.password === this.confirmPassword || 'Passwords must match';
+    },
+    phoneRequiresCountryCodeRule () {
+      return () =>
+        !(this.phone.length > 0 && this.countryCode.length < 1) || 'Country code must be present';
     }
   },
   //as any components are added to the dom, mounted() will be called
