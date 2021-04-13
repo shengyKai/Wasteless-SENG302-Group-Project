@@ -28,6 +28,7 @@ public class User extends Account {
     private Date created;
     private String role;
     private Set<Business> businessesAdministered = new HashSet<>();
+    private Set<Business> businessesOwned = new HashSet<>();
 
     /* Matches:
     123-456-7890
@@ -272,6 +273,23 @@ public class User extends Account {
     }
 
     /**
+     * Gets the set of businesses this user is the primary owner of
+     * @return Set of businesses owned
+     */
+    @OneToMany(mappedBy = "primaryOwner", fetch = FetchType.EAGER)
+    public Set<Business> getBusinessesOwned() {
+        return this.businessesOwned;
+    }
+
+    /**
+     * Sets the set of businesses this user is the primary owner of
+     * @param owned Businesses owned
+     */
+    private void setBusinessesOwned(Set<Business> owned) {
+        this.businessesOwned = owned;
+    }
+
+    /**
      * Gets the set of businesses that the user is an admin of
      * @return Businesses administered
      */
@@ -287,6 +305,19 @@ public class User extends Account {
      */
     private void setBusinessesAdministered(Set<Business> businesses) {
         this.businessesAdministered = businesses;
+    }
+
+    /**
+     * Gets the set of businesses that the user is an admin of OR is the owner of
+     * @return Businesses administered or owned
+     */
+    @Transient
+    public Set<Business> getBusinessesAdministeredAndOwned() {
+        Set<Business> mergedSet = new HashSet<>() {{
+            addAll(getBusinessesOwned());
+            addAll(getBusinessesAdministered());
+        }};
+        return mergedSet;
     }
 
     /**
