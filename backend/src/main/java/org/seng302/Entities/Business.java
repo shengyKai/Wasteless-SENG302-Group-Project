@@ -276,10 +276,18 @@ public class Business {
 
     @Override
     public boolean equals(Object o) {
+        if (o == this) {
+            return true;
+        }
+        if (!(o instanceof Business)) {
+            return false;
+        }
         Business business = (Business) o;
-        return this.id == business.getId() &&
-                this.name == business.getName() &&
-                this.description == business.getDescription();
+        return
+                Float.compare(this.id, business.getId()) == 0 &&
+                this.name.equals(business.getName()) &&
+                this.description.equals(business.getDescription()) &&
+                this.created.equals(business.getCreated());
     }
 
     @Override

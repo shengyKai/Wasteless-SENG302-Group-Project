@@ -139,6 +139,11 @@ public class BusinessController {
      */
     private User getUser(@RequestBody JSONObject userInfo) {
         // Check a valid Long id is given in the request
+        if (!userInfo.containsKey("userId")) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Could not find a user id in the request");
+        }
+
         Long userId = userInfo.getAsNumber("userId").longValue();
         if (userId == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
