@@ -109,7 +109,7 @@ public class BusinessControllerTest {
                 .withEmail("johnsmith99@gmail.com")
                 .withPassword("1337-H%nt3r2")
                 .withBio("Likes long walks on the beach")
-                .withDob("2021-03-11")
+                .withDob("2000-03-11")
                 .withPhoneNumber("+64 3 555 0129")
                 .withAddress(userAddress)
                 .build();
