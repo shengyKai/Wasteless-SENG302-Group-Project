@@ -51,7 +51,14 @@ export default {
 
   data() {
     return {
+      /**
+       * The business that this profile is for.
+       */
       business: {},
+      /**
+       * The admin users for this business.
+       * Also contains strings that represent fetch errors
+       */
       administrators: [],
     };
   },

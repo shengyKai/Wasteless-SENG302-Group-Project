@@ -68,7 +68,15 @@ export default {
 
   data() {
     return {
+      /**
+       * The user that this profile is for.
+       * If null then no profile is displayed
+       */
       user: null,
+      /**
+       * The businesses that this user administers.
+       * Also contains strings that are error messages for businesses that failed to be retreived.
+       */
       businesses: [],
     };
   },
