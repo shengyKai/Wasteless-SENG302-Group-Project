@@ -43,9 +43,14 @@
         <v-col cols="12">
           <h4>Businesses</h4>
           <span v-for="business in businesses" :key="business.id">
-            <router-link :to="'/business/' + business.id">
-              <v-chip color="primary" class="link-chip link"> {{ business.name }} </v-chip>
-            </router-link>
+            <template v-if="typeof business === 'string'">
+              <v-chip color="error" class="link-chip link"> {{ business }} </v-chip>
+            </template>
+            <template v-else>
+              <router-link :to="'/business/' + business.id">
+                <v-chip color="primary" class="link-chip link"> {{ business.name }} </v-chip>
+              </router-link>
+            </template>
           </span>
         </v-col>
       </v-row>
@@ -82,8 +87,7 @@ export default {
     } else {
       getUser(id).then((value) => {
         if (typeof value === 'string') {
-          // TODO Handle error properly
-          console.warn(value);
+          this.$store.commit('setError', value);
         } else {
           this.user = value;
         }
@@ -112,23 +116,8 @@ export default {
 
       if (!admins) return;
 
-      const promises = admins.map(id => {
-        return new Promise((resolve, reject) => {
-          getBusiness(id)
-            .then(val => {
-              if (typeof val === 'string') reject(val);
-              else resolve(val);
-            })
-            .catch(err => reject(err));
-        });
-      });
-
-      const data = await Promise.all(promises);
-
-      this.businesses = data.reduce((acc, cur) => {
-        if (cur) acc.push(cur);
-        return acc;
-      }, []);
+      const promises = admins.map(id => getBusiness(id));
+      this.businesses = await Promise.all(promises);
     }
   },
   components: {

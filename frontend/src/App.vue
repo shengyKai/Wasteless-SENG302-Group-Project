@@ -9,6 +9,16 @@
         <div v-if="loggedIn">
           <AppBar />
 
+          <!-- Global error message -->
+          <v-alert
+            v-if="$store.state.globalError !== null"
+            type="error"
+            dismissible
+            @input="$store.commit('clearError')"
+          >
+            {{ $store.state.globalError }}
+          </v-alert>
+
           <v-main>
             <div class="container-outer">
               <div class="container-inner">
@@ -21,6 +31,16 @@
 
         <div v-else>
           <v-main>
+            <!-- Global error message -->
+            <v-alert
+              v-if="$store.state.globalError !== null"
+              type="error"
+              dismissible
+              @input="$store.commit('clearError')"
+            >
+              {{ $store.state.globalError }}
+            </v-alert>
+
             <div class="container-outer">
               <div class="container-inner">
                 <!-- All content (except AppBar & Footer) should be a child of 'v-main'. -->

@@ -3,8 +3,26 @@ import Vuex, { Store, StoreOptions } from 'vuex';
 import { COOKIE, deleteCookie, setCookie } from './utils';
 
 export type StoreData = {
+  /**
+   * Object representing the current logged in user.
+   * If null then no user is logged in
+   */
   user: User | null,
+
+  /**
+   * The current role the user is acting as.
+   * If acting as user then the user is shown content related to their personal account.
+   * If acting as a business then the user is shown content related to their business.
+   */
   activeRole: { type: "user" | "business", id: number} | null,
+
+  /**
+   * The global error message that is displayed at the top of the screen.
+   *
+   * This is the least perferred method for displaying errors.
+   * Since error messages should be displayed closer to where they are generated from.
+   */
+  globalError: string | null,
 };
 
 export function createOptions(): StoreOptions<StoreData> {
@@ -12,6 +30,7 @@ export function createOptions(): StoreOptions<StoreData> {
     state: {
       user: null,
       activeRole: null,
+      globalError: null,
     },
     mutations: {
       setUser (state, payload: User) {
@@ -22,6 +41,27 @@ export function createOptions(): StoreOptions<StoreData> {
           deleteCookie(COOKIE.USER.toLowerCase());
           setCookie(COOKIE.USER, payload.id);
         }
+      },
+      /**
+       * Displays an error message at the top of the screen.
+       *
+       * This is the least perferred method for displaying errors.
+       * Since error messages should be displayed closer to where they are generated from.
+       *
+       * @param state Current state
+       * @param error Error message to display
+       */
+      setError(state, error: string) {
+        state.globalError = error;
+      },
+      /**
+       * Dismisses the current error message that is display.
+       * This function is only expected to be called from the global error message component.
+       *
+       * @param state Current state
+       */
+      clearError(state) {
+        state.globalError = null;
       },
       logoutUser (state) {
         state.user = null;
@@ -40,7 +80,7 @@ export function createOptions(): StoreOptions<StoreData> {
       getUser (context) {
         return getUser().then((response) => {
           if (typeof response === 'string') {
-            console.warn(response);
+            context.commit('setError', response);
             return;
           }
           context.commit('setUser', response);

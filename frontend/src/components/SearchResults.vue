@@ -41,7 +41,14 @@
       </v-btn-toggle>
     </v-toolbar>
 
-    <v-alert v-if="error !== undefined" type="error"> {{ error }}</v-alert>
+    <v-alert
+      v-if="error !== undefined"
+      type="error"
+      dismissible
+      @input="error = undefined"
+    >
+      {{ error }}
+    </v-alert>
     <v-list three-line>
       <!--users would produce the results for each page, and then it will show each result with
       SearchResultItem-->
