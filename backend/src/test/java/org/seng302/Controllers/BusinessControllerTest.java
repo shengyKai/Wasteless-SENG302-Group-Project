@@ -1,5 +1,6 @@
 package org.seng302.Controllers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
 import org.junit.jupiter.api.Test;
@@ -16,11 +17,14 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import javax.servlet.http.Cookie;
 import java.io.IOException;
 import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,6 +32,8 @@ import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
@@ -46,10 +52,11 @@ public class BusinessControllerTest {
     private Cookie authCookie;
     private Business testBusiness;
     private User owner;
-
-
+    private User admin;
+    private User otherUser;
     /**
-     * Add a user object to the userRepository and construct an authorization token to be used for this session.
+     * Add a user object to the userRepository and construct an authorization token
+     * to be used for this session.
      *
      * @throws ParseException
      */
@@ -92,6 +99,7 @@ public class BusinessControllerTest {
         sessionAuthToken.put("AUTHTOKEN", authCode);
         authCookie = new Cookie("AUTHTOKEN", authCode);
     }
+
     /**
      * This method creates a user and adds it to the repository.
      *
@@ -105,6 +113,8 @@ public class BusinessControllerTest {
                 .withName("COSC co")
                 .withPrimaryOwner(owner)
                 .build();
+        businessRepository.save(testBusiness);
+        testBusiness.addAdmin(admin);
         businessRepository.save(testBusiness);
     }
     /**
@@ -134,9 +144,17 @@ public class BusinessControllerTest {
                 .withPhoneNumber("+64 3 555 0129")
                 .withAddress(userAddress)
                 .build();
+        admin = new User.Builder().withFirstName("Caroline").withMiddleName("Jane").withLastName("Smith")
+                .withNickName("Carrie").withEmail("carriesmith@hotmail.com").withPassword("h375dj82")
+                .withDob("2001-03-11").withPhoneNumber("+64 3 748 7562").withAddress(Location.covertAddressStringToLocation("24,Albert Road,Auckland,Auckland,New KZealand,0624")).build();
+        otherUser = new User.Builder().withFirstName("William").withLastName("Pomeroy").withNickName("Will")
+                .withEmail("pomeroy.will@outlook.com").withPassword("569277hghrud").withDob("1981-03-11")
+                .withPhoneNumber("+64 21 099 5786").withAddress(Location.covertAddressStringToLocation("99,Riccarton Road,Christchurch,Canterbury,New Zealand,4041")).build();
         businessRepository.deleteAll();
         userRepository.deleteAll();
         userRepository.save(owner);
+        userRepository.save(admin);
+        userRepository.save(otherUser);
     }
 
     /**
@@ -266,9 +284,10 @@ public class BusinessControllerTest {
     }
 
     /**
-     * Test for registering a business when the given primaryAdministrator doesn't exist
-     * Session logged in as the given primaryAdministratorId
+     * Test for registering a business when the given primaryAdministrator doesn't
+     * exist Session logged in as the given primaryAdministratorId
      * primaryAdministrator is invalid
+     *
      * @throws Exception
      */
     @Test
@@ -325,14 +344,104 @@ public class BusinessControllerTest {
                         "}", owner.getUserID());
         setCurrentUser(999L);
         JSONObject businessJson = (JSONObject) new JSONParser(JSONParser.MODE_JSON_SIMPLE).parse(businessJsonString);
-        mockMvc.perform(MockMvcRequestBuilders
-                .post("/businesses")
-                .content(businessJson.toJSONString())
-                .sessionAttrs(sessionAuthToken)
-                .cookie(authCookie)
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isForbidden());
+        mockMvc.perform(MockMvcRequestBuilders.post("/businesses").content(businessJson.toJSONString())
+                .sessionAttrs(sessionAuthToken).cookie(authCookie).contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)).andExpect(status().isForbidden());
+    }
+
+    /**
+     * Test that when a request is made to the GET business endpoint from a user who
+     * is not logged in, the response has a 401 status code and an empty body.
+     */
+    @Test
+    public void getBusinessByIdUnauthorizedTest() throws Exception {
+        MvcResult result = mockMvc.perform(get(String.format("/businesses/%d", testBusiness.getId() + 1)))
+        .andExpect(status().isUnauthorized()).andReturn();
+        System.out.println(result.getResponse().getContentAsString());
+        assertTrue(result.getResponse().getContentAsString().isEmpty());
+    }
+
+    /**
+     * Test that when a request is made to the GET business endpoint from a user who
+     * is logged in, but the id given in the request URL does not correspond to a
+     * business in the database, the response has a 406 status code and an empty
+     * body.
+     */
+    @Test
+    public void getBusinessByIdDoesNotExistTest() throws Exception{
+        setCurrentUser(owner.getUserID());
+        MvcResult result = mockMvc.perform(get(String.format("/businesses/%d", testBusiness.getId() + 1))
+                .sessionAttrs(sessionAuthToken).cookie(authCookie)).andExpect(status().isNotAcceptable()).andReturn();
+        System.out.println(result.getResponse().getContentAsString());
+        assertTrue(result.getResponse().getContentAsString().isEmpty());
+    }
+
+    /**
+     * Test that when a request is made to the GET business endpoint from a user who
+     * is logged in as the owner of the business with the given id, the response has
+     * a 200 status code and the body contains a JSON representation of the business
+     * with the given id.
+     *
+     * @throws Exception
+     */
+    @Test
+    public void getBusinessLoggedInAsOwnerTest() throws Exception {
+        testBusiness = businessRepository.findById(testBusiness.getId()).get();
+        setCurrentUser(owner.getUserID());
+        MvcResult result = mockMvc.perform(get(String.format("/businesses/%d", testBusiness.getId()))
+                .sessionAttrs(sessionAuthToken).cookie(authCookie)).andExpect(status().isOk()).andReturn();
+
+        JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
+        JSONObject json = (JSONObject) parser.parse(result.getResponse().getContentAsString());
+        assertEquals(owner.getUserID().toString(), json.getAsString("primaryAdministratorId"));
+        String adminString = json.getAsString("administrators");
+        assertTrue(adminString.contains(String.format("\"id\":%d", owner.getUserID())));
+        ObjectMapper mapper = new ObjectMapper();
+        assertEquals(mapper.readTree(testBusiness.constructJson(true).toJSONString()), mapper.readTree(json.toJSONString()));
+    }
+
+    /**
+     * Test that when a request is made to the GET business endpoint from a user who
+     * is logged in as an admin of the business with the given id, the response has
+     * a 200 status code and the body contains a JSON representation of the business
+     * with the given id.
+     */
+    @Test
+    public void getBusinessLoggedInAsAdminTest() throws Exception {
+        testBusiness = businessRepository.findById(testBusiness.getId()).get();
+        setCurrentUser(admin.getUserID());
+        MvcResult result = mockMvc.perform(get(String.format("/businesses/%d", testBusiness.getId()))
+                .sessionAttrs(sessionAuthToken).cookie(authCookie)).andExpect(status().isOk()).andReturn();
+
+        JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
+        JSONObject json = (JSONObject) parser.parse(result.getResponse().getContentAsString());
+        assertNotEquals(admin.getUserID().toString(), json.getAsString("primaryAdministratorId"));
+        String adminString = json.getAsString("administrators");
+        assertTrue(adminString.contains(String.format("\"id\":%d", admin.getUserID())));
+        ObjectMapper mapper = new ObjectMapper();
+        assertEquals(mapper.readTree(testBusiness.constructJson(true).toJSONString()), mapper.readTree(json.toJSONString()));
+    }
+
+    /**
+     * Test that when a request is made to the GET business endpoint from a user who
+     * is logged in to an account which is not an owner or admin of the business
+     * with the given id, the response has a 200 status code and the body contains a
+     * JSON representation of the business with the given id.
+     */
+    @Test
+    public void getBusinessLoggedInAsOtherTest() throws Exception {
+        testBusiness = businessRepository.findById(testBusiness.getId()).get();
+        setCurrentUser(otherUser.getUserID());
+        MvcResult result = mockMvc.perform(get(String.format("/businesses/%d", testBusiness.getId()))
+                .sessionAttrs(sessionAuthToken).cookie(authCookie)).andExpect(status().isOk()).andReturn();
+
+        JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
+        JSONObject json = (JSONObject) parser.parse(result.getResponse().getContentAsString());
+        assertNotEquals(otherUser.getUserID().toString(), json.getAsString("primaryAdministratorId"));
+        String adminString = json.getAsString("administrators");
+        assertFalse(adminString.contains(String.format("\"id\":%d", otherUser.getUserID())));
+        ObjectMapper mapper = new ObjectMapper();
+        assertEquals(mapper.readTree(testBusiness.constructJson(true).toJSONString()), mapper.readTree(json.toJSONString()));
     }
 
 

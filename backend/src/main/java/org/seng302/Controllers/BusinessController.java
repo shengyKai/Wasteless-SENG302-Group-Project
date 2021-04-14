@@ -12,6 +12,11 @@ import org.seng302.Tools.AuthenticationTokenManager;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.HttpServletRequest;
@@ -82,6 +87,24 @@ public class BusinessController {
             throw err;
         }
     }
+
+    /**
+     * This method searchs for the business with the given ID in the database. If the business exists, return a JSON representation of the
+     * business. If the business does not exists, send a response with status code 406/Not Acceptable.
+     * @return JSON representation of the business.
+     */
+    @GetMapping("/businesses/{id}")
+    JSONObject getUserById(@PathVariable Long id, HttpServletRequest request) {
+        AuthenticationTokenManager.checkAuthenticationToken(request);
+        logger.info(String.format("Retrieving business with ID %d.", id));
+        Optional<Business> business = _businessRepository.findById(id);
+        if (business.isEmpty()) {
+            ResponseStatusException notFoundException = new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, String.format("No business with ID %d.", id));
+            logger.error(notFoundException.getMessage());
+            throw notFoundException;
+        }
+        return business.get().constructJson(true);
+    };
 
 
     /**

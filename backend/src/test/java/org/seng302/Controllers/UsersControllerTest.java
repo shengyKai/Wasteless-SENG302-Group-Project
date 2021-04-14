@@ -107,7 +107,7 @@ public class UsersControllerTest {
                 .withEmail("johnsmith99@gmail.com")
                 .withPassword("1337-H%nt3r2")
                 .withBio("Likes long walks on the beach")
-                .withDob("2021-03-11")
+                .withDob("2001-03-11")
                 .withPhoneNumber("+64 3 555 0129")
                 .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Christchurch,New Zealand," +
                         "Canterbury,8041"))
@@ -784,6 +784,8 @@ public class UsersControllerTest {
     @Test
     public void UserCanSeeOwnPrivateDetails() throws Exception {
         User user = userRepository.findByEmail("johnsmith99@gmail.com");
+        System.out.println(user.getUserID());
+        System.out.println(user.constructPrivateJson());
         setUpSessionAccountId(user.getUserID());
 
         // perform
