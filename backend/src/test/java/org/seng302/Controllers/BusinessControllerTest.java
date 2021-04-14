@@ -113,9 +113,9 @@ public class BusinessControllerTest {
                 .withName("COSC co")
                 .withPrimaryOwner(owner)
                 .build();
-        businessRepository.save(testBusiness);
+        testBusiness = businessRepository.save(testBusiness);
         testBusiness.addAdmin(admin);
-        businessRepository.save(testBusiness);
+        testBusiness = businessRepository.save(testBusiness);
     }
     /**
      * This method creates a user and adds it to the repository.
@@ -152,9 +152,9 @@ public class BusinessControllerTest {
                 .withPhoneNumber("+64 21 099 5786").withAddress(Location.covertAddressStringToLocation("99,Riccarton Road,Christchurch,Canterbury,New Zealand,4041")).build();
         businessRepository.deleteAll();
         userRepository.deleteAll();
-        userRepository.save(owner);
-        userRepository.save(admin);
-        userRepository.save(otherUser);
+        owner = userRepository.save(owner);
+        admin = userRepository.save(admin);
+        otherUser = userRepository.save(otherUser);
     }
 
     /**
@@ -628,7 +628,8 @@ public class BusinessControllerTest {
     @Test
     public void addAdminWhenUserNotExistTest() throws Exception {
 
-        String jsonString = "{\"userId\": 99}";
+        Long unusedId = owner.getUserID() + admin.getUserID() + otherUser.getUserID();
+        String jsonString = String.format("{\"userId\": %d}", unusedId);
         setCurrentUser(owner.getUserID());
 
         mockMvc.perform(MockMvcRequestBuilders
@@ -865,28 +866,7 @@ public class BusinessControllerTest {
                 .withAddress(new Location())
                 .build();
         testAdmin = userRepository.save(testAdmin);
-        System.out.println("Test admin " + testAdmin.getUserID());
-        System.out.println("Owner " + owner.getUserID());
-        System.out.println("Admin " + admin.getUserID());
-        System.out.println("Other user " + otherUser.getUserID());
-        System.out.println("Business " + testBusiness.getId());
-        List<Long> adminIds = new java.util.ArrayList<>();
-        for (User user : testBusiness.getAdministrators()) {
-            adminIds.add(user.getUserID());
-        }
-        System.out.println("Admin ids: " + Arrays.toString(adminIds.toArray()));
         testBusiness.addAdmin(testAdmin); // make user an admin
-        List<Long> adminIds2 = new java.util.ArrayList<>();
-        for (User user : testBusiness.getAdministrators()) {
-            adminIds2.add(user.getUserID());
-        }
-        System.out.println("Admin ids: " + Arrays.toString(adminIds2.toArray()));
-        Business testBusinessPersisted = businessRepository.findById(testBusiness.getId()).get();
-        List<Long> adminIds3 = new java.util.ArrayList<>();
-        for (User user : testBusinessPersisted.getAdministrators()) {
-            adminIds3.add(user.getUserID());
-        }
-        System.out.println("Admin ids: " + Arrays.toString(adminIds3.toArray()));
         testBusiness = businessRepository.save(testBusiness);
 
         String jsonString = String.format("{\"userId\": %d}", testAdmin.getUserID());
