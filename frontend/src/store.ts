@@ -19,7 +19,7 @@ export type StoreData = {
   /**
    * The global error message that is displayed at the top of the screen.
    *
-   * This is the most intruding method for displaying errors and should only be used for errors that 
+   * This is the most intruding method for displaying errors and should only be used for errors that
    * must interrupt the application flow.
    * Otherwise error messages should be displayed closer to where they are generated from.
    */

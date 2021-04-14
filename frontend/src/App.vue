@@ -71,6 +71,11 @@ import { COOKIE, getCookie } from './utils';
 
 const store = createStore();
 
+router.afterEach(() => {
+  // After changing pages clear the global error message
+  store.commit('clearError');
+});
+
 // Vue app instance
 // it is declared as a reusable component in this case.
 // For global instance https://vuejs.org/v2/guide/instance.html
