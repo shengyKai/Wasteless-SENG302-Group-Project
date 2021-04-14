@@ -43,7 +43,7 @@ public class Business {
     @JoinColumn(name = "owner_id")
     private User primaryOwner;
 
-    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
     @JoinTable(
             name="business_admins",
             joinColumns = {@JoinColumn(name="business_id")},

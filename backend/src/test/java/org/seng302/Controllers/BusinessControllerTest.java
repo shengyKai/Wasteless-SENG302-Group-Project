@@ -117,6 +117,7 @@ public class BusinessControllerTest {
         testBusiness.addAdmin(admin);
         testBusiness = businessRepository.save(testBusiness);
     }
+
     /**
      * This method creates a user and adds it to the repository.
      *
