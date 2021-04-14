@@ -105,7 +105,7 @@ public class UsersController {
             }
 
         }
-    };
+    }
 
     /**
      * REST GET method to search for users matching a search query

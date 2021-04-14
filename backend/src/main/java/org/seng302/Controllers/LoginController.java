@@ -44,7 +44,7 @@ public class LoginController {
      * @param response HTTP response.
      */
     @PostMapping("/login")
-    public void login(@RequestBody JSONObject userinfo, HttpServletRequest request, HttpServletResponse response) {
+    JSONObject login(@RequestBody JSONObject userinfo, HttpServletRequest request, HttpServletResponse response) {
         String email = userinfo.getAsString("email");
         String password = userinfo.getAsString("password");
         Account matchingAccount = accountRepository.findByEmail(email);
@@ -67,6 +67,18 @@ public class LoginController {
                 AuthenticationTokenManager.setAuthenticationToken(request, response, accountAsUser.get());
             }
 
+            return getUserIDJSON(matchingAccount);
         }
+    }
+
+    /**
+     * Gets the user id from the account and puts into a JSON object
+     * @param account the account of the user
+     * @return a JSON Object including the user's id
+     */
+    private JSONObject getUserIDJSON(Account account) {
+        JSONObject userIDJSON = new JSONObject();
+        userIDJSON.put("userId", account.getUserID());
+        return userIDJSON;
     }
 }

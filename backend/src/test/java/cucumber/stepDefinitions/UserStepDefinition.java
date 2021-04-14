@@ -1,53 +1,68 @@
-package cucumber.glue;
+package cucumber.stepDefinitions;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
-import org.assertj.core.api.junit.jupiter.SoftAssertionsExtension;
+import io.cucumber.spring.CucumberContextConfiguration;
+import net.minidev.json.JSONArray;
+import net.minidev.json.JSONObject;
+import net.minidev.json.parser.JSONParser;
 import org.junit.After;
 import org.junit.Assert;
-import org.junit.runner.RunWith;
-import org.junit.runners.ParentRunner;
-import org.mockito.Mock;
 import org.seng302.Entities.Location;
 import org.seng302.Entities.User;
+import org.seng302.Main;
 import org.seng302.Persistence.UserRepository;
 import org.seng302.Tools.PasswordAuthenticator;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 
 import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+@AutoConfigureMockMvc
 public class UserStepDefinition {
 
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    @Autowired
+    private MockMvc mockMvc;
     @Autowired
     private UserRepository userRepository;
 
     private User theUser;
-    private String userFirstName;
-    private String userMiddleName;
-    private String userLastName;
-    private String userNickname;
-    private String userEmail;
-    private String userPassword;
-    private String userBio;
-    private String userDob;
-    private String userPhNum;
-    private Location userAddress;
+    private String userFirstName = "Bob";
+    private String userMiddleName = "Bob";
+    private String userLastName = "Bob";
+    private String userNickname = "Bob";
+    private String userEmail = "Bob@bob.com";
+    private String userPassword = "B0bbbbbbbbbbbb";
+    private String userBio = "I am Bob";
+    private String userDob = "10/10/1999";
+    private String userPhNum = "0270000000";
+    private Location userAddress = Location.covertAddressStringToLocation("1,Bob Street,Bob,Bob,Bob,1010");
+
+    private Long userID;
 
     @After
-    public void cleanUp() {
+    public void Setup() {
         userRepository.deleteAll();
     }
 
     @Given("the user with the email {string} does not exist")
     public void theUserWithTheEmailDoesNotExist(String email) {
         Assert.assertNull(userRepository.findByEmail(email));
-        //Assert.assertThrows(NullPointerException.class, () -> { userRepository.findByEmail(email); });
     }
 
     @When("a user is getting created the first name is {string}")
@@ -62,6 +77,7 @@ public class UserStepDefinition {
     @And("their nickname is {string}")
     public void theirNicknameIs(String nickname) { userNickname = nickname; }
 
+    @Given("a user with the email {string} is created")
     @And("their email is {string}")
     public void theirEmailIs(String email) { userEmail = email; }
 
@@ -167,4 +183,33 @@ public class UserStepDefinition {
         location.setId(user.getAddress().getId());
         Assert.assertEquals(user.getAddress(), location);
     }
+
+    @When("the user logs in")
+    public void theUserLogsInWithTheEmail() {
+        JSONObject requestBody = new JSONObject();
+        requestBody.put("email", userEmail);
+        requestBody.put("password", userPassword);
+        try {
+            MvcResult result = (MvcResult) mockMvc.perform(post("/login")
+                    .content(requestBody.toString())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .accept(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isOk());
+
+            JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
+            JSONArray jsonArray = (JSONArray) parser.parse(result.getResponse().getContentAsString());
+            JSONObject jsonObject = (JSONObject) jsonArray.get(0);
+            userID = (Long) jsonObject.getAsNumber("userId");
+        } catch (Exception e) {
+            e.printStackTrace();
+            Assert.fail();
+        }
+    }
+
+    @Then("the user is logged in")
+    public void theUserWithTheEmailIsLoggedIn() {
+        User user = userRepository.findByEmail(userEmail);
+        Assert.assertEquals(user.getUserID(), userID);
+    }
+
 }

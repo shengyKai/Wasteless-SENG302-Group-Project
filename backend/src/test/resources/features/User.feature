@@ -1,6 +1,6 @@
 Feature: User
 
-    Scenario: Create a user account
+    Scenario: Register a user account
         Given the user with the email "connor@gmail.com" does not exist
         When a user is getting created the first name is "Fergus"
         And their middle name is "Connor"
@@ -25,7 +25,7 @@ Feature: User
         Then the user has the phone number "0271234567"
         Then the user has the address "69,Riccarton Road,Christchurch,New Zealand,Canterbury,8041"
 
-    Scenario: Create a second user account
+    Scenario: Register a second user account
         Given the user with the email "roseyrose@gmail.com" does not exist
         When a user is getting created the first name is "Rosey"
         And their middle name is "Red"
@@ -49,3 +49,17 @@ Feature: User
         Then the user has the date of birth "01-03-1998"
         Then the user has the phone number "0279876543"
         Then the user has the address "100,Ocean View Crescent,Auckland,New Zealand,Rakino Island,1010"
+
+    Scenario: Login a user account
+        Given the user has the email "dani@thomp.com"
+        And the user has the password "qu33n420"
+        And the user is created
+        When the user logs in
+        Then the user is logged in
+
+    Scenario: Login a second user account
+        Given the user has the email "james@hotmail.com"
+        And the user has the password "jamesishotmail1#"
+        And the user is created
+        When the user logs in
+        Then the user is logged in
