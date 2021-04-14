@@ -1,9 +1,5 @@
 <template>
   <v-app-bar max-height="64px">
-    <div v-if="showBusinessDialog">
-      <CreateBusiness @closeDialog="showBusinessDialog = false" />
-    </div>
-
     <div class="container-outer">
       <h1>WASTELESS</h1>
 
@@ -96,7 +92,6 @@
 <script>
 import SearchBar from "./utils/SearchBar";
 import UserAvatar from "./utils/UserAvatar";
-import CreateBusiness from "./BusinessProfile/CreateBusiness";
 import { USER_ROLES } from "../utils";
 import {getBusiness} from "@/api";
 
@@ -104,12 +99,10 @@ export default {
   name: "AppBar",
   components: {
     SearchBar,
-    CreateBusiness,
     UserAvatar,
   },
   data() {
     return {
-      showBusinessDialog: false,
       roles : [],
       selectedRole : 0,
     };
@@ -135,11 +128,8 @@ export default {
     viewAdmin() {
       this.$router.push("/admin");
     },
-    viewCheckBusiness() {
-      this.$router.push("/create_business");
-    },
     viewCreateBusiness() {
-      this.showBusinessDialog = true;
+      this.$store.commit('showCreateBusiness');
     },
   },
   computed: {

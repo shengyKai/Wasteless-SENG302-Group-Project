@@ -19,10 +19,16 @@ export type StoreData = {
   /**
    * The global error message that is displayed at the top of the screen.
    *
-   * This is the least perferred method for displaying errors.
-   * Since error messages should be displayed closer to where they are generated from.
+   * This is the most intruding method for displaying errors and should only be used for errors that 
+   * must interrupt the application flow.
+   * Otherwise error messages should be displayed closer to where they are generated from.
    */
   globalError: string | null,
+
+  /**
+   * Whether or not the dialog for registering a business is being shown.
+   */
+  createBusinessDialogShown: boolean,
 };
 
 export function createOptions(): StoreOptions<StoreData> {
@@ -31,10 +37,16 @@ export function createOptions(): StoreOptions<StoreData> {
       user: null,
       activeRole: null,
       globalError: null,
+      createBusinessDialogShown: false,
     },
     mutations: {
       setUser (state, payload: User) {
         state.user = payload;
+
+        // Ensures that when we log in we always have a role.
+        // Maybe it will be worth considering in the future persistently remembering the previous role
+        state.activeRole = { type: "user", id: payload.id };
+
         // If the payload contains a user ID, user is now logged in. Set their session cookie.
         if (payload.id) {
           deleteCookie(COOKIE.USER.toUpperCase());
@@ -63,9 +75,28 @@ export function createOptions(): StoreOptions<StoreData> {
       clearError(state) {
         state.globalError = null;
       },
+
       logoutUser (state) {
         state.user = null;
         deleteCookie(COOKIE.USER);
+      },
+
+      /**
+       * Creates a modal create business dialog
+       *
+       * @param state Current store state
+       */
+      showCreateBusiness(state) {
+        state.createBusinessDialogShown = true;
+      },
+
+      /**
+       * Hides the create business dialog
+       *
+       * @param state Current store state
+       */
+      hideCreateBusiness(state) {
+        state.createBusinessDialogShown = false;
       }
     },
     getters: {
