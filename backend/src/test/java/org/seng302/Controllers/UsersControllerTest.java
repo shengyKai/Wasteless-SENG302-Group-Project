@@ -79,7 +79,7 @@ public class UsersControllerTest {
      * Tags a session as dgaa
      */
     private void setUpDGAAAuthCode() {
-        sessionAuthToken.put("role", "dgaa");
+        sessionAuthToken.put("role", "defaultGlobalApplicationAdmin");
     }
 
     /**
@@ -90,7 +90,7 @@ public class UsersControllerTest {
         sessionAuthToken.put("accountId", accountId);
     }
     private void setUpSessionAsAdmin() {
-        sessionAuthToken.put("role", "admin");
+        sessionAuthToken.put("role", "globalApplicationAdmin");
     }
 
     /**

@@ -109,7 +109,7 @@ public class AuthenticationTokenManager {
     public static void setAuthenticationTokenDGAA(HttpServletRequest request) {
 
         HttpSession session = request.getSession(true);
-        session.setAttribute("role", "dgaa");
+        session.setAttribute("role", "defaultGlobalApplicationAdmin");
     }
 
     /**
@@ -119,7 +119,7 @@ public class AuthenticationTokenManager {
     public static void checkAuthenticationTokenDGAA(HttpServletRequest request) {
         HttpSession session = request.getSession();
         String sessionRole = (String)session.getAttribute("role");
-        if ("dgaa".equals(sessionRole)) {
+        if ("defaultGlobalApplicationAdmin".equals(sessionRole)) {
             return;
         } else {
             InsufficientPermissionException insufficientPermissionException = new InsufficientPermissionException("The user does not have permission to perform the requested action");
@@ -130,7 +130,7 @@ public class AuthenticationTokenManager {
 
     /**
      * Given a HTTP request, and a given account ID, this method determines if the currently logged in account can see the private info of the given ID
-     * When an account has role "admin" or "dgaa" then permission is granted
+     * When an account has role "globalApplicationAdmin" or "defaultGlobalApplicationAdmin" then permission is granted
      * @param request The HTTP request packet
      * @param accountId The account Id to compare
      * @return True if accountId matches session
@@ -141,7 +141,7 @@ public class AuthenticationTokenManager {
         String sessionRole = (String)session.getAttribute("role");
         if (Objects.equals(sessionAccountId, accountId)) {
             return true;
-        } else if ("admin".equals(sessionRole) || "dgaa".equals(sessionRole)) {
+        } else if ("globalApplicationAdmin".equals(sessionRole) || "defaultGlobalApplicationAdmin".equals(sessionRole)) {
             return true;
         }
         return false;
