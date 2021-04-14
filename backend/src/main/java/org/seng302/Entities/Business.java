@@ -284,7 +284,7 @@ public class Business {
         }
         Business business = (Business) o;
         return
-                Float.compare(this.id, business.getId()) == 0 &&
+                this.id.equals(business.getId()) &&
                 this.name.equals(business.getName()) &&
                 this.description.equals(business.getDescription()) &&
                 this.created.equals(business.getCreated());
