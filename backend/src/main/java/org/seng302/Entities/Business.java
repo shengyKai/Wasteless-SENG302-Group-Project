@@ -10,11 +10,16 @@ import javax.servlet.http.HttpSession;
 
 import com.fasterxml.jackson.databind.ser.impl.StringArraySerializer;
 
+
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.*;
 
 @Entity
 public class Business {
 
+    //Minimum age to create a business
+    private final int MinimumAge = 16;
     private static final List<String> businessTypes = new ArrayList<>(Arrays.asList("Accommodation and Food Services", "Retail Trade", "Charitable organisation", "Non-profit organisation"));
 
     @Id
@@ -143,11 +148,19 @@ public class Business {
 
     /**
      * Sets primary owner of the business
+     * If the requested user is less than 16 years of age, a 403 forbidden status is thrown.
      * @param owner Owner of business
      */
     private void setPrimaryOwner(User owner) {
         if (owner == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The business must have a primary owner");
+        }
+
+        //Get the current date as of now and find the difference in years between the current date and the age of the user.
+        long age = java.time.temporal.ChronoUnit.YEARS.between(
+            owner.getDob().toInstant().atZone(ZoneId.systemDefault()).toLocalDate(), LocalDate.now());
+        if (age < MinimumAge) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User is not of minimum age required to create a business");
         }
         this.primaryOwner = owner;
     }
@@ -168,11 +181,29 @@ public class Business {
         return this.administrators;
     }
 
+    /**
+     * Adds a new admin to the business
+     * Throws an ResponseStatusException if the user is already an admin
+     * @param newAdmin The user to make admininstrator
+     */
     public void addAdmin(User newAdmin) {
-        if (this.administrators.contains(newAdmin)) {
+        if (this.administrators.contains(newAdmin) || this.primaryOwner == newAdmin) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "This user is already a registered admin of this business");
         } else {
             this.administrators.add(newAdmin);
+        }
+    }
+
+    /**
+     * Removes an admin from a business
+     * Throws an ResponseStatusException if the user is not an admin of the business
+     * @param oldAdmin the user to revoke administrator
+     */
+    public void removeAdmin(User oldAdmin) {
+        if (!this.administrators.contains(oldAdmin)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The given user is not an admin of this business");
+        } else {
+            this.administrators.remove(oldAdmin);
         }
     }
 
@@ -265,6 +296,27 @@ public class Business {
             business.setPrimaryOwner(this.primaryOwner);
             return business;
         }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == this) {
+            return true;
+        }
+        if (!(o instanceof Business)) {
+            return false;
+        }
+        Business business = (Business) o;
+        return
+                Float.compare(this.id, business.getId()) == 0 &&
+                this.name.equals(business.getName()) &&
+                this.description.equals(business.getDescription()) &&
+                this.created.equals(business.getCreated());
+    }
+
+    @Override
+    public int hashCode() {
+        return this.id.intValue();
     }
 
 }
