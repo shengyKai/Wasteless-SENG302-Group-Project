@@ -31,6 +31,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.when;
 
 @SpringBootTest
 public class BusinessTests {
@@ -39,6 +40,10 @@ public class BusinessTests {
     BusinessRepository businessRepository;
     @Autowired
     UserRepository userRepository;
+    @Mock
+    HttpServletRequest request;
+    @Mock
+    HttpSession session;
 
     User testUser1;
     User testUser2;
@@ -408,8 +413,8 @@ public class BusinessTests {
         try {
             testBusiness1.checkSessionPermissions(request);
         } catch (Exception e) {
-            System.out.println(Arrays.toString(testBusiness.getAdministrators().toArray()));
-            System.out.println(testBusiness.getPrimaryOwner().toString());
+            System.out.println(Arrays.toString(testBusiness1.getAdministrators().toArray()));
+            System.out.println(testBusiness1.getPrimaryOwner().toString());
             System.out.println(user1Id);
             System.out.println(e);
             fail("No exception should be thrown when the user is an admin of the business");

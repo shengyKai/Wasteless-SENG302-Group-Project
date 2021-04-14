@@ -220,7 +220,7 @@ public class Business {
         HttpSession session = request.getSession(false);
         Long userId = (Long) session.getAttribute("accountId");
         Set<Long> adminIds = new HashSet<>();
-        for (User user : administrators) {
+        for (User user : getOwnerAndAdministrators()) {
             adminIds.add(user.getUserID());
         }
         String role = (String) session.getAttribute("role");

@@ -865,8 +865,28 @@ public class BusinessControllerTest {
                 .withAddress(new Location())
                 .build();
         testAdmin = userRepository.save(testAdmin);
-
+        System.out.println("Test admin " + testAdmin.getUserID());
+        System.out.println("Owner " + owner.getUserID());
+        System.out.println("Admin " + admin.getUserID());
+        System.out.println("Other user " + otherUser.getUserID());
+        System.out.println("Business " + testBusiness.getId());
+        List<Long> adminIds = new java.util.ArrayList<>();
+        for (User user : testBusiness.getAdministrators()) {
+            adminIds.add(user.getUserID());
+        }
+        System.out.println("Admin ids: " + Arrays.toString(adminIds.toArray()));
         testBusiness.addAdmin(testAdmin); // make user an admin
+        List<Long> adminIds2 = new java.util.ArrayList<>();
+        for (User user : testBusiness.getAdministrators()) {
+            adminIds2.add(user.getUserID());
+        }
+        System.out.println("Admin ids: " + Arrays.toString(adminIds2.toArray()));
+        Business testBusinessPersisted = businessRepository.findById(testBusiness.getId()).get();
+        List<Long> adminIds3 = new java.util.ArrayList<>();
+        for (User user : testBusinessPersisted.getAdministrators()) {
+            adminIds3.add(user.getUserID());
+        }
+        System.out.println("Admin ids: " + Arrays.toString(adminIds3.toArray()));
         testBusiness = businessRepository.save(testBusiness);
 
         String jsonString = String.format("{\"userId\": %d}", testAdmin.getUserID());
