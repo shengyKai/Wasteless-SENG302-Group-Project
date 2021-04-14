@@ -215,6 +215,7 @@
 
 <script>
 import LocationAutocomplete from '@/components/utils/LocationAutocomplete';
+import {createUser} from '../../api';
 
 export default {
   name: 'Register',
@@ -289,7 +290,25 @@ export default {
     },
     // Complete registration with API
     register () {
-      alert('TODO');
+      // alert('TODO');
+      //Temp this.obj to test whether it works ; need change
+      let user_vrb = {
+        firstName   : this.name,
+        lastName    : this.name,
+        middleName  : this.name,
+        nickname    : this.nickname,
+        bio         : this.bio,
+        email       : this.email,
+        dateOfBirth : this.dob,
+        phoneNumber : this.phone,
+        homeAddress : this.country,
+        password    : this.password };
+
+      console.log(user_vrb);
+      let vrb = createUser(user_vrb);
+      if (vrb !== undefined ) {
+        alert('REGISTRATION FAILED');
+      }
     },
     // Close the date picker modal
     closeDatePicker () {
