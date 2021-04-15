@@ -178,11 +178,29 @@ public class Business {
         return this.administrators;
     }
 
+    /**
+     * Adds a new admin to the business
+     * Throws an ResponseStatusException if the user is already an admin
+     * @param newAdmin The user to make admininstrator
+     */
     public void addAdmin(User newAdmin) {
-        if (this.administrators.contains(newAdmin)) {
+        if (this.administrators.contains(newAdmin) || this.primaryOwner == newAdmin) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "This user is already a registered admin of this business");
         } else {
             this.administrators.add(newAdmin);
+        }
+    }
+
+    /**
+     * Removes an admin from a business
+     * Throws an ResponseStatusException if the user is not an admin of the business
+     * @param oldAdmin the user to revoke administrator
+     */
+    public void removeAdmin(User oldAdmin) {
+        if (!this.administrators.contains(oldAdmin)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The given user is not an admin of this business");
+        } else {
+            this.administrators.remove(oldAdmin);
         }
     }
 
@@ -321,6 +339,27 @@ public class Business {
             business.setPrimaryOwner(this.primaryOwner);
             return business;
         }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == this) {
+            return true;
+        }
+        if (!(o instanceof Business)) {
+            return false;
+        }
+        Business business = (Business) o;
+        return
+                this.id.equals(business.getId()) &&
+                this.name.equals(business.getName()) &&
+                this.description.equals(business.getDescription()) &&
+                this.created.equals(business.getCreated());
+    }
+
+    @Override
+    public int hashCode() {
+        return this.id.intValue();
     }
 
 }
