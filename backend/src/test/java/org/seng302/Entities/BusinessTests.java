@@ -9,13 +9,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
+import org.springframework.test.annotation.Commit;
 import org.springframework.test.annotation.Rollback;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 
 import java.text.ParseException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.Locale;
 import java.util.Date;
 
@@ -513,18 +516,60 @@ public class BusinessTests {
     }
 
     /**
-     * Check that if a user who is currently an admin of a business is deleted from the database, that user will be
-     * removed from the business's list of administrators.
+     * Check that if someone attempts to delete a user who is currently an admin of a business from the database,
+     * a DataIntegrityVioloationException will be thrown, and the user and business will not be changed.
      */
     @Test
-    @Rollback(false)
     public void adminDeletedTest() {
         testBusiness1.addAdmin(testUser2);
         testBusiness1 = businessRepository.save(testBusiness1);
-        System.out.println(testBusiness1.getAdministrators());
-        userRepository.deleteById(testUser2.getUserID());
-        System.out.println(userRepository.findById(testUser2.getUserID()).get());
-        assertEquals(0, testBusiness1.getAdministrators().size());
+        long adminId = testUser2.getUserID();
+        long businessId = testBusiness1.getId();
+        assertThrows(DataIntegrityViolationException.class, () -> {
+            userRepository.deleteById(testUser2.getUserID());
+        });
+        assertTrue(userRepository.existsById(adminId));
+        assertTrue(businessRepository.existsById(businessId));
+        testBusiness1 = businessRepository.findById(businessId).get();
+        assertEquals(1, testBusiness1.getAdministrators().size());
+        for (User user : testBusiness1.getAdministrators()) {
+            assertEquals(adminId, user.getUserID());
+        }
+    }
+
+    /**
+     * Test that when a business which has not admins is deleted, that business is removed from the repository
+     * but its primary owner entity is not deleted.
+     */
+    @Test
+    public void deleteBusinessWithoutAdminsTest() {
+        long businessId = testBusiness1.getId();
+        long ownerId = testBusiness1.getPrimaryOwner().getUserID();
+        businessRepository.deleteById(businessId);
+        assertFalse(businessRepository.existsById(businessId));
+        assertTrue(userRepository.existsById(ownerId));
+        assertTrue(userRepository.findById(ownerId).get().getBusinessesOwned().isEmpty());
+    }
+
+    /**
+     * Test that when delete is called on a business which has administrators, a DataIntegrityViolationException
+     * is thrown and the business and its admins remain in the database.
+     */
+    public void deleteBusinessWithAdminsTest() {
+        testBusiness1.addAdmin(testUser2);
+        testBusiness1 = businessRepository.save(testBusiness1);
+        long adminId = testUser2.getUserID();
+        long businessId = testBusiness1.getId();
+        assertThrows(DataIntegrityViolationException.class, () -> {
+            businessRepository.deleteById(businessId);
+        });
+        assertTrue(userRepository.existsById(adminId));
+        assertTrue(businessRepository.existsById(businessId));
+        testBusiness1 = businessRepository.findById(businessId).get();
+        assertEquals(1, testBusiness1.getAdministrators().size());
+        for (User user : testBusiness1.getAdministrators()) {
+            assertEquals(adminId, user.getUserID());
+        }
     }
 
     /**
