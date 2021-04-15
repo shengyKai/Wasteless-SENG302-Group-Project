@@ -184,7 +184,7 @@ public class BusinessController {
     private boolean loggedInUserIsOwner(HttpServletRequest req, Business business) {
         HttpSession session = req.getSession();
         Long userId = (Long) session.getAttribute("accountId");
-        return userId == business.getPrimaryOwner().getUserID();
+        return userId != null && userId.equals(business.getPrimaryOwner().getUserID());
     }
 
     /**

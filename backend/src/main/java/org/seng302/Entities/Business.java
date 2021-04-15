@@ -15,7 +15,7 @@ public class Business {
     //Minimum age to create a business
     private final int MinimumAge = 16;
     private static final List<String> businessTypes = new ArrayList<>(Arrays.asList("Accommodation and Food Services", "Retail Trade", "Charitable organisation", "Non-profit organisation"));
-    private static final String textRegex = "[ a-zA-Z0-9@//$%&,//.//:;_-]*";
+    private static final String textRegex = "[ a-zA-Z0-9@//$%&',//.//:;_-]*";
 
     @Id
     @GeneratedValue
@@ -110,6 +110,9 @@ public class Business {
      * @param address business address
      */
     public void setAddress(Location address) {
+        if (address == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The business's address cannot be null");
+        }
         this.address = address;
     }
 
@@ -145,6 +148,12 @@ public class Business {
      * @param createdAt date created
      */
     private void setCreated(Date createdAt) {
+        if (createdAt == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The date the business was created cannot be null");
+        }
+        if (this.created != null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The date the business was created cannot be reset");
+        }
         this.created = createdAt;
     }
 

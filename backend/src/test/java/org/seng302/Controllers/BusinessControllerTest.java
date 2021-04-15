@@ -105,7 +105,7 @@ public class BusinessControllerTest {
                 .withName("COSC co")
                 .withPrimaryOwner(owner)
                 .build();
-        businessRepository.save(testBusiness);
+        testBusiness = businessRepository.save(testBusiness);
     }
     /**
      * This method creates a user and adds it to the repository.
@@ -136,7 +136,7 @@ public class BusinessControllerTest {
                 .build();
         businessRepository.deleteAll();
         userRepository.deleteAll();
-        userRepository.save(owner);
+        owner = userRepository.save(owner);
     }
 
     /**
