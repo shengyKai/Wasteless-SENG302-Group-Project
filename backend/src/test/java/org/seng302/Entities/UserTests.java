@@ -673,7 +673,7 @@ public class UserTests {
     public void setCreatedTest() {
         Date testDate = new Date(System.currentTimeMillis());
         User testUser = testBuilder.build();
-        assertEquals(testDate, testUser.getCreated());
+        assertEquals(testDate.compareTo(testUser.getCreated()), 0);
     }
 
     /**

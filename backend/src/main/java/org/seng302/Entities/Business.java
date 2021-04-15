@@ -15,6 +15,7 @@ public class Business {
     //Minimum age to create a business
     private final int MinimumAge = 16;
     private static final List<String> businessTypes = new ArrayList<>(Arrays.asList("Accommodation and Food Services", "Retail Trade", "Charitable organisation", "Non-profit organisation"));
+    private static final String textRegex = "[ a-zA-Z0-9@//$%&,//.//:;_-]*";
 
     @Id
     @GeneratedValue
@@ -31,7 +32,7 @@ public class Business {
     private Date created;
 
     @ManyToOne
-    @JoinColumn(name = "owner_id")
+    @JoinColumn(name = "owner_id", nullable = false)
     private User primaryOwner;
 
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
@@ -56,8 +57,15 @@ public class Business {
      * @param name Business name
      */
     public void setName(String name) {
-        if (name == null || name.isEmpty()) {
+        if (name == null || name.isEmpty() || name.isBlank()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The business name must not be empty");
+        }
+        if (name.length() > 100) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The business name must be 100 characters or fewer");
+        }
+        if (!name.matches(textRegex)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The business name can contain only letters, " +
+                    "numbers, and the special characters @ $ % & - _ , . : ;");
         }
         this.name = name;
     }
@@ -75,8 +83,16 @@ public class Business {
      * @param description Business description
      */
     public void setDescription(String description) {
-        if (description == null || description.isEmpty()) {
+        if (description == null || description.isEmpty() ||  description.isBlank()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The business description must not be empty");
+        }
+        if (description.length() > 200) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The business description must be 200 characters" +
+                    " or fewer");
+        }
+        if (!description.matches(textRegex)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The business description can contain only letters, " +
+                    "numbers, and the special characters @ $ % & - _ , . : ;");
         }
         this.description = description;
     }

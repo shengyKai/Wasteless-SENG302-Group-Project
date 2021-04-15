@@ -184,4 +184,174 @@ public class BusinessTests {
         System.out.print(thrown);
         assertTrue(thrown.getMessage().contains("User is not of minimum age required to create a business"));
     }
+
+    /**
+     * Check that when setName is called with a name which is 100 characters or less, contains only letters, numbers and
+     * the characters "@ $ % & . , ' ; : - _", and is not empty, the businesses name is set to that value.
+     */
+    @Test
+    public void setNameValidNameTest() {
+        fail("Not yet implemented");
+        String[] testNames = {"Joe's cake shop", "BNZ", "X", ""};
+        for (String name : testNames) {
+            testBusiness1.setName(name);
+            assertEquals(testBusiness1.getName(), name);
+        }
+    }
+
+    /**
+     * Check that when setName is called on a business with a valid name and that business is saved to the repository,
+     * the name associated with the saved entity is updated.
+     */
+    @Test
+    public void setNameSavedToRepositoryTest() {fail("Not yet implemented");}
+
+    /**
+     * Check that when setName is called with a name which contains characters which are not letters, numbers or
+     * the characters "@ $ % & . , ; : - _", a response status exception with status code 400 and message "The business
+     * name can contain only letters, numbers, and the special characters @ $ % & - _ , . : ;" will be thrown and the
+     * business's name will not be changed.
+     */
+    @Test
+    public void setNameInvalidCharacterTest() {fail("Not yet implemented");}
+
+    /**
+     * Check that when setName is called with a name which is greater than 100 characters lonog, a response status
+     * exception with status code 400 and message "The business name must be 100 characters or fewer" will be thrown
+     * and the business's name will not be changed.
+     */
+    @Test
+    public void setNameTooLongTest() {fail("Not yet implemented");}
+
+    /**
+     * Check that when setName is called with null as its argument, a response status expection will be thrown with
+     * status code 400 and message "The business name must not be empty" and the business's name will not be changed.
+     */
+    @Test
+    public void setNameNullTest() {fail("Not yet implemented");}
+
+    /**
+     * Check that when setName is called with the empty string as its argument, a response status expection will be thrown
+     * with status code 400 and message "The business name must not be empty" and the business's name will not be changed.
+     */
+    @Test
+    public void setNameEmptyStringTest() {fail("Not yet implemented");}
+
+    /**
+     * Check that when setName is called with a blank string as its argument, a response status expection will be thrown
+     * with status code 400 and message "The business name must not be empty" and the business's name will not be changed.
+     */
+    @Test
+    public void setNameBlankStringTest() {fail("Not yet implemented");}
+
+    /**
+     * Check that when setDescription is called with a string which is 100 characters or less, contains only letters,
+     * and the characters "@ $ % & . , ; : - _", and is not empty, the businesses description is set to that value.
+     */
+    @Test
+    public void setDescriptionValidDescriptionTest() {fail("Not yet implemented");}
+
+    /**
+     * Check that when setDescription is called on a business with a valid name and that business is saved to the repository,
+     * the description associated with the saved entity is updated.
+     */
+    @Test
+    public void setDescriptionSavedToRepositoryTest() {fail("Not yet implemented");}
+
+    /**
+     * Check that when setDescription is called with a name which contains characters which are not letters, numbers or
+     * the characters "@ $ % & . , ; : - _", a response status exception with status code 400 and message "The business
+     * description can contain only letters, numbers, and the special characters @ $ % & - _ , . : ;" will be thrown and the
+     * business's description will not be changed.
+     */
+    @Test
+    public void setDescriptionInvalidCharacterTest() {fail("Not yet implemented");}
+
+    /**
+     * Check that when setDescription is called with a string which is greater than 200 characters lonog, a response status
+     * exception with status code 400 and message "The business description must be 100 characters or fewer" will be thrown
+     * and the business's description will not be changed.
+     */
+    @Test
+    public void setDescriptionTooLongTest() {fail("Not yet implemented");}
+
+    /**
+     * Check that when setDescription is called with null as its argument, a response status expection will be thrown
+     * with status code 400 and message "The business description must not be empty" and the business's description will
+     * not be changed.
+     */
+    @Test
+    public void setDescriptionNullTest() {fail("Not yet implemented");}
+
+    /**
+     * Check that when setDescription is called with the empty string as its argument, a response status expection will
+     * be thrown with status code 400 and message "The business description must not be empty" and the business's
+     * description will not be changed.
+     */
+    @Test
+    public void setDescriptionEmptyStringTest() {fail("Not yet implemented");}
+
+    /**
+     * Check that when setDescription is called with a blank string as its argument, a response status expection will be
+     * thrown with status code 400 and message "The business description must not be empty" and the business's
+     * description will not be changed.
+     */
+    @Test
+    public void setDescriptionBlankStringTest() {fail("Not yet implemented");}
+
+    /**
+     * Check that when setPrimaryOwner is called with null as its argument, a response status exception with status code
+     * 400 is thrown and the primary owner is not changed.
+     */
+    @Test
+    public void setPrimaryOwnerNullTest() {fail("Not yet implemented");}
+
+    /**
+     * Check that if setPrimaryOwner is called with a user who has not been saved to the database, a response status
+     * exception with status code 400 is thrown and the primary owner is not changed.
+     */
+    @Test
+    public void setPrimaryOwnerUnsavedUserTest() {fail("Not yet implemented");}
+
+    /**
+     * Check that if someone attempts to remove a user who is currently the primary owner of a business from the database,
+     * an expection is thrown and the user is not removed from the database.
+     */
+    @Test
+    public void primaryOwnerCantBeDeletedTest() {fail("Not yet implemented");}
+
+    /**
+     * Check that if addAdmin is called with a user who is already an admin of the business, a response status expection
+     * with status code 400 is thrown adn the admin is not added.
+     */
+    @Test
+    public void addAdminCurrentAdminTest() {fail("Not yet implemented");}
+
+    /**
+     * Check that if addAdmin is called with a user who is already the primary owner of the business, a response status
+     * expection with status code 400 is thrown and the admin is not added.
+     */
+    @Test
+    public void addAdminPrimaryOwnerTest() {fail("Not yet implemented");}
+
+    /**
+     * Check that if addAdmin is called with a user who is not currently an admin of the business, that user is added to
+     * the businesses list of administrators.
+     */
+    @Test
+    public void addAdminNewAdminTest() {fail("Not yet implemented");}
+
+    /**
+     * Check that if a user who is currently an admin of a business is deleted from the database, that user will be
+     * removed from the business's list of administrators.
+     */
+    @Test
+    public void adminDeletedTest() {fail("Not yet implemented");}
+
+    /**
+     * Test that when setCreated is called, the business's created attribute will be set to the current date and time
+     */
+    @Test
+    public void setCreatedTest() {fail("Not yet implemented");}
+
 }
