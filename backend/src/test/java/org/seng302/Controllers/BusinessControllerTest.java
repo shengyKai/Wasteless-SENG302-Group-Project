@@ -113,9 +113,9 @@ public class BusinessControllerTest {
                 .withName("COSC co")
                 .withPrimaryOwner(owner)
                 .build();
-        businessRepository.save(testBusiness);
+        testBusiness = businessRepository.save(testBusiness);
         testBusiness.addAdmin(admin);
-        businessRepository.save(testBusiness);
+        testBusiness = businessRepository.save(testBusiness);
     }
     /**
      * This method creates a user and adds it to the repository.
@@ -152,9 +152,9 @@ public class BusinessControllerTest {
                 .withPhoneNumber("+64 21 099 5786").withAddress(Location.covertAddressStringToLocation("99,Riccarton Road,Christchurch,Canterbury,New Zealand,4041")).build();
         businessRepository.deleteAll();
         userRepository.deleteAll();
-        userRepository.save(owner);
-        userRepository.save(admin);
-        userRepository.save(otherUser);
+        owner = userRepository.save(owner);
+        admin = userRepository.save(admin);
+        otherUser = userRepository.save(otherUser);
     }
 
     /**
@@ -627,8 +627,8 @@ public class BusinessControllerTest {
      */
     @Test
     public void addAdminWhenUserNotExistTest() throws Exception {
-
-        String jsonString = "{\"userId\": 99}";
+        Long unusedId = owner.getUserID() + admin.getUserID() + otherUser.getUserID();
+        String jsonString = String.format("{\"userId\": %d}", unusedId);
         setCurrentUser(owner.getUserID());
 
         mockMvc.perform(MockMvcRequestBuilders
