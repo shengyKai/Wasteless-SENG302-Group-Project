@@ -44,6 +44,7 @@ describe('UserProfile.vue', () => {
       },
       activeRole: null,
       createBusinessDialogShown: false,
+      createProductDialogShown: false,
     };
     let store = new Vuex.Store(options);
 

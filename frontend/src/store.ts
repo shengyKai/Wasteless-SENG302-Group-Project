@@ -6,6 +6,7 @@ export type StoreData = {
   user: User | null,
   activeRole: { type: "user" | "business", id: number} | null,
   createBusinessDialogShown: boolean,
+  createProductDialogShown: boolean,
 };
 
 export function createOptions(): StoreOptions<StoreData> {
@@ -14,6 +15,7 @@ export function createOptions(): StoreOptions<StoreData> {
       user: null,
       activeRole: null,
       createBusinessDialogShown: false,
+      createProductDialogShown: false,
     },
     mutations: {
       setUser (state, payload: User) {
@@ -52,6 +54,24 @@ export function createOptions(): StoreOptions<StoreData> {
        */
       hideCreateBusiness(state) {
         state.createBusinessDialogShown = false;
+      },
+
+      /**
+       * Creates a modal create product dialog
+       *
+       * @param state Current store state
+       */
+      showCreateProduct(state) {
+        state.createProductDialogShown = true;
+      },
+
+      /**
+       * Hides the create product dialog
+       *
+       * @param state Current store state
+       */
+      hideCreateProduct(state) {
+        state.createProductDialogShown = false;
       }
     },
     getters: {

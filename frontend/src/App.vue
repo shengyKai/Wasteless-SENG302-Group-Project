@@ -9,6 +9,9 @@
           <div v-if="$store.state.createBusinessDialogShown">
             <CreateBusiness @closeDialog="$store.commit('hideCreateBusiness')" />
           </div>
+          <div v-if="$store.state.createProductDialogShown">
+            <CreateProduct @closeDialog="$store.commit('hideCreateProduct')"/>
+          </div>
 
           <AppBar />
 
@@ -48,6 +51,7 @@ import CreateBusiness from "./components/BusinessProfile/CreateBusiness";
 import createStore from "./store";
 import router from "./plugins/vue-router";
 import { COOKIE, getCookie } from './utils';
+import CreateProduct from "@/components/BusinessProfile/CreateProduct";
 
 const store = createStore();
 
@@ -64,6 +68,7 @@ export default {
     AppBar,
     AppFooter,
     CreateBusiness,
+    CreateProduct,
   },
   async created() {
     const cookie = getCookie(COOKIE.USER);
