@@ -261,7 +261,7 @@ public class Location {
         if (checkValidStreetName(streetName)) {
             this.streetName = streetName;
         } else {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "The region must not be empty, be less then 100 characters, and only contain letters.");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "The street name must not be empty, be less then 100 characters, and only contain letters.");
         }
     }
 

@@ -145,13 +145,6 @@
         outlined
       />
 
-      <!-- INPUT: Apartment, Suite, Unit, Building or Floor -->
-      <v-text-field
-        v-model="street2"
-        label="Apartment, Suite, Unit, Building, Floor"
-        outlined
-      />
-
       <!-- INPUT: District/Region/Province -->
       <LocationAutocomplete
         type="district"
@@ -237,7 +230,6 @@ export default {
       countryCode: '64',
       phone: '',
       street1: '',
-      street2: '',
       district: '',
       state: '',
       city: '',
@@ -302,12 +294,12 @@ export default {
         dateOfBirth : this.dob,
         phoneNumber : this.phone,
         homeAddress : {
-          streetNumber: 7,
-          streetName: this.street1,
-          city: this.city,
-          region: this.state,
-          country: this.country,
-          postcode: this.postcode,
+          streetNumber  : 7,
+          streetName    : this.street1,
+          city          : this.city,
+          region        : this.state,
+          country       : this.country,
+          postcode      : this.postcode,
         },
         password    : this.password,
       };
