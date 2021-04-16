@@ -3,10 +3,13 @@
     <template v-if="loading">
       <v-progress-circular color="primary" />
     </template>
-
     <template v-else>
       <div class="notfooter">
         <div v-if="loggedIn">
+          <div v-if="$store.state.createBusinessDialogShown">
+            <CreateBusiness @closeDialog="$store.commit('hideCreateBusiness')" />
+          </div>
+
           <AppBar />
 
           <v-main>
@@ -40,6 +43,8 @@
 import Auth from "./components/Auth";
 import AppBar from "./components/AppBar";
 import AppFooter from "./components/AppFooter";
+import CreateBusiness from "./components/BusinessProfile/CreateBusiness";
+
 import createStore from "./store";
 import router from "./plugins/vue-router";
 import { COOKIE, getCookie } from './utils';
@@ -58,6 +63,7 @@ export default {
     Auth,
     AppBar,
     AppFooter,
+    CreateBusiness,
   },
   async created() {
     const cookie = getCookie(COOKIE.USER);

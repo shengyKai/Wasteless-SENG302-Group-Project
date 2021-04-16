@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.security.SecureRandom;
+import java.util.Objects;
 
 /**
  * This class provides static methods to generate and verify the authentication tokens used to check whether a user is
@@ -108,7 +109,7 @@ public class AuthenticationTokenManager {
     public static void setAuthenticationTokenDGAA(HttpServletRequest request) {
 
         HttpSession session = request.getSession(true);
-        session.setAttribute("role", "dgaa");
+        session.setAttribute("role", "defaultGlobalApplicationAdmin");
     }
 
     /**
@@ -118,19 +119,18 @@ public class AuthenticationTokenManager {
     public static void checkAuthenticationTokenDGAA(HttpServletRequest request) {
         HttpSession session = request.getSession();
         String sessionRole = (String)session.getAttribute("role");
-        if (sessionRole != null && sessionRole == "dgaa") {
+        if ("defaultGlobalApplicationAdmin".equals(sessionRole)) {
             return;
         } else {
             InsufficientPermissionException insufficientPermissionException = new InsufficientPermissionException("The user does not have permission to perform the requested action");
             logger.error(insufficientPermissionException.getMessage());
             throw insufficientPermissionException;
         }
-
     }
 
     /**
      * Given a HTTP request, and a given account ID, this method determines if the currently logged in account can see the private info of the given ID
-     * When an account has role "admin" or "dgaa" then permission is granted
+     * When an account has role "globalApplicationAdmin" or "defaultGlobalApplicationAdmin" then permission is granted
      * @param request The HTTP request packet
      * @param accountId The account Id to compare
      * @return True if accountId matches session
@@ -139,9 +139,9 @@ public class AuthenticationTokenManager {
         HttpSession session = request.getSession();
         Long sessionAccountId = (Long)session.getAttribute("accountId");
         String sessionRole = (String)session.getAttribute("role");
-        if (sessionAccountId == accountId) {
+        if (Objects.equals(sessionAccountId, accountId)) {
             return true;
-        } else if (sessionRole == "admin" || sessionRole == "dgaa") {
+        } else if ("globalApplicationAdmin".equals(sessionRole) || "defaultGlobalApplicationAdmin".equals(sessionRole)) {
             return true;
         }
         return false;

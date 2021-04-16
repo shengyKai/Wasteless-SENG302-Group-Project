@@ -5,6 +5,7 @@ import { COOKIE, deleteCookie, setCookie } from './utils';
 export type StoreData = {
   user: User | null,
   activeRole: { type: "user" | "business", id: number} | null,
+  createBusinessDialogShown: boolean,
 };
 
 export function createOptions(): StoreOptions<StoreData> {
@@ -12,10 +13,16 @@ export function createOptions(): StoreOptions<StoreData> {
     state: {
       user: null,
       activeRole: null,
+      createBusinessDialogShown: false,
     },
     mutations: {
       setUser (state, payload: User) {
         state.user = payload;
+
+        // Ensures that when we log in we always have a role.
+        // Maybe it will be worth considering in the future persistently remembering the previous role
+        state.activeRole = { type: "user", id: payload.id };
+
         // If the payload contains a user ID, user is now logged in. Set their session cookie.
         if (payload.id) {
           deleteCookie(COOKIE.USER.toUpperCase());
@@ -23,9 +30,28 @@ export function createOptions(): StoreOptions<StoreData> {
           setCookie(COOKIE.USER, payload.id);
         }
       },
+
       logoutUser (state) {
         state.user = null;
         deleteCookie(COOKIE.USER);
+      },
+
+      /**
+       * Creates a modal create business dialog
+       *
+       * @param state Current store state
+       */
+      showCreateBusiness(state) {
+        state.createBusinessDialogShown = true;
+      },
+
+      /**
+       * Hides the create business dialog
+       *
+       * @param state Current store state
+       */
+      hideCreateBusiness(state) {
+        state.createBusinessDialogShown = false;
       }
     },
     getters: {
