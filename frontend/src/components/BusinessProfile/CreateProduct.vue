@@ -55,16 +55,16 @@
             <v-btn
               color="primary"
               text
-              @click="closeDialog"
+              @click="closeDialog">
               Close
-            />
+            </v-btn>
             <v-btn
               type="submit"
               color="primary"
               :disabled="!valid"
-              @click="createProduct"
+              @click="createProduct">
               Create
-            />
+            </v-btn>
           </v-card-actions>
         </v-card>
       </v-form>
@@ -97,13 +97,14 @@ export default {
       ],
       priceRules: [
         //A price must be numbers and may contain a decimal followed by exactly two numbers
-        field => /^\d{1,5}(\.\d{2})?$/.test(field) || 'Must be a valid price'
+        field => /(^\d{1,5}(\.\d{2})?$)|^$/.test(field) || 'Must be a valid price'
       ]
     };
   },
   methods: {
     createProduct() {
-      this.$router.push('/businesses/1/products');
+      //TODO merge with backend
+      //this.$router.push('/businesses/1/products');
       this.closeDialog();
     },
     closeDialog() {
