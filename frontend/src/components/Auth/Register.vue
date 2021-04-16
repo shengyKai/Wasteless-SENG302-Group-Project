@@ -1,5 +1,5 @@
 <template>
-  <v-form @submit="register" v-model="valid">
+  <v-form @submit.prevent="register" v-model="valid">
     <h1>Register</h1>
 
     <v-container>
@@ -292,7 +292,7 @@ export default {
     register () {
       // alert('TODO');
       //Temp this.obj to test whether it works ; need change
-      let user_vrb = {
+      let user = {
         firstName   : this.name,
         lastName    : this.name,
         middleName  : this.name,
@@ -301,11 +301,18 @@ export default {
         email       : this.email,
         dateOfBirth : this.dob,
         phoneNumber : this.phone,
-        homeAddress : this.country,
-        password    : this.password };
+        homeAddress : {
+          streetNumber: 7,
+          streetName: this.street1,
+          city: this.city,
+          region: this.state,
+          country: this.country,
+          postcode: this.postcode,
+        },
+        password    : this.password,
+      };
 
-      console.log(user_vrb);
-      let vrb = createUser(user_vrb);
+      let vrb = createUser(user);
       if (vrb !== undefined ) {
         alert('REGISTRATION FAILED');
       }

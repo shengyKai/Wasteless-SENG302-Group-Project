@@ -14,6 +14,7 @@ import org.seng302.Tools.AuthenticationTokenManager;
 import org.seng302.Tools.UserSearchHelper;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -21,6 +22,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.text.ParseException;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -48,13 +50,24 @@ public class UsersController {
             throw inUseException;
         }
         try {
+            JSONObject rawAddress;
+            try{
+                rawAddress = new JSONObject((Map<String, ?>) userinfo.get("homeAddress"));
+            } catch (ClassCastException e) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                        "Location not provided");
+            }
+
+            Location homeAddress = Location.parseLocationFromJson(rawAddress);
+
+
             User user = new User.Builder()
                     .withFirstName(userinfo.getAsString("firstName"))
                     .withMiddleName(userinfo.getAsString("middleName"))
                     .withLastName(userinfo.getAsString("lastName"))
                     .withNickName(userinfo.getAsString("nickname"))
                     .withBio(userinfo.getAsString("bio"))
-                    .withAddress(Location.covertAddressStringToLocation(userinfo.getAsString("homeAddress")))
+                    .withAddress(homeAddress)
                     .withPhoneNumber(userinfo.getAsString("phoneNumber"))
                     .withDob(userinfo.getAsString("dateOfBirth"))
                     .withEmail(userinfo.getAsString("email"))

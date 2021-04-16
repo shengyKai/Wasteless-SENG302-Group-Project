@@ -41,7 +41,6 @@
 </template>
 
 <script>
-import {login} from '../../api';
 export default {
   loggedIn: true,
   name: "Login",
