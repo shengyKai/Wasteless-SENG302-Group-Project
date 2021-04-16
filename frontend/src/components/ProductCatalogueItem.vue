@@ -6,17 +6,7 @@
     >
       <v-row>
         <v-col cols="3">
-          <v-carousel
-            show-arrows-on-hover
-            hide-delimiters
-            height="8rem"
-          >
-            <v-carousel-item
-              v-for="(item, i) in items"
-              :key="i"
-              :src="item.src"
-            />
-          </v-carousel>
+          <ProductImageCarousel :itemImages="itemImages"/>
         </v-col>
         <v-col cols="8">
           <v-row>
@@ -92,16 +82,17 @@
 
 <script>
 import FullProductDescription from "./FullProductDescription.vue";
+import ProductImageCarousel from "./ProductImageCarousel.vue";
 
 export default {
   name: "ProductCatalogueItem",
   components: {
     FullProductDescription,
+    ProductImageCarousel
   },
   data() {
     return {
-      //delete
-      items: [
+      itemImages: [
         {
           src: "https://cdn.vuetifyjs.com/images/carousel/squirrel.jpg",
         },
@@ -115,7 +106,6 @@ export default {
           src: "https://cdn.vuetifyjs.com/images/carousel/planet.jpg",
         },
       ],
-      //delete
       productName: "Some Product",
       productDescription:
         "Some super long description Some super long description Some super long description Some super long description ",
