@@ -1,6 +1,6 @@
 import {User, getUser, Business} from './api';
 import Vuex, { Store, StoreOptions } from 'vuex';
-import { COOKIE, deleteCookie, setCookie } from './utils';
+import { COOKIE, deleteCookie, isTesting, setCookie } from './utils';
 
 export type StoreData = {
   /**
@@ -121,6 +121,20 @@ export function createOptions(): StoreOptions<StoreData> {
   };
 }
 
-export default function createStore() {
-  return new Vuex.Store(createOptions());
+
+let store: Store<StoreData>;
+if (!isTesting()) {
+  // If we are currently running as a test then we cannot use a global store, since we're using a
+  // local vue instance.
+  store = new Vuex.Store(createOptions());
+}
+
+/**
+ * Gets the global Vuex store.
+ * If we're running as a test this will be undefined
+ *
+ * @returns The global Vuex store
+ */
+export function getStore() {
+  return store;
 }

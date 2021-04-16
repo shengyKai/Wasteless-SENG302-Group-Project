@@ -65,16 +65,11 @@ import AppBar from "./components/AppBar";
 import AppFooter from "./components/AppFooter";
 import CreateBusiness from "./components/BusinessProfile/CreateBusiness";
 
-import createStore from "./store";
+import { getStore } from "./store";
 import router from "./plugins/vue-router";
 import { COOKIE, getCookie } from './utils';
 
-const store = createStore();
-
-router.afterEach(() => {
-  // After changing pages clear the global error message
-  store.commit('clearError');
-});
+const store = getStore();
 
 // Vue app instance
 // it is declared as a reusable component in this case.
@@ -100,6 +95,10 @@ export default {
       this.loading = false;
       if (this.$route.path !== '/login') this.$router.push('/login');
     }
+    this.$router.afterEach(() => {
+      // After changing pages clear the global error message
+      this.$store.commit('clearError');
+    });
   },
   store,
   router,
