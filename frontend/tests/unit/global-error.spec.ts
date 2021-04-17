@@ -40,8 +40,7 @@ describe('GlobalError', () => {
    * @returns Error message component wrapper or if doesn't exist an error wrapper
    */
   function findErrorBox() {
-    // Since we're doing a shallow mount and so long as we don't add a new v-alert component to
-    // App.vue, then this selector should be sufficient.
+    // So long as we don't add a new v-alert component to App.vue, then this selector should be sufficient.
     return wrapper.findComponent({name: 'v-alert'});
   }
 

@@ -72,7 +72,7 @@
 
 <script>
 import SearchResultItem from './SearchResultItem';
-import {getSearchCount, search} from '../api';
+import { getSearchCount, search } from '../api';
 import { debounce } from '../utils';
 
 export default {
