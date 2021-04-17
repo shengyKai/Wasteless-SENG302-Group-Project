@@ -1,8 +1,12 @@
 <template>
+  <!-- use the v-dialog to show a pop up for the carousel -->
   <v-dialog v-model="dialog">
     <template v-slot:activator="{ on, attrs }">
+      <!-- put an image over a link, such that now the image will be clickable to activate the pop up dialog -->
+      <!--  v-bind="attrs" v-on="on" allows the v-dialog to use this link as the activator for the dialog box -->
       <a v-bind="attrs" v-on="on">
-        <v-img height="100%" :src="itemImages[0].src"/>
+        <!-- productImages[0] will be the primary image for the product. -->
+        <v-img height="100%" :src="productImages[0].src"/>
       </a>
     </template>
     <template>
@@ -10,7 +14,8 @@
         show-arrows-on-hover
         hide-delimiters
       >
-        <v-carousel-item v-for="(item, i) in itemImages" :key="i" :src="item.src" />
+        <!-- iterate through each photo in productImages -->
+        <v-carousel-item v-for="(item, i) in productImages" :key="i" :src="item.src" />
       </v-carousel>
     </template>
   </v-dialog>
@@ -18,9 +23,11 @@
 <script>
 export default {
   name: "ProductImageCarousel",
-  props: ["itemImages"],
+  //pass in productImages from parent compoenent
+  props: ["productImages"],
   data() {
     return {
+      // if dialog is false, the popup does not appear.
       dialog: false
     };
   }
