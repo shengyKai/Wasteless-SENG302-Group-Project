@@ -1,79 +1,80 @@
 <template>
-  <v-card class="d-flex">
-    <v-container
-      class="fill-height"
-      fluid
-    >
+  <v-card>
+    <v-container fluid>
       <v-row>
-        <v-col cols="3">
+        <v-col md="3" sm="12">
           <ProductImageCarousel :itemImages="itemImages"/>
         </v-col>
-        <v-col cols="8">
+        <v-col md="9" sm="12">
           <v-row>
-            <v-text class="title">
-              {{ productName }}
-            </v-text>
+            <v-col class="pa-0" md="11" sm="10">
+              <v-card-title>
+                {{ productName }}
+              </v-card-title>
+            </v-col>
+            <v-col md="1" sm="2">
+              <v-card-actions>
+                <a @click="editProductDetails">Edit</a>
+              </v-card-actions>
+            </v-col>
           </v-row>
           <v-row>
-            <v-col cols="8">
+            <v-col md="9" sm="10">
               <v-row>
                 <span v-if="productDescription.length >= 50">
-                  <v-text>
+                  <v-card-text>
                     <b>Description: </b>
                     {{ productDescription.slice(0, 50) }}
-                  </v-text>
-                  <FullProductDescription :productDescription="productDescription"/>
+                    <FullProductDescription :productDescription="productDescription"/>
+                  </v-card-text>
                 </span>
                 <span v-else>
-                  <v-text>
+                  <v-card-text>
                     <b>Description: </b>
                     {{ productDescription }}
-                  </v-text>
+                  </v-card-text>
                 </span>
               </v-row>
               <v-row>
-                <v-text>
+                <v-card-text>
                   <b>Date Added: </b>
                   {{ productDateAdded }}
-                </v-text>
+                </v-card-text>
               </v-row>
               <v-row>
-                <v-text>
+                <v-card-text>
                   <b>Expiry Date: </b>
                   {{ productExpiryDate }}
-                </v-text>
+                </v-card-text>
               </v-row>
               <v-row>
-                <v-text>
+                <v-card-text>
                   <b>Manufacturer: </b>
                   {{ productManufacturer }}
-                </v-text>
+                </v-card-text>
               </v-row>
             </v-col>
-            <v-col cols="4">
+            <v-col md="3" sm="2">
               <v-row>
-                <v-text>
+                <v-card-text>
                   <b>RRP: </b>
                   ${{ productRRP }}
-                </v-text>
+                </v-card-text>
               </v-row>
               <v-row>
-                <v-text>
+                <v-card-text>
                   <b>Quantity: </b>
                   {{ productQuantity }}
-                </v-text>
+                </v-card-text>
               </v-row>
               <v-row>
-                <v-text>
+                <v-card-text>
                   <b>Product Code: </b>
                   {{ productCode }}
-                </v-text>
+                </v-card-text>
               </v-row>
             </v-col>
           </v-row>
-        </v-col>
-        <v-col cols="1">
-          <a href="#">Edit</a>
         </v-col>
       </v-row>
     </v-container>
@@ -122,15 +123,14 @@ export default {
     activateReadMore() {
       this.readMoreActivated = true;
     },
+    editProductDetails() {
+      alert("TODO");
+    }
   },
 };
 </script>
 
 <style scoped>
-.v-carousel {
-  padding-top: 0.25rem;
-  padding-bottom: 0.25rem;
-  padding-left: 0.25rem;
-}
-
+/* .v-card {
+} */
 </style>

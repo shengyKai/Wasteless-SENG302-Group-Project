@@ -1,16 +1,23 @@
 <template>
-  <v-dialog v-model="dialog" max-width="37.5rem">
+  <v-dialog v-model="dialog">
     <template v-slot:activator="{ on, attrs }">
-      <a v-bind="attrs" v-on="on">  Read more... </a>
+      <a
+        v-bind="attrs"
+        v-on="on"
+      >
+        Read more...
+      </a>
     </template>
     <v-card>
       <v-card-title>
-        <h2>Product Description</h2>
+        <h2>Description</h2>
       </v-card-title>
       <v-card-text>
         {{ productDescription }}
         <br>
-        <a @click="dialog = false">return</a>
+        <v-card-actions class="pa-0">
+          <a @click="dialog = false">return</a>
+        </v-card-actions>
       </v-card-text>
     </v-card>
   </v-dialog>

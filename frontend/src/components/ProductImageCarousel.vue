@@ -2,7 +2,7 @@
   <v-dialog v-model="dialog">
     <template v-slot:activator="{ on, attrs }">
       <a v-bind="attrs" v-on="on">
-        <v-img :src="itemImages[0].src"/>
+        <v-img height="100%" :src="itemImages[0].src"/>
       </a>
     </template>
     <template>
