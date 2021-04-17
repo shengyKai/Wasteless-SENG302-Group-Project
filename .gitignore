@@ -7,7 +7,7 @@ build/
 dist/
 node_modules/
 .metadata
-.env
+frontend/.env
 
 ### STS ###
 .apt_generated

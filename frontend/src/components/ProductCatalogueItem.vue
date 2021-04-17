@@ -27,8 +27,8 @@
                 <!-- if the description length is more than or equal to 50, the "Read more..." link will appear which will lead the
                 user to the FullProductDescription component  -->
                 <span v-if="productDescription.length >= 50">
-                  <v-card-text>
-                    <b>Description: </b>
+                  <v-card-text id="description">
+                    <strong>Description: </strong>
                     {{ productDescription.slice(0, 50) }}
                     <!-- feed the productDescription into the dialog box child component -->
                     <FullProductDescription :productDescription="productDescription"/>
@@ -37,7 +37,7 @@
                 <!-- else just show the product description -->
                 <span v-else>
                   <v-card-text>
-                    <b>Description: </b>
+                    <strong>Description: </strong>
                     {{ productDescription }}
                   </v-card-text>
                 </span>
@@ -45,21 +45,21 @@
               <v-row>
                 <!-- shows the date added for the product -->
                 <v-card-text>
-                  <b>Date Added: </b>
+                  <strong>Date Added: </strong>
                   {{ productDateAdded }}
                 </v-card-text>
               </v-row>
               <v-row>
                 <!-- shows the expiry date for the product -->
                 <v-card-text>
-                  <b>Expiry Date: </b>
+                  <strong>Expiry Date: </strong>
                   {{ productExpiryDate }}
                 </v-card-text>
               </v-row>
               <v-row>
                 <!-- shows the product manufacturer -->
                 <v-card-text>
-                  <b>Manufacturer: </b>
+                  <strong>Manufacturer: </strong>
                   {{ productManufacturer }}
                 </v-card-text>
               </v-row>
@@ -68,21 +68,21 @@
               <v-row>
                 <!-- shows the product price -->
                 <v-card-text>
-                  <b>RRP: </b>
+                  <strong>RRP: </strong>
                   ${{ productRRP }}
                 </v-card-text>
               </v-row>
               <v-row>
                 <!-- shows the product quantity -->
                 <v-card-text>
-                  <b>Quantity: </b>
+                  <strong>Quantity: </strong>
                   {{ productQuantity }}
                 </v-card-text>
               </v-row>
               <v-row>
                 <!-- shows the product code -->
                 <v-card-text>
-                  <b>Product Code: </b>
+                  <strong>Product Code: </strong>
                   {{ productCode }}
                 </v-card-text>
               </v-row>
@@ -96,8 +96,8 @@
 
 <script>
 //This component requires two other custom components, one to display the product image, one to view more of the product's description
-import FullProductDescription from "./FullProductDescription.vue";
-import ProductImageCarousel from "./ProductImageCarousel.vue";
+import FullProductDescription from "./utils/FullProductDescription.vue";
+import ProductImageCarousel from "./utils/ProductImageCarousel.vue";
 
 export default {
   name: "ProductCatalogueItem",
@@ -137,7 +137,7 @@ export default {
       // try uncommenting the bottom variables to test out how it looks.
       // productName: "Some Product",
       // productDescription:
-      //   "Some super long description Some super long description Some super long description Some super long description ",
+      //   "Some super long description Some super long description Some super long description Some super long description",
       // productDateAdded: "Some Date Added",
       // productExpiryDate: "Some Expired Date",
       // productManufacturer: "Some Manufacturer",
