@@ -111,8 +111,15 @@ export default {
 
   computed: {
     canAddUserAsAdmin() {
-      return this.$store.state.activeRole?.type === 'business';
+      if (!this.user) return false;
+
+      const role = this.$store.state.activeRole;
+      if (role?.type !== 'business') return false;
+
+      const administrators = role.value.administrators;
+      return !administrators.includes(this.user.id);
     },
+
     createdMsg() {
       if (this.user.created === undefined) return '';
 
