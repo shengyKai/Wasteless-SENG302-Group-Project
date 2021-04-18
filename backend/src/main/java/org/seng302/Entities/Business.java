@@ -5,7 +5,8 @@ import org.springframework.web.server.ResponseStatusException;
 
 import javax.persistence.*;
 
-import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.*;
 
 @Entity
@@ -150,9 +151,9 @@ public class Business {
         }
 
         //Get the current date as of now and find the difference in years between the current date and the age of the user.
-        Date currentDate = new Date();
-        long differenceInYears = (currentDate.getTime() - owner.getDob().getTime()) / (1000l * 60 * 60 * 24 * 365);
-        if (differenceInYears < MinimumAge) {
+        long age = java.time.temporal.ChronoUnit.YEARS.between(
+            owner.getDob().toInstant().atZone(ZoneId.systemDefault()).toLocalDate(), LocalDate.now());
+        if (age < MinimumAge) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User is not of minimum age required to create a business");
         }
         this.primaryOwner = owner;
@@ -174,11 +175,29 @@ public class Business {
         return this.administrators;
     }
 
+    /**
+     * Adds a new admin to the business
+     * Throws an ResponseStatusException if the user is already an admin
+     * @param newAdmin The user to make admininstrator
+     */
     public void addAdmin(User newAdmin) {
-        if (this.administrators.contains(newAdmin)) {
+        if (this.administrators.contains(newAdmin) || this.primaryOwner == newAdmin) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "This user is already a registered admin of this business");
         } else {
             this.administrators.add(newAdmin);
+        }
+    }
+
+    /**
+     * Removes an admin from a business
+     * Throws an ResponseStatusException if the user is not an admin of the business
+     * @param oldAdmin the user to revoke administrator
+     */
+    public void removeAdmin(User oldAdmin) {
+        if (!this.administrators.contains(oldAdmin)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The given user is not an admin of this business");
+        } else {
+            this.administrators.remove(oldAdmin);
         }
     }
 
@@ -253,6 +272,27 @@ public class Business {
             business.setPrimaryOwner(this.primaryOwner);
             return business;
         }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == this) {
+            return true;
+        }
+        if (!(o instanceof Business)) {
+            return false;
+        }
+        Business business = (Business) o;
+        return
+                this.id.equals(business.getId()) &&
+                this.name.equals(business.getName()) &&
+                this.description.equals(business.getDescription()) &&
+                this.created.equals(business.getCreated());
+    }
+
+    @Override
+    public int hashCode() {
+        return this.id.intValue();
     }
 
 }

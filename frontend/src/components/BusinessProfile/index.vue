@@ -27,9 +27,14 @@
         <v-col cols="12">
           <h4>Administrators</h4>
           <span v-for="admin in administrators" :key="admin.id">
-            <router-link :to="'/profile/' + admin.id">
-              <v-chip class="link-chip link" color="primary"> {{ admin.firstName }} {{ admin.lastName }} </v-chip>
-            </router-link>
+            <template v-if="typeof admin === 'string'">
+              <v-chip color="error" class="link-chip link"> {{ admin }} </v-chip>
+            </template>
+            <template v-else>
+              <router-link :to="'/profile/' + admin.id">
+                <v-chip class="link-chip link" color="primary"> {{ admin.firstName }} {{ admin.lastName }} </v-chip>
+              </router-link>
+            </template>
           </span>
         </v-col>
       </v-row>
@@ -46,7 +51,14 @@ export default {
 
   data() {
     return {
+      /**
+       * The business that this profile is for.
+       */
       business: {},
+      /**
+       * The admin users for this business.
+       * Also contains strings that represent fetch errors
+       */
       administrators: [],
     };
   },
@@ -57,8 +69,7 @@ export default {
 
     getBusiness(id).then((value) => {
       if (typeof value === 'string') {
-        // TODO Handle error properly
-        console.warn(value);
+        this.$store.commit('setError', value);
       } else {
         this.business = value;
       }
@@ -81,18 +92,8 @@ export default {
   },
 
   watch: {
-    business() {
-      this.administrators = [];
-      for (let id of this.business.administrators || []) {
-        getUser(id).then((value) => {
-          if (typeof value === 'string') {
-            // TODO Handle error properly
-            console.warn(value);
-          } else {
-            this.administrators.push(value);
-          }
-        });
-      }
+    async business() {
+      this.administrators = await Promise.all((this.business.administrators || []).map(id => getUser(id)));
     }
   }
 };
