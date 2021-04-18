@@ -71,7 +71,7 @@
                 </v-col>
                 <v-col cols="6">
                   <v-text-field
-                    v-model="price"
+                    v-model="recommendedRetailPrice"
                     label="Recommended Retail Price"
                     :rules="priceRules"
                     outlined
@@ -120,7 +120,7 @@
 </template>
 
 <script>
-
+import api from '../../api';
 export default {
   name:'CreateProduct',
   data() {
@@ -131,7 +131,7 @@ export default {
       description: '',
       expiryDate: '',
       manufacturer: '',
-      price: '',
+      recommendedRetailPrice: '',
       quantity: '',
       productCode: '',
       valid: false,
@@ -157,9 +157,20 @@ export default {
     };
   },
   methods: {
+    /**
+     * Creates the product by calling the API
+     **/
     createProduct() {
       //TODO merge with backend
-      //this.$router.push('/businesses/1/products');
+      api.CreateProduct({
+        name: this.$data.product,
+        description: this.$data.description,
+        manufacturer: this.$data.manufacturer,
+        expiryDate: this.$data.expiryDate,
+        recommendedRetailPrice: this.$data.recommendedRetailPrice,
+        quantity: this.$data.quantity,
+        productCode: this.$data.productCode
+      });
       this.closeDialog();
     },
     closeDialog() {
