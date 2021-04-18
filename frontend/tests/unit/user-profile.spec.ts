@@ -175,7 +175,8 @@ describe('UserProfile.vue', () => {
   /**
    * Tests that the UserProfile displays the user's businesses.
    */
-  it('User businesses are displayed', () => {
+  it('User businesses are displayed', async () => {
+    await Vue.nextTick();
     expect(wrapper.text()).toContain('test_business_name1');
     expect(wrapper.text()).toContain('test_business_name2');
   });
