@@ -14,6 +14,24 @@
         </h2>
         <p><b>Member Since:</b> {{ createdMsg }}</p>
       </div>
+
+      <!-- List of avaialable actions -->
+      <div class="action-menu">
+        <v-tooltip bottom v-if="canAddUserAsAdmin">
+          <template v-slot:activator="{ on, attrs }">
+            <v-btn
+              icon
+              color="primary"
+              v-bind="attrs"
+              v-on="on"
+            >
+              <v-icon>mdi-account-plus</v-icon>
+            </v-btn>
+          </template>
+          <span> Add adminstrator </span>
+        </v-tooltip>
+      </div>
+
     </div>
 
     <v-container fluid>
@@ -92,6 +110,9 @@ export default {
   },
 
   computed: {
+    canAddUserAsAdmin() {
+      return this.$store.state.activeRole?.type === 'business';
+    },
     createdMsg() {
       if (this.user.created === undefined) return '';
 
@@ -141,6 +162,12 @@ export default {
 .profile-img {
   margin-top: -116px;
   margin-right: 16px;
+}
+
+.action-menu {
+  display: flex;
+  flex: 1;
+  justify-content: flex-end;
 }
 
 .body {
