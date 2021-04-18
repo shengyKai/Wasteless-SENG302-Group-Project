@@ -43,6 +43,7 @@ describe('UserProfile.vue', () => {
         businessesAdministered: [],
       },
       activeRole: null,
+      globalError: null,
       createBusinessDialogShown: false,
     };
     let store = new Vuex.Store(options);

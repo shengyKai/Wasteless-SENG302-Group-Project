@@ -41,7 +41,14 @@
       </v-btn-toggle>
     </v-toolbar>
 
-    <v-alert v-if="error !== undefined" type="error"> {{ error }}</v-alert>
+    <v-alert
+      v-if="error !== undefined"
+      type="error"
+      dismissible
+      @input="error = undefined"
+    >
+      {{ error }}
+    </v-alert>
     <v-list three-line>
       <!--users would produce the results for each page, and then it will show each result with
       SearchResultItem-->
@@ -65,22 +72,54 @@
 
 <script>
 import SearchResultItem from './SearchResultItem';
-import {getSearchCount, search} from '../api';
+import { getSearchCount, search } from '../api';
 import { debounce } from '../utils';
 
 export default {
   name: 'SearchResults',
-  data: function() {
+  data() {
     return {
+      /**
+       * The contents of the search box.
+       */
       searchQuery: this.$route.query.query || '',
+      /**
+       * Current query that is being searched.
+       */
       searchedQuery: undefined,
+      /**
+       * The search response data for this page.
+       */
       users: [],
+      /**
+       * Current error message string.
+       * If undefined then there is no error.
+       */
       error: undefined,
+      /**
+       * Whether to reverse the search order
+       */
       reverse: false,
+      /**
+       * The current search result order
+       */
       orderBy: 'relevance',
+      /**
+       * Currently selected page (1 is first page)
+       */
       currentPage: 1,
+      /**
+       * Number of results per a result page
+       */
       resultsPerPage: 10,
+      /**
+       * Total number of returned results
+       */
       totalResults: 0,
+      /**
+       * Function that is called whenever the "searchQuery" variable is updated.
+       * This function is rate limited to avoid too many queries to the backend.
+       */
       debouncedUpdateQuery: debounce(this.updateQuery, 500),
     };
   },
@@ -112,17 +151,21 @@ export default {
       if (!this.searchQuery) return; // If the current search query is empty, do not search
 
       this.searchedQuery = this.searchQuery;
+      this.currentPage = 1; // Makes sure we start on the first page
+      await this.updateNotQuery();
 
-      await Promise.all([
-        getSearchCount(this.searchQuery).then(count => {
-          if (typeof count === 'string') {
-            this.error = count;
-          } else {
-            this.totalResults = count;
-          }
-        }),
-        await this.updateNotQuery(),
-      ]);
+      // Sets an initial estimate for the total number of results
+      this.totalResults = this.users.length;
+
+      if (this.users.length >= this.resultsPerPage) {
+        // If we have at least a page worth of results, check if we have any more results.
+        let count = await getSearchCount(this.searchQuery);
+        if (typeof count === 'string') {
+          this.error = count;
+        } else {
+          this.totalResults = count;
+        }
+      }
     },
 
     /**
@@ -130,6 +173,8 @@ export default {
      * The page index, results per page, order by and reverse variables notify this function.
      */
     async updateNotQuery() {
+      if (!this.searchedQuery) return; // If the current search query is empty, do not search
+
       const value = await search (
         this.searchedQuery,
         this.currentPage,

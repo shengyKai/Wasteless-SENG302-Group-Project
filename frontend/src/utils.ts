@@ -70,3 +70,12 @@ export function debounce(func: (() => void), wait: number) {
   }
   return debounced;
 }
+
+/**
+ * Checks whether we are executing in the test enviroment
+ *
+ * @returns true if we're testing false otherwise
+ */
+export function isTesting() {
+  return process.env.JEST_WORKER_ID !== undefined;
+}
