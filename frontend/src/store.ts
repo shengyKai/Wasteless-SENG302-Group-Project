@@ -2,11 +2,9 @@ import {User, getUser, Business} from './api';
 import Vuex, { Store, StoreOptions } from 'vuex';
 import { COOKIE, deleteCookie, setCookie } from './utils';
 
-type RoleType = { type: "user", value: User } | { type: "business", value: Business }
-
 export type StoreData = {
   user: User | null,
-  activeRole: RoleType | null,
+  activeRole: { type: "user" | "business", id: number} | null,
   createBusinessDialogShown: boolean,
 };
 
@@ -23,7 +21,8 @@ export function createOptions(): StoreOptions<StoreData> {
 
         // Ensures that when we log in we always have a role.
         // Maybe it will be worth considering in the future persistently remembering the previous role
-        state.activeRole = { type: "user", value: payload };
+        state.activeRole = { type: "user", id: payload.id };
+
         // If the payload contains a user ID, user is now logged in. Set their session cookie.
         if (payload.id) {
           deleteCookie(COOKIE.USER.toUpperCase());
@@ -31,20 +30,9 @@ export function createOptions(): StoreOptions<StoreData> {
           setCookie(COOKIE.USER, payload.id);
         }
       },
-      /**
-       * Sets the current active role.
-       * This is either a business or user.
-       *
-       * @param state Current state
-       * @param payload The new role, may not be null
-       */
-      setActiveRole(state, payload: RoleType) {
-        state.activeRole = payload;
-      },
 
       logoutUser (state) {
         state.user = null;
-        state.activeRole = null;
         deleteCookie(COOKIE.USER);
       },
 
@@ -67,7 +55,7 @@ export function createOptions(): StoreOptions<StoreData> {
       }
     },
     getters: {
-      isLoggedIn(state) {
+      isLoggedIn (state) {
         return state.user !== null;
       },
       role (state) {

@@ -136,35 +136,33 @@ export default {
     }
   },
   watch : {
-    user: {
-      async handler() {
+    user: { async handler() {
       // When the user changes, update the list of roles that the user can 'act as'
-        this.roles = [ { displayText: this.user.firstName, type: "user", value: this.user } ];
-        if (this.user.businessesAdministered === null) return;
+      this.roles = [ { displayText: this.user.firstName, type: "user", id: this.user.id } ];
+      if (this.user.businessesAdministered === null) return;
 
-        const promises = this.user.businessesAdministered.map(id => {
-          return new Promise((resolve, reject) => {
-            getBusiness(id)
-              .then(value => {
-                if (typeof value === 'string') reject(value);
-                else resolve(value);
-              })
-              .catch(err => reject(err));
-          });
+      const promises = this.user.businessesAdministered.map(id => {
+        return new Promise((resolve, reject) => {
+          getBusiness(id)
+            .then(value => {
+              if (typeof value === 'string') reject(value);
+              else resolve(value);
+            })
+            .catch(err => reject(err));
         });
+      });
 
-        const businesses = await Promise.all(promises);
+      const businesses = await Promise.all(promises);
 
-        for (let business of businesses || []) {
-          this.roles.push({ displayText: business.name, type: "business", value: business });
-        }
-      },
-      immediate: true
+      for (let business of businesses || []) {
+        this.roles.push({ displayText: business.name, type: "business", id: business.id });
+      }
     },
+    immediate: true },
     selectedRole() {
       // Set the role that the user is acting as to the role that has been selected from the list
       const role = this.roles[this.selectedRole];
-      this.$store.commit('setActiveRole', { type: role.type, value: role.value });
+      this.$store.state.activeRole = { type: role.type, id: role.id };
     },
   }
 };
