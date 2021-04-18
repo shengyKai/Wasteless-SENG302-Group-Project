@@ -24,6 +24,7 @@
               color="primary"
               v-bind="attrs"
               v-on="on"
+              @click="addUserAsAdmin"
             >
               <v-icon>mdi-account-plus</v-icon>
             </v-btn>
@@ -73,7 +74,7 @@
 </template>
 
 <script>
-import { getBusiness, getUser } from '../api';
+import { getBusiness, getUser, makeBusinessAdmin } from '../api';
 import UserAvatar from './utils/UserAvatar';
 
 export default {
@@ -106,6 +107,18 @@ export default {
           this.user = value;
         }
       });
+    }
+  },
+
+  methods: {
+    async addUserAsAdmin() {
+      const role = this.$store.state.activeRole;
+      if (!this.user || role?.type !== 'business') return;
+      let response = await makeBusinessAdmin(role.id, this.user.id);
+
+      if (typeof response === 'string') {
+        console.error(response);
+      }
     }
   },
 
