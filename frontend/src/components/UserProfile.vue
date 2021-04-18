@@ -17,7 +17,7 @@
 
       <!-- List of avaialable actions -->
       <div class="action-menu">
-        <v-tooltip bottom v-if="canAddUserAsAdmin">
+        <v-tooltip bottom v-if="isActingAsBusiness">
           <template v-slot:activator="{ on, attrs }">
             <v-btn
               icon
@@ -25,6 +25,7 @@
               v-bind="attrs"
               v-on="on"
               @click="addUserAsAdmin"
+              :disabled="isUserAdminOfActiveBusiness === true"
             >
               <v-icon>mdi-account-plus</v-icon>
             </v-btn>
@@ -97,6 +98,12 @@ export default {
        * Also contains strings that are error messages for businesses that failed to be retreived.
        */
       businesses: [],
+
+      /**
+       * Whether this profile's user is an administrator for the current active business.
+       * This variable is undefined if this is not known.
+       */
+      isUserAdminOfActiveBusiness: undefined,
     };
   },
 
@@ -124,19 +131,22 @@ export default {
 
   methods: {
     async addUserAsAdmin() {
-      const role = this.$store.state.activeRole;
+      const role = this.activeRole;
       if (!this.user || role?.type !== 'business') return;
       let response = await makeBusinessAdmin(role.id, this.user.id);
 
       if (typeof response === 'string') {
-        console.error(response);
+        this.$store.commit('setError', response);
       }
     }
   },
 
   computed: {
-    canAddUserAsAdmin() {
-      return this.$store.state.activeRole?.type === 'business';
+    activeRole() {
+      return this.$store.state.activeRole;
+    },
+    isActingAsBusiness() {
+      return this.activeRole?.type === 'business';
     },
     createdMsg() {
       if (this.user.created === undefined) return '';
@@ -160,6 +170,26 @@ export default {
 
       const promises = admins.map(id => getBusiness(id));
       this.businesses = await Promise.all(promises);
+    },
+
+    activeRole: {
+      async handler() {
+        this.isUserAdminOfActiveBusiness = undefined;
+        if (this.activeRole?.type !== 'business') {
+          return;
+        }
+
+        const business = await getBusiness(this.activeRole.id);
+        if (typeof business === 'string') {
+          this.$store.commit('setError', business);
+          return;
+        }
+
+        if (business.administrators === undefined) return;
+
+        this.isUserAdminOfActiveBusiness = business.administrators.map(user => user.id).includes(this.user.id);
+      },
+      immediate: true,
     }
   },
   components: {
