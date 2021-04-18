@@ -11,6 +11,11 @@ import org.seng302.Persistence.UserRepository;
 import org.seng302.Tools.AuthenticationTokenManager;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -42,6 +47,24 @@ public class BusinessController {
     }
 
     /**
+     * Check that the JSON body for the POST endpoint is present and has all the required fields.
+     * @param businessInfo The JSON body of the request sent to the POST businesses endpoint.
+     */
+    private void checkRegisterJson(JSONObject businessInfo) {
+        if (businessInfo == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Request must contain a JSON body");
+        }
+        if (businessInfo.get("primaryAdministratorId") == null ||
+            businessInfo.get("name") == null ||
+            businessInfo.get("description") == null ||
+            businessInfo.get("businessType") == null ||
+            businessInfo.get("address") == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Request body must contain the fields " +
+            "\"primaryAdministratorId\", \"name\", \"description\" and \"businessType\"");
+        }
+    }
+
+    /**
      * POST endpoint for registering a new business.
      * Ensures that the given primary business owner is an existing User.
      * Adds the business to the database if all of the business information is valid.
@@ -63,6 +86,7 @@ public class BusinessController {
                         "You don't have permission to set the provided Primary Owner");
             }
 
+            checkRegisterJson(businessInfo);
             Location address = parseLocation(businessInfo); // Get the address for the business
             // Build the business
             Business newBusiness = new Business.Builder()
@@ -82,6 +106,24 @@ public class BusinessController {
             throw err;
         }
     }
+
+    /**
+     * This method searchs for the business with the given ID in the database. If the business exists, return a JSON representation of the
+     * business. If the business does not exists, send a response with status code 406/Not Acceptable.
+     * @return JSON representation of the business.
+     */
+    @GetMapping("/businesses/{id}")
+    JSONObject getBusinessById(@PathVariable Long id, HttpServletRequest request) {
+        AuthenticationTokenManager.checkAuthenticationToken(request);
+        logger.info(String.format("Retrieving business with ID %d.", id));
+        Optional<Business> business = _businessRepository.findById(id);
+        if (business.isEmpty()) {
+            ResponseStatusException notFoundException = new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, String.format("No business with ID %d.", id));
+            logger.error(notFoundException.getMessage());
+            throw notFoundException;
+        }
+        return business.get().constructJson(true);
+    };
 
 
     /**
@@ -184,7 +226,7 @@ public class BusinessController {
     private boolean loggedInUserIsOwner(HttpServletRequest req, Business business) {
         HttpSession session = req.getSession();
         Long userId = (Long) session.getAttribute("accountId");
-        return userId == business.getPrimaryOwner().getUserID();
+        return userId != null && userId.equals(business.getPrimaryOwner().getUserID());
     }
 
     /**
