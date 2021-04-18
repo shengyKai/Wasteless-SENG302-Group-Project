@@ -8,7 +8,21 @@ import { shallowMount, createLocalVue, Wrapper } from '@vue/test-utils';
 import { createOptions } from '@/store';
 import UserProfile from '@/components/UserProfile.vue';
 
+import * as api from '@/api';
+import { castMock } from './utils';
+import { User } from '@/api';
+
 Vue.use(Vuetify);
+
+jest.mock('@/api', () => ({
+  makeBusinessAdmin: jest.fn(),
+  getBusiness: jest.fn(),
+  getUser: jest.fn(),
+}));
+
+const makeBusinessAdmin = castMock(api.makeBusinessAdmin);
+const getBusiness = castMock(api.getBusiness);
+const getUser = castMock(api.getUser);
 
 const localVue = createLocalVue();
 
@@ -40,7 +54,7 @@ describe('UserProfile.vue', () => {
         homeAddress: "test_home_address",
         created: "1/1/1950",
         role: "user",
-        businessesAdministered: [],
+        businessesAdministered: [1, 2],
       },
       activeRole: null,
       globalError: null,
@@ -55,6 +69,27 @@ describe('UserProfile.vue', () => {
       router,
       vuetify,
       store
+    });
+
+    getBusiness.mockImplementation(async businessId => {
+      return {
+        id: businessId,
+        name: 'test_business_name' + businessId,
+        address: 'test_business_address' + businessId,
+        businessType: 'Accommodation and Food Services',
+        administrators: [await getUser(999) as User],
+      };
+    });
+
+    getUser.mockImplementation(async userId => {
+      return {
+        id: userId === undefined ? -1 : userId,
+        firstName: 'test_firstname' + userId,
+        lastName: 'test_lastname' + userId,
+        email: 'test_email' + userId,
+        dateOfBirth: '1/1/1900',
+        homeAddress: 'test_business_address' + userId,
+      };
     });
   });
 
@@ -127,5 +162,21 @@ describe('UserProfile.vue', () => {
    */
   it('Creation message is in valid format', () => {
     expect(wrapper.vm.createdMsg).toMatch(/[0-9]{1,2} [A-Z][a-z]{2} [0-9]+ \([0-9]+ months ago\)/);
+  });
+
+  /**
+   * Tests that the UserProfile fetches the user's businesses.
+   */
+  it('User businesses are queried', () => {
+    expect(getBusiness).toBeCalledWith(1);
+    expect(getBusiness).toBeCalledWith(2);
+  });
+
+  /**
+   * Tests that the UserProfile displays the user's businesses.
+   */
+  it('User businesses are displayed', () => {
+    expect(wrapper.text()).toContain('test_business_name1');
+    expect(wrapper.text()).toContain('test_business_name2');
   });
 });

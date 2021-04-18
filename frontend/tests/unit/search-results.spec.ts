@@ -5,7 +5,9 @@ import Vuex, { Store } from 'vuex';
 import { createLocalVue, Wrapper, mount } from '@vue/test-utils';
 import SearchResults from '@/components/SearchResults.vue';
 import SearchResultItem from '@/components/SearchResultItem.vue';
-import { search, getSearchCount, User } from '@/api';
+import { User } from '@/api';
+import * as api from '@/api';
+import { castMock, flushQueue } from './utils';
 
 
 
@@ -19,27 +21,8 @@ jest.mock('@/utils', () => ({
   debounce: (func: (() => void)) => func,
 }));
 
-/**
- * Returns a promise to a point where the current event queue is empty.
- *
- * @returns Empty Promise
- */
-function flushQueue() {
-  return new Promise((resolve) => setTimeout(resolve, 0));
-}
-
-/**
- * Reinterprets the input argument as a jest mock.
- *
- * @param func Function that is mocked
- * @returns Input argument interpreted as a jest mock
- */
-function castMock<T, Y extends any[]>(func: (...args: Y) => T) {
-  return <jest.Mock<T, Y>><unknown>func;
-}
-
-const searchMock = castMock(search);
-const getSearchCountMock = castMock(getSearchCount);
+const search = castMock(api.search);
+const getSearchCount = castMock(api.getSearchCount);
 
 Vue.use(Vuetify);
 
@@ -100,8 +83,8 @@ describe('SearchResults.vue', () => {
    * @param testCount The mock number of total users for this search
    */
   function setResults(users: User[], totalCount?: number) {
-    searchMock.mockResolvedValue(users);
-    getSearchCountMock.mockResolvedValue(totalCount !== undefined ? totalCount : users.length);
+    search.mockResolvedValue(users);
+    getSearchCount.mockResolvedValue(totalCount !== undefined ? totalCount : users.length);
   }
 
   /**
@@ -119,7 +102,7 @@ describe('SearchResults.vue', () => {
   it('The search query passed in from the url is searched', () => {
     setResults(createTestUsers(5));
     createWrapper();
-    expect(searchMock).toBeCalledWith('test_query', 1, RESULTS_PER_PAGE, 'relevance', false);
+    expect(search).toBeCalledWith('test_query', 1, RESULTS_PER_PAGE, 'relevance', false);
   });
 
   /**
@@ -146,7 +129,7 @@ describe('SearchResults.vue', () => {
    * Tests that errors are shown
    */
   it('If there is an error then the error should be displayed', async () => {
-    searchMock.mockResolvedValue('test_error');
+    search.mockResolvedValue('test_error');
 
     createWrapper();
 
@@ -159,7 +142,7 @@ describe('SearchResults.vue', () => {
    * Tests that errors are dismissable
    */
   it('If the error is dismissed then the error should disappear', async () => {
-    searchMock.mockResolvedValue('test_error');
+    search.mockResolvedValue('test_error');
 
     createWrapper();
 
@@ -212,7 +195,7 @@ describe('SearchResults.vue', () => {
     const searchBox = wrapper.findComponent({ name: 'v-text-field' });
     await searchBox.findAll('input').at(0).setValue('new_test_query');
 
-    expect(searchMock).lastCalledWith('new_test_query', 1, RESULTS_PER_PAGE, 'relevance', false);
+    expect(search).lastCalledWith('new_test_query', 1, RESULTS_PER_PAGE, 'relevance', false);
   });
 
   /**
