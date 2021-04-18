@@ -219,11 +219,9 @@ public class Business {
      * representations of the users who are administrators of the business, and a JSON representation
      * of the business's address, as well as simple attributes for all the other properties of the
      * business. If fullAdminDetails is true, the JSON will include a full JSON representation for each
-     * admin of the business. If fullAdminDetails is false, the administrators fields will be ["string"].
-     * This is to avoid an infinite loop of construcing a business JSON to go within a user object,
-     * then constructing a user JSON to go within the business object.
-     * @param fullAdminDetails True if a JSON object should be included for each admin, false if a placeholder
-     * array should be used instead.
+     * admin of the business. If fullAdminDetails is false, the administrators field will be excluded, to
+     * avoid issues when nesting this json within the businessesAdministered field of the user json.
+     * @param fullAdminDetails True if administrators should be included in JSON
      * @return A JSON representation of this business.
      */
     public JSONObject constructJson(boolean fullAdminDetails) {
@@ -242,8 +240,8 @@ public class Business {
     }
 
     /**
-     * Override the constructJson method so that by default it does not include full details for the administrators.
-     * @return A JSON representation of the business with a placeholder array ["string"] for the administrators.
+     * Override the constructJson method so that by default it does not includethe administrators.
+     * @return A JSON representation of the business without details of its administrators.
      */
     public JSONObject constructJson() {
         return constructJson(false);
