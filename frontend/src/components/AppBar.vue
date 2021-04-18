@@ -65,12 +65,22 @@
               v-model="selectedRole"
               color="primary"
             >
-              <v-list-item
-                v-for="(role, index) in roles"
-                :key="index"
-              >
-                <v-list-item-title>{{ role.displayText }}</v-list-item-title>
-              </v-list-item>
+              <template v-for="(role, index) in roles">
+                <v-list-item
+                  :key="index"
+                  v-if="typeof role !== 'string'"
+                >
+                  <v-list-item-title>{{ role.displayText }}</v-list-item-title>
+                </v-list-item>
+                <v-list-item
+                  :key="index"
+                  v-else
+                  disabled
+                  color="error"
+                >
+                  {{ role }}
+                </v-list-item>
+              </template>
             </v-list-item-group>
           </v-list>
         </v-menu>
@@ -136,32 +146,35 @@ export default {
     }
   },
   watch : {
-    user: { async handler() {
-      // When the user changes, update the list of roles that the user can 'act as'
-      this.roles = [ { displayText: this.user.firstName, type: "user", id: this.user.id } ];
-      if (this.user.businessesAdministered === null) return;
+    user: {
+      async handler() {
+        // When the user changes, update the list of roles that the user can 'act as'
+        this.roles = [ { displayText: this.user.firstName, type: "user", id: this.user.id } ];
+        if (this.user.businessesAdministered === null) return;
 
-      const promises = this.user.businessesAdministered.map(id => {
-        return new Promise((resolve, reject) => {
-          getBusiness(id)
-            .then(value => {
-              if (typeof value === 'string') reject(value);
-              else resolve(value);
-            })
-            .catch(err => reject(err));
+        // Fetch all administered businesses
+        let businesses = await Promise.all((this.user.businessesAdministered || []).map(id => getBusiness(id)));
+
+        // Convert businesses to roles
+        businesses = businesses.map(business => {
+          if (typeof business === 'string') return business;
+
+          return { displayText: business.name, type: "business", id: business.id };
         });
-      });
 
-      const businesses = await Promise.all(promises);
-
-      for (let business of businesses || []) {
-        this.roles.push({ displayText: business.name, type: "business", id: business.id });
-      }
+        // Add all the business roles
+        this.roles.push(...businesses);
+      },
+      immediate: true
     },
-    immediate: true },
     selectedRole() {
       // Set the role that the user is acting as to the role that has been selected from the list
       const role = this.roles[this.selectedRole];
+
+      // If we've selected an error entry then do nothing
+      if (role.type === 'error') return;
+
+
       this.$store.state.activeRole = { type: role.type, id: role.id };
     },
   }
