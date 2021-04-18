@@ -120,7 +120,7 @@
 </template>
 
 <script>
-import api from '../../api';
+import {createProduct} from '../../api';
 export default {
   name:'CreateProduct',
   data() {
@@ -160,9 +160,9 @@ export default {
     /**
      * Creates the product by calling the API
      **/
-    createProduct() {
+    async createProduct() {
       //TODO merge with backend
-      api.CreateProduct({
+      await createProduct({
         name: this.$data.product,
         description: this.$data.description,
         manufacturer: this.$data.manufacturer,
