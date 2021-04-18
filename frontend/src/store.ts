@@ -67,7 +67,7 @@ export function createOptions(): StoreOptions<StoreData> {
         state.globalError = error;
       },
       /**
-       * Dismisses the current error message that is display.
+       * Dismisses the current error message that is displayed.
        * This function is only expected to be called from the global error message component.
        *
        * @param state Current state
