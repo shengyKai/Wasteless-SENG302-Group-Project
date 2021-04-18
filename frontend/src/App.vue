@@ -12,6 +12,16 @@
 
           <AppBar />
 
+          <!-- Global error message -->
+          <v-alert
+            v-if="$store.state.globalError !== null"
+            type="error"
+            dismissible
+            @input="$store.commit('clearError')"
+          >
+            {{ $store.state.globalError }}
+          </v-alert>
+
           <v-main>
             <div class="container-outer">
               <div class="container-inner">
@@ -24,6 +34,16 @@
 
         <div v-else>
           <v-main>
+            <!-- Global error message -->
+            <v-alert
+              v-if="$store.state.globalError !== null"
+              type="error"
+              dismissible
+              @input="$store.commit('clearError')"
+            >
+              {{ $store.state.globalError }}
+            </v-alert>
+
             <div class="container-outer">
               <div class="container-inner">
                 <!-- All content (except AppBar & Footer) should be a child of 'v-main'. -->
@@ -45,11 +65,11 @@ import AppBar from "./components/AppBar";
 import AppFooter from "./components/AppFooter";
 import CreateBusiness from "./components/BusinessProfile/CreateBusiness";
 
-import createStore from "./store";
+import { getStore } from "./store";
 import router from "./plugins/vue-router";
 import { COOKIE, getCookie } from './utils';
 
-const store = createStore();
+const store = getStore();
 
 // Vue app instance
 // it is declared as a reusable component in this case.
@@ -75,6 +95,10 @@ export default {
       this.loading = false;
       if (this.$route.path !== '/login') this.$router.push('/login');
     }
+    this.$router.afterEach(() => {
+      // After changing pages clear the global error message
+      this.$store.commit('clearError');
+    });
   },
   store,
   router,
