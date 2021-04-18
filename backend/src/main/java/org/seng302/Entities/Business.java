@@ -233,8 +233,6 @@ public class Business {
         attributeMap.put("description", description);
         if (fullAdminDetails) {
             attributeMap.put("administrators", constructAdminJsonArray());
-        } else {
-            attributeMap.put("administrators", new String[] {"string"});
         }
         attributeMap.put("primaryAdministratorId", primaryOwner.getUserID());
         attributeMap.put("address", getAddress().constructFullJson());
@@ -253,7 +251,8 @@ public class Business {
 
     /**
      * This method gets the public JSON representation of each User who is an admin of this Business
-     *  and adds it to a JSONArray. The JSONs in the array are ordered by the id number of the user.
+     *  and adds it to a JSONArray. The JSONs in the array are ordered by the id number of the user
+     *  to ensure consistency between subsequent requests.
      * @return A JSONArray containing JSON respresentations of all admins of this business.
      */
     private JSONArray constructAdminJsonArray() {

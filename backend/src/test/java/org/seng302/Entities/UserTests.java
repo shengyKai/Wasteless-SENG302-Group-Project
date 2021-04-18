@@ -599,7 +599,7 @@ public class UserTests {
     @Test
     public void constructPublicJsonPublicAttributesPresentTest() {
         testUser.setUserID(1L);
-        JSONObject json = testUser.constructPublicJson();
+        JSONObject json = testUser.constructPublicJson(true);
         assertTrue(json.containsKey("id"));
         assertTrue(json.containsKey("firstName"));
         assertTrue(json.containsKey("middleName"));
@@ -795,28 +795,28 @@ public class UserTests {
         assertEquals(expectedBusinessString, json.getAsString("businessesAdministered"));
     }
 
-        /**
+    /**
      * Test that when constructPublicJson is called with 'false' as its arguement, and the list of 
-     * businesses administered by the user is not empty, the 'businessesAdministered' field of the 
-     * resulting json will contain the placeholder array '["string"]'
+     * businesses administered by the user is not empty, the resulting json wil not contain the businessesAdministered
+     * field.
      */
     @Test
     public void constructPublicJsonBusinessesAdministeredFalseTest() {
         addBusinessesAdministeredToTestUser();
         JSONObject json = testUser.constructPublicJson(false);
-        assertArrayEquals(new String[] {"string"}, (String[]) json.get("businessesAdministered"));
+        assertNull(json.get("businessesAdministered"));
     }
 
-        /**
+    /**
      * Test that when constructPublicJson is called with no arguement, and the list of 
-     * businesses administered by the user is not empty, the 'businessesAdministered' field of the 
-     * resulting json will have placeholder array '["string"]'
+     * businesses administered by the user is not empty, the 'businessesAdministered' field will not be present
+     * in the resulting JSON.
      */
     @Test
     public void constructPublicJsonBusinessesAdministeredNullTest() {
         addBusinessesAdministeredToTestUser();
         JSONObject json = testUser.constructPublicJson();
-        assertArrayEquals(new String[] {"string"}, (String[]) json.get("businessesAdministered"));
+        assertNull(json.get("businessesAdministered"));
     }
 
     /**
@@ -840,28 +840,28 @@ public class UserTests {
         assertEquals(expectedBusinessString, json.getAsString("businessesAdministered"));
     }
 
-        /**
+    /**
      * Test that when constructPrivateJson is called with 'false' as its arguement, and the list of 
-     * businesses administered by the user is not empty, the 'businessesAdministered' field of the 
-     * resulting json will contain the placeholder array '["string"]'
+     * businesses administered by the user is not empty, the resulting json will not include the
+     * businessesAdministered field.
      */
     @Test
     public void constructPrivateJsonBusinessesAdministeredFalseTest() {
         addBusinessesAdministeredToTestUser();
         JSONObject json = testUser.constructPrivateJson(false);
-        assertArrayEquals(new String[] {"string"}, (String[]) json.get("businessesAdministered"));
+        assertNull(json.get("businessesAdministered"));
     }
 
-        /**
+    /**
      * Test that when constructPrivateJson is called with no arguement, and the list of 
-     * businesses administered by the user is not empty, the 'businessesAdministered' field of the 
-     * resulting json will have placeholder array '["string"]'
+     * businesses administered by the user is not empty, the resulting json will not contain the businessesAdministered
+     * field.
      */
     @Test
     public void constructPrivateJsonBusinessesAdministeredNullTest() {
         addBusinessesAdministeredToTestUser();
         JSONObject json = testUser.constructPrivateJson();
-        assertArrayEquals(new String[] {"string"}, (String[]) json.get("businessesAdministered"));
+        assertNull(json.get("businessesAdministered"));
     }
 
     /**

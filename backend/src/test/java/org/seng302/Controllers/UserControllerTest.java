@@ -37,7 +37,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @AutoConfigureMockMvc
-public class UsersControllerTest {
+public class UserControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -375,7 +375,6 @@ public class UsersControllerTest {
         List<User> userList = readUsersFromTestFile("src//test//testFiles//UsersControllerTestData.csv");
         userRepository.deleteAll();
         for (User user : userList) {
-            System.out.println(user.toString());
             userRepository.save(user);
         }
 
@@ -440,7 +439,6 @@ public class UsersControllerTest {
         for (int i = 0; i < jsonObjectList.size(); i++) {
             JSONObject userJSON = jsonObjectList.get(i);
             User user = userList.get(i);
-            System.out.println(userJSON.getAsString("password"));
             mockMvc.perform( MockMvcRequestBuilders
                     .post("/users")
                     .content(userJSON.toString())
@@ -464,7 +462,6 @@ public class UsersControllerTest {
         for (int i = 0; i < jsonObjectList.size(); i++) {
             JSONObject userJSON = jsonObjectList.get(i);
             User user = userList.get(i);
-            System.out.println(userJSON.getAsString("password"));
             mockMvc.perform( MockMvcRequestBuilders
                     .post("/users")
                     .content(userJSON.toString())
@@ -784,8 +781,6 @@ public class UsersControllerTest {
     @Test
     public void UserCanSeeOwnPrivateDetails() throws Exception {
         User user = userRepository.findByEmail("johnsmith99@gmail.com");
-        System.out.println(user.getUserID());
-        System.out.println(user.constructPrivateJson());
         setUpSessionAccountId(user.getUserID());
 
         // perform

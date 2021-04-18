@@ -62,6 +62,8 @@ public class BusinessControllerTest {
      */
     @BeforeEach
     public void setUp() throws ParseException, IOException {
+        businessRepository.deleteAll();
+        userRepository.deleteAll();
         setUpAuthCode();
         setUpTestUser();
         setUpTestBusiness();
@@ -150,8 +152,6 @@ public class BusinessControllerTest {
         otherUser = new User.Builder().withFirstName("William").withLastName("Pomeroy").withNickName("Will")
                 .withEmail("pomeroy.will@outlook.com").withPassword("569277hghrud").withDob("1981-03-11")
                 .withPhoneNumber("+64 21 099 5786").withAddress(Location.covertAddressStringToLocation("99,Riccarton Road,Christchurch,Canterbury,New Zealand,4041")).build();
-        businessRepository.deleteAll();
-        userRepository.deleteAll();
         owner = userRepository.save(owner);
         admin = userRepository.save(admin);
         otherUser = userRepository.save(otherUser);
@@ -350,6 +350,46 @@ public class BusinessControllerTest {
     }
 
     /**
+     * Test that when a PUT business request is made with an empty body, a response with status code 400
+     * is returned and no business is added to the database.
+     */
+    @Test
+    public void registerBusinessNoBodyTest() throws Exception {
+        setCurrentUser(owner.getUserID());
+        mockMvc.perform(MockMvcRequestBuilders.post("/businesses")
+                .sessionAttrs(sessionAuthToken)
+                .cookie(authCookie)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
+    }
+
+    /**
+     * Test that when a PUT business request is made with a body missing one of the required fields, a response with
+     * status code 400 is returned and no business is added to the database.
+     */
+    @Test
+    public void registerBusinessInvalidBodyTest() throws Exception {
+        String businessJsonString =
+                String.format("{\n" +
+                        "  \"primaryAdministratorId\": %s,\n" +
+                        "  \"name\": \"Lumbridge General Store\",\n" +
+                        "  \"description\": \"A one-stop shop for all your adventuring needs\",\n" +
+                        "  \"businessType\": \"Accommodation and Food Services\"\n" +
+                        "}", owner.getUserID());
+        setCurrentUser(owner.getUserID());
+        JSONObject businessJson = (JSONObject) new JSONParser(JSONParser.MODE_JSON_SIMPLE).parse(businessJsonString);
+        mockMvc.perform(MockMvcRequestBuilders
+                .post("/businesses")
+                .content(businessJson.toJSONString())
+                .sessionAttrs(sessionAuthToken)
+                .cookie(authCookie)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
+    }
+
+    /**
      * Test that when a request is made to the GET business endpoint from a user who
      * is not logged in, the response has a 401 status code and an empty body.
      */
@@ -357,7 +397,6 @@ public class BusinessControllerTest {
     public void getBusinessByIdUnauthorizedTest() throws Exception {
         MvcResult result = mockMvc.perform(get(String.format("/businesses/%d", testBusiness.getId() + 1)))
         .andExpect(status().isUnauthorized()).andReturn();
-        System.out.println(result.getResponse().getContentAsString());
         assertTrue(result.getResponse().getContentAsString().isEmpty());
     }
 
@@ -372,7 +411,6 @@ public class BusinessControllerTest {
         setCurrentUser(owner.getUserID());
         MvcResult result = mockMvc.perform(get(String.format("/businesses/%d", testBusiness.getId() + 1))
                 .sessionAttrs(sessionAuthToken).cookie(authCookie)).andExpect(status().isNotAcceptable()).andReturn();
-        System.out.println(result.getResponse().getContentAsString());
         assertTrue(result.getResponse().getContentAsString().isEmpty());
     }
 

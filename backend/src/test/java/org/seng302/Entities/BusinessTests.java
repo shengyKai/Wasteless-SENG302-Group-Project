@@ -187,7 +187,6 @@ public class BusinessTests {
             testBusiness2 = businessRepository.save(testBusiness2);
         }, "Expected Business.builder() to throw, but it didn't" );
 
-        System.out.print(thrown);
         assertTrue(thrown.getMessage().contains("User is not of minimum age required to create a business"));
     }
 
@@ -206,32 +205,72 @@ public class BusinessTests {
 
     /**
      * Test that the JSONObject returned by constructJson contains the fields id, primaryAdministratorId,
-     * name, description, businessType, created, administraters and address whether constructJson is
-     * called with true, false or no argument.
+     * name, description, businessType, created, administrators and address when constructJson is
+     * called with true as its arguement.
      */
     @Test
-    public void constructJsonHasExpectedFieldsTest() {
-       List<JSONObject> testJsons = getTestJsons(testBusiness1);
-       for (JSONObject json : testJsons) {
-           assertTrue(json.containsKey("name"));
-           assertTrue(json.containsKey("description"));
-           assertTrue(json.containsKey("businessType"));
-           assertTrue(json.containsKey("address"));
-           assertTrue(json.containsKey("id"));
-           assertTrue(json.containsKey("primaryAdministratorId"));
-           assertTrue(json.containsKey("administrators"));
-           assertTrue(json.containsKey("created"));
-       }
+    public void constructJsonHasExpectedFieldsFullDetailsTrueTest() {
+       JSONObject json = testBusiness1.constructJson(true);
+       assertTrue(json.containsKey("name"));
+       assertTrue(json.containsKey("description"));
+       assertTrue(json.containsKey("businessType"));
+       assertTrue(json.containsKey("address"));
+       assertTrue(json.containsKey("id"));
+       assertTrue(json.containsKey("primaryAdministratorId"));
+       assertTrue(json.containsKey("administrators"));
+       assertTrue(json.containsKey("created"));
+    }
+
+    /**
+     * Test that the JSONObject returned by constructJson contains the fields id, primaryAdministratorId,
+     * name, description, businessType, created and address when constructJson is
+     * called with false or no argument.
+     */
+    @Test
+    public void constructJsonHasExpectedFieldsFullDetailsFalseTest() {
+        List<JSONObject> testJsons = new ArrayList<>();
+        testJsons.add(testBusiness1.constructJson(false));
+        testJsons.add(testBusiness1.constructJson());
+        for (JSONObject json : testJsons) {
+            assertTrue(json.containsKey("name"));
+            assertTrue(json.containsKey("description"));
+            assertTrue(json.containsKey("businessType"));
+            assertTrue(json.containsKey("address"));
+            assertTrue(json.containsKey("id"));
+            assertTrue(json.containsKey("primaryAdministratorId"));
+            assertTrue(json.containsKey("created"));
+        }
     }
 
     /**
      * Test that the JSONObject returned by contructJson does not contain any fields other than
      * id, primaryAdministratorId, name, description, businessType, created, administraters and address,
-     * whether constructJson is called with true, false or no argument.
+     * whether constructJson is called with true as its argument.
      */
     @Test
-    public void constructJsonDoesntHaveUnexpectedFieldsTest() {
-        List<JSONObject> testJsons = getTestJsons(testBusiness1);
+    public void constructJsonDoesntHaveUnexpectedFieldsFullDetailsTrueTest() {
+        JSONObject json = testBusiness1.constructJson(true);
+        json.remove("name");
+        json.remove("description");
+        json.remove("businessType");
+        json.remove("address");
+        json.remove("id");
+        json.remove("primaryAdministratorId");
+        json.remove("administrators");
+        json.remove("created");
+        assertTrue(json.isEmpty());
+    }
+
+    /**
+     * Test that the JSONObject returned by contructJson does not contain any fields other than
+     * id, primaryAdministratorId, name, description, businessType, created and address,
+     * whether constructJson is called with false or no argument.
+     */
+    @Test
+    public void constructJsonDoesntHaveUnexpectedFieldsFullDetailsFalseTest() {
+        List<JSONObject> testJsons = new ArrayList<>();
+        testJsons.add(testBusiness1.constructJson(false));
+        testJsons.add(testBusiness1.constructJson());
         for (JSONObject json : testJsons) {
             json.remove("name");
             json.remove("description");
@@ -239,7 +278,6 @@ public class BusinessTests {
             json.remove("address");
             json.remove("id");
             json.remove("primaryAdministratorId");
-            json.remove("administrators");
             json.remove("created");
             assertTrue(json.isEmpty());
         }
@@ -283,20 +321,6 @@ public class BusinessTests {
         String expectedAdminString = expectedAdminArray.toJSONString();
         JSONObject testJson = testBusiness1.constructJson(true);
         assertEquals(expectedAdminString, testJson.getAsString("administrators"));
-    }
-
-    /**
-     * Test that when constructJson is called with false as its argument or with no argument, the
-     * administrators field constains the placeholder array ["string"].
-     */
-    @Test
-    public void constructJsonAdministratorsPlaceholderArrayTest() {
-        testBusiness1.addAdmin(testUser2);
-        assertEquals(2, testBusiness1.getOwnerAndAdministrators().size());
-        JSONObject falseJson = testBusiness1.constructJson(false);
-        assertArrayEquals(new String[] {"string"}, (String[]) falseJson.get("administrators"));
-        JSONObject noArgJson = testBusiness1.constructJson();
-        assertArrayEquals(new String[] {"string"}, (String[]) noArgJson.get("administrators"));
     }
 
     /**

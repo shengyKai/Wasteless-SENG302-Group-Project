@@ -361,8 +361,6 @@ public class User extends Account {
         attributeMap.put("homeAddress", getAddress().constructPartialJson());
         if (fullBusinessDetails) {
             attributeMap.put("businessesAdministered", constructBusinessJsonArray());
-        } else {
-            attributeMap.put("businessesAdministered", new String[] {"string"});
         }
         return new JSONObject(attributeMap);
     }
@@ -403,8 +401,8 @@ public class User extends Account {
     }
 
     /**
-     * Construct an array of JSON objects representing the businesses the user administers. The
-     * "administrators" field of the JSON object is replaced by ["string"].
+     * Construct an array of JSON objects representing the businesses the user administers. The JSONs in the array
+     * are sorted by the id number of the business to ensure consistency between subsequent requests.
      * @return An array of JSON representations of the businesses the user administers.
      */
     public JSONArray constructBusinessJsonArray() {
