@@ -31,7 +31,7 @@
                     outlined
                   />
                 </v-col>
-                <v-col>
+                <v-col cols="6">
                   <v-text-field
                     v-model="manufacturer"
                     label="Manufacturer"
@@ -39,11 +39,58 @@
                     outlined
                   />
                 </v-col>
-                <v-col>
+                <v-col cols="6">
+                  <v-menu
+                    v-model="dateMenu"
+                    :close-on-content-click="false"
+                    transition="scale-transition"
+                    nudge-right="40"
+                    offset-y
+                    min-width="auto"
+                  >
+                    <template v-slot:activator="{ on, attrs }">
+                      <v-text-field
+                        v-model="expiryDate"
+                        label="Expiry Date"
+                        prepend-icon="mdi-calendar"
+                        readonly
+                        v-bind="attrs"
+                        v-on="on"
+                        outlined
+                      />
+                    </template>
+                    <v-date-picker
+                      v-model="expiryDate"
+                      :allowed-dates="allowedDates"
+                      show-current
+                      no-title
+                      scrollable
+                      @input="dateMenu=false"
+                    />
+                  </v-menu>
+                </v-col>
+                <v-col cols="6">
                   <v-text-field
                     v-model="price"
                     label="Recommended Retail Price"
                     :rules="priceRules"
+                    outlined
+                  />
+                </v-col>
+                <v-col cols="6">
+                  <v-text-field
+                    v-model="quantity"
+                    label="Quantity"
+                    type="number"
+                    :rules="quantityRules"
+                    single-line
+                    outlined
+                  />
+                </v-col>
+                <v-col>
+                  <v-text-field
+                    v-model="productCode"
+                    label="Short-hand Product Code"
                     outlined
                   />
                 </v-col>
@@ -79,10 +126,14 @@ export default {
   data() {
     return {
       dialog: true,
+      dateMenu: false,
       product: '',
       description: '',
+      expiryDate: '',
       manufacturer: '',
       price: '',
+      quantity: '',
+      productCode: '',
       valid: false,
       maxCharRules: [
         field => (field.length <= 100) || 'Reached max character limit: 100'
@@ -98,6 +149,10 @@ export default {
       priceRules: [
         //A price must be numbers and may contain a decimal followed by exactly two numbers
         field => /(^\d{1,5}(\.\d{2})?$)|^$/.test(field) || 'Must be a valid price'
+      ],
+      quantityRules: [
+        field => field >= 0 || 'Must be a positive number',
+        field => field <= 100000 || 'Must not be too large'
       ]
     };
   },
@@ -109,8 +164,14 @@ export default {
     },
     closeDialog() {
       this.$emit('closeDialog');
-    }
-  }
+    },
+    /**
+     * Accepts only dates in the future
+     * @param val
+     * @returns {boolean}
+     */
+    allowedDates: val => new Date(val) > new Date(),
+  },
 };
 </script>
 
