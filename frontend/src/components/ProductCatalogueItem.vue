@@ -2,19 +2,19 @@
   <v-card>
     <v-container fluid>
       <v-row>
-        <v-col md="3" sm="12">
+        <v-col cols="auto" md="3" sm="12">
           <!-- feed the productImages into the carousel child component -->
           <ProductImageCarousel :productImages="productImages"/>
         </v-col>
-        <v-col md="9" sm="12">
+        <v-col>
           <v-row>
-            <v-col class="pa-0" md="11" sm="10">
+            <v-col class="auto pa-0" md="11" sm="10">
               <v-card-title>
                 <!-- shows product name -->
                 {{ productName }}
               </v-card-title>
             </v-col>
-            <v-col md="1" sm="2">
+            <v-col cols="auto" md="1" sm="2">
               <v-card-actions>
                 <!-- shows the edit button for editing product details, which supposedly links to a form -->
                 <a @click="editProductDetails">Edit</a>
@@ -22,7 +22,7 @@
             </v-col>
           </v-row>
           <v-row>
-            <v-col md="9" sm="10">
+            <v-col cols="auto" md="9" sm="12">
               <v-row>
                 <!-- if the description length is more than or equal to 50, the "Read more..." link will appear which will lead the
                 user to the FullProductDescription component  -->
@@ -64,7 +64,7 @@
                 </v-card-text>
               </v-row>
             </v-col>
-            <v-col md="3" sm="2">
+            <v-col cols="auto" md="3" sm="12">
               <v-row>
                 <!-- shows the product price -->
                 <v-card-text>
@@ -111,39 +111,39 @@ export default {
       //The image MUST be labelled with the key "src" in order to be able to show in component
       productImages: [
         //commented out the images below for the moment, so that if you would like to test out the carousel, just uncomment it
-        // {
-        //   src: "https://cdn.vuetifyjs.com/images/carousel/squirrel.jpg",
-        // },
-        // {
-        //   src: "https://cdn.vuetifyjs.com/images/carousel/sky.jpg",
-        // },
-        // {
-        //   src: "https://cdn.vuetifyjs.com/images/carousel/bird.jpg",
-        // },
-        // {
-        //   src: "https://cdn.vuetifyjs.com/images/carousel/planet.jpg",
-        // },
+        {
+          src: "https://cdn.vuetifyjs.com/images/carousel/squirrel.jpg",
+        },
+        {
+          src: "https://cdn.vuetifyjs.com/images/carousel/sky.jpg",
+        },
+        {
+          src: "https://cdn.vuetifyjs.com/images/carousel/bird.jpg",
+        },
+        {
+          src: "https://cdn.vuetifyjs.com/images/carousel/planet.jpg",
+        },
       ],
       //The bottom 8 variables will all be shown as text/numbers in the component.
-      productName: "",
-      productDescription: "",
-      productDateAdded: "",
-      productExpiryDate: "",
-      productManufacturer: "",
-      productRRP: null,
-      productQuantity: null,
-      productCode: "",
+      // productName: "",
+      // productDescription: "",
+      // productDateAdded: "",
+      // productExpiryDate: "",
+      // productManufacturer: "",
+      // productRRP: null,
+      // productQuantity: null,
+      // productCode: "",
 
       // try uncommenting the bottom variables to test out how it looks.
-      // productName: "Some Product",
-      // productDescription:
-      //   "Some super long description Some super long description Some super long description Some super long description",
-      // productDateAdded: "Some Date Added",
-      // productExpiryDate: "Some Expired Date",
-      // productManufacturer: "Some Manufacturer",
-      // productRRP: 100,
-      // productQuantity: 5,
-      // productCode: "Some Code",
+      productName: "Some Product",
+      productDescription:
+        "Some super long description Some super long description Some super long description Some super long description",
+      productDateAdded: "Some Date Added",
+      productExpiryDate: "Some Expired Date",
+      productManufacturer: "Some Manufacturer",
+      productRRP: 100,
+      productQuantity: 5,
+      productCode: "Some Code",
 
       //If readMoreActivated is false, the product description is less than 50 words, so it wont have to use the FullProductDescription
       //component. Else it will use it and the "Read more..." link will also be shown to lead to the FullProductDescription component

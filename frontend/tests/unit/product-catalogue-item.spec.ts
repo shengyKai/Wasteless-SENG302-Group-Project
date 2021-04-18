@@ -1,8 +1,13 @@
+//!!!NOTICE!!!
+//ProductImageCarousel will not be tested yet because its part of another task for future stories. 
+//Decided not to test it for now because whoever that is going to do that task in the future may want 
+//to redo some details if they desire. If you are doing that task, please refer to ProductCatalogueItem
+//and ProductImageCarousel for more details.
 import Vue from 'vue';
 import Vuetify from 'vuetify';
 import { createLocalVue, mount, Wrapper } from '@vue/test-utils';
 import ProductCatalogueItem from '@/components/ProductCatalogueItem.vue';
-import ProductImageCarousel from "@/components/utils/ProductImageCarousel.vue";
+// import ProductImageCarousel from "@/components/utils/ProductImageCarousel.vue";
 import FullProductDescription from "@/components/utils/FullProductDescription.vue";
 
 Vue.use(Vuetify);
@@ -26,26 +31,18 @@ describe('ProductCatalogueItem.vue', () => {
       localVue,
       vuetify,
       components: {
-        ProductImageCarousel,
+        //ProductImageCarousel will not be tested yet because its part of another task.
+        // ProductImageCarousel,
         FullProductDescription
+      },
+      stubs: {
+        //stub ProductImageCarousel because its not related to this test for now.
+        //remove stub if testing ProductCatalogueItem as a whole
+        ProductImageCarousel: true
       },
       //Sets up each test case with some values to ensure the Product Catalogue item component works as intended
       data() {
         return {
-          productImages: [
-            {
-              src: "https://cdn.vuetifyjs.com/images/carousel/squirrel.jpg",
-            },
-            {
-              src: "https://cdn.vuetifyjs.com/images/carousel/sky.jpg",
-            },
-            {
-              src: "https://cdn.vuetifyjs.com/images/carousel/bird.jpg",
-            },
-            {
-              src: "https://cdn.vuetifyjs.com/images/carousel/planet.jpg",
-            }
-          ],
           productName: "Some Product",
           productDescription: "Some description",
           productDateAdded: "Some Date Added",
