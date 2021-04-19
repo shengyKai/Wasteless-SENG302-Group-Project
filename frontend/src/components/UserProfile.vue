@@ -146,6 +146,12 @@ export default {
     isActingAsBusiness() {
       return this.activeRole?.type === 'business';
     },
+    isUserAdminOfActiveBusiness() {
+      if (!this.isActingAsBusiness) return undefined;
+      if (this.user === undefined) return undefined;
+
+      return this.user.businessesAdministered.includes(this.activeRole.id);
+    },
     createdMsg() {
       if (this.user.created === undefined) return '';
 
@@ -158,12 +164,6 @@ export default {
 
       return `${parts[2]} ${parts[1]} ${parts[3]} (${diffMonths} months ago)`;
     },
-    isUserAdminOfActiveBusiness() {
-      if (this.activeRole?.type !== 'business') return undefined;
-      if (this.user === undefined) return undefined;
-
-      return this.user.businessesAdministered.includes(this.activeRole.id);
-    }
   },
   watch: {
     async user() {
