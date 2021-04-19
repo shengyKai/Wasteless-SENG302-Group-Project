@@ -73,7 +73,7 @@ describe('UserProfile.vue', () => {
         name: 'test_business_name' + businessId,
         address: 'test_business_address' + businessId,
         businessType: 'Accommodation and Food Services',
-        administrators: [await getUser(999) as User],
+        administrators: [await getUser(businessId) as User],
       };
     });
 
@@ -89,10 +89,10 @@ describe('UserProfile.vue', () => {
     });
   });
 
-  function actAsBusiness() {
+  function actAsBusiness(businessId: number) {
     store.state.activeRole = {
       type: 'business',
-      id: 10,
+      id: businessId,
     };
   }
 
@@ -189,7 +189,7 @@ describe('UserProfile.vue', () => {
    * "add admin" button.
    */
   it('If acting as a business then there should be a add admin button', async () => {
-    actAsBusiness();
+    actAsBusiness(10);
 
     await Vue.nextTick();
 
@@ -212,7 +212,7 @@ describe('UserProfile.vue', () => {
    * "add admin" button should be enabled.
    */
   it('If not an administrator of the active business then the "add admin" button should be enabled', async () => {
-    actAsBusiness();
+    actAsBusiness(10);
 
     await flushQueue();
 
@@ -225,9 +225,7 @@ describe('UserProfile.vue', () => {
    * current business
    */
   it('If already an administrator of the active business then the "add admin" button should be disabled', async () => {
-    actAsBusiness();
-    // Sets the current user to an administrator of the current active business
-    (store.state.user as User).id = 999;
+    actAsBusiness(1); // Business 1 has an administrator with userId = 1
 
     await flushQueue();
 
@@ -239,7 +237,7 @@ describe('UserProfile.vue', () => {
    * Tests the case where making a user an administrator of the current business succeeds.
    */
   it('If the "add admin" button is clicked then the "makeBusinessAdmin" function should be called', async () => {
-    actAsBusiness();
+    actAsBusiness(10);
 
     await flushQueue();
 
@@ -259,7 +257,7 @@ describe('UserProfile.vue', () => {
    * Tests the case where making a user an administrator of the current business fails.
    */
   it('If "makeBusinessAdmin" function results in an error then this error should be shown', async () => {
-    actAsBusiness();
+    actAsBusiness(10);
 
     await flushQueue();
 
@@ -279,7 +277,7 @@ describe('UserProfile.vue', () => {
    * Tests that when the user is made an administrator then the add admin button is disabled.
    */
   it('If the user is made an admin then the "add admin" button should be disabled', async () => {
-    actAsBusiness();
+    actAsBusiness(10);
 
     await flushQueue();
 

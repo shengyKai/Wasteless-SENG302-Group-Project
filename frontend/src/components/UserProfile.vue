@@ -99,12 +99,6 @@ export default {
        * Also contains strings that are error messages for businesses that failed to be retreived.
        */
       businesses: [],
-
-      /**
-       * Whether this profile's user is an administrator for the current active business.
-       * This variable is undefined if this is not known.
-       */
-      isUserAdminOfActiveBusiness: undefined,
     };
   },
 
@@ -140,8 +134,8 @@ export default {
         this.$store.commit('setError', response);
         return;
       }
-
-      this.isUserAdminOfActiveBusiness = true;
+      // I alternatively we could query the user to see if it actually updated, but this should work.
+      this.user.businessesAdministered.push(role.id);
     }
   },
 
@@ -163,6 +157,12 @@ export default {
       const diffMonths = Math.ceil(diffTime / (1000 * 60 * 60 * 24 * 30));
 
       return `${parts[2]} ${parts[1]} ${parts[3]} (${diffMonths} months ago)`;
+    },
+    isUserAdminOfActiveBusiness() {
+      if (this.activeRole?.type !== 'business') return undefined;
+      if (this.user === undefined) return undefined;
+
+      return this.user.businessesAdministered.includes(this.activeRole.id);
     }
   },
   watch: {
@@ -175,26 +175,6 @@ export default {
       const promises = admins.map(id => getBusiness(id));
       this.businesses = await Promise.all(promises);
     },
-
-    activeRole: {
-      async handler() {
-        this.isUserAdminOfActiveBusiness = undefined;
-        if (this.activeRole?.type !== 'business') {
-          return;
-        }
-
-        const business = await getBusiness(this.activeRole.id);
-        if (typeof business === 'string') {
-          this.$store.commit('setError', business);
-          return;
-        }
-
-        if (business.administrators === undefined) return;
-
-        this.isUserAdminOfActiveBusiness = business.administrators.map(user => user.id).includes(this.user.id);
-      },
-      immediate: true,
-    }
   },
   components: {
     UserAvatar,
