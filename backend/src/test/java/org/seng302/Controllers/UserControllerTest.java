@@ -37,7 +37,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @AutoConfigureMockMvc
-public class UsersControllerTest {
+public class UserControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -107,7 +107,7 @@ public class UsersControllerTest {
                 .withEmail("johnsmith99@gmail.com")
                 .withPassword("1337-H%nt3r2")
                 .withBio("Likes long walks on the beach")
-                .withDob("2021-03-11")
+                .withDob("2001-03-11")
                 .withPhoneNumber("+64 3 555 0129")
                 .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Christchurch,New Zealand," +
                         "Canterbury,8041"))
@@ -375,7 +375,6 @@ public class UsersControllerTest {
         List<User> userList = readUsersFromTestFile("src//test//testFiles//UsersControllerTestData.csv");
         userRepository.deleteAll();
         for (User user : userList) {
-            System.out.println(user.toString());
             userRepository.save(user);
         }
 
@@ -440,7 +439,6 @@ public class UsersControllerTest {
         for (int i = 0; i < jsonObjectList.size(); i++) {
             JSONObject userJSON = jsonObjectList.get(i);
             User user = userList.get(i);
-            System.out.println(userJSON.getAsString("password"));
             mockMvc.perform( MockMvcRequestBuilders
                     .post("/users")
                     .content(userJSON.toString())
@@ -464,7 +462,6 @@ public class UsersControllerTest {
         for (int i = 0; i < jsonObjectList.size(); i++) {
             JSONObject userJSON = jsonObjectList.get(i);
             User user = userList.get(i);
-            System.out.println(userJSON.getAsString("password"));
             mockMvc.perform( MockMvcRequestBuilders
                     .post("/users")
                     .content(userJSON.toString())

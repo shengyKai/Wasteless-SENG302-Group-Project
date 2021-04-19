@@ -4,11 +4,14 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import net.minidev.json.JSONObject;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.persistence.*;
 import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import java.util.List;
 
 @Data // generate setters and getters for all fields (lombok pre-processor)
@@ -280,6 +283,38 @@ public class Location {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "The post code must be a letter or number, be " +
                     "less than 10 characters long, and at least one character long.");
         }
+    }
+
+    /**
+     * Construct a JSON representation of this Location object which includes its id street number,
+     * street name, city, region and postcode. This method should be used in situations where is it appropriate
+     * to reveal the entire address, such as for a business's address.
+     * @return JSON representation of this Location object
+     */
+    public JSONObject constructFullJson() {
+        Map<String, String> attributeMap = new HashMap<>();
+        attributeMap.put("streetNumber", streetNumber);
+        attributeMap.put("streetName", streetName);
+        attributeMap.put("city", city);
+        attributeMap.put("region", region);
+        attributeMap.put("country", country);
+        attributeMap.put("postcode", postCode);
+        return new JSONObject(attributeMap);
+    }
+
+    /**
+     * Construct a JSON representation of this Location object which includes its city, region and postcode.
+     * This method should be used in situations where it is not appropriate to reveal the entire address,
+     * such as a user who is not an admin viewing another user's details.
+     * @return JSON representation of this Location object
+     */
+    public JSONObject constructPartialJson() {
+        Map<String, String> attributeMap = new HashMap<>();
+
+        attributeMap.put("city", city);
+        attributeMap.put("region", region);
+        attributeMap.put("country", country);
+        return new JSONObject(attributeMap);
     }
 
     /**
