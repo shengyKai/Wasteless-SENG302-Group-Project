@@ -5,7 +5,9 @@
       persistent
       max-width="600px"
     >
-      <v-form v-model="valid">
+      <v-form
+        v-model="valid"
+      >
         <v-card>
           <v-card-title>
             <span class="headline create-product">Create new Product</span>
@@ -109,7 +111,7 @@
               type="submit"
               color="primary"
               :disabled="!valid"
-              @click="createProduct">
+              @click.prevent="createProduct">
               Create
             </v-btn>
           </v-card-actions>

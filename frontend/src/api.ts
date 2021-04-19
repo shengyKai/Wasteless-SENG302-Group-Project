@@ -368,9 +368,7 @@ export async function createBusiness(business: CreateBusiness): Promise<MaybeErr
  */
 export async function createProduct(product: CreateProduct): Promise<MaybeError<undefined>> {
   try {
-    console.log("HERE");
     await  instance.post('/businesses/products', product);
-    console.log("AFTER");
   } catch (error) {
     let status: number | undefined = error.response?.status;
     if (status === undefined) return 'Failed to reach backend';
