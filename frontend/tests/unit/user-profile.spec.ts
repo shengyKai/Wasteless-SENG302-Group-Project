@@ -274,4 +274,23 @@ describe('UserProfile.vue', () => {
     expect(makeBusinessAdmin).lastCalledWith(10, 1); // Must be called with bussinessId, userId
     expect(store.state.globalError).toBe('test_error_message');
   });
+
+  /**
+   * Tests that when the user is made an administrator then the add admin button is disabled.
+   */
+  it('If the user is made an admin then the "add admin" button should be disabled', async () => {
+    actAsBusiness();
+
+    await flushQueue();
+
+    // Ensure that the "makeBusinessAdmin" operation is successful
+    makeBusinessAdmin.mockResolvedValue(undefined);
+
+    let addAdmin = wrapper.findComponent({ ref: 'addAdminButton' });
+    addAdmin.trigger('click');
+
+    await flushQueue();
+
+    expect(addAdmin.props().disabled).toBeTruthy();
+  });
 });

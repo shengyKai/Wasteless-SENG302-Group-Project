@@ -138,7 +138,10 @@ export default {
 
       if (typeof response === 'string') {
         this.$store.commit('setError', response);
+        return;
       }
+
+      this.isUserAdminOfActiveBusiness = true;
     }
   },
 
