@@ -135,6 +135,14 @@
         </v-col>
 
       </v-row>
+      <!-- INPUT: Unit number -->
+      <v-text-field
+        class="required"
+        v-model="streetNO"
+        label="Unit No."
+        :rules="mandatoryRules"
+        outlined
+      />
 
       <!-- INPUT: Street/Company -->
       <v-text-field
@@ -229,6 +237,7 @@ export default {
       dob: '',
       countryCode: '64',
       phone: '',
+      streetNO: '',
       street1: '',
       district: '',
       state: '',
@@ -282,11 +291,15 @@ export default {
     },
     // Complete registration with API
     register () {
-      // alert('TODO');
-      //Temp this.obj to test whether it works ; need change
-
-      //street_1 number into 1st part, ther est into 2nd part
-      //parse streetnumber and streetname
+      //S300T500-16 merge_U1 last final final final bug
+      //Was thinking to use this match method to split unit and street
+      //(e.g) 10 bla street -> streetNo : 10, sreet1 : bla street
+      //however it dosent work, so I change the text field back to our initial design
+      //With the unit text field and street name text field
+      //Leave this here in case someone wan to use this format in the future, it somehow return null? TT
+      // let parts = this.street1.match(/([A-Za-z]+)([0-9]+)/);
+      // #streetNo : parts[2]
+      // #street1  : part[1]
 
       let user = {
         firstName   : this.name,
@@ -298,7 +311,7 @@ export default {
         dateOfBirth : this.dob,
         phoneNumber : this.phone,
         homeAddress : {
-          streetNumber  : 10,    //temp data cause havent do the split street_1 yet
+          streetNumber  : this.streetNO,
           streetName    : this.street1,
           city          : this.city,
           region        : this.state,
@@ -307,11 +320,7 @@ export default {
         },
         password    : this.password,
       };
-      console.log(user);
-      console.log("HERE");
-      //TODO Split street_1 : e.g 10 bla street -> 10 , bla street
-      //string.match(/[a-zA-Z]+|[0-9]+/g)
-      //then shud be done
+
       let vrb = createUser(user);
       console.log(vrb);
       if (vrb !== undefined ) {
