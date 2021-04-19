@@ -31,7 +31,7 @@ export type StoreData = {
   createBusinessDialogShown: boolean,
 };
 
-export function createOptions(): StoreOptions<StoreData> {
+function createOptions(): StoreOptions<StoreData> {
   return {
     state: {
       user: null,
@@ -124,14 +124,21 @@ export function createOptions(): StoreOptions<StoreData> {
 
 let store: Store<StoreData>;
 if (!isTesting()) {
-  // If we are currently running as a test then we cannot use a global store, since we're using a
-  // local vue instance.
+  // If we're in a test enviroment then Vue.use(Vuex) won't have been called yet.
+  store = new Vuex.Store(createOptions());
+}
+
+/**
+ * Resets the global store to the initial state.
+ * This function is only to be used in the test enviroment
+ */
+export function resetStoreForTesting() {
+  if (!isTesting()) throw new Error('This function should only be called when testing');
   store = new Vuex.Store(createOptions());
 }
 
 /**
  * Gets the global Vuex store.
- * If we're running as a test this will be undefined
  *
  * @returns The global Vuex store
  */

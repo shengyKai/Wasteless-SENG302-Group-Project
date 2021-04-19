@@ -26,6 +26,7 @@
               v-on="on"
               @click="addUserAsAdmin"
               :disabled="isUserAdminOfActiveBusiness === true"
+              ref="addAdminButton"
             >
               <v-icon>mdi-account-plus</v-icon>
             </v-btn>
