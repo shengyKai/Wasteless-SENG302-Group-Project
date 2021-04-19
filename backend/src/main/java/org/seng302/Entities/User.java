@@ -341,9 +341,10 @@ public class User extends Account {
      * first name, middle name, last name, nickname, email, bio, the city/region/country part of their address,
      * the businesses they administer, and date the account was created. If fullBusienssDetails is true then
      * a JSON representation of each business they administer will be included, otherwise the businessesAdministered
-     * field will have the placeholder array ["string"].
+     * field will not be present to avoid issues when nesting this json inside the administrators field of the business
+     * json.
      * @param fullBusinessDetails A JSON representation of each business will be included in the businessesAdministered
-     * field if this is set to true, otherwise the field will be set to the placeholder array ["string"]
+     * field if this is set to true, otherwise the field will not be present.
      * @return JSONObject with attribute name as key and attribute value as value.
      */
     // Todo: Replace email with profile picture once profile pictures added.
@@ -361,15 +362,12 @@ public class User extends Account {
         attributeMap.put("homeAddress", getAddress().constructPartialJson());
         if (fullBusinessDetails) {
             attributeMap.put("businessesAdministered", constructBusinessJsonArray());
-        } else {
-            attributeMap.put("businessesAdministered", new String[] {"string"});
         }
         return new JSONObject(attributeMap);
     }
 
     /**
-     * Override the constructPublicJson method so that it defaults to using the placeholder ["string"] for the
-     * businessesAdministered field.
+     * Override the constructPublicJson method so that it defaults to omitting the businessesAdministered field.
      * @return A public JSON representation of the user without information on the businesses they administer
      */
     public JSONObject constructPublicJson() {
@@ -380,7 +378,7 @@ public class User extends Account {
      * This method constructs a JSON representation of the user's private details. This includes all the values from
      * the public JSON, plus their full address, date of birth, phone number and role.
      * @param fullBusinessDetails A JSON representation of each business will be included in the businessesAdministered
-     * field if this is set to true, otherwise the field will be set to the placeholder array ["string"]
+     * field if this is set to true, otherwise the field will not be present.
      * @return JSONObject with attribute name as key and attribute value as value.
      */
     public JSONObject constructPrivateJson(boolean fullBusinessDetails) {
@@ -394,8 +392,7 @@ public class User extends Account {
     }
 
      /**
-     * Override the constructPrivateJson method so that it defaults to using the placeholder ["string"] for the
-     * businessesAdministered field.
+     * Override the constructPrivateJson method so that it defaults omitting the businessesAdministered field
      * @return A private JSON representation of the user without information on the businesses they administer
      */
     public JSONObject constructPrivateJson() {
@@ -403,8 +400,8 @@ public class User extends Account {
     }
 
     /**
-     * Construct an array of JSON objects representing the businesses the user administers. The
-     * "administrators" field of the JSON object is replaced by ["string"].
+     * Construct an array of JSON objects representing the businesses the user administers. The JSONs in the array
+     * are sorted by the id number of the business to ensure consistency between subsequent requests.
      * @return An array of JSON representations of the businesses the user administers.
      */
     public JSONArray constructBusinessJsonArray() {

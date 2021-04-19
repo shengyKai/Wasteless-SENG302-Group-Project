@@ -24,11 +24,11 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-public class UsersController {
+public class UserController {
     private final UserRepository userRepository;
-    private static final Logger logger = LogManager.getLogger(UsersController.class.getName());
+    private static final Logger logger = LogManager.getLogger(UserController.class.getName());
 
-    public UsersController(UserRepository userRepository) {
+    public UserController(UserRepository userRepository) {
 
         this.userRepository = userRepository;
     }

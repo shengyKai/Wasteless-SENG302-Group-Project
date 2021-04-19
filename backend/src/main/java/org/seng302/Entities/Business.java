@@ -43,7 +43,7 @@ public class Business {
     @JoinColumn(name = "owner_id")
     private User primaryOwner;
 
-    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
+    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinTable(
             name="business_admins",
             joinColumns = {@JoinColumn(name="business_id")},
@@ -244,11 +244,9 @@ public class Business {
      * representations of the users who are administrators of the business, and a JSON representation
      * of the business's address, as well as simple attributes for all the other properties of the
      * business. If fullAdminDetails is true, the JSON will include a full JSON representation for each
-     * admin of the business. If fullAdminDetails is false, the administrators fields will be ["string"].
-     * This is to avoid an infinite loop of construcing a business JSON to go within a user object,
-     * then constructing a user JSON to go within the business object.
-     * @param fullAdminDetails True if a JSON object should be included for each admin, false if a placeholder
-     * array should be used instead.
+     * admin of the business. If fullAdminDetails is false, the administrators field will be excluded, to
+     * avoid issues when nesting this json within the businessesAdministered field of the user json.
+     * @param fullAdminDetails True if administrators should be included in JSON
      * @return A JSON representation of this business.
      */
     public JSONObject constructJson(boolean fullAdminDetails) {
@@ -258,8 +256,6 @@ public class Business {
         attributeMap.put("description", description);
         if (fullAdminDetails) {
             attributeMap.put("administrators", constructAdminJsonArray());
-        } else {
-            attributeMap.put("administrators", new String[] {"string"});
         }
         attributeMap.put("primaryAdministratorId", primaryOwner.getUserID());
         attributeMap.put("address", getAddress().constructFullJson());
@@ -269,8 +265,8 @@ public class Business {
     }
 
     /**
-     * Override the constructJson method so that by default it does not include full details for the administrators.
-     * @return A JSON representation of the business with a placeholder array ["string"] for the administrators.
+     * Override the constructJson method so that by default it does not includethe administrators.
+     * @return A JSON representation of the business without details of its administrators.
      */
     public JSONObject constructJson() {
         return constructJson(false);
@@ -278,14 +274,15 @@ public class Business {
 
     /**
      * This method gets the public JSON representation of each User who is an admin of this Business
-     *  and adds it to a JSONArray. The JSONs in the array are ordered by the id number of the user.
+     *  and adds it to a JSONArray. The JSONs in the array are ordered by the id number of the user
+     *  to ensure consistency between subsequent requests.
      * @return A JSONArray containing JSON respresentations of all admins of this business.
      */
     private JSONArray constructAdminJsonArray() {
         JSONArray adminJsons = new JSONArray();
         List<User> admins = new ArrayList<>();
         admins.addAll(getOwnerAndAdministrators());
-        Collections.sort(admins, (User user1, User user2) ->
+        Collections.sort(admins, (User user1, User user2) -> 
             user1.getUserID().compareTo(user2.getUserID()));
         for (User admin : admins) {
             adminJsons.add(admin.constructPublicJson());
