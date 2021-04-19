@@ -284,6 +284,10 @@ export default {
     register () {
       // alert('TODO');
       //Temp this.obj to test whether it works ; need change
+
+      //street_1 number into 1st part, ther est into 2nd part
+      //parse streetnumber and streetname
+
       let user = {
         firstName   : this.name,
         lastName    : this.name,
@@ -294,7 +298,7 @@ export default {
         dateOfBirth : this.dob,
         phoneNumber : this.phone,
         homeAddress : {
-          streetNumber  : 7,
+          streetNumber  : 10,    //temp data cause havent do the split street_1 yet
           streetName    : this.street1,
           city          : this.city,
           region        : this.state,
@@ -303,8 +307,13 @@ export default {
         },
         password    : this.password,
       };
-
+      console.log(user);
+      console.log("HERE");
+      //TODO Split street_1 : e.g 10 bla street -> 10 , bla street
+      //string.match(/[a-zA-Z]+|[0-9]+/g)
+      //then shud be done
       let vrb = createUser(user);
+      console.log(vrb);
       if (vrb !== undefined ) {
         alert('REGISTRATION FAILED');
       }
