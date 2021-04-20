@@ -14,6 +14,7 @@
 
       <!-- INPUT: Password -->
       <v-text-field
+        ref="password"
         class="required"
         v-model="password"
         label="Password"
@@ -250,7 +251,9 @@ export default {
         //regex rules for emails, example format is as such:
         //"blah@hotmail.co
         //if it does not follow the format, display error message
-        email => /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(email) || 'E-mail must be valid'
+        email =>
+          /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(email)
+          || 'E-mail must be valid'
       ],
       mandatoryRules: [
         //All fields with the class "required" will go through this ruleset to ensure the field is not empty.
