@@ -88,6 +88,28 @@ export type CreateBusiness = {
   businessType: BusinessType,
 };
 
+export type Product = {
+  id: number,
+  name: string,
+  description?: string,
+  dateAdded: Date,
+  expiryDate?: Date,
+  manufacturer?: string,
+  recommendedRetailPrice?: string,
+  quantity: number,
+  productCode: string
+};
+
+export type CreateProduct = {
+  name: string,
+  description?: string,
+  manufacturer?: string,
+  expiryDate?: Date,
+  recommendedRetailPrice?: string,
+  quantity: number,
+  productCode: string
+}
+
 function isUser(obj: any): obj is User {
   if (obj === null || typeof obj !== 'object') return false;
   if (typeof obj.id !== 'number') return false;
@@ -336,6 +358,24 @@ export async function createBusiness(business: CreateBusiness): Promise<MaybeErr
     return 'Request failed: ' + status;
   }
 
+  return undefined;
+}
+
+/**
+ * Creates a product
+ * @param product The properties to create a product with
+ * @return undefined if operation is successful, otherwise a string error
+ */
+export async function createProduct(product: CreateProduct): Promise<MaybeError<undefined>> {
+  try {
+    await  instance.post('/businesses/products', product);
+  } catch (error) {
+    let status: number | undefined = error.response?.status;
+    if (status === undefined) return 'Failed to reach backend';
+    if (status === 401) return 'Missing/Invalid access token';
+
+    return 'Request failed: ' + status;
+  }
   return undefined;
 }
 
