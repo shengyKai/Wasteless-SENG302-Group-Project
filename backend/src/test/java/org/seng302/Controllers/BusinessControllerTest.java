@@ -155,9 +155,6 @@ public class BusinessControllerTest {
         owner = userRepository.save(owner);
         admin = userRepository.save(admin);
         otherUser = userRepository.save(otherUser);
-        businessRepository.deleteAll();
-        userRepository.deleteAll();
-        owner = userRepository.save(owner);
     }
 
     /**
