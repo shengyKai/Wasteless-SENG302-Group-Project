@@ -293,7 +293,7 @@ export default {
       this.$emit('showLogin');
     },
     // Complete registration with API
-    register () {
+    async register () {
       //S300T500-16 merge_U1 last final final final bug
       //Was thinking to use this match method to split unit and street
       //(e.g) 10 bla street -> streetNo : 10, sreet1 : bla street
@@ -324,7 +324,7 @@ export default {
         password    : this.password,
       };
 
-      let vrb = createUser(user);
+      let vrb = await createUser(user);
       console.log(vrb);
       if (vrb !== undefined ) {
         alert('REGISTRATION FAILED');
