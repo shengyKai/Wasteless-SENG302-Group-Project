@@ -223,8 +223,7 @@ public class Business {
         for (User user : getOwnerAndAdministrators()) {
             adminIds.add(user.getUserID());
         }
-        String role = (String) session.getAttribute("role");
-        if (!role.equals("admin") && !adminIds.contains(userId)) {
+        if (!AuthenticationTokenManager.sessionCanSeePrivate(request, null) && !adminIds.contains(userId)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User does not have sufficient permissions to perform this action");
         }
     }

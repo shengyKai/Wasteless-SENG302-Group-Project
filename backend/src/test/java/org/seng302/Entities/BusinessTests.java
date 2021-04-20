@@ -437,21 +437,17 @@ public class BusinessTests {
         try {
             testBusiness1.checkSessionPermissions(request);
         } catch (Exception e) {
-            System.out.println(Arrays.toString(testBusiness1.getAdministrators().toArray()));
-            System.out.println(testBusiness1.getPrimaryOwner().toString());
-            System.out.println(user1Id);
-            System.out.println(e);
             fail("No exception should be thrown when the user is an admin of the business");
         }
     }
 
-        /**
+    /**
      * Test that when the checkSessionPermissions method is called with a request from a user who is
      * a global application admin, no exception is thrown.
      */
     @Test
     public void checkSessionPermissionsGlobalApplicationAdminTest() {
-        Long user1Id = userRepository.findByEmail("dave@gmail.com").getUserID();
+        Long user2Id = userRepository.findByEmail("dave@gmail.com").getUserID();
         when(request.getSession()).thenAnswer(
                 (Answer) invocation -> session);
         when(request.getSession(false)).thenAnswer(
@@ -465,13 +461,42 @@ public class BusinessTests {
                     return cookieArray;
                 });
         when(session.getAttribute("role")).thenAnswer(
-            (Answer) invocation -> "admin");
+            (Answer) invocation -> "globalApplicationAdmin");
         when(session.getAttribute("accountId")).thenAnswer(
-            (Answer) invocation -> user1Id);
+            (Answer) invocation -> user2Id);
         try {
             testBusiness1.checkSessionPermissions(request);
         } catch (Exception e) {
             fail("No exception should be thrown when the user is a global application admin");
+        }
+    }
+
+    /**
+     * Test that when the checkSessionPermissions method is called with a request from a user who is
+     * a global application admin, no exception is thrown.
+     */
+    @Test
+    public void checkSessionPermissionsDefaultGlobalApplicationAdminTest() {
+        when(request.getSession()).thenAnswer(
+                (Answer) invocation -> session);
+        when(request.getSession(false)).thenAnswer(
+                (Answer) invocation -> session);
+        when(session.getAttribute("AUTHTOKEN")).thenAnswer(
+                (Answer) invocation -> "abcd1234");
+        when(request.getCookies()).thenAnswer(
+                (Answer) invocation -> {
+                    Cookie[] cookieArray = new Cookie[1];
+                    cookieArray[0] = new Cookie("AUTHTOKEN", "abcd1234");
+                    return cookieArray;
+                });
+        when(session.getAttribute("role")).thenAnswer(
+                (Answer) invocation -> "defaultGlobalApplicationAdmin");
+        when(session.getAttribute("accountId")).thenAnswer(
+                (Answer) invocation -> null);
+        try {
+            testBusiness1.checkSessionPermissions(request);
+        } catch (Exception e) {
+            fail("No exception should be thrown when the user is the default global application admin");
         }
     }
 }
