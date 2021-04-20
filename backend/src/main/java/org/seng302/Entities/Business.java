@@ -1,9 +1,18 @@
 package org.seng302.Entities;
 
+import org.seng302.Tools.AuthenticationTokenManager;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
+import net.minidev.json.JSONArray;
+import net.minidev.json.JSONObject;
+
 import javax.persistence.*;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
+
+import com.fasterxml.jackson.databind.ser.impl.StringArraySerializer;
+
 
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -199,6 +208,85 @@ public class Business {
         } else {
             this.administrators.remove(oldAdmin);
         }
+    }
+
+    /**
+     * This method checks if the account associated with the current session has permission to act as this business (i.e.,
+     * the user is either an admin of the business or a GAA). If the account does not have permission to act as this
+     * business, a response status exception with status code 403 will be thrown.
+     */
+    public void checkSessionPermissions(HttpServletRequest request) {
+        AuthenticationTokenManager.checkAuthenticationToken(request);
+        HttpSession session = request.getSession(false);
+        Long userId = (Long) session.getAttribute("accountId");
+        Set<Long> adminIds = new HashSet<>();
+        for (User user : getOwnerAndAdministrators()) {
+            adminIds.add(user.getUserID());
+        }
+        if (!AuthenticationTokenManager.sessionCanSeePrivate(request, null) && !adminIds.contains(userId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User does not have sufficient permissions to perform this action");
+        }
+    }
+
+    /**
+     * This method retrieves all Users who are owners or admins of this business.
+     * @return A Set containing Users who are owners or admins of the business.
+     */
+    public Set<User> getOwnerAndAdministrators() {
+        Set<User> ownerAdminSet = new HashSet<>();
+        ownerAdminSet.addAll(administrators);
+        ownerAdminSet.add(primaryOwner);
+        return ownerAdminSet;
+    }
+    /**
+     * Construct a JSON object representing the business. The JSON object includes an array of JSON
+     * representations of the users who are administrators of the business, and a JSON representation
+     * of the business's address, as well as simple attributes for all the other properties of the
+     * business. If fullAdminDetails is true, the JSON will include a full JSON representation for each
+     * admin of the business. If fullAdminDetails is false, the administrators field will be excluded, to
+     * avoid issues when nesting this json within the businessesAdministered field of the user json.
+     * @param fullAdminDetails True if administrators should be included in JSON
+     * @return A JSON representation of this business.
+     */
+    public JSONObject constructJson(boolean fullAdminDetails) {
+        Map<String, Object> attributeMap = new HashMap<>();
+        attributeMap.put("id", getId());
+        attributeMap.put("name", name);
+        attributeMap.put("description", description);
+        if (fullAdminDetails) {
+            attributeMap.put("administrators", constructAdminJsonArray());
+        }
+        attributeMap.put("primaryAdministratorId", primaryOwner.getUserID());
+        attributeMap.put("address", getAddress().constructFullJson());
+        attributeMap.put("businessType", businessType);
+        attributeMap.put("created", created.toString());
+        return new JSONObject(attributeMap);
+    }
+
+    /**
+     * Override the constructJson method so that by default it does not includethe administrators.
+     * @return A JSON representation of the business without details of its administrators.
+     */
+    public JSONObject constructJson() {
+        return constructJson(false);
+    }
+
+    /**
+     * This method gets the public JSON representation of each User who is an admin of this Business
+     *  and adds it to a JSONArray. The JSONs in the array are ordered by the id number of the user
+     *  to ensure consistency between subsequent requests.
+     * @return A JSONArray containing JSON respresentations of all admins of this business.
+     */
+    private JSONArray constructAdminJsonArray() {
+        JSONArray adminJsons = new JSONArray();
+        List<User> admins = new ArrayList<>();
+        admins.addAll(getOwnerAndAdministrators());
+        Collections.sort(admins, (User user1, User user2) -> 
+            user1.getUserID().compareTo(user2.getUserID()));
+        for (User admin : admins) {
+            adminJsons.add(admin.constructPublicJson());
+        }
+        return adminJsons;
     }
 
 

@@ -1,18 +1,17 @@
 package org.seng302.Entities;
 
+import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
+import java.util.Collections;
 import org.junit.Ignore;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.mockito.stubbing.Answer;
-import org.seng302.Entities.User;
 import org.seng302.Exceptions.EmailInUseException;
 import org.seng302.Persistence.BusinessRepository;
 import org.seng302.Persistence.UserRepository;
 import org.seng302.Tools.PasswordAuthenticator;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -24,15 +23,14 @@ import java.util.Date;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.when;
 
 @SpringBootTest
 public class UserTests {
     public User testUser;
     private User.Builder testBuilder;
-    @Mock
+    @Autowired
     private UserRepository userRepository;
-    @Mock
+    @Autowired
     private BusinessRepository businessRepository;
 
     @BeforeEach
@@ -46,7 +44,7 @@ public class UserTests {
                 .withEmail("here@testing")
                 .withPassword("12345678abc")
                 .withBio("g")
-                .withDob("2021-03-11")
+                .withDob("2001-03-11")
                 .withPhoneNumber("123-456-7890")
                 .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Christchurch,New Zealand," +
                         "Canterbury,8041"))
@@ -59,11 +57,35 @@ public class UserTests {
                 .withEmail("johnsmith99@gmail.com")
                 .withPassword("1337-H%nt3r2")
                 .withBio("Likes long walks on the beach")
-                .withDob("2021-03-11")
+                .withDob("2001-03-11")
                 .withPhoneNumber("+64 3 555 0129")
                 .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Christchurch,New Zealand," +
                         "Canterbury,8041"));
         MockitoAnnotations.openMocks(this);
+    }
+
+    /**
+     * Helper function for tests involving the businesses administered attribute. Saves the user to the 
+     * user repository and creates two businesses, making the user a primary admin of one and a secondary
+     * admin of the other.
+     */
+    public void addBusinessesAdministeredToTestUser() {
+        businessRepository.deleteAll();
+        userRepository.deleteAll();
+        userRepository.save(testUser);
+        User testUser2 = testBuilder.build();
+        userRepository.save(testUser2);
+        Business testBusiness1 = new Business.Builder().withName("Corellis").withBusinessType("Accommodation and Food Services")
+        .withAddress(Location.covertAddressStringToLocation("46,Victoria Road,Auckland,Auckland,New Zealand,0624"))
+        .withPrimaryOwner(testUser).withDescription("Great coffee").build();
+        businessRepository.save(testBusiness1);
+        Business testBusiness2 = new Business.Builder().withName("Cakes n Ladders").withBusinessType("Accommodation and Food Services")
+        .withAddress(Location.covertAddressStringToLocation("173,Symonds Street,Auckland,Auckland,New Zealand,1010"))
+        .withPrimaryOwner(testUser2).withDescription("Chill spot").build();
+        businessRepository.save(testBusiness2);
+        testBusiness2.addAdmin(testUser);
+        businessRepository.save(testBusiness2);
+        testUser = userRepository.findByEmail(testUser.getEmail());
     }
 
     @Test
@@ -598,8 +620,8 @@ public class UserTests {
     @Test
     public void checkEmailUniquenessUniqueTest() {
         String testEmail = "johnsmith99@gmail.com";
-        when(userRepository.findByEmail(testEmail)).thenAnswer(
-                (Answer) invocation -> null);
+        businessRepository.deleteAll();
+        userRepository.deleteAll();
         try {
             User.checkEmailUniqueness(testEmail, userRepository);
         } catch (Exception e) {
@@ -614,7 +636,7 @@ public class UserTests {
     @Test
     public void constructPublicJsonPublicAttributesPresentTest() {
         testUser.setUserID(1L);
-        JSONObject json = testUser.constructPublicJson();
+        JSONObject json = testUser.constructPublicJson(true);
         assertTrue(json.containsKey("id"));
         assertTrue(json.containsKey("firstName"));
         assertTrue(json.containsKey("middleName"));
@@ -623,6 +645,7 @@ public class UserTests {
         assertTrue(json.containsKey("email"));
         assertTrue(json.containsKey("bio"));
         assertTrue(json.containsKey("created"));
+        assertTrue(json.containsKey("businessesAdministered"));
     }
 
     /**
@@ -631,7 +654,7 @@ public class UserTests {
     @Test
     public void constructPublicJsonHiddenAttributesNotPresentTest() {
         testUser.setUserID(1L);
-        JSONObject json = testUser.constructPublicJson();
+        JSONObject json = testUser.constructPublicJson(true);
         json.remove("id");
         json.remove("firstName");
         json.remove("middleName");
@@ -642,17 +665,18 @@ public class UserTests {
         json.remove("created");
         json.remove("dateOfBirth");
         json.remove("homeAddress");
+        json.remove("businessesAdministered");
         assertTrue(json.isEmpty());
     }
 
     /**
      * Verify that when constructPublicJson is called on a User which has none of its attributes set to null,
-     * all of the attributes in the JSON have the expected value.
+     * and the list of businesses it administers is empty, all of the attributes in the JSON have the expected value.
      */
     @Test
     public void constructPublicJsonNoAttributesNullTest() {
         testUser.setUserID(1L);
-        JSONObject json = testUser.constructPublicJson();
+        JSONObject json = testUser.constructPublicJson(true);
         assertEquals(testUser.getUserID().toString(), json.getAsString("id"));
         assertEquals(testUser.getFirstName(), json.getAsString("firstName"));
         assertEquals(testUser.getMiddleName(), json.getAsString("middleName"));
@@ -661,11 +685,14 @@ public class UserTests {
         assertEquals(testUser.getBio(), json.getAsString("bio"));
         assertEquals(testUser.getEmail(), json.getAsString("email"));
         assertEquals(testUser.getCreated().toString(), json.getAsString("created"));
+        String expectedAddressString = testUser.getAddress().constructPartialJson().toJSONString();
+        assertEquals(expectedAddressString, json.getAsString("homeAddress"));
+        assertEquals("[]", json.getAsString("businessesAdministered"));
     }
 
     /**
      * Verify that when constructPublicJson is called on a User which has its optional attributes set to null,
-     * all of the attributes in the JSON have the expected value.
+     * and the list of businesses it administers is empty, all of the attributes in the JSON have the expected value.
      */
     @Test
     public void constructPublicJsonOptionalAttributesNullTest() {
@@ -673,7 +700,7 @@ public class UserTests {
         testUser.setMiddleName(null);
         testUser.setNickname(null);
         testUser.setBio(null);
-        JSONObject json = testUser.constructPublicJson();
+        JSONObject json = testUser.constructPublicJson(true);
         assertEquals(testUser.getUserID().toString(), json.getAsString("id"));
         assertEquals(testUser.getFirstName(), json.getAsString("firstName"));
         assertEquals(testUser.getMiddleName(), json.getAsString("middleName"));
@@ -682,6 +709,196 @@ public class UserTests {
         assertEquals(testUser.getBio(), json.getAsString("bio"));
         assertEquals(testUser.getEmail(), json.getAsString("email"));
         assertEquals(testUser.getCreated().toString(), json.getAsString("created"));
+        String expectedAddressString = testUser.getAddress().constructPartialJson().toJSONString();
+        assertEquals(expectedAddressString, json.getAsString("homeAddress"));
+        assertEquals("[]", json.getAsString("businessesAdministered"));
+    }
+
+    /**
+     * Verify that constructPrivateJSON returns a JSON with all expected attributes present.
+     */
+    @Test
+    public void constructPrivateJsonAllExpectedAttributesPresentTest() {
+        testUser.setUserID(1L);
+        JSONObject json = testUser.constructPrivateJson(true);
+        assertTrue(json.containsKey("id"));
+        assertTrue(json.containsKey("firstName"));
+        assertTrue(json.containsKey("middleName"));
+        assertTrue(json.containsKey("lastName"));
+        assertTrue(json.containsKey("nickname"));
+        assertTrue(json.containsKey("email"));
+        assertTrue(json.containsKey("bio"));
+        assertTrue(json.containsKey("created"));
+        assertTrue(json.containsKey("businessesAdministered"));
+        assertTrue(json.containsKey("phoneNumber"));
+        assertTrue(json.containsKey("dateOfBirth"));
+        assertTrue(json.containsKey("role"));
+    }
+
+    /**
+     * Verify that constructPrivateJson returns a JSON with no unexpected attributes present.
+     */
+    @Test
+    public void constructPrivateJsonNoUnexpectedAttributesPresentTest() {
+        testUser.setUserID(1L);
+        JSONObject json = testUser.constructPrivateJson(true);
+        json.remove("id");
+        json.remove("firstName");
+        json.remove("middleName");
+        json.remove("lastName");
+        json.remove("nickname");
+        json.remove("email");
+        json.remove("bio");
+        json.remove("created");
+        json.remove("homeAddress");
+        json.remove("businessesAdministered");
+        json.remove("phoneNumber");
+        json.remove("dateOfBirth");
+        json.remove("role");
+        assertTrue(json.isEmpty());
+    }
+
+    /**
+     * Verify that when constructPrivateJson is called on a User which has none of its attributes set to null,
+     * and the list of businesses it administers is empty, all of the attributes in the JSON have the expected value.
+     */
+    @Test
+    public void constructPrivateJsonNoAttributesNullTest() {
+        testUser.setUserID(1L);
+        JSONObject json = testUser.constructPrivateJson(true);
+        assertEquals(testUser.getUserID().toString(), json.getAsString("id"));
+        assertEquals(testUser.getFirstName(), json.getAsString("firstName"));
+        assertEquals(testUser.getMiddleName(), json.getAsString("middleName"));
+        assertEquals(testUser.getLastName(), json.getAsString("lastName"));
+        assertEquals(testUser.getNickname(), json.getAsString("nickname"));
+        assertEquals(testUser.getBio(), json.getAsString("bio"));
+        assertEquals(testUser.getEmail(), json.getAsString("email"));
+        assertEquals(testUser.getCreated().toString(), json.getAsString("created"));
+        String expectedAddressString = testUser.getAddress().constructFullJson().toJSONString();
+        assertEquals(expectedAddressString, json.getAsString("homeAddress"));
+        assertEquals("[]", json.getAsString("businessesAdministered"));
+        assertEquals(testUser.getRole(), json.getAsString("role"));
+        assertEquals(testUser.getPhNum(), json.getAsString("phoneNumber"));
+        assertEquals(testUser.getDob().toString(), json.getAsString("dateOfBirth"));
+    }
+
+    /**
+     * Verify that when constructPrivateJson is called on a User which has its optional attributes set to null,
+     * and the list of businesses it administers is empty, all of the attributes in the JSON have the expected value.
+     */
+    @Test
+    public void constructPrivateJsonOptionalAttributesNullTest() {
+        testUser.setUserID(1L);
+        testUser.setMiddleName(null);
+        testUser.setNickname(null);
+        testUser.setBio(null);
+        testUser.setPhNum(null);
+        JSONObject json = testUser.constructPrivateJson(true);
+        assertEquals(testUser.getUserID().toString(), json.getAsString("id"));
+        assertEquals(testUser.getFirstName(), json.getAsString("firstName"));
+        assertEquals(testUser.getMiddleName(), json.getAsString("middleName"));
+        assertEquals(testUser.getLastName(), json.getAsString("lastName"));
+        assertEquals(testUser.getNickname(), json.getAsString("nickname"));
+        assertEquals(testUser.getBio(), json.getAsString("bio"));
+        assertEquals(testUser.getEmail(), json.getAsString("email"));
+        assertEquals(testUser.getCreated().toString(), json.getAsString("created"));
+        String expectedAddressString = testUser.getAddress().constructFullJson().toJSONString();
+        assertEquals(expectedAddressString, json.getAsString("homeAddress"));
+        assertEquals("[]", json.getAsString("businessesAdministered"));
+        assertEquals(testUser.getRole(), json.getAsString("role"));
+        assertEquals(testUser.getPhNum(), json.getAsString("phoneNumber"));
+        assertEquals(testUser.getDob().toString(), json.getAsString("dateOfBirth"));
+    }
+
+    /**
+     * Test that when constructPublicJson is called with 'true' as its arguement, and the list of 
+     * businesses administered by the user is not empty, the 'businessesAdministered' field of the 
+     * resulting json will have the correct details for every business administered by the user
+     */
+    @Test
+    public void constructPublicJsonBusinessesAdministeredTrueTest() {
+        addBusinessesAdministeredToTestUser();
+        List<Business> testBusinesses = new ArrayList<>();
+        testBusinesses.addAll(testUser.getBusinessesAdministeredAndOwned());
+        Collections.sort(testBusinesses, (Business b1, Business b2) ->
+                b1.getId().compareTo(b2.getId()));
+        assertEquals(2, testBusinesses.size());
+        JSONObject json = testUser.constructPublicJson(true);
+        JSONArray expectedBusinessArray = new JSONArray();
+        for (Business business : testBusinesses) {
+            expectedBusinessArray.add(business.constructJson(false));
+        }
+        String expectedBusinessString = expectedBusinessArray.toJSONString();
+        assertEquals(expectedBusinessString, json.getAsString("businessesAdministered"));
+    }
+
+    /**
+     * Test that when constructPublicJson is called with 'false' as its arguement, and the list of 
+     * businesses administered by the user is not empty, the resulting json wil not contain the businessesAdministered
+     * field.
+     */
+    @Test
+    public void constructPublicJsonBusinessesAdministeredFalseTest() {
+        addBusinessesAdministeredToTestUser();
+        JSONObject json = testUser.constructPublicJson(false);
+        assertNull(json.get("businessesAdministered"));
+    }
+
+    /**
+     * Test that when constructPublicJson is called with no arguement, and the list of 
+     * businesses administered by the user is not empty, the 'businessesAdministered' field will not be present
+     * in the resulting JSON.
+     */
+    @Test
+    public void constructPublicJsonBusinessesAdministeredNullTest() {
+        addBusinessesAdministeredToTestUser();
+        JSONObject json = testUser.constructPublicJson();
+        assertNull(json.get("businessesAdministered"));
+    }
+
+    /**
+     * Test that when constructPrviateJson is called with 'true' as its arguement, and the list of 
+     * businesses administered by the user is not empty, the 'businessesAdministered' field of the 
+     * resulting json will have the correct details for every business administered by the user
+     */
+    @Test
+    public void constructPrivateJsonBusinessesAdministeredTrueTest() {
+        addBusinessesAdministeredToTestUser();
+        List<Business> testBusinesses = new ArrayList<>();
+        testBusinesses.addAll(testUser.getBusinessesAdministeredAndOwned());
+        Collections.sort(testBusinesses, (Business b1, Business b2) -> b1.getId().compareTo(b2.getId()));
+        assertEquals(2, testBusinesses.size());
+        JSONObject json = testUser.constructPrivateJson(true);
+        JSONArray expectedBusinessArray = new JSONArray();
+        for (Business business : testBusinesses) {
+            expectedBusinessArray.add(business.constructJson(false));
+        }
+        String expectedBusinessString = expectedBusinessArray.toJSONString();
+        assertEquals(expectedBusinessString, json.getAsString("businessesAdministered"));
+    }
+
+    /**
+     * Test that when constructPrivateJson is called with 'false' as its arguement, and the list of 
+     * businesses administered by the user is not empty, the resulting json will not include the
+     * businessesAdministered field.
+     */
+    @Test
+    public void constructPrivateJsonBusinessesAdministeredFalseTest() {
+        addBusinessesAdministeredToTestUser();
+        JSONObject json = testUser.constructPrivateJson(false);
+        assertNull(json.get("businessesAdministered"));
+    }
+
+    /**
+     * Test that when constructPrivateJson is called with no arguement, and the list of 
+     * businesses administered by the user is not empty, the resulting json will not contain the businessesAdministered
+     * field.
+     */
+    @Test
+    public void constructPrivateJsonBusinessesAdministeredNullTest() {
+        addBusinessesAdministeredToTestUser();
+        JSONObject json = testUser.constructPrivateJson();
+        assertNull(json.get("businessesAdministered"));
     }
 
     /**
@@ -704,8 +921,9 @@ public class UserTests {
                 .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Christchurch,New Zealand," +
                         "Canterbury,8041"))
                 .build();
-        when(userRepository.findByEmail(testEmail)).thenAnswer(
-                (Answer) invocation -> testUser);
+        businessRepository.deleteAll();
+        userRepository.deleteAll();
+        userRepository.save(testUser);
         assertThrows(EmailInUseException.class, () -> {
             User.checkEmailUniqueness(testEmail, userRepository);
         });
@@ -718,7 +936,7 @@ public class UserTests {
     public void setCreatedTest() {
         Date testDate = new Date(System.currentTimeMillis());
         User testUser = testBuilder.build();
-        assertEquals(testDate, testUser.getCreated());
+        assertEquals(testDate.toString(), testUser.getCreated().toString());
     }
 
     /**
@@ -1014,7 +1232,7 @@ public class UserTests {
     @Test
     public void buildWithDobTest() throws ParseException {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        Date dob = dateFormat.parse("2021-03-11");
+        Date dob = dateFormat.parse("2001-03-11");
         User user = testBuilder.build();
         assertEquals(dob, user.getDob());
     }

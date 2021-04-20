@@ -26,11 +26,11 @@ import java.util.Map;
 import java.util.Optional;
 
 @RestController
-public class UsersController {
+public class UserController {
     private final UserRepository userRepository;
-    private static final Logger logger = LogManager.getLogger(UsersController.class.getName());
+    private static final Logger logger = LogManager.getLogger(UserController.class.getName());
 
-    public UsersController(UserRepository userRepository) {
+    public UserController(UserRepository userRepository) {
 
         this.userRepository = userRepository;
     }
@@ -114,9 +114,9 @@ public class UsersController {
             throw notFound;
         } else {
             if (AuthenticationTokenManager.sessionCanSeePrivate(session, user.get().getUserID())) {
-                return user.get().constructPrivateJson();
+                return user.get().constructPrivateJson(true);
             } else {
-                return user.get().constructPublicJson();
+                return user.get().constructPublicJson(true);
             }
 
         }
@@ -124,8 +124,8 @@ public class UsersController {
 
     /**
      * REST GET method to get the number of users from the search query
-     * @param searchQuery the search term
-     * @return the total number of users
+     * @param searchQuery The search term
+     * @return The total number of users
      */
     @GetMapping("/users/search/count")
     JSONObject getSearchCount(HttpServletRequest session, @RequestParam("searchQuery") String searchQuery) {
@@ -172,9 +172,9 @@ public class UsersController {
         JSONArray publicResults = new JSONArray();
         for (User user : pageInResults) {
             if (AuthenticationTokenManager.sessionCanSeePrivate(session, user.getUserID())) {
-                publicResults.appendElement(user.constructPrivateJson());
+                publicResults.appendElement(user.constructPrivateJson(true));
             } else {
-                publicResults.appendElement(user.constructPublicJson());
+                publicResults.appendElement(user.constructPublicJson(true));
             }
         }
         return publicResults;
