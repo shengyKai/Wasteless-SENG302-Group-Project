@@ -29,6 +29,7 @@ export type StoreData = {
    * Whether or not the dialog for registering a business is being shown.
    */
   createBusinessDialogShown: boolean,
+  createProductDialogShown: boolean,
 };
 
 function createOptions(): StoreOptions<StoreData> {
@@ -38,6 +39,7 @@ function createOptions(): StoreOptions<StoreData> {
       activeRole: null,
       globalError: null,
       createBusinessDialogShown: false,
+      createProductDialogShown: false,
     },
     mutations: {
       setUser (state, payload: User) {
@@ -97,6 +99,24 @@ function createOptions(): StoreOptions<StoreData> {
        */
       hideCreateBusiness(state) {
         state.createBusinessDialogShown = false;
+      },
+
+      /**
+       * Creates a modal create product dialog
+       *
+       * @param state Current store state
+       */
+      showCreateProduct(state) {
+        state.createProductDialogShown = true;
+      },
+
+      /**
+       * Hides the create product dialog
+       *
+       * @param state Current store state
+       */
+      hideCreateProduct(state) {
+        state.createProductDialogShown = false;
       }
     },
     getters: {

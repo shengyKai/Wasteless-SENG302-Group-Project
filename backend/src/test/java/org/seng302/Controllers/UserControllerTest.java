@@ -392,6 +392,29 @@ public class UserControllerTest {
         assertEquals(5, jsonArray.size());
     }
 
+    /**
+     * Verify that a GET request is made to "/users/search/count" it returns a json object with a single field "count".
+     * Where this count field is equal to the number of users matching the query.
+     */
+    @Test
+    public void getUserSearchCountTest() throws Exception {
+        List<User> userList = readUsersFromTestFile("src//test//testFiles//UsersControllerTestData.csv");
+        userRepository.deleteAll();
+        userRepository.saveAll(userList);
+
+        MvcResult result = mockMvc.perform(get("/users/search/count")
+                .param("searchQuery", "andy")
+                .sessionAttrs(sessionAuthToken)
+                .cookie(authCookie))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
+        JSONObject jsonObject = (JSONObject) parser.parse(result.getResponse().getContentAsString());
+        assertEquals(7, jsonObject.getAsNumber("count"));
+        assertEquals(1, jsonObject.size());
+    }
+
 
 //    @Test
 //    public void getUserWhenUserExistsAndSessionValid() throws Exception{

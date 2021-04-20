@@ -1,7 +1,6 @@
 package org.seng302.Tools;
 
 import org.junit.jupiter.api.Test;
-import org.seng302.Exceptions.FailedLoginException;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.web.server.ResponseStatusException;
 

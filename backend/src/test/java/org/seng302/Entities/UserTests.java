@@ -4,13 +4,9 @@ import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import java.util.Collections;
 import org.junit.Ignore;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.mockito.stubbing.Answer;
-import org.seng302.Entities.User;
 import org.seng302.Exceptions.EmailInUseException;
 import org.seng302.Persistence.BusinessRepository;
 import org.seng302.Persistence.UserRepository;
@@ -23,14 +19,10 @@ import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.when;
 
 @SpringBootTest
 public class UserTests {
