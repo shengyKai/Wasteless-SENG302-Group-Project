@@ -329,6 +329,10 @@ export default {
       if (vrb !== undefined ) {
         alert('REGISTRATION FAILED');
       }
+      else {
+        alert('TEST = SUCCESS');
+        this.$emit('showLogin');
+      }
     },
     // Close the date picker modal
     closeDatePicker () {
