@@ -109,8 +109,8 @@ public class UserController {
 
     /**
      * REST GET method to get the number of users from the search query
-     * @param searchQuery the search term
-     * @return the total number of users
+     * @param searchQuery The search term
+     * @return The total number of users
      */
     @GetMapping("/users/search/count")
     JSONObject getSearchCount(HttpServletRequest session, @RequestParam("searchQuery") String searchQuery) {
