@@ -24,6 +24,14 @@
                 <v-list-item-title>Add Business</v-list-item-title>
               </v-list-item-content>
             </v-list-item>
+            <v-list-item v-if="isBusiness" @click="viewCreateProduct">
+              <v-list-item-icon>
+                <v-icon>mdi-tooltip-plus</v-icon>
+              </v-list-item-icon>
+              <v-list-item-content>
+                <v-list-item-title>Add Product</v-list-item-title>
+              </v-list-item-content>
+            </v-list-item>
           </v-list-item-group>
         </v-list>
       </v-card-text>
@@ -36,6 +44,9 @@
       </v-btn>
       <v-btn v-if="!isBusiness" icon @click="viewCreateBusiness" class="action-button">
         <v-icon large>mdi-briefcase-plus</v-icon>
+      </v-btn>
+      <v-btn v-if="isBusiness" icon @click="viewCreateProduct" class="action-button">
+        <v-icon large>mdi-tooltip-plus</v-icon>
       </v-btn>
     </v-card>
 
@@ -120,6 +131,12 @@ export default {
      */
     viewCreateBusiness() {
       this.$store.commit('showCreateBusiness');
+    },
+    /**
+     * Shows the create product dialog
+     */
+    viewCreateProduct() {
+      this.$store.commit('showCreateProduct');
     }
   },
   computed: {
