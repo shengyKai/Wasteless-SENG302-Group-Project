@@ -117,6 +117,7 @@
               type="submit"
               color="primary"
               :disabled="!valid"
+              :loading="isLoading"
               @click.prevent="createProduct">
               Create
             </v-btn>
@@ -143,6 +144,7 @@ export default {
       quantity: '',
       productCode: '',
       errorMessage: undefined,
+      isLoading: false,
       unavailableProductCodes: [],
       valid: false,
       maxCharRules: [
@@ -182,6 +184,7 @@ export default {
       const productCode = this.productCode;
 
       this.errorMessage = undefined;
+      this.isLoading = true;
       let response = await createProduct({
         name: this.product,
         description: this.description,
@@ -191,6 +194,7 @@ export default {
         quantity: this.quantity,
         productCode: productCode
       });
+      this.isLoading = false;
 
       if (response === undefined) {
         // No error occurred
