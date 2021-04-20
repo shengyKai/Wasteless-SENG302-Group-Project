@@ -4,7 +4,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.mockito.stubbing.Answer;
 import org.seng302.Exceptions.AccessTokenException;
 import org.seng302.Persistence.BusinessRepository;
 import org.seng302.Persistence.UserRepository;
@@ -18,7 +17,6 @@ import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 
 import java.text.ParseException;
-import java.util.Arrays;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -373,9 +371,9 @@ public class BusinessTests {
     @Test
     public void checkSessionPermissionsNoAuthenticationTokenTest() {
         when(request.getSession()).thenAnswer(
-                (Answer) invocation -> session);
+                invocation -> session);
         when(session.getAttribute("AUTHTOKEN")).thenAnswer(
-                (Answer) invocation -> null);
+                invocation -> null);
         assertThrows(AccessTokenException.class, () -> {
             testBusiness1.checkSessionPermissions(request);
         });
@@ -390,21 +388,21 @@ public class BusinessTests {
     public void checkSessionPermissionsUserWithoutPermissionTest() {
         Long user2Id = userRepository.findByEmail("dave@gmail.com").getUserID();
         when(request.getSession()).thenAnswer(
-                (Answer) invocation -> session);
+                invocation -> session);
         when(request.getSession(false)).thenAnswer(
-                (Answer) invocation -> session);
+                invocation -> session);
         when(session.getAttribute("AUTHTOKEN")).thenAnswer(
-                (Answer) invocation -> "abcd1234");
+                invocation -> "abcd1234");
         when(request.getCookies()).thenAnswer(
-                (Answer) invocation -> {
+                invocation -> {
                     Cookie[] cookieArray = new Cookie[1];
                     cookieArray[0] = new Cookie("AUTHTOKEN", "abcd1234");
                     return cookieArray;
                 });
         when(session.getAttribute("role")).thenAnswer(
-            (Answer) invocation -> "user");
+            invocation -> "user");
         when(session.getAttribute("accountId")).thenAnswer(
-            (Answer) invocation -> user2Id);
+            invocation -> user2Id);
         ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> {
             testBusiness1.checkSessionPermissions(request);
         });
@@ -419,21 +417,21 @@ public class BusinessTests {
     public void checkSessionPermissionsBusinessAdminTest() {
         Long user1Id = userRepository.findByEmail("johnsmith99@gmail.com").getUserID();
         when(request.getSession()).thenAnswer(
-                (Answer) invocation -> session);
+                invocation -> session);
         when(request.getSession(false)).thenAnswer(
-                (Answer) invocation -> session);
+                invocation -> session);
         when(session.getAttribute("AUTHTOKEN")).thenAnswer(
-                (Answer) invocation -> "abcd1234");
+                invocation -> "abcd1234");
         when(request.getCookies()).thenAnswer(
-                (Answer) invocation -> {
+                invocation -> {
                     Cookie[] cookieArray = new Cookie[1];
                     cookieArray[0] = new Cookie("AUTHTOKEN", "abcd1234");
                     return cookieArray;
                 });
         when(session.getAttribute("role")).thenAnswer(
-            (Answer) invocation -> "user");
+            invocation -> "user");
         when(session.getAttribute("accountId")).thenAnswer(
-            (Answer) invocation -> user1Id);
+            invocation -> user1Id);
         try {
             testBusiness1.checkSessionPermissions(request);
         } catch (Exception e) {
@@ -449,21 +447,21 @@ public class BusinessTests {
     public void checkSessionPermissionsGlobalApplicationAdminTest() {
         Long user2Id = userRepository.findByEmail("dave@gmail.com").getUserID();
         when(request.getSession()).thenAnswer(
-                (Answer) invocation -> session);
+                invocation -> session);
         when(request.getSession(false)).thenAnswer(
-                (Answer) invocation -> session);
+                invocation -> session);
         when(session.getAttribute("AUTHTOKEN")).thenAnswer(
-                (Answer) invocation -> "abcd1234");
+                invocation -> "abcd1234");
         when(request.getCookies()).thenAnswer(
-                (Answer) invocation -> {
+                invocation -> {
                     Cookie[] cookieArray = new Cookie[1];
                     cookieArray[0] = new Cookie("AUTHTOKEN", "abcd1234");
                     return cookieArray;
                 });
         when(session.getAttribute("role")).thenAnswer(
-            (Answer) invocation -> "globalApplicationAdmin");
+            invocation -> "globalApplicationAdmin");
         when(session.getAttribute("accountId")).thenAnswer(
-            (Answer) invocation -> user2Id);
+            invocation -> user2Id);
         try {
             testBusiness1.checkSessionPermissions(request);
         } catch (Exception e) {
@@ -478,21 +476,21 @@ public class BusinessTests {
     @Test
     public void checkSessionPermissionsDefaultGlobalApplicationAdminTest() {
         when(request.getSession()).thenAnswer(
-                (Answer) invocation -> session);
+                invocation -> session);
         when(request.getSession(false)).thenAnswer(
-                (Answer) invocation -> session);
+                invocation -> session);
         when(session.getAttribute("AUTHTOKEN")).thenAnswer(
-                (Answer) invocation -> "abcd1234");
+                invocation -> "abcd1234");
         when(request.getCookies()).thenAnswer(
-                (Answer) invocation -> {
+                invocation -> {
                     Cookie[] cookieArray = new Cookie[1];
                     cookieArray[0] = new Cookie("AUTHTOKEN", "abcd1234");
                     return cookieArray;
                 });
         when(session.getAttribute("role")).thenAnswer(
-                (Answer) invocation -> "defaultGlobalApplicationAdmin");
+                invocation -> "defaultGlobalApplicationAdmin");
         when(session.getAttribute("accountId")).thenAnswer(
-                (Answer) invocation -> null);
+                invocation -> null);
         try {
             testBusiness1.checkSessionPermissions(request);
         } catch (Exception e) {
