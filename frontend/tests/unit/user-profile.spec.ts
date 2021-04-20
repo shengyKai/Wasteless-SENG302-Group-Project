@@ -37,7 +37,7 @@ describe('UserProfile.vue', () => {
         email: "test_email_address",
         dateOfBirth: "1/1/1900",
         phoneNumber: "test_phone_number",
-        homeAddress: "test_home_address",
+        homeAddress: { country: 'test_country' },
         created: "1/1/1950",
         role: "user",
         businessesAdministered: [],
@@ -102,10 +102,10 @@ describe('UserProfile.vue', () => {
   });
 
   /**
-   * Tests that the UserProfile has the user's home address somewhere in the page
+   * Tests that the UserProfile has the user's home address country somewhere in the page
    */
   it('Renders home address', () => {
-    expect(wrapper.text()).toContain('test_home_address');
+    expect(wrapper.text()).toContain('test_country');
   });
 
   /**

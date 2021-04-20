@@ -49,7 +49,7 @@ export type User = {
   email: string,
   dateOfBirth: string,
   phoneNumber?: string,
-  homeAddress: string,
+  homeAddress: Location,
   created?: string,
   role?: "user" | "globalApplicationAdmin" | "defaultGlobalApplicationAdmin",
   businessesAdministered?: number[],
@@ -120,6 +120,18 @@ export type CreateProduct = {
   productCode: string
 }
 
+function isLocation(obj: any): obj is Location {
+  if (obj === null || typeof obj !== 'object') return false;
+  if (obj.streetNumber !== undefined && typeof obj.streetNumber !== 'string') return false;
+  if (obj.streetName !== undefined && typeof obj.streetName !== 'string') return false;
+  if (obj.city !== undefined && typeof obj.city !== 'string') return false;
+  if (obj.region !== undefined && typeof obj.region !== 'string') return false;
+  if (typeof obj.country !== 'string') return false;
+  if (obj.postcode !== undefined && typeof obj.postcode !== 'string') return false;
+
+  return true;
+}
+
 function isUser(obj: any): obj is User {
   if (obj === null || typeof obj !== 'object') return false;
   if (typeof obj.id !== 'number') return false;
@@ -131,7 +143,7 @@ function isUser(obj: any): obj is User {
   if (typeof obj.email !== 'string') return false;
   if (typeof obj.dateOfBirth !== 'string') return false;
   if (obj.phoneNumber !== undefined && typeof obj.phoneNumber !== 'string') return false;
-  if (typeof obj.homeAddress !== 'object') return false;
+  if (!isLocation(obj.homeAddress)) return false;
   if (obj.created !== undefined && typeof obj.created !== 'string') return false;
   if (obj.role !== undefined && !['user', 'globalApplicationAdmin', 'defaultGlobalApplicationAdmin'].includes(obj.role))
     return false;
