@@ -373,6 +373,19 @@ export async function createProduct(product: CreateProduct): Promise<MaybeError<
     let status: number | undefined = error.response?.status;
     if (status === undefined) return 'Failed to reach backend';
     if (status === 401) return 'Missing/Invalid access token';
+    if (status === 403) return 'Operation not permitted';
+
+    if (status === 400) {
+      // TODO Not sure exactly how the backend is going to communicate with us that the product code
+      // is unavailable.
+
+      // eslint-disable-next-line no-constant-condition
+      if (false) {
+        return 'Product code unavailable';
+      }
+
+      return 'Invalid parameters';
+    }
 
     return 'Request failed: ' + status;
   }

@@ -96,12 +96,16 @@
                     label="Short-hand Product Code"
                     outlined
                     :rules="mandatoryRules.concat(productCodeRules)"
+                    ref="productCodeField"
                   />
                 </v-col>
               </v-row>
             </v-container>
+
           </v-card-text>
           <v-card-actions>
+            <v-spacer/>
+            <div class="error-text" v-if="errorMessage !== undefined"> {{ errorMessage }} </div>
             <v-spacer/>
             <v-btn
               color="primary"
@@ -138,6 +142,8 @@ export default {
       recommendedRetailPrice: '',
       quantity: '',
       productCode: '',
+      errorMessage: undefined,
+      unavailableProductCodes: [],
       valid: false,
       maxCharRules: [
         field => (field.length <= 100) || 'Reached max character limit: 100'
@@ -161,7 +167,8 @@ export default {
       ],
       productCodeRules: [
         field => !/ /.test(field) || 'Must not contain a space',
-        field => /^[-A-Z0-9]+$/.test(field) || 'Must be all uppercase letters, numbers and dashes.'
+        field => /^[-A-Z0-9]+$/.test(field) || 'Must be all uppercase letters, numbers and dashes.',
+        field => !this.unavailableProductCodes.includes(field) || 'Product code is unavailable',
       ]
     };
   },
@@ -171,16 +178,32 @@ export default {
      **/
     async createProduct() {
       //TODO merge with backend
-      await createProduct({
-        name: this.$data.product,
-        description: this.$data.description,
-        manufacturer: this.$data.manufacturer,
-        expiryDate: this.$data.expiryDate,
-        recommendedRetailPrice: this.$data.recommendedRetailPrice,
-        quantity: this.$data.quantity,
-        productCode: this.$data.productCode
+      // Ensures that we have a reference to the original product code.
+      const productCode = this.productCode;
+
+      this.errorMessage = undefined;
+      let response = await createProduct({
+        name: this.product,
+        description: this.description,
+        manufacturer: this.manufacturer,
+        expiryDate: this.expiryDate,
+        recommendedRetailPrice: this.recommendedRetailPrice,
+        quantity: this.quantity,
+        productCode: productCode
       });
-      this.closeDialog();
+
+      if (response === undefined) {
+        // No error occurred
+        this.closeDialog();
+        return;
+      }
+
+      if (response === 'Product code unavailable') {
+        this.unavailableProductCodes.push(productCode);
+        this.$refs.productCodeField.validate();
+        return;
+      }
+      this.errorMessage = response;
     },
     closeDialog() {
       this.$emit('closeDialog');
@@ -203,7 +226,12 @@ export default {
 }
 
 .create-product {
-  color: #558b2f; /* TODO Set this to primary colour variable */
+  color: var(--v-primary-base);
   font-weight: bolder;
+}
+
+.error-text {
+  color: var(--v-error-base);
+  text-align: right;
 }
 </style>

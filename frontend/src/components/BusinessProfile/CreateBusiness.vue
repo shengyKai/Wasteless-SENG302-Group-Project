@@ -182,7 +182,7 @@ export default {
 }
 
 .create-business {
-  color: #558b2f; /* TODO Set this to primary colour variable */
+  color: var(--v-primary-base);
   font-weight: bolder;
 }
 </style>
