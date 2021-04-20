@@ -112,12 +112,12 @@ describe('Register.vue', () => {
    */
   it("Testing out all inputs, such that the user can only press the register button " +
     "after inputting valid formats for all fields", () => {
-      //find the register button by the component
-      const registerButton = wrapper.find(".v-btn");
-      //since the fields are all inputted with valid formats and all mandatory fields are filled, the button should not be
-      //disabled.
-      expect(registerButton.props().disabled).toBeFalsy();
-    });
+    //find the register button by the component
+    const registerButton = wrapper.find(".v-btn");
+    //since the fields are all inputted with valid formats and all mandatory fields are filled, the button should not be
+    //disabled.
+    expect(registerButton.props().disabled).toBeFalsy();
+  });
 
   /**
    * The series of tests here is to check if the register button is disabled when an INVALID format is provided in any of the

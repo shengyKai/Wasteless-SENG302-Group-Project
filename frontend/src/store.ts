@@ -128,8 +128,8 @@ export function createOptions(): StoreOptions<StoreData> {
       }
     },
     actions: {
-      getUser (context) {
-        return getUser().then((response) => {
+      getUser (context, userId) {
+        return getUser(userId).then((response) => {
           if (typeof response === 'string') {
             context.commit('setError', response);
             return;
@@ -140,12 +140,12 @@ export function createOptions(): StoreOptions<StoreData> {
       async login(context, { email, password }) {
         let userId = await login(email, password);
         if (typeof userId === 'string') {
-          console.warn(userId);
+          context.commit('setError', userId);
           return;
         }
         let user = await getUser(userId);
         if (typeof user === 'string') {
-          console.error(user);
+          context.commit('setError', user);
           return;
         }
         context.commit('setUser', user);

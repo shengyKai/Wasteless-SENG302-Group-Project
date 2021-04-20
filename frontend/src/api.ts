@@ -131,11 +131,11 @@ function isUser(obj: any): obj is User {
   if (typeof obj.email !== 'string') return false;
   if (typeof obj.dateOfBirth !== 'string') return false;
   if (obj.phoneNumber !== undefined && typeof obj.phoneNumber !== 'string') return false;
-  if (typeof obj.homeAddress !== 'string') return false;
+  if (typeof obj.homeAddress !== 'object') return false;
   if (obj.created !== undefined && typeof obj.created !== 'string') return false;
   if (obj.role !== undefined && !['user', 'globalApplicationAdmin', 'defaultGlobalApplicationAdmin'].includes(obj.role))
     return false;
-  if (obj.businessesAdministered !== undefined && !isNumberArray(obj.businessesAdministered)) return false;
+  if (obj.businessesAdministered !== undefined && !isBusinessArray(obj.businessesAdministered)) return false;
 
   return true;
 }
@@ -146,7 +146,7 @@ function isBusiness(obj: any): obj is Business {
   if (obj.administrators !== undefined && !isUserArray(obj.administrators)) return false;
   if (typeof obj.name !== 'string') return false;
   if (obj.description !== undefined && typeof obj.description !== 'string') return false;
-  if (typeof obj.address !== 'string') return false;
+  if (typeof obj.address !== 'object') return false;
   if (!BUSINESS_TYPES.includes(obj.businessType)) return false;
   if (obj.created !== undefined && typeof obj.created !== 'string') return false;
 
@@ -165,6 +165,14 @@ function isUserArray(obj: any): obj is User[] {
   if (!Array.isArray(obj)) return false;
   for (let elem of obj) {
     if (!isUser(elem)) return false;
+  }
+  return true;
+}
+
+function isBusinessArray(obj: any): obj is Business[] {
+  if (!Array.isArray(obj)) return false;
+  for (let elem of obj) {
+    if (!isBusiness(elem)) return false;
   }
   return true;
 }
