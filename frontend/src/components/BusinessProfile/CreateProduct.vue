@@ -91,9 +91,11 @@
                 </v-col>
                 <v-col>
                   <v-text-field
+                    class="required"
                     v-model="productCode"
                     label="Short-hand Product Code"
                     outlined
+                    :rules="mandatoryRules.concat(productCodeRules)"
                   />
                 </v-col>
               </v-row>
@@ -154,7 +156,12 @@ export default {
       ],
       quantityRules: [
         field => field >= 0 || 'Must be a positive number',
-        field => field <= 100000 || 'Must not be too large'
+        field => field <= 100000 || 'Must not be too large',
+        field => /^([1-9][0-9]*)?$/.test(field) || 'Must be an integer',
+      ],
+      productCodeRules: [
+        field => !/ /.test(field) || 'Must not contain a space',
+        field => /^[-A-Z0-9]+$/.test(field) || 'Must be all uppercase letters, numbers and dashes.'
       ]
     };
   },
