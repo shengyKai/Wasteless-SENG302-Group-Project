@@ -74,7 +74,7 @@ public abstract class Account {
      * @param password to be hashed and stored
      */
     public void setAuthenticationCodeFromPassword(String password) {
-        if (password != null && !password.trim().isEmpty() && password.length() >= 8 && password.length() <= 32) {
+        if (password != null && !password.trim().isEmpty() && password.length() >= 7 && password.length() <= 32 && password.matches(".*[a-zA-Z].*") && password.matches(".*[0-9].*")) {
             try {
                 this.authenticationCode = PasswordAuthenticator.generateAuthenticationCode(password);
 
@@ -83,7 +83,7 @@ public abstract class Account {
             }
         } else {
             // Password cannot be null or empty
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "The password must be at least 8 characters long and no longer than 32.");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "The password must be at least 7 characters long and no longer than 32.");
         }
     }
 

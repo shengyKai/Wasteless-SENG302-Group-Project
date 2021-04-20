@@ -47,8 +47,8 @@ export default {
   data() {
     return {
       valid: false,
-      email: "123andyelliot@gmail.com",
-      password: "password123",
+      email: "",
+      password: "",
       emailRules: [
         (email) =>
           /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(email) ||
@@ -75,8 +75,6 @@ export default {
     },
     login() {
       this.$store.dispatch("login", { email : this.email, password : this.password });
-      //this.$store.dispatch("getUser");
-      //this.$router.push("/profile");
     },
   },
 };

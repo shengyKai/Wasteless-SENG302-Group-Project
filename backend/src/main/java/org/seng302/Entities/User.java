@@ -81,6 +81,8 @@ public class User extends Account {
     public void setMiddleName(String middleName) {
         if (middleName == null || (middleName.length() > 0 && middleName.length() <= 16 && middleName.matches("[ a-zA-Z]+"))) {
             this.middleName = middleName;
+        } else if (middleName.equals("")) {
+            this.middleName = null;
         } else {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The middle name must not be empty, be less then 16 characters, and only contain letters.");
         }
@@ -123,6 +125,8 @@ public class User extends Account {
     public void setNickname(String nickname) {
         if (nickname == null || (nickname.length() > 0 && nickname.length() <= 16 && nickname.matches("[ a-zA-Z]*"))) {
             this.nickname = nickname;
+        } else if (nickname.equals("")) {
+            this.nickname = null;
         } else {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The nickname must not be empty, be less then 16 characters, and only contain letters.");
         }
@@ -144,6 +148,8 @@ public class User extends Account {
     public void setBio(String bio) {
         if (bio == null || (bio.length() > 0 && bio.length() <= 255 && bio.matches("[ a-zA-Z]*"))) {
             this.bio = bio;
+        } else if (bio.equals("")) {
+            this.bio = null;
         } else {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The bio must be less than 255 characters long, and only contain letters.");
         }
@@ -192,6 +198,8 @@ public class User extends Account {
         }
         if (validPhone) {
             this.phNum = phNum;
+        } else if (phNum.equals("")) {
+            this.phNum = null;
         } else {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Your phone number has been entered incorrectly");
         }
