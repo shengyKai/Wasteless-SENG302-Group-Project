@@ -31,9 +31,9 @@
           <h4>Phone Number</h4>
           {{ user.phoneNumber }}
         </v-col>
-        <v-col cols="12" sm="6">
+        <v-col class="address" cols="12" sm="6">
           <h4>Home Address</h4>
-          {{ user.homeAddress }}
+          {{ insertAddress(user.homeAddress) }}
         </v-col>
 
         <v-col cols="12">
@@ -62,10 +62,14 @@
 <script>
 import { getBusiness, getUser } from '../api';
 import UserAvatar from './utils/UserAvatar';
+import JsonAddressToReadableText from './utils/Methods/convertJsonAddressToReadableText';
 
 export default {
   name: 'ProfilePage',
-
+  //a way to use a common method for different components. Note that JsonAddressToReadableText is not the method name
+  //but is just a declaration so that we can use the methods in this file. For this case, the method in this file is called
+  //"convertAddressToReadableText()"
+  mixins: [JsonAddressToReadableText],
   data() {
     return {
       /**
@@ -80,7 +84,6 @@ export default {
       businesses: [],
     };
   },
-
   created() {
     if (this.$route.params.id === undefined) {
       this.user = this.$store.state.user;
@@ -141,6 +144,12 @@ export default {
   components: {
     UserAvatar,
   },
+  methods: {
+    //have to use a method here to access the method from mixins
+    insertAddress(address) {
+      return this.convertAddressToReadableText(address, "full");
+    }
+  }
 };
 </script>
 
@@ -165,5 +174,9 @@ export default {
 
 .link-chip {
   margin-right: 4px;
+}
+
+.address{
+  white-space: pre-line;
 }
 </style>

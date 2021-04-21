@@ -320,6 +320,7 @@ export default {
           region        : this.state,
           country       : this.country,
           postcode      : this.postcode,
+          district      : this.district
         },
         password    : this.password,
       };

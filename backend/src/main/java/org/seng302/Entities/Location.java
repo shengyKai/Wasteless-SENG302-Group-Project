@@ -108,7 +108,7 @@ public class Location {
         if (!checkValidCountry(location.getCountry())) {
             return false;
         }
-        if (!checkValidCountry(location.getDistrict())) {
+        if (!checkValidDistrict(location.getDistrict())) {
             return false;
         }
         return checkValidPostCode(location.getPostCode());
@@ -221,7 +221,7 @@ public class Location {
      * @return true if the district is valid, false otherwise
      */
     public boolean checkValidDistrict(String district) {
-        if (district == null || (district.length() <= 100 && district.matches("[a-zA-Z0-9]+"))) {
+        if (district.equals("") || (district.length() <= 100 && district.matches("[a-zA-Z0-9 ]+"))) {
             return true;
         } else {
             return false;

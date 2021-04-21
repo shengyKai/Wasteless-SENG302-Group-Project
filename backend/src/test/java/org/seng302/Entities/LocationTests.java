@@ -473,7 +473,7 @@ public class LocationTests {
   public void checkValidAllLocationParametersDistrictInvalid() {
     assertThrows(ResponseStatusException.class, () -> {
       Location location = new Location.Builder().atStreetNumber("1").onStreet("Elizabeth Street").inCity("Christchurch")
-                      .inRegion("Canterbury").inCountry("New Zealand").withPostCode("80999999999999941")
+                      .inRegion("Canterbury").inCountry("New Zealand").withPostCode("8041")
                       .atDistrict("this district string contains above one hundred characters from start to end inclusive of spacessssss")
                       .build();
     });

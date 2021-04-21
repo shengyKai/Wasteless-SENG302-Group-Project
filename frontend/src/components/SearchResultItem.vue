@@ -10,19 +10,27 @@
         </router-link>
       </v-list-item-title>
       <v-list-item-subtitle> {{ user.email }} </v-list-item-subtitle>
-      <v-list-item-subtitle> {{ user.homeAddress }} </v-list-item-subtitle>
+      <v-list-item-subtitle> {{ insertAddress(user.homeAddress) }} </v-list-item-subtitle>
     </v-list-item-content>
   </v-list-item>
 </template>
 
 <script>
 import UserAvatar from './utils/UserAvatar';
+import JsonAddressToReadableText from './utils/Methods/convertJsonAddressToReadableText';
 
 export default {
   props: ['user'],
-
   components: {
-    UserAvatar,
+    UserAvatar
+  },
+  //take a look at UserProfile.vue to know more about this
+  mixins: [JsonAddressToReadableText],
+  methods: {
+    //take a look at UserProfile.vue to know more about this
+    insertAddress(address) {
+      return this.convertAddressToReadableText(address, "half");
+    }
   }
 };
 </script>
