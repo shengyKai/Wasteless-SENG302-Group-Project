@@ -39,6 +39,9 @@ public class Business {
     @Column
     private Date created;
 
+    @OneToMany (fetch = FetchType.LAZY, mappedBy = "business")
+    private List<Product> catalogue = new ArrayList<Product>() {};
+
     @ManyToOne
     @JoinColumn(name = "owner_id")
     private User primaryOwner;
