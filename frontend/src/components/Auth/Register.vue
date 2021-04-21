@@ -136,20 +136,12 @@
         </v-col>
 
       </v-row>
-      <!-- INPUT: Unit number -->
-      <v-text-field
-        class="required"
-        v-model="streetNO"
-        label="Unit No."
-        :rules="mandatoryRules"
-        outlined
-      />
 
       <!-- INPUT: Street/Company -->
       <v-text-field
         class="required"
         v-model="street1"
-        label="Street Address, Company Name"
+        label="Street Address"
         :rules="mandatoryRules"
         outlined
       />
@@ -294,15 +286,10 @@ export default {
     },
     // Complete registration with API
     async register () {
-      //S300T500-16 merge_U1 last final final final bug
-      //Was thinking to use this match method to split unit and street
-      //(e.g) 10 bla street -> streetNo : 10, sreet1 : bla street
-      //however it dosent work, so I change the text field back to our initial design
-      //With the unit text field and street name text field
-      //Leave this here in case someone wan to use this format in the future, it somehow return null? TT
-      // let parts = this.street1.match(/([A-Za-z]+)([0-9]+)/);
-      // #streetNo : parts[2]
-      // #street1  : part[1]
+
+      let part = this.street1.split(" ");
+      let streetNum = part[0];
+      let streetName = part.slice(1, part.length).join(" ");
 
       let user = {
         firstName   : this.name,
@@ -314,8 +301,8 @@ export default {
         dateOfBirth : this.dob,
         phoneNumber : this.phone,
         homeAddress : {
-          streetNumber  : this.streetNO,
-          streetName    : this.street1,
+          streetNumber  : streetNum,
+          streetName    : streetName,
           city          : this.city,
           region        : this.state,
           country       : this.country,
