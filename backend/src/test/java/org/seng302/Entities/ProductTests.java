@@ -1,10 +1,9 @@
 package org.seng302.Entities;
 
-import org.junit.Before;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.seng302.Persistence.BusinessRepository;
 import org.seng302.Persistence.ProductRepository;
+import org.seng302.Persistence.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -15,22 +14,24 @@ import java.util.Date;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class ProductTests {
 
     @Autowired
     ProductRepository productRepository;
     @Autowired
     BusinessRepository businessRepository;
+    @Autowired
+    UserRepository userRepository;
 
     private Product testProduct = new Product();
-    private Product.Builder productBuilder;
 
     private User testUser1;
     private Business testBusiness1;
     private Business testBusiness2;
     private Business testBusiness3;
 
-    @Before
+    @BeforeAll
     public void setUp() throws ParseException {
         businessRepository.deleteAll();
 
@@ -47,6 +48,7 @@ public class ProductTests {
                 .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Christchurch,New Zealand," +
                         "Canterbury,8041"))
                 .build();
+        testUser1 = userRepository.save(testUser1);
         testBusiness1 = new Business.Builder()
                 .withBusinessType("Accommodation and Food Services")
                 .withAddress(new Location())
@@ -57,7 +59,7 @@ public class ProductTests {
         testBusiness1 = businessRepository.save(testBusiness1);
     }
 
-    @BeforeEach
+    @AfterEach
     public void cleanUp() {
         productRepository.deleteAll();
     }
@@ -134,7 +136,7 @@ public class ProductTests {
         Product product1 = new Product.Builder().withProductCode("NathanApple-69").withName("The Nathan Apple")
                 .withDescription("Ever wonder why Nathan has an apple").withRecommendedRetailPrice("9000.01")
                 .withBusiness(testBusiness1).build();
-        Product product2 = new Product.Builder().withProductCode("NathanApple-69").withName("The Nathan Apple Two")
+        Product product2 = new Product.Builder().withProductCode("NathanApple-70").withName("The Nathan Apple Two")
                 .withDescription("Ever wonder why Nathan has an apple maybe").withRecommendedRetailPrice("9000.02")
                 .withBusiness(testBusiness1).build();
         productRepository.save(product1);
