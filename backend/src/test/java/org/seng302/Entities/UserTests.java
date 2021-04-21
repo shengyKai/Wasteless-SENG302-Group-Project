@@ -934,9 +934,11 @@ public class UserTests {
      */
     @Test
     public void setCreatedTest() {
-        Date testDate = new Date(System.currentTimeMillis());
+        Date now = new Date(System.currentTimeMillis());
         User testUser = testBuilder.build();
-        assertEquals(testDate.compareTo(testUser.getCreated()), 0);
+        // Check that the difference between the time the user was created and the time at the start of execution of
+        // this function is less than 1 second
+        assertTrue(testUser.getCreated().getTime() - now.getTime() < 1000);
     }
 
     /**
