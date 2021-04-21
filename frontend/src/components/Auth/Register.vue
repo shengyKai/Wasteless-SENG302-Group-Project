@@ -61,7 +61,7 @@
         v-model="bio"
         label="Bio"
         rows="3"
-        :rules="maxCharBioRules"
+        :rules="charBioRules"
         outlined
       />
 
@@ -275,8 +275,9 @@ export default {
       maxCharRules: [
         field => (field.length <= 100) || 'Reached max character limit: 100'
       ],
-      maxCharBioRules: [
-        field => (field.length <= 200) || 'Reached max character limit: 200'
+      charBioRules: [
+        field => (field.length <= 200) || 'Reached max character limit: 200',
+        field => /(^[ a-zA-Z0-9@//$%&!'//#,//.//(//)//:;_-]*$)/.test(field) || 'Bio must only contain letters, numbers, and valid special characters'
       ],
       phoneNumberRules: [
         field => /(^\(?\d{1,3}\)?[\s.-]?\d{3,4}[\s.-]?\d{4,5}$)|(^$)/.test(field) || 'Must be a valid phone number'

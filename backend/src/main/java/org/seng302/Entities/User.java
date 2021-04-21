@@ -148,12 +148,13 @@ public class User extends Account {
      */
     //Todo Discuss with team about what characters should be allowed in the BIO
     public void setBio(String bio) {
-        if (bio == null || (bio.length() > 0 && bio.length() <= 255 && bio.matches("[ a-zA-Z]*"))) {
+        if (bio == null || (bio.length() > 0 && bio.length() <= 200 && bio.matches("[ a-zA-Z0-9@//$%&!'//#,//.//(//)//:;_-]*"))) {
             this.bio = bio;
         } else if (bio.equals("")) {
             this.bio = null;
         } else {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The bio must be less than 255 characters long, and only contain letters.");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The bio must be less than 200 characters long," + 
+            "and only contain letters, numbers, and valid special characters");
         }
     }
 
