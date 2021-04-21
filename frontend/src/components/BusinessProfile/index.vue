@@ -27,14 +27,9 @@
         <v-col cols="12">
           <h4>Administrators</h4>
           <span v-for="admin in administrators" :key="admin.id">
-            <template v-if="typeof admin === 'string'">
-              <v-chip color="error" class="link-chip link"> {{ admin }} </v-chip>
-            </template>
-            <template v-else>
-              <router-link :to="'/profile/' + admin.id">
-                <v-chip class="link-chip link" color="primary"> {{ admin.firstName }} {{ admin.lastName }} </v-chip>
-              </router-link>
-            </template>
+            <router-link :to="'/profile/' + admin.id">
+              <v-chip class="link-chip link" color="primary"> {{ admin.firstName }} {{ admin.lastName }} </v-chip>
+            </router-link>
           </span>
         </v-col>
       </v-row>

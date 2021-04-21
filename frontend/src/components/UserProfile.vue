@@ -43,14 +43,9 @@
         <v-col cols="12">
           <h4>Businesses</h4>
           <span v-for="business in businesses" :key="business.id">
-            <template v-if="typeof business === 'string'">
-              <v-chip color="error" class="link-chip link"> {{ business }} </v-chip>
-            </template>
-            <template v-else>
-              <router-link :to="'/business/' + business.id">
-                <v-chip color="primary" class="link-chip link"> {{ business.name }} </v-chip>
-              </router-link>
-            </template>
+            <router-link :to="'/business/' + business.id">
+              <v-chip color="primary" class="link-chip link"> {{ business.name }} </v-chip>
+            </router-link>
           </span>
         </v-col>
       </v-row>
