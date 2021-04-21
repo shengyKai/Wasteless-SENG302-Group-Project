@@ -102,7 +102,7 @@ public class Product {
      * Sets the date of when the product was created
      * @param created the date when the product was created
      */
-    public void setCreated(Date created) { this.created = created; }
+    private void setCreated(Date created) { this.created = created; }
 
     /**
      * Sets the business associated with the catalogue the product is in
@@ -119,7 +119,6 @@ public class Product {
         private String name;
         private String description;
         private BigDecimal recommendedRetailPrice;
-        private Date created;
         private Business business;
 
         /**
@@ -163,16 +162,6 @@ public class Product {
         }
 
         /**
-         * Sets the builder's created date
-         * @param created the date the product was created
-         * @return Builder with the creation date set
-         */
-        public Builder withCreated(Date created) {
-            this.created = created;
-            return this;
-        }
-
-        /**
          * Sets the builder's business. Mandatory
          * @param business the business of the catalogue the product is in
          * @return Builder with the business set
@@ -192,8 +181,8 @@ public class Product {
             product.setName(this.name);
             product.setDescription(this.description);
             product.setRecommendedRetailPrice(this.recommendedRetailPrice);
-            product.setCreated(this.created);
             product.setBusiness(this.business);
+            product.setCreated(new Date());
             return product;
         }
     }
