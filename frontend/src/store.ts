@@ -1,4 +1,4 @@
-import {User, getUser, Business} from './api';
+import {User,  Business, getUser, login} from './api';
 import Vuex, { Store, StoreOptions } from 'vuex';
 import { COOKIE, deleteCookie, isTesting, setCookie } from './utils';
 
@@ -128,14 +128,27 @@ export function createOptions(): StoreOptions<StoreData> {
       }
     },
     actions: {
-      getUser (context) {
-        return getUser().then((response) => {
+      getUser (context, userId) {
+        return getUser(userId).then((response) => {
           if (typeof response === 'string') {
             context.commit('setError', response);
             return;
           }
           context.commit('setUser', response);
         });
+      },
+      async login(context, { email, password }) {
+        let userId = await login(email, password);
+        if (typeof userId === 'string') {
+          context.commit('setError', userId);
+          return;
+        }
+        let user = await getUser(userId);
+        if (typeof user === 'string') {
+          context.commit('setError', user);
+          return;
+        }
+        context.commit('setUser', user);
       }
     }
   };

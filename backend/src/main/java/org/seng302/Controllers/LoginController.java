@@ -45,6 +45,7 @@ public class LoginController {
      */
     @PostMapping("/login")
     public void login(@RequestBody JSONObject userinfo, HttpServletRequest request, HttpServletResponse response) {
+        logger.info("Login");
         String email = userinfo.getAsString("email");
         String password = userinfo.getAsString("password");
         Account matchingAccount = accountRepository.findByEmail(email);
@@ -65,6 +66,15 @@ public class LoginController {
                 // Must be a user
                 Optional<User> accountAsUser = userRepository.findById(matchingAccount.getUserID());
                 AuthenticationTokenManager.setAuthenticationToken(request, response, accountAsUser.get());
+            }
+            try {
+                response.setStatus(200);
+                response.setContentType("application/json");
+                String authToken = AuthenticationTokenManager.setAuthenticationToken(request, response);
+                response.getWriter().write("{\"userId\":" + matchingAccount.getUserID() + "}");
+                response.getWriter().flush();
+            } catch (IOException e) {
+                e.getMessage();
             }
 
         }
