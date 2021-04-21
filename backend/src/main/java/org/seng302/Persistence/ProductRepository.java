@@ -19,6 +19,6 @@ public interface ProductRepository extends CrudRepository<Product, Long>{
          * @return a single product within the business's catalogue that matches the id of said business and the code
          * of the product
          */
-        Product findByProductCodeAndBusinessID(@Param("business") Business business,
-                                               @Param("product_code") String productCode);
+        Product findByProductCodeAndBusiness(@Param("business") Business business,
+                                               @Param("productCode") String productCode);
 }
