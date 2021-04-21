@@ -5,20 +5,20 @@ import java.math.BigDecimal;
 import java.util.Date;
 
 @Table(uniqueConstraints={
-        @UniqueConstraint(columnNames = {"productCode", "business_id"})
+        @UniqueConstraint(columnNames = {"product_code", "business_id"})
 })
 @Entity
 public class Product {
     @Id
     @GeneratedValue
     private Long id;
-    @Column(nullable = false)
+    @Column(nullable = false, name = "product_code")
     private String productCode;
     @Column(nullable = false)
     private String name;
     @Column(nullable = false)
     private String description;
-    @Column(nullable = false)
+    @Column(nullable = false, name = "recommended_retail_price")
     private BigDecimal recommendedRetailPrice;
     @Column(nullable = false)
     private Date created;
@@ -78,7 +78,7 @@ public class Product {
      * Sets the code of the product
      * @param productCode the code for the product
      */
-    public void setProductCode(String productCode) { this.productCode = productCode; }
+    private void setProductCode(String productCode) { this.productCode = productCode; }
 
     /**
      * Sets the name of the product
@@ -108,5 +108,93 @@ public class Product {
      * Sets the business associated with the catalogue the product is in
      * @param business the business
      */
-    public void setBusiness(Business business) { this.business = business; }
+    private void setBusiness(Business business) { this.business = business; }
+
+
+    /**
+     * Builder for Product
+     */
+    public static class Builder {
+        private String productCode;
+        private String name;
+        private String description;
+        private BigDecimal recommendedRetailPrice;
+        private Date created;
+        private Business business;
+
+        /**
+         * Sets the builder's product code. Mandatory
+         * @param productCode the code of the product. Unique identifier in each business catalogue
+         * @return Builder with the product code set
+         */
+        public Builder withProductCode(String productCode) {
+            this.productCode = productCode;
+            return this;
+        }
+
+        /**
+         * Sets the builder's name. Mandatory
+         * @param name the full name of the product
+         * @return Builder with the name set
+         */
+        public Builder withName(String name) {
+            this.name = name;
+            return this;
+        }
+
+        /**
+         * Sets the builder's description.
+         * @param description the description of the product
+         * @return Builder with the description set
+         */
+        public Builder withDescription(String description) {
+            this.description = description;
+            return this;
+        }
+
+        /**
+         * Sets the builder's recommended retail price
+         * @param recommendedRetailPrice the recommended retail price of the product
+         * @return Builder with the recommended retail price set
+         */
+        public Builder withRecommendedRetailPrice(BigDecimal recommendedRetailPrice) {
+            this.recommendedRetailPrice = recommendedRetailPrice;
+            return this;
+        }
+
+        /**
+         * Sets the builder's created date
+         * @param created the date the product was created
+         * @return Builder with the creation date set
+         */
+        public Builder withCreated(Date created) {
+            this.created = created;
+            return this;
+        }
+
+        /**
+         * Sets the builder's business. Mandatory
+         * @param business the business of the catalogue the product is in
+         * @return Builder with the business set
+         */
+        public Builder withBusiness(Business business) {
+            this.business = business;
+            return this;
+        }
+
+        /**
+         * Builds the product
+         * @return the newly created product
+         */
+        public Product build() {
+            Product product = new Product();
+            product.setProductCode(this.productCode);
+            product.setName(this.name);
+            product.setDescription(this.description);
+            product.setRecommendedRetailPrice(this.recommendedRetailPrice);
+            product.setCreated(this.created);
+            product.setBusiness(this.business);
+            return product;
+        }
+    }
 }
