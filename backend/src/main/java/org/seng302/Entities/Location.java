@@ -295,7 +295,7 @@ public class Location {
         Map<String, String> attributeMap = new HashMap<>();
         attributeMap.put("streetNumber", streetNumber);
         attributeMap.put("streetName", streetName);
-        attributeMap.put("city", city);
+        attributeMap.put("city", "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
         attributeMap.put("region", region);
         attributeMap.put("country", country);
         attributeMap.put("postcode", postCode);
