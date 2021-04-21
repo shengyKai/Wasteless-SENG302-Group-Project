@@ -24,7 +24,7 @@
         </v-col>
         <v-col cols="12" sm="6">
           <h4>Date of Birth</h4>
-          {{ user.dateOfBirth }}
+          {{ dateOfBirth }}
         </v-col>
 
         <v-col cols="12" sm="6">
@@ -115,6 +115,16 @@ export default {
       const diffMonths = Math.ceil(diffTime / (1000 * 60 * 60 * 24 * 30));
 
       return `${parts[2]} ${parts[1]} ${parts[3]} (${diffMonths} months ago)`;
+    },
+    /**
+     * Construct a representation of the user's date of birth to display on the profile
+     */
+    dateOfBirth() {
+      if (this.user.dateOfBirth === undefined) return '';
+
+      const dateOfBirth = new Date(this.user.dateOfBirth);
+      const parts = dateOfBirth.toDateString().split(' ');
+      return `${parts[2]} ${parts[1]} ${parts[3]}`;
     }
   },
   watch: {

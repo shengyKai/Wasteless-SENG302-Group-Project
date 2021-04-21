@@ -1,5 +1,5 @@
 <template>
-  <v-form @submit="register" v-model="valid">
+  <v-form @submit.prevent="register" v-model="valid">
     <h1>Register</h1>
 
     <v-container>
@@ -136,6 +136,14 @@
         </v-col>
 
       </v-row>
+      <!-- INPUT: Unit number -->
+      <v-text-field
+        class="required"
+        v-model="streetNO"
+        label="Unit No."
+        :rules="mandatoryRules"
+        outlined
+      />
 
       <!-- INPUT: Street/Company -->
       <v-text-field
@@ -143,13 +151,6 @@
         v-model="street1"
         label="Street Address, Company Name"
         :rules="mandatoryRules"
-        outlined
-      />
-
-      <!-- INPUT: Apartment, Suite, Unit, Building or Floor -->
-      <v-text-field
-        v-model="street2"
-        label="Apartment, Suite, Unit, Building, Floor"
         outlined
       />
 
@@ -216,6 +217,7 @@
 
 <script>
 import LocationAutocomplete from '@/components/utils/LocationAutocomplete';
+import {createUser} from '../../api';
 
 export default {
   name: 'Register',
@@ -236,8 +238,8 @@ export default {
       dob: '',
       countryCode: '64',
       phone: '',
+      streetNO: '',
       street1: '',
-      street2: '',
       district: '',
       state: '',
       city: '',
@@ -291,8 +293,46 @@ export default {
       this.$emit('showLogin');
     },
     // Complete registration with API
-    register () {
-      alert('TODO');
+    async register () {
+      //S300T500-16 merge_U1 last final final final bug
+      //Was thinking to use this match method to split unit and street
+      //(e.g) 10 bla street -> streetNo : 10, sreet1 : bla street
+      //however it dosent work, so I change the text field back to our initial design
+      //With the unit text field and street name text field
+      //Leave this here in case someone wan to use this format in the future, it somehow return null? TT
+      // let parts = this.street1.match(/([A-Za-z]+)([0-9]+)/);
+      // #streetNo : parts[2]
+      // #street1  : part[1]
+
+      let user = {
+        firstName   : this.name,
+        lastName    : this.name,
+        middleName  : this.name,
+        nickname    : this.nickname,
+        bio         : this.bio,
+        email       : this.email,
+        dateOfBirth : this.dob,
+        phoneNumber : this.phone,
+        homeAddress : {
+          streetNumber  : this.streetNO,
+          streetName    : this.street1,
+          city          : this.city,
+          region        : this.state,
+          country       : this.country,
+          postcode      : this.postcode,
+        },
+        password    : this.password,
+      };
+
+      let vrb = await createUser(user);
+      console.log(vrb);
+      if (vrb !== undefined ) {
+        alert('REGISTRATION FAILED');
+      }
+      else {
+        alert('TEST = SUCCESS');
+        this.$emit('showLogin');
+      }
     },
     // Close the date picker modal
     closeDatePicker () {

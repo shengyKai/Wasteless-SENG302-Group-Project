@@ -62,8 +62,8 @@ class UserSearchHelperTest {
                 .with("nickname", ":", "andy", true);
         spec = builder.build();
 
-        pagingUserList = readUserFile("src//test//testFiles//UserSearchHelperTestData1.csv");
-        savedUserList = readUserFile("src//test//testFiles//UserSearchHelperTestData2.csv");
+        pagingUserList = readUserFile("src/test/testFiles/UserSearchHelperTestData1.csv");
+        savedUserList = readUserFile("src/test/testFiles/UserSearchHelperTestData2.csv");
 
         businessRepository.deleteAll();
         userRepository.deleteAll();
@@ -317,19 +317,19 @@ class UserSearchHelperTest {
      * it returns a Sort which when applied to a query of UserRepository causes the results to be in alphabetical order
      * by the user's address parameter.
      */
-    //@Test
-    // TODO Fix the compareTo, not exactly sure how it works, contact Ella
-    //public void getSortOrderByHomeAddressTest() {
-    //    Sort userSort = UserSearchHelper.getSort("address", null);
-    //    List<User> queryResults = userRepository.findAll(spec, userSort);
-    //    User firstUser = queryResults.get(0);
-    //    Location previousAddress = firstUser.getAddress();
-    //    for (int i = 1; i < queryResults.size(); i++) {
-    //        Location currentAddress = queryResults.get(i).getAddress();
-    //        assertTrue(currentAddress.compareTo(previousAddress) >= 0);
-    //        previousAddress = currentAddress;
-    //    }
-    //}
+//    @Test
+//    TODO Fix the compareTo, not exactly sure how it works, contact Ella
+//    public void getSortOrderByHomeAddressTest() {
+//        Sort userSort = UserSearchHelper.getSort("address", null);
+//        List<User> queryResults = userRepository.findAll(spec, userSort);
+//        User firstUser = queryResults.get(0);
+//        Location previousAddress = firstUser.getAddress();
+//        for (int i = 1; i < queryResults.size(); i++) {
+//            Location currentAddress = queryResults.get(i).getAddress();
+//            assertTrue(currentAddress.compareTo(previousAddress) >= 0);
+//            previousAddress = currentAddress;
+//        }
+//    }
 
     /**
      * Verify that when getSort is called with a parameter for orderBy which does not appear in orderByOptions, it returns
@@ -829,13 +829,13 @@ class UserSearchHelperTest {
         userRepository.deleteAll();
         User donaldDuck = new User.Builder().withFirstName("Donald").withLastName("Duck").withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Christchurch,New Zealand," +
                 "Canterbury,8041"))
-                .withDob("1934-06-09").withEmail("donald.duck@waddlemail.com").withPassword("HonkHonk").build();
+                .withDob("1934-06-09").withEmail("donald.duck@waddlemail.com").withPassword("HonkHonk1").build();
         User donaldSmith = new User.Builder().withFirstName("Donald").withLastName("Smith").withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Christchurch,New Zealand," +
                 "Canterbury,8041"))
-                .withDob("1994-03-08").withEmail("donald.smith@gmail.com").withPassword("123456789").build();
+                .withDob("1994-03-08").withEmail("donald.smith@gmail.com").withPassword("abc123456789").build();
         User lucyMcDonald = new User.Builder().withFirstName("Lucy").withLastName("McDonald").withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Christchurch,New Zealand," +
                 "Canterbury,8041"))
-                .withDob("2000-11-21").withEmail("lucymcdonald@hotmail.com").withPassword("password").build();
+                .withDob("2000-11-21").withEmail("lucymcdonald@hotmail.com").withPassword("password123").build();
         userRepository.save(lucyMcDonald);
         userRepository.save(donaldDuck);
         userRepository.save(donaldSmith);
@@ -858,13 +858,13 @@ class UserSearchHelperTest {
         userRepository.deleteAll();
         User donaldDuck = new User.Builder().withFirstName("Donald").withLastName("Duck").withAddress(
                 Location.covertAddressStringToLocation("4,Rountree Street,Christchurch,New Zealand,Canterbury,8041"))
-                .withDob("1934-06-09").withEmail("donald.duck@waddlemail.com").withPassword("HonkHonk").build();
+                .withDob("1934-06-09").withEmail("donald.duck@waddlemail.com").withPassword("HonkHonk1").build();
         User donaldSmith = new User.Builder().withFirstName("Donald").withLastName("Smith").withAddress(
                 Location.covertAddressStringToLocation("4,Rountree Street,Christchurch,New Zealand,Canterbury,8041"))
-                .withDob("1994-03-08").withEmail("donald.smith@gmail.com").withPassword("123456789").build();
+                .withDob("1994-03-08").withEmail("donald.smith@gmail.com").withPassword("abc123456789").build();
         User lucyMcDonald = new User.Builder().withFirstName("Lucy").withLastName("McDonald").withAddress(
                 Location.covertAddressStringToLocation("4,Rountree Street,Christchurch,New Zealand,Canterbury,8041"))
-                .withDob("2000-11-21").withEmail("lucymcdonald@hotmail.com").withPassword("password").build();
+                .withDob("2000-11-21").withEmail("lucymcdonald@hotmail.com").withPassword("password123").build();
         userRepository.save(lucyMcDonald);
         userRepository.save(donaldDuck);
         userRepository.save(donaldSmith);
