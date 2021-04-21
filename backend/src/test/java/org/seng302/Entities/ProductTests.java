@@ -1,7 +1,6 @@
 package org.seng302.Entities;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.seng302.Persistence.BusinessRepository;
@@ -64,7 +63,7 @@ public class ProductTests {
     }
 
     /**
-     * //TODO Add docstring
+     * Test that a product object can be created and all its attributes are what they are expected to be.
      */
     @Test
     public void createValidProduct() {
@@ -79,7 +78,8 @@ public class ProductTests {
     }
 
     /**
-     * //TODO Add docstring
+     * Test that the auto generated IDs of the products are unique and a newly created product's id does not match
+     * the previously created product's id.
      */
     @Test
     public void checkTwoProductsDoNotHaveTheSameIDs() {
@@ -95,7 +95,7 @@ public class ProductTests {
     }
 
     /**
-     * //TODO Add docstring
+     * Test the date that is generated when a product is created is today (when the product is created).
      */
     @Test
     public void checkDate() {
@@ -111,9 +111,10 @@ public class ProductTests {
     }
 
     /**
-     * //TODO Add docstring
+     * Check that a product with the same code as one in a catalogue cannot be added to said catalogue, because two
+     * products with the same code cannot be in the same catalogue.
       */
-    @Test @Ignore
+    @Test
     public void checkNoTwoSameProductCodesWithinSameCatalogue() {
         Product product1 = new Product.Builder().withProductCode("NathanApple-69").withName("The Nathan Apple")
                 .withDescription("Ever wonder why Nathan has an apple").withRecommendedRetailPrice("9000.01")
@@ -126,7 +127,7 @@ public class ProductTests {
     }
 
     /**
-     * //TODO Add docstring
+     * Checks that two products with different product codes can be added to the same catalogue.
      */
     @Test
     public void checkTwoDifferentProductCodesWithinSameCatalogue() {
@@ -138,5 +139,22 @@ public class ProductTests {
                 .withBusiness(testBusiness1).build();
         productRepository.save(product1);
         productRepository.save(product2);
+    }
+
+    /**
+     * //TODO Add docstring
+     */
+    @Test
+    public void checkTheProductIsConnectedToTheBusinessCatalogue() {
+
+    }
+
+
+    /**
+     * //TODO Add docstring
+     */
+    @Test
+    public void createAValidListOfProductsInACatalogue() {
+
     }
 }
