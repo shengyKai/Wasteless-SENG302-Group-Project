@@ -44,7 +44,7 @@
 </template>
 
 <script>
-import { getBusiness, getUser } from '../../api';
+import { getBusiness } from '../../api';
 
 export default {
   name: 'BusinessProfile',
@@ -55,11 +55,6 @@ export default {
        * The business that this profile is for.
        */
       business: {},
-      /**
-       * The admin users for this business.
-       * Also contains strings that represent fetch errors
-       */
-      administrators: [],
     };
   },
 
@@ -88,14 +83,12 @@ export default {
       const diffMonths = Math.ceil(diffTime / (1000 * 60 * 60 * 24 * 30));
 
       return `${parts[2]} ${parts[1]} ${parts[3]} (${diffMonths} months ago)`;
-    }
-  },
+    },
 
-  watch: {
-    async business() {
-      this.administrators = await Promise.all((this.business.administrators || []).map(id => getUser(id)));
-    }
-  }
+    administrators() {
+      return this.business?.administrators || [];
+    },
+  },
 };
 </script>
 
