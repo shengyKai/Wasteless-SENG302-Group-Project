@@ -1,25 +1,38 @@
-import axios, { AxiosError, AxiosInstance, AxiosInterceptorManager, AxiosRequestConfig } from 'axios';
+import axios, { AxiosError, AxiosInstance } from 'axios';
 
 import { CreateProduct, createProduct } from "@/api";
 import { castMock } from './utils';
 import { AxiosResponse } from 'axios';
 
 jest.mock('axios', () => ({
-  create: jest.fn().mockReturnThis(),
-  get: jest.fn(),
-  post: jest.fn(),
-  patch: jest.fn(),
-  delete: jest.fn(),
-  put: jest.fn(),
+  create: jest.fn(function() {
+    // @ts-ignore
+    return this.instance;
+  }
+  ),
+  instance: {
+    get: jest.fn(),
+    post: jest.fn(),
+    patch: jest.fn(),
+    delete: jest.fn(),
+    put: jest.fn(),
+  },
 }));
 
+// @ts-ignore - We've added an instance attribute in the mock declaration that mimics a AxiosInstance
+const unMockedInstance: AxiosInstance = axios.instance;
+
+// Reinterprets the instance to a convinient mocked instance
 const instance = {
-  get: castMock(axios.get),
-  post: castMock(axios.post),
-  patch: castMock(axios.patch),
-  delete: castMock(axios.delete),
-  put: castMock(axios.put),
+  get: castMock(unMockedInstance.get),
+  post: castMock(unMockedInstance.post),
+  patch: castMock(unMockedInstance.patch),
+  delete: castMock(unMockedInstance.delete),
+  put: castMock(unMockedInstance.put),
 };
+
+// Makes sure that the api.ts has created a axios instance.
+expect(castMock(axios.create)).toBeCalled();
 
 /**
  * Wraps a value inside an AxiosResponse.
