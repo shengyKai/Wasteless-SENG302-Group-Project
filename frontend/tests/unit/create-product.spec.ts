@@ -1,10 +1,12 @@
 import Vue from 'vue';
+import Vuex from 'vuex';
 import Vuetify from 'vuetify';
 import { createLocalVue, Wrapper, mount } from '@vue/test-utils';
 
 import CreateProduct from '@/components/BusinessProfile/CreateProduct.vue';
 import { castMock, flushQueue } from './utils';
 import * as api from '@/api';
+import { createOptions } from '@/store';
 
 jest.mock('@/api', () => ({
   createProduct: jest.fn(),
@@ -31,6 +33,7 @@ describe('CreateProduct.vue', () => {
    * work.
    */
   beforeEach(() => {
+    localVue.use(Vuex);
     const vuetify = new Vuetify();
 
     // Creating wrapper around CreateProduct with data-app to appease vuetify
@@ -44,9 +47,13 @@ describe('CreateProduct.vue', () => {
     const elem = document.createElement('div');
     document.body.appendChild(elem);
 
+    let store = new Vuex.Store(createOptions());
+    store.state.createProductDialogBusiness = 90;
+
     appWrapper = mount(App, {
       localVue,
       vuetify,
+      store: store,
       attachTo: elem,
     });
 
@@ -72,7 +79,7 @@ describe('CreateProduct.vue', () => {
   async function populateRequiredFields() {
     await wrapper.setData({
       product: 'Product Name',
-      productCode: 'ABC-XYZ-0123456789',
+      productCode: 'ABC-XYZ-012-789',
     });
   }
 
@@ -84,18 +91,14 @@ describe('CreateProduct.vue', () => {
    *  - Shortcode
    *  - Description
    *  - Manufacturer
-   *  - Expiry date
    *  - Recommended retail price
-   *  - Quantity
    */
   async function populateAllFields() {
     await populateRequiredFields();
     await wrapper.setData({
       description: 'Product Description',
       manufacturer: 'Product Manufacturer',
-      expiryDate: '1/1/1900',
       recommendedRetailPrice: '100.00',
-      quantity: '50',
     });
   }
 
@@ -272,62 +275,6 @@ describe('CreateProduct.vue', () => {
   });
 
   /**
-   * Tests that the CreateProduct is invalid if the product quantity is negative
-   */
-  it('Invalid if quantity is negative', async () => {
-    await populateRequiredFields();
-    await wrapper.setData({
-      quantity: '-1',
-    });
-
-    await Vue.nextTick();
-
-    expect(wrapper.vm.valid).toBeFalsy();
-  });
-
-  /**
-   * Tests that the CreateProduct is invalid if the product quantity is too large
-   */
-  it('Invalid if quantity is too large', async () => {
-    await populateRequiredFields();
-    await wrapper.setData({
-      quantity: '100001',
-    });
-
-    await Vue.nextTick();
-
-    expect(wrapper.vm.valid).toBeFalsy();
-  });
-
-  /**
-   * Tests that the CreateProduct is invalid if the product quantity is not a number
-   */
-  it('Invalid if quantity is not a number', async () => {
-    await populateRequiredFields();
-    await wrapper.setData({
-      quantity: 'not really a number',
-    });
-
-    await Vue.nextTick();
-
-    expect(wrapper.vm.valid).toBeFalsy();
-  });
-
-  /**
-   * Tests that the CreateProduct is invalid if the product quantity is not a integer
-   */
-  it('Invalid if quantity is not a integer', async () => {
-    await populateRequiredFields();
-    await wrapper.setData({
-      quantity: '3.141592653589',
-    });
-
-    await Vue.nextTick();
-
-    expect(wrapper.vm.valid).toBeFalsy();
-  });
-
-  /**
    * Tests that the CreateProduct is invalid if no product code is provided
    */
   it('Invalid if no product code is provided', async () => {
@@ -393,14 +340,12 @@ describe('CreateProduct.vue', () => {
 
     await Vue.nextTick();
 
-    expect(createProduct).toBeCalledWith({
+    expect(createProduct).toBeCalledWith(90, {
+      id: 'ABC-XYZ-012-789',
       name: 'Product Name',
       description: 'Product Description',
       manufacturer: 'Product Manufacturer',
-      expiryDate: '1/1/1900',
-      recommendedRetailPrice: '100.00',
-      quantity: '50',
-      productCode: 'ABC-XYZ-0123456789',
+      recommendedRetailPrice: 100,
     });
     expect(wrapper.emitted().closeDialog).toBeTruthy();
   });
