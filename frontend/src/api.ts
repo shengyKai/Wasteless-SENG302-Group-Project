@@ -52,7 +52,7 @@ export type User = {
   homeAddress: Location,
   created?: string,
   role?: "user" | "globalApplicationAdmin" | "defaultGlobalApplicationAdmin",
-  businessesAdministered?: number[],
+  businessesAdministered?: Business[],
 };
 
 export type Location = {

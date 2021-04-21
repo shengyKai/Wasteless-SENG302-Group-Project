@@ -66,19 +66,8 @@
               color="primary"
             >
               <template v-for="(role, index) in roles">
-                <v-list-item
-                  :key="index"
-                  v-if="typeof role !== 'string'"
-                >
+                <v-list-item :key="index">
                   <v-list-item-title>{{ role.displayText }}</v-list-item-title>
-                </v-list-item>
-                <v-list-item
-                  :key="index"
-                  v-else
-                  disabled
-                  color="error"
-                >
-                  {{ role }}
                 </v-list-item>
               </template>
             </v-list-item-group>
@@ -93,7 +82,6 @@
 import SearchBar from "./utils/SearchBar";
 import UserAvatar from "./utils/UserAvatar";
 import { USER_ROLES } from "../utils";
-import {getBusiness} from "@/api";
 
 export default {
   name: "AppBar",
@@ -103,7 +91,6 @@ export default {
   },
   data() {
     return {
-      roles : [],
       selectedRole : 0,
     };
   },
@@ -143,30 +130,20 @@ export default {
     },
     user() {
       return this.$store.state.user;
+    },
+    roles() {
+      let result = [
+        { displayText: this.user.firstName, type: "user", id: this.user.id }
+      ];
+
+      for (const business of this.user.businessesAdministered) {
+        result.push({ displayText: business.name, type: "business", id: business.id });
+      }
+
+      return result;
     }
   },
   watch : {
-    user: {
-      async handler() {
-        // When the user changes, update the list of roles that the user can 'act as'
-        this.roles = [ { displayText: this.user.firstName, type: "user", id: this.user.id } ];
-        if (this.user.businessesAdministered === null) return;
-
-        // Fetch all administered businesses
-        let businesses = await Promise.all((this.user.businessesAdministered || []).map(id => getBusiness(id)));
-
-        // Convert businesses to roles
-        businesses = businesses.map(business => {
-          if (typeof business === 'string') return business;
-
-          return { displayText: business.name, type: "business", id: business.id };
-        });
-
-        // Add all the business roles
-        this.roles.push(...businesses);
-      },
-      immediate: true
-    },
     selectedRole() {
       // Set the role that the user is acting as to the role that has been selected from the list
       const role = this.roles[this.selectedRole];

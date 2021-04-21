@@ -43,14 +43,9 @@
         <v-col cols="12">
           <h4>Businesses</h4>
           <span v-for="business in businesses" :key="business.id">
-            <template v-if="typeof business === 'string'">
-              <v-chip color="error" class="link-chip link"> {{ business }} </v-chip>
-            </template>
-            <template v-else>
-              <router-link :to="'/business/' + business.id">
-                <v-chip color="primary" class="link-chip link"> {{ business.name }} </v-chip>
-              </router-link>
-            </template>
+            <router-link :to="'/business/' + business.id">
+              <v-chip color="primary" class="link-chip link"> {{ business.name }} </v-chip>
+            </router-link>
           </span>
         </v-col>
       </v-row>
@@ -60,7 +55,7 @@
 </template>
 
 <script>
-import { getBusiness, getUser } from '../api';
+import { getUser } from '../api';
 import UserAvatar from './utils/UserAvatar';
 
 export default {
@@ -73,11 +68,6 @@ export default {
        * If null then no profile is displayed
        */
       user: null,
-      /**
-       * The businesses that this user administers.
-       * Also contains strings that are error messages for businesses that failed to be retreived.
-       */
-      businesses: [],
     };
   },
 
@@ -116,6 +106,9 @@ export default {
 
       return `${parts[2]} ${parts[1]} ${parts[3]} (${diffMonths} months ago)`;
     },
+    businesses() {
+      return this.user?.businessesAdministered;
+    },
     /**
      * Construct a representation of the user's date of birth to display on the profile
      */
@@ -125,17 +118,6 @@ export default {
       const dateOfBirth = new Date(this.user.dateOfBirth);
       const parts = dateOfBirth.toDateString().split(' ');
       return `${parts[2]} ${parts[1]} ${parts[3]}`;
-    }
-  },
-  watch: {
-    async user() {
-      this.businesses = [];
-      const admins = this.user.businessesAdministered;
-
-      if (!admins) return;
-
-      const promises = admins.map(id => getBusiness(id));
-      this.businesses = await Promise.all(promises);
     }
   },
   components: {
