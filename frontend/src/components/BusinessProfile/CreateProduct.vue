@@ -134,6 +134,8 @@ export default {
      * Creates the product by calling the API
      **/
     async createProduct() {
+      const businessId = this.$store.state.createProductDialogBusiness;
+
       // Ensures that we have a reference to the original product code.
       const productCode = this.productCode;
 
@@ -144,7 +146,7 @@ export default {
 
       this.errorMessage = undefined;
       this.isLoading = true;
-      let response = await createProduct({
+      let response = await createProduct(businessId, {
         id: productCode,
         name: this.product,
         description: this.description,

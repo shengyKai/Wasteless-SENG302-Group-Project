@@ -387,13 +387,15 @@ export async function createBusiness(business: CreateBusiness): Promise<MaybeErr
 }
 
 /**
- * Creates a product
+ * Add a product to a businesses catalogue.
+ *
+ * @param businessId The business to add the product to
  * @param product The properties to create a product with
  * @return undefined if operation is successful, otherwise a string error
  */
-export async function createProduct(product: CreateProduct): Promise<MaybeError<undefined>> {
+export async function createProduct(businessId: number, product: CreateProduct): Promise<MaybeError<undefined>> {
   try {
-    await  instance.post('/businesses/products', product);
+    await  instance.post(`/businesses/${businessId}/products`, product);
   } catch (error) {
     let status: number | undefined = error.response?.status;
     if (status === undefined) return 'Failed to reach backend';
