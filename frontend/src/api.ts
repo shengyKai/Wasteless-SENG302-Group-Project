@@ -98,27 +98,23 @@ export type CreateBusiness = {
   businessType: BusinessType,
 };
 
-export type Product = {
+export type Image = {
   id: number,
-  name: string,
-  description?: string,
-  dateAdded: Date,
-  expiryDate?: Date,
-  manufacturer?: string,
-  recommendedRetailPrice?: string,
-  quantity: number,
-  productCode: string
+  filename: string,
+  thumbnailFilename: string,
 };
 
-export type CreateProduct = {
+export type Product = {
+  id: string,
   name: string,
   description?: string,
   manufacturer?: string,
-  expiryDate?: Date,
-  recommendedRetailPrice?: string,
-  quantity: number,
-  productCode: string
-}
+  recommendedRetailPrice?: number,
+  created?: string,
+  images: Image[],
+};
+
+export type CreateProduct = Omit<Product, 'created' | 'images'>;
 
 function isLocation(obj: any): obj is Location {
   if (obj === null || typeof obj !== 'object') return false;

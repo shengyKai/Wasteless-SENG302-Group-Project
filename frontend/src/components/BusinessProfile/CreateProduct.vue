@@ -18,6 +18,16 @@
                 <v-col>
                   <v-text-field
                     class="required"
+                    v-model="productCode"
+                    label="Short-hand Product Code"
+                    outlined
+                    :rules="mandatoryRules.concat(productCodeRules)"
+                    ref="productCodeField"
+                  />
+                </v-col>
+                <v-col>
+                  <v-text-field
+                    class="required"
                     v-model="product"
                     label="Name of product"
                     :rules="mandatoryRules.concat(maxCharRules)"
@@ -37,39 +47,9 @@
                   <v-text-field
                     v-model="manufacturer"
                     label="Manufacturer"
-                    :rules="maxCharRules"
+                    :rules="maxCharManufacturerRules"
                     outlined
                   />
-                </v-col>
-                <v-col cols="6">
-                  <v-menu
-                    v-model="dateMenu"
-                    :close-on-content-click="false"
-                    transition="scale-transition"
-                    nudge-right="40"
-                    offset-y
-                    min-width="auto"
-                  >
-                    <template v-slot:activator="{ on, attrs }">
-                      <v-text-field
-                        v-model="expiryDate"
-                        label="Expiry Date"
-                        prepend-icon="mdi-calendar"
-                        readonly
-                        v-bind="attrs"
-                        v-on="on"
-                        outlined
-                      />
-                    </template>
-                    <v-date-picker
-                      v-model="expiryDate"
-                      :allowed-dates="allowedDates"
-                      show-current
-                      no-title
-                      scrollable
-                      @input="dateMenu=false"
-                    />
-                  </v-menu>
                 </v-col>
                 <v-col cols="6">
                   <v-text-field
@@ -79,29 +59,8 @@
                     outlined
                   />
                 </v-col>
-                <v-col cols="6">
-                  <v-text-field
-                    v-model="quantity"
-                    label="Quantity"
-                    type="number"
-                    :rules="quantityRules"
-                    single-line
-                    outlined
-                  />
-                </v-col>
-                <v-col>
-                  <v-text-field
-                    class="required"
-                    v-model="productCode"
-                    label="Short-hand Product Code"
-                    outlined
-                    :rules="mandatoryRules.concat(productCodeRules)"
-                    ref="productCodeField"
-                  />
-                </v-col>
               </v-row>
             </v-container>
-
           </v-card-text>
           <v-card-actions>
             <v-spacer/>
@@ -135,23 +94,23 @@ export default {
   data() {
     return {
       dialog: true,
-      dateMenu: false,
+      productCode: '',
       product: '',
       description: '',
-      expiryDate: '',
       manufacturer: '',
       recommendedRetailPrice: '',
-      quantity: '',
-      productCode: '',
       errorMessage: undefined,
       isLoading: false,
       unavailableProductCodes: [],
       valid: false,
       maxCharRules: [
-        field => (field.length <= 100) || 'Reached max character limit: 100'
+        field => (field.length <= 50) || 'Reached max character limit: 50',
+      ],
+      maxCharManufacturerRules: [
+        field => (field.length <= 100) || 'Reached max character limit: 100',
       ],
       maxCharDescriptionRules: [
-        field => (field.length <= 200) || 'Reached max character limit: 200'
+        field => (field.length <= 200) || 'Reached max character limit: 200',
       ],
       mandatoryRules: [
         //All fields with the class "required" will go through this ruleset to ensure the field is not empty.
@@ -162,12 +121,8 @@ export default {
         //A price must be numbers and may contain a decimal followed by exactly two numbers
         field => /(^\d{1,5}(\.\d{2})?$)|^$/.test(field) || 'Must be a valid price'
       ],
-      quantityRules: [
-        field => field >= 0 || 'Must be a positive number',
-        field => field <= 100000 || 'Must not be too large',
-        field => /^([1-9][0-9]*)?$/.test(field) || 'Must be an integer',
-      ],
       productCodeRules: [
+        field => field.length <= 15 || 'Reached max character limit: 15',
         field => !/ /.test(field) || 'Must not contain a space',
         field => /^[-A-Z0-9]+$/.test(field) || 'Must be all uppercase letters, numbers and dashes.',
         field => !this.unavailableProductCodes.includes(field) || 'Product code is unavailable',
@@ -179,20 +134,22 @@ export default {
      * Creates the product by calling the API
      **/
     async createProduct() {
-      //TODO merge with backend
       // Ensures that we have a reference to the original product code.
       const productCode = this.productCode;
+
+      let recommendedRetailPrice = parseFloat(this.recommendedRetailPrice);
+      if (isNaN(recommendedRetailPrice)) {
+        recommendedRetailPrice = undefined;
+      }
 
       this.errorMessage = undefined;
       this.isLoading = true;
       let response = await createProduct({
+        id: productCode,
         name: this.product,
         description: this.description,
         manufacturer: this.manufacturer,
-        expiryDate: this.expiryDate,
-        recommendedRetailPrice: this.recommendedRetailPrice,
-        quantity: this.quantity,
-        productCode: productCode
+        recommendedRetailPrice,
       });
       this.isLoading = false;
 
