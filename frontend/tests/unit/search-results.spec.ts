@@ -70,7 +70,7 @@ function createTestUsers(count: number) {
       lastName: 'test_lastname' + i,
       email: 'test_email' + i,
       dateOfBirth: '1/1/1900',
-      homeAddress: 'test_address' + i,
+      homeAddress: { country: 'test_country' + i },
     });
   }
   return result;

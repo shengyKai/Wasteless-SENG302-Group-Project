@@ -1,4 +1,4 @@
-import {User, getUser, Business} from './api';
+import {User,  Business, getUser, login} from './api';
 import Vuex, { Store, StoreOptions } from 'vuex';
 import { COOKIE, deleteCookie, isTesting, setCookie } from './utils';
 
@@ -29,6 +29,7 @@ export type StoreData = {
    * Whether or not the dialog for registering a business is being shown.
    */
   createBusinessDialogShown: boolean,
+  createProductDialogShown: boolean,
 };
 
 export function createOptions(): StoreOptions<StoreData> {
@@ -38,6 +39,7 @@ export function createOptions(): StoreOptions<StoreData> {
       activeRole: null,
       globalError: null,
       createBusinessDialogShown: false,
+      createProductDialogShown: false,
     },
     mutations: {
       setUser (state, payload: User) {
@@ -97,6 +99,24 @@ export function createOptions(): StoreOptions<StoreData> {
        */
       hideCreateBusiness(state) {
         state.createBusinessDialogShown = false;
+      },
+
+      /**
+       * Creates a modal create product dialog
+       *
+       * @param state Current store state
+       */
+      showCreateProduct(state) {
+        state.createProductDialogShown = true;
+      },
+
+      /**
+       * Hides the create product dialog
+       *
+       * @param state Current store state
+       */
+      hideCreateProduct(state) {
+        state.createProductDialogShown = false;
       }
     },
     getters: {
@@ -108,14 +128,27 @@ export function createOptions(): StoreOptions<StoreData> {
       }
     },
     actions: {
-      getUser (context) {
-        return getUser().then((response) => {
+      getUser (context, userId) {
+        return getUser(userId).then((response) => {
           if (typeof response === 'string') {
             context.commit('setError', response);
             return;
           }
           context.commit('setUser', response);
         });
+      },
+      async login(context, { email, password }) {
+        let userId = await login(email, password);
+        if (typeof userId === 'string') {
+          context.commit('setError', userId);
+          return;
+        }
+        let user = await getUser(userId);
+        if (typeof user === 'string') {
+          context.commit('setError', user);
+          return;
+        }
+        context.commit('setUser', user);
       }
     }
   };

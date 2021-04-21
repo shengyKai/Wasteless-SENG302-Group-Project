@@ -1,5 +1,6 @@
 package org.seng302.Entities;
 
+import org.seng302.Tools.AuthenticationTokenManager;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -7,6 +8,11 @@ import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 
 import javax.persistence.*;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
+
+import com.fasterxml.jackson.databind.ser.impl.StringArraySerializer;
+
 
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -226,6 +232,24 @@ public class Business {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The given user is not an admin of this business");
         } else {
             this.administrators.remove(oldAdmin);
+        }
+    }
+
+    /**
+     * This method checks if the account associated with the current session has permission to act as this business (i.e.,
+     * the user is either an admin of the business or a GAA). If the account does not have permission to act as this
+     * business, a response status exception with status code 403 will be thrown.
+     */
+    public void checkSessionPermissions(HttpServletRequest request) {
+        AuthenticationTokenManager.checkAuthenticationToken(request);
+        HttpSession session = request.getSession(false);
+        Long userId = (Long) session.getAttribute("accountId");
+        Set<Long> adminIds = new HashSet<>();
+        for (User user : getOwnerAndAdministrators()) {
+            adminIds.add(user.getUserID());
+        }
+        if (!AuthenticationTokenManager.sessionCanSeePrivate(request, null) && !adminIds.contains(userId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User does not have sufficient permissions to perform this action");
         }
     }
 
