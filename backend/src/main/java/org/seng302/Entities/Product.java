@@ -69,12 +69,6 @@ public class Product {
     public Business getBusiness() { return business; }
 
     /**
-     * Sets the id of the product
-     * @param id  the id of the product
-     */
-    public void setID(Long id) { this.id = id; }
-
-    /**
      * Sets the code of the product
      * @param productCode the code for the product
      */
@@ -156,8 +150,9 @@ public class Product {
          * @param recommendedRetailPrice the recommended retail price of the product
          * @return Builder with the recommended retail price set
          */
-        public Builder withRecommendedRetailPrice(BigDecimal recommendedRetailPrice) {
-            this.recommendedRetailPrice = recommendedRetailPrice;
+        public Builder withRecommendedRetailPrice(String recommendedRetailPrice) {
+            BigDecimal RRP = new BigDecimal(recommendedRetailPrice);
+            this.recommendedRetailPrice = RRP;
             return this;
         }
 
