@@ -3,6 +3,14 @@ import Vuetify from 'vuetify';
 import { createLocalVue, Wrapper, mount } from '@vue/test-utils';
 
 import CreateProduct from '@/components/BusinessProfile/CreateProduct.vue';
+import { castMock, flushQueue } from './utils';
+import * as api from '@/api';
+
+jest.mock('@/api', () => ({
+  createProduct: jest.fn(),
+}));
+
+const createProduct = castMock(api.createProduct);
 
 Vue.use(Vuetify);
 
@@ -68,6 +76,18 @@ describe('CreateProduct.vue', () => {
     });
   }
 
+  /**
+   * Populates all fields of the CreateProduct form
+   *
+   * Which include the product's:
+   *  - Name
+   *  - Shortcode
+   *  - Description
+   *  - Manufacturer
+   *  - Expiry date
+   *  - Recommended retail price
+   *  - Quantity
+   */
   async function populateAllFields() {
     await populateRequiredFields();
     await wrapper.setData({
@@ -77,6 +97,30 @@ describe('CreateProduct.vue', () => {
       recommendedRetailPrice: '100.00',
       quantity: '50',
     });
+  }
+
+  /**
+   * Finds the close button in the CreateProduct form
+   *
+   * @returns A Wrapper around the close button
+   */
+  function findCloseButton() {
+    const buttons = wrapper.findAllComponents({ name: 'v-btn' });
+    const filtered = buttons.filter(button => button.text().includes('Close'));
+    expect(filtered.length).toBe(1);
+    return filtered.at(0);
+  }
+
+  /**
+   * Finds the create button in the CreateProduct form
+   *
+   * @returns A Wrapper around the create button
+   */
+  function findCreateButton() {
+    const buttons = wrapper.findAllComponents({ name: 'v-btn' });
+    const filtered = buttons.filter(button => button.text().includes('Create'));
+    expect(filtered.length).toBe(1);
+    return filtered.at(0);
   }
 
   /**
@@ -323,5 +367,60 @@ describe('CreateProduct.vue', () => {
     await Vue.nextTick();
 
     expect(wrapper.vm.valid).toBeFalsy();
+  });
+
+  /**
+   * Tests that when the close button is pressed the "closeDialog" event is emitted, this should
+   * also result in the dialog getting closed.
+   */
+  it('When the close button is pressed then the "closeDialog" event should be emitted', async () => {
+    await findCloseButton().trigger('click'); // Click close button
+
+    expect(wrapper.emitted().closeDialog).toBeTruthy();
+  });
+
+  /**
+   * Tests that when the create button is pressed and the api call is successful that the parameters
+   * are passed to the api function and the dialog is closed.
+   */
+  it('When the create button is pressed then an api call should be made and is successful', async () => {
+    await populateAllFields();
+    createProduct.mockResolvedValue(undefined); // Ensure that the operation is successful
+
+    await Vue.nextTick();
+
+    await findCreateButton().trigger('click'); // Click create button
+
+    await Vue.nextTick();
+
+    expect(createProduct).toBeCalledWith({
+      name: 'Product Name',
+      description: 'Product Description',
+      manufacturer: 'Product Manufacturer',
+      expiryDate: '1/1/1900',
+      recommendedRetailPrice: '100.00',
+      quantity: '50',
+      productCode: 'ABC-XYZ-0123456789',
+    });
+    expect(wrapper.emitted().closeDialog).toBeTruthy();
+  });
+
+  /**
+   * Tests that if the create button is pressed, but the api returns an error. Then this error
+   * should be shown
+   */
+  it('When the create button is pressed and the api returns an error then the error should be shown', async () => {
+    await populateAllFields();
+    createProduct.mockResolvedValue('test_error_message'); // Ensure that the operation is successful
+
+    await Vue.nextTick();
+
+    await findCreateButton().trigger('click'); // Click create button
+
+    await flushQueue();
+
+    // The appWrapper is tested for the text, because the dialog content is not in the dialog
+    // element.
+    expect(appWrapper.text()).toContain('test_error_message');
   });
 });
