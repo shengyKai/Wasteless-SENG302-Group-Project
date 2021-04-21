@@ -411,7 +411,7 @@ describe('CreateProduct.vue', () => {
    */
   it('When the create button is pressed and the api returns an error then the error should be shown', async () => {
     await populateAllFields();
-    createProduct.mockResolvedValue('test_error_message'); // Ensure that the operation is successful
+    createProduct.mockResolvedValue('test_error_message'); // Ensure that the operation is fails
 
     await Vue.nextTick();
 
