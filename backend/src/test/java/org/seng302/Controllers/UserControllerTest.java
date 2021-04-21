@@ -242,7 +242,7 @@ public class UserControllerTest {
      */
     @Test
     public void getUserSearchOrderByFirstNameReverseTrueTest() throws Exception {
-        List<User> userList = readUsersFromTestFile("src//test//testFiles//UsersControllerTestData.csv");
+        List<User> userList = readUsersFromTestFile("src/test/testFiles/UsersControllerTestData.csv");
         userRepository.deleteAll();
         for (User user : userList) {
             userRepository.save(user);
@@ -276,7 +276,7 @@ public class UserControllerTest {
      */
     @Test
     public void getUserSearchOrderByEmailReverseFalseTest() throws Exception {
-        List<User> userList = readUsersFromTestFile("src//test//testFiles//UsersControllerTestData.csv");
+        List<User> userList = readUsersFromTestFile("src/test/testFiles/UsersControllerTestData.csv");
         userRepository.deleteAll();
         for (User user : userList) {
             userRepository.save(user);
@@ -309,7 +309,7 @@ public class UserControllerTest {
      */
     @Test
     public void getUserSearchOrderByRelevanceTest() throws Exception {
-        List<User> userList = readUsersFromTestFile("src//test//testFiles//UsersControllerTestData.csv");
+        List<User> userList = readUsersFromTestFile("src/test/testFiles/UsersControllerTestData.csv");
         userRepository.deleteAll();
         for (User user : userList) {
             userRepository.save(user);
@@ -342,7 +342,7 @@ public class UserControllerTest {
      */
     @Test
     public void getUserSearchPageTwoTest() throws Exception {
-        List<User> userList = readUsersFromTestFile("src//test//testFiles//UsersControllerTestData.csv");
+        List<User> userList = readUsersFromTestFile("src/test/testFiles/UsersControllerTestData.csv");
         userRepository.deleteAll();
         for (User user : userList) {
             userRepository.save(user);
@@ -372,7 +372,7 @@ public class UserControllerTest {
      */
     @Test
     public void getUserSearchFiveResultsPerPageTest() throws Exception {
-        List<User> userList = readUsersFromTestFile("src//test//testFiles//UsersControllerTestData.csv");
+        List<User> userList = readUsersFromTestFile("src/test/testFiles/UsersControllerTestData.csv");
         userRepository.deleteAll();
         for (User user : userList) {
             userRepository.save(user);
@@ -425,7 +425,7 @@ public class UserControllerTest {
 //                "+64 3 555 0129", "address", false);
 //        userRepository.save(john);
 //
-//        User expectedUser = userRepository.findByEmail("johnsmith99@gmail.com");
+///        User expectedUser = userRepository.findByEmail("johnsmith99@gmail.com");
 //        //get a cookie
 //        String loginBody = "{\"email\": \"johnsmith99@gmail.com\", \"password\": \"1337-H%nt3r2\"}";
 //
@@ -443,8 +443,8 @@ public class UserControllerTest {
 //
 //        JsonValue json = Json.parse(result.getResponse().getContentAsString());
 //
-
-
+//
+//
 //      }
 //
 
@@ -457,8 +457,8 @@ public class UserControllerTest {
     @Test @Ignore
     public void registerAccountWithValidRequest() throws Exception {
         userRepository.deleteAll();
-        List<User> userList = readUsersFromTestFile("src//test//testFiles//UsersControllerTestData.csv");
-        List<JSONObject> jsonObjectList = readJSONFromTestFile("src//test//testFiles//UsersControllerTestData.csv");
+        List<User> userList = readUsersFromTestFile("src/test/testFiles/UsersControllerTestData.csv");
+        List<JSONObject> jsonObjectList = readJSONFromTestFile("src/test/testFiles/UsersControllerTestData.csv");
         for (int i = 0; i < jsonObjectList.size(); i++) {
             JSONObject userJSON = jsonObjectList.get(i);
             User user = userList.get(i);
@@ -480,8 +480,8 @@ public class UserControllerTest {
     @Test @Ignore
     public void testConflictErrorOnRegisterWithSameEmail() throws Exception {
         userRepository.deleteAll();
-        List<User> userList = readUsersFromTestFile("src//test//testFiles//UsersControllerTestData.csv");
-        List<JSONObject> jsonObjectList = readJSONFromTestFile("src//test//testFiles//UsersControllerTestData.csv");
+        List<User> userList = readUsersFromTestFile("src/test/testFiles/UsersControllerTestData.csv");
+        List<JSONObject> jsonObjectList = readJSONFromTestFile("src/test/testFiles/UsersControllerTestData.csv");
         for (int i = 0; i < jsonObjectList.size(); i++) {
             JSONObject userJSON = jsonObjectList.get(i);
             User user = userList.get(i);
@@ -508,7 +508,7 @@ public class UserControllerTest {
     @Test
     public void testRegisteringUserWithInvalidFirstName() throws Exception {
         userRepository.deleteAll();
-        List<User> userList = readUsersFromTestFile("src//test//testFiles//UsersControllerTestDataInvalidFirstName" +
+        List<User> userList = readUsersFromTestFile("src/test/testFiles/UsersControllerTestDataInvalidFirstName" +
                 ".csv");
 
         for (User user : userList) {
@@ -531,7 +531,7 @@ public class UserControllerTest {
     @Test
     public void testRegisteringUserWithInvalidMiddleName() throws Exception {
         userRepository.deleteAll();
-        List<User> userList = readUsersFromTestFile("src//test//testFiles//UsersControllerTestDataInvalidMiddleName" +
+        List<User> userList = readUsersFromTestFile("src/test/testFiles/UsersControllerTestDataInvalidMiddleName" +
                 ".csv");
 
         for (User user : userList) {
@@ -555,7 +555,7 @@ public class UserControllerTest {
     @Test
     public void testRegisteringUserWithInvalidLastName() throws Exception {
         userRepository.deleteAll();
-        List<User> userList = readUsersFromTestFile("src//test//testFiles//UsersControllerTestDataInvalidLastName" +
+        List<User> userList = readUsersFromTestFile("src/test/testFiles/UsersControllerTestDataInvalidLastName" +
                 ".csv");
 
         for (User user : userList) {
@@ -579,7 +579,7 @@ public class UserControllerTest {
     @Test
     public void testRegisteringUserWithInvalidNickname() throws Exception {
         userRepository.deleteAll();
-        List<User> userList = readUsersFromTestFile("src//test//testFiles//UsersControllerTestDataInvalidNickname" +
+        List<User> userList = readUsersFromTestFile("src/test/testFiles/UsersControllerTestDataInvalidNickname" +
                 ".csv");
 
         for (User user : userList) {
@@ -603,7 +603,7 @@ public class UserControllerTest {
     @Test
     public void testRegisteringUserWithInvalidBio() throws Exception {
         userRepository.deleteAll();
-        List<User> userList = readUsersFromTestFile("src//test//testFiles//UsersControllerTestDataInvalidBio" +
+        List<User> userList = readUsersFromTestFile("src/test/testFiles/UsersControllerTestDataInvalidBio" +
                 ".csv");
 
         for (User user : userList) {
@@ -627,7 +627,7 @@ public class UserControllerTest {
     @Test
     public void testRegisteringUserWithInvalidDOB() throws Exception {
         userRepository.deleteAll();
-        List<User> userList = readUsersFromTestFile("src//test//testFiles//UsersControllerTestDataInvalidDOB" +
+        List<User> userList = readUsersFromTestFile("src/test/testFiles/UsersControllerTestDataInvalidDOB" +
                 ".csv");
 
         for (User user : userList) {
@@ -650,7 +650,7 @@ public class UserControllerTest {
     @Test
     public void testRegisteringUserWithInvalidPhNum() throws Exception {
         userRepository.deleteAll();
-        List<User> userList = readUsersFromTestFile("src//test//testFiles//UsersControllerTestDataInvalidPhoneNumber" +
+        List<User> userList = readUsersFromTestFile("src/test/testFiles/UsersControllerTestDataInvalidPhoneNumber" +
                 ".csv");
 
         for (User user : userList) {
@@ -673,7 +673,7 @@ public class UserControllerTest {
     @Test
     public void testRegisteringUserWithInvalidAddress() throws Exception {
         userRepository.deleteAll();
-        List<User> userList = readUsersFromTestFile("src//test//testFiles//UsersControllerTestDataInvalidAddress" +
+        List<User> userList = readUsersFromTestFile("src/test/testFiles/UsersControllerTestDataInvalidAddress" +
                 ".csv");
 
         for (User user : userList) {

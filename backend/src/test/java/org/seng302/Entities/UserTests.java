@@ -42,7 +42,7 @@ public class UserTests {
                 .withLastName("Smith")
                 .withNickName("nick")
                 .withEmail("here@testing")
-                .withPassword("12345678")
+                .withPassword("12345678abc")
                 .withBio("g")
                 .withDob("2001-03-11")
                 .withPhoneNumber("123-456-7890")
@@ -157,6 +157,20 @@ public class UserTests {
         }
     }
 
+    /**
+     * Checks that when setPhNum is called with the empty string, the user's phone number is set to null when the user's
+     * phone number is null or a non-empty string before setPhNum is called
+     */
+    @Test
+    public void checkPhNumEmptyStringTest() {
+        testUser.setPhNum("6494456719");
+        testUser.setPhNum("");
+        assertNull(testUser.getPhNum());
+        testUser.setPhNum(null);
+        testUser.setPhNum("");
+        assertNull(testUser.getPhNum());
+    }
+
 
     @Test @Ignore
     public void createUserTest() {
@@ -241,14 +255,17 @@ public class UserTests {
     }
 
     /**
-     * Checks an empty middle name will not be set as the user's middle name
+     * Checks that when the given middle name is empty, the user's middle name is set to null, whether the user's middle
+     * name is null or a non-null string before setMiddleName is called.
      */
     @Test
-    public void checkInvalidMiddleNameEmpty() {
-        try {
-            testUser.setMiddleName("");
-            fail("A Forbidden exception was expected, but not thrown");
-        } catch (ResponseStatusException expectedException) { }
+    public void checkMiddleNameEmpty() {
+        testUser.setMiddleName("Bert");
+        testUser.setMiddleName("");
+        assertNull(testUser.getMiddleName());
+        testUser.setMiddleName(null);
+        testUser.setMiddleName("");
+        assertNull(testUser.getMiddleName());
     }
 
     /**
@@ -371,6 +388,20 @@ public class UserTests {
     }
 
     /**
+     * Checks that when setNickname is called with the empty string, the user's nickname is set to null, when the user's
+     * nickname is null or a non-null string before setNickname is called
+     */
+    @Test
+    public void checkNicknameEmptyStringTest() {
+        testUser.setNickname("Fred");
+        testUser.setNickname("");
+        assertNull(testUser.getNickname());
+        testUser.setNickname(null);
+        testUser.setNickname("");
+        assertNull(testUser.getNickname());
+    }
+
+    /**
      * Checks several nicknames that are too long (above 16 letters long) will not be set as the user's nickname
      */
     @Test
@@ -424,6 +455,20 @@ public class UserTests {
             testUser.setBio(bio);
             assertEquals(testUser.getBio(), bio);
         }
+    }
+
+    /**
+     * Checks that when setBio is called with the empty string, the user's bio is set to null, when the user's bio is
+     * null or a non-null string before setBio is called.
+     */
+    @Test
+    public void checkBioEmptyStringTest() {
+        testUser.setBio("My name is Inigo Montoya You killed my father Prepare to die");
+        testUser.setBio("");
+        assertNull(testUser.getBio());
+        testUser.setBio(null);
+        testUser.setBio("");
+        assertNull(testUser.getBio());
     }
 
     /**
@@ -519,7 +564,7 @@ public class UserTests {
      */
     @Test @Ignore
     public void checkValidPassword() throws NoSuchAlgorithmException {
-        String[] validPasswords = { "SAASDJKAasdasdsa$*#", "asdjaskdj383", "asjdksajk&&&",
+        String[] validPasswords = { "SAASDJ3KAasdasdsa$*#", "asdjaskdj383", "77asjdksajk&&&",
                 "ASJDKLASJLKDJASKLDJK234567890123", "SKLDJASKD*(*(@*(#@*(8238283999" };
         for (String password : validPasswords) {
             testUser.setAuthenticationCodeFromPassword(password);
