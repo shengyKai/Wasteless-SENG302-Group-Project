@@ -186,4 +186,28 @@ public class ProductTests {
         List<Product> catalogue = testBusiness1.getCatalogue();
         assertEquals(3, catalogue.size());
     }
+
+    @Test
+    public void testDeletingBusinessWithProducts() {
+        Business tempBusiness = new Business.Builder()
+                .withBusinessType("Accommodation and Food Services")
+                .withAddress(new Location())
+                .withDescription("This business will be deleted")
+                .withName("Temp Name")
+                .withPrimaryOwner(testUser1)
+                .build();
+        businessRepository.save(tempBusiness);
+
+        Product product1 = new Product.Builder()
+                .withProductCode("NathanApple-69")
+                .withName("The Nathan Apple")
+                .withDescription("Ever wonder why Nathan has an apple")
+                .withRecommendedRetailPrice("9000.01")
+                .withBusiness(tempBusiness).build();
+        productRepository.save(product1);
+
+
+        businessRepository.delete(tempBusiness);
+
+    }
 }
