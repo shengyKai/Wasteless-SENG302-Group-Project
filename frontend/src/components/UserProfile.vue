@@ -44,7 +44,7 @@
             <v-card-title class="headline">
               Are you sure?
             </v-card-title>
-            <v-card-text>This user will no longer be able to operate this business as an administrator.</v-card-text>
+            <v-card-text>This user will no longer be able to operate this business as an administrator for {{this.$store.state.user.businessesAdministered.find(x => x.id === this.activeRole.id).name}}.</v-card-text>
             <v-card-actions>
               <v-spacer/>
               <v-btn
@@ -91,7 +91,7 @@
             <v-card-title class="headline">
               Are you sure?
             </v-card-title>
-            <v-card-text>This user will be able to act as an administrator for this business</v-card-text>
+            <v-card-text>This user will be able to act as an administrator for {{this.$store.state.user.businessesAdministered.find(x => x.id === this.activeRole.id).name}}</v-card-text>
             <v-card-actions>
               <v-spacer/>
               <v-btn
@@ -259,9 +259,7 @@ export default {
       return this.user.businessesAdministered.map(business => business.id).includes(this.activeRole.id);
     },
     isViewingOwnProfile() {
-      const id = parseInt(this.$route.params.id);
-      if (isNaN(id)) return undefined;
-      return (this.user === this.$store.state.user);
+      return (this.user?.id === this.$store.state.user?.id);
     },
     createdMsg() {
       if (this.user.created === undefined) return '';
