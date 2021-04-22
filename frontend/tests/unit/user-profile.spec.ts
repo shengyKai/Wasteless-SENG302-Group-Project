@@ -110,10 +110,10 @@ describe('UserProfile.vue', () => {
 
   /**
    * Tests that the UserProfile has the user's birthday somewhere in the page
-   * and that the birthday is in the correct format dd/mm/yyyy.
+   * and that the birthday is in the correct format dd MMM yyyy.
    */
   it('Renders birthday', () => {
-    expect(wrapper.text()).toContain('1/1/1900');
+    expect(wrapper.text()).toContain('01 Jan 1900');
   });
 
   /**

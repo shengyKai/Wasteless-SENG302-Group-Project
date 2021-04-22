@@ -39,11 +39,28 @@
         outlined
       />
 
-      <!-- INPUT: Name -->
+      <!-- INPUT: First name -->
       <v-text-field
         class="required"
-        v-model="name"
-        label="Name"
+        v-model="firstName"
+        label="First name"
+        :rules="mandatoryRules.concat(nameRules).concat(maxCharRules)"
+        outlined
+      />
+
+      <!-- INPUT: Middle name(s) -->
+      <v-text-field
+        v-model="middleName"
+        label="Middle name(s)"
+        :rules="nameRules.concat(maxCharRules)"
+        outlined
+      />
+
+      <!-- INPUT: Last name -->
+      <v-text-field
+        class="required"
+        v-model="lastName"
+        label="Last name"
         :rules="mandatoryRules.concat(nameRules).concat(maxCharRules)"
         outlined
       />
@@ -224,7 +241,9 @@ export default {
       email: '',
       password: '',
       confirmPassword: '',
-      name: '',
+      firstName: '',
+      middleName: '',
+      lastName: '',
       nickname: '',
       bio: '',
       dob: '',
@@ -292,9 +311,9 @@ export default {
       let streetName = part.slice(1, part.length).join(" ");
 
       let user = {
-        firstName   : this.name,
-        lastName    : this.name,
-        middleName  : this.name,
+        firstName   : this.firstName,
+        lastName    : this.lastName,
+        middleName  : this.middleName,
         nickname    : this.nickname,
         bio         : this.bio,
         email       : this.email,

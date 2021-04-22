@@ -78,7 +78,9 @@ describe('Register.vue', () => {
           email: 'someemail@gmail.com',
           password: 'somepassword1',
           confirmPassword: 'somepassword1',
-          name: 'some name',
+          firstName: 'Winnie',
+          middleName: 'The',
+          lastName: 'Pooh',
           nickname: 'some nickname',
           bio: 'some bio',
           dob: '2008-04-06',
@@ -268,33 +270,99 @@ describe('Register.vue', () => {
     });
   });
 
-  it("Testing for invalid name format, empty name field", async () => {
+  it("Testing for invalid first name format, empty first name field", async () => {
     const registerButton = wrapper.find(".v-btn");
 
     await wrapper.setData({
-      name: ""
+      firstName: ""
     });
     Vue.nextTick(() => {
       expect(registerButton.props().disabled).toBeTruthy();
     });
   });
 
-  it("Testing for invalid name format, name with numbers", async () => {
+  it("Testing for invalid first name format, first name with numbers", async () => {
     const registerButton = wrapper.find(".v-btn");
 
     await wrapper.setData({
-      name: "somename1"
+      firstName: "somename1"
     });
     Vue.nextTick(() => {
       expect(registerButton.props().disabled).toBeTruthy();
     });
   });
 
-  it("Testing for invalid name format, over character limit", async () => {
+  it("Testing for invalid first name format, over character limit", async () => {
     const registerButton = wrapper.find(".v-btn");
 
     await wrapper.setData({
-      name: 'a'.repeat(101)
+      firstName: 'a'.repeat(101)
+    });
+    Vue.nextTick(() => {
+      expect(registerButton.props().disabled).toBeTruthy();
+    });
+  });
+
+  it("Testing that empty middle name field is not invalid because middle name is not mandatory", async () => {
+    const registerButton = wrapper.find(".v-btn");
+
+    await wrapper.setData({
+      middleName: ""
+    });
+    Vue.nextTick(() => {
+      expect(registerButton.props().disabled).toBeFalsy();
+    });
+  });
+
+  it("Testing for invalid middle name format, middle name with numbers", async () => {
+    const registerButton = wrapper.find(".v-btn");
+
+    await wrapper.setData({
+      middleName: "somename1"
+    });
+    Vue.nextTick(() => {
+      expect(registerButton.props().disabled).toBeTruthy();
+    });
+  });
+
+  it("Testing for invalid middle name format, middle name over character limit", async () => {
+    const registerButton = wrapper.find(".v-btn");
+
+    await wrapper.setData({
+      middleName: 'a'.repeat(101)
+    });
+    Vue.nextTick(() => {
+      expect(registerButton.props().disabled).toBeTruthy();
+    });
+  });
+
+  it("Testing for invalid last name format, empty last name field", async () => {
+    const registerButton = wrapper.find(".v-btn");
+
+    await wrapper.setData({
+      lastName: ""
+    });
+    Vue.nextTick(() => {
+      expect(registerButton.props().disabled).toBeTruthy();
+    });
+  });
+
+  it("Testing for invalid last name format, last name with numbers", async () => {
+    const registerButton = wrapper.find(".v-btn");
+
+    await wrapper.setData({
+      lastName: "somename1"
+    });
+    Vue.nextTick(() => {
+      expect(registerButton.props().disabled).toBeTruthy();
+    });
+  });
+
+  it("Testing for invalid last name format, over character limit", async () => {
+    const registerButton = wrapper.find(".v-btn");
+
+    await wrapper.setData({
+      lastName: 'a'.repeat(101)
     });
     Vue.nextTick(() => {
       expect(registerButton.props().disabled).toBeTruthy();
