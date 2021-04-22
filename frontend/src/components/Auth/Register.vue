@@ -190,7 +190,7 @@
         class="required"
         v-model="postcode"
         label="Postcode"
-        :rules="mandatoryRules.concat(maxCharRules)"
+        :rules="mandatoryRules.concat(maxCharRules).concat(numberRules)"
         outlined
       />
 
