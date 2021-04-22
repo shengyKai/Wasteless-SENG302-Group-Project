@@ -10,6 +10,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.util.Date;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -28,13 +29,24 @@ public class ProductTests {
 
     private User testUser1;
     private Business testBusiness1;
-    private Business testBusiness2;
-    private Business testBusiness3;
+
+    /**
+     * Created a business object for testing
+     */
+    public void createTestBusiness() {
+        businessRepository.deleteAll();
+        testBusiness1 = new Business.Builder()
+                .withBusinessType("Accommodation and Food Services")
+                .withAddress(new Location())
+                .withDescription("Some description")
+                .withName("BusinessName")
+                .withPrimaryOwner(testUser1)
+                .build();
+        testBusiness1 = businessRepository.save(testBusiness1);
+    }
 
     @BeforeAll
     public void setUp() throws ParseException {
-        businessRepository.deleteAll();
-
         testUser1 = new User.Builder()
                 .withFirstName("John")
                 .withMiddleName("Hector")
@@ -49,14 +61,7 @@ public class ProductTests {
                         "Canterbury,8041"))
                 .build();
         testUser1 = userRepository.save(testUser1);
-        testBusiness1 = new Business.Builder()
-                .withBusinessType("Accommodation and Food Services")
-                .withAddress(new Location())
-                .withDescription("Some description")
-                .withName("BusinessName")
-                .withPrimaryOwner(testUser1)
-                .build();
-        testBusiness1 = businessRepository.save(testBusiness1);
+        createTestBusiness();
     }
 
     @AfterEach
@@ -144,19 +149,41 @@ public class ProductTests {
     }
 
     /**
-     * //TODO Add docstring
+     * Checks the product is connected to the business's catalogue by checking the mentioned product is the same as
+     * the one in the catalogue.
      */
     @Test
     public void checkTheProductIsConnectedToTheBusinessCatalogue() {
-
+        createTestBusiness();
+        Product product1 = new Product.Builder().withProductCode("NathanApple-70").withName("The Nathan Apple")
+                .withDescription("Ever wonder why Nathan has an apple").withRecommendedRetailPrice("9000.03")
+                .withBusiness(testBusiness1).build();
+        productRepository.save(product1);
+        testBusiness1 = businessRepository.findByName("BusinessName");
+        List<Product> catalogue = testBusiness1.getCatalogue();
+        assertEquals(product1.getID(), catalogue.get(0).getID());
     }
 
-
     /**
-     * //TODO Add docstring
+     * Checks that several products are successfully added to the business's catalogue
      */
     @Test
     public void createAValidListOfProductsInACatalogue() {
-
+        createTestBusiness();
+        Product product1 = new Product.Builder().withProductCode("NathanApple-70").withName("The Nathan Apple")
+                .withDescription("Ever wonder why Nathan has an apple").withRecommendedRetailPrice("9000.03")
+                .withBusiness(testBusiness1).build();
+        Product product2 = new Product.Builder().withProductCode("NathanApple-71").withName("The Nathan Apple Two")
+                .withDescription("Ever wonder why Nathan has an apple too").withRecommendedRetailPrice("9000.04")
+                .withBusiness(testBusiness1).build();
+        Product product3 = new Product.Builder().withProductCode("NathanApple-72").withName("The Nathan Apple Three")
+                .withDescription("Ever wonder why Nathan has an apple too maybe").withRecommendedRetailPrice("9000.05")
+                .withBusiness(testBusiness1).build();
+        productRepository.save(product1);
+        productRepository.save(product2);
+        productRepository.save(product3);
+        testBusiness1 = businessRepository.findByName("BusinessName");
+        List<Product> catalogue = testBusiness1.getCatalogue();
+        assertEquals(3, catalogue.size());
     }
 }

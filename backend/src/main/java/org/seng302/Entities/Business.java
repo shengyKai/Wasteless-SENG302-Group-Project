@@ -39,8 +39,8 @@ public class Business {
     @Column
     private Date created;
 
-    @OneToMany (fetch = FetchType.LAZY, mappedBy = "business")
-    private List<Product> catalogue = new ArrayList<Product>() {};
+    @OneToMany (fetch = FetchType.EAGER, mappedBy = "business")
+    private List<Product> catalogue;
 
     @ManyToOne
     @JoinColumn(name = "owner_id")
@@ -241,6 +241,15 @@ public class Business {
         ownerAdminSet.add(primaryOwner);
         return ownerAdminSet;
     }
+
+    /**
+     * The getter for the catalogue (list of products the business owns)
+     * @return the catalogue
+     */
+    public List<Product> getCatalogue() {
+        return catalogue;
+    }
+
     /**
      * Construct a JSON object representing the business. The JSON object includes an array of JSON
      * representations of the users who are administrators of the business, and a JSON representation
