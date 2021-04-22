@@ -15,9 +15,9 @@
         <p><b>Member Since:</b> {{ createdMsg }}</p>
       </div>
 
-      <!-- List of avaialable actions -->
+      <!-- List of available actions -->
       <div class="action-menu">
-        <v-tooltip bottom v-if="isActingAsBusiness">
+        <v-tooltip bottom v-if="isActingAsBusiness && isViewingOwnProfile===false">
           <template v-slot:activator="{ on, attrs }">
             <v-btn
               icon
@@ -33,7 +33,7 @@
           </template>
           <span> Remove administrator </span>
         </v-tooltip>
-        <v-tooltip bottom v-if="isActingAsBusiness">
+        <v-tooltip bottom v-if="isActingAsBusiness && isViewingOwnProfile===false">
           <template v-slot:activator="{ on, attrs }">
             <v-btn
               icon
@@ -193,6 +193,11 @@ export default {
       if (this.user === undefined) return undefined;
 
       return this.user.businessesAdministered.map(business => business.id).includes(this.activeRole.id);
+    },
+    isViewingOwnProfile() {
+      const id = parseInt(this.$route.params.id);
+      if (isNaN(id)) return undefined;
+      return (this.user === this.$store.state.user);
     },
     createdMsg() {
       if (this.user.created === undefined) return '';
