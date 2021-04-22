@@ -11,11 +11,11 @@ export function flushQueue() {
 }
 
 /**
-   * Reinterprets the input argument as a jest mock.
-   *
-   * @param func Function that is mocked
-   * @returns Input argument interpreted as a jest mock
-   */
+ * Reinterprets the input argument as a jest mock.
+ *
+ * @param func Function that is mocked
+ * @returns Input argument interpreted as a jest mock
+ */
 export function castMock<T, Y extends any[]>(func: (...args: Y) => T) {
   if (!jest.isMockFunction(func)) {
     throw new Error('Argument is not jest mock');

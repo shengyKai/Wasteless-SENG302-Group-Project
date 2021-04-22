@@ -444,3 +444,29 @@ export async function getBusiness(businessId: number): Promise<MaybeError<Busine
 
   return response.data;
 }
+
+/**
+ * Makes the provided user an administrator of the provided business.
+ *
+ * @param businessId Business id to add an administrator to
+ * @param userId User id to add to the provided business
+ * @returns undefined if operation is successful, otherwise a string error message
+ */
+export async function makeBusinessAdmin(businessId: number, userId: number): Promise<MaybeError<undefined>> {
+  try {
+    await instance.put(`/businesses/${businessId}/makeAdministrator`, {
+      userId,
+    });
+  } catch (error) {
+    let status: number | undefined = error.response?.status;
+    if (status === undefined) return 'Failed to reach backend';
+    if (status === 400) return 'User doesn\'t exist or is already an admin';
+    if (status === 401) return 'Missing/Invalid access token';
+    if (status === 403) return 'Current user cannot perform this action';
+    if (status === 406) return 'Business not found';
+
+    return 'Request failed: ' + status;
+  }
+
+  return undefined;
+}
