@@ -1,8 +1,12 @@
 package org.seng302.Entities;
 
+import net.minidev.json.JSONObject;
+
 import javax.persistence.*;
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 @Table(uniqueConstraints={
         @UniqueConstraint(columnNames = {"product_code", "business_id"})
@@ -104,6 +108,19 @@ public class Product {
      */
     private void setBusiness(Business business) { this.business = business; }
 
+    /**
+     * Convert product to a JSON object
+     */
+    public JSONObject constructJSONObject() {
+        Map<String, Object> attributeMap = new HashMap<>();
+        attributeMap.put("id", id);
+        attributeMap.put("code", productCode);
+        attributeMap.put("name", name);
+        attributeMap.put("description", description);
+        attributeMap.put("recommendedRetailPrice", recommendedRetailPrice);
+        attributeMap.put("createdDate", created);
+        return new JSONObject(attributeMap);
+    }
 
     /**
      * Builder for Product
