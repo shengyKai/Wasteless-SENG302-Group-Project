@@ -30,14 +30,6 @@
     </v-btn>
   </v-container>
 
-  <!--
-  //TODO 0. connect to DB
-  1. login change GET to POST in API
-  2. How to put param into the login()
-  3. Change store.dispatach from user to login
-  4. We need 2 request, a = Post to login, B=Get to show profile
-
-  -->
 </template>
 
 <script>
@@ -60,11 +52,11 @@ export default {
         (field) => !!field || "Field is required",
       ],
       passwordRules: [
-        field => (field && field.length >= 7) || 'Password must have 7+ characters',
-        field => /^(?=.*[0-9])(?=.*[a-zA-Z])([a-zA-Z0-9]+)$/.test(field) || 'Must have at least one number and one alphabet'
+        field => (field && field.length >= 7) || '',                            //Password must have 7+ characters, , should not show error message
+        field => /^(?=.*[0-9])(?=.*[a-zA-Z])([a-zA-Z0-9]+)$/.test(field) || ''  //Must have at least one number and one alphabet', should not show error message
       ],
       maxCharRules: [
-        (field) => field.length <= 100 || "Reached max character limit: 100",
+        (field) => field.length <= 100 || "",                                   //Reached max character limit: 100, should not show error message
       ],
     };
   },
