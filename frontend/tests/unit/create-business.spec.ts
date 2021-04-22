@@ -79,7 +79,7 @@ describe('CreateBusiness.vue', () => {
    * - Business type
    * - Street address line 1
    * - City
-   * - State
+   * - Region
    * - Country
    * - Postcode
    */
@@ -89,7 +89,7 @@ describe('CreateBusiness.vue', () => {
       businessType: 'Business Type',
       street1: 'Street 1',
       city: 'City',
-      state: 'State',
+      region: 'Region',
       country: 'Country',
       postcode: '1234',
     });
@@ -219,12 +219,12 @@ describe('CreateBusiness.vue', () => {
   });
 
   /**
-   * Tests that the CreateBusiness is invalid if no state field is provided
+   * Tests that the CreateBusiness is invalid if no region field is provided
    */
-  it('Invalid if state not provided', async () => {
+  it('Invalid if region not provided', async () => {
     await populateRequiredFields();
     await wrapper.setData({
-      state: '',
+      region: '',
     });
 
     await Vue.nextTick();
@@ -233,12 +233,12 @@ describe('CreateBusiness.vue', () => {
   });
 
   /**
-   * Tests that the CreateBusiness is invalid if state field is too long (> 100 characters)
+   * Tests that the CreateBusiness is invalid if region field is too long (> 100 characters)
    */
-  it('Invalid if state too long', async () => {
+  it('Invalid if region too long', async () => {
     await populateRequiredFields();
     await wrapper.setData({
-      state: 'a'.repeat(101),
+      region: 'a'.repeat(101),
     });
 
     await Vue.nextTick();
