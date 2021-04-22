@@ -29,7 +29,7 @@ export default {
   methods: {
     //take a look at UserProfile.vue to know more about this
     insertAddress(address) {
-      return this.convertAddressToReadableText(address, "half");
+      return this.convertAddressToReadableText(address, "partial");
     }
   }
 };

@@ -62,14 +62,14 @@
 <script>
 import { getBusiness, getUser } from '../api';
 import UserAvatar from './utils/UserAvatar';
-import JsonAddressToReadableText from './utils/Methods/convertJsonAddressToReadableText';
+import convertJsonAddressToReadableText from './utils/Methods/convertJsonAddressToReadableText';
 
 export default {
   name: 'ProfilePage',
   //a way to use a common method for different components. Note that JsonAddressToReadableText is not the method name
   //but is just a declaration so that we can use the methods in this file. For this case, the method in this file is called
   //"convertAddressToReadableText()"
-  mixins: [JsonAddressToReadableText],
+  mixins: [convertJsonAddressToReadableText],
   data() {
     return {
       /**

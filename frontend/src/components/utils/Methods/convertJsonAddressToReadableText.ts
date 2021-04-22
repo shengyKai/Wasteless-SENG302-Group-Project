@@ -2,6 +2,7 @@ export default {
   methods: {
     //method to return the appropriate format for addresses depending on the fields provided
     convertAddressToReadableText: function(address: any, status: string) {
+      //full means the address format will show all fields, partial means the format will show some location fields only
       if (status === "full") {
         if (address.district !== ""){
           return `${address.streetNumber} ${address.streetName}, ${address.district}\n` +
@@ -9,10 +10,9 @@ export default {
         }
         return `${address.streetNumber} ${address.streetName}\n` +
                 `${address.city} ${address.postcode}\n${address.region}, ${address.country}`;
-      } else {
+      } else if (status === "partial") {
         return `${address.city}, ${address.region}, ${address.country}`;
       }
-
     }
   }
 };
