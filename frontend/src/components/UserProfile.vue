@@ -18,12 +18,13 @@
       <!-- List of available actions -->
       <div class="action-menu">
         <v-dialog
+          v-if="isActingAsBusiness && isViewingOwnProfile===false"
           v-model="removeAdminDialog"
           persistent
           max-width="300"
         >
           <template #activator="{ on: dialog, attrs}">
-            <v-tooltip bottom v-if="isActingAsBusiness && isViewingOwnProfile===false">
+            <v-tooltip bottom >
               <template #activator="{ on: tooltip}">
                 <v-btn
                   icon
@@ -51,25 +52,26 @@
                 text
                 @click="removeAdminDialog = false"
               >
-                Disagree
+                No
               </v-btn>
               <v-btn
                 color="green darken-1"
                 text
                 @click="removeAdminDialog = false; removeUserAdmin()"
               >
-                Agree
+                Yes, Demote
               </v-btn>
             </v-card-actions>
           </v-card>
         </v-dialog>
         <v-dialog
+          v-if="isActingAsBusiness && isViewingOwnProfile===false"
           v-model="addAdminDialog"
           persistent
           max-width="300"
         >
           <template #activator="{ on: dialog, attrs}">
-            <v-tooltip bottom v-if="isActingAsBusiness && isViewingOwnProfile===false">
+            <v-tooltip bottom>
               <template #activator="{ on: tooltip }">
                 <v-btn
                   icon
@@ -97,14 +99,14 @@
                 text
                 @click="addAdminDialog = false"
               >
-                Disagree
+                No
               </v-btn>
               <v-btn
                 color="green darken-1"
                 text
                 @click="addAdminDialog = false; addUserAsAdmin()"
               >
-                Agree
+                Yes, promote
               </v-btn>
             </v-card-actions>
           </v-card>
