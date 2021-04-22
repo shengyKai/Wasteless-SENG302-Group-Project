@@ -25,28 +25,41 @@ public class ProductTests {
     @Autowired
     UserRepository userRepository;
 
-    private Product testProduct = new Product();
-
     private User testUser1;
     private Business testBusiness1;
+    private Business testBusiness2;
 
     /**
-     * Created a business object for testing
+     * Created a business objects for testing
      */
-    public void createTestBusiness() {
-        businessRepository.deleteAll();
+    public void createTestBusinesses() {
+        System.out.println("Creating businesses");
+        Thread.dumpStack();
         testBusiness1 = new Business.Builder()
                 .withBusinessType("Accommodation and Food Services")
                 .withAddress(new Location())
                 .withDescription("Some description")
-                .withName("BusinessName")
+                .withName("BusinessName1")
                 .withPrimaryOwner(testUser1)
                 .build();
         testBusiness1 = businessRepository.save(testBusiness1);
+
+        testBusiness2 = new Business.Builder()
+                .withBusinessType("Accommodation and Food Services")
+                .withAddress(new Location())
+                .withDescription("Some description 2")
+                .withName("BusinessName2")
+                .withPrimaryOwner(testUser1)
+                .build();
+        testBusiness2 = businessRepository.save(testBusiness2);
     }
 
     @BeforeAll
     public void setUp() throws ParseException {
+        businessRepository.deleteAll();
+        userRepository.deleteAll();
+
+        // Add a test user that will be the owner of both businesses
         testUser1 = new User.Builder()
                 .withFirstName("John")
                 .withMiddleName("Hector")
@@ -61,7 +74,13 @@ public class ProductTests {
                         "Canterbury,8041"))
                 .build();
         testUser1 = userRepository.save(testUser1);
-        createTestBusiness();
+        createTestBusinesses();
+    }
+
+    @AfterAll
+    public void tearDown() {
+        businessRepository.deleteAll();
+        userRepository.deleteAll();
     }
 
     @AfterEach
@@ -134,6 +153,29 @@ public class ProductTests {
     }
 
     /**
+     * Check that two products with the same code can be added to different catalogues
+     */
+    @Test
+    public void checkTwoSameProductCodesWithinDifferentCatalogues() {
+        Product product1 = new Product.Builder()
+                .withProductCode("NathanApple-69")
+                .withName("The Nathan Apple")
+                .withDescription("Ever wonder why Nathan has an apple")
+                .withRecommendedRetailPrice("9000.01")
+                .withBusiness(testBusiness1)
+                .build();
+        Product product2 = new Product.Builder()
+                .withProductCode("NathanApple-69")
+                .withName("The Nathan Apple Two")
+                .withDescription("Ever wonder why Nathan has an apple maybe")
+                .withRecommendedRetailPrice("9000.02")
+                .withBusiness(testBusiness2)
+                .build();
+        productRepository.save(product1);
+        assertDoesNotThrow(() -> productRepository.save(product2));
+    }
+
+    /**
      * Checks that two products with different product codes can be added to the same catalogue.
      */
     @Test
@@ -154,12 +196,11 @@ public class ProductTests {
      */
     @Test
     public void checkTheProductIsConnectedToTheBusinessCatalogue() {
-        createTestBusiness();
         Product product1 = new Product.Builder().withProductCode("NathanApple-70").withName("The Nathan Apple")
                 .withDescription("Ever wonder why Nathan has an apple").withRecommendedRetailPrice("9000.03")
                 .withBusiness(testBusiness1).build();
         productRepository.save(product1);
-        testBusiness1 = businessRepository.findByName("BusinessName");
+        testBusiness1 = businessRepository.findByName("BusinessName1");
         List<Product> catalogue = testBusiness1.getCatalogue();
         assertEquals(product1.getID(), catalogue.get(0).getID());
     }
@@ -169,7 +210,6 @@ public class ProductTests {
      */
     @Test
     public void createAValidListOfProductsInACatalogue() {
-        createTestBusiness();
         Product product1 = new Product.Builder().withProductCode("NathanApple-70").withName("The Nathan Apple")
                 .withDescription("Ever wonder why Nathan has an apple").withRecommendedRetailPrice("9000.03")
                 .withBusiness(testBusiness1).build();
@@ -182,31 +222,32 @@ public class ProductTests {
         productRepository.save(product1);
         productRepository.save(product2);
         productRepository.save(product3);
-        testBusiness1 = businessRepository.findByName("BusinessName");
+        testBusiness1 = businessRepository.findByName("BusinessName1");
         List<Product> catalogue = testBusiness1.getCatalogue();
         assertEquals(3, catalogue.size());
     }
 
+    /**
+     * Checks that deleting a business while it still has remaining products doesn't result in an error
+     */
     @Test
     public void testDeletingBusinessWithProducts() {
-        Business tempBusiness = new Business.Builder()
+        Business tempBusinessInitial = new Business.Builder()
                 .withBusinessType("Accommodation and Food Services")
                 .withAddress(new Location())
                 .withDescription("This business will be deleted")
                 .withName("Temp Name")
                 .withPrimaryOwner(testUser1)
                 .build();
-        tempBusiness = businessRepository.save(tempBusiness);
-
+        Business tempBusiness = businessRepository.save(tempBusinessInitial);
         Product product1 = new Product.Builder()
                 .withProductCode("NathanApple-69")
                 .withName("The Nathan Apple")
                 .withDescription("Ever wonder why Nathan has an apple")
                 .withRecommendedRetailPrice("9000.01")
                 .withBusiness(tempBusiness).build();
-        product1 = productRepository.save(product1);
+        productRepository.save(product1);
 
-        businessRepository.delete(tempBusiness);
-
+        assertDoesNotThrow(() -> businessRepository.delete(tempBusiness));
     }
 }
