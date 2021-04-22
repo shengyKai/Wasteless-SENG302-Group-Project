@@ -56,7 +56,7 @@ describe('index.vue', () => {
  * of these fields.
  */
 // TODO Fix this test
-describe.skip('Register.vue', () => {
+describe('Register.vue', () => {
   let wrapper: Wrapper<any>;
   const localVue = createLocalVue();
   let vuetify: Vuetify;
@@ -87,9 +87,8 @@ describe.skip('Register.vue', () => {
           dob: '2008-04-06',
           countryCode: '64',
           phone: '1234567890',
-          street1: 'some street address',
-          street2: 'some street address',
-          state: "some state",
+          streetAddress: '15 some street',
+          region: "some state",
           city: "some city",
           country: "some country",
           district: "some district",
