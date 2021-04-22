@@ -102,7 +102,10 @@ public class Product {
      * Sets the business associated with the catalogue the product is in
      * @param business the business
      */
-    private void setBusiness(Business business) { this.business = business; }
+    private void setBusiness(Business business) {
+        business.addToCatalogue(this);
+        this.business = business;
+    }
 
 
     /**

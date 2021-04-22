@@ -40,7 +40,7 @@ public class Business {
     private Date created;
 
     @OneToMany (fetch = FetchType.EAGER, mappedBy = "business", cascade = CascadeType.REMOVE)
-    private List<Product> catalogue;
+    private List<Product> catalogue = new ArrayList<>();
 
     @ManyToOne
     @JoinColumn(name = "owner_id")
@@ -248,6 +248,14 @@ public class Business {
      */
     public List<Product> getCatalogue() {
         return catalogue;
+    }
+
+    /**
+     * Add the given product to the business's catalogue.
+     * @param product The product to be added.
+     */
+    public void addToCatalogue(Product product) {
+        catalogue.add(product);
     }
 
     /**

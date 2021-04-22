@@ -196,7 +196,7 @@ public class ProductTests {
                 .withName("Temp Name")
                 .withPrimaryOwner(testUser1)
                 .build();
-        businessRepository.save(tempBusiness);
+        tempBusiness = businessRepository.save(tempBusiness);
 
         Product product1 = new Product.Builder()
                 .withProductCode("NathanApple-69")
@@ -204,8 +204,7 @@ public class ProductTests {
                 .withDescription("Ever wonder why Nathan has an apple")
                 .withRecommendedRetailPrice("9000.01")
                 .withBusiness(tempBusiness).build();
-        productRepository.save(product1);
-
+        product1 = productRepository.save(product1);
 
         businessRepository.delete(tempBusiness);
 
