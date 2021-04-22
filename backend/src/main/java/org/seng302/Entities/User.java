@@ -171,11 +171,21 @@ public class User extends Account {
     /**
      * Sets the users date of birth
      * Not Null
+     * Check the dob satisfied the condition( >= 13years)
+     * Date constructor is deprecated (Date class issue)
+     * LocalDate class can be used but come with time zone -- over complicated
      * @param dob date of birth (used to verify age)
      */
     public void setDob(Date dob) {
         if (dob != null) {
-            this.dob = dob;
+            Date today = new Date();
+            int year = today.getYear();
+            int month = today.getMonth();
+            int day = today.getDate();
+            Date minDate = new Date(year - 13, month, day + 1);
+            if (dob.before(minDate)) {
+                this.dob = dob;
+            }
         } else {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Your date of birth has been entered incorrectly");
         }
