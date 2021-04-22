@@ -7,6 +7,7 @@ import org.junit.Ignore;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockitoAnnotations;
+import org.mockito.internal.matchers.apachecommons.ReflectionEquals;
 import org.seng302.Exceptions.EmailInUseException;
 import org.seng302.Persistence.BusinessRepository;
 import org.seng302.Persistence.UserRepository;
@@ -530,7 +531,7 @@ public class UserTests {
         for (String address : validAddresses) {
             testUser.setAddress(address);
             Location location = Location.covertAddressStringToLocation(address);
-            assertEquals(testUser.getAddress(), location);
+            assertTrue(new ReflectionEquals(location).matches(testUser.getAddress()));
         }
     }
 
@@ -1213,7 +1214,8 @@ public class UserTests {
     @Test
     public void buildWithAddressTest() {
         User user = testBuilder.build();
-        assertEquals(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand,Canterbury,8041"), user.getAddress());
+        //ReflectionEquals.match() matches the contents of the object instead of the object itself.
+        assertTrue(new ReflectionEquals(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand,Canterbury,8041")).matches(user.getAddress()));
     }
 
     /**

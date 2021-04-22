@@ -62,6 +62,7 @@ export type Location = {
   region?: string,
   country: string,
   postcode?: string,
+  district?: string
 };
 
 export type CreateUser = {
