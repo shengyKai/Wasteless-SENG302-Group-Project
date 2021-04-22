@@ -55,7 +55,19 @@ describe('UserProfile.vue', () => {
       homeAddress: { country: 'test_country' },
       created: "1/1/1950",
       role: "user",
-      businessesAdministered: [1, 2],
+      businessesAdministered: [
+        {
+          id: 1,
+          name: 'test_business_name1',
+          address: 'test_business_address1',
+          businessType: 'Accommodation and Food Services',
+        },
+        { 
+          id: 2,
+          name: 'test_business_name2',
+          address: 'test_business_address2',
+          businessType: 'Accommodation and Food Services',
+        }],
     };
 
     const vuetify = new Vuetify();
@@ -166,14 +178,6 @@ describe('UserProfile.vue', () => {
    */
   it('Creation message is in valid format', () => {
     expect(wrapper.vm.createdMsg).toMatch(/[0-9]{1,2} [A-Z][a-z]{2} [0-9]+ \([0-9]+ months ago\)/);
-  });
-
-  /**
-   * Tests that the UserProfile fetches the user's businesses.
-   */
-  it('User businesses are queried', () => {
-    expect(getBusiness).toBeCalledWith(1);
-    expect(getBusiness).toBeCalledWith(2);
   });
 
   /**
