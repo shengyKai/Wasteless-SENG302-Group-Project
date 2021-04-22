@@ -31,16 +31,16 @@ import java.util.stream.Collectors;
 @Component
 public class MainApplicationRunner implements ApplicationRunner {
 
-    private UserRepository _userRepository;
-    private DGAARepository _dgaaRepository;
-    private BusinessRepository _businessRepository;
+    private UserRepository userRepository;
+    private DGAARepository dgaaRepository;
+    private BusinessRepository businessRepository;
     private static final Logger logger = LogManager.getLogger(MainApplicationRunner.class.getName());
 
     @Autowired
     public MainApplicationRunner(UserRepository userRepository, DGAARepository dgaaRepository, BusinessRepository businessRepository) {
-        this._userRepository = userRepository;
-        this._dgaaRepository = dgaaRepository;
-        this._businessRepository = businessRepository;
+        this.userRepository = userRepository;
+        this.dgaaRepository = dgaaRepository;
+        this.businessRepository = businessRepository;
     }
 
 
@@ -53,20 +53,20 @@ public class MainApplicationRunner implements ApplicationRunner {
         logger.info("Startup application with {}", args);
         List<User> demoUsers = readUserFile("src//main//DemoData.txt");
         for (User user : demoUsers) {
-            if (_userRepository.findByEmail(user.getEmail()) == null) {
-                _userRepository.save(user);
+            if (userRepository.findByEmail(user.getEmail()) == null) {
+                userRepository.save(user);
             }
         }
 
-        for (User user : _userRepository.findAll() ) {
+        for (User user : userRepository.findAll() ) {
             logger.info(user.toString());
         }
 
         // Checks if DGAA present in DB and generates one if not
 
-        DGAAController.checkDGAA(_dgaaRepository);
+        DGAAController.checkDGAA(dgaaRepository);
 
-        User user = _userRepository.findByEmail("123andyelliot@gmail.com");
+        User user = userRepository.findByEmail("123andyelliot@gmail.com");
         Business business = new Business.Builder()
                 .withBusinessType("Accommodation and Food Services")
                 .withDescription("DESCRIPTION")
@@ -75,10 +75,10 @@ public class MainApplicationRunner implements ApplicationRunner {
                 .withPrimaryOwner(user)
                 .build();
 
-        Business testBusiness = _businessRepository.save(business);
+        Business testBusiness = businessRepository.save(business);
         //testBusiness.addAdmin(user);
-        _businessRepository.save(testBusiness);
-        user = _userRepository.findByEmail("123andyelliot@gmail.com");
+        businessRepository.save(testBusiness);
+        user = userRepository.findByEmail("123andyelliot@gmail.com");
     }
 
     /**
