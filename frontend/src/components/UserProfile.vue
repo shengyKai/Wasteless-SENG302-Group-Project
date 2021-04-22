@@ -14,6 +14,27 @@
         </h2>
         <p><b>Member Since:</b> {{ createdMsg }}</p>
       </div>
+
+      <!-- List of avaialable actions -->
+      <div class="action-menu">
+        <v-tooltip bottom v-if="isActingAsBusiness">
+          <template v-slot:activator="{ on, attrs }">
+            <v-btn
+              icon
+              color="primary"
+              v-bind="attrs"
+              v-on="on"
+              @click="addUserAsAdmin"
+              :disabled="isUserAdminOfActiveBusiness === true"
+              ref="addAdminButton"
+            >
+              <v-icon>mdi-account-plus</v-icon>
+            </v-btn>
+          </template>
+          <span> Add administrator </span>
+        </v-tooltip>
+      </div>
+
     </div>
 
     <v-container fluid>
@@ -43,14 +64,9 @@
         <v-col cols="12">
           <h4>Businesses</h4>
           <span v-for="business in businesses" :key="business.id">
-            <template v-if="typeof business === 'string'">
-              <v-chip color="error" class="link-chip link"> {{ business }} </v-chip>
-            </template>
-            <template v-else>
-              <router-link :to="'/business/' + business.id">
-                <v-chip color="primary" class="link-chip link"> {{ business.name }} </v-chip>
-              </router-link>
-            </template>
+            <router-link :to="'/business/' + business.id">
+              <v-chip color="primary" class="link-chip link"> {{ business.name }} </v-chip>
+            </router-link>
           </span>
         </v-col>
       </v-row>
@@ -60,7 +76,7 @@
 </template>
 
 <script>
-import { getBusiness, getUser } from '../api';
+import { getUser, makeBusinessAdmin } from '../api';
 import UserAvatar from './utils/UserAvatar';
 
 export default {
@@ -73,11 +89,6 @@ export default {
        * If null then no profile is displayed
        */
       user: null,
-      /**
-       * The businesses that this user administers.
-       * Also contains strings that are error messages for businesses that failed to be retreived.
-       */
-      businesses: [],
     };
   },
 
@@ -90,7 +101,7 @@ export default {
     const id = parseInt(this.$route.params.id);
     if (isNaN(id)) return;
 
-    if (id !== this.$store.state.user?.id) {
+    if (id === this.$store.state.user?.id) {
       this.user = this.$store.state.user;
     } else {
       getUser(id).then((value) => {
@@ -103,7 +114,46 @@ export default {
     }
   },
 
+  methods: {
+    async addUserAsAdmin() {
+      const role = this.activeRole;
+      if (!this.user || role?.type !== 'business') return;
+      let response = await makeBusinessAdmin(role.id, this.user.id);
+
+      if (typeof response === 'string') {
+        this.$store.commit('setError', response);
+        return;
+      }
+      // Temporarily adds the business to the list of administered businesses.
+      this.user.businessesAdministered.push({ id: role.id });
+
+      response = await getUser(this.user.id);
+      if (typeof response === 'string') {
+        this.$store.commit('setError', response);
+        return;
+      }
+
+      // Updates the user properly
+      this.user = response;
+      if (this.user.id === this.$store.state.user?.id) {
+        this.$store.commit('setUser', this.user);
+      }
+    }
+  },
+
   computed: {
+    activeRole() {
+      return this.$store.state.activeRole;
+    },
+    isActingAsBusiness() {
+      return this.activeRole?.type === 'business';
+    },
+    isUserAdminOfActiveBusiness() {
+      if (!this.isActingAsBusiness) return undefined;
+      if (this.user === undefined) return undefined;
+
+      return this.user.businessesAdministered.map(business => business.id).includes(this.activeRole.id);
+    },
     createdMsg() {
       if (this.user.created === undefined) return '';
 
@@ -116,6 +166,9 @@ export default {
 
       return `${parts[2]} ${parts[1]} ${parts[3]} (${diffMonths} months ago)`;
     },
+    businesses() {
+      return this.user?.businessesAdministered;
+    },
     /**
      * Construct a representation of the user's date of birth to display on the profile
      */
@@ -125,17 +178,6 @@ export default {
       const dateOfBirth = new Date(this.user.dateOfBirth);
       const parts = dateOfBirth.toDateString().split(' ');
       return `${parts[2]} ${parts[1]} ${parts[3]}`;
-    }
-  },
-  watch: {
-    async user() {
-      this.businesses = [];
-      const admins = this.user.businessesAdministered;
-
-      if (!admins) return;
-
-      const promises = admins.map(id => getBusiness(id));
-      this.businesses = await Promise.all(promises);
     }
   },
   components: {
@@ -148,6 +190,12 @@ export default {
 .profile-img {
   margin-top: -116px;
   margin-right: 16px;
+}
+
+.action-menu {
+  display: flex;
+  flex: 1;
+  justify-content: flex-end;
 }
 
 .body {

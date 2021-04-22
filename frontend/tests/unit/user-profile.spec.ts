@@ -1,14 +1,28 @@
 import Vue from 'vue';
 import VueRouter from 'vue-router';
 import Vuetify from 'vuetify';
-import Vuex from 'vuex';
+import Vuex, { Store } from 'vuex';
 import { CombinedVueInstance } from 'vue/types/vue';
-import { shallowMount, createLocalVue, Wrapper } from '@vue/test-utils';
+import { createLocalVue, Wrapper, mount } from '@vue/test-utils';
 
-import { createOptions } from '@/store';
+import { getStore, resetStoreForTesting, StoreData } from '@/store';
 import UserProfile from '@/components/UserProfile.vue';
 
+import * as api from '@/api';
+import { castMock, flushQueue } from './utils';
+import { User } from '@/api';
+
 Vue.use(Vuetify);
+
+jest.mock('@/api', () => ({
+  makeBusinessAdmin: jest.fn(),
+  getBusiness: jest.fn(),
+  getUser: jest.fn(),
+}));
+
+const makeBusinessAdmin = castMock(api.makeBusinessAdmin);
+const getBusiness = castMock(api.getBusiness);
+const getUser = castMock(api.getUser);
 
 const localVue = createLocalVue();
 
@@ -19,45 +33,80 @@ const router = new VueRouter();
 describe('UserProfile.vue', () => {
   // Container for the UserProfile under test
   let wrapper: Wrapper<any>;
+  let store: Store<StoreData>;
 
   /**
    * Sets up the test UserProfile instance and populates it with test data.
    */
   beforeEach(() => {
     localVue.use(Vuex);
-    let options = createOptions();
-    options.state = {
-      user: {
-        id: 1,
-        firstName: "test_first_name",
-        lastName: "test_last_name",
-        middleName: "test_middle_name",
-        nickname: "test_nickname",
-        bio: "test_biography",
-        email: "test_email_address",
-        dateOfBirth: "1/1/1900",
-        phoneNumber: "test_phone_number",
-        homeAddress: { country: 'test_country' },
-        created: "1/1/1950",
-        role: "user",
-        businessesAdministered: [],
-      },
-      activeRole: null,
-      globalError: null,
-      createBusinessDialogShown: false,
-      createProductDialogShown: false,
+    resetStoreForTesting();
+    store = getStore();
+    store.state.user = {
+      id: 1,
+      firstName: "test_first_name",
+      lastName: "test_last_name",
+      middleName: "test_middle_name",
+      nickname: "test_nickname",
+      bio: "test_biography",
+      email: "test_email_address",
+      dateOfBirth: "1/1/1900",
+      phoneNumber: "test_phone_number",
+      homeAddress: { country: 'test_country' },
+      created: "1/1/1950",
+      role: "user",
+      businessesAdministered: [
+        {
+          id: 1,
+          name: 'test_business_name1',
+          address: 'test_business_address1',
+          businessType: 'Accommodation and Food Services',
+        },
+        {
+          id: 2,
+          name: 'test_business_name2',
+          address: 'test_business_address2',
+          businessType: 'Accommodation and Food Services',
+        }],
     };
-    let store = new Vuex.Store(options);
 
     const vuetify = new Vuetify();
 
-    wrapper = shallowMount(UserProfile, {
+    wrapper = mount(UserProfile, {
       localVue,
       router,
       vuetify,
       store
     });
+
+    getBusiness.mockImplementation(async businessId => {
+      return {
+        id: businessId,
+        name: 'test_business_name' + businessId,
+        address: 'test_business_address' + businessId,
+        businessType: 'Accommodation and Food Services',
+        administrators: [await getUser(businessId) as User],
+      };
+    });
+
+    getUser.mockImplementation(async userId => {
+      return {
+        id:  userId,
+        firstName: 'test_firstname' + userId,
+        lastName: 'test_lastname' + userId,
+        email: 'test_email' + userId,
+        dateOfBirth: '1/1/1900',
+        homeAddress: { country: 'test_user_country' + userId },
+      };
+    });
   });
+
+  function actAsBusiness(businessId: number) {
+    store.state.activeRole = {
+      type: 'business',
+      id: businessId,
+    };
+  }
 
   /**
    * Tests that the UserProfile has the user's first name somewhere in the page
@@ -128,5 +177,103 @@ describe('UserProfile.vue', () => {
    */
   it('Creation message is in valid format', () => {
     expect(wrapper.vm.createdMsg).toMatch(/[0-9]{1,2} [A-Z][a-z]{2} [0-9]+ \([0-9]+ months ago\)/);
+  });
+
+  /**
+   * Tests that the UserProfile displays the user's businesses.
+   */
+  it('User businesses are displayed', async () => {
+    await Vue.nextTick();
+    expect(wrapper.text()).toContain('test_business_name1');
+    expect(wrapper.text()).toContain('test_business_name2');
+  });
+
+  /**
+   * Tests that if the user is acting as a business they administer then there should be an
+   * "add admin" button.
+   */
+  it('If acting as a business then there should be a add admin button', async () => {
+    actAsBusiness(10);
+
+    await Vue.nextTick();
+
+    let addAdmin = wrapper.findComponent({ ref: 'addAdminButton' });
+    expect(addAdmin.exists()).toBeTruthy();
+  });
+
+  /**
+   * Tests that if the user is acting as themselves then there should be no add admin button.
+   */
+  it('If not acting as a business then there should not be a add admin button', async () => {
+    await flushQueue();
+
+    let addAdmin = wrapper.findComponent({ ref: 'addAdminButton' });
+    expect(addAdmin.exists()).toBeFalsy();
+  });
+
+  /**
+   * Tests that if the current user is not an administrator of the current business then the
+   * "add admin" button should be enabled.
+   */
+  it('If not an administrator of the active business then the "add admin" button should be enabled', async () => {
+    actAsBusiness(10);
+
+    await flushQueue();
+
+    let addAdmin = wrapper.findComponent({ ref: 'addAdminButton' });
+    expect(addAdmin.props().disabled).toBeFalsy();
+  });
+
+  /**
+   * Tests that the "add admin" button is disabled when the user is already an administrator of the
+   * current business
+   */
+  it('If already an administrator of the active business then the "add admin" button should be disabled', async () => {
+    actAsBusiness(1); // Business 1 has an administrator with userId = 1
+
+    await flushQueue();
+
+    let addAdmin = wrapper.findComponent({ ref: 'addAdminButton' });
+    expect(addAdmin.props().disabled).toBeTruthy();
+  });
+
+  /**
+   * Tests the case where making a user an administrator of the current business succeeds.
+   */
+  it('If the "add admin" button is clicked then the "makeBusinessAdmin" function should be called', async () => {
+    actAsBusiness(10);
+
+    await flushQueue();
+
+    // Ensure that the "makeBusinessAdmin" operation is successful
+    makeBusinessAdmin.mockResolvedValue(undefined);
+
+    let addAdmin = wrapper.findComponent({ ref: 'addAdminButton' });
+    addAdmin.trigger('click');
+
+    await flushQueue();
+
+    expect(makeBusinessAdmin).lastCalledWith(10, 1); // Must be called with bussinessId, userId
+    expect(store.state.globalError).toBeNull();
+  });
+
+  /**
+   * Tests the case where making a user an administrator of the current business fails.
+   */
+  it('If "makeBusinessAdmin" function results in an error then this error should be shown', async () => {
+    actAsBusiness(10);
+
+    await flushQueue();
+
+    // Ensure that the "makeBusinessAdmin" operation fails
+    makeBusinessAdmin.mockResolvedValue('test_error_message');
+
+    let addAdmin = wrapper.findComponent({ ref: 'addAdminButton' });
+    addAdmin.trigger('click');
+
+    await flushQueue();
+
+    expect(makeBusinessAdmin).lastCalledWith(10, 1); // Must be called with bussinessId, userId
+    expect(store.state.globalError).toBe('test_error_message');
   });
 });
