@@ -268,9 +268,12 @@ public class BusinessController {
     }
 
     /**
-     * This method searchs for the business with the given ID in the database. If the business exists, return a JSON representation of the
-     * business. If the business does not exists, send a response with status code 406/Not Acceptable.
-     * @return JSON representation of the business.
+     * POST endpoint for adding a product to a businesses catalogue.
+     * This is only accessible to the DGAA, the business owner or a business admin.
+     * @param id The business id to add a product to
+     * @param productInfo The request body that should contain the product information
+     * @param request Additional information about the request
+     * @param response The response to this request
      */
     @PostMapping("/businesses/{id}/products")
     public void addProductToBusiness(@PathVariable Long id, @RequestBody JSONObject productInfo, HttpServletRequest request, HttpServletResponse response) {
