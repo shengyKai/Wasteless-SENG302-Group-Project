@@ -294,7 +294,7 @@ export async function login(email: string, password: string): Promise<MaybeError
 
     if (status === undefined) return 'Failed to reach backend';
     if (status === 400) return 'Invalid credentials';
-    return `Request failed: ' + ${status}`;
+    return `Request failed: ${status}`;
   }
   let id = response.data.userId;
   if (typeof id !== 'number') return 'Invalid response';
