@@ -6,7 +6,7 @@ import { createLocalVue, Wrapper, mount } from '@vue/test-utils';
 import CreateProduct from '@/components/BusinessProfile/CreateProduct.vue';
 import { castMock, flushQueue } from './utils';
 import * as api from '@/api';
-import { createOptions } from '@/store';
+import { getStore, resetStoreForTesting } from '@/store';
 
 jest.mock('@/api', () => ({
   createProduct: jest.fn(),
@@ -47,7 +47,8 @@ describe('CreateProduct.vue', () => {
     const elem = document.createElement('div');
     document.body.appendChild(elem);
 
-    let store = new Vuex.Store(createOptions());
+    resetStoreForTesting();
+    let store = getStore();
     store.state.createProductDialogBusiness = 90;
 
     appWrapper = mount(App, {
