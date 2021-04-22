@@ -17,38 +17,98 @@
 
       <!-- List of available actions -->
       <div class="action-menu">
-        <v-tooltip bottom v-if="isActingAsBusiness && isViewingOwnProfile===false">
-          <template v-slot:activator="{ on, attrs }">
-            <v-btn
-              icon
-              color="primary"
-              v-bind="attrs"
-              v-on="on"
-              @click="removeUserAdmin"
-              :disabled="isUserAdminOfActiveBusiness === false"
-              ref="removeAdminButton"
-            >
-              <v-icon>mdi-account-minus</v-icon>
-            </v-btn>
+        <v-dialog
+          v-model="removeAdminDialog"
+          persistent
+          max-width="300"
+        >
+          <template #activator="{ on: dialog, attrs}">
+            <v-tooltip bottom v-if="isActingAsBusiness && isViewingOwnProfile===false">
+              <template #activator="{ on: tooltip}">
+                <v-btn
+                  icon
+                  color="primary"
+                  v-bind="attrs"
+                  v-on="{...tooltip, ...dialog}"
+                  :disabled="isUserAdminOfActiveBusiness === false"
+                  ref="removeAdminButton"
+                >
+                  <v-icon>mdi-account-minus</v-icon>
+                </v-btn>
+              </template>
+              <span> Remove administrator </span>
+            </v-tooltip>
           </template>
-          <span> Remove administrator </span>
-        </v-tooltip>
-        <v-tooltip bottom v-if="isActingAsBusiness && isViewingOwnProfile===false">
-          <template v-slot:activator="{ on, attrs }">
-            <v-btn
-              icon
-              color="primary"
-              v-bind="attrs"
-              v-on="on"
-              @click="addUserAsAdmin"
-              :disabled="isUserAdminOfActiveBusiness === true"
-              ref="addAdminButton"
-            >
-              <v-icon>mdi-account-plus</v-icon>
-            </v-btn>
+          <v-card>
+            <v-card-title class="headline">
+              Are you sure?
+            </v-card-title>
+            <v-card-text>This user will no longer be able to operate this business as an administrator.</v-card-text>
+            <v-card-actions>
+              <v-spacer/>
+              <v-btn
+                color="green darken-1"
+                text
+                @click="removeAdminDialog = false"
+              >
+                Disagree
+              </v-btn>
+              <v-btn
+                color="green darken-1"
+                text
+                @click="removeAdminDialog = false; removeUserAdmin()"
+              >
+                Agree
+              </v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-dialog>
+        <v-dialog
+          v-model="addAdminDialog"
+          persistent
+          max-width="300"
+        >
+          <template #activator="{ on: dialog, attrs}">
+            <v-tooltip bottom v-if="isActingAsBusiness && isViewingOwnProfile===false">
+              <template #activator="{ on: tooltip }">
+                <v-btn
+                  icon
+                  color="primary"
+                  v-bind="attrs"
+                  v-on="{...dialog, ...tooltip}"
+                  :disabled="isUserAdminOfActiveBusiness === true"
+                  ref="addAdminButton"
+                >
+                  <v-icon>mdi-account-plus</v-icon>
+                </v-btn>
+              </template>
+              <span> Add administrator </span>
+            </v-tooltip>
           </template>
-          <span> Add administrator </span>
-        </v-tooltip>
+          <v-card>
+            <v-card-title class="headline">
+              Are you sure?
+            </v-card-title>
+            <v-card-text>This user will be able to act as an administrator for this business</v-card-text>
+            <v-card-actions>
+              <v-spacer/>
+              <v-btn
+                color="green darken-1"
+                text
+                @click="addAdminDialog = false"
+              >
+                Disagree
+              </v-btn>
+              <v-btn
+                color="green darken-1"
+                text
+                @click="addAdminDialog = false; addUserAsAdmin()"
+              >
+                Agree
+              </v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-dialog>
       </div>
 
     </div>
@@ -105,6 +165,8 @@ export default {
        * If null then no profile is displayed
        */
       user: null,
+      removeAdminDialog: false,
+      addAdminDialog: false,
     };
   },
 
