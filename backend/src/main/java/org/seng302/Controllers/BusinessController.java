@@ -24,6 +24,7 @@ import org.springframework.web.server.ResponseStatusException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -249,6 +250,24 @@ public class BusinessController {
     }
 
     /**
+     * Checks that the provided JSON object exists and has all the fields that are required
+     * @param requestBody The request body to validate
+     * @param requiredFields The fields that are required to exist in the request body
+     * @throws ResponseStatusException If the requestBody is invalid
+     */
+    private void checkObjectHasFields(JSONObject requestBody, List<String> requiredFields) throws ResponseStatusException {
+        if (requestBody == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Request must contain a JSON body");
+        }
+
+        for (String field : requiredFields) {
+            if (requestBody.get(field) == null) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Request must have a \"" + field + "\" field");
+            }
+        }
+    }
+
+    /**
      * This method searchs for the business with the given ID in the database. If the business exists, return a JSON representation of the
      * business. If the business does not exists, send a response with status code 406/Not Acceptable.
      * @return JSON representation of the business.
@@ -257,16 +276,24 @@ public class BusinessController {
     public void addProductToBusiness(@PathVariable Long id, @RequestBody JSONObject productInfo, HttpServletRequest request, HttpServletResponse response) {
         try {
             AuthenticationTokenManager.checkAuthenticationToken(request);
-            logger.info(String.format("Adding product to business (id=%d).", id));
+            logger.info(String.format("Adding product to business (businessId=%d).", id));
             Business business = getBusiness(id);
 
             business.checkSessionPermissions(request);
 
+            checkObjectHasFields(productInfo, List.of("id", "name", "description", "manufacturer", "recommendedRetailPrice"));
+
+            String productCode = productInfo.getAsString("id");
+
+            if (productRepository.findByBusinessAndProductCode(business, productCode) != null) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Product already exists with product code in this catalogue \"" + productCode + "\"");
+            }
+
             Product product = new Product.Builder()
-                                .withProductCode(productInfo.getAsString("id"))
+                                .withProductCode(productCode)
                                 .withName(productInfo.getAsString("name"))
                                 .withDescription(productInfo.getAsString("description"))
-                                //.withManufacturer(productInfo.getAsString("manufacturer"))
+                                .withManufacturer(productInfo.getAsString("manufacturer"))
                                 .withRecommendedRetailPrice(productInfo.getAsString("recommendedRetailPrice"))
                                 .withBusiness(business)
                                 .build();
