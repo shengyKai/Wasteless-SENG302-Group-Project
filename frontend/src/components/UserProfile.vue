@@ -24,6 +24,22 @@
               color="primary"
               v-bind="attrs"
               v-on="on"
+              @click="removeUserAdmin"
+              :disabled="isUserAdminOfActiveBusiness === false"
+              ref="removeAdminButton"
+            >
+              <v-icon>mdi-account-minus</v-icon>
+            </v-btn>
+          </template>
+          <span> Remove administrator </span>
+        </v-tooltip>
+        <v-tooltip bottom v-if="isActingAsBusiness">
+          <template v-slot:activator="{ on, attrs }">
+            <v-btn
+              icon
+              color="primary"
+              v-bind="attrs"
+              v-on="on"
               @click="addUserAsAdmin"
               :disabled="isUserAdminOfActiveBusiness === true"
               ref="addAdminButton"
@@ -76,7 +92,7 @@
 </template>
 
 <script>
-import { getUser, makeBusinessAdmin } from '../api';
+import { getUser, makeBusinessAdmin, removeBusinessAdmin } from '../api';
 import UserAvatar from './utils/UserAvatar';
 
 export default {
@@ -126,6 +142,30 @@ export default {
       }
       // Temporarily adds the business to the list of administered businesses.
       this.user.businessesAdministered.push({ id: role.id });
+
+      response = await getUser(this.user.id);
+      if (typeof response === 'string') {
+        this.$store.commit('setError', response);
+        return;
+      }
+
+      // Updates the user properly
+      this.user = response;
+      if (this.user.id === this.$store.state.user?.id) {
+        this.$store.commit('setUser', this.user);
+      }
+    },
+    async removeUserAdmin() {
+      const role = this.activeRole;
+      if (!this.user || role?.type !== 'business') return;
+      let response = await removeBusinessAdmin(role.id, this.user.id);
+
+      if (typeof response === 'string') {
+        this.$store.commit('setError', response);
+        return;
+      }
+
+      this.user.businessesAdministered.filter(business => business.id !== role.id);
 
       response = await getUser(this.user.id);
       if (typeof response === 'string') {
