@@ -157,7 +157,7 @@
       <!-- INPUT: Street/Company -->
       <v-text-field
         class="required"
-        v-model="street1"
+        v-model="streetAddress"
         label="Street Address"
         :rules="mandatoryRules"
         outlined
@@ -178,11 +178,11 @@
         :rules="maxCharRules.concat(mandatoryRules)"
       />
 
-      <!-- INPUT: State -->
+      <!-- INPUT: Region -->
       <LocationAutocomplete
-        type="state"
+        type="region"
         class="required"
-        v-model="state"
+        v-model="region"
         :rules="maxCharRules.concat(mandatoryRules)"
       />
 
@@ -249,10 +249,9 @@ export default {
       dob: '',
       countryCode: '64',
       phone: '',
-      streetNO: '',
-      street1: '',
+      streetAddress: '',
       district: '',
-      state: '',
+      region: '',
       city: '',
       country: '',
       postcode: '',
@@ -306,9 +305,21 @@ export default {
     // Complete registration with API
     async register () {
 
-      let part = this.street1.split(" ");
-      let streetNum = part[0];
-      let streetName = part.slice(1, part.length).join(" ");
+      /**
+       * Get the street number and name from the street address field.
+       */
+      const streetParts = this.streetAddress.split(" ");
+      const streetNum = streetParts[0];
+      const streetName = streetParts.slice(1, streetParts.length).join(" ");
+      /**
+       * Combine the country code and phone number to get the full phone number.
+       */
+      let fullPhoneNum;
+      if (this.phone === '') {
+        fullPhoneNum = '';
+      } else {
+        fullPhoneNum = '+' + this.countryCode + ' ' + this.phone;
+      }
 
       let user = {
         firstName   : this.firstName,
@@ -318,12 +329,12 @@ export default {
         bio         : this.bio,
         email       : this.email,
         dateOfBirth : this.dob,
-        phoneNumber : this.phone,
+        phoneNumber : fullPhoneNum,
         homeAddress : {
           streetNumber  : streetNum,
           streetName    : streetName,
           city          : this.city,
-          region        : this.state,
+          region        : this.region,
           country       : this.country,
           postcode      : this.postcode,
         },
