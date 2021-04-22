@@ -232,24 +232,6 @@ public class User extends Account {
     }
 
     /**
-     * Sets the users home address.
-     * Not Null
-     * @param address where the user lives/provides items from as a string
-     */
-    public void setAddress(String address) {
-        try {
-            if (address != null && address.length() > 0 && address.length() <= 255) {
-                this.address = Location.covertAddressStringToLocation(address);
-            } else {
-                throw new Exception("Address not entered correctly.");
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Your address has been entered incorrectly");
-        }
-    }
-
-    /**
      * Date the account was created
      * @return Date the account was created
      */

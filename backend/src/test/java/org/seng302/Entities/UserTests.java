@@ -528,35 +528,9 @@ public class UserTests {
                 "49,You Would Not,Ashburton,Believe,Your,Eyes,11111",
                 "20,Elizabeth Street,,Christchurch,New Zealand,Canterbury,8041"};
         for (String address : validAddresses) {
-            testUser.setAddress(address);
+            testUser.setAddress(Location.covertAddressStringToLocation(address));
             Location location = Location.covertAddressStringToLocation(address);
             assertEquals(testUser.getAddress(), location);
-        }
-    }
-
-    /**
-     * Checks an empty address string will not be set as the user's address
-     */
-    @Test
-    public void checkInvalidAddressEmpty() {
-        try {
-            testUser.setAddress("");
-            fail("A Forbidden exception was expected, but not thrown");
-        } catch (ResponseStatusException expectedException) { }
-    }
-
-    /**
-     * Checks several address strings that are too long (above 255 letters long) will not be set as the user's address
-     */
-    @Test
-    public void checkInvalidAddressTooLong() {
-        String[] invalidAddresses = { "This is the story of a student hoping one day to become a developer he sat here writing this long sentence hoping to reach exactly two hundred and fifty six characters however this was a challenge if he wanted to make a sentence that would read well nicely",
-                "This is the story of an address hoping one day to become a developer he sat here writing this long sentence hoping to reach exactly two hundred and fifty six characters however this was a challenge if he wanted to make a sentence that would read well nicely This is the story of a student hoping one day to become a developer he sat here writing this long sentence hoping to reach exactly two hundred and fifty six characters however this was a challenge if he wanted to make a sentence that would read well nicely"};
-        for (String address : invalidAddresses) {
-            try {
-                testUser.setAddress(address);
-                fail("A Forbidden exception was expected, but not thrown");
-            } catch (ResponseStatusException expectedException) { }
         }
     }
 
