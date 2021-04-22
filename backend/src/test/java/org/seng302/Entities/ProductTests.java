@@ -25,8 +25,6 @@ public class ProductTests {
     @Autowired
     UserRepository userRepository;
 
-    private Product testProduct = new Product();
-
     private User testUser1;
     private Business testBusiness1;
 
