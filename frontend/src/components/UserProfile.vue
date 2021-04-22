@@ -124,8 +124,20 @@ export default {
         this.$store.commit('setError', response);
         return;
       }
-      // I alternatively we could query the user to see if it actually updated, but this should work.
+      // Temporarily adds the business to the list of administered businesses.
       this.user.businessesAdministered.push({ id: role.id });
+
+      response = await getUser(this.user.id);
+      if (typeof response === 'string') {
+        this.$store.commit('setError', response);
+        return;
+      }
+
+      // Updates the user properly
+      this.user = response;
+      if (this.user.id === this.$store.state.user?.id) {
+        this.$store.commit('setUser', this.user);
+      }
     }
   },
 
@@ -139,6 +151,7 @@ export default {
     isUserAdminOfActiveBusiness() {
       if (!this.isActingAsBusiness) return undefined;
       if (this.user === undefined) return undefined;
+
       return this.user.businessesAdministered.map(business => business.id).includes(this.activeRole.id);
     },
     createdMsg() {
