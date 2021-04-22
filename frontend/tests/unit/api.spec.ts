@@ -19,17 +19,14 @@ jest.mock('axios', () => ({
   },
 }));
 
-// @ts-ignore - We've added an instance attribute in the mock declaration that mimics a AxiosInstance
-const unMockedInstance: AxiosInstance = axios.instance;
+// Makes a type for a mocked version of T where T is an object containing only methods.
+type Mocked<T extends {[k: string]: (...args: any[]) => any}> = { [k in keyof T]: jest.Mock<ReturnType<T[k]>, Parameters<T[k]>>}
 
-// Reinterprets the instance to a convinient mocked instance
-const instance = {
-  get: castMock(unMockedInstance.get),
-  post: castMock(unMockedInstance.post),
-  patch: castMock(unMockedInstance.patch),
-  delete: castMock(unMockedInstance.delete),
-  put: castMock(unMockedInstance.put),
-};
+// Makes a type from T with only the methods of T
+type Methods<T> = Pick<T, ({[P in keyof T]: T[P] extends (...args: any[]) => any ? P : never })[keyof T]>;
+
+// @ts-ignore - We've added an instance attribute in the mock declaration that mimics a AxiosInstance
+const instance: Mocked<Methods<AxiosInstance>> = axios.instance;
 
 // Makes sure that the api.ts has created a axios instance.
 expect(castMock(axios.create)).toBeCalled();
