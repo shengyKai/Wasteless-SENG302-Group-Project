@@ -40,7 +40,7 @@ public class ProductTests {
                 .withMiddleName("Hector")
                 .withLastName("Smith")
                 .withNickName("Jonny")
-                .withEmail("johnsmith99@gmail.com")
+                .withEmail("johnsmith98@gmail.com")
                 .withPassword("1337-H%nt3r2")
                 .withBio("Likes long walks on the beach")
                 .withDob("2000-03-11")
