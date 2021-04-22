@@ -31,7 +31,7 @@
               <v-icon>mdi-account-plus</v-icon>
             </v-btn>
           </template>
-          <span> Add adminstrator </span>
+          <span> Add administrator </span>
         </v-tooltip>
       </div>
 
@@ -101,7 +101,7 @@ export default {
     const id = parseInt(this.$route.params.id);
     if (isNaN(id)) return;
 
-    if (id !== this.$store.state.user?.id) {
+    if (id === this.$store.state.user?.id) {
       this.user = this.$store.state.user;
     } else {
       getUser(id).then((value) => {
@@ -139,7 +139,6 @@ export default {
     isUserAdminOfActiveBusiness() {
       if (!this.isActingAsBusiness) return undefined;
       if (this.user === undefined) return undefined;
-      
       return this.user.businessesAdministered.map(business => business.id).includes(this.activeRole.id);
     },
     createdMsg() {
