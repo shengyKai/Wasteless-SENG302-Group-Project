@@ -16,11 +16,14 @@ Vue.use(Vuetify);
 
 jest.mock('@/api', () => ({
   makeBusinessAdmin: jest.fn(),
+  removeBusinessAdmin: jest.fn(),
   getBusiness: jest.fn(),
   getUser: jest.fn(),
 }));
 
 const makeBusinessAdmin = castMock(api.makeBusinessAdmin);
+const removeBusinessAdmin = castMock(api.removeBusinessAdmin);
+
 const getBusiness = castMock(api.getBusiness);
 const getUser = castMock(api.getUser);
 
@@ -28,7 +31,6 @@ const localVue = createLocalVue();
 
 localVue.use(VueRouter);
 const router = new VueRouter();
-
 
 describe('UserProfile.vue', () => {
   // Container for the UserProfile under test
@@ -276,5 +278,54 @@ describe('UserProfile.vue', () => {
 
     expect(makeBusinessAdmin).lastCalledWith(10, 1); // Must be called with bussinessId, userId
     expect(store.state.globalError).toBe('test_error_message');
+  });
+
+  /**
+   * Tests that if the user is acting as a business they administer then there should be an
+   * "remove admin" button.
+   */
+  it('If acting as a business there should be a "remove admin" button', async () => {
+    actAsBusiness(10);
+
+    await Vue.nextTick();
+
+    let addAdmin = wrapper.findComponent({ ref: 'removeAdminButton' });
+    expect(addAdmin.exists()).toBeTruthy();
+  });
+
+  /**
+   * Tests that if the user is acting as themselves then there should be no remove admin button.
+   */
+  it('If not acting as a business then there should not be a remove admin button', async () => {
+    await flushQueue();
+
+    let addAdmin = wrapper.findComponent({ ref: 'removeAdminButton' });
+    expect(addAdmin.exists()).toBeFalsy();
+  });
+
+  /**
+   * Tests that if the current user is not an administrator of the current business then the
+   * "remove admin" button should be disabled.
+   */
+  it('If not an administrator of the active business then the "remove admin" button should be disabled', async () => {
+    actAsBusiness(10);
+
+    await flushQueue();
+
+    let addAdmin = wrapper.findComponent({ ref: 'removeAdminButton' });
+    expect(addAdmin.props().disabled).toBeTruthy();
+  });
+
+  /**
+   * Tests that the "remove admin" button is enabled when the user is an administrator of the
+   * current business
+   */
+  it('If an administrator of the active business then the "remove admin" button should be enabled', async () => {
+    actAsBusiness(1); // Business 1 has an administrator with userId = 1
+
+    await flushQueue();
+
+    let addAdmin = wrapper.findComponent({ ref: 'removeAdminButton' });
+    expect(addAdmin.props().disabled).toBeFalsy();
   });
 });
