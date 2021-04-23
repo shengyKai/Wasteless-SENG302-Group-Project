@@ -29,9 +29,13 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -225,5 +229,29 @@ public class ProductControllerTest {
      * - Check a DGAA can retrieve catalogues
      */
 
+    @Test
+    public void postingAProductAddsItToTheCatalogue() throws Exception {
+        JSONObject productInfo = new JSONObject();
+        productInfo.put("id", "WATT-420-BEANS");
+        productInfo.put("name", "Watties Baked Beans - 420g can");
+        productInfo.put("description", "Baked Beans as they should be.");
+        productInfo.put("manufacturer", "Heinz Wattie's Limited");
+        productInfo.put("recommendedRetailPrice", 2.2);
 
+        MvcResult result = mockMvc.perform(post(String.format("/businesses/%d/products", testBusiness1.getId()))
+                .content(productInfo.toString())
+                .sessionAttrs(sessionAuthToken)
+                .contentType("application/json")
+                .cookie(authCookie))
+                .andExpect(status().isCreated())
+                .andReturn();
+
+        Product product = productRepository.findByBusinessAndProductCode(testBusiness1, productInfo.getAsString("id"));
+        assertEquals(productInfo.get("id"), product.getProductCode());
+        assertEquals(productInfo.get("name"), product.getName());
+        assertEquals(productInfo.get("description"), product.getDescription());
+        assertEquals(productInfo.get("manufacturer"), product.getManufacturer());
+        // There is a small fudge factor between the exact decimal value and the closest double representation of said value
+        assertEquals((double)productInfo.get("recommendedRetailPrice"), product.getRecommendedRetailPrice().doubleValue(), 1e-10);
+    }
 }
