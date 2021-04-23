@@ -193,6 +193,8 @@ public class User extends Account {
             
             if (dateOfBirth.compareTo(minDate) < 0) {
                 this.dob = dob;
+            } else {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You must be at least 13 years old to create an account");
             }
         } else {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Your date of birth has been entered incorrectly");
