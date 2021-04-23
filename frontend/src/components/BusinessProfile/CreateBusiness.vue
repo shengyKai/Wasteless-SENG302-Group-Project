@@ -73,9 +73,9 @@
                 </v-col>
                 <v-col cols="12">
                   <LocationAutocomplete
-                    type="state"
+                    type="region"
                     class="required"
-                    v-model="state"
+                    v-model="region"
                     :rules="mandatoryRules.concat(maxCharRules)"
                   />
                 </v-col>
@@ -139,7 +139,7 @@ export default {
       street2: '',
       district: '',
       city: '',
-      state: '',
+      region: '',
       country: '',
       postcode: '',
       businessTypes: [

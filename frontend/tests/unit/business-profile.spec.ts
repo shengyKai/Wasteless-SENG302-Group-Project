@@ -35,20 +35,20 @@ describe('index.vue', () => {
             address: "1 Some Street Name",
             businessType: "Some Business Type",
             description: "Some Description",
-            created: date
+            created: date,
+            administrators: [
+              {
+                id: 1,
+                firstName: "Some First Name",
+                lastName: "Some Last Name"
+              },
+              {
+                id: 2,
+                firstName: "Another First Name",
+                lastName: "Another Last Name"
+              }
+            ]
           },
-          administrators: [
-            {
-              id: 1,
-              firstName: "Some First Name",
-              lastName: "Some Last Name"
-            },
-            {
-              id: 2,
-              firstName: "Another First Name",
-              lastName: "Another Last Name"
-            }
-          ]
         };
       }
     });

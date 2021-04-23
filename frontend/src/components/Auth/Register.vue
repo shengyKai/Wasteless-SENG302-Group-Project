@@ -39,11 +39,28 @@
         outlined
       />
 
-      <!-- INPUT: Name -->
+      <!-- INPUT: First name -->
       <v-text-field
         class="required"
-        v-model="name"
-        label="Name"
+        v-model="firstName"
+        label="First name"
+        :rules="mandatoryRules.concat(nameRules).concat(maxCharRules)"
+        outlined
+      />
+
+      <!-- INPUT: Middle name(s) -->
+      <v-text-field
+        v-model="middleName"
+        label="Middle name(s)"
+        :rules="nameRules.concat(maxCharRules)"
+        outlined
+      />
+
+      <!-- INPUT: Last name -->
+      <v-text-field
+        class="required"
+        v-model="lastName"
+        label="Last name"
         :rules="mandatoryRules.concat(nameRules).concat(maxCharRules)"
         outlined
       />
@@ -136,20 +153,12 @@
         </v-col>
 
       </v-row>
-      <!-- INPUT: Unit number -->
-      <v-text-field
-        class="required"
-        v-model="streetNO"
-        label="Unit No."
-        :rules="mandatoryRules"
-        outlined
-      />
 
       <!-- INPUT: Street/Company -->
       <v-text-field
         class="required"
-        v-model="street1"
-        label="Street Address, Company Name"
+        v-model="streetAddress"
+        label="Street Address"
         :rules="mandatoryRules"
         outlined
       />
@@ -169,11 +178,11 @@
         :rules="maxCharRules.concat(mandatoryRules)"
       />
 
-      <!-- INPUT: State -->
+      <!-- INPUT: Region -->
       <LocationAutocomplete
-        type="state"
+        type="region"
         class="required"
-        v-model="state"
+        v-model="region"
         :rules="maxCharRules.concat(mandatoryRules)"
       />
 
@@ -232,16 +241,17 @@ export default {
       email: '',
       password: '',
       confirmPassword: '',
-      name: '',
+      firstName: '',
+      middleName: '',
+      lastName: '',
       nickname: '',
       bio: '',
       dob: '',
       countryCode: '64',
       phone: '',
-      streetNO: '',
-      street1: '',
+      streetAddress: '',
       district: '',
-      state: '',
+      region: '',
       city: '',
       country: '',
       postcode: '',
@@ -295,30 +305,37 @@ export default {
     },
     // Complete registration with API
     async register () {
-      //S300T500-16 merge_U1 last final final final bug
-      //Was thinking to use this match method to split unit and street
-      //(e.g) 10 bla street -> streetNo : 10, sreet1 : bla street
-      //however it dosent work, so I change the text field back to our initial design
-      //With the unit text field and street name text field
-      //Leave this here in case someone wan to use this format in the future, it somehow return null? TT
-      // let parts = this.street1.match(/([A-Za-z]+)([0-9]+)/);
-      // #streetNo : parts[2]
-      // #street1  : part[1]
+
+      /**
+       * Get the street number and name from the street address field.
+       */
+      const streetParts = this.streetAddress.split(" ");
+      const streetNum = streetParts[0];
+      const streetName = streetParts.slice(1, streetParts.length).join(" ");
+      /**
+       * Combine the country code and phone number to get the full phone number.
+       */
+      let fullPhoneNum;
+      if (this.phone === '') {
+        fullPhoneNum = '';
+      } else {
+        fullPhoneNum = '+' + this.countryCode + ' ' + this.phone;
+      }
 
       let user = {
-        firstName   : this.name,
-        lastName    : this.name,
-        middleName  : this.name,
+        firstName   : this.firstName,
+        lastName    : this.lastName,
+        middleName  : this.middleName,
         nickname    : this.nickname,
         bio         : this.bio,
         email       : this.email,
         dateOfBirth : this.dob,
-        phoneNumber : this.phone,
+        phoneNumber : fullPhoneNum,
         homeAddress : {
-          streetNumber  : this.streetNO,
-          streetName    : this.street1,
+          streetNumber  : streetNum,
+          streetName    : streetName,
           city          : this.city,
-          region        : this.state,
+          region        : this.region,
           country       : this.country,
           postcode      : this.postcode,
         },

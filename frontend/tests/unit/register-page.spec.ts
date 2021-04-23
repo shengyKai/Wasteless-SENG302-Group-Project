@@ -55,6 +55,7 @@ describe('index.vue', () => {
  * Tests in here focuses on the input of the fields, of which, Register would be used as the mount as it is the parent
  * of these fields.
  */
+// TODO Fix this test
 describe('Register.vue', () => {
   let wrapper: Wrapper<any>;
   const localVue = createLocalVue();
@@ -78,15 +79,16 @@ describe('Register.vue', () => {
           email: 'someemail@gmail.com',
           password: 'somepassword1',
           confirmPassword: 'somepassword1',
-          name: 'some name',
+          firstName: 'Winnie',
+          middleName: 'The',
+          lastName: 'Pooh',
           nickname: 'some nickname',
           bio: 'some bio',
           dob: '2008-04-06',
           countryCode: '64',
           phone: '1234567890',
-          street1: 'some street address',
-          street2: 'some street address',
-          state: "some state",
+          streetAddress: '15 some street',
+          region: "some state",
           city: "some city",
           country: "some country",
           district: "some district",
@@ -121,7 +123,7 @@ describe('Register.vue', () => {
 
   /**
    * The series of tests here is to check if the register button is disabled when an INVALID format is provided in any of the
-   * input fields. The fields checked are email, password, confirmPassword, name, nickname, bio, dob, countryCode, phone, street1, district, city, state,
+   * input fields. The fields checked are email, password, confirmPassword, name, nickname, bio, dob, countryCode, phone, streetAddres, district, city, region,
    * country and postcode.
    */
   it("Testing for invalid email format, with less than two characters after each '.'", async () => {
@@ -130,9 +132,8 @@ describe('Register.vue', () => {
     await wrapper.setData({
       email: "someemail@gmail.c"
     });
-    Vue.nextTick(() => {
-      expect(registerButton.props().disabled).toBeTruthy();
-    });
+    await Vue.nextTick();
+    expect(registerButton.props().disabled).toBeTruthy();
   });
 
   it("Testing for invalid email format,with no '@'", async () => {
@@ -141,9 +142,8 @@ describe('Register.vue', () => {
     await wrapper.setData({
       email: "someemail.com"
     });
-    Vue.nextTick(() => {
-      expect(registerButton.props().disabled).toBeTruthy();
-    });
+    await Vue.nextTick();
+    expect(registerButton.props().disabled).toBeTruthy();
   });
 
   it("Testing for invalid email format, with no characters before '@'", async () => {
@@ -152,9 +152,8 @@ describe('Register.vue', () => {
     await wrapper.setData({
       email: "@gmail.com"
     });
-    Vue.nextTick(() => {
-      expect(registerButton.props().disabled).toBeTruthy();
-    });
+    await Vue.nextTick();
+    expect(registerButton.props().disabled).toBeTruthy();
   });
 
   it("Testing for invalid email format, with no '.'", async () => {
@@ -163,9 +162,8 @@ describe('Register.vue', () => {
     await wrapper.setData({
       email: "fsefsgr@gmailcom"
     });
-    Vue.nextTick(() => {
-      expect(registerButton.props().disabled).toBeTruthy();
-    });
+    await Vue.nextTick();
+    expect(registerButton.props().disabled).toBeTruthy();
   });
 
   it("Testing for invalid email format, empty email field", async () => {
@@ -174,9 +172,8 @@ describe('Register.vue', () => {
     await wrapper.setData({
       email: ""
     });
-    Vue.nextTick(() => {
-      expect(registerButton.props().disabled).toBeTruthy();
-    });
+    await Vue.nextTick();
+    expect(registerButton.props().disabled).toBeTruthy();
   });
 
   it("Testing for invalid email format, over character limit", async () => {
@@ -185,9 +182,8 @@ describe('Register.vue', () => {
     await wrapper.setData({
       email: 'a'.repeat(101)
     });
-    Vue.nextTick(() => {
-      expect(registerButton.props().disabled).toBeTruthy();
-    });
+    await Vue.nextTick();
+    expect(registerButton.props().disabled).toBeTruthy();
   });
 
   it("Testing for invalid password format, with no numbers", async () => {
@@ -196,9 +192,8 @@ describe('Register.vue', () => {
     await wrapper.setData({
       password: "hello"
     });
-    Vue.nextTick(() => {
-      expect(registerButton.props().disabled).toBeTruthy();
-    });
+    await Vue.nextTick();
+    expect(registerButton.props().disabled).toBeTruthy();
   });
 
   it("Testing for invalid password format, with no alphabets", async () => {
@@ -207,9 +202,8 @@ describe('Register.vue', () => {
     await wrapper.setData({
       password: "123455678"
     });
-    Vue.nextTick(() => {
-      expect(registerButton.props().disabled).toBeTruthy();
-    });
+    await Vue.nextTick();
+    expect(registerButton.props().disabled).toBeTruthy();
   });
 
   it("Testing for invalid password format, with less than 7 characters", async () => {
@@ -218,9 +212,8 @@ describe('Register.vue', () => {
     await wrapper.setData({
       password: "abcd1"
     });
-    Vue.nextTick(() => {
-      expect(registerButton.props().disabled).toBeTruthy();
-    });
+    await Vue.nextTick();
+    expect(registerButton.props().disabled).toBeTruthy();
   });
 
   it("Testing for invalid password format, empty password field", async () => {
@@ -229,9 +222,8 @@ describe('Register.vue', () => {
     await wrapper.setData({
       password: ""
     });
-    Vue.nextTick(() => {
-      expect(registerButton.props().disabled).toBeTruthy();
-    });
+    await Vue.nextTick();
+    expect(registerButton.props().disabled).toBeTruthy();
   });
 
   it("Testing for invalid password format, over character limit", async () => {
@@ -240,9 +232,8 @@ describe('Register.vue', () => {
     await wrapper.setData({
       password: 'a'.repeat(101)
     });
-    Vue.nextTick(() => {
-      expect(registerButton.props().disabled).toBeTruthy();
-    });
+    await Vue.nextTick();
+    expect(registerButton.props().disabled).toBeTruthy();
   });
 
   it("Testing for invalid confirm password format, different input value from password field", async () => {
@@ -252,9 +243,8 @@ describe('Register.vue', () => {
     await wrapper.setData({
       confirmPassword: "somepassword2"
     });
-    Vue.nextTick(() => {
-      expect(registerButton.props().disabled).toBeTruthy();
-    });
+    await Vue.nextTick();
+    expect(registerButton.props().disabled).toBeTruthy();
   });
 
   it("Testing for invalid confirm password format, empty confirm password field", async () => {
@@ -263,42 +253,98 @@ describe('Register.vue', () => {
     await wrapper.setData({
       confirmPassword: ""
     });
-    Vue.nextTick(() => {
-      expect(registerButton.props().disabled).toBeTruthy();
-    });
+    await Vue.nextTick();
+    expect(registerButton.props().disabled).toBeTruthy();
   });
 
-  it("Testing for invalid name format, empty name field", async () => {
+  it("Testing for invalid first name format, empty first name field", async () => {
     const registerButton = wrapper.find(".v-btn");
 
     await wrapper.setData({
-      name: ""
+      firstName: ""
     });
-    Vue.nextTick(() => {
-      expect(registerButton.props().disabled).toBeTruthy();
-    });
+    await Vue.nextTick();
+    expect(registerButton.props().disabled).toBeTruthy();
   });
 
-  it("Testing for invalid name format, name with numbers", async () => {
+  it("Testing for invalid first name format, first name with numbers", async () => {
     const registerButton = wrapper.find(".v-btn");
 
     await wrapper.setData({
-      name: "somename1"
+      firstName: "somename1"
     });
-    Vue.nextTick(() => {
-      expect(registerButton.props().disabled).toBeTruthy();
-    });
+    await Vue.nextTick();
+    expect(registerButton.props().disabled).toBeTruthy();
   });
 
-  it("Testing for invalid name format, over character limit", async () => {
+  it("Testing for invalid first name format, over character limit", async () => {
     const registerButton = wrapper.find(".v-btn");
 
     await wrapper.setData({
-      name: 'a'.repeat(101)
+      firstName: 'a'.repeat(101)
     });
-    Vue.nextTick(() => {
-      expect(registerButton.props().disabled).toBeTruthy();
+    await Vue.nextTick();
+    expect(registerButton.props().disabled).toBeTruthy();
+  });
+
+  it("Testing that empty middle name field is not invalid because middle name is not mandatory", async () => {
+    const registerButton = wrapper.find(".v-btn");
+
+    await wrapper.setData({
+      middleName: ""
     });
+    await Vue.nextTick();
+    expect(registerButton.props().disabled).toBeFalsy();
+  });
+
+  it("Testing for invalid middle name format, middle name with numbers", async () => {
+    const registerButton = wrapper.find(".v-btn");
+
+    await wrapper.setData({
+      middleName: "somename1"
+    });
+    await Vue.nextTick();
+    expect(registerButton.props().disabled).toBeTruthy();
+  });
+
+  it("Testing for invalid middle name format, middle name over character limit", async () => {
+    const registerButton = wrapper.find(".v-btn");
+
+    await wrapper.setData({
+      middleName: 'a'.repeat(101)
+    });
+    await Vue.nextTick();
+    expect(registerButton.props().disabled).toBeTruthy();
+  });
+
+  it("Testing for invalid last name format, empty last name field", async () => {
+    const registerButton = wrapper.find(".v-btn");
+
+    await wrapper.setData({
+      lastName: ""
+    });
+    await Vue.nextTick();
+    expect(registerButton.props().disabled).toBeTruthy();
+  });
+
+  it("Testing for invalid last name format, last name with numbers", async () => {
+    const registerButton = wrapper.find(".v-btn");
+
+    await wrapper.setData({
+      lastName: "somename1"
+    });
+    await Vue.nextTick();
+    expect(registerButton.props().disabled).toBeTruthy();
+  });
+
+  it("Testing for invalid last name format, over character limit", async () => {
+    const registerButton = wrapper.find(".v-btn");
+
+    await wrapper.setData({
+      lastName: 'a'.repeat(101)
+    });
+    await Vue.nextTick();
+    expect(registerButton.props().disabled).toBeTruthy();
   });
 
   it("Testing for invalid nickname format, name with numbers", async () => {
@@ -307,9 +353,8 @@ describe('Register.vue', () => {
     await wrapper.setData({
       nickname: "somename1"
     });
-    Vue.nextTick(() => {
-      expect(registerButton.props().disabled).toBeTruthy();
-    });
+    await Vue.nextTick();
+    expect(registerButton.props().disabled).toBeTruthy();
   });
 
   it("Testing for invalid nickname format, over character limit", async () => {
@@ -318,9 +363,8 @@ describe('Register.vue', () => {
     await wrapper.setData({
       nickname: 'a'.repeat(101)
     });
-    Vue.nextTick(() => {
-      expect(registerButton.props().disabled).toBeTruthy();
-    });
+    await Vue.nextTick();
+    expect(registerButton.props().disabled).toBeTruthy();
   });
 
   it("Testing for invalid bio format, over character limit", async () => {
@@ -329,9 +373,8 @@ describe('Register.vue', () => {
     await wrapper.setData({
       bio: 'a'.repeat(201)
     });
-    Vue.nextTick(() => {
-      expect(registerButton.props().disabled).toBeTruthy();
-    });
+    await Vue.nextTick();
+    expect(registerButton.props().disabled).toBeTruthy();
   });
 
   it("Testing for invalid date format, empty date field", async () => {
@@ -340,9 +383,8 @@ describe('Register.vue', () => {
     await wrapper.setData({
       dob: ""
     });
-    Vue.nextTick(() => {
-      expect(registerButton.props().disabled).toBeTruthy();
-    });
+    await Vue.nextTick();
+    expect(registerButton.props().disabled).toBeTruthy();
   });
 
   it("Testing for invalid country code format, no country code", async () => {
@@ -351,9 +393,8 @@ describe('Register.vue', () => {
     await wrapper.setData({
       countryCode: ""
     });
-    Vue.nextTick(() => {
-      expect(registerButton.props().disabled).toBeTruthy();
-    });
+    await Vue.nextTick();
+    expect(registerButton.props().disabled).toBeTruthy();
   });
 
   it("Testing for invalid country code format, alphabets in country code", async () => {
@@ -362,9 +403,8 @@ describe('Register.vue', () => {
     await wrapper.setData({
       countryCode: "a1"
     });
-    Vue.nextTick(() => {
-      expect(registerButton.props().disabled).toBeTruthy();
-    });
+    await Vue.nextTick();
+    expect(registerButton.props().disabled).toBeTruthy();
   });
 
   it("Testing for invalid country code format, more than three numbers in country code", async () => {
@@ -373,9 +413,8 @@ describe('Register.vue', () => {
     await wrapper.setData({
       countryCode: "1234"
     });
-    Vue.nextTick(() => {
-      expect(registerButton.props().disabled).toBeTruthy();
-    });
+    await Vue.nextTick();
+    expect(registerButton.props().disabled).toBeTruthy();
   });
 
   it("Testing for invalid country code format, less than two numbers in country code", async () => {
@@ -384,9 +423,8 @@ describe('Register.vue', () => {
     await wrapper.setData({
       countryCode: "1"
     });
-    Vue.nextTick(() => {
-      expect(registerButton.props().disabled).toBeTruthy();
-    });
+    await Vue.nextTick();
+    expect(registerButton.props().disabled).toBeTruthy();
   });
 
   it("Testing for invalid phone format, alphabets in field", async () => {
@@ -395,9 +433,8 @@ describe('Register.vue', () => {
     await wrapper.setData({
       phone: "123456789a"
     });
-    Vue.nextTick(() => {
-      expect(registerButton.props().disabled).toBeTruthy();
-    });
+    await Vue.nextTick();
+    expect(registerButton.props().disabled).toBeTruthy();
   });
 
   it("Testing for invalid phone format, over character limit", async () => {
@@ -406,9 +443,8 @@ describe('Register.vue', () => {
     await wrapper.setData({
       phone: '1'.repeat(101)
     });
-    Vue.nextTick(() => {
-      expect(registerButton.props().disabled).toBeTruthy();
-    });
+    await Vue.nextTick();
+    expect(registerButton.props().disabled).toBeTruthy();
   });
 
   it("Testing for invalid phone format, spaces at the start of the phone number", async () => {
@@ -417,9 +453,8 @@ describe('Register.vue', () => {
     await wrapper.setData({
       phone: " 1234567890"
     });
-    Vue.nextTick(() => {
-      expect(registerButton.props().disabled).toBeTruthy();
-    });
+    await Vue.nextTick();
+    expect(registerButton.props().disabled).toBeTruthy();
   });
 
   it("Testing for invalid phone format, spaces at the end of the phone number", async () => {
@@ -428,20 +463,18 @@ describe('Register.vue', () => {
     await wrapper.setData({
       phone: "1234567890 "
     });
-    Vue.nextTick(() => {
-      expect(registerButton.props().disabled).toBeTruthy();
-    });
+    await Vue.nextTick();
+    expect(registerButton.props().disabled).toBeTruthy();
   });
 
   it("Testing for invalid street format, empty street field", async () => {
     const registerButton = wrapper.find(".v-btn");
 
     await wrapper.setData({
-      street1: ""
+      streetAddress: ""
     });
-    Vue.nextTick(() => {
-      expect(registerButton.props().disabled).toBeTruthy();
-    });
+    await Vue.nextTick();
+    expect(registerButton.props().disabled).toBeTruthy();
   });
 
   it("Testing for invalid district format, over character limit", async () => {
@@ -450,9 +483,8 @@ describe('Register.vue', () => {
     await wrapper.setData({
       district: 'a'.repeat(101)
     });
-    Vue.nextTick(() => {
-      expect(registerButton.props().disabled).toBeTruthy();
-    });
+    await Vue.nextTick();
+    expect(registerButton.props().disabled).toBeTruthy();
   });
 
   it("Testing for invalid city format, empty city field", async () => {
@@ -461,9 +493,8 @@ describe('Register.vue', () => {
     await wrapper.setData({
       city: ""
     });
-    Vue.nextTick(() => {
-      expect(registerButton.props().disabled).toBeTruthy();
-    });
+    await Vue.nextTick();
+    expect(registerButton.props().disabled).toBeTruthy();
   });
 
   it("Testing for invalid city format, over character limit", async () => {
@@ -472,31 +503,28 @@ describe('Register.vue', () => {
     await wrapper.setData({
       city: 'a'.repeat(101)
     });
-    Vue.nextTick(() => {
-      expect(registerButton.props().disabled).toBeTruthy();
-    });
+    await Vue.nextTick();
+    expect(registerButton.props().disabled).toBeTruthy();
   });
 
-  it("Testing for invalid state format, empty state field", async () => {
+  it("Testing for invalid region format, empty region field", async () => {
     const registerButton = wrapper.find(".v-btn");
 
     await wrapper.setData({
-      state: ""
+      region: ""
     });
-    Vue.nextTick(() => {
-      expect(registerButton.props().disabled).toBeTruthy();
-    });
+    await Vue.nextTick();
+    expect(registerButton.props().disabled).toBeTruthy();
   });
 
-  it("Testing for invalid state format, over character limit", async () => {
+  it("Testing for invalid region format, over character limit", async () => {
     const registerButton = wrapper.find(".v-btn");
 
     await wrapper.setData({
-      state: 'a'.repeat(101)
+      region: 'a'.repeat(101)
     });
-    Vue.nextTick(() => {
-      expect(registerButton.props().disabled).toBeTruthy();
-    });
+    await Vue.nextTick();
+    expect(registerButton.props().disabled).toBeTruthy();
   });
 
   it("Testing for invalid country format, empty country field", async () => {
@@ -505,9 +533,8 @@ describe('Register.vue', () => {
     await wrapper.setData({
       country: ""
     });
-    Vue.nextTick(() => {
-      expect(registerButton.props().disabled).toBeTruthy();
-    });
+    await Vue.nextTick();
+    expect(registerButton.props().disabled).toBeTruthy();
   });
 
   it("Testing for invalid country format, over character limit", async () => {
@@ -516,9 +543,8 @@ describe('Register.vue', () => {
     await wrapper.setData({
       country: 'a'.repeat(101)
     });
-    Vue.nextTick(() => {
-      expect(registerButton.props().disabled).toBeTruthy();
-    });
+    await Vue.nextTick();
+    expect(registerButton.props().disabled).toBeTruthy();
   });
 
   /**
