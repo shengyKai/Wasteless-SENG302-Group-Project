@@ -5,7 +5,6 @@ import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
 import org.junit.Ignore;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.runner.RunWith;
@@ -22,14 +21,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import javax.servlet.http.Cookie;
-import java.io.IOException;
-import java.text.DateFormat;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 
@@ -55,16 +49,15 @@ public class ProductControllerTest {
     private final HashMap<String, Object> sessionAuthToken = new HashMap<>();
     private Cookie authCookie;
     private Business testBusiness1;
-    private User testUser1;
-    private User testUser2;
+    private User ownerUser;
+    private User bystanderUser;
+    private User administratorUser;
 
     /**
      * This method creates an authentication code for sessions and cookies.
      */
     private void setUpAuthCode() {
-        StringBuilder authCodeBuilder = new StringBuilder();
-        authCodeBuilder.append("0".repeat(64));
-        String authCode = authCodeBuilder.toString();
+        String authCode = "0".repeat(64);
         sessionAuthToken.put("AUTHTOKEN", authCode);
         authCookie = new Cookie("AUTHTOKEN", authCode);
     }
@@ -80,6 +73,14 @@ public class ProductControllerTest {
     }
 
     /**
+     * Mocks a session logged in as a given user
+     * @param userId Log in with userId
+     */
+    private void setCurrentUser(Long userId) {
+        sessionAuthToken.put("accountId", userId);
+    }
+
+    /**
      * Created a business object for testing
      */
     public void createTestBusiness() {
@@ -89,7 +90,7 @@ public class ProductControllerTest {
                 .withAddress(new Location())
                 .withDescription("Some description")
                 .withName("BusinessName")
-                .withPrimaryOwner(testUser1)
+                .withPrimaryOwner(ownerUser)
                 .build();
         testBusiness1 = businessRepository.save(testBusiness1);
     }
@@ -102,7 +103,7 @@ public class ProductControllerTest {
 
         setUpAuthCode();
 
-        testUser1 = new User.Builder()
+        ownerUser = new User.Builder()
                 .withFirstName("John")
                 .withMiddleName("Hector")
                 .withLastName("Smith")
@@ -115,10 +116,11 @@ public class ProductControllerTest {
                 .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Christchurch,New Zealand," +
                         "Canterbury,8041"))
                 .build();
-        testUser1 = userRepository.save(testUser1);
+
+        ownerUser = userRepository.save(ownerUser);
         createTestBusiness();
 
-        testUser2 = new User.Builder()
+        bystanderUser = new User.Builder()
                 .withFirstName("Happy")
                 .withMiddleName("Boi")
                 .withLastName("Jones")
@@ -131,7 +133,29 @@ public class ProductControllerTest {
                 .withAddress(Location.covertAddressStringToLocation("5,Rountree Street,Christchurch,New Zealand," +
                         "Canterbury,8041"))
                 .build();
-        testUser2 = userRepository.save(testUser1);
+        bystanderUser = userRepository.save(bystanderUser);
+
+
+        administratorUser = new User.Builder()
+                .withFirstName("Connor")
+                .withMiddleName("Boi")
+                .withLastName("Hitchcock")
+                .withNickName("Hitchy")
+                .withEmail("connor.hitchcock@gmail.com")
+                .withPassword("hunter2")
+                .withBio("Likes long walks on the beach always")
+                .withDob("2000-03-11")
+                .withPhoneNumber("+64 5 565 0125")
+                .withAddress(Location.covertAddressStringToLocation("5,Rountree Street,Christchurch,New Zealand," +
+                        "Canterbury,8041"))
+                .build();
+        administratorUser = userRepository.save(administratorUser);
+
+        testBusiness1.addAdmin(administratorUser);
+        testBusiness1 = businessRepository.save(testBusiness1);
+
+        // Ensures that we have a copy of administratorUser with all the administered businesses
+        administratorUser = userRepository.findById(administratorUser.getUserID()).get();
     }
 
     /**
@@ -161,6 +185,7 @@ public class ProductControllerTest {
      */
     @Test
     void retrieveCatalogueWithSeveralProducts() throws Exception {
+        setCurrentUser(ownerUser.getUserID());
         addSeveralProductsToACatalogue();
 
         MvcResult result = mockMvc.perform(get(String.format("/businesses/%d/products", testBusiness1.getId()))
@@ -191,6 +216,7 @@ public class ProductControllerTest {
      */
     @Test
     void retrieveCatalogueWithZeroProducts() throws Exception {
+        setCurrentUser(ownerUser.getUserID());
         MvcResult result = mockMvc.perform(get(String.format("/businesses/%d/products", testBusiness1.getId()))
                 .sessionAttrs(sessionAuthToken)
                 .cookie(authCookie))
@@ -207,16 +233,8 @@ public class ProductControllerTest {
      */
     @Test
     void invalidAuthTokenThenCannotViewCatalogue() throws Exception {
-        StringBuilder authCodeBuilder = new StringBuilder();
-        authCodeBuilder.append("9".repeat(64));
-        String authCode = authCodeBuilder.toString();
-        HashMap<String, Object> fakeAuthToken = new HashMap<>();
-        fakeAuthToken.put("FAKEAUTHTOKEN", authCode);
-        Cookie fakeAuthCookie = new Cookie("FAKEAUTHTOKEN", authCode);
-
-        MvcResult result = mockMvc.perform(get(String.format("/businesses/%d/products", testBusiness1.getId()))
-                .sessionAttrs(fakeAuthToken)
-                .cookie(fakeAuthCookie))
+        mockMvc.perform(
+                get(String.format("/businesses/%d/products", testBusiness1.getId())))
                 .andExpect(status().isUnauthorized())
                 .andReturn();
     }
@@ -226,8 +244,9 @@ public class ProductControllerTest {
      */
     @Test
     void businessDoesNotExistThenNotAccepted() throws Exception {
+        setCurrentUser(ownerUser.getUserID());
         businessRepository.deleteAll();
-        MvcResult result = mockMvc.perform(get(String.format("/businesses/%d/products", testBusiness1.getId()))
+        mockMvc.perform(get(String.format("/businesses/%d/products", testBusiness1.getId()))
                 .sessionAttrs(sessionAuthToken)
                 .cookie(authCookie))
                 .andExpect(status().isNotAcceptable())
@@ -235,26 +254,68 @@ public class ProductControllerTest {
     }
 
     /**
-     *  //TODO Write docstring (expect 403)
+     *  Tests that a user that is not a GAA, DGAA, business owner or business admin cannot see the business catalogue.
      */
-    @Test @Ignore
-    void userIsNotAnAdminThenForbidden() {
-
+    @Test
+    void userIsNotAnAdminThenForbidden() throws Exception {
+        setCurrentUser(bystanderUser.getUserID());
+        mockMvc.perform(get(String.format("/businesses/%d/products", testBusiness1.getId()))
+                .sessionAttrs(sessionAuthToken)
+                .cookie(authCookie))
+                .andExpect(status().isForbidden())
+                .andReturn();
     }
 
     /**
-     * //TODO Write docstring
+     * Tests that a business administrator can see see the business catalogue
      */
-    @Test @Ignore
-    void userIsAnAdminCanRetrieveCatalogue() {
+    @Test
+    void userIsABusinessAdminCanRetrieveCatalogue() throws Exception {
+        setCurrentUser(administratorUser.getUserID());
+        MvcResult result = mockMvc.perform(get(String.format("/businesses/%d/products", testBusiness1.getId()))
+                .sessionAttrs(sessionAuthToken)
+                .cookie(authCookie))
+                .andExpect(status().isOk())
+                .andReturn();
 
+        JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
+        JSONArray responseBody = (JSONArray) parser.parse(result.getResponse().getContentAsString());
+        assertTrue(responseBody.isEmpty());
     }
 
     /**
-     * //TODO Write docstring
+     * Tests that the DGAA can see a businesses catalogue, even if they are not associated with the business.
      */
-    @Test @Ignore
-    void userIsADGAACanRetrieveCatalogue() {
+    @Test
+    void userIsDGAACanRetrieveCatalogue() throws Exception {
+        setCurrentUser(bystanderUser.getUserID());
+        setUpDGAAAuthCode();
+        MvcResult result = mockMvc.perform(get(String.format("/businesses/%d/products", testBusiness1.getId()))
+                .sessionAttrs(sessionAuthToken)
+                .cookie(authCookie))
+                .andExpect(status().isOk())
+                .andReturn();
 
+        JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
+        JSONArray responseBody = (JSONArray) parser.parse(result.getResponse().getContentAsString());
+        assertTrue(responseBody.isEmpty());
+    }
+
+    /**
+     * Tests that a GAA can see a businesses catalogue, even if they are not associated with the business.
+     */
+    @Test
+    void userIsGAACanRetrieveCatalogue() throws Exception {
+        setCurrentUser(bystanderUser.getUserID());
+        setUpSessionAsAdmin();
+        MvcResult result = mockMvc.perform(get(String.format("/businesses/%d/products", testBusiness1.getId()))
+                .sessionAttrs(sessionAuthToken)
+                .cookie(authCookie))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
+        JSONArray responseBody = (JSONArray) parser.parse(result.getResponse().getContentAsString());
+        assertTrue(responseBody.isEmpty());
     }
 }
