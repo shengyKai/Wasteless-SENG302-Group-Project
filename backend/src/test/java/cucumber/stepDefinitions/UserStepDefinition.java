@@ -1,11 +1,12 @@
 package cucumber.stepDefinitions;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
-import io.cucumber.spring.CucumberContextConfiguration;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
@@ -13,12 +14,9 @@ import org.junit.After;
 import org.junit.Assert;
 import org.seng302.Entities.Location;
 import org.seng302.Entities.User;
-import org.seng302.Main;
 import org.seng302.Persistence.UserRepository;
 import org.seng302.Tools.PasswordAuthenticator;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -30,7 +28,6 @@ import java.text.SimpleDateFormat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@AutoConfigureMockMvc
 public class UserStepDefinition {
 
     @Autowired
@@ -49,7 +46,7 @@ public class UserStepDefinition {
     private String userEmail = "Bob@bob.com";
     private String userPassword = "B0bbbbbbbbbbbb";
     private String userBio = "I am Bob";
-    private String userDob = "10/10/1999";
+    private String userDob = "10-10-1999";
     private String userPhNum = "0270000000";
     private Location userAddress = Location.covertAddressStringToLocation("1,Bob Street,Bob,Bob,Bob,1010");
 
@@ -57,6 +54,7 @@ public class UserStepDefinition {
 
     @After
     public void Setup() {
+        objectMapper.enable(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT);
         userRepository.deleteAll();
     }
 
@@ -184,14 +182,21 @@ public class UserStepDefinition {
         Assert.assertEquals(user.getAddress(), location);
     }
 
+    @Given("the user possesses the email {string}")
+    public void theUserPossessesTheEmail(String email) { userEmail = email; }
+
+    @And("the user possesses the password {string}")
+    public void theUserPossessesThePassword(String password) { userPassword = password; }
+
     @When("the user logs in")
     public void theUserLogsInWithTheEmail() {
         JSONObject requestBody = new JSONObject();
-        requestBody.put("email", userEmail);
         requestBody.put("password", userPassword);
+        requestBody.put("email", userEmail);
+
         try {
             MvcResult result = (MvcResult) mockMvc.perform(post("/login")
-                    .content(requestBody.toString())
+                    .content(objectMapper.writeValueAsString(requestBody.toString()))
                     .contentType(MediaType.APPLICATION_JSON)
                     .accept(MediaType.APPLICATION_JSON))
                     .andExpect(status().isOk());

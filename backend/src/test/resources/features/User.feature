@@ -51,15 +51,15 @@ Feature: User
         Then the user has the address "100,Ocean View Crescent,Auckland,New Zealand,Rakino Island,1010"
 
     Scenario: Login a user account
-        Given the user has the email "dani@thomp.com"
-        And the user has the password "qu33n420"
+        Given the user possesses the email "dan@thomp.com"
+        And the user possesses the password "thompyboi"
         And the user is created
         When the user logs in
         Then the user is logged in
 
     Scenario: Login a second user account
-        Given the user has the email "james@hotmail.com"
-        And the user has the password "jamesishotmail1#"
+        Given the user possesses the email "james@hotmail.com"
+        And the user possesses the password "jamesishotmail1#"
         And the user is created
         When the user logs in
         Then the user is logged in
