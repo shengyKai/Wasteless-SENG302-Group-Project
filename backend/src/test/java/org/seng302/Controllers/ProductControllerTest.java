@@ -148,7 +148,7 @@ public class ProductControllerTest {
     }
 
     /**
-     * //TODO Write docstring
+     * Checks that the API returns the expect products in the business's catalogue within the response body.
      */
     @Test
     void retrieveCatalogueWithSeveralProducts() throws Exception {
@@ -178,33 +178,46 @@ public class ProductControllerTest {
     }
 
     /**
-     * //TODO Write docstring
+     * Tests that a business with an empty catalogue is still received
      */
     @Test
-    void retrieveCatalogueWithZeroProducts() {
+    void retrieveCatalogueWithZeroProducts() throws Exception {
+        MvcResult result = mockMvc.perform(get(String.format("/businesses/%d/products", testBusiness1.getId()))
+                .sessionAttrs(sessionAuthToken)
+                .cookie(authCookie))
+                .andExpect(status().isOk())
+                .andReturn();
 
+        JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
+        JSONArray responseBody = (JSONArray) parser.parse(result.getResponse().getContentAsString());
+        assertTrue(responseBody.isEmpty());
     }
 
     /**
      * //TODO Write docstring
      */
-    @Test
+    @Test @Ignore
     void invalidAuthTokenThenCannotViewCatalogue() {
 
     }
 
     /**
-     * //TODO Write docstring
+     * Tests that when a business with the given ID does not exist the API returns a not acceptable response code.
      */
     @Test
-    void businessDoesNotExistThenNotAccepted() {
-
+    void businessDoesNotExistThenNotAccepted() throws Exception {
+        businessRepository.deleteAll();
+        MvcResult result = mockMvc.perform(get(String.format("/businesses/%d/products", testBusiness1.getId()))
+                .sessionAttrs(sessionAuthToken)
+                .cookie(authCookie))
+                .andExpect(status().isNotAcceptable())
+                .andReturn();
     }
 
     /**
      * //TODO Write docstring
      */
-    @Test
+    @Test @Ignore
     public void userIsNotAnAdminThenForbidden() {
 
     }
@@ -212,7 +225,7 @@ public class ProductControllerTest {
     /**
      * //TODO Write docstring
      */
-    @Test
+    @Test @Ignore
     void userIsAnAdminCanRetrieveCatalogue() {
 
     }
@@ -220,21 +233,8 @@ public class ProductControllerTest {
     /**
      * //TODO Write docstring
      */
-    @Test
+    @Test @Ignore
     void userIsADGAACanRetrieveCatalogue() {
 
     }
-
-    /**
-     * Tests to create:
-     *
-     * - Retrieve a catalogue with several products (code 200)
-     * - Retrieve a catalogue with zero products (code 200)
-     * - Check the when an invalid auth token is provided permission is denied (code 401)
-     * - Check when the business does not exist there a exception thrown (code 406)
-     * - Check when the user is not an admin a forbidden is thrown (code 403)
-     * - Check a DGAA can retrieve catalogues
-     */
-
-
 }
