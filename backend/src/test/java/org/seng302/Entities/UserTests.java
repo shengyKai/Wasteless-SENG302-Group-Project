@@ -487,18 +487,16 @@ public class UserTests {
     }
 
     /**
-     * Checks several bios with numbers in them will not be set as the user's bio
+     * Checks several bios with numbers in them will be set as the user's bio
      */
     @Test
-    public void checkInvalidBioNumbers() {
+    public void checkValidBioNumbers() {
         String[] invalidBios = { "I am a happy p3rs0n when 1 am n0t study1ng",
                 "1 am a Un1vers1ty stud3nt meaning I have n0 fr33 t1m3",
                 "D0 y0u l1k3 cats caus3 1 l1k3 cats", "0", "1", "0123456789" };
         for (String bio : invalidBios) {
-            try {
-                testUser.setBio(bio);
-                fail("A Forbidden exception was expected, but not thrown");
-            } catch (ResponseStatusException expectedException) { }
+            testUser.setBio(bio);
+            assertEquals(bio, testUser.getBio());
         }
     }
 
@@ -916,7 +914,7 @@ public class UserTests {
                 .withEmail("johnsmith99@gmail.com")
                 .withPassword("1337-H%nt3r2")
                 .withBio("Likes long walks on the beach")
-                .withDob("2021-03-11")
+                .withDob("2001-03-11")
                 .withPhoneNumber("+64 3 555 0129")
                 .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Christchurch,New Zealand," +
                         "Canterbury,8041"))
