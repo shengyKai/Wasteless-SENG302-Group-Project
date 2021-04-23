@@ -26,10 +26,14 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import javax.servlet.http.Cookie;
 import java.io.IOException;
+import java.text.DateFormat;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 
+import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -146,7 +150,7 @@ public class ProductControllerTest {
     /**
      * //TODO Write docstring
      */
-    @Test @Ignore
+    @Test
     public void retrieveCatalogueWithSeveralProducts() throws Exception {
         addSeveralProductsToACatalogue();
 
@@ -162,7 +166,14 @@ public class ProductControllerTest {
         for (Object productObject: responseBody) {
             JSONObject productJSON = (JSONObject) productObject;
 
+            String productCode = productJSON.getAsString("code");
+            Product storedProduct = productRepository.findByBusinessAndProductCode(testBusiness1, productCode);
 
+            assertEquals(storedProduct.getProductCode(), productCode);
+            assertEquals(storedProduct.getCreated().toString().substring(0, 10), productJSON.getAsString("createdDate").substring(0, 10));
+            assertEquals(storedProduct.getRecommendedRetailPrice().toString(), productJSON.getAsString("recommendedRetailPrice"));
+            assertEquals(storedProduct.getName(), productJSON.getAsString("name"));
+            assertEquals(storedProduct.getDescription(), productJSON.getAsString("description"));
         }
     }
 

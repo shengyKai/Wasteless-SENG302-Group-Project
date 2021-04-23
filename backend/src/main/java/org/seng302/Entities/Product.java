@@ -1,6 +1,7 @@
 package org.seng302.Entities;
 
 import net.minidev.json.JSONObject;
+import org.seng302.Persistence.BusinessRepository;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
