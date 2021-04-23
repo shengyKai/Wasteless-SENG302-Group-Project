@@ -18,6 +18,8 @@ import org.springframework.web.server.ResponseStatusException;
 import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -500,20 +502,70 @@ public class UserTests {
         }
     }
 
+        /**
+     * Checks several bios with characters in , only set when it satisfy the condition
+     */
+    @Test
+    public void checkValidBioCharacters() {
+        String[] validBios = { "! @m @ h@ppy per$on when ! @m not study!ng",
+                "! @m @ Un!ver$ity $tudent meaning I have no &ree ime",
+                "Do you li%e ca(s cause ) lke cats", "!", "@", "!@#$%&()" };
+        for (String bio : validBios) {
+            testUser.setBio(bio);
+            assertEquals(bio, testUser.getBio());
+        }
+    }
     /**
      * Checks several bios with characters in them will not be set as the user's bio
      */
     @Test
     public void checkInvalidBioCharacters() {
-        String[] invalidBios = { "! @m @ h@ppy per$on when ! @m not study!ng",
-                "! @m @ Un!ver$ity $tudent meaning I have no &ree ^ime",
-                "Do you li%e ca(s cause ) l*ke cats", "!", "@", "!@#$%^&^*(*)" };
+        String[] invalidBios = { "! @m @ h@ppy per$on when ! []m not study!ng",
+                "! @m @ Un!ver$ity $tudent meaning I have no &***ree ^ime",
+                "Do you li%e ca(s cause ) l*ke cats", "!^^^@#$%^&^*(*)" };
         for (String bio : invalidBios) {
             try {
                 testUser.setBio(bio);
                 fail("A Forbidden exception was expected, but not thrown");
             } catch (ResponseStatusException expectedException) { }
         }
+    }
+    /**
+     * Check user age > 13 when register
+     * @throws ParseException
+     */
+    @Test
+    public void checkDateofBirthGreaterThanThirteen() throws ParseException {
+        String dateOfBirthString = "11-05-2000";
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
+        Date dateOfBirth = dateFormat.parse(dateOfBirthString);
+            
+        testUser.setDob(dateOfBirth);
+        assertEquals(dateOfBirth, testUser.getDob());
+
+    }
+
+        /**
+     * Check user age < 13 when register
+     * @throws ParseException
+     */
+    @Test
+    public void checkDateofBirthLesserThanThirteen() throws ParseException {
+        String dateOfBirthString = "11-05-2010";
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
+        Date dateOfBirth = dateFormat.parse(dateOfBirthString);
+        
+        LocalDate localDateOfBirth = dateOfBirth.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        LocalDate date = LocalDate.now();
+        LocalDate minDate = date.minusYears(13);
+        
+        assertTrue(localDateOfBirth.compareTo(minDate) > 0);
+        System.out.println(minDate);
+        try {
+            testUser.setDob(dateOfBirth);
+            fail("A Forbidden exception was expected, but not thrown");
+        } catch (ResponseStatusException expectedException) { }
+        
     }
 
     /**

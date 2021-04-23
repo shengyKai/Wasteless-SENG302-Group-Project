@@ -6,6 +6,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.data.annotation.ReadOnlyProperty;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
@@ -34,6 +37,8 @@ public class User extends Account {
     private Set<Business> businessesAdministered = new HashSet<>();
     private Set<Business> businessesOwned = new HashSet<>();
 
+
+    private static final Logger logger = LogManager.getLogger(User.class.getName());
     /* Matches:
     123-456-7890
     (123) 456-7890
@@ -184,6 +189,8 @@ public class User extends Account {
             LocalDate date = LocalDate.now();
             LocalDate minDate = date.minusYears(13);
 
+            logger.info(minDate);
+            
             if (dateOfBirth.compareTo(minDate) < 0) {
                 this.dob = dob;
             }
