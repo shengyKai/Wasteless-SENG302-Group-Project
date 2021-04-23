@@ -17,16 +17,25 @@ public class Product {
     @Id
     @GeneratedValue
     private Long id;
+
     @Column(nullable = false, name = "product_code")
     private String productCode;
+
     @Column(nullable = false)
     private String name;
+
     @Column(nullable = false)
     private String description;
+
+    @Column(nullable = false)
+    private String manufacturer;
+
     @Column(nullable = false, name = "recommended_retail_price")
     private BigDecimal recommendedRetailPrice;
+
     @Column(nullable = false)
     private Date created;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "business_id")
     private Business business;
@@ -54,6 +63,12 @@ public class Product {
      * @return the description of the product
      */
     public String getDescription() { return description; }
+
+    /**
+     * Get the manufacturer name of the product
+     * @return the manufacturer name of the product
+     */
+    public String getManufacturer() { return manufacturer; }
 
     /**
      * Get the recommended retail price of the product
@@ -92,6 +107,12 @@ public class Product {
     public void setDescription(String description) { this.description = description; }
 
     /**
+     * Sets the manufacturer name of the product
+     * @param manufacturer the manufacturer name of the product
+     */
+    public void setManufacturer(String manufacturer) { this.manufacturer = manufacturer; }
+
+    /**
      * Sets the recommended retail price of the product
      * @param recommendedRetailPrice the RRP of the product
      */
@@ -107,7 +128,10 @@ public class Product {
      * Sets the business associated with the catalogue the product is in
      * @param business the business
      */
-    private void setBusiness(Business business) { this.business = business; }
+    private void setBusiness(Business business) {
+        business.addToCatalogue(this);
+        this.business = business;
+    }
 
     /**
      * Convert product to a JSON object
@@ -129,6 +153,7 @@ public class Product {
         private String productCode;
         private String name;
         private String description;
+        private String manufacturer;
         private BigDecimal recommendedRetailPrice;
         private Business business;
 
@@ -163,13 +188,22 @@ public class Product {
         }
 
         /**
+         * Sets the builder's manufacturer name.
+         * @param manufacturer the manufacturer name of the product
+         * @return Builder with the description set
+         */
+        public Builder withManufacturer(String manufacturer) {
+            this.manufacturer = manufacturer;
+            return this;
+        }
+
+        /**
          * Sets the builder's recommended retail price
          * @param recommendedRetailPrice the recommended retail price of the product
          * @return Builder with the recommended retail price set
          */
         public Builder withRecommendedRetailPrice(String recommendedRetailPrice) {
-            BigDecimal RRP = new BigDecimal(recommendedRetailPrice);
-            this.recommendedRetailPrice = RRP;
+            this.recommendedRetailPrice = new BigDecimal(recommendedRetailPrice);
             return this;
         }
 
@@ -192,6 +226,7 @@ public class Product {
             product.setProductCode(this.productCode);
             product.setName(this.name);
             product.setDescription(this.description);
+            product.setManufacturer(this.manufacturer);
             product.setRecommendedRetailPrice(this.recommendedRetailPrice);
             product.setBusiness(this.business);
             product.setCreated(new Date());

@@ -27,24 +27,39 @@ public class ProductTests {
 
     private User testUser1;
     private Business testBusiness1;
+    private Business testBusiness2;
 
     /**
-     * Created a business object for testing
+     * Created a business objects for testing
      */
-    public void createTestBusiness() {
-        businessRepository.deleteAll();
+    public void createTestBusinesses() {
+        System.out.println("Creating businesses");
+        Thread.dumpStack();
         testBusiness1 = new Business.Builder()
                 .withBusinessType("Accommodation and Food Services")
                 .withAddress(new Location())
                 .withDescription("Some description")
-                .withName("BusinessName")
+                .withName("BusinessName1")
                 .withPrimaryOwner(testUser1)
                 .build();
         testBusiness1 = businessRepository.save(testBusiness1);
+
+        testBusiness2 = new Business.Builder()
+                .withBusinessType("Accommodation and Food Services")
+                .withAddress(new Location())
+                .withDescription("Some description 2")
+                .withName("BusinessName2")
+                .withPrimaryOwner(testUser1)
+                .build();
+        testBusiness2 = businessRepository.save(testBusiness2);
     }
 
     @BeforeAll
     public void setUp() throws ParseException {
+        businessRepository.deleteAll();
+        userRepository.deleteAll();
+
+        // Add a test user that will be the owner of both businesses
         testUser1 = new User.Builder()
                 .withFirstName("John")
                 .withMiddleName("Hector")
@@ -59,7 +74,13 @@ public class ProductTests {
                         "Canterbury,8041"))
                 .build();
         testUser1 = userRepository.save(testUser1);
-        createTestBusiness();
+        createTestBusinesses();
+    }
+
+    @AfterAll
+    public void tearDown() {
+        businessRepository.deleteAll();
+        userRepository.deleteAll();
     }
 
     @AfterEach
@@ -72,13 +93,19 @@ public class ProductTests {
      */
     @Test
     public void createValidProduct() {
-        Product product = new Product.Builder().withProductCode("Orange-69").withName("Fresh Orange")
-                .withDescription("This is a fresh orange").withRecommendedRetailPrice("2.01")
-                .withBusiness(testBusiness1).build();
+        Product product = new Product.Builder()
+                .withProductCode("Orange-69")
+                .withName("Fresh Orange")
+                .withDescription("This is a fresh orange")
+                .withManufacturer("Apple")
+                .withRecommendedRetailPrice("2.01")
+                .withBusiness(testBusiness1)
+                .build();
         productRepository.save(product);
         assertEquals(product.getProductCode(), "Orange-69");
         assertEquals(product.getName(), "Fresh Orange");
         assertEquals(product.getDescription(), "This is a fresh orange");
+        assertEquals(product.getManufacturer(), "Apple");
         assertEquals(product.getRecommendedRetailPrice(), new BigDecimal("2.01"));
     }
 
@@ -88,12 +115,22 @@ public class ProductTests {
      */
     @Test
     public void checkTwoProductsDoNotHaveTheSameIDs() {
-        Product product1 = new Product.Builder().withProductCode("NathanApple-69").withName("The Nathan Apple")
-                .withDescription("Ever wonder why Nathan has an apple").withRecommendedRetailPrice("9000.01")
-                .withBusiness(testBusiness1).build();
-        Product product2 = new Product.Builder().withProductCode("Orange-70").withName("Fresh Orange")
-                .withDescription("This is a fresh orange").withRecommendedRetailPrice("2.02")
-                .withBusiness(testBusiness1).build();
+        Product product1 = new Product.Builder()
+                .withProductCode("NathanApple-69")
+                .withName("The Nathan Apple")
+                .withDescription("Ever wonder why Nathan has an apple")
+                .withManufacturer("Apple")
+                .withRecommendedRetailPrice("9000.01")
+                .withBusiness(testBusiness1)
+                .build();
+        Product product2 = new Product.Builder()
+                .withProductCode("Orange-70")
+                .withName("Fresh Orange")
+                .withDescription("This is a fresh orange")
+                .withManufacturer("Apple")
+                .withRecommendedRetailPrice("2.02")
+                .withBusiness(testBusiness1)
+                .build();
         productRepository.save(product1);
         productRepository.save(product2);
         assertNotEquals(product1.getID(), product2.getID());
@@ -105,9 +142,14 @@ public class ProductTests {
     @Test
     public void checkDate() {
         Date before = new Date();
-        Product product = new Product.Builder().withProductCode("NathanApple-69").withName("The Nathan Apple")
-                .withDescription("Ever wonder why Nathan has an apple").withRecommendedRetailPrice("9000.01")
-                .withBusiness(testBusiness1).build();
+        Product product = new Product.Builder()
+                .withProductCode("NathanApple-69")
+                .withName("The Nathan Apple")
+                .withDescription("Ever wonder why Nathan has an apple")
+                .withManufacturer("Apple")
+                .withRecommendedRetailPrice("9000.01")
+                .withBusiness(testBusiness1)
+                .build();
         productRepository.save(product);
         Date after = new Date();
         Date productDate = product.getCreated();
@@ -121,14 +163,49 @@ public class ProductTests {
       */
     @Test
     public void checkNoTwoSameProductCodesWithinSameCatalogue() {
-        Product product1 = new Product.Builder().withProductCode("NathanApple-69").withName("The Nathan Apple")
-                .withDescription("Ever wonder why Nathan has an apple").withRecommendedRetailPrice("9000.01")
-                .withBusiness(testBusiness1).build();
-        Product product2 = new Product.Builder().withProductCode("NathanApple-69").withName("The Nathan Apple Two")
-                .withDescription("Ever wonder why Nathan has an apple maybe").withRecommendedRetailPrice("9000.02")
-                .withBusiness(testBusiness1).build();
+        Product product1 = new Product.Builder()
+                .withProductCode("NathanApple-69")
+                .withName("The Nathan Apple")
+                .withDescription("Ever wonder why Nathan has an apple")
+                .withManufacturer("Apple")
+                .withRecommendedRetailPrice("9000.01")
+                .withBusiness(testBusiness1)
+                .build();
+        Product product2 = new Product.Builder()
+                .withProductCode("NathanApple-69")
+                .withName("The Nathan Apple Two")
+                .withDescription("Ever wonder why Nathan has an apple maybe")
+                .withManufacturer("Apple")
+                .withRecommendedRetailPrice("9000.02")
+                .withBusiness(testBusiness1)
+                .build();
         productRepository.save(product1);
         assertThrows(Exception.class, () -> productRepository.save(product2));
+    }
+
+    /**
+     * Check that two products with the same code can be added to different catalogues
+     */
+    @Test
+    public void checkTwoSameProductCodesWithinDifferentCatalogues() {
+        Product product1 = new Product.Builder()
+                .withProductCode("NathanApple-69")
+                .withName("The Nathan Apple")
+                .withDescription("Ever wonder why Nathan has an apple")
+                .withManufacturer("Apple")
+                .withRecommendedRetailPrice("9000.01")
+                .withBusiness(testBusiness1)
+                .build();
+        Product product2 = new Product.Builder()
+                .withProductCode("NathanApple-69")
+                .withName("The Nathan Apple Two")
+                .withDescription("Ever wonder why Nathan has an apple maybe")
+                .withManufacturer("Apple")
+                .withRecommendedRetailPrice("9000.02")
+                .withBusiness(testBusiness2)
+                .build();
+        productRepository.save(product1);
+        assertDoesNotThrow(() -> productRepository.save(product2));
     }
 
     /**
@@ -136,14 +213,24 @@ public class ProductTests {
      */
     @Test
     public void checkTwoDifferentProductCodesWithinSameCatalogue() {
-        Product product1 = new Product.Builder().withProductCode("NathanApple-69").withName("The Nathan Apple")
-                .withDescription("Ever wonder why Nathan has an apple").withRecommendedRetailPrice("9000.01")
-                .withBusiness(testBusiness1).build();
-        Product product2 = new Product.Builder().withProductCode("NathanApple-70").withName("The Nathan Apple Two")
-                .withDescription("Ever wonder why Nathan has an apple maybe").withRecommendedRetailPrice("9000.02")
-                .withBusiness(testBusiness1).build();
+        Product product1 = new Product.Builder()
+                .withProductCode("NathanApple-69")
+                .withName("The Nathan Apple")
+                .withDescription("Ever wonder why Nathan has an apple")
+                .withManufacturer("Apple")
+                .withRecommendedRetailPrice("9000.01")
+                .withBusiness(testBusiness1)
+                .build();
+        Product product2 = new Product.Builder()
+                .withProductCode("NathanApple-70")
+                .withName("The Nathan Apple Two")
+                .withDescription("Ever wonder why Nathan has an apple maybe")
+                .withManufacturer("Apple")
+                .withRecommendedRetailPrice("9000.02")
+                .withBusiness(testBusiness1)
+                .build();
         productRepository.save(product1);
-        productRepository.save(product2);
+        assertDoesNotThrow(() -> productRepository.save(product2));
     }
 
     /**
@@ -152,12 +239,16 @@ public class ProductTests {
      */
     @Test
     public void checkTheProductIsConnectedToTheBusinessCatalogue() {
-        createTestBusiness();
-        Product product1 = new Product.Builder().withProductCode("NathanApple-70").withName("The Nathan Apple")
-                .withDescription("Ever wonder why Nathan has an apple").withRecommendedRetailPrice("9000.03")
-                .withBusiness(testBusiness1).build();
+        Product product1 = new Product.Builder()
+                .withProductCode("NathanApple-70")
+                .withName("The Nathan Apple")
+                .withDescription("Ever wonder why Nathan has an apple")
+                .withManufacturer("Apple")
+                .withRecommendedRetailPrice("9000.03")
+                .withBusiness(testBusiness1)
+                .build();
         productRepository.save(product1);
-        testBusiness1 = businessRepository.findByName("BusinessName");
+        testBusiness1 = businessRepository.findByName("BusinessName1");
         List<Product> catalogue = testBusiness1.getCatalogue();
         assertEquals(product1.getID(), catalogue.get(0).getID());
     }
@@ -167,21 +258,60 @@ public class ProductTests {
      */
     @Test
     public void createAValidListOfProductsInACatalogue() {
-        createTestBusiness();
-        Product product1 = new Product.Builder().withProductCode("NathanApple-70").withName("The Nathan Apple")
-                .withDescription("Ever wonder why Nathan has an apple").withRecommendedRetailPrice("9000.03")
-                .withBusiness(testBusiness1).build();
-        Product product2 = new Product.Builder().withProductCode("NathanApple-71").withName("The Nathan Apple Two")
-                .withDescription("Ever wonder why Nathan has an apple too").withRecommendedRetailPrice("9000.04")
-                .withBusiness(testBusiness1).build();
-        Product product3 = new Product.Builder().withProductCode("NathanApple-72").withName("The Nathan Apple Three")
-                .withDescription("Ever wonder why Nathan has an apple too maybe").withRecommendedRetailPrice("9000.05")
-                .withBusiness(testBusiness1).build();
+        Product product1 = new Product.Builder()
+                .withProductCode("NathanApple-70")
+                .withName("The Nathan Apple")
+                .withDescription("Ever wonder why Nathan has an apple")
+                .withManufacturer("Apple")
+                .withRecommendedRetailPrice("9000.03")
+                .withBusiness(testBusiness1)
+                .build();
+        Product product2 = new Product.Builder()
+                .withProductCode("NathanApple-71")
+                .withName("The Nathan Apple Two")
+                .withDescription("Ever wonder why Nathan has an apple too")
+                .withManufacturer("Apple")
+                .withRecommendedRetailPrice("9000.04")
+                .withBusiness(testBusiness1)
+                .build();
+        Product product3 = new Product.Builder()
+                .withProductCode("NathanApple-72")
+                .withName("The Nathan Apple Three")
+                .withDescription("Ever wonder why Nathan has an apple too maybe")
+                .withManufacturer("Apple")
+                .withRecommendedRetailPrice("9000.05")
+                .withBusiness(testBusiness1)
+                .build();
         productRepository.save(product1);
         productRepository.save(product2);
         productRepository.save(product3);
-        testBusiness1 = businessRepository.findByName("BusinessName");
+        testBusiness1 = businessRepository.findByName("BusinessName1");
         List<Product> catalogue = testBusiness1.getCatalogue();
         assertEquals(3, catalogue.size());
+    }
+
+    /**
+     * Checks that deleting a business while it still has remaining products doesn't result in an error
+     */
+    @Test
+    public void testDeletingBusinessWithProducts() {
+        Business tempBusinessInitial = new Business.Builder()
+                .withBusinessType("Accommodation and Food Services")
+                .withAddress(new Location())
+                .withDescription("This business will be deleted")
+                .withName("Temp Name")
+                .withPrimaryOwner(testUser1)
+                .build();
+        Business tempBusiness = businessRepository.save(tempBusinessInitial);
+        Product product1 = new Product.Builder()
+                .withProductCode("NathanApple-69")
+                .withName("The Nathan Apple")
+                .withDescription("Ever wonder why Nathan has an apple")
+                .withManufacturer("Apple")
+                .withRecommendedRetailPrice("9000.01")
+                .withBusiness(tempBusiness).build();
+        productRepository.save(product1);
+
+        assertDoesNotThrow(() -> businessRepository.delete(tempBusiness));
     }
 }
