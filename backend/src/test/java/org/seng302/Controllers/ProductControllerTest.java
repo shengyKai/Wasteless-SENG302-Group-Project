@@ -5,7 +5,6 @@ import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
 import org.junit.Ignore;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.runner.RunWith;
@@ -22,15 +21,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import javax.servlet.http.Cookie;
-import java.io.IOException;
 import java.text.ParseException;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -51,42 +46,40 @@ public class ProductControllerTest {
     @Autowired
     private BusinessRepository businessRepository;
     @Autowired
-    UserRepository userRepository;
+    private UserRepository userRepository;
 
     private final HashMap<String, Object> sessionAuthToken = new HashMap<>();
     private Cookie authCookie;
     private Business testBusiness1;
-    private User testUser1;
-
-    /**
-     * Add a user object to the userRepository and construct an authorization token to be used for this session.
-     *
-     * @throws ParseException
-     */
-    @BeforeEach
-    public void setUpIndividual() throws ParseException, IOException {
-        setUpAuthCode();
-    }
+    private User ownerUser;
+    private User bystanderUser;
+    private User administratorUser;
 
     /**
      * This method creates an authentication code for sessions and cookies.
      */
     private void setUpAuthCode() {
-        StringBuilder authCodeBuilder = new StringBuilder();
-        authCodeBuilder.append("0".repeat(64));
-        String authCode = authCodeBuilder.toString();
+        String authCode = "0".repeat(64);
         sessionAuthToken.put("AUTHTOKEN", authCode);
         authCookie = new Cookie("AUTHTOKEN", authCode);
     }
 
     /**
-     * Tags a session as dgaa
+     * Tags a session as DGAA
      */
     private void setUpDGAAAuthCode() {
         sessionAuthToken.put("role", "defaultGlobalApplicationAdmin");
     }
     private void setUpSessionAsAdmin() {
         sessionAuthToken.put("role", "globalApplicationAdmin");
+    }
+
+    /**
+     * Mocks a session logged in as a given user
+     * @param userId Log in with userId
+     */
+    private void setCurrentUser(Long userId) {
+        sessionAuthToken.put("accountId", userId);
     }
 
     /**
@@ -99,17 +92,20 @@ public class ProductControllerTest {
                 .withAddress(new Location())
                 .withDescription("Some description")
                 .withName("BusinessName")
-                .withPrimaryOwner(testUser1)
+                .withPrimaryOwner(ownerUser)
                 .build();
         testBusiness1 = businessRepository.save(testBusiness1);
     }
 
-    @BeforeAll
+    @BeforeEach
     public void setUp() throws ParseException {
         productRepository.deleteAll();
         businessRepository.deleteAll();
+        userRepository.deleteAll();
 
-        testUser1 = new User.Builder()
+        setUpAuthCode();
+
+        ownerUser = new User.Builder()
                 .withFirstName("John")
                 .withMiddleName("Hector")
                 .withLastName("Smith")
@@ -122,26 +118,84 @@ public class ProductControllerTest {
                 .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Christchurch,New Zealand," +
                         "Canterbury,8041"))
                 .build();
-        testUser1 = userRepository.save(testUser1);
+
+        ownerUser = userRepository.save(ownerUser);
         createTestBusiness();
+
+        bystanderUser = new User.Builder()
+                .withFirstName("Happy")
+                .withMiddleName("Boi")
+                .withLastName("Jones")
+                .withNickName("HappyBoi")
+                .withEmail("happyboi@gmail.com")
+                .withPassword("1337-H548*nt3r2")
+                .withBio("Likes long walks on the beach sometimes")
+                .withDob("2010-03-11")
+                .withPhoneNumber("+64 5 565 0129")
+                .withAddress(Location.covertAddressStringToLocation("5,Rountree Street,Christchurch,New Zealand," +
+                        "Canterbury,8041"))
+                .build();
+        bystanderUser = userRepository.save(bystanderUser);
+
+
+        administratorUser = new User.Builder()
+                .withFirstName("Connor")
+                .withMiddleName("Boi")
+                .withLastName("Hitchcock")
+                .withNickName("Hitchy")
+                .withEmail("connor.hitchcock@gmail.com")
+                .withPassword("hunter2")
+                .withBio("Likes long walks on the beach always")
+                .withDob("2000-03-11")
+                .withPhoneNumber("+64 5 565 0125")
+                .withAddress(Location.covertAddressStringToLocation("5,Rountree Street,Christchurch,New Zealand," +
+                        "Canterbury,8041"))
+                .build();
+        administratorUser = userRepository.save(administratorUser);
+
+        testBusiness1.addAdmin(administratorUser);
+        testBusiness1 = businessRepository.save(testBusiness1);
+
+        // Ensures that we have a copy of administratorUser with all the administered businesses
+        administratorUser = userRepository.findById(administratorUser.getUserID()).get();
     }
 
     /**
      * Adds several products to a catalogue
      */
     public void addSeveralProductsToACatalogue() {
-        Product product1 = new Product.Builder().withProductCode("NathanApple-70").withName("The Nathan Apple")
-                .withDescription("Ever wonder why Nathan has an apple").withRecommendedRetailPrice("9000.03")
-                .withBusiness(testBusiness1).build();
-        Product product2 = new Product.Builder().withProductCode("AlmondMilk100").withName("Almond Milk")
-                .withDescription("Like water except bad for the environment").withRecommendedRetailPrice("10.02")
-                .withBusiness(testBusiness1).build();
-        Product product3 = new Product.Builder().withProductCode("Coffee7").withName("Generic Brand Coffee")
-                .withDescription("This coffee tastes exactly as you expect it would").withRecommendedRetailPrice("4.02")
-                .withBusiness(testBusiness1).build();
-        Product product4 = new Product.Builder().withProductCode("DarkChocolate").withName("Dark Chocolate")
-                .withDescription("Would like a high cocoa concentration").withRecommendedRetailPrice("6.07")
-                .withBusiness(testBusiness1).build();
+        Product product1 = new Product.Builder()
+                .withProductCode("NathanApple-70")
+                .withName("The Nathan Apple")
+                .withDescription("Ever wonder why Nathan has an apple")
+                .withManufacturer("Apple")
+                .withRecommendedRetailPrice("9000.03")
+                .withBusiness(testBusiness1)
+                .build();
+        Product product2 = new Product.Builder()
+                .withProductCode("AlmondMilk100")
+                .withName("Almond Milk")
+                .withDescription("Like water except bad for the environment")
+                .withManufacturer("Apple")
+                .withRecommendedRetailPrice("10.02")
+                .withBusiness(testBusiness1)
+                .build();
+        Product product3 = new Product.Builder()
+                .withProductCode("Coffee7")
+                .withName("Generic Brand Coffee")
+                .withDescription("This coffee tastes exactly as you expect it would")
+                .withManufacturer("Apple")
+                .withRecommendedRetailPrice("4.02")
+                .withBusiness(testBusiness1)
+                .build();
+        Product product4 = new Product.Builder()
+                .withProductCode("DarkChocolate")
+                .withName("Dark Chocolate")
+                .withDescription("Would like a high cocoa concentration")
+                .withManufacturer("Apple")
+                .withRecommendedRetailPrice("6.07")
+                .withBusiness(testBusiness1)
+                .build();
         productRepository.save(product1);
         productRepository.save(product2);
         productRepository.save(product3);
@@ -149,10 +203,11 @@ public class ProductControllerTest {
     }
 
     /**
-     * //TODO Write docstring
+     * Checks that the API returns the expect products in the business's catalogue within the response body.
      */
-    @Test @Ignore
-    public void retrieveCatalogueWithSeveralProducts() throws Exception {
+    @Test
+    void retrieveCatalogueWithSeveralProducts() throws Exception {
+        setCurrentUser(ownerUser.getUserID());
         addSeveralProductsToACatalogue();
 
         MvcResult result = mockMvc.perform(get(String.format("/businesses/%d/products", testBusiness1.getId()))
@@ -167,68 +222,124 @@ public class ProductControllerTest {
         for (Object productObject: responseBody) {
             JSONObject productJSON = (JSONObject) productObject;
 
+            String productCode = productJSON.getAsString("id");
+            Product storedProduct = productRepository.findByBusinessAndProductCode(testBusiness1, productCode);
 
+            assertEquals(storedProduct.getProductCode(), productCode);
+            assertEquals(storedProduct.getCreated().toString().substring(0, 10), productJSON.getAsString("created").substring(0, 10));
+            assertEquals(storedProduct.getRecommendedRetailPrice().toString(), productJSON.getAsString("recommendedRetailPrice"));
+            assertEquals(storedProduct.getName(), productJSON.getAsString("name"));
+            assertEquals(storedProduct.getDescription(), productJSON.getAsString("description"));
         }
     }
 
     /**
-     * //TODO Write docstring
+     * Tests that a business with an empty catalogue is still received
      */
     @Test
-    public void retrieveCatalogueWithZeroProducts() {
+    void retrieveCatalogueWithZeroProducts() throws Exception {
+        setCurrentUser(ownerUser.getUserID());
+        MvcResult result = mockMvc.perform(get(String.format("/businesses/%d/products", testBusiness1.getId()))
+                .sessionAttrs(sessionAuthToken)
+                .cookie(authCookie))
+                .andExpect(status().isOk())
+                .andReturn();
 
+        JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
+        JSONArray responseBody = (JSONArray) parser.parse(result.getResponse().getContentAsString());
+        assertTrue(responseBody.isEmpty());
     }
 
     /**
-     * //TODO Write docstring
+     * Tests that when an invalid auth token is provided an unauthorised response code
      */
     @Test
-    public void invalidAuthTokenThenCannotViewCatalogue() {
-
+    void invalidAuthTokenThenCannotViewCatalogue() throws Exception {
+        mockMvc.perform(
+                get(String.format("/businesses/%d/products", testBusiness1.getId())))
+                .andExpect(status().isUnauthorized())
+                .andReturn();
     }
 
     /**
-     * //TODO Write docstring
+     * Tests that when a business with the given ID does not exist the API returns a not acceptable response code.
      */
     @Test
-    public void businessDoesNotExistThenNotAccepted() {
-
+    void businessDoesNotExistThenNotAccepted() throws Exception {
+        setCurrentUser(ownerUser.getUserID());
+        businessRepository.deleteAll();
+        mockMvc.perform(get(String.format("/businesses/%d/products", testBusiness1.getId()))
+                .sessionAttrs(sessionAuthToken)
+                .cookie(authCookie))
+                .andExpect(status().isNotAcceptable())
+                .andReturn();
     }
 
     /**
-     * //TODO Write docstring
+     *  Tests that a user that is not a GAA, DGAA, business owner or business admin cannot see the business catalogue.
      */
     @Test
-    public void userIsNotAnAdminThenForbidden() {
-
+    void userIsNotAnAdminThenForbidden() throws Exception {
+        setCurrentUser(bystanderUser.getUserID());
+        mockMvc.perform(get(String.format("/businesses/%d/products", testBusiness1.getId()))
+                .sessionAttrs(sessionAuthToken)
+                .cookie(authCookie))
+                .andExpect(status().isForbidden())
+                .andReturn();
     }
 
     /**
-     * //TODO Write docstring
+     * Tests that a business administrator can see see the business catalogue
      */
     @Test
-    public void userIsAnAdminCanRetrieveCatalogue() {
+    void userIsABusinessAdminCanRetrieveCatalogue() throws Exception {
+        setCurrentUser(administratorUser.getUserID());
+        MvcResult result = mockMvc.perform(get(String.format("/businesses/%d/products", testBusiness1.getId()))
+                .sessionAttrs(sessionAuthToken)
+                .cookie(authCookie))
+                .andExpect(status().isOk())
+                .andReturn();
 
+        JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
+        JSONArray responseBody = (JSONArray) parser.parse(result.getResponse().getContentAsString());
+        assertTrue(responseBody.isEmpty());
     }
 
     /**
-     * //TODO Write docstring
+     * Tests that the DGAA can see a businesses catalogue, even if they are not associated with the business.
      */
     @Test
-    public void userIsADGAACanRetrieveCatalogue() {
+    void userIsDGAACanRetrieveCatalogue() throws Exception {
+        setCurrentUser(bystanderUser.getUserID());
+        setUpDGAAAuthCode();
+        MvcResult result = mockMvc.perform(get(String.format("/businesses/%d/products", testBusiness1.getId()))
+                .sessionAttrs(sessionAuthToken)
+                .cookie(authCookie))
+                .andExpect(status().isOk())
+                .andReturn();
 
+        JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
+        JSONArray responseBody = (JSONArray) parser.parse(result.getResponse().getContentAsString());
+        assertTrue(responseBody.isEmpty());
     }
 
     /**
-     * Tests to create:
-     *
-     * - Retrieve a catalogue with several products (code 200)
-     * - Retrieve a catalogue with zero products (code 200)
-     * - Check the when an invalid auth token is provided permission is denied (code 401)
-     * - Check when the business does not exist there a exception thrown (code 406)
-     * - Check when the user is not an admin a forbidden is thrown (code 403)
-     * - Check a DGAA can retrieve catalogues
+     * Tests that a GAA can see a businesses catalogue, even if they are not associated with the business.
      */
+    @Test
+    void userIsGAACanRetrieveCatalogue() throws Exception {
+        setCurrentUser(bystanderUser.getUserID());
+        setUpSessionAsAdmin();
+        MvcResult result = mockMvc.perform(get(String.format("/businesses/%d/products", testBusiness1.getId()))
+                .sessionAttrs(sessionAuthToken)
+                .cookie(authCookie))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
+        JSONArray responseBody = (JSONArray) parser.parse(result.getResponse().getContentAsString());
+        assertTrue(responseBody.isEmpty());
+    }
 
     /**
      * Creates a valid request body for the /businesses/:id/products endpoint
@@ -251,6 +362,7 @@ public class ProductControllerTest {
      */
     @Test
     void postingAProductAddsItToTheCatalogue() {
+        setCurrentUser(ownerUser.getUserID());
         var productInfo = generateProductCreationInfo();
 
         assertDoesNotThrow(() -> mockMvc.perform(post(String.format("/businesses/%d/products", testBusiness1.getId()))
@@ -283,6 +395,7 @@ public class ProductControllerTest {
      */
     @Test
     void postingAProductSetsTheCreationTimeCorrectly() {
+        setCurrentUser(ownerUser.getUserID());
         var productInfo = generateProductCreationInfo();
 
         Date before = new Date();
@@ -313,6 +426,7 @@ public class ProductControllerTest {
      */
     @Test
     void postingProductToNonExistentBusiness() {
+        setCurrentUser(ownerUser.getUserID());
         var productInfo = generateProductCreationInfo();
 
         assertDoesNotThrow(() -> mockMvc.perform(post("/businesses/999999999/products")
