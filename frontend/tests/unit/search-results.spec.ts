@@ -1,5 +1,4 @@
 import Vue from 'vue';
-import VueRouter from 'vue-router';
 import Vuetify from 'vuetify';
 import Vuex, { Store } from 'vuex';
 import { createLocalVue, Wrapper, mount } from '@vue/test-utils';
@@ -27,15 +26,9 @@ const getSearchCount = castMock(api.getSearchCount);
 Vue.use(Vuetify);
 
 const localVue = createLocalVue();
-
-localVue.use(VueRouter);
 localVue.use(Vuex);
-const router = new VueRouter();
 
 const RESULTS_PER_PAGE = 10;
-
-// Sets the initial search query
-router.push({ path: 'unimportant', query: { query: 'test_query' }});
 
 /**
  * Creates a list of unique test users
@@ -70,8 +63,15 @@ describe('SearchResults.vue', () => {
    */
   function createWrapper() {
     wrapper = mount(SearchResults, {
+      stubs: ['router-link', 'router-view'],
+      mocks: {
+        $route: {
+          query: {
+            query: 'test_query',
+          },
+        },
+      },
       localVue,
-      router,
       vuetify: new Vuetify(),
     });
   }

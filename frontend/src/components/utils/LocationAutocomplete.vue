@@ -20,7 +20,7 @@ const AUTOCOMPLETE_TYPES = {
     label: 'Country',
     tags: 'osm_tag=place:country',
   },
-  state: {
+  region: {
     label: 'State/Province/Region',
     tags: 'osm_tag=place',
   },
