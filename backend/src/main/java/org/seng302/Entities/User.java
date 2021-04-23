@@ -13,6 +13,7 @@ import org.springframework.web.server.ResponseStatusException;
 import javax.persistence.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -175,15 +176,15 @@ public class User extends Account {
      * Date constructor is deprecated (Date class issue)
      * LocalDate class can be used but come with time zone -- over complicated
      * @param dob date of birth (used to verify age)
+     * @throws ParseException
      */
-    public void setDob(Date dob) {
+    public void setDob(Date dob) throws ParseException {
         if (dob != null) {
-            Date today = new Date();
-            int year = today.getYear();
-            int month = today.getMonth();
-            int day = today.getDate();
-            Date minDate = new Date(year - 13, month, day + 1);
-            if (dob.before(minDate)) {
+            LocalDate dateOfBirth = LocalDate.from(dob.toInstant());
+            LocalDate date = LocalDate.now();
+            LocalDate minDate = date.minusYears(13);
+
+            if (dateOfBirth.compareTo(minDate) < 0) {
                 this.dob = dob;
             }
         } else {
