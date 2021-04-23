@@ -202,15 +202,9 @@
         :rules="mandatoryRules.concat(maxCharRules).concat(numberRules)"
         outlined
       />
+      <div class="error-text" v-if ="errorMessage !== undefined"> {{errorMessage}} </div>
 
-      <!-- Login button if user already has an account. -->
-      <p
-        class="link"
-        @click="showLogin"
-      >
-        Already have an account? Login.
-      </p>
-
+      <v-spacer/>
       <!-- Register -->
       <v-btn
         type="submit"
@@ -219,6 +213,13 @@
         REGISTER
       </v-btn>
 
+      <!-- Login button if user already has an account. -->
+      <p
+        class="link"
+        @click="showLogin"
+      >
+        Already have an account? Login.
+      </p>
     </v-container>
   </v-form>
 </template>
@@ -237,6 +238,7 @@ export default {
     return {
       showPassword: false,
       showConfirmPassword: false,
+      errorMessage: undefined,
       valid: false,
       email: '',
       password: '',
@@ -305,6 +307,7 @@ export default {
     },
     // Complete registration with API
     async register () {
+      this.errorMessage = undefined;
 
       /**
        * Get the street number and name from the street address field.
@@ -342,15 +345,13 @@ export default {
         password    : this.password,
       };
 
-      let vrb = await createUser(user);
-      console.log(vrb);
-      if (vrb !== undefined ) {
-        alert('REGISTRATION FAILED');
-      }
-      else {
-        alert('TEST = SUCCESS');
+      let response = await createUser(user);
+      console.log(response);
+      if (response === undefined ) {
         this.$emit('showLogin');
+        return;
       }
+      this.errorMessage = response;
     },
     // Close the date picker modal
     closeDatePicker () {
@@ -420,5 +421,9 @@ export default {
 .required label::after {
   content: "*";
   color: red;
+}
+.error-text {
+  color: var(--v-error-base);
+  font-size: 140%;
 }
 </style>
