@@ -162,18 +162,38 @@ public class ProductControllerTest {
      * Adds several products to a catalogue
      */
     public void addSeveralProductsToACatalogue() {
-        Product product1 = new Product.Builder().withProductCode("NathanApple-70").withName("The Nathan Apple")
-                .withDescription("Ever wonder why Nathan has an apple").withRecommendedRetailPrice("9000.03")
-                .withBusiness(testBusiness1).build();
-        Product product2 = new Product.Builder().withProductCode("AlmondMilk100").withName("Almond Milk")
-                .withDescription("Like water except bad for the environment").withRecommendedRetailPrice("10.02")
-                .withBusiness(testBusiness1).build();
-        Product product3 = new Product.Builder().withProductCode("Coffee7").withName("Generic Brand Coffee")
-                .withDescription("This coffee tastes exactly as you expect it would").withRecommendedRetailPrice("4.02")
-                .withBusiness(testBusiness1).build();
-        Product product4 = new Product.Builder().withProductCode("DarkChocolate").withName("Dark Chocolate")
-                .withDescription("Would like a high cocoa concentration").withRecommendedRetailPrice("6.07")
-                .withBusiness(testBusiness1).build();
+        Product product1 = new Product.Builder()
+                .withProductCode("NathanApple-70")
+                .withName("The Nathan Apple")
+                .withDescription("Ever wonder why Nathan has an apple")
+                .withManufacturer("Apple")
+                .withRecommendedRetailPrice("9000.03")
+                .withBusiness(testBusiness1)
+                .build();
+        Product product2 = new Product.Builder()
+                .withProductCode("AlmondMilk100")
+                .withName("Almond Milk")
+                .withDescription("Like water except bad for the environment")
+                .withManufacturer("Apple")
+                .withRecommendedRetailPrice("10.02")
+                .withBusiness(testBusiness1)
+                .build();
+        Product product3 = new Product.Builder()
+                .withProductCode("Coffee7")
+                .withName("Generic Brand Coffee")
+                .withDescription("This coffee tastes exactly as you expect it would")
+                .withManufacturer("Apple")
+                .withRecommendedRetailPrice("4.02")
+                .withBusiness(testBusiness1)
+                .build();
+        Product product4 = new Product.Builder()
+                .withProductCode("DarkChocolate")
+                .withName("Dark Chocolate")
+                .withDescription("Would like a high cocoa concentration")
+                .withManufacturer("Apple")
+                .withRecommendedRetailPrice("6.07")
+                .withBusiness(testBusiness1)
+                .build();
         productRepository.save(product1);
         productRepository.save(product2);
         productRepository.save(product3);
