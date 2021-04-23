@@ -50,22 +50,13 @@ public class ProductControllerTest {
     @Autowired
     private BusinessRepository businessRepository;
     @Autowired
-    UserRepository userRepository;
+    private UserRepository userRepository;
 
     private final HashMap<String, Object> sessionAuthToken = new HashMap<>();
     private Cookie authCookie;
     private Business testBusiness1;
     private User testUser1;
-
-    /**
-     * Add a user object to the userRepository and construct an authorization token to be used for this session.
-     *
-     * @throws ParseException
-     */
-    @BeforeEach
-    public void setUpIndividual() throws ParseException, IOException {
-        setUpAuthCode();
-    }
+    private User testUser2;
 
     /**
      * This method creates an authentication code for sessions and cookies.
@@ -79,7 +70,7 @@ public class ProductControllerTest {
     }
 
     /**
-     * Tags a session as dgaa
+     * Tags a session as DGAA
      */
     private void setUpDGAAAuthCode() {
         sessionAuthToken.put("role", "defaultGlobalApplicationAdmin");
@@ -103,10 +94,13 @@ public class ProductControllerTest {
         testBusiness1 = businessRepository.save(testBusiness1);
     }
 
-    @BeforeAll
+    @BeforeEach
     public void setUp() throws ParseException {
         productRepository.deleteAll();
         businessRepository.deleteAll();
+        userRepository.deleteAll();
+
+        setUpAuthCode();
 
         testUser1 = new User.Builder()
                 .withFirstName("John")
@@ -123,6 +117,21 @@ public class ProductControllerTest {
                 .build();
         testUser1 = userRepository.save(testUser1);
         createTestBusiness();
+
+        testUser2 = new User.Builder()
+                .withFirstName("Happy")
+                .withMiddleName("Boi")
+                .withLastName("Jones")
+                .withNickName("HappyBoi")
+                .withEmail("happyboi@gmail.com")
+                .withPassword("1337-H548*nt3r2")
+                .withBio("Likes long walks on the beach sometimes")
+                .withDob("2010-03-11")
+                .withPhoneNumber("+64 5 565 0129")
+                .withAddress(Location.covertAddressStringToLocation("5,Rountree Street,Christchurch,New Zealand," +
+                        "Canterbury,8041"))
+                .build();
+        testUser2 = userRepository.save(testUser1);
     }
 
     /**
@@ -194,11 +203,22 @@ public class ProductControllerTest {
     }
 
     /**
-     * //TODO Write docstring
+     * Tests that when an invalid auth token is provided an unauthorised response code
      */
-    @Test @Ignore
-    void invalidAuthTokenThenCannotViewCatalogue() {
+    @Test
+    void invalidAuthTokenThenCannotViewCatalogue() throws Exception {
+        StringBuilder authCodeBuilder = new StringBuilder();
+        authCodeBuilder.append("9".repeat(64));
+        String authCode = authCodeBuilder.toString();
+        HashMap<String, Object> fakeAuthToken = new HashMap<>();
+        fakeAuthToken.put("FAKEAUTHTOKEN", authCode);
+        Cookie fakeAuthCookie = new Cookie("FAKEAUTHTOKEN", authCode);
 
+        MvcResult result = mockMvc.perform(get(String.format("/businesses/%d/products", testBusiness1.getId()))
+                .sessionAttrs(fakeAuthToken)
+                .cookie(fakeAuthCookie))
+                .andExpect(status().isUnauthorized())
+                .andReturn();
     }
 
     /**
@@ -215,10 +235,10 @@ public class ProductControllerTest {
     }
 
     /**
-     * //TODO Write docstring
+     *  //TODO Write docstring (expect 403)
      */
     @Test @Ignore
-    public void userIsNotAnAdminThenForbidden() {
+    void userIsNotAnAdminThenForbidden() {
 
     }
 
