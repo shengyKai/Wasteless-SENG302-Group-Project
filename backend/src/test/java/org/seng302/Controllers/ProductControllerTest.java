@@ -151,7 +151,7 @@ public class ProductControllerTest {
      * //TODO Write docstring
      */
     @Test
-    public void retrieveCatalogueWithSeveralProducts() throws Exception {
+    void retrieveCatalogueWithSeveralProducts() throws Exception {
         addSeveralProductsToACatalogue();
 
         MvcResult result = mockMvc.perform(get(String.format("/businesses/%d/products", testBusiness1.getId()))
@@ -166,11 +166,11 @@ public class ProductControllerTest {
         for (Object productObject: responseBody) {
             JSONObject productJSON = (JSONObject) productObject;
 
-            String productCode = productJSON.getAsString("code");
+            String productCode = productJSON.getAsString("id");
             Product storedProduct = productRepository.findByBusinessAndProductCode(testBusiness1, productCode);
 
             assertEquals(storedProduct.getProductCode(), productCode);
-            assertEquals(storedProduct.getCreated().toString().substring(0, 10), productJSON.getAsString("createdDate").substring(0, 10));
+            assertEquals(storedProduct.getCreated().toString().substring(0, 10), productJSON.getAsString("created").substring(0, 10));
             assertEquals(storedProduct.getRecommendedRetailPrice().toString(), productJSON.getAsString("recommendedRetailPrice"));
             assertEquals(storedProduct.getName(), productJSON.getAsString("name"));
             assertEquals(storedProduct.getDescription(), productJSON.getAsString("description"));
@@ -181,7 +181,7 @@ public class ProductControllerTest {
      * //TODO Write docstring
      */
     @Test
-    public void retrieveCatalogueWithZeroProducts() {
+    void retrieveCatalogueWithZeroProducts() {
 
     }
 
@@ -189,7 +189,7 @@ public class ProductControllerTest {
      * //TODO Write docstring
      */
     @Test
-    public void invalidAuthTokenThenCannotViewCatalogue() {
+    void invalidAuthTokenThenCannotViewCatalogue() {
 
     }
 
@@ -197,7 +197,7 @@ public class ProductControllerTest {
      * //TODO Write docstring
      */
     @Test
-    public void businessDoesNotExistThenNotAccepted() {
+    void businessDoesNotExistThenNotAccepted() {
 
     }
 
@@ -213,7 +213,7 @@ public class ProductControllerTest {
      * //TODO Write docstring
      */
     @Test
-    public void userIsAnAdminCanRetrieveCatalogue() {
+    void userIsAnAdminCanRetrieveCatalogue() {
 
     }
 
@@ -221,7 +221,7 @@ public class ProductControllerTest {
      * //TODO Write docstring
      */
     @Test
-    public void userIsADGAACanRetrieveCatalogue() {
+    void userIsADGAACanRetrieveCatalogue() {
 
     }
 

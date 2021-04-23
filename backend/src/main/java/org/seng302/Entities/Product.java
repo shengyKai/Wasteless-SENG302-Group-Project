@@ -114,12 +114,11 @@ public class Product {
      */
     public JSONObject constructJSONObject() {
         Map<String, Object> attributeMap = new HashMap<>();
-        attributeMap.put("id", id);
-        attributeMap.put("code", productCode);
+        attributeMap.put("id", productCode);
         attributeMap.put("name", name);
         attributeMap.put("description", description);
         attributeMap.put("recommendedRetailPrice", recommendedRetailPrice);
-        attributeMap.put("createdDate", created);
+        attributeMap.put("created", created);
         return new JSONObject(attributeMap);
     }
 
