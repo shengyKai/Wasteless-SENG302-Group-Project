@@ -28,6 +28,7 @@ import javax.servlet.http.Cookie;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
@@ -229,29 +230,97 @@ public class ProductControllerTest {
      * - Check a DGAA can retrieve catalogues
      */
 
-    @Test
-    public void postingAProductAddsItToTheCatalogue() throws Exception {
+    /**
+     * Creates a valid request body for the /businesses/:id/products endpoint
+     *
+     * @return A JSONObject that is to be used in a POST /businesses/:id/products request
+     */
+    private JSONObject generateProductCreationInfo() {
         JSONObject productInfo = new JSONObject();
         productInfo.put("id", "WATT-420-BEANS");
         productInfo.put("name", "Watties Baked Beans - 420g can");
         productInfo.put("description", "Baked Beans as they should be.");
         productInfo.put("manufacturer", "Heinz Wattie's Limited");
         productInfo.put("recommendedRetailPrice", 2.2);
+        return productInfo;
+    }
 
-        MvcResult result = mockMvc.perform(post(String.format("/businesses/%d/products", testBusiness1.getId()))
+    /**
+     * Tests that using the POST /businesses/:id/products endpoint adds a product to the given businesses product
+     * catalogue
+     */
+    @Test
+    void postingAProductAddsItToTheCatalogue() {
+        var productInfo = generateProductCreationInfo();
+
+        assertDoesNotThrow(() -> mockMvc.perform(post(String.format("/businesses/%d/products", testBusiness1.getId()))
                 .content(productInfo.toString())
                 .sessionAttrs(sessionAuthToken)
                 .contentType("application/json")
                 .cookie(authCookie))
                 .andExpect(status().isCreated())
-                .andReturn();
+                .andReturn());
 
-        Product product = productRepository.findByBusinessAndProductCode(testBusiness1, productInfo.getAsString("id"));
+        Product product =
+                productRepository.findByBusinessAndProductCode(testBusiness1, productInfo.getAsString("id"));
+
+        assertNotNull(product);
         assertEquals(productInfo.get("id"), product.getProductCode());
         assertEquals(productInfo.get("name"), product.getName());
         assertEquals(productInfo.get("description"), product.getDescription());
         assertEquals(productInfo.get("manufacturer"), product.getManufacturer());
         // There is a small fudge factor between the exact decimal value and the closest double representation of said value
-        assertEquals((double)productInfo.get("recommendedRetailPrice"), product.getRecommendedRetailPrice().doubleValue(), 1e-10);
+        assertEquals(
+                (double)productInfo.get("recommendedRetailPrice"),
+                product.getRecommendedRetailPrice().doubleValue(),
+                1e-10
+        );
+    }
+
+    /**
+     * Tests that when a product is added via the POST /businesses/:id/products endpoint that the created product's
+     * creation time is between the start of the request and the end of the request
+     */
+    @Test
+    void postingAProductSetsTheCreationTimeCorrectly() {
+        var productInfo = generateProductCreationInfo();
+
+        Date before = new Date();
+        MvcResult result = assertDoesNotThrow(() ->
+                mockMvc.perform(post(String.format("/businesses/%d/products", testBusiness1.getId()))
+                    .content(productInfo.toString())
+                    .sessionAttrs(sessionAuthToken)
+                    .contentType("application/json")
+                    .cookie(authCookie))
+                    .andExpect(status().isCreated())
+                    .andReturn()
+            );
+        Date after = new Date();
+
+        Product product =
+                productRepository.findByBusinessAndProductCode(testBusiness1, productInfo.getAsString("id"));
+
+        assertNotNull(product);
+        // Asserts that the product is created not before the production creation should have finished
+        assertFalse(after.before(product.getCreated()));
+        // Asserts that the product is created not after the production creation shouldn't have started
+        assertFalse(before.after(product.getCreated()));
+    }
+
+    /**
+     * Tests that trying the add a product via the POST /businesses/:id/products endpoint results in a 406 if there is
+     * no business with that id.
+     */
+    @Test
+    void postingProductToNonExistentBusiness() {
+        var productInfo = generateProductCreationInfo();
+
+        assertDoesNotThrow(() -> mockMvc.perform(post("/businesses/999999999/products")
+                .content(productInfo.toString())
+                .sessionAttrs(sessionAuthToken)
+                .contentType("application/json")
+                .cookie(authCookie))
+                .andExpect(status().isNotAcceptable())
+                .andReturn());
     }
 }
