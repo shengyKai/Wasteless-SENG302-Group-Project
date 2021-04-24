@@ -8,7 +8,7 @@
         v-bind="attrs"
         v-on="on"
       >
-        Read more...
+        Read more
       </a>
     </template>
     <v-card>

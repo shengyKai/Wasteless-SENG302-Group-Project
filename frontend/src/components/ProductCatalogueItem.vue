@@ -9,13 +9,13 @@
         <v-col>
           <v-row>
             <v-col class="auto pa-0" md="11" sm="10">
-              <v-card-title>
+              <v-card-title :class="{'pt-0': $vuetify.breakpoint.smAndDown}" class="pb-0">
                 <!-- shows product name -->
                 {{ productName }}
               </v-card-title>
             </v-col>
             <v-col cols="auto" md="1" sm="2">
-              <v-card-actions>
+              <v-card-actions :class="{'pt-0': $vuetify.breakpoint.smAndDown}" class="pb-0">
                 <!-- shows the edit button for editing product details, which supposedly links to a form -->
                 <a @click="editProductDetails">Edit</a>
               </v-card-actions>
@@ -24,42 +24,40 @@
           <v-row>
             <v-col cols="auto" md="9" sm="12">
               <v-row>
-                <!-- if the description length is more than or equal to 50, the "Read more..." link will appear which will lead the
-                user to the FullProductDescription component  -->
+                <!-- if the description length is more than or equal to 50 without slicing any words, the "Read more..." link will
+                appear which will lead the user to the FullProductDescription component  -->
                 <span v-if="productDescription.length >= 50">
-                  <v-card-text id="description">
+                  <v-card-text id="description" class="pb-0 product-fields">
                     <strong>Description: </strong>
-                    {{ productDescription.slice(0, 50) }}
+                    <br>
+                    {{ productDescription.replace(/^([\s\S]{50}\S*)[\s\S]*/, "$1") }}...
+                    <!-- {{ productDescription.slice(0, 50) }}... -->
                     <!-- feed the productDescription into the dialog box child component -->
                     <FullProductDescription :productDescription="productDescription"/>
                   </v-card-text>
                 </span>
                 <!-- else just show the product description -->
                 <span v-else>
-                  <v-card-text>
+                  <v-card-text class="pb-0 product-fields">
                     <strong>Description: </strong>
+                    <br>
                     {{ productDescription }}
                   </v-card-text>
                 </span>
               </v-row>
               <v-row>
                 <!-- shows the date added for the product -->
-                <v-card-text>
+                <v-card-text class="pb-0 product-fields">
                   <strong>Date Added: </strong>
+                  <br>
                   {{ productDateAdded }}
                 </v-card-text>
               </v-row>
               <v-row>
-                <!-- shows the expiry date for the product -->
-                <v-card-text>
-                  <strong>Expiry Date: </strong>
-                  {{ productExpiryDate }}
-                </v-card-text>
-              </v-row>
-              <v-row>
                 <!-- shows the product manufacturer -->
-                <v-card-text>
+                <v-card-text :class="{'pb-0': $vuetify.breakpoint.smAndDown}" class="product-fields">
                   <strong>Manufacturer: </strong>
+                  <br>
                   {{ productManufacturer }}
                 </v-card-text>
               </v-row>
@@ -67,22 +65,17 @@
             <v-col cols="auto" md="3" sm="12">
               <v-row>
                 <!-- shows the product price -->
-                <v-card-text>
+                <v-card-text class="pb-0 product-fields">
                   <strong>RRP: </strong>
+                  <br>
                   ${{ productRRP }}
                 </v-card-text>
               </v-row>
               <v-row>
-                <!-- shows the product quantity -->
-                <v-card-text>
-                  <strong>Quantity: </strong>
-                  {{ productQuantity }}
-                </v-card-text>
-              </v-row>
-              <v-row>
                 <!-- shows the product code -->
-                <v-card-text>
+                <v-card-text :class="{'pb-0': $vuetify.breakpoint.mdAndUp}" class="product-fields">
                   <strong>Product Code: </strong>
+                  <br>
                   {{ productCode }}
                 </v-card-text>
               </v-row>
@@ -128,10 +121,8 @@ export default {
       // productName: "",
       // productDescription: "",
       // productDateAdded: "",
-      // productExpiryDate: "",
       // productManufacturer: "",
       // productRRP: null,
-      // productQuantity: null,
       // productCode: "",
 
       // try uncommenting the bottom variables to test out how it looks.
@@ -139,10 +130,8 @@ export default {
       productDescription:
         "Some super long description Some super long description Some super long description Some super long description",
       productDateAdded: "Some Date Added",
-      productExpiryDate: "Some Expired Date",
       productManufacturer: "Some Manufacturer",
       productRRP: 100,
-      productQuantity: 5,
       productCode: "Some Code",
 
       //If readMoreActivated is false, the product description is less than 50 words, so it wont have to use the FullProductDescription
@@ -164,6 +153,7 @@ export default {
 </script>
 
 <style scoped>
-/* .v-card {
-} */
+.product-fields {
+  padding-top: 0;
+}
 </style>
