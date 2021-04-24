@@ -37,7 +37,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @AutoConfigureMockMvc
-public class UsersControllerTest {
+public class UserControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -79,7 +79,7 @@ public class UsersControllerTest {
      * Tags a session as dgaa
      */
     private void setUpDGAAAuthCode() {
-        sessionAuthToken.put("role", "dgaa");
+        sessionAuthToken.put("role", "defaultGlobalApplicationAdmin");
     }
 
     /**
@@ -90,7 +90,7 @@ public class UsersControllerTest {
         sessionAuthToken.put("accountId", accountId);
     }
     private void setUpSessionAsAdmin() {
-        sessionAuthToken.put("role", "admin");
+        sessionAuthToken.put("role", "globalApplicationAdmin");
     }
 
     /**
@@ -107,7 +107,7 @@ public class UsersControllerTest {
                 .withEmail("johnsmith99@gmail.com")
                 .withPassword("1337-H%nt3r2")
                 .withBio("Likes long walks on the beach")
-                .withDob("2021-03-11")
+                .withDob("2001-03-11")
                 .withPhoneNumber("+64 3 555 0129")
                 .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Christchurch,New Zealand," +
                         "Canterbury,8041"))
@@ -242,7 +242,7 @@ public class UsersControllerTest {
      */
     @Test
     public void getUserSearchOrderByFirstNameReverseTrueTest() throws Exception {
-        List<User> userList = readUsersFromTestFile("src//test//testFiles//UsersControllerTestData.csv");
+        List<User> userList = readUsersFromTestFile("src/test/testFiles/UsersControllerTestData.csv");
         userRepository.deleteAll();
         for (User user : userList) {
             userRepository.save(user);
@@ -276,7 +276,7 @@ public class UsersControllerTest {
      */
     @Test
     public void getUserSearchOrderByEmailReverseFalseTest() throws Exception {
-        List<User> userList = readUsersFromTestFile("src//test//testFiles//UsersControllerTestData.csv");
+        List<User> userList = readUsersFromTestFile("src/test/testFiles/UsersControllerTestData.csv");
         userRepository.deleteAll();
         for (User user : userList) {
             userRepository.save(user);
@@ -309,7 +309,7 @@ public class UsersControllerTest {
      */
     @Test
     public void getUserSearchOrderByRelevanceTest() throws Exception {
-        List<User> userList = readUsersFromTestFile("src//test//testFiles//UsersControllerTestData.csv");
+        List<User> userList = readUsersFromTestFile("src/test/testFiles/UsersControllerTestData.csv");
         userRepository.deleteAll();
         for (User user : userList) {
             userRepository.save(user);
@@ -342,7 +342,7 @@ public class UsersControllerTest {
      */
     @Test
     public void getUserSearchPageTwoTest() throws Exception {
-        List<User> userList = readUsersFromTestFile("src//test//testFiles//UsersControllerTestData.csv");
+        List<User> userList = readUsersFromTestFile("src/test/testFiles/UsersControllerTestData.csv");
         userRepository.deleteAll();
         for (User user : userList) {
             userRepository.save(user);
@@ -372,10 +372,9 @@ public class UsersControllerTest {
      */
     @Test
     public void getUserSearchFiveResultsPerPageTest() throws Exception {
-        List<User> userList = readUsersFromTestFile("src//test//testFiles//UsersControllerTestData.csv");
+        List<User> userList = readUsersFromTestFile("src/test/testFiles/UsersControllerTestData.csv");
         userRepository.deleteAll();
         for (User user : userList) {
-            System.out.println(user.toString());
             userRepository.save(user);
         }
 
@@ -393,6 +392,29 @@ public class UsersControllerTest {
         assertEquals(5, jsonArray.size());
     }
 
+    /**
+     * Verify that a GET request is made to "/users/search/count" it returns a json object with a single field "count".
+     * Where this count field is equal to the number of users matching the query.
+     */
+    @Test
+    public void getUserSearchCountTest() throws Exception {
+        List<User> userList = readUsersFromTestFile("src//test//testFiles//UsersControllerTestData.csv");
+        userRepository.deleteAll();
+        userRepository.saveAll(userList);
+
+        MvcResult result = mockMvc.perform(get("/users/search/count")
+                .param("searchQuery", "andy")
+                .sessionAttrs(sessionAuthToken)
+                .cookie(authCookie))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
+        JSONObject jsonObject = (JSONObject) parser.parse(result.getResponse().getContentAsString());
+        assertEquals(7, jsonObject.getAsNumber("count"));
+        assertEquals(1, jsonObject.size());
+    }
+
 
 //    @Test
 //    public void getUserWhenUserExistsAndSessionValid() throws Exception{
@@ -403,7 +425,7 @@ public class UsersControllerTest {
 //                "+64 3 555 0129", "address", false);
 //        userRepository.save(john);
 //
-//        User expectedUser = userRepository.findByEmail("johnsmith99@gmail.com");
+///        User expectedUser = userRepository.findByEmail("johnsmith99@gmail.com");
 //        //get a cookie
 //        String loginBody = "{\"email\": \"johnsmith99@gmail.com\", \"password\": \"1337-H%nt3r2\"}";
 //
@@ -421,8 +443,8 @@ public class UsersControllerTest {
 //
 //        JsonValue json = Json.parse(result.getResponse().getContentAsString());
 //
-
-
+//
+//
 //      }
 //
 
@@ -435,12 +457,11 @@ public class UsersControllerTest {
     @Test @Ignore
     public void registerAccountWithValidRequest() throws Exception {
         userRepository.deleteAll();
-        List<User> userList = readUsersFromTestFile("src//test//testFiles//UsersControllerTestData.csv");
-        List<JSONObject> jsonObjectList = readJSONFromTestFile("src//test//testFiles//UsersControllerTestData.csv");
+        List<User> userList = readUsersFromTestFile("src/test/testFiles/UsersControllerTestData.csv");
+        List<JSONObject> jsonObjectList = readJSONFromTestFile("src/test/testFiles/UsersControllerTestData.csv");
         for (int i = 0; i < jsonObjectList.size(); i++) {
             JSONObject userJSON = jsonObjectList.get(i);
             User user = userList.get(i);
-            System.out.println(userJSON.getAsString("password"));
             mockMvc.perform( MockMvcRequestBuilders
                     .post("/users")
                     .content(userJSON.toString())
@@ -459,12 +480,11 @@ public class UsersControllerTest {
     @Test @Ignore
     public void testConflictErrorOnRegisterWithSameEmail() throws Exception {
         userRepository.deleteAll();
-        List<User> userList = readUsersFromTestFile("src//test//testFiles//UsersControllerTestData.csv");
-        List<JSONObject> jsonObjectList = readJSONFromTestFile("src//test//testFiles//UsersControllerTestData.csv");
+        List<User> userList = readUsersFromTestFile("src/test/testFiles/UsersControllerTestData.csv");
+        List<JSONObject> jsonObjectList = readJSONFromTestFile("src/test/testFiles/UsersControllerTestData.csv");
         for (int i = 0; i < jsonObjectList.size(); i++) {
             JSONObject userJSON = jsonObjectList.get(i);
             User user = userList.get(i);
-            System.out.println(userJSON.getAsString("password"));
             mockMvc.perform( MockMvcRequestBuilders
                     .post("/users")
                     .content(userJSON.toString())
@@ -488,7 +508,7 @@ public class UsersControllerTest {
     @Test
     public void testRegisteringUserWithInvalidFirstName() throws Exception {
         userRepository.deleteAll();
-        List<User> userList = readUsersFromTestFile("src//test//testFiles//UsersControllerTestDataInvalidFirstName" +
+        List<User> userList = readUsersFromTestFile("src/test/testFiles/UsersControllerTestDataInvalidFirstName" +
                 ".csv");
 
         for (User user : userList) {
@@ -511,7 +531,7 @@ public class UsersControllerTest {
     @Test
     public void testRegisteringUserWithInvalidMiddleName() throws Exception {
         userRepository.deleteAll();
-        List<User> userList = readUsersFromTestFile("src//test//testFiles//UsersControllerTestDataInvalidMiddleName" +
+        List<User> userList = readUsersFromTestFile("src/test/testFiles/UsersControllerTestDataInvalidMiddleName" +
                 ".csv");
 
         for (User user : userList) {
@@ -535,7 +555,7 @@ public class UsersControllerTest {
     @Test
     public void testRegisteringUserWithInvalidLastName() throws Exception {
         userRepository.deleteAll();
-        List<User> userList = readUsersFromTestFile("src//test//testFiles//UsersControllerTestDataInvalidLastName" +
+        List<User> userList = readUsersFromTestFile("src/test/testFiles/UsersControllerTestDataInvalidLastName" +
                 ".csv");
 
         for (User user : userList) {
@@ -559,7 +579,7 @@ public class UsersControllerTest {
     @Test
     public void testRegisteringUserWithInvalidNickname() throws Exception {
         userRepository.deleteAll();
-        List<User> userList = readUsersFromTestFile("src//test//testFiles//UsersControllerTestDataInvalidNickname" +
+        List<User> userList = readUsersFromTestFile("src/test/testFiles/UsersControllerTestDataInvalidNickname" +
                 ".csv");
 
         for (User user : userList) {
@@ -583,7 +603,7 @@ public class UsersControllerTest {
     @Test
     public void testRegisteringUserWithInvalidBio() throws Exception {
         userRepository.deleteAll();
-        List<User> userList = readUsersFromTestFile("src//test//testFiles//UsersControllerTestDataInvalidBio" +
+        List<User> userList = readUsersFromTestFile("src/test/testFiles/UsersControllerTestDataInvalidBio" +
                 ".csv");
 
         for (User user : userList) {
@@ -607,7 +627,7 @@ public class UsersControllerTest {
     @Test
     public void testRegisteringUserWithInvalidDOB() throws Exception {
         userRepository.deleteAll();
-        List<User> userList = readUsersFromTestFile("src//test//testFiles//UsersControllerTestDataInvalidDOB" +
+        List<User> userList = readUsersFromTestFile("src/test/testFiles/UsersControllerTestDataInvalidDOB" +
                 ".csv");
 
         for (User user : userList) {
@@ -630,7 +650,7 @@ public class UsersControllerTest {
     @Test
     public void testRegisteringUserWithInvalidPhNum() throws Exception {
         userRepository.deleteAll();
-        List<User> userList = readUsersFromTestFile("src//test//testFiles//UsersControllerTestDataInvalidPhoneNumber" +
+        List<User> userList = readUsersFromTestFile("src/test/testFiles/UsersControllerTestDataInvalidPhoneNumber" +
                 ".csv");
 
         for (User user : userList) {
@@ -653,7 +673,7 @@ public class UsersControllerTest {
     @Test
     public void testRegisteringUserWithInvalidAddress() throws Exception {
         userRepository.deleteAll();
-        List<User> userList = readUsersFromTestFile("src//test//testFiles//UsersControllerTestDataInvalidAddress" +
+        List<User> userList = readUsersFromTestFile("src/test/testFiles/UsersControllerTestDataInvalidAddress" +
                 ".csv");
 
         for (User user : userList) {
@@ -793,9 +813,7 @@ public class UsersControllerTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        String dob = JsonPath.read(result.getResponse().getContentAsString(), "$.dateOfBirth");
         String role = JsonPath.read(result.getResponse().getContentAsString(), "$.role");
-        assertNotNull(dob);
         assertNotNull(role);
     }
     /**
@@ -815,7 +833,6 @@ public class UsersControllerTest {
                 .andReturn();
 
         org.json.JSONObject json = new org.json.JSONObject(result.getResponse().getContentAsString());
-        assertFalse(json.has("dateOfBirth"));
         assertFalse(json.has("role"));
     }
     /**
@@ -835,7 +852,6 @@ public class UsersControllerTest {
 
         org.json.JSONObject json = new org.json.JSONObject(result.getResponse().getContentAsString());
         // Result should contain role and DOB
-        assertTrue(json.has("dateOfBirth"));
         assertTrue(json.has("role"));
     }
     //endregion

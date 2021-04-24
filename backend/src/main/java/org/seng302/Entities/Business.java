@@ -1,14 +1,28 @@
 package org.seng302.Entities;
 
+import org.seng302.Tools.AuthenticationTokenManager;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
+import net.minidev.json.JSONArray;
+import net.minidev.json.JSONObject;
+
 import javax.persistence.*;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
+
+import com.fasterxml.jackson.databind.ser.impl.StringArraySerializer;
+
+
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.*;
 
 @Entity
 public class Business {
 
+    //Minimum age to create a business
+    private final int MinimumAge = 16;
     private static final List<String> businessTypes = new ArrayList<>(Arrays.asList("Accommodation and Food Services", "Retail Trade", "Charitable organisation", "Non-profit organisation"));
 
     @Id
@@ -137,11 +151,19 @@ public class Business {
 
     /**
      * Sets primary owner of the business
+     * If the requested user is less than 16 years of age, a 403 forbidden status is thrown.
      * @param owner Owner of business
      */
     private void setPrimaryOwner(User owner) {
         if (owner == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The business must have a primary owner");
+        }
+
+        //Get the current date as of now and find the difference in years between the current date and the age of the user.
+        long age = java.time.temporal.ChronoUnit.YEARS.between(
+            owner.getDob().toInstant().atZone(ZoneId.systemDefault()).toLocalDate(), LocalDate.now());
+        if (age < MinimumAge) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User is not of minimum age required to create a business");
         }
         this.primaryOwner = owner;
     }
@@ -162,12 +184,109 @@ public class Business {
         return this.administrators;
     }
 
+    /**
+     * Adds a new admin to the business
+     * Throws an ResponseStatusException if the user is already an admin
+     * @param newAdmin The user to make admininstrator
+     */
     public void addAdmin(User newAdmin) {
-        if (this.administrators.contains(newAdmin)) {
+        if (this.administrators.contains(newAdmin) || this.primaryOwner == newAdmin) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "This user is already a registered admin of this business");
         } else {
             this.administrators.add(newAdmin);
         }
+    }
+
+    /**
+     * Removes an admin from a business
+     * Throws an ResponseStatusException if the user is not an admin of the business
+     * @param oldAdmin the user to revoke administrator
+     */
+    public void removeAdmin(User oldAdmin) {
+        if (!this.administrators.contains(oldAdmin)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The given user is not an admin of this business");
+        } else {
+            this.administrators.remove(oldAdmin);
+        }
+    }
+
+    /**
+     * This method checks if the account associated with the current session has permission to act as this business (i.e.,
+     * the user is either an admin of the business or a GAA). If the account does not have permission to act as this
+     * business, a response status exception with status code 403 will be thrown.
+     */
+    public void checkSessionPermissions(HttpServletRequest request) {
+        AuthenticationTokenManager.checkAuthenticationToken(request);
+        HttpSession session = request.getSession(false);
+        Long userId = (Long) session.getAttribute("accountId");
+        Set<Long> adminIds = new HashSet<>();
+        for (User user : getOwnerAndAdministrators()) {
+            adminIds.add(user.getUserID());
+        }
+        if (!AuthenticationTokenManager.sessionCanSeePrivate(request, null) && !adminIds.contains(userId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User does not have sufficient permissions to perform this action");
+        }
+    }
+
+    /**
+     * This method retrieves all Users who are owners or admins of this business.
+     * @return A Set containing Users who are owners or admins of the business.
+     */
+    public Set<User> getOwnerAndAdministrators() {
+        Set<User> ownerAdminSet = new HashSet<>();
+        ownerAdminSet.addAll(administrators);
+        ownerAdminSet.add(primaryOwner);
+        return ownerAdminSet;
+    }
+    /**
+     * Construct a JSON object representing the business. The JSON object includes an array of JSON
+     * representations of the users who are administrators of the business, and a JSON representation
+     * of the business's address, as well as simple attributes for all the other properties of the
+     * business. If fullAdminDetails is true, the JSON will include a full JSON representation for each
+     * admin of the business. If fullAdminDetails is false, the administrators field will be excluded, to
+     * avoid issues when nesting this json within the businessesAdministered field of the user json.
+     * @param fullAdminDetails True if administrators should be included in JSON
+     * @return A JSON representation of this business.
+     */
+    public JSONObject constructJson(boolean fullAdminDetails) {
+        Map<String, Object> attributeMap = new HashMap<>();
+        attributeMap.put("id", getId());
+        attributeMap.put("name", name);
+        attributeMap.put("description", description);
+        if (fullAdminDetails) {
+            attributeMap.put("administrators", constructAdminJsonArray());
+        }
+        attributeMap.put("primaryAdministratorId", primaryOwner.getUserID());
+        attributeMap.put("address", getAddress().constructFullJson());
+        attributeMap.put("businessType", businessType);
+        attributeMap.put("created", created.toString());
+        return new JSONObject(attributeMap);
+    }
+
+    /**
+     * Override the constructJson method so that by default it does not includethe administrators.
+     * @return A JSON representation of the business without details of its administrators.
+     */
+    public JSONObject constructJson() {
+        return constructJson(false);
+    }
+
+    /**
+     * This method gets the public JSON representation of each User who is an admin of this Business
+     *  and adds it to a JSONArray. The JSONs in the array are ordered by the id number of the user
+     *  to ensure consistency between subsequent requests.
+     * @return A JSONArray containing JSON respresentations of all admins of this business.
+     */
+    private JSONArray constructAdminJsonArray() {
+        JSONArray adminJsons = new JSONArray();
+        List<User> admins = new ArrayList<>();
+        admins.addAll(getOwnerAndAdministrators());
+        Collections.sort(admins, (User user1, User user2) -> 
+            user1.getUserID().compareTo(user2.getUserID()));
+        for (User admin : admins) {
+            adminJsons.add(admin.constructPublicJson());
+        }
+        return adminJsons;
     }
 
 
@@ -241,6 +360,27 @@ public class Business {
             business.setPrimaryOwner(this.primaryOwner);
             return business;
         }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == this) {
+            return true;
+        }
+        if (!(o instanceof Business)) {
+            return false;
+        }
+        Business business = (Business) o;
+        return
+                this.id.equals(business.getId()) &&
+                this.name.equals(business.getName()) &&
+                this.description.equals(business.getDescription()) &&
+                this.created.equals(business.getCreated());
+    }
+
+    @Override
+    public int hashCode() {
+        return this.id.intValue();
     }
 
 }

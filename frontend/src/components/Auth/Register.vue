@@ -1,5 +1,5 @@
 <template>
-  <v-form @submit="register" v-model="valid">
+  <v-form @submit.prevent="register" v-model="valid">
     <h1>Register</h1>
 
     <v-container>
@@ -14,6 +14,7 @@
 
       <!-- INPUT: Password -->
       <v-text-field
+        ref="password"
         class="required"
         v-model="password"
         label="Password"
@@ -114,8 +115,10 @@
           sm="4"
         >
           <v-text-field
+            ref="countryCode"
             v-model="countryCode"
             label="Country Code"
+            :rules="countryCodeRules.concat(phoneRequiresCountryCodeRule)"
             outlined
           />
         </v-col>
@@ -126,12 +129,21 @@
           <v-text-field
             v-model="phone"
             label="Phone"
-            :rules="numberRules.concat(maxCharRules)"
+            @keyup="phoneNumberChange"
+            :rules="phoneNumberRules"
             outlined
           />
         </v-col>
 
       </v-row>
+      <!-- INPUT: Unit number -->
+      <v-text-field
+        class="required"
+        v-model="streetNO"
+        label="Unit No."
+        :rules="mandatoryRules"
+        outlined
+      />
 
       <!-- INPUT: Street/Company -->
       <v-text-field
@@ -139,13 +151,6 @@
         v-model="street1"
         label="Street Address, Company Name"
         :rules="mandatoryRules"
-        outlined
-      />
-
-      <!-- INPUT: Apartment, Suite, Unit, Building or Floor -->
-      <v-text-field
-        v-model="street2"
-        label="Apartment, Suite, Unit, Building, Floor"
         outlined
       />
 
@@ -212,6 +217,7 @@
 
 <script>
 import LocationAutocomplete from '@/components/utils/LocationAutocomplete';
+import {createUser} from '../../api';
 
 export default {
   name: 'Register',
@@ -230,10 +236,10 @@ export default {
       nickname: '',
       bio: '',
       dob: '',
-      countryCode: '',
+      countryCode: '64',
       phone: '',
+      streetNO: '',
       street1: '',
-      street2: '',
       district: '',
       state: '',
       city: '',
@@ -247,7 +253,9 @@ export default {
         //regex rules for emails, example format is as such:
         //"blah@hotmail.co
         //if it does not follow the format, display error message
-        email => /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(email) || 'E-mail must be valid'
+        email =>
+          /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(email)
+          || 'E-mail must be valid'
       ],
       mandatoryRules: [
         //All fields with the class "required" will go through this ruleset to ensure the field is not empty.
@@ -269,7 +277,13 @@ export default {
       ],
       maxCharBioRules: [
         field => (field.length <= 200) || 'Reached max character limit: 200'
-      ]
+      ],
+      phoneNumberRules: [
+        field => /(^\(?\d{1,3}\)?[\s.-]?\d{3,4}[\s.-]?\d{4,5}$)|(^$)/.test(field) || 'Must be a valid phone number'
+      ],
+      countryCodeRules: [
+        field => /(^(\d{1,2}-)?\d{2,3}$)|(^$)/.test(field) || 'Must be a valid country code.'
+      ],
     };
   },
 
@@ -279,8 +293,46 @@ export default {
       this.$emit('showLogin');
     },
     // Complete registration with API
-    register () {
-      alert('TODO');
+    async register () {
+      //S300T500-16 merge_U1 last final final final bug
+      //Was thinking to use this match method to split unit and street
+      //(e.g) 10 bla street -> streetNo : 10, sreet1 : bla street
+      //however it dosent work, so I change the text field back to our initial design
+      //With the unit text field and street name text field
+      //Leave this here in case someone wan to use this format in the future, it somehow return null? TT
+      // let parts = this.street1.match(/([A-Za-z]+)([0-9]+)/);
+      // #streetNo : parts[2]
+      // #street1  : part[1]
+
+      let user = {
+        firstName   : this.name,
+        lastName    : this.name,
+        middleName  : this.name,
+        nickname    : this.nickname,
+        bio         : this.bio,
+        email       : this.email,
+        dateOfBirth : this.dob,
+        phoneNumber : this.phone,
+        homeAddress : {
+          streetNumber  : this.streetNO,
+          streetName    : this.street1,
+          city          : this.city,
+          region        : this.state,
+          country       : this.country,
+          postcode      : this.postcode,
+        },
+        password    : this.password,
+      };
+
+      let vrb = await createUser(user);
+      console.log(vrb);
+      if (vrb !== undefined ) {
+        alert('REGISTRATION FAILED');
+      }
+      else {
+        alert('TEST = SUCCESS');
+        this.$emit('showLogin');
+      }
     },
     // Close the date picker modal
     closeDatePicker () {
@@ -297,6 +349,9 @@ export default {
     //it refers to the confirmPassword field)to revalidate itself upon any changes in the password field.
     passwordChange () {
       this.$refs.confirmPassword.validate();
+    },
+    phoneNumberChange () {
+      this.$refs.countryCode.validate();
     },
     querySelections (v) {
       this.loading = true;
@@ -326,6 +381,10 @@ export default {
     passwordConfirmationRule () {
       return () =>
         this.password === this.confirmPassword || 'Passwords must match';
+    },
+    phoneRequiresCountryCodeRule () {
+      return () =>
+        !(this.phone.length > 0 && this.countryCode.length < 1) || 'Country code must be present';
     }
   },
   //as any components are added to the dom, mounted() will be called

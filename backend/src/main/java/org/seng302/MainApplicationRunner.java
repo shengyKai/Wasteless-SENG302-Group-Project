@@ -76,7 +76,7 @@ public class MainApplicationRunner implements ApplicationRunner {
                 .build();
 
         Business testBusiness = _businessRepository.save(business);
-        testBusiness.addAdmin(user);
+        //testBusiness.addAdmin(user);
         _businessRepository.save(testBusiness);
         user = _userRepository.findByEmail("123andyelliot@gmail.com");
     }
@@ -92,15 +92,14 @@ public class MainApplicationRunner implements ApplicationRunner {
         String row;
         BufferedReader csvReader = new BufferedReader(new FileReader(filepath));
         while ((row = csvReader.readLine()) != null) {
-            try {
-                String[] userData = row.split("\\|");
-                User user = new User.Builder().withFirstName(userData[0]).withMiddleName(userData[1]).withLastName(userData[2]).withNickName(userData[3])
-                        .withEmail(userData[4]).withPassword(userData[5]).withAddress(Location.covertAddressStringToLocation(userData[6])).withDob(userData[7]).build();
-                userList.add(user);
-            } catch (Exception e) {
-                e.printStackTrace();
-                throw e;
-            }
+            logger.info(row);
+            String[] userData = row.split("\\|");
+            logger.info(java.util.Arrays.toString(userData));
+            User user = new User.Builder().withFirstName(userData[0]).withMiddleName(userData[1]).withLastName(userData[2]).withNickName(userData[3])
+                    .withEmail(userData[4]).withPassword(userData[5]).withAddress(Location.covertAddressStringToLocation(userData[6])).withDob(userData[7]).build();
+            userList.add(user);
+            logger.info("Successfully read user from file");
+            logger.info(user);
         }
         csvReader.close();
         return userList;

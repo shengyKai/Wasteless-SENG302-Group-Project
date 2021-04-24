@@ -24,7 +24,7 @@
         </v-col>
         <v-col cols="12" sm="6">
           <h4>Date of Birth</h4>
-          {{ user.dateOfBirth }}
+          {{ dateOfBirth }}
         </v-col>
 
         <v-col cols="12" sm="6">
@@ -55,7 +55,7 @@
 </template>
 
 <script>
-import { getBusiness, getUser } from '../api';
+import { getUser } from '../api';
 import UserAvatar from './utils/UserAvatar';
 
 export default {
@@ -63,8 +63,11 @@ export default {
 
   data() {
     return {
+      /**
+       * The user that this profile is for.
+       * If null then no profile is displayed
+       */
       user: null,
-      businesses: [],
     };
   },
 
@@ -82,8 +85,7 @@ export default {
     } else {
       getUser(id).then((value) => {
         if (typeof value === 'string') {
-          // TODO Handle error properly
-          console.warn(value);
+          this.$store.commit('setError', value);
         } else {
           this.user = value;
         }
@@ -103,32 +105,19 @@ export default {
       const diffMonths = Math.ceil(diffTime / (1000 * 60 * 60 * 24 * 30));
 
       return `${parts[2]} ${parts[1]} ${parts[3]} (${diffMonths} months ago)`;
-    }
-  },
-  watch: {
-    async user() {
-      this.businesses = [];
-      const admins = this.user.businessesAdministered;
+    },
+    businesses() {
+      return this.user?.businessesAdministered;
+    },
+    /**
+     * Construct a representation of the user's date of birth to display on the profile
+     */
+    dateOfBirth() {
+      if (this.user.dateOfBirth === undefined) return '';
 
-      if (!admins) return;
-
-      const promises = admins.map(id => {
-        return new Promise((resolve, reject) => {
-          getBusiness(id)
-            .then(val => {
-              if (typeof val === 'string') reject(val);
-              else resolve(val);
-            })
-            .catch(err => reject(err));
-        });
-      });
-
-      const data = await Promise.all(promises);
-
-      this.businesses = data.reduce((acc, cur) => {
-        if (cur) acc.push(cur);
-        return acc;
-      }, []);
+      const dateOfBirth = new Date(this.user.dateOfBirth);
+      const parts = dateOfBirth.toDateString().split(' ');
+      return `${parts[2]} ${parts[1]} ${parts[3]}`;
     }
   },
   components: {
