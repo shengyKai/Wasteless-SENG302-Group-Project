@@ -3,6 +3,7 @@ package cucumber.stepDefinitions;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.cucumber.core.gherkin.messages.internal.gherkin.internal.com.eclipsesource.json.JsonObject;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
@@ -20,19 +21,24 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.context.WebApplicationContext;
 
 import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 public class UserStepDefinition {
 
     @Autowired
     private ObjectMapper objectMapper;
 
+    @Autowired
+    private WebApplicationContext webApplicationContext;
     @Autowired
     private MockMvc mockMvc;
     @Autowired
@@ -55,6 +61,7 @@ public class UserStepDefinition {
     @After
     public void Setup() {
         objectMapper.enable(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT);
+        mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
         userRepository.deleteAll();
     }
 
@@ -189,22 +196,27 @@ public class UserStepDefinition {
     public void theUserPossessesThePassword(String password) { userPassword = password; }
 
     @When("the user logs in")
-    public void theUserLogsInWithTheEmail() {
+    public void theUserLogsInWithTheEmail() throws JsonProcessingException {
         JSONObject requestBody = new JSONObject();
         requestBody.put("password", userPassword);
         requestBody.put("email", userEmail);
 
         try {
-            MvcResult result = (MvcResult) mockMvc.perform(post("/login")
-                    .content(objectMapper.writeValueAsString(requestBody.toString()))
+             MvcResult result = mockMvc.perform(post("/login")
+                    .content(requestBody.toString())
                     .contentType(MediaType.APPLICATION_JSON)
                     .accept(MediaType.APPLICATION_JSON))
-                    .andExpect(status().isOk());
+                    .andExpect(status().isOk())
+                    .andReturn();
 
-            JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
-            JSONArray jsonArray = (JSONArray) parser.parse(result.getResponse().getContentAsString());
-            JSONObject jsonObject = (JSONObject) jsonArray.get(0);
-            userID = (Long) jsonObject.getAsNumber("userId");
+             System.out.println(result.getResponse().getContentAsString());
+
+             JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
+             JSONObject jsonObject = (JSONObject) parser.parse(result.getResponse().getContentAsString());
+             System.out.println(jsonObject.getAsNumber("userId"));
+             // Refuses to cast from integer to long. So used the below work around
+             Integer userId = (Integer) jsonObject.getAsNumber("userId");
+             userID = userId.longValue();
         } catch (Exception e) {
             e.printStackTrace();
             Assert.fail();
