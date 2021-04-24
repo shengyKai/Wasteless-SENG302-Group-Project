@@ -166,7 +166,7 @@ public class ProductControllerTest {
                 .withProductCode("NathanApple-70")
                 .withName("The Nathan Apple")
                 .withDescription("Ever wonder why Nathan has an apple")
-                .withManufacturer("Apple")
+                .withManufacturer("Apple1")
                 .withRecommendedRetailPrice("9000.03")
                 .withBusiness(testBusiness1)
                 .build();
@@ -174,7 +174,7 @@ public class ProductControllerTest {
                 .withProductCode("AlmondMilk100")
                 .withName("Almond Milk")
                 .withDescription("Like water except bad for the environment")
-                .withManufacturer("Apple")
+                .withManufacturer("Apple2")
                 .withRecommendedRetailPrice("10.02")
                 .withBusiness(testBusiness1)
                 .build();
@@ -182,7 +182,7 @@ public class ProductControllerTest {
                 .withProductCode("Coffee7")
                 .withName("Generic Brand Coffee")
                 .withDescription("This coffee tastes exactly as you expect it would")
-                .withManufacturer("Apple")
+                .withManufacturer("Apple3")
                 .withRecommendedRetailPrice("4.02")
                 .withBusiness(testBusiness1)
                 .build();
@@ -190,7 +190,7 @@ public class ProductControllerTest {
                 .withProductCode("DarkChocolate")
                 .withName("Dark Chocolate")
                 .withDescription("Would like a high cocoa concentration")
-                .withManufacturer("Apple")
+                .withManufacturer("Apple4")
                 .withRecommendedRetailPrice("6.07")
                 .withBusiness(testBusiness1)
                 .build();
@@ -228,6 +228,7 @@ public class ProductControllerTest {
             assertEquals(storedProduct.getRecommendedRetailPrice().toString(), productJSON.getAsString("recommendedRetailPrice"));
             assertEquals(storedProduct.getName(), productJSON.getAsString("name"));
             assertEquals(storedProduct.getDescription(), productJSON.getAsString("description"));
+            assertEquals(storedProduct.getManufacturer(), productJSON.getAsString("manufacturer"));
         }
     }
 
