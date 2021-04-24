@@ -52,7 +52,7 @@ Feature: User
 
     Scenario: Login a user account
         Given the user possesses the email "dan@thomp.com"
-        And the user possesses the password "thompyboi"
+        And the user possesses the password "thompyboi9"
         And the user is created
         When the user logs in
         Then the user is logged in

@@ -50,7 +50,7 @@ public class UserStepDefinition {
     private String userLastName = "Bob";
     private String userNickname = "Bob";
     private String userEmail = "Bob@bob.com";
-    private String userPassword = "B0bbbbbbbbbbbb";
+    private String userPassword = "B0bbbbbbb76#bb";
     private String userBio = "I am Bob";
     private String userDob = "10-10-1999";
     private String userPhNum = "0270000000";
@@ -208,8 +208,6 @@ public class UserStepDefinition {
                     .accept(MediaType.APPLICATION_JSON))
                     .andExpect(status().isOk())
                     .andReturn();
-
-             System.out.println(result.getResponse().getContentAsString());
 
              JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
              JSONObject jsonObject = (JSONObject) parser.parse(result.getResponse().getContentAsString());

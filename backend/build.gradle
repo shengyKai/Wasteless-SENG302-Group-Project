@@ -89,6 +89,7 @@ dependencies {
 
 // create a specific task to run cucumber tests
 task cucumber(type: Test) {
+    excludes = ['**/org/seng302/**']
     description = "Runs JUnit 4 tests (cucumber tests)"
     testLogging.showStandardStreams = true
     useJUnit()
