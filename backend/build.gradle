@@ -81,6 +81,10 @@ dependencies {
 
     // entityManagerFactory
     implementation 'javax.xml.bind:jaxb-api:2.3.0'
+
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
+    // Required for MockMvc autoconfigure
+    testImplementation 'org.springframework.boot:spring-boot-starter-web'
 }
 
 // create a specific task to run cucumber tests

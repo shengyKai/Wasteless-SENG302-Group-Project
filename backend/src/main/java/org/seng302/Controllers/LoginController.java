@@ -45,7 +45,6 @@ public class LoginController {
      */
     @PostMapping("/login")
     public void login(@RequestBody JSONObject userinfo, HttpServletRequest request, HttpServletResponse response) {
-        logger.info("Login");
         String email = userinfo.getAsString("email");
         String password = userinfo.getAsString("password");
         Account matchingAccount = accountRepository.findByEmail(email);
