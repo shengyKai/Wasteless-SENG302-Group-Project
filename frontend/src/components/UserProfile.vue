@@ -48,6 +48,7 @@
             <v-card-actions>
               <v-spacer/>
               <v-btn
+                ref="cancelButton"
                 color="green darken-1"
                 text
                 @click="removeAdminDialog = false"
@@ -55,6 +56,7 @@
                 No
               </v-btn>
               <v-btn
+                ref="confirmButton"
                 color="green darken-1"
                 text
                 @click="removeAdminDialog = false; removeUserAdmin()"
@@ -95,6 +97,7 @@
             <v-card-actions>
               <v-spacer/>
               <v-btn
+                ref="cancelButton"
                 color="green darken-1"
                 text
                 @click="addAdminDialog = false"
@@ -102,6 +105,7 @@
                 No
               </v-btn>
               <v-btn
+                ref="confirmButton"
                 color="green darken-1"
                 text
                 @click="addAdminDialog = false; addUserAsAdmin()"

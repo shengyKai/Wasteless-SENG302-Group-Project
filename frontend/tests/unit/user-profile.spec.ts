@@ -323,6 +323,10 @@ describe('UserProfile.vue', () => {
 
     await flushQueue();
 
+    let confirm = wrapper.findComponent({ref: 'confirmButton' });
+    confirm.trigger('click');
+    await flushQueue();
+
     expect(makeBusinessAdmin).lastCalledWith(1, 100); // Must be called with bussinessId, userId
     expect(store.state.globalError).toBeNull();
   });
@@ -340,7 +344,10 @@ describe('UserProfile.vue', () => {
 
     let addAdmin = wrapper.findComponent({ ref: 'addAdminButton' });
     addAdmin.trigger('click');
+    await flushQueue();
 
+    let confirm = wrapper.findComponent({ref: 'confirmButton' });
+    confirm.trigger('click');
     await flushQueue();
 
     expect(makeBusinessAdmin).lastCalledWith(1, 100); // Must be called with bussinessId, userId
@@ -394,5 +401,52 @@ describe('UserProfile.vue', () => {
 
     let addAdmin = wrapper.findComponent({ ref: 'removeAdminButton' });
     expect(addAdmin.props().disabled).toBeFalsy();
+  });
+
+  /**
+   * Tests the case where removing a user from administrator of the current business succeeds.
+   */
+  it('If the "remove admin" button is clicked then the "removeBusinessAdmin" function should be called', async () => {
+    actAsBusiness(100);
+
+    await flushQueue();
+
+    // Ensure that the "makeBusinessAdmin" operation is successful
+    removeBusinessAdmin.mockResolvedValue(undefined);
+
+    let removeAdmin = wrapper.findComponent({ ref: 'removeAdminButton' });
+    removeAdmin.trigger('click');
+
+    await flushQueue();
+
+    let confirm = wrapper.findComponent({ref: 'confirmButton' });
+    confirm.trigger('click');
+    await flushQueue();
+
+    expect(removeBusinessAdmin).lastCalledWith(100, 100); // Must be called with bussinessId, userId
+    expect(store.state.globalError).toBeNull();
+  });
+
+  /**
+   * Tests the case where removing a user from administrator of the current business fails.
+   */
+  it('If "removeBusinessAdmin" function results in an error then this error should be shown', async () => {
+    actAsBusiness(100);
+
+    await flushQueue();
+
+    // Ensure that the "makeBusinessAdmin" operation fails
+    removeBusinessAdmin.mockResolvedValue('test_error_message');
+
+    let removeAdmin = wrapper.findComponent({ ref: 'removeAdminButton' });
+    removeAdmin.trigger('click');
+    await flushQueue();
+
+    let confirm = wrapper.findComponent({ref: 'confirmButton' });
+    confirm.trigger('click');
+    await flushQueue();
+
+    expect(removeBusinessAdmin).lastCalledWith(100, 100); // Must be called with bussinessId, userId
+    expect(store.state.globalError).toBe('test_error_message');
   });
 });
