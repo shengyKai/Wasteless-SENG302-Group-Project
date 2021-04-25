@@ -3,9 +3,13 @@ package org.seng302.Controllers;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.Ignore;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.junit.runner.RunWith;
 import org.seng302.Entities.Business;
 import org.seng302.Entities.Location;
@@ -22,7 +26,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 import javax.servlet.http.Cookie;
-import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
@@ -30,11 +33,13 @@ import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Objects;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -63,6 +68,7 @@ public class ProductControllerTest {
      */
     private void setUpAuthCode() {
         String authCode = "0".repeat(64);
+        sessionAuthToken.clear();
         sessionAuthToken.put("AUTHTOKEN", authCode);
         authCookie = new Cookie("AUTHTOKEN", authCode);
     }
@@ -345,5 +351,258 @@ public class ProductControllerTest {
         JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
         JSONArray responseBody = (JSONArray) parser.parse(result.getResponse().getContentAsString());
         assertTrue(responseBody.isEmpty());
+    }
+
+    /**
+     * Creates a valid request body for the /businesses/:id/products endpoint
+     *
+     * @return A JSONObject that is to be used in a POST /businesses/:id/products request
+     */
+    private JSONObject generateProductCreationInfo() {
+        JSONObject productInfo = new JSONObject();
+        productInfo.put("id", "WATT-420-BEANS");
+        productInfo.put("name", "Watties Baked Beans - 420g can");
+        productInfo.put("description", "Baked Beans as they should be.");
+        productInfo.put("manufacturer", "Heinz Wattie's Limited");
+        productInfo.put("recommendedRetailPrice", 2.2);
+        return productInfo;
+    }
+
+    /**
+     * Tests that using the POST /businesses/:id/products endpoint adds a product to the given businesses product
+     * catalogue
+     */
+    @Test
+    void postingAProductAddsItToTheCatalogue() {
+        setCurrentUser(ownerUser.getUserID());
+        var productInfo = generateProductCreationInfo();
+
+        assertDoesNotThrow(() -> mockMvc.perform(post(String.format("/businesses/%d/products", testBusiness1.getId()))
+                .content(productInfo.toString())
+                .sessionAttrs(sessionAuthToken)
+                .contentType("application/json")
+                .cookie(authCookie))
+                .andExpect(status().isCreated())
+                .andReturn());
+
+        Product product =
+                productRepository.findByBusinessAndProductCode(testBusiness1, productInfo.getAsString("id"));
+
+        assertNotNull(product);
+        assertEquals(productInfo.get("id"), product.getProductCode());
+        assertEquals(productInfo.get("name"), product.getName());
+        assertEquals(productInfo.get("description"), product.getDescription());
+        assertEquals(productInfo.get("manufacturer"), product.getManufacturer());
+        // There is a small fudge factor between the exact decimal value and the closest double representation of said value
+        assertEquals(
+                (double)productInfo.get("recommendedRetailPrice"),
+                product.getRecommendedRetailPrice().doubleValue(),
+                1e-10
+        );
+    }
+
+    /**
+     * Tests that when a product is added via the POST /businesses/:id/products endpoint that the created product's
+     * creation time is between the start of the request and the end of the request
+     */
+    @Test
+    void postingAProductSetsTheCreationTimeCorrectly() {
+        setCurrentUser(ownerUser.getUserID());
+        var productInfo = generateProductCreationInfo();
+
+        Date before = new Date();
+        MvcResult result = assertDoesNotThrow(() ->
+                mockMvc.perform(post(String.format("/businesses/%d/products", testBusiness1.getId()))
+                    .content(productInfo.toString())
+                    .sessionAttrs(sessionAuthToken)
+                    .contentType("application/json")
+                    .cookie(authCookie))
+                    .andExpect(status().isCreated())
+                    .andReturn()
+            );
+        Date after = new Date();
+
+        Product product =
+                productRepository.findByBusinessAndProductCode(testBusiness1, productInfo.getAsString("id"));
+
+        assertNotNull(product);
+        // Asserts that the product is created not before the production creation should have finished
+        assertFalse(after.before(product.getCreated()));
+        // Asserts that the product is created not after the production creation shouldn't have started
+        assertFalse(before.after(product.getCreated()));
+    }
+
+    /**
+     * Tests that trying the add a product via the POST /businesses/:id/products endpoint results in a 406 if there is
+     * no business with that id.
+     */
+    @Test
+    void postingProductToNonExistentBusiness() {
+        setCurrentUser(ownerUser.getUserID());
+        var productInfo = generateProductCreationInfo();
+
+        assertDoesNotThrow(() -> mockMvc.perform(post("/businesses/999999999/products")
+                .content(productInfo.toString())
+                .sessionAttrs(sessionAuthToken)
+                .contentType("application/json")
+                .cookie(authCookie))
+                .andExpect(status().isNotAcceptable())
+                .andReturn());
+    }
+
+    /**
+     * Tests that posting two products with the same product code results in a 400 response on the second product post
+     */
+    @Test
+    void postingTwoProductsWithSameProductCodeToSameBusiness() {
+        setCurrentUser(ownerUser.getUserID());
+        var productInfo = generateProductCreationInfo();
+
+        assertDoesNotThrow(() -> mockMvc.perform(post(String.format("/businesses/%d/products", testBusiness1.getId()))
+                .content(productInfo.toString())
+                .sessionAttrs(sessionAuthToken)
+                .contentType("application/json")
+                .cookie(authCookie))
+                .andExpect(status().isCreated())
+                .andReturn());
+
+        assertDoesNotThrow(() -> mockMvc.perform(post(String.format("/businesses/%d/products", testBusiness1.getId()))
+                .content(productInfo.toString())
+                .sessionAttrs(sessionAuthToken)
+                .contentType("application/json")
+                .cookie(authCookie))
+                .andExpect(status().isBadRequest())
+                .andReturn());
+    }
+
+    /**
+     * Tests that posting two products with the same product code results in a 201 response, if the requests are made on
+     * different businesses
+     */
+    @Test
+    void postingTwoProductsWithSameProductCodeToDifferentBusinesses() {
+        setCurrentUser(ownerUser.getUserID());
+        var productInfo = generateProductCreationInfo();
+
+        Business tempBusiness = businessRepository.save(
+                new Business.Builder()
+                    .withBusinessType("Accommodation and Food Services")
+                    .withAddress(new Location())
+                    .withDescription("Some description2")
+                    .withName("BusinessName2")
+                    .withPrimaryOwner(ownerUser)
+                    .build()
+        );
+
+        assertDoesNotThrow(() -> mockMvc.perform(post(String.format("/businesses/%d/products", testBusiness1.getId()))
+                .content(productInfo.toString())
+                .sessionAttrs(sessionAuthToken)
+                .contentType("application/json")
+                .cookie(authCookie))
+                .andExpect(status().isCreated())
+                .andReturn());
+
+        assertDoesNotThrow(() -> mockMvc.perform(post(String.format("/businesses/%d/products", tempBusiness.getId()))
+                .content(productInfo.toString())
+                .sessionAttrs(sessionAuthToken)
+                .contentType("application/json")
+                .cookie(authCookie))
+                .andExpect(status().isCreated())
+                .andReturn());
+    }
+
+    /**
+     * Tests that if any field in the post product request is not included then a 400 response is sent.
+     * @param key The field to remove
+     */
+    @ParameterizedTest
+    @ValueSource(strings = {"id", "name"})
+    void postingProductWithMissingField(String key) {
+        setCurrentUser(ownerUser.getUserID());
+        var productInfo = generateProductCreationInfo();
+
+        productInfo.remove(key);
+
+        assertDoesNotThrow(() -> mockMvc.perform(post(String.format("/businesses/%d/products", testBusiness1.getId()))
+                .content(productInfo.toString())
+                .sessionAttrs(sessionAuthToken)
+                .contentType("application/json")
+                .cookie(authCookie))
+                .andExpect(status().isBadRequest())
+                .andReturn());
+    }
+
+    /**
+     * Tests that a business admin can post a product
+     */
+    @Test
+    void postingProductFromBusinessAdminAccount() {
+        setCurrentUser(administratorUser.getUserID());
+
+        var productInfo = generateProductCreationInfo();
+
+        assertDoesNotThrow(() -> mockMvc.perform(post(String.format("/businesses/%d/products", testBusiness1.getId()))
+                .content(productInfo.toString())
+                .sessionAttrs(sessionAuthToken)
+                .contentType("application/json")
+                .cookie(authCookie))
+                .andExpect(status().isCreated())
+                .andReturn());
+    }
+
+    /**
+     * Tests that the DGAA can post a product
+     */
+    @Test
+    void postingProductFromDGAAAccount() {
+        setCurrentUser(bystanderUser.getUserID());
+        setUpDGAAAuthCode();
+
+        var productInfo = generateProductCreationInfo();
+
+        assertDoesNotThrow(() -> mockMvc.perform(post(String.format("/businesses/%d/products", testBusiness1.getId()))
+                .content(productInfo.toString())
+                .sessionAttrs(sessionAuthToken)
+                .contentType("application/json")
+                .cookie(authCookie))
+                .andExpect(status().isCreated())
+                .andReturn());
+    }
+
+    /**
+     * Tests that the GAA can post a product
+     */
+    @Test
+    void postingProductFromGAAAccount() {
+        setCurrentUser(bystanderUser.getUserID());
+        setUpSessionAsAdmin();
+
+        var productInfo = generateProductCreationInfo();
+
+        assertDoesNotThrow(() -> mockMvc.perform(post(String.format("/businesses/%d/products", testBusiness1.getId()))
+                .content(productInfo.toString())
+                .sessionAttrs(sessionAuthToken)
+                .contentType("application/json")
+                .cookie(authCookie))
+                .andExpect(status().isCreated())
+                .andReturn());
+    }
+
+    /**
+     * Tests that the user that is not a DGAA, GAA, owner, business admin cannot post a product
+     */
+    @Test
+    void postingProductFromBystanderAccount() {
+        setCurrentUser(bystanderUser.getUserID());
+
+        var productInfo = generateProductCreationInfo();
+
+        assertDoesNotThrow(() -> mockMvc.perform(post(String.format("/businesses/%d/products", testBusiness1.getId()))
+                .content(productInfo.toString())
+                .sessionAttrs(sessionAuthToken)
+                .contentType("application/json")
+                .cookie(authCookie))
+                .andExpect(status().isForbidden())
+                .andReturn());
     }
 }

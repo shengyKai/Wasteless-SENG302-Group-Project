@@ -254,6 +254,10 @@ public class Product {
          * @return Builder with the recommended retail price set
          */
         public Builder withRecommendedRetailPrice(String recommendedRetailPrice) {
+            if (recommendedRetailPrice == null) {
+                this.recommendedRetailPrice = null;
+                return this;
+            }
             try {
                 this.recommendedRetailPrice = new BigDecimal(recommendedRetailPrice);
             } catch (NumberFormatException ignored) {
