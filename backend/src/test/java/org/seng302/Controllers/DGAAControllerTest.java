@@ -14,6 +14,9 @@ public class DGAAControllerTest {
     @Autowired
     private DGAARepository dgaaRepository;
 
+    @Autowired
+    private DGAAController dgaaController;
+
     @BeforeEach
     public void clean() {
         dgaaRepository.deleteAll();
@@ -24,7 +27,7 @@ public class DGAAControllerTest {
      */
     @Test @Ignore
     public void dgaaNotPresent() {
-        DGAAController.checkDGAA(dgaaRepository);
+        dgaaController.checkDGAA();
         assert(dgaaRepository.findByEmail("wasteless@seng302.com") != null);
     }
 
@@ -35,7 +38,7 @@ public class DGAAControllerTest {
     public void dgaaPresent() {
         DefaultGlobalApplicationAdmin dgaa = new DefaultGlobalApplicationAdmin();
         dgaaRepository.save(dgaa);
-        DGAAController.checkDGAA(dgaaRepository);
+        dgaaController.checkDGAA();
         // DGAA in repo, check that .checkDGAA() doesn't make a duplicate
         Iterable<DefaultGlobalApplicationAdmin> dgaas = dgaaRepository.findAll();
         int count = 0;
