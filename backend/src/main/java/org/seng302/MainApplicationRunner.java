@@ -3,12 +3,11 @@ package org.seng302;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.seng302.Controllers.DGAAController;
-import org.seng302.Entities.Business;
+import org.seng302.Entities.*;
 import org.seng302.Entities.Location;
-import org.seng302.Entities.Location;
-import org.seng302.Entities.User;
 import org.seng302.Persistence.BusinessRepository;
 import org.seng302.Persistence.DGAARepository;
+import org.seng302.Persistence.ProductRepository;
 import org.seng302.Persistence.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
@@ -19,10 +18,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * NOTE: Use this class to setup application
@@ -31,16 +27,18 @@ import java.util.stream.Collectors;
 @Component
 public class MainApplicationRunner implements ApplicationRunner {
 
-    private UserRepository userRepository;
-    private DGAARepository dgaaRepository;
-    private BusinessRepository businessRepository;
+    private final UserRepository userRepository;
+    private final DGAARepository dgaaRepository;
+    private final BusinessRepository businessRepository;
+    private final ProductRepository productRepository;
     private static final Logger logger = LogManager.getLogger(MainApplicationRunner.class.getName());
 
     @Autowired
-    public MainApplicationRunner(UserRepository userRepository, DGAARepository dgaaRepository, BusinessRepository businessRepository) {
+    public MainApplicationRunner(UserRepository userRepository, DGAARepository dgaaRepository, BusinessRepository businessRepository, ProductRepository productRepository) {
         this.userRepository = userRepository;
         this.dgaaRepository = dgaaRepository;
         this.businessRepository = businessRepository;
+        this.productRepository = productRepository;
     }
 
 
@@ -75,10 +73,18 @@ public class MainApplicationRunner implements ApplicationRunner {
                 .withPrimaryOwner(user)
                 .build();
 
-        Business testBusiness = businessRepository.save(business);
-        //testBusiness.addAdmin(user);
-        businessRepository.save(testBusiness);
-        user = userRepository.findByEmail("123andyelliot@gmail.com");
+
+        business = businessRepository.save(business);
+
+        Product product = new Product.Builder()
+                .withProductCode("NathanApple-70")
+                .withName("The Nathan Apple")
+                .withDescription("Ever wonder why Nathan has an apple")
+                .withManufacturer("Apple")
+                .withRecommendedRetailPrice("9000.03")
+                .withBusiness(business)
+                .build();
+        productRepository.save(product);
     }
 
     /**
