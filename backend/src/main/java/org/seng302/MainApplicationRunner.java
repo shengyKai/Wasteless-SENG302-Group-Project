@@ -5,7 +5,6 @@ import org.apache.logging.log4j.Logger;
 import org.seng302.Controllers.DGAAController;
 import org.seng302.Entities.Business;
 import org.seng302.Entities.Location;
-import org.seng302.Entities.Location;
 import org.seng302.Entities.User;
 import org.seng302.Persistence.BusinessRepository;
 import org.seng302.Persistence.DGAARepository;
@@ -13,6 +12,7 @@ import org.seng302.Persistence.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.stereotype.Component;
 
 import java.io.BufferedReader;
@@ -29,18 +29,22 @@ import java.util.stream.Collectors;
  * Avoid using Main.class
  */
 @Component
+@EnableScheduling
 public class MainApplicationRunner implements ApplicationRunner {
 
     private UserRepository _userRepository;
     private DGAARepository _dgaaRepository;
     private BusinessRepository _businessRepository;
+    private DGAAController dgaaController;
     private static final Logger logger = LogManager.getLogger(MainApplicationRunner.class.getName());
 
     @Autowired
-    public MainApplicationRunner(UserRepository userRepository, DGAARepository dgaaRepository, BusinessRepository businessRepository) {
+    public MainApplicationRunner(
+        UserRepository userRepository, DGAARepository dgaaRepository, BusinessRepository businessRepository, DGAAController dgaaController) {
         this._userRepository = userRepository;
         this._dgaaRepository = dgaaRepository;
         this._businessRepository = businessRepository;
+        this.dgaaController = dgaaController;
     }
 
 
@@ -63,8 +67,7 @@ public class MainApplicationRunner implements ApplicationRunner {
         }
 
         // Checks if DGAA present in DB and generates one if not
-
-        DGAAController.checkDGAA(_dgaaRepository);
+        dgaaController.checkDGAA();
 
         User user = _userRepository.findByEmail("123andyelliot@gmail.com");
         Business business = new Business.Builder()
