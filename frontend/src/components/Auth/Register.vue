@@ -44,7 +44,7 @@
         class="required"
         v-model="firstName"
         label="First name"
-        :rules="mandatoryRules.concat(nameRules).concat(maxShortCharRules)"
+        :rules="mandatoryRules.concat(nameRules).concat(maxMediumCharRules)"
         outlined
       />
 
@@ -52,7 +52,7 @@
       <v-text-field
         v-model="middleName"
         label="Middle name(s)"
-        :rules="nameRules.concat(maxShortCharRules)"
+        :rules="nameRules.concat(maxMediumCharRules)"
         outlined
       />
 
@@ -61,7 +61,7 @@
         class="required"
         v-model="lastName"
         label="Last name"
-        :rules="mandatoryRules.concat(nameRules).concat(maxShortCharRules)"
+        :rules="mandatoryRules.concat(nameRules).concat(maxMediumCharRules)"
         outlined
       />
 
@@ -69,7 +69,7 @@
       <v-text-field
         v-model="nickname"
         label="Nickname"
-        :rules="nameRules.concat(maxShortCharRules)"
+        :rules="nameRules.concat(maxMediumCharRules)"
         outlined
       />
 
@@ -283,9 +283,6 @@ export default {
       ],
       nameRules: [
         field =>  (field.length === 0 || (/^[a-z ,.'-]+$/i).test(field)) || 'Naming must be valid'
-      ],
-      maxShortCharRules: [
-        field => (field.length <= 16) || 'Reached max character limit: 16'
       ],
       maxMediumCharRules: [
         field => (field.length <= 32) || 'Reached max character limit: 32'
