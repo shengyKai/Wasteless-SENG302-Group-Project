@@ -8,7 +8,7 @@
         class="required"
         v-model="email"
         label="Email"
-        :rules="mandatoryRules.concat(emailRules).concat(maxCharRules)"
+        :rules="mandatoryRules.concat(emailRules).concat(maxLongCharRules)"
         outlined
       />
 
@@ -22,7 +22,7 @@
         :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
         :type="showPassword ? 'text' : 'password'"
         @click:append="showPassword = !showPassword"
-        :rules="mandatoryRules.concat(passwordRules).concat(maxCharRules)"
+        :rules="mandatoryRules.concat(passwordRules).concat(maxMediumCharRules)"
         outlined
       />
 
@@ -35,7 +35,7 @@
         :append-icon="showConfirmPassword ? 'mdi-eye' : 'mdi-eye-off'"
         :type="showConfirmPassword ? 'text' : 'password'"
         @click:append="showConfirmPassword = !showConfirmPassword"
-        :rules="mandatoryRules.concat(passwordConfirmationRule).concat(maxCharRules)"
+        :rules="mandatoryRules.concat(passwordConfirmationRule).concat(maxMediumCharRules)"
         outlined
       />
 
@@ -44,7 +44,7 @@
         class="required"
         v-model="firstName"
         label="First name"
-        :rules="mandatoryRules.concat(nameRules).concat(maxCharRules)"
+        :rules="mandatoryRules.concat(nameRules).concat(maxShortCharRules)"
         outlined
       />
 
@@ -52,7 +52,7 @@
       <v-text-field
         v-model="middleName"
         label="Middle name(s)"
-        :rules="nameRules.concat(maxCharRules)"
+        :rules="nameRules.concat(maxShortCharRules)"
         outlined
       />
 
@@ -61,7 +61,7 @@
         class="required"
         v-model="lastName"
         label="Last name"
-        :rules="mandatoryRules.concat(nameRules).concat(maxCharRules)"
+        :rules="mandatoryRules.concat(nameRules).concat(maxShortCharRules)"
         outlined
       />
 
@@ -69,7 +69,7 @@
       <v-text-field
         v-model="nickname"
         label="Nickname"
-        :rules="nameRules.concat(maxCharRules)"
+        :rules="nameRules.concat(maxShortCharRules)"
         outlined
       />
 
@@ -167,7 +167,7 @@
       <LocationAutocomplete
         type="district"
         v-model="district"
-        :rules="maxCharRules"
+        :rules="maxLongCharRules"
       />
 
       <!-- INPUT: City -->
@@ -175,7 +175,7 @@
         type="city"
         class="required"
         v-model="city"
-        :rules="maxCharRules.concat(mandatoryRules)"
+        :rules="maxLongCharRules.concat(mandatoryRules)"
       />
 
       <!-- INPUT: Region -->
@@ -183,7 +183,7 @@
         type="region"
         class="required"
         v-model="region"
-        :rules="maxCharRules.concat(mandatoryRules)"
+        :rules="maxLongCharRules.concat(mandatoryRules)"
       />
 
       <!-- INPUT: Country -->
@@ -191,7 +191,7 @@
         type="country"
         class="required"
         v-model="country"
-        :rules="maxCharRules.concat(mandatoryRules)"
+        :rules="maxLongCharRules.concat(mandatoryRules)"
       />
 
       <!-- INPUT: Postcode -->
@@ -199,7 +199,7 @@
         class="required"
         v-model="postcode"
         label="Postcode"
-        :rules="mandatoryRules.concat(maxCharRules).concat(numberRules)"
+        :rules="mandatoryRules.concat(maxLongCharRules).concat(numberRules)"
         outlined
       />
       <div class="error-text" v-if ="errorMessage !== undefined"> {{errorMessage}} </div>
@@ -284,8 +284,14 @@ export default {
       nameRules: [
         field =>  (field.length === 0 || (/^[a-z ,.'-]+$/i).test(field)) || 'Naming must be valid'
       ],
-      maxCharRules: [
-        field => (field.length <= 100) || 'Reached max character limit: 100'
+      maxShortCharRules: [
+        field => (field.length <= 16) || 'Reached max character limit: 16'
+      ],
+      maxMediumCharRules: [
+        field => (field.length <= 32) || 'Reached max character limit: 32'
+      ],
+      maxLongCharRules: [
+        field => (field.length <= 255) || 'Reached max character limit: 255'
       ],
       charBioRules: [
         field => (field.length <= 200) || 'Reached max character limit: 200',
