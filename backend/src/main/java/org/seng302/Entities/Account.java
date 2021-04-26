@@ -74,6 +74,7 @@ public abstract class Account {
      * @param password to be hashed and stored
      */
     public void setAuthenticationCodeFromPassword(String password) {
+        System.out.println(password.length());
         if (password != null && !password.trim().isEmpty() && password.length() >= 7 && password.length() <= 32 && password.matches(".*[a-zA-Z].*") && password.matches(".*[0-9].*")) {
             try {
                 this.authenticationCode = PasswordAuthenticator.generateAuthenticationCode(password);
