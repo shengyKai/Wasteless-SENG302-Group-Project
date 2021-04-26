@@ -252,9 +252,14 @@ public class Business {
 
     /**
      * Add the given product to the business's catalogue.
+     * This function is only expected to be called from "Product.setBusiness"
+     *
      * @param product The product to be added.
      */
     public void addToCatalogue(Product product) {
+        if (product.getBusiness() != this) {
+            throw new IllegalArgumentException("\"addToCatalogue\" is not being called from \"Product.setBusiness\"");
+        }
         catalogue.add(product);
     }
 

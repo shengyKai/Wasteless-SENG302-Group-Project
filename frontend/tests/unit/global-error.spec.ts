@@ -4,7 +4,7 @@ import Vuetify from 'vuetify';
 import Vuex, { Store } from 'vuex';
 import { createLocalVue, Wrapper, mount } from '@vue/test-utils';
 import App from '@/App.vue';
-import { createOptions, StoreData } from '@/store';
+import { getStore, resetStoreForTesting, StoreData } from '@/store';
 
 Vue.use(Vuetify);
 
@@ -23,8 +23,8 @@ describe('GlobalError', () => {
    */
   beforeEach(() => {
     localVue.use(Vuex);
-    let options = createOptions();
-    store = new Vuex.Store(options);
+    resetStoreForTesting();
+    store = getStore();
 
     wrapper = mount(App, {
       localVue,

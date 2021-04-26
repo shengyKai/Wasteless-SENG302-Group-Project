@@ -21,13 +21,13 @@ public class Product {
     @Column(nullable = false)
     private String name;
 
-    @Column(nullable = false)
+    @Column
     private String description;
 
-    @Column(nullable = false)
+    @Column
     private String manufacturer;
 
-    @Column(nullable = false, name = "recommended_retail_price")
+    @Column(name = "recommended_retail_price")
     private BigDecimal recommendedRetailPrice;
 
     @Column(nullable = false)
@@ -126,8 +126,8 @@ public class Product {
      * @param business the business
      */
     private void setBusiness(Business business) {
-        business.addToCatalogue(this);
         this.business = business;
+        business.addToCatalogue(this);
     }
 
     /**
