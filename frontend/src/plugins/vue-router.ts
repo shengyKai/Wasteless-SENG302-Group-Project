@@ -8,6 +8,7 @@ import BusinessProfile from "../components/BusinessProfile/index.vue";
 import SearchResults from "../components/SearchResults.vue";
 import CreateBusiness from "../components/BusinessProfile/CreateBusiness.vue";
 import HomePage from "../components/HomePage.vue";
+import Catalogue from "../components/ProductCatalogueItem.vue";
 
 Vue.use(VueRouter);
 
@@ -26,6 +27,7 @@ const routes = [
   { path: "/business/:id",    component: BusinessProfile },
   { path: "/admin",           component: admin },
   { path: "/search",          component: SearchResults },
+  { path: "/catalogue",       component: Catalogue},
   { path: "*",                component: NotFound },
 ];
 
