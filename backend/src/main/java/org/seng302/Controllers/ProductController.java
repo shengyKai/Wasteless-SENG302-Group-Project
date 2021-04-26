@@ -93,7 +93,7 @@ public class ProductController {
         logger.info("Get catalogue by business id.");
         AuthenticationTokenManager.checkAuthenticationToken(request);
 
-        logger.info("Retrieving catalogue from business with id %d.", id);
+        logger.info(String.format("Retrieving catalogue from business with id %d.", id));
         Optional<Business> business = businessRepository.findById(id);
         if (business.isEmpty()) {
             BusinessNotFoundException notFound = new BusinessNotFoundException();

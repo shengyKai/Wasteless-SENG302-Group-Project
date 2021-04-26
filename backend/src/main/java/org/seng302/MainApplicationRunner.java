@@ -81,7 +81,7 @@ public class MainApplicationRunner implements ApplicationRunner {
                 .withName("The Nathan Apple")
                 .withDescription("Ever wonder why Nathan has an apple")
                 .withManufacturer("Apple")
-                .withRecommendedRetailPrice("9000.03")
+                .withRecommendedRetailPrice("900.03")
                 .withBusiness(business)
                 .build();
         productRepository.save(product1);
