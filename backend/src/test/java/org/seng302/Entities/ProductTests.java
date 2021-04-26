@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class ProductTests {
+class ProductTests {
 
     @Autowired
     ProductRepository productRepository;
@@ -32,7 +32,7 @@ public class ProductTests {
     /**
      * Created a business objects for testing
      */
-    public void createTestBusinesses() {
+    void createTestBusinesses() {
         System.out.println("Creating businesses");
         Thread.dumpStack();
         testBusiness1 = new Business.Builder()
@@ -55,7 +55,7 @@ public class ProductTests {
     }
 
     @BeforeAll
-    public void setUp() throws ParseException {
+    void setUp() throws ParseException {
         businessRepository.deleteAll();
         userRepository.deleteAll();
 
@@ -78,13 +78,13 @@ public class ProductTests {
     }
 
     @AfterAll
-    public void tearDown() {
+    void tearDown() {
         businessRepository.deleteAll();
         userRepository.deleteAll();
     }
 
     @AfterEach
-    public void cleanUp() {
+    void cleanUp() {
         productRepository.deleteAll();
     }
 
@@ -92,7 +92,7 @@ public class ProductTests {
      * Test that a product object can be created and all its attributes are what they are expected to be.
      */
     @Test
-    public void createValidProduct() {
+    void createValidProduct() {
         Product product = new Product.Builder()
                 .withProductCode("Orange-69")
                 .withName("Fresh Orange")
@@ -102,11 +102,11 @@ public class ProductTests {
                 .withBusiness(testBusiness1)
                 .build();
         productRepository.save(product);
-        assertEquals(product.getProductCode(), "Orange-69");
-        assertEquals(product.getName(), "Fresh Orange");
-        assertEquals(product.getDescription(), "This is a fresh orange");
-        assertEquals(product.getManufacturer(), "Apple");
-        assertEquals(product.getRecommendedRetailPrice(), new BigDecimal("2.01"));
+        assertEquals("Orange-69", product.getProductCode());
+        assertEquals("Fresh Orange", product.getName());
+        assertEquals("This is a fresh orange", product.getDescription());
+        assertEquals("Apple", product.getManufacturer());
+        assertEquals(new BigDecimal("2.01"), product.getRecommendedRetailPrice());
     }
 
     /**
@@ -114,7 +114,7 @@ public class ProductTests {
      * the previously created product's id.
      */
     @Test
-    public void checkTwoProductsDoNotHaveTheSameIDs() {
+    void checkTwoProductsDoNotHaveTheSameIDs() {
         Product product1 = new Product.Builder()
                 .withProductCode("NathanApple-69")
                 .withName("The Nathan Apple")
@@ -140,7 +140,7 @@ public class ProductTests {
      * Test the date that is generated when a product is created is today (when the product is created).
      */
     @Test
-    public void checkDate() {
+    void checkDate() {
         Date before = new Date();
         Product product = new Product.Builder()
                 .withProductCode("NathanApple-69")
@@ -162,7 +162,7 @@ public class ProductTests {
      * products with the same code cannot be in the same catalogue.
       */
     @Test
-    public void checkNoTwoSameProductCodesWithinSameCatalogue() {
+    void checkNoTwoSameProductCodesWithinSameCatalogue() {
         Product product1 = new Product.Builder()
                 .withProductCode("NathanApple-69")
                 .withName("The Nathan Apple")
@@ -187,7 +187,7 @@ public class ProductTests {
      * Check that two products with the same code can be added to different catalogues
      */
     @Test
-    public void checkTwoSameProductCodesWithinDifferentCatalogues() {
+    void checkTwoSameProductCodesWithinDifferentCatalogues() {
         Product product1 = new Product.Builder()
                 .withProductCode("NathanApple-69")
                 .withName("The Nathan Apple")
@@ -212,7 +212,7 @@ public class ProductTests {
      * Checks that two products with different product codes can be added to the same catalogue.
      */
     @Test
-    public void checkTwoDifferentProductCodesWithinSameCatalogue() {
+    void checkTwoDifferentProductCodesWithinSameCatalogue() {
         Product product1 = new Product.Builder()
                 .withProductCode("NathanApple-69")
                 .withName("The Nathan Apple")
@@ -238,7 +238,7 @@ public class ProductTests {
      * the one in the catalogue.
      */
     @Test
-    public void checkTheProductIsConnectedToTheBusinessCatalogue() {
+    void checkTheProductIsConnectedToTheBusinessCatalogue() {
         Product product1 = new Product.Builder()
                 .withProductCode("NathanApple-70")
                 .withName("The Nathan Apple")
@@ -257,7 +257,7 @@ public class ProductTests {
      * Checks that several products are successfully added to the business's catalogue
      */
     @Test
-    public void createAValidListOfProductsInACatalogue() {
+    void createAValidListOfProductsInACatalogue() {
         Product product1 = new Product.Builder()
                 .withProductCode("NathanApple-70")
                 .withName("The Nathan Apple")
@@ -294,7 +294,7 @@ public class ProductTests {
      * Checks that deleting a business while it still has remaining products doesn't result in an error
      */
     @Test
-    public void testDeletingBusinessWithProducts() {
+    void testDeletingBusinessWithProducts() {
         Business tempBusinessInitial = new Business.Builder()
                 .withBusinessType("Accommodation and Food Services")
                 .withAddress(new Location())
@@ -313,5 +313,73 @@ public class ProductTests {
         productRepository.save(product1);
 
         assertDoesNotThrow(() -> businessRepository.delete(tempBusiness));
+    }
+
+    /**
+     * Tests that a product can be found using "findByBusinessAndProductCode"
+     */
+    @Test
+    void testFindByBusinessAndProductCode() {
+        Product product = productRepository.save(
+                new Product.Builder()
+                    .withProductCode("NathanApple-70")
+                    .withName("The Nathan Apple")
+                    .withDescription("Ever wonder why Nathan has an apple")
+                    .withManufacturer("Apple")
+                    .withRecommendedRetailPrice("9000.03")
+                    .withBusiness(testBusiness1)
+                    .build()
+        );
+
+        Product foundProduct = productRepository.findByBusinessAndProductCode(testBusiness1, "NathanApple-70");
+        assertNotNull(foundProduct);
+
+        assertEquals(product.getID(), foundProduct.getID());
+        assertEquals(product.getProductCode(), foundProduct.getProductCode());
+        assertEquals(product.getName(), foundProduct.getName());
+        assertEquals(product.getDescription(), foundProduct.getDescription());
+        assertEquals(product.getManufacturer(), foundProduct.getManufacturer());
+        assertEquals(product.getRecommendedRetailPrice(), foundProduct.getRecommendedRetailPrice());
+        assertEquals(product.getBusiness().getId(), foundProduct.getBusiness().getId());
+    }
+
+    /**
+     * Tests that "findByBusinessAndProductCode" returns null if no product exists with the given business and product code
+     */
+    @Test
+    void testFindByBusinessAndProductCodeIsNullIfNoProduct() {
+        // Product with same code saved to a different business
+        productRepository.save(
+                new Product.Builder()
+                        .withProductCode("NathanApple-70")
+                        .withName("The Nathan Apple")
+                        .withDescription("Ever wonder why Nathan has an apple")
+                        .withManufacturer("Apple")
+                        .withRecommendedRetailPrice("9000.03")
+                        .withBusiness(testBusiness2)
+                        .build()
+        );
+
+        Product foundProduct = productRepository.findByBusinessAndProductCode(testBusiness1, "NathanApple-70");
+        assertNull(foundProduct);
+    }
+
+    /**
+     * Tests that trying the change a product's business using "addToCatalogue" fails.
+     */
+    @Test
+    void testUsingAddToCatalogueFails() {
+        Product product = productRepository.save(
+                new Product.Builder()
+                        .withProductCode("NathanApple-70")
+                        .withName("The Nathan Apple")
+                        .withDescription("Ever wonder why Nathan has an apple")
+                        .withManufacturer("Apple")
+                        .withRecommendedRetailPrice("9000.03")
+                        .withBusiness(testBusiness1)
+                        .build()
+        );
+
+        assertThrows(IllegalArgumentException.class, () -> testBusiness2.addToCatalogue(product));
     }
 }
