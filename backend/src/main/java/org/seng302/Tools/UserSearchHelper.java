@@ -34,7 +34,7 @@ public class UserSearchHelper {
      * @param resultsPerPageString The number of results which will be returned. Defaults to 15.
      * @return An ordered list of Users with length resultsPerPage.
      */
-    public static List<User> getPageInResults(List<User> queryResults, String requestedPageString, String resultsPerPageString) {
+    public static <T>List<T> getPageInResults(List<T> queryResults, String requestedPageString, String resultsPerPageString) {
 
         int resultsPerPage = getResultsPerPageInt(resultsPerPageString);
         int requestedPage = getRequestedPageInt(requestedPageString);

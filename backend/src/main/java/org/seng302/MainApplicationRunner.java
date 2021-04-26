@@ -76,7 +76,7 @@ public class MainApplicationRunner implements ApplicationRunner {
 
         business = businessRepository.save(business);
 
-        Product product = new Product.Builder()
+        Product product1 = new Product.Builder()
                 .withProductCode("NathanApple-70")
                 .withName("The Nathan Apple")
                 .withDescription("Ever wonder why Nathan has an apple")
@@ -84,7 +84,25 @@ public class MainApplicationRunner implements ApplicationRunner {
                 .withRecommendedRetailPrice("9000.03")
                 .withBusiness(business)
                 .build();
-        productRepository.save(product);
+        productRepository.save(product1);
+        Product product2 = new Product.Builder()
+                .withProductCode("SteveIceCream-50")
+                .withName("Steve's Ice Cream")
+                .withDescription("Ice Cream by Steve")
+                .withManufacturer("Steve")
+                .withRecommendedRetailPrice("8000.03")
+                .withBusiness(business)
+                .build();
+        productRepository.save(product2);
+        Product product3 = new Product.Builder()
+                .withProductCode("NathanCarrot-90")
+                .withName("The Nathan Carrot")
+                .withDescription("Ever wonder why Nathan has an carrot")
+                .withManufacturer("Carrot")
+                .withRecommendedRetailPrice("7000.03")
+                .withBusiness(business)
+                .build();
+        productRepository.save(product3);
     }
 
     /**
