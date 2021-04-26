@@ -102,6 +102,7 @@ class ProductTests {
                 .withBusiness(testBusiness1)
                 .build();
         productRepository.save(product);
+
         assertEquals("Orange-69", product.getProductCode());
         assertEquals("Fresh Orange", product.getName());
         assertEquals("This is a fresh orange", product.getDescription());
@@ -133,6 +134,7 @@ class ProductTests {
                 .build();
         productRepository.save(product1);
         productRepository.save(product2);
+
         assertNotEquals(product1.getID(), product2.getID());
     }
 
@@ -153,6 +155,7 @@ class ProductTests {
         productRepository.save(product);
         Date after = new Date();
         Date productDate = product.getCreated();
+
         assertFalse(productDate.after(after));
         assertFalse(productDate.before(before));
     }
@@ -180,6 +183,7 @@ class ProductTests {
                 .withBusiness(testBusiness1)
                 .build();
         productRepository.save(product1);
+
         assertThrows(Exception.class, () -> productRepository.save(product2));
     }
 
@@ -205,6 +209,7 @@ class ProductTests {
                 .withBusiness(testBusiness2)
                 .build();
         productRepository.save(product1);
+
         assertDoesNotThrow(() -> productRepository.save(product2));
     }
 
@@ -230,6 +235,7 @@ class ProductTests {
                 .withBusiness(testBusiness1)
                 .build();
         productRepository.save(product1);
+
         assertDoesNotThrow(() -> productRepository.save(product2));
     }
 
@@ -250,6 +256,7 @@ class ProductTests {
         productRepository.save(product1);
         testBusiness1 = businessRepository.findByName("BusinessName1");
         List<Product> catalogue = testBusiness1.getCatalogue();
+
         assertEquals(product1.getID(), catalogue.get(0).getID());
     }
 
@@ -287,6 +294,7 @@ class ProductTests {
         productRepository.save(product3);
         testBusiness1 = businessRepository.findByName("BusinessName1");
         List<Product> catalogue = testBusiness1.getCatalogue();
+
         assertEquals(3, catalogue.size());
     }
 
