@@ -142,7 +142,7 @@ public class BusinessController {
 
             business.addAdmin(user);
             _businessRepository.save(business);
-
+            logger.info("Added user " + user.getUserID() + " as admin of business " + businessId);
         } catch (Exception err) {
             logger.error(err.getMessage());
             throw err;
@@ -165,7 +165,7 @@ public class BusinessController {
 
             business.removeAdmin(user);
             _businessRepository.save(business);
-
+            logger.info("Removed user " + user.getUserID() + " as admin of business " + businessId);
         } catch (Exception err) {
             logger.error(err.getMessage());
             throw err;
