@@ -34,16 +34,16 @@ cucumber:
      - cd backend
      - ./gradlew cucumber
 
-jest:
-   stage: test
-   cache:
-     key: node-modules
-     paths:
-       - frontend/node_modules
-     policy: pull
-   script:
-     - cd frontend
-     - npm run test
+#jest:
+#   stage: test
+#   cache:
+#     key: node-modules
+#     paths:
+#       - frontend/node_modules
+#     policy: pull
+#   script:
+#     - cd frontend
+#     - npm run test
 
 # Export sonarqube (static code analysis) reports
 # Uncomment after ATDD workshop (at the latest)
