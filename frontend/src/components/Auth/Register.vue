@@ -202,6 +202,7 @@
         :rules="mandatoryRules.concat(maxLongCharRules).concat(numberRules)"
         outlined
       />
+      <!-- Hidden component, only appear when theres errror and show the respond from backend -->
       <p class="error-text" v-if ="errorMessage !== undefined"> {{errorMessage}} </p>
       <!-- Register -->
       <v-btn
