@@ -394,7 +394,7 @@ export default {
       let year = today.getFullYear();
       let month = today.getMonth();
       let day = today.getDate();
-      return new Date(year - 13, month, day + 1);
+      return new Date(year - 13, month, day);
     }
   },
   computed: {
