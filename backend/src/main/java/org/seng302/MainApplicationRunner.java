@@ -67,6 +67,7 @@ public class MainApplicationRunner implements ApplicationRunner {
         DGAAController.checkDGAA(_dgaaRepository);
 
         User user = _userRepository.findByEmail("123andyelliot@gmail.com");
+        User user2 = _userRepository.findByEmail("harry@webmail.com");
         Business business = new Business.Builder()
                 .withBusinessType("Accommodation and Food Services")
                 .withDescription("DESCRIPTION")
@@ -76,9 +77,6 @@ public class MainApplicationRunner implements ApplicationRunner {
                 .build();
 
         Business testBusiness = _businessRepository.save(business);
-        //testBusiness.addAdmin(user);
-        _businessRepository.save(testBusiness);
-        user = _userRepository.findByEmail("123andyelliot@gmail.com");
     }
 
     /**

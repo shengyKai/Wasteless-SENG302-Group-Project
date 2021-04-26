@@ -40,7 +40,7 @@ public class Business {
     private Date created;
 
     @ManyToOne
-    @JoinColumn(name = "owner_id")
+    @JoinColumn(name = "owner_id", nullable = false)
     private User primaryOwner;
 
     @ManyToMany(fetch = FetchType.EAGER)
@@ -289,8 +289,9 @@ public class Business {
         return adminJsons;
     }
 
-    public void delete() {
-
+    @Override
+    public String toString() {
+        return this.name;
     }
 
     /**
