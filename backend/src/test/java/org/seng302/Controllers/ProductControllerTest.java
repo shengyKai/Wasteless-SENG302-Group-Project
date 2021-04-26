@@ -3,9 +3,8 @@ package org.seng302.Controllers;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
-import org.junit.Ignore;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.runner.RunWith;
 import org.seng302.Entities.Business;
@@ -23,11 +22,15 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 import javax.servlet.http.Cookie;
+import java.text.DateFormat;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -223,8 +226,22 @@ public class ProductControllerTest {
             String productCode = productJSON.getAsString("id");
             Product storedProduct = productRepository.findByBusinessAndProductCode(testBusiness1, productCode);
 
+            // The date object returned as JSON comes back as a different timezone. Additionally, parsing two different
+            // strings with different formats was not working. So this is a successful work around to compare these dates.
+            String expectedProductDateStr = storedProduct.getCreated().toString();
+            String actualProductDateStr = productJSON.getAsString("created");
+            DateFormat dateFormat = new SimpleDateFormat("yyyy-mm-dd");
+            Date expectedCreatedDate = dateFormat.parse(expectedProductDateStr);
+            Date actualCreatedDate = dateFormat.parse(actualProductDateStr);
+            if (Integer.parseInt(actualProductDateStr.substring(11, 13)) >= 12) {
+                Calendar c = Calendar.getInstance();
+                c.setTime(actualCreatedDate);
+                c.add(Calendar.DATE, 1);
+                actualCreatedDate = c.getTime();
+            }
+
             assertEquals(storedProduct.getProductCode(), productCode);
-            assertEquals(storedProduct.getCreated().toString().substring(0, 10), productJSON.getAsString("created").substring(0, 10));
+            assertEquals(expectedCreatedDate, actualCreatedDate);
             assertEquals(storedProduct.getRecommendedRetailPrice().toString(), productJSON.getAsString("recommendedRetailPrice"));
             assertEquals(storedProduct.getName(), productJSON.getAsString("name"));
             assertEquals(storedProduct.getDescription(), productJSON.getAsString("description"));
