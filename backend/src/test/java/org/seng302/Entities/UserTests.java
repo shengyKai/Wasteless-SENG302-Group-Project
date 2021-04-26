@@ -2,13 +2,11 @@ package org.seng302.Entities;
 
 import net.minidev.json.JSONObject;
 import org.junit.Ignore;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.stubbing.Answer;
-import org.seng302.Entities.User;
 import org.seng302.Exceptions.EmailInUseException;
 import org.seng302.Persistence.BusinessRepository;
 import org.seng302.Persistence.UserRepository;
