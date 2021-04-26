@@ -39,15 +39,17 @@
 </template>
 
 <script>
-import { getBusiness, getUser } from '../../api';
+import { getBusiness } from '../../api';
 
 export default {
   name: 'BusinessProfile',
 
   data() {
     return {
+      /**
+       * The business that this profile is for.
+       */
       business: {},
-      administrators: [],
     };
   },
 
@@ -57,8 +59,7 @@ export default {
 
     getBusiness(id).then((value) => {
       if (typeof value === 'string') {
-        // TODO Handle error properly
-        console.warn(value);
+        this.$store.commit('setError', value);
       } else {
         this.business = value;
       }
@@ -77,24 +78,12 @@ export default {
       const diffMonths = Math.ceil(diffTime / (1000 * 60 * 60 * 24 * 30));
 
       return `${parts[2]} ${parts[1]} ${parts[3]} (${diffMonths} months ago)`;
-    }
-  },
+    },
 
-  watch: {
-    business() {
-      this.administrators = [];
-      for (let id of this.business.administrators || []) {
-        getUser(id).then((value) => {
-          if (typeof value === 'string') {
-            // TODO Handle error properly
-            console.warn(value);
-          } else {
-            this.administrators.push(value);
-          }
-        });
-      }
-    }
-  }
+    administrators() {
+      return this.business?.administrators || [];
+    },
+  },
 };
 </script>
 

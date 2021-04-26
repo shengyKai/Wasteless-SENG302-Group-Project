@@ -1,9 +1,9 @@
 package org.seng302.Tools;
 
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.mockito.*;
-import org.mockito.stubbing.Answer;
 import org.seng302.Exceptions.AccessTokenException;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -16,6 +16,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class AuthenticationTokenManagerTest {
 
     @Mock
@@ -38,7 +39,7 @@ class AuthenticationTokenManagerTest {
 
     private final String authTokenName = "AUTHTOKEN";
 
-    @Before
+    @BeforeAll
     public void setUp() {
         MockitoAnnotations.openMocks(this);
     }
@@ -50,7 +51,7 @@ class AuthenticationTokenManagerTest {
     @Test
     public void setAuthenticationTokenCookieAddedTest() {
         when(request.getSession(true)).thenAnswer(
-                (Answer) invocation -> session);
+                invocation -> session);
         AuthenticationTokenManager.setAuthenticationToken(request, response);
         Mockito.verify(response).addCookie(cookieArgumentCaptor.capture());
         Cookie responseCookie = cookieArgumentCaptor.getValue();
@@ -63,7 +64,7 @@ class AuthenticationTokenManagerTest {
     @Test
     public void setAuthenticationTokenCookieValueTest() {
         when(request.getSession(true)).thenAnswer(
-                (Answer) invocation -> session);
+                invocation -> session);
         AuthenticationTokenManager.setAuthenticationToken(request, response);
         Mockito.verify(response).addCookie(cookieArgumentCaptor.capture());
         Cookie responseCookie = cookieArgumentCaptor.getValue();
@@ -76,7 +77,7 @@ class AuthenticationTokenManagerTest {
     @Test
     public void setAuthenticationTokenCookieExpiryTest() {
         when(request.getSession(true)).thenAnswer(
-                (Answer) invocation -> session);
+                invocation -> session);
         AuthenticationTokenManager.setAuthenticationToken(request, response);
         Mockito.verify(response).addCookie(cookieArgumentCaptor.capture());
         Cookie responseCookie = cookieArgumentCaptor.getValue();
@@ -90,7 +91,7 @@ class AuthenticationTokenManagerTest {
     @Test
     public void setAuthenticationTokenSessionAttributeAddedTest() {
         when(request.getSession(true)).thenAnswer(
-                (Answer) invocation -> session);
+                invocation -> session);
         AuthenticationTokenManager.setAuthenticationToken(request, response);
         Mockito.verify(session).setAttribute(nameArgumentCaptor.capture(), valueArgumentCaptor.capture());
         String attributeName = nameArgumentCaptor.getValue();
@@ -104,7 +105,7 @@ class AuthenticationTokenManagerTest {
     @Test
     public void setAuthenticationTokenSessionAttributeCookieMatchTest() {
         when(request.getSession(true)).thenAnswer(
-                (Answer) invocation -> session);
+                invocation -> session);
         AuthenticationTokenManager.setAuthenticationToken(request, response);
         Mockito.verify(response).addCookie(cookieArgumentCaptor.capture());
         Cookie responseCookie = cookieArgumentCaptor.getValue();
@@ -120,14 +121,14 @@ class AuthenticationTokenManagerTest {
     @Test
     public void checkAuthenticationTokenCookieNotPresentTest() {
         when(request.getSession()).thenAnswer(
-                (Answer) invocation -> session);
+                invocation -> session);
         when(session.getAttribute(authTokenName)).thenAnswer(
-                (Answer) invocation -> "abcd1234");
+                invocation -> "abcd1234");
         when(request.getCookies()).thenAnswer(
-                (Answer) invocation -> new Cookie[0]);
-        assertThrows(AccessTokenException.class, () -> {
-            AuthenticationTokenManager.checkAuthenticationToken(request);
-        });
+                invocation -> new Cookie[0]);
+        assertThrows(AccessTokenException.class, () ->
+            AuthenticationTokenManager.checkAuthenticationToken(request)
+        );
     }
 
     /**
@@ -137,14 +138,14 @@ class AuthenticationTokenManagerTest {
     @Test
     public void checkAuthenticationTokenSessionAttributeNotPresentTest() {
         when(request.getSession()).thenAnswer(
-                (Answer) invocation -> session);
+                invocation -> session);
         when(session.getAttribute(authTokenName)).thenAnswer(
-                (Answer) invocation -> null);
+                invocation -> null);
         when(request.getCookies()).thenAnswer(
-                (Answer) invocation -> new Cookie[0]);
-        assertThrows(AccessTokenException.class, () -> {
-            AuthenticationTokenManager.checkAuthenticationToken(request);
-        });
+                invocation -> new Cookie[0]);
+        assertThrows(AccessTokenException.class, () ->
+            AuthenticationTokenManager.checkAuthenticationToken(request)
+        );
     }
 
     /**
@@ -154,18 +155,18 @@ class AuthenticationTokenManagerTest {
     @Test
     public void checkAuthenticationTokenNoMatchTest() {
         when(request.getSession()).thenAnswer(
-                (Answer) invocation -> session);
+                invocation -> session);
         when(session.getAttribute(authTokenName)).thenAnswer(
-                (Answer) invocation -> "abcd1234");
+                invocation -> "abcd1234");
         when(request.getCookies()).thenAnswer(
-                (Answer) invocation -> {
+                invocation -> {
                     Cookie[] cookieArray = new Cookie[1];
                     cookieArray[0] = new Cookie(authTokenName, "1234abcd");
                     return cookieArray;
                 });
-        assertThrows(AccessTokenException.class, () -> {
-            AuthenticationTokenManager.checkAuthenticationToken(request);
-        });
+        assertThrows(AccessTokenException.class, () ->
+            AuthenticationTokenManager.checkAuthenticationToken(request)
+        );
     }
 
     /**
@@ -175,11 +176,11 @@ class AuthenticationTokenManagerTest {
     @Test
     public void checkAuthenticationTokenMatchTest() {
         when(request.getSession()).thenAnswer(
-                (Answer) invocation -> session);
+                invocation -> session);
         when(session.getAttribute(authTokenName)).thenAnswer(
-                (Answer) invocation -> "abcd1234");
+                invocation -> "abcd1234");
         when(request.getCookies()).thenAnswer(
-                (Answer) invocation -> {
+                invocation -> {
                     Cookie[] cookieArray = new Cookie[1];
                     cookieArray[0] = new Cookie(authTokenName, "abcd1234");
                     return cookieArray;

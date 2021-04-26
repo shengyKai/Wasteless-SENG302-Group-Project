@@ -3,6 +3,8 @@ package org.seng302.Entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
+import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import org.springframework.data.annotation.ReadOnlyProperty;
 import org.springframework.http.HttpStatus;
@@ -28,6 +30,7 @@ public class User extends Account {
     private Date created;
     private String role;
     private Set<Business> businessesAdministered = new HashSet<>();
+    private Set<Business> businessesOwned = new HashSet<>();
 
     /* Matches:
     123-456-7890
@@ -36,7 +39,7 @@ public class User extends Account {
     123.456.7890
     +91 (123) 456-7890
      */
-    String phoneRegex = "^(\\+\\d{1,2}\\s)?\\(?\\d{1,3}\\)?[\\s.-]?\\d{3,4}[\\s.-]?\\d{3,4}$";
+    String phoneRegex = "^(\\+\\d{1,2}\\s)?\\(?\\d{1,3}\\)?[\\s.-]?\\d{3,4}[\\s.-]?\\d{4,5}";
     // Allows letters, numbers and selected symbols then 1 @ then some amount of other characters
     // Todo: this regex does not match the example data from the API spec. Update regex and tests
     String emailRegex = "^[A-Za-z0-9+_.-]+@(.+)$";
@@ -80,6 +83,8 @@ public class User extends Account {
     public void setMiddleName(String middleName) {
         if (middleName == null || (middleName.length() > 0 && middleName.length() <= 16 && middleName.matches("[ a-zA-Z]+"))) {
             this.middleName = middleName;
+        } else if (middleName.equals("")) {
+            this.middleName = null;
         } else {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The middle name must not be empty, be less then 16 characters, and only contain letters.");
         }
@@ -122,6 +127,8 @@ public class User extends Account {
     public void setNickname(String nickname) {
         if (nickname == null || (nickname.length() > 0 && nickname.length() <= 16 && nickname.matches("[ a-zA-Z]*"))) {
             this.nickname = nickname;
+        } else if (nickname.equals("")) {
+            this.nickname = null;
         } else {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The nickname must not be empty, be less then 16 characters, and only contain letters.");
         }
@@ -143,6 +150,8 @@ public class User extends Account {
     public void setBio(String bio) {
         if (bio == null || (bio.length() > 0 && bio.length() <= 255 && bio.matches("[ a-zA-Z]*"))) {
             this.bio = bio;
+        } else if (bio.equals("")) {
+            this.bio = null;
         } else {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The bio must be less than 255 characters long, and only contain letters.");
         }
@@ -191,6 +200,8 @@ public class User extends Account {
         }
         if (validPhone) {
             this.phNum = phNum;
+        } else if (phNum.equals("")) {
+            this.phNum = null;
         } else {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Your phone number has been entered incorrectly");
         }
@@ -272,6 +283,23 @@ public class User extends Account {
     }
 
     /**
+     * Gets the set of businesses this user is the primary owner of
+     * @return Set of businesses owned
+     */
+    @OneToMany(mappedBy = "primaryOwner", fetch = FetchType.EAGER)
+    public Set<Business> getBusinessesOwned() {
+        return this.businessesOwned;
+    }
+
+    /**
+     * Sets the set of businesses this user is the primary owner of
+     * @param owned Businesses owned
+     */
+    private void setBusinessesOwned(Set<Business> owned) {
+        this.businessesOwned = owned;
+    }
+
+    /**
      * Gets the set of businesses that the user is an admin of
      * @return Businesses administered
      */
@@ -290,6 +318,19 @@ public class User extends Account {
     }
 
     /**
+     * Gets the set of businesses that the user is an admin of OR is the owner of
+     * @return Businesses administered or owned
+     */
+    @Transient
+    public Set<Business> getBusinessesAdministeredAndOwned() {
+        Set<Business> mergedSet = new HashSet<>() {{
+            addAll(getBusinessesOwned());
+            addAll(getBusinessesAdministered());
+        }};
+        return mergedSet;
+    }
+
+    /**
      * ToString method override, helpful for testing
      * @return String representation of a user
      */
@@ -305,38 +346,84 @@ public class User extends Account {
 
     /**
      * This method constructs a JSON representation of the user's public details. These are their id number,
-     * first name, middle name, last name, nickname, email, bio and date the account was created.
+     * first name, middle name, last name, nickname, email, bio, the city/region/country part of their address,
+     * the businesses they administer, and date the account was created. If fullBusienssDetails is true then
+     * a JSON representation of each business they administer will be included, otherwise the businessesAdministered
+     * field will not be present to avoid issues when nesting this json inside the administrators field of the business
+     * json.
+     * @param fullBusinessDetails A JSON representation of each business will be included in the businessesAdministered
+     * field if this is set to true, otherwise the field will not be present.
      * @return JSONObject with attribute name as key and attribute value as value.
      */
-    // Todo: Add city, region and country parts of address once parsing address string is done.
     // Todo: Replace email with profile picture once profile pictures added.
-    public JSONObject constructPublicJson() {
-        Map<String, String> attributeMap = new HashMap<>();
-        attributeMap.put("id", getUserID().toString());
-        attributeMap.put("firstName", firstName);
-        attributeMap.put("middleName", middleName);
-        attributeMap.put("lastName", lastName);
-        attributeMap.put("nickname", nickname);
-        attributeMap.put("email", getEmail());
-        attributeMap.put("bio", bio);
-        attributeMap.put("created", created.toString());
-        attributeMap.put("homeAddress", getAddress().toString());
+    public JSONObject constructPublicJson(boolean fullBusinessDetails) {
+        Map<String, Object> attributeMap = new HashMap<>();
+        attributeMap.put("id",          getUserID());
+        attributeMap.put("firstName",   getFirstName());
+        attributeMap.put("lastName",    getLastName());
+        attributeMap.put("email",       getEmail());
+        attributeMap.put("dateOfBirth", getDob().toString());
+        attributeMap.put("created",     getCreated().toString());
+        if (getMiddleName() != null) { attributeMap.put("middleName",  getMiddleName()); }
+        if (getNickname() != null) { attributeMap.put("nickname",    getNickname()); }
+        if (getBio() != null) { attributeMap.put("bio", getBio()); }
+        attributeMap.put("homeAddress", getAddress().constructPartialJson());
+        if (fullBusinessDetails) {
+            attributeMap.put("businessesAdministered", constructBusinessJsonArray());
+        }
         return new JSONObject(attributeMap);
     }
 
     /**
-     * This method constructs a JSON representation of the user's private details.
+     * Override the constructPublicJson method so that it defaults to omitting the businessesAdministered field.
+     * @return A public JSON representation of the user without information on the businesses they administer
+     */
+    public JSONObject constructPublicJson() {
+        return constructPublicJson(false);
+    }
+
+    /**
+     * This method constructs a JSON representation of the user's private details. This includes all the values from
+     * the public JSON, plus their full address, date of birth, phone number and role.
+     * @param fullBusinessDetails A JSON representation of each business will be included in the businessesAdministered
+     * field if this is set to true, otherwise the field will not be present.
      * @return JSONObject with attribute name as key and attribute value as value.
      */
-    // Todo: Once businesses are done, add businessesAdministered
-    public JSONObject constructPrivateJson() {
-        //Map<String, String> attributeMap = constructPublicJson();
-        JSONObject json = constructPublicJson();
+    public JSONObject constructPrivateJson(boolean fullBusinessDetails) {
+        JSONObject json = constructPublicJson(fullBusinessDetails);
+        json.replace("homeAddress", getAddress().constructFullJson());
         json.appendField("dateOfBirth", dob.toString());
-        json.appendField("phoneNumber", phNum);
+        if (phNum != null) {
+            json.appendField("phoneNumber", phNum);
+        }
         json.appendField("role", role);
-        //json.appendField("businessesAdministered", businessesAdministered);
+
         return json;
+    }
+
+     /**
+     * Override the constructPrivateJson method so that it defaults omitting the businessesAdministered field
+     * @return A private JSON representation of the user without information on the businesses they administer
+     */
+    public JSONObject constructPrivateJson() {
+        return constructPrivateJson(false);
+    }
+
+    /**
+     * Construct an array of JSON objects representing the businesses the user administers. The JSONs in the array
+     * are sorted by the id number of the business to ensure consistency between subsequent requests.
+     * @return An array of JSON representations of the businesses the user administers.
+     */
+    public JSONArray constructBusinessJsonArray() {
+        List<Business> businesses = new ArrayList<>();
+        businesses.addAll(getBusinessesAdministeredAndOwned());
+        Collections.sort(businesses, (Business business1, Business business2) ->
+            business1.getId().compareTo(business2.getId()));
+        JSONArray businessArray = new JSONArray();
+        for (Business business : businesses) {
+            businessArray.add(business.constructJson());
+        }
+        return businessArray;
     }
 
 

@@ -33,7 +33,8 @@ const SERVER_URL = process.env.VUE_APP_SERVER_ADD;
 
 const instance = axios.create({
   baseURL: SERVER_URL,
-  timeout: 2000
+  timeout: 2000,
+  withCredentials: true,
 });
 
 type MaybeError<T> = T | string;
@@ -48,10 +49,19 @@ export type User = {
   email: string,
   dateOfBirth: string,
   phoneNumber?: string,
-  homeAddress: string,
+  homeAddress: Location,
   created?: string,
-  role: "user" | "globalApplicationAdmin" | "defaultGlobalApplicationAdmin",
-  businessesAdministered?: number[],
+  role?: "user" | "globalApplicationAdmin" | "defaultGlobalApplicationAdmin",
+  businessesAdministered?: Business[],
+};
+
+export type Location = {
+  streetNumber?: string,
+  streetName?: string,
+  city?: string,
+  region?: string,
+  country: string,
+  postcode?: string,
 };
 
 export type CreateUser = {
@@ -63,7 +73,7 @@ export type CreateUser = {
   email: string,
   dateOfBirth: string,
   phoneNumber?: string,
-  homeAddress: string,
+  homeAddress: Location,
   password: string,
 };
 
@@ -88,6 +98,40 @@ export type CreateBusiness = {
   businessType: BusinessType,
 };
 
+export type Product = {
+  id: number,
+  name: string,
+  description?: string,
+  dateAdded: Date,
+  expiryDate?: Date,
+  manufacturer?: string,
+  recommendedRetailPrice?: string,
+  quantity: number,
+  productCode: string
+};
+
+export type CreateProduct = {
+  name: string,
+  description?: string,
+  manufacturer?: string,
+  expiryDate?: Date,
+  recommendedRetailPrice?: string,
+  quantity: number,
+  productCode: string
+}
+
+function isLocation(obj: any): obj is Location {
+  if (obj === null || typeof obj !== 'object') return false;
+  if (obj.streetNumber !== undefined && typeof obj.streetNumber !== 'string') return false;
+  if (obj.streetName !== undefined && typeof obj.streetName !== 'string') return false;
+  if (obj.city !== undefined && typeof obj.city !== 'string') return false;
+  if (obj.region !== undefined && typeof obj.region !== 'string') return false;
+  if (typeof obj.country !== 'string') return false;
+  if (obj.postcode !== undefined && typeof obj.postcode !== 'string') return false;
+
+  return true;
+}
+
 function isUser(obj: any): obj is User {
   if (obj === null || typeof obj !== 'object') return false;
   if (typeof obj.id !== 'number') return false;
@@ -99,10 +143,11 @@ function isUser(obj: any): obj is User {
   if (typeof obj.email !== 'string') return false;
   if (typeof obj.dateOfBirth !== 'string') return false;
   if (obj.phoneNumber !== undefined && typeof obj.phoneNumber !== 'string') return false;
-  if (typeof obj.homeAddress !== 'string') return false;
+  if (!isLocation(obj.homeAddress)) return false;
   if (obj.created !== undefined && typeof obj.created !== 'string') return false;
-  if (!['user', 'globalApplicationAdmin', 'defaultGlobalApplicationAdmin'].includes(obj.role)) return false;
-  if (obj.businessesAdministered !== undefined && !isNumberArray(obj.businessesAdministered)) return false;
+  if (obj.role !== undefined && !['user', 'globalApplicationAdmin', 'defaultGlobalApplicationAdmin'].includes(obj.role))
+    return false;
+  if (obj.businessesAdministered !== undefined && !isBusinessArray(obj.businessesAdministered)) return false;
 
   return true;
 }
@@ -113,7 +158,7 @@ function isBusiness(obj: any): obj is Business {
   if (obj.administrators !== undefined && !isUserArray(obj.administrators)) return false;
   if (typeof obj.name !== 'string') return false;
   if (obj.description !== undefined && typeof obj.description !== 'string') return false;
-  if (typeof obj.address !== 'string') return false;
+  if (typeof obj.address !== 'object') return false;
   if (!BUSINESS_TYPES.includes(obj.businessType)) return false;
   if (obj.created !== undefined && typeof obj.created !== 'string') return false;
 
@@ -136,18 +181,36 @@ function isUserArray(obj: any): obj is User[] {
   return true;
 }
 
+function isBusinessArray(obj: any): obj is Business[] {
+  if (!Array.isArray(obj)) return false;
+  for (let elem of obj) {
+    if (!isBusiness(elem)) return false;
+  }
+  return true;
+}
+
+type OrderBy = 'userId' | 'relevance' | 'firstName' | 'middleName' | 'lastName' | 'nickname' | 'email' | 'address';
+
 /**
- * Sends a search query to the backend and returns a list of users or an error string.
+ * Sends a search query to the backend.
  *
  * @param query Query string to search for
- * @returns List of user infos or an error message
+ * @param pageIndex Index of page to start the results from (1 = first page)
+ * @param resultsPerPage Number of results to return per page
+ * @param orderBy Specifies the method used to sort the results
+ * @param reverse Specifies whether to reverse the search results (default order is descending for relevance and ascending for all other orders)
+ * @returns List of user infos for the current page or an error message
  */
-export async function search(query: string): Promise<MaybeError<User[]>> {
+export async function search(query: string, pageIndex: number, resultsPerPage: number, orderBy: OrderBy, reverse: boolean): Promise<MaybeError<User[]>> {
   let response;
   try {
     response = await instance.get('/users/search', {
       params: {
-        'searchQuery': query,
+        searchQuery: query,
+        page: pageIndex,
+        resultsPerPage,
+        orderBy,
+        reverse: reverse.toString(),
       }
     });
   } catch (error) {
@@ -165,14 +228,40 @@ export async function search(query: string): Promise<MaybeError<User[]>> {
 }
 
 /**
+ * Sends a query for the number of search results for a given query to the backend.
+ *
+ * @param query Query string to search for
+ * @returns Number of search results or an error message
+ */
+export async function getSearchCount(query: string): Promise<MaybeError<number>> {
+  let response;
+  try {
+    response = await instance.get('/users/search/count', {
+      params: {
+        searchQuery: query,
+      }
+    });
+  } catch (error) {
+    let status: number | undefined = error.response?.status;
+
+    if (status === undefined) return 'Failed to reach backend';
+    return `Request failed: ${status}`;
+  }
+
+  if (typeof response.data?.count !== 'number') {
+    return 'Response is not number';
+  }
+
+  return response.data.count;
+}
+
+/**
  * Queries the backend for a specific user by their id.
  *
  * @param id User id, if ommitted then fetch the logged in user's info
  * @returns User info for the given id or an error message
  */
-export async function getUser(id?: number): Promise<MaybeError<User>> {
-  if (id === undefined) id = 0;
-
+export async function getUser(id: number): Promise<MaybeError<User>> {
   let response;
   try {
     response = await instance.get('/users/' + id);
@@ -200,7 +289,7 @@ export async function getUser(id?: number): Promise<MaybeError<User>> {
 export async function login(email: string, password: string): Promise<MaybeError<number>> {
   let response;
   try {
-    response = await instance.post('/users/login', {
+    response = await instance.post('/login', {
       email: email,
       password: password,
     });
@@ -209,7 +298,7 @@ export async function login(email: string, password: string): Promise<MaybeError
 
     if (status === undefined) return 'Failed to reach backend';
     if (status === 400) return 'Invalid credentials';
-    return 'Request failed: ' + status;
+    return `Request failed: ' + ${status}`;
   }
   let id = response.data.userId;
   if (typeof id !== 'number') return 'Invalid response';
@@ -231,6 +320,7 @@ export async function createUser(user: CreateUser): Promise<MaybeError<undefined
     let status: number | undefined = error.response?.status;
 
     if (status === undefined) return 'Failed to reach backend';
+    if (status === 400) return 'Invalid create user request';
     if (status === 409) return 'Email in use';
     return 'Request failed: ' + status;
   }
@@ -301,6 +391,24 @@ export async function createBusiness(business: CreateBusiness): Promise<MaybeErr
 }
 
 /**
+ * Creates a product
+ * @param product The properties to create a product with
+ * @return undefined if operation is successful, otherwise a string error
+ */
+export async function createProduct(product: CreateProduct): Promise<MaybeError<undefined>> {
+  try {
+    await  instance.post('/businesses/products', product);
+  } catch (error) {
+    let status: number | undefined = error.response?.status;
+    if (status === undefined) return 'Failed to reach backend';
+    if (status === 401) return 'Missing/Invalid access token';
+
+    return 'Request failed: ' + status;
+  }
+  return undefined;
+}
+
+/**
  * Fetches a business with the given id.
  *
  * @param businessId Business id to fetch
@@ -324,4 +432,56 @@ export async function getBusiness(businessId: number): Promise<MaybeError<Busine
   }
 
   return response.data;
+}
+
+/**
+ * Makes the provided user an administrator of the provided business.
+ *
+ * @param businessId Business id to add an administrator to
+ * @param userId User id to add to the provided business
+ * @returns undefined if operation is successful, otherwise a string error message
+ */
+export async function makeBusinessAdmin(businessId: number, userId: number): Promise<MaybeError<undefined>> {
+  try {
+    await instance.put(`/businesses/${businessId}/makeAdministrator`, {
+      userId,
+    });
+  } catch (error) {
+    let status: number | undefined = error.response?.status;
+    if (status === undefined) return 'Failed to reach backend';
+    if (status === 400) return 'User doesn\'t exist or is already an admin';
+    if (status === 401) return 'Missing/Invalid access token';
+    if (status === 403) return 'Current user cannot perform this action';
+    if (status === 406) return 'Business not found';
+
+    return 'Request failed: ' + status;
+  }
+
+  return undefined;
+}
+
+/**
+ * Removes the administrator status of a user from a business
+ *
+ * @param businessId Business id to remove an administrator from
+ * @param userId User id to remove from the provided business
+ * @returns undefined if operation is successful, otherwise a string error message
+ */
+export async function removeBusinessAdmin(businessId: number, userId: number): Promise<MaybeError<undefined>> {
+  try {
+    await instance.put(`/businesses/${businessId}/removeAdministrator`, {
+      userId,
+    });
+  } catch (error) {
+    let status: number | undefined = error.response?.status;
+    if (status === undefined) return 'Failed to reach backend';
+    if (status === 400) return 'User doesn\'t exist or is not an admin';
+    if (status === 401) return 'Missing/Invalid access token';
+    if (status === 403) return 'Current user cannot perform this action';
+    if (status === 406) return 'Business not found';
+
+    return 'Request failed: ' + status;
+  }
+
+  return undefined;
 }

@@ -1,9 +1,5 @@
 <template>
   <v-app-bar max-height="64px">
-    <div v-if="showBusinessDialog">
-      <CreateBusiness @closeDialog="showBusinessDialog = false" />
-    </div>
-
     <div class="container-outer">
       <h1>WASTELESS</h1>
 
@@ -69,12 +65,11 @@
               v-model="selectedRole"
               color="primary"
             >
-              <v-list-item
-                v-for="(role, index) in roles"
-                :key="index"
-              >
-                <v-list-item-title>{{ role.displayText }}</v-list-item-title>
-              </v-list-item>
+              <template v-for="(role, index) in roles">
+                <v-list-item :key="index">
+                  <v-list-item-title>{{ role.displayText }}</v-list-item-title>
+                </v-list-item>
+              </template>
             </v-list-item-group>
           </v-list>
         </v-menu>
@@ -86,21 +81,16 @@
 <script>
 import SearchBar from "./utils/SearchBar";
 import UserAvatar from "./utils/UserAvatar";
-import CreateBusiness from "./BusinessProfile/CreateBusiness";
 import { USER_ROLES } from "../utils";
-import {getBusiness} from "@/api";
 
 export default {
   name: "AppBar",
   components: {
     SearchBar,
-    CreateBusiness,
     UserAvatar,
   },
   data() {
     return {
-      showBusinessDialog: false,
-      roles : [],
       selectedRole : 0,
     };
   },
@@ -125,11 +115,8 @@ export default {
     viewAdmin() {
       this.$router.push("/admin");
     },
-    viewCheckBusiness() {
-      this.$router.push("/create_business");
-    },
     viewCreateBusiness() {
-      this.showBusinessDialog = true;
+      this.$store.commit('showCreateBusiness');
     },
   },
   computed: {
@@ -143,35 +130,28 @@ export default {
     },
     user() {
       return this.$store.state.user;
+    },
+    roles() {
+      let result = [
+        { displayText: this.user.firstName, type: "user", id: this.user.id }
+      ];
+
+      for (const business of this.user.businessesAdministered) {
+        result.push({ displayText: business.name, type: "business", id: business.id });
+      }
+
+      return result;
     }
   },
   watch : {
-    user: { async handler() {
-      // When the user changes, update the list of roles that the user can 'act as'
-      this.roles = [ { displayText: this.user.firstName, type: "user", id: this.user.id } ];
-      if (this.user.businessesAdministered === null) return;
-
-      const promises = this.user.businessesAdministered.map(id => {
-        return new Promise((resolve, reject) => {
-          getBusiness(id)
-            .then(value => {
-              if (typeof value === 'string') reject(value);
-              else resolve(value);
-            })
-            .catch(err => reject(err));
-        });
-      });
-
-      const businesses = await Promise.all(promises);
-
-      for (let business of businesses || []) {
-        this.roles.push({ displayText: business.name, type: "business", id: business.id });
-      }
-    },
-    immediate: true },
     selectedRole() {
       // Set the role that the user is acting as to the role that has been selected from the list
       const role = this.roles[this.selectedRole];
+
+      // If we've selected an error entry then do nothing
+      if (role.type === 'error') return;
+
+
       this.$store.state.activeRole = { type: role.type, id: role.id };
     },
   }

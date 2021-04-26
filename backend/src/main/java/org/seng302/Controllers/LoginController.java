@@ -66,6 +66,15 @@ public class LoginController {
                 Optional<User> accountAsUser = userRepository.findById(matchingAccount.getUserID());
                 AuthenticationTokenManager.setAuthenticationToken(request, response, accountAsUser.get());
             }
+            try {
+                response.setStatus(200);
+                response.setContentType("application/json");
+                String authToken = AuthenticationTokenManager.setAuthenticationToken(request, response);
+                response.getWriter().write("{\"userId\":" + matchingAccount.getUserID() + "}");
+                response.getWriter().flush();
+            } catch (IOException e) {
+                e.getMessage();
+            }
 
         }
     }
