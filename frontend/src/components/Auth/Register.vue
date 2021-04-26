@@ -3,138 +3,129 @@
     <h1>Register</h1>
 
     <v-container>
-      <v-row>
-        <!-- INPUT: Email -->
-        <v-text-field
-          class="required"
-          v-model="email"
-          label="Email"
-          :rules="mandatoryRules.concat(emailRules).concat(maxLongCharRules)"
-          outlined
-        />
-      </v-row>
-      <v-row>
-        <!-- INPUT: Password -->
-        <v-text-field
-          ref="password"
-          class="required"
-          v-model="password"
-          label="Password"
-          @keyup="passwordChange"
-          :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
-          :type="showPassword ? 'text' : 'password'"
-          @click:append="showPassword = !showPassword"
-          :rules="mandatoryRules.concat(passwordRules).concat(maxMediumCharRules)"
-          outlined
-        />
-      </v-row>
-      <v-row>
-        <!-- INPUT: Confirm Password -->
-        <v-text-field
-          ref="confirmPassword"
-          class="required"
-          v-model="confirmPassword"
-          label="Confirm Password"
-          :append-icon="showConfirmPassword ? 'mdi-eye' : 'mdi-eye-off'"
-          :type="showConfirmPassword ? 'text' : 'password'"
-          @click:append="showConfirmPassword = !showConfirmPassword"
-          :rules="mandatoryRules.concat(passwordConfirmationRule).concat(maxMediumCharRules)"
-          outlined
-        />
-      </v-row>
-      <v-row>
-        <!-- INPUT: First name -->
-        <v-text-field
-          class="required"
-          v-model="firstName"
-          label="First name"
-          :rules="mandatoryRules.concat(nameRules).concat(maxMediumCharRules)"
-          outlined
-        />
-      </v-row>
-      <v-row>
-        <!-- INPUT: Middle name(s) -->
-        <v-text-field
-          v-model="middleName"
-          label="Middle name(s)"
-          :rules="nameRules.concat(maxMediumCharRules)"
-          outlined
-        />
-      </v-row>
-      <v-row>
-        <!-- INPUT: Last name -->
-        <v-text-field
-          class="required"
-          v-model="lastName"
-          label="Last name"
-          :rules="mandatoryRules.concat(nameRules).concat(maxMediumCharRules)"
-          outlined
-        />
-      </v-row>
-      <v-row>
-        <!-- INPUT: Nickname -->
-        <v-text-field
-          v-model="nickname"
-          label="Nickname"
-          :rules="nameRules.concat(maxMediumCharRules)"
-          outlined
-        />
-      </v-row>
-      <v-row>
-        <!-- INPUT: Bio -->
-        <v-textarea
-          v-model="bio"
-          label="Bio"
-          rows="3"
-          :rules="charBioRules"
-          outlined
-        />
-      </v-row>
-      <v-row>
-        <!-- INPUT: Date of Birth -->
-        <v-dialog
-          ref="dialog"
-          v-model="modal"
-          :return-value.sync="dob"
-          width="300px"
-          persistent
-        >
-          <template v-slot:activator="{ on, attrs }">
-            <v-text-field
-              class="required"
-              v-model="dob"
-              label="Date of Birth"
-              :rules="mandatoryRules"
-              prepend-inner-icon="mdi-calendar"
-              readonly
-              v-bind="attrs"
-              v-on="on"
-              outlined
-            />
-          </template>
-          <v-date-picker
+      <!-- INPUT: Email -->
+      <v-text-field
+        class="required"
+        v-model="email"
+        label="Email"
+        :rules="mandatoryRules.concat(emailRules).concat(maxLongCharRules)"
+        outlined
+      />
+
+      <!-- INPUT: Password -->
+      <v-text-field
+        ref="password"
+        class="required"
+        v-model="password"
+        label="Password"
+        @keyup="passwordChange"
+        :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
+        :type="showPassword ? 'text' : 'password'"
+        @click:append="showPassword = !showPassword"
+        :rules="mandatoryRules.concat(passwordRules).concat(maxMediumCharRules)"
+        outlined
+      />
+
+      <!-- INPUT: Confirm Password -->
+      <v-text-field
+        ref="confirmPassword"
+        class="required"
+        v-model="confirmPassword"
+        label="Confirm Password"
+        :append-icon="showConfirmPassword ? 'mdi-eye' : 'mdi-eye-off'"
+        :type="showConfirmPassword ? 'text' : 'password'"
+        @click:append="showConfirmPassword = !showConfirmPassword"
+        :rules="mandatoryRules.concat(passwordConfirmationRule).concat(maxMediumCharRules)"
+        outlined
+      />
+
+      <!-- INPUT: First name -->
+      <v-text-field
+        class="required"
+        v-model="firstName"
+        label="First name"
+        :rules="mandatoryRules.concat(nameRules).concat(maxMediumCharRules)"
+        outlined
+      />
+
+      <!-- INPUT: Middle name(s) -->
+      <v-text-field
+        v-model="middleName"
+        label="Middle name(s)"
+        :rules="nameRules.concat(maxMediumCharRules)"
+        outlined
+      />
+
+      <!-- INPUT: Last name -->
+      <v-text-field
+        class="required"
+        v-model="lastName"
+        label="Last name"
+        :rules="mandatoryRules.concat(nameRules).concat(maxMediumCharRules)"
+        outlined
+      />
+
+      <!-- INPUT: Nickname -->
+      <v-text-field
+        v-model="nickname"
+        label="Nickname"
+        :rules="nameRules.concat(maxMediumCharRules)"
+        outlined
+      />
+
+      <!-- INPUT: Bio -->
+      <v-textarea
+        v-model="bio"
+        label="Bio"
+        rows="3"
+        :rules="charBioRules"
+        outlined
+      />
+
+      <!-- INPUT: Date of Birth -->
+      <v-dialog
+        ref="dialog"
+        v-model="modal"
+        :return-value.sync="dob"
+        width="300px"
+        persistent
+      >
+        <template v-slot:activator="{ on, attrs }">
+          <v-text-field
+            class="required"
             v-model="dob"
-            :max="maxDate"
-            scrollable
+            label="Date of Birth"
+            :rules="mandatoryRules"
+            prepend-inner-icon="mdi-calendar"
+            readonly
+            v-bind="attrs"
+            v-on="on"
+            outlined
+          />
+        </template>
+        <v-date-picker
+          v-model="dob"
+          :max="maxDate"
+          scrollable
+        >
+          <v-spacer/>
+          <v-btn
+            text
+            color="primary"
+            @click="closeDatePicker"
           >
-            <v-spacer/>
-            <v-btn
-              text
-              color="primary"
-              @click="closeDatePicker"
-            >
-              Cancel
-            </v-btn>
-            <v-btn
-              text
-              color="primary"
-              @click="$refs.dialog.save(dob)"
-            >
-              OK
-            </v-btn>
-          </v-date-picker>
-        </v-dialog>
-      </v-row>
+            Cancel
+          </v-btn>
+          <v-btn
+            text
+            color="primary"
+            @click="$refs.dialog.save(dob)"
+          >
+            OK
+          </v-btn>
+        </v-date-picker>
+      </v-dialog>
+
       <v-row>
         <v-col
           cols="12"
@@ -160,86 +151,72 @@
             outlined
           />
         </v-col>
+
       </v-row>
-      <v-row>
-        <!-- INPUT: Street/Company -->
-        <v-text-field
-          class="required"
-          v-model="streetAddress"
-          label="Street Address"
-          :rules="mandatoryRules"
-          outlined
-        />
-      </v-row>
-      <v-row>
-        <!-- INPUT: District/Region/Province -->
-        <LocationAutocomplete
-          type="district"
-          v-model="district"
-          :rules="maxLongCharRules"
-        />
-      </v-row>
-      <v-row>
-        <!-- INPUT: City -->
-        <LocationAutocomplete
-          type="city"
-          class="required"
-          v-model="city"
-          :rules="maxLongCharRules.concat(mandatoryRules)"
-        />
-      </v-row>
-      <v-row>
-        <!-- INPUT: Region -->
-        <LocationAutocomplete
-          type="region"
-          class="required"
-          v-model="region"
-          :rules="maxLongCharRules.concat(mandatoryRules)"
-        />
-      </v-row>
-      <v-row>
-        <!-- INPUT: Country -->
-        <LocationAutocomplete
-          type="country"
-          class="required"
-          v-model="country"
-          :rules="maxLongCharRules.concat(mandatoryRules)"
-        />
-      </v-row>
-      <v-row>
-        <!-- INPUT: Postcode -->
-        <v-text-field
-          class="required"
-          v-model="postcode"
-          label="Postcode"
-          :rules="mandatoryRules.concat(maxLongCharRules).concat(numberRules)"
-          outlined
-        />
-      </v-row>
-      <v-row align="center"
-             justify="center">
-        <div class="error-text" v-if ="errorMessage !== undefined"> {{errorMessage}} </div>
-      </v-row>
-      <v-row align="center"
-             justify="center">
-        <!-- Register -->
-        <v-btn
-          type="submit"
-          color="primary"
-          :disabled="!valid">
-          REGISTER
-        </v-btn>
-      </v-row>
-      <v-row align="center"
-             justify="center">
-        <!-- Login Link if user already has an account. -->
-        <p
-          class="link pb-3"
-          @click="showLogin"
-        >
-          Already have an account? Login.
-        </p>
-      </v-row>
+
+      <!-- INPUT: Street/Company -->
+      <v-text-field
+        class="required"
+        v-model="streetAddress"
+        label="Street Address"
+        :rules="mandatoryRules"
+        outlined
+      />
+
+      <!-- INPUT: District/Region/Province -->
+      <LocationAutocomplete
+        type="district"
+        v-model="district"
+        :rules="maxLongCharRules"
+      />
+
+      <!-- INPUT: City -->
+      <LocationAutocomplete
+        type="city"
+        class="required"
+        v-model="city"
+        :rules="maxLongCharRules.concat(mandatoryRules)"
+      />
+
+      <!-- INPUT: Region -->
+      <LocationAutocomplete
+        type="region"
+        class="required"
+        v-model="region"
+        :rules="maxLongCharRules.concat(mandatoryRules)"
+      />
+
+      <!-- INPUT: Country -->
+      <LocationAutocomplete
+        type="country"
+        class="required"
+        v-model="country"
+        :rules="maxLongCharRules.concat(mandatoryRules)"
+      />
+
+      <!-- INPUT: Postcode -->
+      <v-text-field
+        class="required"
+        v-model="postcode"
+        label="Postcode"
+        :rules="mandatoryRules.concat(maxLongCharRules).concat(numberRules)"
+        outlined
+      />
+      <p class="error-text" v-if ="errorMessage !== undefined"> {{errorMessage}} </p>
+      <!-- Register -->
+      <v-btn
+        type="submit"
+        color="primary"
+        :disabled="!valid">
+        REGISTER
+      </v-btn>
+      <!-- Login Link if user already has an account. -->
+      <p
+        class="link pt-5"
+        @click="showLogin"
+      >
+        Already have an account? Login.
+      </p>
     </v-container>
   </v-form>
 </template>
