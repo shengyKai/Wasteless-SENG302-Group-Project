@@ -5,8 +5,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.seng302.Entities.Business;
 import org.seng302.Entities.Location;
+import org.seng302.Entities.Product;
 import org.seng302.Entities.User;
 import org.seng302.Persistence.BusinessRepository;
+import org.seng302.Persistence.ProductRepository;
 import org.seng302.Persistence.UserRepository;
 import org.seng302.Tools.AuthenticationTokenManager;
 import org.springframework.http.HttpStatus;
@@ -20,19 +22,23 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 @RestController
 public class BusinessController {
-    private final BusinessRepository _businessRepository;
-    private final UserRepository _userRepository;
+    private final BusinessRepository businessRepository;
+    private final UserRepository userRepository;
+    private final ProductRepository productRepository;
     private static final Logger logger = LogManager.getLogger(BusinessController.class.getName());
 
-    public BusinessController(BusinessRepository businessRepository, UserRepository userRepository) {
-        this._businessRepository = businessRepository;
-        this._userRepository = userRepository;
+    public BusinessController(BusinessRepository businessRepository, UserRepository userRepository, ProductRepository productRepository) {
+        this.businessRepository = businessRepository;
+        this.userRepository = userRepository;
+        this.productRepository = productRepository;
     }
 
     /**
@@ -76,7 +82,7 @@ public class BusinessController {
             AuthenticationTokenManager.checkAuthenticationToken(req);
 
             // Make sure this is an existing user ID
-            Optional<User> primaryOwner = _userRepository.findById(Long.parseLong((businessInfo.getAsString("primaryAdministratorId"))));
+            Optional<User> primaryOwner = userRepository.findById(Long.parseLong((businessInfo.getAsString("primaryAdministratorId"))));
 
             if (!primaryOwner.isPresent()) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
@@ -97,7 +103,7 @@ public class BusinessController {
                     .withAddress(address)
                     .build();
 
-            _businessRepository.save(newBusiness); // Save the new business
+            businessRepository.save(newBusiness); // Save the new business
             logger.info("Business has been registered");
             return new ResponseEntity(HttpStatus.CREATED);
 
@@ -116,7 +122,7 @@ public class BusinessController {
     JSONObject getBusinessById(@PathVariable Long id, HttpServletRequest request) {
         AuthenticationTokenManager.checkAuthenticationToken(request);
         logger.info(String.format("Retrieving business with ID %d.", id));
-        Optional<Business> business = _businessRepository.findById(id);
+        Optional<Business> business = businessRepository.findById(id);
         if (business.isEmpty()) {
             ResponseStatusException notFoundException = new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, String.format("No business with ID %d.", id));
             logger.error(notFoundException.getMessage());
@@ -141,7 +147,7 @@ public class BusinessController {
             User user = getUser(userInfo); // Get the user to promote
 
             business.addAdmin(user);
-            _businessRepository.save(business);
+            businessRepository.save(business);
             logger.info("Added user " + user.getUserID() + " as admin of business " + businessId);
         } catch (Exception err) {
             logger.error(err.getMessage());
@@ -164,7 +170,7 @@ public class BusinessController {
             User user = getUser(userInfo); // Get the user to demote
 
             business.removeAdmin(user);
-            _businessRepository.save(business);
+            businessRepository.save(business);
             logger.info("Removed user " + user.getUserID() + " as admin of business " + businessId);
         } catch (Exception err) {
             logger.error(err.getMessage());
@@ -192,7 +198,7 @@ public class BusinessController {
                     "Could not find a user id in the request");
         }
         // check the requested user exists
-        Optional<User> user = _userRepository.findById(userId);
+        Optional<User> user = userRepository.findById(userId);
         if (!user.isPresent()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "The given user does not exist");
@@ -209,7 +215,7 @@ public class BusinessController {
      */
     private Business getBusiness(Long businessId) {
         // check business exists
-        Optional<Business> business = _businessRepository.findById(businessId);
+        Optional<Business> business = businessRepository.findById(businessId);
         if (!business.isPresent()) {
             throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE,
                     "The given business does not exist");
