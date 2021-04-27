@@ -290,6 +290,20 @@ describe('CreateProduct.vue', () => {
   });
 
   /**
+   * Tests that the CreateProduct is invalid if the product code is too long
+   */
+  it('Invalid if product code is too long', async () => {
+    await populateRequiredFields();
+    await wrapper.setData({
+      productcode: 'a'.repeat(16),
+    });
+
+    await Vue.nextTick();
+
+    expect(wrapper.vm.valid).toBeFalsy();
+  });
+
+  /**
    * Tests that the CreateProduct is invalid if product code uses lowercase letters
    */
   it('Invalid if product code uses lowercase letters', async () => {
@@ -357,7 +371,7 @@ describe('CreateProduct.vue', () => {
    */
   it('When the create button is pressed and the api returns an error then the error should be shown', async () => {
     await populateAllFields();
-    createProduct.mockResolvedValue('test_error_message'); // Ensure that the operation is fails
+    createProduct.mockResolvedValue('test_error_message'); // Ensure that the operation fails
 
     await Vue.nextTick();
 
