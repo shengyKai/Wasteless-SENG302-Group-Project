@@ -25,6 +25,8 @@ import javax.servlet.http.Cookie;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -226,22 +228,10 @@ public class ProductControllerTest {
             String productCode = productJSON.getAsString("id");
             Product storedProduct = productRepository.findByBusinessAndProductCode(testBusiness1, productCode);
 
-            // The date object returned as JSON comes back as a different timezone. Additionally, parsing two different
-            // strings with different formats was not working. So this is a successful work around to compare these dates.
-            String expectedProductDateStr = storedProduct.getCreated().toString();
-            String actualProductDateStr = productJSON.getAsString("created");
-            DateFormat dateFormat = new SimpleDateFormat("yyyy-mm-dd");
-            Date expectedCreatedDate = dateFormat.parse(expectedProductDateStr);
-            Date actualCreatedDate = dateFormat.parse(actualProductDateStr);
-            if (Integer.parseInt(actualProductDateStr.substring(11, 13)) >= 12) {
-                Calendar c = Calendar.getInstance();
-                c.setTime(actualCreatedDate);
-                c.add(Calendar.DATE, 1);
-                actualCreatedDate = c.getTime();
-            }
+            Instant actualCreatedDate = Instant.from(DateTimeFormatter.ISO_DATE_TIME.parse(productJSON.getAsString("created")));
 
             assertEquals(storedProduct.getProductCode(), productCode);
-            assertEquals(expectedCreatedDate, actualCreatedDate);
+            assertEquals(storedProduct.getCreated().toInstant(), actualCreatedDate);
             assertEquals(storedProduct.getRecommendedRetailPrice().toString(), productJSON.getAsString("recommendedRetailPrice"));
             assertEquals(storedProduct.getName(), productJSON.getAsString("name"));
             assertEquals(storedProduct.getDescription(), productJSON.getAsString("description"));
