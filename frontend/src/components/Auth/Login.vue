@@ -79,7 +79,7 @@ export default {
      * Method to direct into home page, embed in a button
      * dispatch details from textfield to store plugin before directing
      */
-    showHome() {
+    async showHome() {
       this.errorMessage = undefined;
       this.$store.dispatch("login", { email : this.email, password : this.password });
       this.$router.push("/home");
@@ -89,7 +89,7 @@ export default {
         password  : this.password,
       };
       // Cant await? unexpected reserved word
-      let response = login(credential);
+      let response = await login(credential);
       console.log(response);
       if (response === undefined ) {
         this.$emit('showLogin');
