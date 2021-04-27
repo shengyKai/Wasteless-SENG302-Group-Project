@@ -77,7 +77,7 @@ public class MainApplicationRunner implements ApplicationRunner {
         business = businessRepository.save(business);
 
         Product product = new Product.Builder()
-                .withProductCode("NathanApple-70")
+                .withProductCode("NATHAN-APPLE-70")
                 .withName("The Nathan Apple")
                 .withDescription("Ever wonder why Nathan has an apple")
                 .withManufacturer("Apple")

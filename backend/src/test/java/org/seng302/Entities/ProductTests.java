@@ -94,7 +94,7 @@ class ProductTests {
     @Test
     void createValidProduct() {
         Product product = new Product.Builder()
-                .withProductCode("Orange-69")
+                .withProductCode("ORANGE-69")
                 .withName("Fresh Orange")
                 .withDescription("This is a fresh orange")
                 .withManufacturer("Apple")
@@ -103,7 +103,7 @@ class ProductTests {
                 .build();
         productRepository.save(product);
 
-        assertEquals("Orange-69", product.getProductCode());
+        assertEquals("ORANGE-69", product.getProductCode());
         assertEquals("Fresh Orange", product.getName());
         assertEquals("This is a fresh orange", product.getDescription());
         assertEquals("Apple", product.getManufacturer());
@@ -117,7 +117,7 @@ class ProductTests {
     @Test
     void checkTwoProductsDoNotHaveTheSameIDs() {
         Product product1 = new Product.Builder()
-                .withProductCode("NathanApple-69")
+                .withProductCode("NATHAN-APPLE-69")
                 .withName("The Nathan Apple")
                 .withDescription("Ever wonder why Nathan has an apple")
                 .withManufacturer("Apple")
@@ -125,7 +125,7 @@ class ProductTests {
                 .withBusiness(testBusiness1)
                 .build();
         Product product2 = new Product.Builder()
-                .withProductCode("Orange-70")
+                .withProductCode("ORANGE-70")
                 .withName("Fresh Orange")
                 .withDescription("This is a fresh orange")
                 .withManufacturer("Apple")
@@ -145,7 +145,7 @@ class ProductTests {
     void checkDate() {
         Date before = new Date();
         Product product = new Product.Builder()
-                .withProductCode("NathanApple-69")
+                .withProductCode("NATHAN-APPLE-69")
                 .withName("The Nathan Apple")
                 .withDescription("Ever wonder why Nathan has an apple")
                 .withManufacturer("Apple")
@@ -167,7 +167,7 @@ class ProductTests {
     @Test
     void checkNoTwoSameProductCodesWithinSameCatalogue() {
         Product product1 = new Product.Builder()
-                .withProductCode("NathanApple-69")
+                .withProductCode("NATHAN-APPLE-69")
                 .withName("The Nathan Apple")
                 .withDescription("Ever wonder why Nathan has an apple")
                 .withManufacturer("Apple")
@@ -175,7 +175,7 @@ class ProductTests {
                 .withBusiness(testBusiness1)
                 .build();
         Product product2 = new Product.Builder()
-                .withProductCode("NathanApple-69")
+                .withProductCode("NATHAN-APPLE-69")
                 .withName("The Nathan Apple Two")
                 .withDescription("Ever wonder why Nathan has an apple maybe")
                 .withManufacturer("Apple")
@@ -193,7 +193,7 @@ class ProductTests {
     @Test
     void checkTwoSameProductCodesWithinDifferentCatalogues() {
         Product product1 = new Product.Builder()
-                .withProductCode("NathanApple-69")
+                .withProductCode("NATHAN-APPLE-69")
                 .withName("The Nathan Apple")
                 .withDescription("Ever wonder why Nathan has an apple")
                 .withManufacturer("Apple")
@@ -201,7 +201,7 @@ class ProductTests {
                 .withBusiness(testBusiness1)
                 .build();
         Product product2 = new Product.Builder()
-                .withProductCode("NathanApple-69")
+                .withProductCode("NATHAN-APPLE-69")
                 .withName("The Nathan Apple Two")
                 .withDescription("Ever wonder why Nathan has an apple maybe")
                 .withManufacturer("Apple")
@@ -219,7 +219,7 @@ class ProductTests {
     @Test
     void checkTwoDifferentProductCodesWithinSameCatalogue() {
         Product product1 = new Product.Builder()
-                .withProductCode("NathanApple-69")
+                .withProductCode("NATHAN-APPLE-69")
                 .withName("The Nathan Apple")
                 .withDescription("Ever wonder why Nathan has an apple")
                 .withManufacturer("Apple")
@@ -227,7 +227,7 @@ class ProductTests {
                 .withBusiness(testBusiness1)
                 .build();
         Product product2 = new Product.Builder()
-                .withProductCode("NathanApple-70")
+                .withProductCode("NATHAN-APPLE-70")
                 .withName("The Nathan Apple Two")
                 .withDescription("Ever wonder why Nathan has an apple maybe")
                 .withManufacturer("Apple")
@@ -246,7 +246,7 @@ class ProductTests {
     @Test
     void checkTheProductIsConnectedToTheBusinessCatalogue() {
         Product product1 = new Product.Builder()
-                .withProductCode("NathanApple-70")
+                .withProductCode("NATHAN-APPLE-70")
                 .withName("The Nathan Apple")
                 .withDescription("Ever wonder why Nathan has an apple")
                 .withManufacturer("Apple")
@@ -266,7 +266,7 @@ class ProductTests {
     @Test
     void createAValidListOfProductsInACatalogue() {
         Product product1 = new Product.Builder()
-                .withProductCode("NathanApple-70")
+                .withProductCode("NATHAN-APPLE-70")
                 .withName("The Nathan Apple")
                 .withDescription("Ever wonder why Nathan has an apple")
                 .withManufacturer("Apple")
@@ -274,7 +274,7 @@ class ProductTests {
                 .withBusiness(testBusiness1)
                 .build();
         Product product2 = new Product.Builder()
-                .withProductCode("NathanApple-71")
+                .withProductCode("NATHAN-APPLE-71")
                 .withName("The Nathan Apple Two")
                 .withDescription("Ever wonder why Nathan has an apple too")
                 .withManufacturer("Apple")
@@ -282,7 +282,7 @@ class ProductTests {
                 .withBusiness(testBusiness1)
                 .build();
         Product product3 = new Product.Builder()
-                .withProductCode("NathanApple-72")
+                .withProductCode("NATHAN-APPLE-72")
                 .withName("The Nathan Apple Three")
                 .withDescription("Ever wonder why Nathan has an apple too maybe")
                 .withManufacturer("Apple")
@@ -312,7 +312,7 @@ class ProductTests {
                 .build();
         Business tempBusiness = businessRepository.save(tempBusinessInitial);
         Product product1 = new Product.Builder()
-                .withProductCode("NathanApple-69")
+                .withProductCode("NATHAN-APPLE-69")
                 .withName("The Nathan Apple")
                 .withDescription("Ever wonder why Nathan has an apple")
                 .withManufacturer("Apple")
@@ -330,7 +330,7 @@ class ProductTests {
     void testFindByBusinessAndProductCode() {
         Product product = productRepository.save(
                 new Product.Builder()
-                    .withProductCode("NathanApple-70")
+                    .withProductCode("NATHAN-APPLE-70")
                     .withName("The Nathan Apple")
                     .withDescription("Ever wonder why Nathan has an apple")
                     .withManufacturer("Apple")
@@ -339,7 +339,7 @@ class ProductTests {
                     .build()
         );
 
-        Product foundProduct = productRepository.findByBusinessAndProductCode(testBusiness1, "NathanApple-70");
+        Product foundProduct = productRepository.findByBusinessAndProductCode(testBusiness1, "NATHAN-APPLE-70");
         assertNotNull(foundProduct);
 
         assertEquals(product.getID(), foundProduct.getID());
@@ -359,7 +359,7 @@ class ProductTests {
         // Product with same code saved to a different business
         productRepository.save(
                 new Product.Builder()
-                        .withProductCode("NathanApple-70")
+                        .withProductCode("NATHAN-APPLE-70")
                         .withName("The Nathan Apple")
                         .withDescription("Ever wonder why Nathan has an apple")
                         .withManufacturer("Apple")
@@ -368,7 +368,7 @@ class ProductTests {
                         .build()
         );
 
-        Product foundProduct = productRepository.findByBusinessAndProductCode(testBusiness1, "NathanApple-70");
+        Product foundProduct = productRepository.findByBusinessAndProductCode(testBusiness1, "NATHAN-APPLE-70");
         assertNull(foundProduct);
     }
 
@@ -379,7 +379,7 @@ class ProductTests {
     void testUsingAddToCatalogueFails() {
         Product product = productRepository.save(
                 new Product.Builder()
-                        .withProductCode("NathanApple-70")
+                        .withProductCode("NATHAN-APPLE-70")
                         .withName("The Nathan Apple")
                         .withDescription("Ever wonder why Nathan has an apple")
                         .withManufacturer("Apple")

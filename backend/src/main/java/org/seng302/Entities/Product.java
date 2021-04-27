@@ -1,6 +1,8 @@
 package org.seng302.Entities;
 
 import net.minidev.json.JSONObject;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
@@ -11,6 +13,11 @@ import java.util.Date;
 })
 @Entity
 public class Product {
+    // Product code must only contain uppercase letters, numbers and dashes
+    // Product code have a length between 1-15
+    private final String productCodeRegex = "^[-A-Z0-9]{1,15}$";
+
+
     @Id
     @GeneratedValue
     private Long id;
@@ -89,31 +96,75 @@ public class Product {
      * Sets the code of the product
      * @param productCode the code for the product
      */
-    private void setProductCode(String productCode) { this.productCode = productCode; }
+    private void setProductCode(String productCode) {
+        if (productCode == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Product code must be provided");
+        }
+        if (!productCode.matches(productCodeRegex)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Product code must have a valid format");
+        }
+        this.productCode = productCode;
+    }
 
     /**
      * Sets the name of the product
      * @param name the name of the product
      */
-    public void setName(String name) { this.name = name; }
+    public void setName(String name) {
+        if (name == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Product name must be provided");
+        }
+        if (name.length() == 0 || name.length() > 50) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Product name must be between 1-50 characters long");
+        }
+        this.name = name;
+    }
 
     /**
      * Sets the description of the product
      * @param description the description of the product
      */
-    public void setDescription(String description) { this.description = description; }
+    public void setDescription(String description) {
+        if (description != null) {
+            if (description.length() == 0) {
+                description = null;
+            } else if (description.length() > 200) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Product description must not be longer than 200 characters");
+            }
+        }
+        this.description = description;
+    }
 
     /**
      * Sets the manufacturer name of the product
      * @param manufacturer the manufacturer name of the product
      */
-    public void setManufacturer(String manufacturer) { this.manufacturer = manufacturer; }
+    public void setManufacturer(String manufacturer) {
+        if (manufacturer != null) {
+            if (manufacturer.length() == 0) {
+                manufacturer = null;
+            } else if (manufacturer.length() > 100) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Product manufacturer must not be longer than 100 characters");
+            }
+        }
+        this.manufacturer = manufacturer;
+    }
 
     /**
      * Sets the recommended retail price of the product
      * @param recommendedRetailPrice the RRP of the product
      */
-    public void setRecommendedRetailPrice(BigDecimal recommendedRetailPrice) { this.recommendedRetailPrice = recommendedRetailPrice; }
+    public void setRecommendedRetailPrice(BigDecimal recommendedRetailPrice) {
+        if (recommendedRetailPrice != null) {
+            if (recommendedRetailPrice.compareTo(BigDecimal.ZERO) < 0) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Product recommended retail price must not be less than 0");
+            }
+            if (recommendedRetailPrice.compareTo(new BigDecimal(10000)) >= 0) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Product recommended retail price must be less that 100,000");
+            }
+        }
+        this.recommendedRetailPrice = recommendedRetailPrice;
+    }
 
     /**
      * Sets the date of when the product was created

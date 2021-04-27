@@ -168,7 +168,7 @@ public class ProductControllerTest {
      */
     public void addSeveralProductsToACatalogue() {
         Product product1 = new Product.Builder()
-                .withProductCode("NathanApple-70")
+                .withProductCode("NATHAN-APPLE-70")
                 .withName("The Nathan Apple")
                 .withDescription("Ever wonder why Nathan has an apple")
                 .withManufacturer("Apple1")
@@ -176,7 +176,7 @@ public class ProductControllerTest {
                 .withBusiness(testBusiness1)
                 .build();
         Product product2 = new Product.Builder()
-                .withProductCode("AlmondMilk100")
+                .withProductCode("ALMOND-MILK-100")
                 .withName("Almond Milk")
                 .withDescription("Like water except bad for the environment")
                 .withManufacturer("Apple2")
@@ -184,7 +184,7 @@ public class ProductControllerTest {
                 .withBusiness(testBusiness1)
                 .build();
         Product product3 = new Product.Builder()
-                .withProductCode("Coffee7")
+                .withProductCode("COFFEE-7")
                 .withName("Generic Brand Coffee")
                 .withDescription("This coffee tastes exactly as you expect it would")
                 .withManufacturer("Apple3")
@@ -192,7 +192,7 @@ public class ProductControllerTest {
                 .withBusiness(testBusiness1)
                 .build();
         Product product4 = new Product.Builder()
-                .withProductCode("DarkChocolate")
+                .withProductCode("DARK-CHOCOLATE")
                 .withName("Dark Chocolate")
                 .withDescription("Would like a high cocoa concentration")
                 .withManufacturer("Apple4")
