@@ -1001,7 +1001,7 @@ public class UserTests {
                 .withEmail("johnsmith99@gmail.com")
                 .withPassword("1337-H%nt3r2")
                 .withBio("Likes long walks on the beach")
-                .withDob("2021-03-11")
+                .withDob("2000-03-11")
                 .withPhoneNumber("+64 3 555 0129")
                 .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Christchurch,New Zealand," +
                         "Canterbury,8041"));
@@ -1020,7 +1020,7 @@ public class UserTests {
                 .withEmail("johnsmith99@gmail.com")
                 .withPassword("1337-H%nt3r2")
                 .withBio("Likes long walks on the beach")
-                .withDob("2021-03-11")
+                .withDob("2000-03-11")
                 .withPhoneNumber("+64 3 555 0129")
                 .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Christchurch,New Zealand," +
                         "Canterbury,8041"));
@@ -1039,7 +1039,7 @@ public class UserTests {
                 .withNickName("Jonny")
                 .withPassword("1337-H%nt3r2")
                 .withBio("Likes long walks on the beach")
-                .withDob("2021-03-11")
+                .withDob("2000-03-11")
                 .withPhoneNumber("+64 3 555 0129")
                 .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Christchurch,New Zealand," +
                         "Canterbury,8041"));
@@ -1058,7 +1058,7 @@ public class UserTests {
                 .withNickName("Jonny")
                 .withEmail("johnsmith99@gmail.com")
                 .withBio("Likes long walks on the beach")
-                .withDob("2021-03-11")
+                .withDob("2000-03-11")
                 .withPhoneNumber("+64 3 555 0129")
                 .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Christchurch,New Zealand," +
                         "Canterbury,8041"));
@@ -1078,7 +1078,7 @@ public class UserTests {
                 .withEmail("johnsmith99@gmail.com")
                 .withPassword("1337-H%nt3r2")
                 .withBio("Likes long walks on the beach")
-                .withDob("2021-03-11")
+                .withDob("2001-03-11")
                 .withPhoneNumber("+64 3 555 0129");
         assertThrows(ResponseStatusException.class, testBuilder::build);
     }
@@ -1115,7 +1115,7 @@ public class UserTests {
                 .withEmail("johnsmith99@gmail.com")
                 .withPassword("1337-H%nt3r2")
                 .withBio("Likes long walks on the beach")
-                .withDob("2021-03-11")
+                .withDob("2001-03-11")
                 .withPhoneNumber("+64 3 555 0129")
                 .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Christchurch,New Zealand," +
                         "Canterbury,8041"));
@@ -1136,7 +1136,7 @@ public class UserTests {
                 .withEmail("johnsmith99@gmail.com")
                 .withPassword("1337-H%nt3r2")
                 .withBio("Likes long walks on the beach")
-                .withDob("2021-03-11")
+                .withDob("2001-03-11")
                 .withPhoneNumber("+64 3 555 0129")
                 .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Christchurch,New Zealand," +
                         "Canterbury,8041"));
@@ -1156,7 +1156,7 @@ public class UserTests {
                 .withNickName("Jonny")
                 .withEmail("johnsmith99@gmail.com")
                 .withPassword("1337-H%nt3r2")
-                .withDob("2021-03-11")
+                .withDob("2001-03-11")
                 .withPhoneNumber("+64 3 555 0129")
                 .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Christchurch,New Zealand," +
                         "Canterbury,8041"));
@@ -1178,7 +1178,7 @@ public class UserTests {
                 .withEmail("johnsmith99@gmail.com")
                 .withPassword("1337-H%nt3r2")
                 .withBio("Likes long walks on the beach")
-                .withDob("2021-03-11")
+                .withDob("2000-03-11")
                 .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Christchurch,New Zealand," +
                         "Canterbury,8041"));
         User testUser = testBuilder.build();
