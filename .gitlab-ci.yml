@@ -34,6 +34,7 @@ cucumber:
      - cd backend
      - ./gradlew cucumber
 
+# Temporary disabled till the team fixes the failing jest test
 #jest:
 #   stage: test
 #   cache:
