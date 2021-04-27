@@ -88,7 +88,6 @@ export default {
         email     : this.email,
         password  : this.password,
       };
-      // Cant await? unexpected reserved word
       let response = await login(credential);
       console.log(response);
       if (response === undefined ) {
