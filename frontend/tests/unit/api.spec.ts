@@ -2,6 +2,7 @@ import axios, { AxiosError, AxiosInstance } from 'axios';
 
 import * as api from '@/api';
 import { AxiosResponse } from 'axios';
+import { CreateProduct, CreateUser, MaybeError } from '@/api';
 
 jest.mock('axios', () => ({
   create: jest.fn(function() {
@@ -78,6 +79,27 @@ function makeAxiosError<T>(value: T, status = 400): AxiosError<T> {
   };
 }
 
+const testCreateUser: CreateUser = {
+  firstName: 'test_firstname',
+  lastName: 'test_lastname',
+  middleName: 'test_middlename',
+  nickname: 'test_nickname',
+  bio: 'test_bio',
+  email: 'test_email',
+  dateOfBirth: 'test_date_of_birth',
+  phoneNumber: 'test_phone_number',
+  homeAddress: { country: 'test_country'},
+  password: 'test_password',
+};
+
+const testCreateProduct: CreateProduct = {
+  id: 'ID-VALUE',
+  name: 'test_name',
+  description: 'test_description',
+  manufacturer: 'test_manufacturer',
+  recommendedRetailPrice: 100,
+};
+
 // Creates a type from the methods of T where the methods return promises
 type PromiseMethods<T> = Pick<T, ({[P in keyof T]: T[P] extends (...args: any[]) => Promise<any> ? P : never })[keyof T]>;
 
@@ -88,74 +110,36 @@ type UnwrapPromise<T extends Promise<any>> = T extends Promise<infer U> ? U : ne
 type ApiMethods = PromiseMethods<typeof api>;
 
 // Object representing a call to an api method and the results of said call
-type ApiCall = {[k in keyof ApiMethods]: {
-  methodName: k,                                    // The method name to call
+type ApiCalls = {[k in keyof ApiMethods]: {
   parameters: Parameters<ApiMethods[k]>,            // The arguments that are provided
   httpMethod: keyof (typeof instance),              // The HTTP method to be used
   url: string,                                      // The expected url to be accessed
   body: any,                                        // The expected http body
   result: UnwrapPromise<ReturnType<ApiMethods[k]>>, // The expected function result if successful
   apiResult?: any,                                  // If the api returns a different value from the overall result then this should be used to specify that
-}}[keyof ApiMethods];
+}};
 
-const apiCalls: ApiCall[] = [
-  {
-    methodName: 'createProduct',
+const apiCalls: Partial<ApiCalls> = {
+  createProduct: {
     parameters: [
       7,
-      {
-        id: 'ID-VALUE',
-        name: 'test_name',
-        description: 'test_description',
-        manufacturer: 'test_manufacturer',
-        recommendedRetailPrice: 100,
-      }
+      testCreateProduct,
     ],
     httpMethod: 'post',
     url: '/businesses/7/products',
-    body: {
-      id: 'ID-VALUE',
-      name: 'test_name',
-      description: 'test_description',
-      manufacturer: 'test_manufacturer',
-      recommendedRetailPrice: 100,
-    },
+    body: testCreateProduct,
     result: undefined,
   },
-  {
-    methodName: 'createUser',
+  createUser: {
     parameters: [
-      {
-        firstName: 'test_firstname',
-        lastName: 'test_lastname',
-        middleName: 'test_middlename',
-        nickname: 'test_nickname',
-        bio: 'test_bio',
-        email: 'test_email',
-        dateOfBirth: 'test_date_of_birth',
-        phoneNumber: 'test_phone_number',
-        homeAddress: { country: 'test_country'},
-        password: 'test_password',
-      }
+      testCreateUser,
     ],
     httpMethod: 'post',
     url: '/users',
-    body: {
-      firstName: 'test_firstname',
-      lastName: 'test_lastname',
-      middleName: 'test_middlename',
-      nickname: 'test_nickname',
-      bio: 'test_bio',
-      email: 'test_email',
-      dateOfBirth: 'test_date_of_birth',
-      phoneNumber: 'test_phone_number',
-      homeAddress: { country: 'test_country'},
-      password: 'test_password',
-    },
+    body: testCreateUser,
     result: undefined,
   },
-  {
-    methodName: 'login',
+  login: {
     parameters: ['test_email', 'test_password'],
     httpMethod: 'post',
     url: '/login',
@@ -163,24 +147,20 @@ const apiCalls: ApiCall[] = [
     result: 7,
     apiResult: { userId: 7 },
   }
-];
-
-// Makes the stringification in the describe.each block look a bit nicer
-apiCalls.map(call =>
-  Object.assign(call, { toString(): string { return (this as any).methodName; }})
-);
-
-// Makes sure the the mocks are clean
-afterEach(() => {
-  jest.clearAllMocks();
-});
+};
 
 describe('api', () => {
-  describe.each(apiCalls)('"%s" method', (fields) => {
+  // Makes sure the the mocks are clean
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+  describe.each(Object.keys(apiCalls))('"%s" method', (key) => {
+    // Assumes that we don't assign undefined into apiCalls
+    let fields = apiCalls[key as keyof ApiCalls]!;
 
-    function doCall() {
-      // @ts-ignore - This should pass type checking but doesn't :(
-      return api[fields.methodName](...fields.parameters);
+    function doCall(): Promise<typeof fields.result> {
+      // @ts-ignore - Assuming that the construction of the ApiCalls type is correct then this is valid
+      return api[key](...fields.parameters);
     }
 
     it('If the backend is unavailable then there should be a "Failed to reach backend" message', async () => {

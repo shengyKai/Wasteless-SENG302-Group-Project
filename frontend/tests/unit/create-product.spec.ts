@@ -295,7 +295,7 @@ describe('CreateProduct.vue', () => {
   it('Invalid if product code is too long', async () => {
     await populateRequiredFields();
     await wrapper.setData({
-      productcode: 'a'.repeat(16),
+      productCode: 'a'.repeat(16),
     });
 
     await Vue.nextTick();

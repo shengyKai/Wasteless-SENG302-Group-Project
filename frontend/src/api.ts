@@ -37,7 +37,7 @@ const instance = axios.create({
   withCredentials: true,
 });
 
-type MaybeError<T> = T | string;
+export type MaybeError<T> = T | string;
 
 export type User = {
   id: number,
