@@ -1,11 +1,14 @@
 package org.seng302.Entities;
 
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.seng302.Persistence.BusinessRepository;
 import org.seng302.Persistence.ProductRepository;
 import org.seng302.Persistence.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
 import java.text.ParseException;
@@ -33,8 +36,6 @@ class ProductTests {
      * Created a business objects for testing
      */
     void createTestBusinesses() {
-        System.out.println("Creating businesses");
-        Thread.dumpStack();
         testBusiness1 = new Business.Builder()
                 .withBusinessType("Accommodation and Food Services")
                 .withAddress(new Location())
@@ -389,5 +390,187 @@ class ProductTests {
         );
 
         assertThrows(IllegalArgumentException.class, () -> testBusiness2.addToCatalogue(product));
+    }
+
+    /**
+     * Tests that a product built without a product code throws a ResponseStatusException
+     */
+    @Test
+    void buildWithoutProductCode() {
+        var builder = new Product.Builder()
+                .withName("The Nathan Apple")
+                .withDescription("Ever wonder why Nathan has an apple")
+                .withManufacturer("Apple")
+                .withRecommendedRetailPrice("9000.03")
+                .withBusiness(testBusiness1);
+        assertThrows(ResponseStatusException.class, builder::build);
+    }
+
+    /**
+     * Tests that a product built with a product code that is too long (>15 characters) throws a ResponseStatusException
+     */
+    @Test
+    void buildWithLongProductCode() {
+        var builder = new Product.Builder()
+                .withProductCode("A".repeat(16))
+                .withName("The Nathan Apple")
+                .withDescription("Ever wonder why Nathan has an apple")
+                .withManufacturer("Apple")
+                .withRecommendedRetailPrice("9000.03")
+                .withBusiness(testBusiness1);
+        assertThrows(ResponseStatusException.class, builder::build);
+    }
+
+    /**
+     * Tests that a product built with a product code that is empty throws a ResponseStatusException
+     */
+    @Test
+    void buildWithEmptyProductCode() {
+        var builder = new Product.Builder()
+                .withProductCode("")
+                .withName("The Nathan Apple")
+                .withDescription("Ever wonder why Nathan has an apple")
+                .withManufacturer("Apple")
+                .withRecommendedRetailPrice("9000.03")
+                .withBusiness(testBusiness1);
+        assertThrows(ResponseStatusException.class, builder::build);
+    }
+
+    /**
+     * Tests that a product built with a product code that contains an invalid character
+     * (not a uppercase letter, number or dash) throws a ResponseStatusException
+     */
+    @ParameterizedTest
+    @ValueSource(strings = {"a", "z", "_", ",", ".", " ", "\t", "\n"})
+    void buildWithInvalidCharactersInProductCode(String character) {
+        var builder = new Product.Builder()
+                .withProductCode(character)
+                .withName("The Nathan Apple")
+                .withDescription("Ever wonder why Nathan has an apple")
+                .withManufacturer("Apple")
+                .withRecommendedRetailPrice("9000.03")
+                .withBusiness(testBusiness1);
+        assertThrows(ResponseStatusException.class, builder::build);
+    }
+
+    /**
+     * Tests that a product built without a name throws a ResponseStatusException
+     */
+    @Test
+    void buildWithoutName() {
+        var builder = new Product.Builder()
+                .withProductCode("NATHAN-APPLE-70")
+                .withDescription("Ever wonder why Nathan has an apple")
+                .withManufacturer("Apple")
+                .withRecommendedRetailPrice("9000.03")
+                .withBusiness(testBusiness1);
+        assertThrows(ResponseStatusException.class, builder::build);
+    }
+
+    /**
+     * Tests that a product built with an empty name throws a ResponseStatusException
+     */
+    @Test
+    void buildWithEmptyName() {
+        var builder = new Product.Builder()
+                .withProductCode("NATHAN-APPLE-70")
+                .withName("")
+                .withDescription("Ever wonder why Nathan has an apple")
+                .withManufacturer("Apple")
+                .withRecommendedRetailPrice("9000.03")
+                .withBusiness(testBusiness1);
+        assertThrows(ResponseStatusException.class, builder::build);
+    }
+
+    /**
+     * Tests that a product built with a long name (>50 characters) throws a ResponseStatusException
+     */
+    @Test
+    void buildWithLongName() {
+        var builder = new Product.Builder()
+                .withProductCode("NATHAN-APPLE-70")
+                .withName("a".repeat(51))
+                .withDescription("Ever wonder why Nathan has an apple")
+                .withManufacturer("Apple")
+                .withRecommendedRetailPrice("9000.03")
+                .withBusiness(testBusiness1);
+        assertThrows(ResponseStatusException.class, builder::build);
+    }
+
+    /**
+     * Tests that a product built with a long description (>200 characters) throws a ResponseStatusException
+     */
+    @Test
+    void buildWithLongDescription() {
+        var builder = new Product.Builder()
+                .withProductCode("NATHAN-APPLE-70")
+                .withName("The Nathan Apple")
+                .withDescription("a".repeat(201))
+                .withManufacturer("Apple")
+                .withRecommendedRetailPrice("9000.03")
+                .withBusiness(testBusiness1);
+        assertThrows(ResponseStatusException.class, builder::build);
+    }
+
+    /**
+     * Tests that a product built with a long manufacturer (>100 characters) throws a ResponseStatusException
+     */
+    @Test
+    void buildWithLongManufacturer() {
+        var builder = new Product.Builder()
+                .withProductCode("NATHAN-APPLE-70")
+                .withName("The Nathan Apple")
+                .withDescription("Ever wonder why Nathan has an apple")
+                .withManufacturer("a".repeat(101))
+                .withRecommendedRetailPrice("9000.03")
+                .withBusiness(testBusiness1);
+        assertThrows(ResponseStatusException.class, builder::build);
+    }
+
+    /**
+     * Tests that a product built with a recommended retail price that is not parsable into a number throws a
+     * ResponseStatusException
+     */
+    @Test
+    void buildWithNonNumberPrice() {
+        var builder = new Product.Builder()
+                .withProductCode("NATHAN-APPLE-70")
+                .withName("The Nathan Apple")
+                .withDescription("Ever wonder why Nathan has an apple")
+                .withManufacturer("Apple")
+                .withBusiness(testBusiness1);
+
+        // Maybe it is worth delaying this exception until build
+        assertThrows(ResponseStatusException.class, () -> builder.withRecommendedRetailPrice("pricen't"));
+    }
+
+    /**
+     * Tests that a product built with a negative recommended retail price throws a ResponseStatusException
+     */
+    @Test
+    void buildWithNegativePrice() {
+        var builder = new Product.Builder()
+                .withProductCode("NATHAN-APPLE-70")
+                .withName("The Nathan Apple")
+                .withDescription("Ever wonder why Nathan has an apple")
+                .withManufacturer("Apple")
+                .withRecommendedRetailPrice("-1")
+                .withBusiness(testBusiness1);
+        assertThrows(ResponseStatusException.class, builder::build);
+    }
+
+    /**
+     * Tests that a product built with a large recommended retail price (>=100000) throws a ResponseStatusException
+     */
+    @Test
+    void buildWithLargePrice() {
+        var builder = new Product.Builder()
+                .withProductCode("NATHAN-APPLE-70")
+                .withName("The Nathan Apple")
+                .withDescription("Ever wonder why Nathan has an apple")
+                .withManufacturer("Apple")
+                .withRecommendedRetailPrice("100000")
+                .withBusiness(testBusiness1);
+        assertThrows(ResponseStatusException.class, builder::build);
     }
 }

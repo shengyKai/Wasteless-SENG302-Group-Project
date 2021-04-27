@@ -247,7 +247,9 @@ public class Product {
         }
 
         /**
-         * Sets the builder's recommended retail price
+         * Sets the builder's recommended retail price.
+         * If the provided string is not a valid number then this method will throw an exception
+         *
          * @param recommendedRetailPrice the recommended retail price of the product
          * @return Builder with the recommended retail price set
          */
