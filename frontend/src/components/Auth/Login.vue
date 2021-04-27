@@ -82,6 +82,7 @@ export default {
     async showHome() {
       this.errorMessage = undefined;
       this.$store.dispatch("login", { email : this.email, password : this.password });
+<<<<<<< HEAD
       this.$router.push("/home");
 
       let credential = {
@@ -96,6 +97,10 @@ export default {
         return;
       }
       this.errorMessage = response;
+=======
+      this.$router.push("/profile");
+      console.log("A");
+>>>>>>> t80-validation-register
     },
   },
 };
