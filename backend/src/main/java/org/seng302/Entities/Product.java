@@ -1,5 +1,7 @@
 package org.seng302.Entities;
 
+import net.minidev.json.JSONObject;
+
 import javax.persistence.*;
 import java.math.BigDecimal;
 import java.util.Date;
@@ -128,6 +130,19 @@ public class Product {
         business.addToCatalogue(this);
     }
 
+    /**
+     * Convert product to a JSON object
+     */
+    public JSONObject constructJSONObject() {
+        JSONObject object = new JSONObject();
+        object.put("id", productCode);
+        object.put("name", name);
+        object.put("description", description);
+        object.put("manufacturer", manufacturer);
+        object.put("recommendedRetailPrice", recommendedRetailPrice);
+        object.put("created", created);
+        return object;
+    }
 
     /**
      * Builder for Product
