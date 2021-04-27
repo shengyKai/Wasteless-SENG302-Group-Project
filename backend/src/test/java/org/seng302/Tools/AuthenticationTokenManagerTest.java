@@ -1,7 +1,8 @@
 package org.seng302.Tools;
 
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.mockito.*;
 import org.seng302.Exceptions.AccessTokenException;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -15,6 +16,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class AuthenticationTokenManagerTest {
 
     @Mock
@@ -37,7 +39,7 @@ class AuthenticationTokenManagerTest {
 
     private final String authTokenName = "AUTHTOKEN";
 
-    @Before
+    @BeforeAll
     public void setUp() {
         MockitoAnnotations.openMocks(this);
     }
@@ -124,9 +126,9 @@ class AuthenticationTokenManagerTest {
                 invocation -> "abcd1234");
         when(request.getCookies()).thenAnswer(
                 invocation -> new Cookie[0]);
-        assertThrows(AccessTokenException.class, () -> {
-            AuthenticationTokenManager.checkAuthenticationToken(request);
-        });
+        assertThrows(AccessTokenException.class, () ->
+            AuthenticationTokenManager.checkAuthenticationToken(request)
+        );
     }
 
     /**
@@ -141,9 +143,9 @@ class AuthenticationTokenManagerTest {
                 invocation -> null);
         when(request.getCookies()).thenAnswer(
                 invocation -> new Cookie[0]);
-        assertThrows(AccessTokenException.class, () -> {
-            AuthenticationTokenManager.checkAuthenticationToken(request);
-        });
+        assertThrows(AccessTokenException.class, () ->
+            AuthenticationTokenManager.checkAuthenticationToken(request)
+        );
     }
 
     /**
@@ -162,9 +164,9 @@ class AuthenticationTokenManagerTest {
                     cookieArray[0] = new Cookie(authTokenName, "1234abcd");
                     return cookieArray;
                 });
-        assertThrows(AccessTokenException.class, () -> {
-            AuthenticationTokenManager.checkAuthenticationToken(request);
-        });
+        assertThrows(AccessTokenException.class, () ->
+            AuthenticationTokenManager.checkAuthenticationToken(request)
+        );
     }
 
     /**
