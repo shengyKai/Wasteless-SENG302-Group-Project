@@ -252,7 +252,11 @@ public class Product {
          * @return Builder with the recommended retail price set
          */
         public Builder withRecommendedRetailPrice(String recommendedRetailPrice) {
-            this.recommendedRetailPrice = new BigDecimal(recommendedRetailPrice);
+            try {
+                this.recommendedRetailPrice = new BigDecimal(recommendedRetailPrice);
+            } catch (NumberFormatException ignored) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The recommended retail price is not a number");
+            }
             return this;
         }
 
