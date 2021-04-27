@@ -228,7 +228,6 @@ public class User extends Account {
         }
     }
 
-
     /**
      * Gets the users country, city, street, house number etc as string
      * @return address

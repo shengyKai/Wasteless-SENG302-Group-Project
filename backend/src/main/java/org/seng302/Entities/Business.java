@@ -39,6 +39,9 @@ public class Business {
     @Column
     private Date created;
 
+    @OneToMany (fetch = FetchType.EAGER, mappedBy = "business", cascade = CascadeType.REMOVE)
+    private List<Product> catalogue = new ArrayList<>();
+
     @ManyToOne
     @JoinColumn(name = "owner_id")
     private User primaryOwner;
@@ -238,6 +241,28 @@ public class Business {
         ownerAdminSet.add(primaryOwner);
         return ownerAdminSet;
     }
+
+    /**
+     * The getter for the catalogue (list of products the business owns)
+     * @return the catalogue
+     */
+    public List<Product> getCatalogue() {
+        return catalogue;
+    }
+
+    /**
+     * Add the given product to the business's catalogue.
+     * This function is only expected to be called from "Product.setBusiness"
+     *
+     * @param product The product to be added.
+     */
+    public void addToCatalogue(Product product) {
+        if (product.getBusiness() != this) {
+            throw new IllegalArgumentException("\"addToCatalogue\" is not being called from \"Product.setBusiness\"");
+        }
+        catalogue.add(product);
+    }
+
     /**
      * Construct a JSON object representing the business. The JSON object includes an array of JSON
      * representations of the users who are administrators of the business, and a JSON representation
