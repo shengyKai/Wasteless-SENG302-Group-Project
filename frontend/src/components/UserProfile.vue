@@ -118,6 +118,7 @@
         <v-tooltip bottom >
           <template #activator="{on, attrs}">
             <v-chip
+              ref="administratorStatus"
               v-if="user.role==='globalApplicationAdmin'"
               outlined
               color="primary"
