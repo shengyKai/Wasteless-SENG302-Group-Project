@@ -88,10 +88,10 @@ describe('Register.vue', () => {
           countryCode: '64',
           phone: '1234567890',
           streetAddress: '15 some street',
-          region: "some state",
-          city: "some city",
-          country: "some country",
           district: "some district",
+          city: "some city",
+          region: "some state",
+          country: "some country",
           postcode: '1234'
         };
       }

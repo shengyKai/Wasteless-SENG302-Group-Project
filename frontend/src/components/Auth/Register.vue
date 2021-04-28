@@ -69,7 +69,7 @@
       <v-text-field
         v-model="nickname"
         label="Nickname"
-        :rules="nameRules.concat(maxMediumCharRules)"
+        :rules="alphabetRules.concat(maxMediumCharRules)"
         outlined
       />
 
@@ -167,7 +167,7 @@
       <LocationAutocomplete
         type="district"
         v-model="district"
-        :rules="maxLongCharRules"
+        :rules="maxLongCharRules.concat(alphabetRules).concat(maxLongCharRules)"
       />
 
       <!-- INPUT: City -->
@@ -175,7 +175,7 @@
         type="city"
         class="required"
         v-model="city"
-        :rules="mandatoryRules.concat(addressRules).concat(maxLongCharRules)"
+        :rules="mandatoryRules.concat(alphabetRules).concat(maxLongCharRules)"
       />
 
       <!-- INPUT: Region -->
@@ -183,7 +183,7 @@
         type="region"
         class="required"
         v-model="region"
-        :rules="mandatoryRules.concat(addressRules).concat(maxLongCharRules)"
+        :rules="mandatoryRules.concat(alphabetRules).concat(maxLongCharRules)"
       />
 
       <!-- INPUT: Country -->
@@ -191,7 +191,7 @@
         type="country"
         class="required"
         v-model="country"
-        :rules="mandatoryRules.concat(addressRules).concat(maxLongCharRules)"
+        :rules="mandatoryRules.concat(alphabetRules).concat(maxLongCharRules)"
       />
 
       <!-- INPUT: Postcode -->
@@ -302,7 +302,7 @@ export default {
       countryCodeRules: [
         field => /(^(\d{1,2}-)?\d{2,3}$)|(^$)/.test(field) || 'Must be a valid country code.'
       ],
-      addressRules: [
+      alphabetRules: [
         field => /^[a-z ]+$/i.test(field) || 'Naming must be valid'
       ],
       streetNumRules: [
