@@ -72,12 +72,7 @@ public class MainApplicationRunner implements ApplicationRunner {
                 .withAddress(new Location())
                 .withPrimaryOwner(user)
                 .build();
-
-        User user2 = userRepository.findByEmail("harry@webmail.com");
-        user2.setRole("globalApplicationAdmin");
-        userRepository.save(user2);
-        user.setRole("globalApplicationAdmin");
-        userRepository.save(user);
+        
         business = businessRepository.save(business);
 
         Product product = new Product.Builder()
