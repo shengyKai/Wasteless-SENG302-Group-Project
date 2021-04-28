@@ -39,10 +39,10 @@ public abstract class Account {
      */
     public void setEmail(String email) {
         boolean validEmail = (email != null && Pattern.matches(emailRegex, email));
-        if (validEmail && !email.trim().isEmpty()) {
+        if (validEmail && !email.trim().isEmpty() && email.length() <= 100) {
             this.email = email;
         } else {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Email must not be empty and must consist of an email prefix, a @ symbol and a domain");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Email must not be empty and must consist of an email prefix, a @ symbol and a domain, and less than 100 char");
         }
     }
 

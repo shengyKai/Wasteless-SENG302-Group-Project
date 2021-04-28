@@ -133,7 +133,7 @@ public class Location {
      * @return true if the street name is valid, false otherwise
      */
     public boolean checkValidStreetName(String streetName) {
-        if (streetName != null && streetName.length() < 100 && streetName.length() > 0 && streetName.matches("[ a-zA-Z]+")) {
+        if (streetName != null && streetName.length() <= 100 && streetName.length() > 0 && streetName.matches("[ a-zA-Z]+")) {
             return true;
         } else {
             return false;
@@ -149,7 +149,7 @@ public class Location {
      * @return true if the city name is valid, false otherwise
      */
     public boolean checkValidCity(String city) {
-        if (city != null && city.length() < 50 && city.length() > 0 && city.matches("[ a-zA-Z]+")) {
+        if (city != null && city.length() < 100 && city.length() > 0 && city.matches("[ a-zA-Z]+")) {
             return true;
         } else {
             return false;
@@ -165,7 +165,7 @@ public class Location {
      * @return true if the region name is valid, false otherwise
      */
     public boolean checkValidRegion(String region) {
-        if (region != null && region.length() < 50 && region.length() > 0 && region.matches("[ a-zA-Z]+")) {
+        if (region != null && region.length() < 100 && region.length() > 0 && region.matches("[ a-zA-Z]+")) {
             return true;
         } else {
             return false;
@@ -181,7 +181,7 @@ public class Location {
      * @return true if the country name is valid, false otherwise
      */
     public boolean checkValidCountry(String country) {
-        if (country != null && country.length() < 50 && country.length() > 0 && country.matches("[ a-zA-Z]+")) {
+        if (country != null && country.length() < 100 && country.length() > 0 && country.matches("[ a-zA-Z]+")) {
             return true;
         } else {
             return false;
@@ -197,7 +197,7 @@ public class Location {
      * @return true if the post code number is valid, false otherwise
      */
     public boolean checkValidPostCode(String postCode) {
-        if (postCode != null && postCode.length() <= 9 && postCode.length() > 0 && postCode.matches("[a-zA-Z0-9]+")) {
+        if (postCode != null && postCode.length() <= 16 && postCode.length() > 0 && postCode.matches("[a-zA-Z0-9]+")) {
             return true;
         } else {
             return false;
@@ -240,7 +240,7 @@ public class Location {
         if (checkValidCountry(country)) {
             this.country = country;
         } else {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "The country must not be empty, be less then 50 characters, and only contain letters.");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "The country must not be empty, be less then 32 characters, and only contain letters.");
         }
     }
 
@@ -248,7 +248,7 @@ public class Location {
         if (checkValidCity(city)) {
             this.city = city;
         } else {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "The city must not be empty, be less then 50 characters, and only contain letters.");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "The city must not be empty, be less then 32 characters, and only contain letters.");
         }
     }
 
@@ -256,7 +256,7 @@ public class Location {
         if (checkValidRegion(region)) {
             this.region = region;
         } else {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "The region must not be empty, be less then 50 characters, and only contain letters.");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "The region must not be empty, be less then 32 characters, and only contain letters.");
         }
     }
 
@@ -272,7 +272,7 @@ public class Location {
         if (checkValidStreetNumber(streetNumber)) {
             this.streetNumber = streetNumber;
         } else {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "The street number must be an number less than 1,000 and above 0.");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "The street number must not be empty, be less than 10 characters, adn only contain numbers.");
         }
     }
 
@@ -281,7 +281,7 @@ public class Location {
             this.postCode = postCode;
         } else {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "The post code must be a letter or number, be " +
-                    "less than 10 characters long, and at least one character long.");
+                    "less than 16 characters long, and at least one character long.");
         }
     }
 

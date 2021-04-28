@@ -8,7 +8,7 @@
         class="required"
         v-model="email"
         label="Email"
-        :rules="mandatoryRules.concat(emailRules).concat(maxMediumCharRules)"
+        :rules="mandatoryRules.concat(emailRules).concat(maxLongCharRules)"
         outlined
       />
 
@@ -154,12 +154,12 @@
 
       </v-row>
 
-      <!-- INPUT: Street/Company -->
+      <!-- INPUT: Street -->
       <v-text-field
         class="required"
         v-model="streetAddress"
         label="Street Address"
-        :rules="mandatoryRules"
+        :rules="mandatoryRules.concat(streetNumRules)"
         outlined
       />
 
@@ -175,7 +175,7 @@
         type="city"
         class="required"
         v-model="city"
-        :rules="maxLongCharRules.concat(mandatoryRules)"
+        :rules="mandatoryRules.concat(nameRules).concat(maxLongCharRules)"
       />
 
       <!-- INPUT: Region -->
@@ -183,7 +183,7 @@
         type="region"
         class="required"
         v-model="region"
-        :rules="maxLongCharRules.concat(mandatoryRules)"
+        :rules="mandatoryRules.concat(nameRules).concat(maxLongCharRules)"
       />
 
       <!-- INPUT: Country -->
@@ -191,7 +191,7 @@
         type="country"
         class="required"
         v-model="country"
-        :rules="maxLongCharRules.concat(mandatoryRules)"
+        :rules="mandatoryRules.concat(nameRules).concat(maxLongCharRules)"
       />
 
       <!-- INPUT: Postcode -->
@@ -199,10 +199,12 @@
         class="required"
         v-model="postcode"
         label="Postcode"
-        :rules="mandatoryRules.concat(maxLongCharRules).concat(numberRules)"
+        :rules="mandatoryRules.concat(numberRules).concat(maxShortCharRules)"
         outlined
       />
+
       <p class="error-text" v-if ="errorMessage !== undefined"> {{errorMessage}} </p>
+
       <!-- Register -->
       <v-btn
         type="submit"
@@ -279,13 +281,16 @@ export default {
         field => /(^[0-9]*$)/.test(field) || 'Must contain numbers only'
       ],
       nameRules: [
-        field =>  (field.length === 0 || (/^[a-z ,.'-]+$/i).test(field)) || 'Naming must be valid'
+        field =>  (field.length === 0 || (/^[a-z]+$/i).test(field)) || 'Naming must be valid'
+      ],
+      maxShortCharRules: [
+        field => (field.length <= 16) || 'Reached max character limit: 32'
       ],
       maxMediumCharRules: [
         field => (field.length <= 32) || 'Reached max character limit: 32'
       ],
-      maxLongCharRules: [
-        field => (field.length <= 255) || 'Reached max character limit: 255'
+      maxLongCharRules: [   
+        field => (field.length <= 100) || 'Reached max character limit: 100'
       ],
       charBioRules: [
         field => (field.length <= 200) || 'Reached max character limit: 200',
@@ -296,6 +301,10 @@ export default {
       ],
       countryCodeRules: [
         field => /(^(\d{1,2}-)?\d{2,3}$)|(^$)/.test(field) || 'Must be a valid country code.'
+      ],
+      streetNumRules: [
+        field => (field && field.length <= 109) || 'street num + aplhabet should not exist 109 characters. 100 for name, 9 for num ',
+        field => /^(?=.*[0-9])(?=.*[a-zA-Z])([a-zA-Z0-9]+)$/.test(field) || 'Must have at least one number and one alphabet'
       ],
     };
   },

@@ -560,7 +560,6 @@ public class UserTests {
         LocalDate minDate = date.minusYears(13);
         
         assertTrue(localDateOfBirth.compareTo(minDate) > 0);
-        System.out.println(minDate);
         try {
             testUser.setDob(dateOfBirth);
             fail("A Forbidden exception was expected, but not thrown");

@@ -65,7 +65,7 @@ public class User extends Account {
      * @param firstName users first name
      */
     public void setFirstName(String firstName) {
-        if (firstName != null && firstName.length() > 0 && firstName.length() <= 16 && firstName.matches("[ a-zA-Z]+")) {
+        if (firstName != null && firstName.length() > 0 && firstName.length() <= 32 && firstName.matches("[ a-zA-Z]+")) {
             this.firstName = firstName;
         } else {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The first name must not be empty, be less then 16 characters, and only contain letters.");
@@ -84,7 +84,7 @@ public class User extends Account {
      * @param middleName
      */
     public void setMiddleName(String middleName) {
-        if (middleName == null || (middleName.length() > 0 && middleName.length() <= 16 && middleName.matches("[ a-zA-Z]+"))) {
+        if (middleName == null || (middleName.length() > 0 && middleName.length() <= 32 && middleName.matches("[ a-zA-Z]+"))) {
             this.middleName = middleName;
         } else if (middleName.equals("")) {
             this.middleName = null;
@@ -108,7 +108,7 @@ public class User extends Account {
      * @param lastName users surname
      */
     public void setLastName(String lastName) {
-        if (lastName != null && lastName.length() > 0 && lastName.length() <= 16 && lastName.matches("[ a-zA-Z]+")) {
+        if (lastName != null && lastName.length() > 0 && lastName.length() <= 32 && lastName.matches("[ a-zA-Z]+")) {
             this.lastName = lastName;
         } else {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The last name must not be empty, be less then 16 characters, and only contain letters.");
@@ -128,7 +128,7 @@ public class User extends Account {
      * @param nickname users preferred name
      */
     public void setNickname(String nickname) {
-        if (nickname == null || (nickname.length() > 0 && nickname.length() <= 16 && nickname.matches("[ a-zA-Z]*"))) {
+        if (nickname == null || (nickname.length() > 0 && nickname.length() <= 32 && nickname.matches("[ a-zA-Z]*"))) {
             this.nickname = nickname;
         } else if (nickname.equals("")) {
             this.nickname = null;
@@ -151,7 +151,7 @@ public class User extends Account {
      */
     //Todo Discuss with team about what characters should be allowed in the BIO
     public void setBio(String bio) {
-        if (bio == null || (bio.length() > 0 && bio.length() <= 200 && bio.matches("[ a-zA-Z0-9@//$%&!'//#,//.//(//)//:;_-]*"))) {
+        if (bio == null || (bio.length() > 0 && bio.length() <= 200 && bio.matches("[ a-zA-Z0-9/p{Punct}]*"))) {
             this.bio = bio;
         } else if (bio.equals("")) {
             this.bio = null;
