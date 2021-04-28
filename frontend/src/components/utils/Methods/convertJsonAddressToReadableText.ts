@@ -10,7 +10,7 @@ export default {
         }
         return `${address.streetNumber} ${address.streetName}\n` +
                 `${address.city} ${address.postcode}\n${address.region}, ${address.country}`;
-      } else if (status === "partial") {
+      } else {
         return `${address.city}, ${address.region}, ${address.country}`;
       }
     }

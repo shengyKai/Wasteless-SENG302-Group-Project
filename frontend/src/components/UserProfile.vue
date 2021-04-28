@@ -249,6 +249,10 @@ export default {
       if (this.user.id === this.$store.state.user?.id) {
         this.$store.commit('setUser', this.user);
       }
+    },
+    //have to use a method here to access the method from mixins
+    insertAddress(address) {
+      return this.convertAddressToReadableText(address, "full");
     }
   },
 
@@ -296,12 +300,6 @@ export default {
   },
   components: {
     UserAvatar,
-  },
-  methods: {
-    //have to use a method here to access the method from mixins
-    insertAddress(address) {
-      return this.convertAddressToReadableText(address, "full");
-    }
   }
 };
 </script>
