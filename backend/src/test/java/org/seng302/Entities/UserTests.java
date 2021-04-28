@@ -275,7 +275,7 @@ public class UserTests {
      */
     @Test
     public void checkInvalidMiddleNameTooLong() {
-        String[] invalidMiddleNames = { "HippoTooLongPotamus", "Connnnnnnnnnnnnnnnnnnnnor", "MrsMagicalMagical" };
+        String[] invalidMiddleNames = { "HippoTooLongPotamusqwertyuiopasdfg", "Connnnnnnnnnnnnnnnnnnnnorqwertyui", "MrsMagicalMagicalqwertyuiopqwerty" };
         for (String middleName : invalidMiddleNames) {
             try {
                 testUser.setMiddleName(middleName);

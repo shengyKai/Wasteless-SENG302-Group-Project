@@ -151,7 +151,7 @@ public class User extends Account {
      */
     //Todo Discuss with team about what characters should be allowed in the BIO
     public void setBio(String bio) {
-        if (bio == null || (bio.length() > 0 && bio.length() <= 200 && bio.matches("[ a-zA-Z0-9\\p{Punct}&&[^*^]]*"))) {
+        if (bio == null || (bio.length() > 0 && bio.length() <= 200 && bio.matches("[ a-zA-Z0-9\\p{Punct}&&[^*()]]*"))) {
             this.bio = bio;
         } else if (bio.equals("")) {
             this.bio = null;

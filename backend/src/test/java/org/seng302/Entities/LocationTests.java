@@ -121,11 +121,11 @@ public class LocationTests {
    * Checks several names with over 100 characters fail when passed into the checkValidStreetName method
    */
   @Test
-  public void checkValidStreetNameOverHundred() {
+  public void checkValidStreetNameOverHundredNine() {
     String[] streetNames = new String[]{
             "abcdefghijklmnopqrstuvwxyz abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz",
             "helphelphelphelphelphelphelphelphelphelphelphelphelphelphelphelphelphelphelphelphelphelphelphelphelp",
-            "idontneedit idontneedit idontneedit idontneedit idontneeditidontneeditidontneeditidontneeditidontneedit" };
+            "idontneedit idontneedit idontneedit idontneedit idontneedit idontneeditidontneeditidontneeditidontneeditidontneedit" };
     for (String streetName : streetNames) {
       assertFalse(testLocation.checkValidStreetName(streetName));
     }
@@ -179,9 +179,10 @@ public class LocationTests {
    * Checks several names with over 50 characters fail when passed into the checkValidCity method
    */
   @Test
-  public void checkValidCityOverFifty() {
+  public void checkValidCityOverHundred() {
     String[] cities = new String[]{ "this city string contains exactly fifty characters",
                                     "helpppppppppppppppppppppppppppppppppppppppppppppppppppppp",
+                                    "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
                                     "This is a city name that resembles the name of city" };
     for (String city : cities) {
       assertFalse(testLocation.checkValidCity(city));
@@ -236,10 +237,10 @@ public class LocationTests {
    * Checks several names with over 50 characters fail when passed into the checkValidRegion method
    */
   @Test
-  public void checkValidRegionOverFifty() {
-    String[] regions = new String[]{ "this region issssssssssssssssssss fifty characters",
-                                      "helppppppppppppppppppppppppppppppppppppppppppppppp",
-                                      "this region is full of surprises you should come have a look" };
+  public void checkValidRegionOverHundred() {
+    String[] regions = new String[]{ "this region issssssssssssssssssssssssssssssssssssssss fifty characters",
+                                      "helppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppp",
+                                      "this region is full of surprises you should come have a lookkkkkkkkkkkk" };
     for (String region : regions) {
       assertFalse(testLocation.checkValidRegion(region));
     }
@@ -293,9 +294,10 @@ public class LocationTests {
    * Checks several names with over 50 characters fail when passed into the checkValidCountry method
    */
   @Test
-  public void checkValidCountryOverFifty() {
+  public void checkValidCountryOverHundred() {
     String[] countries = new String[]{ "This country is exactlyyyyyy fifty characters long",
                                         "helppppppppppppppppppppppppppppppppppppppppppppppp",
+                                        "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
                                         "This country has a lot going for it we are coronavirus free" };
     for (String country : countries) {
       assertFalse(testLocation.checkValidRegion(country));
@@ -350,8 +352,8 @@ public class LocationTests {
    * Checks several zipcodes over ten characters fail when passed into the checkValidZipCode method
    */
   @Test
-  public void checkValidZipCodeOverTen() {
-    String[] zipcodes = new String[]{ "1234567890", "123456789123456789", "123456789000000" };
+  public void checkValidZipCodeOverSixteen() {
+    String[] zipcodes = new String[]{ "12345678901234567", "99123456789123456789", "456123456789000000" };
     for (String zipcode : zipcodes) {
       assertFalse(testLocation.checkValidPostCode(zipcode));
     }

@@ -142,7 +142,7 @@ public class Location {
 
     /**
      * Checks the name of the city is valid
-     * Realistically no city name will be over 50 characters, they are also generally one or two words. Therefore, the
+     * Realistically no city name will be over 100 characters, they are also generally one or two words. Therefore, the
      * city name must be below 50 characters and have at least one character. Additionally, foreign addresses are
      * expected to be put in the English version, thus, the city must only contain letters.
      * @param city the city of the location
@@ -158,7 +158,7 @@ public class Location {
 
     /**
      * Checks the name of the region is valid
-     * Realisitcally no region name will be over 50 characters, they are also generally are one word. Therefore, the
+     * Realisitcally no region name will be over 100 characters, they are also generally are one word. Therefore, the
      * region name must be below 50 characters and have at least one character. Additionally, foreign addresses are
      * expected to be put in the English version, thus, the region must only contain letters.
      * @param region the city of the location
@@ -174,7 +174,7 @@ public class Location {
 
     /**
      * Checks the name of the country is valid
-     * Realisitcally no region name will be over 50 characters, they are also generally are one word. Therefore, the
+     * Realisitcally no region name will be over 100 characters, they are also generally are one word. Therefore, the
      * country name must be below 50 characters and have at least one character. Additionally, foreign addresses are
      * expected to be put in the English version, thus, the country must only contain letters.
      * @param country the country of the location
