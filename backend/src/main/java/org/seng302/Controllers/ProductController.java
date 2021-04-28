@@ -9,8 +9,8 @@ import org.seng302.Entities.Product;
 import org.seng302.Exceptions.BusinessNotFoundException;
 import org.seng302.Persistence.BusinessRepository;
 import org.seng302.Persistence.ProductRepository;
-import org.seng302.Persistence.UserRepository;
 import org.seng302.Tools.AuthenticationTokenManager;
+import org.seng302.Tools.SearchHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -18,6 +18,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -38,17 +39,67 @@ public class ProductController {
     }
 
     /**
+     * Sort products by a key. Can reverse results.
+     * @param key Key to order products by.
+     * @param reverse Reverse results.
+     * @return Product Comparator
+     */
+    Comparator<Product> sortProducts(String key, String reverse) {
+        key = key == null ? "productCode" : key;
+        reverse = reverse == null ? "false" : reverse;
+
+        Comparator<Product> sort;
+        switch (key) {
+            case "name":
+                sort = Comparator.comparing(Product::getName);
+                break;
+
+            case "description":
+                sort = Comparator.comparing(Product::getDescription);
+                break;
+
+            case "manufacturer":
+                sort = Comparator.comparing(Product::getManufacturer);
+                break;
+
+            case "recommendedRetailPrice":
+                sort = Comparator.comparing(Product::getRecommendedRetailPrice);
+                break;
+
+            case "created":
+                sort = Comparator.comparing(Product::getCreated);
+                break;
+
+            default:
+                sort = Comparator.comparing(Product::getProductCode);
+                break;
+        }
+
+        if (!reverse.isEmpty() && reverse.equals("true")) {
+            sort = sort.reversed();
+        }
+
+        return sort;
+    }
+
+    /**
      * REST GET method to retrieve all the products with a business's catalogue.
      * @param id the id of the business
      * @param request the HTTP request
      * @return List of products in the business's catalogue
      */
     @GetMapping("/businesses/{id}/products")
-    JSONArray retrieveCatalogue(@PathVariable Long id, HttpServletRequest request) {
+    private JSONArray retrieveCatalogue(@PathVariable Long id,
+                                HttpServletRequest request,
+                                @RequestParam(required = false) String orderBy,
+                                @RequestParam(required = false) String page,
+                                @RequestParam(required = false) String resultsPerPage,
+                                @RequestParam(required = false) String reverse) {
+
         logger.info("Get catalogue by business id.");
         AuthenticationTokenManager.checkAuthenticationToken(request);
 
-        logger.info("Retrieving catalogue from business with id %d.", id);
+        logger.info(String.format("Retrieving catalogue from business with id %d.", id));
         Optional<Business> business = businessRepository.findById(id);
         if (business.isEmpty()) {
             BusinessNotFoundException notFound = new BusinessNotFoundException();
@@ -58,6 +109,12 @@ public class ProductController {
             business.get().checkSessionPermissions(request);
 
             List<Product> catalogue = business.get().getCatalogue();
+
+            Comparator<Product> sort = sortProducts(orderBy, reverse);
+            catalogue.sort(sort);
+
+            catalogue = SearchHelper.getPageInResults(catalogue, page, resultsPerPage);
+
             JSONArray responseBody = new JSONArray();
             for (Product product: catalogue) {
                 responseBody.appendElement(product.constructJSONObject());
@@ -65,6 +122,37 @@ public class ProductController {
             return responseBody;
         }
     }
+
+    /**
+     * REST GET method to retrieve the number of products in a business's catalogue.
+     * @param id the id of the business
+     * @param request the HTTP request
+     * @return List of products in the business's catalogue
+     */
+    @GetMapping("/businesses/{id}/products/count")
+    private JSONObject retrieveCatalogueCount(@PathVariable Long id,
+                                      HttpServletRequest request) {
+
+        AuthenticationTokenManager.checkAuthenticationToken(request);
+
+        Optional<Business> business = businessRepository.findById(id);
+
+        if(business.isEmpty()) {
+            BusinessNotFoundException notFound = new BusinessNotFoundException();
+            logger.error(notFound.getMessage());
+            throw new BusinessNotFoundException();
+        } else {
+            business.get().checkSessionPermissions(request);
+
+            List<Product> catalogue = business.get().getCatalogue();
+
+            JSONObject responseBody = new JSONObject();
+            responseBody.put("count", catalogue.size());
+
+            return responseBody;
+        }
+    }
+
 
     /**
      * POST endpoint for adding a product to a businesses catalogue.

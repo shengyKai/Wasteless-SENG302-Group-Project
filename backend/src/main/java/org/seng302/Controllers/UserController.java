@@ -11,7 +11,7 @@ import org.seng302.Exceptions.FailedRegisterException;
 import org.seng302.Exceptions.UserNotFoundException;
 import org.seng302.Persistence.UserRepository;
 import org.seng302.Tools.AuthenticationTokenManager;
-import org.seng302.Tools.UserSearchHelper;
+import org.seng302.Tools.SearchHelper;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
@@ -132,7 +132,7 @@ public class UserController {
         AuthenticationTokenManager.checkAuthenticationToken(session);
         logger.info(String.format("Performing search for \"%s\" and getting search count", searchQuery));
         List<User> queryResults;
-        queryResults = UserSearchHelper.getSearchResultsOrderedByRelevance(searchQuery, userRepository, "false");
+        queryResults = SearchHelper.getSearchResultsOrderedByRelevance(searchQuery, userRepository, "false");
 
         JSONObject count = new JSONObject();
         count.put("count", queryResults.size());
@@ -162,13 +162,13 @@ public class UserController {
         logger.info(String.format("Performing search for \"%s\"", searchQuery));
         List<User> queryResults;
         if (orderBy == null || orderBy.equals("relevance")) {
-            queryResults = UserSearchHelper.getSearchResultsOrderedByRelevance(searchQuery, userRepository, reverse);
+            queryResults = SearchHelper.getSearchResultsOrderedByRelevance(searchQuery, userRepository, reverse);
         } else {
-            Specification<User> spec = UserSearchHelper.constructUserSpecificationFromSearchQuery(searchQuery);
-            Sort userSort = UserSearchHelper.getSort(orderBy, reverse);
+            Specification<User> spec = SearchHelper.constructUserSpecificationFromSearchQuery(searchQuery);
+            Sort userSort = SearchHelper.getSort(orderBy, reverse);
             queryResults = userRepository.findAll(spec, userSort);
         }
-        List<User> pageInResults = UserSearchHelper.getPageInResults(queryResults, page, resultsPerPage);
+        List<User> pageInResults = SearchHelper.getPageInResults(queryResults, page, resultsPerPage);
         JSONArray publicResults = new JSONArray();
         for (User user : pageInResults) {
             if (AuthenticationTokenManager.sessionCanSeePrivate(session, user.getUserID())) {
