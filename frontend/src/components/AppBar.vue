@@ -1,78 +1,78 @@
 <template>
   <v-app-bar max-height="64px">
-    <div class="container-outer">
-      <h1>WASTELESS</h1>
-
-      <!-- Space between the app name and the controls -->
-      <div class="spacer"/>
+    <div class="container-outer flex-center">
+      <h2>WASTELESS</h2>
 
       <!-- Search Bar component to perform search and show result, if not on search page -->
       <SearchBar v-if="$route.path !== '/search'" />
 
-      <!-- Action menu -->
-      <div class="text-center">
-        <v-menu offset-y>
-          <template v-slot:activator="{ on, attrs }">
-            <v-btn icon v-bind="attrs" v-on="on">
-              <v-avatar>
-                <v-icon> mdi-account-circle </v-icon>
-              </v-avatar>
-            </v-btn>
-          </template>
-          <v-list class="list">
-            <v-list-item v-if="isDGAA" class="admin link" @click="viewAdmin">
-              <v-list-item-title class="admin"> ADMIN </v-list-item-title>
-            </v-list-item>
-            <v-list-item v-else-if="isAdmin" class="admin">
-              <v-list-item-title class="admin"> ADMIN </v-list-item-title>
-            </v-list-item>
-            <v-list-item>
-              <v-list-item-title class="link" @click="viewProfile">
-                Profile
-              </v-list-item-title>
-            </v-list-item>
-            <v-list-item>
-              <v-list-item-title class="link" @click="logout">
-                Logout
-              </v-list-item-title>
-            </v-list-item>
-            <v-list-item>
-              <v-list-item-title class="link" @click="viewCreateBusiness">
-                Create Business
-              </v-list-item-title>
-            </v-list-item>
-          </v-list>
-        </v-menu>
-      </div>
-      <!-- Dropdown menu for selecting role which user is currently acting as -->
-      <div class="role-menu">
-        <v-menu offset-y>
-          <template v-slot:activator="{ on, attrs }">
-            <!-- User name and icon -->
-            <v-chip
-              v-if="user"
-              v-bind="attrs"
-              v-on="on"
-            >
-              <UserAvatar :user="user" size="small" />
-              <div class="name">
-                {{ roles[selectedRole].displayText }}
-              </div>
-            </v-chip>
-          </template>
-          <v-list>
-            <v-list-item-group
-              v-model="selectedRole"
-              color="primary"
-            >
-              <template v-for="(role, index) in roles">
-                <v-list-item :key="index">
-                  <v-list-item-title>{{ role.displayText }}</v-list-item-title>
-                </v-list-item>
-              </template>
-            </v-list-item-group>
-          </v-list>
-        </v-menu>
+      <!-- Right items -->
+      <div class="flex-center">
+        <!-- Action menu -->
+        <div class="text-center">
+          <v-menu offset-y>
+            <template v-slot:activator="{ on, attrs }">
+              <v-btn icon v-bind="attrs" v-on="on">
+                <v-avatar>
+                  <v-icon> mdi-account-circle </v-icon>
+                </v-avatar>
+              </v-btn>
+            </template>
+            <v-list class="list">
+              <v-list-item v-if="isDGAA" class="admin link" @click="viewAdmin">
+                <v-list-item-title class="admin"> ADMIN </v-list-item-title>
+              </v-list-item>
+              <v-list-item v-else-if="isAdmin" class="admin">
+                <v-list-item-title class="admin"> ADMIN </v-list-item-title>
+              </v-list-item>
+              <v-list-item>
+                <v-list-item-title class="link" @click="viewProfile">
+                  Profile
+                </v-list-item-title>
+              </v-list-item>
+              <v-list-item>
+                <v-list-item-title class="link" @click="logout">
+                  Logout
+                </v-list-item-title>
+              </v-list-item>
+              <v-list-item>
+                <v-list-item-title class="link" @click="viewCreateBusiness">
+                  Create Business
+                </v-list-item-title>
+              </v-list-item>
+            </v-list>
+          </v-menu>
+        </div>
+        <!-- Dropdown menu for selecting role which user is currently acting as -->
+        <div class="role-menu">
+          <v-menu offset-y>
+            <template v-slot:activator="{ on, attrs }">
+              <!-- User name and icon -->
+              <v-chip
+                v-if="user"
+                v-bind="attrs"
+                v-on="on"
+              >
+                <UserAvatar :user="user" size="small" />
+                <div class="name">
+                  {{ roles[selectedRole].displayText }}
+                </div>
+              </v-chip>
+            </template>
+            <v-list>
+              <v-list-item-group
+                v-model="selectedRole"
+                color="primary"
+              >
+                <template v-for="(role, index) in roles">
+                  <v-list-item :key="index">
+                    <v-list-item-title>{{ role.displayText }}</v-list-item-title>
+                  </v-list-item>
+                </template>
+              </v-list-item-group>
+            </v-list>
+          </v-menu>
+        </div>
       </div>
     </div>
   </v-app-bar>
@@ -178,5 +178,11 @@ export default {
 .list {
   padding-top: 0;
   padding-bottom: 0;
+}
+
+.flex-center {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 </style>
