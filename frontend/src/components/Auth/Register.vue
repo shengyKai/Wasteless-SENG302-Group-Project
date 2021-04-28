@@ -303,7 +303,7 @@ export default {
         field => /(^(\d{1,2}-)?\d{2,3}$)|(^$)/.test(field) || 'Must be a valid country code.'
       ],
       alphabetRules: [
-        field => /^[a-z ]+$/i.test(field) || 'Naming must be valid'
+        field => ( field.length === 0 || /^[a-z ]+$/i.test(field)) || 'Naming must be valid'
       ],
       streetNumRules: [
         field => (field && field.length <= 109) || 'Reach Max chracter limit 109 ',
