@@ -65,7 +65,7 @@ public class UserTests {
     }
 
     /**
-     * Helper function for tests involving the businesses administered attribute. Saves the user to the 
+     * Helper function for tests involving the businesses administered attribute. Saves the user to the
      * user repository and creates two businesses, making the user a primary admin of one and a secondary
      * admin of the other.
      */
@@ -811,8 +811,8 @@ public class UserTests {
     }
 
     /**
-     * Test that when constructPublicJson is called with 'true' as its arguement, and the list of 
-     * businesses administered by the user is not empty, the 'businessesAdministered' field of the 
+     * Test that when constructPublicJson is called with 'true' as its arguement, and the list of
+     * businesses administered by the user is not empty, the 'businessesAdministered' field of the
      * resulting json will have the correct details for every business administered by the user
      */
     @Test
@@ -833,7 +833,7 @@ public class UserTests {
     }
 
     /**
-     * Test that when constructPublicJson is called with 'false' as its arguement, and the list of 
+     * Test that when constructPublicJson is called with 'false' as its arguement, and the list of
      * businesses administered by the user is not empty, the resulting json wil not contain the businessesAdministered
      * field.
      */
@@ -845,7 +845,7 @@ public class UserTests {
     }
 
     /**
-     * Test that when constructPublicJson is called with no arguement, and the list of 
+     * Test that when constructPublicJson is called with no arguement, and the list of
      * businesses administered by the user is not empty, the 'businessesAdministered' field will not be present
      * in the resulting JSON.
      */
@@ -857,8 +857,8 @@ public class UserTests {
     }
 
     /**
-     * Test that when constructPrviateJson is called with 'true' as its arguement, and the list of 
-     * businesses administered by the user is not empty, the 'businessesAdministered' field of the 
+     * Test that when constructPrviateJson is called with 'true' as its arguement, and the list of
+     * businesses administered by the user is not empty, the 'businessesAdministered' field of the
      * resulting json will have the correct details for every business administered by the user
      */
     @Test
@@ -878,7 +878,7 @@ public class UserTests {
     }
 
     /**
-     * Test that when constructPrivateJson is called with 'false' as its arguement, and the list of 
+     * Test that when constructPrivateJson is called with 'false' as its arguement, and the list of
      * businesses administered by the user is not empty, the resulting json will not include the
      * businessesAdministered field.
      */
@@ -890,7 +890,7 @@ public class UserTests {
     }
 
     /**
-     * Test that when constructPrivateJson is called with no arguement, and the list of 
+     * Test that when constructPrivateJson is called with no arguement, and the list of
      * businesses administered by the user is not empty, the resulting json will not contain the businessesAdministered
      * field.
      */
@@ -934,9 +934,11 @@ public class UserTests {
      */
     @Test
     public void setCreatedTest() {
-        Date testDate = new Date(System.currentTimeMillis());
+        Date now = new Date(System.currentTimeMillis());
         User testUser = testBuilder.build();
-        assertEquals(testDate.toString(), testUser.getCreated().toString());
+        // Check that the difference between the time the user was created and the time at the start of execution of
+        // this function is less than 1 second
+        assertTrue(testUser.getCreated().getTime() - now.getTime() < 1000);
     }
 
     /**

@@ -24,6 +24,7 @@ public class Business {
     //Minimum age to create a business
     private final int MinimumAge = 16;
     private static final List<String> businessTypes = new ArrayList<>(Arrays.asList("Accommodation and Food Services", "Retail Trade", "Charitable organisation", "Non-profit organisation"));
+    private static final String textRegex = "[ a-zA-Z0-9@//$%&',//.//:;_-]*";
 
     @Id
     @GeneratedValue
@@ -39,11 +40,14 @@ public class Business {
     @Column
     private Date created;
 
+    @OneToMany (fetch = FetchType.EAGER, mappedBy = "business", cascade = CascadeType.REMOVE)
+    private List<Product> catalogue = new ArrayList<>();
+
     @ManyToOne
-    @JoinColumn(name = "owner_id")
+    @JoinColumn(name = "owner_id", nullable = false)
     private User primaryOwner;
 
-    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name="business_admins",
             joinColumns = {@JoinColumn(name="business_id")},
@@ -65,8 +69,15 @@ public class Business {
      * @param name Business name
      */
     public void setName(String name) {
-        if (name == null || name.isEmpty()) {
+        if (name == null || name.isEmpty() || name.isBlank()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The business name must not be empty");
+        }
+        if (name.length() > 100) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The business name must be 100 characters or fewer");
+        }
+        if (!name.matches(textRegex)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The business name can contain only letters, " +
+                    "numbers, and the special characters @ $ % & - _ , . : ;");
         }
         this.name = name;
     }
@@ -84,8 +95,16 @@ public class Business {
      * @param description Business description
      */
     public void setDescription(String description) {
-        if (description == null || description.isEmpty()) {
+        if (description == null || description.isEmpty() ||  description.isBlank()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The business description must not be empty");
+        }
+        if (description.length() > 200) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The business description must be 200 characters" +
+                    " or fewer");
+        }
+        if (!description.matches(textRegex)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The business description can contain only letters, " +
+                    "numbers, and the special characters @ $ % & - _ , . : ;");
         }
         this.description = description;
     }
@@ -103,6 +122,9 @@ public class Business {
      * @param address business address
      */
     public void setAddress(Location address) {
+        if (address == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The business's address cannot be null");
+        }
         this.address = address;
     }
 
@@ -138,6 +160,12 @@ public class Business {
      * @param createdAt date created
      */
     private void setCreated(Date createdAt) {
+        if (createdAt == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The date the business was created cannot be null");
+        }
+        if (this.created != null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The date the business was created cannot be reset");
+        }
         this.created = createdAt;
     }
 
@@ -238,6 +266,28 @@ public class Business {
         ownerAdminSet.add(primaryOwner);
         return ownerAdminSet;
     }
+
+    /**
+     * The getter for the catalogue (list of products the business owns)
+     * @return the catalogue
+     */
+    public List<Product> getCatalogue() {
+        return catalogue;
+    }
+
+    /**
+     * Add the given product to the business's catalogue.
+     * This function is only expected to be called from "Product.setBusiness"
+     *
+     * @param product The product to be added.
+     */
+    public void addToCatalogue(Product product) {
+        if (product.getBusiness() != this) {
+            throw new IllegalArgumentException("\"addToCatalogue\" is not being called from \"Product.setBusiness\"");
+        }
+        catalogue.add(product);
+    }
+
     /**
      * Construct a JSON object representing the business. The JSON object includes an array of JSON
      * representations of the users who are administrators of the business, and a JSON representation
