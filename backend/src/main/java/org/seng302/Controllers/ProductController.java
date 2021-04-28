@@ -9,9 +9,8 @@ import org.seng302.Entities.Product;
 import org.seng302.Exceptions.BusinessNotFoundException;
 import org.seng302.Persistence.BusinessRepository;
 import org.seng302.Persistence.ProductRepository;
-import org.seng302.Persistence.UserRepository;
 import org.seng302.Tools.AuthenticationTokenManager;
-import org.seng302.Tools.UserSearchHelper;
+import org.seng302.Tools.SearchHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -39,11 +38,17 @@ public class ProductController {
         this.businessRepository = businessRepository;
     }
 
-    Comparator orderBy(String key, String reverse) {
+    /**
+     * Sort products by a key. Can reverse results.
+     * @param key Key to order products by.
+     * @param reverse Reverse results.
+     * @return Product Comparator
+     */
+    Comparator<Product> sortProducts(String key, String reverse) {
         key = key == null ? "productCode" : key;
         reverse = reverse == null ? "false" : reverse;
 
-        Comparator sort;
+        Comparator<Product> sort;
         switch (key) {
             case "name":
                 sort = Comparator.comparing(Product::getName);
@@ -84,7 +89,7 @@ public class ProductController {
      * @return List of products in the business's catalogue
      */
     @GetMapping("/businesses/{id}/products")
-    JSONArray retrieveCatalogue(@PathVariable Long id,
+    private JSONArray retrieveCatalogue(@PathVariable Long id,
                                 HttpServletRequest request,
                                 @RequestParam(required = false) String orderBy,
                                 @RequestParam(required = false) String page,
@@ -105,10 +110,10 @@ public class ProductController {
 
             List<Product> catalogue = business.get().getCatalogue();
 
-            Comparator sort = orderBy(orderBy, reverse);
+            Comparator<Product> sort = sortProducts(orderBy, reverse);
             catalogue.sort(sort);
 
-            catalogue = UserSearchHelper.getPageInResults(catalogue, page, resultsPerPage);
+            catalogue = SearchHelper.getPageInResults(catalogue, page, resultsPerPage);
 
             JSONArray responseBody = new JSONArray();
             for (Product product: catalogue) {
@@ -117,6 +122,37 @@ public class ProductController {
             return responseBody;
         }
     }
+
+    /**
+     * REST GET method to retrieve the number of products in a business's catalogue.
+     * @param id the id of the business
+     * @param request the HTTP request
+     * @return List of products in the business's catalogue
+     */
+    @GetMapping("/businesses/{id}/products/count")
+    private JSONObject retrieveCatalogueCount(@PathVariable Long id,
+                                      HttpServletRequest request) {
+
+        AuthenticationTokenManager.checkAuthenticationToken(request);
+
+        Optional<Business> business = businessRepository.findById(id);
+
+        if(business.isEmpty()) {
+            BusinessNotFoundException notFound = new BusinessNotFoundException();
+            logger.error(notFound.getMessage());
+            throw new BusinessNotFoundException();
+        } else {
+            business.get().checkSessionPermissions(request);
+
+            List<Product> catalogue = business.get().getCatalogue();
+
+            JSONObject responseBody = new JSONObject();
+            responseBody.put("count", catalogue.size());
+
+            return responseBody;
+        }
+    }
+
 
     /**
      * POST endpoint for adding a product to a businesses catalogue.
