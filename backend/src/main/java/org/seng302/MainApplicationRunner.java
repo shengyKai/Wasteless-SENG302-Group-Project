@@ -35,7 +35,6 @@ public class MainApplicationRunner implements ApplicationRunner {
         DGAAController.checkDGAA(dgaaRepository);
 
         logger.info("Startup application with {}", args);
-        User user2 = _userRepository.findByEmail("harry@webmail.com");
     }
 
 }
