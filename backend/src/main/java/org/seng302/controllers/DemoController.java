@@ -91,7 +91,7 @@ public class DemoController {
 
         // Construct demo product and save it to the repository
         Product product = new Product.Builder()
-                .withProductCode("NathanApple-70")
+                .withProductCode("NATHAN-APPLE-70")
                 .withName("The Nathan Apple")
                 .withDescription("Ever wonder why Nathan has an apple")
                 .withManufacturer("Apple")

@@ -3,10 +3,17 @@ package org.seng302.controllers;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.Ignore;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.junit.runner.RunWith;
+import org.mockito.MockedConstruction;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.seng302.entities.Business;
 import org.seng302.entities.Location;
 import org.seng302.entities.Product;
@@ -17,26 +24,31 @@ import org.seng302.persistence.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpStatus;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.Cookie;
 import java.text.ParseException;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
+import java.util.Objects;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @AutoConfigureMockMvc
-public class ProductControllerTest {
+class ProductControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -59,6 +71,7 @@ public class ProductControllerTest {
      */
     private void setUpAuthCode() {
         String authCode = "0".repeat(64);
+        sessionAuthToken.clear();
         sessionAuthToken.put("AUTHTOKEN", authCode);
         authCookie = new Cookie("AUTHTOKEN", authCode);
     }
@@ -164,7 +177,7 @@ public class ProductControllerTest {
      */
     public void addSeveralProductsToACatalogue() {
         Product product1 = new Product.Builder()
-                .withProductCode("NathanApple-70")
+                .withProductCode("NATHAN-APPLE-70")
                 .withName("The Nathan Apple")
                 .withDescription("Ever wonder why Nathan has an apple")
                 .withManufacturer("Apple1")
@@ -172,7 +185,7 @@ public class ProductControllerTest {
                 .withBusiness(testBusiness1)
                 .build();
         Product product2 = new Product.Builder()
-                .withProductCode("AlmondMilk100")
+                .withProductCode("ALMOND-MILK-100")
                 .withName("Almond Milk")
                 .withDescription("Like water except bad for the environment")
                 .withManufacturer("Apple2")
@@ -180,7 +193,7 @@ public class ProductControllerTest {
                 .withBusiness(testBusiness1)
                 .build();
         Product product3 = new Product.Builder()
-                .withProductCode("Coffee7")
+                .withProductCode("COFFEE-7")
                 .withName("Generic Brand Coffee")
                 .withDescription("This coffee tastes exactly as you expect it would")
                 .withManufacturer("Apple3")
@@ -188,7 +201,7 @@ public class ProductControllerTest {
                 .withBusiness(testBusiness1)
                 .build();
         Product product4 = new Product.Builder()
-                .withProductCode("DarkChocolate")
+                .withProductCode("DARK-CHOCOLATE")
                 .withName("Dark Chocolate")
                 .withDescription("Would like a high cocoa concentration")
                 .withManufacturer("Apple4")
@@ -343,7 +356,301 @@ public class ProductControllerTest {
         assertTrue(responseBody.isEmpty());
     }
 
+    /**
+     * Creates a valid request body for the /businesses/:id/products endpoint
+     *
+     * @return A JSONObject that is to be used in a POST /businesses/:id/products request
+     */
+    private JSONObject generateProductCreationInfo() {
+        JSONObject productInfo = new JSONObject();
+        productInfo.put("id", "WATT-420-BEANS");
+        productInfo.put("name", "Watties Baked Beans - 420g can");
+        productInfo.put("description", "Baked Beans as they should be.");
+        productInfo.put("manufacturer", "Heinz Wattie's Limited");
+        productInfo.put("recommendedRetailPrice", 2.2);
+        return productInfo;
+    }
 
+    /**
+     * Tests that using the POST /bussinesses/:id/products without a request body results in a 400 response
+     */
+    @Test
+    void postingAProductWithoutARequestBody() {
+        setCurrentUser(ownerUser.getUserID());
+        assertDoesNotThrow(() -> mockMvc.perform(post(String.format("/businesses/%d/products", testBusiness1.getId()))
+                .sessionAttrs(sessionAuthToken)
+                .contentType("application/json")
+                .cookie(authCookie))
+                .andExpect(status().isBadRequest())
+                .andReturn());
+    }
+
+    /**
+     * Tests that using the POST /businesses/:id/products endpoint adds a product that is returned from
+     * Product.Builder.build to the businesses catalogue.
+     */
+    @Test
+    void postingAProductAddsItToTheCatalogue() {
+        setCurrentUser(ownerUser.getUserID());
+        // The mock result
+        Product mockedResult = new Product.Builder()
+                .withProductCode("NATHAN-APPLE-71")
+                .withName("The Nathan Apple")
+                .withDescription("Ever wonder why Nathan has an apple")
+                .withManufacturer("Apple")
+                .withRecommendedRetailPrice("9000.05")
+                .withBusiness(testBusiness1)
+                .build();
+
+        try (MockedConstruction<Product.Builder> mocked = Mockito.mockConstruction(Product.Builder.class, withSettings().defaultAnswer(RETURNS_SELF), (mock, context) -> {
+            when(mock.build()).thenReturn(mockedResult); // Makes sure that build returns a valid product
+        })) {
+            setCurrentUser(ownerUser.getUserID());
+            // The value inside here will be ignored
+            var productInfo = generateProductCreationInfo();
+
+            assertDoesNotThrow(() -> mockMvc.perform(post(String.format("/businesses/%d/products", testBusiness1.getId()))
+                    .content(productInfo.toString())
+                    .sessionAttrs(sessionAuthToken)
+                    .contentType("application/json")
+                    .cookie(authCookie))
+                    .andExpect(status().isCreated())
+                    .andReturn());
+
+            // Checks that exactly 1 product builder was instantiated
+            assertEquals(1, mocked.constructed().size());
+            var mockBuilder = mocked.constructed().get(0);
+
+            // Checks that the product was built
+            verify(mockBuilder).build();
+
+            Product addedProduct = productRepository.findByBusinessAndProductCode(testBusiness1, mockedResult.getProductCode());
+
+            // Check that the added product is equivalent to the result from Product.Builder.build.
+            assertNotNull(addedProduct);
+            assertEquals(mockedResult.getName(), addedProduct.getName());
+            assertEquals(mockedResult.getManufacturer(), addedProduct.getManufacturer());
+            assertEquals(mockedResult.getDescription(), addedProduct.getDescription());
+            assertEquals(mockedResult.getRecommendedRetailPrice(), addedProduct.getRecommendedRetailPrice());
+        }
+    }
+
+    /**
+     * Tests that trying the add a product via the POST /businesses/:id/products endpoint results in a 406 if there is
+     * no business with that id.
+     */
+    @Test
+    void postingProductToNonExistentBusiness() {
+        setCurrentUser(ownerUser.getUserID());
+        var productInfo = generateProductCreationInfo();
+
+        assertDoesNotThrow(() -> mockMvc.perform(post("/businesses/999999999/products")
+                .content(productInfo.toString())
+                .sessionAttrs(sessionAuthToken)
+                .contentType("application/json")
+                .cookie(authCookie))
+                .andExpect(status().isNotAcceptable())
+                .andReturn());
+    }
+
+    /**
+     * Tests that posting two products with the same product code results in a 400 response on the second product post
+     */
+    @Test
+    void postingTwoProductsWithSameProductCodeToSameBusiness() {
+        setCurrentUser(ownerUser.getUserID());
+        var productInfo = generateProductCreationInfo();
+
+        assertDoesNotThrow(() -> mockMvc.perform(post(String.format("/businesses/%d/products", testBusiness1.getId()))
+                .content(productInfo.toString())
+                .sessionAttrs(sessionAuthToken)
+                .contentType("application/json")
+                .cookie(authCookie))
+                .andExpect(status().isCreated())
+                .andReturn());
+
+        assertDoesNotThrow(() -> mockMvc.perform(post(String.format("/businesses/%d/products", testBusiness1.getId()))
+                .content(productInfo.toString())
+                .sessionAttrs(sessionAuthToken)
+                .contentType("application/json")
+                .cookie(authCookie))
+                .andExpect(status().isBadRequest())
+                .andReturn());
+    }
+
+    /**
+     * Tests that posting two products with the same product code results in a 201 response, if the requests are made on
+     * different businesses
+     */
+    @Test
+    void postingTwoProductsWithSameProductCodeToDifferentBusinesses() {
+        setCurrentUser(ownerUser.getUserID());
+        var productInfo = generateProductCreationInfo();
+
+        Business tempBusiness = businessRepository.save(
+                new Business.Builder()
+                    .withBusinessType("Accommodation and Food Services")
+                    .withAddress(new Location())
+                    .withDescription("Some description2")
+                    .withName("BusinessName2")
+                    .withPrimaryOwner(ownerUser)
+                    .build()
+        );
+
+        assertDoesNotThrow(() -> mockMvc.perform(post(String.format("/businesses/%d/products", testBusiness1.getId()))
+                .content(productInfo.toString())
+                .sessionAttrs(sessionAuthToken)
+                .contentType("application/json")
+                .cookie(authCookie))
+                .andExpect(status().isCreated())
+                .andReturn());
+
+        assertDoesNotThrow(() -> mockMvc.perform(post(String.format("/businesses/%d/products", tempBusiness.getId()))
+                .content(productInfo.toString())
+                .sessionAttrs(sessionAuthToken)
+                .contentType("application/json")
+                .cookie(authCookie))
+                .andExpect(status().isCreated())
+                .andReturn());
+    }
+
+    /**
+     * Tests that posting a product creates a Product.Builder and puts all the fields into said product builder.
+     */
+    @Test
+    void postingProductPassesTheValuesToTheProductBuilder() {
+        // This just has to be some value that will not crash when productRepository.save is called on it.
+        Product mockedResult = new Product.Builder()
+                .withProductCode("NATHAN-APPLE-71")
+                .withName("The Nathan Apple")
+                .withDescription("Ever wonder why Nathan has an apple")
+                .withManufacturer("Apple")
+                .withRecommendedRetailPrice("9000.05")
+                .withBusiness(testBusiness1)
+                .build();
+
+        try (MockedConstruction<Product.Builder> mocked = Mockito.mockConstruction(Product.Builder.class, withSettings().defaultAnswer(RETURNS_SELF), (mock, context) -> {
+            when(mock.build()).thenReturn(mockedResult); // Makes sure that build returns a valid product
+        })) {
+            setCurrentUser(ownerUser.getUserID());
+            var productInfo = generateProductCreationInfo();
+
+            assertDoesNotThrow(() -> mockMvc.perform(post(String.format("/businesses/%d/products", testBusiness1.getId()))
+                    .content(productInfo.toString())
+                    .sessionAttrs(sessionAuthToken)
+                    .contentType("application/json")
+                    .cookie(authCookie))
+                    .andExpect(status().isCreated())
+                    .andReturn());
+
+            // Checks that exactly 1 product builder was instantiated
+            assertEquals(1, mocked.constructed().size());
+            var mockBuilder = mocked.constructed().get(0);
+
+            // Checks that the product builder was passed in the correct values
+            verify(mockBuilder).withProductCode(productInfo.getAsString("id"));
+            verify(mockBuilder).withName(productInfo.getAsString("name"));
+            verify(mockBuilder).withDescription(productInfo.getAsString("description"));
+            verify(mockBuilder).withManufacturer(productInfo.getAsString("manufacturer"));
+            verify(mockBuilder).withRecommendedRetailPrice(productInfo.getAsString("recommendedRetailPrice"));
+            verify(mockBuilder).build();
+        }
+    }
+
+    /**
+     * Tests that if Product.Builder.build returns a 400 then posting a product will also fail and return a 400.
+     */
+    @Test
+    void postingProductFailsIfProductBuilderFails() {
+        try (MockedConstruction<Product.Builder> ignored = Mockito.mockConstruction(Product.Builder.class, withSettings().defaultAnswer(RETURNS_SELF), (mock, context) ->
+            when(mock.build()).thenThrow(new ResponseStatusException(HttpStatus.BAD_REQUEST, "Failed for some reason"))
+        )) {
+            setCurrentUser(ownerUser.getUserID());
+            var productInfo = generateProductCreationInfo();
+
+            assertDoesNotThrow(() -> mockMvc.perform(post(String.format("/businesses/%d/products", testBusiness1.getId()))
+                    .content(productInfo.toString())
+                    .sessionAttrs(sessionAuthToken)
+                    .contentType("application/json")
+                    .cookie(authCookie))
+                    .andExpect(status().isBadRequest())
+                    .andReturn());
+        }
+    }
+
+    /**
+     * Tests that a business admin can post a product
+     */
+    @Test
+    void postingProductFromBusinessAdminAccount() {
+        setCurrentUser(administratorUser.getUserID());
+
+        var productInfo = generateProductCreationInfo();
+
+        assertDoesNotThrow(() -> mockMvc.perform(post(String.format("/businesses/%d/products", testBusiness1.getId()))
+                .content(productInfo.toString())
+                .sessionAttrs(sessionAuthToken)
+                .contentType("application/json")
+                .cookie(authCookie))
+                .andExpect(status().isCreated())
+                .andReturn());
+    }
+
+    /**
+     * Tests that the DGAA can post a product
+     */
+    @Test
+    void postingProductFromDGAAAccount() {
+        setCurrentUser(bystanderUser.getUserID());
+        setUpDGAAAuthCode();
+
+        var productInfo = generateProductCreationInfo();
+
+        assertDoesNotThrow(() -> mockMvc.perform(post(String.format("/businesses/%d/products", testBusiness1.getId()))
+                .content(productInfo.toString())
+                .sessionAttrs(sessionAuthToken)
+                .contentType("application/json")
+                .cookie(authCookie))
+                .andExpect(status().isCreated())
+                .andReturn());
+    }
+
+    /**
+     * Tests that the GAA can post a product
+     */
+    @Test
+    void postingProductFromGAAAccount() {
+        setCurrentUser(bystanderUser.getUserID());
+        setUpSessionAsAdmin();
+
+        var productInfo = generateProductCreationInfo();
+
+        assertDoesNotThrow(() -> mockMvc.perform(post(String.format("/businesses/%d/products", testBusiness1.getId()))
+                .content(productInfo.toString())
+                .sessionAttrs(sessionAuthToken)
+                .contentType("application/json")
+                .cookie(authCookie))
+                .andExpect(status().isCreated())
+                .andReturn());
+    }
+
+    /**
+     * Tests that the user that is not a DGAA, GAA, owner, business admin cannot post a product
+     */
+    @Test
+    void postingProductFromBystanderAccount() {
+        setCurrentUser(bystanderUser.getUserID());
+
+        var productInfo = generateProductCreationInfo();
+
+        assertDoesNotThrow(() -> mockMvc.perform(post(String.format("/businesses/%d/products", testBusiness1.getId()))
+                .content(productInfo.toString())
+                .sessionAttrs(sessionAuthToken)
+                .contentType("application/json")
+                .cookie(authCookie))
+                .andExpect(status().isForbidden())
+                .andReturn());
+    }
     /**
      * Checks that the API returns products in the business's catalogue in default (product code) order.
      */
@@ -366,8 +673,8 @@ public class ProductControllerTest {
         JSONObject firstProduct = (JSONObject) responseBody.get(0);
         JSONObject lastProduct = (JSONObject) responseBody.get(3);
 
-        assertEquals("AlmondMilk100", firstProduct.getAsString("id"));
-        assertEquals("NathanApple-70", lastProduct.getAsString("id"));
+        assertEquals("ALMOND-MILK-100", firstProduct.getAsString("id"));
+        assertEquals("NATHAN-APPLE-70", lastProduct.getAsString("id"));
     }
 
 
@@ -392,8 +699,8 @@ public class ProductControllerTest {
         JSONObject firstProduct = (JSONObject) responseBody.get(0);
         JSONObject lastProduct = (JSONObject) responseBody.get(3);
 
-        assertEquals("NathanApple-70", firstProduct.getAsString("id"));
-        assertEquals("AlmondMilk100", lastProduct.getAsString("id"));
+        assertEquals("NATHAN-APPLE-70", firstProduct.getAsString("id"));
+        assertEquals("ALMOND-MILK-100", lastProduct.getAsString("id"));
     }
 
 
@@ -423,8 +730,8 @@ public class ProductControllerTest {
         JSONObject firstProduct = (JSONObject) responseBody.get(0);
         JSONObject secondProduct = (JSONObject) responseBody.get(1);
 
-        assertEquals("AlmondMilk100", firstProduct.getAsString("id"));
-        assertEquals("Coffee7", secondProduct.getAsString("id"));
+        assertEquals("ALMOND-MILK-100", firstProduct.getAsString("id"));
+        assertEquals("COFFEE-7", secondProduct.getAsString("id"));
     }
 
 
@@ -454,12 +761,9 @@ public class ProductControllerTest {
         JSONObject firstProduct = (JSONObject) responseBody.get(0);
         JSONObject secondProduct = (JSONObject) responseBody.get(1);
 
-        assertEquals("DarkChocolate", firstProduct.getAsString("id"));
-        assertEquals("NathanApple-70", secondProduct.getAsString("id"));
+        assertEquals("DARK-CHOCOLATE", firstProduct.getAsString("id"));
+        assertEquals("NATHAN-APPLE-70", secondProduct.getAsString("id"));
     }
-
-
-
 
     /**
      * Checks that the API returns products correctly ordered by ID.
@@ -482,8 +786,8 @@ public class ProductControllerTest {
         JSONObject firstProduct = (JSONObject) responseBody.get(0);
         JSONObject lastProduct = (JSONObject) responseBody.get(3);
 
-        assertEquals("AlmondMilk100", firstProduct.getAsString("id"));
-        assertEquals("NathanApple-70", lastProduct.getAsString("id"));
+        assertEquals("ALMOND-MILK-100", firstProduct.getAsString("id"));
+        assertEquals("NATHAN-APPLE-70", lastProduct.getAsString("id"));
     }
 
     /**
@@ -507,8 +811,8 @@ public class ProductControllerTest {
         JSONObject firstProduct = (JSONObject) responseBody.get(0);
         JSONObject lastProduct = (JSONObject) responseBody.get(3);
 
-        assertEquals("AlmondMilk100", firstProduct.getAsString("id"));
-        assertEquals("NathanApple-70", lastProduct.getAsString("id"));
+        assertEquals("ALMOND-MILK-100", firstProduct.getAsString("id"));
+        assertEquals("NATHAN-APPLE-70", lastProduct.getAsString("id"));
     }
 
     /**
@@ -532,8 +836,8 @@ public class ProductControllerTest {
         JSONObject firstProduct = (JSONObject) responseBody.get(0);
         JSONObject lastProduct = (JSONObject) responseBody.get(3);
 
-        assertEquals("NathanApple-70", firstProduct.getAsString("id"));
-        assertEquals("DarkChocolate", lastProduct.getAsString("id"));
+        assertEquals("NATHAN-APPLE-70", firstProduct.getAsString("id"));
+        assertEquals("DARK-CHOCOLATE", lastProduct.getAsString("id"));
     }
 
     /**
@@ -557,8 +861,8 @@ public class ProductControllerTest {
         JSONObject firstProduct = (JSONObject) responseBody.get(0);
         JSONObject lastProduct = (JSONObject) responseBody.get(3);
 
-        assertEquals("NathanApple-70", firstProduct.getAsString("id"));
-        assertEquals("DarkChocolate", lastProduct.getAsString("id"));
+        assertEquals("NATHAN-APPLE-70", firstProduct.getAsString("id"));
+        assertEquals("DARK-CHOCOLATE", lastProduct.getAsString("id"));
     }
 
     /**
@@ -582,8 +886,8 @@ public class ProductControllerTest {
         JSONObject firstProduct = (JSONObject) responseBody.get(0);
         JSONObject lastProduct = (JSONObject) responseBody.get(3);
 
-        assertEquals("Coffee7", firstProduct.getAsString("id"));
-        assertEquals("NathanApple-70", lastProduct.getAsString("id"));
+        assertEquals("COFFEE-7", firstProduct.getAsString("id"));
+        assertEquals("NATHAN-APPLE-70", lastProduct.getAsString("id"));
     }
 
     /**
@@ -607,8 +911,8 @@ public class ProductControllerTest {
         JSONObject firstProduct = (JSONObject) responseBody.get(0);
         JSONObject lastProduct = (JSONObject) responseBody.get(3);
 
-        assertEquals("NathanApple-70", firstProduct.getAsString("id"));
-        assertEquals("DarkChocolate", lastProduct.getAsString("id"));
+        assertEquals("NATHAN-APPLE-70", firstProduct.getAsString("id"));
+        assertEquals("DARK-CHOCOLATE", lastProduct.getAsString("id"));
     }
 
     /**

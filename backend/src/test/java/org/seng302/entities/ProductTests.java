@@ -1,11 +1,14 @@
 package org.seng302.entities;
 
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.seng302.persistence.BusinessRepository;
 import org.seng302.persistence.ProductRepository;
 import org.seng302.persistence.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
 import java.text.ParseException;
@@ -33,8 +36,6 @@ class ProductTests {
      * Created a business objects for testing
      */
     void createTestBusinesses() {
-        System.out.println("Creating businesses");
-        Thread.dumpStack();
         testBusiness1 = new Business.Builder()
                 .withBusinessType("Accommodation and Food Services")
                 .withAddress(new Location())
@@ -94,7 +95,7 @@ class ProductTests {
     @Test
     void createValidProduct() {
         Product product = new Product.Builder()
-                .withProductCode("Orange-69")
+                .withProductCode("ORANGE-69")
                 .withName("Fresh Orange")
                 .withDescription("This is a fresh orange")
                 .withManufacturer("Apple")
@@ -103,7 +104,7 @@ class ProductTests {
                 .build();
         productRepository.save(product);
 
-        assertEquals("Orange-69", product.getProductCode());
+        assertEquals("ORANGE-69", product.getProductCode());
         assertEquals("Fresh Orange", product.getName());
         assertEquals("This is a fresh orange", product.getDescription());
         assertEquals("Apple", product.getManufacturer());
@@ -117,7 +118,7 @@ class ProductTests {
     @Test
     void checkTwoProductsDoNotHaveTheSameIDs() {
         Product product1 = new Product.Builder()
-                .withProductCode("NathanApple-69")
+                .withProductCode("NATHAN-APPLE-69")
                 .withName("The Nathan Apple")
                 .withDescription("Ever wonder why Nathan has an apple")
                 .withManufacturer("Apple")
@@ -125,7 +126,7 @@ class ProductTests {
                 .withBusiness(testBusiness1)
                 .build();
         Product product2 = new Product.Builder()
-                .withProductCode("Orange-70")
+                .withProductCode("ORANGE-70")
                 .withName("Fresh Orange")
                 .withDescription("This is a fresh orange")
                 .withManufacturer("Apple")
@@ -145,7 +146,7 @@ class ProductTests {
     void checkDate() {
         Date before = new Date();
         Product product = new Product.Builder()
-                .withProductCode("NathanApple-69")
+                .withProductCode("NATHAN-APPLE-69")
                 .withName("The Nathan Apple")
                 .withDescription("Ever wonder why Nathan has an apple")
                 .withManufacturer("Apple")
@@ -167,7 +168,7 @@ class ProductTests {
     @Test
     void checkNoTwoSameProductCodesWithinSameCatalogue() {
         Product product1 = new Product.Builder()
-                .withProductCode("NathanApple-69")
+                .withProductCode("NATHAN-APPLE-69")
                 .withName("The Nathan Apple")
                 .withDescription("Ever wonder why Nathan has an apple")
                 .withManufacturer("Apple")
@@ -175,7 +176,7 @@ class ProductTests {
                 .withBusiness(testBusiness1)
                 .build();
         Product product2 = new Product.Builder()
-                .withProductCode("NathanApple-69")
+                .withProductCode("NATHAN-APPLE-69")
                 .withName("The Nathan Apple Two")
                 .withDescription("Ever wonder why Nathan has an apple maybe")
                 .withManufacturer("Apple")
@@ -193,7 +194,7 @@ class ProductTests {
     @Test
     void checkTwoSameProductCodesWithinDifferentCatalogues() {
         Product product1 = new Product.Builder()
-                .withProductCode("NathanApple-69")
+                .withProductCode("NATHAN-APPLE-69")
                 .withName("The Nathan Apple")
                 .withDescription("Ever wonder why Nathan has an apple")
                 .withManufacturer("Apple")
@@ -201,7 +202,7 @@ class ProductTests {
                 .withBusiness(testBusiness1)
                 .build();
         Product product2 = new Product.Builder()
-                .withProductCode("NathanApple-69")
+                .withProductCode("NATHAN-APPLE-69")
                 .withName("The Nathan Apple Two")
                 .withDescription("Ever wonder why Nathan has an apple maybe")
                 .withManufacturer("Apple")
@@ -219,7 +220,7 @@ class ProductTests {
     @Test
     void checkTwoDifferentProductCodesWithinSameCatalogue() {
         Product product1 = new Product.Builder()
-                .withProductCode("NathanApple-69")
+                .withProductCode("NATHAN-APPLE-69")
                 .withName("The Nathan Apple")
                 .withDescription("Ever wonder why Nathan has an apple")
                 .withManufacturer("Apple")
@@ -227,7 +228,7 @@ class ProductTests {
                 .withBusiness(testBusiness1)
                 .build();
         Product product2 = new Product.Builder()
-                .withProductCode("NathanApple-70")
+                .withProductCode("NATHAN-APPLE-70")
                 .withName("The Nathan Apple Two")
                 .withDescription("Ever wonder why Nathan has an apple maybe")
                 .withManufacturer("Apple")
@@ -246,7 +247,7 @@ class ProductTests {
     @Test
     void checkTheProductIsConnectedToTheBusinessCatalogue() {
         Product product1 = new Product.Builder()
-                .withProductCode("NathanApple-70")
+                .withProductCode("NATHAN-APPLE-70")
                 .withName("The Nathan Apple")
                 .withDescription("Ever wonder why Nathan has an apple")
                 .withManufacturer("Apple")
@@ -266,7 +267,7 @@ class ProductTests {
     @Test
     void createAValidListOfProductsInACatalogue() {
         Product product1 = new Product.Builder()
-                .withProductCode("NathanApple-70")
+                .withProductCode("NATHAN-APPLE-70")
                 .withName("The Nathan Apple")
                 .withDescription("Ever wonder why Nathan has an apple")
                 .withManufacturer("Apple")
@@ -274,7 +275,7 @@ class ProductTests {
                 .withBusiness(testBusiness1)
                 .build();
         Product product2 = new Product.Builder()
-                .withProductCode("NathanApple-71")
+                .withProductCode("NATHAN-APPLE-71")
                 .withName("The Nathan Apple Two")
                 .withDescription("Ever wonder why Nathan has an apple too")
                 .withManufacturer("Apple")
@@ -282,7 +283,7 @@ class ProductTests {
                 .withBusiness(testBusiness1)
                 .build();
         Product product3 = new Product.Builder()
-                .withProductCode("NathanApple-72")
+                .withProductCode("NATHAN-APPLE-72")
                 .withName("The Nathan Apple Three")
                 .withDescription("Ever wonder why Nathan has an apple too maybe")
                 .withManufacturer("Apple")
@@ -312,7 +313,7 @@ class ProductTests {
                 .build();
         Business tempBusiness = businessRepository.save(tempBusinessInitial);
         Product product1 = new Product.Builder()
-                .withProductCode("NathanApple-69")
+                .withProductCode("NATHAN-APPLE-69")
                 .withName("The Nathan Apple")
                 .withDescription("Ever wonder why Nathan has an apple")
                 .withManufacturer("Apple")
@@ -330,7 +331,7 @@ class ProductTests {
     void testFindByBusinessAndProductCode() {
         Product product = productRepository.save(
                 new Product.Builder()
-                    .withProductCode("NathanApple-70")
+                    .withProductCode("NATHAN-APPLE-70")
                     .withName("The Nathan Apple")
                     .withDescription("Ever wonder why Nathan has an apple")
                     .withManufacturer("Apple")
@@ -339,7 +340,7 @@ class ProductTests {
                     .build()
         );
 
-        Product foundProduct = productRepository.findByBusinessAndProductCode(testBusiness1, "NathanApple-70");
+        Product foundProduct = productRepository.findByBusinessAndProductCode(testBusiness1, "NATHAN-APPLE-70");
         assertNotNull(foundProduct);
 
         assertEquals(product.getID(), foundProduct.getID());
@@ -359,7 +360,7 @@ class ProductTests {
         // Product with same code saved to a different business
         productRepository.save(
                 new Product.Builder()
-                        .withProductCode("NathanApple-70")
+                        .withProductCode("NATHAN-APPLE-70")
                         .withName("The Nathan Apple")
                         .withDescription("Ever wonder why Nathan has an apple")
                         .withManufacturer("Apple")
@@ -368,7 +369,7 @@ class ProductTests {
                         .build()
         );
 
-        Product foundProduct = productRepository.findByBusinessAndProductCode(testBusiness1, "NathanApple-70");
+        Product foundProduct = productRepository.findByBusinessAndProductCode(testBusiness1, "NATHAN-APPLE-70");
         assertNull(foundProduct);
     }
 
@@ -379,7 +380,7 @@ class ProductTests {
     void testUsingAddToCatalogueFails() {
         Product product = productRepository.save(
                 new Product.Builder()
-                        .withProductCode("NathanApple-70")
+                        .withProductCode("NATHAN-APPLE-70")
                         .withName("The Nathan Apple")
                         .withDescription("Ever wonder why Nathan has an apple")
                         .withManufacturer("Apple")
@@ -389,5 +390,289 @@ class ProductTests {
         );
 
         assertThrows(IllegalArgumentException.class, () -> testBusiness2.addToCatalogue(product));
+    }
+
+    /**
+     * Tests that a product built without a product code throws a ResponseStatusException
+     */
+    @Test
+    void buildWithoutProductCode() {
+        var builder = new Product.Builder()
+                .withName("The Nathan Apple")
+                .withDescription("Ever wonder why Nathan has an apple")
+                .withManufacturer("Apple")
+                .withRecommendedRetailPrice("9000.03")
+                .withBusiness(testBusiness1);
+        assertThrows(ResponseStatusException.class, builder::build);
+    }
+
+    /**
+     * Tests that a product built with a product code that is too long (>15 characters) throws a ResponseStatusException
+     */
+    @Test
+    void buildWithLongProductCode() {
+        var builder = new Product.Builder()
+                .withProductCode("A".repeat(16))
+                .withName("The Nathan Apple")
+                .withDescription("Ever wonder why Nathan has an apple")
+                .withManufacturer("Apple")
+                .withRecommendedRetailPrice("9000.03")
+                .withBusiness(testBusiness1);
+        assertThrows(ResponseStatusException.class, builder::build);
+    }
+
+    /**
+     * Tests that a product built with a product code that is empty throws a ResponseStatusException
+     */
+    @Test
+    void buildWithEmptyProductCode() {
+        var builder = new Product.Builder()
+                .withProductCode("")
+                .withName("The Nathan Apple")
+                .withDescription("Ever wonder why Nathan has an apple")
+                .withManufacturer("Apple")
+                .withRecommendedRetailPrice("9000.03")
+                .withBusiness(testBusiness1);
+        assertThrows(ResponseStatusException.class, builder::build);
+    }
+
+    /**
+     * Tests that a product built with a product code that contains an invalid character
+     * (not a uppercase letter, number or dash) throws a ResponseStatusException
+     */
+    @ParameterizedTest
+    @ValueSource(strings = {"a", "z", "_", ",", ".", " ", "\t", "\n"})
+    void buildWithInvalidCharactersInProductCode(String character) {
+        var builder = new Product.Builder()
+                .withProductCode(character)
+                .withName("The Nathan Apple")
+                .withDescription("Ever wonder why Nathan has an apple")
+                .withManufacturer("Apple")
+                .withRecommendedRetailPrice("9000.03")
+                .withBusiness(testBusiness1);
+        assertThrows(ResponseStatusException.class, builder::build);
+    }
+
+    /**
+     * Tests that a product built without a name throws a ResponseStatusException
+     */
+    @Test
+    void buildWithoutName() {
+        var builder = new Product.Builder()
+                .withProductCode("NATHAN-APPLE-70")
+                .withDescription("Ever wonder why Nathan has an apple")
+                .withManufacturer("Apple")
+                .withRecommendedRetailPrice("9000.03")
+                .withBusiness(testBusiness1);
+        assertThrows(ResponseStatusException.class, builder::build);
+    }
+
+    /**
+     * Tests that a product built with an empty name throws a ResponseStatusException
+     */
+    @Test
+    void buildWithEmptyName() {
+        var builder = new Product.Builder()
+                .withProductCode("NATHAN-APPLE-70")
+                .withName("")
+                .withDescription("Ever wonder why Nathan has an apple")
+                .withManufacturer("Apple")
+                .withRecommendedRetailPrice("9000.03")
+                .withBusiness(testBusiness1);
+        assertThrows(ResponseStatusException.class, builder::build);
+    }
+
+    /**
+     * Tests that the Product name cannot have characters that are neither a letter, number, space or punctuation.
+     * @param name The test name to use
+     */
+    @ParameterizedTest
+    @ValueSource(strings = {"\n", "\t", "\uD83D\uDE02", "\uFFFF"})
+    void buildWithInvalidCharactersInName(String name) {
+        var builder = new Product.Builder()
+                .withProductCode("NATHAN-APPLE-70")
+                .withName(name)
+                .withDescription("Ever wonder why Nathan has an apple")
+                .withManufacturer("Apple")
+                .withRecommendedRetailPrice("9000.03")
+                .withBusiness(testBusiness1);
+        assertThrows(ResponseStatusException.class, builder::build);
+    }
+
+    /**
+     * Tests that the Product can have a name using letters, numbers, spaces and punctuation
+     * @param name The test name to use
+     */
+    @ParameterizedTest
+    @ValueSource(strings = {" ", ":", ",", "7", "é", "树"})
+    void buildWithValidCharactersInName(String name) {
+        var builder = new Product.Builder()
+                .withProductCode("NATHAN-APPLE-70")
+                .withName(name)
+                .withDescription("Ever wonder why Nathan has an apple")
+                .withManufacturer("Apple")
+                .withRecommendedRetailPrice("9000.03")
+                .withBusiness(testBusiness1);
+        assertDoesNotThrow(builder::build);
+    }
+
+    /**
+     * Tests that a product built with a long name (>50 characters) throws a ResponseStatusException
+     */
+    @Test
+    void buildWithLongName() {
+        var builder = new Product.Builder()
+                .withProductCode("NATHAN-APPLE-70")
+                .withName("a".repeat(51))
+                .withDescription("Ever wonder why Nathan has an apple")
+                .withManufacturer("Apple")
+                .withRecommendedRetailPrice("9000.03")
+                .withBusiness(testBusiness1);
+        assertThrows(ResponseStatusException.class, builder::build);
+    }
+
+    /**
+     * Tests that the Product description cannot have characters that are neither a letter, number, whitespace or punctuation.
+     * @param name The test name to use
+     */
+    @ParameterizedTest
+    @ValueSource(strings = {"\uD83D\uDE02", "\uFFFF"})
+    void buildWithInvalidCharactersInDescription(String name) {
+        var builder = new Product.Builder()
+                .withProductCode("NATHAN-APPLE-70")
+                .withName("The Nathan Apple")
+                .withDescription(name)
+                .withManufacturer("Apple")
+                .withRecommendedRetailPrice("9000.03")
+                .withBusiness(testBusiness1);
+        assertThrows(ResponseStatusException.class, builder::build);
+    }
+
+    /**
+     * Tests that the Product can have a description using letters, numbers, whitespace and punctuation
+     * @param description The test description to use
+     */
+    @ParameterizedTest
+    @ValueSource(strings = {" ", "\n", "\t",  ":", ",", "7", "é", "树"})
+    void buildWithValidCharactersInDescription(String description) {
+        var builder = new Product.Builder()
+                .withProductCode("NATHAN-APPLE-70")
+                .withName("The Nathan Apple")
+                .withDescription(description)
+                .withManufacturer("Apple")
+                .withRecommendedRetailPrice("9000.03")
+                .withBusiness(testBusiness1);
+        assertDoesNotThrow(builder::build);
+    }
+
+    /**
+     * Tests that a product built with a long description (>200 characters) throws a ResponseStatusException
+     */
+    @Test
+    void buildWithLongDescription() {
+        var builder = new Product.Builder()
+                .withProductCode("NATHAN-APPLE-70")
+                .withName("The Nathan Apple")
+                .withDescription("a".repeat(201))
+                .withManufacturer("Apple")
+                .withRecommendedRetailPrice("9000.03")
+                .withBusiness(testBusiness1);
+        assertThrows(ResponseStatusException.class, builder::build);
+    }
+
+    /**
+     * Tests that the Product manufacturer cannot have characters that are neither a letter, number, space or punctuation.
+     * @param manufacturer The test manufacturer to use
+     */
+    @ParameterizedTest
+    @ValueSource(strings = {"\n", "\t", "\uD83D\uDE02", "\uFFFF"})
+    void buildWithInvalidCharactersInManufacturer(String manufacturer) {
+        var builder = new Product.Builder()
+                .withProductCode("NATHAN-APPLE-70")
+                .withName("The Nathan Apple")
+                .withDescription("Ever wonder why Nathan has an apple")
+                .withManufacturer(manufacturer)
+                .withRecommendedRetailPrice("9000.03")
+                .withBusiness(testBusiness1);
+        assertThrows(ResponseStatusException.class, builder::build);
+    }
+
+    /**
+     * Tests that the Product can have a manufacturer using letters, numbers, spaces and punctuation
+     * @param manufacturer The test manufacturer to use
+     */
+    @ParameterizedTest
+    @ValueSource(strings = {" ", ":", ",", "7", "é", "树"})
+    void buildWithValidCharactersInManufacturer(String manufacturer) {
+        var builder = new Product.Builder()
+                .withProductCode("NATHAN-APPLE-70")
+                .withName("The Nathan Apple")
+                .withDescription("Ever wonder why Nathan has an apple")
+                .withManufacturer(manufacturer)
+                .withRecommendedRetailPrice("9000.03")
+                .withBusiness(testBusiness1);
+        assertDoesNotThrow(builder::build);
+    }
+
+    /**
+     * Tests that a product built with a long manufacturer (>100 characters) throws a ResponseStatusException
+     */
+    @Test
+    void buildWithLongManufacturer() {
+        var builder = new Product.Builder()
+                .withProductCode("NATHAN-APPLE-70")
+                .withName("The Nathan Apple")
+                .withDescription("Ever wonder why Nathan has an apple")
+                .withManufacturer("a".repeat(101))
+                .withRecommendedRetailPrice("9000.03")
+                .withBusiness(testBusiness1);
+        assertThrows(ResponseStatusException.class, builder::build);
+    }
+
+    /**
+     * Tests that a product built with a recommended retail price that is not parsable into a number throws a
+     * ResponseStatusException
+     */
+    @Test
+    void buildWithNonNumberPrice() {
+        var builder = new Product.Builder()
+                .withProductCode("NATHAN-APPLE-70")
+                .withName("The Nathan Apple")
+                .withDescription("Ever wonder why Nathan has an apple")
+                .withManufacturer("Apple")
+                .withBusiness(testBusiness1);
+
+        // Maybe it is worth delaying this exception until build
+        assertThrows(ResponseStatusException.class, () -> builder.withRecommendedRetailPrice("pricen't"));
+    }
+
+    /**
+     * Tests that a product built with a negative recommended retail price throws a ResponseStatusException
+     */
+    @Test
+    void buildWithNegativePrice() {
+        var builder = new Product.Builder()
+                .withProductCode("NATHAN-APPLE-70")
+                .withName("The Nathan Apple")
+                .withDescription("Ever wonder why Nathan has an apple")
+                .withManufacturer("Apple")
+                .withRecommendedRetailPrice("-1")
+                .withBusiness(testBusiness1);
+        assertThrows(ResponseStatusException.class, builder::build);
+    }
+
+    /**
+     * Tests that a product built with a large recommended retail price (>=100000) throws a ResponseStatusException
+     */
+    @Test
+    void buildWithLargePrice() {
+        var builder = new Product.Builder()
+                .withProductCode("NATHAN-APPLE-70")
+                .withName("The Nathan Apple")
+                .withDescription("Ever wonder why Nathan has an apple")
+                .withManufacturer("Apple")
+                .withRecommendedRetailPrice("100000")
+                .withBusiness(testBusiness1);
+        assertThrows(ResponseStatusException.class, builder::build);
     }
 }
