@@ -15,7 +15,7 @@
         type="password"
         label="Password"
         outlined
-        :rules="mandatoryRules.concat(passwordRules).concat(maxCharRules)"
+        :rules="mandatoryRules.concat(passwordRules)"
       />
 
       <!-- Login button if user already has an account. -->
@@ -52,11 +52,11 @@ export default {
         (field) => !!field || "Field is required",
       ],
       passwordRules: [
-        field => (field && field.length >= 7) || '',                            //Password must have 7+ characters, , should not show error message
+        field => (field && field.length >= 7 && field.length <= 16) || '',      //Password must have 7+ characters, , should not show error message
         field => /^(?=.*[0-9])(?=.*[a-zA-Z])([a-zA-Z0-9]+)$/.test(field) || ''  //Must have at least one number and one alphabet', should not show error message
       ],
       maxCharRules: [
-        (field) => field.length <= 100 || "",                                   //Reached max character limit: 100, should not show error message
+        (field) => field.length <= 132 || "",                                   //Reached max character limit: 143, should not show error message
       ],
     };
   },

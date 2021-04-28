@@ -8,7 +8,7 @@
         class="required"
         v-model="email"
         label="Email"
-        :rules="mandatoryRules.concat(emailRules).concat(maxLongCharRules)"
+        :rules="mandatoryRules.concat(emailRules).concat(maxMediumCharRules)"
         outlined
       />
 
