@@ -207,7 +207,6 @@ public class User extends Account {
         }
     }
 
-
     /**
      * Gets the users country, city, street, house number etc as string
      * @return address
@@ -279,6 +278,17 @@ public class User extends Account {
      * @param role admin status and what businesses they are associated with
      */
     public void setRole(String role){
+        if (!Set.of("user", "globalApplicationAdmin", "defaultGlobalApplicationAdmin").contains(role)) {
+            throw new IllegalArgumentException("Invalid role: \"" + role + "\"");
+        }
+
+        if (
+            "defaultGlobalApplicationAdmin".equals(role) &&
+            !"wasteless@seng302.com".equals(this.getEmail())
+        ) {
+            throw new IllegalArgumentException("Tried creating new DGAA");
+        }
+
         this.role=role;
     }
 

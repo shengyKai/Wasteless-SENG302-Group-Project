@@ -1,7 +1,13 @@
 package org.seng302.Controllers;
 
-import org.seng302.Entities.DefaultGlobalApplicationAdmin;
-import org.seng302.Persistence.DGAARepository;
+import java.text.ParseException;
+import java.util.Date;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.seng302.Entities.Location;
+import org.seng302.Entities.User;
+import org.seng302.Persistence.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -10,11 +16,12 @@ import org.springframework.web.bind.annotation.RestController;
 @Component
 public class DGAAController {
 
-    private DGAARepository dgaaRepository;
+    private UserRepository userRepository;
+    private static final Logger logger = LogManager.getLogger(DGAAController.class.getName());
 
     @Autowired
-    public DGAAController(DGAARepository dgaaRepository) {
-        this.dgaaRepository = dgaaRepository;
+    public DGAAController(UserRepository userRepository) {
+        this.userRepository = userRepository;
     }
 
     /**
@@ -23,11 +30,39 @@ public class DGAAController {
      */
     @Scheduled(fixedRate = 1800000)
     public void checkDGAA() {
-        DefaultGlobalApplicationAdmin dgaa = this.dgaaRepository.findByEmail("wasteless@seng302.com");
+        User dgaa = this.userRepository.findByEmail("wasteless@seng302.com");
+        
+        if (dgaa != null && !dgaa.isIsDGAA()) {
+            userRepository.delete(dgaa);
+            dgaa = null;
+        }
+
         // Default Global Application Admin doesn't exist or has been tampered with
-        if (dgaa == null || !dgaa.isIsDGAA()) {
-            DefaultGlobalApplicationAdmin admin = new DefaultGlobalApplicationAdmin();
-            dgaaRepository.save(admin);
+        if (dgaa == null) {
+            User admin;
+            Location adminAddress;
+            try {
+                adminAddress = new Location.Builder()
+                            .atStreetNumber("1")
+                            .onStreet("wasteless")
+                            .inCity("wasteless")
+                            .inRegion("wasteless")
+                            .inCountry("wasteless")
+                            .withPostCode("1111")
+                            .build();
+                admin = new User.Builder()
+                    .withEmail("wasteless@seng302.com")
+                    .withFirstName("DGAA")
+                    .withLastName("DGAA")
+                    .withPassword("T3amThr33IsTh3B3st")
+                    .withDob("2021-03-11")
+                    .withAddress(adminAddress)
+                    .build();
+                admin.setRole("defaultGlobalApplicationAdmin");
+                userRepository.save(admin);
+            } catch (ParseException e) {
+                logger.error(e);
+            }
         }
     }
 }

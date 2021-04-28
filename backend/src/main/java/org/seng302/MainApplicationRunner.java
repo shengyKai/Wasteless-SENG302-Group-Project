@@ -3,11 +3,10 @@ package org.seng302;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.seng302.Controllers.DGAAController;
-import org.seng302.Entities.Business;
+import org.seng302.Entities.*;
 import org.seng302.Entities.Location;
 import org.seng302.Entities.User;
 import org.seng302.Persistence.BusinessRepository;
-import org.seng302.Persistence.DGAARepository;
 import org.seng302.Persistence.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
@@ -19,10 +18,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * NOTE: Use this class to setup application
@@ -32,18 +28,15 @@ import java.util.stream.Collectors;
 @EnableScheduling
 public class MainApplicationRunner implements ApplicationRunner {
 
-    private UserRepository _userRepository;
-    private DGAARepository _dgaaRepository;
-    private BusinessRepository _businessRepository;
+    private final UserRepository userRepository;
+    private final BusinessRepository businessRepository;
     private DGAAController dgaaController;
     private static final Logger logger = LogManager.getLogger(MainApplicationRunner.class.getName());
 
     @Autowired
-    public MainApplicationRunner(
-        UserRepository userRepository, DGAARepository dgaaRepository, BusinessRepository businessRepository, DGAAController dgaaController) {
-        this._userRepository = userRepository;
-        this._dgaaRepository = dgaaRepository;
-        this._businessRepository = businessRepository;
+    public MainApplicationRunner(UserRepository userRepository, BusinessRepository businessRepository, DGAAController dgaaController) {
+        this.userRepository = userRepository;
+        this.businessRepository = businessRepository;
         this.dgaaController = dgaaController;
     }
 
@@ -57,19 +50,20 @@ public class MainApplicationRunner implements ApplicationRunner {
         logger.info("Startup application with {}", args);
         List<User> demoUsers = readUserFile("src//main//DemoData.txt");
         for (User user : demoUsers) {
-            if (_userRepository.findByEmail(user.getEmail()) == null) {
-                _userRepository.save(user);
+            if (userRepository.findByEmail(user.getEmail()) == null) {
+                userRepository.save(user);
             }
         }
 
-        for (User user : _userRepository.findAll() ) {
+        for (User user : userRepository.findAll() ) {
             logger.info(user.toString());
         }
 
         // Checks if DGAA present in DB and generates one if not
         dgaaController.checkDGAA();
 
-        User user = _userRepository.findByEmail("123andyelliot@gmail.com");
+
+        User user = userRepository.findByEmail("123andyelliot@gmail.com");
         Business business = new Business.Builder()
                 .withBusinessType("Accommodation and Food Services")
                 .withDescription("DESCRIPTION")
@@ -78,10 +72,8 @@ public class MainApplicationRunner implements ApplicationRunner {
                 .withPrimaryOwner(user)
                 .build();
 
-        Business testBusiness = _businessRepository.save(business);
-        //testBusiness.addAdmin(user);
-        _businessRepository.save(testBusiness);
-        user = _userRepository.findByEmail("123andyelliot@gmail.com");
+
+        business = businessRepository.save(business);
     }
 
     /**
