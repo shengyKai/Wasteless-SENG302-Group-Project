@@ -28,17 +28,14 @@ junit:
     - cd backend
     - ./gradlew test
 
-# Run acceptance (cucumber) tests
-# Uncomment after ATDD workshop (at the latest)
-# cucumber:
-#   stage: test
-#   script:
-#     - cd backend
-#     - ./gradlew cucumber
+cucumber:
+   stage: test
+   script:
+     - cd backend
+     - ./gradlew cucumber
 
-# Run Jest (Javascript) tests
-# Uncomment after Jest workshop (at the latest)
-# jest:
+# Temporary disabled till the team fixes the failing jest test
+#jest:
 #   stage: test
 #   cache:
 #     key: node-modules

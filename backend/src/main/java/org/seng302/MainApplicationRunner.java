@@ -5,8 +5,14 @@ import org.apache.logging.log4j.Logger;
 import org.seng302.Controllers.DGAAController;
 import org.seng302.Entities.*;
 import org.seng302.Entities.Location;
+<<<<<<< HEAD
 import org.seng302.Entities.User;
 import org.seng302.Persistence.BusinessRepository;
+=======
+import org.seng302.Persistence.BusinessRepository;
+import org.seng302.Persistence.DGAARepository;
+import org.seng302.Persistence.ProductRepository;
+>>>>>>> dev
 import org.seng302.Persistence.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
@@ -29,6 +35,7 @@ import java.util.List;
 public class MainApplicationRunner implements ApplicationRunner {
 
     private final UserRepository userRepository;
+<<<<<<< HEAD
     private final BusinessRepository businessRepository;
     private DGAAController dgaaController;
     private static final Logger logger = LogManager.getLogger(MainApplicationRunner.class.getName());
@@ -38,6 +45,19 @@ public class MainApplicationRunner implements ApplicationRunner {
         this.userRepository = userRepository;
         this.businessRepository = businessRepository;
         this.dgaaController = dgaaController;
+=======
+    private final DGAARepository dgaaRepository;
+    private final BusinessRepository businessRepository;
+    private final ProductRepository productRepository;
+    private static final Logger logger = LogManager.getLogger(MainApplicationRunner.class.getName());
+
+    @Autowired
+    public MainApplicationRunner(UserRepository userRepository, DGAARepository dgaaRepository, BusinessRepository businessRepository, ProductRepository productRepository) {
+        this.userRepository = userRepository;
+        this.dgaaRepository = dgaaRepository;
+        this.businessRepository = businessRepository;
+        this.productRepository = productRepository;
+>>>>>>> dev
     }
 
 
@@ -62,6 +82,10 @@ public class MainApplicationRunner implements ApplicationRunner {
         // Checks if DGAA present in DB and generates one if not
         dgaaController.checkDGAA();
 
+<<<<<<< HEAD
+=======
+        DGAAController.checkDGAA(dgaaRepository);
+>>>>>>> dev
 
         User user = userRepository.findByEmail("123andyelliot@gmail.com");
         Business business = new Business.Builder()
@@ -74,6 +98,37 @@ public class MainApplicationRunner implements ApplicationRunner {
 
 
         business = businessRepository.save(business);
+<<<<<<< HEAD
+=======
+
+        Product product1 = new Product.Builder()
+                .withProductCode("NathanApple-70")
+                .withName("The Nathan Apple")
+                .withDescription("Ever wonder why Nathan has an apple")
+                .withManufacturer("Apple")
+                .withRecommendedRetailPrice("900.03")
+                .withBusiness(business)
+                .build();
+        productRepository.save(product1);
+        Product product2 = new Product.Builder()
+                .withProductCode("SteveIceCream-50")
+                .withName("Steve's Ice Cream")
+                .withDescription("Ice Cream by Steve")
+                .withManufacturer("Steve")
+                .withRecommendedRetailPrice("8000.03")
+                .withBusiness(business)
+                .build();
+        productRepository.save(product2);
+        Product product3 = new Product.Builder()
+                .withProductCode("NathanCarrot-90")
+                .withName("The Nathan Carrot")
+                .withDescription("Ever wonder why Nathan has an carrot")
+                .withManufacturer("Carrot")
+                .withRecommendedRetailPrice("7000.03")
+                .withBusiness(business)
+                .build();
+        productRepository.save(product3);
+>>>>>>> dev
     }
 
     /**
