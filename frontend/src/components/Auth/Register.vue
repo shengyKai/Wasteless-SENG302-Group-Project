@@ -175,7 +175,7 @@
         type="city"
         class="required"
         v-model="city"
-        :rules="mandatoryRules.concat(nameRules).concat(maxLongCharRules)"
+        :rules="mandatoryRules.concat(addressRules).concat(maxLongCharRules)"
       />
 
       <!-- INPUT: Region -->
@@ -183,7 +183,7 @@
         type="region"
         class="required"
         v-model="region"
-        :rules="mandatoryRules.concat(nameRules).concat(maxLongCharRules)"
+        :rules="mandatoryRules.concat(addressRules).concat(maxLongCharRules)"
       />
 
       <!-- INPUT: Country -->
@@ -191,7 +191,7 @@
         type="country"
         class="required"
         v-model="country"
-        :rules="mandatoryRules.concat(nameRules).concat(maxLongCharRules)"
+        :rules="mandatoryRules.concat(addressRules).concat(maxLongCharRules)"
       />
 
       <!-- INPUT: Postcode -->
@@ -302,9 +302,12 @@ export default {
       countryCodeRules: [
         field => /(^(\d{1,2}-)?\d{2,3}$)|(^$)/.test(field) || 'Must be a valid country code.'
       ],
+      addressRules: [
+        field => /^[a-z ]+$/i.test(field) || 'Naming must be valid'
+      ],
       streetNumRules: [
         field => (field && field.length <= 109) || 'Reach Max chracter limit 109 ',
-        field => /^(?=.*[0-9])(?=.*[a-zA-Z])([a-zA-Z0-9]+)$/.test(field) || 'Must have at least one number and one alphabet'
+        field => /^(?=.*[0-9 ])(?=.*[a-zA-Z ])([a-zA-Z0-9 ]+)$/.test(field) || 'Must have at least one number and one alphabet'
       ],
     };
   },
