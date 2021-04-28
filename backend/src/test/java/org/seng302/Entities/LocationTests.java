@@ -123,9 +123,9 @@ public class LocationTests {
   @Test
   public void checkValidStreetNameOverHundredNine() {
     String[] streetNames = new String[]{
-            "abcdefghijklmnopqrstuvwxyz abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz",
-            "helphelphelphelphelphelphelphelphelphelphelphelphelphelphelphelphelphelphelphelphelphelphelphelphelp",
-            "idontneedit idontneedit idontneedit idontneedit idontneedit idontneeditidontneeditidontneeditidontneeditidontneedit" };
+            " abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz",
+            "helphelphelphelphelphelphelphelphelphelphelphelphelphelphelphelphelphelphelphelphelphelphelphelphelphelphelphelp",
+            "idontneeditidontneeditidontneeditidontneeditidontneeditidontneeditidontneeditidontneeditidontneeditidontneedit" };
     for (String streetName : streetNames) {
       assertFalse(testLocation.checkValidStreetName(streetName));
     }
@@ -180,10 +180,10 @@ public class LocationTests {
    */
   @Test
   public void checkValidCityOverHundred() {
-    String[] cities = new String[]{ "this city string contains exactly fifty characters",
-                                    "helpppppppppppppppppppppppppppppppppppppppppppppppppppppp",
-                                    "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-                                    "This is a city name that resembles the name of city" };
+    String[] cities = new String[]{ "this city string contains exactly fifty characters this city string contains exactly fifty characters",
+                                    "helpppppppppppppppppppppppppppppppppppppppppppppppppppppp helpppppppppppppppppppppppppppppppppppppppppppppppppppppp",
+                                    "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                                    "This is a city name that resembles the name of city This is a city name that resembles the name of city" };
     for (String city : cities) {
       assertFalse(testLocation.checkValidCity(city));
     }
@@ -234,13 +234,13 @@ public class LocationTests {
   }
 
   /**
-   * Checks several names with over 50 characters fail when passed into the checkValidRegion method
+   * Checks several names with over 100 characters fail when passed into the checkValidRegion method
    */
   @Test
   public void checkValidRegionOverHundred() {
-    String[] regions = new String[]{ "this region issssssssssssssssssssssssssssssssssssssss fifty characters",
-                                      "helppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppp",
-                                      "this region is full of surprises you should come have a lookkkkkkkkkkkk" };
+    String[] regions = new String[]{ "this region abcdefghijklmnopqrstuvwxyz abcdefghijklmnopqrstuvwxyz abcdefghijklmnopqrstuvwxyz abcdefghijklmnopqrstuvwxyz",
+                                      "helpppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppp",
+                                      "this region is full of surprises you should come have a lookkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk" };
     for (String region : regions) {
       assertFalse(testLocation.checkValidRegion(region));
     }
@@ -295,10 +295,10 @@ public class LocationTests {
    */
   @Test
   public void checkValidCountryOverHundred() {
-    String[] countries = new String[]{ "This country is exactlyyyyyy fifty characters long",
-                                        "helppppppppppppppppppppppppppppppppppppppppppppppp",
-                                        "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-                                        "This country has a lot going for it we are coronavirus free" };
+    String[] countries = new String[]{ "This country is exactlyyyyyy fifty characters long This country is exactlyyyyyy fifty characters long",
+                                        "helppppppppppppppppppppppppppppppppppppppppppppppp helppppppppppppppppppppppppppppppppppppppppppppppp",
+                                        "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                                        "This country has a lot going for it we are coronavirus free This country has a lot going for it we are coronavirus free" };
     for (String country : countries) {
       assertFalse(testLocation.checkValidRegion(country));
     }

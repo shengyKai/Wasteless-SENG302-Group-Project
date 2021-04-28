@@ -207,7 +207,7 @@ public class UserTests {
      */
     @Test
     public void checkInvalidFirstNameTooLong() {
-        String[] invalidFirstNames = { "HippoTooLongPotamus", "Connnnnnnnnnnnnnnnnnnnnor", "MrsMagicalMagical" };
+        String[] invalidFirstNames = { "HippoTooLongPotamusHippoTooLongPotamus", "ConnnnnnnnnnnnnnnnnnnnnorConnnnnnnnnnnnnnnnnnnnnor", "MrsMagicalMagicalMrsMagicalMagical" };
         for (String firstName : invalidFirstNames) {
             try {
                 testUser.setFirstName(firstName);
@@ -340,7 +340,7 @@ public class UserTests {
      */
     @Test
     public void checkInvalidLastNameTooLong() {
-        String[] invalidLastNames = { "HippoTooLongPotamus", "Connnnnnnnnnnnnnnnnnnnnor", "MrsMagicalMagical" };
+        String[] invalidLastNames = { "HippoTooLongPotamusHippoTooLongPotamus", "HippoTooLongPotamusConnnnnnnnnnnnnnnnnnnnnor", "HippoTooLongPotamusMrsMagicalMagical" };
         for (String lastName : invalidLastNames) {
             try {
                 testUser.setLastName(lastName);
@@ -408,7 +408,7 @@ public class UserTests {
      */
     @Test
     public void checkInvalidNicknameTooLong() {
-        String[] invalidNicknames = { "HippoTooLongPotamus", "Connnnnnnnnnnnnnnnnnnnnor", "MrsMagicalMagical" };
+        String[] invalidNicknames = { "HippoTooLongPotamusHippoTooLongPotamus", "HippoTooLongPotamusConnnnnnnnnnnnnnnnnnnnnor", "HippoTooLongPotamusMrsMagicalMagical" };
         for (String nickname : invalidNicknames) {
             try {
                 testUser.setNickname(nickname);
@@ -516,13 +516,11 @@ public class UserTests {
         }
     }
     /**
-     * Checks several bios with characters in them will not be set as the user's bio
+     * Checks several bios with non ASCII chracter in them will not be set as the user's bio
      */
     @Test
     public void checkInvalidBioCharacters() {
-        String[] invalidBios = { "! @m @ h@ppy per$on when ! []m not study!ng",
-                "! @m @ Un!ver$ity $tudent meaning I have no &***ree ^ime",
-                "Do you li%e ca(s cause ) l*ke cats", "!^^^@#$%^&^*(*)" };
+        String[] invalidBios = {"dummy भारतभारत", "bladummy网络网络", "hahadummy.קום.קום" };
         for (String bio : invalidBios) {
             try {
                 testUser.setBio(bio);
