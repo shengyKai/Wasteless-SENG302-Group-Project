@@ -68,7 +68,15 @@ function makeTestUser(userId: number, businesses?: number[]) {
     phoneNumber: 'test_phone_number' + userId,
     dateOfBirth: '1/1/1900',
     created: '1/5/2005',
-    homeAddress: { country: 'test_country' + userId },
+    homeAddress: { 
+      streetNumber: 'test_street_number',
+      streetName: 'test_street1',
+      city: 'test_city',
+      region: 'test_region',
+      postcode: 'test_postcode',
+      district: 'test_district',
+      country: 'test_country' + userId 
+    },
   };
 
   if (businesses !== undefined) {
@@ -98,44 +106,10 @@ describe('UserProfile.vue', () => {
    */
   beforeEach(() => {
     localVue.use(Vuex);
-<<<<<<< HEAD
-    let options = createOptions();
-    options.state = {
-      user: {
-        id: 1,
-        firstName: "test_first_name",
-        lastName: "test_last_name",
-        middleName: "test_middle_name",
-        nickname: "test_nickname",
-        bio: "test_biography",
-        email: "test_email_address",
-        dateOfBirth: "1/1/1900",
-        phoneNumber: "test_phone_number",
-        homeAddress: {
-          streetNumber: 'test_street_number',
-          streetName: 'test_street1',
-          city: 'test_city',
-          region: 'test_region',
-          postcode: 'test_postcode',
-          district: 'test_district',
-          country: 'test_country'
-        },
-        created: "1/1/1950",
-        role: "user",
-        businessesAdministered: [],
-      },
-      activeRole: null,
-      globalError: null,
-      createBusinessDialogShown: false,
-      createProductDialogShown: false,
-    };
-    let store = new Vuex.Store(options);
-=======
     resetStoreForTesting();
     store = getStore();
     store.state.user = makeTestUser(1, [1, 2]);
     store.state.user.role = 'user'; // Make sure we have this private field instantiated.
->>>>>>> dev
 
     getBusiness.mockImplementation(async businessId => {
       return makeTestBusiness(businessId, [businessId, businessId - 1]);
@@ -257,7 +231,6 @@ describe('UserProfile.vue', () => {
    * Tests that the UserProfile has the user's home street address somewhere in the page
    */
   it('Renders home address', () => {
-<<<<<<< HEAD
     expect(wrapper.text()).toContain('test_street1');
   });
 
@@ -300,19 +273,12 @@ describe('UserProfile.vue', () => {
   * Tests that the UserProfile has the user's home address country somewhere in the page
   */
   it('Renders home address', () => {
-    expect(wrapper.text()).toContain('test_country');
-=======
     expect(wrapper.text()).toContain('test_country100');
->>>>>>> dev
   });
 
   /**
    * Tests that the UserProfile has the user's birthday somewhere in the page
-<<<<<<< HEAD
    * and that the birthday is in the correct format dd mm yyyy, where mm is the abbreviation of each month
-=======
-   * and that the birthday is in the correct format dd MMM yyyy.
->>>>>>> dev
    */
   it('Renders birthday', () => {
     expect(wrapper.text()).toContain('01 Jan 1900');

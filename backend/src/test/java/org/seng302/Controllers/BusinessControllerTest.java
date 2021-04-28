@@ -128,6 +128,7 @@ public class BusinessControllerTest {
                 .atStreetNumber("123")
                 .onStreet("Ilam road")
                 .withPostCode("8041")
+                .atDistrict("Ashburton")
                 .build();
         owner = new User.Builder()
                 .withFirstName("John")
@@ -143,10 +144,10 @@ public class BusinessControllerTest {
                 .build();
         admin = new User.Builder().withFirstName("Caroline").withMiddleName("Jane").withLastName("Smith")
                 .withNickName("Carrie").withEmail("carriesmith@hotmail.com").withPassword("h375dj82")
-                .withDob("2001-03-11").withPhoneNumber("+64 3 748 7562").withAddress(Location.covertAddressStringToLocation("24,Albert Road,Auckland,Auckland,New KZealand,0624")).build();
+                .withDob("2001-03-11").withPhoneNumber("+64 3 748 7562").withAddress(Location.covertAddressStringToLocation("24,Albert Road,Ashburton,Auckland,Auckland,New KZealand,0624")).build();
         otherUser = new User.Builder().withFirstName("William").withLastName("Pomeroy").withNickName("Will")
                 .withEmail("pomeroy.will@outlook.com").withPassword("569277hghrud").withDob("1981-03-11")
-                .withPhoneNumber("+64 21 099 5786").withAddress(Location.covertAddressStringToLocation("99,Riccarton Road,Christchurch,Canterbury,New Zealand,4041")).build();
+                .withPhoneNumber("+64 21 099 5786").withAddress(Location.covertAddressStringToLocation("99,Riccarton Road,Ashburton,Christchurch,Canterbury,New Zealand,4041")).build();
         owner = userRepository.save(owner);
         admin = userRepository.save(admin);
         otherUser = userRepository.save(otherUser);
@@ -170,6 +171,7 @@ public class BusinessControllerTest {
         assertEquals(address.getAsString("region"), object.getAddress().getRegion());
         assertEquals(address.getAsString("country"), object.getAddress().getCountry());
         assertEquals(address.getAsString("postcode"), object.getAddress().getPostCode());
+        assertEquals(address.getAsString("district"), object.getAddress().getDistrict());
     }
 
     /**
@@ -188,6 +190,7 @@ public class BusinessControllerTest {
                         "  \"address\": {\n" +
                         "    \"streetNumber\": \"324\",\n" +
                         "    \"streetName\": \"Ilam Road\",\n" +
+                        "    \"district\": \"Ashburton\",\n" +
                         "    \"city\": \"Christchurch\",\n" +
                         "    \"region\": \"Canterbury\",\n" +
                         "    \"country\": \"New Zealand\",\n" +
@@ -226,6 +229,7 @@ public class BusinessControllerTest {
                         "  \"address\": {\n" +
                         "    \"streetNumber\": \"324\",\n" +
                         "    \"streetName\": \"Ilam Road\",\n" +
+                        "    \"district\": \"Ashburton\",\n" +
                         "    \"city\": \"Christchurch\",\n" +
                         "    \"region\": \"Canterbury\",\n" +
                         "    \"country\": \"New Zealand\",\n" +
@@ -261,6 +265,7 @@ public class BusinessControllerTest {
                         "  \"address\": {\n" +
                         "    \"streetNumber\": \"324\",\n" +
                         "    \"streetName\": \"Ilam Road\",\n" +
+                        "    \"district\": \"Ashburton\",\n" +
                         "    \"city\": \"Christchurch\",\n" +
                         "    \"region\": \"Canterbury\",\n" +
                         "    \"country\": \"New Zealand\",\n" +
@@ -295,6 +300,7 @@ public class BusinessControllerTest {
                         "  \"address\": {\n" +
                         "    \"streetNumber\": \"324\",\n" +
                         "    \"streetName\": \"Ilam Road\",\n" +
+                        "    \"district\": \"Ashburton\",\n" +
                         "    \"city\": \"Christchurch\",\n" +
                         "    \"region\": \"Canterbury\",\n" +
                         "    \"country\": \"New Zealand\",\n" +
@@ -330,6 +336,7 @@ public class BusinessControllerTest {
                         "  \"address\": {\n" +
                         "    \"streetNumber\": \"324\",\n" +
                         "    \"streetName\": \"Ilam Road\",\n" +
+                        "    \"district\": \"Ashburton\",\n" +
                         "    \"city\": \"Christchurch\",\n" +
                         "    \"region\": \"Canterbury\",\n" +
                         "    \"country\": \"New Zealand\",\n" +

@@ -588,7 +588,7 @@ public class BusinessTests {
     public void setCreatedInitialValueTest() {
         Date now = new Date();
         Business testBusiness2 = new Business.Builder().withBusinessType("Non-profit organisation").withName("Zesty Business")
-                .withAddress(Location.covertAddressStringToLocation("101,My Street,Christchurch,Canterbury,New Zealand,1010"))
+                .withAddress(Location.covertAddressStringToLocation("101,My Street,Ashburton,Christchurch,Canterbury,New Zealand,1010"))
                 .withDescription("A nice place").withPrimaryOwner(testUser2).build();
         // Check that the difference between the time the business was created and the time at the start of exection of
         // this function is less than 1 second
@@ -615,7 +615,7 @@ public class BusinessTests {
      */
     @Test
     public void setAddressValidTest() {
-        Location address = Location.covertAddressStringToLocation("44,Humbug Ave,Hamilton,Waikato,New Zealand,1000");
+        Location address = Location.covertAddressStringToLocation("44,Humbug Ave,Ashburton,Hamilton,Waikato,New Zealand,1000");
         testBusiness1.setAddress(address);
         assertEquals(address, testBusiness1.getAddress());
     }

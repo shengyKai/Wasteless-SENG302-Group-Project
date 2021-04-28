@@ -827,13 +827,13 @@ class SearchHelperTest {
     @Test
     public void getSearchResultsOrderedByRelevanceCorrectRelevanceOrderTest() throws ParseException {
         userRepository.deleteAll();
-        User donaldDuck = new User.Builder().withFirstName("Donald").withLastName("Duck").withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Christchurch,New Zealand," +
+        User donaldDuck = new User.Builder().withFirstName("Donald").withLastName("Duck").withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
                 "Canterbury,8041"))
                 .withDob("1934-06-09").withEmail("donald.duck@waddlemail.com").withPassword("HonkHonk1").build();
-        User donaldSmith = new User.Builder().withFirstName("Donald").withLastName("Smith").withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Christchurch,New Zealand," +
+        User donaldSmith = new User.Builder().withFirstName("Donald").withLastName("Smith").withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
                 "Canterbury,8041"))
                 .withDob("1994-03-08").withEmail("donald.smith@gmail.com").withPassword("abc123456789").build();
-        User lucyMcDonald = new User.Builder().withFirstName("Lucy").withLastName("McDonald").withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Christchurch,New Zealand," +
+        User lucyMcDonald = new User.Builder().withFirstName("Lucy").withLastName("McDonald").withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
                 "Canterbury,8041"))
                 .withDob("2000-11-21").withEmail("lucymcdonald@hotmail.com").withPassword("password123").build();
         userRepository.save(lucyMcDonald);
@@ -857,13 +857,13 @@ class SearchHelperTest {
     public void getSearchResultsOrderedByRelevanceCorrectRelevanceOrderReverseTrueTest() throws ParseException {
         userRepository.deleteAll();
         User donaldDuck = new User.Builder().withFirstName("Donald").withLastName("Duck").withAddress(
-                Location.covertAddressStringToLocation("4,Rountree Street,Christchurch,New Zealand,Canterbury,8041"))
+                Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand,Canterbury,8041"))
                 .withDob("1934-06-09").withEmail("donald.duck@waddlemail.com").withPassword("HonkHonk1").build();
         User donaldSmith = new User.Builder().withFirstName("Donald").withLastName("Smith").withAddress(
-                Location.covertAddressStringToLocation("4,Rountree Street,Christchurch,New Zealand,Canterbury,8041"))
+                Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand,Canterbury,8041"))
                 .withDob("1994-03-08").withEmail("donald.smith@gmail.com").withPassword("abc123456789").build();
         User lucyMcDonald = new User.Builder().withFirstName("Lucy").withLastName("McDonald").withAddress(
-                Location.covertAddressStringToLocation("4,Rountree Street,Christchurch,New Zealand,Canterbury,8041"))
+                Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand,Canterbury,8041"))
                 .withDob("2000-11-21").withEmail("lucymcdonald@hotmail.com").withPassword("password123").build();
         userRepository.save(lucyMcDonald);
         userRepository.save(donaldDuck);

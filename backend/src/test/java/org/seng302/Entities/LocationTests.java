@@ -380,6 +380,17 @@ public class LocationTests {
   }
 
   /**
+   * Checks if Location object is still valid even if district field is an empty string
+   */
+  @Test
+  public void checkLocationValidIfNoDistrict() {
+    Location location = new Location.Builder().atStreetNumber("1").onStreet("Elizabeth Street").inCity("Christchurch")
+                                      .inRegion("Canterbury").inCountry("New Zealand").withPostCode("8041").atDistrict("")
+                                      .build();
+    assertTrue(testLocation.checkValidAllLocationParameters(location));
+  }
+
+  /**
    * Checks a Location object with all valid parameters returns true when passed into the
    * checkValidAllLocationParameters method
    */
