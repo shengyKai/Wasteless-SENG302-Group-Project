@@ -374,6 +374,17 @@ class ProductControllerTest {
         return productInfo;
     }
 
+    @Test
+    void postingAProductWithoutARequestBody() {
+        setCurrentUser(ownerUser.getUserID());
+        assertDoesNotThrow(() -> mockMvc.perform(post(String.format("/businesses/%d/products", testBusiness1.getId()))
+                .sessionAttrs(sessionAuthToken)
+                .contentType("application/json")
+                .cookie(authCookie))
+                .andExpect(status().isBadRequest())
+                .andReturn());
+    }
+
     /**
      * Tests that using the POST /businesses/:id/products endpoint adds a product that is returned from
      * Product.Builder.build to the businesses catalogue.
