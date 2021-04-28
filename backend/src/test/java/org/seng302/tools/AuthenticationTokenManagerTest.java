@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.*;
 import org.seng302.exceptions.AccessTokenException;
@@ -15,7 +14,6 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -46,29 +44,28 @@ class AuthenticationTokenManagerTest {
     private final String authTokenName = "AUTHTOKEN";
 
     @BeforeAll
-    public void setUp() {
+    void setUp() {
         MockitoAnnotations.openMocks(this);
     }
 
     /**
-     * Verify that when setAuthenticationToken is called a cookie with name "JSESSIONID" is added to the HTTP response.
+     * Verify that when setAuthenticationToken is called a cookie with name "AUTHTOKEN" is added to the HTTP response.
      */
-    // Todo: Fix or replace this test once spring security is working
     @Test
-    public void setAuthenticationTokenCookieAddedTest() {
+    void setAuthenticationTokenCookieAddedTest() {
         when(request.getSession(true)).thenAnswer(
                 invocation -> session);
         AuthenticationTokenManager.setAuthenticationToken(request, response);
         Mockito.verify(response).addCookie(cookieArgumentCaptor.capture());
         Cookie responseCookie = cookieArgumentCaptor.getValue();
-        assertEquals("AUTHTOKEN", responseCookie.getName());
+        assertEquals(authTokenName, responseCookie.getName());
     }
 
     /**
-     * Verify that when setAuthenticationToken is called the JSESSIONID cookie contains a 32 character hexidemcimal string.
+     * Verify that when setAuthenticationToken is called the AUTHTOKEN cookie contains a 32 character hexidemcimal string.
      */
     @Test
-    public void setAuthenticationTokenCookieValueTest() {
+    void setAuthenticationTokenCookieValueTest() {
         when(request.getSession(true)).thenAnswer(
                 invocation -> session);
         AuthenticationTokenManager.setAuthenticationToken(request, response);
@@ -78,10 +75,10 @@ class AuthenticationTokenManagerTest {
     }
 
     /**
-     * Verify that when setAuthenticationToken is called the JSESSIONID cookie is set to expire in 30 minutes.
+     * Verify that when setAuthenticationToken is called the AUTHTOKEN cookie is set to expire in 30 minutes.
      */
     @Test
-    public void setAuthenticationTokenCookieExpiryTest() {
+    void setAuthenticationTokenCookieExpiryTest() {
         when(request.getSession(true)).thenAnswer(
                 invocation -> session);
         AuthenticationTokenManager.setAuthenticationToken(request, response);
@@ -91,25 +88,24 @@ class AuthenticationTokenManagerTest {
     }
 
     /**
-     * Verify that when setAuthenticationToken is called an attribute with name JSESSIONID is added to the session.
+     * Verify that when setAuthenticationToken is called an attribute with name AUTHTOKEN is added to the session.
      */
-    // Todo: fix or replace this test once we have got spring security working
     @Test
-    public void setAuthenticationTokenSessionAttributeAddedTest() {
+    void setAuthenticationTokenSessionAttributeAddedTest() {
         when(request.getSession(true)).thenAnswer(
                 invocation -> session);
         AuthenticationTokenManager.setAuthenticationToken(request, response);
         Mockito.verify(session).setAttribute(nameArgumentCaptor.capture(), valueArgumentCaptor.capture());
         String attributeName = nameArgumentCaptor.getValue();
-        assertEquals("AUTHTOKEN", attributeName);
+        assertEquals(authTokenName, attributeName);
     }
 
     /**
-     * Verify that when setAuthenticationToken is called the value of the cookie JSESSIONID added to the response is the
-     * same as the value of the attribute JSESSIONID added to the session.
+     * Verify that when setAuthenticationToken is called the value of the cookie AUTHTOKEN added to the response is the
+     * same as the value of the attribute AUTHTOKEN added to the session.
      */
     @Test
-    public void setAuthenticationTokenSessionAttributeCookieMatchTest() {
+    void setAuthenticationTokenSessionAttributeCookieMatchTest() {
         when(request.getSession(true)).thenAnswer(
                 invocation -> session);
         AuthenticationTokenManager.setAuthenticationToken(request, response);
@@ -121,11 +117,11 @@ class AuthenticationTokenManagerTest {
     }
 
     /**
-     * Verify that when checkAuthenticationToken is called and the cookie JSESSIONID is not present in the request an
+     * Verify that when checkAuthenticationToken is called and the cookie AUTHTOKEN is not present in the request an
      * AccessTokenException is thrown.
      */
     @Test
-    public void checkAuthenticationTokenCookieNotPresentTest() {
+    void checkAuthenticationTokenCookieNotPresentTest() {
         when(request.getSession()).thenAnswer(
                 invocation -> session);
         when(session.getAttribute(authTokenName)).thenAnswer(
@@ -138,11 +134,11 @@ class AuthenticationTokenManagerTest {
     }
 
     /**
-     * Verify that when checkAuthenticationToken is called and the attribute JSESSIONID does not exist for this session
+     * Verify that when checkAuthenticationToken is called and the attribute AUTHTOKEN does not exist for this session
      * an AccessTokenException is thrown.
      */
     @Test
-    public void checkAuthenticationTokenSessionAttributeNotPresentTest() {
+    void checkAuthenticationTokenSessionAttributeNotPresentTest() {
         when(request.getSession()).thenAnswer(
                 invocation -> session);
         when(session.getAttribute(authTokenName)).thenAnswer(
@@ -155,11 +151,11 @@ class AuthenticationTokenManagerTest {
     }
 
     /**
-     * Verify that when checkAuthenticationToken is called and the value of the cookie JSESSIONID does not match the
-     * value of the attribute JSESSIONID for this session an AccessTokenException is thrown.
+     * Verify that when checkAuthenticationToken is called and the value of the cookie AUTHTOKEN does not match the
+     * value of the attribute AUTHTOKEN for this session an AccessTokenException is thrown.
      */
     @Test
-    public void checkAuthenticationTokenNoMatchTest() {
+    void checkAuthenticationTokenNoMatchTest() {
         when(request.getSession()).thenAnswer(
                 invocation -> session);
         when(session.getAttribute(authTokenName)).thenAnswer(
@@ -176,11 +172,11 @@ class AuthenticationTokenManagerTest {
     }
 
     /**
-     * Verify that when checkAuthenticationToken is called and the value of the cookie JSESSIONID matches the
-     * value of the attribute JSESSIONID for this session an no exception is thrown.
+     * Verify that when checkAuthenticationToken is called and the value of the cookie AUTHTOKEN matches the
+     * value of the attribute AUTHTOKEN for this session an no exception is thrown.
      */
     @Test
-    public void checkAuthenticationTokenMatchTest() {
+    void checkAuthenticationTokenMatchTest() {
         when(request.getSession()).thenAnswer(
                 invocation -> session);
         when(session.getAttribute(authTokenName)).thenAnswer(

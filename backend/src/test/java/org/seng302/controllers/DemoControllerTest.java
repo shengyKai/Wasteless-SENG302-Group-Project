@@ -1,9 +1,7 @@
 package org.seng302.controllers;
 
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
@@ -21,20 +19,15 @@ import org.seng302.tools.AuthenticationTokenManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.HttpServletRequest;
-
 import java.text.ParseException;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -104,7 +97,7 @@ class DemoControllerTest {
      * no entities will be saved to the database.
      */
     @Test
-    void loadDemoData_noAuthToken_dataNotLoadedTest() throws Exception {
+    void loadDemoData_noAuthToken_dataNotLoadedTest() {
         try (MockedStatic<AuthenticationTokenManager> authenticationTokenManager = Mockito.mockStatic(AuthenticationTokenManager.class)) {
             authenticationTokenManager. when(() -> AuthenticationTokenManager.checkAuthenticationToken(any())).thenThrow(new AccessTokenException());
 
@@ -140,7 +133,7 @@ class DemoControllerTest {
      * which is associated with an account with role 'user', no entities are saved to the database.
      */
     @Test
-    void loadDemoData_userAuthToken_dataNotLoadedTest() throws Exception {
+    void loadDemoData_userAuthToken_dataNotLoadedTest() {
         // Mock the AuthenticationTokenManager to respond as it would when the session role is 'user'
         try (MockedStatic<AuthenticationTokenManager> authenticationTokenManager = Mockito.mockStatic(AuthenticationTokenManager.class)) {
             authenticationTokenManager. when(() -> AuthenticationTokenManager.checkAuthenticationToken(any())).then(invocation -> null);
@@ -177,7 +170,7 @@ class DemoControllerTest {
      * which is associated with an account with an admin role, the demo data is loaded to the repositories.
      */
     @Test
-    void loadDemoData_adminAuthToken_dataLoadedTest() throws Exception {
+    void loadDemoData_adminAuthToken_dataLoadedTest() {
         // Mock the AuthenticationTokenManager to respond as it would when the session role is 'admin'
         try (MockedStatic<AuthenticationTokenManager> authenticationTokenManager = Mockito.mockStatic(AuthenticationTokenManager.class)) {
             authenticationTokenManager. when(() -> AuthenticationTokenManager.checkAuthenticationToken(any())).then(invocation -> null);
