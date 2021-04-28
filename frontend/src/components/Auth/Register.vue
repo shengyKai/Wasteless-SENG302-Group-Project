@@ -284,12 +284,12 @@ export default {
         field =>  (field.length === 0 || (/^[a-z]+$/i).test(field)) || 'Naming must be valid'
       ],
       maxShortCharRules: [
-        field => (field.length <= 16) || 'Reached max character limit: 32'
+        field => (field.length <= 16) || 'Reached max character limit: 16'
       ],
       maxMediumCharRules: [
         field => (field.length <= 32) || 'Reached max character limit: 32'
       ],
-      maxLongCharRules: [   
+      maxLongCharRules: [
         field => (field.length <= 100) || 'Reached max character limit: 100'
       ],
       charBioRules: [
@@ -303,7 +303,7 @@ export default {
         field => /(^(\d{1,2}-)?\d{2,3}$)|(^$)/.test(field) || 'Must be a valid country code.'
       ],
       streetNumRules: [
-        field => (field && field.length <= 109) || 'street num + aplhabet should not exist 109 characters. 100 for name, 9 for num ',
+        field => (field && field.length <= 109) || 'Reach Max chracter limit 109 ',
         field => /^(?=.*[0-9])(?=.*[a-zA-Z])([a-zA-Z0-9]+)$/.test(field) || 'Must have at least one number and one alphabet'
       ],
     };
