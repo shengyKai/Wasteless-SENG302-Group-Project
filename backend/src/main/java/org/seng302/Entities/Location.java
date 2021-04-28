@@ -41,10 +41,14 @@ public class Location {
     @Column(name="post_code")
     private String postCode;
 
+<<<<<<< HEAD
     @Column(name="district")
     private String district;
 
     /**
+=======
+    /*
+>>>>>>> dev
      * Converts the address string into a location object
      * @param address
      * @return

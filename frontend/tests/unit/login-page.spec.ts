@@ -71,7 +71,7 @@ describe('index.vue', () => {
       expect(loginButton.props().disabled).toBeFalsy();
     });
 
-    await loginButton.trigger('submit');
+    await loginButton.trigger('click');
 
     await Vue.nextTick();
     expect(methodInvoked).toBeCalled();
