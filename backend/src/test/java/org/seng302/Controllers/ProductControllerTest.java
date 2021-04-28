@@ -358,8 +358,7 @@ public class ProductControllerTest {
 
         MvcResult result = mockMvc.perform(get(String.format("/businesses/%d/products", testBusiness1.getId()))
                 .sessionAttrs(sessionAuthToken)
-                .cookie(authCookie)
-                .param("reverse", "true"))
+                .cookie(authCookie))
                 .andExpect(status().isOk())
                 .andReturn();
 
@@ -464,11 +463,113 @@ public class ProductControllerTest {
     }
 
 
+
+
     /**
-     * Checks that the API returns paginated products in the businesses catalogue.
+     * Checks that the API returns products correctly ordered by ID.
      */
     @Test
-    void retrieveCatalogueOrderedByKey() throws Exception {
+    void retrieveCatalogueOrderedById() throws Exception {
+        setCurrentUser(ownerUser.getUserID());
+        addSeveralProductsToACatalogue();
+
+        MvcResult result = mockMvc.perform(get(String.format("/businesses/%d/products", testBusiness1.getId()))
+                .sessionAttrs(sessionAuthToken)
+                .cookie(authCookie)
+                .param("orderBy", "id"))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
+        JSONArray responseBody = (JSONArray) parser.parse(result.getResponse().getContentAsString());
+
+        JSONObject firstProduct = (JSONObject) responseBody.get(0);
+        JSONObject lastProduct = (JSONObject) responseBody.get(3);
+
+        assertEquals("AlmondMilk100", firstProduct.getAsString("id"));
+        assertEquals("NathanApple-70", lastProduct.getAsString("id"));
+    }
+
+    /**
+     * Checks that the API returns products correctly ordered by Name.
+     */
+    @Test
+    void retrieveCatalogueOrderedByName() throws Exception {
+        setCurrentUser(ownerUser.getUserID());
+        addSeveralProductsToACatalogue();
+
+        MvcResult result = mockMvc.perform(get(String.format("/businesses/%d/products", testBusiness1.getId()))
+                .sessionAttrs(sessionAuthToken)
+                .cookie(authCookie)
+                .param("orderBy", "name"))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
+        JSONArray responseBody = (JSONArray) parser.parse(result.getResponse().getContentAsString());
+
+        JSONObject firstProduct = (JSONObject) responseBody.get(0);
+        JSONObject lastProduct = (JSONObject) responseBody.get(3);
+
+        assertEquals("AlmondMilk100", firstProduct.getAsString("id"));
+        assertEquals("NathanApple-70", lastProduct.getAsString("id"));
+    }
+
+    /**
+     * Checks that the API returns products correctly ordered by Description.
+     */
+    @Test
+    void retrieveCatalogueOrderedByDescription() throws Exception {
+        setCurrentUser(ownerUser.getUserID());
+        addSeveralProductsToACatalogue();
+
+        MvcResult result = mockMvc.perform(get(String.format("/businesses/%d/products", testBusiness1.getId()))
+                .sessionAttrs(sessionAuthToken)
+                .cookie(authCookie)
+                .param("orderBy", "description"))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
+        JSONArray responseBody = (JSONArray) parser.parse(result.getResponse().getContentAsString());
+
+        JSONObject firstProduct = (JSONObject) responseBody.get(0);
+        JSONObject lastProduct = (JSONObject) responseBody.get(3);
+
+        assertEquals("NathanApple-70", firstProduct.getAsString("id"));
+        assertEquals("DarkChocolate", lastProduct.getAsString("id"));
+    }
+
+    /**
+     * Checks that the API returns products correctly ordered by Manufacturer.
+     */
+    @Test
+    void retrieveCatalogueOrderedByManufacturer() throws Exception {
+        setCurrentUser(ownerUser.getUserID());
+        addSeveralProductsToACatalogue();
+
+        MvcResult result = mockMvc.perform(get(String.format("/businesses/%d/products", testBusiness1.getId()))
+                .sessionAttrs(sessionAuthToken)
+                .cookie(authCookie)
+                .param("orderBy", "manufacturer"))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
+        JSONArray responseBody = (JSONArray) parser.parse(result.getResponse().getContentAsString());
+
+        JSONObject firstProduct = (JSONObject) responseBody.get(0);
+        JSONObject lastProduct = (JSONObject) responseBody.get(3);
+
+        assertEquals("NathanApple-70", firstProduct.getAsString("id"));
+        assertEquals("DarkChocolate", lastProduct.getAsString("id"));
+    }
+
+    /**
+     * Checks that the API returns products correctly ordered by Recommended Retail Price.
+     */
+    @Test
+    void retrieveCatalogueOrderedByRRP() throws Exception {
         setCurrentUser(ownerUser.getUserID());
         addSeveralProductsToACatalogue();
 
@@ -487,5 +588,52 @@ public class ProductControllerTest {
 
         assertEquals("Coffee7", firstProduct.getAsString("id"));
         assertEquals("NathanApple-70", lastProduct.getAsString("id"));
+    }
+
+    /**
+     * Checks that the API returns products correctly ordered by Created.
+     */
+    @Test
+    void retrieveCatalogueOrderedByCreated() throws Exception {
+        setCurrentUser(ownerUser.getUserID());
+        addSeveralProductsToACatalogue();
+
+        MvcResult result = mockMvc.perform(get(String.format("/businesses/%d/products", testBusiness1.getId()))
+                .sessionAttrs(sessionAuthToken)
+                .cookie(authCookie)
+                .param("orderBy", "created"))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
+        JSONArray responseBody = (JSONArray) parser.parse(result.getResponse().getContentAsString());
+
+        JSONObject firstProduct = (JSONObject) responseBody.get(0);
+        JSONObject lastProduct = (JSONObject) responseBody.get(3);
+
+        assertEquals("NathanApple-70", firstProduct.getAsString("id"));
+        assertEquals("DarkChocolate", lastProduct.getAsString("id"));
+    }
+
+    /**
+     * Checks that the API returns the number of products in the catalogue correctly.
+     */
+    @Test
+    void retrieveCatalogueCount() throws Exception {
+        setCurrentUser(ownerUser.getUserID());
+        addSeveralProductsToACatalogue();
+
+        MvcResult result = mockMvc.perform(get(String.format("/businesses/%d/products/count", testBusiness1.getId()))
+                .sessionAttrs(sessionAuthToken)
+                .cookie(authCookie))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
+        JSONObject responseBody = (JSONObject) parser.parse(result.getResponse().getContentAsString());
+
+        Number count = responseBody.getAsNumber("count");
+
+        assertEquals(4, count);
     }
 }
