@@ -55,6 +55,7 @@ function makeTestBusiness(businessId: number, administrators?: number[]) {
  *
  * @param userId The user id to use
  * @param businesses The businesses for this user to administer
+ * @param applicationAdmin True if you want the user to be an system administrator
  * @returns The generated user
  */
 function makeTestUser(userId: number, businesses?: number[], applicationAdmin?: boolean) {
@@ -79,6 +80,9 @@ function makeTestUser(userId: number, businesses?: number[], applicationAdmin?: 
 }
 
 /**
+ * Describe groups the following tests together into a single component
+ * This component tests against the User Profile page
+ *
  * For this set of tests the users involved are as follows.
  *  - User 1  : The user that is observing the profile. They administer businesses 1 and 2.
  *  - User 100: The user within this UserProfile. They administer businesses 100 and 101.
@@ -128,7 +132,8 @@ describe('UserProfile.vue', () => {
   });
 
   /**
-   * Creates the wrapper
+   * Creates the environment used for testing. The profile page being viewed can be altered by changing the route parameter
+   * @param route The ID of the user to view the profile of
    */
   function generateWrapper(route: number) {
     // Creating wrapper around UserProfile with data-app to appease vuetify
