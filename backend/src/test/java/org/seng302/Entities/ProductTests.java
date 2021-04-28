@@ -483,6 +483,40 @@ class ProductTests {
     }
 
     /**
+     * Tests that the Product name cannot have characters that are neither a letter, number, space or punctuation.
+     * @param name The test name to use
+     */
+    @ParameterizedTest
+    @ValueSource(strings = {"\n", "\t", "\uD83D\uDE02", "\uFFFF"})
+    void buildWithInvalidCharactersInName(String name) {
+        var builder = new Product.Builder()
+                .withProductCode("NATHAN-APPLE-70")
+                .withName(name)
+                .withDescription("Ever wonder why Nathan has an apple")
+                .withManufacturer("Apple")
+                .withRecommendedRetailPrice("9000.03")
+                .withBusiness(testBusiness1);
+        assertThrows(ResponseStatusException.class, builder::build);
+    }
+
+    /**
+     * Tests that the Product can have a name using letters, numbers, spaces and punctuation
+     * @param name The test name to use
+     */
+    @ParameterizedTest
+    @ValueSource(strings = {" ", ":", ",", "7", "é", "树"})
+    void buildWithValidCharactersInName(String name) {
+        var builder = new Product.Builder()
+                .withProductCode("NATHAN-APPLE-70")
+                .withName(name)
+                .withDescription("Ever wonder why Nathan has an apple")
+                .withManufacturer("Apple")
+                .withRecommendedRetailPrice("9000.03")
+                .withBusiness(testBusiness1);
+        assertDoesNotThrow(builder::build);
+    }
+
+    /**
      * Tests that a product built with a long name (>50 characters) throws a ResponseStatusException
      */
     @Test
@@ -498,6 +532,40 @@ class ProductTests {
     }
 
     /**
+     * Tests that the Product description cannot have characters that are neither a letter, number, whitespace or punctuation.
+     * @param name The test name to use
+     */
+    @ParameterizedTest
+    @ValueSource(strings = {"\uD83D\uDE02", "\uFFFF"})
+    void buildWithInvalidCharactersInDescription(String name) {
+        var builder = new Product.Builder()
+                .withProductCode("NATHAN-APPLE-70")
+                .withName("The Nathan Apple")
+                .withDescription(name)
+                .withManufacturer("Apple")
+                .withRecommendedRetailPrice("9000.03")
+                .withBusiness(testBusiness1);
+        assertThrows(ResponseStatusException.class, builder::build);
+    }
+
+    /**
+     * Tests that the Product can have a description using letters, numbers, whitespace and punctuation
+     * @param description The test description to use
+     */
+    @ParameterizedTest
+    @ValueSource(strings = {" ", "\n", "\t",  ":", ",", "7", "é", "树"})
+    void buildWithValidCharactersInDescription(String description) {
+        var builder = new Product.Builder()
+                .withProductCode("NATHAN-APPLE-70")
+                .withName("The Nathan Apple")
+                .withDescription(description)
+                .withManufacturer("Apple")
+                .withRecommendedRetailPrice("9000.03")
+                .withBusiness(testBusiness1);
+        assertDoesNotThrow(builder::build);
+    }
+
+    /**
      * Tests that a product built with a long description (>200 characters) throws a ResponseStatusException
      */
     @Test
@@ -510,6 +578,40 @@ class ProductTests {
                 .withRecommendedRetailPrice("9000.03")
                 .withBusiness(testBusiness1);
         assertThrows(ResponseStatusException.class, builder::build);
+    }
+
+    /**
+     * Tests that the Product manufacturer cannot have characters that are neither a letter, number, space or punctuation.
+     * @param manufacturer The test manufacturer to use
+     */
+    @ParameterizedTest
+    @ValueSource(strings = {"\n", "\t", "\uD83D\uDE02", "\uFFFF"})
+    void buildWithInvalidCharactersInManufacturer(String manufacturer) {
+        var builder = new Product.Builder()
+                .withProductCode("NATHAN-APPLE-70")
+                .withName("The Nathan Apple")
+                .withDescription("Ever wonder why Nathan has an apple")
+                .withManufacturer(manufacturer)
+                .withRecommendedRetailPrice("9000.03")
+                .withBusiness(testBusiness1);
+        assertThrows(ResponseStatusException.class, builder::build);
+    }
+
+    /**
+     * Tests that the Product can have a manufacturer using letters, numbers, spaces and punctuation
+     * @param manufacturer The test manufacturer to use
+     */
+    @ParameterizedTest
+    @ValueSource(strings = {" ", ":", ",", "7", "é", "树"})
+    void buildWithValidCharactersInManufacturer(String manufacturer) {
+        var builder = new Product.Builder()
+                .withProductCode("NATHAN-APPLE-70")
+                .withName("The Nathan Apple")
+                .withDescription("Ever wonder why Nathan has an apple")
+                .withManufacturer(manufacturer)
+                .withRecommendedRetailPrice("9000.03")
+                .withBusiness(testBusiness1);
+        assertDoesNotThrow(builder::build);
     }
 
     /**

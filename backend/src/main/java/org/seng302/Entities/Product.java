@@ -117,6 +117,9 @@ public class Product {
         if (name.length() == 0 || name.length() > 50) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Product name must be between 1-50 characters long");
         }
+        if (!name.matches("^[ \\d\\p{Punct}\\p{L}]*$")) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Product name must only contain letters, numbers, spaces and punctuation");
+        }
         this.name = name;
     }
 
@@ -125,12 +128,15 @@ public class Product {
      * @param description the description of the product
      */
     public void setDescription(String description) {
-        if (description != null) {
-            if (description.length() == 0) {
-                description = null;
-            } else if (description.length() > 200) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Product description must not be longer than 200 characters");
-            }
+        if (description == null || description.length() == 0) {
+            this.description = null;
+            return;
+        }
+        if (description.length() > 200) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Product description must not be longer than 200 characters");
+        }
+        if (!description.matches("^[\\p{Space}\\d\\p{Punct}\\p{L}]*$")) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Product description must only contain letters, numbers, whitespace and punctuation");
         }
         this.description = description;
     }
@@ -140,12 +146,15 @@ public class Product {
      * @param manufacturer the manufacturer name of the product
      */
     public void setManufacturer(String manufacturer) {
-        if (manufacturer != null) {
-            if (manufacturer.length() == 0) {
-                manufacturer = null;
-            } else if (manufacturer.length() > 100) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Product manufacturer must not be longer than 100 characters");
-            }
+        if (manufacturer == null || manufacturer.length() == 0) {
+            this.manufacturer = null;
+            return;
+        }
+        if (manufacturer.length() > 100) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Product manufacturer must not be longer than 100 characters");
+        }
+        if (!manufacturer.matches("^[ \\d\\p{Punct}\\p{L}]*$")) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Product manufacturer must only contain letters, numbers, spaces and punctuation");
         }
         this.manufacturer = manufacturer;
     }
@@ -254,7 +263,7 @@ public class Product {
          * @return Builder with the recommended retail price set
          */
         public Builder withRecommendedRetailPrice(String recommendedRetailPrice) {
-            if (recommendedRetailPrice == null) {
+            if (recommendedRetailPrice == null || recommendedRetailPrice.equals("")) {
                 this.recommendedRetailPrice = null;
                 return this;
             }
