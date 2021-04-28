@@ -160,14 +160,10 @@
 <script>
 import { getUser, makeBusinessAdmin, removeBusinessAdmin } from '../api';
 import UserAvatar from './utils/UserAvatar';
-import convertJsonAddressToReadableText from './utils/Methods/convertJsonAddressToReadableText';
+import convertAddressToReadableText from './utils/Methods/convertJsonAddressToReadableText';
 
 export default {
   name: 'ProfilePage',
-  //a way to use a common method for different components. Note that JsonAddressToReadableText is not the method name
-  //but is just a declaration so that we can use the methods in this file. For this case, the method in this file is called
-  //"convertAddressToReadableText()"
-  mixins: [convertJsonAddressToReadableText],
   data() {
     return {
       /**
@@ -250,9 +246,9 @@ export default {
         this.$store.commit('setUser', this.user);
       }
     },
-    //have to use a method here to access the method from mixins
+    //have to use a method here to access the method
     insertAddress(address) {
-      return this.convertAddressToReadableText(address, "full");
+      return convertAddressToReadableText(address, "full");
     }
   },
 

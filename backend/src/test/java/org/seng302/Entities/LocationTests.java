@@ -603,7 +603,8 @@ public class LocationTests {
             .inCity("Christchurch")
             .inRegion("Canterbury")
             .inCountry("New Zealand")
-            .withPostCode("8041");
+            .withPostCode("8041")
+            .atDistrict("");
     assertNotNull(locationBuilder);
   }
 

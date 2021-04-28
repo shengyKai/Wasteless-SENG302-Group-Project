@@ -17,19 +17,17 @@
 
 <script>
 import UserAvatar from './utils/UserAvatar';
-import JsonAddressToReadableText from './utils/Methods/convertJsonAddressToReadableText';
+import convertAddressToReadableText from './utils/Methods/convertJsonAddressToReadableText';
 
 export default {
   props: ['user'],
   components: {
     UserAvatar
   },
-  //take a look at UserProfile.vue to know more about this
-  mixins: [JsonAddressToReadableText],
   methods: {
     //take a look at UserProfile.vue to know more about this
     insertAddress(address) {
-      return this.convertAddressToReadableText(address, "partial");
+      return convertAddressToReadableText(address, "partial");
     }
   }
 };

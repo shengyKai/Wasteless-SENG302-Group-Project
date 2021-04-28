@@ -58,11 +58,11 @@ export type User = {
 export type Location = {
   streetNumber?: string,
   streetName?: string,
+  district?: string,
   city?: string,
   region?: string,
   country: string,
-  postcode?: string,
-  district?: string
+  postcode?: string
 };
 
 export type CreateUser = {
@@ -129,7 +129,8 @@ function isLocation(obj: any): obj is Location {
   if (obj.region !== undefined && typeof obj.region !== 'string') return false;
   if (typeof obj.country !== 'string') return false;
   if (obj.postcode !== undefined && typeof obj.postcode !== 'string') return false;
-
+  if (obj.district === null) return true;
+  if (obj.district !== undefined && typeof obj.district !== 'string') return false;
   return true;
 }
 

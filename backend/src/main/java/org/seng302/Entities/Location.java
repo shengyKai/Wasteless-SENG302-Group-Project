@@ -221,7 +221,7 @@ public class Location {
      * @return true if the district is valid, false otherwise
      */
     public boolean checkValidDistrict(String district) {
-        if (district.equals("") || (district.length() <= 100 && district.matches("[a-zA-Z0-9 ]+"))) {
+        if (district == null || (district.length() <= 100 && district.matches("[a-zA-Z0-9 ]+"))) {
             return true;
         } else {
             return false;
@@ -444,6 +444,9 @@ public class Location {
          * @return Builder with post code parameter set.
          */
         public Builder atDistrict(String district)  {
+            if (district.equals("")) {
+                district = null;
+            }
             this.district = district;
             return this;
         }

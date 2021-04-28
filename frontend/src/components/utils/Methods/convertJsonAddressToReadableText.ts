@@ -1,18 +1,16 @@
-export default {
-  methods: {
-    //method to return the appropriate format for addresses depending on the fields provided
-    convertAddressToReadableText: function(address: any, status: string) {
-      //full means the address format will show all fields, partial means the format will show some location fields only
-      if (status === "full") {
-        if (address.district !== ""){
-          return `${address.streetNumber} ${address.streetName}, ${address.district}\n` +
-                  `${address.city} ${address.postcode}\n ${address.region}, ${address.country}`;
-        }
-        return `${address.streetNumber} ${address.streetName}\n` +
-                `${address.city} ${address.postcode}\n${address.region}, ${address.country}`;
-      } else {
-        return `${address.city}, ${address.region}, ${address.country}`;
-      }
-    }
-  }
-};
+import { Location } from "@/api";
+import StatusError from "../CustomErrors/StatusError";
+
+//method to return the appropriate format for addresses depending on the fields provided
+function convertAddressToReadableText(address: Location, status: "full" | "partial") {
+  //full means the address format will show all fields, partial means the format will show some location fields only
+  if (status === "full" && address.district !== null)
+    return `${address.streetNumber} ${address.streetName}, ${address.district}\n` +
+      `${address.city} ${address.postcode}\n ${address.region}, ${address.country}`;
+  if (status === "full" && address.district === null)
+    return `${address.streetNumber} ${address.streetName}\n` +
+      `${address.city} ${address.postcode}\n${address.region}, ${address.country}`;
+  if (status === "partial") return `${address.city}, ${address.region}, ${address.country}`;
+  else throw new StatusError("Invalid status for address format used.");
+}
+export default convertAddressToReadableText;
