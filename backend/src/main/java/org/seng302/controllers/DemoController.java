@@ -20,6 +20,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Class for API endpoints used for developing/demoing application. Remove from release.
@@ -67,15 +68,26 @@ public class DemoController {
 
         User user = userRepository.findByEmail("123andyelliot@gmail.com");
 
+        // Check if the business has already been added to the user's businesses to avoid adding it again
+        Business business = null;
+        Set<Business> businessesOwned = user.getBusinessesOwned();
+        for (Business owned: businessesOwned) {
+            if (owned.getName().equals("BUSINESS_NAME")) {
+                business = owned;
+            }
+        }
+
         // Construct demo business and save it to the repository
-        Business business = new Business.Builder()
-                .withBusinessType("Accommodation and Food Services")
-                .withDescription("DESCRIPTION")
-                .withName("BUSINESS_NAME")
-                .withAddress(new Location())
-                .withPrimaryOwner(user)
-                .build();
-        business = businessRepository.save(business);
+        if (business == null) {
+            business = new Business.Builder()
+                    .withBusinessType("Accommodation and Food Services")
+                    .withDescription("DESCRIPTION")
+                    .withName("BUSINESS_NAME")
+                    .withAddress(new Location())
+                    .withPrimaryOwner(user)
+                    .build();
+            business = businessRepository.save(business);
+        }
 
         // Construct demo product and save it to the repository
         Product product = new Product.Builder()

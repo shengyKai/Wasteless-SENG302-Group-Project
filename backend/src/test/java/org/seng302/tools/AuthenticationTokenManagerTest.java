@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.*;
 import org.seng302.exceptions.AccessTokenException;
@@ -196,26 +197,11 @@ class AuthenticationTokenManagerTest {
     }
 
     /**
-     * This method returns the arguments to be passed into sessionIsAdminTest. The first argument is the role associated
-     * with the session and the second argument is the expected return value from sessionIsAdmin when it is called with
-     * a request with that role.
-     * @return A stream of arguments for sessionIsAdminTest to be called with.
-     */
-    private static Stream<Arguments> provideArgsForSessionIsAdmin() {
-        return Stream.of(
-                Arguments.of(null, false),
-                Arguments.of("user", false),
-                Arguments.of("globalApplicationAdmin", true),
-                Arguments.of("defaultGlobalApplicationAdmin", true)
-        );
-    }
-
-    /**
-     * Verify that sessionIsAdmin returns false when the role associated with the the session is null or 'user', and
-     * that it returns true when the role is 'globalApplicationAdmin' or 'defaultGlobalApplicationAdmin'.
+     * Verify that sessionIsAdmin returns false when the role associated with the the session is null, 'user' or another
+     * string, and that it returns true when the role is 'globalApplicationAdmin' or 'defaultGlobalApplicationAdmin'.
      */
     @ParameterizedTest
-    @MethodSource("provideArgsForSessionIsAdmin")
+    @CsvSource({",false", "user,false", "potato,false", "globalApplicationAdmin,true", "defaultGlobalApplicationAdmin,true"})
     void sessionIsAdminTest(String testRole, boolean expectedValue) {
         when(request.getSession()).thenReturn(session);
         when(session.getAttribute("role")).thenReturn(testRole);
