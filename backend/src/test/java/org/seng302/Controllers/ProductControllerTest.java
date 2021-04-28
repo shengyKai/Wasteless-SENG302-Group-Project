@@ -11,6 +11,9 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.junit.runner.RunWith;
+import org.mockito.MockedConstruction;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.seng302.Entities.Business;
 import org.seng302.Entities.Location;
 import org.seng302.Entities.Product;
@@ -21,9 +24,11 @@ import org.seng302.Persistence.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpStatus;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.Cookie;
 import java.text.ParseException;
@@ -35,6 +40,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Objects;
 
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -45,7 +51,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @AutoConfigureMockMvc
-public class ProductControllerTest {
+class ProductControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -369,67 +375,53 @@ public class ProductControllerTest {
     }
 
     /**
-     * Tests that using the POST /businesses/:id/products endpoint adds a product to the given businesses product
-     * catalogue
+     * Tests that using the POST /businesses/:id/products endpoint adds a product that is returned from
+     * Product.Builder.build to the businesses catalogue.
      */
     @Test
     void postingAProductAddsItToTheCatalogue() {
         setCurrentUser(ownerUser.getUserID());
-        var productInfo = generateProductCreationInfo();
+        // The mock result
+        Product mockedResult = new Product.Builder()
+                .withProductCode("NATHAN-APPLE-71")
+                .withName("The Nathan Apple")
+                .withDescription("Ever wonder why Nathan has an apple")
+                .withManufacturer("Apple")
+                .withRecommendedRetailPrice("9000.05")
+                .withBusiness(testBusiness1)
+                .build();
 
-        assertDoesNotThrow(() -> mockMvc.perform(post(String.format("/businesses/%d/products", testBusiness1.getId()))
-                .content(productInfo.toString())
-                .sessionAttrs(sessionAuthToken)
-                .contentType("application/json")
-                .cookie(authCookie))
-                .andExpect(status().isCreated())
-                .andReturn());
+        try (MockedConstruction<Product.Builder> mocked = Mockito.mockConstruction(Product.Builder.class, withSettings().defaultAnswer(RETURNS_SELF), (mock, context) -> {
+            when(mock.build()).thenReturn(mockedResult); // Makes sure that build returns a valid product
+        })) {
+            setCurrentUser(ownerUser.getUserID());
+            // The value inside here will be ignored
+            var productInfo = generateProductCreationInfo();
 
-        Product product =
-                productRepository.findByBusinessAndProductCode(testBusiness1, productInfo.getAsString("id"));
-
-        assertNotNull(product);
-        assertEquals(productInfo.get("id"), product.getProductCode());
-        assertEquals(productInfo.get("name"), product.getName());
-        assertEquals(productInfo.get("description"), product.getDescription());
-        assertEquals(productInfo.get("manufacturer"), product.getManufacturer());
-        // There is a small fudge factor between the exact decimal value and the closest double representation of said value
-        assertEquals(
-                (double)productInfo.get("recommendedRetailPrice"),
-                product.getRecommendedRetailPrice().doubleValue(),
-                1e-10
-        );
-    }
-
-    /**
-     * Tests that when a product is added via the POST /businesses/:id/products endpoint that the created product's
-     * creation time is between the start of the request and the end of the request
-     */
-    @Test
-    void postingAProductSetsTheCreationTimeCorrectly() {
-        setCurrentUser(ownerUser.getUserID());
-        var productInfo = generateProductCreationInfo();
-
-        Date before = new Date();
-        MvcResult result = assertDoesNotThrow(() ->
-                mockMvc.perform(post(String.format("/businesses/%d/products", testBusiness1.getId()))
+            assertDoesNotThrow(() -> mockMvc.perform(post(String.format("/businesses/%d/products", testBusiness1.getId()))
                     .content(productInfo.toString())
                     .sessionAttrs(sessionAuthToken)
                     .contentType("application/json")
                     .cookie(authCookie))
                     .andExpect(status().isCreated())
-                    .andReturn()
-            );
-        Date after = new Date();
+                    .andReturn());
 
-        Product product =
-                productRepository.findByBusinessAndProductCode(testBusiness1, productInfo.getAsString("id"));
+            // Checks that exactly 1 product builder was instantiated
+            assertEquals(1, mocked.constructed().size());
+            var mockBuilder = mocked.constructed().get(0);
 
-        assertNotNull(product);
-        // Asserts that the product is created not before the production creation should have finished
-        assertFalse(after.before(product.getCreated()));
-        // Asserts that the product is created not after the production creation shouldn't have started
-        assertFalse(before.after(product.getCreated()));
+            // Checks that the product was built
+            verify(mockBuilder).build();
+
+            Product addedProduct = productRepository.findByBusinessAndProductCode(testBusiness1, mockedResult.getProductCode());
+
+            // Check that the added product is equivalent to the result from Product.Builder.build.
+            assertNotNull(addedProduct);
+            assertEquals(mockedResult.getName(), addedProduct.getName());
+            assertEquals(mockedResult.getManufacturer(), addedProduct.getManufacturer());
+            assertEquals(mockedResult.getDescription(), addedProduct.getDescription());
+            assertEquals(mockedResult.getRecommendedRetailPrice(), addedProduct.getRecommendedRetailPrice());
+        }
     }
 
     /**
@@ -512,24 +504,67 @@ public class ProductControllerTest {
     }
 
     /**
-     * Tests that if any field in the post product request is not included then a 400 response is sent.
-     * @param key The field to remove
+     * Tests that posting a product creates a Product.Builder and puts all the fields into said product builder.
      */
-    @ParameterizedTest
-    @ValueSource(strings = {"id", "name"})
-    void postingProductWithMissingField(String key) {
-        setCurrentUser(ownerUser.getUserID());
-        var productInfo = generateProductCreationInfo();
+    @Test
+    void postingProductPassesTheValuesToTheProductBuilder() {
+        // This just has to be some value that will not crash when productRepository.save is called on it.
+        Product mockedResult = new Product.Builder()
+                .withProductCode("NATHAN-APPLE-71")
+                .withName("The Nathan Apple")
+                .withDescription("Ever wonder why Nathan has an apple")
+                .withManufacturer("Apple")
+                .withRecommendedRetailPrice("9000.05")
+                .withBusiness(testBusiness1)
+                .build();
 
-        productInfo.remove(key);
+        try (MockedConstruction<Product.Builder> mocked = Mockito.mockConstruction(Product.Builder.class, withSettings().defaultAnswer(RETURNS_SELF), (mock, context) -> {
+            when(mock.build()).thenReturn(mockedResult); // Makes sure that build returns a valid product
+        })) {
+            setCurrentUser(ownerUser.getUserID());
+            var productInfo = generateProductCreationInfo();
 
-        assertDoesNotThrow(() -> mockMvc.perform(post(String.format("/businesses/%d/products", testBusiness1.getId()))
-                .content(productInfo.toString())
-                .sessionAttrs(sessionAuthToken)
-                .contentType("application/json")
-                .cookie(authCookie))
-                .andExpect(status().isBadRequest())
-                .andReturn());
+            assertDoesNotThrow(() -> mockMvc.perform(post(String.format("/businesses/%d/products", testBusiness1.getId()))
+                    .content(productInfo.toString())
+                    .sessionAttrs(sessionAuthToken)
+                    .contentType("application/json")
+                    .cookie(authCookie))
+                    .andExpect(status().isCreated())
+                    .andReturn());
+
+            // Checks that exactly 1 product builder was instantiated
+            assertEquals(1, mocked.constructed().size());
+            var mockBuilder = mocked.constructed().get(0);
+
+            // Checks that the product builder was passed in the correct values
+            verify(mockBuilder).withProductCode(productInfo.getAsString("id"));
+            verify(mockBuilder).withName(productInfo.getAsString("name"));
+            verify(mockBuilder).withDescription(productInfo.getAsString("description"));
+            verify(mockBuilder).withManufacturer(productInfo.getAsString("manufacturer"));
+            verify(mockBuilder).withRecommendedRetailPrice(productInfo.getAsString("recommendedRetailPrice"));
+            verify(mockBuilder).build();
+        }
+    }
+
+    /**
+     * Tests that if Product.Builder.build returns a 400 then posting a product will also fail and return a 400.
+     */
+    @Test
+    void postingProductFailsIfProductBuilderFails() {
+        try (MockedConstruction<Product.Builder> ignored = Mockito.mockConstruction(Product.Builder.class, withSettings().defaultAnswer(RETURNS_SELF), (mock, context) ->
+            when(mock.build()).thenThrow(new ResponseStatusException(HttpStatus.BAD_REQUEST, "Failed for some reason"))
+        )) {
+            setCurrentUser(ownerUser.getUserID());
+            var productInfo = generateProductCreationInfo();
+
+            assertDoesNotThrow(() -> mockMvc.perform(post(String.format("/businesses/%d/products", testBusiness1.getId()))
+                    .content(productInfo.toString())
+                    .sessionAttrs(sessionAuthToken)
+                    .contentType("application/json")
+                    .cookie(authCookie))
+                    .andExpect(status().isBadRequest())
+                    .andReturn());
+        }
     }
 
     /**
