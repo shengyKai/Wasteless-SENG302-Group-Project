@@ -115,8 +115,21 @@
             </v-card-actions>
           </v-card>
         </v-dialog>
+        <v-tooltip bottom >
+          <template #activator="{on, attrs}">
+            <v-chip
+              v-if="user.role==='globalApplicationAdmin'"
+              outlined
+              color="primary"
+              v-on="on"
+              v-bind="attrs"
+            >
+              <v-icon>mdi-account-tie</v-icon>
+            </v-chip>
+          </template>
+          <span>System Administrator</span>
+        </v-tooltip>
       </div>
-
     </div>
 
     <v-container fluid>

@@ -189,7 +189,7 @@ public class UserController {
      */
     @GetMapping("/users/{id}/makeAdmin")
     void makeUserAdmin(HttpServletRequest session, @PathVariable("id") long id) {
-        changeUserPrivilege(session, id, "admin");
+        changeUserPrivilege(session, id, "globalApplicationAdmin");
     }
 
     /**
