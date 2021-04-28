@@ -374,6 +374,9 @@ class ProductControllerTest {
         return productInfo;
     }
 
+    /**
+     * Tests that using the POST /bussinesses/:id/products without a request body results in a 400 response
+     */
     @Test
     void postingAProductWithoutARequestBody() {
         setCurrentUser(ownerUser.getUserID());
