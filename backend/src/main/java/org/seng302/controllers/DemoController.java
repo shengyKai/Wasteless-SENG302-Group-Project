@@ -56,18 +56,18 @@ public class DemoController {
             throw error;
         }
         logger.info("Loading demo data...");
+
+        // Load demo users from demo data file and save them to the repository
         List<User> demoUsers = readUserFile();
         for (User user : demoUsers) {
             if (userRepository.findByEmail(user.getEmail()) == null) {
                 userRepository.save(user);
             }
         }
-        for (User user : userRepository.findAll() ) {
-            String userString = user.toString();
-            logger.info(userString);
-        }
 
         User user = userRepository.findByEmail("123andyelliot@gmail.com");
+
+        // Construct demo business and save it to the repository
         Business business = new Business.Builder()
                 .withBusinessType("Accommodation and Food Services")
                 .withDescription("DESCRIPTION")
@@ -75,10 +75,9 @@ public class DemoController {
                 .withAddress(new Location())
                 .withPrimaryOwner(user)
                 .build();
-
-
         business = businessRepository.save(business);
 
+        // Construct demo product and save it to the repository
         Product product = new Product.Builder()
                 .withProductCode("NathanApple-70")
                 .withName("The Nathan Apple")

@@ -3,6 +3,10 @@ package org.seng302.tools;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.*;
 import org.seng302.exceptions.AccessTokenException;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -11,6 +15,8 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
@@ -191,6 +197,33 @@ class AuthenticationTokenManagerTest {
         } catch (RuntimeException e) {
             fail("Exception should not be thrown when stored authentication token matches authentication token in cookie");
         }
+    }
+
+    /**
+     * This method returns the arguments to be passed into sessionIsAdminTest. The first argument is the role associated
+     * with the session and the second argument is the expected return value from sessionIsAdmin when it is called with
+     * a request with that role.
+     * @return A stream of arguments for sessionIsAdminTest to be called with.
+     */
+    private static Stream<Arguments> provideArgsForSessionIsAdmin() {
+        return Stream.of(
+                Arguments.of(null, false),
+                Arguments.of("user", false),
+                Arguments.of("globalApplicationAdmin", true),
+                Arguments.of("defaultGlobalApplicationAdmin", true)
+        );
+    }
+
+    /**
+     * Verify that sessionIsAdmin returns false when the role associated with the the session is null or 'user', and
+     * that it returns true when the role is 'globalApplicationAdmin' or 'defaultGlobalApplicationAdmin'.
+     */
+    @ParameterizedTest
+    @MethodSource("provideArgsForSessionIsAdmin")
+    void sessionIsAdminTest(String testRole, boolean expectedValue) {
+        when(request.getSession()).thenReturn(session);
+        when(session.getAttribute("role")).thenReturn(testRole);
+        assertEquals(expectedValue, AuthenticationTokenManager.sessionIsAdmin(request));
     }
 
 }
