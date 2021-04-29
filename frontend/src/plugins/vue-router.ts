@@ -7,7 +7,7 @@ import ProfilePage from "../components/UserProfile.vue";
 import BusinessProfile from "../components/BusinessProfile/index.vue";
 import SearchResults from "../components/SearchResults.vue";
 import HomePage from "../components/HomePage.vue";
-import ProductCatalogue from "../components/ProductCatalogue.vue";
+import ProductCatalogue from "../components/ProductCatalogueItem.vue";
 
 
 Vue.use(VueRouter);
