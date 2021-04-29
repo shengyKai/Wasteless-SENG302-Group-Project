@@ -51,7 +51,7 @@ public class UserStepDefinition {
     private String userBio = "I am Bob";
     private String userDob = "10-10-1999";
     private String userPhNum = "0270000000";
-    private Location userAddress = Location.covertAddressStringToLocation("1,Bob Street,Bob,Bob,Bob,1010");
+    private Location userAddress = Location.covertAddressStringToLocation("1,Bob Street,Bob,Bob,Bob,Bob,1010");
 
     private Long userID;
 

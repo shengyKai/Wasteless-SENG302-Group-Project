@@ -4,6 +4,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.seng302.entities.Business;
+import org.seng302.entities.Location;
+import org.seng302.entities.User;
 import org.seng302.exceptions.AccessTokenException;
 import org.seng302.persistence.BusinessRepository;
 import org.seng302.persistence.UserRepository;
@@ -72,7 +75,7 @@ public class BusinessTests {
                 .withBio("Likes long walks on the beach")
                 .withDob("2000-03-11")
                 .withPhoneNumber("+64 3 555 0129")
-                .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Christchurch,New Zealand," +
+                .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
                         "Canterbury,8041"))
                 .build();
         testUser2 = new User.Builder()
@@ -85,7 +88,7 @@ public class BusinessTests {
                 .withBio("Likes long walks on the beach")
                 .withDob("2000-03-11")
                 .withPhoneNumber("+64 3 555 0129")
-                .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Christchurch,New Zealand," +
+                .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
                         "Canterbury,8041"))
                 .build();
         testUser3 = new User.Builder()
@@ -98,7 +101,7 @@ public class BusinessTests {
                 .withBio("Likes slow walks on the beach")
                 .withDob(ageBelow16)
                 .withPhoneNumber("+64 3 555 0129")
-                .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Christchurch,New Zealand," +
+                .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
                         "Canterbury,8041"))
                 .build();
         testUser1 = userRepository.save(testUser1);
@@ -588,7 +591,7 @@ public class BusinessTests {
     public void setCreatedInitialValueTest() {
         Date now = new Date();
         Business testBusiness2 = new Business.Builder().withBusinessType("Non-profit organisation").withName("Zesty Business")
-                .withAddress(Location.covertAddressStringToLocation("101,My Street,Christchurch,Canterbury,New Zealand,1010"))
+                .withAddress(Location.covertAddressStringToLocation("101,My Street,Ashburton,Christchurch,Canterbury,New Zealand,1010"))
                 .withDescription("A nice place").withPrimaryOwner(testUser2).build();
         // Check that the difference between the time the business was created and the time at the start of exection of
         // this function is less than 1 second
@@ -615,7 +618,7 @@ public class BusinessTests {
      */
     @Test
     public void setAddressValidTest() {
-        Location address = Location.covertAddressStringToLocation("44,Humbug Ave,Hamilton,Waikato,New Zealand,1000");
+        Location address = Location.covertAddressStringToLocation("44,Humbug Ave,Ashburton,Hamilton,Waikato,New Zealand,1000");
         testBusiness1.setAddress(address);
         assertEquals(address, testBusiness1.getAddress());
     }

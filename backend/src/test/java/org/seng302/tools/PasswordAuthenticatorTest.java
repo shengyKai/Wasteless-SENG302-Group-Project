@@ -1,6 +1,7 @@
 package org.seng302.tools;
 
 import org.junit.jupiter.api.Test;
+import org.seng302.tools.PasswordAuthenticator;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.web.server.ResponseStatusException;
 

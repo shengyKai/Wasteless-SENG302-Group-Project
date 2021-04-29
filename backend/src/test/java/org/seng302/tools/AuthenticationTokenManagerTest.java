@@ -9,6 +9,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.*;
 import org.seng302.exceptions.AccessTokenException;
+import org.seng302.tools.AuthenticationTokenManager;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import javax.servlet.http.Cookie;

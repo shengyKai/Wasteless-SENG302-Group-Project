@@ -11,7 +11,7 @@ Feature: User
         And their bio is "Your average fourth year software engineer"
         And their date of birth is "17-07-1999"
         And their phone number is "0271234567"
-        And their address is "69,Riccarton Road,Christchurch,New Zealand,Canterbury,8041"
+        And their address is "69,Riccarton Road,Ashburton,Christchurch,New Zealand,Canterbury,8041"
         And the user is created
         Then a user with the email "connor@gmail.com" exists
         Then the user has the first name "Fergus"
@@ -23,7 +23,7 @@ Feature: User
         Then the user has the bio "Your average fourth year software engineer"
         Then the user has the date of birth "17-07-1999"
         Then the user has the phone number "0271234567"
-        Then the user has the address "69,Riccarton Road,Christchurch,New Zealand,Canterbury,8041"
+        Then the user has the address "69,Riccarton Road,Ashburton,Christchurch,New Zealand,Canterbury,8041"
 
     Scenario: Register a second user account
         Given the user with the email "roseyrose@gmail.com" does not exist
@@ -36,7 +36,7 @@ Feature: User
         And their bio is "My friends say I am as sweet as a peach with the looks of a rose"
         And their date of birth is "01-03-1998"
         And their phone number is "0279876543"
-        And their address is "100,Ocean View Crescent,Auckland,New Zealand,Rakino Island,1010"
+        And their address is "100,Ocean View Crescent,Ashburton,Auckland,New Zealand,Rakino Island,1010"
         And the user is created
         Then a user with the email "roseyrose@gmail.com" exists
         Then the user has the first name "Rosey"
@@ -48,7 +48,7 @@ Feature: User
         Then the user has the bio "My friends say I am as sweet as a peach with the looks of a rose"
         Then the user has the date of birth "01-03-1998"
         Then the user has the phone number "0279876543"
-        Then the user has the address "100,Ocean View Crescent,Auckland,New Zealand,Rakino Island,1010"
+        Then the user has the address "100,Ocean View Crescent,Ashburton,Auckland,New Zealand,Rakino Island,1010"
 
     Scenario: Login a user account
         Given the user possesses the email "dan@thomp.com"
