@@ -478,7 +478,7 @@ public class BusinessTests {
     @Test
     public void primaryOwnerCantBeDeletedTest() {
         User primaryOwner = testBusiness1.getPrimaryOwner();
-        assertThrows(DataIntegrityViolationException.class, () -> {
+        assertThrows(ResponseStatusException.class, () -> {
             userRepository.deleteById(primaryOwner.getUserID());
         });
         assertNotNull(userRepository.findById(primaryOwner.getUserID()).get());
@@ -533,16 +533,11 @@ public class BusinessTests {
         testBusiness1 = businessRepository.save(testBusiness1);
         long adminId = testUser2.getUserID();
         long businessId = testBusiness1.getId();
-        assertThrows(DataIntegrityViolationException.class, () -> {
-            userRepository.deleteById(testUser2.getUserID());
-        });
-        assertTrue(userRepository.existsById(adminId));
+        userRepository.deleteById(testUser2.getUserID());
+        assertFalse(userRepository.existsById(adminId));
         assertTrue(businessRepository.existsById(businessId));
         testBusiness1 = businessRepository.findById(businessId).get();
-        assertEquals(1, testBusiness1.getAdministrators().size());
-        for (User user : testBusiness1.getAdministrators()) {
-            assertEquals(adminId, user.getUserID());
-        }
+        assertEquals(0, testBusiness1.getAdministrators().size());
     }
 
     /**
