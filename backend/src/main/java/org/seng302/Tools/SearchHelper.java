@@ -14,12 +14,12 @@ import java.util.*;
 /**
  * This class provides static methods to help the controller classes return results from queries to the database.
  */
-public class UserSearchHelper {
+public class SearchHelper {
 
     private static final int defaultResultsPerPage = 15;
     // Todo: add city, region and country as order by options once Location and User tables have been linked.
     private static final List<String> orderByOptions = new ArrayList<>(List.of("userID", "firstName", "middleName", "lastName", "nickname", "email", "address"));
-    private static final Logger logger = LogManager.getLogger(UserSearchHelper.class.getName());
+    private static final Logger logger = LogManager.getLogger(SearchHelper.class.getName());
 
     private enum PredicateType {
         OR, AND
@@ -34,7 +34,7 @@ public class UserSearchHelper {
      * @param resultsPerPageString The number of results which will be returned. Defaults to 15.
      * @return An ordered list of Users with length resultsPerPage.
      */
-    public static List<User> getPageInResults(List<User> queryResults, String requestedPageString, String resultsPerPageString) {
+    public static <T>List<T> getPageInResults(List<T> queryResults, String requestedPageString, String resultsPerPageString) {
 
         int resultsPerPage = getResultsPerPageInt(resultsPerPageString);
         int requestedPage = getRequestedPageInt(requestedPageString);
