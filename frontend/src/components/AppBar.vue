@@ -1,7 +1,7 @@
 <template>
   <v-app-bar max-height="64px">
     <div class="container-outer">
-      <h1>WASTELESS</h1>
+      <h1 class="link" @click="showHome">WASTELESS</h1>
 
       <!-- Space between the app name and the controls -->
       <div class="spacer"/>
@@ -27,18 +27,28 @@
               <v-list-item-title class="admin"> ADMIN </v-list-item-title>
             </v-list-item>
             <v-list-item>
+              <v-list-item-title class="link" @click="showHome">
+                Home
+              </v-list-item-title>
+            </v-list-item>
+            <v-list-item>
               <v-list-item-title class="link" @click="viewProfile">
                 Profile
               </v-list-item-title>
             </v-list-item>
             <v-list-item>
-              <v-list-item-title class="link" @click="logout">
-                Logout
+              <v-list-item-title class="link" @click="viewCreateBusiness">
+                Create Business
               </v-list-item-title>
             </v-list-item>
             <v-list-item>
-              <v-list-item-title class="link" @click="viewCreateBusiness">
-                Create Business
+              <v-list-item-title class="link" @click="showCatalogue">
+                Testing_Page
+              </v-list-item-title>
+            </v-list-item>
+            <v-list-item>
+              <v-list-item-title class="link" @click="logout">
+                Logout
               </v-list-item-title>
             </v-list-item>
           </v-list>
@@ -107,6 +117,12 @@ export default {
       default:
         this.$router.push("/profile");
       }
+    },
+    showHome() {
+      this.$router.push("/home");
+    },
+    showCatalogue() {
+      this.$router.push("/catalogue");
     },
     logout() {
       this.$store.commit("logoutUser");

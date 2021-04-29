@@ -1,5 +1,17 @@
 <template>
   <v-card>
+    <v-toolbar dark color="primary">
+      <v-col class="text-right">
+        <v-btn-toggle class="toggle" v-model="reverse" mandatory>
+          <v-btn depressed color="primary" :value="false">
+            <v-icon>mdi-arrow-up</v-icon>
+          </v-btn>
+          <v-btn depressed color="primary" :value="true">
+            <v-icon>mdi-arrow-down</v-icon>
+          </v-btn>
+        </v-btn-toggle>
+      </v-col>
+    </v-toolbar>
     <v-container fluid>
       <v-row>
         <v-col cols="auto" md="3" sm="12">
@@ -8,11 +20,21 @@
         </v-col>
         <v-col>
           <v-row>
-            <v-col class="auto pa-0" md="11" sm="10">
+            <v-col class="auto pa-0" md="8" sm="10">
               <v-card-title :class="{'pt-0': $vuetify.breakpoint.smAndDown}" class="pb-0">
                 <!-- shows product name -->
                 {{ productName }}
               </v-card-title>
+            </v-col>
+            <v-col cols="auto" md="2" sm="2">
+              <v-btn-toggle class="toggle" v-model="reverse" mandatory>
+                <v-btn depressed color="primary" :value="false">
+                  <v-icon>mdi-arrow-up</v-icon>
+                </v-btn>
+                <v-btn depressed color="primary" :value="true">
+                  <v-icon>mdi-arrow-down</v-icon>
+                </v-btn>
+              </v-btn-toggle>
             </v-col>
             <v-col cols="auto" md="1" sm="2">
               <v-card-actions :class="{'pt-0': $vuetify.breakpoint.smAndDown}" class="pb-0">
@@ -21,6 +43,7 @@
               </v-card-actions>
             </v-col>
           </v-row>
+          <v-row/>
           <v-row>
             <v-col cols="auto" md="9" sm="12">
               <v-row>
