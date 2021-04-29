@@ -113,11 +113,11 @@
         </v-col>
       </v-row>
     </v-container>
-    <v-pagination
+    <!-- <v-pagination
       v-model="currentPage"
       :length="totalPages"
       circle
-    />
+    /> -->
   </v-card>
 </template>
 
@@ -198,6 +198,25 @@ export default {
       readMoreActivated: false,
     };
   },
+  // computed: {
+  //   /**
+  //    * The total number of pages required to show all the users
+  //    * May be 0 if there are no results
+  //    */
+  //   totalPages () {
+  //     return Math.ceil(this.totalResults / this.resultsPerPage);
+  //   },
+  //   /**
+  //    * The message displayed at the bottom of the page to show how many results there are
+  //    */
+  //   resultsMessage() {
+  //     if (this.users.length === 0) return 'There are no results to show';
+
+  //     const pageStartIndex = (this.currentPage - 1) * this.resultsPerPage;
+  //     const pageEndIndex = pageStartIndex + this.users.length;
+  //     return`Displaying ${pageStartIndex + 1} - ${pageEndIndex} of ${this.totalResults} results`;
+  //   },
+  // },
   methods: {
     //if the "Read more..." link if clicked, readMoreActivated becomes true and the FullProductDescription dialog box will open
     activateReadMore() {
@@ -213,10 +232,9 @@ export default {
      * The page index, results per page, order by and reverse variables notify this function.
      */
     async updateNotQuery() {
-      if (!this.searchedQuery) return; // If the current search query is empty, do not search
-
+      console.log("E");
       const value = await getProduct (
-        this.$route.params.id,
+        this.$store.state.activeRole.id,
         this.orderBy,
         this.currentPage,
         this.resultsPerPage,
