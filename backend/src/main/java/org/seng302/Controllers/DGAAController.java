@@ -39,10 +39,9 @@ public class DGAAController {
 
         // Default Global Application Admin doesn't exist or has been tampered with
         if (dgaa == null) {
-            User admin;
-            Location adminAddress;
+            Location dgaaAddress;
             try {
-                adminAddress = new Location.Builder()
+                dgaaAddress = new Location.Builder()
                             .atStreetNumber("1")
                             .onStreet("wasteless")
                             .inCity("wasteless")
@@ -50,16 +49,16 @@ public class DGAAController {
                             .inCountry("wasteless")
                             .withPostCode("1111")
                             .build();
-                admin = new User.Builder()
+                dgaa = new User.Builder()
                     .withEmail("wasteless@seng302.com")
                     .withFirstName("DGAA")
                     .withLastName("DGAA")
                     .withPassword("T3amThr33IsTh3B3st")
                     .withDob("2021-03-11")
-                    .withAddress(adminAddress)
+                    .withAddress(dgaaAddress)
                     .build();
-                admin.setRole("defaultGlobalApplicationAdmin");
-                userRepository.save(admin);
+                dgaa.setRole("defaultGlobalApplicationAdmin");
+                userRepository.save(dgaa);
             } catch (ParseException e) {
                 logger.error(e);
             }

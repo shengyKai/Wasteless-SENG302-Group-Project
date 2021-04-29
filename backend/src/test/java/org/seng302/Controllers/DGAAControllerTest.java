@@ -1,10 +1,16 @@
 package org.seng302.Controllers;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import java.text.ParseException;
+
 import org.junit.Ignore;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.seng302.Entities.DefaultGlobalApplicationAdmin;
-import org.seng302.Persistence.DGAARepository;
+import org.seng302.Entities.Location;
+import org.seng302.Entities.User;
+import org.seng302.Persistence.BusinessRepository;
+import org.seng302.Persistence.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -12,14 +18,19 @@ import org.springframework.boot.test.context.SpringBootTest;
 public class DGAAControllerTest {
 
     @Autowired
-    private DGAARepository dgaaRepository;
+    private UserRepository userRepository;
+
+    @Autowired
+    private BusinessRepository businessRepository;
 
     @Autowired
     private DGAAController dgaaController;
 
     @BeforeEach
     public void clean() {
-        dgaaRepository.deleteAll();
+        //because business repo has a foreign key in user repo, it needs to be cleared too
+        businessRepository.deleteAll();
+        userRepository.deleteAll();
     }
 
     /**
@@ -28,23 +39,40 @@ public class DGAAControllerTest {
     @Test @Ignore
     public void dgaaNotPresent() {
         dgaaController.checkDGAA();
-        assert(dgaaRepository.findByEmail("wasteless@seng302.com") != null);
+        assert(userRepository.findByEmail("wasteless@seng302.com") != null);
     }
 
     /**
      * DGAA already exists, no need for new one
+     * @throws ParseException
      */
     @Test @Ignore
-    public void dgaaPresent() {
-        DefaultGlobalApplicationAdmin dgaa = new DefaultGlobalApplicationAdmin();
-        dgaaRepository.save(dgaa);
+    public void dgaaPresent() throws ParseException {
         dgaaController.checkDGAA();
-        // DGAA in repo, check that .checkDGAA() doesn't make a duplicate
-        Iterable<DefaultGlobalApplicationAdmin> dgaas = dgaaRepository.findAll();
-        int count = 0;
-        for (DefaultGlobalApplicationAdmin ignored : dgaas) {
-            count++;
+        User dgaa;
+        Location adminAddress;
+        adminAddress = new Location.Builder()
+                    .atStreetNumber("1")
+                    .onStreet("wasteless")
+                    .inCity("wasteless")
+                    .inRegion("wasteless")
+                    .inCountry("wasteless")
+                    .withPostCode("1111")
+                    .build();
+        dgaa = new User.Builder()
+            .withEmail("wasteless2@seng302.com")
+            .withFirstName("DGAA")
+            .withLastName("DGAA")
+            .withPassword("T3amThr33IsTh3B3st")
+            .withDob("2021-03-11")
+            .withAddress(adminAddress)
+            .build();
+        try {
+            dgaa.setRole("defaultGlobalApplicationAdmin");
+            userRepository.save(dgaa);
+        } catch (IllegalArgumentException e) {
+            assertEquals(e.getMessage(), "Tried creating new DGAA");
         }
-        assert(count == 1);
+
     }
 }
