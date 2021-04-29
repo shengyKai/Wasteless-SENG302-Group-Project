@@ -43,6 +43,9 @@ jest:
      paths:
        - frontend/node_modules
      policy: pull
+   artifacts:
+    paths:
+      - frontend/coverage
    script:
      - cd frontend
      - npm run test

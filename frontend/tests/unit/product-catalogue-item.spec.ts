@@ -109,12 +109,12 @@ describe('ProductCatalogueItem.vue', () => {
     expect(wrapper.text()).toContain('Some Date Added');
   });
 
-  /**
-  * Tests that the same product expiry date exists as per the set data above
-  */
-  it("Must contain the product expiry date", () => {
-    expect(wrapper.text()).toContain('Some Expired Date');
-  });
+  // /**
+  // * Tests that the same product expiry date exists as per the set data above
+  // */
+  // it("Must contain the product expiry date", () => {
+  //   expect(wrapper.text()).toContain('Some Expired Date');
+  // });
 
   /**
   * Tests that the same product manufacturer exists as per the set data above
@@ -130,12 +130,12 @@ describe('ProductCatalogueItem.vue', () => {
     expect(wrapper.text()).toContain(100);
   });
 
-  /**
-  * Tests that the same product quantity exists as per the set data above
-  */
-  it("Must contain the product quantity", () => {
-    expect(wrapper.text()).toContain(5);
-  });
+  // /**
+  // * Tests that the same product quantity exists as per the set data above
+  // */
+  // it("Must contain the product quantity", () => {
+  //   expect(wrapper.text()).toContain(5);
+  // });
 
   /**
   * Tests that the same product code exists as per the set data above
