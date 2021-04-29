@@ -16,6 +16,13 @@ const createProduct = castMock(api.createProduct);
 
 Vue.use(Vuetify);
 
+// Characters that are in the set of letters, numbers, spaces and punctuation.
+const validCharacters = [" ", ":", ",", "7", "é", "树", "A"];
+// Characters that are not a letter, number, space or punctuation.
+const invalidCharacters = ["\uD83D\uDE02", "\uFFFF"];
+// Characters that are whitespace not including the space character.
+const whitespaceCharacters = ["\n", "\t"];
+
 const localVue = createLocalVue();
 
 describe('CreateProduct.vue', () => {
@@ -150,6 +157,34 @@ describe('CreateProduct.vue', () => {
   });
 
   /**
+   * Tests that the CreateProduct is invalid if product name consists of letters, numbers, spaces and punctuation.
+   */
+  it.each(validCharacters)('Valid if product has name "%s"', async (name) => {
+    await populateAllFields();
+    await wrapper.setData({
+      product: name,
+    });
+
+    await Vue.nextTick();
+
+    expect(wrapper.vm.valid).toBeTruthy();
+  });
+
+  /**
+   * Tests that the CreateProduct is invalid if product name has a character that is not a letter, number, space or punctuation.
+   */
+  it.each(invalidCharacters.concat(whitespaceCharacters))('Invalid if product has name "%s"', async (name) => {
+    await populateAllFields();
+    await wrapper.setData({
+      product: name,
+    });
+
+    await Vue.nextTick();
+
+    expect(wrapper.vm.valid).toBeFalsy();
+  });
+
+  /**
    * Tests that the CreateProduct is invalid if product name is not provided
    */
   it('Invalid if no product name', async () => {
@@ -178,12 +213,68 @@ describe('CreateProduct.vue', () => {
   });
 
   /**
+   * Tests that the CreateProduct is invalid if product description consists of letters, numbers, whitespace and punctuation.
+   */
+  it.each(validCharacters.concat(whitespaceCharacters))('Valid if product has description "%s"', async (description) => {
+    await populateAllFields();
+    await wrapper.setData({
+      description,
+    });
+
+    await Vue.nextTick();
+
+    expect(wrapper.vm.valid).toBeTruthy();
+  });
+
+  /**
+   * Tests that the CreateProduct is invalid if product description has a character that is not a letter, number, whitespace or punctuation.
+   */
+  it.each(invalidCharacters)('Invalid if product has description "%s"', async (description) => {
+    await populateAllFields();
+    await wrapper.setData({
+      description,
+    });
+
+    await Vue.nextTick();
+
+    expect(wrapper.vm.valid).toBeFalsy();
+  });
+
+  /**
    * Tests that the CreateProduct is invalid if the product description is too long (> 200 characters)
    */
   it('Invalid if description is too long', async () => {
     await populateRequiredFields();
     await wrapper.setData({
       description: 'a'.repeat(201),
+    });
+
+    await Vue.nextTick();
+
+    expect(wrapper.vm.valid).toBeFalsy();
+  });
+
+  /**
+   * Tests that the CreateProduct is invalid if product manufacturer consists of letters, numbers, spaces and punctuation.
+   */
+  it.each(validCharacters)('Valid if product has manufacturer "%s"', async (manufacturer) => {
+    await populateAllFields();
+    await wrapper.setData({
+      manufacturer,
+    });
+
+    await Vue.nextTick();
+
+    expect(wrapper.vm.valid).toBeTruthy();
+  });
+
+  /**
+   * Tests that the CreateProduct is invalid if product manufacturer has a character that is not a letter, number, space or punctuation.
+   */
+  it.each(invalidCharacters.concat(whitespaceCharacters))('Invalid if product has manufacturer "%s"', async (manufacturer) => {
+    await populateAllFields();
+    await wrapper.setData({
+      manufacturer,
     });
 
     await Vue.nextTick();
