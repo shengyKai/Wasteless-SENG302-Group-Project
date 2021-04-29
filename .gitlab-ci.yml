@@ -102,7 +102,7 @@ deploy-staging-backend:
     paths:
       - backend/build/libs
   only:
-    - t73-setup-pipeline # TODO This needs to be reverted
+    - dev
 
 deploy-staging-frontend:
   stage: deploy
