@@ -269,6 +269,7 @@ public class User extends Account {
      * Authority within the system, eg: admin status and what businesses they are associated with
      * @return role
      */
+    @Column(nullable = false)
     public String getRole(){
         return this.role;
     }

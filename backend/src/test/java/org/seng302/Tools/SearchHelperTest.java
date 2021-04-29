@@ -2,6 +2,7 @@ package org.seng302.Tools;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.seng302.Controllers.DGAAController;
 import org.seng302.Entities.Location;
 import org.seng302.Entities.User;
 import org.seng302.Exceptions.SearchFormatException;
@@ -43,6 +44,8 @@ class SearchHelperTest {
     private UserRepository userRepository;
     @Autowired
     private BusinessRepository businessRepository;
+    @Autowired
+    private DGAAController dgaaController;
     /**
      * Speification for repository queries.
      */
@@ -65,6 +68,7 @@ class SearchHelperTest {
         pagingUserList = readUserFile("src/test/testFiles/UserSearchHelperTestData1.csv");
         savedUserList = readUserFile("src/test/testFiles/UserSearchHelperTestData2.csv");
 
+        dgaaController.checkDGAA();
         businessRepository.deleteAll();
         userRepository.deleteAll();
         for (User user : savedUserList) {
@@ -909,6 +913,18 @@ class SearchHelperTest {
         }
     }
 
-
+    /**
+     * Verify that when constructUserSpecificationFromSearchQuery is called with "DGAA" in double or single
+     * quotes as its argument, it will not return the DGAA result.
+     */
+    @Test
+    public void constructUserSpecificationFromSearchQueryToMatchDGAATest() {
+        Specification<User> specificationDouble = SearchHelper.constructUserSpecificationFromSearchQuery("\"DGAA\"");
+        List<User> matchesDouble = userRepository.findAll(specificationDouble);
+        Specification<User> specificationSingle = SearchHelper.constructUserSpecificationFromSearchQuery("\'DGAA\'");
+        List<User> matchesSingle = userRepository.findAll(specificationSingle);
+        assertEquals(0, matchesDouble.size());
+        assertEquals(0, matchesSingle.size());
+    }
 
 }

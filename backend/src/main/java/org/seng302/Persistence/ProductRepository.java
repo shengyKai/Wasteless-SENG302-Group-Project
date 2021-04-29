@@ -1,7 +1,6 @@
 package org.seng302.Persistence;
 
 import org.seng302.Entities.Business;
-import org.seng302.Entities.DefaultGlobalApplicationAdmin;
 import org.seng302.Entities.Product;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
