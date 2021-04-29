@@ -1,6 +1,6 @@
 //!!!NOTICE!!!
-//ProductImageCarousel will not be tested yet because its part of another task for future stories. 
-//Decided not to test it for now because whoever that is going to do that task in the future may want 
+//ProductImageCarousel will not be tested yet because its part of another task for future stories.
+//Decided not to test it for now because whoever that is going to do that task in the future may want
 //to redo some details if they desire. If you are doing that task, please refer to ProductCatalogueItem
 //and ProductImageCarousel for more details.
 import Vue from 'vue';
@@ -98,7 +98,7 @@ describe('ProductCatalogueItem.vue', () => {
         //at index 1, the link is the "return" link
         productDescriptionComponent.findAll('a').at(1).trigger("click");
         expect(productDescriptionComponent.vm.$data.dialog).toBeFalsy();
-      })
+      });
     });
   });
 
@@ -140,7 +140,7 @@ describe('ProductCatalogueItem.vue', () => {
   /**
   * Tests that the same product code exists as per the set data above
   */
-   it("Must contain the product code", () => {
+  it("Must contain the product code", () => {
     expect(wrapper.text()).toContain("Some Code");
   });
-})
+});
