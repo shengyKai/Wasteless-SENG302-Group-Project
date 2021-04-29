@@ -165,6 +165,20 @@ function isBusiness(obj: any): obj is Business {
   return true;
 }
 
+function isProduct(obj: any): obj is Product {
+  if (obj === null || typeof obj !== 'object') return false;
+  if (typeof obj.id !== 'number') return false;
+  if (typeof obj.name !== 'string') return false;
+  if (obj.description !== undefined && typeof obj.description !== 'string') return false;
+  if (obj.dateAdded !== undefined && typeof obj.dateAdded !== 'string') return false;
+  if (obj.expiryDate !== undefined && typeof obj.expiryDate !== 'string') return false;
+  if (obj.manufacturer !== undefined && typeof obj.manufacturer !== 'string') return false;
+  if (obj.recommendedRetailPrice !== undefined && typeof obj.recommendedRetailPrice !== 'string') return false;
+  if (obj.quantity !== undefined && typeof obj.quantity !== 'number') return false;
+  if (obj.productCode !== undefined && typeof obj.productCode !== 'string') return false;
+  return true;
+}
+
 function isNumberArray(obj: any): obj is number[] {
   if (!Array.isArray(obj)) return false;
   for (let elem of obj) {
@@ -189,6 +203,13 @@ function isBusinessArray(obj: any): obj is Business[] {
   return true;
 }
 
+function isProductsArray(obj: any): obj is Product[] {
+  if (!Array.isArray(obj)) return false;
+  for (let elem of obj) {
+    if (!isProduct(elem)) return false;
+  }
+  return true;
+}
 type OrderBy = 'userId' | 'relevance' | 'firstName' | 'middleName' | 'lastName' | 'nickname' | 'email' | 'address';
 
 /**
@@ -407,6 +428,42 @@ export async function createProduct(product: CreateProduct): Promise<MaybeError<
   }
   return undefined;
 }
+
+/**
+ * Get all products for that business
+ * @param businessId
+ * @param orderBy
+ * @param page
+ * @param resultsPerPage
+ * @param reverse
+ * @return a list of products
+ */
+export async function getProduct(buisnessId: Number, orderBy: String, page: Number, resultsPerPage: Number, reverse: Boolean ): Promise<MaybeError<Array<Product>>> {
+  let response;
+  try {
+
+    response = await  instance.get(`/businesses/${buisnessId}/products`, {
+      params: {
+        orderBy: orderBy,
+        page : page,
+        resultsPerPage : resultsPerPage,
+        reverse: reverse.toString(),
+      }});
+
+  } catch (error) {
+    let status: number | undefined = error.response?.status;
+    if (status === undefined) return 'Failed to reach backend';
+    if (status === 401) return 'Missing/Invalid access token';
+
+    if (!isProductsArray(response?.data)) {
+      return 'Response is not user array';
+    }
+
+    return 'Request failed: ' + status;
+  }
+  return response.data;
+}
+
 
 /**
  * Fetches a business with the given id.

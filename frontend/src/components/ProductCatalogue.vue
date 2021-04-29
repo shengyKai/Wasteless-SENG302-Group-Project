@@ -1,6 +1,22 @@
 <template>
   <v-card>
     <v-toolbar dark color="primary">
+      <v-select
+        v-model="orderBy"
+        flat
+        solo-inverted
+        hide-details
+        :items="[
+          { text: 'Product Code',               value: 'productCode'},
+          { text: 'Product Name',               value: 'name'},
+          { text: 'Description',                value: 'description'},
+          { text: 'Manufacturer',               value: 'manufacturer'},
+          { text: 'Recommended Retail Price',   value: 'recommendedRetailPrice'},
+          { text: 'Created',                    value: 'created'},
+        ]"
+        prepend-inner-icon="mdi-sort-variant"
+        label="Sort by"
+      />
       <v-col class="text-right">
         <v-btn-toggle class="toggle" v-model="reverse" mandatory>
           <v-btn depressed color="primary" :value="false">
@@ -20,21 +36,11 @@
         </v-col>
         <v-col>
           <v-row>
-            <v-col class="auto pa-0" md="8" sm="10">
+            <v-col class="auto pa-0" md="10" sm="10">
               <v-card-title :class="{'pt-0': $vuetify.breakpoint.smAndDown}" class="pb-0">
                 <!-- shows product name -->
                 {{ productName }}
               </v-card-title>
-            </v-col>
-            <v-col cols="auto" md="2" sm="2">
-              <v-btn-toggle class="toggle" v-model="reverse" mandatory>
-                <v-btn depressed color="primary" :value="false">
-                  <v-icon>mdi-arrow-up</v-icon>
-                </v-btn>
-                <v-btn depressed color="primary" :value="true">
-                  <v-icon>mdi-arrow-down</v-icon>
-                </v-btn>
-              </v-btn-toggle>
             </v-col>
             <v-col cols="auto" md="1" sm="2">
               <v-card-actions :class="{'pt-0': $vuetify.breakpoint.smAndDown}" class="pb-0">
@@ -107,22 +113,52 @@
         </v-col>
       </v-row>
     </v-container>
+    <v-pagination
+      v-model="currentPage"
+      :length="totalPages"
+      circle
+    />
   </v-card>
 </template>
 
 <script>
+import { getProduct } from '../api';
 //This component requires two other custom components, one to display the product image, one to view more of the product's description
 import FullProductDescription from "./utils/FullProductDescription.vue";
 import ProductImageCarousel from "./utils/ProductImageCarousel.vue";
 
 export default {
-  name: "ProductCatalogueItem",
+  name: "ProductCatalogue",
+
   components: {
     FullProductDescription,
     ProductImageCarousel
   },
   data() {
     return {
+      products: [],
+      /**
+       * Current error message string.
+       * If undefined then there is no error.
+       */
+      error: undefined,
+      /**
+       * Whether to reverse the search order
+       */
+      reverse: false,
+      /**
+       * The current search result order
+       */
+      orderBy: 'productCode',
+      /**
+       * Currently selected page (1 is first page)
+       */
+      currentPage: 1,
+      /**
+       * Number of results per a result page
+       */
+      resultsPerPage: 10,
+
       //insert the product images here, do note that the first index, at index 0, will be the primary image of the product.
       //The image MUST be labelled with the key "src" in order to be able to show in component
       productImages: [
@@ -170,9 +206,51 @@ export default {
     //add the form to edit product details here
     editProductDetails() {
       alert("TODO");
-    }
+    },
+
+    /**
+     * This function gets called when the search results need to change, but the search query has not changed.
+     * The page index, results per page, order by and reverse variables notify this function.
+     */
+    async updateNotQuery() {
+      if (!this.searchedQuery) return; // If the current search query is empty, do not search
+
+      const value = await getProduct (
+        this.$route.params.id,
+        this.orderBy,
+        this.currentPage,
+        this.resultsPerPage,
+        this.reverse
+      );
+      if (typeof value === 'string') {
+        this.products = [];
+        this.error = value;
+      } else {
+        this.products = value;
+        this.error = undefined;
+      }
+    },
+  },
+
+  watch: {
+
+    orderBy() {
+      this.updateNotQuery();
+      console.log("A");
+    },
+    reverse() {
+      this.updateNotQuery();
+      console.log("B");
+    },
+    currentPage() {
+      this.updateNotQuery();
+    },
+    resultsPerPage() {
+      this.updateNotQuery();
+    },
   },
 };
+
 </script>
 
 <style scoped>

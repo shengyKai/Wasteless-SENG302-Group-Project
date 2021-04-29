@@ -8,7 +8,7 @@ import BusinessProfile from "../components/BusinessProfile/index.vue";
 import SearchResults from "../components/SearchResults.vue";
 import CreateBusiness from "../components/BusinessProfile/CreateBusiness.vue";
 import HomePage from "../components/HomePage.vue";
-import ProductCatalogue from "../components/ProductCatalogueItem.vue";
+import ProductCatalogue from "../components/ProductCatalogue.vue";
 
 Vue.use(VueRouter);
 
@@ -19,16 +19,16 @@ const NotFound = {
 
 const routes = [
   { path: "/", redirect: "/login" }, // TODO handle case when already logged in
-  { path: "/login",           component: Auth },
-  { path: "/home",            component: HomePage},
-  { path: "/profile",         component: ProfilePage },
-  { path: "/profile/:id",     component: ProfilePage },
-  { path: "/create_business", component: CreateBusiness },
-  { path: "/business/:id",    component: BusinessProfile },
-  { path: "/admin",           component: admin },
-  { path: "/search",          component: SearchResults },
-  { path: "/catalogue",       component: ProductCatalogue },
-  { path: "*",                component: NotFound },
+  { path: "/login",                         component: Auth },
+  { path: "/home",                          component: HomePage},
+  { path: "/profile",                       component: ProfilePage },
+  { path: "/profile/:id",                   component: ProfilePage },
+  { path: "/create_business",               component: CreateBusiness },
+  { path: "/business/:id",                  component: BusinessProfile },
+  { path: "/admin",                         component: admin },
+  { path: "/search",                        component: SearchResults },
+  { path: "/business/:id/products",        component: ProductCatalogue },
+  { path: "*",                              component: NotFound },
 ];
 
 export default new VueRouter({

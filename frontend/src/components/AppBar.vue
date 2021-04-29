@@ -122,7 +122,7 @@ export default {
       this.$router.push("/home");
     },
     showCatalogue() {
-      this.$router.push("/catalogue");
+      this.$router.push("/business/:id/products");
     },
     logout() {
       this.$store.commit("logoutUser");
