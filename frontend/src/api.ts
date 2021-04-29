@@ -37,7 +37,7 @@ const instance = axios.create({
   withCredentials: true,
 });
 
-type MaybeError<T> = T | string;
+export type MaybeError<T> = T | string;
 
 export type User = {
   id: number,
@@ -99,27 +99,23 @@ export type CreateBusiness = {
   businessType: BusinessType,
 };
 
-export type Product = {
+export type Image = {
   id: number,
-  name: string,
-  description?: string,
-  dateAdded: Date,
-  expiryDate?: Date,
-  manufacturer?: string,
-  recommendedRetailPrice?: string,
-  quantity: number,
-  productCode: string
+  filename: string,
+  thumbnailFilename: string,
 };
 
-export type CreateProduct = {
+export type Product = {
+  id: string,
   name: string,
   description?: string,
   manufacturer?: string,
-  expiryDate?: Date,
-  recommendedRetailPrice?: string,
-  quantity: number,
-  productCode: string
-}
+  recommendedRetailPrice?: number,
+  created?: string,
+  images: Image[],
+};
+
+export type CreateProduct = Omit<Product, 'created' | 'images'>;
 
 function isLocation(obj: any): obj is Location {
   if (obj === null || typeof obj !== 'object') return false;
@@ -300,7 +296,7 @@ export async function login(email: string, password: string): Promise<MaybeError
 
     if (status === undefined) return 'Failed to reach backend';
     if (status === 400) return 'Invalid credentials';
-    return `Request failed: ' + ${status}`;
+    return `Request failed: ${status}`;
   }
   let id = response.data.userId;
   if (typeof id !== 'number') return 'Invalid response';
@@ -393,17 +389,32 @@ export async function createBusiness(business: CreateBusiness): Promise<MaybeErr
 }
 
 /**
- * Creates a product
+ * Add a product to a businesses catalogue.
+ *
+ * @param businessId The business to add the product to
  * @param product The properties to create a product with
  * @return undefined if operation is successful, otherwise a string error
  */
-export async function createProduct(product: CreateProduct): Promise<MaybeError<undefined>> {
+export async function createProduct(businessId: number, product: CreateProduct): Promise<MaybeError<undefined>> {
   try {
-    await  instance.post('/businesses/products', product);
+    await  instance.post(`/businesses/${businessId}/products`, product);
   } catch (error) {
     let status: number | undefined = error.response?.status;
     if (status === undefined) return 'Failed to reach backend';
     if (status === 401) return 'Missing/Invalid access token';
+    if (status === 403) return 'Operation not permitted';
+
+    if (status === 400) {
+      // TODO Not sure exactly how the backend is going to communicate with us that the product code
+      // is unavailable.
+
+      // eslint-disable-next-line no-constant-condition
+      if (false) {
+        return 'Product code unavailable';
+      }
+
+      return 'Invalid parameters';
+    }
 
     return 'Request failed: ' + status;
   }
