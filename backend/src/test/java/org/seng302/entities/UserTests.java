@@ -18,6 +18,8 @@ import org.springframework.web.server.ResponseStatusException;
 import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -205,7 +207,7 @@ public class UserTests {
      */
     @Test
     public void checkInvalidFirstNameTooLong() {
-        String[] invalidFirstNames = { "HippoTooLongPotamus", "Connnnnnnnnnnnnnnnnnnnnor", "MrsMagicalMagical" };
+        String[] invalidFirstNames = { "HippoTooLongPotamusHippoTooLongPotamus", "ConnnnnnnnnnnnnnnnnnnnnorConnnnnnnnnnnnnnnnnnnnnor", "MrsMagicalMagicalMrsMagicalMagical" };
         for (String firstName : invalidFirstNames) {
             try {
                 testUser.setFirstName(firstName);
@@ -273,7 +275,7 @@ public class UserTests {
      */
     @Test
     public void checkInvalidMiddleNameTooLong() {
-        String[] invalidMiddleNames = { "HippoTooLongPotamus", "Connnnnnnnnnnnnnnnnnnnnor", "MrsMagicalMagical" };
+        String[] invalidMiddleNames = { "HippoTooLongPotamusqwertyuiopasdfg", "Connnnnnnnnnnnnnnnnnnnnorqwertyui", "MrsMagicalMagicalqwertyuiopqwerty" };
         for (String middleName : invalidMiddleNames) {
             try {
                 testUser.setMiddleName(middleName);
@@ -338,7 +340,7 @@ public class UserTests {
      */
     @Test
     public void checkInvalidLastNameTooLong() {
-        String[] invalidLastNames = { "HippoTooLongPotamus", "Connnnnnnnnnnnnnnnnnnnnor", "MrsMagicalMagical" };
+        String[] invalidLastNames = { "HippoTooLongPotamusHippoTooLongPotamus", "HippoTooLongPotamusConnnnnnnnnnnnnnnnnnnnnor", "HippoTooLongPotamusMrsMagicalMagical" };
         for (String lastName : invalidLastNames) {
             try {
                 testUser.setLastName(lastName);
@@ -406,7 +408,7 @@ public class UserTests {
      */
     @Test
     public void checkInvalidNicknameTooLong() {
-        String[] invalidNicknames = { "HippoTooLongPotamus", "Connnnnnnnnnnnnnnnnnnnnor", "MrsMagicalMagical" };
+        String[] invalidNicknames = { "HippoTooLongPotamusHippoTooLongPotamus", "HippoTooLongPotamusConnnnnnnnnnnnnnnnnnnnnor", "HippoTooLongPotamusMrsMagicalMagical" };
         for (String nickname : invalidNicknames) {
             try {
                 testUser.setNickname(nickname);
@@ -487,13 +489,38 @@ public class UserTests {
     }
 
     /**
-     * Checks several bios with numbers in them will not be set as the user's bio
+     * Checks several bios with numbers in them will be set as the user's bio
      */
     @Test
-    public void checkInvalidBioNumbers() {
+    public void checkValidBioNumbers() {
         String[] invalidBios = { "I am a happy p3rs0n when 1 am n0t study1ng",
                 "1 am a Un1vers1ty stud3nt meaning I have n0 fr33 t1m3",
                 "D0 y0u l1k3 cats caus3 1 l1k3 cats", "0", "1", "0123456789" };
+        for (String bio : invalidBios) {
+            testUser.setBio(bio);
+            assertEquals(bio, testUser.getBio());
+        }
+    }
+
+        /**
+     * Checks several bios with characters in , only set when it satisfy the condition
+     */
+    @Test
+    public void checkValidBioCharacters() {
+        String[] validBios = { "! @m @ h@ppy per$on when ! @m not study!ng",
+                "! @m @ Un!ver$ity $tudent meaning I have no &ree ime",
+                "Do you li%e ca(s cause ) lke cats", "!", "@", "!@#$%&()" };
+        for (String bio : validBios) {
+            testUser.setBio(bio);
+            assertEquals(bio, testUser.getBio());
+        }
+    }
+    /**
+     * Checks several bios with non ASCII chracter in them will not be set as the user's bio
+     */
+    @Test
+    public void checkInvalidBioCharacters() {
+        String[] invalidBios = {"dummy भारतभारत", "bladummy网络网络", "hahadummy.קום.קום" };
         for (String bio : invalidBios) {
             try {
                 testUser.setBio(bio);
@@ -501,21 +528,41 @@ public class UserTests {
             } catch (ResponseStatusException expectedException) { }
         }
     }
-
     /**
-     * Checks several bios with characters in them will not be set as the user's bio
+     * Check user age > 13 when register
+     * @throws ParseException
      */
     @Test
-    public void checkInvalidBioCharacters() {
-        String[] invalidBios = { "! @m @ h@ppy per$on when ! @m not study!ng",
-                "! @m @ Un!ver$ity $tudent meaning I have no &ree ^ime",
-                "Do you li%e ca(s cause ) l*ke cats", "!", "@", "!@#$%^&^*(*)" };
-        for (String bio : invalidBios) {
-            try {
-                testUser.setBio(bio);
-                fail("A Forbidden exception was expected, but not thrown");
-            } catch (ResponseStatusException expectedException) { }
-        }
+    public void checkDateofBirthGreaterThanThirteen() throws ParseException {
+        String dateOfBirthString = "11-05-2000";
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
+        Date dateOfBirth = dateFormat.parse(dateOfBirthString);
+            
+        testUser.setDob(dateOfBirth);
+        assertEquals(dateOfBirth, testUser.getDob());
+
+    }
+
+        /**
+     * Check user age < 13 when register
+     * @throws ParseException
+     */
+    @Test
+    public void checkDateofBirthLesserThanThirteen() throws ParseException {
+        String dateOfBirthString = "11-05-2010";
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
+        Date dateOfBirth = dateFormat.parse(dateOfBirthString);
+        
+        LocalDate localDateOfBirth = dateOfBirth.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        LocalDate date = LocalDate.now();
+        LocalDate minDate = date.minusYears(13);
+        
+        assertTrue(localDateOfBirth.compareTo(minDate) > 0);
+        try {
+            testUser.setDob(dateOfBirth);
+            fail("A Forbidden exception was expected, but not thrown");
+        } catch (ResponseStatusException expectedException) { }
+        
     }
 
     /**
@@ -916,7 +963,7 @@ public class UserTests {
                 .withEmail("johnsmith99@gmail.com")
                 .withPassword("1337-H%nt3r2")
                 .withBio("Likes long walks on the beach")
-                .withDob("2021-03-11")
+                .withDob("2001-03-11")
                 .withPhoneNumber("+64 3 555 0129")
                 .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Christchurch,New Zealand," +
                         "Canterbury,8041"))
@@ -953,7 +1000,7 @@ public class UserTests {
                 .withEmail("johnsmith99@gmail.com")
                 .withPassword("1337-H%nt3r2")
                 .withBio("Likes long walks on the beach")
-                .withDob("2021-03-11")
+                .withDob("2000-03-11")
                 .withPhoneNumber("+64 3 555 0129")
                 .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Christchurch,New Zealand," +
                         "Canterbury,8041"));
@@ -972,7 +1019,7 @@ public class UserTests {
                 .withEmail("johnsmith99@gmail.com")
                 .withPassword("1337-H%nt3r2")
                 .withBio("Likes long walks on the beach")
-                .withDob("2021-03-11")
+                .withDob("2000-03-11")
                 .withPhoneNumber("+64 3 555 0129")
                 .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Christchurch,New Zealand," +
                         "Canterbury,8041"));
@@ -991,7 +1038,7 @@ public class UserTests {
                 .withNickName("Jonny")
                 .withPassword("1337-H%nt3r2")
                 .withBio("Likes long walks on the beach")
-                .withDob("2021-03-11")
+                .withDob("2000-03-11")
                 .withPhoneNumber("+64 3 555 0129")
                 .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Christchurch,New Zealand," +
                         "Canterbury,8041"));
@@ -1010,7 +1057,7 @@ public class UserTests {
                 .withNickName("Jonny")
                 .withEmail("johnsmith99@gmail.com")
                 .withBio("Likes long walks on the beach")
-                .withDob("2021-03-11")
+                .withDob("2000-03-11")
                 .withPhoneNumber("+64 3 555 0129")
                 .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Christchurch,New Zealand," +
                         "Canterbury,8041"));
@@ -1030,7 +1077,7 @@ public class UserTests {
                 .withEmail("johnsmith99@gmail.com")
                 .withPassword("1337-H%nt3r2")
                 .withBio("Likes long walks on the beach")
-                .withDob("2021-03-11")
+                .withDob("2001-03-11")
                 .withPhoneNumber("+64 3 555 0129");
         assertThrows(ResponseStatusException.class, testBuilder::build);
     }
@@ -1067,7 +1114,7 @@ public class UserTests {
                 .withEmail("johnsmith99@gmail.com")
                 .withPassword("1337-H%nt3r2")
                 .withBio("Likes long walks on the beach")
-                .withDob("2021-03-11")
+                .withDob("2001-03-11")
                 .withPhoneNumber("+64 3 555 0129")
                 .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Christchurch,New Zealand," +
                         "Canterbury,8041"));
@@ -1088,7 +1135,7 @@ public class UserTests {
                 .withEmail("johnsmith99@gmail.com")
                 .withPassword("1337-H%nt3r2")
                 .withBio("Likes long walks on the beach")
-                .withDob("2021-03-11")
+                .withDob("2001-03-11")
                 .withPhoneNumber("+64 3 555 0129")
                 .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Christchurch,New Zealand," +
                         "Canterbury,8041"));
@@ -1108,7 +1155,7 @@ public class UserTests {
                 .withNickName("Jonny")
                 .withEmail("johnsmith99@gmail.com")
                 .withPassword("1337-H%nt3r2")
-                .withDob("2021-03-11")
+                .withDob("2001-03-11")
                 .withPhoneNumber("+64 3 555 0129")
                 .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Christchurch,New Zealand," +
                         "Canterbury,8041"));
@@ -1130,7 +1177,7 @@ public class UserTests {
                 .withEmail("johnsmith99@gmail.com")
                 .withPassword("1337-H%nt3r2")
                 .withBio("Likes long walks on the beach")
-                .withDob("2021-03-11")
+                .withDob("2000-03-11")
                 .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Christchurch,New Zealand," +
                         "Canterbury,8041"));
         User testUser = testBuilder.build();

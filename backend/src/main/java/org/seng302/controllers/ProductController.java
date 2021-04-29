@@ -171,8 +171,9 @@ public class ProductController {
 
             business.checkSessionPermissions(request);
 
-            checkObjectHasFields(productInfo, List.of("id", "name", "description", "manufacturer", "recommendedRetailPrice"));
-
+            if (productInfo == null) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Product creation info not provided");
+            }
             String productCode = productInfo.getAsString("id");
 
             if (productRepository.findByBusinessAndProductCode(business, productCode) != null) {

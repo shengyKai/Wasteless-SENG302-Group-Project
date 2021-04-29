@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
+
 import org.springframework.data.annotation.ReadOnlyProperty;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
@@ -12,6 +13,8 @@ import org.springframework.web.server.ResponseStatusException;
 import javax.persistence.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -61,7 +64,7 @@ public class User extends Account {
      * @param firstName users first name
      */
     public void setFirstName(String firstName) {
-        if (firstName != null && firstName.length() > 0 && firstName.length() <= 16 && firstName.matches("[ a-zA-Z]+")) {
+        if (firstName != null && firstName.length() > 0 && firstName.length() <= 32 && firstName.matches("[ a-zA-Z]+")) {
             this.firstName = firstName;
         } else {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The first name must not be empty, be less then 16 characters, and only contain letters.");
@@ -80,7 +83,7 @@ public class User extends Account {
      * @param middleName
      */
     public void setMiddleName(String middleName) {
-        if (middleName == null || (middleName.length() > 0 && middleName.length() <= 16 && middleName.matches("[ a-zA-Z]+"))) {
+        if (middleName == null || (middleName.length() > 0 && middleName.length() <= 32 && middleName.matches("[ a-zA-Z]+"))) {
             this.middleName = middleName;
         } else if (middleName.equals("")) {
             this.middleName = null;
@@ -104,7 +107,7 @@ public class User extends Account {
      * @param lastName users surname
      */
     public void setLastName(String lastName) {
-        if (lastName != null && lastName.length() > 0 && lastName.length() <= 16 && lastName.matches("[ a-zA-Z]+")) {
+        if (lastName != null && lastName.length() > 0 && lastName.length() <= 32 && lastName.matches("[ a-zA-Z]+")) {
             this.lastName = lastName;
         } else {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The last name must not be empty, be less then 16 characters, and only contain letters.");
@@ -124,7 +127,7 @@ public class User extends Account {
      * @param nickname users preferred name
      */
     public void setNickname(String nickname) {
-        if (nickname == null || (nickname.length() > 0 && nickname.length() <= 16 && nickname.matches("[ a-zA-Z]*"))) {
+        if (nickname == null || (nickname.length() > 0 && nickname.length() <= 32 && nickname.matches("[ a-zA-Z]*"))) {
             this.nickname = nickname;
         } else if (nickname.equals("")) {
             this.nickname = null;
@@ -147,12 +150,13 @@ public class User extends Account {
      */
     //Todo Discuss with team about what characters should be allowed in the BIO
     public void setBio(String bio) {
-        if (bio == null || (bio.length() > 0 && bio.length() <= 255 && bio.matches("[ a-zA-Z]*"))) {
+        if (bio == null || (bio.length() > 0 && bio.length() <= 200 && bio.matches("[ a-zA-Z0-9\\p{Punct}]*"))) {
             this.bio = bio;
         } else if (bio.equals("")) {
             this.bio = null;
         } else {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The bio must be less than 255 characters long, and only contain letters.");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The bio must be less than 200 characters long," + 
+            "and only contain letters, numbers, and valid special characters");
         }
     }
 
@@ -169,11 +173,22 @@ public class User extends Account {
     /**
      * Sets the users date of birth
      * Not Null
+     * Check the dob satisfied the condition( >= 13years)
+     * Date constructor is deprecated (Date class issue)
+     * LocalDate class can be used but come with time zone -- over complicated
      * @param dob date of birth (used to verify age)
      */
     public void setDob(Date dob) {
         if (dob != null) {
-            this.dob = dob;
+            LocalDate dateOfBirth = dob.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+            LocalDate date = LocalDate.now();
+            LocalDate minDate = date.minusYears(13);
+            
+            if (dateOfBirth.compareTo(minDate) < 0) {
+                this.dob = dob;
+            } else {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You must be at least 13 years old to create an account");
+            }
         } else {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Your date of birth has been entered incorrectly");
         }
