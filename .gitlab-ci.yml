@@ -28,17 +28,14 @@ junit:
     - cd backend
     - ./gradlew test
 
-# Run acceptance (cucumber) tests
-# Uncomment after ATDD workshop (at the latest)
-# cucumber:
-#   stage: test
-#   script:
-#     - cd backend
-#     - ./gradlew cucumber
+cucumber:
+   stage: test
+   script:
+     - cd backend
+     - ./gradlew cucumber
 
-# Run Jest (Javascript) tests
-# Uncomment after Jest workshop (at the latest)
-# jest:
+# Temporary disabled till the team fixes the failing jest test
+#jest:
 #   stage: test
 #   cache:
 #     key: node-modules
@@ -78,6 +75,7 @@ branch-build:
     - cd frontend
     - npm run build
     - cd ../backend
+    - echo "Variables are $DB_USERNAME $DB_URL"
     - ./gradlew bootJar
   artifacts:
     paths:
@@ -92,6 +90,8 @@ deploy-staging-backend:
   stage: deploy
   script:
     - cd backend
+    - echo "Variables are $DB_USERNAME $DB_URL"
+    - source ../runner/copy-environment.sh
     - ./gradlew bootJar
     - rm -rf /home/gitlab-runner/staging-backend/ || true
     - mkdir /home/gitlab-runner/staging-backend/
