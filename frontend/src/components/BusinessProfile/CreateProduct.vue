@@ -71,15 +71,17 @@
                     />
                   </v-menu>
                 </v-col>
-                <v-col cols="6">
+                <v-col cols="7">
                   <v-text-field
                     v-model="recommendedRetailPrice"
                     label="Recommended Retail Price"
+                    :prefix="currency.symbol"
+                    :suffix="currency.code"
                     :rules="priceRules"
                     outlined
                   />
                 </v-col>
-                <v-col cols="6">
+                <v-col cols="5">
                   <v-text-field
                     v-model="quantity"
                     label="Quantity"
@@ -122,7 +124,8 @@
 </template>
 
 <script>
-import {createProduct} from '../../api';
+import {createProduct, getBusiness} from '../../api';
+import {currencyFromCountry} from "@/components/utils/Methods/currency";
 export default {
   name:'CreateProduct',
   data() {
@@ -136,6 +139,7 @@ export default {
       recommendedRetailPrice: '',
       quantity: '',
       productCode: '',
+      currency: {},
       valid: false,
       maxCharRules: [
         field => (field.length <= 100) || 'Reached max character limit: 100'
@@ -157,6 +161,17 @@ export default {
         field => field <= 100000 || 'Must not be too large'
       ]
     };
+  },
+  async created() {
+    // When the create product dialogue, the currency will be set to the currency of the country the product is being
+    // sold in. It will default to New Zealand Dollars if no currency can be found from the country.
+    if (this.$store.state.activeRole.type !== 'business') {
+      console.warn("Active role is not business");
+      return;
+    }
+    const business = await getBusiness(this.$store.state.activeRole.id);
+    const countryOfSale = business.address.country;
+    this.currency = await currencyFromCountry(countryOfSale);
   },
   methods: {
     /**

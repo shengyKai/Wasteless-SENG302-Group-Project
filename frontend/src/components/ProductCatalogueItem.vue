@@ -92,7 +92,6 @@
 import FullProductDescription from "./utils/FullProductDescription.vue";
 import ProductImageCarousel from "./utils/ProductImageCarousel.vue";
 import {currencyFromCountry} from "./utils/Methods/currency.ts";
-import {newZealandDollar} from "./utils/Methods/currency.ts";
 
 export default {
   name: "ProductCatalogueItem",
@@ -126,7 +125,7 @@ export default {
       // productManufacturer: "",
       // productRRP: null,
       // productCode: "",
-      // currency: newZealandDollar,
+      // currency: {},
 
       // try uncommenting the bottom variables to test out how it looks.
       productName: "Some Product",
@@ -136,7 +135,8 @@ export default {
       productManufacturer: "Some Manufacturer",
       productRRP: 100,
       productCode: "Some Code",
-      currency: newZealandDollar,
+      countryOfSale: "Japan",
+      currency: {},
 
       //If readMoreActivated is false, the product description is less than 50 words, so it wont have to use the FullProductDescription
       //component. Else it will use it and the "Read more..." link will also be shown to lead to the FullProductDescription component
@@ -144,12 +144,9 @@ export default {
     };
   },
   async created() {
-    // When the catalogue item is created, the currency will be set to the currency of the country from the user's address. It will
-    // default to New Zealand Dollars if no currency can be found from the user's address.
-    this.currency = await currencyFromCountry(this.$store.state.user.homeAddress.country);
-    if (typeof this.currency !== 'object') {
-      this.currency = newZealandDollar;
-    }
+    // When the catalogue item is created, the currency will be set to the currency of the country the product is being
+    // sold in. It will default to New Zealand Dollars if no currency can be found from the country.
+    this.currency = await currencyFromCountry(this.countryOfSale);
   },
   methods: {
     //if the "Read more..." link if clicked, readMoreActivated becomes true and the FullProductDescription dialog box will open
