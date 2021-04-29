@@ -88,6 +88,8 @@ deploy-staging-backend:
   stage: deploy
   script:
     - cd backend
+    - chmod u+x ../copy-environment.sh
+    - ../copy-environment.sh
     - ./gradlew bootJar
     - rm -rf /home/gitlab-runner/staging-backend/ || true
     - mkdir /home/gitlab-runner/staging-backend/
@@ -99,7 +101,7 @@ deploy-staging-backend:
     paths:
       - backend/build/libs
   only:
-    - dev
+    - t73-setup-pipeline # TODO This needs to be reverted
 
 deploy-staging-frontend:
   stage: deploy
