@@ -41,7 +41,10 @@ public class Location {
     @Column(name="post_code")
     private String postCode;
 
-    /*
+    @Column(name="district")
+    private String district;
+
+    /**
      * Converts the address string into a location object
      * @param address
      * @return
@@ -51,12 +54,13 @@ public class Location {
         try {
             String streetNumber = addressComponents.get(0);
             String streetName = addressComponents.get(1);
-            String city = addressComponents.get(2);
-            String country = addressComponents.get(3);
-            String region = addressComponents.get(4);
-            String postCode = addressComponents.get(5);
+            String district = addressComponents.get(2);
+            String city = addressComponents.get(3);
+            String country = addressComponents.get(4);
+            String region = addressComponents.get(5);
+            String postCode = addressComponents.get(6);
             Location.Builder locationBuilder = new Location.Builder().atStreetNumber(streetNumber).onStreet(streetName)
-                    .inCity(city).inRegion(region).inCountry(country).withPostCode(postCode);
+                    .inCity(city).inRegion(region).inCountry(country).withPostCode(postCode).atDistrict(district);
             Location location = locationBuilder.build();
             return location;
         } catch (Exception e) {
@@ -77,6 +81,7 @@ public class Location {
                 .onStreet(json.getAsString("streetName"))
                 .atStreetNumber(json.getAsString("streetNumber"))
                 .withPostCode(json.getAsString("postcode"))
+                .atDistrict(json.getAsString("district"))
                 .inSuburb("suburb")
                 .build();
         return address;
@@ -101,6 +106,9 @@ public class Location {
             return false;
         }
         if (!checkValidCountry(location.getCountry())) {
+            return false;
+        }
+        if (!checkValidDistrict(location.getDistrict())) {
             return false;
         }
         return checkValidPostCode(location.getPostCode());
@@ -203,6 +211,22 @@ public class Location {
             return false;
         }
     }
+    
+    /**
+     * Checks if the district is valid
+     * There are some districts with long names, as such we are targetting the length of the characters to be at most 100 characters.
+     * Some districts also have numbers in them so that has to be checked. District field is not mandatory, so it can be an empty
+     * string.
+     * @param district district of the location
+     * @return true if the district is valid, false otherwise
+     */
+    public boolean checkValidDistrict(String district) {
+        if (district == null || (district.length() <= 100 && district.matches("[a-zA-Z0-9 ]+"))) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 
     public Long getId() {
         return id;
@@ -230,6 +254,10 @@ public class Location {
 
     public String getPostCode() {
         return postCode;
+    }
+
+    public String getDistrict() {
+        return district;
     }
 
     public void setId(Long id) {
@@ -284,10 +312,18 @@ public class Location {
                     "less than 16 characters long, and at least one character long.");
         }
     }
+    
+    public void setDistrict(String district) {
+        if (checkValidDistrict(district)) {
+            this.district = district;
+        } else {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "The district must not be more than 100 characters long.");
+        }
+    }
 
     /**
      * Construct a JSON representation of this Location object which includes its id street number,
-     * street name, city, region and postcode. This method should be used in situations where is it appropriate
+     * street name, city, region, district and postcode. This method should be used in situations where is it appropriate
      * to reveal the entire address, such as for a business's address.
      * @return JSON representation of this Location object
      */
@@ -299,6 +335,7 @@ public class Location {
         attributeMap.put("region", region);
         attributeMap.put("country", country);
         attributeMap.put("postcode", postCode);
+        attributeMap.put("district", district);
         return new JSONObject(attributeMap);
     }
 
@@ -329,6 +366,7 @@ public class Location {
         private String streetName;
         private String streetNumber;
         private String postCode;
+        private String district;
 
         /**
          * Set the builder's country.
@@ -401,6 +439,19 @@ public class Location {
         }
 
         /**
+         * Set the builder's district.
+         * @param district A string representing a district.
+         * @return Builder with post code parameter set.
+         */
+        public Builder atDistrict(String district)  {
+            if (district.equals("")) {
+                district = null;
+            }
+            this.district = district;
+            return this;
+        }
+
+        /**
          * Construct an instance of the Location class.
          * @return Location with parameters of Builder.
          */
@@ -412,6 +463,7 @@ public class Location {
             location.setStreetName(this.streetName);
             location.setStreetNumber(this.streetNumber);
             location.setPostCode(this.postCode);
+            location.setDistrict(this.district);
             return location;
         }
 

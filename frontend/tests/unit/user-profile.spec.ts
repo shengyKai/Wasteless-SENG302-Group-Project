@@ -68,7 +68,15 @@ function makeTestUser(userId: number, businesses?: number[]) {
     phoneNumber: 'test_phone_number' + userId,
     dateOfBirth: '1/1/1900',
     created: '1/5/2005',
-    homeAddress: { country: 'test_country' + userId },
+    homeAddress: { 
+      streetNumber: 'test_street_number',
+      streetName: 'test_street1',
+      city: 'test_city',
+      region: 'test_region',
+      postcode: 'test_postcode',
+      district: 'test_district',
+      country: 'test_country' + userId 
+    },
   };
 
   if (businesses !== undefined) {
@@ -220,15 +228,57 @@ describe('UserProfile.vue', () => {
   });
 
   /**
-   * Tests that the UserProfile has the user's home address country somewhere in the page
+   * Tests that the UserProfile has the user's home street address somewhere in the page
    */
+  it('Renders home address', () => {
+    expect(wrapper.text()).toContain('test_street1');
+  });
+
+  /**
+   * Tests that the UserProfile has the user's home address street number somewhere in the page
+   */
+  it('Renders home address', () => {
+    expect(wrapper.text()).toContain('test_street_number');
+  });
+
+  /**
+  * Tests that the UserProfile has the user's home address city somewhere in the page
+  */
+  it('Renders home address', () => {
+    expect(wrapper.text()).toContain('test_city');
+  });
+
+  /**
+   * Tests that the UserProfile has the user's home address region somewhere in the page
+   */
+  it('Renders home address', () => {
+    expect(wrapper.text()).toContain('test_region');
+  });
+
+  /**
+  * Tests that the UserProfile has the user's home address postcode somewhere in the page
+  */
+  it('Renders home address', () => {
+    expect(wrapper.text()).toContain('test_postcode');
+  });
+
+  /**
+   * Tests that the UserProfile has the user's home address district somewhere in the page
+   */
+  it('Renders home address', () => {
+    expect(wrapper.text()).toContain('test_district');
+  });
+
+  /**
+  * Tests that the UserProfile has the user's home address country somewhere in the page
+  */
   it('Renders home address', () => {
     expect(wrapper.text()).toContain('test_country100');
   });
 
   /**
    * Tests that the UserProfile has the user's birthday somewhere in the page
-   * and that the birthday is in the correct format dd MMM yyyy.
+   * and that the birthday is in the correct format dd mm yyyy, where mm is the abbreviation of each month
    */
   it('Renders birthday', () => {
     expect(wrapper.text()).toContain('01 Jan 1900');

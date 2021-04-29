@@ -46,10 +46,8 @@ describe('ProductCatalogueItem.vue', () => {
           productName: "Some Product",
           productDescription: "Some description",
           productDateAdded: "Some Date Added",
-          productExpiryDate: "Some Expired Date",
           productManufacturer: "Some Manufacturer",
           productRRP: 100,
-          productQuantity: 5,
           productCode: "Some Code",
           readMoreActivated: false
         };
@@ -110,13 +108,6 @@ describe('ProductCatalogueItem.vue', () => {
   });
 
   /**
-  * Tests that the same product expiry date exists as per the set data above
-  */
-  it("Must contain the product expiry date", () => {
-    expect(wrapper.text()).toContain('Some Expired Date');
-  });
-
-  /**
   * Tests that the same product manufacturer exists as per the set data above
   */
   it("Must contain the product manufacturer", () => {
@@ -128,13 +119,6 @@ describe('ProductCatalogueItem.vue', () => {
   */
   it("Must contain the product RRP", () => {
     expect(wrapper.text()).toContain(100);
-  });
-
-  /**
-  * Tests that the same product quantity exists as per the set data above
-  */
-  it("Must contain the product quantity", () => {
-    expect(wrapper.text()).toContain(5);
   });
 
   /**
