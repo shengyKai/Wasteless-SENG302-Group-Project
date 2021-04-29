@@ -88,8 +88,7 @@ deploy-staging-backend:
   stage: deploy
   script:
     - cd backend
-    - chmod u+x ../runner/copy-environment.sh
-    - ../runner/copy-environment.sh
+    - source ../runner/copy-environment.sh
     - ./gradlew bootJar
     - rm -rf /home/gitlab-runner/staging-backend/ || true
     - mkdir /home/gitlab-runner/staging-backend/
