@@ -75,6 +75,7 @@ branch-build:
     - cd frontend
     - npm run build
     - cd ../backend
+    - echo "Variables are $DB_USERNAME $DB_URL"
     - ./gradlew bootJar
   artifacts:
     paths:
@@ -89,6 +90,8 @@ deploy-staging-backend:
   stage: deploy
   script:
     - cd backend
+    - echo "Variables are $DB_USERNAME $DB_URL"
+    - source ../runner/copy-environment.sh
     - ./gradlew bootJar
     - rm -rf /home/gitlab-runner/staging-backend/ || true
     - mkdir /home/gitlab-runner/staging-backend/
