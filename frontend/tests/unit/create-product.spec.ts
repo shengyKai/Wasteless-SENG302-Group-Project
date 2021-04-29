@@ -453,7 +453,7 @@ describe('CreateProduct.vue', () => {
       manufacturer: 'Product Manufacturer',
       recommendedRetailPrice: 100,
     });
-    expect(wrapper.emitted().closeDialog).toBeTruthy();
+    expect(wrapper.emitted().closeDialog).toBeTruthy(); // The dialog should close
   });
 
   /**
@@ -473,5 +473,24 @@ describe('CreateProduct.vue', () => {
     // The appWrapper is tested for the text, because the dialog content is not in the dialog
     // element.
     expect(appWrapper.text()).toContain('test_error_message');
+    expect(wrapper.emitted().closeDialog).toBeFalsy(); // The dialog should stay open
+  });
+
+  /**
+   * Tests that if the create button is pressed, but the api returns an 'Product code unavailable'
+   * then the form should become invalid. Since the product code cannot be used.
+   */
+  it('When the create button is pressed and the api says that the product code is unavailable then the form should become invalid', async () => {
+    await populateAllFields();
+    createProduct.mockResolvedValue('Product code unavailable'); // Ensure that the operation fails
+
+    await Vue.nextTick();
+
+    await findCreateButton().trigger('click'); // Click create button
+
+    await flushQueue();
+
+    expect(wrapper.vm.valid).toBeFalsy();
+    expect(wrapper.emitted().closeDialog).toBeFalsy(); // The dialog should stay open
   });
 });
