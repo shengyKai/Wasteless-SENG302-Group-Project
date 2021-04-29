@@ -30,7 +30,7 @@
                     class="required"
                     v-model="product"
                     label="Name of product"
-                    :rules="mandatoryRules.concat(maxCharRules)"
+                    :rules="mandatoryRules.concat(maxCharRules).concat(validCharactersSingleLineRules)"
                     outlined
                   />
                 </v-col>
@@ -38,7 +38,7 @@
                   <v-textarea
                     v-model="description"
                     label="Description"
-                    :rules="maxCharDescriptionRules"
+                    :rules="maxCharDescriptionRules.concat(validCharactersMultiLineRules)"
                     rows="3"
                     outlined
                   />
@@ -47,7 +47,7 @@
                   <v-text-field
                     v-model="manufacturer"
                     label="Manufacturer"
-                    :rules="maxCharManufacturerRules"
+                    :rules="maxCharManufacturerRules.concat(validCharactersSingleLineRules)"
                     outlined
                   />
                 </v-col>
@@ -111,6 +111,12 @@ export default {
       ],
       maxCharDescriptionRules: [
         field => (field.length <= 200) || 'Reached max character limit: 200',
+      ],
+      validCharactersSingleLineRules: [
+        field => /^[ \d\p{L}\p{P}]*$/u.test(field) || 'Must only contain letters, numbers, punctuation and spaces',
+      ],
+      validCharactersMultiLineRules: [
+        field => /^[\s\d\p{L}\p{P}]*$/u.test(field) || 'Must only contain letters, numbers, punctuation and whitespace',
       ],
       mandatoryRules: [
         //All fields with the class "required" will go through this ruleset to ensure the field is not empty.
