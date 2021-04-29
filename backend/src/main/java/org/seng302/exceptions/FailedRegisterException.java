@@ -18,8 +18,6 @@ public class FailedRegisterException extends ResponseStatusException {
 
     public FailedRegisterException(String reason) {
         super(status, reason);
-        System.out.println(status);
-        System.out.println(reason);
     }
 }
 

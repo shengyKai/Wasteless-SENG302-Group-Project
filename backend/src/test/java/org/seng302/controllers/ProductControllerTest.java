@@ -142,7 +142,7 @@ class ProductControllerTest {
                 .withEmail("happyboi@gmail.com")
                 .withPassword("1337-H548*nt3r2")
                 .withBio("Likes long walks on the beach sometimes")
-                .withDob("2010-03-11")
+                .withDob("2008-03-11")
                 .withPhoneNumber("+64 5 565 0129")
                 .withAddress(Location.covertAddressStringToLocation("5,Rountree Street,Christchurch,New Zealand," +
                         "Canterbury,8041"))

@@ -135,7 +135,6 @@ public class UserControllerTest {
                         .withEmail(userData[4]).withPassword(userData[5]).withAddress(Location.covertAddressStringToLocation(userData[6])).withDob(userData[7]).build();
                 userList.add(user);
             } catch (Exception e) {
-
             }
         }
         csvReader.close();
