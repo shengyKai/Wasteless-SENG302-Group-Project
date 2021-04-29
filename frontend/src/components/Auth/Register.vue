@@ -389,6 +389,7 @@ export default {
       let year = today.getFullYear();
       let month = today.getMonth();
       let day = today.getDate();
+      console.log(day);
       return new Date(year - 13, month, day);
     }
   },
