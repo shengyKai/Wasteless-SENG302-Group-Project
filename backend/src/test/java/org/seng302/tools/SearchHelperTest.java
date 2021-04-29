@@ -8,6 +8,7 @@ import org.seng302.exceptions.SearchFormatException;
 import org.seng302.persistence.BusinessRepository;
 import org.seng302.persistence.UserRepository;
 import org.seng302.persistence.UserSpecificationsBuilder;
+import org.seng302.tools.SearchHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Sort;

@@ -7,6 +7,7 @@ import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.seng302.controllers.DemoController;
 import org.seng302.entities.Business;
 import org.seng302.entities.Location;
 import org.seng302.entities.Product;
@@ -64,7 +65,7 @@ class DemoControllerTest {
                 .withEmail("123andyelliot@gmail.com")
                 .withPassword("password123")
                 .withDob("1987-04-12")
-                .withAddress(Location.covertAddressStringToLocation("108,Albert Road,Christchurch,New Zealand,Canterbury,8041"))
+                .withAddress(Location.covertAddressStringToLocation("108,Albert Road,Ashburton,Christchurch,New Zealand,Canterbury,8041"))
                 .build();
         testBusiness = new Business.Builder()
                 .withBusinessType("Accommodation and Food Services")
