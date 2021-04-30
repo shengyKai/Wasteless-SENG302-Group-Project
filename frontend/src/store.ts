@@ -29,7 +29,11 @@ export type StoreData = {
    * Whether or not the dialog for registering a business is being shown.
    */
   createBusinessDialogShown: boolean,
-  createProductDialogShown: boolean,
+  /**
+   * The current business the create product dialog is being applied to.
+   * If undefined then the create product dialog is hidden.
+   */
+  createProductDialogBusiness: number | undefined,
 };
 
 function createOptions(): StoreOptions<StoreData> {
@@ -39,7 +43,7 @@ function createOptions(): StoreOptions<StoreData> {
       activeRole: null,
       globalError: null,
       createBusinessDialogShown: false,
-      createProductDialogShown: false,
+      createProductDialogBusiness: undefined,
     },
     mutations: {
       setUser (state, payload: User) {
@@ -102,12 +106,13 @@ function createOptions(): StoreOptions<StoreData> {
       },
 
       /**
-       * Creates a modal create product dialog
+       * Creates a modal create product dialog for adding a product to the provided business
        *
        * @param state Current store state
+       * @param businessId Business to create the product for
        */
-      showCreateProduct(state) {
-        state.createProductDialogShown = true;
+      showCreateProduct(state, businessId: number) {
+        state.createProductDialogBusiness = businessId;
       },
 
       /**
@@ -116,7 +121,7 @@ function createOptions(): StoreOptions<StoreData> {
        * @param state Current store state
        */
       hideCreateProduct(state) {
-        state.createProductDialogShown = false;
+        state.createProductDialogBusiness = undefined;
       }
     },
     getters: {

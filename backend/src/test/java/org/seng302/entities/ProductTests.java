@@ -75,7 +75,7 @@ class ProductTests {
                 .withBio("Likes long walks on the beach")
                 .withDob("2000-03-11")
                 .withPhoneNumber("+64 3 555 0129")
-                .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Christchurch,New Zealand," +
+                .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
                         "Canterbury,8041"))
                 .build();
         testUser1 = userRepository.save(testUser1);
