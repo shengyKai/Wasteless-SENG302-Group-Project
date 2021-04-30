@@ -54,7 +54,7 @@ class LoginControllerTest {
                 .withBio("Likes long walks on the beach")
                 .withDob("2001-03-11")
                 .withPhoneNumber("+64 3 555 0129")
-                .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Christchurch,New Zealand," +
+                .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
                         "Canterbury,8041"))
                 .build();
         Account sameEmailAccount = accountRepository.findByEmail("johnsmith99@gmail.com");

@@ -353,6 +353,7 @@ export default {
           region        : this.region,
           country       : this.country,
           postcode      : this.postcode,
+          district      : this.district
         },
         password    : this.password,
       };

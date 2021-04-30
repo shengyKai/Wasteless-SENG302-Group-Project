@@ -8,7 +8,7 @@
       <v-form v-model="valid">
         <v-card>
           <v-card-title>
-            <span class="headline create-business">Create Business</span>
+            <h4 class="primary--text">Create Business</h4>
           </v-card-title>
           <v-card-text>
             <v-container>
@@ -174,15 +174,10 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
 /* Mandatory fields are accompanied with a * after it's respective labels*/
 .required label::after {
   content: "*";
   color: red;
-}
-
-.create-business {
-  color: #558b2f; /* TODO Set this to primary colour variable */
-  font-weight: bolder;
 }
 </style>
