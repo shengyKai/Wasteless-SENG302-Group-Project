@@ -433,47 +433,14 @@ public class BusinessTests {
     }
 
     /**
-     * Check that when setDescription is called with null as its argument, a response status expection will be thrown
-     * with status code 400 and the business's description will not be changed.
+     * Check that when setDescription is called with null as its argument, the description becomes an empty string
      */
     @Test
     public void setDescriptionNullTest() {
-        String originalDescription = testBusiness1.getDescription();
-        ResponseStatusException e = assertThrows(ResponseStatusException.class, () -> {
-            testBusiness1.setDescription(null);
-        });
-        assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
-        assertEquals(originalDescription, testBusiness1.getDescription());
+        testBusiness1.setDescription(null);
+        assertEquals("", testBusiness1.getDescription());
     }
-
-    /**
-     * Check that when setDescription is called with the empty string as its argument, a response status expection will
-     * be thrown with status code 400 and the business's description will not be changed.
-     */
-    @Test
-    public void setDescriptionEmptyStringTest() {
-        String originalDescription = testBusiness1.getDescription();
-        ResponseStatusException e = assertThrows(ResponseStatusException.class, () -> {
-            testBusiness1.setDescription("");
-        });
-        assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
-        assertEquals(originalDescription, testBusiness1.getDescription());
-    }
-
-    /**
-     * Check that when setDescription is called with a blank string as its argument, a response status expection will be
-     * thrown with status code 400 and the business's description will not be changed.
-     */
-    @Test
-    public void setDescriptionBlankStringTest() {
-        String originalDescription = testBusiness1.getDescription();
-        ResponseStatusException e = assertThrows(ResponseStatusException.class, () -> {
-            testBusiness1.setDescription("          ");
-        });
-        assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
-        assertEquals(originalDescription, testBusiness1.getDescription());
-    }
-
+    
     /**
      * Check that if someone attempts to remove a user who is currently the primary owner of a business from the database,
      * an expection is thrown and the user is not removed from the database.
