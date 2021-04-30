@@ -9,8 +9,8 @@ public interface ImageRepository extends CrudRepository<Image, Long> {
 
     /**
      *
-     * @param imageDirectory the directory at which the image is stored
+     * @param filename the directory at which the image is stored
      * @return a image found by its associated directory location
      */
-    //Image findByDirectory(@Param("imageDirectory") String imageDirectory);
+    //Image findByDirectory(@Param("filename") String filename);
 }

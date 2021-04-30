@@ -1,12 +1,18 @@
 package org.seng302.entities;
 
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.seng302.persistence.ImageRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
+
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -24,7 +30,7 @@ public class ImageTests {
         imageRepository.save(testImage);
     }
 
-    @BeforeAll
+    @BeforeEach
     void setUp() {
         imageRepository.deleteAll();
         createTestImage();
@@ -40,7 +46,11 @@ public class ImageTests {
      */
     @Test
     void createImageObject_imageCreated_imageCreated() {
-
+        String filename = "boi.png";
+        String filenameThumbnail = "boi_thumbnail.png";
+        Image newTestImage = new Image(filename, filenameThumbnail);
+        assertEquals(filename, newTestImage.getFilename());
+        assertEquals(filenameThumbnail, newTestImage.getFilenameThumbnail());
     }
 
     /**
@@ -48,7 +58,12 @@ public class ImageTests {
      */
     @Test
     void createImageObject_imageInDatabase_imageCreated() {
-
+        Optional<Image> actualImageArray = imageRepository.findById(testImage.getID());
+        assertNotNull(actualImageArray);
+        Image actualImage = actualImageArray.get();
+        assertEquals(testImage.getID(), actualImage.getID());
+        assertEquals(testImage.getFilename(), actualImage.getFilename());
+        assertEquals(testImage.getFilenameThumbnail(), actualImage.getFilenameThumbnail());
     }
 
     /**
@@ -56,7 +71,19 @@ public class ImageTests {
      */
     @Test
     void setFilename_changeFilename_filenameChanged() {
+        String filename = "/goodboi/verygoodboi.png";
+        testImage.setFilename(filename);
+        assertEquals(filename, testImage.getFilename());
+    }
 
+    /**
+     * Tests that an image object can have its directory for the thumbnail changed
+     */
+    @Test
+    void setFilenameThumbnail_changeFilenameThumbnail_filenameThumbnailChanged() {
+        String filenameThumbnail = "/goodboi/verygoodboi_thumbnail.png";
+        testImage.setFilenameThumbnail(filenameThumbnail);
+        assertEquals(filenameThumbnail, testImage.getFilenameThumbnail());
     }
 
     /**
@@ -64,7 +91,55 @@ public class ImageTests {
      */
     @Test
     void setFilename_changeFilenameToNull_BadRequestException() {
+        try {
+            testImage.setFilename(null);
+            fail();
+        } catch (ResponseStatusException e) {
+            assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+            assertEquals("No filename was provided", e.getReason());
+        } catch (Exception e) { fail(); }
+    }
 
+    /**
+     * Tests that an image object cannot have its directory for the thumbnail set to null
+     */
+    @Test
+    void setFilenameThumbnail_changeFilenameThumbnailToNull_BadRequestException() {
+        try {
+            testImage.setFilenameThumbnail(null);
+            fail();
+        } catch (ResponseStatusException e) {
+            assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+            assertEquals("No thumbnail filename was provided", e.getReason());
+        } catch (Exception e) { fail(); }
+    }
+
+    /**
+     * Tests that an image object cannot have its directory (filename) set to an empty string
+     */
+    @Test
+    void setFilename_changeFilenameToEmpty_BadRequestException() {
+        try {
+            testImage.setFilename("");
+            fail();
+        } catch (ResponseStatusException e) {
+            assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+            assertEquals("An empty filename was provided", e.getReason());
+        } catch (Exception e) { fail(); }
+    }
+
+    /**
+     * Tests that an image object cannot have its directory for the thumbnail set to an empty string
+     */
+    @Test
+    void setFilenameThumbnail_changeFilenameThumbnailToEmpty_BadRequestException() {
+        try {
+            testImage.setFilenameThumbnail("");
+            fail();
+        } catch (ResponseStatusException e) {
+            assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+            assertEquals("An empty thumbnail filename was provided", e.getReason());
+        } catch (Exception e) { fail(); }
     }
 
     /**
@@ -106,22 +181,6 @@ public class ImageTests {
      */
     @Test
     void setFilename_changeFilenameForwardSlashesBeforeDot_BadRequestException() {
-
-    }
-
-    /**
-     * Tests that an image object can have its directory for the thumbnail changed
-     */
-    @Test
-    void setFilenameThumbnail_changeFilenameThumbnail_filenameThumbnailChanged() {
-
-    }
-
-    /**
-     * Tests that an image object cannot have its directory for the thumbnail set to null
-     */
-    @Test
-    void setFilenameThumbnail_changeFilenameThumbnailToNull_BadRequestException() {
 
     }
 

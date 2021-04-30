@@ -1,5 +1,8 @@
 package org.seng302.entities;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
+
 import javax.persistence.*;
 
 @Table( uniqueConstraints = {
@@ -63,7 +66,13 @@ public class Image {
      * @param filename the directory of where the image is located
      */
     //TODO Add validation
-    private void setFilename(String filename) {
+    public void setFilename(String filename) {
+        if (filename == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No filename was provided");
+        } else if (filename.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "An empty filename was provided");
+        }
+        System.out.println("HMM");
         this.filename = filename;
     }
 
@@ -72,7 +81,12 @@ public class Image {
      * @param filenameThumbnail the directory of where the image thumbnail is located
      */
     //TODO Add validation
-    private void setFilenameThumbnail(String filenameThumbnail) {
+    public void setFilenameThumbnail(String filenameThumbnail) {
+        if (filenameThumbnail == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No thumbnail filename was provided");
+        } else if (filenameThumbnail.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "An empty thumbnail filename was provided");
+        }
         this.filenameThumbnail = filenameThumbnail;
     }
 }
