@@ -147,7 +147,13 @@ public class ImageTests {
      */
     @Test
     void setFilename_changeFilenameHaveSpace_BadRequestException() {
-
+        try {
+            testImage.setFilename("Happy Meal.png");
+            fail();
+        } catch (ResponseStatusException e) {
+            assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+            assertEquals("Spaces are not allowed in the filename", e.getReason());
+        } catch (Exception e) { fail(); }
     }
 
     /**
@@ -156,7 +162,13 @@ public class ImageTests {
      */
     @Test
     void setFilename_changeFilenameHaveNoDot_BadRequestException() {
-
+        try {
+            testImage.setFilename("Connorpng");
+            fail();
+        } catch (ResponseStatusException e) {
+            assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+            assertEquals("An invalid image format was provided", e.getReason());
+        } catch (Exception e) { fail(); }
     }
 
     /**
@@ -165,7 +177,13 @@ public class ImageTests {
      */
     @Test
     void setFilename_changeFilenameInvalidImageType_BadRequestException() {
-
+        try {
+            testImage.setFilename("Connor.yup");
+            fail();
+        } catch (ResponseStatusException e) {
+            assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+            assertEquals("An invalid image format was provided", e.getReason());
+        } catch (Exception e) { fail(); }
     }
 
     /**
@@ -173,7 +191,12 @@ public class ImageTests {
      */
     @Test
     void setFilename_changeFilenameValidTypes_filenameChanged() {
-
+        String filenamePNG = "happyboi.png";
+        String filenameJPG = "happyboi.jpg";
+        testImage.setFilename(filenamePNG);
+        assertEquals(filenamePNG, testImage.getFilename());
+        testImage.setFilename(filenameJPG);
+        assertEquals(filenameJPG, testImage.getFilename());
     }
 
     /**
@@ -181,7 +204,13 @@ public class ImageTests {
      */
     @Test
     void setFilename_changeFilenameForwardSlashesBeforeDot_BadRequestException() {
-
+        try {
+            testImage.setFilename("connor./png");
+            fail();
+        } catch (ResponseStatusException e) {
+            assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+            assertEquals("An invalid image format was provided", e.getReason());
+        } catch (Exception e) { fail(); }
     }
 
     /**
@@ -189,7 +218,13 @@ public class ImageTests {
      */
     @Test
     void setFilenameThumbnail_changeFilenameThumbnailHaveSpace_BadRequestException() {
-
+        try {
+            testImage.setFilenameThumbnail("Happy Meal_thumbnail.png");
+            fail();
+        } catch (ResponseStatusException e) {
+            assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+            assertEquals("Spaces are not allowed in the thumbnail filename", e.getReason());
+        } catch (Exception e) { fail(); }
     }
 
     /**
@@ -198,7 +233,13 @@ public class ImageTests {
      */
     @Test
     void setFilenameThumbnail_changeFilenameThumbnailHaveNoDot_BadRequestException() {
-
+        try {
+            testImage.setFilenameThumbnail("Connorthumbnailpng");
+            fail();
+        } catch (ResponseStatusException e) {
+            assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+            assertEquals("An invalid image format was provided", e.getReason());
+        } catch (Exception e) { fail(); }
     }
 
     /**
@@ -207,7 +248,13 @@ public class ImageTests {
      */
     @Test
     void setFilenameThumbnail_changeFilenameThumbnailInvalidImageType_BadRequestException() {
-
+        try {
+            testImage.setFilenameThumbnail("Connor_thumbnail.yup");
+            fail();
+        } catch (ResponseStatusException e) {
+            assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+            assertEquals("An invalid image format was provided", e.getReason());
+        } catch (Exception e) { fail(); }
     }
 
     /**
@@ -216,7 +263,12 @@ public class ImageTests {
      */
     @Test
     void setFilenameThumbnail_changeFilenameThumbnailValidTypes_filenameThumbnailChanged() {
-
+        String filenameThumbnailPNG = "happyboi_thumbnail.png";
+        String filenameThumbnailJPG = "happyboi_thumbnail.jpg";
+        testImage.setFilenameThumbnail(filenameThumbnailPNG);
+        assertEquals(filenameThumbnailPNG, testImage.getFilenameThumbnail());
+        testImage.setFilenameThumbnail(filenameThumbnailJPG);
+        assertEquals(filenameThumbnailJPG, testImage.getFilenameThumbnail());
     }
 
     /**
@@ -224,7 +276,13 @@ public class ImageTests {
      */
     @Test
     void setFilenameThumbnail_changeFilenameThumbnailForwardSlashesBeforeDot_BadRequestException() {
-
+        try {
+            testImage.setFilenameThumbnail("connor_thumbnail./png");
+            fail();
+        } catch (ResponseStatusException e) {
+            assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+            assertEquals("An invalid image format was provided", e.getReason());
+        } catch (Exception e) { fail(); }
     }
 
     /**
@@ -233,7 +291,13 @@ public class ImageTests {
      */
     @Test
     void setFilenameThumbnail_changeFilenameThumbnailNotIncludeUnderscoreThumbnail_BadRequestException() {
-
+        try {
+            testImage.setFilenameThumbnail("helppppppppppp.png");
+            fail();
+        } catch (ResponseStatusException e) {
+            assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+            assertEquals("The thumbnail filename does not contain an _thumbnail", e.getReason());
+        } catch (Exception e) { fail(); }
     }
 
     //TODO Discuss with team if we should include tests and validation to test if the image at the directory (filename) actually exists
