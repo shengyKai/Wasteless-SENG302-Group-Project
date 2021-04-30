@@ -3,6 +3,7 @@ package org.seng302.controllers;
 import org.junit.Ignore;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.seng302.controllers.DGAAController;
 import org.seng302.entities.DefaultGlobalApplicationAdmin;
 import org.seng302.persistence.DGAARepository;
 import org.springframework.beans.factory.annotation.Autowired;

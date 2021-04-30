@@ -41,7 +41,10 @@ public class Location {
     @Column(name="post_code")
     private String postCode;
 
-    /*
+    @Column(name="district")
+    private String district;
+
+    /**
      * Converts the address string into a location object
      * @param address
      * @return
@@ -51,12 +54,13 @@ public class Location {
         try {
             String streetNumber = addressComponents.get(0);
             String streetName = addressComponents.get(1);
-            String city = addressComponents.get(2);
-            String country = addressComponents.get(3);
-            String region = addressComponents.get(4);
-            String postCode = addressComponents.get(5);
+            String district = addressComponents.get(2);
+            String city = addressComponents.get(3);
+            String country = addressComponents.get(4);
+            String region = addressComponents.get(5);
+            String postCode = addressComponents.get(6);
             Location.Builder locationBuilder = new Location.Builder().atStreetNumber(streetNumber).onStreet(streetName)
-                    .inCity(city).inRegion(region).inCountry(country).withPostCode(postCode);
+                    .inCity(city).inRegion(region).inCountry(country).withPostCode(postCode).atDistrict(district);
             Location location = locationBuilder.build();
             return location;
         } catch (Exception e) {
@@ -77,6 +81,7 @@ public class Location {
                 .onStreet(json.getAsString("streetName"))
                 .atStreetNumber(json.getAsString("streetNumber"))
                 .withPostCode(json.getAsString("postcode"))
+                .atDistrict(json.getAsString("district"))
                 .inSuburb("suburb")
                 .build();
         return address;
@@ -101,6 +106,9 @@ public class Location {
             return false;
         }
         if (!checkValidCountry(location.getCountry())) {
+            return false;
+        }
+        if (!checkValidDistrict(location.getDistrict())) {
             return false;
         }
         return checkValidPostCode(location.getPostCode());
@@ -133,7 +141,7 @@ public class Location {
      * @return true if the street name is valid, false otherwise
      */
     public boolean checkValidStreetName(String streetName) {
-        if (streetName != null && streetName.length() < 100 && streetName.length() > 0 && streetName.matches("[ a-zA-Z]+")) {
+        if (streetName != null && streetName.length() <= 100 && streetName.length() > 0 && streetName.matches("[ a-zA-Z]+")) {
             return true;
         } else {
             return false;
@@ -142,14 +150,14 @@ public class Location {
 
     /**
      * Checks the name of the city is valid
-     * Realistically no city name will be over 50 characters, they are also generally one or two words. Therefore, the
+     * Realistically no city name will be over 100 characters, they are also generally one or two words. Therefore, the
      * city name must be below 50 characters and have at least one character. Additionally, foreign addresses are
      * expected to be put in the English version, thus, the city must only contain letters.
      * @param city the city of the location
      * @return true if the city name is valid, false otherwise
      */
     public boolean checkValidCity(String city) {
-        if (city != null && city.length() < 50 && city.length() > 0 && city.matches("[ a-zA-Z]+")) {
+        if (city != null && city.length() < 100 && city.length() > 0 && city.matches("[ a-zA-Z]+")) {
             return true;
         } else {
             return false;
@@ -158,14 +166,14 @@ public class Location {
 
     /**
      * Checks the name of the region is valid
-     * Realisitcally no region name will be over 50 characters, they are also generally are one word. Therefore, the
+     * Realisitcally no region name will be over 100 characters, they are also generally are one word. Therefore, the
      * region name must be below 50 characters and have at least one character. Additionally, foreign addresses are
      * expected to be put in the English version, thus, the region must only contain letters.
      * @param region the city of the location
      * @return true if the region name is valid, false otherwise
      */
     public boolean checkValidRegion(String region) {
-        if (region != null && region.length() < 50 && region.length() > 0 && region.matches("[ a-zA-Z]+")) {
+        if (region != null && region.length() < 100 && region.length() > 0 && region.matches("[ a-zA-Z]+")) {
             return true;
         } else {
             return false;
@@ -174,14 +182,14 @@ public class Location {
 
     /**
      * Checks the name of the country is valid
-     * Realisitcally no region name will be over 50 characters, they are also generally are one word. Therefore, the
+     * Realisitcally no region name will be over 100 characters, they are also generally are one word. Therefore, the
      * country name must be below 50 characters and have at least one character. Additionally, foreign addresses are
      * expected to be put in the English version, thus, the country must only contain letters.
      * @param country the country of the location
      * @return true if the country name is valid, false otherwise
      */
     public boolean checkValidCountry(String country) {
-        if (country != null && country.length() < 50 && country.length() > 0 && country.matches("[ a-zA-Z]+")) {
+        if (country != null && country.length() < 100 && country.length() > 0 && country.matches("[ a-zA-Z]+")) {
             return true;
         } else {
             return false;
@@ -197,7 +205,23 @@ public class Location {
      * @return true if the post code number is valid, false otherwise
      */
     public boolean checkValidPostCode(String postCode) {
-        if (postCode != null && postCode.length() <= 9 && postCode.length() > 0 && postCode.matches("[a-zA-Z0-9]+")) {
+        if (postCode != null && postCode.length() <= 16 && postCode.length() > 0 && postCode.matches("[a-zA-Z0-9]+")) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+    
+    /**
+     * Checks if the district is valid
+     * There are some districts with long names, as such we are targetting the length of the characters to be at most 100 characters.
+     * Some districts also have numbers in them so that has to be checked. District field is not mandatory, so it can be an empty
+     * string.
+     * @param district district of the location
+     * @return true if the district is valid, false otherwise
+     */
+    public boolean checkValidDistrict(String district) {
+        if (district == null || (district.length() <= 100 && district.matches("[a-zA-Z0-9 ]+"))) {
             return true;
         } else {
             return false;
@@ -232,6 +256,10 @@ public class Location {
         return postCode;
     }
 
+    public String getDistrict() {
+        return district;
+    }
+
     public void setId(Long id) {
         this.id = id;
     }
@@ -240,7 +268,7 @@ public class Location {
         if (checkValidCountry(country)) {
             this.country = country;
         } else {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "The country must not be empty, be less then 50 characters, and only contain letters.");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "The country must not be empty, be less then 32 characters, and only contain letters.");
         }
     }
 
@@ -248,7 +276,7 @@ public class Location {
         if (checkValidCity(city)) {
             this.city = city;
         } else {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "The city must not be empty, be less then 50 characters, and only contain letters.");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "The city must not be empty, be less then 32 characters, and only contain letters.");
         }
     }
 
@@ -256,7 +284,7 @@ public class Location {
         if (checkValidRegion(region)) {
             this.region = region;
         } else {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "The region must not be empty, be less then 50 characters, and only contain letters.");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "The region must not be empty, be less then 32 characters, and only contain letters.");
         }
     }
 
@@ -272,7 +300,7 @@ public class Location {
         if (checkValidStreetNumber(streetNumber)) {
             this.streetNumber = streetNumber;
         } else {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "The street number must be an number less than 1,000 and above 0.");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "The street number must not be empty, be less than 10 characters, adn only contain numbers.");
         }
     }
 
@@ -281,13 +309,21 @@ public class Location {
             this.postCode = postCode;
         } else {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "The post code must be a letter or number, be " +
-                    "less than 10 characters long, and at least one character long.");
+                    "less than 16 characters long, and at least one character long.");
+        }
+    }
+    
+    public void setDistrict(String district) {
+        if (checkValidDistrict(district)) {
+            this.district = district;
+        } else {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "The district must not be more than 100 characters long.");
         }
     }
 
     /**
      * Construct a JSON representation of this Location object which includes its id street number,
-     * street name, city, region and postcode. This method should be used in situations where is it appropriate
+     * street name, city, region, district and postcode. This method should be used in situations where is it appropriate
      * to reveal the entire address, such as for a business's address.
      * @return JSON representation of this Location object
      */
@@ -299,6 +335,7 @@ public class Location {
         attributeMap.put("region", region);
         attributeMap.put("country", country);
         attributeMap.put("postcode", postCode);
+        attributeMap.put("district", district);
         return new JSONObject(attributeMap);
     }
 
@@ -329,6 +366,7 @@ public class Location {
         private String streetName;
         private String streetNumber;
         private String postCode;
+        private String district;
 
         /**
          * Set the builder's country.
@@ -401,6 +439,19 @@ public class Location {
         }
 
         /**
+         * Set the builder's district.
+         * @param district A string representing a district.
+         * @return Builder with post code parameter set.
+         */
+        public Builder atDistrict(String district)  {
+            if (district.equals("")) {
+                district = null;
+            }
+            this.district = district;
+            return this;
+        }
+
+        /**
          * Construct an instance of the Location class.
          * @return Location with parameters of Builder.
          */
@@ -412,6 +463,7 @@ public class Location {
             location.setStreetName(this.streetName);
             location.setStreetNumber(this.streetNumber);
             location.setPostCode(this.postCode);
+            location.setDistrict(this.district);
             return location;
         }
 

@@ -3,6 +3,10 @@ package org.seng302.entities;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.seng302.entities.Business;
+import org.seng302.entities.Location;
+import org.seng302.entities.Product;
+import org.seng302.entities.User;
 import org.seng302.persistence.BusinessRepository;
 import org.seng302.persistence.ProductRepository;
 import org.seng302.persistence.UserRepository;
@@ -71,7 +75,7 @@ class ProductTests {
                 .withBio("Likes long walks on the beach")
                 .withDob("2000-03-11")
                 .withPhoneNumber("+64 3 555 0129")
-                .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Christchurch,New Zealand," +
+                .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
                         "Canterbury,8041"))
                 .build();
         testUser1 = userRepository.save(testUser1);

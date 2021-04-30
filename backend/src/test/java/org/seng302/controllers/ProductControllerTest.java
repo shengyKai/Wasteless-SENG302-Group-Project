@@ -127,7 +127,7 @@ class ProductControllerTest {
                 .withBio("Likes long walks on the beach")
                 .withDob("2000-03-11")
                 .withPhoneNumber("+64 3 555 0129")
-                .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Christchurch,New Zealand," +
+                .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
                         "Canterbury,8041"))
                 .build();
 
@@ -142,9 +142,9 @@ class ProductControllerTest {
                 .withEmail("happyboi@gmail.com")
                 .withPassword("1337-H548*nt3r2")
                 .withBio("Likes long walks on the beach sometimes")
-                .withDob("2010-03-11")
+                .withDob("2008-03-11")
                 .withPhoneNumber("+64 5 565 0129")
-                .withAddress(Location.covertAddressStringToLocation("5,Rountree Street,Christchurch,New Zealand," +
+                .withAddress(Location.covertAddressStringToLocation("5,Rountree Street,Ashburton,Christchurch,New Zealand," +
                         "Canterbury,8041"))
                 .build();
         bystanderUser = userRepository.save(bystanderUser);
@@ -160,7 +160,7 @@ class ProductControllerTest {
                 .withBio("Likes long walks on the beach always")
                 .withDob("2000-03-11")
                 .withPhoneNumber("+64 5 565 0125")
-                .withAddress(Location.covertAddressStringToLocation("5,Rountree Street,Christchurch,New Zealand," +
+                .withAddress(Location.covertAddressStringToLocation("5,Rountree Street,Ashburton,Christchurch,New Zealand," +
                         "Canterbury,8041"))
                 .build();
         administratorUser = userRepository.save(administratorUser);

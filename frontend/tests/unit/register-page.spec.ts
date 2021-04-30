@@ -88,10 +88,10 @@ describe('Register.vue', () => {
           countryCode: '64',
           phone: '1234567890',
           streetAddress: '15 some street',
-          region: "some state",
-          city: "some city",
-          country: "some country",
           district: "some district",
+          city: "some city",
+          region: "some state",
+          country: "some country",
           postcode: '1234'
         };
       }
@@ -481,7 +481,7 @@ describe('Register.vue', () => {
     const registerButton = wrapper.find(".v-btn");
 
     await wrapper.setData({
-      district: 'a'.repeat(101)
+      district: 'a'.repeat(256)
     });
     await Vue.nextTick();
     expect(registerButton.props().disabled).toBeTruthy();
@@ -501,7 +501,7 @@ describe('Register.vue', () => {
     const registerButton = wrapper.find(".v-btn");
 
     await wrapper.setData({
-      city: 'a'.repeat(101)
+      city: 'a'.repeat(256)
     });
     await Vue.nextTick();
     expect(registerButton.props().disabled).toBeTruthy();
@@ -521,7 +521,7 @@ describe('Register.vue', () => {
     const registerButton = wrapper.find(".v-btn");
 
     await wrapper.setData({
-      region: 'a'.repeat(101)
+      region: 'a'.repeat(256)
     });
     await Vue.nextTick();
     expect(registerButton.props().disabled).toBeTruthy();
@@ -541,7 +541,7 @@ describe('Register.vue', () => {
     const registerButton = wrapper.find(".v-btn");
 
     await wrapper.setData({
-      country: 'a'.repeat(101)
+      country: 'a'.repeat(256)
     });
     await Vue.nextTick();
     expect(registerButton.props().disabled).toBeTruthy();

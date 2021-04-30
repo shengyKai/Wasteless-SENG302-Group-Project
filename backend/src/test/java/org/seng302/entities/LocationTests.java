@@ -3,6 +3,7 @@ package org.seng302.entities;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
+import org.seng302.entities.Location;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.server.ResponseStatusException;
@@ -24,7 +25,7 @@ public class LocationTests {
   @BeforeEach
   public void setUp() {
     locationBuilder = new Location.Builder().atStreetNumber("1").onStreet("Elizabeth Street").inCity("Christchurch")
-            .inRegion("Canterbury").inCountry("New Zealand").withPostCode("8041");
+            .inRegion("Canterbury").inCountry("New Zealand").withPostCode("8041").atDistrict("Ashburton");
   }
 
   /**
@@ -121,11 +122,11 @@ public class LocationTests {
    * Checks several names with over 100 characters fail when passed into the checkValidStreetName method
    */
   @Test
-  public void checkValidStreetNameOverHundred() {
+  public void checkValidStreetNameOverHundredNine() {
     String[] streetNames = new String[]{
-            "abcdefghijklmnopqrstuvwxyz abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz",
-            "helphelphelphelphelphelphelphelphelphelphelphelphelphelphelphelphelphelphelphelphelphelphelphelphelp",
-            "idontneedit idontneedit idontneedit idontneedit idontneeditidontneeditidontneeditidontneeditidontneedit" };
+            " abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz",
+            "helphelphelphelphelphelphelphelphelphelphelphelphelphelphelphelphelphelphelphelphelphelphelphelphelphelphelphelp",
+            "idontneeditidontneeditidontneeditidontneeditidontneeditidontneeditidontneeditidontneeditidontneeditidontneedit" };
     for (String streetName : streetNames) {
       assertFalse(testLocation.checkValidStreetName(streetName));
     }
@@ -179,10 +180,11 @@ public class LocationTests {
    * Checks several names with over 50 characters fail when passed into the checkValidCity method
    */
   @Test
-  public void checkValidCityOverFifty() {
-    String[] cities = new String[]{ "this city string contains exactly fifty characters",
-                                    "helpppppppppppppppppppppppppppppppppppppppppppppppppppppp",
-                                    "This is a city name that resembles the name of city" };
+  public void checkValidCityOverHundred() {
+    String[] cities = new String[]{ "this city string contains exactly fifty characters this city string contains exactly fifty characters",
+                                    "helpppppppppppppppppppppppppppppppppppppppppppppppppppppp helpppppppppppppppppppppppppppppppppppppppppppppppppppppp",
+                                    "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                                    "This is a city name that resembles the name of city This is a city name that resembles the name of city" };
     for (String city : cities) {
       assertFalse(testLocation.checkValidCity(city));
     }
@@ -233,13 +235,13 @@ public class LocationTests {
   }
 
   /**
-   * Checks several names with over 50 characters fail when passed into the checkValidRegion method
+   * Checks several names with over 100 characters fail when passed into the checkValidRegion method
    */
   @Test
-  public void checkValidRegionOverFifty() {
-    String[] regions = new String[]{ "this region issssssssssssssssssss fifty characters",
-                                      "helppppppppppppppppppppppppppppppppppppppppppppppp",
-                                      "this region is full of surprises you should come have a look" };
+  public void checkValidRegionOverHundred() {
+    String[] regions = new String[]{ "this region abcdefghijklmnopqrstuvwxyz abcdefghijklmnopqrstuvwxyz abcdefghijklmnopqrstuvwxyz abcdefghijklmnopqrstuvwxyz",
+                                      "helpppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppp",
+                                      "this region is full of surprises you should come have a lookkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk" };
     for (String region : regions) {
       assertFalse(testLocation.checkValidRegion(region));
     }
@@ -293,10 +295,11 @@ public class LocationTests {
    * Checks several names with over 50 characters fail when passed into the checkValidCountry method
    */
   @Test
-  public void checkValidCountryOverFifty() {
-    String[] countries = new String[]{ "This country is exactlyyyyyy fifty characters long",
-                                        "helppppppppppppppppppppppppppppppppppppppppppppppp",
-                                        "This country has a lot going for it we are coronavirus free" };
+  public void checkValidCountryOverHundred() {
+    String[] countries = new String[]{ "This country is exactlyyyyyy fifty characters long This country is exactlyyyyyy fifty characters long",
+                                        "helppppppppppppppppppppppppppppppppppppppppppppppp helppppppppppppppppppppppppppppppppppppppppppppppp",
+                                        "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                                        "This country has a lot going for it we are coronavirus free This country has a lot going for it we are coronavirus free" };
     for (String country : countries) {
       assertFalse(testLocation.checkValidRegion(country));
     }
@@ -350,8 +353,8 @@ public class LocationTests {
    * Checks several zipcodes over ten characters fail when passed into the checkValidZipCode method
    */
   @Test
-  public void checkValidZipCodeOverTen() {
-    String[] zipcodes = new String[]{ "1234567890", "123456789123456789", "123456789000000" };
+  public void checkValidZipCodeOverSixteen() {
+    String[] zipcodes = new String[]{ "12345678901234567", "99123456789123456789", "456123456789000000" };
     for (String zipcode : zipcodes) {
       assertFalse(testLocation.checkValidPostCode(zipcode));
     }
@@ -365,6 +368,31 @@ public class LocationTests {
     assertFalse(testLocation.checkValidPostCode(""));
   }
 
+  
+  /**
+   * Checks several names with over 50 characters fail when passed into the checkValidDistrict method
+   */
+  @Test
+  public void checkValidDistrictOverHundredChar() {
+    String[] districts = new String[]{"this district string contains above one hundred characters from start to end inclusive of spacessssss",
+                                    "this district string contains way above one hundred characters from start to end inclusive of spacessssss" +
+                                    "this district string contains way above one hundred characters from start to end inclusive of spacessssss" };
+    for (String district : districts) {
+      assertFalse(testLocation.checkValidDistrict(district));
+    }
+  }
+
+  /**
+   * Checks if Location object is still valid even if district field is an empty string
+   */
+  @Test
+  public void checkLocationValidIfNoDistrict() {
+    Location location = new Location.Builder().atStreetNumber("1").onStreet("Elizabeth Street").inCity("Christchurch")
+                                      .inRegion("Canterbury").inCountry("New Zealand").withPostCode("8041").atDistrict("")
+                                      .build();
+    assertTrue(testLocation.checkValidAllLocationParameters(location));
+  }
+
   /**
    * Checks a Location object with all valid parameters returns true when passed into the
    * checkValidAllLocationParameters method
@@ -372,7 +400,8 @@ public class LocationTests {
   @Test
   public void checkValidAllLocationParametersEverythingValid() {
     Location location = new Location.Builder().atStreetNumber("1").onStreet("Elizabeth Street").inCity("Christchurch")
-                                      .inRegion("Canterbury").inCountry("New Zealand").withPostCode("8041").build();
+                                      .inRegion("Canterbury").inCountry("New Zealand").withPostCode("8041").atDistrict("Ashburton")
+                                      .build();
     assertTrue(testLocation.checkValidAllLocationParameters(location));
   }
 
@@ -384,7 +413,7 @@ public class LocationTests {
   public void checkValidAllLocationParametersStreetNumberInvalid() {
     assertThrows(ResponseStatusException.class, () -> {
       Location location = new Location.Builder().atStreetNumber("1234567890").onStreet("Elizabeth Street").inCity("Christchurch")
-                      .inRegion("Canterbury").inCountry("New Zealand").withPostCode("8041").build();
+                      .inRegion("Canterbury").inCountry("New Zealand").withPostCode("8041").atDistrict("Ashburton").build();
     });
   }
 
@@ -396,7 +425,8 @@ public class LocationTests {
   public void checkValidAllLocationParametersStreetNameInvalid() {
     assertThrows(ResponseStatusException.class, () -> {
       Location location = new Location.Builder().atStreetNumber("1").onStreet("Eliz@beth Str33t").inCity("Christchurch")
-            .inRegion("Canterbury").inCountry("New Zealand").withPostCode("8041").build();
+            .inRegion("Canterbury").inCountry("New Zealand").withPostCode("8041").atDistrict("Ashburton").atDistrict("Ashburton")
+            .build();
     });
   }
 
@@ -408,7 +438,7 @@ public class LocationTests {
   public void checkValidAllLocationParametersCityInvalid() {
     assertThrows(ResponseStatusException.class, () -> {
       Location location = new Location.Builder().atStreetNumber("1").onStreet("Elizabeth Street").inCity("Chr!$stchurch")
-              .inRegion("Canterbury").inCountry("New Zealand").withPostCode("8041").build();
+              .inRegion("Canterbury").inCountry("New Zealand").withPostCode("8041").atDistrict("Ashburton").build();
     });
   }
 
@@ -420,7 +450,7 @@ public class LocationTests {
   public void checkValidAllLocationParametersRegionInvalid() {
     assertThrows(ResponseStatusException.class, () -> {
       Location location = new Location.Builder().atStreetNumber("1").onStreet("Elizabeth Street").inCity("Christchurch")
-              .inRegion("C@nt3rbury").inCountry("New Zealand").withPostCode("8041").build();
+              .inRegion("C@nt3rbury").inCountry("New Zealand").withPostCode("8041").atDistrict("Ashburton").build();
     });
   }
 
@@ -432,7 +462,7 @@ public class LocationTests {
   public void checkValidAllLocationParametersCountryInvalid() {
     assertThrows(ResponseStatusException.class, () -> {
       Location location = new Location.Builder().atStreetNumber("1").onStreet("Elizabeth Street").inCity("Christchurch")
-              .inRegion("Canterbury").inCountry("N3w Z3@l@nd").withPostCode("8041").build();
+              .inRegion("Canterbury").inCountry("N3w Z3@l@nd").withPostCode("8041").atDistrict("Ashburton").build();
     });
   }
 
@@ -444,7 +474,22 @@ public class LocationTests {
   public void checkValidAllLocationParametersZipCodeInvalid() {
     assertThrows(ResponseStatusException.class, () -> {
       Location location = new Location.Builder().atStreetNumber("1").onStreet("Elizabeth Street").inCity("Christchurch")
-                      .inRegion("Canterbury").inCountry("New Zealand").withPostCode("80999999999999941").build();
+                      .inRegion("Canterbury").inCountry("New Zealand").withPostCode("80999999999999941").atDistrict("Ashburton")
+                      .build();
+    });
+  }
+
+  /**
+   * Checks a Location object with an invalid district parameter fails when passed into the
+   * checkValidAllLocationParameters method
+   */
+  @Test
+  public void checkValidAllLocationParametersDistrictInvalid() {
+    assertThrows(ResponseStatusException.class, () -> {
+      Location location = new Location.Builder().atStreetNumber("1").onStreet("Elizabeth Street").inCity("Christchurch")
+                      .inRegion("Canterbury").inCountry("New Zealand").withPostCode("8041")
+                      .atDistrict("this district string contains above one hundred characters from start to end inclusive of spacessssss")
+                      .build();
     });
   }
 
@@ -460,7 +505,8 @@ public class LocationTests {
             .inCity("Christchurch")
             .inRegion("Canterbury")
             .inCountry("New Zealand")
-            .withPostCode("8041");
+            .withPostCode("8041")
+            .atDistrict("Ashburton");
     assertThrows(ResponseStatusException.class, locationBuilder::build);
   }
 
@@ -476,7 +522,8 @@ public class LocationTests {
             .inCity("Christchurch")
             .inRegion("Canterbury")
             .inCountry("New Zealand")
-            .withPostCode("8041");
+            .withPostCode("8041")
+            .atDistrict("Ashburton");
     assertThrows(ResponseStatusException.class, locationBuilder::build);
   }
 
@@ -491,7 +538,8 @@ public class LocationTests {
             .inSuburb("Riccarton")
             .inRegion("Canterbury")
             .inCountry("New Zealand")
-            .withPostCode("8041");
+            .withPostCode("8041")
+            .atDistrict("Ashburton");
     assertThrows(ResponseStatusException.class, locationBuilder::build);
   }
 
@@ -507,7 +555,8 @@ public class LocationTests {
             .inSuburb("Riccarton")
             .inCity("Christchurch")
             .inCountry("New Zealand")
-            .withPostCode("8041");
+            .withPostCode("8041")
+            .atDistrict("Ashburton");
     assertThrows(ResponseStatusException.class, locationBuilder::build);
   }
 
@@ -523,7 +572,8 @@ public class LocationTests {
             .inSuburb("Riccarton")
             .inCity("Christchurch")
             .inRegion("Canterbury")
-            .withPostCode("8041");
+            .withPostCode("8041")
+            .atDistrict("Ashburton");
     assertThrows(ResponseStatusException.class, locationBuilder::build);
   }
 
@@ -539,8 +589,26 @@ public class LocationTests {
             .inSuburb("Riccarton")
             .inCity("Christchurch")
             .inRegion("Canterbury")
-            .inCountry("New Zealand");
+            .inCountry("New Zealand")
+            .atDistrict("Ashburton");
     assertThrows(ResponseStatusException.class, locationBuilder::build);
+  }
+
+  /**
+   * Verify that Location.Builder.build() builds successfully even with no district.
+   */
+  @Test
+  public void buildWithoutDistrictTest() {
+    Location.Builder locationBuilder = new Location.Builder()
+            .atStreetNumber("1")
+            .onStreet("Elizabeth Street")
+            .inSuburb("Riccarton")
+            .inCity("Christchurch")
+            .inRegion("Canterbury")
+            .inCountry("New Zealand")
+            .withPostCode("8041")
+            .atDistrict("");
+    assertNotNull(locationBuilder);
   }
 
   /**
@@ -593,6 +661,17 @@ public class LocationTests {
     assertEquals("New Zealand", location.getCountry());
   }
 
+  
+  /**
+   * Verify that when Location.Builder.build() is called with all parameters set, the district of the resulting
+   * location is the same as value set for the builder.
+   */
+  @Test
+  public void buildDistrictTest() {
+    Location location = locationBuilder.build();
+    assertEquals("Ashburton", location.getDistrict());
+  }
+
   /**
    * Test that the JSON produced by constructFullJson includes the street number, street name,
    * city, region, country and postcode of the location object.
@@ -607,6 +686,7 @@ public class LocationTests {
     assertTrue(json.containsKey("region"));
     assertTrue(json.containsKey("country"));
     assertTrue(json.containsKey("postcode"));
+    assertTrue(json.containsKey("district"));
   }
 
   /**
@@ -623,6 +703,7 @@ public class LocationTests {
     json.remove("region");
     json.remove("country");
     json.remove("postcode");
+    json.remove("district");
     assertTrue(json.isEmpty());
   }
 
@@ -639,6 +720,7 @@ public class LocationTests {
     assertEquals(location.getRegion(), json.getAsString("region"));
     assertEquals(location.getCountry(), json.getAsString("country"));
     assertEquals(location.getPostCode(), json.getAsString("postcode"));
+    assertEquals(location.getDistrict(), json.getAsString("district"));
   }
 
     /**

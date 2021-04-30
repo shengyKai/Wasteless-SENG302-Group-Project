@@ -53,7 +53,7 @@ public class DemoController {
         AuthenticationTokenManager.checkAuthenticationToken(request);
         if (!AuthenticationTokenManager.sessionIsAdmin(request)) {
             ResponseStatusException error = new ResponseStatusException(HttpStatus.FORBIDDEN, "Only admin accounts can perform demo actions.");
-            logger.error(error);
+            logger.error(error.getMessage());
             throw error;
         }
         logger.info("Loading demo data...");
