@@ -32,7 +32,7 @@ module.exports = {
   runtimeCompiler: true,
 
   // because of nginx inner routing and http-server, must set public path to empty
-  publicPath:'/',
+  publicPath: process.env.VUE_APP_BASE_URL,
 
   transpileDependencies: [
     'vuetify'
