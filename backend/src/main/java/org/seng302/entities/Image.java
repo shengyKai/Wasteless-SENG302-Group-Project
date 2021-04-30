@@ -51,7 +51,6 @@ public class Image {
      * Sets the direction location of where the image file is located
      * @param imageDirectory the directory of where the image is located
      */
-    //TODO Add validation
     private void setImageDirectory(String imageDirectory) {
         this.imageDirectory = imageDirectory;
     }
