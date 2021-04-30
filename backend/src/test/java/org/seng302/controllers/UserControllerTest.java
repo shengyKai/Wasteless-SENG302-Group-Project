@@ -710,7 +710,7 @@ public class UserControllerTest {
 
         // Check if user has been updated
         User updatedUser = userRepository.findByEmail("johnsmith99@gmail.com");
-        assertEquals( "admin", updatedUser.getRole());
+        assertEquals( "globalApplicationAdmin", updatedUser.getRole());
     }
 
     /**

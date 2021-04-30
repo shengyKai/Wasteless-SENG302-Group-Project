@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import Vuetify from 'vuetify';
 import Vuex, { Store } from 'vuex';
-import { createLocalVue, Wrapper, mount } from '@vue/test-utils';
+import {createLocalVue, Wrapper, mount, createWrapper} from '@vue/test-utils';
 
 import { getStore, resetStoreForTesting, StoreData } from '@/store';
 import UserProfile from '@/components/UserProfile.vue';
@@ -55,9 +55,10 @@ function makeTestBusiness(businessId: number, administrators?: number[]) {
  *
  * @param userId The user id to use
  * @param businesses The businesses for this user to administer
+ * @param applicationAdmin True if you want the user to be an system administrator
  * @returns The generated user
  */
-function makeTestUser(userId: number, businesses?: number[]) {
+function makeTestUser(userId: number, businesses?: number[], applicationAdmin?: boolean) {
   let user: User = {
     id:  userId,
     firstName: 'test_firstname' + userId,
@@ -77,6 +78,7 @@ function makeTestUser(userId: number, businesses?: number[]) {
       district: 'test_district',
       country: 'test_country' + userId 
     },
+    role: applicationAdmin ? 'globalApplicationAdmin' : 'user'
   };
 
   if (businesses !== undefined) {
@@ -86,6 +88,9 @@ function makeTestUser(userId: number, businesses?: number[]) {
 }
 
 /**
+ * Describe groups the following tests together into a single component
+ * This component tests against the User Profile page
+ *
  * For this set of tests the users involved are as follows.
  *  - User 1  : The user that is observing the profile. They administer businesses 1 and 2.
  *  - User 100: The user within this UserProfile. They administer businesses 100 and 101.
@@ -116,37 +121,13 @@ describe('UserProfile.vue', () => {
     });
 
     getUser.mockImplementation(async userId => {
+      if (userId === 200) {
+        return makeTestUser(userId, [userId, userId + 1], true);
+      }
       return makeTestUser(userId, [userId, userId + 1]);
     });
 
-    // Creating wrapper around UserProfile with data-app to appease vuetify
-    const App = localVue.component('App', {
-      components: { UserProfile },
-      template: '<div data-app><UserProfile/></div>',
-    });
-
-    // Put the UserProfile component inside a div in the global document,
-    // this seems to make vuetify work correctly, but necessitates calling appWrapper.destroy
-    const elem = document.createElement('div');
-    document.body.appendChild(elem);
-
-    const vuetify = new Vuetify();
-    appWrapper = mount(App, {
-      stubs: ['router-link', 'router-view'],
-      mocks: {
-        $route: {
-          params: {
-            id: 100,
-          }
-        }
-      },
-      localVue,
-      vuetify,
-      store,
-      attachTo: elem,
-    });
-
-    wrapper = appWrapper.getComponent(UserProfile);
+    generateWrapper(100);
   });
 
   /**
@@ -158,6 +139,39 @@ describe('UserProfile.vue', () => {
     appWrapper.destroy();
   });
 
+  /**
+   * Creates the environment used for testing. The profile page being viewed can be altered by changing the route parameter
+   * @param route The ID of the user to view the profile of
+   */
+  function generateWrapper(route: number) {
+    // Creating wrapper around UserProfile with data-app to appease vuetify
+    const App = localVue.component('App', {
+      components: { UserProfile },
+      template: '<div data-app><UserProfile/></div>',
+    });
+
+    // Put the UserProfile component inside a div in the global document,
+    // this seems to make vuetify work correctly, but necessitates calling appWrapper.destroy
+    const elem = document.createElement('div');
+    document.body.appendChild(elem);
+    const vuetify = new Vuetify();
+    appWrapper = mount(App, {
+      stubs: ['router-link', 'router-view'],
+      mocks: {
+        $route: {
+          params: {
+            id: route,
+          }
+        }
+      },
+      localVue,
+      vuetify,
+      store,
+      attachTo: elem,
+    });
+
+    wrapper = appWrapper.getComponent(UserProfile);
+  }
 
   /**
    * Makes the current viewer of the profile page act as the provided business
@@ -497,5 +511,24 @@ describe('UserProfile.vue', () => {
 
     expect(removeBusinessAdmin).lastCalledWith(100, 100); // Must be called with bussinessId, userId
     expect(store.state.globalError).toBe('test_error_message');
+  });
+
+  /**
+   * Tests that the application administrator status is hidden by default
+   */
+  it('If not an Application admin, then there should not be a administrator chip', async () => {
+    let adminChip = wrapper.findComponent({ref:'administratorStatus'});
+    expect(adminChip.exists()).toBeFalsy();
+  });
+
+  /**
+   * Tests that when viewing an application admin as an application admin, the application administrator status is shown
+   */
+  it('If acting as application admin and viewing an admin, then there should be a administrator chip', async () => {
+    // To be able to see the role of another user implies you are an admin. No extra steps needed. Just mock the user role.
+    generateWrapper(200);
+    await flushQueue();
+    let adminChip = wrapper.findComponent({ref:'administratorStatus'});
+    expect(adminChip.exists()).toBeTruthy();
   });
 });
