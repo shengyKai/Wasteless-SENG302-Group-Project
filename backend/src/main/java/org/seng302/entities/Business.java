@@ -94,7 +94,7 @@ public class Business {
      */
     public void setDescription(String description) {
         if (description == null || description.isEmpty() ||  description.isBlank()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The business description must not be empty");
+            description = "";
         }
         if (description.length() > 200) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The business description must be 200 characters" +
