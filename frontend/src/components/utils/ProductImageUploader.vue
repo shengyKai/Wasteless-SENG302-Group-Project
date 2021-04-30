@@ -1,5 +1,5 @@
 <template>
-  <v-dialog v-model="visible" persistent max-width="500px">
+  <v-dialog v-model="dialog" persistent max-width="500px">
     <v-form>
       <v-card>
         <v-card-title>
@@ -64,11 +64,6 @@
 import { uploadProductImage } from '@/api';
 export default {
   name: "ProductImageUploader",
-  /*props: [
-    'businessId', // Business id that has this product
-    'productId' // Product code for which this dialog will add a product to
-  ],*/
-
   props: { // TODO remove the default values
     businessId: {
       default: 10
@@ -79,9 +74,9 @@ export default {
   },
   data() {
     return {
+      dialog: true,
       file: undefined,
       isDragging: false,
-      visible: true,
       errorMessage: undefined,
       isLoading: false,
     };
@@ -109,7 +104,6 @@ export default {
       let input = document.createElement("input");
       input.setAttribute('type', 'file');
       input.setAttribute('accept', 'image/*');
-      // add onchange handler if you wish to get the file :)
 
       input.onchange = () => {
         const files = input.files;
@@ -132,7 +126,10 @@ export default {
       this.isLoading = false;
       if (response !== undefined) {
         this.errorMessage = response;
+        return;
       }
+
+      this.$emit('closeDialog');
     },
 
     closeDialog() {
