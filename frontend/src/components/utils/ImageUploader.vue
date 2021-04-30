@@ -1,31 +1,75 @@
 <template>
-  <div>
-    <v-file-input v-model="file" filled prepend-icon="mdi-camera"/>
-    <v-card
-      :elevation="isDragging ? 4 : 2"
-      class="preview-window"
-      @dragover="onDragOver"
-      @dragleave="isDragging = false"
-      @drop="onDrop"
-    >
-      <img v-if="url" :src="url" class="preview-image">
-      <template v-else>
-        <div>
-          Drag a file
-        </div>
-        <v-icon>mdi-upload</v-icon>
-      </template>
-    </v-card>
-  </div>
+  <v-dialog v-model="visible" persistent max-width="500px">
+    <v-form>
+      <v-card>
+        <v-card-title>
+          Upload Product Image
+        </v-card-title>
+        <v-card-text>
+          <v-container>
+            <v-row justify="center">
+              <div v-if="url" class="preview-container">
+                <img
+                  alt="Uploaded Image"
+                  :src="url"
+                  class="image-preview"
+                  @dragover="onDragOver"
+                  @dragleave="isDragging = false"
+                  @drop="onDrop">
+                <v-btn icon class="remove-image" @click="file=undefined" color="error">
+                  <v-icon>mdi-close</v-icon>
+                </v-btn>
+              </div>
+              <v-card v-else
+                      :elevation="isDragging ? 4 : 2"
+                      @dragover="onDragOver"
+                      @dragleave="isDragging = false"
+                      @drop="onDrop"
+              >
+                <div class="preview-window">
+                  <v-icon x-large>mdi-upload</v-icon>
+                  <div>
+                    <v-btn small @click="openFileDialog">Select</v-btn> image or drag image here
+                  </div>
+                </div>
+              </v-card>
+            </v-row>
+          </v-container>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer/>
+          <div class="error-text" v-if="errorMessage !== undefined"> {{ errorMessage }} </div>
+          <v-spacer/>
+          <v-btn
+            color="primary"
+            text
+            @click="closeDialog">
+            Close
+          </v-btn>
+          <v-btn
+            type="submit"
+            color="primary"
+            :disabled="!file"
+            :loading="isLoading"
+            @click.prevent="uploadImage">
+            Create
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-form>
+  </v-dialog>
 </template>
 
 <script>
 export default {
-  name: 'ImageUploader',
+  name: "ImageUploader",
   data() {
     return {
-      file: null,
+      file: undefined,
       isDragging: false,
+      visible: true,
+      errorMessage: undefined,
+      isLoading: false,
     };
   },
   methods: {
@@ -34,9 +78,9 @@ export default {
       if (data.items.length !== 1) return;
 
       let item = data.items[0];
-      if (item.kind !== 'file' || !item.type.match('^image/')) return;
+      if (item.kind !== "file" || !item.type.match("^image/")) return;
 
-      data.effectAllowed = 'copy';
+      data.effectAllowed = "copy";
       this.isDragging = true;
 
       event.preventDefault();
@@ -46,19 +90,63 @@ export default {
 
       this.isDragging = false;
       event.preventDefault();
+    },
+    openFileDialog() {
+      let input = document.createElement("input");
+      input.setAttribute('type', 'file');
+      input.setAttribute('accept', 'image/*');
+      // add onchange handler if you wish to get the file :)
+
+      input.onchange = () => {
+        const files = input.files;
+        if (files.length !== 1) return;
+        const file = files[0];
+        if (!file.type.match('^image/')) return;
+
+        this.file = file;
+      };
+
+      input.click();
+    },
+
+    uploadImage() {
+      console.log('Uploading!');
+    },
+
+    closeDialog() {
+      this.$emit('closeDialog');
     }
   },
 
   computed: {
     url() {
-      if (this.file === null) return null;
+      if (this.file === undefined) return undefined;
       return URL.createObjectURL(this.file);
     }
-  }
+  },
 };
 </script>
 
-<style>
+<style scoped>
+.file-input {
+  max-width: 400px;
+}
+
+.preview-container {
+  position: relative;
+}
+
+.image-preview {
+  width: 400px;
+  height: auto;
+}
+
+.remove-image {
+  position: absolute;
+  right: 0px;
+  top: 0px;
+}
+
 .preview-window {
   display: flex;
   flex-direction: column;
@@ -66,10 +154,5 @@ export default {
   justify-content: center;
   width: 400px;
   height: 400px;
-}
-
-.preview-image {
-  width: 100%;
-  object-fit: contain;
 }
 </style>
