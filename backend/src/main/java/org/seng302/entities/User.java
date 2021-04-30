@@ -265,6 +265,7 @@ public class User extends Account {
      * Authority within the system, eg: admin status and what businesses they are associated with
      * @return role
      */
+    @Column(nullable = false)
     public String getRole(){
         return this.role;
     }
@@ -274,6 +275,17 @@ public class User extends Account {
      * @param role admin status and what businesses they are associated with
      */
     public void setRole(String role){
+        if (!Set.of("user", "globalApplicationAdmin", "defaultGlobalApplicationAdmin").contains(role)) {
+            throw new IllegalArgumentException("Invalid role: \"" + role + "\"");
+        }
+
+        if (
+            "defaultGlobalApplicationAdmin".equals(role) &&
+            !"wasteless@seng302.com".equals(this.getEmail())
+        ) {
+            throw new IllegalArgumentException("Tried creating new DGAA");
+        }
+
         this.role=role;
     }
 

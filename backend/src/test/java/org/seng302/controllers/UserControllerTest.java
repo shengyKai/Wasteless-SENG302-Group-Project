@@ -778,7 +778,7 @@ public class UserControllerTest {
         setUpDGAAAuthCode(); // give us dgaa auth
         // Set up our user to have admin rights
         User john = userRepository.findByEmail("johnsmith99@gmail.com");
-        john.setRole("admin");
+        john.setRole("globalApplicationAdmin");
         userRepository.save(john);
 
         // perform
