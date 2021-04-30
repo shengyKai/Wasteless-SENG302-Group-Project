@@ -100,7 +100,7 @@ describe('ProductImageUploader.vue', () => {
    */
   function findCreateButton() {
     const buttons = wrapper.findAllComponents({ name: 'v-btn' });
-    const filtered = buttons.filter(button => button.text().includes('Create'));
+    const filtered = buttons.filter(button => button.text().includes('Upload'));
     expect(filtered.length).toBe(1);
     return filtered.at(0);
   }

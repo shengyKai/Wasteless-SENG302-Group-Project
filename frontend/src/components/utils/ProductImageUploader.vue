@@ -8,6 +8,7 @@
         <v-card-text>
           <v-container>
             <v-row justify="center">
+              <!-- The previewed image, if available -->
               <div v-if="url" class="preview-container">
                 <img
                   alt="Uploaded Image"
@@ -16,10 +17,12 @@
                   @dragover="onDragOver"
                   @dragleave="isDragging = false"
                   @drop="onDrop">
+                <!-- Button for removing an image -->
                 <v-btn icon class="remove-image" @click="file=undefined" color="error">
                   <v-icon>mdi-close</v-icon>
                 </v-btn>
               </div>
+              <!-- The drag image / submit image prompt window -->
               <v-card v-else
                       :elevation="isDragging ? 4 : 2"
                       @dragover="onDragOver"
@@ -38,6 +41,7 @@
         </v-card-text>
         <v-card-actions>
           <v-spacer/>
+          <!-- Current error message -->
           <div class="error-text" v-if="errorMessage !== undefined"> {{ errorMessage }} </div>
           <v-spacer/>
           <v-btn
@@ -52,7 +56,7 @@
             :disabled="!file"
             :loading="isLoading"
             @click.prevent="uploadImage">
-            Create
+            Upload
           </v-btn>
         </v-card-actions>
       </v-card>
@@ -82,6 +86,9 @@ export default {
     };
   },
   methods: {
+    /**
+     * Handler for a dragged entity entering the target region
+     */
     onDragOver(event) {
       let data = event.dataTransfer;
       if (data.items.length !== 1) return;
@@ -94,12 +101,19 @@ export default {
 
       event.preventDefault();
     },
+    /**
+     * Handler for a dragged file being dropped into this component
+     */
     onDrop(event) {
       this.file = event.dataTransfer.files[0];
 
       this.isDragging = false;
       event.preventDefault();
     },
+    /**
+     * Handler for when the submit button is clicked.
+     * This will result in a dialog being created for selecting a file
+     */
     openFileDialog() {
       let input = document.createElement("input");
       input.setAttribute('type', 'file');
@@ -116,7 +130,10 @@ export default {
 
       input.click();
     },
-
+    /**
+     * Handler for the "create" button
+     * This will trigger a call to the add product image endpoint and close the dialog if successful
+     */
     async uploadImage() {
       this.isLoading = true;
       this.errorMessage = undefined;
