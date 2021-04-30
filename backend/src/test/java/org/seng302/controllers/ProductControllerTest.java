@@ -1,8 +1,93 @@
-package org.seng302.Controllers;
+package org.seng302.controllers;
 
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.seng302.entities.Business;
+import org.seng302.entities.Location;
+import org.seng302.entities.Product;
+import org.seng302.entities.User;
+import org.seng302.persistence.BusinessRepository;
+import org.seng302.persistence.ProductRepository;
+import org.seng302.persistence.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.web.servlet.MockMvc;
+
+import java.text.ParseException;
 
 public class ProductControllerTest {
+
+    @Autowired
+    private MockMvc mockMvc;
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private BusinessRepository businessRepository;
+    @Autowired
+    private ProductRepository productRepository;
+
+    private User testUser;
+    private Business testBusiness;
+    private Product testProduct;
+
+    /**
+     * Creates a user, business and product objects for use within the unit tests, where the
+     * user is the owner of the business and the product exists within the business's
+     * product catalogue.
+     * @throws ParseException from the date attribute within the user object
+     */
+    private void setUpTestObjects() throws ParseException {
+        testUser = new User.Builder()
+                .withFirstName("Fergus")
+                .withMiddleName("Connor")
+                .withLastName("Hitchcock")
+                .withNickName("Ferg")
+                .withEmail("fergus.hitchcock@gmail.com")
+                .withPassword("IDoLikeBreaks69#H3!p")
+                .withBio("Did you know I had a second last name Yarker")
+                .withDob("1999-07-17")
+                .withPhoneNumber("+64 27 370 2682")
+                .withAddress(Location.covertAddressStringToLocation("6,Help Street,Place,Dunedin,New Zelaand,Otago,6959"))
+                .build();
+        userRepository.deleteAll();
+        userRepository.save(testUser);
+
+        testBusiness = new Business.Builder()
+                .withName("Help Industries")
+                .withAddress(Location.covertAddressStringToLocation("6,Help Street,Place,Dunedin,New Zelaand,Otago,6959"))
+                .withBusinessType("Accommodation and Food Services")
+                .withDescription("Helps industries hopefully")
+                .withPrimaryOwner(testUser)
+                .build();
+        businessRepository.deleteAll();
+        businessRepository.save(testBusiness);
+
+        testProduct = new Product.Builder()
+                .withProductCode("PieceOfFish69")
+                .withName("A Piece of Fish")
+                .withDescription("A fish but only a piece of it remains")
+                .withManufacturer("Tokyo Fishing LTD")
+                .withRecommendedRetailPrice("3.20")
+                .withBusiness(testBusiness)
+                .build();
+        productRepository.deleteAll();
+        productRepository.save(testProduct);
+
+        testBusiness.addToCatalogue(testProduct);
+        businessRepository.save(testBusiness);
+    }
+
+    @BeforeAll
+    void setUp() throws ParseException {
+        setUpTestObjects();
+    }
+
+    @AfterAll
+    void tearDown() {
+        userRepository.deleteAll();
+        businessRepository.deleteAll();
+        productRepository.deleteAll();
+    }
 
     /**
      * Tests using the delete product image method to see if a product with an image will have its image deleted.
