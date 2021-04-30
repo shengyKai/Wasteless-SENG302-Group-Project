@@ -393,6 +393,9 @@ class ProductTests {
         assertThrows(IllegalArgumentException.class, () -> testBusiness2.addToCatalogue(product));
     }
 
+
+
+
     /**
      * Tests that a product built without a product code throws a ResponseStatusException
      */
@@ -676,4 +679,6 @@ class ProductTests {
                 .withBusiness(testBusiness1);
         assertThrows(ResponseStatusException.class, builder::build);
     }
+
+
 }
