@@ -436,7 +436,12 @@ export async function uploadProductImage(businessId: number, productCode: string
     if (status === 403) return 'Operation not permitted';
     if (status === 406) return 'Product/Business not found';
     return 'Request failed: ' + status;
-  }rigger the
+  }
+
+  return undefined;
+}
+
+/**
  * Fetches a business with the given id.
  *
  * @param businessId Business id to fetch
