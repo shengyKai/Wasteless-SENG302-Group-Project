@@ -97,6 +97,7 @@
                   />
                 </v-col>
               </v-row>
+              <p class="error-text" v-if ="errorMessage !== undefined"> {{errorMessage}} </p>
             </v-container>
           </v-card-text>
           <v-card-actions>
@@ -111,7 +112,7 @@
               type="submit"
               color="primary"
               :disabled="!valid"
-              @click="createBusiness">
+              @click.prevent="createBusiness">
               Create
             </v-btn>
           </v-card-actions>
@@ -123,6 +124,7 @@
 
 <script>
 import LocationAutocomplete from '@/components/utils/LocationAutocomplete';
+import {createBusiness} from '@/api';
 
 export default {
   name: 'CreateBusiness',
@@ -131,6 +133,7 @@ export default {
   },
   data() {
     return {
+      errorMessage: undefined,
       dialog: true,
       business: '',
       description: '',
@@ -144,8 +147,8 @@ export default {
       postcode: '',
       businessTypes: [
         'Accommodation and Food Services',
-        'Charitable organization',
-        'Non-profit organization',
+        'Charitable organisation',
+        'Non-profit organisation',
         'Retail Trade',
       ],
       valid: false,
@@ -163,9 +166,37 @@ export default {
     };
   },
   methods: {
-    createBusiness() {
-      this.$router.push('/business/1');
-      this.closeDialog();
+    async createBusiness() {
+      this.errorMessage = undefined;
+      /**
+       * Get the street number and name from the street address field.
+       */
+      const streetParts = this.street1.split(" ");
+      const streetNum = streetParts[0];
+      const streetName = streetParts.slice(1, streetParts.length).join(" ");
+      let business = {
+        primaryAdministratorId: this.$store.state.user.id,
+        name: this.business,
+        description: this.description,
+        address: {
+          streetNumber: streetNum,
+          streetName: streetName,
+          district: this.district,
+          city: this.city,
+          region: this.region,
+          country: this.country,
+          postcode: this.postcode,
+        },
+        businessType: this.businessType,
+      };
+      let response = await createBusiness(business);
+      console.log(response);
+      if (response === undefined) {
+        this.closeDialog();
+        this.$router.go();
+      } else {
+        this.errorMessage = response;
+      }
     },
     closeDialog() {
       this.$emit('closeDialog');

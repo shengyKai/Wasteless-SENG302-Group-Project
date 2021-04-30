@@ -93,9 +93,10 @@ export type Business = {
 };
 
 export type CreateBusiness = {
+  primaryAdministratorId: number,
   name: string,
   description?: string,
-  address: string,
+  address: Location,
   businessType: BusinessType,
 };
 
