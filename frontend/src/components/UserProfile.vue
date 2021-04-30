@@ -115,21 +115,39 @@
             </v-card-actions>
           </v-card>
         </v-dialog>
-        <v-tooltip bottom >
-          <template #activator="{on, attrs}">
-            <v-chip
-              ref="administratorStatus"
-              v-if="user.role==='globalApplicationAdmin'"
-              outlined
-              color="primary"
-              v-on="on"
-              v-bind="attrs"
-            >
-              <v-icon>mdi-account-tie</v-icon>
-            </v-chip>
+        <v-menu
+          v-if="user.role==='globalApplicationAdmin'"
+          bottom
+          left
+        >
+          <template #activator="{on: menu, attrs}">
+            <v-tooltip bottom>
+              <template #activator="{ on: tooltip }">
+                <v-chip
+                  ref="administratorStatus"
+                  outlined
+                  color="primary"
+                  v-on="{...menu, ...tooltip}"
+                  v-bind="attrs"
+                >
+                  <v-icon>mdi-account-tie</v-icon>
+                </v-chip>
+              </template>
+              <span>System Administrator</span>
+            </v-tooltip>
           </template>
-          <span>System Administrator</span>
-        </v-tooltip>
+          <v-btn
+            @click="removeGAAFromUser()"
+          >
+            Revoke Admin
+          </v-btn>
+        </v-menu>
+        <v-btn
+          v-else-if="user.role==='user'"
+          @click="addUserAsGAA()"
+        >
+          Make Admin
+        </v-btn>
       </div>
     </div>
 
@@ -172,7 +190,7 @@
 </template>
 
 <script>
-import { getUser, makeBusinessAdmin, removeBusinessAdmin } from '../api';
+import { getUser, makeBusinessAdmin, removeBusinessAdmin, makeAdmin, revokeAdmin } from '../api';
 import UserAvatar from './utils/UserAvatar';
 import convertAddressToReadableText from './utils/Methods/convertJsonAddressToReadableText';
 
@@ -187,6 +205,7 @@ export default {
       user: null,
       removeAdminDialog: false,
       addAdminDialog: false,
+      currentUserRole: this.$store.role
     };
   },
   created() {
@@ -263,6 +282,46 @@ export default {
     //have to use a method here to access the method
     insertAddress(address) {
       return convertAddressToReadableText(address, "full");
+    },
+    async addUserAsGAA() {
+      let response = await makeAdmin(this.user.id);
+
+      if (typeof response === 'string') {
+        this.$store.commit('setError', response);
+        return;
+      }
+
+      // response = await getUser(this.user.id);
+      // if (typeof response === 'string') {
+      //   this.$store.commit('setError', response);
+      //   return;
+      // }
+
+      // // Updates the user properly
+      // this.user = response;
+      // if (this.user.id === this.$store.state.user?.id) {
+      //   this.$store.commit('setUser', this.user);
+      // }
+    },
+    async removeGAAFromUser() {
+      let response = await revokeAdmin(this.user.id);
+
+      if (typeof response === 'string') {
+        this.$store.commit('setError', response);
+        return;
+      }
+
+      // response = await getUser(this.user.id);
+      // if (typeof response === 'string') {
+      //   this.$store.commit('setError', response);
+      //   return;
+      // }
+
+      // // Updates the user properly
+      // this.user = response;
+      // if (this.user.id === this.$store.state.user?.id) {
+      //   this.$store.commit('setUser', this.user);
+      // }
     }
   },
 
