@@ -54,7 +54,7 @@ public class DGAAController {
                     .withEmail("wasteless@seng302.com")
                     .withFirstName("DGAA")
                     .withLastName("DGAA")
-                    .withPassword("T3amThr33IsTh3")
+                    .withPassword("T3amThr33IsTh3B3st")
                     .withDob("2000-03-11")
                     .withAddress(dgaaAddress)
                     .build();
