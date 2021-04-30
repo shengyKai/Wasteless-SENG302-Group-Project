@@ -46,15 +46,8 @@
                     class="required"
                     v-model="street1"
                     label="Company Street Address"
-                    :rules="mandatoryRules"
+                    :rules="mandatoryRules.concat(streetRules)"
                     outlined/>
-                </v-col>
-                <v-col cols="12">
-                  <v-text-field
-                    v-model="street2"
-                    label="Apartment, Suite, Unit, Building, Floor"
-                    outlined
-                  />
                 </v-col>
                 <v-col cols="12">
                   <LocationAutocomplete
@@ -139,7 +132,6 @@ export default {
       description: '',
       businessType: [],
       street1: '',
-      street2: '',
       district: '',
       city: '',
       region: '',
@@ -162,6 +154,9 @@ export default {
         //All fields with the class "required" will go through this ruleset to ensure the field is not empty.
         //if it does not follow the format, display error message
         field => !!field || 'Field is required'
+      ],
+      streetRules: [
+        field => /(^\d{1,6}\s[a-zA-Z\s]+[a-zA-Z]$)/.test(field) || 'Must be a valid street number. eg "12 Rutherford lane"'
       ]
     };
   },
