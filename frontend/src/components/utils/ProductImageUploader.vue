@@ -61,8 +61,22 @@
 </template>
 
 <script>
+import { uploadProductImage } from '@/api';
 export default {
-  name: "ImageUploader",
+  name: "ProductImageUploader",
+  /*props: [
+    'businessId', // Business id that has this product
+    'productId' // Product code for which this dialog will add a product to
+  ],*/
+
+  props: { // TODO remove the default values
+    businessId: {
+      default: 10
+    },
+    productId: {
+      default: 'NATHAN-APPLE-70'
+    }
+  },
   data() {
     return {
       file: undefined,
@@ -109,8 +123,16 @@ export default {
       input.click();
     },
 
-    uploadImage() {
-      console.log('Uploading!');
+    async uploadImage() {
+      this.isLoading = true;
+      this.errorMessage = undefined;
+
+      let response = await uploadProductImage(this.businessId, this.productId, this.file);
+
+      this.isLoading = false;
+      if (response !== undefined) {
+        this.errorMessage = response;
+      }
     },
 
     closeDialog() {

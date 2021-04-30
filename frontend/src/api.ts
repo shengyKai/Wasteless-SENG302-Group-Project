@@ -405,19 +405,43 @@ export async function createProduct(businessId: number, product: CreateProduct):
     if (status === 403) return 'Operation not permitted';
 
     if (status === 400) {
-      // TODO Not sure exactly how the backend is going to communicate with us that the product code
-      // is unavailable.
-
-      // eslint-disable-next-line no-constant-condition
-      if (false) {
-        return 'Product code unavailable';
-      }
 
       return 'Invalid parameters';
     }
 
     return 'Request failed: ' + status;
   }
+  return undefined;
+}
+
+
+/**
+ * Add a product image to the given product
+ *
+ * @param businessId The business for which the product belongs
+ * @param productId The product's product code
+ * @param file Image file to add
+ */
+export async function uploadProductImage(businessId: number, productId: number, file: File): Promise<MaybeError<undefined>> {
+  try {
+    let formData = new FormData();
+    formData.append('file', file);
+    await instance.post(`/businesses/${businessId}/products/${productId}/images`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
+  } catch (error) {
+    console.log(error);
+    let status: number | undefined = error.response?.status;
+    if (status === undefined) return 'Failed to reach backend';
+    if (status === 400) return 'Invalid image';
+    if (status === 401) return 'Missing/Invalid access token';
+    if (status === 403) return 'Operation not permitted';
+    if (status === 406) return 'Product/Business not found';
+    return 'Request failed: ' + status;
+  }
+
   return undefined;
 }
 
