@@ -403,11 +403,8 @@ export async function createProduct(businessId: number, product: CreateProduct):
     if (status === undefined) return 'Failed to reach backend';
     if (status === 401) return 'Missing/Invalid access token';
     if (status === 403) return 'Operation not permitted';
-
-    if (status === 400) {
-
-      return 'Invalid parameters';
-    }
+    if (status === 400) return 'Invalid parameters';
+    if (status === 409) return 'Product code unavailable';
 
     return 'Request failed: ' + status;
   }
@@ -439,12 +436,7 @@ export async function uploadProductImage(businessId: number, productCode: string
     if (status === 403) return 'Operation not permitted';
     if (status === 406) return 'Product/Business not found';
     return 'Request failed: ' + status;
-  }
-
-  return undefined;
-}
-
-/**
+  }rigger the
  * Fetches a business with the given id.
  *
  * @param businessId Business id to fetch
