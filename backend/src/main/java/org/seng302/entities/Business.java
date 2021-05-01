@@ -22,7 +22,7 @@ public class Business {
     //Minimum age to create a business
     private final int MinimumAge = 16;
     private static final List<String> businessTypes = new ArrayList<>(Arrays.asList("Accommodation and Food Services", "Retail Trade", "Charitable organisation", "Non-profit organisation"));
-    private static final String textRegex = "[ a-zA-Z0-9@//$%&',//.//:;_-]*";
+    private static final String textRegex = "[ a-zA-Z0-9\\p{Punct}]*";
 
     @Id
     @GeneratedValue
@@ -75,7 +75,7 @@ public class Business {
         }
         if (!name.matches(textRegex)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The business name can contain only letters, " +
-                    "numbers, and the special characters @ $ % & - _ , . : ;");
+                    "numbers, and the special characters !\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~");
         }
         this.name = name;
     }

@@ -440,7 +440,7 @@ public class BusinessTests {
         testBusiness1.setDescription(null);
         assertEquals("", testBusiness1.getDescription());
     }
-    
+
     /**
      * Check that if someone attempts to remove a user who is currently the primary owner of a business from the database,
      * an expection is thrown and the user is not removed from the database.

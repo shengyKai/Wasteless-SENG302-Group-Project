@@ -156,7 +156,7 @@ export default {
         field => !!field || 'Field is required'
       ],
       streetRules: [
-        field => /(^\d{1,6}[a-zA-Z]?\s[a-zA-Z\s]*[a-zA-Z]+$)/.test(field) || 'Must be a valid street number. eg "12B Rutherford lane"'
+        field => /^(?=.*[0-9 ])(?=.*[a-zA-Z ])([a-zA-Z0-9 ]+)$/.test(field) || 'Must have at least one number and one alphabet'
       ]
     };
   },
