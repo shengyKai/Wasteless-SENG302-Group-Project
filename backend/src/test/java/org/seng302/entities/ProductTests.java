@@ -20,6 +20,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class ProductTests {
+    //TODO ADD NEW TESTS FOR THE NEW IMAGE ATTRIBUTE!!!
 
     @Autowired
     ProductRepository productRepository;
@@ -71,7 +72,7 @@ class ProductTests {
                 .withBio("Likes long walks on the beach")
                 .withDob("2000-03-11")
                 .withPhoneNumber("+64 3 555 0129")
-                .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Christchurch,New Zealand," +
+                .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
                         "Canterbury,8041"))
                 .build();
         testUser1 = userRepository.save(testUser1);
@@ -392,6 +393,9 @@ class ProductTests {
         assertThrows(IllegalArgumentException.class, () -> testBusiness2.addToCatalogue(product));
     }
 
+
+
+
     /**
      * Tests that a product built without a product code throws a ResponseStatusException
      */
@@ -675,4 +679,6 @@ class ProductTests {
                 .withBusiness(testBusiness1);
         assertThrows(ResponseStatusException.class, builder::build);
     }
+
+
 }

@@ -4,6 +4,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.seng302.entities.Business;
+import org.seng302.entities.Location;
+import org.seng302.entities.User;
 import org.seng302.exceptions.AccessTokenException;
 import org.seng302.persistence.BusinessRepository;
 import org.seng302.persistence.UserRepository;
@@ -72,7 +75,7 @@ public class BusinessTests {
                 .withBio("Likes long walks on the beach")
                 .withDob("2000-03-11")
                 .withPhoneNumber("+64 3 555 0129")
-                .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Christchurch,New Zealand," +
+                .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
                         "Canterbury,8041"))
                 .build();
         testUser2 = new User.Builder()
@@ -85,7 +88,7 @@ public class BusinessTests {
                 .withBio("Likes long walks on the beach")
                 .withDob("2000-03-11")
                 .withPhoneNumber("+64 3 555 0129")
-                .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Christchurch,New Zealand," +
+                .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
                         "Canterbury,8041"))
                 .build();
         testUser3 = new User.Builder()
@@ -98,7 +101,7 @@ public class BusinessTests {
                 .withBio("Likes slow walks on the beach")
                 .withDob(ageBelow16)
                 .withPhoneNumber("+64 3 555 0129")
-                .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Christchurch,New Zealand," +
+                .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
                         "Canterbury,8041"))
                 .build();
         testUser1 = userRepository.save(testUser1);
@@ -252,13 +255,14 @@ public class BusinessTests {
 
     /**
      * Check that when setName is called with a name which contains characters which are not letters, numbers or
-     * the characters "@ $ % & . , ; : - _", a response status exception with status code 400 will be thrown and the
+     * the characters "! " # $ % & ' ( ) * + , - . / : ; < = > ? @ [ \ ] ^ _ ` { | } ~",
+     * a response status exception with status code 400 will be thrown and the
      * business's name will not be changed.
      */
     @Test
     public void setNameInvalidCharacterTest() {
         String originalName = testBusiness1.getName();
-        String[] invalidCharacterNames = {"?", "^^^^^^^", "business*", "!This is not allowed", "(or this)"};
+        String[] invalidCharacterNames = {"\n", "»»»»»", "business¢", "½This is not allowed", "¡or this¡"};
         for (String name : invalidCharacterNames) {
             ResponseStatusException e = assertThrows(ResponseStatusException.class, () -> {
                 testBusiness1.setName(name);
@@ -392,7 +396,7 @@ public class BusinessTests {
     @Test
     public void setDescriptionInvalidCharacterTest() {
         String originalDescription = testBusiness1.getDescription();
-        String[] invalidCharacterDescriptions = {"?", "^^^^^^^", "business*", "!This is not allowed", "(or this)"};
+        String[] invalidCharacterDescriptions = {"ƒ", "»»»»»", "business¢", "½This is not allowed", "¡or this¡"};
         for (String description : invalidCharacterDescriptions) {
             ResponseStatusException e = assertThrows(ResponseStatusException.class, () -> {
                 testBusiness1.setDescription(description);
@@ -430,45 +434,12 @@ public class BusinessTests {
     }
 
     /**
-     * Check that when setDescription is called with null as its argument, a response status expection will be thrown
-     * with status code 400 and the business's description will not be changed.
+     * Check that when setDescription is called with null as its argument, the description becomes an empty string
      */
     @Test
     public void setDescriptionNullTest() {
-        String originalDescription = testBusiness1.getDescription();
-        ResponseStatusException e = assertThrows(ResponseStatusException.class, () -> {
-            testBusiness1.setDescription(null);
-        });
-        assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
-        assertEquals(originalDescription, testBusiness1.getDescription());
-    }
-
-    /**
-     * Check that when setDescription is called with the empty string as its argument, a response status expection will
-     * be thrown with status code 400 and the business's description will not be changed.
-     */
-    @Test
-    public void setDescriptionEmptyStringTest() {
-        String originalDescription = testBusiness1.getDescription();
-        ResponseStatusException e = assertThrows(ResponseStatusException.class, () -> {
-            testBusiness1.setDescription("");
-        });
-        assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
-        assertEquals(originalDescription, testBusiness1.getDescription());
-    }
-
-    /**
-     * Check that when setDescription is called with a blank string as its argument, a response status expection will be
-     * thrown with status code 400 and the business's description will not be changed.
-     */
-    @Test
-    public void setDescriptionBlankStringTest() {
-        String originalDescription = testBusiness1.getDescription();
-        ResponseStatusException e = assertThrows(ResponseStatusException.class, () -> {
-            testBusiness1.setDescription("          ");
-        });
-        assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
-        assertEquals(originalDescription, testBusiness1.getDescription());
+        testBusiness1.setDescription(null);
+        assertEquals("", testBusiness1.getDescription());
     }
 
     /**
@@ -588,7 +559,7 @@ public class BusinessTests {
     public void setCreatedInitialValueTest() {
         Date now = new Date();
         Business testBusiness2 = new Business.Builder().withBusinessType("Non-profit organisation").withName("Zesty Business")
-                .withAddress(Location.covertAddressStringToLocation("101,My Street,Christchurch,Canterbury,New Zealand,1010"))
+                .withAddress(Location.covertAddressStringToLocation("101,My Street,Ashburton,Christchurch,Canterbury,New Zealand,1010"))
                 .withDescription("A nice place").withPrimaryOwner(testUser2).build();
         // Check that the difference between the time the business was created and the time at the start of exection of
         // this function is less than 1 second
@@ -615,7 +586,7 @@ public class BusinessTests {
      */
     @Test
     public void setAddressValidTest() {
-        Location address = Location.covertAddressStringToLocation("44,Humbug Ave,Hamilton,Waikato,New Zealand,1000");
+        Location address = Location.covertAddressStringToLocation("44,Humbug Ave,Ashburton,Hamilton,Waikato,New Zealand,1000");
         testBusiness1.setAddress(address);
         assertEquals(address, testBusiness1.getAddress());
     }

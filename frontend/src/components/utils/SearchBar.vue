@@ -40,6 +40,6 @@ export default {
 
 <style scoped>
 .searchbox {
-  width: 260px;
+  width: 300px;
 }
 </style>

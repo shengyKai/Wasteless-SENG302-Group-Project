@@ -54,7 +54,7 @@ class LoginControllerTest {
                 .withBio("Likes long walks on the beach")
                 .withDob("2001-03-11")
                 .withPhoneNumber("+64 3 555 0129")
-                .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Christchurch,New Zealand," +
+                .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
                         "Canterbury,8041"))
                 .build();
         Account sameEmailAccount = accountRepository.findByEmail("johnsmith99@gmail.com");
@@ -153,14 +153,14 @@ class LoginControllerTest {
     }
 
     /**
-     * Verify that when logging in as a user with role "admin", the session role is "admin"
+     * Verify that when logging in as a user with role "globalApplicationAdmin", the session role is "globalApplicationAdmin"
      * @throws Exception
      */
     @Test
     public void loginWithAdminUserSessionRoleIsAdmin() throws Exception {
         String loginBody = "{\"email\": \"johnsmith99@gmail.com\", \"password\": \"1337-H%nt3r2\"}";
         User user = userRepository.findByEmail("johnsmith99@gmail.com");
-        user.setRole("admin");
+        user.setRole("globalApplicationAdmin");
         userRepository.save(user);
 
         MvcResult result = mockMvc.perform(post("/login")
@@ -169,7 +169,7 @@ class LoginControllerTest {
                 .andExpect(status().isOk())
                 .andReturn();
         HttpSession session = result.getRequest().getSession();
-        assertEquals("admin", session.getAttribute("role"));
+        assertEquals("globalApplicationAdmin", session.getAttribute("role"));
         // Might change to cookies within the future
     }
 }

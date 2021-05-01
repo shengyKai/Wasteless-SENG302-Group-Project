@@ -6,30 +6,66 @@ import admin from "../components/Admin.vue";
 import ProfilePage from "../components/UserProfile.vue";
 import BusinessProfile from "../components/BusinessProfile/index.vue";
 import SearchResults from "../components/SearchResults.vue";
-import CreateBusiness from "../components/BusinessProfile/CreateBusiness.vue";
 import HomePage from "../components/HomePage.vue";
+
 
 Vue.use(VueRouter);
 
 // Doesn't actually send status code 404
 const NotFound = {
-  template: "<h1> 404 Not Found - {{ $route.path }} </h1>",
+  template: "<h2>404 Not Found - {{ $route.path }}</h2>"
 };
 
 const routes = [
-  { path: "/", redirect: "/login" }, // TODO handle case when already logged in
-  { path: "/login",           component: Auth },
-  { path: "/home",            component: HomePage},
-  { path: "/profile",         component: ProfilePage },
-  { path: "/profile/:id",     component: ProfilePage },
-  { path: "/create_business", component: CreateBusiness },
-  { path: "/business/:id",    component: BusinessProfile },
-  { path: "/admin",           component: admin },
-  { path: "/search",          component: SearchResults },
-  { path: "*",                component: NotFound },
+  {
+    path: "/",
+    redirect: "/login"
+  },
+  {
+    path: "/login",
+    component: Auth,
+    meta: { title: 'Login' }
+  },
+  {
+    path: "/home",
+    component: HomePage,
+    meta: { title: 'Home' }
+  },
+  {
+    path: "/profile",
+    component: ProfilePage,
+    meta: { title: 'Profile' }
+  },
+  {
+    path: "/profile/:id",
+    component: ProfilePage,
+    meta: { title: 'Profile' }
+  },
+  {
+    path: "/business/:id",
+    component: BusinessProfile,
+    meta: { title: 'Business' }
+  },
+  {
+    path: "/admin",
+    component: admin,
+    meta: { title: 'Admin' }
+  },
+  {
+    path: "/search",
+    component: SearchResults,
+    meta: { title: 'Search' }
+  },
+  {
+    path: "*",
+    component: NotFound,
+    meta: { title: 'Not Found' }
+  }
 ];
+
 
 export default new VueRouter({
   mode: "history",
+  base: process.env.VUE_APP_BASE_URL,
   routes,
 });
