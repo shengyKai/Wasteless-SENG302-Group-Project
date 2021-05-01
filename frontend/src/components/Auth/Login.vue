@@ -35,7 +35,7 @@
 </template>
 
 <script>
-import {login} from '../../api';
+// import {login} from '../../api';
 export default {
   loggedIn: true,
   name: "Login",
@@ -55,7 +55,7 @@ export default {
          * All fields with the class "required" will go through this ruleset to ensure the field is not empty.
          * If it does not follow the format, turn text field into red
         */
-        (field) => !!field || "Field is required",
+        (field) => !!field || '',
       ],
       passwordRules: [
         field => (field && field.length >= 7 && field.length <= 16) || '',                    //Password must have 7-16 characters
@@ -81,20 +81,31 @@ export default {
      */
     async showHome() {
       this.errorMessage = undefined;
-      this.$store.dispatch("login", { email : this.email, password : this.password });
-      this.$router.push("/home");
+      await this.$store.dispatch("login", { email : this.email, password : this.password });
+      // this.$router.push("/home");
 
-      let credential = {
-        email     : this.email,
-        password  : this.password,
-      };
-      let response = await login(credential);
-      console.log(response);
-      if (response === undefined ) {
-        this.$emit('showLogin');
-        return;
-      }
-      this.errorMessage = response;
+      // let credential = {
+      //   email     : this.email,
+      //   password  : this.password,
+      // };
+      // let response = await login(credential);
+      // console.log(response);
+      // if (response === undefined ) {
+      //   this.$emit('showLogin');
+      //   return;
+      // }
+      // this.errorMessage = response;
+
+      console.log(this.$store.getters.getglobalError);
+      this.errorMessage = this.$store.getters.getglobalError;
+      this.$store.commit('clearError');
+      // if(this.$store.getters.getglobalError) {
+      //   this.errorMessage = "Its wrong";
+      // }
+      // else {
+      //   this.errorMessage = "Its IN";
+      // }
+      console.log(this.$store);
     },
   },
 };

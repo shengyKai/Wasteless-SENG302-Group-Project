@@ -125,7 +125,10 @@ function createOptions(): StoreOptions<StoreData> {
       },
       role (state) {
         return state.user?.role;
-      }
+      },
+      getglobalError (state) {
+        return state.globalError;
+      },
     },
     actions: {
       getUser (context, userId) {
