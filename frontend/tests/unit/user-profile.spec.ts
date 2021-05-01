@@ -68,14 +68,14 @@ function makeTestUser(userId: number, businesses?: number[]) {
     phoneNumber: 'test_phone_number' + userId,
     dateOfBirth: '1/1/1900',
     created: '1/5/2005',
-    homeAddress: { 
+    homeAddress: {
       streetNumber: 'test_street_number',
       streetName: 'test_street1',
       city: 'test_city',
       region: 'test_region',
       postcode: 'test_postcode',
       district: 'test_district',
-      country: 'test_country' + userId 
+      country: 'test_country' + userId
     },
   };
 
