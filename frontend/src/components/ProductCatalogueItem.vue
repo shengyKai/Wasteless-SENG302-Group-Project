@@ -136,7 +136,10 @@ export default {
       productRRP: 100,
       productCode: "Some Code",
       countryOfSale: "Japan",
-      currency: {},
+      currency: {
+        code: "",
+        symbol: ""
+      },
 
       //If readMoreActivated is false, the product description is less than 50 words, so it wont have to use the FullProductDescription
       //component. Else it will use it and the "Read more..." link will also be shown to lead to the FullProductDescription component

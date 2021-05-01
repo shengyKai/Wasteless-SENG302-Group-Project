@@ -60,7 +60,7 @@ function currencyResponseHasExpectedFormat(response: any): response is Currencie
 /**
  * Default currency when currency of current location cannot be resolved from API request.
  */
-const newZealandDollar : Currency = {
+export const newZealandDollar : Currency = {
   code: "NZD",
   name: "New Zealand dollar",
   symbol: "$"
@@ -102,18 +102,20 @@ export async function currencyFromCountry(country: string) : Promise<Currency> {
 async function queryCurrencyAPI(country: string) : Promise<MaybeError<Response>> {
 
   const queryUrl = `https://restcountries.eu/rest/v2/name/${country}?fullText=true&fields=currencies`;
-  const response = await fetch(queryUrl);
 
-  if (response.status === undefined) {
-    return `Failed to reach ${queryUrl}`;
-  }
-  if (response.status === 404) {
-    return `No country with name ${country} was found`;
-  }
-  if (response.status !== 200) {
-    return `Request failed: ' + ${response.status}`;
-  }
-  return response;
+  const responseOrError = await fetch(queryUrl).then(response => {
+    if (response.status === 404) {
+      return `No country with name ${country} was found`;
+    }
+    if (response.status !== 200) {
+      return `Request failed: ' + ${response.status}`;
+    }
+    return response;
+  })
+    .catch(error => {
+      return `Failed to reach ${queryUrl}`;
+    });
+  return responseOrError;
 }
 
 /**
