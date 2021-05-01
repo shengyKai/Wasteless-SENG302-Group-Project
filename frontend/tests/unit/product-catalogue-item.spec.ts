@@ -28,7 +28,7 @@ describe('ProductCatalogueItem.vue', () => {
         });
       })
     }));
-  })
+  });
 
   /**
    * Set up to test the routing and whether the Product Catalogue item component shows what is required

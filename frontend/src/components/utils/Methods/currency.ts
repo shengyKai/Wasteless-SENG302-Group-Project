@@ -108,7 +108,7 @@ async function queryCurrencyAPI(country: string) : Promise<MaybeError<Response>>
       return `No country with name ${country} was found`;
     }
     if (response.status !== 200) {
-      return `Request failed: ' + ${response.status}`;
+      return `Request failed: ${response.status}`;
     }
     return response;
   })
