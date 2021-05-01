@@ -198,6 +198,20 @@ public class ProductController {
     }
 
     /**
+     * Matches up the businessID, productID and imageID to find the image of a product to be deleted. Only business
+     * owners can delete product images and they must be within their own product catalogue.
+     * @param businessId the ID of the business
+     * @param productId the ID of the product
+     * @param imageId the ID of the image
+     */
+    @DeleteMapping("/businesses/{businessId}/products/{productId}/images/{imageId}")
+    void deleteProductImage(@PathVariable Long businessId, @PathVariable Long productId, @PathVariable Long imageId,
+                            HttpServletRequest request, HttpServletResponse response) {
+
+    }
+
+
+    /**
      * Checks that the provided JSON object exists and has all the fields that are required
      * @param requestBody The request body to validate
      * @param requiredFields The fields that are required to exist in the request body
