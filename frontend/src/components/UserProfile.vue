@@ -115,14 +115,22 @@
             </v-card-actions>
           </v-card>
         </v-dialog>
-        <v-menu
-          v-if="user.role==='globalApplicationAdmin'"
-          bottom
-          left
-        >
-          <template #activator="{on: menu, attrs}">
-            <v-tooltip bottom>
-              <template #activator="{ on: tooltip }">
+        <!--
+          "currentUserRole==='user'" is so that normal users cannot see the GAA/DGAA statuses of system admins.
+          "user.role==='globalApplicationAdmin' || user.role==='defaultGlobalApplicationAdmin'" is so that if the profile is
+          a GAA/DGAA, it will be obvious to the current user viewing the profile that this user is a system admininstrator.
+          Note: DGAAs wont be searchable by normal users in the first place so "user.role==='defaultGlobalApplicationAdmin'" is
+          just there to remind DGAAs that they are in the DGAA account.
+        -->
+        <v-tooltip
+          v-if="currentUserRole!=='user' && (user.role==='globalApplicationAdmin' || user.role==='defaultGlobalApplicationAdmin')"
+          bottom>
+          <template #activator="{ on: tooltip }">
+            <v-menu
+              bottom
+              left
+            >
+              <template #activator="{on: menu, attrs}">
                 <v-chip
                   ref="administratorStatus"
                   outlined
@@ -133,18 +141,32 @@
                   <v-icon>mdi-account-tie</v-icon>
                 </v-chip>
               </template>
-              <span>System Administrator</span>
-            </v-tooltip>
+              <!-- put as a v-list item because if in the future we want to be able to add more actions between DGAA/GAA, its easy -->
+              <!--
+                "currentUserRole==='defaultGlobalApplicationAdmin'" is so that only DGAA can see the revoke button
+                "user.role!=='defaultGlobalApplicationAdmin'" is so that DGAA wont revoke themselves
+              -->
+              <v-list
+                v-if="currentUserRole==='defaultGlobalApplicationAdmin' && user.role!=='defaultGlobalApplicationAdmin'">
+                <v-list-item
+                  @click="revokeGAAFromUser()"
+                >
+                  Revoke Admin
+                </v-list-item>
+              </v-list>
+            </v-menu>
           </template>
-          <v-btn
-            @click="removeGAAFromUser()"
-          >
-            Revoke Admin
-          </v-btn>
-        </v-menu>
+          <span>System Administrator</span>
+        </v-tooltip>
+        <!--
+          "user.role==='user'" is so that the DGAA can only make users as a GAA, not current GAAs/DGAAs
+          "currentUserRole==='defaultGlobalApplicationAdmin'" is to ensure only DGAAs can make users admin
+        -->
         <v-btn
-          v-else-if="user.role==='user'"
-          @click="addUserAsGAA()"
+          v-else-if="user.role==='user' && currentUserRole==='defaultGlobalApplicationAdmin'"
+          @click="makeUserAsGAA(); loader='loadingMake'"
+          :loading="loadingMake"
+          :disabled="loadingMake"
         >
           Make Admin
         </v-btn>
@@ -205,7 +227,9 @@ export default {
       user: null,
       removeAdminDialog: false,
       addAdminDialog: false,
-      currentUserRole: this.$store.role
+      currentUserRole: this.$store.state.user.role,
+      loader: null,
+      loadingMake: false
     };
   },
   created() {
@@ -281,9 +305,15 @@ export default {
     },
     //have to use a method here to access the method
     insertAddress(address) {
-      return convertAddressToReadableText(address, "full");
+      if (this.currentUserRole === "defaultGlobalApplicationAdmin" ||
+          this.currentUserRole ===  "globalApplicationAdmin" ||
+          this.user === this.$store.state.user) {
+        return convertAddressToReadableText(address, "full");
+      } else {
+        return convertAddressToReadableText(address, "partial");
+      }
     },
-    async addUserAsGAA() {
+    async makeUserAsGAA() {
       let response = await makeAdmin(this.user.id);
 
       if (typeof response === 'string') {
@@ -291,19 +321,19 @@ export default {
         return;
       }
 
-      // response = await getUser(this.user.id);
-      // if (typeof response === 'string') {
-      //   this.$store.commit('setError', response);
-      //   return;
-      // }
+      response = await getUser(this.user.id);
+      if (typeof response === 'string') {
+        this.$store.commit('setError', response);
+        return;
+      }
 
-      // // Updates the user properly
-      // this.user = response;
-      // if (this.user.id === this.$store.state.user?.id) {
-      //   this.$store.commit('setUser', this.user);
-      // }
+      // Updates the user properly
+      this.user = response;
+      if (this.user.id === this.$store.state.user?.id) {
+        this.$store.commit('setUser', this.user);
+      }
     },
-    async removeGAAFromUser() {
+    async revokeGAAFromUser() {
       let response = await revokeAdmin(this.user.id);
 
       if (typeof response === 'string') {
@@ -311,17 +341,17 @@ export default {
         return;
       }
 
-      // response = await getUser(this.user.id);
-      // if (typeof response === 'string') {
-      //   this.$store.commit('setError', response);
-      //   return;
-      // }
+      response = await getUser(this.user.id);
+      if (typeof response === 'string') {
+        this.$store.commit('setError', response);
+        return;
+      }
 
-      // // Updates the user properly
-      // this.user = response;
-      // if (this.user.id === this.$store.state.user?.id) {
-      //   this.$store.commit('setUser', this.user);
-      // }
+      // Updates the user properly
+      this.user = response;
+      if (this.user.id === this.$store.state.user?.id) {
+        this.$store.commit('setUser', this.user);
+      }
     }
   },
 
@@ -365,10 +395,21 @@ export default {
       const dateOfBirth = new Date(this.user.dateOfBirth);
       const parts = dateOfBirth.toDateString().split(' ');
       return `${parts[2]} ${parts[1]} ${parts[3]}`;
+    },
+    userRole() {
+      return this.user.role;
     }
   },
   components: {
     UserAvatar,
+  },
+  watch: {
+    loader () {
+      const l = this.loader;
+      this[l] = !this[l];
+      setTimeout(() => (this[l] = false), 3000);
+      this.loader = null;
+    }
   }
 };
 </script>
