@@ -17,11 +17,6 @@
         outlined
         :rules="mandatoryRules.concat(passwordRules).concat(maxCharShortRules)"
       />
-
-      <!-- Register Button Allow user to click on this link and get directed to registration form -->
-      <p class="link" @click="showRegister">
-        Don't have an account? Register.
-      </p>
       <!-- Hidden component, only appear when theres errror and show the respond from backend -->
       <p class="error-text" v-if ="errorMessage !== undefined"> {{errorMessage}} </p>
 
@@ -30,6 +25,11 @@
     <v-btn @click="showHome" type="submit" color="primary" :disabled="!valid">
       LOGIN
     </v-btn>
+
+    <!-- Register Button Allow user to click on this link and get directed to registration form -->
+    <p class="link pt-5" @click="showRegister">
+      Don't have an account? Register.
+    </p>
   </v-container>
 
 </template>
@@ -48,7 +48,7 @@ export default {
       emailRules: [
         email =>
           /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(email)
-          || 'E-mail must be valid'
+          || ''
       ],
       mandatoryRules: [
         /**
@@ -78,34 +78,16 @@ export default {
     /**
      * Method to direct into home page, embed in a button
      * dispatch details from textfield to store plugin before directing
+     * store.dispatch need to await in this case else the globalError might be inconsistent
+     * router.push need to be await else when user click 2 times in a row it will caught Avoided redundant navigation
      */
     async showHome() {
       this.errorMessage = undefined;
       await this.$store.dispatch("login", { email : this.email, password : this.password });
-      // this.$router.push("/home");
-
-      // let credential = {
-      //   email     : this.email,
-      //   password  : this.password,
-      // };
-      // let response = await login(credential);
-      // console.log(response);
-      // if (response === undefined ) {
-      //   this.$emit('showLogin');
-      //   return;
-      // }
-      // this.errorMessage = response;
-
-      console.log(this.$store.getters.getglobalError);
+      this.$router.push("/home");
       this.errorMessage = this.$store.getters.getglobalError;
       this.$store.commit('clearError');
-      // if(this.$store.getters.getglobalError) {
-      //   this.errorMessage = "Its wrong";
-      // }
-      // else {
-      //   this.errorMessage = "Its IN";
-      // }
-      console.log(this.$store);
+
     },
   },
 };
