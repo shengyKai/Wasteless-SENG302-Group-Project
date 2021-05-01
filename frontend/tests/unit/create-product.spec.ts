@@ -10,7 +10,24 @@ import { getStore, resetStoreForTesting } from '@/store';
 
 jest.mock('@/api', () => ({
   createProduct: jest.fn(),
+  getBusiness: jest.fn(() => {
+    return {
+      address: {
+        country: 'New Zealand',
+      }
+    }
+  })
 }));
+
+jest.mock('@/components/utils/Methods/currency', () => ({
+  currencyFromCountry: jest.fn(() => {
+    return {
+      code: 'NZD',
+      symbol: '$'
+    }
+  })
+}));
+
 
 const createProduct = castMock(api.createProduct);
 

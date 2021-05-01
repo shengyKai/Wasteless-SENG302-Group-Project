@@ -12,23 +12,18 @@ import FullProductDescription from "@/components/utils/FullProductDescription.vu
 
 Vue.use(Vuetify);
 
-
+jest.mock('@/components/utils/Methods/currency', () => ({
+  currencyFromCountry: jest.fn(() => {
+    return {
+      code: 'NZD',
+      symbol: '$'
+    }
+  })
+}));
 
 describe('ProductCatalogueItem.vue', () => {
   let wrapper: Wrapper<any>;
   let vuetify: Vuetify;
-
-  beforeAll(() => {
-    jest.mock('@/components/utils/Methods/currency', () => ({
-      currencyFromCountry: jest.fn(() => {
-        Promise.resolve({
-          code: "",
-          name: "",
-          symbol: ""
-        });
-      })
-    }));
-  });
 
   /**
    * Set up to test the routing and whether the Product Catalogue item component shows what is required
