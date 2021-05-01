@@ -77,7 +77,6 @@ public class BusinessController {
     public ResponseEntity register(@RequestBody JSONObject businessInfo, HttpServletRequest req) {
         try {
             AuthenticationTokenManager.checkAuthenticationToken(req);
-
             // Make sure this is an existing user ID
             Optional<User> primaryOwner = userRepository.findById(Long.parseLong((businessInfo.getAsString("primaryAdministratorId"))));
 
