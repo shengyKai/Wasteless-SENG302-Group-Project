@@ -52,27 +52,46 @@ public class Image {
         final List<String> imageFormats = Arrays.asList(".png", ".jpg");
         if (filename.length() > 4) {
             for (String format : imageFormats) {
-                if (format.equals(filename.substring(filename.length() - 4))) {
-                    return Boolean.TRUE;
+                String imageFormat = filename.substring(filename.length() - 4).toLowerCase();
+                if (format.equals(imageFormat)) {
+                    return true;
                 }
             }
         }
-        return Boolean.FALSE;
+        return false;
     }
 
     /**
      * A helper function to confirm that the filename thumbnail contains the string "_thumbnail" before the image type
-     * @param filenameThumbnail
+     * @param filenameThumbnail the thumbnail filename
      * @return true if the thumbnail filename contains "_thumbnail" before the image type
      */
     private Boolean checkContainsUnderscoreThumbnail(String filenameThumbnail) {
         if (filenameThumbnail.length() > 14) {
             if ("_thumbnail".equals(filenameThumbnail.substring(
                     filenameThumbnail.length() - 14, filenameThumbnail.length() - 4))) {
-                return Boolean.TRUE;
+                return true;
             }
         }
-        return Boolean.FALSE;
+        return false;
+    }
+
+    /**
+     * A helper function to check the filename does not contain any illegal characters
+     * @param filename the name of the directory
+     * @return true if the the filename does not contain any illegal characters, false otherwise
+     */
+    private Boolean checkContainsIllegalCharacters(String filename) {
+        // A list of illegal characters that cannot exist within a filename directory string
+        final List<String> illegalCharacters = Arrays.asList(".", "\n", "\t", "\\", ",");
+
+        String filenameSubStr = filename.substring(0, filename.length() - 4);
+        for (String characters: illegalCharacters) {
+            if (filenameSubStr.contains(characters)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
@@ -110,6 +129,8 @@ public class Image {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Spaces are not allowed in the filename");
         } else if (!checkImageFormats(filename)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "An invalid image format was provided");
+        } else if (!checkContainsIllegalCharacters(filename)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "An illegal character was in the filename");
         }
         this.filename = filename;
     }
@@ -129,6 +150,8 @@ public class Image {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "An invalid image format was provided");
         } else if (!checkContainsUnderscoreThumbnail(filenameThumbnail)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The thumbnail filename does not contain an _thumbnail");
+        } else if (!checkContainsIllegalCharacters(filenameThumbnail)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "An illegal character was in the filename");
         }
         this.filenameThumbnail = filenameThumbnail;
     }

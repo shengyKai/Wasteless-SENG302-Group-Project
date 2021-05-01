@@ -7,9 +7,12 @@ import org.junit.jupiter.api.TestInstance;
 import org.seng302.persistence.ImageRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -21,6 +24,8 @@ public class ImageTests {
     ImageRepository imageRepository;
 
     Image testImage;
+
+    final List<String> illegalCharacters = Arrays.asList(".", "\n", "\t", "\\", ",");
 
     /**
      * Creates a test image to be used within these tests
@@ -193,10 +198,16 @@ public class ImageTests {
     void setFilename_changeFilenameValidTypes_filenameChanged() {
         String filenamePNG = "happyboi.png";
         String filenameJPG = "happyboi.jpg";
+        String filenamePNGUpper = "happyboi.PNG";
+        String filenameJPGUpper = "happyboi.JPG";
         testImage.setFilename(filenamePNG);
         assertEquals(filenamePNG, testImage.getFilename());
         testImage.setFilename(filenameJPG);
         assertEquals(filenameJPG, testImage.getFilename());
+        testImage.setFilename(filenamePNGUpper);
+        assertEquals(filenamePNGUpper, testImage.getFilename());
+        testImage.setFilename(filenameJPGUpper);
+        assertEquals(filenameJPGUpper, testImage.getFilename());
     }
 
     /**
@@ -265,10 +276,16 @@ public class ImageTests {
     void setFilenameThumbnail_changeFilenameThumbnailValidTypes_filenameThumbnailChanged() {
         String filenameThumbnailPNG = "happyboi_thumbnail.png";
         String filenameThumbnailJPG = "happyboi_thumbnail.jpg";
+        String filenameThumbnailPNGUpper = "happyboi_thumbnail.PNG";
+        String filenameThumbnailJPGUpper = "happyboi_thumbnail.JPG";
         testImage.setFilenameThumbnail(filenameThumbnailPNG);
         assertEquals(filenameThumbnailPNG, testImage.getFilenameThumbnail());
         testImage.setFilenameThumbnail(filenameThumbnailJPG);
         assertEquals(filenameThumbnailJPG, testImage.getFilenameThumbnail());
+        testImage.setFilenameThumbnail(filenameThumbnailPNGUpper);
+        assertEquals(filenameThumbnailPNGUpper, testImage.getFilenameThumbnail());
+        testImage.setFilenameThumbnail(filenameThumbnailJPGUpper);
+        assertEquals(filenameThumbnailJPGUpper, testImage.getFilenameThumbnail());
     }
 
     /**
@@ -299,6 +316,67 @@ public class ImageTests {
             assertEquals("The thumbnail filename does not contain an _thumbnail", e.getReason());
         } catch (Exception e) { fail(); }
     }
+
+    /**
+     * Tests that an image's filename must not include a newline, \t, two dots, a comma, etc.
+     */
+    @Test
+    void setFilename_changeFilenameIncludeIllegalCharacters_BadRequestException() {
+        for (String characters: illegalCharacters) {
+            try {
+                String filename = "connor/he" + characters + "lp.png";
+                testImage.setFilename(filename);
+                fail();
+            } catch (ResponseStatusException e) {
+                assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+                assertEquals("An illegal character was in the filename", e.getReason());
+            } catch (Exception e) { fail(); }
+        }
+    }
+
+    /**
+     * Tests that an image's filename must not include a newline
+     */
+    @Test
+    void setFilenameThumbnail_changeFilenameThumbnailIncludeIllegalCharacters_BadRequestException() {
+        for (String characters: illegalCharacters) {
+            try {
+                String filenameThumbnail = "connor/he" + characters + "lp_thumbnail.png";
+                testImage.setFilenameThumbnail(filenameThumbnail);
+                fail();
+            } catch (ResponseStatusException e) {
+                assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+                assertEquals("An illegal character was in the filename", e.getReason());
+            } catch (Exception e) { fail(); }
+        }
+    }
+
+    /**
+     * Checks that there cannot be two images with the same filename within the database.
+     */
+    @Test
+    void createImage_ViolateUniqueFilename_Exception() {
+        try {
+            testImage = new Image("help.png", "original_thumbnail.png");
+            imageRepository.save(testImage);
+            fail();
+        } catch (Exception e) { assertEquals(DataIntegrityViolationException.class, e.getClass()); }
+    }
+
+    /**
+     * Checks that there cannot be two images with the same thumbnail filename within the database.
+     */
+    @Test
+    void createImage_ViolateUniqueFilenameThumbnail_BadRequest() {
+        try {
+            testImage = new Image("original.png", "help_thumbnail.png");
+            imageRepository.save(testImage);
+            fail();
+        } catch (Exception e) { assertEquals(DataIntegrityViolationException.class, e.getClass()); }
+    }
+
+
+
 
     //TODO Discuss with team if we should include tests and validation to test if the image at the directory (filename) actually exists
 }
