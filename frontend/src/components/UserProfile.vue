@@ -15,26 +15,122 @@
         <p><b>Member Since:</b> {{ createdMsg }}</p>
       </div>
 
-      <!-- List of avaialable actions -->
+      <!-- List of available actions -->
       <div class="action-menu">
-        <v-tooltip bottom v-if="isActingAsBusiness">
-          <template v-slot:activator="{ on, attrs }">
-            <v-btn
-              icon
-              color="primary"
-              v-bind="attrs"
-              v-on="on"
-              @click="addUserAsAdmin"
-              :disabled="isUserAdminOfActiveBusiness === true"
-              ref="addAdminButton"
-            >
-              <v-icon>mdi-account-plus</v-icon>
-            </v-btn>
+        <v-dialog
+          v-if="isActingAsBusiness && isViewingOwnProfile===false"
+          v-model="removeAdminDialog"
+          persistent
+          max-width="300"
+        >
+          <template #activator="{ on: dialog, attrs}">
+            <v-tooltip bottom >
+              <template #activator="{ on: tooltip}">
+                <v-btn
+                  icon
+                  color="primary"
+                  v-bind="attrs"
+                  v-on="{...tooltip, ...dialog}"
+                  :disabled="isUserAdminOfActiveBusiness === false"
+                  ref="removeAdminButton"
+                >
+                  <v-icon>mdi-account-minus</v-icon>
+                </v-btn>
+              </template>
+              <span> Remove administrator </span>
+            </v-tooltip>
           </template>
-          <span> Add administrator </span>
+          <v-card>
+            <v-card-title class="headline">
+              Are you sure?
+            </v-card-title>
+            <v-card-text>This user will no longer be able to operate this business as an administrator for {{this.$store.state.user.businessesAdministered.find(x => x.id === this.activeRole.id).name}}.</v-card-text>
+            <v-card-actions>
+              <v-spacer/>
+              <v-btn
+                ref="cancelButton"
+                color="green darken-1"
+                text
+                @click="removeAdminDialog = false"
+              >
+                No
+              </v-btn>
+              <v-btn
+                ref="confirmButton"
+                color="green darken-1"
+                text
+                @click="removeAdminDialog = false; removeUserAdmin()"
+              >
+                Yes, Demote
+              </v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-dialog>
+        <v-dialog
+          v-if="isActingAsBusiness && isViewingOwnProfile===false"
+          v-model="addAdminDialog"
+          persistent
+          max-width="300"
+        >
+          <template #activator="{ on: dialog, attrs}">
+            <v-tooltip bottom>
+              <template #activator="{ on: tooltip }">
+                <v-btn
+                  icon
+                  color="primary"
+                  v-bind="attrs"
+                  v-on="{...dialog, ...tooltip}"
+                  :disabled="isUserAdminOfActiveBusiness === true"
+                  ref="addAdminButton"
+                >
+                  <v-icon>mdi-account-plus</v-icon>
+                </v-btn>
+              </template>
+              <span> Add administrator </span>
+            </v-tooltip>
+          </template>
+          <v-card>
+            <v-card-title class="headline">
+              Are you sure?
+            </v-card-title>
+            <v-card-text>This user will be able to act as an administrator for {{this.$store.state.user.businessesAdministered.find(x => x.id === this.activeRole.id).name}}</v-card-text>
+            <v-card-actions>
+              <v-spacer/>
+              <v-btn
+                ref="cancelButton"
+                color="green darken-1"
+                text
+                @click="addAdminDialog = false"
+              >
+                No
+              </v-btn>
+              <v-btn
+                ref="confirmButton"
+                color="green darken-1"
+                text
+                @click="addAdminDialog = false; addUserAsAdmin()"
+              >
+                Yes, promote
+              </v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-dialog>
+        <v-tooltip bottom >
+          <template #activator="{on, attrs}">
+            <v-chip
+              ref="administratorStatus"
+              v-if="user.role==='globalApplicationAdmin'"
+              outlined
+              color="primary"
+              v-on="on"
+              v-bind="attrs"
+            >
+              <v-icon>mdi-account-tie</v-icon>
+            </v-chip>
+          </template>
+          <span>System Administrator</span>
         </v-tooltip>
       </div>
-
     </div>
 
     <v-container fluid>
@@ -52,9 +148,9 @@
           <h4>Phone Number</h4>
           {{ user.phoneNumber }}
         </v-col>
-        <v-col cols="12" sm="6">
+        <v-col class="address" cols="12" sm="6">
           <h4>Home Address</h4>
-          {{ user.homeAddress }}
+          {{ insertAddress(user.homeAddress) }}
         </v-col>
 
         <v-col cols="12">
@@ -76,12 +172,12 @@
 </template>
 
 <script>
-import { getUser, makeBusinessAdmin } from '../api';
+import { getUser, makeBusinessAdmin, removeBusinessAdmin } from '../api';
 import UserAvatar from './utils/UserAvatar';
+import convertAddressToReadableText from './utils/Methods/convertJsonAddressToReadableText';
 
 export default {
   name: 'ProfilePage',
-
   data() {
     return {
       /**
@@ -89,9 +185,10 @@ export default {
        * If null then no profile is displayed
        */
       user: null,
+      removeAdminDialog: false,
+      addAdminDialog: false,
     };
   },
-
   created() {
     if (this.$route.params.id === undefined) {
       this.user = this.$store.state.user;
@@ -138,6 +235,34 @@ export default {
       if (this.user.id === this.$store.state.user?.id) {
         this.$store.commit('setUser', this.user);
       }
+    },
+    async removeUserAdmin() {
+      const role = this.activeRole;
+      if (!this.user || role?.type !== 'business') return;
+      let response = await removeBusinessAdmin(role.id, this.user.id);
+
+      if (typeof response === 'string') {
+        this.$store.commit('setError', response);
+        return;
+      }
+
+      this.user.businessesAdministered.filter(business => business.id !== role.id);
+
+      response = await getUser(this.user.id);
+      if (typeof response === 'string') {
+        this.$store.commit('setError', response);
+        return;
+      }
+
+      // Updates the user properly
+      this.user = response;
+      if (this.user.id === this.$store.state.user?.id) {
+        this.$store.commit('setUser', this.user);
+      }
+    },
+    //have to use a method here to access the method
+    insertAddress(address) {
+      return convertAddressToReadableText(address, "full");
     }
   },
 
@@ -153,6 +278,9 @@ export default {
       if (this.user === undefined) return undefined;
 
       return this.user.businessesAdministered.map(business => business.id).includes(this.activeRole.id);
+    },
+    isViewingOwnProfile() {
+      return (this.user?.id === this.$store.state.user?.id);
     },
     createdMsg() {
       if (this.user.created === undefined) return '';
@@ -182,7 +310,7 @@ export default {
   },
   components: {
     UserAvatar,
-  },
+  }
 };
 </script>
 
@@ -213,5 +341,9 @@ export default {
 
 .link-chip {
   margin-right: 4px;
+}
+
+.address{
+  white-space: pre-line;
 }
 </style>

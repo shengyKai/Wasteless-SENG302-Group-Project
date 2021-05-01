@@ -35,6 +35,14 @@ import vuetify from './plugins/vuetify';
 import router from './plugins/vue-router';
 import './plugins/vuex';
 
+// Set Page Title
+router.afterEach((to, from) => {
+  Vue.nextTick(() => {
+    const title = to.meta.title;
+    document.title = title ? `${title} - Wasteless` : 'Wasteless';
+  });
+});
+
 // Import App
 import App from './App.vue';
 
