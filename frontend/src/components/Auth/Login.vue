@@ -17,11 +17,12 @@
         outlined
         :rules="mandatoryRules.concat(passwordRules).concat(maxCharShortRules)"
       />
-      <!-- Hidden component, only appear when theres errror and show the respond from backend -->
-      <p class="error-text" v-if ="errorMessage !== undefined"> {{errorMessage}} </p>
-
-      <!-- Login Button Direct user into the home page. Invalid credential will trigger a pop up error message -->
     </v-form>
+
+    <!-- Hidden component, only appear when theres errror and show the respond from backend -->
+    <p class="login-error-text" v-if ="errorMessage !== undefined"> {{errorMessage}} </p>
+
+    <!-- Login Button Direct user into the home page. Invalid credential will trigger a pop up error message -->
     <v-btn @click="showHome" type="submit" color="primary" :disabled="!valid">
       LOGIN
     </v-btn>
@@ -79,15 +80,16 @@ export default {
      * Method to direct into home page, embed in a button
      * dispatch details from textfield to store plugin before directing
      * store.dispatch need to await in this case else the globalError might be inconsistent
-     * router.push need to be await else when user click 2 times in a row it will caught Avoided redundant navigation
      */
     async showHome() {
       this.errorMessage = undefined;
       await this.$store.dispatch("login", { email : this.email, password : this.password });
-      this.$router.push("/home");
       this.errorMessage = this.$store.getters.getglobalError;
       this.$store.commit('clearError');
 
+      if(this.errorMessage !== "Invalid credentials") {
+        this.$router.push("/home");
+      }
     },
   },
 };
@@ -96,10 +98,8 @@ export default {
 </script>
 
 <style>
-.error-text {
+.login-error-text {
   color: var(--v-error-base);
   font-size: 140%;
 }
 </style>
-
-
