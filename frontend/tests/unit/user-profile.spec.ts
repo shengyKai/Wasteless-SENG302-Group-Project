@@ -242,51 +242,51 @@ describe('UserProfile.vue', () => {
   });
 
   /**
-   * Tests that the UserProfile has the user's home street address somewhere in the page
+   * Tests that as a normal user, the UserProfile will not show the user's home street address 
    */
-  it('Renders home address', () => {
-    expect(wrapper.text()).toContain('test_street1');
+  it('Does not render street address as normal user', () => {
+    expect(wrapper.text()).not.toContain('test_street1');
   });
 
   /**
-   * Tests that the UserProfile has the user's home address street number somewhere in the page
+   * Tests that as a normal user, the UserProfile will not show the user's home street number 
    */
-  it('Renders home address', () => {
-    expect(wrapper.text()).toContain('test_street_number');
+  it('Does not render street number as normal user', () => {
+    expect(wrapper.text()).not.toContain('test_street_number');
   });
 
   /**
-  * Tests that the UserProfile has the user's home address city somewhere in the page
+  * Tests that as a normal user, the UserProfile has the user's home address city somewhere in the page
   */
-  it('Renders home address', () => {
+  it('Renders city as normal user', () => {
     expect(wrapper.text()).toContain('test_city');
   });
 
   /**
-   * Tests that the UserProfile has the user's home address region somewhere in the page
+   * Tests that as a normal user, the UserProfile has the user's home address region somewhere in the page
    */
-  it('Renders home address', () => {
+  it('Renders region as normal user', () => {
     expect(wrapper.text()).toContain('test_region');
   });
 
   /**
-  * Tests that the UserProfile has the user's home address postcode somewhere in the page
+  * Tests that as a normal user, the UserProfile will not show the user's postcode
   */
-  it('Renders home address', () => {
-    expect(wrapper.text()).toContain('test_postcode');
+  it('Does not render postcode as normal user', () => {
+    expect(wrapper.text()).not.toContain('test_postcode');
   });
 
   /**
-   * Tests that the UserProfile has the user's home address district somewhere in the page
+   * Tests that as a normal user, the UserProfile will not show the user's district
    */
-  it('Renders home address', () => {
-    expect(wrapper.text()).toContain('test_district');
+  it('Does not render district as normal user', () => {
+    expect(wrapper.text()).not.toContain('test_district');
   });
 
   /**
-  * Tests that the UserProfile has the user's home address country somewhere in the page
+  * Tests that as a normal user, the UserProfile has the user's home address country somewhere in the page
   */
-  it('Renders home address', () => {
+  it('Renders country as normal user', () => {
     expect(wrapper.text()).toContain('test_country100');
   });
 
@@ -526,6 +526,8 @@ describe('UserProfile.vue', () => {
    */
   it('If acting as application admin and viewing an admin, then there should be a administrator chip', async () => {
     // To be able to see the role of another user implies you are an admin. No extra steps needed. Just mock the user role.
+    store.state.user = makeTestUser(1, [1, 2], true);
+    store.state.user.role = "globalApplicationAdmin";
     generateWrapper(200);
     await flushQueue();
     let adminChip = wrapper.findComponent({ref:'administratorStatus'});
