@@ -9,7 +9,7 @@
           <div v-if="$store.state.createBusinessDialogShown">
             <CreateBusiness @closeDialog="$store.commit('hideCreateBusiness')" />
           </div>
-          <div v-if="$store.state.createProductDialogShown">
+          <div v-if="$store.state.createProductDialogBusiness !== undefined">
             <CreateProduct @closeDialog="$store.commit('hideCreateProduct')"/>
           </div>
 

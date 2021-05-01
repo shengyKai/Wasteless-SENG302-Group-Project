@@ -2,12 +2,14 @@ package org.seng302.tools;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.seng302.controllers.DGAAController;
 import org.seng302.entities.Location;
 import org.seng302.entities.User;
 import org.seng302.exceptions.SearchFormatException;
 import org.seng302.persistence.BusinessRepository;
 import org.seng302.persistence.UserRepository;
 import org.seng302.persistence.UserSpecificationsBuilder;
+import org.seng302.tools.SearchHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Sort;
@@ -43,6 +45,8 @@ class SearchHelperTest {
     private UserRepository userRepository;
     @Autowired
     private BusinessRepository businessRepository;
+    @Autowired
+    private DGAAController dgaaController;
     /**
      * Speification for repository queries.
      */
@@ -65,6 +69,7 @@ class SearchHelperTest {
         pagingUserList = readUserFile("src/test/testFiles/UserSearchHelperTestData1.csv");
         savedUserList = readUserFile("src/test/testFiles/UserSearchHelperTestData2.csv");
 
+        dgaaController.checkDGAA();
         businessRepository.deleteAll();
         userRepository.deleteAll();
         for (User user : savedUserList) {
@@ -827,13 +832,13 @@ class SearchHelperTest {
     @Test
     public void getSearchResultsOrderedByRelevanceCorrectRelevanceOrderTest() throws ParseException {
         userRepository.deleteAll();
-        User donaldDuck = new User.Builder().withFirstName("Donald").withLastName("Duck").withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Christchurch,New Zealand," +
+        User donaldDuck = new User.Builder().withFirstName("Donald").withLastName("Duck").withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
                 "Canterbury,8041"))
                 .withDob("1934-06-09").withEmail("donald.duck@waddlemail.com").withPassword("HonkHonk1").build();
-        User donaldSmith = new User.Builder().withFirstName("Donald").withLastName("Smith").withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Christchurch,New Zealand," +
+        User donaldSmith = new User.Builder().withFirstName("Donald").withLastName("Smith").withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
                 "Canterbury,8041"))
                 .withDob("1994-03-08").withEmail("donald.smith@gmail.com").withPassword("abc123456789").build();
-        User lucyMcDonald = new User.Builder().withFirstName("Lucy").withLastName("McDonald").withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Christchurch,New Zealand," +
+        User lucyMcDonald = new User.Builder().withFirstName("Lucy").withLastName("McDonald").withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
                 "Canterbury,8041"))
                 .withDob("2000-11-21").withEmail("lucymcdonald@hotmail.com").withPassword("password123").build();
         userRepository.save(lucyMcDonald);
@@ -857,13 +862,13 @@ class SearchHelperTest {
     public void getSearchResultsOrderedByRelevanceCorrectRelevanceOrderReverseTrueTest() throws ParseException {
         userRepository.deleteAll();
         User donaldDuck = new User.Builder().withFirstName("Donald").withLastName("Duck").withAddress(
-                Location.covertAddressStringToLocation("4,Rountree Street,Christchurch,New Zealand,Canterbury,8041"))
+                Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand,Canterbury,8041"))
                 .withDob("1934-06-09").withEmail("donald.duck@waddlemail.com").withPassword("HonkHonk1").build();
         User donaldSmith = new User.Builder().withFirstName("Donald").withLastName("Smith").withAddress(
-                Location.covertAddressStringToLocation("4,Rountree Street,Christchurch,New Zealand,Canterbury,8041"))
+                Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand,Canterbury,8041"))
                 .withDob("1994-03-08").withEmail("donald.smith@gmail.com").withPassword("abc123456789").build();
         User lucyMcDonald = new User.Builder().withFirstName("Lucy").withLastName("McDonald").withAddress(
-                Location.covertAddressStringToLocation("4,Rountree Street,Christchurch,New Zealand,Canterbury,8041"))
+                Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand,Canterbury,8041"))
                 .withDob("2000-11-21").withEmail("lucymcdonald@hotmail.com").withPassword("password123").build();
         userRepository.save(lucyMcDonald);
         userRepository.save(donaldDuck);
@@ -909,6 +914,18 @@ class SearchHelperTest {
         }
     }
 
-
+    /**
+     * Verify that when constructUserSpecificationFromSearchQuery is called with "DGAA" in double or single
+     * quotes as its argument, it will not return the DGAA result.
+     */
+    @Test
+    public void constructUserSpecificationFromSearchQueryToMatchDGAATest() {
+        Specification<User> specificationDouble = SearchHelper.constructUserSpecificationFromSearchQuery("\"DGAA\"");
+        List<User> matchesDouble = userRepository.findAll(specificationDouble);
+        Specification<User> specificationSingle = SearchHelper.constructUserSpecificationFromSearchQuery("\'DGAA\'");
+        List<User> matchesSingle = userRepository.findAll(specificationSingle);
+        assertEquals(0, matchesDouble.size());
+        assertEquals(0, matchesSingle.size());
+    }
 
 }

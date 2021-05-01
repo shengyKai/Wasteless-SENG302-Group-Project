@@ -7,7 +7,16 @@ import org.junit.Ignore;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockitoAnnotations;
+import org.mockito.internal.matchers.apachecommons.ReflectionEquals;
+import org.seng302.entities.Business;
+import org.seng302.entities.Location;
+import org.seng302.entities.User;
 import org.seng302.exceptions.EmailInUseException;
+import org.mockito.internal.matchers.apachecommons.ReflectionEquals;
+import org.seng302.entities.Business;
+import org.seng302.entities.Location;
+import org.seng302.entities.User;
+import org.seng302.tools.PasswordAuthenticator;
 import org.seng302.persistence.BusinessRepository;
 import org.seng302.persistence.UserRepository;
 import org.seng302.tools.PasswordAuthenticator;
@@ -48,7 +57,7 @@ public class UserTests {
                 .withBio("g")
                 .withDob("2001-03-11")
                 .withPhoneNumber("123-456-7890")
-                .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Christchurch,New Zealand," +
+                .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
                         "Canterbury,8041"))
                 .build();
         testBuilder = new User.Builder()
@@ -61,7 +70,7 @@ public class UserTests {
                 .withBio("Likes long walks on the beach")
                 .withDob("2001-03-11")
                 .withPhoneNumber("+64 3 555 0129")
-                .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Christchurch,New Zealand," +
+                .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
                         "Canterbury,8041"));
         MockitoAnnotations.openMocks(this);
     }
@@ -78,11 +87,11 @@ public class UserTests {
         User testUser2 = testBuilder.build();
         userRepository.save(testUser2);
         Business testBusiness1 = new Business.Builder().withName("Corellis").withBusinessType("Accommodation and Food Services")
-        .withAddress(Location.covertAddressStringToLocation("46,Victoria Road,Auckland,Auckland,New Zealand,0624"))
+        .withAddress(Location.covertAddressStringToLocation("46,Victoria Road,Ashburton,Auckland,Auckland,New Zealand,0624"))
         .withPrimaryOwner(testUser).withDescription("Great coffee").build();
         businessRepository.save(testBusiness1);
         Business testBusiness2 = new Business.Builder().withName("Cakes n Ladders").withBusinessType("Accommodation and Food Services")
-        .withAddress(Location.covertAddressStringToLocation("173,Symonds Street,Auckland,Auckland,New Zealand,1010"))
+        .withAddress(Location.covertAddressStringToLocation("173,Symonds Street,Ashburton,Auckland,Auckland,New Zealand,1010"))
         .withPrimaryOwner(testUser2).withDescription("Chill spot").build();
         businessRepository.save(testBusiness2);
         testBusiness2.addAdmin(testUser);
@@ -570,39 +579,14 @@ public class UserTests {
      */
     @Test
     public void checkValidAddress() {
-        String[] validAddresses = { "20,Elizabeth Street,Christchurch,New Zealand,Canterbury,8041",
-                "10,Made Up Street,Los Angeles,United States of Not Real,Fakeland,99999",
-                "49,You Would Not,Believe,Your,Eyes,11111" };
+        String[] validAddresses = { "20,Elizabeth Street,Ashburton,Christchurch,New Zealand,Canterbury,8041",
+                "10,Made Up Street,Ashburton,Los Angeles,United States of Not Real,Fakeland,99999",
+                "49,You Would Not,Ashburton,Believe,Your,Eyes,11111",
+                "20,Elizabeth Street,,Christchurch,New Zealand,Canterbury,8041"};
         for (String address : validAddresses) {
-            testUser.setAddress(address);
+            testUser.setAddress(Location.covertAddressStringToLocation(address));
             Location location = Location.covertAddressStringToLocation(address);
-            assertEquals(testUser.getAddress(), location);
-        }
-    }
-
-    /**
-     * Checks an empty address string will not be set as the user's address
-     */
-    @Test
-    public void checkInvalidAddressEmpty() {
-        try {
-            testUser.setAddress("");
-            fail("A Forbidden exception was expected, but not thrown");
-        } catch (ResponseStatusException expectedException) { }
-    }
-
-    /**
-     * Checks several address strings that are too long (above 255 letters long) will not be set as the user's address
-     */
-    @Test
-    public void checkInvalidAddressTooLong() {
-        String[] invalidAddresses = { "This is the story of a student hoping one day to become a developer he sat here writing this long sentence hoping to reach exactly two hundred and fifty six characters however this was a challenge if he wanted to make a sentence that would read well nicely",
-                "This is the story of an address hoping one day to become a developer he sat here writing this long sentence hoping to reach exactly two hundred and fifty six characters however this was a challenge if he wanted to make a sentence that would read well nicely This is the story of a student hoping one day to become a developer he sat here writing this long sentence hoping to reach exactly two hundred and fifty six characters however this was a challenge if he wanted to make a sentence that would read well nicely"};
-        for (String address : invalidAddresses) {
-            try {
-                testUser.setAddress(address);
-                fail("A Forbidden exception was expected, but not thrown");
-            } catch (ResponseStatusException expectedException) { }
+            assertTrue(new ReflectionEquals(location).matches(testUser.getAddress()));
         }
     }
 
@@ -965,7 +949,7 @@ public class UserTests {
                 .withBio("Likes long walks on the beach")
                 .withDob("2001-03-11")
                 .withPhoneNumber("+64 3 555 0129")
-                .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Christchurch,New Zealand," +
+                .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
                         "Canterbury,8041"))
                 .build();
         businessRepository.deleteAll();
@@ -1002,7 +986,7 @@ public class UserTests {
                 .withBio("Likes long walks on the beach")
                 .withDob("2000-03-11")
                 .withPhoneNumber("+64 3 555 0129")
-                .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Christchurch,New Zealand," +
+                .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
                         "Canterbury,8041"));
         assertThrows(ResponseStatusException.class, testBuilder::build);
     }
@@ -1021,7 +1005,7 @@ public class UserTests {
                 .withBio("Likes long walks on the beach")
                 .withDob("2000-03-11")
                 .withPhoneNumber("+64 3 555 0129")
-                .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Christchurch,New Zealand," +
+                .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
                         "Canterbury,8041"));
         assertThrows(ResponseStatusException.class, testBuilder::build);
     }
@@ -1040,7 +1024,7 @@ public class UserTests {
                 .withBio("Likes long walks on the beach")
                 .withDob("2000-03-11")
                 .withPhoneNumber("+64 3 555 0129")
-                .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Christchurch,New Zealand," +
+                .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
                         "Canterbury,8041"));
         assertThrows(ResponseStatusException.class, testBuilder::build);
     }
@@ -1059,7 +1043,7 @@ public class UserTests {
                 .withBio("Likes long walks on the beach")
                 .withDob("2000-03-11")
                 .withPhoneNumber("+64 3 555 0129")
-                .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Christchurch,New Zealand," +
+                .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
                         "Canterbury,8041"));
         assertThrows(ResponseStatusException.class, testBuilder::build);
     }
@@ -1096,7 +1080,7 @@ public class UserTests {
                 .withPassword("1337-H%nt3r2")
                 .withBio("Likes long walks on the beach")
                 .withPhoneNumber("+64 3 555 0129")
-                .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Christchurch,New Zealand," +
+                .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
                         "Canterbury,8041"));
         assertThrows(ResponseStatusException.class, testBuilder::build);
     }
@@ -1116,7 +1100,7 @@ public class UserTests {
                 .withBio("Likes long walks on the beach")
                 .withDob("2001-03-11")
                 .withPhoneNumber("+64 3 555 0129")
-                .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Christchurch,New Zealand," +
+                .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
                         "Canterbury,8041"));
         User testUser = testBuilder.build();
         assertNull(testUser.getMiddleName());
@@ -1137,7 +1121,7 @@ public class UserTests {
                 .withBio("Likes long walks on the beach")
                 .withDob("2001-03-11")
                 .withPhoneNumber("+64 3 555 0129")
-                .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Christchurch,New Zealand," +
+                .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
                         "Canterbury,8041"));
         User testUser = testBuilder.build();
         assertNull(testUser.getNickname());
@@ -1157,7 +1141,7 @@ public class UserTests {
                 .withPassword("1337-H%nt3r2")
                 .withDob("2001-03-11")
                 .withPhoneNumber("+64 3 555 0129")
-                .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Christchurch,New Zealand," +
+                .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
                         "Canterbury,8041"));
         User testUser = testBuilder.build();
         assertNull(testUser.getBio());
@@ -1178,7 +1162,7 @@ public class UserTests {
                 .withPassword("1337-H%nt3r2")
                 .withBio("Likes long walks on the beach")
                 .withDob("2000-03-11")
-                .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Christchurch,New Zealand," +
+                .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
                         "Canterbury,8041"));
         User testUser = testBuilder.build();
         assertNull(testUser.getPhNum());
@@ -1261,7 +1245,8 @@ public class UserTests {
     @Test
     public void buildWithAddressTest() {
         User user = testBuilder.build();
-        assertEquals(Location.covertAddressStringToLocation("4,Rountree Street,Christchurch,New Zealand,Canterbury,8041"), user.getAddress());
+        //ReflectionEquals.match() matches the contents of the object instead of the object itself.
+        assertTrue(new ReflectionEquals(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand,Canterbury,8041")).matches(user.getAddress()));
     }
 
     /**

@@ -40,6 +40,11 @@ public class LocationStepDefinition {
         Assert.assertEquals(theAddress.getStreetName(), streetName);
     }
 
+    @Then("the address has the district {string}")
+    public void theAddressHasTheDistrict(String district) {
+        Assert.assertEquals(theAddress.getDistrict(), district);
+    }
+
     @Then("the address has the city name {string}")
     public void theAddressHasTheCityName(String city) {
         Assert.assertEquals(theAddress.getCity(), city);

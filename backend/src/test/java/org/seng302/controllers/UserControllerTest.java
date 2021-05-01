@@ -109,7 +109,7 @@ public class UserControllerTest {
                 .withBio("Likes long walks on the beach")
                 .withDob("2001-03-11")
                 .withPhoneNumber("+64 3 555 0129")
-                .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Christchurch,New Zealand," +
+                .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
                         "Canterbury,8041"))
                 .build();
         businessRepository.deleteAll();
@@ -710,7 +710,7 @@ public class UserControllerTest {
 
         // Check if user has been updated
         User updatedUser = userRepository.findByEmail("johnsmith99@gmail.com");
-        assertEquals( "admin", updatedUser.getRole());
+        assertEquals( "globalApplicationAdmin", updatedUser.getRole());
     }
 
     /**
@@ -778,7 +778,7 @@ public class UserControllerTest {
         setUpDGAAAuthCode(); // give us dgaa auth
         // Set up our user to have admin rights
         User john = userRepository.findByEmail("johnsmith99@gmail.com");
-        john.setRole("admin");
+        john.setRole("globalApplicationAdmin");
         userRepository.save(john);
 
         // perform

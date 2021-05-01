@@ -16,11 +16,13 @@ export function setCookie(name: string, value: string|number) {
  */
 export function getCookie(name: string) {
   let cookies = document.cookie.split(';');
-  let target = null;
-  cookies.forEach(cookie => {
-    if (cookie.startsWith(`${name}=`)) target = cookie;
-  });
-  return target;
+  for (let cookie of cookies) {
+    cookie = cookie.trim();
+    if (cookie.startsWith(name + '=')) {
+      return cookie;
+    }
+  }
+  return null;
 }
 
 /**
