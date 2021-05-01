@@ -255,13 +255,14 @@ public class BusinessTests {
 
     /**
      * Check that when setName is called with a name which contains characters which are not letters, numbers or
-     * the characters "@ $ % & . , ; : - _", a response status exception with status code 400 will be thrown and the
+     * the characters "! " # $ % & ' ( ) * + , - . / : ; < = > ? @ [ \ ] ^ _ ` { | } ~",
+     * a response status exception with status code 400 will be thrown and the
      * business's name will not be changed.
      */
     @Test
     public void setNameInvalidCharacterTest() {
         String originalName = testBusiness1.getName();
-        String[] invalidCharacterNames = {"?", "^^^^^^^", "business*", "!This is not allowed", "(or this)"};
+        String[] invalidCharacterNames = {"\n", "»»»»»", "business¢", "½This is not allowed", "¡or this¡"};
         for (String name : invalidCharacterNames) {
             ResponseStatusException e = assertThrows(ResponseStatusException.class, () -> {
                 testBusiness1.setName(name);
@@ -395,7 +396,7 @@ public class BusinessTests {
     @Test
     public void setDescriptionInvalidCharacterTest() {
         String originalDescription = testBusiness1.getDescription();
-        String[] invalidCharacterDescriptions = {"?", "^^^^^^^", "business*", "!This is not allowed", "(or this)"};
+        String[] invalidCharacterDescriptions = {"ƒ", "»»»»»", "business¢", "½This is not allowed", "¡or this¡"};
         for (String description : invalidCharacterDescriptions) {
             ResponseStatusException e = assertThrows(ResponseStatusException.class, () -> {
                 testBusiness1.setDescription(description);
