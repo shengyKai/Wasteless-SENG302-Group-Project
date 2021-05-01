@@ -44,6 +44,10 @@ public class Product {
     @JoinColumn(name = "business_id")
     private Business business;
 
+    @OneToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "image_id")
+    private Image productImage;
+
     /**
      * Get the id of the product (Is globally unique)
      * @return the id of the product
@@ -91,6 +95,12 @@ public class Product {
      * @return the business
      */
     public Business getBusiness() { return business; }
+
+    /**
+     * Get the image object associated with this product
+     * @return the image
+     */
+    public Image getProductImage() { return productImage; }
 
     /**
      * Sets the code of the product
@@ -188,6 +198,14 @@ public class Product {
     private void setBusiness(Business business) {
         this.business = business;
         business.addToCatalogue(this);
+    }
+
+    /**
+     * Sets the image associated with the product
+     * @param productImage the product image
+     */
+    private void setProductImage(Image productImage) {
+        this.productImage = productImage;
     }
 
     /**
