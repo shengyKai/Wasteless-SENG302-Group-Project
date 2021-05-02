@@ -50,9 +50,9 @@ describe('index.vue', () => {
     expect(wrapper.findComponent(Register).exists()).toBeTruthy();
   });
 
-  it("Testing out the log in page button, should call function login which redirects to Profile Page from " +
+  it("Testing out the log in page button, should call function login which redirects to Home Page from " +
     "Login Page", async () => {
-    //initially wrapper should not be able to find UserProfile page as its in the Login page
+    //initially wrapper should not be able to find HomePage as its in the Login page
     //checking Login page existence
     expect(wrapper.findComponent(Login).exists()).toBeTruthy();
 
@@ -64,12 +64,10 @@ describe('index.vue', () => {
     await passwordInput.setValue('hello123');
 
     const loginButton = wrapper.findComponent(Login).find(".v-btn");
-    //should be disabled at first because DOM is still not updated
-    expect(loginButton.props().disabled).toBeTruthy();
 
-    await Vue.nextTick(() => {
-      expect(loginButton.props().disabled).toBeFalsy();
-    });
+    await Vue.nextTick();
+
+    expect(loginButton.props().disabled).toBeFalsy();
 
     await loginButton.trigger('click');
 
@@ -101,6 +99,14 @@ describe('Login.vue', () => {
     });
   });
 
+  /**
+   * Forces the form to be validated
+   */
+  function validateForm() {
+    const form = wrapper.findComponent({ name: 'v-form'});
+    (form.vm as any).validate();
+  }
+
   it("Testing out the inputs for the email and password, such that the user can only press the login button " +
     "after inputting valid formats for both fields", async () => {
     //find the login button by the component
@@ -121,9 +127,13 @@ describe('Login.vue', () => {
     //Use it immediately after you’ve changed some data to wait for the DOM update.
     //In this case, we just changed some data on the email and password field, so we need to call nextTick for a DOM
     //update.
-    await Vue.nextTick(() => {
-      expect(loginButton.props().disabled).toBeTruthy();
-    });
+    await Vue.nextTick();
+
+    validateForm();
+
+    await Vue.nextTick();
+
+    expect(loginButton.props().disabled).toBeTruthy();
   });
 
   it("Testing for invalid email format,with no '@'", async () => {
@@ -132,6 +142,9 @@ describe('Login.vue', () => {
     await wrapper.setData({
       email: "someemail.com"
     });
+
+    validateForm();
+
     await Vue.nextTick(() => {
       expect(loginButton.props().disabled).toBeTruthy();
     });
@@ -143,6 +156,9 @@ describe('Login.vue', () => {
     await wrapper.setData({
       email: "@gmail.com"
     });
+
+    validateForm();
+
     await Vue.nextTick(() => {
       expect(loginButton.props().disabled).toBeTruthy();
     });
@@ -154,6 +170,9 @@ describe('Login.vue', () => {
     await wrapper.setData({
       email: "fsefsgr@gmailcom"
     });
+
+    validateForm();
+
     await Vue.nextTick(() => {
       expect(loginButton.props().disabled).toBeTruthy();
     });
@@ -165,6 +184,9 @@ describe('Login.vue', () => {
     await wrapper.setData({
       email: ""
     });
+
+    validateForm();
+
     await Vue.nextTick(() => {
       expect(loginButton.props().disabled).toBeTruthy();
     });
@@ -176,63 +198,19 @@ describe('Login.vue', () => {
     await wrapper.setData({
       email: 'a'.repeat(101)
     });
+
+    validateForm();
+
     await Vue.nextTick(() => {
       expect(loginButton.props().disabled).toBeTruthy();
     });
   });
 
-  it("Testing for invalid password format, with no numbers", async () => {
-    const loginButton = wrapper.find(".v-btn");
-
+  it('Tests that errorMessage is displayed if not undefined', async () => {
     await wrapper.setData({
-      password: "hello"
+      errorMessage: 'test_error_message',
     });
-    await Vue.nextTick(() => {
-      expect(loginButton.props().disabled).toBeTruthy();
-    });
-  });
 
-  it("Testing for invalid password format, with no alphabets", async () => {
-    const loginButton = wrapper.find(".v-btn");
-
-    await wrapper.setData({
-      password: "123455678"
-    });
-    await Vue.nextTick(() => {
-      expect(loginButton.props().disabled).toBeTruthy();
-    });
-  });
-
-  it("Testing for invalid password format, with less than 7 characters", async () => {
-    const loginButton = wrapper.find(".v-btn");
-
-    await wrapper.setData({
-      password: "abcd1"
-    });
-    await Vue.nextTick(() => {
-      expect(loginButton.props().disabled).toBeTruthy();
-    });
-  });
-
-  it("Testing for invalid password format, empty password field", async () => {
-    const loginButton = wrapper.find(".v-btn");
-
-    await wrapper.setData({
-      password: ""
-    });
-    await Vue.nextTick(() => {
-      expect(loginButton.props().disabled).toBeTruthy();
-    });
-  });
-
-  it("Testing for invalid password format, over character limit", async () => {
-    const loginButton = wrapper.find(".v-btn");
-
-    await wrapper.setData({
-      password: 'a'.repeat(101)
-    });
-    await Vue.nextTick(() => {
-      expect(loginButton.props().disabled).toBeTruthy();
-    });
+    expect(wrapper.text()).toContain('test_error_message');
   });
 });
