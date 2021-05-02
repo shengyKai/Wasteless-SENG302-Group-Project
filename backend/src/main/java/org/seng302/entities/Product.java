@@ -204,7 +204,7 @@ public class Product {
      * Sets the image associated with the product
      * @param productImage the product image
      */
-    private void setProductImage(Image productImage) {
+    public void setProductImage(Image productImage) {
         this.productImage = productImage;
     }
 

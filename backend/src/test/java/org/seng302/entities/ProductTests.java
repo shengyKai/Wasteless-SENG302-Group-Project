@@ -341,7 +341,7 @@ class ProductTests {
                     .build()
         );
 
-        Product foundProduct = productRepository.findByBusinessAndProductCode(testBusiness1, "NATHAN-APPLE-70");
+        Product foundProduct = productRepository.findByBusinessAndProductCode(testBusiness1, "NATHAN-APPLE-70").get();
         assertNotNull(foundProduct);
 
         assertEquals(product.getID(), foundProduct.getID());
@@ -370,7 +370,7 @@ class ProductTests {
                         .build()
         );
 
-        Product foundProduct = productRepository.findByBusinessAndProductCode(testBusiness1, "NATHAN-APPLE-70");
+        Product foundProduct = productRepository.findByBusinessAndProductCode(testBusiness1, "NATHAN-APPLE-70").get();
         assertNull(foundProduct);
     }
 

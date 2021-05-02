@@ -6,6 +6,8 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 @Repository
 public interface ProductRepository extends CrudRepository<Product, Long>{
 
@@ -16,6 +18,6 @@ public interface ProductRepository extends CrudRepository<Product, Long>{
          * @return a single product within the business's catalogue that matches the id of said business and the code
          * of the product
          */
-        Product findByBusinessAndProductCode(@Param("business") Business business,
-                                             @Param("productCode") String productCode);
+        Optional<Product> findByBusinessAndProductCode(@Param("business") Business business,
+                                                       @Param("productCode") String productCode);
 }

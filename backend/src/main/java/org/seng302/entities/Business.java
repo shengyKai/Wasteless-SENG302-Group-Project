@@ -55,6 +55,22 @@ public class Business {
 
 
     /**
+     *  Checks if the product exists within the business's product catalogue
+     * @param business the business
+     * @param productCode the product code of the given product
+     * @return true if the product exists within the business, false otherwise
+     */
+    //TODO write unit tests for this class
+    public static boolean checkProductExistsWithinCatalogue(Business business, String productCode) {
+        for (Product product: business.getCatalogue()) {
+            if (product.getProductCode().equals(productCode)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * Gets the id
      * @return Business Id
      */

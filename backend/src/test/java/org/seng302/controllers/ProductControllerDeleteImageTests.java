@@ -1,20 +1,30 @@
 package org.seng302.controllers;
 
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-import org.seng302.entities.Business;
-import org.seng302.entities.Location;
-import org.seng302.entities.Product;
-import org.seng302.entities.User;
+import org.junit.Ignore;
+import org.junit.jupiter.api.*;
+import org.junit.runner.RunWith;
+import org.seng302.entities.*;
 import org.seng302.persistence.BusinessRepository;
+import org.seng302.persistence.ImageRepository;
 import org.seng302.persistence.ProductRepository;
 import org.seng302.persistence.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
+import javax.servlet.http.Cookie;
 import java.text.ParseException;
+import java.util.HashMap;
 
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+@RunWith(SpringRunner.class)
+@SpringBootTest
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@AutoConfigureMockMvc
 public class ProductControllerDeleteImageTests {
 
     @Autowired
@@ -25,10 +35,35 @@ public class ProductControllerDeleteImageTests {
     private BusinessRepository businessRepository;
     @Autowired
     private ProductRepository productRepository;
+    @Autowired
+    private ImageRepository imageRepository;
 
     private User testUser;
     private Business testBusiness;
     private Product testProduct;
+    private Image testImage;
+
+    private User testUser2;
+    private Business testBusiness2;
+    private Product testProduct2;
+
+    private final HashMap<String, Object> sessionAuthToken = new HashMap<>();
+    private Cookie authCookie;
+
+    /**
+     * This method creates an authentication code for sessions and cookies.
+     */
+    private void setUpAuthCode(boolean valid) {
+        StringBuilder authCodeBuilder = new StringBuilder();
+        authCodeBuilder.append("0".repeat(64));
+        String authCode = authCodeBuilder.toString();
+        if (valid) {
+            sessionAuthToken.put("AUTHTOKEN", authCode);
+        } else {
+            sessionAuthToken.put("AUTHTOKEN", "GIBBERISH");
+        }
+        authCookie = new Cookie("AUTHTOKEN", authCode);
+    }
 
     /**
      * Creates a user, business and product objects for use within the unit tests, where the
@@ -37,6 +72,11 @@ public class ProductControllerDeleteImageTests {
      * @throws ParseException from the date attribute within the user object
      */
     private void setUpTestObjects() throws ParseException {
+        userRepository.deleteAll();
+        businessRepository.deleteAll();
+        imageRepository.deleteAll();
+        productRepository.deleteAll();
+
         testUser = new User.Builder()
                 .withFirstName("Fergus")
                 .withMiddleName("Connor")
@@ -49,7 +89,6 @@ public class ProductControllerDeleteImageTests {
                 .withPhoneNumber("+64 27 370 2682")
                 .withAddress(Location.covertAddressStringToLocation("6,Help Street,Place,Dunedin,New Zelaand,Otago,6959"))
                 .build();
-        userRepository.deleteAll();
         userRepository.save(testUser);
 
         testBusiness = new Business.Builder()
@@ -59,8 +98,10 @@ public class ProductControllerDeleteImageTests {
                 .withDescription("Helps industries hopefully")
                 .withPrimaryOwner(testUser)
                 .build();
-        businessRepository.deleteAll();
         businessRepository.save(testBusiness);
+
+        testImage = new Image("photo_of_connor.png", "photo_of_connor_thumbnail.png");
+        imageRepository.save(testImage);
 
         testProduct = new Product.Builder()
                 .withProductCode("PieceOfFish69")
@@ -70,15 +111,53 @@ public class ProductControllerDeleteImageTests {
                 .withRecommendedRetailPrice("3.20")
                 .withBusiness(testBusiness)
                 .build();
-        productRepository.deleteAll();
+        testProduct.setProductImage(testImage);
         productRepository.save(testProduct);
 
         testBusiness.addToCatalogue(testProduct);
         businessRepository.save(testBusiness);
+
+
+        testUser2 = new User.Builder()
+                .withFirstName("Ferguss")
+                .withMiddleName("Connorr")
+                .withLastName("Hitchcockk")
+                .withNickName("Fergg")
+                .withEmail("fergus.hitchcockk@gmail.com")
+                .withPassword("IDoLikeBreaks69#H3!pp")
+                .withBio("Did you know I had a second last name Yarker two")
+                .withDob("1999-07-18")
+                .withPhoneNumber("+64 27 470 2682")
+                .withAddress(Location.covertAddressStringToLocation("7,Help Street,Place,Dunedin,New Zelaand,Otago,6959"))
+                .build();
+        userRepository.save(testUser2);
+
+        testBusiness2 = new Business.Builder()
+                .withName("Help Industries")
+                .withAddress(Location.covertAddressStringToLocation("6,Help Street,Place,Dunedin,New Zelaand,Otago,6959"))
+                .withBusinessType("Accommodation and Food Services")
+                .withDescription("Helps industries hopefully")
+                .withPrimaryOwner(testUser2)
+                .build();
+        businessRepository.save(testBusiness2);
+
+        testProduct2 = new Product.Builder()
+                .withProductCode("PieceOfFishy69")
+                .withName("A Piece of Fishy")
+                .withDescription("A fishy but only a piece of it remains")
+                .withManufacturer("Tokyo Fishying LTD")
+                .withRecommendedRetailPrice("4.20")
+                .withBusiness(testBusiness)
+                .build();
+        productRepository.save(testProduct2);
+
+        testBusiness2.addToCatalogue(testProduct2);
+        businessRepository.save(testBusiness2);
     }
 
-    @BeforeAll
+    @BeforeEach
     void setUp() throws ParseException {
+        setUpAuthCode(true);
         setUpTestObjects();
     }
 
@@ -87,75 +166,130 @@ public class ProductControllerDeleteImageTests {
         userRepository.deleteAll();
         businessRepository.deleteAll();
         productRepository.deleteAll();
+        imageRepository.deleteAll();
     }
 
     /**
      * Tests using the delete product image method to see if a product with an image will have its image deleted.
      * This is done by calling the API endpoint to delete a product image and checking if it not longer has an image
      */
+    @Disabled
     @Test
-    void deleteProductImage_hasImage_imageDeleted() {
-
+    void deleteProductImage_hasImage_imageDeleted() throws Exception {
+        String url = String.format("/businesses/%d/products/%s/images/%d",
+                testBusiness.getId(), testProduct.getProductCode(), testImage.getID());
+        mockMvc.perform( MockMvcRequestBuilders
+                .delete(url)
+                .sessionAttrs(sessionAuthToken)
+                .cookie(authCookie))
+                .andExpect(status().isOk());
     }
 
     /**
      * Tests using the delete product image method to see if a product without an image will respond with the not
      * acceptable response code.
      */
+    @Disabled
     @Test
-    void deleteProductImage_noImage_406Response() {
-
+    void deleteProductImage_noImage_406Response() throws Exception {
+        String url = String.format("/businesses/%d/products/%s/images/%d",
+                testBusiness.getId(), testProduct.getProductCode(), 999);
+        testProduct.setProductImage(null);
+        productRepository.save(testProduct);
+        mockMvc.perform( MockMvcRequestBuilders
+                .delete(url)
+                .sessionAttrs(sessionAuthToken)
+                .cookie(authCookie))
+                .andExpect(status().isNotAcceptable());
     }
 
     /**
      * Tests using the delete image method to see if a request with an invalid business ID will return a not acceptable
      * response code.
      */
+    @Disabled
     @Test
-    void deleteProductImage_invalidBusinessID_406Response() {
-
+    void deleteProductImage_invalidBusinessID_406Response() throws Exception {
+        String url = String.format("/businesses/%d/products/%s/images/%d",
+                999, testProduct.getProductCode(), testImage.getID());
+        mockMvc.perform( MockMvcRequestBuilders
+                .delete(url)
+                .sessionAttrs(sessionAuthToken)
+                .cookie(authCookie))
+                .andExpect(status().isNotAcceptable());
     }
 
     /**
      * Tests using the delete image method to see if a request with an invalid product ID will return a not acceptable
      * response code.
      */
+    @Disabled
     @Test
-    void deleteProductImage_invalidProductID_406Response() {
-
+    void deleteProductImage_invalidProductID_406Response() throws Exception {
+        String url = String.format("/businesses/%d/products/%s/images/%d",
+                testBusiness.getId(), "NOTAPRODUCT999", testImage.getID());
+        mockMvc.perform( MockMvcRequestBuilders
+                .delete(url)
+                .sessionAttrs(sessionAuthToken)
+                .cookie(authCookie))
+                .andExpect(status().isNotAcceptable());
     }
 
     /**
      * Tests using the delete product image method to see if a product with a valid authentication token has permission
      * to delete an image.
      */
+    @Disabled
     @Test
-    void deleteProductImage_validAuthToken_hasPermission() {
-
+    void deleteProductImage_validAuthToken_hasPermission() throws Exception {
+        String url = String.format("/businesses/%d/products/%s/images/%d",
+                testBusiness.getId(), testProduct.getProductCode(), testImage.getID());
+        mockMvc.perform( MockMvcRequestBuilders
+                .delete(url)
+                .sessionAttrs(sessionAuthToken)
+                .cookie(authCookie))
+                .andExpect(status().isOk());
     }
 
     /**
      * Tests using the delete product image method to see if a user without a authentication token cannot delete an image.
      * A unauthorised response code should be given back when the API endpoint is called under these conditions.
      */
+    @Disabled
     @Test
-    void deleteProductImage_noAuthToken_401Response() {
-
+    void deleteProductImage_noAuthToken_401Response() throws Exception {
+        String url = String.format("/businesses/%d/products/%s/images/%d",
+                testBusiness.getId(), testProduct.getProductCode(), testImage.getID());
+        mockMvc.perform( MockMvcRequestBuilders
+                .delete(url)
+                .sessionAttrs(null)
+                .cookie(authCookie))
+                .andExpect(status().isUnauthorized());
     }
 
     /**
      * Tests using the delete product image method to see if a user without an invalid authentication token cannot delete
      * an image. A unauthorised response code should be given back when the API endpoint is called under these conditions.
      */
+    @Disabled
     @Test
-    void deleteProductImage_invalidAuthToken_401Response() {
-
+    void deleteProductImage_invalidAuthToken_401Response() throws Exception {
+        String url = String.format("/businesses/%d/products/%s/images/%d",
+                testBusiness.getId(), testProduct.getProductCode(), testImage.getID());
+        setUpAuthCode(false);
+        mockMvc.perform( MockMvcRequestBuilders
+                .delete(url)
+                .sessionAttrs(sessionAuthToken)
+                .cookie(authCookie))
+                .andExpect(status().isUnauthorized());
     }
 
     /**
      * Tests using the delete product image method to see if a user who is not a DGAA and just a regular user cannot
      * delete the image.
      */
+    //TODO note to Connor - Ask Josh for help
+    @Disabled
     @Test
     void deleteProductImage_isNotDGAA_403Response() {
 
@@ -164,6 +298,8 @@ public class ProductControllerDeleteImageTests {
     /**
      * Tests using the delete image method to see if a DGAA without being a business owner can delete images products.
      */
+    //TODO note to Connor - Ask Josh for help
+    @Disabled
     @Test
     void deleteProductImage_isDGAA_imageDeleted() {
 
@@ -173,26 +309,47 @@ public class ProductControllerDeleteImageTests {
      * Tests using the delete image method to see if the business administrator can delete images within there
      * businesses product catalogue.
      */
+    @Disabled
     @Test
-    void deleteProductImage_isBusinessAdmin_imageDeleted() {
-
+    void deleteProductImage_isBusinessAdmin_imageDeleted() throws Exception {
+        String url = String.format("/businesses/%d/products/%s/images/%d",
+                testBusiness.getId(), testProduct.getProductCode(), testImage.getID());
+        mockMvc.perform( MockMvcRequestBuilders
+                .delete(url)
+                .sessionAttrs(sessionAuthToken)
+                .cookie(authCookie))
+                .andExpect(status().isOk());
     }
 
     /**
      * Tests using the delete image method to see if a user who is not a business administrator cannot delete images
      * from products.
      */
+    @Disabled
     @Test
-    void deleteProductImage_notBusinessAdmin_403Response() {
-
+    void deleteProductImage_notBusinessAdmin_403Response() throws Exception {
+        String url = String.format("/businesses/%d/products/%s/images/%d",
+                testBusiness2.getId(), testProduct.getProductCode(), testImage.getID());
+        mockMvc.perform( MockMvcRequestBuilders
+                .delete(url)
+                .sessionAttrs(sessionAuthToken)
+                .cookie(authCookie))
+                .andExpect(status().isForbidden());
     }
 
     /**
      * Tests using the delete image method to see if a user who is a business administrator cannot delete images from
      * products that exist in a different business's product catalogue
      */
+    @Disabled
     @Test
-    void deleteProductImage_isBusinessAdminForWrongCatalogue_403Response() {
-
+    void deleteProductImage_isBusinessAdminForWrongCatalogue_403Response() throws Exception {
+        String url = String.format("/businesses/%d/products/%s/images/%d",
+                testBusiness.getId(), testProduct2.getProductCode(), testImage.getID());
+        mockMvc.perform( MockMvcRequestBuilders
+                .delete(url)
+                .sessionAttrs(sessionAuthToken)
+                .cookie(authCookie))
+                .andExpect(status().isForbidden());
     }
 }

@@ -5,9 +5,11 @@ import net.minidev.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.seng302.entities.Business;
+import org.seng302.entities.Image;
 import org.seng302.entities.Product;
 import org.seng302.exceptions.BusinessNotFoundException;
 import org.seng302.persistence.BusinessRepository;
+import org.seng302.persistence.ImageRepository;
 import org.seng302.persistence.ProductRepository;
 import org.seng302.tools.AuthenticationTokenManager;
 import org.seng302.tools.SearchHelper;
@@ -30,12 +32,14 @@ public class ProductController {
 
     private final ProductRepository productRepository;
     private final BusinessRepository businessRepository;
+    private final ImageRepository imageRepository;
     private static final Logger logger = LogManager.getLogger(ProductController.class.getName());
 
     @Autowired
-    public ProductController(ProductRepository productRepository, BusinessRepository businessRepository) {
+    public ProductController(ProductRepository productRepository, BusinessRepository businessRepository, ImageRepository imageRepository) {
         this.productRepository = productRepository;
         this.businessRepository = businessRepository;
+        this.imageRepository = imageRepository;
     }
 
     /**
@@ -205,9 +209,32 @@ public class ProductController {
      * @param imageId the ID of the image
      */
     @DeleteMapping("/businesses/{businessId}/products/{productId}/images/{imageId}")
-    void deleteProductImage(@PathVariable Long businessId, @PathVariable Long productId, @PathVariable Long imageId,
-                            HttpServletRequest request, HttpServletResponse response) {
+    void deleteProductImage(@PathVariable Long businessId, @PathVariable String productId, @PathVariable Long imageId,
+                            HttpServletRequest request) {
+        AuthenticationTokenManager.checkAuthenticationToken(request);
+        logger.info(String.format("Deleting image with id %d from the product %s within the business's catalogue %d",
+                imageId, productId, businessId));
 
+        Optional<Business> business;
+        Optional<Product> product;
+        Optional<Image> image;
+        if ((business = businessRepository.findById(businessId)).isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "Could not retrieve the business");
+        } else if ((product = productRepository.findByBusinessAndProductCode(business.get(), productId)).isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "Could not retrieve the product");
+        } else if ((image = imageRepository.findById(imageId)).isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "Could not retrieve the image");
+        }
+
+        business.get().checkSessionPermissions(request);
+
+        //TODO Add DGAA check
+        if (!Business.checkProductExistsWithinCatalogue(business.get(), product.get().getProductCode())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "The product is not within the business's catalogue");
+        }
+
+        product.get().setProductImage(null);
+        productRepository.save(product.get());
     }
 
 
