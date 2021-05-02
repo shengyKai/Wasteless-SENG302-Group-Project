@@ -15,8 +15,8 @@ Vue.use(Vuetify);
 jest.mock('@/components/utils/Methods/currency', () => ({
   currencyFromCountry: jest.fn(() => {
     return {
-      code: 'NZD',
-      symbol: '$'
+      code: 'Currency code',
+      symbol: 'Currency symbol'
     }
   })
 }));
@@ -59,8 +59,8 @@ describe('ProductCatalogueItem.vue', () => {
           productRRP: 100,
           productCode: "Some Code",
           currency: {
-            code: "",
-            symbol: ""
+            code: "Currency code",
+            symbol: "Currency symbol"
           },
           readMoreActivated: false
         };
@@ -132,6 +132,13 @@ describe('ProductCatalogueItem.vue', () => {
   */
   it("Must contain the product RRP", () => {
     expect(wrapper.text()).toContain(100);
+  });
+
+  /**
+   * Test that the product RRP is formatted with the currency symbol and code
+   */
+  it("RRP must be formatted with symbol and code", () => {
+    expect(wrapper.text()).toContain("Currency symbol100 Currency code");
   });
 
   /**
