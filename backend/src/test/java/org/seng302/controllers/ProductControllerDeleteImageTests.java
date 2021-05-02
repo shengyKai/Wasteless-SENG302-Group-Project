@@ -1,6 +1,5 @@
 package org.seng302.controllers;
 
-import org.junit.Ignore;
 import org.junit.jupiter.api.*;
 import org.junit.runner.RunWith;
 import org.seng302.entities.*;
@@ -72,8 +71,8 @@ public class ProductControllerDeleteImageTests {
      * @throws ParseException from the date attribute within the user object
      */
     private void setUpTestObjects() throws ParseException {
-        userRepository.deleteAll();
         businessRepository.deleteAll();
+        userRepository.deleteAll();
         imageRepository.deleteAll();
         productRepository.deleteAll();
 
@@ -104,7 +103,7 @@ public class ProductControllerDeleteImageTests {
         imageRepository.save(testImage);
 
         testProduct = new Product.Builder()
-                .withProductCode("PieceOfFish69")
+                .withProductCode("PIECEOFFISH69")
                 .withName("A Piece of Fish")
                 .withDescription("A fish but only a piece of it remains")
                 .withManufacturer("Tokyo Fishing LTD")
@@ -142,12 +141,12 @@ public class ProductControllerDeleteImageTests {
         businessRepository.save(testBusiness2);
 
         testProduct2 = new Product.Builder()
-                .withProductCode("PieceOfFishy69")
+                .withProductCode("PIECEOFFISHY69")
                 .withName("A Piece of Fishy")
                 .withDescription("A fishy but only a piece of it remains")
                 .withManufacturer("Tokyo Fishying LTD")
                 .withRecommendedRetailPrice("4.20")
-                .withBusiness(testBusiness)
+                .withBusiness(testBusiness2)
                 .build();
         productRepository.save(testProduct2);
 
@@ -163,8 +162,8 @@ public class ProductControllerDeleteImageTests {
 
     @AfterAll
     void tearDown() {
-        userRepository.deleteAll();
         businessRepository.deleteAll();
+        userRepository.deleteAll();
         productRepository.deleteAll();
         imageRepository.deleteAll();
     }
@@ -173,7 +172,6 @@ public class ProductControllerDeleteImageTests {
      * Tests using the delete product image method to see if a product with an image will have its image deleted.
      * This is done by calling the API endpoint to delete a product image and checking if it not longer has an image
      */
-    @Disabled
     @Test
     void deleteProductImage_hasImage_imageDeleted() throws Exception {
         String url = String.format("/businesses/%d/products/%s/images/%d",
@@ -189,7 +187,6 @@ public class ProductControllerDeleteImageTests {
      * Tests using the delete product image method to see if a product without an image will respond with the not
      * acceptable response code.
      */
-    @Disabled
     @Test
     void deleteProductImage_noImage_406Response() throws Exception {
         String url = String.format("/businesses/%d/products/%s/images/%d",
@@ -207,7 +204,6 @@ public class ProductControllerDeleteImageTests {
      * Tests using the delete image method to see if a request with an invalid business ID will return a not acceptable
      * response code.
      */
-    @Disabled
     @Test
     void deleteProductImage_invalidBusinessID_406Response() throws Exception {
         String url = String.format("/businesses/%d/products/%s/images/%d",
@@ -223,7 +219,6 @@ public class ProductControllerDeleteImageTests {
      * Tests using the delete image method to see if a request with an invalid product ID will return a not acceptable
      * response code.
      */
-    @Disabled
     @Test
     void deleteProductImage_invalidProductID_406Response() throws Exception {
         String url = String.format("/businesses/%d/products/%s/images/%d",
@@ -239,7 +234,6 @@ public class ProductControllerDeleteImageTests {
      * Tests using the delete product image method to see if a product with a valid authentication token has permission
      * to delete an image.
      */
-    @Disabled
     @Test
     void deleteProductImage_validAuthToken_hasPermission() throws Exception {
         String url = String.format("/businesses/%d/products/%s/images/%d",
@@ -255,14 +249,12 @@ public class ProductControllerDeleteImageTests {
      * Tests using the delete product image method to see if a user without a authentication token cannot delete an image.
      * A unauthorised response code should be given back when the API endpoint is called under these conditions.
      */
-    @Disabled
     @Test
     void deleteProductImage_noAuthToken_401Response() throws Exception {
         String url = String.format("/businesses/%d/products/%s/images/%d",
                 testBusiness.getId(), testProduct.getProductCode(), testImage.getID());
         mockMvc.perform( MockMvcRequestBuilders
                 .delete(url)
-                .sessionAttrs(null)
                 .cookie(authCookie))
                 .andExpect(status().isUnauthorized());
     }
@@ -271,7 +263,6 @@ public class ProductControllerDeleteImageTests {
      * Tests using the delete product image method to see if a user without an invalid authentication token cannot delete
      * an image. A unauthorised response code should be given back when the API endpoint is called under these conditions.
      */
-    @Disabled
     @Test
     void deleteProductImage_invalidAuthToken_401Response() throws Exception {
         String url = String.format("/businesses/%d/products/%s/images/%d",
@@ -309,7 +300,6 @@ public class ProductControllerDeleteImageTests {
      * Tests using the delete image method to see if the business administrator can delete images within there
      * businesses product catalogue.
      */
-    @Disabled
     @Test
     void deleteProductImage_isBusinessAdmin_imageDeleted() throws Exception {
         String url = String.format("/businesses/%d/products/%s/images/%d",
@@ -325,7 +315,6 @@ public class ProductControllerDeleteImageTests {
      * Tests using the delete image method to see if a user who is not a business administrator cannot delete images
      * from products.
      */
-    @Disabled
     @Test
     void deleteProductImage_notBusinessAdmin_403Response() throws Exception {
         String url = String.format("/businesses/%d/products/%s/images/%d",
@@ -341,7 +330,6 @@ public class ProductControllerDeleteImageTests {
      * Tests using the delete image method to see if a user who is a business administrator cannot delete images from
      * products that exist in a different business's product catalogue
      */
-    @Disabled
     @Test
     void deleteProductImage_isBusinessAdminForWrongCatalogue_403Response() throws Exception {
         String url = String.format("/businesses/%d/products/%s/images/%d",

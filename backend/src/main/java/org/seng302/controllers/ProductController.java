@@ -216,15 +216,19 @@ public class ProductController {
                 imageId, productId, businessId));
 
         Business business = getBusiness(businessId);
-        Product product = ProductController.getImage(productRepository, business, productId);
+        if (!ProductController.checkProductFromCodeExists(productRepository, productId)) {
+            throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "the product does not exist");
+        }
         Image image = ImageController.getImage(imageRepository, imageId);
 
         business.checkSessionPermissions(request);
 
         //TODO Add DGAA check
-        if (!Business.checkProductExistsWithinCatalogue(business, product.getProductCode())) {
+        if (!Business.checkProductExistsWithinCatalogue(business, productId)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "The product is not within the business's catalogue");
         }
+
+        Product product = ProductController.getProduct(productRepository, business, productId);
 
         product.setProductImage(null);
         productRepository.save(product);
@@ -275,12 +279,28 @@ public class ProductController {
      * @return the product object that matches the business and product code
      */
     //TODO add unit tests
-    public static Product getImage(ProductRepository productRepository, Business business, String productCode) {
+    public static Product getProduct(ProductRepository productRepository, Business business, String productCode) {
         Optional<Product> product = productRepository.findByBusinessAndProductCode(business, productCode);
         if (!product.isPresent()) {
             throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE,
-                    "the given product does not exist");
+                    "the product does not exist");
         }
         return product.get();
+    }
+
+    /**
+     * Checks if a product with a given product code exists within the database.
+     * @param productRepository the database that holds product objects
+     * @param productCode the code of the product
+     * @return true if the product that matches the product code exists within the database, false otherwise
+     */
+    //TODO add tests
+    public static boolean checkProductFromCodeExists(ProductRepository productRepository, String productCode) {
+        for (Product product: productRepository.findAll()) {
+            if (product.getProductCode().equals(productCode)) {
+                return true;
+            }
+        }
+        return false;
     }
 }
