@@ -12,7 +12,7 @@ import FullProductDescription from "@/components/utils/FullProductDescription.vu
 
 Vue.use(Vuetify);
 
-jest.mock('@/components/utils/Methods/currency', () => ({
+jest.mock('@/api/currency', () => ({
   currencyFromCountry: jest.fn(() => {
     return {
       code: 'Currency code',

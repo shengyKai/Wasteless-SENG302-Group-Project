@@ -4,9 +4,9 @@ import { createLocalVue, Wrapper, mount } from '@vue/test-utils';
 
 import ProductImageUploader from '@/components/utils/ProductImageUploader.vue';
 import { castMock, flushQueue } from './utils';
-import * as api from '@/api';
+import * as api from '@/api/internal';
 
-jest.mock('@/api', () => ({
+jest.mock('@/api/internal', () => ({
   uploadProductImage: jest.fn(),
 }));
 

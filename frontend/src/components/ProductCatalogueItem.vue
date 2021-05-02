@@ -91,7 +91,7 @@
 //This component requires two other custom components, one to display the product image, one to view more of the product's description
 import FullProductDescription from "./utils/FullProductDescription.vue";
 import ProductImageCarousel from "./utils/ProductImageCarousel.vue";
-import {currencyFromCountry} from "./utils/Methods/currency.ts";
+import {currencyFromCountry} from "@/api/currency";
 
 export default {
   name: "ProductCatalogueItem",
@@ -148,7 +148,7 @@ export default {
   },
   async created() {
     // When the catalogue item is created, the currency will be set to the currency of the country the product is being
-    // sold in. It will default to New Zealand Dollars if no currency can be found from the country.
+    // sold in. It will have blank fields if no currency can be found from the country.
     this.currency = await currencyFromCountry(this.countryOfSale);
   },
   methods: {

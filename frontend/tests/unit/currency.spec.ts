@@ -1,4 +1,4 @@
-import {currencyFromCountry, newZealandDollar} from "@/components/utils/Methods/currency";
+import {currencyFromCountry, defaultCurrency} from "@/api/currency";
 
 describe('currency.ts', () => {
 
@@ -11,14 +11,14 @@ describe('currency.ts', () => {
 
     /**
    * Test that when no response is recieved from the API, the currencyFromCountry will print a warning to the console
-   * saying the API cannot be reached anad will return the default currency of New Zealand Dollars
+   * saying the API cannot be reached anad will return the default currency 
    */
   it('Returns NZD when API can\'t be reached', async () => {
     globalThis.fetch = jest.fn(() =>
       Promise.reject("API is down")
     );
     const currency = await currencyFromCountry("Australia");
-    expect(currency).toBe(newZealandDollar);
+    expect(currency).toBe(defaultCurrency);
     expect(consoleOutput).toEqual([
       "Failed to reach https://restcountries.eu/rest/v2/name/Australia?fullText=true&fields=currencies"
     ]);
@@ -26,7 +26,7 @@ describe('currency.ts', () => {
 
     /**
    * Test that when a 404 response is recieved from the RESTCounties API, the currencyFromCountry method print a 
-   * warning to the console which says that country cannot be found and will return the default currency of New Zealand Dollars
+   * warning to the console which says that country cannot be found and will return the default currency 
    */
   it('Returns NZD when 404 response received', async () => {
     globalThis.fetch = jest.fn(() =>
@@ -35,7 +35,7 @@ describe('currency.ts', () => {
       }) as any
     );
     const currency = await currencyFromCountry("Australia");
-    expect(currency).toBe(newZealandDollar);
+    expect(currency).toBe(defaultCurrency);
     expect(consoleOutput).toEqual([
       "No country with name Australia was found"
     ]);
@@ -43,7 +43,7 @@ describe('currency.ts', () => {
 
   /**
    * Test that when a 400 response is recieved from the RESTCounties API, the currencyFromCountry method print a 
-   * warning to the console with the error code 400 and will return the default currency of New Zealand Dollars
+   * warning to the console with the error code 400 and will return the default currency 
    */
   it('Return NZD when 400 response received', async () => {
     globalThis.fetch = jest.fn(() =>
@@ -52,7 +52,7 @@ describe('currency.ts', () => {
         }) as any
     );
     const currency = await currencyFromCountry("Australia");
-    expect(currency).toBe(newZealandDollar);
+    expect(currency).toBe(defaultCurrency);
     expect(consoleOutput).toEqual([
       "Request failed: 400"
     ]);
@@ -61,7 +61,7 @@ describe('currency.ts', () => {
   /**
    * Test that when a 200 response is recieved from the RESTCounties API and that response does not have
    * the expected format, the currencyFromCountry method print a warning to the console which says it can't
-   * read the resopnse and will return the default currency of New Zealand Dollars
+   * read the resopnse and will return the default currency 
    */
   it('Return NZD when 200 response received but response is not in expected format', async () => {
     globalThis.fetch = jest.fn(() =>
@@ -71,7 +71,7 @@ describe('currency.ts', () => {
         }) as any
     );
     const currency = await currencyFromCountry("Australia");
-    expect(currency).toBe(newZealandDollar);
+    expect(currency).toBe(defaultCurrency);
     expect(consoleOutput).toEqual([
       "API response was not in readable format"
     ]);

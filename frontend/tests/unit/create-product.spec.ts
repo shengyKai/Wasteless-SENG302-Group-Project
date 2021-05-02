@@ -5,11 +5,11 @@ import { createLocalVue, Wrapper, mount } from '@vue/test-utils';
 
 import CreateProduct from '@/components/BusinessProfile/CreateProduct.vue';
 import { castMock, flushQueue } from './utils';
-import * as api from '@/api';
+import * as api from '@/api/internal';
 import { getStore, resetStoreForTesting } from '@/store';
-import { currencyFromCountry } from '@/components/utils/Methods/currency';
+import { currencyFromCountry } from '@/api/currency';
 
-jest.mock('@/api', () => ({
+jest.mock('@/api/internal', () => ({
   createProduct: jest.fn(),
   getBusiness: jest.fn(() => {
     return {
@@ -20,7 +20,7 @@ jest.mock('@/api', () => ({
   })
 }));
 
-jest.mock('@/components/utils/Methods/currency', () => ({
+jest.mock('@/api/currency', () => ({
   currencyFromCountry: jest.fn(() => {
     return {
       code: 'Currency code',

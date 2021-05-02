@@ -5,12 +5,12 @@ import { createLocalVue, Wrapper, mount } from '@vue/test-utils';
 
 import CreateBusiness from '@/components/BusinessProfile/CreateBusiness.vue';
 import {castMock} from "./utils";
-import * as api from '@/api';
+import * as api from '@/api/internal';
 import { getStore, resetStoreForTesting } from '@/store';
-import {User} from "@/api";
+import {User} from "@/api/internal";
 
 
-jest.mock('@/api', () => ({
+jest.mock('@/api/internal', () => ({
   createBusiness: jest.fn(),
 }));
 

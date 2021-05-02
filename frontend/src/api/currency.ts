@@ -1,4 +1,4 @@
-import { MaybeError } from "@/api";
+import { MaybeError } from "@/api/internal";
 
 /**
  * Currency information for a specific country.
@@ -60,16 +60,16 @@ function currencyResponseHasExpectedFormat(response: any): response is Currencie
 /**
  * Default currency when currency of current location cannot be resolved from API request.
  */
-export const newZealandDollar : Currency = {
-  code: "NZD",
-  name: "New Zealand dollar",
-  symbol: "$"
+export const defaultCurrency : Currency = {
+  code: "",
+  name: "",
+  symbol: ""
 };
 
 /**
  * Make a request to the RESTCounties API to find the currency associated with the given country name.
  * If the request is successful the currency from the API will be returned. If it is unsuccessful then
- * a Currency object of the default currency, New Zealand Dollars, will be returned.
+ * a default currency object with blank code, name and symbol fields will be returned.
  * @param country The name of a country to use in the API request for the currency.
  * @returns An object containing information on the currency of the given country.
  */
@@ -79,14 +79,14 @@ export async function currencyFromCountry(country: string) : Promise<Currency> {
 
   if (typeof response === 'string') {
     console.warn(response);
-    return newZealandDollar;
+    return defaultCurrency;
   }
 
   const currency = await getCurrencyFromAPIResponse(response);
 
   if (typeof currency === 'string') {
     console.warn(currency);
-    return newZealandDollar;
+    return defaultCurrency;
   }
 
   return currency;

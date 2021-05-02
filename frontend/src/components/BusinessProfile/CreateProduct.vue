@@ -88,10 +88,10 @@
     </v-dialog>
   </v-row>
 </template>
-
+../../internal
 <script>
-import {createProduct, getBusiness} from '../../api';
-import {currencyFromCountry} from "@/components/utils/Methods/currency";
+import {createProduct, getBusiness} from '@/api/internal';
+import {currencyFromCountry} from "@/api/currency";
 export default {
   name:'CreateProduct',
   data() {
@@ -141,7 +141,7 @@ export default {
   },
   async created() {
     // When the create product dialogue, the currency will be set to the currency of the country the product is being
-    // sold in. It will default to New Zealand Dollars if no currency can be found from the country.
+    // sold in. It will have blank fields if no currency can be found from the country.
     const business = await getBusiness(this.$store.state.createProductDialogBusiness);
     const countryOfSale = business.address.country;
     this.currency = await currencyFromCountry(countryOfSale);
