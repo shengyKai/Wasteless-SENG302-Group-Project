@@ -29,10 +29,9 @@ describe('currency.ts', () => {
    * warning to the console which says that country cannot be found and will return the default currency 
    */
   it('Returns NZD when 404 response received', async () => {
-    globalThis.fetch = jest.fn(() =>
-      Promise.resolve({
+    globalThis.fetch = jest.fn().mockResolvedValue({
         status: 404
-      }) as any
+      } as any
     );
     const currency = await currencyFromCountry("Australia");
     expect(currency).toBe(defaultCurrency);
@@ -46,10 +45,9 @@ describe('currency.ts', () => {
    * warning to the console with the error code 400 and will return the default currency 
    */
   it('Return NZD when 400 response received', async () => {
-    globalThis.fetch = jest.fn(() =>
-        Promise.resolve({
+    globalThis.fetch = jest.fn().mockResolvedValue({
           status: 400
-        }) as any
+        } as any
     );
     const currency = await currencyFromCountry("Australia");
     expect(currency).toBe(defaultCurrency);
@@ -64,11 +62,10 @@ describe('currency.ts', () => {
    * read the resopnse and will return the default currency 
    */
   it('Return NZD when 200 response received but response is not in expected format', async () => {
-    globalThis.fetch = jest.fn(() =>
-        Promise.resolve({
+    globalThis.fetch = jest.fn().mockResolvedValue({
           status: 200,
           json: () => Promise.resolve([{currencies: [{potato: 'potato'}]}]) as any
-        }) as any
+        } as any
     );
     const currency = await currencyFromCountry("Australia");
     expect(currency).toBe(defaultCurrency);
@@ -82,16 +79,14 @@ describe('currency.ts', () => {
    * the currencyFromCountries method will return that currency.
    */
   it('Return currency received from API when response list contains one currency', async () => {
-    globalThis.fetch = jest.fn(() =>
-        Promise.resolve({
+    globalThis.fetch = jest.fn().mockResolvedValue({
           status: 200,
           json: () => Promise.resolve([{currencies: [{
             code: 'AUD',
             name: 'Australian Dollar',
             symbol: '$'
           }]}]) as any
-        }) as any
-    );
+        });
     const currency = await currencyFromCountry("Australia");
     expect(currency).toEqual({
       code: 'AUD',
@@ -106,23 +101,21 @@ describe('currency.ts', () => {
    * the currencyFromCountries method will return the first of those currencies.
    */
   it('Return first currency received from API when response list contains multiple currencies', async () => {
-    globalThis.fetch = jest.fn(() =>
-        Promise.resolve({
-          status: 200,
-          json: () => Promise.resolve([{"currencies": [
-            {
-              "code": "BTN",
-              "name": "Bhutanese ngultrum",
-              "symbol": "Nu."
-            },
-            {
-              "code": "INR",
-              "name": "Indian rupee",
-              "symbol": "₹"
-            }
-          ]}]) as any
-        }) as any
-    );
+    globalThis.fetch = jest.fn().mockResolvedValue({
+      status: 200,
+      json: () => Promise.resolve([{"currencies": [
+        {
+          "code": "BTN",
+          "name": "Bhutanese ngultrum",
+          "symbol": "Nu."
+        },
+        {
+          "code": "INR",
+          "name": "Indian rupee",
+          "symbol": "₹"
+        }
+      ]}]) as any
+    });
     const currency = await currencyFromCountry("Bhutan");
     expect(currency).toEqual({
       "code": "BTN",

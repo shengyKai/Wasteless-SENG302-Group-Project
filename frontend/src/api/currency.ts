@@ -49,7 +49,7 @@ function isCurrencyArray(obj: any): obj is Currency[] {
  * @param response The body of the response received from the API.
  * @returns True if the response is in the expected format, false otherwise.
  */
-function currencyResponseHasExpectedFormat(response: any): response is CurrenciesContainer[] {
+function currencyResponseHasExpectedFormat(response: any): response is [CurrenciesContainer] {
   if (!Array.isArray(response)) return false;
   if (response.length !== 1) return false;
   const country = response[0];
@@ -103,19 +103,20 @@ async function queryCurrencyAPI(country: string) : Promise<MaybeError<Response>>
 
   const queryUrl = `https://restcountries.eu/rest/v2/name/${country}?fullText=true&fields=currencies`;
 
-  const responseOrError = await fetch(queryUrl).then(response => {
-    if (response.status === 404) {
-      return `No country with name ${country} was found`;
-    }
-    if (response.status !== 200) {
-      return `Request failed: ${response.status}`;
-    }
-    return response;
-  })
+  const response = await fetch(queryUrl)
     .catch(error => {
       return `Failed to reach ${queryUrl}`;
     });
-  return responseOrError;
+  if (typeof response === 'string') {
+    return response;
+  }
+  if (response.status === 404) {
+    return `No country with name ${country} was found`;
+  }
+  if (response.status !== 200) {
+    return `Request failed: ${response.status}`;
+  }
+  return response;
 }
 
 /**
