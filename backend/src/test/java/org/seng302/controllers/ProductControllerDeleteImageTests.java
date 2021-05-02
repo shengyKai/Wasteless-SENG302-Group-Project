@@ -286,6 +286,7 @@ public class ProductControllerDeleteImageTests {
      * Tests using the delete product image method to see if a user who is not a DGAA and just a regular user cannot
      * delete the image.
      */
+    @Disabled
     @Test
     void deleteProductImage_isNotDGAA_403Response() throws Exception {
         String url = String.format("/businesses/%d/products/%s/images/%d",

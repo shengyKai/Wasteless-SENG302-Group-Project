@@ -593,7 +593,6 @@ class ProductControllerTest {
     /**
      * Tests that the DGAA can post a product
      */
-    @Disabled
     @Test
     void postingProductFromDGAAAccount() {
         setCurrentUser(bystanderUser.getUserID());
