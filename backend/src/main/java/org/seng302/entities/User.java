@@ -279,13 +279,6 @@ public class User extends Account {
             throw new IllegalArgumentException("Invalid role: \"" + role + "\"");
         }
 
-        if (
-            "defaultGlobalApplicationAdmin".equals(role) &&
-            !"wasteless@seng302.com".equals(this.getEmail())
-        ) {
-            throw new IllegalArgumentException("Tried creating new DGAA");
-        }
-
         this.role=role;
     }
 
