@@ -255,13 +255,14 @@ public class BusinessTests {
 
     /**
      * Check that when setName is called with a name which contains characters which are not letters, numbers or
-     * the characters "@ $ % & . , ; : - _", a response status exception with status code 400 will be thrown and the
+     * the characters "! " # $ % & ' ( ) * + , - . / : ; < = > ? @ [ \ ] ^ _ ` { | } ~",
+     * a response status exception with status code 400 will be thrown and the
      * business's name will not be changed.
      */
     @Test
     public void setNameInvalidCharacterTest() {
         String originalName = testBusiness1.getName();
-        String[] invalidCharacterNames = {"?", "^^^^^^^", "business*", "!This is not allowed", "(or this)"};
+        String[] invalidCharacterNames = {"\n", "»»»»»", "business¢", "½This is not allowed", "¡or this¡"};
         for (String name : invalidCharacterNames) {
             ResponseStatusException e = assertThrows(ResponseStatusException.class, () -> {
                 testBusiness1.setName(name);
@@ -395,7 +396,7 @@ public class BusinessTests {
     @Test
     public void setDescriptionInvalidCharacterTest() {
         String originalDescription = testBusiness1.getDescription();
-        String[] invalidCharacterDescriptions = {"?", "^^^^^^^", "business*", "!This is not allowed", "(or this)"};
+        String[] invalidCharacterDescriptions = {"ƒ", "»»»»»", "business¢", "½This is not allowed", "¡or this¡"};
         for (String description : invalidCharacterDescriptions) {
             ResponseStatusException e = assertThrows(ResponseStatusException.class, () -> {
                 testBusiness1.setDescription(description);
@@ -433,45 +434,12 @@ public class BusinessTests {
     }
 
     /**
-     * Check that when setDescription is called with null as its argument, a response status expection will be thrown
-     * with status code 400 and the business's description will not be changed.
+     * Check that when setDescription is called with null as its argument, the description becomes an empty string
      */
     @Test
     public void setDescriptionNullTest() {
-        String originalDescription = testBusiness1.getDescription();
-        ResponseStatusException e = assertThrows(ResponseStatusException.class, () -> {
-            testBusiness1.setDescription(null);
-        });
-        assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
-        assertEquals(originalDescription, testBusiness1.getDescription());
-    }
-
-    /**
-     * Check that when setDescription is called with the empty string as its argument, a response status expection will
-     * be thrown with status code 400 and the business's description will not be changed.
-     */
-    @Test
-    public void setDescriptionEmptyStringTest() {
-        String originalDescription = testBusiness1.getDescription();
-        ResponseStatusException e = assertThrows(ResponseStatusException.class, () -> {
-            testBusiness1.setDescription("");
-        });
-        assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
-        assertEquals(originalDescription, testBusiness1.getDescription());
-    }
-
-    /**
-     * Check that when setDescription is called with a blank string as its argument, a response status expection will be
-     * thrown with status code 400 and the business's description will not be changed.
-     */
-    @Test
-    public void setDescriptionBlankStringTest() {
-        String originalDescription = testBusiness1.getDescription();
-        ResponseStatusException e = assertThrows(ResponseStatusException.class, () -> {
-            testBusiness1.setDescription("          ");
-        });
-        assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
-        assertEquals(originalDescription, testBusiness1.getDescription());
+        testBusiness1.setDescription(null);
+        assertEquals("", testBusiness1.getDescription());
     }
 
     /**
@@ -481,7 +449,7 @@ public class BusinessTests {
     @Test
     public void primaryOwnerCantBeDeletedTest() {
         User primaryOwner = testBusiness1.getPrimaryOwner();
-        assertThrows(DataIntegrityViolationException.class, () -> {
+        assertThrows(ResponseStatusException.class, () -> {
             userRepository.deleteById(primaryOwner.getUserID());
         });
         assertNotNull(userRepository.findById(primaryOwner.getUserID()).get());
@@ -536,16 +504,11 @@ public class BusinessTests {
         testBusiness1 = businessRepository.save(testBusiness1);
         long adminId = testUser2.getUserID();
         long businessId = testBusiness1.getId();
-        assertThrows(DataIntegrityViolationException.class, () -> {
-            userRepository.deleteById(testUser2.getUserID());
-        });
-        assertTrue(userRepository.existsById(adminId));
+        userRepository.deleteById(testUser2.getUserID());
+        assertFalse(userRepository.existsById(adminId));
         assertTrue(businessRepository.existsById(businessId));
         testBusiness1 = businessRepository.findById(businessId).get();
-        assertEquals(1, testBusiness1.getAdministrators().size());
-        for (User user : testBusiness1.getAdministrators()) {
-            assertEquals(adminId, user.getUserID());
-        }
+        assertEquals(0, testBusiness1.getAdministrators().size());
     }
 
     /**

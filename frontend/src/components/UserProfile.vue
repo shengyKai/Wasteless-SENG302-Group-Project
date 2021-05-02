@@ -216,7 +216,11 @@
 </template>
 
 <script>
+<<<<<<< HEAD
 import { getUser, makeBusinessAdmin, removeBusinessAdmin, makeAdmin, revokeAdmin } from '../api';
+=======
+import { getUser, makeBusinessAdmin, removeBusinessAdmin } from '../api/internal';
+>>>>>>> dev
 import UserAvatar from './utils/UserAvatar';
 import convertAddressToReadableText from './utils/Methods/convertJsonAddressToReadableText';
 

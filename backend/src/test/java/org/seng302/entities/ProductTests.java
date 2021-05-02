@@ -3,10 +3,6 @@ package org.seng302.entities;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.seng302.entities.Business;
-import org.seng302.entities.Location;
-import org.seng302.entities.Product;
-import org.seng302.entities.User;
 import org.seng302.persistence.BusinessRepository;
 import org.seng302.persistence.ProductRepository;
 import org.seng302.persistence.UserRepository;
@@ -24,6 +20,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class ProductTests {
+    //TODO ADD NEW TESTS FOR THE NEW IMAGE ATTRIBUTE!!!
 
     @Autowired
     ProductRepository productRepository;
@@ -396,6 +393,9 @@ class ProductTests {
         assertThrows(IllegalArgumentException.class, () -> testBusiness2.addToCatalogue(product));
     }
 
+
+
+
     /**
      * Tests that a product built without a product code throws a ResponseStatusException
      */
@@ -679,4 +679,6 @@ class ProductTests {
                 .withBusiness(testBusiness1);
         assertThrows(ResponseStatusException.class, builder::build);
     }
+
+
 }

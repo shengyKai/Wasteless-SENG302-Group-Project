@@ -93,9 +93,10 @@ export type Business = {
 };
 
 export type CreateBusiness = {
+  primaryAdministratorId: number,
   name: string,
   description?: string,
-  address: string,
+  address: Location,
   businessType: BusinessType,
 };
 
@@ -382,7 +383,7 @@ export async function createBusiness(business: CreateBusiness): Promise<MaybeErr
     if (status === undefined) return 'Failed to reach backend';
     if (status === 401) return 'Missing/Invalid access token';
 
-    return 'Request failed: ' + status;
+    return 'Request failed: ' + status + ' ' + error.response.data.message;
   }
 
   return undefined;
@@ -408,6 +409,36 @@ export async function createProduct(businessId: number, product: CreateProduct):
 
     return 'Request failed: ' + status;
   }
+  return undefined;
+}
+
+
+/**
+ * Add a product image to the given product
+ *
+ * @param businessId The business for which the product belongs
+ * @param productCode The product's product code
+ * @param file Image file to add
+ */
+export async function uploadProductImage(businessId: number, productCode: string, file: File): Promise<MaybeError<undefined>> {
+  try {
+    let formData = new FormData();
+    formData.append('file', file);
+    await instance.post(`/businesses/${businessId}/products/${productCode}/images`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
+  } catch (error) {
+    let status: number | undefined = error.response?.status;
+    if (status === undefined) return 'Failed to reach backend';
+    if (status === 400) return 'Invalid image';
+    if (status === 401) return 'Missing/Invalid access token';
+    if (status === 403) return 'Operation not permitted';
+    if (status === 406) return 'Product/Business not found';
+    return 'Request failed: ' + status;
+  }
+
   return undefined;
 }
 
