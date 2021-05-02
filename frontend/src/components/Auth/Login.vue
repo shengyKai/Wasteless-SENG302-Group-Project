@@ -1,10 +1,11 @@
 <template>
   <v-container>
     <!-- @submit.prevent="login"-->
-    <v-form v-model="valid">
+    <v-form v-model="valid" lazy-validation>
       <h1>Sign in</h1>
       <v-text-field
         v-model="email"
+        validate-on-blur
         type="email"
         label="Email"
         outlined
@@ -15,7 +16,6 @@
         type="password"
         label="Password"
         outlined
-        :rules="mandatoryRules.concat(passwordRules).concat(maxCharShortRules)"
       />
     </v-form>
 
