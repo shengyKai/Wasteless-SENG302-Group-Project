@@ -180,7 +180,7 @@ public class ProductController {
             }
             String productCode = productInfo.getAsString("id");
 
-            if (productRepository.findByBusinessAndProductCode(business, productCode) != null) {
+            if ((productRepository.findByBusinessAndProductCode(business, productCode)).isPresent()) {
                 throw new ResponseStatusException(HttpStatus.CONFLICT, "Product already exists with product code in this catalogue \"" + productCode + "\"");
             }
 
@@ -215,26 +215,19 @@ public class ProductController {
         logger.info(String.format("Deleting image with id %d from the product %s within the business's catalogue %d",
                 imageId, productId, businessId));
 
-        Optional<Business> business;
-        Optional<Product> product;
-        Optional<Image> image;
-        if ((business = businessRepository.findById(businessId)).isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "Could not retrieve the business");
-        } else if ((product = productRepository.findByBusinessAndProductCode(business.get(), productId)).isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "Could not retrieve the product");
-        } else if ((image = imageRepository.findById(imageId)).isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "Could not retrieve the image");
-        }
+        Business business = getBusiness(businessId);
+        Product product = ProductController.getImage(productRepository, business, productId);
+        Image image = ImageController.getImage(imageRepository, imageId);
 
-        business.get().checkSessionPermissions(request);
+        business.checkSessionPermissions(request);
 
         //TODO Add DGAA check
-        if (!Business.checkProductExistsWithinCatalogue(business.get(), product.get().getProductCode())) {
+        if (!Business.checkProductExistsWithinCatalogue(business, product.getProductCode())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "The product is not within the business's catalogue");
         }
 
-        product.get().setProductImage(null);
-        productRepository.save(product.get());
+        product.setProductImage(null);
+        productRepository.save(product);
     }
 
 
@@ -271,5 +264,23 @@ public class ProductController {
                     "The given business does not exist");
         }
         return business.get();
+    }
+
+    /**
+     * Gets a product from the database that matches a given image Id. This method preforms a sanity check to ensure the
+     * image does exist and if not throws a not accepted response status exception.
+     * @param productRepository the product repository that connects to the database
+     * @param business the business object
+     * @param productCode the product code of the product
+     * @return the product object that matches the business and product code
+     */
+    //TODO add unit tests
+    public static Product getImage(ProductRepository productRepository, Business business, String productCode) {
+        Optional<Product> product = productRepository.findByBusinessAndProductCode(business, productCode);
+        if (!product.isPresent()) {
+            throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE,
+                    "the given product does not exist");
+        }
+        return product.get();
     }
 }
