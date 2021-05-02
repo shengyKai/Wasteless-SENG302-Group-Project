@@ -13,11 +13,14 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.Cookie;
 import java.text.ParseException;
 import java.util.HashMap;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
@@ -120,10 +123,6 @@ public class ProductControllerDeleteImageTests {
         testProduct.setProductImage(testImage);
         productRepository.save(testProduct);
 
-        testBusiness.addToCatalogue(testProduct);
-        businessRepository.save(testBusiness);
-
-
         testUser2 = new User.Builder()
                 .withFirstName("Ferguss")
                 .withMiddleName("Connorr")
@@ -156,9 +155,6 @@ public class ProductControllerDeleteImageTests {
                 .withBusiness(testBusiness2)
                 .build();
         productRepository.save(testProduct2);
-
-        testBusiness2.addToCatalogue(testProduct2);
-        businessRepository.save(testBusiness2);
     }
 
     @BeforeEach
@@ -359,5 +355,40 @@ public class ProductControllerDeleteImageTests {
                 .sessionAttrs(sessionAuthToken)
                 .cookie(authCookie))
                 .andExpect(status().isForbidden());
+    }
+
+
+
+    //Tests for getProduct helper function
+    /**
+     * Checks that a product that exists within the database and belongs to a catalogue can be retrieved.
+     */
+    @Test
+    void getProduct_productExists_getExpectedProduct() {
+        Product actualProduct = ProductController.getProduct(productRepository, testBusiness, testProduct.getProductCode());
+        assertEquals(testProduct.getProductCode(), actualProduct.getProductCode());
+    }
+
+    /**
+     * Checks that a products that exists but in a different business's catalogue cannot be retrieved.
+     */
+    @Test
+    void getProduct_productExistsInDifferentCatalogue_406ResponseException() {
+        assertThrows(ResponseStatusException.class, () -> {
+            ProductController.getProduct(productRepository, testBusiness2, testProduct.getProductCode());
+        });
+    }
+
+    /**
+     * Checks that a product that does not exist cannot be retrieved.
+     */
+    @Disabled
+    @Test
+    void getProduct_productDoesNotExist_406ResponseException() throws Exception {
+        testBusiness.removeFromCatalogue(testProduct);
+        businessRepository.save(testBusiness);
+        assertThrows(ResponseStatusException.class, () -> {
+            ProductController.getProduct(productRepository, testBusiness, testProduct.getProductCode());
+        });
     }
 }

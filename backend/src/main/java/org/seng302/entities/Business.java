@@ -303,6 +303,16 @@ public class Business {
     }
 
     /**
+     * Removes the given product from the business's catalogue
+     */
+    //TODO add unit tests
+    public void removeFromCatalogue(Product product) throws Exception {
+        if(!catalogue.remove(product)) {
+            throw new Exception("The product did not match any within the business's catalogue");
+        }
+    }
+
+    /**
      * Construct a JSON object representing the business. The JSON object includes an array of JSON
      * representations of the users who are administrators of the business, and a JSON representation
      * of the business's address, as well as simple attributes for all the other properties of the

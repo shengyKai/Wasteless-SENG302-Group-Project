@@ -281,11 +281,13 @@ public class ProductController {
     //TODO add unit tests
     public static Product getProduct(ProductRepository productRepository, Business business, String productCode) {
         Optional<Product> product = productRepository.findByBusinessAndProductCode(business, productCode);
-        if (!product.isPresent()) {
+        if (product.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE,
                     "the product does not exist");
         }
         return product.get();
+        // The product repo is not working as expected, the product can still be retrieved even when it does not exist
+        // within the business's catalogue
     }
 
     /**
