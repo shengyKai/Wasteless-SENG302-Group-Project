@@ -17,6 +17,8 @@ jest.mock('@/api', () => ({
   removeBusinessAdmin: jest.fn(),
   getBusiness: jest.fn(),
   getUser: jest.fn(),
+  makeAdmin: jest.fn(),
+  revokeAdmin: jest.fn(),
 }));
 
 const makeBusinessAdmin = castMock(api.makeBusinessAdmin);
@@ -24,6 +26,9 @@ const removeBusinessAdmin = castMock(api.removeBusinessAdmin);
 
 const getBusiness = castMock(api.getBusiness);
 const getUser = castMock(api.getUser);
+
+const makeAdmin = castMock(api.makeAdmin);
+const revokeAdmin = castMock(api.revokeAdmin);
 
 const localVue = createLocalVue();
 
@@ -125,6 +130,24 @@ describe('UserProfile.vue', () => {
         return makeTestUser(userId, [userId, userId + 1], true);
       }
       return makeTestUser(userId, [userId, userId + 1]);
+    });
+
+    makeAdmin.mockImplementation(async userId => {
+      if (userId === 100) {
+        //need to mock the backend successfully changing the user role to GAA
+        wrapper.vm.user.role = "globalApplicationAdmin";
+        return undefined;
+      }
+      return "Some error string";
+    });
+
+    revokeAdmin.mockImplementation(async userId => {
+      if (userId === 200) {
+        //need to mock the backend successfully changing the GAA role to user
+        wrapper.vm.user.role = "user";
+        return undefined;
+      }
+      return "Some error string";
     });
 
     generateWrapper(100);
@@ -525,12 +548,80 @@ describe('UserProfile.vue', () => {
    * Tests that when viewing an application admin as an application admin, the application administrator status is shown
    */
   it('If acting as application admin and viewing an admin, then there should be a administrator chip', async () => {
-    // To be able to see the role of another user implies you are an admin. No extra steps needed. Just mock the user role.
-    store.state.user = makeTestUser(1, [1, 2], true);
-    store.state.user.role = "globalApplicationAdmin";
+    appWrapper.destroy();
+    // change the current user into a GAA
+    store.state.user = makeTestUser(1, [1], true);
+    //regenerate wrapper for a GAA profile
     generateWrapper(200);
     await flushQueue();
     let adminChip = wrapper.findComponent({ref:'administratorStatus'});
     expect(adminChip.exists()).toBeTruthy();
+  });
+
+  /**
+   * Tests that a DGAA will be able to see the make admin button if viewing a normal user
+   */
+  it('If acting as DGAA viewing a user, there should be a make admin button', async () => {
+    appWrapper.destroy();
+    // change the current user into a DGAA
+    store.state.user = makeTestUser(1, [1]);
+    store.state.user.role = "defaultGlobalApplicationAdmin";
+    //regenerate wrapper for a normal user profile
+    generateWrapper(100);
+    await flushQueue();
+    let adminChip = wrapper.findComponent({ref:'administratorStatus'});
+    expect(adminChip.exists()).toBeFalsy();
+    let makeAdminButton = wrapper.findComponent({ref:'makeAdminButton'});
+    expect(makeAdminButton.exists()).toBeTruthy();
+  });
+
+  /**
+   * Tests that a DGAA will be able to click the make admin button to change the user into an admin
+   */
+  it('If acting as DGAA viewing a user, the DGAA can make the user into a application admin(GAA)', async () => {
+    appWrapper.destroy();
+    // change the current user into a DGAA
+    store.state.user = makeTestUser(1, [1]);
+    store.state.user.role = "defaultGlobalApplicationAdmin";
+    //regenerate wrapper for a normal user profile
+    generateWrapper(100);
+    await flushQueue();
+    let makeAdminButton = wrapper.findComponent({ref:'makeAdminButton'});
+    await makeAdminButton.trigger('click');
+    let adminChip = wrapper.findComponent({ref:'administratorStatus'});
+    expect(adminChip.exists()).toBeTruthy();
+    expect(wrapper.vm.user.role).toEqual("globalApplicationAdmin");
+    await flushQueue();
+    expect(makeAdminButton.exists()).toBeFalsy();
+  });
+
+  /**
+   * Tests that a DGAA will be able to click the revoke admin button to change the admin into a user
+   */
+   it('If acting as DGAA viewing a GAA, the DGAA can revoke the GAA into a normal user', async () => {
+    appWrapper.destroy();
+    // change the current user into a DGAA
+    store.state.user = makeTestUser(1, [1]);
+    store.state.user.role = "defaultGlobalApplicationAdmin";
+    //regenerate wrapper for a GAA profile
+    generateWrapper(200);
+    await flushQueue();
+    let adminChip = wrapper.findComponent({ref:'administratorStatus'});
+    await adminChip.trigger('click');
+    let revokeAdminButton = wrapper.findComponent({ref:'revokeAdminButton'});
+    await revokeAdminButton.trigger('click');
+    expect(revokeAdmin).toHaveBeenCalled();
+    await flushQueue();
+    //for some reason, nextTick() or flushQueue() does not seem to work, have to wait for a timeout for the change to take place
+    setTimeout(() => {
+      expect(wrapper.vm.user.role).toEqual("user");
+      //since the user is now a normal user, the make admin button should reappear
+      let makeAdminButton = wrapper.findComponent({ref:'makeAdminButton'});
+      expect(makeAdminButton.exists()).toBeTruthy();
+    }, 100);
+    //commented out for testing
+    // Vue.nextTick(() => {
+    //   expect(wrapper.vm.user.role).toEqual("user");
+    // })
   });
 });

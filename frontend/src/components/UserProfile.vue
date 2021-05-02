@@ -141,7 +141,7 @@
                   <v-icon>mdi-account-tie</v-icon>
                 </v-chip>
               </template>
-              <!-- put as a v-list item because if in the future we want to be able to add more actions between DGAA/GAA, its easy -->
+              <!-- put as a v-list item because if in the future we want to be able to add more actions between DGAA/GAA, its easy to add-->
               <!--
                 "currentUserRole==='defaultGlobalApplicationAdmin'" is so that only DGAA can see the revoke button
                 "user.role!=='defaultGlobalApplicationAdmin'" is so that DGAA wont revoke themselves
@@ -149,7 +149,10 @@
               <v-list
                 v-if="currentUserRole==='defaultGlobalApplicationAdmin' && user.role!=='defaultGlobalApplicationAdmin'">
                 <v-list-item
-                  @click="revokeGAAFromUser()"
+                  ref="revokeAdminButton"
+                  @click="revokeGAAFromUser(); loader='loadingRevoke'"
+                  :loading="loadingRevoke"
+                  :disabled="loadingRevoke"
                 >
                   Revoke Admin
                 </v-list-item>
@@ -163,6 +166,7 @@
           "currentUserRole==='defaultGlobalApplicationAdmin'" is to ensure only DGAAs can make users admin
         -->
         <v-btn
+          ref="makeAdminButton"
           v-else-if="user.role==='user' && currentUserRole==='defaultGlobalApplicationAdmin'"
           @click="makeUserAsGAA(); loader='loadingMake'"
           :loading="loadingMake"
@@ -227,9 +231,12 @@ export default {
       user: null,
       removeAdminDialog: false,
       addAdminDialog: false,
+      //get this session's user's role
       currentUserRole: this.$store.state.user.role,
+      //for loader, loadingMake and loadingRevoke is for the loading animation in the makeAdmin/revokeAdmin buttons
       loader: null,
-      loadingMake: false
+      loadingMake: false,
+      loadingRevoke: false
     };
   },
   created() {
@@ -314,16 +321,22 @@ export default {
       }
     },
     async makeUserAsGAA() {
+      //let the loading for the make admin start
+      this.loadingMake = true;
       let response = await makeAdmin(this.user.id);
 
       if (typeof response === 'string') {
         this.$store.commit('setError', response);
+        //let the loading for the make admin stop
+        this.loadingMake = false;
         return;
       }
 
       response = await getUser(this.user.id);
       if (typeof response === 'string') {
         this.$store.commit('setError', response);
+        //let the loading for the make admin stop
+        this.loadingMake = false;
         return;
       }
 
@@ -332,18 +345,26 @@ export default {
       if (this.user.id === this.$store.state.user?.id) {
         this.$store.commit('setUser', this.user);
       }
+      //let the loading for the make admin stop
+      this.loadingMake = false;
     },
     async revokeGAAFromUser() {
+      //let the loading for the revoke admin start
+      this.loadingRevoke = true;
       let response = await revokeAdmin(this.user.id);
 
       if (typeof response === 'string') {
         this.$store.commit('setError', response);
+        //let the loading for the revoke admin stop
+        this.loadingRevoke = false;
         return;
       }
 
       response = await getUser(this.user.id);
       if (typeof response === 'string') {
         this.$store.commit('setError', response);
+        //let the loading for the revoke admin stop
+        this.loadingRevoke = false;
         return;
       }
 
@@ -352,6 +373,8 @@ export default {
       if (this.user.id === this.$store.state.user?.id) {
         this.$store.commit('setUser', this.user);
       }
+      //let the loading for the revoke stop
+      this.loadingRevoke = false;
     }
   },
 
@@ -402,14 +425,6 @@ export default {
   },
   components: {
     UserAvatar,
-  },
-  watch: {
-    loader () {
-      const l = this.loader;
-      this[l] = !this[l];
-      setTimeout(() => (this[l] = false), 3000);
-      this.loader = null;
-    }
   }
 };
 </script>
