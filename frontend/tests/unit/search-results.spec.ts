@@ -4,13 +4,13 @@ import Vuex, { Store } from 'vuex';
 import { createLocalVue, Wrapper, mount } from '@vue/test-utils';
 import SearchResults from '@/components/SearchResults.vue';
 import SearchResultItem from '@/components/SearchResultItem.vue';
-import { User } from '@/api';
-import * as api from '@/api';
+import { User } from '@/api/internal';
+import * as api from '@/api/internal';
 import { castMock, flushQueue } from './utils';
 
 
 
-jest.mock('@/api', () => ({
+jest.mock('@/api/internal', () => ({
   search: jest.fn(),
   getSearchCount: jest.fn(),
 }));

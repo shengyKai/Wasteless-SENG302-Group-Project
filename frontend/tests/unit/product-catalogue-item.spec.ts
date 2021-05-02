@@ -12,6 +12,15 @@ import FullProductDescription from "@/components/utils/FullProductDescription.vu
 
 Vue.use(Vuetify);
 
+jest.mock('@/api/currency', () => ({
+  currencyFromCountry: jest.fn(() => {
+    return {
+      code: 'Currency code',
+      symbol: 'Currency symbol'
+    }
+  })
+}));
+
 describe('ProductCatalogueItem.vue', () => {
   let wrapper: Wrapper<any>;
   let vuetify: Vuetify;
@@ -49,6 +58,10 @@ describe('ProductCatalogueItem.vue', () => {
           productManufacturer: "Some Manufacturer",
           productRRP: 100,
           productCode: "Some Code",
+          currency: {
+            code: "Currency code",
+            symbol: "Currency symbol"
+          },
           readMoreActivated: false
         };
       }
@@ -119,6 +132,13 @@ describe('ProductCatalogueItem.vue', () => {
   */
   it("Must contain the product RRP", () => {
     expect(wrapper.text()).toContain(100);
+  });
+
+  /**
+   * Test that the product RRP is formatted with the currency symbol and code
+   */
+  it("RRP must be formatted with symbol and code", () => {
+    expect(wrapper.text()).toContain("Currency symbol100 Currency code");
   });
 
   /**

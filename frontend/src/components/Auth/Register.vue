@@ -226,7 +226,7 @@
 
 <script>
 import LocationAutocomplete from '@/components/utils/LocationAutocomplete';
-import {createUser} from '../../api';
+import {createUser} from '../../api/internal';
 
 export default {
   name: 'Register',

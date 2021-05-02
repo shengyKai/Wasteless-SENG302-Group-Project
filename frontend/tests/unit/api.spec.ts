@@ -1,8 +1,8 @@
 import axios, { AxiosError, AxiosInstance } from 'axios';
 
-import * as api from '@/api';
+import * as api from '@/api/internal';
 import { AxiosResponse } from 'axios';
-import { CreateProduct, CreateUser, MaybeError } from '@/api';
+import { CreateProduct, CreateUser, MaybeError } from '@/api/internal';
 
 jest.mock('axios', () => ({
   create: jest.fn(function() {

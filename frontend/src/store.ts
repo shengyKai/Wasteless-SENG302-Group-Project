@@ -1,4 +1,4 @@
-import {User,  Business, getUser, login} from './api';
+import {User,  Business, getUser, login} from './api/internal';
 import Vuex, { Store, StoreOptions } from 'vuex';
 import { COOKIE, deleteCookie, isTesting, setCookie } from './utils';
 
