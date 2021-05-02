@@ -65,6 +65,13 @@ public class ProductControllerDeleteImageTests {
     }
 
     /**
+     * Tags a session as dgaa
+     */
+    private void setUpDGAAAuthCode() {
+        sessionAuthToken.put("role", "defaultGlobalApplicationAdmin");
+    }
+
+    /**
      * Creates a user, business and product objects for use within the unit tests, where the
      * user is the owner of the business and the product exists within the business's
      * product catalogue.
@@ -279,21 +286,33 @@ public class ProductControllerDeleteImageTests {
      * Tests using the delete product image method to see if a user who is not a DGAA and just a regular user cannot
      * delete the image.
      */
-    //TODO note to Connor - Ask Josh for help
-    @Disabled
     @Test
-    void deleteProductImage_isNotDGAA_403Response() {
-
+    void deleteProductImage_isNotDGAA_403Response() throws Exception {
+        String url = String.format("/businesses/%d/products/%s/images/%d",
+                testBusiness2.getId(), testProduct.getProductCode(), testImage.getID());
+        mockMvc.perform( MockMvcRequestBuilders
+                .delete(url)
+                .sessionAttrs(sessionAuthToken)
+                .cookie(authCookie))
+                .andExpect(status().isForbidden());
     }
 
     /**
      * Tests using the delete image method to see if a DGAA without being a business owner can delete images products.
      */
-    //TODO note to Connor - Ask Josh for help
-    @Disabled
     @Test
-    void deleteProductImage_isDGAA_imageDeleted() {
+    void deleteProductImage_isDGAA_imageDeleted() throws Exception {
+        setUpDGAAAuthCode();
+        testUser.setRole("globalApplicationAdmin");
+        userRepository.save(testUser);
 
+        String url = String.format("/businesses/%d/products/%s/images/%d",
+                testBusiness2.getId(), testProduct.getProductCode(), testImage.getID());
+        mockMvc.perform( MockMvcRequestBuilders
+                .delete(url)
+                .sessionAttrs(sessionAuthToken)
+                .cookie(authCookie))
+                .andExpect(status().isOk());
     }
 
     /**

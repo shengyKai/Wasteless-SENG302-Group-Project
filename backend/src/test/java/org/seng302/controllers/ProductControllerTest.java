@@ -4,6 +4,7 @@ import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.runner.RunWith;
@@ -592,6 +593,7 @@ class ProductControllerTest {
     /**
      * Tests that the DGAA can post a product
      */
+    @Disabled
     @Test
     void postingProductFromDGAAAccount() {
         setCurrentUser(bystanderUser.getUserID());
