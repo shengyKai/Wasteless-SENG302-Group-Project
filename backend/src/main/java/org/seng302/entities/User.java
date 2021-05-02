@@ -10,6 +10,7 @@ import org.springframework.data.annotation.ReadOnlyProperty;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
+import javax.annotation.PreDestroy;
 import javax.persistence.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -279,13 +280,6 @@ public class User extends Account {
             throw new IllegalArgumentException("Invalid role: \"" + role + "\"");
         }
 
-        if (
-            "defaultGlobalApplicationAdmin".equals(role) &&
-            !"wasteless@seng302.com".equals(this.getEmail())
-        ) {
-            throw new IllegalArgumentException("Tried creating new DGAA");
-        }
-
         this.role=role;
     }
 
@@ -431,6 +425,22 @@ public class User extends Account {
             businessArray.add(business.constructJson());
         }
         return businessArray;
+    }
+
+    /**
+     * Called before a user is removed from the database
+     * Ensures that the User is not an owner of any Businesses.
+     * If the User is an administrator for any businesses, they are removed from the administrator set for each business
+     * @throws ResponseStatusException If User owns any businesses
+     */
+    @PreRemove
+    public void preRemove() {
+        if (!this.getBusinessesOwned().isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Cannot delete a user who is an owner of one or more businesses");
+        }
+        for (Business business : this.getBusinessesAdministered()) {
+            business.removeAdmin(this);
+        }
     }
 
 

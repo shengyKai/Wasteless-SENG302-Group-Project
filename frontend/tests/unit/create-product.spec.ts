@@ -5,12 +5,30 @@ import { createLocalVue, Wrapper, mount } from '@vue/test-utils';
 
 import CreateProduct from '@/components/BusinessProfile/CreateProduct.vue';
 import { castMock, flushQueue } from './utils';
-import * as api from '@/api';
+import * as api from '@/api/internal';
 import { getStore, resetStoreForTesting } from '@/store';
+import { currencyFromCountry } from '@/api/currency';
 
-jest.mock('@/api', () => ({
+jest.mock('@/api/internal', () => ({
   createProduct: jest.fn(),
+  getBusiness: jest.fn(() => {
+    return {
+      address: {
+        country: 'New Zealand',
+      }
+    }
+  })
 }));
+
+jest.mock('@/api/currency', () => ({
+  currencyFromCountry: jest.fn(() => {
+    return {
+      code: 'Currency code',
+      symbol: 'Currency symbol'
+    }
+  })
+}));
+
 
 const createProduct = castMock(api.createProduct);
 
@@ -493,4 +511,17 @@ describe('CreateProduct.vue', () => {
     expect(wrapper.vm.valid).toBeFalsy();
     expect(wrapper.emitted().closeDialog).toBeFalsy(); // The dialog should stay open
   });
+
+  /**
+   * Tests that the values of the code and symbol attributes returned by the mocked currencyFromCountry
+   * method are present in the Recommended Retail Price field.
+   */
+  it('RRP field contains currency code and symbol recieved from API', () => {
+    const fields = wrapper.findAllComponents({ name: 'v-text-field' });
+    const rrpFields = fields.filter(field => field.text().includes('Recommended Retail Price'));
+    expect(rrpFields.length).toBe(1);
+    const rrpField = rrpFields.at(0);
+    expect(rrpField.text()).toContain('Currency symbol');
+    expect(rrpField.text()).toContain('Currency code');
+  }) 
 });

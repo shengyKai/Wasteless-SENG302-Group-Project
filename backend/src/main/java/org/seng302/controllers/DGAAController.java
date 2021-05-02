@@ -8,6 +8,7 @@ import org.seng302.entities.Location;
 import org.seng302.entities.User;
 import org.seng302.persistence.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.stereotype.Component;
@@ -15,6 +16,11 @@ import org.springframework.stereotype.Component;
 @Component
 @EnableScheduling
 public class DGAAController {
+    @Value("${dgaa.username}")
+    private String dgaaUsername;
+
+    @Value("${dgaa.password}")
+    private String dgaaPassword;
 
     private UserRepository userRepository;
     private static final Logger logger = LogManager.getLogger(DGAAController.class.getName());
@@ -22,7 +28,6 @@ public class DGAAController {
     @Autowired
     public DGAAController(UserRepository userRepository) {
         this.userRepository = userRepository;
-        checkDGAA();
     }
 
     /**
@@ -31,7 +36,8 @@ public class DGAAController {
      */
     @Scheduled(fixedRate = 1800000)
     public void checkDGAA() {
-        User dgaa = this.userRepository.findByEmail("wasteless@seng302.com");
+        logger.info("Checking DGAA exists");
+        User dgaa = this.userRepository.findByEmail(dgaaUsername);
         
         if (dgaa != null && !dgaa.isIsDGAA()) {
             userRepository.delete(dgaa);
@@ -40,6 +46,7 @@ public class DGAAController {
 
         // Default Global Application Admin doesn't exist or has been tampered with
         if (dgaa == null) {
+            logger.warn(() -> "DGAA does not exist, creating one (" + dgaaUsername + ")");
             Location dgaaAddress;
             try {
                 dgaaAddress = new Location.Builder()
@@ -51,15 +58,14 @@ public class DGAAController {
                             .withPostCode("1111")
                             .build();
                 dgaa = new User.Builder()
-                    .withEmail("wasteless@seng302.com")
+                    .withEmail(dgaaUsername)
                     .withFirstName("DGAA")
                     .withLastName("DGAA")
-                    .withPassword("T3amThr33IsTh3")
+                    .withPassword(dgaaPassword)
                     .withDob("2000-03-11")
                     .withAddress(dgaaAddress)
                     .build();
                 dgaa.setRole("defaultGlobalApplicationAdmin");
-
                 userRepository.save(dgaa);
             } catch (ParseException e) {
                 logger.error(e);
