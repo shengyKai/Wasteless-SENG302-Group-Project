@@ -114,6 +114,7 @@ export type Product = {
   recommendedRetailPrice?: number,
   created?: string,
   images: Image[],
+  countryOfSale?: string,
 };
 
 export type CreateProduct = Omit<Product, 'created' | 'images'>;
