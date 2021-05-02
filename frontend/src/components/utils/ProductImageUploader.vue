@@ -15,7 +15,7 @@
                   :src="url"
                   class="image-preview"
                   @dragover="onDragOver"
-                  @dragleave="isDragging = false"
+                  @dragleave="onDragLeave"
                   @drop="onDrop">
                 <!-- Button for removing an image -->
                 <v-btn icon class="remove-image" @click="file=undefined" color="error">
@@ -87,6 +87,12 @@ export default {
   },
   methods: {
     /**
+     * Handler for a dragged entity leaving the target region
+     */
+    onDragLeave() {
+      this.isDragging = false;
+    },
+    /**
      * Handler for a dragged entity entering the target region
      */
     onDragOver(event) {
@@ -96,9 +102,7 @@ export default {
       let item = data.items[0];
       if (item.kind !== "file" || !item.type.match("^image/")) return;
 
-      data.effectAllowed = "copy";
       this.isDragging = true;
-
       event.preventDefault();
     },
     /**
