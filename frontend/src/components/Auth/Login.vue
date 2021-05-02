@@ -23,7 +23,7 @@
     <p class="login-error-text" v-if ="errorMessage !== undefined"> {{errorMessage}} </p>
 
     <!-- Login Button Direct user into the home page. Invalid credential will trigger a pop up error message -->
-    <v-btn @click="showHome" type="submit" color="primary" :disabled="!valid">
+    <v-btn @click="login" type="submit" color="primary" :disabled="!valid">
       LOGIN
     </v-btn>
 
@@ -77,11 +77,10 @@ export default {
       this.$emit("showRegister");
     },
     /**
-     * Method to direct into home page, embed in a button
-     * dispatch details from textfield to store plugin before directing
-     * store.dispatch need to await in this case else the globalError might be inconsistent
+     * Method to log in with the provided user credentials and if they are valid then show home page.
+     * Otherwise this will show an error message.
      */
-    async showHome() {
+    async login() {
       this.errorMessage = undefined;
       this.errorMessage = await this.$store.dispatch("login", { email : this.email, password : this.password });
       if(this.errorMessage !== "Invalid credentials") {
