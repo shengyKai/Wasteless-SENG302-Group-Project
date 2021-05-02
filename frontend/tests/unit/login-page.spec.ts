@@ -205,4 +205,12 @@ describe('Login.vue', () => {
       expect(loginButton.props().disabled).toBeTruthy();
     });
   });
+
+  it('Tests that errorMessage is displayed if not undefined', async () => {
+    await wrapper.setData({
+      errorMessage: 'test_error_message',
+    });
+
+    expect(wrapper.text()).toContain('test_error_message');
+  });
 });
