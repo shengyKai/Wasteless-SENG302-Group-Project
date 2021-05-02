@@ -105,7 +105,8 @@ public class BusinessControllerTest {
     private void setUpTestBusiness() throws ParseException {
         testBusiness = new Business.Builder()
                 .withBusinessType("Accommodation and Food Services")
-                .withAddress(new Location())
+                .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
+                        "Canterbury,8041"))
                 .withDescription("Some description")
                 .withName("COSC co")
                 .withPrimaryOwner(owner)
@@ -504,7 +505,8 @@ public class BusinessControllerTest {
                 .withBio("buids things")
                 .withDob("2000-03-11")
                 .withPhoneNumber("+64 3 555 0129")
-                .withAddress(new Location())
+                .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
+                        "Canterbury,8041"))
                 .build();
         testAdmin = userRepository.save(testAdmin);
         String jsonString = String.format("{\"userId\": %d}", testAdmin.getUserID());
@@ -539,7 +541,8 @@ public class BusinessControllerTest {
                 .withBio("buids things")
                 .withDob("2000-03-11")
                 .withPhoneNumber("+64 3 555 0129")
-                .withAddress(new Location())
+                .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
+                        "Canterbury,8041"))
                 .build();
         testAdmin = userRepository.save(testAdmin);
         String jsonString = String.format("{\"userId\": %d}", testAdmin.getUserID());
@@ -575,7 +578,8 @@ public class BusinessControllerTest {
                 .withBio("buids things")
                 .withDob("2000-03-11")
                 .withPhoneNumber("+64 3 555 0129")
-                .withAddress(new Location())
+                .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
+                        "Canterbury,8041"))
                 .build();
         testAdmin = userRepository.save(testAdmin);
         String jsonString = String.format("{\"userId\": %d}", testAdmin.getUserID());
@@ -613,7 +617,8 @@ public class BusinessControllerTest {
                 .withBio("buids things")
                 .withDob("2000-03-11")
                 .withPhoneNumber("+64 3 555 0129")
-                .withAddress(new Location())
+                .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
+                        "Canterbury,8041"))
                 .build();
         testAdmin = userRepository.save(testAdmin);
         String jsonString = String.format("{\"userId\": %d}", testAdmin.getUserID());
@@ -647,7 +652,8 @@ public class BusinessControllerTest {
                 .withBio("buids things")
                 .withDob("2000-03-11")
                 .withPhoneNumber("+64 3 555 0129")
-                .withAddress(new Location())
+                .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
+                        "Canterbury,8041"))
                 .build();
         testAdmin = userRepository.save(testAdmin);
         String jsonString = String.format("{\"userId\": %d}", testAdmin.getUserID());
@@ -698,7 +704,8 @@ public class BusinessControllerTest {
                 .withBio("buids things")
                 .withDob("2000-03-11")
                 .withPhoneNumber("+64 3 555 0129")
-                .withAddress(new Location())
+                .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
+                        "Canterbury,8041"))
                 .build();
         testAdmin = userRepository.save(testAdmin);
         String jsonString = String.format("{\"userId\": %d}", testAdmin.getUserID());
@@ -732,7 +739,8 @@ public class BusinessControllerTest {
                 .withBio("buids things")
                 .withDob("2000-03-11")
                 .withPhoneNumber("+64 3 555 0129")
-                .withAddress(new Location())
+                .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
+                        "Canterbury,8041"))
                 .build();
         testAdmin = userRepository.save(testAdmin);
         testBusiness.addAdmin(testAdmin);
@@ -769,7 +777,8 @@ public class BusinessControllerTest {
                 .withBio("buids things")
                 .withDob("2000-03-11")
                 .withPhoneNumber("+64 3 555 0129")
-                .withAddress(new Location())
+                .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
+                        "Canterbury,8041"))
                 .build();
         testAdmin = userRepository.save(testAdmin);
 
@@ -809,7 +818,8 @@ public class BusinessControllerTest {
                 .withBio("buids things")
                 .withDob("2000-03-11")
                 .withPhoneNumber("+64 3 555 0129")
-                .withAddress(new Location())
+                .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
+                        "Canterbury,8041"))
                 .build();
         testAdmin = userRepository.save(testAdmin);
 
@@ -862,7 +872,8 @@ public class BusinessControllerTest {
                 .withBio("buids things")
                 .withDob("2000-03-11")
                 .withPhoneNumber("+64 3 555 0129")
-                .withAddress(new Location())
+                .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
+                        "Canterbury,8041"))
                 .build();
         testAdmin = userRepository.save(testAdmin);
 
@@ -902,7 +913,8 @@ public class BusinessControllerTest {
                 .withBio("buids things")
                 .withDob("2000-03-11")
                 .withPhoneNumber("+64 3 555 0129")
-                .withAddress(new Location())
+                .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
+                        "Canterbury,8041"))
                 .build();
         testAdmin = userRepository.save(testAdmin);
         testBusiness.addAdmin(testAdmin); // make user an admin
