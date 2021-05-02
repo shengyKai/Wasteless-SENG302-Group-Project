@@ -353,6 +353,10 @@ public class Business {
         return adminJsons;
     }
 
+    @Override
+    public String toString() {
+        return this.name;
+    }
 
     /**
      * Builder for Business
