@@ -83,10 +83,7 @@ export default {
      */
     async showHome() {
       this.errorMessage = undefined;
-      await this.$store.dispatch("login", { email : this.email, password : this.password });
-      this.errorMessage = this.$store.getters.getglobalError;
-      this.$store.commit('clearError');
-
+      this.errorMessage = await this.$store.dispatch("login", { email : this.email, password : this.password });
       if(this.errorMessage !== "Invalid credentials") {
         this.$router.push("/home");
       }
