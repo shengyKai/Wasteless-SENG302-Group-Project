@@ -10,6 +10,7 @@ import org.springframework.data.annotation.ReadOnlyProperty;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
+import javax.annotation.PreDestroy;
 import javax.persistence.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -265,6 +266,7 @@ public class User extends Account {
      * Authority within the system, eg: admin status and what businesses they are associated with
      * @return role
      */
+    @Column(nullable = false)
     public String getRole(){
         return this.role;
     }
@@ -274,6 +276,10 @@ public class User extends Account {
      * @param role admin status and what businesses they are associated with
      */
     public void setRole(String role){
+        if (!Set.of("user", "globalApplicationAdmin", "defaultGlobalApplicationAdmin").contains(role)) {
+            throw new IllegalArgumentException("Invalid role: \"" + role + "\"");
+        }
+
         this.role=role;
     }
 
@@ -419,6 +425,22 @@ public class User extends Account {
             businessArray.add(business.constructJson());
         }
         return businessArray;
+    }
+
+    /**
+     * Called before a user is removed from the database
+     * Ensures that the User is not an owner of any Businesses.
+     * If the User is an administrator for any businesses, they are removed from the administrator set for each business
+     * @throws ResponseStatusException If User owns any businesses
+     */
+    @PreRemove
+    public void preRemove() {
+        if (!this.getBusinessesOwned().isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Cannot delete a user who is an owner of one or more businesses");
+        }
+        for (Business business : this.getBusinessesAdministered()) {
+            business.removeAdmin(this);
+        }
     }
 
 

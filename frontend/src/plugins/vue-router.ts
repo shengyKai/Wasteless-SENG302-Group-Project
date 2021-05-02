@@ -72,5 +72,6 @@ const routes = [
 
 export default new VueRouter({
   mode: "history",
-  routes
+  base: process.env.VUE_APP_BASE_URL,
+  routes,
 });

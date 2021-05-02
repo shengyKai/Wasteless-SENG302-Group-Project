@@ -93,9 +93,10 @@ export type Business = {
 };
 
 export type CreateBusiness = {
+  primaryAdministratorId: number,
   name: string,
   description?: string,
-  address: string,
+  address: Location,
   businessType: BusinessType,
 };
 
@@ -382,7 +383,7 @@ export async function createBusiness(business: CreateBusiness): Promise<MaybeErr
     if (status === undefined) return 'Failed to reach backend';
     if (status === 401) return 'Missing/Invalid access token';
 
-    return 'Request failed: ' + status;
+    return 'Request failed: ' + status + ' ' + error.response.data.message;
   }
 
   return undefined;
