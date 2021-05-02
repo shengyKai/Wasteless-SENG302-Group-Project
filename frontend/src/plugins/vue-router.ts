@@ -7,6 +7,7 @@ import ProfilePage from "../components/UserProfile.vue";
 import BusinessProfile from "../components/BusinessProfile/index.vue";
 import SearchResults from "../components/SearchResults.vue";
 import HomePage from "../components/HomePage.vue";
+import ProductImageUploader from "../components/utils/ProductImageUploader.vue";
 
 
 Vue.use(VueRouter);
@@ -55,6 +56,11 @@ const routes = [
     path: "/search",
     component: SearchResults,
     meta: { title: 'Search' }
+  },
+  { // TODO Remove this
+    path: "/upload",
+    component: ProductImageUploader,
+    meta: { title: 'Upload Product Image'}
   },
   {
     path: "*",

@@ -100,6 +100,10 @@ const testCreateProduct: CreateProduct = {
   recommendedRetailPrice: 100,
 };
 
+const testFile = new File([], 'test_file');
+let testFormData = new FormData();
+testFormData.append('file', testFile);
+
 // Creates a type from the methods of T where the methods return promises
 type PromiseMethods<T> = Pick<T, ({[P in keyof T]: T[P] extends (...args: any[]) => Promise<any> ? P : never })[keyof T]>;
 
@@ -115,6 +119,7 @@ type ApiCalls = {[k in keyof ApiMethods]: {
   httpMethod: keyof (typeof instance),              // The HTTP method to be used
   url: string,                                      // The expected url to be accessed
   body: any,                                        // The expected http body
+  headers?: any,                                    // The expected headers
   result: UnwrapPromise<ReturnType<ApiMethods[k]>>, // The expected function result if successful
   apiResult?: any,                                  // If the api returns a different value from the overall result then this should be used to specify that
 }};
@@ -146,6 +151,16 @@ const apiCalls: Partial<ApiCalls> = {
     body: { email: 'test_email', password: 'test_password' },
     result: 7,
     apiResult: { userId: 7 },
+  },
+  uploadProductImage: {
+    parameters: [100, 'TEST-PRODUCT', testFile],
+    httpMethod: 'post',
+    url: '/businesses/100/products/TEST-PRODUCT/images',
+    body: testFormData,
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    },
+    result: undefined,
   }
 };
 
@@ -187,7 +202,11 @@ describe('api', () => {
 
       await doCall();
 
-      expect(instance[fields.httpMethod]).toBeCalledWith(fields.url, fields.body);
+      if (fields.headers === undefined) {
+        expect(instance[fields.httpMethod]).toBeCalledWith(fields.url, fields.body);
+      } else {
+        expect(instance[fields.httpMethod]).toBeCalledWith(fields.url, fields.body, { headers: fields.headers });
+      }
     });
 
     it('Method should return the correct value if successful', async () => {
