@@ -6,7 +6,7 @@
       <!--  v-bind="attrs" v-on="on" allows the v-dialog to use this link as the activator for the dialog box -->
       <a v-bind="attrs" v-on="on">
         <!-- productImages[0] will be the primary image for the product. -->
-        <v-img height="100%" :src="productImages[0].src"/>
+        <v-img height="100%" :src="productImages[0].filename"/>
       </a>
     </template>
     <template>
@@ -15,7 +15,7 @@
         hide-delimiters
       >
         <!-- iterate through each photo in productImages -->
-        <v-carousel-item v-for="(item, i) in productImages" :key="i" :src="item.src" />
+        <v-carousel-item v-for="(item, i) in productImages" :key="i" :src="item.filename" />
       </v-carousel>
     </template>
   </v-dialog>

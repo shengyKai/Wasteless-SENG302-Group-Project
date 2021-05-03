@@ -17,7 +17,7 @@ jest.mock('@/api/currency', () => ({
     return {
       code: 'Currency code',
       symbol: 'Currency symbol'
-    }
+    };
   })
 }));
 

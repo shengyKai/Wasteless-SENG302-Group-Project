@@ -16,7 +16,7 @@ jest.mock('@/api/internal', () => ({
       address: {
         country: 'New Zealand',
       }
-    }
+    };
   })
 }));
 
@@ -25,7 +25,7 @@ jest.mock('@/api/currency', () => ({
     return {
       code: 'Currency code',
       symbol: 'Currency symbol'
-    }
+    };
   })
 }));
 
@@ -523,5 +523,5 @@ describe('CreateProduct.vue', () => {
     const rrpField = rrpFields.at(0);
     expect(rrpField.text()).toContain('Currency symbol');
     expect(rrpField.text()).toContain('Currency code');
-  }) 
+  });
 });
