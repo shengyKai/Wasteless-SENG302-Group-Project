@@ -24,19 +24,19 @@ npm-install:
 
 junit:
   stage: test
-  script:
-    - cd backend
-    - ./gradlew test
   artifacts:
     paths:
       - backend/build
+  script:
+    - cd backend
+    - ./gradlew test
+
 cucumber:
    stage: test
    script:
      - cd backend
      - ./gradlew cucumber
 
-# Run Jest (Javascript) tests
 jest:
    stage: test
    cache:
@@ -45,8 +45,8 @@ jest:
        - frontend/node_modules
      policy: pull
    artifacts:
-    paths:
-      - frontend/coverage
+     paths:
+       - frontend/coverage
    script:
      - cd frontend
      - npm run test
@@ -79,7 +79,6 @@ branch-build:
     - cd frontend
     - npm run build
     - cd ../backend
-    - echo "Variables are $DB_USERNAME $DB_URL"
     - ./gradlew bootJar
   artifacts:
     paths:
@@ -94,7 +93,6 @@ deploy-staging-backend:
   stage: deploy
   script:
     - cd backend
-    - echo "Variables are $DB_USERNAME $DB_URL"
     - source ../runner/copy-environment.sh
     - ./gradlew bootJar
     - rm -rf /home/gitlab-runner/staging-backend/ || true
@@ -135,6 +133,7 @@ deploy-production-backend:
   stage: deploy
   script:
     - cd backend
+    - source ../runner/copy-environment.sh
     - ./gradlew bootJar
     - rm -rf /home/gitlab-runner/production-backend/ || true
     - mkdir /home/gitlab-runner/production-backend/

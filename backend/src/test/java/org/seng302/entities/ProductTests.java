@@ -3,10 +3,6 @@ package org.seng302.entities;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.seng302.entities.Business;
-import org.seng302.entities.Location;
-import org.seng302.entities.Product;
-import org.seng302.entities.User;
 import org.seng302.persistence.BusinessRepository;
 import org.seng302.persistence.ProductRepository;
 import org.seng302.persistence.UserRepository;
@@ -24,6 +20,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class ProductTests {
+    //TODO ADD NEW TESTS FOR THE NEW IMAGE ATTRIBUTE!!!
 
     @Autowired
     ProductRepository productRepository;
@@ -378,6 +375,29 @@ class ProductTests {
     }
 
     /**
+     * Tests that "findByBusinessAndProductCode" returns null if the product is deleted
+     */
+    @Test
+    void testFindByBusinessAndProductCodeIsNullIfProductHasBeenDeleted() {
+        // Product with same code saved to a different business
+        Product product = productRepository.save(
+                new Product.Builder()
+                        .withProductCode("NATHAN-APPLE-70")
+                        .withName("The Nathan Apple")
+                        .withDescription("Ever wonder why Nathan has an apple")
+                        .withManufacturer("Apple")
+                        .withRecommendedRetailPrice("9000.03")
+                        .withBusiness(testBusiness1)
+                        .build()
+        );
+
+        productRepository.delete(product);
+
+        Product foundProduct = productRepository.findByBusinessAndProductCode(testBusiness1, "NATHAN-APPLE-70");
+        assertNull(foundProduct);
+    }
+
+    /**
      * Tests that trying the change a product's business using "addToCatalogue" fails.
      */
     @Test
@@ -395,6 +415,9 @@ class ProductTests {
 
         assertThrows(IllegalArgumentException.class, () -> testBusiness2.addToCatalogue(product));
     }
+
+
+
 
     /**
      * Tests that a product built without a product code throws a ResponseStatusException
@@ -679,4 +702,6 @@ class ProductTests {
                 .withBusiness(testBusiness1);
         assertThrows(ResponseStatusException.class, builder::build);
     }
+
+
 }

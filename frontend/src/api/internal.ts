@@ -37,7 +37,7 @@ const instance = axios.create({
   withCredentials: true,
 });
 
-type MaybeError<T> = T | string;
+export type MaybeError<T> = T | string;
 
 export type User = {
   id: number,
@@ -93,33 +93,30 @@ export type Business = {
 };
 
 export type CreateBusiness = {
+  primaryAdministratorId: number,
   name: string,
   description?: string,
-  address: string,
+  address: Location,
   businessType: BusinessType,
 };
 
-export type Product = {
+export type Image = {
   id: number,
-  name: string,
-  description?: string,
-  dateAdded: Date,
-  expiryDate?: Date,
-  manufacturer?: string,
-  recommendedRetailPrice?: string,
-  quantity: number,
-  productCode: string
+  filename: string,
+  thumbnailFilename: string,
 };
 
-export type CreateProduct = {
+export type Product = {
+  id: string,
   name: string,
   description?: string,
   manufacturer?: string,
-  expiryDate?: Date,
-  recommendedRetailPrice?: string,
-  quantity: number,
-  productCode: string
-}
+  recommendedRetailPrice?: number,
+  created?: string,
+  images: Image[],
+};
+
+export type CreateProduct = Omit<Product, 'created' | 'images'>;
 
 function isLocation(obj: any): obj is Location {
   if (obj === null || typeof obj !== 'object') return false;
@@ -300,7 +297,7 @@ export async function login(email: string, password: string): Promise<MaybeError
 
     if (status === undefined) return 'Failed to reach backend';
     if (status === 400) return 'Invalid credentials';
-    return `Request failed: ' + ${status}`;
+    return `Request failed: ${status}`;
   }
   let id = response.data.userId;
   if (typeof id !== 'number') return 'Invalid response';
@@ -386,27 +383,62 @@ export async function createBusiness(business: CreateBusiness): Promise<MaybeErr
     if (status === undefined) return 'Failed to reach backend';
     if (status === 401) return 'Missing/Invalid access token';
 
-    return 'Request failed: ' + status;
+    return 'Request failed: ' + status + ' ' + error.response.data.message;
   }
 
   return undefined;
 }
 
 /**
- * Creates a product
+ * Add a product to a businesses catalogue.
+ *
+ * @param businessId The business to add the product to
  * @param product The properties to create a product with
  * @return undefined if operation is successful, otherwise a string error
  */
-export async function createProduct(product: CreateProduct): Promise<MaybeError<undefined>> {
+export async function createProduct(businessId: number, product: CreateProduct): Promise<MaybeError<undefined>> {
   try {
-    await  instance.post('/businesses/products', product);
+    await  instance.post(`/businesses/${businessId}/products`, product);
   } catch (error) {
     let status: number | undefined = error.response?.status;
     if (status === undefined) return 'Failed to reach backend';
     if (status === 401) return 'Missing/Invalid access token';
+    if (status === 403) return 'Operation not permitted';
+    if (status === 400) return 'Invalid parameters';
+    if (status === 409) return 'Product code unavailable';
 
     return 'Request failed: ' + status;
   }
+  return undefined;
+}
+
+
+/**
+ * Add a product image to the given product
+ *
+ * @param businessId The business for which the product belongs
+ * @param productCode The product's product code
+ * @param file Image file to add
+ */
+export async function uploadProductImage(businessId: number, productCode: string, file: File): Promise<MaybeError<undefined>> {
+  try {
+    let formData = new FormData();
+    formData.append('file', file);
+    await instance.post(`/businesses/${businessId}/products/${productCode}/images`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
+  } catch (error) {
+    let status: number | undefined = error.response?.status;
+    if (status === undefined) return 'Failed to reach backend';
+    if (status === 400) return 'Invalid image';
+    if (status === 401) return 'Missing/Invalid access token';
+    if (status === 403) return 'Operation not permitted';
+    if (status === 406) return 'Product/Business not found';
+    return 'Request failed: ' + status;
+  }
+
   return undefined;
 }
 

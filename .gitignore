@@ -8,6 +8,7 @@ dist/
 node_modules/
 .scannerwork/
 .metadata
+.scannerwork/
 
 ### STS ###
 .apt_generated

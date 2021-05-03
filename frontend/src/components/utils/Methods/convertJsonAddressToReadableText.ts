@@ -1,4 +1,4 @@
-import { Location } from "@/api";
+import { Location } from "@/api/internal";
 
 //method to return the appropriate format for addresses depending on the fields provided
 function convertAddressToReadableText(address: Location, status: "full" | "partial") {

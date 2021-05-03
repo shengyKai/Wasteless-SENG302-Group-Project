@@ -177,7 +177,7 @@ public class ProductController {
             String productCode = productInfo.getAsString("id");
 
             if (productRepository.findByBusinessAndProductCode(business, productCode) != null) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Product already exists with product code in this catalogue \"" + productCode + "\"");
+                throw new ResponseStatusException(HttpStatus.CONFLICT, "Product already exists with product code in this catalogue \"" + productCode + "\"");
             }
 
             Product product = new Product.Builder()

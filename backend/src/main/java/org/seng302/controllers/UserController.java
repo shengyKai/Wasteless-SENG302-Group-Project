@@ -172,6 +172,10 @@ public class UserController {
         List<User> pageInResults = SearchHelper.getPageInResults(queryResults, page, resultsPerPage);
         JSONArray publicResults = new JSONArray();
         for (User user : pageInResults) {
+            //the dgaa profile shouldnt be searchable, so the result of it shouldnt be added into publicResults
+            if (user.getRole().equals("defaultGlobalApplicationAdmin")) {
+                continue;
+            }
             if (AuthenticationTokenManager.sessionCanSeePrivate(session, user.getUserID())) {
                 publicResults.appendElement(user.constructPrivateJson(true));
             } else {
@@ -190,7 +194,7 @@ public class UserController {
      */
     @GetMapping("/users/{id}/makeAdmin")
     void makeUserAdmin(HttpServletRequest session, @PathVariable("id") long id) {
-        changeUserPrivilege(session, id, "admin");
+        changeUserPrivilege(session, id, "globalApplicationAdmin");
     }
 
     /**
