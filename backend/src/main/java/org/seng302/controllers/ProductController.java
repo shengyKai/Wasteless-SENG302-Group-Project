@@ -228,7 +228,7 @@ public class ProductController {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "The product is not within the business's catalogue");
         }
 
-        Product product = ProductController.getProduct(productRepository, business, productId);
+        Product product = productRepository.getProduct(business, productId);
 
         product.setProductImage(null);
         productRepository.save(product);
@@ -260,6 +260,7 @@ public class ProductController {
      * @param businessId The id of the business to retrieve
      * @return The business matching the given Id
      */
+    //TODO Needs moved to the business repository
     private Business getBusiness(Long businessId) {
         // check business exists
         Optional<Business> business = businessRepository.findById(businessId);
@@ -268,25 +269,6 @@ public class ProductController {
                     "The given business does not exist");
         }
         return business.get();
-    }
-
-    /**
-     * Gets a product from the database that matches a given image Id. This method preforms a sanity check to ensure the
-     * image does exist and if not throws a not accepted response status exception.
-     * @param productRepository the product repository that connects to the database
-     * @param business the business object
-     * @param productCode the product code of the product
-     * @return the product object that matches the business and product code
-     */
-    public static Product getProduct(ProductRepository productRepository, Business business, String productCode) {
-        Optional<Product> product = productRepository.findByBusinessAndProductCode(business, productCode);
-        if (product.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE,
-                    "the product does not exist");
-        }
-        return product.get();
-        // The product repo is not working as expected, the product can still be retrieved even when it does not exist
-        // within the business's catalogue
     }
 
     /**

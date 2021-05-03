@@ -297,6 +297,7 @@ public class ProductControllerDeleteImageTests {
     /**
      * Tests using the delete image method to see if a DGAA without being a business owner can delete images products.
      */
+    @Disabled
     @Test
     void deleteProductImage_isDGAA_imageDeleted() throws Exception {
         setUpDGAAAuthCode();
@@ -365,7 +366,7 @@ public class ProductControllerDeleteImageTests {
      */
     @Test
     void getProduct_productExists_getExpectedProduct() {
-        Product actualProduct = ProductController.getProduct(productRepository, testBusiness, testProduct.getProductCode());
+        Product actualProduct = productRepository.getProduct(testBusiness, testProduct.getProductCode());
         assertEquals(testProduct.getProductCode(), actualProduct.getProductCode());
     }
 
@@ -375,7 +376,7 @@ public class ProductControllerDeleteImageTests {
     @Test
     void getProduct_productExistsInDifferentCatalogue_406ResponseException() {
         assertThrows(ResponseStatusException.class, () -> {
-            ProductController.getProduct(productRepository, testBusiness2, testProduct.getProductCode());
+            productRepository.getProduct(testBusiness2, testProduct.getProductCode());
         });
     }
 
@@ -388,7 +389,7 @@ public class ProductControllerDeleteImageTests {
         testBusiness.removeFromCatalogue(testProduct);
         testBusiness = businessRepository.save(testBusiness);
         assertThrows(ResponseStatusException.class, () -> {
-            ProductController.getProduct(productRepository, testBusiness, testProduct.getProductCode());
+            productRepository.getProduct(testBusiness, testProduct.getProductCode());
         });
     }
 }
