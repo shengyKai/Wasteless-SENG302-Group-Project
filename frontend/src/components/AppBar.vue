@@ -131,7 +131,11 @@ export default {
       this.$router.push("/home");
     },
     showCatalogue() {
-      this.$router.push("/business/:id/products");
+      //Should be using this
+      // this.$router.push("/business/" + this.$store.state.activeRole.id + "/products");
+      this.$router.push("/business/" + "10"+ "/products");
+      //testing the catalogue with id=10 to show product in catalogue this.$store.state.activeRole.id
+
     },
     logout() {
       this.$store.commit("logoutUser");
