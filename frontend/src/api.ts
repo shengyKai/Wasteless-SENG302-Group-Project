@@ -442,11 +442,11 @@ export async function createProduct(businessId: number, product: CreateProduct):
  * @param reverse
  * @return a list of products
  */
-export async function getProduct(buisnessId: Number, orderBy: String, page: Number, resultsPerPage: Number, reverse: Boolean ): Promise<MaybeError<Array<Product>>> {
+export async function getProducts(buisnessId: Number, orderBy: String, page: Number, resultsPerPage: Number, reverse: Boolean ): Promise<MaybeError<Product[]>> {
   let response;
   try {
 
-    response = await  instance.get(`/businesses/${buisnessId}/products`, {
+    response = await instance.get(`/businesses/${buisnessId}/products`, {
       params: {
         orderBy: orderBy,
         page : page,
