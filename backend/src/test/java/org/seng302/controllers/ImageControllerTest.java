@@ -42,7 +42,7 @@ public class ImageControllerTest {
      */
     @Test
     void getImage_ImageExist_getExpectedImage() {
-        Image actualImage = ImageController.getImage(imageRepository, testImage.getID());
+        Image actualImage = imageRepository.getImage(testImage.getID());
         assertEquals(testImage.getID(), actualImage.getID());
     }
 
@@ -53,7 +53,7 @@ public class ImageControllerTest {
     void getImage_ImageDoesNotExist_406ResponseException() {
         imageRepository.delete(testImage);
         assertThrows(ResponseStatusException.class, () -> {
-            ImageController.getImage(imageRepository, testImage.getID());
+            imageRepository.getImage(testImage.getID());;
         });
     }
 

@@ -219,7 +219,7 @@ public class ProductController {
         if (!ProductController.checkProductFromCodeExists(productRepository, productId)) {
             throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "the product does not exist");
         }
-        Image image = ImageController.getImage(imageRepository, imageId);
+        Image image = imageRepository.getImage(imageId);
 
         business.checkSessionPermissions(request);
 
@@ -278,7 +278,6 @@ public class ProductController {
      * @param productCode the product code of the product
      * @return the product object that matches the business and product code
      */
-    //TODO add unit tests
     public static Product getProduct(ProductRepository productRepository, Business business, String productCode) {
         Optional<Product> product = productRepository.findByBusinessAndProductCode(business, productCode);
         if (product.isEmpty()) {
