@@ -4,13 +4,17 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.seng302.controllers.DGAAController;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.util.FileSystemUtils;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -29,6 +33,8 @@ public class StorageServiceImpl implements StorageService {
         logger.warn("Initialising StorageServiceImpl");
         try {
             Files.createDirectory(root);
+        } catch (FileAlreadyExistsException ignored) {
+            // It is alright if the /uploads folder already exists.
         } catch (IOException e) {
             throw new RuntimeException("Could not initialize folder for upload!");
         }
@@ -44,24 +50,41 @@ public class StorageServiceImpl implements StorageService {
         }
     }
 
+
+    @Override
+    public Resource load(String filename) {
+        try {
+            Path file = root.resolve(filename);
+            Resource resource = new UrlResource(file.toUri());
+
+            if (resource.exists() || resource.isReadable()) {
+                return resource;
+            } else {
+                throw new RuntimeException("Could not read the file!");
+            }
+        } catch (MalformedURLException e) {
+            throw new RuntimeException("Error: " + e.getMessage());
+        }
+//        return null;
+    }
+
     @Override
     public Stream<Path> loadAll() {
-        return null;
+        try {
+            return Files.walk(this.root, 1).filter(path -> !path.equals(this.root)).map(this.root::relativize);
+        } catch (IOException e) {
+            throw new RuntimeException("Could not load the files!");
+        }
     }
 
-    @Override
-    public Path load(String filename) {
-        return null;
-    }
-
-    @Override
-    public Resource loadAsResource(String filename) {
-        return null;
-    }
+//    @Override
+//    public Resource loadAsResource(String filename) {
+//        return null;
+//    }
 
     @Override
     public void deleteAll() {
-
+        FileSystemUtils.deleteRecursively(root.toFile());
     }
 
     // compress the image bytes before storing it in the database

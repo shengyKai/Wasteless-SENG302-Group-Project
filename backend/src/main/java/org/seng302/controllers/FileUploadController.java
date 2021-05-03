@@ -10,6 +10,8 @@ import org.seng302.service.StorageServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -37,14 +39,16 @@ public class FileUploadController {
 	@GetMapping("/upload/{filename:.+}")
 	@ResponseBody
 	public ResponseEntity<Resource> serveFile(@PathVariable String filename) {
-		Resource file = storageService.loadAsResource(filename);
+		logger.info("Fetching a file with filename=" + filename);
 
-		return null;
+		Resource file = storageService.load(filename);
+		logger.warn(file.getDescription());
+		return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.IMAGE_JPEG).body(file);
 	}
 
 	@PostMapping("/upload")
 	public void handleFileUpload(@RequestParam("file") MultipartFile file) {
-		logger.info("Uploading a file :)");
+		logger.info("Uploading a file :) -> " + file.getName());
 		storageService.store(file);
 	}
 }
