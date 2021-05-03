@@ -216,6 +216,19 @@ public class ProductController {
     }
 
     /**
+     * Matches up the businessID, productID and imageID to find the image of a product to be deleted. Only business
+     * owners can delete product images and they must be within their own product catalogue.
+     * @param businessId the ID of the business
+     * @param productId the ID of the product
+     * @param imageId the ID of the image
+     */
+    @DeleteMapping("/businesses/{businessId}/products/{productId}/images/{imageId}")
+    void deleteProductImage(@PathVariable Long businessId, @PathVariable Long productId, @PathVariable Long imageId,
+                            HttpServletRequest request, HttpServletResponse response) {
+
+    }
+
+    /**
      * Gets a business from the database matching a given Business Id
      * Performs sanity checks to ensure the business is not null
      * Throws ResponseStatusException if business does not exist
