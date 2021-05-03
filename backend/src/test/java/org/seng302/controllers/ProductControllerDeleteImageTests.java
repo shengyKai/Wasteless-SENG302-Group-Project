@@ -357,38 +357,4 @@ public class ProductControllerDeleteImageTests {
                 .cookie(authCookie))
                 .andExpect(status().isForbidden());
     }
-
-
-
-    //Tests for getProduct helper function
-    /**
-     * Checks that a product that exists within the database and belongs to a catalogue can be retrieved.
-     */
-    @Test
-    void getProduct_productExists_getExpectedProduct() {
-        Product actualProduct = productRepository.getProduct(testBusiness, testProduct.getProductCode());
-        assertEquals(testProduct.getProductCode(), actualProduct.getProductCode());
-    }
-
-    /**
-     * Checks that a products that exists but in a different business's catalogue cannot be retrieved.
-     */
-    @Test
-    void getProduct_productExistsInDifferentCatalogue_406ResponseException() {
-        assertThrows(ResponseStatusException.class, () -> {
-            productRepository.getProduct(testBusiness2, testProduct.getProductCode());
-        });
-    }
-
-    /**
-     * Checks that a product that does not exist cannot be retrieved.
-     */
-    @Test
-    void getProduct_productDoesNotExist_406ResponseException() throws Exception {
-        testBusiness.removeFromCatalogue(testProduct);
-        testBusiness = businessRepository.save(testBusiness);
-        assertThrows(ResponseStatusException.class, () -> {
-            productRepository.getProduct(testBusiness, testProduct.getProductCode());
-        });
-    }
 }

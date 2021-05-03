@@ -1,15 +1,14 @@
 package org.seng302.persistence;
 
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.*;
 import org.junit.runner.RunWith;
-import org.seng302.entities.Image;
+import org.seng302.entities.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.server.ResponseStatusException;
+
+import java.text.ParseException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -20,40 +19,149 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 public class ProductRepositoryTest {
 
     @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private BusinessRepository businessRepository;
+    @Autowired
+    private ProductRepository productRepository;
+    @Autowired
     private ImageRepository imageRepository;
 
+    private User testUser;
+    private Business testBusiness;
+    private Product testProduct;
     private Image testImage;
 
-    @BeforeAll
-    private void setUp() {
+    private User testUser2;
+    private Business testBusiness2;
+    private Product testProduct2;
+
+    /**
+     * Creates a user, business and product objects for use within the unit tests, where the
+     * user is the owner of the business and the product exists within the business's
+     * product catalogue.
+     * @throws ParseException from the date attribute within the user object
+     */
+    private void setUpTestObjects() throws ParseException {
+        businessRepository.deleteAll();
+        userRepository.deleteAll();
         imageRepository.deleteAll();
-        testImage = new Image("anImage.png", "anImage_thumbnail.png");
+        productRepository.deleteAll();
+
+        testUser = new User.Builder()
+                .withFirstName("Fergus")
+                .withMiddleName("Connor")
+                .withLastName("Hitchcock")
+                .withNickName("Ferg")
+                .withEmail("fergus.hitchcock@gmail.com")
+                .withPassword("IDoLikeBreaks69#H3!p")
+                .withBio("Did you know I had a second last name Yarker")
+                .withDob("1999-07-17")
+                .withPhoneNumber("+64 27 370 2682")
+                .withAddress(Location.covertAddressStringToLocation("6,Help Street,Place,Dunedin,New Zelaand,Otago,6959"))
+                .build();
+        userRepository.save(testUser);
+
+        testBusiness = new Business.Builder()
+                .withName("Help Industries")
+                .withAddress(Location.covertAddressStringToLocation("6,Help Street,Place,Dunedin,New Zelaand,Otago,6959"))
+                .withBusinessType("Accommodation and Food Services")
+                .withDescription("Helps industries hopefully")
+                .withPrimaryOwner(testUser)
+                .build();
+        businessRepository.save(testBusiness);
+
+        testImage = new Image("photo_of_connor.png", "photo_of_connor_thumbnail.png");
         imageRepository.save(testImage);
+
+        testProduct = new Product.Builder()
+                .withProductCode("PIECEOFFISH69")
+                .withName("A Piece of Fish")
+                .withDescription("A fish but only a piece of it remains")
+                .withManufacturer("Tokyo Fishing LTD")
+                .withRecommendedRetailPrice("3.20")
+                .withBusiness(testBusiness)
+                .build();
+        testProduct.setProductImage(testImage);
+        productRepository.save(testProduct);
+
+        testUser2 = new User.Builder()
+                .withFirstName("Ferguss")
+                .withMiddleName("Connorr")
+                .withLastName("Hitchcockk")
+                .withNickName("Fergg")
+                .withEmail("fergus.hitchcockk@gmail.com")
+                .withPassword("IDoLikeBreaks69#H3!pp")
+                .withBio("Did you know I had a second last name Yarker two")
+                .withDob("1999-07-18")
+                .withPhoneNumber("+64 27 470 2682")
+                .withAddress(Location.covertAddressStringToLocation("7,Help Street,Place,Dunedin,New Zelaand,Otago,6959"))
+                .build();
+        userRepository.save(testUser2);
+
+        testBusiness2 = new Business.Builder()
+                .withName("Help Industries")
+                .withAddress(Location.covertAddressStringToLocation("6,Help Street,Place,Dunedin,New Zelaand,Otago,6959"))
+                .withBusinessType("Accommodation and Food Services")
+                .withDescription("Helps industries hopefully")
+                .withPrimaryOwner(testUser2)
+                .build();
+        businessRepository.save(testBusiness2);
+
+        testProduct2 = new Product.Builder()
+                .withProductCode("PIECEOFFISHY69")
+                .withName("A Piece of Fishy")
+                .withDescription("A fishy but only a piece of it remains")
+                .withManufacturer("Tokyo Fishying LTD")
+                .withRecommendedRetailPrice("4.20")
+                .withBusiness(testBusiness2)
+                .build();
+        productRepository.save(testProduct2);
+    }
+
+    @BeforeEach
+    void setUp() throws ParseException {
+        setUpTestObjects();
     }
 
     @AfterAll
-    private void tearDown() {
+    void tearDown() {
+        businessRepository.deleteAll();
+        userRepository.deleteAll();
+        productRepository.deleteAll();
         imageRepository.deleteAll();
     }
 
+    //Tests for getProduct helper function
     /**
-     * Checks that an image that exists within the database can be retrieves
+     * Checks that a product that exists within the database and belongs to a catalogue can be retrieved.
      */
     @Test
-    void getImage_ImageExist_getExpectedImage() {
-        Image actualImage = imageRepository.getImage(testImage.getID());
-        assertEquals(testImage.getID(), actualImage.getID());
+    void getProduct_productExists_getExpectedProduct() {
+        Product actualProduct = productRepository.getProduct(testBusiness, testProduct.getProductCode());
+        assertEquals(testProduct.getProductCode(), actualProduct.getProductCode());
     }
 
     /**
-     * Checks that an image that does not exists cannot be retrieved
+     * Checks that a products that exists but in a different business's catalogue cannot be retrieved.
      */
     @Test
-    void getImage_ImageDoesNotExist_406ResponseException() {
-        imageRepository.delete(testImage);
+    void getProduct_productExistsInDifferentCatalogue_406ResponseException() {
         assertThrows(ResponseStatusException.class, () -> {
-            imageRepository.getImage(testImage.getID());;
+            productRepository.getProduct(testBusiness2, testProduct.getProductCode());
         });
     }
 
+    /**
+     * Checks that a product that does not exist cannot be retrieved.
+     */
+    @Disabled
+    @Test
+    void getProduct_productDoesNotExist_406ResponseException() throws Exception {
+        testBusiness.removeFromCatalogue(testProduct);
+        testBusiness = businessRepository.save(testBusiness);
+        assertThrows(ResponseStatusException.class, () -> {
+            productRepository.getProduct(testBusiness, testProduct.getProductCode());
+        });
+    }
 }
