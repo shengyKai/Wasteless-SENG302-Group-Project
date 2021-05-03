@@ -35,7 +35,7 @@ public class ImageController {
   @Autowired
     ImageRepository imageRepository;
     @PostMapping("/upload")
-    public BodyBuilder uplaodImage(@RequestParam("imageFile") MultipartFile file) throws IOException {
+    public BodyBuilder uplaodImage(@RequestParam("file") MultipartFile file) throws IOException {
 
         System.out.println("Original Image Byte Size - " + file.getBytes().length);
         Image img = new Image(file.getOriginalFilename(), file.getContentType(),

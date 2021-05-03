@@ -1,4 +1,4 @@
-package org.seng302.Controllers;
+package org.seng302.controllers;
 
 import net.minidev.json.JSONObject;
 import org.apache.logging.log4j.LogManager;

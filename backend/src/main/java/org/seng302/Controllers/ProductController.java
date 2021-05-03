@@ -1,4 +1,4 @@
-package org.seng302.Controllers;
+package org.seng302.controllers;
 
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;

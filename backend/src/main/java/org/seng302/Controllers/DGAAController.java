@@ -1,4 +1,4 @@
-package org.seng302.Controllers;
+package org.seng302.controllers;
 
 import org.seng302.Entities.DefaultGlobalApplicationAdmin;
 import org.seng302.Persistence.DGAARepository;
