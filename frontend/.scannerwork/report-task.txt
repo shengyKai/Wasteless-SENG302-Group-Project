@@ -1,6 +1,0 @@
-projectKey=team-500-client
-serverUrl=https://csse-s302g5.canterbury.ac.nz/sonarqube
-serverVersion=8.6.0.39681
-dashboardUrl=https://csse-s302g5.canterbury.ac.nz/sonarqube/dashboard?id=team-500-client
-ceTaskId=AXj77_iE3KRo5sSBElCx
-ceTaskUrl=https://csse-s302g5.canterbury.ac.nz/sonarqube/api/ce/task?id=AXj77_iE3KRo5sSBElCx

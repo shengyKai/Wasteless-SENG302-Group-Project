@@ -8,9 +8,9 @@ sonarqubeScanner(
       'sonar.projectName': 'Team 500 - Client',
       "sonar.sourceEncoding": "UTF-8",
       'sonar.sources': 'src',
-      'sonar.tests': 'src',
+      'sonar.tests': 'test',
       'sonar.inclusions': '**',
-      'sonar.test.inclusions': 'src/**/*.spec.js,src/**/*.test.js,src/**/*.test.ts, src/test',
+      'sonar.test.inclusions': 'tests/unit/**/*.spec.ts',
       'sonar.typescript.lcov.reportPaths': 'coverage/lcov.info',
       'sonar.javascript.lcov.reportPaths': 'coverage/lcov.info',
       'sonar.testExecutionReportPaths': 'coverage/test-reporter.xml'
