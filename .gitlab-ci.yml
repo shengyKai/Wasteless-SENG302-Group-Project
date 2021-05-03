@@ -27,7 +27,9 @@ junit:
   script:
     - cd backend
     - ./gradlew test
-
+  artifacts:
+    paths:
+      - backend/build
 cucumber:
    stage: test
    script:
@@ -35,7 +37,6 @@ cucumber:
      - ./gradlew cucumber
 
 # Run Jest (Javascript) tests
-# Uncomment after Jest workshop (at the latest)
 jest:
    stage: test
    cache:
@@ -51,7 +52,6 @@ jest:
      - npm run test
 
 # Export sonarqube (static code analysis) reports
-# Uncomment after ATDD workshop (at the latest)
 dev-sonarqube:
    stage: sonarqube
    cache:
@@ -63,7 +63,7 @@ dev-sonarqube:
      - cd frontend
      - npm run sonarqube
      - cd ../backend
-     - ./gradlew sonarqube
+     - ./gradlew jacocoTestReport jacocoTestCoverageVerification sonarqube
    only:
      - t77-sonarqube-setup
 
