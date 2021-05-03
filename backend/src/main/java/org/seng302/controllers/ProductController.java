@@ -215,16 +215,21 @@ public class ProductController {
         logger.info(String.format("Deleting image with id %d from the product %s within the business's catalogue %d",
                 imageId, productId, businessId));
 
+        System.out.println("A");
         Business business = getBusiness(businessId);
+        System.out.println("B");
         if (!ProductController.checkProductFromCodeExists(productRepository, productId)) {
             throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "the product does not exist");
         }
+        System.out.println("C");
         Image image = imageRepository.getImage(imageId);
+        System.out.println("D");
 
         business.checkSessionPermissions(request);
+        System.out.println("E");
 
-        //TODO Add DGAA check
-        if (!Business.checkProductExistsWithinCatalogue(business, productId)) {
+        if (!Business.checkProductExistsWithinCatalogue(business, productId) &&
+                !AuthenticationTokenManager.checkDGGAPermissions(request)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "The product is not within the business's catalogue");
         }
 

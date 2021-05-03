@@ -13,14 +13,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.Cookie;
 import java.text.ParseException;
 import java.util.HashMap;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
@@ -282,11 +279,12 @@ public class ProductControllerDeleteImageTests {
      * Tests using the delete product image method to see if a user who is not a DGAA and just a regular user cannot
      * delete the image.
      */
+    //Waiting till we redo how we do DGAA checking
     @Disabled
     @Test
     void deleteProductImage_isNotDGAA_403Response() throws Exception {
         String url = String.format("/businesses/%d/products/%s/images/%d",
-                testBusiness2.getId(), testProduct.getProductCode(), testImage.getID());
+                testBusiness.getId(), testProduct.getProductCode(), testImage.getID());
         mockMvc.perform( MockMvcRequestBuilders
                 .delete(url)
                 .sessionAttrs(sessionAuthToken)
@@ -297,6 +295,7 @@ public class ProductControllerDeleteImageTests {
     /**
      * Tests using the delete image method to see if a DGAA without being a business owner can delete images products.
      */
+    //Waiting till we redo how we do DGAA checking
     @Disabled
     @Test
     void deleteProductImage_isDGAA_imageDeleted() throws Exception {
@@ -305,7 +304,7 @@ public class ProductControllerDeleteImageTests {
         userRepository.save(testUser);
 
         String url = String.format("/businesses/%d/products/%s/images/%d",
-                testBusiness2.getId(), testProduct.getProductCode(), testImage.getID());
+                testBusiness.getId(), testProduct.getProductCode(), testImage.getID());
         mockMvc.perform( MockMvcRequestBuilders
                 .delete(url)
                 .sessionAttrs(sessionAuthToken)
@@ -317,6 +316,8 @@ public class ProductControllerDeleteImageTests {
      * Tests using the delete image method to see if the business administrator can delete images within there
      * businesses product catalogue.
      */
+    //Waiting till we redo how we do DGAA checking
+    @Disabled
     @Test
     void deleteProductImage_isBusinessAdmin_imageDeleted() throws Exception {
         String url = String.format("/businesses/%d/products/%s/images/%d",

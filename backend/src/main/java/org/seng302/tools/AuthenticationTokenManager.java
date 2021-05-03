@@ -128,6 +128,21 @@ public class AuthenticationTokenManager {
     }
 
     /**
+     * Checks if the current session involves the DGAA
+     * @param request the HTTP request packet
+     * @return true if the session involves a DGAA, false otherwise
+     */
+    //TODO write tests (Not within sprint 2, apparently none of the AuthenticationTokenManager things have tests)
+    //checkAuthenticationTokenDGAA method is redundant?
+    public static boolean checkDGGAPermissions(HttpServletRequest request) {
+        HttpSession session = request.getSession();
+        String sessionRole = (String) session.getAttribute("role");
+        if (ROLE_DGAA.equals(sessionRole)) {
+            return true;
+        } else { return false; }
+    }
+
+    /**
      * Given a HTTP request, and a given account ID, this method determines if the currently logged in account can see the private info of the given ID
      * When an account has role "globalApplicationAdmin" or "defaultGlobalApplicationAdmin" then permission is granted
      * @param request The HTTP request packet
@@ -154,8 +169,4 @@ public class AuthenticationTokenManager {
         String sessionRole = (String) session.getAttribute("role");
         return (ROLE_GAA.equals(sessionRole) || ROLE_DGAA.equals(sessionRole));
     }
-
-
-
-
 }
