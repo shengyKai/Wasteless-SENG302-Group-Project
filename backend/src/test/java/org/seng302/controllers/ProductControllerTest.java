@@ -3,16 +3,11 @@ package org.seng302.controllers;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
-import org.junit.Ignore;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.junit.runner.RunWith;
 import org.mockito.MockedConstruction;
-import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.seng302.entities.Business;
 import org.seng302.entities.Location;
@@ -35,14 +30,12 @@ import java.text.ParseException;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
-import java.util.Objects;
 
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -235,7 +228,7 @@ class ProductControllerTest {
             JSONObject productJSON = (JSONObject) productObject;
 
             String productCode = productJSON.getAsString("id");
-            Product storedProduct = productRepository.findByBusinessAndProductCode(testBusiness1, productCode);
+            Product storedProduct = productRepository.findByBusinessAndProductCode(testBusiness1, productCode).get();
 
             Instant actualCreatedDate = Instant.from(DateTimeFormatter.ISO_DATE_TIME.parse(productJSON.getAsString("created")));
 
@@ -424,7 +417,7 @@ class ProductControllerTest {
             // Checks that the product was built
             verify(mockBuilder).build();
 
-            Product addedProduct = productRepository.findByBusinessAndProductCode(testBusiness1, mockedResult.getProductCode());
+            Product addedProduct = productRepository.findByBusinessAndProductCode(testBusiness1, mockedResult.getProductCode()).get();
 
             // Check that the added product is equivalent to the result from Product.Builder.build.
             assertNotNull(addedProduct);

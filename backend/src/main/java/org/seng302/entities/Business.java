@@ -55,6 +55,22 @@ public class Business {
 
 
     /**
+     *  Checks if the product exists within the business's product catalogue
+     * @param business the business
+     * @param productCode the product code of the given product
+     * @return true if the product exists within the business, false otherwise
+     */
+    //TODO write unit tests for this class
+    public static boolean checkProductExistsWithinCatalogue(Business business, String productCode) {
+        for (Product product: business.getCatalogue()) {
+            if (product.getProductCode().equals(productCode)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * Gets the id
      * @return Business Id
      */
@@ -284,6 +300,16 @@ public class Business {
             throw new IllegalArgumentException("\"addToCatalogue\" is not being called from \"Product.setBusiness\"");
         }
         catalogue.add(product);
+    }
+
+    /**
+     * Removes the given product from the business's catalogue
+     */
+    //TODO add unit tests
+    public void removeFromCatalogue(Product product) throws Exception {
+        if(!catalogue.remove(product)) {
+            throw new Exception("The product did not match any within the business's catalogue");
+        }
     }
 
     /**
