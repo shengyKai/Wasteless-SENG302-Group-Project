@@ -29,6 +29,21 @@
       </v-col>
     </v-toolbar>
 
+    <v-alert
+      v-if="error !== undefined"
+      type="error"
+      dismissible
+      @input="error = undefined"
+    >
+      {{ error }}
+    </v-alert>
+    <v-list three-line>
+      <!--users would produce the results for each page, and then it will show each result with
+      SearchResultItem-->
+      <template v-for="product in products">
+        <ProductCatalogueItem :key="product.id" :product="product"/>
+      </template>
+    </v-list>
     <!-- <v-pagination
       v-model="currentPage"
       :length="totalPages"
@@ -39,11 +54,13 @@
 
 <script>
 import { getProducts } from '../api/internal';
+import ProductCatalogueItem from './ProductCatalogueItem.vue';
 
 export default {
   name: "ProductCatalogue",
 
   components: {
+    ProductCatalogueItem
   },
   data() {
     return {
@@ -90,20 +107,23 @@ export default {
   //     return`Displaying ${pageStartIndex + 1} - ${pageEndIndex} of ${this.totalResults} results`;
   //   },
   // },
+  created() {
+    this.updateResults();
+  },
   methods: {
-    async created() {
-      let products = await getProducts(10);
-      console.log(products);
-    },
-
     /**
-     * This function gets called when the search results need to change, but the search query has not changed.
+     * This function gets called when the product list needs to be updated.
      * The page index, results per page, order by and reverse variables notify this function.
      */
-    async updateNotQuery() {
-      console.log("E");
+    async updateResults() {
+      const id = parseInt(this.$route.params.id);
+      if (isNaN(id)) {
+        this.error = `Invalid business id "${this.$route.params.id}"`;
+        return;
+      }
+
       const value = await getProducts (
-        this.$store.state.activeRole.id,
+        id,
         this.orderBy,
         this.currentPage,
         this.resultsPerPage,
@@ -122,18 +142,18 @@ export default {
   watch: {
 
     orderBy() {
-      this.updateNotQuery();
+      this.updateResults();
       console.log("A");
     },
     reverse() {
-      this.updateNotQuery();
+      this.updateResults();
       console.log("B");
     },
     currentPage() {
-      this.updateNotQuery();
+      this.updateResults();
     },
     resultsPerPage() {
-      this.updateNotQuery();
+      this.updateResults();
     },
   },
 };
