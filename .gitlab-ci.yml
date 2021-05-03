@@ -65,7 +65,7 @@ dev-sonarqube:
      - cd ../backend
      - ./gradlew jacocoTestReport jacocoTestCoverageVerification sonarqube
    only:
-     - t77-sonarqube-setup
+     - dev
 
 # builds all branches, except dev and master
 branch-build:
