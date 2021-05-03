@@ -165,16 +165,20 @@ function isBusiness(obj: any): obj is Business {
 }
 
 function isProduct(obj: any): obj is Product {
+
   if (obj === null || typeof obj !== 'object') return false;
-  if (typeof obj.id !== 'number') return false;
+  if (typeof obj.id !== 'string') return false;   //BACKEND response productCode as product.id
   if (typeof obj.name !== 'string') return false;
   if (obj.description !== undefined && typeof obj.description !== 'string') return false;
-  if (obj.dateAdded !== undefined && typeof obj.dateAdded !== 'string') return false;
-  if (obj.expiryDate !== undefined && typeof obj.expiryDate !== 'string') return false;
+
   if (obj.manufacturer !== undefined && typeof obj.manufacturer !== 'string') return false;
-  if (obj.recommendedRetailPrice !== undefined && typeof obj.recommendedRetailPrice !== 'string') return false;
-  if (obj.quantity !== undefined && typeof obj.quantity !== 'number') return false;
-  if (obj.productCode !== undefined && typeof obj.productCode !== 'string') return false;
+  if (obj.recommendedRetailPrice !== undefined && typeof obj.recommendedRetailPrice !== 'number') return false;
+  //Line that getting comment out is not applicable as the backend respond dosent contain these object
+
+  // if (obj.dateAdded !== undefined && typeof obj.dateAdded !== 'string') return false;
+  // if (obj.expiryDate !== undefined && typeof obj.expiryDate !== 'string') return false;
+  // if (obj.quantity !== undefined && typeof obj.quantity !== 'number') return false;
+  // if (obj.productCode !== undefined && typeof obj.productCode !== 'string') return false;
   return true;
 }
 
