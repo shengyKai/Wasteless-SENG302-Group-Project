@@ -386,7 +386,7 @@ public class ProductControllerDeleteImageTests {
     @Test
     void getProduct_productDoesNotExist_406ResponseException() throws Exception {
         testBusiness.removeFromCatalogue(testProduct);
-        businessRepository.save(testBusiness);
+        testBusiness = businessRepository.save(testBusiness);
         assertThrows(ResponseStatusException.class, () -> {
             ProductController.getProduct(productRepository, testBusiness, testProduct.getProductCode());
         });
