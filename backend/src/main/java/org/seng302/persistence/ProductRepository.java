@@ -23,10 +23,11 @@ public interface ProductRepository extends CrudRepository<Product, Long>{
         Optional<Product> findByBusinessAndProductCode(@Param("business") Business business,
                                                        @Param("productCode") String productCode);
 
+
+
         /**
          * Gets a product from the database that matches a given image Id. This method preforms a sanity check to ensure the
          * image does exist and if not throws a not accepted response status exception.
-         * @param productRepository the product repository that connects to the database
          * @param business the business object
          * @param productCode the product code of the product
          * @return the product object that matches the business and product code

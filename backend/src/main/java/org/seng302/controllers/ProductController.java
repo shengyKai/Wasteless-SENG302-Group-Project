@@ -287,7 +287,7 @@ public class ProductController {
 
             business.checkSessionPermissions(request);
 
-            Product product = productRepository.findByBusinessAndProductCode(business, productCode);
+            Product product = productRepository.findByBusinessAndProductCode(business, productCode).get();
             if (product == null) {
                 throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "No product found with the given product code");
             }
@@ -297,6 +297,7 @@ public class ProductController {
             // TODO This is very ugly, talk to connor about validation on image creation
             Image image = new Image(null, null);
             image.setFilename(file.getOriginalFilename());
+
             image = imageRepository.save(image);
             product.setProductImage(image);
             productRepository.save(product);

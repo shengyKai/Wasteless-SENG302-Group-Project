@@ -2,6 +2,7 @@ package org.seng302.persistence;
 
 import org.seng302.entities.Image;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Repository;
 import org.springframework.web.server.ResponseStatusException;
@@ -18,10 +19,11 @@ public interface ImageRepository extends CrudRepository<Image, Long> {
      */
     //Image findByDirectory(@Param("filename") String filename);
 
+
+    Optional<Image> findByFilename(@Param("filename") String filename);
     /**
      * Gets an image from the database that matches a given image Id. This method preforms a sanity check to ensure the
      * image does exist and if not throws a not accepted response status exception.
-     * @param imageRepository the image repository that connects to the database
      * @param imageId the id of the image
      * @return the image object that matches the given Id
      */
