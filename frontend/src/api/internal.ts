@@ -466,16 +466,15 @@ export async function uploadProductImage(businessId: number, productCode: string
 /**
  * Get all products for that business
  * @param businessId
- * @param orderBy
  * @param page
  * @param resultsPerPage
+ * @param orderBy
  * @param reverse
  * @return a list of products
  */
-export async function getProducts(buisnessId: Number, orderBy: String, page: Number, resultsPerPage: Number, reverse: Boolean ): Promise<MaybeError<Product[]>> {
+export async function getProducts(buisnessId: number, page: number, resultsPerPage: number, orderBy: string, reverse: boolean): Promise<MaybeError<Product[]>> {
   let response;
   try {
-
     response = await instance.get(`/businesses/${buisnessId}/products`, {
       params: {
         orderBy: orderBy,
@@ -483,17 +482,16 @@ export async function getProducts(buisnessId: Number, orderBy: String, page: Num
         resultsPerPage : resultsPerPage,
         reverse: reverse.toString(),
       }});
-
   } catch (error) {
     let status: number | undefined = error.response?.status;
     if (status === undefined) return 'Failed to reach backend';
     if (status === 401) return 'Missing/Invalid access token';
 
-    if (!isProductsArray(response?.data)) {
-      return 'Response is not user array';
-    }
-
     return 'Request failed: ' + status;
+  }
+
+  if (!isProductsArray(response.data)) {
+    return 'Response is not product array';
   }
   return response.data;
 }

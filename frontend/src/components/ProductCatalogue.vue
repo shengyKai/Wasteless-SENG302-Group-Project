@@ -124,9 +124,9 @@ export default {
 
       const value = await getProducts (
         id,
-        this.orderBy,
         this.currentPage,
         this.resultsPerPage,
+        this.orderBy,
         this.reverse
       );
       if (typeof value === 'string') {
@@ -140,14 +140,11 @@ export default {
   },
 
   watch: {
-
     orderBy() {
       this.updateResults();
-      console.log("A");
     },
     reverse() {
       this.updateResults();
-      console.log("B");
     },
     currentPage() {
       this.updateResults();
