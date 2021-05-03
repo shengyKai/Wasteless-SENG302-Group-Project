@@ -1,12 +1,56 @@
 import Vue from 'vue';
+import Vuex from 'vuex';
 import Vuetify from 'vuetify';
 import { createLocalVue, Wrapper, mount } from '@vue/test-utils';
 
 import CreateBusiness from '@/components/BusinessProfile/CreateBusiness.vue';
+import {castMock} from "./utils";
+import * as api from '@/api';
+import { getStore, resetStoreForTesting } from '@/store';
+import {User} from "@/api";
 
+
+jest.mock('@/api', () => ({
+  createBusiness: jest.fn(),
+}));
+
+const createBusiness = castMock(api.createBusiness);
 Vue.use(Vuetify);
-
 const localVue = createLocalVue();
+
+/**
+ * Creates a test user with the given user id
+ *
+ * @param userId The user id to use
+ * @param businesses The businesses for this user to administer
+ * @returns The generated user
+ */
+function makeTestUser(userId: number) {
+  let user: User = {
+    id:  userId,
+    firstName: 'test_firstname' + userId,
+    lastName: 'test_lastname' + userId,
+    nickname: 'test_nickname' + userId,
+    email: 'test_email' + userId,
+    bio: 'test_biography' + userId,
+    phoneNumber: 'test_phone_number' + userId,
+    dateOfBirth: '1/1/1900',
+    created: '1/5/2005',
+    homeAddress: {
+      streetNumber: 'test_street_number',
+      streetName: 'test_street1',
+      city: 'test_city',
+      region: 'test_region',
+      postcode: 'test_postcode',
+      district: 'test_district',
+      country: 'test_country' + userId
+    },
+    businessesAdministered: [],
+  };
+
+
+  return user;
+}
 
 describe('CreateBusiness.vue', () => {
   // Container for the wrapper around CreateBusiness
@@ -41,7 +85,10 @@ describe('CreateBusiness.vue', () => {
    */
   beforeEach(() => {
     const vuetify = new Vuetify();
-
+    localVue.use(Vuex);
+    resetStoreForTesting();
+    let store = getStore();
+    store.state.user = makeTestUser(1); // log in as user 1
     // Creating wrapper around CreateBusiness with data-app to appease vuetify
     const App = localVue.component('App', {
       components: { CreateBusiness },
@@ -53,10 +100,18 @@ describe('CreateBusiness.vue', () => {
     const elem = document.createElement('div');
     document.body.appendChild(elem);
 
+    // We have to mock the $router.go method to prevent errors.
     appWrapper = mount(App, {
+      stubs: ['router-link', 'router-view'],
+      mocks: {
+        $router: {
+          go: () => {return;},
+        }
+      },
       localVue,
       vuetify,
       attachTo: elem,
+      store: store,
     });
 
     wrapper = appWrapper.getComponent(CreateBusiness);
@@ -93,6 +148,30 @@ describe('CreateBusiness.vue', () => {
       country: 'Country',
       postcode: '1234',
     });
+  }
+
+  /**
+   * Finds the close button in the CreateProduct form
+   *
+   * @returns A Wrapper around the close button
+   */
+  function findCloseButton() {
+    const buttons = wrapper.findAllComponents({ name: 'v-btn' });
+    const filtered = buttons.filter(button => button.text().includes('Close'));
+    expect(filtered.length).toBe(1);
+    return filtered.at(0);
+  }
+
+  /**
+   * Finds the create button in the CreateProduct form
+   *
+   * @returns A Wrapper around the create button
+   */
+  function findCreateButton() {
+    const buttons = wrapper.findAllComponents({ name: 'v-btn' });
+    const filtered = buttons.filter(button => button.text().includes('Create'));
+    expect(filtered.length).toBe(1);
+    return filtered.at(0);
   }
 
   /**
@@ -300,5 +379,46 @@ describe('CreateBusiness.vue', () => {
     await Vue.nextTick();
 
     expect(wrapper.vm.valid).toBeFalsy();
+  });
+
+  /**
+   * Tests that when the close button is pressed the "closeDialog" event is emitted, this should
+   * also result in the dialog getting closed.
+   */
+  it('Test that when the close button is pressed, then the "closeDialog" event should be emitted', async () => {
+    await findCloseButton().trigger('click');
+    expect(wrapper.emitted().closeDialog).toBeTruthy();
+  });
+
+  /**
+   * Tests that when the create button is pressed and the api call is successful that the parameters
+   * are passed to the api function and the dialog is closed.
+   */
+  it('When the create button is pressed then an api call should be made and is successful', async () => {
+    await populateRequiredFields();
+    createBusiness.mockResolvedValue(undefined); // Ensure that the operation is successful
+
+    await Vue.nextTick();
+
+    await findCreateButton().trigger('click'); // Click create button
+
+    await Vue.nextTick();
+
+    expect(createBusiness).toBeCalledWith({
+      primaryAdministratorId: 1,
+      name: 'Business Name',
+      description: '',
+      businessType: 'Business Type',
+      address: {
+        streetNumber: 'Street',
+        streetName: '1',
+        district: '',
+        city: 'City',
+        region: 'Region',
+        country: 'Country',
+        postcode: '1234',
+      }
+    });
+    expect(wrapper.emitted().closeDialog).toBeTruthy();
   });
 });

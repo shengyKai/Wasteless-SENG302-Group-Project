@@ -474,7 +474,7 @@ class ProductControllerTest {
                 .sessionAttrs(sessionAuthToken)
                 .contentType("application/json")
                 .cookie(authCookie))
-                .andExpect(status().isBadRequest())
+                .andExpect(status().isConflict())
                 .andReturn());
     }
 
