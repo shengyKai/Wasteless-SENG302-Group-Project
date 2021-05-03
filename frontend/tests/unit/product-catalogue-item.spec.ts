@@ -1,6 +1,6 @@
 //!!!NOTICE!!!
-//ProductImageCarousel will not be tested yet because its part of another task for future stories. 
-//Decided not to test it for now because whoever that is going to do that task in the future may want 
+//ProductImageCarousel will not be tested yet because its part of another task for future stories.
+//Decided not to test it for now because whoever that is going to do that task in the future may want
 //to redo some details if they desire. If you are doing that task, please refer to ProductCatalogueItem
 //and ProductImageCarousel for more details.
 import Vue from 'vue';
@@ -11,6 +11,15 @@ import ProductCatalogueItem from '@/components/ProductCatalogueItem.vue';
 import FullProductDescription from "@/components/utils/FullProductDescription.vue";
 
 Vue.use(Vuetify);
+
+jest.mock('@/api/currency', () => ({
+  currencyFromCountry: jest.fn(() => {
+    return {
+      code: 'Currency code',
+      symbol: 'Currency symbol'
+    }
+  })
+}));
 
 describe('ProductCatalogueItem.vue', () => {
   let wrapper: Wrapper<any>;
@@ -46,11 +55,13 @@ describe('ProductCatalogueItem.vue', () => {
           productName: "Some Product",
           productDescription: "Some description",
           productDateAdded: "Some Date Added",
-          productExpiryDate: "Some Expired Date",
           productManufacturer: "Some Manufacturer",
           productRRP: 100,
-          productQuantity: 5,
           productCode: "Some Code",
+          currency: {
+            code: "Currency code",
+            symbol: "Currency symbol"
+          },
           readMoreActivated: false
         };
       }
@@ -98,7 +109,7 @@ describe('ProductCatalogueItem.vue', () => {
         //at index 1, the link is the "return" link
         productDescriptionComponent.findAll('a').at(1).trigger("click");
         expect(productDescriptionComponent.vm.$data.dialog).toBeFalsy();
-      })
+      });
     });
   });
 
@@ -107,13 +118,6 @@ describe('ProductCatalogueItem.vue', () => {
   */
   it("Must contain the product date added", () => {
     expect(wrapper.text()).toContain('Some Date Added');
-  });
-
-  /**
-  * Tests that the same product expiry date exists as per the set data above
-  */
-  it("Must contain the product expiry date", () => {
-    expect(wrapper.text()).toContain('Some Expired Date');
   });
 
   /**
@@ -131,16 +135,16 @@ describe('ProductCatalogueItem.vue', () => {
   });
 
   /**
-  * Tests that the same product quantity exists as per the set data above
-  */
-  it("Must contain the product quantity", () => {
-    expect(wrapper.text()).toContain(5);
+   * Test that the product RRP is formatted with the currency symbol and code
+   */
+  it("RRP must be formatted with symbol and code", () => {
+    expect(wrapper.text()).toContain("Currency symbol100 Currency code");
   });
 
   /**
   * Tests that the same product code exists as per the set data above
   */
-   it("Must contain the product code", () => {
+  it("Must contain the product code", () => {
     expect(wrapper.text()).toContain("Some Code");
   });
-})
+});

@@ -39,7 +39,7 @@
 </template>
 
 <script>
-import { getBusiness } from '../../api';
+import { getBusiness } from '../../api/internal';
 
 export default {
   name: 'BusinessProfile',

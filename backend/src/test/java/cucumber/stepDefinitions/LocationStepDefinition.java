@@ -4,12 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
-import io.cucumber.spring.CucumberContextConfiguration;
 import org.junit.Assert;
-import org.seng302.Entities.Location;
-import org.seng302.Main;
+import org.seng302.entities.Location;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 
 public class LocationStepDefinition {
 
@@ -41,6 +38,11 @@ public class LocationStepDefinition {
     @Then("the address has the street name {string}")
     public void theAddressHasTheStreetName(String streetName) {
         Assert.assertEquals(theAddress.getStreetName(), streetName);
+    }
+
+    @Then("the address has the district {string}")
+    public void theAddressHasTheDistrict(String district) {
+        Assert.assertEquals(theAddress.getDistrict(), district);
     }
 
     @Then("the address has the city name {string}")

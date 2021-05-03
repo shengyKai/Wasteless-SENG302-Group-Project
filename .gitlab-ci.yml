@@ -24,6 +24,9 @@ npm-install:
 
 junit:
   stage: test
+  artifacts:
+    paths:
+      - backend/build
   script:
     - cd backend
     - ./gradlew test
@@ -34,34 +37,35 @@ cucumber:
      - cd backend
      - ./gradlew cucumber
 
-# Temporary disabled till the team fixes the failing jest test
-#jest:
-#   stage: test
-#   cache:
-#     key: node-modules
-#     paths:
-#       - frontend/node_modules
-#     policy: pull
-#   script:
-#     - cd frontend
-#     - npm run test
+jest:
+   stage: test
+   cache:
+     key: node-modules
+     paths:
+       - frontend/node_modules
+     policy: pull
+   artifacts:
+     paths:
+       - frontend/coverage
+   script:
+     - cd frontend
+     - npm run test
 
 # Export sonarqube (static code analysis) reports
-# Uncomment after ATDD workshop (at the latest)
-# dev-sonarqube:
-#   stage: sonarqube
-#   cache:
-#     key: node-modules
-#     paths:
-#       - frontend/node_modules
-#     policy: pull
-#   script:
-#     - cd frontend
-#     - npm run sonarqube
-#     - cd ../backend
-#     - ./gradlew sonarqube
-#   only:
-#     - dev
+dev-sonarqube:
+   stage: sonarqube
+   cache:
+     key: node-modules
+     paths:
+       - frontend/node_modules
+     policy: pull
+   script:
+     - cd frontend
+     - npm run sonarqube
+     - cd ../backend
+     - ./gradlew jacocoTestReport jacocoTestCoverageVerification sonarqube
+   only:
+     - dev
 
 # builds all branches, except dev and master
 branch-build:
@@ -89,6 +93,7 @@ deploy-staging-backend:
   stage: deploy
   script:
     - cd backend
+    - source ../runner/copy-environment.sh
     - ./gradlew bootJar
     - rm -rf /home/gitlab-runner/staging-backend/ || true
     - mkdir /home/gitlab-runner/staging-backend/
@@ -128,6 +133,7 @@ deploy-production-backend:
   stage: deploy
   script:
     - cd backend
+    - source ../runner/copy-environment.sh
     - ./gradlew bootJar
     - rm -rf /home/gitlab-runner/production-backend/ || true
     - mkdir /home/gitlab-runner/production-backend/

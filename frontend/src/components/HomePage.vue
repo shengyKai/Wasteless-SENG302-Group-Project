@@ -136,7 +136,7 @@ export default {
      * Shows the create product dialog
      */
     viewCreateProduct() {
-      this.$store.commit('showCreateProduct');
+      this.$store.commit('showCreateProduct', this.$store.state.activeRole.id);
     }
   },
   computed: {

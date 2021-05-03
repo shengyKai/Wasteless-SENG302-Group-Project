@@ -72,12 +72,16 @@ dependencies {
     testImplementation 'io.cucumber:cucumber-java:6.9.1'
     testImplementation 'io.cucumber:cucumber-junit:6.9.1'
     testImplementation 'io.cucumber:cucumber-spring:6.9.1'
+    // Needed for mocking static methods
+    testImplementation 'org.mockito:mockito-inline:3.+'
 
     // use code pre-processor to generate boiler plate code (e.g., getters)
     compileOnly 'org.projectlombok:lombok:1.18.16'
     annotationProcessor 'org.projectlombok:lombok:1.18.16'
     testCompileOnly 'org.projectlombok:lombok:1.18.16'
     testAnnotationProcessor 'org.projectlombok:lombok:1.18.16'
+
+    testImplementation 'org.mockito:mockito-inline:3.+'
 
     // entityManagerFactory
     implementation 'javax.xml.bind:jaxb-api:2.3.0'

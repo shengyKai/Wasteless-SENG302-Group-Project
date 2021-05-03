@@ -8,7 +8,7 @@
         class="required"
         v-model="email"
         label="Email"
-        :rules="mandatoryRules.concat(emailRules).concat(maxCharRules)"
+        :rules="mandatoryRules.concat(emailRules).concat(maxLongCharRules)"
         outlined
       />
 
@@ -22,7 +22,7 @@
         :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
         :type="showPassword ? 'text' : 'password'"
         @click:append="showPassword = !showPassword"
-        :rules="mandatoryRules.concat(passwordRules).concat(maxCharRules)"
+        :rules="mandatoryRules.concat(passwordRules).concat(maxMediumCharRules)"
         outlined
       />
 
@@ -35,7 +35,7 @@
         :append-icon="showConfirmPassword ? 'mdi-eye' : 'mdi-eye-off'"
         :type="showConfirmPassword ? 'text' : 'password'"
         @click:append="showConfirmPassword = !showConfirmPassword"
-        :rules="mandatoryRules.concat(passwordConfirmationRule).concat(maxCharRules)"
+        :rules="mandatoryRules.concat(passwordConfirmationRule).concat(maxMediumCharRules)"
         outlined
       />
 
@@ -44,7 +44,7 @@
         class="required"
         v-model="firstName"
         label="First name"
-        :rules="mandatoryRules.concat(nameRules).concat(maxCharRules)"
+        :rules="mandatoryRules.concat(nameRules).concat(maxMediumCharRules)"
         outlined
       />
 
@@ -52,7 +52,7 @@
       <v-text-field
         v-model="middleName"
         label="Middle name(s)"
-        :rules="nameRules.concat(maxCharRules)"
+        :rules="nameRules.concat(maxMediumCharRules)"
         outlined
       />
 
@@ -61,7 +61,7 @@
         class="required"
         v-model="lastName"
         label="Last name"
-        :rules="mandatoryRules.concat(nameRules).concat(maxCharRules)"
+        :rules="mandatoryRules.concat(nameRules).concat(maxMediumCharRules)"
         outlined
       />
 
@@ -69,7 +69,7 @@
       <v-text-field
         v-model="nickname"
         label="Nickname"
-        :rules="nameRules.concat(maxCharRules)"
+        :rules="alphabetRules.concat(maxMediumCharRules)"
         outlined
       />
 
@@ -78,7 +78,7 @@
         v-model="bio"
         label="Bio"
         rows="3"
-        :rules="maxCharBioRules"
+        :rules="charBioRules"
         outlined
       />
 
@@ -154,12 +154,12 @@
 
       </v-row>
 
-      <!-- INPUT: Street/Company -->
+      <!-- INPUT: Street -->
       <v-text-field
         class="required"
         v-model="streetAddress"
         label="Street Address"
-        :rules="mandatoryRules"
+        :rules="mandatoryRules.concat(streetNumRules)"
         outlined
       />
 
@@ -167,7 +167,7 @@
       <LocationAutocomplete
         type="district"
         v-model="district"
-        :rules="maxCharRules"
+        :rules="maxLongCharRules.concat(alphabetRules).concat(maxLongCharRules)"
       />
 
       <!-- INPUT: City -->
@@ -175,7 +175,7 @@
         type="city"
         class="required"
         v-model="city"
-        :rules="maxCharRules.concat(mandatoryRules)"
+        :rules="mandatoryRules.concat(alphabetRules).concat(maxLongCharRules)"
       />
 
       <!-- INPUT: Region -->
@@ -183,7 +183,7 @@
         type="region"
         class="required"
         v-model="region"
-        :rules="maxCharRules.concat(mandatoryRules)"
+        :rules="mandatoryRules.concat(alphabetRules).concat(maxLongCharRules)"
       />
 
       <!-- INPUT: Country -->
@@ -191,7 +191,7 @@
         type="country"
         class="required"
         v-model="country"
-        :rules="maxCharRules.concat(mandatoryRules)"
+        :rules="mandatoryRules.concat(alphabetRules).concat(maxLongCharRules)"
       />
 
       <!-- INPUT: Postcode -->
@@ -199,17 +199,11 @@
         class="required"
         v-model="postcode"
         label="Postcode"
-        :rules="mandatoryRules.concat(maxCharRules)"
+        :rules="mandatoryRules.concat(numberRules).concat(maxShortCharRules)"
         outlined
       />
 
-      <!-- Login button if user already has an account. -->
-      <p
-        class="link"
-        @click="showLogin"
-      >
-        Already have an account? Login.
-      </p>
+      <p class="error-text" v-if ="errorMessage !== undefined"> {{errorMessage}} </p>
 
       <!-- Register -->
       <v-btn
@@ -218,7 +212,13 @@
         :disabled="!valid">
         REGISTER
       </v-btn>
-
+      <!-- Login Link if user already has an account. -->
+      <p
+        class="link pt-5"
+        @click="showLogin"
+      >
+        Already have an account? Login.
+      </p>
     </v-container>
   </v-form>
 </template>
@@ -226,7 +226,7 @@
 
 <script>
 import LocationAutocomplete from '@/components/utils/LocationAutocomplete';
-import {createUser} from '../../api';
+import {createUser} from '../../api/internal';
 
 export default {
   name: 'Register',
@@ -237,6 +237,7 @@ export default {
     return {
       showPassword: false,
       showConfirmPassword: false,
+      errorMessage: undefined,
       valid: false,
       email: '',
       password: '',
@@ -280,19 +281,33 @@ export default {
         field => /(^[0-9]*$)/.test(field) || 'Must contain numbers only'
       ],
       nameRules: [
-        field =>  (field.length === 0 || (/^[a-z ,.'-]+$/i).test(field)) || 'Naming must be valid'
+        field =>  (field.length === 0 || (/^[a-z]+$/i).test(field)) || 'Naming must be valid'
       ],
-      maxCharRules: [
+      maxShortCharRules: [
+        field => (field.length <= 16) || 'Reached max character limit: 16'
+      ],
+      maxMediumCharRules: [
+        field => (field.length <= 32) || 'Reached max character limit: 32'
+      ],
+      maxLongCharRules: [
         field => (field.length <= 100) || 'Reached max character limit: 100'
       ],
-      maxCharBioRules: [
-        field => (field.length <= 200) || 'Reached max character limit: 200'
+      charBioRules: [
+        field => (field.length <= 200) || 'Reached max character limit: 200',
+        field => /(^[ a-zA-Z0-9@//$%&!'//#,//.//(//)//:;_-]*$)/.test(field) || 'Bio must only contain letters, numbers, and valid special characters'
       ],
       phoneNumberRules: [
         field => /(^\(?\d{1,3}\)?[\s.-]?\d{3,4}[\s.-]?\d{4,5}$)|(^$)/.test(field) || 'Must be a valid phone number'
       ],
       countryCodeRules: [
         field => /(^(\d{1,2}-)?\d{2,3}$)|(^$)/.test(field) || 'Must be a valid country code.'
+      ],
+      alphabetRules: [
+        field => ( field.length === 0 || /^[a-z ]+$/i.test(field)) || 'Naming must be valid'
+      ],
+      streetNumRules: [
+        field => (field && field.length <= 109) || 'Reach Max chracter limit 109 ',
+        field => /^(?=.*[0-9 ])(?=.*[a-zA-Z ])([a-zA-Z0-9 ]+)$/.test(field) || 'Must have at least one number and one alphabet'
       ],
     };
   },
@@ -304,6 +319,7 @@ export default {
     },
     // Complete registration with API
     async register () {
+      this.errorMessage = undefined;
 
       /**
        * Get the street number and name from the street address field.
@@ -337,19 +353,18 @@ export default {
           region        : this.region,
           country       : this.country,
           postcode      : this.postcode,
+          district      : this.district
         },
         password    : this.password,
       };
 
-      let vrb = await createUser(user);
-      console.log(vrb);
-      if (vrb !== undefined ) {
-        alert('REGISTRATION FAILED');
-      }
-      else {
-        alert('TEST = SUCCESS');
+      let response = await createUser(user);
+      console.log(response);
+      if (response === undefined ) {
         this.$emit('showLogin');
+        return;
       }
+      this.errorMessage = response;
     },
     // Close the date picker modal
     closeDatePicker () {
@@ -386,7 +401,8 @@ export default {
       let year = today.getFullYear();
       let month = today.getMonth();
       let day = today.getDate();
-      return new Date(year - 13, month, day + 1);
+
+      return new Date(year - 13, month, day);
     }
   },
   computed: {
@@ -419,5 +435,9 @@ export default {
 .required label::after {
   content: "*";
   color: red;
+}
+.error-text {
+  color: var(--v-error-base);
+  font-size: 140%;
 }
 </style>
