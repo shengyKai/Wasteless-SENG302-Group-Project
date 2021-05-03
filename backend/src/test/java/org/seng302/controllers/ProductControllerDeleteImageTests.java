@@ -383,7 +383,6 @@ public class ProductControllerDeleteImageTests {
     /**
      * Checks that a product that does not exist cannot be retrieved.
      */
-    @Disabled
     @Test
     void getProduct_productDoesNotExist_406ResponseException() throws Exception {
         testBusiness.removeFromCatalogue(testProduct);
