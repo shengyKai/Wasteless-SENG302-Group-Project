@@ -33,6 +33,9 @@ junit:
 
 cucumber:
    stage: test
+   artifacts:
+     paths:
+       - backend/build
    script:
      - cd backend
      - ./gradlew cucumber
