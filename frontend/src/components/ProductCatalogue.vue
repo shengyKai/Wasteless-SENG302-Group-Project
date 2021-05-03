@@ -1,5 +1,5 @@
 <template>
-  <v-card>
+  <div>
     <v-toolbar dark color="primary">
       <v-select
         v-model="orderBy"
@@ -49,7 +49,7 @@
       :length="totalPages"
       circle
     /> -->
-  </v-card>
+  </div>
 </template>
 
 <script>
