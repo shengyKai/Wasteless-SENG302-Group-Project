@@ -54,7 +54,7 @@ describe('ProductImageUploader.vue', () => {
       components: { ProductImageUploader },
       template: `
       <div data-app>
-        <ProductImageUploader :businessId="100" productId="PRODUCT-ID"/>
+        <ProductImageUploader v-model="showImageUploaderForm" :businessId="100" productId="PRODUCT-ID"/>
       </div>`,
     });
 
@@ -67,6 +67,11 @@ describe('ProductImageUploader.vue', () => {
       localVue,
       vuetify,
       attachTo: elem,
+      data() {
+        return {
+          showImageUploaderForm: true
+        }
+      }
     });
 
     wrapper = appWrapper.getComponent(ProductImageUploader);
@@ -273,13 +278,13 @@ describe('ProductImageUploader.vue', () => {
   });
 
   /**
-   * Tests that when the close button is pressed the "closeDialog" event is emitted, this should
+   * Tests that when the close button is pressed the "showImageUploaderForm" boolean should be changed to false, this should
    * also result in the dialog getting closed.
    */
-  it('When the close button is pressed then the "closeDialog" event should be emitted', async () => {
+  it('When the close button is pressed then the "showImageUploaderForm" boolean should be false', async () => {
     await findCloseButton().trigger('click'); // Click close button
 
-    expect(wrapper.emitted().closeDialog).toBeTruthy();
+    expect(appWrapper.vm.showImageUploaderForm).toBeFalsy();
   });
 
   /**
@@ -324,7 +329,7 @@ describe('ProductImageUploader.vue', () => {
       'PRODUCT-ID',
       testFile
     );
-    expect(wrapper.emitted().closeDialog).toBeTruthy();
+    expect(appWrapper.vm.showImageUploaderForm).toBeFalsy();
   });
 
   /**

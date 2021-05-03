@@ -1,5 +1,5 @@
 <template>
-  <v-dialog v-model="dialog" persistent max-width="500px">
+  <v-dialog v-model="showDialog" persistent max-width="500px">
     <v-form>
       <v-card>
         <v-card-title>
@@ -47,7 +47,7 @@
           <v-btn
             color="primary"
             text
-            @click="closeDialog">
+            @click="showDialog=false">
             Close
           </v-btn>
           <v-btn
@@ -74,11 +74,12 @@ export default {
     },
     productId: {
       default: 'NATHAN-APPLE-70'
-    }
+    },
+    //the value here refers to the parent component in ProductCatalogueItem
+    value: Boolean
   },
   data() {
     return {
-      dialog: true,
       file: undefined,
       isDragging: false,
       errorMessage: undefined,
@@ -149,12 +150,7 @@ export default {
         this.errorMessage = response;
         return;
       }
-
-      this.$emit('closeDialog');
-    },
-
-    closeDialog() {
-      this.$emit('closeDialog');
+      this.showDialog = false;
     }
   },
 
@@ -162,6 +158,16 @@ export default {
     url() {
       if (this.file === undefined) return undefined;
       return URL.createObjectURL(this.file);
+    },
+    //need to use computed property in child component to track changes
+    showDialog: {
+      //gets the value of the showImageUploaderForm
+      get() {
+        return this.value;
+      },
+      set (value) {
+        this.$emit('input', value);
+      },
     }
   },
 };
