@@ -1,4 +1,4 @@
-import {User,  Business, getUser, login} from './api';
+import {User,  Business, getUser, login} from './api/internal';
 import Vuex, { Store, StoreOptions } from 'vuex';
 import { COOKIE, deleteCookie, isTesting, setCookie } from './utils';
 
@@ -29,7 +29,11 @@ export type StoreData = {
    * Whether or not the dialog for registering a business is being shown.
    */
   createBusinessDialogShown: boolean,
-  createProductDialogShown: boolean,
+  /**
+   * The current business the create product dialog is being applied to.
+   * If undefined then the create product dialog is hidden.
+   */
+  createProductDialogBusiness: number | undefined,
 };
 
 function createOptions(): StoreOptions<StoreData> {
@@ -39,7 +43,7 @@ function createOptions(): StoreOptions<StoreData> {
       activeRole: null,
       globalError: null,
       createBusinessDialogShown: false,
-      createProductDialogShown: false,
+      createProductDialogBusiness: undefined,
     },
     mutations: {
       setUser (state, payload: User) {
@@ -102,12 +106,13 @@ function createOptions(): StoreOptions<StoreData> {
       },
 
       /**
-       * Creates a modal create product dialog
+       * Creates a modal create product dialog for adding a product to the provided business
        *
        * @param state Current store state
+       * @param businessId Business to create the product for
        */
-      showCreateProduct(state) {
-        state.createProductDialogShown = true;
+      showCreateProduct(state, businessId: number) {
+        state.createProductDialogBusiness = businessId;
       },
 
       /**
@@ -116,7 +121,7 @@ function createOptions(): StoreOptions<StoreData> {
        * @param state Current store state
        */
       hideCreateProduct(state) {
-        state.createProductDialogShown = false;
+        state.createProductDialogBusiness = undefined;
       }
     },
     getters: {
@@ -125,7 +130,7 @@ function createOptions(): StoreOptions<StoreData> {
       },
       role (state) {
         return state.user?.role;
-      }
+      },
     },
     actions: {
       getUser (context, userId) {
@@ -137,18 +142,26 @@ function createOptions(): StoreOptions<StoreData> {
           context.commit('setUser', response);
         });
       },
+      /**
+       * Attempts to log in the given user.
+       * This will set the cookies and with authenticate future requests.
+       *
+       * @param context The current context
+       * @param Object containing the login credentials
+       * @returns Undefined if successful or a string error message
+       */
       async login(context, { email, password }) {
         let userId = await login(email, password);
         if (typeof userId === 'string') {
-          context.commit('setError', userId);
-          return;
+          return userId;
         }
         let user = await getUser(userId);
         if (typeof user === 'string') {
-          context.commit('setError', user);
-          return;
+          return user;
         }
         context.commit('setUser', user);
+
+        return undefined;
       }
     }
   };

@@ -68,7 +68,7 @@
                 <v-card-text class="pb-0 product-fields">
                   <strong>RRP: </strong>
                   <br>
-                  ${{ productRRP }}
+                  {{ currency.symbol }}{{ productRRP }} {{ currency.code }}
                 </v-card-text>
               </v-row>
               <v-row>
@@ -91,6 +91,7 @@
 //This component requires two other custom components, one to display the product image, one to view more of the product's description
 import FullProductDescription from "./utils/FullProductDescription.vue";
 import ProductImageCarousel from "./utils/ProductImageCarousel.vue";
+import {currencyFromCountry} from "@/api/currency";
 
 export default {
   name: "ProductCatalogueItem",
@@ -124,6 +125,7 @@ export default {
       // productManufacturer: "",
       // productRRP: null,
       // productCode: "",
+      // currency: {},
 
       // try uncommenting the bottom variables to test out how it looks.
       productName: "Some Product",
@@ -133,11 +135,21 @@ export default {
       productManufacturer: "Some Manufacturer",
       productRRP: 100,
       productCode: "Some Code",
+      countryOfSale: "Japan",
+      currency: {
+        code: "",
+        symbol: ""
+      },
 
       //If readMoreActivated is false, the product description is less than 50 words, so it wont have to use the FullProductDescription
       //component. Else it will use it and the "Read more..." link will also be shown to lead to the FullProductDescription component
       readMoreActivated: false,
     };
+  },
+  async created() {
+    // When the catalogue item is created, the currency will be set to the currency of the country the product is being
+    // sold in. It will have blank fields if no currency can be found from the country.
+    this.currency = await currencyFromCountry(this.countryOfSale);
   },
   methods: {
     //if the "Read more..." link if clicked, readMoreActivated becomes true and the FullProductDescription dialog box will open
@@ -147,7 +159,7 @@ export default {
     //add the form to edit product details here
     editProductDetails() {
       alert("TODO");
-    }
+    },
   },
 };
 </script>

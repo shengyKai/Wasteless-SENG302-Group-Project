@@ -69,7 +69,7 @@
       <v-text-field
         v-model="nickname"
         label="Nickname"
-        :rules="nameRules.concat(maxMediumCharRules)"
+        :rules="alphabetRules.concat(maxMediumCharRules)"
         outlined
       />
 
@@ -167,7 +167,7 @@
       <LocationAutocomplete
         type="district"
         v-model="district"
-        :rules="maxLongCharRules"
+        :rules="maxLongCharRules.concat(alphabetRules).concat(maxLongCharRules)"
       />
 
       <!-- INPUT: City -->
@@ -175,7 +175,7 @@
         type="city"
         class="required"
         v-model="city"
-        :rules="mandatoryRules.concat(nameRules).concat(maxLongCharRules)"
+        :rules="mandatoryRules.concat(alphabetRules).concat(maxLongCharRules)"
       />
 
       <!-- INPUT: Region -->
@@ -183,7 +183,7 @@
         type="region"
         class="required"
         v-model="region"
-        :rules="mandatoryRules.concat(nameRules).concat(maxLongCharRules)"
+        :rules="mandatoryRules.concat(alphabetRules).concat(maxLongCharRules)"
       />
 
       <!-- INPUT: Country -->
@@ -191,7 +191,7 @@
         type="country"
         class="required"
         v-model="country"
-        :rules="mandatoryRules.concat(nameRules).concat(maxLongCharRules)"
+        :rules="mandatoryRules.concat(alphabetRules).concat(maxLongCharRules)"
       />
 
       <!-- INPUT: Postcode -->
@@ -226,7 +226,7 @@
 
 <script>
 import LocationAutocomplete from '@/components/utils/LocationAutocomplete';
-import {createUser} from '../../api';
+import {createUser} from '../../api/internal';
 
 export default {
   name: 'Register',
@@ -284,12 +284,12 @@ export default {
         field =>  (field.length === 0 || (/^[a-z]+$/i).test(field)) || 'Naming must be valid'
       ],
       maxShortCharRules: [
-        field => (field.length <= 16) || 'Reached max character limit: 32'
+        field => (field.length <= 16) || 'Reached max character limit: 16'
       ],
       maxMediumCharRules: [
         field => (field.length <= 32) || 'Reached max character limit: 32'
       ],
-      maxLongCharRules: [   
+      maxLongCharRules: [
         field => (field.length <= 100) || 'Reached max character limit: 100'
       ],
       charBioRules: [
@@ -302,9 +302,12 @@ export default {
       countryCodeRules: [
         field => /(^(\d{1,2}-)?\d{2,3}$)|(^$)/.test(field) || 'Must be a valid country code.'
       ],
+      alphabetRules: [
+        field => ( field.length === 0 || /^[a-z ]+$/i.test(field)) || 'Naming must be valid'
+      ],
       streetNumRules: [
-        field => (field && field.length <= 109) || 'street num + aplhabet should not exist 109 characters. 100 for name, 9 for num ',
-        field => /^(?=.*[0-9])(?=.*[a-zA-Z])([a-zA-Z0-9]+)$/.test(field) || 'Must have at least one number and one alphabet'
+        field => (field && field.length <= 109) || 'Reach Max chracter limit 109 ',
+        field => /^(?=.*[0-9 ])(?=.*[a-zA-Z ])([a-zA-Z0-9 ]+)$/.test(field) || 'Must have at least one number and one alphabet'
       ],
     };
   },
@@ -350,6 +353,7 @@ export default {
           region        : this.region,
           country       : this.country,
           postcode      : this.postcode,
+          district      : this.district
         },
         password    : this.password,
       };
@@ -397,6 +401,7 @@ export default {
       let year = today.getFullYear();
       let month = today.getMonth();
       let day = today.getDate();
+
       return new Date(year - 13, month, day);
     }
   },

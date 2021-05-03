@@ -12,6 +12,15 @@ import FullProductDescription from "@/components/utils/FullProductDescription.vu
 
 Vue.use(Vuetify);
 
+jest.mock('@/api/currency', () => ({
+  currencyFromCountry: jest.fn(() => {
+    return {
+      code: 'Currency code',
+      symbol: 'Currency symbol'
+    }
+  })
+}));
+
 describe('ProductCatalogueItem.vue', () => {
   let wrapper: Wrapper<any>;
   let vuetify: Vuetify;
@@ -46,11 +55,13 @@ describe('ProductCatalogueItem.vue', () => {
           productName: "Some Product",
           productDescription: "Some description",
           productDateAdded: "Some Date Added",
-          productExpiryDate: "Some Expired Date",
           productManufacturer: "Some Manufacturer",
           productRRP: 100,
-          productQuantity: 5,
           productCode: "Some Code",
+          currency: {
+            code: "Currency code",
+            symbol: "Currency symbol"
+          },
           readMoreActivated: false
         };
       }
@@ -110,13 +121,6 @@ describe('ProductCatalogueItem.vue', () => {
   });
 
   /**
-  * Tests that the same product expiry date exists as per the set data above
-  */
-  it("Must contain the product expiry date", () => {
-    expect(wrapper.text()).toContain('Some Expired Date');
-  });
-
-  /**
   * Tests that the same product manufacturer exists as per the set data above
   */
   it("Must contain the product manufacturer", () => {
@@ -131,10 +135,10 @@ describe('ProductCatalogueItem.vue', () => {
   });
 
   /**
-  * Tests that the same product quantity exists as per the set data above
-  */
-  it("Must contain the product quantity", () => {
-    expect(wrapper.text()).toContain(5);
+   * Test that the product RRP is formatted with the currency symbol and code
+   */
+  it("RRP must be formatted with symbol and code", () => {
+    expect(wrapper.text()).toContain("Currency symbol100 Currency code");
   });
 
   /**

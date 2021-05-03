@@ -115,8 +115,22 @@
             </v-card-actions>
           </v-card>
         </v-dialog>
+        <v-tooltip bottom >
+          <template #activator="{on, attrs}">
+            <v-chip
+              ref="administratorStatus"
+              v-if="user.role==='globalApplicationAdmin'"
+              outlined
+              color="primary"
+              v-on="on"
+              v-bind="attrs"
+            >
+              <v-icon>mdi-account-tie</v-icon>
+            </v-chip>
+          </template>
+          <span>System Administrator</span>
+        </v-tooltip>
       </div>
-
     </div>
 
     <v-container fluid>
@@ -134,9 +148,9 @@
           <h4>Phone Number</h4>
           {{ user.phoneNumber }}
         </v-col>
-        <v-col cols="12" sm="6">
+        <v-col class="address" cols="12" sm="6">
           <h4>Home Address</h4>
-          {{ user.homeAddress }}
+          {{ insertAddress(user.homeAddress) }}
         </v-col>
 
         <v-col cols="12">
@@ -158,12 +172,12 @@
 </template>
 
 <script>
-import { getUser, makeBusinessAdmin, removeBusinessAdmin } from '../api';
+import { getUser, makeBusinessAdmin, removeBusinessAdmin } from '../api/internal';
 import UserAvatar from './utils/UserAvatar';
+import convertAddressToReadableText from './utils/Methods/convertJsonAddressToReadableText';
 
 export default {
   name: 'ProfilePage',
-
   data() {
     return {
       /**
@@ -175,7 +189,6 @@ export default {
       addAdminDialog: false,
     };
   },
-
   created() {
     if (this.$route.params.id === undefined) {
       this.user = this.$store.state.user;
@@ -246,6 +259,10 @@ export default {
       if (this.user.id === this.$store.state.user?.id) {
         this.$store.commit('setUser', this.user);
       }
+    },
+    //have to use a method here to access the method
+    insertAddress(address) {
+      return convertAddressToReadableText(address, "full");
     }
   },
 
@@ -293,7 +310,7 @@ export default {
   },
   components: {
     UserAvatar,
-  },
+  }
 };
 </script>
 
@@ -324,5 +341,9 @@ export default {
 
 .link-chip {
   margin-right: 4px;
+}
+
+.address{
+  white-space: pre-line;
 }
 </style>

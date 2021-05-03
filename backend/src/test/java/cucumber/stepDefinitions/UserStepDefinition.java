@@ -3,25 +3,22 @@ package cucumber.stepDefinitions;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.cucumber.core.gherkin.messages.internal.gherkin.internal.com.eclipsesource.json.JsonObject;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
-import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
 import org.junit.After;
 import org.junit.Assert;
-import org.seng302.Entities.Location;
-import org.seng302.Entities.User;
-import org.seng302.Persistence.UserRepository;
-import org.seng302.Tools.PasswordAuthenticator;
+import org.seng302.entities.Location;
+import org.seng302.entities.User;
+import org.seng302.persistence.UserRepository;
+import org.seng302.tools.PasswordAuthenticator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
@@ -54,7 +51,7 @@ public class UserStepDefinition {
     private String userBio = "I am Bob";
     private String userDob = "10-10-1999";
     private String userPhNum = "0270000000";
-    private Location userAddress = Location.covertAddressStringToLocation("1,Bob Street,Bob,Bob,Bob,1010");
+    private Location userAddress = Location.covertAddressStringToLocation("1,Bob Street,Bob,Bob,Bob,Bob,1010");
 
     private Long userID;
 
