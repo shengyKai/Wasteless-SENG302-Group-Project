@@ -56,7 +56,7 @@
                 <v-card-text class="pb-0 product-fields">
                   <strong>Description: </strong>
                   <br >
-                  {{ productDescription }}
+                  {{ product.description }}
                 </v-card-text>
               </span>
             </v-row>
@@ -88,8 +88,7 @@
               <v-card-text class="pb-0 product-fields">
                 <strong>RRP: </strong>
                 <br >
-                {{ currency.symbol }}{{ product.recommendedRetailPrice }}
-                {{ currency.code }}
+                {{ currency.symbol }}{{ product.recommendedRetailPrice }} {{ currency.code }}
               </v-card-text>
             </v-row>
             <v-row>
