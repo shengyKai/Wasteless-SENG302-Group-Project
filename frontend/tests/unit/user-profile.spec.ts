@@ -6,13 +6,13 @@ import {createLocalVue, Wrapper, mount, createWrapper} from '@vue/test-utils';
 import { getStore, resetStoreForTesting, StoreData } from '@/store';
 import UserProfile from '@/components/UserProfile.vue';
 
-import * as api from '@/api';
+import * as api from '@/api/internal';
 import { castMock, flushQueue } from './utils';
-import { User, Business } from '@/api';
+import { User, Business } from '@/api/internal';
 
 Vue.use(Vuetify);
 
-jest.mock('@/api', () => ({
+jest.mock('@/api/internal', () => ({
   makeBusinessAdmin: jest.fn(),
   removeBusinessAdmin: jest.fn(),
   getBusiness: jest.fn(),

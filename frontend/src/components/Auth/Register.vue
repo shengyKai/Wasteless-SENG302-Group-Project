@@ -202,6 +202,7 @@
         :rules="mandatoryRules.concat(numberRules).concat(maxShortCharRules)"
         outlined
       />
+
       <p class="error-text" v-if ="errorMessage !== undefined"> {{errorMessage}} </p>
 
       <!-- Register -->
@@ -225,7 +226,7 @@
 
 <script>
 import LocationAutocomplete from '@/components/utils/LocationAutocomplete';
-import {createUser} from '../../api';
+import {createUser} from '../../api/internal';
 
 export default {
   name: 'Register',
@@ -400,7 +401,7 @@ export default {
       let year = today.getFullYear();
       let month = today.getMonth();
       let day = today.getDate();
-      console.log(day);
+
       return new Date(year - 13, month, day);
     }
   },

@@ -117,7 +117,7 @@
 
 <script>
 import LocationAutocomplete from '@/components/utils/LocationAutocomplete';
-import {createBusiness} from '@/api';
+import {createBusiness} from '@/api/internal';
 
 export default {
   name: 'CreateBusiness',

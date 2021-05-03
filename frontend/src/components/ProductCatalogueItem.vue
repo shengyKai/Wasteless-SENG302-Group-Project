@@ -68,7 +68,7 @@
                 <v-card-text class="pb-0 product-fields">
                   <strong>RRP: </strong>
                   <br>
-                  ${{ productRRP }}
+                  {{ currency.symbol }}{{ productRRP }} {{ currency.code }}
                 </v-card-text>
               </v-row>
               <v-row>
@@ -87,9 +87,84 @@
 </template>
 
 <script>
+//This component requires two other custom components, one to display the product image, one to view more of the product's description
+import FullProductDescription from "./utils/FullProductDescription.vue";
+import ProductImageCarousel from "./utils/ProductImageCarousel.vue";
+import {currencyFromCountry} from "@/api/currency";
 
 export default {
   name: "ProductCatalogueItem",
+  components: {
+    FullProductDescription,
+    ProductImageCarousel
+  },
+  data() {
+    return {
+      //insert the product images here, do note that the first index, at index 0, will be the primary image of the product.
+      //The image MUST be labelled with the key "src" in order to be able to show in component
+      productImages: [
+        //commented out the images below for the moment, so that if you would like to test out the carousel, just uncomment it
+        {
+          src: "https://cdn.vuetifyjs.com/images/carousel/squirrel.jpg",
+        },
+        {
+          src: "https://cdn.vuetifyjs.com/images/carousel/sky.jpg",
+        },
+        {
+          src: "https://cdn.vuetifyjs.com/images/carousel/bird.jpg",
+        },
+        {
+          src: "https://cdn.vuetifyjs.com/images/carousel/planet.jpg",
+        },
+      ],
+      //The bottom 8 variables will all be shown as text/numbers in the component.
+      // productName: "",
+      // productDescription: "",
+      // productDateAdded: "",
+      // productManufacturer: "",
+      // productRRP: null,
+      // productCode: "",
+      // currency: {},
 
-}
+      // try uncommenting the bottom variables to test out how it looks.
+      productName: "Some Product",
+      productDescription:
+        "Some super long description Some super long description Some super long description Some super long description",
+      productDateAdded: "Some Date Added",
+      productManufacturer: "Some Manufacturer",
+      productRRP: 100,
+      productCode: "Some Code",
+      countryOfSale: "Japan",
+      currency: {
+        code: "",
+        symbol: ""
+      },
+
+      //If readMoreActivated is false, the product description is less than 50 words, so it wont have to use the FullProductDescription
+      //component. Else it will use it and the "Read more..." link will also be shown to lead to the FullProductDescription component
+      readMoreActivated: false,
+    };
+  },
+  async created() {
+    // When the catalogue item is created, the currency will be set to the currency of the country the product is being
+    // sold in. It will have blank fields if no currency can be found from the country.
+    this.currency = await currencyFromCountry(this.countryOfSale);
+  },
+  methods: {
+    //if the "Read more..." link if clicked, readMoreActivated becomes true and the FullProductDescription dialog box will open
+    activateReadMore() {
+      this.readMoreActivated = true;
+    },
+    //add the form to edit product details here
+    editProductDetails() {
+      alert("TODO");
+    },
+  },
+};
 </script>
+
+<style scoped>
+.product-fields {
+  padding-top: 0;
+}
+</style>

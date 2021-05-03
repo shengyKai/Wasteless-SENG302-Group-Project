@@ -375,6 +375,29 @@ class ProductTests {
     }
 
     /**
+     * Tests that "findByBusinessAndProductCode" returns null if the product is deleted
+     */
+    @Test
+    void testFindByBusinessAndProductCodeIsNullIfProductHasBeenDeleted() {
+        // Product with same code saved to a different business
+        Product product = productRepository.save(
+                new Product.Builder()
+                        .withProductCode("NATHAN-APPLE-70")
+                        .withName("The Nathan Apple")
+                        .withDescription("Ever wonder why Nathan has an apple")
+                        .withManufacturer("Apple")
+                        .withRecommendedRetailPrice("9000.03")
+                        .withBusiness(testBusiness1)
+                        .build()
+        );
+
+        productRepository.delete(product);
+
+        Product foundProduct = productRepository.findByBusinessAndProductCode(testBusiness1, "NATHAN-APPLE-70");
+        assertNull(foundProduct);
+    }
+
+    /**
      * Tests that trying the change a product's business using "addToCatalogue" fails.
      */
     @Test

@@ -1,10 +1,11 @@
 <template>
   <v-container>
     <!-- @submit.prevent="login"-->
-    <v-form v-model="valid">
+    <v-form v-model="valid" lazy-validation>
       <h1>Sign in</h1>
       <v-text-field
         v-model="email"
+        validate-on-blur
         type="email"
         label="Email"
         outlined
@@ -15,27 +16,27 @@
         type="password"
         label="Password"
         outlined
-        :rules="mandatoryRules.concat(passwordRules).concat(maxCharShortRules)"
       />
-
-      <!-- Register Button Allow user to click on this link and get directed to registration form -->
-      <p class="link" @click="showRegister">
-        Don't have an account? Register.
-      </p>
-      <!-- Hidden component, only appear when theres errror and show the respond from backend -->
-      <p class="error-text" v-if ="errorMessage !== undefined"> {{errorMessage}} </p>
-
-      <!-- Login Button Direct user into the home page. Invalid credential will trigger a pop up error message -->
     </v-form>
-    <v-btn @click="showHome" type="submit" color="primary" :disabled="!valid">
+
+    <!-- Hidden component, only appear when theres errror and show the respond from backend -->
+    <p class="login-error-text" v-if ="errorMessage !== undefined"> {{errorMessage}} </p>
+
+    <!-- Login Button Direct user into the home page. Invalid credential will trigger a pop up error message -->
+    <v-btn @click="login" type="submit" color="primary" :disabled="!valid">
       LOGIN
     </v-btn>
+
+    <!-- Register Button Allow user to click on this link and get directed to registration form -->
+    <p class="link pt-5" @click="showRegister">
+      Don't have an account? Register.
+    </p>
   </v-container>
 
 </template>
 
 <script>
-import {login} from '../../api';
+// import {login} from '../../api';
 export default {
   loggedIn: true,
   name: "Login",
@@ -48,14 +49,14 @@ export default {
       emailRules: [
         email =>
           /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(email)
-          || 'E-mail must be valid'
+          || ''
       ],
       mandatoryRules: [
         /**
          * All fields with the class "required" will go through this ruleset to ensure the field is not empty.
          * If it does not follow the format, turn text field into red
         */
-        (field) => !!field || "Field is required",
+        (field) => !!field || '',
       ],
       passwordRules: [
         field => (field && field.length >= 7 && field.length <= 16) || '',                    //Password must have 7-16 characters
@@ -76,25 +77,15 @@ export default {
       this.$emit("showRegister");
     },
     /**
-     * Method to direct into home page, embed in a button
-     * dispatch details from textfield to store plugin before directing
+     * Method to log in with the provided user credentials and if they are valid then show home page.
+     * Otherwise this will show an error message.
      */
-    async showHome() {
+    async login() {
       this.errorMessage = undefined;
-      this.$store.dispatch("login", { email : this.email, password : this.password });
-      this.$router.push("/home");
-
-      let credential = {
-        email     : this.email,
-        password  : this.password,
-      };
-      let response = await login(credential);
-      console.log(response);
-      if (response === undefined ) {
-        this.$emit('showLogin');
-        return;
+      this.errorMessage = await this.$store.dispatch("login", { email : this.email, password : this.password });
+      if(this.errorMessage !== "Invalid credentials") {
+        this.$router.push("/home");
       }
-      this.errorMessage = response;
     },
   },
 };
@@ -103,10 +94,8 @@ export default {
 </script>
 
 <style>
-.error-text {
+.login-error-text {
   color: var(--v-error-base);
   font-size: 140%;
 }
 </style>
-
-
