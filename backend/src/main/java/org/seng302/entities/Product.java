@@ -6,7 +6,9 @@ import org.springframework.web.server.ResponseStatusException;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 @Table(uniqueConstraints={
         @UniqueConstraint(columnNames = {"product_code", "business_id"})
@@ -44,9 +46,13 @@ public class Product {
     @JoinColumn(name = "business_id")
     private Business business;
 
-    @OneToOne(fetch = FetchType.EAGER)
+    @OneToMany(fetch = FetchType.EAGER)
     @JoinColumn(name = "image_id")
-    private Image productImage;
+    private List<Image> productImages = new ArrayList<>();
+
+    public void addImage(Image image) {
+        this.productImages.add(image);
+    }
 
     /**
      * Get the id of the product (Is globally unique)
@@ -100,7 +106,7 @@ public class Product {
      * Get the image object associated with this product
      * @return the image
      */
-    public Image getProductImage() { return productImage; }
+    public List<Image> getProductImages() { return productImages; }
 
     /**
      * Sets the code of the product
@@ -201,11 +207,11 @@ public class Product {
     }
 
     /**
-     * Sets the image associated with the product
-     * @param productImage the product image
+     * Sets the images associated with the product
+     * @param productImages the product images
      */
-    public void setProductImage(Image productImage) {
-        this.productImage = productImage;
+    public void setProductImages(List<Image> productImages) {
+        this.productImages = productImages;
     }
 
     /**

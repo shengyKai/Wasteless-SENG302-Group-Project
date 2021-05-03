@@ -2,11 +2,9 @@ package org.seng302.controllers;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.seng302.entities.Business;
-import org.seng302.entities.Location;
-import org.seng302.entities.Product;
-import org.seng302.entities.User;
+import org.seng302.entities.*;
 import org.seng302.persistence.BusinessRepository;
+import org.seng302.persistence.ImageRepository;
 import org.seng302.persistence.ProductRepository;
 import org.seng302.persistence.UserRepository;
 import org.seng302.tools.AuthenticationTokenManager;
@@ -31,12 +29,14 @@ public class DemoController {
     private final UserRepository userRepository;
     private final BusinessRepository businessRepository;
     private final ProductRepository productRepository;
+    private final ImageRepository imageRepository;
     private static final Logger logger = LogManager.getLogger(DemoController.class.getName());
 
-    public DemoController(UserRepository userRepository, BusinessRepository businessRepository, ProductRepository productRepository) {
+    public DemoController(UserRepository userRepository, BusinessRepository businessRepository, ProductRepository productRepository, ImageRepository imageRepository) {
         this.userRepository = userRepository;
         this.businessRepository = businessRepository;
         this.productRepository = productRepository;
+        this.imageRepository = imageRepository;
     }
 
     /**
