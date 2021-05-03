@@ -2,7 +2,9 @@ package org.seng302.controllers;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 import org.seng302.entities.Business;
 import org.seng302.entities.Location;
 import org.seng302.entities.Product;
@@ -19,11 +21,11 @@ public class ProductControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
-    @Autowired
+    @Mock
     private UserRepository userRepository;
-    @Autowired
+    @Mock
     private BusinessRepository businessRepository;
-    @Autowired
+    @Mock
     private ProductRepository productRepository;
 
     private User testUser;
@@ -61,7 +63,7 @@ public class ProductControllerTest {
                 .build();
         businessRepository.deleteAll();
         businessRepository.save(testBusiness);
-                .andExpect(status().isConflict())
+
 
         testProduct = new Product.Builder()
                 .withProductCode("PieceOfFish69")
@@ -78,7 +80,7 @@ public class ProductControllerTest {
         businessRepository.save(testBusiness);
     }
 
-    @BeforeAll
+    @BeforeEach
     void setUp() throws ParseException {
         setUpTestObjects();
     }
@@ -196,4 +198,68 @@ public class ProductControllerTest {
     void deleteProductImage_isBusinessAdminForWrongCatalogue_403Response() {
 
     }
+
+    /**
+     * Tests using the make image primary method will make the given image the primary image
+     */
+    @Test
+    public void makeImagePrimary_valid_sets_image_primary() {
+
+    }
+
+    /**
+     * Tests that using the make image primary method with a business that does not exist,
+     * a 406 response is thrown
+     */
+    @Test
+    public void makeImagePrimary_InvalidBusinessId_406Response() {
+
+    }
+    /**
+     * Tests that using the make image primary method with a product that does not exist,
+     * a 406 response is thrown
+     */
+    @Test
+    public void makeImagePrimary_InvalidProductId_406Response() {
+
+    }
+
+    /**
+     * Tests that using the make image primary method with a Image that does not exist,
+     * a 406 response is thrown
+     */
+    @Test
+    public void makeImagePrimary_InvalidImageId_406Response() {
+
+    }
+
+    /**
+     * Tests that using the make image primary method with a session that is not a business admin,
+     * a 403 response is thrown
+     */
+    @Test
+    public void makeImagePrimary_NotBusinessAdmin_403Response() {
+
+    }
+    /**
+     * Tests that using the make image primary method with a session that is not logged in,
+     * a 401 response is thrown
+     */
+    @Test
+    public void makeImagePrimary_NoSession_401Response() {
+
+    }
+
+    /**
+     * Tests using the ake image primary method to see if a user who is a business administrator cannot edit images from
+     * products that exist in a different business's product catalogue
+     */
+    @Test
+    void makeImagePrimary_isBusinessAdminForWrongCatalogue_403Response() {
+
+    }
+
+
+
+
 }
