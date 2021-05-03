@@ -1,7 +1,9 @@
 package org.seng302.persistence;
 
 import org.seng302.entities.Image;
+import org.seng302.entities.Product;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
@@ -18,6 +20,6 @@ public interface ImageRepository extends JpaRepository<Image, Long> {
     //Image findByDirectory(@Param("filename") String filename);
 
     
-    Optional<Image> findByName(String name);
+    Optional<Image> findByFilename(@Param("filename") String filename);
 
 }

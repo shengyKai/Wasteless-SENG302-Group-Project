@@ -1,5 +1,6 @@
 package org.seng302.entities;
 
+import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
@@ -219,6 +220,11 @@ public class Product {
         object.put("manufacturer", manufacturer);
         object.put("recommendedRetailPrice", recommendedRetailPrice);
         object.put("created", created);
+        JSONArray images = new JSONArray();
+        if (productImage != null) {
+            images.appendElement(productImage.constructJSONObject());
+        }
+        object.put("images", images);
         return object;
     }
 

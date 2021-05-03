@@ -5,19 +5,25 @@ import net.minidev.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.seng302.entities.Business;
+import org.seng302.entities.Image;
 import org.seng302.entities.Product;
 import org.seng302.exceptions.BusinessNotFoundException;
 import org.seng302.persistence.BusinessRepository;
+import org.seng302.persistence.ImageRepository;
 import org.seng302.persistence.ProductRepository;
+import org.seng302.service.StorageService;
 import org.seng302.tools.AuthenticationTokenManager;
 import org.seng302.tools.SearchHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -30,12 +36,16 @@ public class ProductController {
 
     private final ProductRepository productRepository;
     private final BusinessRepository businessRepository;
+    private final StorageService storageService;
+    private final ImageRepository imageRepository;
     private static final Logger logger = LogManager.getLogger(ProductController.class.getName());
 
     @Autowired
-    public ProductController(ProductRepository productRepository, BusinessRepository businessRepository) {
+    public ProductController(ProductRepository productRepository, BusinessRepository businessRepository, StorageService storageService, ImageRepository imageRepository) {
         this.productRepository = productRepository;
         this.businessRepository = businessRepository;
+        this.storageService = storageService;
+        this.imageRepository = imageRepository;
     }
 
     /**
@@ -230,5 +240,39 @@ public class ProductController {
                     "The given business does not exist");
         }
         return business.get();
+    }
+
+
+    @PostMapping("/businesses/{businessId}/products/{productCode}/images")
+    public ResponseEntity uplaodImage(@PathVariable Long businessId, @PathVariable String productCode, @RequestParam("file") MultipartFile file, HttpServletRequest request) throws IOException {
+        try {
+            AuthenticationTokenManager.checkAuthenticationToken(request);
+            logger.info(String.format("Adding product image to business (businessId=%d, productCode=%s).", businessId, productCode));
+            Business business = getBusiness(businessId);
+
+            business.checkSessionPermissions(request);
+
+            Product product = productRepository.findByBusinessAndProductCode(business, productCode);
+            if (product == null) {
+                throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "No product found with the given product code");
+            }
+
+            storageService.store(file);
+
+            // TODO This is very ugly, talk to connor about validation on image creation
+            Image image = new Image(null, null);
+            image.setFilename(file.getOriginalFilename());
+            image = imageRepository.save(image);
+            product.setProductImage(image);
+            productRepository.save(product);
+
+            return new ResponseEntity(HttpStatus.CREATED);
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            throw e;
+        }
+
+
+
     }
 }
