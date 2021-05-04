@@ -223,6 +223,17 @@ public class Product {
     }
 
     /**
+     * Removes a given image from the list of products
+     * @param productImage The image to remove
+     */
+    public void removeProductImage(Image productImage) {
+        if (!this.productImages.contains(productImage)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Product cannot be removed");
+        }
+        this.productImages.remove(productImage);
+    }
+
+    /**
      * Sets the name of the country which the product is being sold in. The country of sale must not be null, empty or
      * blank, and must contain up to 100 characters which can only be letters or spaces.
      * @param countryOfSale the name of the country where the product is to be sold.

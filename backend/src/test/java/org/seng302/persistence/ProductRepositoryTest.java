@@ -9,6 +9,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.text.ParseException;
+import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -82,7 +83,7 @@ public class ProductRepositoryTest {
                 .withRecommendedRetailPrice("3.20")
                 .withBusiness(testBusiness)
                 .build();
-        testProduct.setProductImage(testImage);
+        testProduct.setProductImages(Arrays.asList(testImage));
         productRepository.save(testProduct);
 
         testUser2 = new User.Builder()

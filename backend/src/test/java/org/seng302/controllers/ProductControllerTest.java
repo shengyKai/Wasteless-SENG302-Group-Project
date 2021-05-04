@@ -961,7 +961,7 @@ class ProductControllerTest {
         product = addImagesToProduct(product); // load test images
         Image image = product.getProductImages().get(1); // get the second item in list
 
-        mockMvc.perform(put(String.format("/businesses/%d/products/%d/images/%d/makeprimary", testBusiness1.getId(), product.getID(), image.getID()))
+        mockMvc.perform(put(String.format("/businesses/%d/products/%s/images/%d/makeprimary", testBusiness1.getId(), product.getProductCode(), image.getID()))
                 .sessionAttrs(sessionAuthToken)
                 .cookie(authCookie))
                 .andExpect(status().isOk());
