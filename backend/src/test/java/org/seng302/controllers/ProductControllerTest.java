@@ -57,8 +57,7 @@ class ProductControllerTest {
     private User ownerUser;
     private User bystanderUser;
     private User administratorUser;
-    private Image image1;
-    private Image image2;
+
 
     /**
      * This method creates an authentication code for sessions and cookies.
@@ -110,8 +109,8 @@ class ProductControllerTest {
      * @return The product with images added
      */
     private Product addImagesToProduct(Product product) {
-        image1 = new Image("abc.jpg", "abc_thumbnail.jpg");
-        image2 = new Image("apple.jpg", "apple_thumbnail.jpg");
+        Image image1 = new Image("abc.jpg", "abc_thumbnail.jpg");
+        Image image2 = new Image("apple.jpg", "apple_thumbnail.jpg");
         image1 = imageRepository.save(image1);
         image2 = imageRepository.save(image2);
         product.addImage(image1);
@@ -955,6 +954,19 @@ class ProductControllerTest {
      */
     @Test
     public void makeImagePrimary_valid_sets_image_primary() throws Exception {
+        setCurrentUser(ownerUser.getUserID());
+        addSeveralProductsToACatalogue();
+        Product product = testBusiness1.getCatalogue().get(0); // get product 1
+        product = addImagesToProduct(product);
+        Image image1 = product.getProductImages().get(0);
+        Image image2 = product.getProductImages().get(1);
+        mockMvc.perform(
+                put(String.format("/businesses/%d/products/%s/images/%d/makeprimary", testBusiness1.getId(), product.getProductCode(), image2.getID()))
+                .sessionAttrs(sessionAuthToken)
+                .cookie(authCookie))
+                .andExpect(status().isOk());
+        product = productRepository.findByProductCode(product.getProductCode()).get();
+        assertEquals(image2.getID(), product.getProductImages().get(0).getID());
 
     }
 
