@@ -54,7 +54,7 @@ describe('ProductImageUploader.vue', () => {
       components: { ProductImageUploader },
       template: `
       <div data-app>
-        <ProductImageUploader v-model="showImageUploaderForm" :businessId="100" productId="PRODUCT-ID"/>
+        <ProductImageUploader v-model="showImageUploaderForm" :businessId="100" productCode="PRODUCT-ID"/>
       </div>`,
     });
 

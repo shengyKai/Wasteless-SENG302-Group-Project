@@ -140,7 +140,7 @@ export default {
       this.isLoading = true;
       this.errorMessage = undefined;
 
-      let response = await uploadProductImage(this.businessId, this.productId, this.file);
+      let response = await uploadProductImage(this.businessId, this.productCode, this.file);
 
       this.isLoading = false;
       if (response !== undefined) {
