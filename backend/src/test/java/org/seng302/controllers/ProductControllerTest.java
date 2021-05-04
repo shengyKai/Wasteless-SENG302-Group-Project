@@ -101,7 +101,8 @@ class ProductControllerTest {
         businessRepository.deleteAll();
         testBusiness1 = new Business.Builder()
                 .withBusinessType("Accommodation and Food Services")
-                .withAddress(new Location())
+                .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
+                        "Canterbury,8041"))
                 .withDescription("Some description")
                 .withName("BusinessName")
                 .withPrimaryOwner(ownerUser)
@@ -245,6 +246,7 @@ class ProductControllerTest {
             assertEquals(storedProduct.getName(), productJSON.getAsString("name"));
             assertEquals(storedProduct.getDescription(), productJSON.getAsString("description"));
             assertEquals(storedProduct.getManufacturer(), productJSON.getAsString("manufacturer"));
+            assertEquals(storedProduct.getCountryOfSale(), productJSON.getAsString("countryOfSale"));
         }
     }
 
@@ -432,6 +434,7 @@ class ProductControllerTest {
             assertEquals(mockedResult.getManufacturer(), addedProduct.getManufacturer());
             assertEquals(mockedResult.getDescription(), addedProduct.getDescription());
             assertEquals(mockedResult.getRecommendedRetailPrice(), addedProduct.getRecommendedRetailPrice());
+            assertEquals(mockedResult.getCountryOfSale(), addedProduct.getCountryOfSale());
         }
     }
 
@@ -490,7 +493,8 @@ class ProductControllerTest {
         Business tempBusiness = businessRepository.save(
                 new Business.Builder()
                     .withBusinessType("Accommodation and Food Services")
-                    .withAddress(new Location())
+                    .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
+                        "Canterbury,8041"))
                     .withDescription("Some description2")
                     .withName("BusinessName2")
                     .withPrimaryOwner(ownerUser)
