@@ -255,8 +255,8 @@ public class ProductController {
      * @param imageId the ID of the image
      */
     @PutMapping("/businesses/{businessId}/products/{productId}/images/{imageId}/makeprimary")
-    void makeImagePrimary(@PathVariable Long businessId,@PathVariable Long productId, @PathVariable Long imageId,
-                          HttpServletRequest request, HttpServletResponse response ) {
+    void makeImagePrimary(@PathVariable Long businessId,@PathVariable String productId, @PathVariable Long imageId,
+                          HttpServletRequest request ) {
         AuthenticationTokenManager.checkAuthenticationToken(request);
         // get business + sanity
         Business business = getBusiness(businessId);
@@ -264,7 +264,7 @@ public class ProductController {
         business.checkSessionPermissions(request);
 
         // get product + sanity
-        Product product = getProduct(business, "productId");
+        Product product = getProduct(business, productId);
         // get image + sanity
         Image image = getImage(product, imageId);
 
