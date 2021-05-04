@@ -109,7 +109,6 @@ export default {
   // },
   async created() {
     await this.updateResults();
-    console.log(this.products);
   },
   methods: {
     /**

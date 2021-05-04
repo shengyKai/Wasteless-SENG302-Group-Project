@@ -20,7 +20,7 @@
             <template #activator="{ on: tooltip}">
               <v-btn
                 icon
-                v-if="i !== 0 && activeRole.type === 'business'"
+                v-if="i !== 0"
                 color="primary"
                 v-on="{...tooltip}"
                 @click="makeImagePrimary(item.id)"
@@ -54,17 +54,17 @@ export default {
      * @param imageId Id of the currently selected image
      */
     async makeImagePrimary(imageId) {
-      let response = await makeImagePrimary(this.activeRole.id, this.productId, imageId);
+      let response = await makeImagePrimary(this.businessId, this.productId, imageId);
       if (typeof response === 'string') {
         this.$store.commit('setError', response);
         return;
       }
-      //this.$router.go(); // refresh the page to see the changes
+      this.$router.go(); // refresh the page to see the changes
     },
   },
   computed: {
-    activeRole() {
-      return this.$store.state.activeRole;
+    businessId() {
+      return this.$route.params.id;
     }
   }
 };
