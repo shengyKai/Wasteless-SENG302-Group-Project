@@ -31,6 +31,20 @@
             </template>
             <span> Make Primary Image </span>
           </v-tooltip>
+          <v-tooltip bottom >
+            <template #activator="{ on: tooltip}">
+              <v-btn
+                icon
+                color="error"
+                v-on="{...tooltip}"
+                @click="deleteImage(item.id)"
+                ref="deleteImageButton"
+              >
+                <v-icon>mdi-delete</v-icon>
+              </v-btn>
+            </template>
+            <span> Delete Image </span>
+          </v-tooltip>
         </v-carousel-item>
       </v-carousel>
     </template>
@@ -52,9 +66,16 @@ export default {
      * Sets the currently selected image as the primary image.
      * @param imageId Id of the currently selected image
      */
-    async makeImagePrimary(imageId) {
+    makeImagePrimary(imageId) {
       this.$emit('change-primary-image', imageId);
     },
+    /**
+     * Deletes the provided image
+     * @param imageId Image to delete
+     */
+    deleteImage(imageId) {
+      this.$emit('delete-image', imageId);
+    }
   },
 };
 </script>
