@@ -444,6 +444,25 @@ export async function uploadProductImage(businessId: number, productCode: string
 }
 
 /**
+ * Sets an image as the primary image for a product
+ * @param businessId The ID of the business that owns the product
+ * @param productId The ID of the product that has the image
+ * @param imageId The ID of the image
+ */
+export async function makeImagePrimary(businessId: number, productId: number, imageId: number) : Promise<MaybeError<undefined>> {
+  try {
+    await instance.put(`/businesses/${businessId}/products/${productId}/images/${imageId}/makeprimary`);
+  } catch ( error ) {
+    let status: number | undefined = error.response?.status;
+    if (status === undefined) return 'Failed to reach backend';
+    if (status === 401) return 'Missing/Invalid access token';
+    if (status === 403) return 'Operation not permitted';
+    if (status === 406) return 'Product/Business not found';
+  }
+  return undefined;
+}
+
+/**
  * Fetches a business with the given id.
  *
  * @param businessId Business id to fetch

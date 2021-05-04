@@ -15,21 +15,57 @@
         hide-delimiters
       >
         <!-- iterate through each photo in productImages -->
-        <v-carousel-item v-for="(item, i) in productImages" :key="i" :src="item.filename" />
+        <v-carousel-item v-for="(item, i) in productImages" :key="i" :src="item.filename" >
+          <v-tooltip bottom >
+            <template #activator="{ on: tooltip}">
+              <v-btn
+                icon
+                v-if="i !== 0"
+                color="primary"
+                v-on="{...tooltip}"
+                @click="makeImagePrimary(item.id)"
+                ref="makePrimaryImageButton"
+              >
+                <v-icon>mdi-eye-plus</v-icon>
+              </v-btn>
+            </template>
+            <span> Make Primary Image </span>
+          </v-tooltip>
+        </v-carousel-item>
       </v-carousel>
     </template>
   </v-dialog>
 </template>
 <script>
+import {makeImagePrimary} from '@/api/internal';
 export default {
   name: "ProductImageCarousel",
   //pass in productImages from parent compoenent
-  props: ["productImages"],
+  props: ["productImages", "productId"],
   data() {
     return {
       // if dialog is false, the popup does not appear.
       dialog: false
     };
+  },
+  methods: {
+    /**
+     * Sets the currently selected image as the primary image.
+     * @param imageId Id of the currently selected image
+     */
+    async makeImagePrimary(imageId) {
+      let response = await makeImagePrimary(this.activeRole.id, this.productId, imageId);
+      if (typeof response === 'string') {
+        this.$store.commit('setError', response);
+        return;
+      }
+      this.$router.go(); // refresh the page to see the changes
+    }
+  },
+  computed: {
+    activeRole() {
+      return this.$store.state.activeRole;
+    }
   }
 };
 </script>

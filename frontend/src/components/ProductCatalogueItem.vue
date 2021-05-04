@@ -4,7 +4,7 @@
       <v-row>
         <v-col cols="auto" md="3" sm="12">
           <!-- feed the productImages into the carousel child component -->
-          <ProductImageCarousel :productImages="product.images" />
+          <ProductImageCarousel :productImages="product.images" :productId="product.id" />
         </v-col>
         <v-col>
           <v-row>
