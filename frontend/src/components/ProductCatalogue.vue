@@ -41,7 +41,7 @@
       <!--users would produce the results for each page, and then it will show each result with
       SearchResultItem-->
       <template v-for="product in products">
-        <ProductCatalogueItem :key="product.id" :product="product"/>
+        <ProductCatalogueItem :businessId="businessId" :key="product.id" :product="product"/>
       </template>
     </v-list>
     <!-- <v-pagination
@@ -86,6 +86,7 @@ export default {
        * Number of results per a result page
        */
       resultsPerPage: 10,
+      businessId: null
     };
   },
   // computed: {
@@ -116,14 +117,14 @@ export default {
      * The page index, results per page, order by and reverse variables notify this function.
      */
     async updateResults() {
-      const id = parseInt(this.$route.params.id);
-      if (isNaN(id)) {
+      this.businessId = parseInt(this.$route.params.id);
+      if (isNaN(this.businessId)) {
         this.error = `Invalid business id "${this.$route.params.id}"`;
         return;
       }
 
       const value = await getProducts (
-        id,
+        this.businessId,
         this.currentPage,
         this.resultsPerPage,
         this.orderBy,
