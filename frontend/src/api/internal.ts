@@ -214,7 +214,7 @@ function isProductsArray(obj: any): obj is Product[] {
   }
   return true;
 }
-type OrderBy = 'userId' | 'relevance' | 'firstName' | 'middleName' | 'lastName' | 'nickname' | 'email' | 'address';
+type OrderBy = 'userId' | 'relevance' | 'firstName' | 'middleName' | 'lastName' | 'nickname' | 'email';
 
 /**
  * Sends a search query to the backend.

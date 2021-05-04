@@ -19,7 +19,7 @@ public class SearchHelper {
 
     private static final int defaultResultsPerPage = 15;
     // Todo: add city, region and country as order by options once Location and User tables have been linked.
-    private static final List<String> orderByOptions = new ArrayList<>(List.of("userID", "firstName", "middleName", "lastName", "nickname", "email", "address"));
+    private static final List<String> orderByOptions = new ArrayList<>(List.of("userID", "firstName", "middleName", "lastName", "nickname", "email"));
     private static final Logger logger = LogManager.getLogger(SearchHelper.class.getName());
 
     private enum PredicateType {

@@ -26,7 +26,6 @@
           { text: 'Last Name',   value: 'lastName'   },
           { text: 'Nickname',    value: 'nickname'   },
           { text: 'Email',       value: 'email'      },
-          { text: 'Address',     value: 'address'    },
         ]"
         prepend-inner-icon="mdi-sort-variant"
         label="Sort by"
