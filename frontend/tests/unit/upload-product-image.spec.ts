@@ -70,7 +70,7 @@ describe('ProductImageUploader.vue', () => {
       data() {
         return {
           showImageUploaderForm: true
-        }
+        };
       }
     });
 
