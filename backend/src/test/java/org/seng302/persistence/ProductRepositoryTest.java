@@ -8,6 +8,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.server.ResponseStatusException;
 
+import javax.persistence.EntityNotFoundException;
 import java.text.ParseException;
 import java.util.Arrays;
 
@@ -158,11 +159,10 @@ public class ProductRepositoryTest {
     /**
      * Checks that a product that does not exist cannot be retrieved.
      */
-    @Disabled
     @Test
     void getProduct_productDoesNotExist_406ResponseException() throws Exception {
-        testBusiness.removeFromCatalogue(testProduct);
-        testBusiness = businessRepository.save(testBusiness);
+        productRepository.delete(testProduct);
+        testBusiness = businessRepository.getBusinessById(testBusiness.getId());
         assertThrows(ResponseStatusException.class, () -> {
             productRepository.getProductByBusinessAndProductCode(testBusiness, testProduct.getProductCode());
         });

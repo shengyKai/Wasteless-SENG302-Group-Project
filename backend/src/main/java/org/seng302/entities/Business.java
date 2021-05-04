@@ -305,10 +305,9 @@ public class Business {
     /**
      * Removes the given product from the business's catalogue
      */
-    //TODO add unit tests
     public void removeFromCatalogue(Product product) throws Exception {
         if(!catalogue.remove(product)) {
-            throw new Exception("The product did not match any within the business's catalogue");
+            throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE,"The product did not match any within the business's catalogue");
         }
     }
 
