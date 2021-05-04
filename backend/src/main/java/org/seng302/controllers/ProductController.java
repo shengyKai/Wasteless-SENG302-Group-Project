@@ -232,7 +232,6 @@ public class ProductController {
         product.removeProductImage(image);
         imageRepository.delete(image);
         storageService.deleteOne(image.getFilename());
-        storageService.deleteOne(image.getFilenameThumbnail());
 
         productRepository.save(product);
     }
