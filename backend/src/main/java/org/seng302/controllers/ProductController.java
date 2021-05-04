@@ -295,9 +295,9 @@ public class ProductController {
             validateImage(file);
 
             String filename = UUID.randomUUID().toString();
-            if (file.getContentType().equals("image/jpeg")) {
+            if ("image/jpeg".equals(file.getContentType())) {
                 filename += ".jpg";
-            } else if (file.getContentType().equals("image/png")) {
+            } else if ("image/png".equals(file.getContentType())) {
                 filename += ".png";
             } else {
                 assert false; // We've already validated the image type so this should not be possible.
@@ -310,7 +310,7 @@ public class ProductController {
             productRepository.save(product); 
             storageService.store(file, filename);             //store the file using storageService
 
-            return new ResponseEntity<Void>(HttpStatus.CREATED);
+            return new ResponseEntity<>(HttpStatus.CREATED);
         } catch (Exception e) {
             logger.error(e.getMessage());
             throw e;
