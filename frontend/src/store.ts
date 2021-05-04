@@ -1,6 +1,8 @@
 import {User,  Business, getUser, login} from './api/internal';
 import Vuex, { Store, StoreOptions } from 'vuex';
-import { COOKIE, deleteCookie, isTesting, setCookie } from './utils';
+import { COOKIE, deleteCookie, getCookie, isTesting, setCookie } from './utils';
+
+type UserRole = { type: "user" | "business", id: number};
 
 export type StoreData = {
   /**
@@ -14,7 +16,7 @@ export type StoreData = {
    * If acting as user then the user is shown content related to their personal account.
    * If acting as a business then the user is shown content related to their business.
    */
-  activeRole: { type: "user" | "business", id: number} | null,
+  activeRole: UserRole | null,
 
   /**
    * The global error message that is displayed at the top of the screen.
@@ -50,7 +52,6 @@ function createOptions(): StoreOptions<StoreData> {
         state.user = payload;
 
         // Ensures that when we log in we always have a role.
-        // Maybe it will be worth considering in the future persistently remembering the previous role
         state.activeRole = { type: "user", id: payload.id };
 
         // If the payload contains a user ID, user is now logged in. Set their session cookie.
@@ -122,6 +123,17 @@ function createOptions(): StoreOptions<StoreData> {
        */
       hideCreateProduct(state) {
         state.createProductDialogBusiness = undefined;
+      },
+
+      /**
+       * Sets the current user role
+       *
+       * @param state Current store state
+       * @param role Role to act as
+       */
+      setRole(state, role: UserRole) {
+        setCookie('role', JSON.stringify(role));
+        state.activeRole = role;
       }
     },
     getters: {
@@ -133,14 +145,50 @@ function createOptions(): StoreOptions<StoreData> {
       },
     },
     actions: {
-      getUser (context, userId) {
-        return getUser(userId).then((response) => {
-          if (typeof response === 'string') {
-            context.commit('setError', response);
-            return;
+      /**
+       * Attempts to automatically log in the provided user id with the current authentication cookies.
+       * Will also set the current role to the previously selected role.
+       *
+       * @param context The store context
+       * @param userId The userId to try to login as
+       */
+      async autoLogin(context, userId: number) {
+        const response = await getUser(userId);
+        if (typeof response === 'string') {
+          context.commit('setError', response);
+          return;
+        }
+        context.commit('setUser', response);
+
+        let rawRole = getCookie('role');
+        if (rawRole !== null) {
+          rawRole = rawRole.split('=')[1];
+
+          const role: UserRole = JSON.parse(rawRole);
+          // We should already be logged in at this point, so this should be valid
+          const user = context.state.user!;
+
+          if (role.type === 'user') {
+            if (user.id === role.id) {
+              context.state.activeRole = role;
+            } else {
+              console.warn('Previous role id does not match current user id');
+            }
+          } else if (role.type === 'business') {
+            let success = false;
+            for (const business of (user.businessesAdministered || [])) {
+              if (business.id !== role.id) continue;
+              context.state.activeRole = role;
+              success = true;
+              break;
+            }
+            if (!success) {
+              console.warn(`Previous role id does not match a administered business id=${role.id}`);
+            }
+          } else {
+            console.error(`Unknown role type: "${role.type}"`);
           }
-          context.commit('setUser', response);
-        });
+        }
       },
       /**
        * Attempts to log in the given user.
