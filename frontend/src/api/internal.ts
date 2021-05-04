@@ -141,7 +141,7 @@ function isUser(obj: any): obj is User {
   if (obj.nickname !== undefined && typeof obj.nickname !== 'string') return false;
   if (obj.bio !== undefined && typeof obj.bio !== 'string') return false;
   if (typeof obj.email !== 'string') return false;
-  if (typeof obj.dateOfBirth !== 'string') return false;
+  if (obj.dateOfBirth !== undefined && typeof obj.dateOfBirth !== 'string') return false;
   if (obj.phoneNumber !== undefined && typeof obj.phoneNumber !== 'string') return false;
   if (!isLocation(obj.homeAddress)) return false;
   if (obj.created !== undefined && typeof obj.created !== 'string') return false;
