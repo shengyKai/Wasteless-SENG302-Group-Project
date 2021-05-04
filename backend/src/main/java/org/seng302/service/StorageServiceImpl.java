@@ -123,4 +123,20 @@ public class StorageServiceImpl implements StorageService {
         }
         return outputStream.toByteArray();
     }
+
+    /**
+     * Deletes a single file from the disk
+     * @param filename Filename to delete
+     */
+    @Override
+    public void deleteOne(String filename) {
+        if (filename.isEmpty() || filename.isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Filename not given for deletion");
+        }
+        Path file = root.resolve(filename);
+        file.toFile().delete();
+    }
+
+
+
 }
