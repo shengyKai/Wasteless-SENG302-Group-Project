@@ -83,7 +83,7 @@ public class DemoController {
                     .withBusinessType("Accommodation and Food Services")
                     .withDescription("DESCRIPTION")
                     .withName("BUSINESS_NAME")
-                    .withAddress(new Location())
+                    .withAddress(Location.covertAddressStringToLocation("108,Albert Road,Ashburton,Christchurch,New Zealand,Canterbury,8041"))
                     .withPrimaryOwner(user)
                     .build();
             business = businessRepository.save(business);
