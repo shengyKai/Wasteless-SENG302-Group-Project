@@ -4,7 +4,7 @@ Feature: Product
     Given the business "Biz" exists
     When the product code "ABCD" and the name "Exploding Pineapples" is provided
     Then the product "ABCD" exists for the business
-    And the time created is set to now
+    And the time of "ABCD" created is set to now
     And the other fields are null
 
   Scenario: All data is given
@@ -12,7 +12,7 @@ Feature: Product
     When the product code "ABCD" and the name "Exploding Pineapples" is provided
     And the description "Monkeys in planes keep dropping them", manufacturer "NinjaKiwi", and retail price "400" is provided
     Then the product "ABCD" exists for the business
-    And the time created is set to now
+    And the time of "ABCD" created is set to now
     And all fields have a value
 
   Scenario: Compulsory field is invalid

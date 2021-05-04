@@ -92,8 +92,9 @@ public class ProductStepDefinition {
         Assertions.assertNotNull(productRepository.findByBusinessAndProductCode(business, prodCode));
     }
 
-    @And("the time created is set to now")
-    public void timeSetNow() {
+    @And("the time of {string} created is set to now")
+    public void timeSetNow(String prodCode) {
+        product = productRepository.findByBusinessAndProductCode(business, prodCode);
         LocalDateTime created = LocalDateTime.ofInstant(product.getCreated().toInstant(),
                 ZoneId.systemDefault());
         assert(ChronoUnit.SECONDS.between(LocalDateTime.now(), created) < 20);
