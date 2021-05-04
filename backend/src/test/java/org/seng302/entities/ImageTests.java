@@ -1,9 +1,6 @@
 package org.seng302.entities;
 
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.*;
 import org.seng302.persistence.ImageRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -366,6 +363,7 @@ public class ImageTests {
     /**
      * Checks that there cannot be two images with the same thumbnail filename within the database.
      */
+    @Disabled // This is disabled because we currently do not generate image thumbnails, so all thumbnail images are null.
     @Test
     void createImage_ViolateUniqueFilenameThumbnail_BadRequest() {
         try {

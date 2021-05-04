@@ -10,17 +10,29 @@ import org.seng302.persistence.BusinessRepository;
 import org.seng302.persistence.ProductRepository;
 import org.seng302.persistence.UserRepository;
 import org.seng302.tools.AuthenticationTokenManager;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Class for API endpoints used for developing/demoing application. Remove from release.
@@ -120,5 +132,4 @@ public class DemoController {
         }
         return userList;
     }
-
 }

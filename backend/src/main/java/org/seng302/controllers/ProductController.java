@@ -5,22 +5,29 @@ import net.minidev.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.seng302.entities.Business;
+import org.seng302.entities.Image;
 import org.seng302.entities.Product;
 import org.seng302.exceptions.BusinessNotFoundException;
 import org.seng302.persistence.BusinessRepository;
+import org.seng302.persistence.ImageRepository;
 import org.seng302.persistence.ProductRepository;
+import org.seng302.service.StorageService;
 import org.seng302.tools.AuthenticationTokenManager;
 import org.seng302.tools.SearchHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 /**
  * This class handles requests for retrieving and saving products
@@ -30,12 +37,16 @@ public class ProductController {
 
     private final ProductRepository productRepository;
     private final BusinessRepository businessRepository;
+    private final StorageService storageService;
+    private final ImageRepository imageRepository;
     private static final Logger logger = LogManager.getLogger(ProductController.class.getName());
 
     @Autowired
-    public ProductController(ProductRepository productRepository, BusinessRepository businessRepository) {
+    public ProductController(ProductRepository productRepository, BusinessRepository businessRepository, StorageService storageService, ImageRepository imageRepository) {
         this.productRepository = productRepository;
         this.businessRepository = businessRepository;
+        this.storageService = storageService;
+        this.imageRepository = imageRepository;
     }
 
     /**
@@ -131,7 +142,7 @@ public class ProductController {
      */
     @GetMapping("/businesses/{id}/products/count")
     private JSONObject retrieveCatalogueCount(@PathVariable Long id,
-                                      HttpServletRequest request) {
+                                HttpServletRequest request) {
 
         AuthenticationTokenManager.checkAuthenticationToken(request);
 
@@ -176,7 +187,7 @@ public class ProductController {
             }
             String productCode = productInfo.getAsString("id");
 
-            if (productRepository.findByBusinessAndProductCode(business, productCode) != null) {
+            if (productRepository.findByBusinessAndProductCode(business, productCode).isPresent()) {
                 throw new ResponseStatusException(HttpStatus.CONFLICT, "Product already exists with product code in this catalogue \"" + productCode + "\"");
             }
 
@@ -196,6 +207,40 @@ public class ProductController {
             throw error;
         }
     }
+
+    /**
+     * Matches up the businessID, productID and imageID to find the image of a product to be deleted. Only business
+     * owners can delete product images and they must be within their own product catalogue.
+     * @param businessId the ID of the business
+     * @param productId the ID of the product
+     * @param imageId the ID of the image
+     */
+    @DeleteMapping("/businesses/{businessId}/products/{productId}/images/{imageId}")
+    void deleteProductImage(@PathVariable Long businessId, @PathVariable String productId, @PathVariable Long imageId,
+                            HttpServletRequest request) {
+        AuthenticationTokenManager.checkAuthenticationToken(request);
+        logger.info(String.format("Deleting image with id %d from the product %s within the business's catalogue %d",
+                imageId, productId, businessId));
+
+        Business business = getBusiness(businessId);
+        if (!ProductController.checkProductFromCodeExists(productRepository, productId)) {
+            throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "the product does not exist");
+        }
+        Image image = imageRepository.getImage(imageId);
+
+        business.checkSessionPermissions(request);
+
+        //TODO Add DGAA check
+        if (!Business.checkProductExistsWithinCatalogue(business, productId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "The product is not within the business's catalogue");
+        }
+
+        Product product = productRepository.getProduct(business, productId);
+
+        product.setProductImage(null);
+        productRepository.save(product);
+    }
+
 
     /**
      * Checks that the provided JSON object exists and has all the fields that are required
@@ -222,6 +267,7 @@ public class ProductController {
      * @param businessId The id of the business to retrieve
      * @return The business matching the given Id
      */
+    //TODO Needs moved to the business repository
     private Business getBusiness(Long businessId) {
         // check business exists
         Optional<Business> business = businessRepository.findById(businessId);
@@ -230,5 +276,72 @@ public class ProductController {
                     "The given business does not exist");
         }
         return business.get();
+    }
+
+
+    @PostMapping("/businesses/{businessId}/products/{productCode}/images")
+    public ResponseEntity<Void> uploadImage(@PathVariable Long businessId, @PathVariable String productCode, @RequestParam("file") MultipartFile file, HttpServletRequest request) throws IOException {
+        try {
+            AuthenticationTokenManager.checkAuthenticationToken(request);
+            logger.info(String.format("Adding product image to business (businessId=%d, productCode=%s).", businessId, productCode));
+            Business business = getBusiness(businessId);
+
+
+            business.checkSessionPermissions(request);
+
+            // Will throw 406 response status exception if product does not exist
+            Product product = productRepository.getProduct(business, productCode);
+
+            validateImage(file);
+
+            String filename = UUID.randomUUID().toString();
+            if ("image/jpeg".equals(file.getContentType())) {
+                filename += ".jpg";
+            } else if ("image/png".equals(file.getContentType())) {
+                filename += ".png";
+            } else {
+                assert false; // We've already validated the image type so this should not be possible.
+            }
+
+            Image image = new Image(null, null);
+            image.setFilename(filename);
+            image = imageRepository.save(image);
+            product.setProductImage(image);
+            productRepository.save(product); 
+            storageService.store(file, filename);             //store the file using storageService
+
+            return new ResponseEntity<>(HttpStatus.CREATED);
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            throw e;
+        }
+
+
+
+    }
+    public void validateImage(MultipartFile file) {
+
+            if(file.getSize() >= 1048575) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Image size exceed 1048575 bytes.");
+            }
+            else if(!(file.getContentType().equals("image/jpeg") || file.getContentType().equals("image/png"))) {
+
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid image format. Must be jpeg or png");
+            }
+    }
+    /**
+     * Checks if a product with a given product code exists within the database.
+     * @param productRepository the database that holds product objects
+     * @param productCode the code of the product
+     * @return true if the product that matches the product code exists within the database, false otherwise
+     */
+    //TODO add tests
+    public static boolean checkProductFromCodeExists(ProductRepository productRepository, String productCode) {
+        for (Product product: productRepository.findAll()) {
+            if (product.getProductCode().equals(productCode)) {
+                return true;
+            }
+        }
+        return false;
     }
 }
