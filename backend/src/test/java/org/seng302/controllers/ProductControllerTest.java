@@ -564,7 +564,7 @@ class ProductControllerTest {
         )) {
             setCurrentUser(ownerUser.getUserID());
             var productInfo = generateProductCreationInfo();
-
+            System.out.println(String.format("/businesses/%d/products", testBusiness1.getId()));
             assertDoesNotThrow(() -> mockMvc.perform(post(String.format("/businesses/%d/products", testBusiness1.getId()))
                     .content(productInfo.toString())
                     .sessionAttrs(sessionAuthToken)

@@ -187,7 +187,7 @@ public class ProductController {
             }
             String productCode = productInfo.getAsString("id");
 
-            if (productRepository.findByBusinessAndProductCode(business, productCode) != null) {
+            if (productRepository.findByBusinessAndProductCode(business, productCode).isPresent()) {
                 throw new ResponseStatusException(HttpStatus.CONFLICT, "Product already exists with product code in this catalogue \"" + productCode + "\"");
             }
 

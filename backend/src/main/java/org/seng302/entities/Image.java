@@ -8,10 +8,6 @@ import javax.persistence.*;
 import java.util.Arrays;
 import java.util.List;
 
-@Table( uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"filename", "filename_thumbnail"})
-})
-
 @Entity
 public class Image {
 
