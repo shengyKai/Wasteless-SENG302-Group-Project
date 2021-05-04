@@ -363,7 +363,6 @@ public class User extends Account {
         attributeMap.put("firstName",   getFirstName());
         attributeMap.put("lastName",    getLastName());
         attributeMap.put("email",       getEmail());
-        attributeMap.put("dateOfBirth", getDob().toString());
         attributeMap.put("created",     getCreated().toString());
         if (getMiddleName() != null) { attributeMap.put("middleName",  getMiddleName()); }
         if (getNickname() != null) { attributeMap.put("nickname",    getNickname()); }
