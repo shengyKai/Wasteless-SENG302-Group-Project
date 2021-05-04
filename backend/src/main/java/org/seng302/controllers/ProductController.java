@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 /**
  * This class handles requests for retrieving and saving products
@@ -279,7 +280,7 @@ public class ProductController {
 
 
     @PostMapping("/businesses/{businessId}/products/{productCode}/images")
-    public ResponseEntity uplaodImage(@PathVariable Long businessId, @PathVariable String productCode, @RequestParam("file") MultipartFile file, HttpServletRequest request) throws IOException {
+    public ResponseEntity<Void> uploadImage(@PathVariable Long businessId, @PathVariable String productCode, @RequestParam("file") MultipartFile file, HttpServletRequest request) throws IOException {
         try {
             AuthenticationTokenManager.checkAuthenticationToken(request);
             logger.info(String.format("Adding product image to business (businessId=%d, productCode=%s).", businessId, productCode));
@@ -291,24 +292,25 @@ public class ProductController {
             // Will throw 406 response status exception if product does not exist
             Product product = productRepository.getProduct(business, productCode);
 
-            // TODO This is very ugly, talk to connor about validation on image creation
             validateImage(file);
 
-            Image image = new Image(null, null);
-            image.setFilename(file.getOriginalFilename());
+            String filename = UUID.randomUUID().toString();
+            if (file.getContentType().equals("image/jpeg")) {
+                filename += ".jpg";
+            } else if (file.getContentType().equals("image/png")) {
+                filename += ".png";
+            } else {
+                assert false; // We've already validated the image type so this should not be possible.
+            }
 
+            Image image = new Image(null, null);
+            image.setFilename(filename);
             image = imageRepository.save(image);
             product.setProductImage(image);
-            productRepository.save(product);
-            // long imageID = image.getID();       // parsing this into string and add this into file name
-            
-            // String fileID = String.valueOf(imageID);
-            // String filename = file.getName();
-            // filename += fileID;                     // ugly_coconut'imageID', put this into the store param?
-            // logger.info(file.getSize());               //if its too big, then we throw something   
-            storageService.store(file);             //store the file using storageService
+            productRepository.save(product); 
+            storageService.store(file, filename);             //store the file using storageService
 
-            return new ResponseEntity(HttpStatus.CREATED);
+            return new ResponseEntity<Void>(HttpStatus.CREATED);
         } catch (Exception e) {
             logger.error(e.getMessage());
             throw e;

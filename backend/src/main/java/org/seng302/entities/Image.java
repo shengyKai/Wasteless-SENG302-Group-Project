@@ -22,7 +22,7 @@ public class Image {
     @Column(name = "filename", nullable = false, unique = true)
     private String filename;
 
-    @Column(name = "filename_thumbnail", nullable = true, unique = true)
+    @Column(name = "filename_thumbnail", nullable = true, unique = false)
     private String filenameThumbnail;
 
     /**
