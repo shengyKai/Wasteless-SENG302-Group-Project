@@ -15,7 +15,7 @@
         hide-delimiters
       >
         <!-- iterate through each photo in productImages -->
-        <v-carousel-item v-for="(item, i) in productImages" :key="i" :src="item.filename" />
+        <v-carousel-item v-for="(item, i) in productImages" :key="i" :src="serverUrl + productImages[i].filename" />
       </v-carousel>
     </template>
   </v-dialog>
