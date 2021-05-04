@@ -93,7 +93,7 @@ export default {
   async created() {
     const cookie = getCookie(COOKIE.USER);
     if (cookie) {
-      await this.$store.dispatch('getUser', cookie.split('=')[1]);
+      await this.$store.dispatch('autoLogin', cookie.split('=')[1]);
       if (this.$route.path === '/login') this.$router.push('/profile');
       this.loading = false;
     } else {
