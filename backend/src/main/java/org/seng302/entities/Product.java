@@ -263,6 +263,7 @@ public class Product {
         object.put("recommendedRetailPrice", recommendedRetailPrice);
         object.put("created", created);
         object.put("countryOfSale", countryOfSale);
+        object.put("images", productImages);
         return object;
     }
 

@@ -20,7 +20,7 @@
             <template #activator="{ on: tooltip}">
               <v-btn
                 icon
-                v-if="i !== 0"
+                v-if="i !== 0 && activeRole.type === 'business'"
                 color="primary"
                 v-on="{...tooltip}"
                 @click="makeImagePrimary(item.id)"
@@ -60,7 +60,7 @@ export default {
         return;
       }
       //this.$router.go(); // refresh the page to see the changes
-    }
+    },
   },
   computed: {
     activeRole() {

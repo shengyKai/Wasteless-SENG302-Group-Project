@@ -107,8 +107,9 @@ export default {
   //     return`Displaying ${pageStartIndex + 1} - ${pageEndIndex} of ${this.totalResults} results`;
   //   },
   // },
-  created() {
-    this.updateResults();
+  async created() {
+    await this.updateResults();
+    console.log(this.products);
   },
   methods: {
     /**

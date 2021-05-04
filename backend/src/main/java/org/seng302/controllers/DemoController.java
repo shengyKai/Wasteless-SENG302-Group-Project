@@ -98,6 +98,13 @@ public class DemoController {
                 .withRecommendedRetailPrice("9000.03")
                 .withBusiness(business)
                 .build();
+        product = productRepository.save(product);
+        Image image = new Image("https://i.picsum.photos/id/376/200/200.jpg?hmac=lM2SnAPO9nDnPBP5FjJOFIJSaRoPKUJRovk6goT_nA4", "https://i.picsum.photos/id/376/200/200.jpg?hmac=lM2SnAPO9nDnPBP5FjJOFIJSaRoPKUJRovk6goT_nA4");
+        image = imageRepository.save(image);
+        product.addImage(image);
+        Image image2 = new Image("https://i.picsum.photos/id/650/200/200.jpg?hmac=gu3C13pBxCSHokbnumczMYlmWRLt3CFGx1sDaPpfRnk", "https://i.picsum.photos/id/650/200/200.jpg?hmac=gu3C13pBxCSHokbnumczMYlmWRLt3CFGx1sDaPpfRnk");
+        image2 = imageRepository.save(image2);
+        product.addImage(image2);
         productRepository.save(product);
     }
 
