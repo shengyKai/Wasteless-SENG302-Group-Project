@@ -174,7 +174,7 @@ public class ProductController {
         try {
             AuthenticationTokenManager.checkAuthenticationToken(request);
             logger.info(String.format("Adding product to business (businessId=%d).", id));
-            Business business = getBusiness(id);
+            Business business = businessRepository.getBusinessById(id);
 
             business.checkSessionPermissions(request);
 
@@ -217,11 +217,11 @@ public class ProductController {
         logger.info(String.format("Deleting image with id %d from the product %s within the business's catalogue %d",
                 imageId, productId, businessId));
 
-        Business business = getBusiness(businessId); // get the business + sanity checks
+        Business business = businessRepository.getBusinessById(businessId); // get the business + sanity checks
 
-        Product product = getProduct(business, productId); // get the product + sanity checks
+        Product product = productRepository.getProductByBusinessAndProductCode(business, productId); // get the product + sanity checks
 
-        Image image = getImage(product, imageId); // get the image + sanity checks
+        Image image = imageRepository.getImageByProductAndId(product, imageId); // get the image + sanity checks
 
         business.checkSessionPermissions(request); // Can this user do this action
 
@@ -261,14 +261,14 @@ public class ProductController {
     void makeImagePrimary(@PathVariable Long businessId,@PathVariable String productId, @PathVariable Long imageId,
                           HttpServletRequest request ) {
         // get business + sanity
-        Business business = getBusiness(businessId);
+        Business business = businessRepository.getBusinessById(businessId);
         // check user priv
         business.checkSessionPermissions(request);
 
         // get product + sanity
-        Product product = getProduct(business, productId);
+        Product product = productRepository.getProductByBusinessAndProductCode(business, productId);
         // get image + sanity
-        Image image = getImage(product, imageId);
+        Image image = imageRepository.getImageByProductAndId(product, imageId);
 
         List<Image> images = product.getProductImages(); // get the images so we can manipulate them
         // If the given image is already the primary image, return
@@ -283,60 +283,6 @@ public class ProductController {
         logger.info(String.format("Set Image %d of product \"%s\" as the primary image", image.getID(), product.getName()));
     }
 
-    /**
-     * Gets a business from the database matching a given Business Id
-     * Performs sanity checks to ensure the business is not null
-     * Throws ResponseStatusException if business does not exist
-     * @param businessId The id of the business to retrieve
-     * @return The business matching the given Id
-     */
-    //TODO Needs moved to the business repository
-    private Business getBusiness(Long businessId) {
-        // check business exists
-        Optional<Business> business = businessRepository.findById(businessId);
-        if (!business.isPresent()) {
-            throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE,
-                    "The given business does not exist");
-        }
-        return business.get();
-    }
 
 
-    /**
-     * Gets a product from the repository.
-     * If the product does not exist then a 406 Not Acceptable is thrown
-     * If the product belongs to another business, a 403 Forbidden is thrown
-     * @param business The business that has the product
-     * @param productId The ID of the product
-     * @return A product or ResponseStatusException
-     */
-    private Product getProduct(Business business, String productId) {
-        Optional<Product> product = productRepository.findByProductCode(productId);
-        if (!product.isPresent()) {
-            throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE,
-                    "The given product does not exist");
-        }
-        if (product.get().getBusiness().getId() != business.getId()) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-                    "You cannot modify this product");
-        }
-        return product.get();
-    }
-
-    /**
-     * Gets an image for a product by ID
-     * If the image does not exists, a 406 Not Acceptable is thrown
-     * @param product The product
-     * @param imageId The ID of the image to fetch
-     * @return An Image or ResponseStatusException
-     */
-    private Image getImage(Product product, Long imageId) {
-        Optional<Image> image = imageRepository.findById(imageId);
-        if (!image.isPresent() || !product.getProductImages().contains(image.get())) {
-            throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE,
-                    "The given image does not exist for this product");
-        }
-        return image.get();
-
-    }
 }
