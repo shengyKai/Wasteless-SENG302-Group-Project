@@ -87,14 +87,16 @@ public class AuthenticationTokenManager {
             throw accessTokenException;
         }
         Cookie[] requestCookies = request.getCookies();
-        for (Cookie cookie : requestCookies) {
-            if (cookie.getName().equals(AUTH_TOKEN_NAME)) {
-                if (cookie.getValue().equals(session.getAttribute(AUTH_TOKEN_NAME))) {
-                    return;
-                } else {
-                    AccessTokenException accessTokenException = new AccessTokenException("Invalid access token.");
-                    logger.error(accessTokenException.getMessage());
-                    throw accessTokenException;
+        if (requestCookies != null) {
+            for (Cookie cookie : requestCookies) {
+                if (cookie.getName().equals(AUTH_TOKEN_NAME)) {
+                    if (cookie.getValue().equals(session.getAttribute(AUTH_TOKEN_NAME))) {
+                        return;
+                    } else {
+                        AccessTokenException accessTokenException = new AccessTokenException("Invalid access token.");
+                        logger.error(accessTokenException.getMessage());
+                        throw accessTokenException;
+                    }
                 }
             }
         }

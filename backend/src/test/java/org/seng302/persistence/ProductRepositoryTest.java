@@ -70,7 +70,7 @@ public class ProductRepositoryTest {
                 .withDescription("Helps industries hopefully")
                 .withPrimaryOwner(testUser)
                 .build();
-        businessRepository.save(testBusiness);
+        testBusiness =  businessRepository.save(testBusiness);
 
         testImage = new Image("photo_of_connor.png", "photo_of_connor_thumbnail.png");
         imageRepository.save(testImage);
@@ -85,6 +85,7 @@ public class ProductRepositoryTest {
                 .build();
         testProduct.setProductImages(Arrays.asList(testImage));
         productRepository.save(testProduct);
+        testBusiness = businessRepository.save(testBusiness);
 
         testUser2 = new User.Builder()
                 .withFirstName("Ferguss")
@@ -107,7 +108,7 @@ public class ProductRepositoryTest {
                 .withDescription("Helps industries hopefully")
                 .withPrimaryOwner(testUser2)
                 .build();
-        businessRepository.save(testBusiness2);
+        testBusiness2 = businessRepository.save(testBusiness2);
 
         testProduct2 = new Product.Builder()
                 .withProductCode("PIECEOFFISHY69")
@@ -118,6 +119,7 @@ public class ProductRepositoryTest {
                 .withBusiness(testBusiness2)
                 .build();
         productRepository.save(testProduct2);
+        testBusiness2 = businessRepository.save(testBusiness2);
     }
 
     @BeforeEach
@@ -139,7 +141,7 @@ public class ProductRepositoryTest {
      */
     @Test
     void getProduct_productExists_getExpectedProduct() {
-        Product actualProduct = productRepository.getProduct(testBusiness, testProduct.getProductCode());
+        Product actualProduct = productRepository.getProductByBusinessAndProductCode(testBusiness, testProduct.getProductCode());
         assertEquals(testProduct.getProductCode(), actualProduct.getProductCode());
     }
 
@@ -149,7 +151,7 @@ public class ProductRepositoryTest {
     @Test
     void getProduct_productExistsInDifferentCatalogue_406ResponseException() {
         assertThrows(ResponseStatusException.class, () -> {
-            productRepository.getProduct(testBusiness2, testProduct.getProductCode());
+            productRepository.getProductByBusinessAndProductCode(testBusiness2, testProduct.getProductCode());
         });
     }
 
@@ -162,7 +164,7 @@ public class ProductRepositoryTest {
         testBusiness.removeFromCatalogue(testProduct);
         testBusiness = businessRepository.save(testBusiness);
         assertThrows(ResponseStatusException.class, () -> {
-            productRepository.getProduct(testBusiness, testProduct.getProductCode());
+            productRepository.getProductByBusinessAndProductCode(testBusiness, testProduct.getProductCode());
         });
     }
 }
