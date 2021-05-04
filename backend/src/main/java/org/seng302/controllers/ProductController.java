@@ -263,7 +263,7 @@ public class ProductController {
         try {
             AuthenticationTokenManager.checkAuthenticationToken(request);
             logger.info(String.format("Adding product image to business (businessId=%d, productCode=%s).", businessId, productCode));
-            Business business = getBusiness(businessId);
+            Business business = businessRepository.getBusinessById(businessId);
 
 
             business.checkSessionPermissions(request);
@@ -285,7 +285,7 @@ public class ProductController {
             Image image = new Image(null, null);
             image.setFilename(filename);
             image = imageRepository.save(image);
-            product.setProductImage(image);
+            product.addImage(image);
             productRepository.save(product); 
             storageService.store(file, filename);             //store the file using storageService
 

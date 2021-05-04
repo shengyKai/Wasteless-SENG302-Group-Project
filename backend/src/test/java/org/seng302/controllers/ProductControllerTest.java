@@ -1123,6 +1123,7 @@ class ProductControllerTest {
                 .cookie(authCookie))
                 .andExpect(status().isForbidden())
                 .andReturn();
+    }
     /**
      * Tests that using the make image primary method with a session that is not a business admin,
      * a 403 response is thrown

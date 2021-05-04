@@ -264,10 +264,7 @@ public class Product {
         object.put("recommendedRetailPrice", recommendedRetailPrice);
         object.put("created", created);
         JSONArray images = new JSONArray();
-        if (productImage != null) {
-            images.appendElement(productImage.constructJSONObject());
-        }
-        object.put("images", images);
+        object.put("images", productImages);
         object.put("countryOfSale", countryOfSale);
         object.put("images", productImages);
         return object;

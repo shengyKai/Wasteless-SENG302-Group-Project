@@ -25,6 +25,13 @@ public interface ProductRepository extends CrudRepository<Product, Long>{
 
 
         /**
+         *
+         * @param productCode
+         * @return a single product within the business's catalogue that matches the the code
+         *          * of the product
+         */
+        Optional<Product> findByProductCode(@Param("productCode") String productCode);
+        /**
          * Gets a product from the repository.
          * If the product does not exist then a 406 Not Acceptable is thrown
          * If the product belongs to another business, a 403 Forbidden is thrown
@@ -51,7 +58,7 @@ public interface ProductRepository extends CrudRepository<Product, Long>{
          * @param productCode the product code of the product
          * @return the product object that matches the business and product code
          */
-        default public Product getProduct(Business business, String productCode) {
+        default Product getProduct(Business business, String productCode) {
                 Optional<Product> product = findByBusinessAndProductCode(business, productCode);
                 if (product.isEmpty()) {
                         throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE,

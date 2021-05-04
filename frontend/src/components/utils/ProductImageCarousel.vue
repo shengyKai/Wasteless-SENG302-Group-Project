@@ -37,7 +37,6 @@
   </v-dialog>
 </template>
 <script>
-import {makeImagePrimary} from '@/api/internal';
 export default {
   name: "ProductImageCarousel",
   //pass in productImages from parent compoenent
@@ -54,18 +53,8 @@ export default {
      * @param imageId Id of the currently selected image
      */
     async makeImagePrimary(imageId) {
-      let response = await makeImagePrimary(this.businessId, this.productId, imageId);
-      if (typeof response === 'string') {
-        this.$store.commit('setError', response);
-        return;
-      }
-      this.$router.go(); // refresh the page to see the changes
+      this.$emit('change-primary-image', imageId);
     },
   },
-  computed: {
-    businessId() {
-      return this.$route.params.id;
-    }
-  }
 };
 </script>
