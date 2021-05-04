@@ -131,10 +131,6 @@ public class BusinessController {
      */
     @PutMapping("/businesses/{id}/makeAdministrator")
     public void makeAdmin(@RequestBody JSONObject userInfo, HttpServletRequest req, @PathVariable("id") Long businessId) {
-        logger.info("Making user an admin of business");
-        logger.info("Business id: " + businessId.toString());
-        logger.info("User info:");
-        logger.info(userInfo.toString());
         try {
             AuthenticationTokenManager.checkAuthenticationToken(req); // Ensure a user is logged in
             Business business = getBusiness(businessId); // Get the business
