@@ -43,14 +43,27 @@ public class StorageServiceImpl implements StorageService {
     @Override
     public void store(MultipartFile file) {
         try {
-            Files.copy(file.getInputStream(), this.root.resolve(file.getOriginalFilename()));
-            logger.info(file.getOriginalFilename());    //Someone_Big_Banana
-            logger.info(file.getOriginalFilename());
-            logger.info(file.getOriginalFilename());
-            logger.info(file.getName());                //File
-            logger.info(file.getResource());
-            logger.info(file.getContentType());
-            logger.info(file.getInputStream());
+            //Validation of image
+            if ((file.getContentType().equals("image/jpeg")) || (file.getContentType().equals("image/png"))) {
+                Files.copy(file.getInputStream(), this.root.resolve(file.getOriginalFilename()));
+                logger.info(file.getOriginalFilename());    //Someone_Big_Banana
+                logger.info(file.getOriginalFilename());
+                logger.info(file.getOriginalFilename());
+                logger.info(file.getName());                //File
+                logger.info(file.getResource());            //MultipartFile resource [file]
+                logger.info(file.getContentType());         //Image/Jpeg
+                logger.info(file.getInputStream());         //java.io.FileInputStream@6a647a35
+            }
+            else {
+                logger.info(file.getOriginalFilename());    //Someone_Big_Banana
+                logger.info(file.getOriginalFilename());
+                logger.info(file.getOriginalFilename());
+                logger.info(file.getOriginalFilename());
+                logger.info(file.getOriginalFilename());
+                logger.info(file.getContentType());
+            }
+
+
         } catch (Exception e) {
             logger.error(e);
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to store file");
