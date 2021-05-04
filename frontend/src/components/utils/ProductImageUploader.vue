@@ -1,5 +1,5 @@
 <template>
-  <v-dialog v-model="dialog" persistent max-width="500px">
+  <v-dialog v-model="showDialog" persistent max-width="500px">
     <v-form>
       <v-card>
         <v-card-title>
@@ -47,7 +47,7 @@
           <v-btn
             color="primary"
             text
-            @click="closeDialog">
+            @click="closeForm">
             Close
           </v-btn>
           <v-btn
@@ -68,17 +68,15 @@
 import { uploadProductImage } from '@/api/internal';
 export default {
   name: "ProductImageUploader",
-  props: { // TODO remove the default values
-    businessId: {
-      default: 10
-    },
-    productId: {
-      default: 'NATHAN-APPLE-70'
-    }
+  props: {
+    //we need these two values to update the product image accordingly
+    businessId: Number,
+    productCode: String,
+    //the value here refers to the parent component in ProductCatalogueItem
+    value: Boolean
   },
   data() {
     return {
-      dialog: true,
       file: undefined,
       isDragging: false,
       errorMessage: undefined,
@@ -134,6 +132,10 @@ export default {
 
       input.click();
     },
+    closeForm() {
+      this.showDialog = false;
+      this.file = undefined;
+    },
     /**
      * Handler for the "create" button
      * This will trigger a call to the add product image endpoint and close the dialog if successful
@@ -142,19 +144,15 @@ export default {
       this.isLoading = true;
       this.errorMessage = undefined;
 
-      let response = await uploadProductImage(this.businessId, this.productId, this.file);
+      let response = await uploadProductImage(this.businessId, this.productCode, this.file);
 
       this.isLoading = false;
       if (response !== undefined) {
         this.errorMessage = response;
         return;
       }
-
-      this.$emit('closeDialog');
-    },
-
-    closeDialog() {
-      this.$emit('closeDialog');
+      this.showDialog = false;
+      this.file = undefined;
     }
   },
 
@@ -162,6 +160,16 @@ export default {
     url() {
       if (this.file === undefined) return undefined;
       return URL.createObjectURL(this.file);
+    },
+    //need to use computed property in child component to track changes
+    showDialog: {
+      //gets the value of the showImageUploaderForm
+      get() {
+        return this.value;
+      },
+      set (value) {
+        this.$emit('input', value);
+      },
     }
   },
 };

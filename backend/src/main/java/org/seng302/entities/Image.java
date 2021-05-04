@@ -1,16 +1,13 @@
 package org.seng302.entities;
 
 import net.minidev.json.annotate.JsonIgnore;
+import net.minidev.json.JSONObject;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.persistence.*;
 import java.util.Arrays;
 import java.util.List;
-
-@Table( uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"filename", "filename_thumbnail"})
-})
 
 @Entity
 public class Image {
@@ -22,7 +19,7 @@ public class Image {
     @Column(name = "filename", nullable = false, unique = true)
     private String filename;
 
-    @Column(name = "filename_thumbnail", nullable = false, unique = true)
+    @Column(name = "filename_thumbnail", nullable = true, unique = false)
     private String filenameThumbnail;
 
     /**
@@ -40,6 +37,14 @@ public class Image {
      */
     protected Image() {
 
+    }
+
+    public JSONObject constructJSONObject() {
+        var object = new JSONObject();
+        object.put("id", getID());
+        object.put("filename", "/media/images/" + getFilename());
+        object.put("thumbnailFilename", "media/images/" + getFilenameThumbnail());
+        return object;
     }
 
     /**

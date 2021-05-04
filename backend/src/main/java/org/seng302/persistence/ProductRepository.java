@@ -23,7 +23,6 @@ public interface ProductRepository extends CrudRepository<Product, Long>{
         Optional<Product> findByBusinessAndProductCode(@Param("business") Business business,
                                                        @Param("productCode") String productCode);
 
-        Optional<Product> findByProductCode(@Param("productCode") String productCode);
 
         /**
          * Gets a product from the repository.
@@ -45,4 +44,22 @@ public interface ProductRepository extends CrudRepository<Product, Long>{
                 }
                 return product.get();
         }
+                /**
+         * Gets a product from the database that matches a given image Id. This method preforms a sanity check to ensure the
+         * image does exist and if not throws a not accepted response status exception.
+         * @param business the business object
+         * @param productCode the product code of the product
+         * @return the product object that matches the business and product code
+         */
+        default public Product getProduct(Business business, String productCode) {
+                Optional<Product> product = findByBusinessAndProductCode(business, productCode);
+                if (product.isEmpty()) {
+                        throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE,
+                                "the product does not exist");
+                }
+                return product.get();
+                // The product repo is not working as expected, the product can still be retrieved even when it does not exist
+                // within the business's catalogue
+        }
+
 }

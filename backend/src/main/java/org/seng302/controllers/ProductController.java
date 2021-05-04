@@ -11,19 +11,24 @@ import org.seng302.exceptions.BusinessNotFoundException;
 import org.seng302.persistence.BusinessRepository;
 import org.seng302.persistence.ImageRepository;
 import org.seng302.persistence.ProductRepository;
+import org.seng302.service.StorageService;
 import org.seng302.tools.AuthenticationTokenManager;
 import org.seng302.tools.SearchHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
@@ -35,13 +40,15 @@ public class ProductController {
 
     private final ProductRepository productRepository;
     private final BusinessRepository businessRepository;
+    private final StorageService storageService;
     private final ImageRepository imageRepository;
     private static final Logger logger = LogManager.getLogger(ProductController.class.getName());
 
     @Autowired
-    public ProductController(ProductRepository productRepository, BusinessRepository businessRepository, ImageRepository imageRepository) {
+    public ProductController(ProductRepository productRepository, BusinessRepository businessRepository, StorageService storageService, ImageRepository imageRepository) {
         this.productRepository = productRepository;
         this.businessRepository = businessRepository;
+        this.storageService = storageService;
         this.imageRepository = imageRepository;
     }
 
@@ -138,7 +145,7 @@ public class ProductController {
      */
     @GetMapping("/businesses/{id}/products/count")
     private JSONObject retrieveCatalogueCount(@PathVariable Long id,
-                                      HttpServletRequest request) {
+                                HttpServletRequest request) {
 
         AuthenticationTokenManager.checkAuthenticationToken(request);
 
@@ -183,7 +190,7 @@ public class ProductController {
             }
             String productCode = productInfo.getAsString("id");
 
-            if ((productRepository.findByBusinessAndProductCode(business, productCode)).isPresent()) {
+            if (productRepository.findByBusinessAndProductCode(business, productCode).isPresent()) {
                 throw new ResponseStatusException(HttpStatus.CONFLICT, "Product already exists with product code in this catalogue \"" + productCode + "\"");
             }
 
@@ -250,6 +257,57 @@ public class ProductController {
     }
 
 
+
+    @PostMapping("/businesses/{businessId}/products/{productCode}/images")
+    public ResponseEntity<Void> uploadImage(@PathVariable Long businessId, @PathVariable String productCode, @RequestParam("file") MultipartFile file, HttpServletRequest request) throws IOException {
+        try {
+            AuthenticationTokenManager.checkAuthenticationToken(request);
+            logger.info(String.format("Adding product image to business (businessId=%d, productCode=%s).", businessId, productCode));
+            Business business = getBusiness(businessId);
+
+
+            business.checkSessionPermissions(request);
+
+            // Will throw 406 response status exception if product does not exist
+            Product product = productRepository.getProduct(business, productCode);
+
+            validateImage(file);
+
+            String filename = UUID.randomUUID().toString();
+            if ("image/jpeg".equals(file.getContentType())) {
+                filename += ".jpg";
+            } else if ("image/png".equals(file.getContentType())) {
+                filename += ".png";
+            } else {
+                assert false; // We've already validated the image type so this should not be possible.
+            }
+
+            Image image = new Image(null, null);
+            image.setFilename(filename);
+            image = imageRepository.save(image);
+            product.setProductImage(image);
+            productRepository.save(product); 
+            storageService.store(file, filename);             //store the file using storageService
+
+            return new ResponseEntity<>(HttpStatus.CREATED);
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            throw e;
+        }
+
+
+
+    }
+    public void validateImage(MultipartFile file) {
+
+            if(file.getSize() >= 1048575) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Image size exceed 1048575 bytes.");
+            }
+            else if(!(file.getContentType().equals("image/jpeg") || file.getContentType().equals("image/png"))) {
+
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid image format. Must be jpeg or png");
+            }
+    }
     /**
      * Sets the given image as the primary image for the given product
      * Only business administrators can perform this action.
