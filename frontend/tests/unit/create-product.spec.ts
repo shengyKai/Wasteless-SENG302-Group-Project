@@ -37,7 +37,7 @@ Vue.use(Vuetify);
 // Characters that are in the set of letters, numbers, spaces and punctuation.
 const validCharacters = [" ", ":", ",", "7", "é", "树", "A"];
 // Characters that are not a letter, number, space or punctuation.
-const invalidCharacters = ["\uD83D\uDE02", "\uFFFF"];
+const invalidCharacters = ["\uD83D\uDE02", "♔"];
 // Characters that are whitespace not including the space character.
 const whitespaceCharacters = ["\n", "\t"];
 
@@ -191,7 +191,7 @@ describe('CreateProduct.vue', () => {
   /**
    * Tests that the CreateProduct is invalid if product name has a character that is not a letter, number, space or punctuation.
    */
-  it.each(invalidCharacters.concat(whitespaceCharacters))('Invalid if product has name "%s"', async (name) => {
+  it.each(invalidCharacters.concat(whitespaceCharacters))(`Invalid if product has name "%s"`, async (name) => {
     await populateAllFields();
     await wrapper.setData({
       product: name,
