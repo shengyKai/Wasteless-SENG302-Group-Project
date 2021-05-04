@@ -109,7 +109,8 @@ public class BusinessTests {
         testUser3 = userRepository.save(testUser3);
         testBusiness1 = new Business.Builder()
                 .withBusinessType("Accommodation and Food Services")
-                .withAddress(new Location())
+                .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
+                        "Canterbury,8041"))
                 .withDescription("Some description")
                 .withName("BusinessName")
                 .withPrimaryOwner(testUser1)
@@ -199,7 +200,8 @@ public class BusinessTests {
         Exception thrown = assertThrows(ResponseStatusException.class, () -> {
             Business testBusiness2 = new Business.Builder()
                     .withBusinessType("Accommodation and Food Services")
-                    .withAddress(new Location())
+                    .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
+                        "Canterbury,8041"))
                     .withDescription("Some description")
                     .withName("BusinessName")
                     .withPrimaryOwner(testUser3)
