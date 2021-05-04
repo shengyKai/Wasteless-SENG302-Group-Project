@@ -7,7 +7,9 @@ import org.springframework.web.server.ResponseStatusException;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 @Table(uniqueConstraints={
         @UniqueConstraint(columnNames = {"product_code", "business_id"})
@@ -45,9 +47,14 @@ public class Product {
     @JoinColumn(name = "business_id")
     private Business business;
 
-    @OneToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "image_id")
-    private Image productImage;
+    @OrderColumn(name="image_order")
+    @OneToMany(fetch = FetchType.EAGER)
+    @JoinColumn(name="image_id")
+    private List<Image> productImages = new ArrayList<>();
+
+    public void addImage(Image image) {
+        this.productImages.add(image);
+    }
 
     @Column(nullable = false)
     private String countryOfSale;
@@ -104,7 +111,7 @@ public class Product {
      * Get the image object associated with this product
      * @return the image
      */
-    public Image getProductImage() { return productImage; }
+    public List<Image> getProductImages() { return productImages; }
 
     /**
      * Get the name of the country which the product is being sold in.
@@ -210,11 +217,22 @@ public class Product {
     }
 
     /**
-     * Sets the image associated with the product
-     * @param productImage the product image
+     * Sets the images associated with the product
+     * @param productImages the product images
      */
-    public void setProductImage(Image productImage) {
-        this.productImage = productImage;
+    public void setProductImages(List<Image> productImages) {
+        this.productImages = productImages;
+    }
+
+    /**
+     * Removes a given image from the list of products
+     * @param productImage The image to remove
+     */
+    public void removeProductImage(Image productImage) {
+        if (!this.productImages.contains(productImage)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Product cannot be removed");
+        }
+        this.productImages.remove(productImage);
     }
 
     /**
@@ -246,11 +264,9 @@ public class Product {
         object.put("recommendedRetailPrice", recommendedRetailPrice);
         object.put("created", created);
         JSONArray images = new JSONArray();
-        if (productImage != null) {
-            images.appendElement(productImage.constructJSONObject());
-        }
-        object.put("images", images);
+        object.put("images", productImages);
         object.put("countryOfSale", countryOfSale);
+        object.put("images", productImages);
         return object;
     }
 

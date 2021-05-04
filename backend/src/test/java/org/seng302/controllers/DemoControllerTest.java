@@ -14,6 +14,7 @@ import org.seng302.entities.Product;
 import org.seng302.entities.User;
 import org.seng302.exceptions.AccessTokenException;
 import org.seng302.persistence.BusinessRepository;
+import org.seng302.persistence.ImageRepository;
 import org.seng302.persistence.ProductRepository;
 import org.seng302.persistence.UserRepository;
 import org.seng302.tools.AuthenticationTokenManager;
@@ -49,6 +50,8 @@ class DemoControllerTest {
     private BusinessRepository businessRepository;
     @Mock
     private ProductRepository productRepository;
+    @Mock
+    private ImageRepository imageRepository;
 
     private User testUser;
     private Business testBusiness;
@@ -56,7 +59,7 @@ class DemoControllerTest {
     @BeforeEach
     public void setUp() throws ParseException {
         MockitoAnnotations.openMocks(this);
-        demoController = new DemoController(userRepository, businessRepository, productRepository);
+        demoController = new DemoController(userRepository, businessRepository, productRepository, imageRepository);
         testUser = new User.Builder()
                 .withFirstName("Andy")
                 .withMiddleName("Percy")
@@ -180,13 +183,14 @@ class DemoControllerTest {
             // Prevent null pointer exceptions when DemoController tries to retrieve these entities from the repositories
             when(userRepository.findByEmail("123andyelliot@gmail.com")).thenReturn(null).thenReturn(testUser);
             when(businessRepository.save(any(Business.class))).thenReturn(testBusiness);
+            when(productRepository.save(any(Product.class))).thenAnswer(x->x.getArgument(0));
 
             demoController.loadDemoData(request);
         }
         // Verify that expected number of entities were loaded to the database
         verify(userRepository, times(8)).save(any(User.class));
         verify(businessRepository, times(1)).save(any(Business.class));
-        verify(productRepository, times(1)).save(any(Product.class));
+        verify(productRepository, times(2)).save(any(Product.class));
     }
 
 }
