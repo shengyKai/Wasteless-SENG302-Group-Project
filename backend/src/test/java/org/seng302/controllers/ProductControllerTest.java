@@ -114,8 +114,8 @@ class ProductControllerTest {
         Image image2 = new Image("apple.jpg", "apple_thumbnail.jpg");
         image1 = imageRepository.save(image1);
         image2 = imageRepository.save(image2);
-        product.addImage(image1);
-        product.addImage(image2);
+        product.addProductImage(image1);
+        product.addProductImage(image2);
         return productRepository.save(product);
     }
 

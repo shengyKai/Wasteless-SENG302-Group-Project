@@ -24,13 +24,10 @@ import org.springframework.web.server.ResponseStatusException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collector;
-import java.util.stream.Collectors;
 
 /**
  * This class handles requests for retrieving and saving products
@@ -285,7 +282,7 @@ public class ProductController {
             Image image = new Image(null, null);
             image.setFilename(filename);
             image = imageRepository.save(image);
-            product.addImage(image);
+            product.addProductImage(image);
             productRepository.save(product); 
             storageService.store(file, filename);             //store the file using storageService
 
