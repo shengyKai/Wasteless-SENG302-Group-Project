@@ -10,7 +10,18 @@ import ProductCatalogueItem from '@/components/ProductCatalogueItem.vue';
 // import ProductImageCarousel from "@/components/utils/ProductImageCarousel.vue";
 import FullProductDescription from "@/components/utils/FullProductDescription.vue";
 
+import * as api from "@/api/internal";
+import { castMock, flushQueue } from './utils';
+import Vuex, { Store } from 'vuex';
+import { getStore, resetStoreForTesting, StoreData } from '@/store';
+
 Vue.use(Vuetify);
+
+jest.mock('@/api/internal', () => ({
+  deleteImage: jest.fn(),
+}));
+
+const deleteImage = castMock(api.deleteImage);
 
 jest.mock('@/api/currency', () => ({
   currencyFromCountry: jest.fn(() => {
@@ -24,6 +35,8 @@ jest.mock('@/api/currency', () => ({
 describe('ProductCatalogueItem.vue', () => {
   let wrapper: Wrapper<any>;
   let vuetify: Vuetify;
+  // The global store to be used
+  let store: Store<StoreData>;
 
   /**
    * Set up to test the routing and whether the Product Catalogue item component shows what is required
@@ -32,6 +45,10 @@ describe('ProductCatalogueItem.vue', () => {
     const localVue = createLocalVue();
     vuetify = new Vuetify();
 
+    localVue.use(Vuex);
+    resetStoreForTesting();
+    store = getStore();
+
     const app = document.createElement ("div");
     app.setAttribute ("data-app", "true");
     document.body.append (app);
@@ -39,6 +56,7 @@ describe('ProductCatalogueItem.vue', () => {
     wrapper = mount(ProductCatalogueItem, {
       localVue,
       vuetify,
+      store,
       components: {
         //ProductImageCarousel will not be tested yet because its part of another task.
         // ProductImageCarousel,
@@ -49,25 +67,31 @@ describe('ProductCatalogueItem.vue', () => {
         //remove stub if testing ProductCatalogueItem as a whole
         ProductImageCarousel: true
       },
+      mocks: {
+        $router: {
+          go: () => undefined,
+        }
+      }
       //Sets up each test case with some values to ensure the Product Catalogue item component works as intended
     });
     await wrapper.setProps({
       product: {
-          name: "Some Product",
-          description: "Some description",
-          created: "Some Date Added",
-          manufacturer: "Some Manufacturer",
-          recommendedRetailPrice: 100,
-          id: "Some Code",
-          readMoreActivated: false
-      }
+        name: "Some Product",
+        description: "Some description",
+        created: "Some Date Added",
+        manufacturer: "Some Manufacturer",
+        recommendedRetailPrice: 100,
+        id: "Some Code",
+        readMoreActivated: false
+      },
+      businessId: 77,
     });
     await wrapper.setData({
       currency: {
         code: "Currency code",
         symbol: "Currency symbol"
       },
-    })
+    });
   });
 
   /**
@@ -150,5 +174,27 @@ describe('ProductCatalogueItem.vue', () => {
   */
   it("Must contain the product code", () => {
     expect(wrapper.text()).toContain("Some Code");
+  });
+
+  /**
+   * Tests that the delete-image event generated from the ProductImageCarousel is handled as expected.
+   */
+  it('If "delete-image" is emitted from ProductImageCarousel then the corresponding image is deleted', () => {
+    deleteImage.mockResolvedValue(undefined);
+    wrapper.findComponent({name: 'ProductImageCarousel' }).vm.$emit('delete-image', 33);
+
+    expect(deleteImage).toBeCalledWith(77, 'Some Code', 33);
+  });
+
+  /**
+   * Tests that the delete-image event handler sets the global error if the delete image api request fails.
+   */
+  it('If "delete-image" handler fails to delete the image then the global error should be set', async () => {
+    deleteImage.mockResolvedValue('test_error_message');
+    wrapper.findComponent({name: 'ProductImageCarousel' }).vm.$emit('delete-image', 33);
+
+    await flushQueue();
+
+    expect(store.state.globalError).toBe('test_error_message');
   });
 });
