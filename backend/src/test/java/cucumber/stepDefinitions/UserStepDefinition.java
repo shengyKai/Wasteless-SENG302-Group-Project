@@ -3,28 +3,34 @@ package cucumber.stepDefinitions;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.cucumber.java.Before;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
-import org.junit.After;
 import org.junit.Assert;
 import org.seng302.entities.Location;
 import org.seng302.entities.User;
+import org.seng302.persistence.AccountRepository;
 import org.seng302.persistence.UserRepository;
 import org.seng302.tools.PasswordAuthenticator;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -40,6 +46,8 @@ public class UserStepDefinition {
     private MockMvc mockMvc;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private AccountRepository accountRepository;
 
     private User theUser;
     private String userFirstName = "Bob";
@@ -55,11 +63,12 @@ public class UserStepDefinition {
 
     private Long userID;
 
-    @After
+    @Before
     public void Setup() {
         objectMapper.enable(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT);
         mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
         userRepository.deleteAll();
+        accountRepository.deleteAll();
     }
 
     @Given("the user with the email {string} does not exist")
@@ -100,19 +109,21 @@ public class UserStepDefinition {
 
     @And("the user is created")
     public void theUserIsCreated() throws ParseException {
-        theUser = new User.Builder()
-                .withFirstName(userFirstName)
-                .withMiddleName(userMiddleName)
-                .withLastName(userLastName)
-                .withNickName(userNickname)
-                .withEmail(userEmail)
-                .withPassword(userPassword)
-                .withBio(userBio)
-                .withDob(userDob)
-                .withPhoneNumber(userPhNum)
-                .withAddress(userAddress)
-                .build();
-        userRepository.save(theUser);
+        try {
+            theUser = new User.Builder()
+                    .withFirstName(userFirstName)
+                    .withMiddleName(userMiddleName)
+                    .withLastName(userLastName)
+                    .withNickName(userNickname)
+                    .withEmail(userEmail)
+                    .withPassword(userPassword)
+                    .withBio(userBio)
+                    .withDob(userDob)
+                    .withPhoneNumber(userPhNum)
+                    .withAddress(userAddress)
+                    .build();
+            userRepository.save(theUser);
+        } catch (ResponseStatusException | DataIntegrityViolationException ignored) {}
     }
 
     @Then("a user with the email {string} exists")
@@ -198,6 +209,7 @@ public class UserStepDefinition {
         requestBody.put("password", userPassword);
         requestBody.put("email", userEmail);
 
+        userID = null;
         try {
              MvcResult result = mockMvc.perform(post("/login")
                     .content(requestBody.toString())
@@ -212,10 +224,31 @@ public class UserStepDefinition {
              // Refuses to cast from integer to long. So used the below work around
              Integer userId = (Integer) jsonObject.getAsNumber("userId");
              userID = userId.longValue();
-        } catch (Exception e) {
-            e.printStackTrace();
-            Assert.fail();
-        }
+        } catch (Exception ignored) {}
+    }
+
+    @When("the user logs in badly")
+    public void theUserLogsInBadly() throws JsonProcessingException {
+        JSONObject requestBody = new JSONObject();
+        requestBody.put("password", userPassword);
+        requestBody.put("email", userEmail);
+
+        userID = null;
+        try {
+            MvcResult result = mockMvc.perform(post("/login")
+                    .content(requestBody.toString())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .accept(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isBadRequest())
+                    .andReturn();
+
+            JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
+            JSONObject jsonObject = (JSONObject) parser.parse(result.getResponse().getContentAsString());
+            System.out.println(jsonObject.getAsNumber("userId"));
+            // Refuses to cast from integer to long. So used the below work around
+            Integer userId = (Integer) jsonObject.getAsNumber("userId");
+            userID = userId.longValue();
+        } catch (Exception ignored) {}
     }
 
     @Then("the user is logged in")
@@ -224,4 +257,35 @@ public class UserStepDefinition {
         Assert.assertEquals(user.getUserID(), userID);
     }
 
+    @Then("the user is not logged in")
+    public void theUserWithTheEmailIsNotLoggedIn() {
+        Assert.assertNull(userID);
+    }
+
+    @Then("a user with the email {string} does not exist")
+    public void aUserWithTheEmailDoesNotExist(String email) {
+        Assert.assertNull(userRepository.findByEmail(email));
+    }
+
+    @Then("only the first account with {string} remains with bio {string}")
+    public void onlyTheFirstAccountWithRemains(String email, String bio) {
+        User user = userRepository.findByEmail(email);
+        Assert.assertEquals(user.getBio(), bio);
+    }
+
+    @And("no optional values are set")
+    public void noOptionalValuesAreSet() {
+        userMiddleName = null;
+        userNickname = null;
+        userBio = null;
+        userPhNum = null;
+    }
+
+    @Then("the user {string} was created now")
+    public void theUserWasCreatedNow(String email) {
+        theUser = userRepository.findByEmail(email);
+        LocalDateTime created = LocalDateTime.ofInstant(theUser.getCreated().toInstant(),
+                ZoneId.systemDefault());
+        assert(ChronoUnit.SECONDS.between(LocalDateTime.now(), created) < 20);
+    }
 }
