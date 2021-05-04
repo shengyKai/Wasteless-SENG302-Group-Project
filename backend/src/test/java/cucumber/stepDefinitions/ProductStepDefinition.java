@@ -133,7 +133,7 @@ public class ProductStepDefinition {
 
     @Then("the product {string} does not exist for the business")
     public void theProductDoesNotExistForTheBusiness(String prodCode) {
-        Assertions.assertNull(productRepository.findByBusinessAndProductCode(business, prodCode));
+        Assertions.assertTrue(productRepository.findByBusinessAndProductCode(business, prodCode).isEmpty());
     }
 
     @Given("the business does not exist")
