@@ -4,7 +4,7 @@
       <v-row>
         <v-col cols="auto" md="3" sm="12">
           <!-- feed the productImages into the carousel child component -->
-          <ProductImageCarousel :productImages="productImages"/>
+          <ProductImageCarousel :productImages="images"/>
         </v-col>
         <v-col>
           <v-row>
@@ -103,20 +103,13 @@ export default {
     return {
       //insert the product images here, do note that the first index, at index 0, will be the primary image of the product.
       //The image MUST be labelled with the key "src" in order to be able to show in component
-      productImages: [
+      images: [
         //commented out the images below for the moment, so that if you would like to test out the carousel, just uncomment it
         {
-          src: "https://cdn.vuetifyjs.com/images/carousel/squirrel.jpg",
-        },
-        {
-          src: "https://cdn.vuetifyjs.com/images/carousel/sky.jpg",
-        },
-        {
-          src: "https://cdn.vuetifyjs.com/images/carousel/bird.jpg",
-        },
-        {
-          src: "https://cdn.vuetifyjs.com/images/carousel/planet.jpg",
-        },
+          id: 12,
+          filename: "media/images/potato.jpg",
+          thumbnailFilename: "media/images/null",
+        }
       ],
       //The bottom 8 variables will all be shown as text/numbers in the component.
       // productName: "",
