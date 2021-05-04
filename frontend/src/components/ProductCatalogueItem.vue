@@ -2,7 +2,12 @@
   <v-card>
     <v-container fluid>
       <v-row>
-        <v-col cols="auto" md="3" sm="12">
+        <v-col align="center" justify="center" cols="auto" md="3" sm="12" v-if="product.images.length === 0">
+          <v-icon size="250">
+            mdi-image
+          </v-icon>
+        </v-col>
+        <v-col cols="auto" md="3" sm="12" v-else>
           <!-- feed the productImages into the carousel child component -->
           <ProductImageCarousel :productImages="product.images" :productId="product.id" v-on:change-primary-image="setPrimaryImage"/>
         </v-col>
