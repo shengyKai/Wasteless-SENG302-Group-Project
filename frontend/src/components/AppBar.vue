@@ -79,7 +79,7 @@
               <!-- Catalogue -->
               <v-list-item>
                 <v-list-item-title class="link" @click="showCatalogue">
-                  Testing_Page
+                  Product Catalogue
                 </v-list-item-title>
               </v-list-item>
 
