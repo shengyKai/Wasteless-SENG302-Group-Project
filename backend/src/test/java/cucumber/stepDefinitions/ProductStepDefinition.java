@@ -94,7 +94,7 @@ public class ProductStepDefinition {
 
     @And("the time of {string} created is set to now")
     public void timeSetNow(String prodCode) {
-        product = productRepository.findByBusinessAndProductCode(business, prodCode);
+        product = productRepository.findByBusinessAndProductCode(business, prodCode).get();
         LocalDateTime created = LocalDateTime.ofInstant(product.getCreated().toInstant(),
                 ZoneId.systemDefault());
         assert(ChronoUnit.SECONDS.between(LocalDateTime.now(), created) < 20);
@@ -194,7 +194,7 @@ public class ProductStepDefinition {
 
     @Then("only the first product {string} exists, not with name {string}")
     public void onlyTheFirstProductExists(String prodCode, String desc) {
-        product = productRepository.findByBusinessAndProductCode(business, prodCode);
+        product = productRepository.findByBusinessAndProductCode(business, prodCode).get();
         Assertions.assertNotEquals(desc, product.getDescription());
     }
 }
