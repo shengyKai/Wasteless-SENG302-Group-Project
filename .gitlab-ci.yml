@@ -89,7 +89,7 @@ deploy-staging-backend:
   script:
     - cd backend
     - chmod +x ../runner/copy-environment.sh
-    - ../runner/copy-environment.sh $DB_URL
+    - ../runner/copy-environment.sh $DB_URL_STAGING
     - ./gradlew bootJar
     - rm -rf /home/gitlab-runner/staging-backend/ || true
     - mkdir /home/gitlab-runner/staging-backend/
