@@ -53,13 +53,13 @@ describe('ProductCatalogueItem.vue', () => {
     });
     await wrapper.setProps({
       product: {
-          name: "Some Product",
-          description: "Some description",
-          created: "Some Date Added",
-          manufacturer: "Some Manufacturer",
-          recommendedRetailPrice: 100,
-          id: "Some Code",
-          readMoreActivated: false
+        name: "Some Product",
+        description: "Some description",
+        created: "Some Date Added",
+        manufacturer: "Some Manufacturer",
+        recommendedRetailPrice: 100,
+        id: "Some Code",
+        readMoreActivated: false
       }
     });
     await wrapper.setData({
@@ -67,7 +67,7 @@ describe('ProductCatalogueItem.vue', () => {
         code: "Currency code",
         symbol: "Currency symbol"
       },
-    })
+    });
   });
 
   /**
