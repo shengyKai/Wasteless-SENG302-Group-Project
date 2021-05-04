@@ -235,7 +235,7 @@ public class ProductController {
 
         Product product = productRepository.getProduct(business, productId);
 
-        product.setProductImage(null);
+        product.setProductImages(null);
         productRepository.save(product);
     }
 
@@ -258,18 +258,6 @@ public class ProductController {
         }
     }
 
-    /**
-     * Matches up the businessID, productID and imageID to find the image of a product to be deleted. Only business
-     * owners can delete product images and they must be within their own product catalogue.
-     * @param businessId the ID of the business
-     * @param productId the ID of the product
-     * @param imageId the ID of the image
-     */
-    @DeleteMapping("/businesses/{businessId}/products/{productId}/images/{imageId}")
-    void deleteProductImage(@PathVariable Long businessId, @PathVariable Long productId, @PathVariable Long imageId,
-                            HttpServletRequest request, HttpServletResponse response) {
-
-    }
 
     /**
      * Sets the given image as the primary image for the given product
@@ -281,6 +269,7 @@ public class ProductController {
     @PutMapping("/businesses/{businessId}/products/{productId}/images/{imageId}/makeprimary")
     void makeImagePrimary(@PathVariable Long businessId,@PathVariable Long productId, @PathVariable Long imageId,
                           HttpServletRequest request, HttpServletResponse response ) {
+        AuthenticationTokenManager.checkAuthenticationToken(request);
         // get business + sanity
         Business business = getBusiness(businessId);
         // check user priv

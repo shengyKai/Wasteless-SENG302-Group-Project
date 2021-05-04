@@ -9,11 +9,9 @@ import org.junit.jupiter.api.TestInstance;
 import org.junit.runner.RunWith;
 import org.mockito.MockedConstruction;
 import org.mockito.Mockito;
-import org.seng302.entities.Business;
-import org.seng302.entities.Location;
-import org.seng302.entities.Product;
-import org.seng302.entities.User;
+import org.seng302.entities.*;
 import org.seng302.persistence.BusinessRepository;
+import org.seng302.persistence.ImageRepository;
 import org.seng302.persistence.ProductRepository;
 import org.seng302.persistence.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,8 +31,7 @@ import java.util.HashMap;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
@@ -51,6 +48,8 @@ class ProductControllerTest {
     private BusinessRepository businessRepository;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private ImageRepository imageRepository;
 
     private final HashMap<String, Object> sessionAuthToken = new HashMap<>();
     private Cookie authCookie;
@@ -58,6 +57,8 @@ class ProductControllerTest {
     private User ownerUser;
     private User bystanderUser;
     private User administratorUser;
+    private Image image1;
+    private Image image2;
 
     /**
      * This method creates an authentication code for sessions and cookies.
@@ -102,11 +103,27 @@ class ProductControllerTest {
         testBusiness1 = businessRepository.save(testBusiness1);
     }
 
+    /**
+     * Adds several images to a given product
+     * @param product The product to add test images to
+     * @return The product with images added
+     */
+    private Product addImagesToProduct(Product product) {
+        image1 = new Image("abc.jpg", "abc_thumbnail.jpg");
+        image2 = new Image("apple.jpg", "apple_thumbnail.jpg");
+        image1 = imageRepository.save(image1);
+        image2 = imageRepository.save(image2);
+        product.addImage(image1);
+        product.addImage(image2);
+        return productRepository.save(product);
+    }
+
     @BeforeEach
     public void setUp() throws ParseException {
         productRepository.deleteAll();
         businessRepository.deleteAll();
         userRepository.deleteAll();
+        imageRepository.deleteAll();
 
         setUpAuthCode();
 
@@ -933,7 +950,20 @@ class ProductControllerTest {
      * Tests using the make image primary method will make the given image the primary image
      */
     @Test
-    public void makeImagePrimary_valid_sets_image_primary() {
+    public void makeImagePrimary_valid_sets_image_primary() throws Exception {
+        setCurrentUser(ownerUser.getUserID());
+        addSeveralProductsToACatalogue();
+        Product product = testBusiness1.getCatalogue().get(0);
+        product = addImagesToProduct(product); // load test images
+        Image image = product.getProductImages().get(1); // get the second item in list
+
+        mockMvc.perform(put(String.format("/businesses/%d/products/%d/images/%d/makeprimary", testBusiness1.getId(), product.getID(), image.getID()))
+                .sessionAttrs(sessionAuthToken)
+                .cookie(authCookie))
+                .andExpect(status().isOk());
+
+        product = productRepository.findById(product.getID()).get();
+        assertEquals(image.getID(), product.getProductImages().get(0).getID());
 
     }
 
