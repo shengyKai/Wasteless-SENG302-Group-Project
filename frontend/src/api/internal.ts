@@ -492,7 +492,6 @@ export async function getProducts(buisnessId: number, page: number, resultsPerPa
     if (status === 401) return 'Missing/Invalid access token';
     if (status === 403) return 'Not an admin of the business';
     if (status === 406) return 'Business not found';
-    
     return 'Request failed: ' + status;
   }
 
