@@ -165,6 +165,7 @@ function createOptions(): StoreOptions<StoreData> {
           rawRole = rawRole.split('=')[1];
 
           const role: UserRole = JSON.parse(rawRole);
+          // We should already be logged in at this point, so this should be valid
           const user = context.state.user!;
 
           if (role.type === 'user') {
