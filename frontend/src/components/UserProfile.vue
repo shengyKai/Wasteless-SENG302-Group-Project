@@ -159,7 +159,8 @@
               </v-list>
             </v-menu>
           </template>
-          <span>System Administrator</span>
+          <span v-if="user.role==='defaultGlobalApplicationAdmin'">Default System Administrator</span>
+          <span v-else-if="user.role==='globalApplicationAdmin'">System Administrator</span>
         </v-tooltip>
         <!--
           "user.role==='user'" is so that the DGAA can only make users as a GAA, not current GAAs/DGAAs
@@ -171,6 +172,8 @@
           @click="makeUserAsGAA(); loader='loadingMake'"
           :loading="loadingMake"
           :disabled="loadingMake"
+          small
+          outlined
         >
           Make Admin
         </v-btn>

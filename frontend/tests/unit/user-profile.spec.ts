@@ -611,18 +611,9 @@ describe('UserProfile.vue', () => {
     let revokeAdminButton = wrapper.findComponent({ref:'revokeAdminButton'});
     await revokeAdminButton.trigger('click');
     expect(revokeAdmin).toHaveBeenCalled();
-    await flushQueue();
-    //for some reason, nextTick() or flushQueue() does not seem to work
-    //Have to use setTimeout() to ensure call stack is empty first before executing the other tests
-    setTimeout(() => {
-      expect(wrapper.vm.user.role).toEqual("user");
-      //since the user is now a normal user, the make admin button should reappear
-      let makeAdminButton = wrapper.findComponent({ref:'makeAdminButton'});
-      expect(makeAdminButton.exists()).toBeTruthy();
-    }, 0);
-    //commented out for testing
-    // Vue.nextTick(() => {
-    //   expect(wrapper.vm.user.role).toEqual("user");
-    // })
+    expect(wrapper.vm.user.role).toEqual("user");
+    //since the user is now a normal user, the make admin button should reappear
+    let makeAdminButton = wrapper.findComponent({ref:'makeAdminButton'});
+    expect(makeAdminButton.exists()).toBeTruthy();
   });
 });
