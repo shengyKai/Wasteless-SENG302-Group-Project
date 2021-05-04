@@ -89,7 +89,7 @@ export default {
       /**
        * Number of results per a result page
        */
-      resultsPerPage: 3,
+      resultsPerPage: 10,
       /**
        * Total number of results for all pages
        */

@@ -12,9 +12,11 @@ import { castMock, flushQueue } from './utils';
 
 jest.mock('@/api/internal', () => ({
   getProducts: jest.fn(),
+  getProductCount: jest.fn()
 }));
 
 const getProducts = castMock(api.getProducts);
+const getProductCount = castMock(api.getProductCount);
 
 Vue.use(Vuetify);
 
@@ -48,8 +50,12 @@ function createTestProducts(count: number) {
 describe('ProductCatalogue.vue', () => {
   // Container for the ProductCatalogue under test
   let wrapper: Wrapper<any>;
+  let numberOfTestProducts: number;
 
-
+  getProductCount.mockImplementation(async businessId => {
+    return numberOfTestProducts;
+  });
+  
   /**
    * Creates the wrapper for the ProductCatalogue component.
    * This must be called before using the ProductCatalogue wrapper.
@@ -87,11 +93,14 @@ describe('ProductCatalogue.vue', () => {
     return wrapper.findComponent({name: 'v-alert'});
   }
 
+  beforeEach(() => {
+    numberOfTestProducts = 5;
+  })
   /**
    * Tests that when initially opened that the products are queried
    */
   it('The products from the business id are queried', () => {
-    setResults(createTestProducts(5));
+    setResults(createTestProducts(numberOfTestProducts));
     createWrapper();
     expect(getProducts).toBeCalledWith(100, 1, RESULTS_PER_PAGE, 'productCode', false);
   });
@@ -100,7 +109,7 @@ describe('ProductCatalogue.vue', () => {
    * Tests that the product results are shown
    */
   it('The search results should be displayed somewhere', async () => {
-    let products = createTestProducts(5);
+    let products = createTestProducts(numberOfTestProducts);
     setResults(products);
 
     createWrapper();
