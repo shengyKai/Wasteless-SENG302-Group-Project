@@ -245,12 +245,12 @@ public class Product {
         object.put("manufacturer", manufacturer);
         object.put("recommendedRetailPrice", recommendedRetailPrice);
         object.put("created", created);
-        object.put("countryOfSale", countryOfSale);
         JSONArray images = new JSONArray();
         if (productImage != null) {
             images.appendElement(productImage.constructJSONObject());
         }
         object.put("images", images);
+        object.put("countryOfSale", countryOfSale);
         return object;
     }
 

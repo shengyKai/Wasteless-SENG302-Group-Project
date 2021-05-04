@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 /**
  * This class handles requests for retrieving and saving products
@@ -141,7 +142,7 @@ public class ProductController {
      */
     @GetMapping("/businesses/{id}/products/count")
     private JSONObject retrieveCatalogueCount(@PathVariable Long id,
-                                      HttpServletRequest request) {
+                                HttpServletRequest request) {
 
         AuthenticationTokenManager.checkAuthenticationToken(request);
 
@@ -186,7 +187,7 @@ public class ProductController {
             }
             String productCode = productInfo.getAsString("id");
 
-            if (productRepository.findByBusinessAndProductCode(business, productCode) != null) {
+            if (productRepository.findByBusinessAndProductCode(business, productCode).isPresent()) {
                 throw new ResponseStatusException(HttpStatus.CONFLICT, "Product already exists with product code in this catalogue \"" + productCode + "\"");
             }
 
@@ -279,30 +280,37 @@ public class ProductController {
 
 
     @PostMapping("/businesses/{businessId}/products/{productCode}/images")
-    public ResponseEntity uplaodImage(@PathVariable Long businessId, @PathVariable String productCode, @RequestParam("file") MultipartFile file, HttpServletRequest request) throws IOException {
+    public ResponseEntity<Void> uploadImage(@PathVariable Long businessId, @PathVariable String productCode, @RequestParam("file") MultipartFile file, HttpServletRequest request) throws IOException {
         try {
             AuthenticationTokenManager.checkAuthenticationToken(request);
             logger.info(String.format("Adding product image to business (businessId=%d, productCode=%s).", businessId, productCode));
             Business business = getBusiness(businessId);
 
+
             business.checkSessionPermissions(request);
 
-            Product product = productRepository.findByBusinessAndProductCode(business, productCode).get();
-            if (product == null) {
-                throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "No product found with the given product code");
+            // Will throw 406 response status exception if product does not exist
+            Product product = productRepository.getProduct(business, productCode);
+
+            validateImage(file);
+
+            String filename = UUID.randomUUID().toString();
+            if ("image/jpeg".equals(file.getContentType())) {
+                filename += ".jpg";
+            } else if ("image/png".equals(file.getContentType())) {
+                filename += ".png";
+            } else {
+                assert false; // We've already validated the image type so this should not be possible.
             }
 
-            storageService.store(file);
-
-            // TODO This is very ugly, talk to connor about validation on image creation
             Image image = new Image(null, null);
-            image.setFilename(file.getOriginalFilename());
-
+            image.setFilename(filename);
             image = imageRepository.save(image);
             product.setProductImage(image);
-            productRepository.save(product);
+            productRepository.save(product); 
+            storageService.store(file, filename);             //store the file using storageService
 
-            return new ResponseEntity(HttpStatus.CREATED);
+            return new ResponseEntity<>(HttpStatus.CREATED);
         } catch (Exception e) {
             logger.error(e.getMessage());
             throw e;
@@ -311,7 +319,16 @@ public class ProductController {
 
 
     }
+    public void validateImage(MultipartFile file) {
 
+            if(file.getSize() >= 1048575) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Image size exceed 1048575 bytes.");
+            }
+            else if(!(file.getContentType().equals("image/jpeg") || file.getContentType().equals("image/png"))) {
+
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid image format. Must be jpeg or png");
+            }
+    }
     /**
      * Checks if a product with a given product code exists within the database.
      * @param productRepository the database that holds product objects
