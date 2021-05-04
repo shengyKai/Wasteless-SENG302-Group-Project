@@ -172,7 +172,7 @@
 </template>
 
 <script>
-import { getUser, makeBusinessAdmin, removeBusinessAdmin } from '../api';
+import { getUser, makeBusinessAdmin, removeBusinessAdmin } from '../api/internal';
 import UserAvatar from './utils/UserAvatar';
 import convertAddressToReadableText from './utils/Methods/convertJsonAddressToReadableText';
 

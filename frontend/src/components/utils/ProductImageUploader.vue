@@ -65,7 +65,7 @@
 </template>
 
 <script>
-import { uploadProductImage } from '@/api';
+import { uploadProductImage } from '@/api/internal';
 export default {
   name: "ProductImageUploader",
   props: { // TODO remove the default values

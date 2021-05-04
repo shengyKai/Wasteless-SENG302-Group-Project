@@ -24,21 +24,21 @@ public class Location {
     @GeneratedValue(strategy = GenerationType.IDENTITY) // autoincrement the ID
     private Long id;
 
-    @Column(name = "country")
+    @Column(name = "country", nullable = false)
     private  String country;
-    @Column(name = "city")
+    @Column(name = "city", nullable = false)
     private  String city;
 
-    @Column(name="region")
+    @Column(name="region", nullable = false)
     private String region;
 
-    @Column(name="street_name")
+    @Column(name="street_name", nullable = false)
     private String streetName;
 
-    @Column(name="street_number")
+    @Column(name="street_number", nullable = false)
     private String streetNumber;
 
-    @Column(name="post_code")
+    @Column(name="post_code", nullable = false)
     private String postCode;
 
     @Column(name="district")

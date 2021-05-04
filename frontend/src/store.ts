@@ -1,4 +1,4 @@
-import {User,  Business, getUser, login} from './api';
+import {User,  Business, getUser, login} from './api/internal';
 import Vuex, { Store, StoreOptions } from 'vuex';
 import { COOKIE, deleteCookie, isTesting, setCookie } from './utils';
 
@@ -130,7 +130,7 @@ function createOptions(): StoreOptions<StoreData> {
       },
       role (state) {
         return state.user?.role;
-      }
+      },
     },
     actions: {
       getUser (context, userId) {
@@ -142,18 +142,26 @@ function createOptions(): StoreOptions<StoreData> {
           context.commit('setUser', response);
         });
       },
+      /**
+       * Attempts to log in the given user.
+       * This will set the cookies and with authenticate future requests.
+       *
+       * @param context The current context
+       * @param Object containing the login credentials
+       * @returns Undefined if successful or a string error message
+       */
       async login(context, { email, password }) {
         let userId = await login(email, password);
         if (typeof userId === 'string') {
-          context.commit('setError', userId);
-          return;
+          return userId;
         }
         let user = await getUser(userId);
         if (typeof user === 'string') {
-          context.commit('setError', user);
-          return;
+          return user;
         }
         context.commit('setUser', user);
+
+        return undefined;
       }
     }
   };

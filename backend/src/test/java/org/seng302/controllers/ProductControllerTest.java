@@ -9,11 +9,9 @@ import org.junit.jupiter.api.TestInstance;
 import org.junit.runner.RunWith;
 import org.mockito.MockedConstruction;
 import org.mockito.Mockito;
-import org.seng302.entities.Business;
-import org.seng302.entities.Location;
-import org.seng302.entities.Product;
-import org.seng302.entities.User;
+import org.seng302.entities.*;
 import org.seng302.persistence.BusinessRepository;
+import org.seng302.persistence.ImageRepository;
 import org.seng302.persistence.ProductRepository;
 import org.seng302.persistence.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,8 +31,7 @@ import java.util.HashMap;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
@@ -51,6 +48,8 @@ class ProductControllerTest {
     private BusinessRepository businessRepository;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private ImageRepository imageRepository;
 
     private final HashMap<String, Object> sessionAuthToken = new HashMap<>();
     private Cookie authCookie;
@@ -58,6 +57,8 @@ class ProductControllerTest {
     private User ownerUser;
     private User bystanderUser;
     private User administratorUser;
+    private Image image1;
+    private Image image2;
 
     /**
      * This method creates an authentication code for sessions and cookies.
@@ -94,7 +95,8 @@ class ProductControllerTest {
         businessRepository.deleteAll();
         testBusiness1 = new Business.Builder()
                 .withBusinessType("Accommodation and Food Services")
-                .withAddress(new Location())
+                .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
+                        "Canterbury,8041"))
                 .withDescription("Some description")
                 .withName("BusinessName")
                 .withPrimaryOwner(ownerUser)
@@ -102,11 +104,27 @@ class ProductControllerTest {
         testBusiness1 = businessRepository.save(testBusiness1);
     }
 
+    /**
+     * Adds several images to a given product
+     * @param product The product to add test images to
+     * @return The product with images added
+     */
+    private Product addImagesToProduct(Product product) {
+        image1 = new Image("abc.jpg", "abc_thumbnail.jpg");
+        image2 = new Image("apple.jpg", "apple_thumbnail.jpg");
+        image1 = imageRepository.save(image1);
+        image2 = imageRepository.save(image2);
+        product.addImage(image1);
+        product.addImage(image2);
+        return productRepository.save(product);
+    }
+
     @BeforeEach
     public void setUp() throws ParseException {
         productRepository.deleteAll();
         businessRepository.deleteAll();
         userRepository.deleteAll();
+        imageRepository.deleteAll();
 
         setUpAuthCode();
 
@@ -238,6 +256,7 @@ class ProductControllerTest {
             assertEquals(storedProduct.getName(), productJSON.getAsString("name"));
             assertEquals(storedProduct.getDescription(), productJSON.getAsString("description"));
             assertEquals(storedProduct.getManufacturer(), productJSON.getAsString("manufacturer"));
+            assertEquals(storedProduct.getCountryOfSale(), productJSON.getAsString("countryOfSale"));
         }
     }
 
@@ -425,6 +444,7 @@ class ProductControllerTest {
             assertEquals(mockedResult.getManufacturer(), addedProduct.getManufacturer());
             assertEquals(mockedResult.getDescription(), addedProduct.getDescription());
             assertEquals(mockedResult.getRecommendedRetailPrice(), addedProduct.getRecommendedRetailPrice());
+            assertEquals(mockedResult.getCountryOfSale(), addedProduct.getCountryOfSale());
         }
     }
 
@@ -482,12 +502,13 @@ class ProductControllerTest {
 
         Business tempBusiness = businessRepository.save(
                 new Business.Builder()
-                    .withBusinessType("Accommodation and Food Services")
-                    .withAddress(new Location())
-                    .withDescription("Some description2")
-                    .withName("BusinessName2")
-                    .withPrimaryOwner(ownerUser)
-                    .build()
+                        .withBusinessType("Accommodation and Food Services")
+                    .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
+                        "Canterbury,8041"))
+                        .withDescription("Some description2")
+                        .withName("BusinessName2")
+                        .withPrimaryOwner(ownerUser)
+                        .build()
         );
 
         assertDoesNotThrow(() -> mockMvc.perform(post(String.format("/businesses/%d/products", testBusiness1.getId()))
@@ -556,7 +577,7 @@ class ProductControllerTest {
     @Test
     void postingProductFailsIfProductBuilderFails() {
         try (MockedConstruction<Product.Builder> ignored = Mockito.mockConstruction(Product.Builder.class, withSettings().defaultAnswer(RETURNS_SELF), (mock, context) ->
-            when(mock.build()).thenThrow(new ResponseStatusException(HttpStatus.BAD_REQUEST, "Failed for some reason"))
+                when(mock.build()).thenThrow(new ResponseStatusException(HttpStatus.BAD_REQUEST, "Failed for some reason"))
         )) {
             setCurrentUser(ownerUser.getUserID());
             var productInfo = generateProductCreationInfo();
@@ -928,5 +949,77 @@ class ProductControllerTest {
         Number count = responseBody.getAsNumber("count");
 
         assertEquals(4, count);
+    }
+    /**
+     * Tests using the make image primary method will make the given image the primary image
+     */
+    @Test
+    public void makeImagePrimary_valid_sets_image_primary() throws Exception {
+        setCurrentUser(ownerUser.getUserID());
+        addSeveralProductsToACatalogue();
+        Product product = testBusiness1.getCatalogue().get(0);
+        product = addImagesToProduct(product); // load test images
+        Image image = product.getProductImages().get(1); // get the second item in list
+
+        mockMvc.perform(put(String.format("/businesses/%d/products/%d/images/%d/makeprimary", testBusiness1.getId(), product.getID(), image.getID()))
+                .sessionAttrs(sessionAuthToken)
+                .cookie(authCookie))
+                .andExpect(status().isOk());
+
+        product = productRepository.findById(product.getID()).get();
+        assertEquals(image.getID(), product.getProductImages().get(0).getID());
+
+    }
+
+    /**
+     * Tests that using the make image primary method with a business that does not exist,
+     * a 406 response is thrown
+     */
+    @Test
+    public void makeImagePrimary_InvalidBusinessId_406Response() {
+
+    }
+    /**
+     * Tests that using the make image primary method with a product that does not exist,
+     * a 406 response is thrown
+     */
+    @Test
+    public void makeImagePrimary_InvalidProductId_406Response() {
+
+    }
+
+    /**
+     * Tests that using the make image primary method with a Image that does not exist,
+     * a 406 response is thrown
+     */
+    @Test
+    public void makeImagePrimary_InvalidImageId_406Response() {
+
+    }
+
+    /**
+     * Tests that using the make image primary method with a session that is not a business admin,
+     * a 403 response is thrown
+     */
+    @Test
+    public void makeImagePrimary_NotBusinessAdmin_403Response() {
+
+    }
+    /**
+     * Tests that using the make image primary method with a session that is not logged in,
+     * a 401 response is thrown
+     */
+    @Test
+    public void makeImagePrimary_NoSession_401Response() {
+
+    }
+
+    /**
+     * Tests using the ake image primary method to see if a user who is a business administrator cannot edit images from
+     * products that exist in a different business's product catalogue
+     */
+    @Test
+    void makeImagePrimary_isBusinessAdminForWrongCatalogue_403Response() {
+
     }
 }

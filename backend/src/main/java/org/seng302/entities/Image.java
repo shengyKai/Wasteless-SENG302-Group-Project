@@ -24,6 +24,7 @@ public class Image {
     @Column(name = "filename_thumbnail", nullable = false, unique = true)
     private String filenameThumbnail;
 
+
     /**
      * The constructor for a product image
      * @param filename the directory where the image is stored

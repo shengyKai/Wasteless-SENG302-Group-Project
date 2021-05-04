@@ -235,7 +235,7 @@ public class ProductController {
 
         Product product = productRepository.getProduct(business, productId);
 
-        product.setProductImage(null);
+        product.setProductImages(null);
         productRepository.save(product);
     }
 
@@ -256,6 +256,41 @@ public class ProductController {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Request must have a \"" + field + "\" field");
             }
         }
+    }
+
+
+    /**
+     * Sets the given image as the primary image for the given product
+     * Only business administrators can perform this action.
+     * @param businessId the ID of the business
+     * @param productId the ID of the product
+     * @param imageId the ID of the image
+     */
+    @PutMapping("/businesses/{businessId}/products/{productId}/images/{imageId}/makeprimary")
+    void makeImagePrimary(@PathVariable Long businessId,@PathVariable Long productId, @PathVariable Long imageId,
+                          HttpServletRequest request, HttpServletResponse response ) {
+        AuthenticationTokenManager.checkAuthenticationToken(request);
+        // get business + sanity
+        Business business = getBusiness(businessId);
+        // check user priv
+        business.checkSessionPermissions(request);
+
+        // get product + sanity
+        Product product = getProduct(businessId, productId);
+        // get image + sanity
+        Image image = getImage(product, imageId);
+
+        List<Image> images = product.getProductImages(); // get the images so we can manipulate them
+        // If the given image is already the primary image, return
+        if (images.get(0).getID().equals(image.getID())) {
+            return;
+        }
+
+        images.remove(image); // pop the image from the list
+        images.add(0, image); // append to the start of the list
+        product.setProductImages(images); // apply the changes
+        productRepository.save(product);
+        logger.info(String.format("Set Image %d of product \"%s\" as the primary image", image.getID(), product.getName()));
     }
 
     /**
@@ -284,11 +319,48 @@ public class ProductController {
      */
     //TODO add tests
     public static boolean checkProductFromCodeExists(ProductRepository productRepository, String productCode) {
-        for (Product product: productRepository.findAll()) {
+        for (Product product : productRepository.findAll()) {
             if (product.getProductCode().equals(productCode)) {
                 return true;
             }
         }
         return false;
+    }
+    /**
+     * Gets a product from the repository.
+     * If the product does not exist then a 406 Not Acceptable is thrown
+     * If the product belongs to another business, a 403 Forbidden is thrown
+     * @param businessId The ID of the business that has the product
+     * @param productId The ID of the product
+     * @return A product or ResponseStatusException
+     */
+    private Product getProduct(Long businessId, Long productId) {
+        Optional<Product> product = productRepository.findById(productId);
+        if (!product.isPresent()) {
+            throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE,
+                    "The given product does not exist");
+        }
+        if (product.get().getBusiness().getId() != businessId) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                    "You cannot modify this product");
+        }
+        return product.get();
+    }
+
+    /**
+     * Gets an image for a product by ID
+     * If the image does not exists, a 406 Not Acceptable is thrown
+     * @param product The product
+     * @param imageId The ID of the image to fetch
+     * @return An Image or ResponseStatusException
+     */
+    private Image getImage(Product product, Long imageId) {
+        Optional<Image> image = imageRepository.findById(imageId);
+        if (!image.isPresent() || !product.getProductImages().contains(image.get())) {
+            throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE,
+                    "The given image does not exist for this product");
+        }
+        return image.get();
+
     }
 }

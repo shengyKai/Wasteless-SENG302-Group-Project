@@ -55,6 +55,8 @@
                   <v-text-field
                     v-model="recommendedRetailPrice"
                     label="Recommended Retail Price"
+                    :prefix="currency.symbol"
+                    :suffix="currency.code"
                     :rules="priceRules"
                     outlined
                   />
@@ -86,9 +88,10 @@
     </v-dialog>
   </v-row>
 </template>
-
+../../internal
 <script>
-import {createProduct} from '../../api';
+import {createProduct, getBusiness} from '@/api/internal';
+import {currencyFromCountry} from "@/api/currency";
 export default {
   name:'CreateProduct',
   data() {
@@ -102,6 +105,7 @@ export default {
       errorMessage: undefined,
       isLoading: false,
       unavailableProductCodes: [],
+      currency: {},
       valid: false,
       maxCharRules: [
         field => (field.length <= 50) || 'Reached max character limit: 50',
@@ -134,6 +138,13 @@ export default {
         field => !this.unavailableProductCodes.includes(field) || 'Product code is unavailable',
       ]
     };
+  },
+  async created() {
+    // When the create product dialogue, the currency will be set to the currency of the country the product is being
+    // sold in. It will have blank fields if no currency can be found from the country.
+    const business = await getBusiness(this.$store.state.createProductDialogBusiness);
+    const countryOfSale = business.address.country;
+    this.currency = await currencyFromCountry(countryOfSale);
   },
   methods: {
     /**

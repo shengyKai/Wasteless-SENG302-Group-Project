@@ -14,6 +14,7 @@ import org.seng302.entities.Product;
 import org.seng302.entities.User;
 import org.seng302.exceptions.AccessTokenException;
 import org.seng302.persistence.BusinessRepository;
+import org.seng302.persistence.ImageRepository;
 import org.seng302.persistence.ProductRepository;
 import org.seng302.persistence.UserRepository;
 import org.seng302.tools.AuthenticationTokenManager;
@@ -49,6 +50,8 @@ class DemoControllerTest {
     private BusinessRepository businessRepository;
     @Mock
     private ProductRepository productRepository;
+    @Mock
+    private ImageRepository imageRepository;
 
     private User testUser;
     private Business testBusiness;
@@ -56,7 +59,7 @@ class DemoControllerTest {
     @BeforeEach
     public void setUp() throws ParseException {
         MockitoAnnotations.openMocks(this);
-        demoController = new DemoController(userRepository, businessRepository, productRepository);
+        demoController = new DemoController(userRepository, businessRepository, productRepository, imageRepository);
         testUser = new User.Builder()
                 .withFirstName("Andy")
                 .withMiddleName("Percy")
@@ -71,7 +74,7 @@ class DemoControllerTest {
                 .withBusinessType("Accommodation and Food Services")
                 .withDescription("DESCRIPTION")
                 .withName("BUSINESS_NAME")
-                .withAddress(new Location())
+                .withAddress(Location.covertAddressStringToLocation("108,Albert Road,Ashburton,Christchurch,New Zealand,Canterbury,8041"))
                 .withPrimaryOwner(testUser)
                 .build();
     }
