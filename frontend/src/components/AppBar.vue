@@ -59,13 +59,6 @@
                 </v-list-item-title>
               </v-list-item>
 
-              <!-- Create Business -->
-              <v-list-item>
-                <v-list-item-title class="link" @click="viewCreateBusiness">
-                  Create Business
-                </v-list-item-title>
-              </v-list-item>
-
               <!-- Logout -->
               <v-list-item>
                 <v-list-item-title class="link" @click="logout">
