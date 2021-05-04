@@ -68,9 +68,10 @@
 import { uploadProductImage } from '@/api/internal';
 export default {
   name: "ProductImageUploader",
-  props: { // TODO remove the default values
-    businessId,
-    productId,
+  props: {
+    //we need these two values to update the product image accordingly
+    businessId: Number,
+    productCode: String,
     //the value here refers to the parent component in ProductCatalogueItem
     value: Boolean
   },

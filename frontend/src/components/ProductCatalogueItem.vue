@@ -151,6 +151,8 @@ export default {
         };
       },
     },
+    //retrieved from ProductCatalogue
+    businessId: Number
   },
   components: {
     FullProductDescription,
@@ -166,15 +168,13 @@ export default {
       showImageUploaderForm: false,
       //If readMoreActivated is false, the product description is less than 50 words, so it wont have to use the FullProductDescription
       //component. Else it will use it and the "Read more..." link will also be shown to lead to the FullProductDescription component
-      readMoreActivated: false,
-      businessId: null
+      readMoreActivated: false
     };
   },
   async created() {
     // When the catalogue item is created, the currency will be set to the currency of the country the product is being
     // sold in. It will have blank fields if no currency can be found from the country.
     this.currency = await currencyFromCountry(this.product.countryOfSale);
-    getBusinessId();
   },
   methods: {
     //if the "Read more..." link if clicked, readMoreActivated becomes true and the FullProductDescription dialog box will open
@@ -183,9 +183,6 @@ export default {
     },
     closeDialog() {
       this.showImageUploaderForm = false;
-    },
-    getBusinessId() {
-      this.businessId = this.$route.params.id;
     }
   },
 };
