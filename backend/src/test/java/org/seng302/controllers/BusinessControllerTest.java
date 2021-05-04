@@ -345,7 +345,7 @@ public class BusinessControllerTest {
                         "  },\n" +
                         "  \"businessType\": \"Accommodation and Food Services\"\n" +
                         "}", owner.getUserID());
-        setCurrentUser(999L);
+        setCurrentUser(99999L);
         JSONObject businessJson = (JSONObject) new JSONParser(JSONParser.MODE_JSON_SIMPLE).parse(businessJsonString);
         mockMvc.perform(MockMvcRequestBuilders.post("/businesses").content(businessJson.toJSONString())
                 .sessionAttrs(sessionAuthToken).cookie(authCookie).contentType(MediaType.APPLICATION_JSON)
@@ -623,7 +623,7 @@ public class BusinessControllerTest {
         testAdmin = userRepository.save(testAdmin);
         String jsonString = String.format("{\"userId\": %d}", testAdmin.getUserID());
 
-        setCurrentUser(999L); // LOGGED IN AS SOMEONE WHO IS NOT BUSINESS OWNER
+        setCurrentUser(99999L); // LOGGED IN AS SOMEONE WHO IS NOT BUSINESS OWNER
 
         mockMvc.perform(MockMvcRequestBuilders
                 .put(String.format("/businesses/%d/makeAdministrator", testBusiness.getId()))
@@ -843,7 +843,7 @@ public class BusinessControllerTest {
      */
     @Test
     public void removeAdminWhenUserNotExistTest() throws Exception {
-        String jsonString = String.format("{\"userId\": %d}", 999L);
+        String jsonString = String.format("{\"userId\": %d}", 99999L);
         setCurrentUser(owner.getUserID());
 
         mockMvc.perform(MockMvcRequestBuilders
