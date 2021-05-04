@@ -501,6 +501,30 @@ export async function getProducts(buisnessId: number, page: number, resultsPerPa
   return response.data;
 }
 
+/**
+ * Sends a query for the total number of products in the business
+ *
+ * @param buisnessId Business id to identify with the database to retrieve the product count
+ * @returns Number of products or an error message
+ */
+export async function getProductCount(buisnessId: number): Promise<MaybeError<number>> {
+  let response;
+  try {
+    response = await instance.get(`/businesses/${buisnessId}/products/count`);
+  } catch (error) {
+    let status: number | undefined = error.response?.status;
+
+    if (status === undefined) return 'Failed to reach backend';
+    return `Request failed: ${status}`;
+  }
+
+  if (typeof response.data?.count !== 'number') {
+    return 'Response is not number';
+  }
+
+  return response.data.count;
+}
+
 
 /**
  * Fetches a business with the given id.

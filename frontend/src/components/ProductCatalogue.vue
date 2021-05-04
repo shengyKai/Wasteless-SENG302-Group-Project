@@ -44,16 +44,20 @@
         <ProductCatalogueItem :businessId="businessId" :key="product.id" :product="product"/>
       </template>
     </v-list>
-    <!-- <v-pagination
+    <v-pagination
       v-model="currentPage"
       :length="totalPages"
       circle
-    /> -->
+    />
+    <!--Text to display range of results out of total number of results-->
+    <v-row justify="center" no-gutters>
+      {{ resultsMessage }}
+    </v-row>
   </div>
 </template>
 
 <script>
-import { getProducts } from '../api/internal';
+import { getProducts, getProductCount } from '../api/internal';
 import ProductCatalogueItem from './ProductCatalogueItem.vue';
 
 export default {
@@ -85,29 +89,33 @@ export default {
       /**
        * Number of results per a result page
        */
-      resultsPerPage: 10,
+      resultsPerPage: 3,
+      /**
+       * Total number of results for all pages
+       */
+      totalResults: 0,
       businessId: null
     };
   },
-  // computed: {
-  //   /**
-  //    * The total number of pages required to show all the users
-  //    * May be 0 if there are no results
-  //    */
-  //   totalPages () {
-  //     return Math.ceil(this.totalResults / this.resultsPerPage);
-  //   },
-  //   /**
-  //    * The message displayed at the bottom of the page to show how many results there are
-  //    */
-  //   resultsMessage() {
-  //     if (this.users.length === 0) return 'There are no results to show';
+  computed: {
+    /**
+     * The total number of pages required to show all the users
+     * May be 0 if there are no results
+     */
+    totalPages () {
+      return Math.ceil(this.totalResults / this.resultsPerPage);
+    },
+    /**
+     * The message displayed at the bottom of the page to show how many results there are
+     */
+    resultsMessage() {
+      if (this.products.length === 0) return 'There are no results to show';
 
-  //     const pageStartIndex = (this.currentPage - 1) * this.resultsPerPage;
-  //     const pageEndIndex = pageStartIndex + this.users.length;
-  //     return`Displaying ${pageStartIndex + 1} - ${pageEndIndex} of ${this.totalResults} results`;
-  //   },
-  // },
+      const pageStartIndex = (this.currentPage - 1) * this.resultsPerPage;
+      const pageEndIndex = pageStartIndex + this.products.length;
+      return`Displaying ${pageStartIndex + 1} - ${pageEndIndex} of ${this.totalResults} results`;
+    },
+  },
   created() {
     this.updateResults();
   },
@@ -130,6 +138,7 @@ export default {
         this.orderBy,
         this.reverse
       );
+      this.totalResults = await getProductCount(this.businessId);
       if (typeof value === 'string') {
         this.products = [];
         this.error = value;
