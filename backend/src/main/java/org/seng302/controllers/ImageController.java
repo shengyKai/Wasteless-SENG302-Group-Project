@@ -36,7 +36,7 @@ import javax.servlet.http.HttpServletRequest;
 
 @RestController
 public class ImageController {
-    private static final Logger logger = LogManager.getLogger(org.seng302.controllers.UserController.class.getName());
+    private static final Logger logger = LogManager.getLogger(ImageController.class.getName());
 
     @Autowired
     ImageRepository imageRepository;
