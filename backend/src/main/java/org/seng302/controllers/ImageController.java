@@ -66,9 +66,6 @@ public class ImageController {
         if (filename.endsWith(".png")) {
             return MediaType.IMAGE_PNG;
         }
-        if (filename.endsWith(".gif")) {
-            return MediaType.IMAGE_GIF;
-        }
 
         throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Couldn't determine image type");
     }

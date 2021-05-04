@@ -43,7 +43,8 @@ public class StorageServiceImpl implements StorageService {
     @Override
     public void store(MultipartFile file) {
         try {
-            //Validation of image
+            logger.info("Try to store image - before validation");
+            //Validation of image before storing it
             if ((file.getContentType().equals("image/jpeg")) || (file.getContentType().equals("image/png"))) {
                 Files.copy(file.getInputStream(), this.root.resolve(file.getOriginalFilename()));
                 logger.info(file.getOriginalFilename());    //Someone_Big_Banana
@@ -54,14 +55,14 @@ public class StorageServiceImpl implements StorageService {
                 logger.info(file.getContentType());         //Image/Jpeg
                 logger.info(file.getInputStream());         //java.io.FileInputStream@6a647a35
             }
-            else {
-                logger.info(file.getOriginalFilename());    //Someone_Big_Banana
-                logger.info(file.getOriginalFilename());
-                logger.info(file.getOriginalFilename());
-                logger.info(file.getOriginalFilename());
-                logger.info(file.getOriginalFilename());
-                logger.info(file.getContentType());
-            }
+//            else {  //FOR debugging , should show filename for 5time
+//                logger.info(file.getOriginalFilename());    //Someone_Big_Banana
+//                logger.info(file.getOriginalFilename());
+//                logger.info(file.getOriginalFilename());
+//                logger.info(file.getOriginalFilename());
+//                logger.info(file.getOriginalFilename());
+//                logger.info(file.getContentType());
+//            }
 
 
         } catch (Exception e) {

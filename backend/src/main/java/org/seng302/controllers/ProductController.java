@@ -285,6 +285,7 @@ public class ProductController {
             logger.info(String.format("Adding product image to business (businessId=%d, productCode=%s).", businessId, productCode));
             Business business = getBusiness(businessId);
 
+
             business.checkSessionPermissions(request);
 
             Product product = productRepository.findByBusinessAndProductCode(business, productCode).get();
@@ -292,7 +293,7 @@ public class ProductController {
                 throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "No product found with the given product code");
             }
 
-            storageService.store(file);
+
 
             // TODO This is very ugly, talk to connor about validation on image creation
             Image image = new Image(null, null);
@@ -301,7 +302,9 @@ public class ProductController {
             image = imageRepository.save(image);
             product.setProductImage(image);
             productRepository.save(product);
+            long imageID = image.getID();       // Parse this into string and add this into file name ## ugly_coconut'imageID'
 
+            storageService.store(file);
             return new ResponseEntity(HttpStatus.CREATED);
         } catch (Exception e) {
             logger.error(e.getMessage());
