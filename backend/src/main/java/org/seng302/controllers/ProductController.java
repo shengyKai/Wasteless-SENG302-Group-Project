@@ -302,9 +302,11 @@ public class ProductController {
             image = imageRepository.save(image);
             product.setProductImage(image);
             productRepository.save(product);
-            long imageID = image.getID();       // Parse this into string and add this into file name ## ugly_coconut'imageID'
+            long imageID = image.getID();       // parsing this into string and add this into file name
+            String fileID = String.valueOf(imageID);
+//            file += fileID;                     // ugly_coconut'imageID', put this into the store param?
+            storageService.store(file);         //store the file using storageService
 
-            storageService.store(file);
             return new ResponseEntity(HttpStatus.CREATED);
         } catch (Exception e) {
             logger.error(e.getMessage());
