@@ -955,19 +955,6 @@ class ProductControllerTest {
      */
     @Test
     public void makeImagePrimary_valid_sets_image_primary() throws Exception {
-        setCurrentUser(ownerUser.getUserID());
-        addSeveralProductsToACatalogue();
-        Product product = testBusiness1.getCatalogue().get(0);
-        product = addImagesToProduct(product); // load test images
-        Image image = product.getProductImages().get(1); // get the second item in list
-
-        mockMvc.perform(put(String.format("/businesses/%d/products/%s/images/%d/makeprimary", testBusiness1.getId(), product.getProductCode(), image.getID()))
-                .sessionAttrs(sessionAuthToken)
-                .cookie(authCookie))
-                .andExpect(status().isOk());
-
-        product = productRepository.findById(product.getID()).get();
-        assertEquals(image.getID(), product.getProductImages().get(0).getID());
 
     }
 

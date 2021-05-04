@@ -46,8 +46,9 @@ public class Product {
     @JoinColumn(name = "business_id")
     private Business business;
 
+    @OrderColumn(name="image_order")
     @OneToMany(fetch = FetchType.EAGER)
-    @JoinColumn(name = "image_id")
+    @JoinColumn(name="image_id")
     private List<Image> productImages = new ArrayList<>();
 
     public void addImage(Image image) {
