@@ -12,7 +12,7 @@
           { text: 'Description',                value: 'description'},
           { text: 'Manufacturer',               value: 'manufacturer'},
           { text: 'Recommended Retail Price',   value: 'recommendedRetailPrice'},
-          { text: 'Created',                    value: 'created'},
+          { text: 'Date Added',                 value: 'created'},
         ]"
         prepend-inner-icon="mdi-sort-variant"
         label="Sort by"
