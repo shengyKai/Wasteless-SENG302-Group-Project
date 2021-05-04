@@ -3,10 +3,10 @@
   <v-dialog v-model="dialog">
     <template v-slot:activator="{ on, attrs }">
       <!-- put an image over a link, such that now the image will be clickable to activate the pop up dialog -->
-      <!--  v-bind="attrs" v-on="on" allows the v-dialog to use this link as the activator for the dialog box -->
+      <!--  v-bind="attrs" v-on="on" allows the v-dialog to use this link as the activator for the dialog box  height=100%-->
       <a v-bind="attrs" v-on="on">
         <!-- productImages[0] will be the primary image for the product. -->
-        <v-img height="100%" :src="serverUrl + productImages[0].filename"/>
+        <v-img height="200px" :src="serverUrl + productImages[0].filename"/>
       </a>
     </template>
     <template>
