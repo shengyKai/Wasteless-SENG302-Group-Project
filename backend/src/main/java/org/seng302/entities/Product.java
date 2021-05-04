@@ -48,6 +48,9 @@ public class Product {
     @JoinColumn(name = "image_id")
     private Image productImage;
 
+    @Column(nullable = false)
+    private String countryOfSale;
+
     /**
      * Get the id of the product (Is globally unique)
      * @return the id of the product
@@ -101,6 +104,11 @@ public class Product {
      * @return the image
      */
     public Image getProductImage() { return productImage; }
+
+    /**
+     * Get the name of the country which the product is being sold in.
+     */
+    public String getCountryOfSale() { return countryOfSale; }
 
     /**
      * Sets the code of the product
@@ -209,6 +217,23 @@ public class Product {
     }
 
     /**
+     * Sets the name of the country which the product is being sold in. The country of sale must not be null, empty or
+     * blank, and must contain up to 100 characters which can only be letters or spaces.
+     * @param countryOfSale the name of the country where the product is to be sold.
+     */
+    public void setCountryOfSale(String countryOfSale) {
+        if (countryOfSale == null || countryOfSale.isEmpty() || countryOfSale.isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Country of sale cannot be empty");
+        } else if (countryOfSale.length() > 100) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Country of sale must be less than 100 characters long");
+        } else if (!countryOfSale.matches("[ a-zA-Z]+")) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Country of sale contains illegal characters");
+        } else {
+            this.countryOfSale = countryOfSale;
+        }
+    }
+
+    /**
      * Convert product to a JSON object
      */
     public JSONObject constructJSONObject() {
@@ -219,6 +244,7 @@ public class Product {
         object.put("manufacturer", manufacturer);
         object.put("recommendedRetailPrice", recommendedRetailPrice);
         object.put("created", created);
+        object.put("countryOfSale", countryOfSale);
         return object;
     }
 
@@ -315,6 +341,7 @@ public class Product {
             product.setManufacturer(this.manufacturer);
             product.setRecommendedRetailPrice(this.recommendedRetailPrice);
             product.setBusiness(this.business);
+            product.setCountryOfSale(this.business.getAddress().getCountry());
             product.setCreated(new Date());
             return product;
         }

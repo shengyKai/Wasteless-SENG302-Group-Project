@@ -39,7 +39,8 @@ class ProductTests {
     void createTestBusinesses() {
         testBusiness1 = new Business.Builder()
                 .withBusinessType("Accommodation and Food Services")
-                .withAddress(new Location())
+                .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
+                        "Canterbury,8041"))
                 .withDescription("Some description")
                 .withName("BusinessName1")
                 .withPrimaryOwner(testUser1)
@@ -48,7 +49,8 @@ class ProductTests {
 
         testBusiness2 = new Business.Builder()
                 .withBusinessType("Accommodation and Food Services")
-                .withAddress(new Location())
+                .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
+                        "Canterbury,8041"))
                 .withDescription("Some description 2")
                 .withName("BusinessName2")
                 .withPrimaryOwner(testUser1)
@@ -110,6 +112,7 @@ class ProductTests {
         assertEquals("This is a fresh orange", product.getDescription());
         assertEquals("Apple", product.getManufacturer());
         assertEquals(new BigDecimal("2.01"), product.getRecommendedRetailPrice());
+        assertEquals(testBusiness1.getAddress().getCountry(), product.getCountryOfSale());
     }
 
     /**
@@ -307,7 +310,8 @@ class ProductTests {
     void testDeletingBusinessWithProducts() {
         Business tempBusinessInitial = new Business.Builder()
                 .withBusinessType("Accommodation and Food Services")
-                .withAddress(new Location())
+                .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
+                        "Canterbury,8041"))
                 .withDescription("This business will be deleted")
                 .withName("Temp Name")
                 .withPrimaryOwner(testUser1)
@@ -703,5 +707,91 @@ class ProductTests {
         assertThrows(ResponseStatusException.class, builder::build);
     }
 
+    /**
+     * Check that when setCountryOfSale is called with a string that is not blank, contains only letters and spaces
+     * and is less than 100 characters, the product's country of sale is set to that country.
+     */
+    @Test
+    void setCountryOfSaleValidCountryTest() {
+        String[] validCountries = {"New Zealand", "MADEUPCOUNTRY", "another country"};
+        Product testProduct = new Product.Builder()
+                .withProductCode("NATHAN-APPLE-70")
+                .withName("The Nathan Apple")
+                .withDescription("Ever wonder why Nathan has an apple")
+                .withManufacturer("Apple")
+                .withRecommendedRetailPrice("9000.03")
+                .withBusiness(testBusiness1)
+                .build();
+        for (String country : validCountries) {
+            testProduct.setCountryOfSale(country);
+            assertEquals(country, testProduct.getCountryOfSale());
+        }
+    }
+
+    /**
+     * Check that when setCountryOfSale is called with a string that contains characters which are not letters or spaces,
+     * a response status exception is thrown and the product's country is not set to that string.
+     */
+    @Test
+    void setCountryOfSaleInvalidCharactersTest() {
+        String[] invalidCountries = {"-", "country123", "New Zealand!"};
+        Product testProduct = new Product.Builder()
+                .withProductCode("NATHAN-APPLE-70")
+                .withName("The Nathan Apple")
+                .withDescription("Ever wonder why Nathan has an apple")
+                .withManufacturer("Apple")
+                .withRecommendedRetailPrice("9000.03")
+                .withBusiness(testBusiness1)
+                .build();
+        for (String country : invalidCountries) {
+            assertThrows(ResponseStatusException.class, ()  -> testProduct.setCountryOfSale(country));
+            assertEquals(testBusiness1.getAddress().getCountry(), testProduct.getCountryOfSale());
+        }
+    }
+
+    /**
+     * Check that when setCountryOfSale is called with a string that is over 100 characters long,
+     * a response status exception is thrown and the product's country is not set to that string.
+     */
+    @Test
+    void setCountryOfSaleTooManyCharactersTest() {
+        String[] invalidCountries = new String[2];
+        invalidCountries[0] = "a".repeat(101);
+        invalidCountries[1] = "Long Country Name ".repeat(100);
+        Product testProduct = new Product.Builder()
+                .withProductCode("NATHAN-APPLE-70")
+                .withName("The Nathan Apple")
+                .withDescription("Ever wonder why Nathan has an apple")
+                .withManufacturer("Apple")
+                .withRecommendedRetailPrice("9000.03")
+                .withBusiness(testBusiness1)
+                .build();
+        for (String country : invalidCountries) {
+            assertThrows(ResponseStatusException.class, ()  -> testProduct.setCountryOfSale(country));
+            assertEquals(testBusiness1.getAddress().getCountry(), testProduct.getCountryOfSale());
+        }
+    }
+
+    /**
+     * Check that when setCountryOfSale is called with a string that is null, empty or blank,
+     * a response status exception is thrown and the product's country is not set to that string.
+     */
+    @Test
+    void setCountryOfSaleEmptyTest() {
+        String[] invalidCountries = {null, "", "     "};
+        invalidCountries[1] = "Long Country Name ".repeat(100);
+        Product testProduct = new Product.Builder()
+                .withProductCode("NATHAN-APPLE-70")
+                .withName("The Nathan Apple")
+                .withDescription("Ever wonder why Nathan has an apple")
+                .withManufacturer("Apple")
+                .withRecommendedRetailPrice("9000.03")
+                .withBusiness(testBusiness1)
+                .build();
+        for (String country : invalidCountries) {
+            assertThrows(ResponseStatusException.class, ()  -> testProduct.setCountryOfSale(country));
+            assertEquals(testBusiness1.getAddress().getCountry(), testProduct.getCountryOfSale());
+        }
+    }
 
 }
