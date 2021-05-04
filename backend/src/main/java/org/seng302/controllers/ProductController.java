@@ -180,7 +180,7 @@ public class ProductController {
             }
             String productCode = productInfo.getAsString("id");
 
-            if (productRepository.findByBusinessAndProductCode(business, productCode) != null) {
+            if ((productRepository.findByBusinessAndProductCode(business, productCode)).isPresent()) {
                 throw new ResponseStatusException(HttpStatus.CONFLICT, "Product already exists with product code in this catalogue \"" + productCode + "\"");
             }
 
@@ -200,6 +200,45 @@ public class ProductController {
             throw error;
         }
     }
+
+    /**
+     * Matches up the businessID, productID and imageID to find the image of a product to be deleted. Only business
+     * owners can delete product images and they must be within their own product catalogue.
+     * @param businessId the ID of the business
+     * @param productId the ID of the product
+     * @param imageId the ID of the image
+     */
+    @DeleteMapping("/businesses/{businessId}/products/{productId}/images/{imageId}")
+    void deleteProductImage(@PathVariable Long businessId, @PathVariable String productId, @PathVariable Long imageId,
+                            HttpServletRequest request) {
+        AuthenticationTokenManager.checkAuthenticationToken(request);
+        logger.info(String.format("Deleting image with id %d from the product %s within the business's catalogue %d",
+                imageId, productId, businessId));
+
+        System.out.println("A");
+        Business business = getBusiness(businessId);
+        System.out.println("B");
+        if (!ProductController.checkProductFromCodeExists(productRepository, productId)) {
+            throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "the product does not exist");
+        }
+        System.out.println("C");
+        Image image = imageRepository.getImage(imageId);
+        System.out.println("D");
+
+        business.checkSessionPermissions(request);
+        System.out.println("E");
+
+        if (!Business.checkProductExistsWithinCatalogue(business, productId) &&
+                !AuthenticationTokenManager.checkDGGAPermissions(request)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "The product is not within the business's catalogue");
+        }
+
+        Product product = productRepository.getProduct(business, productId);
+
+        product.setProductImage(null);
+        productRepository.save(product);
+    }
+
 
     /**
      * Checks that the provided JSON object exists and has all the fields that are required
@@ -272,6 +311,7 @@ public class ProductController {
      * @param businessId The id of the business to retrieve
      * @return The business matching the given Id
      */
+    //TODO Needs moved to the business repository
     private Business getBusiness(Long businessId) {
         // check business exists
         Optional<Business> business = businessRepository.findById(businessId);
@@ -282,6 +322,21 @@ public class ProductController {
         return business.get();
     }
 
+    /**
+     * Checks if a product with a given product code exists within the database.
+     * @param productRepository the database that holds product objects
+     * @param productCode the code of the product
+     * @return true if the product that matches the product code exists within the database, false otherwise
+     */
+    //TODO add tests
+    public static boolean checkProductFromCodeExists(ProductRepository productRepository, String productCode) {
+        for (Product product : productRepository.findAll()) {
+            if (product.getProductCode().equals(productCode)) {
+                return true;
+            }
+        }
+        return false;
+    }
     /**
      * Gets a product from the repository.
      * If the product does not exist then a 406 Not Acceptable is thrown
