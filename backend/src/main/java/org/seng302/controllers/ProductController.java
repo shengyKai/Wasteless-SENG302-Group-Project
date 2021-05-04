@@ -260,7 +260,6 @@ public class ProductController {
     @PutMapping("/businesses/{businessId}/products/{productId}/images/{imageId}/makeprimary")
     void makeImagePrimary(@PathVariable Long businessId,@PathVariable String productId, @PathVariable Long imageId,
                           HttpServletRequest request ) {
-        AuthenticationTokenManager.checkAuthenticationToken(request);
         // get business + sanity
         Business business = getBusiness(businessId);
         // check user priv
