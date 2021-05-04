@@ -43,7 +43,28 @@ public class StorageServiceImpl implements StorageService {
     @Override
     public void store(MultipartFile file) {
         try {
-            Files.copy(file.getInputStream(), this.root.resolve(file.getOriginalFilename()));
+            logger.info("Try to store image - before validation");
+            //Validation of image before storing it
+            if ((file.getContentType().equals("image/jpeg")) || (file.getContentType().equals("image/png"))) {
+                Files.copy(file.getInputStream(), this.root.resolve(file.getOriginalFilename()));
+                logger.info(file.getOriginalFilename());    //Someone_Big_Banana
+                logger.info(file.getOriginalFilename());
+                logger.info(file.getOriginalFilename());
+                logger.info(file.getName());                //File
+                logger.info(file.getResource());            //MultipartFile resource [file]
+                logger.info(file.getContentType());         //Image/Jpeg
+                logger.info(file.getInputStream());         //java.io.FileInputStream@6a647a35
+            }
+//            else {  //FOR debugging , should show filename for 5time
+//                logger.info(file.getOriginalFilename());    //Someone_Big_Banana
+//                logger.info(file.getOriginalFilename());
+//                logger.info(file.getOriginalFilename());
+//                logger.info(file.getOriginalFilename());
+//                logger.info(file.getOriginalFilename());
+//                logger.info(file.getContentType());
+//            }
+
+
         } catch (Exception e) {
             logger.error(e);
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to store file");
@@ -81,7 +102,7 @@ public class StorageServiceImpl implements StorageService {
 //    public Resource loadAsResource(String filename) {
 //        return null;
 //    }
-
+    // Took out deleteAll as product images should not be deleted all at once
     @Override
     public void deleteAll() {
         FileSystemUtils.deleteRecursively(root.toFile());
