@@ -1,7 +1,10 @@
 <template>
   <v-app-bar max-height="64px">
     <div class="container-outer flex-center">
-      <h2>WASTELESS</h2>
+      <h1 class="link" @click="showHome">WASTELESS</h1>
+
+      <!-- Space between the app name and the controls -->
+      <div class="spacer"/>
 
       <!-- Search Bar component to perform search and show result, if not on search page -->
       <SearchBar v-if="$route.path !== '/search'" />
@@ -59,6 +62,13 @@
                 </v-list-item-title>
               </v-list-item>
 
+              <!-- Home -->
+              <v-list-item>
+                <v-list-item-title class="link" @click="showHome">
+                  Home
+                </v-list-item-title>
+              </v-list-item>
+
               <!-- Logout -->
               <v-list-item>
                 <v-list-item-title class="link" @click="logout">
@@ -102,6 +112,16 @@ export default {
       default:
         this.$router.push("/profile");
       }
+    },
+    showHome() {
+      this.$router.push("/home");
+    },
+    showCatalogue() {
+      //Should be using this
+      // this.$router.push("/business/" + this.$store.state.activeRole.id + "/products");
+      this.$router.push("/business/" + "10"+ "/products");
+      //testing the catalogue with id=10 to show product in catalogue this.$store.state.activeRole.id
+
     },
     logout() {
       this.$store.commit("logoutUser");
