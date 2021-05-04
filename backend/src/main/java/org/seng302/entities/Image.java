@@ -1,5 +1,6 @@
 package org.seng302.entities;
 
+import net.minidev.json.annotate.JsonIgnore;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -23,7 +24,6 @@ public class Image {
 
     @Column(name = "filename_thumbnail", nullable = false, unique = true)
     private String filenameThumbnail;
-
 
     /**
      * The constructor for a product image
@@ -155,5 +155,10 @@ public class Image {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "An illegal character was in the filename");
         }
         this.filenameThumbnail = filenameThumbnail;
+    }
+
+    @Override
+    public String toString() {
+        return "IMAGE_"+this.getID().toString();
     }
 }

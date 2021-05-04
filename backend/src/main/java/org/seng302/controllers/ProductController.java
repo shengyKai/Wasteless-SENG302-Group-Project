@@ -20,9 +20,12 @@ import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 /**
  * This class handles requests for retrieving and saving products
@@ -211,31 +214,19 @@ public class ProductController {
     @DeleteMapping("/businesses/{businessId}/products/{productId}/images/{imageId}")
     void deleteProductImage(@PathVariable Long businessId, @PathVariable String productId, @PathVariable Long imageId,
                             HttpServletRequest request) {
-        AuthenticationTokenManager.checkAuthenticationToken(request);
         logger.info(String.format("Deleting image with id %d from the product %s within the business's catalogue %d",
                 imageId, productId, businessId));
 
-        System.out.println("A");
-        Business business = getBusiness(businessId);
-        System.out.println("B");
-        if (!ProductController.checkProductFromCodeExists(productRepository, productId)) {
-            throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "the product does not exist");
-        }
-        System.out.println("C");
-        Image image = imageRepository.getImage(imageId);
-        System.out.println("D");
+        Business business = getBusiness(businessId); // get the business + sanity checks
 
-        business.checkSessionPermissions(request);
-        System.out.println("E");
+        Product product = getProduct(business, productId); // get the product + sanity checks
 
-        if (!Business.checkProductExistsWithinCatalogue(business, productId) &&
-                !AuthenticationTokenManager.checkDGGAPermissions(request)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "The product is not within the business's catalogue");
-        }
+        Image image = getImage(product, imageId); // get the image + sanity checks
 
-        Product product = productRepository.getProduct(business, productId);
+        business.checkSessionPermissions(request); // Can this user do this action
 
-        product.setProductImages(null);
+        product.removeProductImage(image);
+
         productRepository.save(product);
     }
 
@@ -267,8 +258,8 @@ public class ProductController {
      * @param imageId the ID of the image
      */
     @PutMapping("/businesses/{businessId}/products/{productId}/images/{imageId}/makeprimary")
-    void makeImagePrimary(@PathVariable Long businessId,@PathVariable Long productId, @PathVariable Long imageId,
-                          HttpServletRequest request, HttpServletResponse response ) {
+    void makeImagePrimary(@PathVariable Long businessId,@PathVariable String productId, @PathVariable Long imageId,
+                          HttpServletRequest request ) {
         AuthenticationTokenManager.checkAuthenticationToken(request);
         // get business + sanity
         Business business = getBusiness(businessId);
@@ -276,7 +267,7 @@ public class ProductController {
         business.checkSessionPermissions(request);
 
         // get product + sanity
-        Product product = getProduct(businessId, productId);
+        Product product = getProduct(business, productId);
         // get image + sanity
         Image image = getImage(product, imageId);
 
@@ -311,36 +302,22 @@ public class ProductController {
         return business.get();
     }
 
-    /**
-     * Checks if a product with a given product code exists within the database.
-     * @param productRepository the database that holds product objects
-     * @param productCode the code of the product
-     * @return true if the product that matches the product code exists within the database, false otherwise
-     */
-    //TODO add tests
-    public static boolean checkProductFromCodeExists(ProductRepository productRepository, String productCode) {
-        for (Product product : productRepository.findAll()) {
-            if (product.getProductCode().equals(productCode)) {
-                return true;
-            }
-        }
-        return false;
-    }
+
     /**
      * Gets a product from the repository.
      * If the product does not exist then a 406 Not Acceptable is thrown
      * If the product belongs to another business, a 403 Forbidden is thrown
-     * @param businessId The ID of the business that has the product
+     * @param business The business that has the product
      * @param productId The ID of the product
      * @return A product or ResponseStatusException
      */
-    private Product getProduct(Long businessId, Long productId) {
-        Optional<Product> product = productRepository.findById(productId);
+    private Product getProduct(Business business, String productId) {
+        Optional<Product> product = productRepository.findByProductCode(productId);
         if (!product.isPresent()) {
             throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE,
                     "The given product does not exist");
         }
-        if (product.get().getBusiness().getId() != businessId) {
+        if (product.get().getBusiness().getId() != business.getId()) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN,
                     "You cannot modify this product");
         }

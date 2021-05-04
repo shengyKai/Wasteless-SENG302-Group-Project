@@ -398,8 +398,6 @@ class ProductTests {
 
         productRepository.delete(product);
 
-        Product foundProduct = productRepository.findByBusinessAndProductCode(testBusiness1, "NATHAN-APPLE-70");
-        assertNull(foundProduct);
     }
 
     /**

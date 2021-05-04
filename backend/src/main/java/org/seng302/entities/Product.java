@@ -46,8 +46,9 @@ public class Product {
     @JoinColumn(name = "business_id")
     private Business business;
 
+    @OrderColumn(name="image_order")
     @OneToMany(fetch = FetchType.EAGER)
-    @JoinColumn(name = "image_id")
+    @JoinColumn(name="image_id")
     private List<Image> productImages = new ArrayList<>();
 
     public void addImage(Image image) {
@@ -220,6 +221,17 @@ public class Product {
      */
     public void setProductImages(List<Image> productImages) {
         this.productImages = productImages;
+    }
+
+    /**
+     * Removes a given image from the list of products
+     * @param productImage The image to remove
+     */
+    public void removeProductImage(Image productImage) {
+        if (!this.productImages.contains(productImage)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Product cannot be removed");
+        }
+        this.productImages.remove(productImage);
     }
 
     /**
