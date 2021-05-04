@@ -48,29 +48,18 @@ public class StorageServiceImpl implements StorageService {
             if ((file.getContentType().equals("image/jpeg")) || (file.getContentType().equals("image/png"))) {
                 Files.copy(file.getInputStream(), this.root.resolve(file.getOriginalFilename()));
                 logger.info(file.getOriginalFilename());    //Someone_Big_Banana
-                logger.info(file.getOriginalFilename());
-                logger.info(file.getOriginalFilename());
                 logger.info(file.getName());                //File
                 logger.info(file.getResource());            //MultipartFile resource [file]
                 logger.info(file.getContentType());         //Image/Jpeg
                 logger.info(file.getInputStream());         //java.io.FileInputStream@6a647a35
+                logger.info(file.getBytes());               //if its too big, then we throw something
             }
-//            else {  //FOR debugging , should show filename for 5time
-//                logger.info(file.getOriginalFilename());    //Someone_Big_Banana
-//                logger.info(file.getOriginalFilename());
-//                logger.info(file.getOriginalFilename());
-//                logger.info(file.getOriginalFilename());
-//                logger.info(file.getOriginalFilename());
-//                logger.info(file.getContentType());
-//            }
-
 
         } catch (Exception e) {
             logger.error(e);
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to store file");
         }
     }
-
 
     @Override
     public Resource load(String filename) {
