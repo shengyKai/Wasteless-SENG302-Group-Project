@@ -265,14 +265,14 @@ describe('UserProfile.vue', () => {
   });
 
   /**
-   * Tests that as a normal user, the UserProfile will not show the user's home street address 
+   * Tests that as a normal user, the UserProfile will not show the user's home street address
    */
   it('Does not render street address as normal user', () => {
     expect(wrapper.text()).not.toContain('test_street1');
   });
 
   /**
-   * Tests that as a normal user, the UserProfile will not show the user's home street number 
+   * Tests that as a normal user, the UserProfile will not show the user's home street number
    */
   it('Does not render street number as normal user', () => {
     expect(wrapper.text()).not.toContain('test_street_number');
@@ -598,7 +598,7 @@ describe('UserProfile.vue', () => {
   /**
    * Tests that a DGAA will be able to click the revoke admin button to change the admin into a user
    */
-   it('If acting as DGAA viewing a GAA, the DGAA can revoke the GAA into a normal user', async () => {
+  it('If acting as DGAA viewing a GAA, the DGAA can revoke the GAA into a normal user', async () => {
     appWrapper.destroy();
     // change the current user into a DGAA
     store.state.user = makeTestUser(1, [1]);
