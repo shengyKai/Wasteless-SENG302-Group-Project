@@ -712,7 +712,7 @@ public class BusinessControllerTest {
         setCurrentUser(owner.getUserID());
 
         mockMvc.perform(MockMvcRequestBuilders
-                .put(String.format("/businesses/%d/makeAdministrator", 999L))
+                .put(String.format("/businesses/%d/makeAdministrator", 99999L))
                 .content(jsonString)
                 .sessionAttrs(sessionAuthToken)
                 .cookie(authCookie)

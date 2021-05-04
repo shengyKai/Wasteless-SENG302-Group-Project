@@ -9,7 +9,7 @@
         </v-col>
         <v-col cols="auto" md="3" sm="12" v-else>
           <!-- feed the productImages into the carousel child component -->
-          <ProductImageCarousel :productImages="product.images"/>
+          <ProductImageCarousel :productImages="product.images" :productId="product.id" v-on:change-primary-image="setPrimaryImage"/>
         </v-col>
         <v-col>
           <v-row>
@@ -124,6 +124,7 @@ import FullProductDescription from "./utils/FullProductDescription.vue";
 import ProductImageCarousel from "./utils/ProductImageCarousel.vue";
 import { currencyFromCountry } from "@/api/currency";
 import ProductImageUploader from "./utils/ProductImageUploader";
+import {makeImagePrimary} from "@/api/internal";
 
 export default {
   name: "ProductCatalogueItem",
@@ -140,16 +141,24 @@ export default {
           created: "Some Date Added",
           images: [
             {
-              filename: "https://cdn.vuetifyjs.com/images/carousel/squirrel.jpg"
+              filename: "https://cdn.vuetifyjs.com/images/carousel/squirrel.jpg",
+              thumbnail: "https://cdn.vuetifyjs.com/images/carousel/squirrel.jpg",
+              id: 1,
             },
             {
-              filename: "https://cdn.vuetifyjs.com/images/carousel/sky.jpg"
+              filename: "https://cdn.vuetifyjs.com/images/carousel/sky.jpg",
+              thumbnail: "https://cdn.vuetifyjs.com/images/carousel/sky.jpg",
+              id: 2,
             },
             {
-              filename: "https://cdn.vuetifyjs.com/images/carousel/bird.jpg"
+              filename: "https://cdn.vuetifyjs.com/images/carousel/bird.jpg",
+              thumbnail: "https://cdn.vuetifyjs.com/images/carousel/bird.jpg",
+              id: 3,
             },
             {
-              filename: "https://cdn.vuetifyjs.com/images/carousel/planet.jpg"
+              filename: "https://cdn.vuetifyjs.com/images/carousel/planet.jpg",
+              thumbnail: "https://cdn.vuetifyjs.com/images/carousel/planet.jpg",
+              id: 4,
             },
           ],
           countryOfSale: "Japan",
@@ -188,7 +197,19 @@ export default {
     },
     closeDialog() {
       this.showImageUploaderForm = false;
-    }
+    },
+    /**
+     * Sets the currently selected image as the primary image.
+     * @param imageId Id of the currently selected image
+     */
+    async setPrimaryImage(imageId) {
+      let response = await makeImagePrimary(this.businessId, this.product.id, imageId);
+      if (typeof response === 'string') {
+        this.$store.commit('setError', response);
+        return;
+      }
+      this.$router.go(); // refresh the page to see the changes
+    },
   },
 };
 </script>
