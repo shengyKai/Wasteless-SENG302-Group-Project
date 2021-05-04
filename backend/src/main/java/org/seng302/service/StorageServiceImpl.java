@@ -41,15 +41,16 @@ public class StorageServiceImpl implements StorageService {
     }
 
     @Override
-    public void store(MultipartFile file) {
+    public void store(MultipartFile file, String filename) {
+        logger.info("Storing image with filename="+filename);
         try {
-            Files.copy(file.getInputStream(), this.root.resolve(file.getOriginalFilename()));
+            Files.copy(file.getInputStream(), this.root.resolve(filename));
+            
         } catch (Exception e) {
             logger.error(e);
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to store file");
         }
     }
-
 
     @Override
     public Resource load(String filename) {
@@ -81,7 +82,7 @@ public class StorageServiceImpl implements StorageService {
 //    public Resource loadAsResource(String filename) {
 //        return null;
 //    }
-
+    // Took out deleteAll as product images should not be deleted all at once
     @Override
     public void deleteAll() {
         FileSystemUtils.deleteRecursively(root.toFile());

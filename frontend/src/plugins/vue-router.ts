@@ -60,11 +60,6 @@ const routes = [
     meta: { title: 'Search' }
   },
   { // TODO Remove this
-    path: "/upload",
-    component: ProductImageUploader,
-    meta: { title: 'Upload Product Image'}
-  },
-  { // TODO Remove this
     path: "/catalogue",
     component: ProductCatalogueItem,
     meta: { title: 'Catalogue'}

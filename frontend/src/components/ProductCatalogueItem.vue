@@ -17,13 +17,15 @@
                 {{ product.name }}
               </v-card-title>
             </v-col>
-            <v-col cols="auto" md="1" sm="2">
+            <v-col cols="auto" md="2" sm="2">
               <v-card-actions
                 :class="{ 'pt-0': $vuetify.breakpoint.smAndDown }"
                 class="pb-0"
               >
                 <!-- shows the edit button for editing product details, which supposedly links to a form -->
-                <a @click="editProductDetails">Edit</a>
+                <a @click="showImageUploaderForm=true">Upload Image</a>
+                <!-- cant mutate parent props directly, so no point to send a prop to the child -->
+                <ProductImageUploader :businessId="businessId" :productCode="product.id" v-model="showImageUploaderForm"/>
               </v-card-actions>
             </v-col>
           </v-row>
@@ -116,6 +118,7 @@
 import FullProductDescription from "./utils/FullProductDescription.vue";
 import ProductImageCarousel from "./utils/ProductImageCarousel.vue";
 import { currencyFromCountry } from "@/api/currency";
+import ProductImageUploader from "./utils/ProductImageUploader";
 
 export default {
   name: "ProductCatalogueItem",
@@ -148,21 +151,24 @@ export default {
         };
       },
     },
+    //retrieved from ProductCatalogue
+    businessId: Number
   },
   components: {
     FullProductDescription,
     ProductImageCarousel,
+    ProductImageUploader
   },
   data() {
     return {
       currency: {
         code: "",
-        symbol: "",
+        symbol: ""
       },
-
+      showImageUploaderForm: false,
       //If readMoreActivated is false, the product description is less than 50 words, so it wont have to use the FullProductDescription
       //component. Else it will use it and the "Read more..." link will also be shown to lead to the FullProductDescription component
-      readMoreActivated: false,
+      readMoreActivated: false
     };
   },
   async created() {
@@ -175,10 +181,9 @@ export default {
     activateReadMore() {
       this.readMoreActivated = true;
     },
-    //add the form to edit product details here
-    editProductDetails() {
-      alert("TODO");
-    },
+    closeDialog() {
+      this.showImageUploaderForm = false;
+    }
   },
 };
 </script>

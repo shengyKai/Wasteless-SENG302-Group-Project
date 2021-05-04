@@ -36,7 +36,7 @@ import javax.servlet.http.HttpServletRequest;
 
 @RestController
 public class ImageController {
-    private static final Logger logger = LogManager.getLogger(org.seng302.controllers.ImageController.class.getName());
+    private static final Logger logger = LogManager.getLogger(ImageController.class.getName());
 
     @Autowired
     ImageRepository imageRepository;
@@ -55,6 +55,7 @@ public class ImageController {
         }
 
         Resource file = storageService.load(retrievedImage.get().getFilename());
+        logger.warn(file.getDescription());
         return ResponseEntity.status(HttpStatus.OK).contentType(guessMediaType(retrievedImage.get().getFilename())).body(file);
     }
 
@@ -64,9 +65,6 @@ public class ImageController {
         }
         if (filename.endsWith(".png")) {
             return MediaType.IMAGE_PNG;
-        }
-        if (filename.endsWith(".gif")) {
-            return MediaType.IMAGE_GIF;
         }
 
         throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Couldn't determine image type");
