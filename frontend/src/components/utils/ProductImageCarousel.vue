@@ -15,22 +15,22 @@
         hide-delimiters
       >
         <!-- iterate through each photo in productImages -->
-        <v-carousel-item v-for="(item, i) in productImages" :key="i" :src="serverUrl + productImages[i].filename" />
-        <v-tooltip bottom >
-          <template #activator="{ on: tooltip}">
-            <v-btn
-              icon
-              v-if="i !== 0"
-              color="primary"
-              v-on="{...tooltip}"
-              @click="makeImagePrimary(item.id)"
-              ref="makePrimaryImageButton"
-            >
-              <v-icon>mdi-eye-plus</v-icon>
-            </v-btn>
-          </template>
-          <span> Make Primary Image </span>
-        </v-tooltip>
+        <v-carousel-item v-for="(item, i) in productImages" :key="i" :src="serverUrl + productImages[i].filename">
+          <v-tooltip bottom >
+            <template #activator="{ on: tooltip}">
+              <v-btn
+                icon
+                v-if="i !== 0"
+                color="primary"
+                v-on="{...tooltip}"
+                @click="makeImagePrimary(item.id)"
+                ref="makePrimaryImageButton"
+              >
+                <v-icon>mdi-eye-plus</v-icon>
+              </v-btn>
+            </template>
+            <span> Make Primary Image </span>
+          </v-tooltip>
         </v-carousel-item>
       </v-carousel>
     </template>
