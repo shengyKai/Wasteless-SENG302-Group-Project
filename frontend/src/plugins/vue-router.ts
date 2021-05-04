@@ -7,7 +7,8 @@ import ProfilePage from "../components/UserProfile.vue";
 import BusinessProfile from "../components/BusinessProfile/index.vue";
 import SearchResults from "../components/SearchResults.vue";
 import HomePage from "../components/HomePage.vue";
-import Catalogue from "../components/ProductCatalogueItem.vue";
+import ProductCatalogue from "../components/ProductCatalogue.vue";
+import ProductCatalogueItem from "../components/ProductCatalogueItem.vue";
 import ProductImageUploader from "../components/utils/ProductImageUploader.vue";
 
 
@@ -65,14 +66,20 @@ const routes = [
   },
   { // TODO Remove this
     path: "/catalogue",
-    component: Catalogue,
+    component: ProductCatalogueItem,
     meta: { title: 'Catalogue'}
+  },
+  {
+    path: "/business/:id/products",
+    component: ProductCatalogue,
+    meta: { title: 'Buisness Products' }
   },
   {
     path: "*",
     component: NotFound,
     meta: { title: 'Not Found' }
   }
+
 ];
 
 

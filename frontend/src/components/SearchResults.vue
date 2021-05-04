@@ -174,7 +174,6 @@ export default {
      */
     async updateNotQuery() {
       if (!this.searchedQuery) return; // If the current search query is empty, do not search
-
       const value = await search (
         this.searchedQuery,
         this.currentPage,
