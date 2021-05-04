@@ -449,7 +449,7 @@ export async function uploadProductImage(businessId: number, productCode: string
  * @param productId The ID of the product that has the image
  * @param imageId The ID of the image
  */
-export async function makeImagePrimary(businessId: number, productId: number, imageId: number) : Promise<MaybeError<undefined>> {
+export async function makeImagePrimary(businessId: number, productId: string, imageId: number) : Promise<MaybeError<undefined>> {
   try {
     await instance.put(`/businesses/${businessId}/products/${productId}/images/${imageId}/makeprimary`);
   } catch ( error ) {

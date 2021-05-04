@@ -132,16 +132,24 @@ export default {
           created: "Some Date Added",
           images: [
             {
-              filename: "https://cdn.vuetifyjs.com/images/carousel/squirrel.jpg"
+              filename: "https://cdn.vuetifyjs.com/images/carousel/squirrel.jpg",
+              thumbnail: "https://cdn.vuetifyjs.com/images/carousel/squirrel.jpg",
+              id: 1,
             },
             {
-              filename: "https://cdn.vuetifyjs.com/images/carousel/sky.jpg"
+              filename: "https://cdn.vuetifyjs.com/images/carousel/sky.jpg",
+              thumbnail: "https://cdn.vuetifyjs.com/images/carousel/sky.jpg",
+              id: 2,
             },
             {
-              filename: "https://cdn.vuetifyjs.com/images/carousel/bird.jpg"
+              filename: "https://cdn.vuetifyjs.com/images/carousel/bird.jpg",
+              thumbnail: "https://cdn.vuetifyjs.com/images/carousel/bird.jpg",
+              id: 3,
             },
             {
-              filename: "https://cdn.vuetifyjs.com/images/carousel/planet.jpg"
+              filename: "https://cdn.vuetifyjs.com/images/carousel/planet.jpg",
+              thumbnail: "https://cdn.vuetifyjs.com/images/carousel/planet.jpg",
+              id: 4,
             },
           ],
           countryOfSale: "Japan",

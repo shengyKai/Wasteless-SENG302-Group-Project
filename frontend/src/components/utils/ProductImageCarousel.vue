@@ -59,7 +59,7 @@ export default {
         this.$store.commit('setError', response);
         return;
       }
-      this.$router.go(); // refresh the page to see the changes
+      //this.$router.go(); // refresh the page to see the changes
     }
   },
   computed: {
