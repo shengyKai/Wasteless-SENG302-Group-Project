@@ -78,7 +78,7 @@ export default {
       const parts = createdAt.toDateString().split(' ');
 
       const diffTime = now - createdAt;
-      const diffMonths = Math.ceil(diffTime / (1000 * 60 * 60 * 24 * 30));
+      const diffMonths = Math.floor(diffTime / (1000 * 60 * 60 * 24 * 30));
 
       return `${parts[2]} ${parts[1]} ${parts[3]} (${diffMonths} months ago)`;
     },
