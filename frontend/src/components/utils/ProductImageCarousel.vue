@@ -11,6 +11,7 @@
     </template>
     <template>
       <v-carousel
+        v-model="carouselItem"
         show-arrows-on-hover
         hide-delimiters
       >
@@ -57,6 +58,7 @@ export default {
   props: ["productImages", "productId"],
   data() {
     return {
+      carouselItem: 0,
       // if dialog is false, the popup does not appear.
       dialog: false
     };
