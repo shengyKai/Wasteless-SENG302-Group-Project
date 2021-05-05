@@ -2,15 +2,12 @@
 package org.seng302.entities;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
-
 import org.springframework.data.annotation.ReadOnlyProperty;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
-import javax.annotation.PreDestroy;
 import javax.persistence.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;

@@ -1,19 +1,18 @@
 package org.seng302.controllers;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
-import java.text.ParseException;
-
 import org.junit.Ignore;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.seng302.controllers.DGAAController;
 import org.seng302.entities.Location;
 import org.seng302.entities.User;
 import org.seng302.persistence.BusinessRepository;
 import org.seng302.persistence.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+
+import java.text.ParseException;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest
 public class DGAAControllerTest {

@@ -1,15 +1,15 @@
 package cucumber.stepDefinitions;
 
 import io.cucumber.java.Before;
-
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
-
 import org.junit.jupiter.api.Assertions;
-
-import org.seng302.entities.*;
+import org.seng302.entities.Business;
+import org.seng302.entities.Location;
+import org.seng302.entities.Product;
+import org.seng302.entities.User;
 import org.seng302.persistence.AccountRepository;
 import org.seng302.persistence.BusinessRepository;
 import org.seng302.persistence.ProductRepository;
@@ -22,8 +22,6 @@ import java.text.ParseException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
-
-import static org.junit.Assert.*;
 
 public class ProductStepDefinition {
 

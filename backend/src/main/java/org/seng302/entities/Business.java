@@ -1,17 +1,14 @@
 package org.seng302.entities;
 
+import net.minidev.json.JSONArray;
+import net.minidev.json.JSONObject;
 import org.seng302.tools.AuthenticationTokenManager;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
-import net.minidev.json.JSONArray;
-import net.minidev.json.JSONObject;
-
 import javax.persistence.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
-
-
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.*;

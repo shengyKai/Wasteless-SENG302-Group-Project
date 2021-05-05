@@ -1,11 +1,13 @@
 package org.seng302.entities;
 
-import net.minidev.json.annotate.JsonIgnore;
 import net.minidev.json.JSONObject;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
 import java.util.Arrays;
 import java.util.List;
 

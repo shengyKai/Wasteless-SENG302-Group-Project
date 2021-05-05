@@ -7,7 +7,6 @@ import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-import org.seng302.controllers.DemoController;
 import org.seng302.entities.Business;
 import org.seng302.entities.Location;
 import org.seng302.entities.Product;

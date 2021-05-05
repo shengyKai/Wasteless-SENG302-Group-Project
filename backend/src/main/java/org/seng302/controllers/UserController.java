@@ -231,16 +231,4 @@ public class UserController {
             userRepository.save(user.get());
         }
     }
-
-    /**
-     * For development
-     * Starts a session
-     * @param request
-     * @param response
-     */
-    @GetMapping("/dev/session")
-    void experimentalGetSession(HttpServletRequest request, HttpServletResponse response) {
-        AuthenticationTokenManager.setAuthenticationToken(request, response, null);
-        AuthenticationTokenManager.setAuthenticationTokenDGAA(request);
-    }
 }
