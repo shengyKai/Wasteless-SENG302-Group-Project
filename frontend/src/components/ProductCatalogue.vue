@@ -12,7 +12,7 @@
           { text: 'Description',                value: 'description'},
           { text: 'Manufacturer',               value: 'manufacturer'},
           { text: 'Recommended Retail Price',   value: 'recommendedRetailPrice'},
-          { text: 'Created',                    value: 'created'},
+          { text: 'Date Added',                 value: 'created'},
         ]"
         prepend-inner-icon="mdi-sort-variant"
         label="Sort by"
@@ -111,13 +111,14 @@ export default {
     resultsMessage() {
       if (this.products.length === 0) return 'There are no results to show';
 
+
       const pageStartIndex = (this.currentPage - 1) * this.resultsPerPage;
       const pageEndIndex = pageStartIndex + this.products.length;
       return`Displaying ${pageStartIndex + 1} - ${pageEndIndex} of ${this.totalResults} results`;
     },
   },
-  created() {
-    this.updateResults();
+  async created() {
+    await this.updateResults();
   },
   methods: {
     /**

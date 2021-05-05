@@ -47,7 +47,7 @@
           <v-btn
             color="primary"
             text
-            @click="showDialog=false">
+            @click="closeForm">
             Close
           </v-btn>
           <v-btn
@@ -132,6 +132,10 @@ export default {
 
       input.click();
     },
+    closeForm() {
+      this.showDialog = false;
+      this.file = undefined;
+    },
     /**
      * Handler for the "create" button
      * This will trigger a call to the add product image endpoint and close the dialog if successful
@@ -148,6 +152,7 @@ export default {
         return;
       }
       this.showDialog = false;
+      this.file = undefined;
     }
   },
 

@@ -14,6 +14,7 @@ import java.math.BigDecimal;
 import java.text.ParseException;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -345,7 +346,7 @@ class ProductTests {
                     .build()
         );
 
-        Product foundProduct = productRepository.findByBusinessAndProductCode(testBusiness1, "NATHAN-APPLE-70");
+        Product foundProduct = productRepository.findByBusinessAndProductCode(testBusiness1, "NATHAN-APPLE-70").get();
         assertNotNull(foundProduct);
 
         assertEquals(product.getID(), foundProduct.getID());
@@ -374,8 +375,8 @@ class ProductTests {
                         .build()
         );
 
-        Product foundProduct = productRepository.findByBusinessAndProductCode(testBusiness1, "NATHAN-APPLE-70");
-        assertNull(foundProduct);
+        Optional<Product> foundProduct = productRepository.findByBusinessAndProductCode(testBusiness1, "NATHAN-APPLE-70");
+        assertTrue(foundProduct.isEmpty());
     }
 
     /**
@@ -397,8 +398,8 @@ class ProductTests {
 
         productRepository.delete(product);
 
-        Product foundProduct = productRepository.findByBusinessAndProductCode(testBusiness1, "NATHAN-APPLE-70");
-        assertNull(foundProduct);
+        Optional<Product> foundProduct = productRepository.findByBusinessAndProductCode(testBusiness1, "NATHAN-APPLE-70");
+        assertTrue(foundProduct.isEmpty());
     }
 
     /**

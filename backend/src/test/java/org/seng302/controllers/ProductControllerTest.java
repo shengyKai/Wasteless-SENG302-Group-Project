@@ -3,28 +3,22 @@ package org.seng302.controllers;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
-import org.junit.Ignore;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.junit.runner.RunWith;
 import org.mockito.MockedConstruction;
-import org.mockito.MockedStatic;
 import org.mockito.Mockito;
-import org.seng302.entities.Business;
-import org.seng302.entities.Location;
-import org.seng302.entities.Product;
-import org.seng302.entities.User;
+import org.seng302.entities.*;
 import org.seng302.persistence.BusinessRepository;
+import org.seng302.persistence.ImageRepository;
 import org.seng302.persistence.ProductRepository;
 import org.seng302.persistence.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -35,14 +29,11 @@ import java.text.ParseException;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
-import java.util.Objects;
-
-import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -58,6 +49,8 @@ class ProductControllerTest {
     private BusinessRepository businessRepository;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private ImageRepository imageRepository;
 
     private final HashMap<String, Object> sessionAuthToken = new HashMap<>();
     private Cookie authCookie;
@@ -65,6 +58,7 @@ class ProductControllerTest {
     private User ownerUser;
     private User bystanderUser;
     private User administratorUser;
+
 
     /**
      * This method creates an authentication code for sessions and cookies.
@@ -110,11 +104,27 @@ class ProductControllerTest {
         testBusiness1 = businessRepository.save(testBusiness1);
     }
 
+    /**
+     * Adds several images to a given product
+     * @param product The product to add test images to
+     * @return The product with images added
+     */
+    private Product addImagesToProduct(Product product) {
+        Image image1 = new Image("abc.jpg", "abc_thumbnail.jpg");
+        Image image2 = new Image("apple.jpg", "apple_thumbnail.jpg");
+        image1 = imageRepository.save(image1);
+        image2 = imageRepository.save(image2);
+        product.addProductImage(image1);
+        product.addProductImage(image2);
+        return productRepository.save(product);
+    }
+
     @BeforeEach
     public void setUp() throws ParseException {
         productRepository.deleteAll();
         businessRepository.deleteAll();
         userRepository.deleteAll();
+        imageRepository.deleteAll();
 
         setUpAuthCode();
 
@@ -236,7 +246,7 @@ class ProductControllerTest {
             JSONObject productJSON = (JSONObject) productObject;
 
             String productCode = productJSON.getAsString("id");
-            Product storedProduct = productRepository.findByBusinessAndProductCode(testBusiness1, productCode);
+            Product storedProduct = productRepository.findByBusinessAndProductCode(testBusiness1, productCode).get();
 
             Instant actualCreatedDate = Instant.from(DateTimeFormatter.ISO_DATE_TIME.parse(productJSON.getAsString("created")));
 
@@ -426,7 +436,7 @@ class ProductControllerTest {
             // Checks that the product was built
             verify(mockBuilder).build();
 
-            Product addedProduct = productRepository.findByBusinessAndProductCode(testBusiness1, mockedResult.getProductCode());
+            Product addedProduct = productRepository.findByBusinessAndProductCode(testBusiness1, mockedResult.getProductCode()).get();
 
             // Check that the added product is equivalent to the result from Product.Builder.build.
             assertNotNull(addedProduct);
@@ -492,13 +502,13 @@ class ProductControllerTest {
 
         Business tempBusiness = businessRepository.save(
                 new Business.Builder()
-                    .withBusinessType("Accommodation and Food Services")
+                        .withBusinessType("Accommodation and Food Services")
                     .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
                         "Canterbury,8041"))
-                    .withDescription("Some description2")
-                    .withName("BusinessName2")
-                    .withPrimaryOwner(ownerUser)
-                    .build()
+                        .withDescription("Some description2")
+                        .withName("BusinessName2")
+                        .withPrimaryOwner(ownerUser)
+                        .build()
         );
 
         assertDoesNotThrow(() -> mockMvc.perform(post(String.format("/businesses/%d/products", testBusiness1.getId()))
@@ -567,11 +577,11 @@ class ProductControllerTest {
     @Test
     void postingProductFailsIfProductBuilderFails() {
         try (MockedConstruction<Product.Builder> ignored = Mockito.mockConstruction(Product.Builder.class, withSettings().defaultAnswer(RETURNS_SELF), (mock, context) ->
-            when(mock.build()).thenThrow(new ResponseStatusException(HttpStatus.BAD_REQUEST, "Failed for some reason"))
+                when(mock.build()).thenThrow(new ResponseStatusException(HttpStatus.BAD_REQUEST, "Failed for some reason"))
         )) {
             setCurrentUser(ownerUser.getUserID());
             var productInfo = generateProductCreationInfo();
-
+            System.out.println(String.format("/businesses/%d/products", testBusiness1.getId()));
             assertDoesNotThrow(() -> mockMvc.perform(post(String.format("/businesses/%d/products", testBusiness1.getId()))
                     .content(productInfo.toString())
                     .sessionAttrs(sessionAuthToken)
@@ -939,5 +949,249 @@ class ProductControllerTest {
         Number count = responseBody.getAsNumber("count");
 
         assertEquals(4, count);
+    }
+    /**
+     * Tests using the make image primary method will make the given image the primary image
+     */
+    @Test
+    public void makeImagePrimary_valid_sets_image_primary() throws Exception {
+        setCurrentUser(ownerUser.getUserID());
+        addSeveralProductsToACatalogue();
+        Product product = testBusiness1.getCatalogue().get(0); // get product 1
+        product = addImagesToProduct(product);
+        Image image1 = product.getProductImages().get(0);
+        Image image2 = product.getProductImages().get(1);
+        mockMvc.perform(
+                put(String.format("/businesses/%d/products/%s/images/%d/makeprimary", testBusiness1.getId(), product.getProductCode(), image2.getID()))
+                .sessionAttrs(sessionAuthToken)
+                .cookie(authCookie))
+                .andExpect(status().isOk());
+        product = productRepository.findByProductCode(product.getProductCode()).get();
+        assertEquals(image2.getID(), product.getProductImages().get(0).getID()); // they should have switched
+        assertEquals(image1.getID(), product.getProductImages().get(1).getID());
+
+    }
+
+    /**
+     * Tests that using the make image primary method with a business that does not exist,
+     * a 406 response is thrown
+     */
+    @Test
+    public void makeImagePrimary_InvalidBusinessId_406Response() throws Exception{
+        setCurrentUser(ownerUser.getUserID());
+        addSeveralProductsToACatalogue();
+        Product product = testBusiness1.getCatalogue().get(0); // get product 1
+        product = addImagesToProduct(product);
+        Image image2 = product.getProductImages().get(1);
+        mockMvc.perform(
+                put(String.format("/businesses/%d/products/%s/images/%d/makeprimary", 9999, product.getProductCode(), image2.getID()))
+                        .sessionAttrs(sessionAuthToken)
+                        .cookie(authCookie))
+                .andExpect(status().isNotAcceptable());
+    }
+    /**
+     * Tests that using the make image primary method with a product that does not exist,
+     * a 406 response is thrown
+     */
+    @Test
+    public void makeImagePrimary_InvalidProductId_406Response() throws Exception{
+        setCurrentUser(ownerUser.getUserID());
+        addSeveralProductsToACatalogue();
+        Product product = testBusiness1.getCatalogue().get(0); // get product 1
+        product = addImagesToProduct(product);
+        Image image2 = product.getProductImages().get(1);
+        mockMvc.perform(
+                put(String.format("/businesses/%d/products/%s/images/%d/makeprimary", testBusiness1.getId(), "S0m3_Rand0m", image2.getID()))
+                        .sessionAttrs(sessionAuthToken)
+                        .cookie(authCookie))
+                .andExpect(status().isNotAcceptable());
+    }
+
+    /**
+     * Tests that using the make image primary method with a Image that does not exist,
+     * a 406 response is thrown
+     */
+    @Test
+    public void makeImagePrimary_InvalidImageId_406Response() throws Exception {
+        setCurrentUser(ownerUser.getUserID());
+        addSeveralProductsToACatalogue();
+        Product product = testBusiness1.getCatalogue().get(0); // get product 1
+        product = addImagesToProduct(product);
+        Image image2 = product.getProductImages().get(1);
+        mockMvc.perform(
+                put(String.format("/businesses/%d/products/%s/images/%d/makeprimary", testBusiness1.getId(), product.getProductCode(), 99999))
+                        .sessionAttrs(sessionAuthToken)
+                        .cookie(authCookie))
+                .andExpect(status().isNotAcceptable());
+    }
+
+    /**
+     * Tests that trying to upload a product to a non-existent business fails with 404
+     */
+    @Test
+    void uploadingImageToProductFailsIfBusinessDoesNotExist() throws Exception {
+        setCurrentUser(ownerUser.getUserID());
+
+        MockMultipartFile file = new MockMultipartFile("file", "filename.txt", "image/jpeg", new byte[100]);
+        mockMvc.perform(multipart("/businesses/99999/products/NATHAN-APPLE-70/images", testBusiness1.getId())
+                .file(file)
+                .sessionAttrs(sessionAuthToken)
+                .cookie(authCookie))
+                .andExpect(status().isNotAcceptable())
+                .andReturn();
+    }
+
+    /**
+     * Tests that trying to upload a product to a non-existent product fails with 404
+     */
+    @Test
+    void uploadingImageToProductFailsIfProductDoesNotExist() throws Exception {
+        setCurrentUser(ownerUser.getUserID());
+
+        MockMultipartFile file = new MockMultipartFile("file", "filename.txt", "image/jpeg", new byte[100]);
+        mockMvc.perform(multipart(String.format("/businesses/%d/products/UNKNOWN-PRODUCT/images", testBusiness1.getId()))
+                .file(file)
+                .sessionAttrs(sessionAuthToken)
+                .cookie(authCookie))
+                .andExpect(status().isNotAcceptable())
+                .andReturn();
+    }
+
+    /**
+     * Tests that uploading an image with an invalid content type fails with a 400 response.
+     */
+    @Test
+    void uploadingImageToProductFailsIfInvalidContentType() throws Exception {
+        setCurrentUser(ownerUser.getUserID());
+        addSeveralProductsToACatalogue();
+
+        MockMultipartFile file = new MockMultipartFile("file", "filename.txt", "image/bad", new byte[100]);
+        mockMvc.perform(multipart(String.format("/businesses/%d/products/NATHAN-APPLE-70/images", testBusiness1.getId()))
+                .file(file)
+                .sessionAttrs(sessionAuthToken)
+                .cookie(authCookie))
+                .andExpect(status().isBadRequest())
+                .andReturn();
+    }
+
+    /**
+     * Tests that uploading an image fails with 400 response if image is greater than or equal to 1048575bytes
+     */
+    @Test
+    void uploadingImageToProductFailsIfTooLarge() throws Exception {
+        setCurrentUser(ownerUser.getUserID());
+        addSeveralProductsToACatalogue();
+
+        MockMultipartFile file = new MockMultipartFile("file", "filename.txt", "image/jpeg", new byte[1048575]);
+        mockMvc.perform(multipart(String.format("/businesses/%d/products/NATHAN-APPLE-70/images", testBusiness1.getId()))
+                .file(file)
+                .sessionAttrs(sessionAuthToken)
+                .cookie(authCookie))
+                .andExpect(status().isBadRequest())
+                .andReturn();
+    }
+
+    /**
+     * Tests that uploading an image with a valid content type returns a created response.
+     */
+    @Test
+    void uploadingImageToProductSucceedsWithValidImage() throws Exception {
+        setCurrentUser(ownerUser.getUserID());
+        addSeveralProductsToACatalogue();
+
+        MockMultipartFile file = new MockMultipartFile("file", "filename.txt", "image/jpeg", new byte[100]);
+        mockMvc.perform(multipart(String.format("/businesses/%d/products/NATHAN-APPLE-70/images", testBusiness1.getId()))
+                .file(file)
+                .sessionAttrs(sessionAuthToken)
+                .cookie(authCookie))
+                .andExpect(status().isCreated())
+                .andReturn();
+    }
+
+    /**
+     * Tests that uploading an image with a non-authorised user returns a 403 response
+     */
+    @Test
+    void uploadingImageToProductFailsWithInvalidAuthentication() throws Exception {
+        setCurrentUser(bystanderUser.getUserID());
+        addSeveralProductsToACatalogue();
+
+        MockMultipartFile file = new MockMultipartFile("file", "filename.txt", "image/jpeg", new byte[100]);
+        mockMvc.perform(multipart(String.format("/businesses/%d/products/NATHAN-APPLE-70/images", testBusiness1.getId()))
+                .file(file)
+                .sessionAttrs(sessionAuthToken)
+                .cookie(authCookie))
+                .andExpect(status().isForbidden())
+                .andReturn();
+    }
+    /**
+     * Tests that using the make image primary method with a session that is not a business admin,
+     * a 403 response is thrown
+     */
+    @Test
+    public void makeImagePrimary_NotBusinessAdmin_403Response() throws Exception{
+        setCurrentUser(bystanderUser.getUserID());
+        addSeveralProductsToACatalogue();
+        Product product = testBusiness1.getCatalogue().get(0); // get product 1
+        product = addImagesToProduct(product);
+        Image image2 = product.getProductImages().get(1);
+        mockMvc.perform(
+                put(String.format("/businesses/%d/products/%s/images/%d/makeprimary", testBusiness1.getId(), product.getProductCode(), image2.getID()))
+                        .sessionAttrs(sessionAuthToken)
+                        .cookie(authCookie))
+                .andExpect(status().isForbidden());
+    }
+
+    /**
+     * Tests that using the make image primary method with a session that is not logged in,
+     * a 401 response is thrown
+     */
+    @Test
+    public void makeImagePrimary_NoSession_401Response() throws Exception{
+        addSeveralProductsToACatalogue();
+        Product product = testBusiness1.getCatalogue().get(0); // get product 1
+        product = addImagesToProduct(product);
+        Image image2 = product.getProductImages().get(1);
+        mockMvc.perform(
+                put(String.format("/businesses/%d/products/%s/images/%d/makeprimary", testBusiness1.getId(), product.getProductCode(), image2.getID()))
+                        .sessionAttrs(sessionAuthToken))
+                .andExpect(status().isUnauthorized());
+    }
+
+    /**
+     * Tests using the ake image primary method to see if a user who is a business administrator cannot edit images from
+     * products that exist in a different business's product catalogue
+     */
+    @Test
+    void makeImagePrimary_isBusinessAdminForWrongCatalogue_403Response() throws Exception{
+        setCurrentUser(bystanderUser.getUserID());
+        addSeveralProductsToACatalogue();
+        Product product = testBusiness1.getCatalogue().get(0); // get product 1
+        product = addImagesToProduct(product);
+        Image image2 = product.getProductImages().get(1);
+        mockMvc.perform(
+                put(String.format("/businesses/%d/products/%s/images/%d/makeprimary", testBusiness1.getId(), product.getProductCode(), image2.getID()))
+                        .sessionAttrs(sessionAuthToken)
+                        .cookie(authCookie))
+                .andExpect(status().isForbidden());
+    }
+
+    /**
+     * Tests using the make image primary method to see if a user who is a business administrator for that business
+     * can perform this action
+     * @throws Exception
+     */
+    @Test
+    void makeImagePrimary_isBusinessAdmin_200Response() throws Exception {
+        setCurrentUser(administratorUser.getUserID());
+        addSeveralProductsToACatalogue();
+        Product product = testBusiness1.getCatalogue().get(0); // get product 1
+        product = addImagesToProduct(product);
+        Image image2 = product.getProductImages().get(1);
+        mockMvc.perform(
+                put(String.format("/businesses/%d/products/%s/images/%d/makeprimary", testBusiness1.getId(), product.getProductCode(), image2.getID()))
+                        .sessionAttrs(sessionAuthToken)
+                        .cookie(authCookie))
+                .andExpect(status().isOk());
     }
 }

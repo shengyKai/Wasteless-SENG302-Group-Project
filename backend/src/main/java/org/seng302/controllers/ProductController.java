@@ -5,22 +5,29 @@ import net.minidev.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.seng302.entities.Business;
+import org.seng302.entities.Image;
 import org.seng302.entities.Product;
 import org.seng302.exceptions.BusinessNotFoundException;
 import org.seng302.persistence.BusinessRepository;
+import org.seng302.persistence.ImageRepository;
 import org.seng302.persistence.ProductRepository;
+import org.seng302.service.StorageService;
 import org.seng302.tools.AuthenticationTokenManager;
 import org.seng302.tools.SearchHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 /**
  * This class handles requests for retrieving and saving products
@@ -30,12 +37,16 @@ public class ProductController {
 
     private final ProductRepository productRepository;
     private final BusinessRepository businessRepository;
+    private final StorageService storageService;
+    private final ImageRepository imageRepository;
     private static final Logger logger = LogManager.getLogger(ProductController.class.getName());
 
     @Autowired
-    public ProductController(ProductRepository productRepository, BusinessRepository businessRepository) {
+    public ProductController(ProductRepository productRepository, BusinessRepository businessRepository, StorageService storageService, ImageRepository imageRepository) {
         this.productRepository = productRepository;
         this.businessRepository = businessRepository;
+        this.storageService = storageService;
+        this.imageRepository = imageRepository;
     }
 
     /**
@@ -89,7 +100,7 @@ public class ProductController {
      * @return List of products in the business's catalogue
      */
     @GetMapping("/businesses/{id}/products")
-    private JSONArray retrieveCatalogue(@PathVariable Long id,
+    public JSONArray retrieveCatalogue(@PathVariable Long id,
                                 HttpServletRequest request,
                                 @RequestParam(required = false) String orderBy,
                                 @RequestParam(required = false) String page,
@@ -130,8 +141,8 @@ public class ProductController {
      * @return List of products in the business's catalogue
      */
     @GetMapping("/businesses/{id}/products/count")
-    private JSONObject retrieveCatalogueCount(@PathVariable Long id,
-                                      HttpServletRequest request) {
+    public JSONObject retrieveCatalogueCount(@PathVariable Long id,
+                                HttpServletRequest request) {
 
         AuthenticationTokenManager.checkAuthenticationToken(request);
 
@@ -167,7 +178,7 @@ public class ProductController {
         try {
             AuthenticationTokenManager.checkAuthenticationToken(request);
             logger.info(String.format("Adding product to business (businessId=%d).", id));
-            Business business = getBusiness(id);
+            Business business = businessRepository.getBusinessById(id);
 
             business.checkSessionPermissions(request);
 
@@ -176,7 +187,7 @@ public class ProductController {
             }
             String productCode = productInfo.getAsString("id");
 
-            if (productRepository.findByBusinessAndProductCode(business, productCode) != null) {
+            if (productRepository.findByBusinessAndProductCode(business, productCode).isPresent()) {
                 throw new ResponseStatusException(HttpStatus.CONFLICT, "Product already exists with product code in this catalogue \"" + productCode + "\"");
             }
 
@@ -198,6 +209,36 @@ public class ProductController {
     }
 
     /**
+     * Matches up the businessID, productID and imageID to find the image of a product to be deleted. Only business
+     * owners can delete product images and they must be within their own product catalogue.
+     * @param businessId the ID of the business
+     * @param productId the ID of the product
+     * @param imageId the ID of the image
+     */
+    @DeleteMapping("/businesses/{businessId}/products/{productId}/images/{imageId}")
+    public void deleteProductImage(@PathVariable Long businessId, @PathVariable String productId,
+                               @PathVariable Long imageId,
+                            HttpServletRequest request) {
+        logger.info(String.format("Deleting image with id %d from the product %s within the business's catalogue %d",
+                imageId, productId, businessId));
+
+        Business business = businessRepository.getBusinessById(businessId); // get the business + sanity checks
+
+        Product product = productRepository.getProductByBusinessAndProductCode(business, productId); // get the product + sanity checks
+
+        Image image = imageRepository.getImageByProductAndId(product, imageId); // get the image + sanity checks
+
+        business.checkSessionPermissions(request); // Can this user do this action
+
+        product.removeProductImage(image);
+        imageRepository.delete(image);
+        storageService.deleteOne(image.getFilename());
+
+        productRepository.save(product);
+    }
+
+
+    /**
      * Checks that the provided JSON object exists and has all the fields that are required
      * @param requestBody The request body to validate
      * @param requiredFields The fields that are required to exist in the request body
@@ -215,20 +256,92 @@ public class ProductController {
         }
     }
 
-    /**
-     * Gets a business from the database matching a given Business Id
-     * Performs sanity checks to ensure the business is not null
-     * Throws ResponseStatusException if business does not exist
-     * @param businessId The id of the business to retrieve
-     * @return The business matching the given Id
-     */
-    private Business getBusiness(Long businessId) {
-        // check business exists
-        Optional<Business> business = businessRepository.findById(businessId);
-        if (!business.isPresent()) {
-            throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE,
-                    "The given business does not exist");
+
+
+    @PostMapping("/businesses/{businessId}/products/{productCode}/images")
+    public ResponseEntity<Void> uploadImage(@PathVariable Long businessId, @PathVariable String productCode, @RequestParam("file") MultipartFile file, HttpServletRequest request) throws IOException {
+        try {
+            AuthenticationTokenManager.checkAuthenticationToken(request);
+            logger.info(String.format("Adding product image to business (businessId=%d, productCode=%s).", businessId, productCode));
+            Business business = businessRepository.getBusinessById(businessId);
+
+
+            business.checkSessionPermissions(request);
+
+            // Will throw 406 response status exception if product does not exist
+            Product product = productRepository.getProduct(business, productCode);
+
+            validateImage(file);
+
+            String filename = UUID.randomUUID().toString();
+            if ("image/jpeg".equals(file.getContentType())) {
+                filename += ".jpg";
+            } else if ("image/png".equals(file.getContentType())) {
+                filename += ".png";
+            } else {
+                assert false; // We've already validated the image type so this should not be possible.
+            }
+
+            Image image = new Image(null, null);
+            image.setFilename(filename);
+            image = imageRepository.save(image);
+            product.addProductImage(image);
+            productRepository.save(product); 
+            storageService.store(file, filename);             //store the file using storageService
+
+            return new ResponseEntity<>(HttpStatus.CREATED);
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            throw e;
         }
-        return business.get();
+
+
+
     }
+    public void validateImage(MultipartFile file) {
+
+            if(file.getSize() >= 1048575) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Image size exceed 1048575 bytes.");
+            }
+            else if(!(file.getContentType().equals("image/jpeg") || file.getContentType().equals("image/png"))) {
+
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid image format. Must be jpeg or png");
+            }
+    }
+    /**
+     * Sets the given image as the primary image for the given product
+     * Only business administrators can perform this action.
+     * @param businessId the ID of the business
+     * @param productId the ID of the product
+     * @param imageId the ID of the image
+     */
+    @PutMapping("/businesses/{businessId}/products/{productId}/images/{imageId}/makeprimary")
+    public void makeImagePrimary(@PathVariable Long businessId,@PathVariable String productId,
+                                @PathVariable Long imageId,
+                          HttpServletRequest request ) {
+        // get business + sanity
+        Business business = businessRepository.getBusinessById(businessId);
+        // check user priv
+        business.checkSessionPermissions(request);
+
+        // get product + sanity
+        Product product = productRepository.getProductByBusinessAndProductCode(business, productId);
+        // get image + sanity
+        Image image = imageRepository.getImageByProductAndId(product, imageId);
+
+        List<Image> images = product.getProductImages(); // get the images so we can manipulate them
+        // If the given image is already the primary image, return
+        if (images.get(0).getID().equals(image.getID())) {
+            return;
+        }
+
+        images.remove(image); // pop the image from the list
+        images.add(0, image); // append to the start of the list
+        product.setProductImages(images); // apply the changes
+        productRepository.save(product);
+        logger.info(String.format("Set Image %d of product \"%s\" as the primary image", image.getID(), product.getName()));
+    }
+
+
+
 }

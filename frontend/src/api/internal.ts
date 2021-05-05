@@ -141,7 +141,7 @@ function isUser(obj: any): obj is User {
   if (obj.nickname !== undefined && typeof obj.nickname !== 'string') return false;
   if (obj.bio !== undefined && typeof obj.bio !== 'string') return false;
   if (typeof obj.email !== 'string') return false;
-  if (typeof obj.dateOfBirth !== 'string') return false;
+  if (obj.dateOfBirth !== undefined && typeof obj.dateOfBirth !== 'string') return false;
   if (obj.phoneNumber !== undefined && typeof obj.phoneNumber !== 'string') return false;
   if (!isLocation(obj.homeAddress)) return false;
   if (obj.created !== undefined && typeof obj.created !== 'string') return false;
@@ -214,7 +214,7 @@ function isProductsArray(obj: any): obj is Product[] {
   }
   return true;
 }
-type OrderBy = 'userId' | 'relevance' | 'firstName' | 'middleName' | 'lastName' | 'nickname' | 'email' | 'address';
+type OrderBy = 'userId' | 'relevance' | 'firstName' | 'middleName' | 'lastName' | 'nickname' | 'email';
 
 /**
  * Sends a search query to the backend.
@@ -469,6 +469,49 @@ export async function uploadProductImage(businessId: number, productCode: string
 }
 
 /**
+ * Sets an image as the primary image for a product
+ * @param businessId The ID of the business that owns the product
+ * @param productId The ID of the product that has the image
+ * @param imageId The ID of the image
+ */
+export async function makeImagePrimary(businessId: number, productId: string, imageId: number) : Promise<MaybeError<undefined>> {
+  try {
+    await instance.put(`/businesses/${businessId}/products/${productId}/images/${imageId}/makeprimary`);
+  } catch ( error ) {
+    let status: number | undefined = error.response?.status;
+    if (status === undefined) return 'Failed to reach backend';
+    if (status === 401) return 'Missing/Invalid access token';
+    if (status === 403) return 'Operation not permitted';
+    if (status === 406) return 'Product/Business not found';
+
+    return 'Request failed: ' + status;
+  }
+  return undefined;
+}
+
+/**
+ * Deletes an image from a product
+ * @param businessId The ID of the business that owns the product
+ * @param productId The ID of the product that has the image
+ * @param imageId The ID of the image
+ */
+export async function deleteImage(businessId: number, productId: string, imageId: number) : Promise<MaybeError<undefined>> {
+  try {
+    await instance.delete(`/businesses/${businessId}/products/${productId}/images/${imageId}`);
+  } catch ( error ) {
+    let status: number | undefined = error.response?.status;
+    if (status === undefined) return 'Failed to reach backend';
+    if (status === 401) return 'Missing/Invalid access token';
+    if (status === 403) return 'Operation not permitted';
+    if (status === 406) return 'Product/Business not found';
+
+    return 'Request failed: ' + status;
+  }
+  return undefined;
+}
+
+
+/**
  * Get all products for that business
  * @param businessId
  * @param page
@@ -491,7 +534,8 @@ export async function getProducts(buisnessId: number, page: number, resultsPerPa
     let status: number | undefined = error.response?.status;
     if (status === undefined) return 'Failed to reach backend';
     if (status === 401) return 'Missing/Invalid access token';
-
+    if (status === 403) return 'Not an admin of the business';
+    if (status === 406) return 'Business not found';
     return 'Request failed: ' + status;
   }
 

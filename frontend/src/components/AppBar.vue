@@ -68,7 +68,6 @@
                   Home
                 </v-list-item-title>
               </v-list-item>
-
               <!-- Create Business -->
               <v-list-item>
                 <v-list-item-title class="link" @click="viewCreateBusiness">
@@ -82,7 +81,6 @@
                   Catalogue
                 </v-list-item-title>
               </v-list-item>
-
               <!-- Logout -->
               <v-list-item>
                 <v-list-item-title class="link" @click="logout">
@@ -176,12 +174,31 @@ export default {
     selectedRole() {
       // Set the role that the user is acting as to the role that has been selected from the list
       const role = this.roles[this.selectedRole];
+      this.$store.commit('setRole', { type: role.type, id: role.id });
+    },
 
-      // If we've selected an error entry then do nothing
-      if (role.type === 'error') return;
+    /**
+     * Handler for when the store changes the active role.
+     * Updates the selected item if it differs from the current selection.
+     */
+    '$store.state.activeRole': {
+      handler() {
+        // This is a bit dubious I'd like to refactor it into something cleaner.
+        const currentRole = this.roles[this.selectedRole];
+        const actualRole = this.$store.state.activeRole;
 
+        if (actualRole === null) return;
+        if (actualRole.type === currentRole.type && actualRole.id === currentRole.id) return;
 
-      this.$store.state.activeRole = { type: role.type, id: role.id };
+        let newSelection = 0;
+        for (const role of this.roles) {
+          if (role.type === actualRole.type && role.id === actualRole.id) {
+            this.selectedRole = newSelection;
+          }
+          newSelection++;
+        }
+      },
+      immediate: true,
     },
   }
 };

@@ -242,27 +242,6 @@ export default {
       loadingRevoke: false
     };
   },
-  created() {
-    if (this.$route.params.id === undefined) {
-      this.user = this.$store.state.user;
-      return;
-    }
-
-    const id = parseInt(this.$route.params.id);
-    if (isNaN(id)) return;
-
-    if (id === this.$store.state.user?.id) {
-      this.user = this.$store.state.user;
-    } else {
-      getUser(id).then((value) => {
-        if (typeof value === 'string') {
-          this.$store.commit('setError', value);
-        } else {
-          this.user = value;
-        }
-      });
-    }
-  },
 
   methods: {
     async addUserAsAdmin() {
@@ -380,7 +359,32 @@ export default {
       this.loadingRevoke = false;
     }
   },
+  watch: {
+    $route: {
+      handler() {
+        if (this.$route.params.id === undefined) {
+          this.user = this.$store.state.user;
+          return;
+        }
 
+        const id = parseInt(this.$route.params.id);
+        if (isNaN(id)) return;
+
+        if (id === this.$store.state.user?.id) {
+          this.user = this.$store.state.user;
+        } else {
+          getUser(id).then((value) => {
+            if (typeof value === 'string') {
+              this.$store.commit('setError', value);
+            } else {
+              this.user = value;
+            }
+          });
+        }
+      },
+      immediate: true,
+    },
+  },
   computed: {
     activeRole() {
       return this.$store.state.activeRole;
@@ -405,7 +409,7 @@ export default {
       const parts = createdAt.toDateString().split(' ');
 
       const diffTime = now - createdAt;
-      const diffMonths = Math.ceil(diffTime / (1000 * 60 * 60 * 24 * 30));
+      const diffMonths = Math.floor(diffTime / (1000 * 60 * 60 * 24 * 30));
 
       return `${parts[2]} ${parts[1]} ${parts[3]} (${diffMonths} months ago)`;
     },

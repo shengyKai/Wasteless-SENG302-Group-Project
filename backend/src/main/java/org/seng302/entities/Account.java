@@ -11,6 +11,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import javax.persistence.*;
 import java.security.NoSuchAlgorithmException;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 @Entity
@@ -19,7 +20,7 @@ public abstract class Account {
     private String email;
     private String authenticationCode;
     private Long userID;
-    private boolean isDGAA;
+    protected String role;
     // Allows letters, numbers and selected symbols then 1 @ then some amount of other characters
     String emailRegex = "^[A-Za-z0-9+_.-]+@(.+)$";
 
@@ -120,19 +121,24 @@ public abstract class Account {
     }
 
     /**
-     * Token of if they have admin rights, certain actions will check this before happening
-     * @return admin
+     * Authority within the system, eg: admin status and what businesses they are associated with
+     * @return role
      */
-    public boolean isIsDGAA() {
-        return isDGAA;
+    @Column(nullable = false)
+    public String getRole(){
+        return this.role;
     }
 
     /**
-     * Set whether or not user has administrative powers
-     * @param DGAA whether or not user is an admin
+     * Change the description of their status within the system
+     * @param role admin status and what businesses they are associated with
      */
-    @JsonIgnore
-    public void setIsDGAA(boolean isDGAA) {
-        this.isDGAA = isDGAA;
+    public void setRole(String role){
+        if (!Set.of("user", "globalApplicationAdmin", "defaultGlobalApplicationAdmin").contains(role)) {
+            throw new IllegalArgumentException("Invalid role: \"" + role + "\"");
+        }
+
+        this.role=role;
     }
+
 }

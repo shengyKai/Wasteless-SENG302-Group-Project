@@ -135,6 +135,8 @@ public class UserController {
         List<User> queryResults;
         queryResults = SearchHelper.getSearchResultsOrderedByRelevance(searchQuery, userRepository, "false");
 
+        queryResults = SearchHelper.removeDGAAAccountFromResults(queryResults);
+
         JSONObject count = new JSONObject();
         count.put("count", queryResults.size());
         return count;
@@ -169,13 +171,12 @@ public class UserController {
             Sort userSort = SearchHelper.getSort(orderBy, reverse);
             queryResults = userRepository.findAll(spec, userSort);
         }
+
+        queryResults = SearchHelper.removeDGAAAccountFromResults(queryResults);
+
         List<User> pageInResults = SearchHelper.getPageInResults(queryResults, page, resultsPerPage);
         JSONArray publicResults = new JSONArray();
         for (User user : pageInResults) {
-            //the dgaa profile shouldnt be searchable, so the result of it shouldnt be added into publicResults
-            if (user.getRole().equals("defaultGlobalApplicationAdmin")) {
-                continue;
-            }
             if (AuthenticationTokenManager.sessionCanSeePrivate(session, user.getUserID())) {
                 publicResults.appendElement(user.constructPrivateJson(true));
             } else {

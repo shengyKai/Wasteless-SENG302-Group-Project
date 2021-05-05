@@ -3,6 +3,7 @@ import Vuetify from 'vuetify';
 import {createLocalVue, mount, Wrapper, RouterLinkStub} from '@vue/test-utils';
 import BusinessProfile from '@/components/BusinessProfile/index.vue';
 import VueRouter from "vue-router";
+import convertAddressToReadableText from '@/components/utils/Methods/convertJsonAddressToReadableText';
 
 Vue.use(Vuetify);
 
@@ -32,7 +33,15 @@ describe('index.vue', () => {
         return {
           business: {
             name: "Some Business Name",
-            address: "1 Some Street Name",
+            address: {
+              "country": "Some Country",
+              "streetName": "Some Street Name",
+              "streetNumber": "1",
+              "city": "Some City",
+              "district": "Some District",
+              "postcode": "1234",
+              "region": "Some Region"
+            },
             businessType: "Some Business Type",
             description: "Some Description",
             created: date,
@@ -49,6 +58,7 @@ describe('index.vue', () => {
               }
             ]
           },
+          readableAddress: "1 Some Street Name",
         };
       }
     });
