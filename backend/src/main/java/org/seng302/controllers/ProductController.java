@@ -103,7 +103,7 @@ public class ProductController {
      * @return List of products in the business's catalogue
      */
     @GetMapping("/businesses/{id}/products")
-    private JSONArray retrieveCatalogue(@PathVariable Long id,
+    public JSONArray retrieveCatalogue(@PathVariable Long id,
                                 HttpServletRequest request,
                                 @RequestParam(required = false) String orderBy,
                                 @RequestParam(required = false) String page,
@@ -144,7 +144,7 @@ public class ProductController {
      * @return List of products in the business's catalogue
      */
     @GetMapping("/businesses/{id}/products/count")
-    private JSONObject retrieveCatalogueCount(@PathVariable Long id,
+    public JSONObject retrieveCatalogueCount(@PathVariable Long id,
                                 HttpServletRequest request) {
 
         AuthenticationTokenManager.checkAuthenticationToken(request);
@@ -219,7 +219,8 @@ public class ProductController {
      * @param imageId the ID of the image
      */
     @DeleteMapping("/businesses/{businessId}/products/{productId}/images/{imageId}")
-    void deleteProductImage(@PathVariable Long businessId, @PathVariable String productId, @PathVariable Long imageId,
+    public void deleteProductImage(@PathVariable Long businessId, @PathVariable String productId,
+                               @PathVariable Long imageId,
                             HttpServletRequest request) {
         logger.info(String.format("Deleting image with id %d from the product %s within the business's catalogue %d",
                 imageId, productId, businessId));
@@ -318,7 +319,8 @@ public class ProductController {
      * @param imageId the ID of the image
      */
     @PutMapping("/businesses/{businessId}/products/{productId}/images/{imageId}/makeprimary")
-    void makeImagePrimary(@PathVariable Long businessId,@PathVariable String productId, @PathVariable Long imageId,
+    public void makeImagePrimary(@PathVariable Long businessId,@PathVariable String productId,
+                                @PathVariable Long imageId,
                           HttpServletRequest request ) {
         // get business + sanity
         Business business = businessRepository.getBusinessById(businessId);
