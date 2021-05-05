@@ -409,7 +409,7 @@ export async function createBusiness(business: CreateBusiness): Promise<MaybeErr
     if (status === undefined) return 'Failed to reach backend';
     if (status === 401) return 'Missing/Invalid access token';
 
-    return 'Request failed: ' + status + ' ' + error.response.data.message;
+    return error.response.data.message;
   }
 
   return undefined;
