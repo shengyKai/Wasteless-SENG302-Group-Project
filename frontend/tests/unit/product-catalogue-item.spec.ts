@@ -83,7 +83,12 @@ describe('ProductCatalogueItem.vue', () => {
         recommendedRetailPrice: 100,
         id: "Some Code",
         readMoreActivated: false,
-        images: [],
+        images: [
+          {
+            id: 1,
+            filename: 'test_filename',
+          }
+        ],
         countryOfSale: "someCountry",
       },
       businessId: 77,
