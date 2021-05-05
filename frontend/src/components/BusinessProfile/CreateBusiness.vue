@@ -156,7 +156,7 @@ export default {
         field => !!field || 'Field is required'
       ],
       streetRules: [
-        field => /^(?=.*[0-9 ])(?=.*[a-zA-Z ])([a-zA-Z0-9 ]+)$/.test(field) || 'Must have at least one number and one alphabet'
+        field => /^(?=.*[0-9 ])(?=.*[\s])(?=.*[a-zA-Z ])([a-zA-Z0-9 ]+)$/.test(field) || 'Must have at least one number and one alphabet'
       ]
     };
   },
@@ -185,7 +185,6 @@ export default {
         businessType: this.businessType,
       };
       let response = await createBusiness(business);
-      console.log(response);
       if (response === undefined) {
         this.closeDialog();
         this.$router.go();
