@@ -361,7 +361,7 @@ export async function createUser(user: CreateUser): Promise<MaybeError<undefined
  */
 export async function makeAdmin(userId: number): Promise<MaybeError<undefined>> {
   try {
-    await instance.post(`/users/${userId}/makeAdmin`);
+    await instance.put(`/users/${userId}/makeAdmin`);
   } catch (error) {
     let status: number | undefined = error.response?.status;
 
@@ -383,7 +383,7 @@ export async function makeAdmin(userId: number): Promise<MaybeError<undefined>> 
  */
 export async function revokeAdmin(userId: number): Promise<MaybeError<undefined>> {
   try {
-    await instance.post(`/users/${userId}/revokeAdmin`);
+    await instance.put(`/users/${userId}/revokeAdmin`);
   } catch (error) {
     let status: number | undefined = error.response?.status;
     if (status === 401) return 'Missing/Invalid access token';
