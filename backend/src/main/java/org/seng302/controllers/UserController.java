@@ -7,7 +7,6 @@ import org.apache.logging.log4j.Logger;
 import org.seng302.entities.Location;
 import org.seng302.entities.User;
 import org.seng302.exceptions.EmailInUseException;
-import org.seng302.exceptions.FailedRegisterException;
 import org.seng302.exceptions.UserNotFoundException;
 import org.seng302.persistence.UserRepository;
 import org.seng302.tools.AuthenticationTokenManager;
@@ -83,7 +82,7 @@ public class UserController {
             throw responseError;
         } catch (ParseException e) {
             e.printStackTrace();
-            throw new FailedRegisterException("Could not process date of birth.");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Could not process date of birth.");
         }
 
     }

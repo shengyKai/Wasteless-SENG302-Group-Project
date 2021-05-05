@@ -40,7 +40,6 @@ public class User extends Account {
      */
     String phoneRegex = "^(\\+\\d{1,2}\\s)?\\(?\\d{1,3}\\)?[\\s.-]?\\d{3,4}[\\s.-]?\\d{4,5}";
     // Allows letters, numbers and selected symbols then 1 @ then some amount of other characters
-    // Todo: this regex does not match the example data from the API spec. Update regex and tests
     String emailRegex = "^[A-Za-z0-9+_.-]+@(.+)$";
 
 

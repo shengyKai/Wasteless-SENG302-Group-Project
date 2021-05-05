@@ -37,8 +37,7 @@ public class PasswordAuthenticator {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Password is incorrect");
             }
         } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException("500: Server error");
-            // Todo write custom exception
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Could not verify password");
         }
     }
 
