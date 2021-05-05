@@ -155,7 +155,7 @@ function createOptions(): StoreOptions<StoreData> {
       async autoLogin(context, userId: number) {
         const response = await getUser(userId);
         if (typeof response === 'string') {
-          context.commit('setError', response);
+          //context.commit('setError', response);
           return;
         }
         context.commit('setUser', response);

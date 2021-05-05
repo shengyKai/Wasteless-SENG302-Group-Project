@@ -55,18 +55,23 @@ export default {
     };
   },
 
-  mounted() {
-    const id = parseInt(this.$route.params.id);
-    if (isNaN(id)) return;
+  watch: {
+    $route: {
+      handler() {
+        const id = parseInt(this.$route.params.id);
+        if (isNaN(id)) return;
 
-    getBusiness(id).then((value) => {
-      if (typeof value === 'string') {
-        this.$store.commit('setError', value);
-      } else {
-        this.business = value;
-        this.readableAddress = convertAddressToReadableText(value.address, "full");
-      }
-    });
+        getBusiness(id).then((value) => {
+          if (typeof value === 'string') {
+            this.$store.commit('setError', value);
+          } else {
+            this.business = value;
+            this.readableAddress = convertAddressToReadableText(value.address, "full");
+          }
+        });
+      },
+      immediate: true,
+    }
   },
 
   computed: {
