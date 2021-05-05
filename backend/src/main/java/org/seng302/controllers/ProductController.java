@@ -25,6 +25,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * This class handles requests for retrieving and saving products
@@ -158,7 +159,10 @@ public class ProductController {
         } else {
             business.get().checkSessionPermissions(request);
 
-            List<Product> catalogue = business.get().getCatalogue();
+            Set<String> catalogue = business.get().getCatalogue()
+                    .stream()
+                    .map(Product::getProductCode)
+                    .collect(Collectors.toSet());
 
             JSONObject responseBody = new JSONObject();
             responseBody.put("count", catalogue.size());
