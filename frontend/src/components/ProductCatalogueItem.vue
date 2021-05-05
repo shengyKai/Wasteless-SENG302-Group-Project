@@ -9,7 +9,7 @@
         </v-col>
         <v-col cols="auto" md="3" sm="12" v-else>
           <!-- feed the productImages into the carousel child component -->
-          <ProductImageCarousel :productImages="product.images" :productId="product.id" v-on:change-primary-image="setPrimaryImage"/>
+          <ProductImageCarousel :productImages="product.images" :productId="product.id" v-on:change-primary-image="setPrimaryImage" @delete-image="deleteImage"/>
         </v-col>
         <v-col>
           <v-row>
@@ -124,7 +124,7 @@ import FullProductDescription from "./utils/FullProductDescription.vue";
 import ProductImageCarousel from "./utils/ProductImageCarousel.vue";
 import { currencyFromCountry } from "@/api/currency";
 import ProductImageUploader from "./utils/ProductImageUploader";
-import {makeImagePrimary} from "@/api/internal";
+import { makeImagePrimary, deleteImage } from "@/api/internal";
 
 export default {
   name: "ProductCatalogueItem",
@@ -204,6 +204,19 @@ export default {
      */
     async setPrimaryImage(imageId) {
       let response = await makeImagePrimary(this.businessId, this.product.id, imageId);
+      if (typeof response === 'string') {
+        this.$store.commit('setError', response);
+        return;
+      }
+      this.$router.go(); // refresh the page to see the changes
+    },
+
+    /**
+     * Deletes the provided image
+     * @param imageId Image to delete
+     */
+    async deleteImage(imageId) {
+      let response = await deleteImage(this.businessId, this.product.id, imageId);
       if (typeof response === 'string') {
         this.$store.commit('setError', response);
         return;
