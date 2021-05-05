@@ -24,13 +24,10 @@ import org.springframework.web.server.ResponseStatusException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collector;
-import java.util.stream.Collectors;
 
 /**
  * This class handles requests for retrieving and saving products
@@ -103,7 +100,7 @@ public class ProductController {
      * @return List of products in the business's catalogue
      */
     @GetMapping("/businesses/{id}/products")
-    private JSONArray retrieveCatalogue(@PathVariable Long id,
+    public JSONArray retrieveCatalogue(@PathVariable Long id,
                                 HttpServletRequest request,
                                 @RequestParam(required = false) String orderBy,
                                 @RequestParam(required = false) String page,
@@ -144,7 +141,7 @@ public class ProductController {
      * @return List of products in the business's catalogue
      */
     @GetMapping("/businesses/{id}/products/count")
-    private JSONObject retrieveCatalogueCount(@PathVariable Long id,
+    public JSONObject retrieveCatalogueCount(@PathVariable Long id,
                                 HttpServletRequest request) {
 
         AuthenticationTokenManager.checkAuthenticationToken(request);
@@ -219,7 +216,8 @@ public class ProductController {
      * @param imageId the ID of the image
      */
     @DeleteMapping("/businesses/{businessId}/products/{productId}/images/{imageId}")
-    void deleteProductImage(@PathVariable Long businessId, @PathVariable String productId, @PathVariable Long imageId,
+    public void deleteProductImage(@PathVariable Long businessId, @PathVariable String productId,
+                               @PathVariable Long imageId,
                             HttpServletRequest request) {
         logger.info(String.format("Deleting image with id %d from the product %s within the business's catalogue %d",
                 imageId, productId, businessId));
@@ -287,7 +285,7 @@ public class ProductController {
             Image image = new Image(null, null);
             image.setFilename(filename);
             image = imageRepository.save(image);
-            product.addImage(image);
+            product.addProductImage(image);
             productRepository.save(product); 
             storageService.store(file, filename);             //store the file using storageService
 
@@ -318,7 +316,8 @@ public class ProductController {
      * @param imageId the ID of the image
      */
     @PutMapping("/businesses/{businessId}/products/{productId}/images/{imageId}/makeprimary")
-    void makeImagePrimary(@PathVariable Long businessId,@PathVariable String productId, @PathVariable Long imageId,
+    public void makeImagePrimary(@PathVariable Long businessId,@PathVariable String productId,
+                                @PathVariable Long imageId,
                           HttpServletRequest request ) {
         // get business + sanity
         Business business = businessRepository.getBusinessById(businessId);

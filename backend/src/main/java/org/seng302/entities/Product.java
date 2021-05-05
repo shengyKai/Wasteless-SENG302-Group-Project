@@ -18,7 +18,7 @@ import java.util.List;
 public class Product {
     // Product code must only contain uppercase letters, numbers and dashes
     // Product code have a length between 1-15
-    private final String productCodeRegex = "^[-A-Z0-9]{1,15}$";
+    private static final String productCodeRegex = "^[-A-Z0-9]{1,15}$";
 
 
     @Id
@@ -52,9 +52,7 @@ public class Product {
     @JoinColumn(name="image_id")
     private List<Image> productImages = new ArrayList<>();
 
-    public void addImage(Image image) {
-        this.productImages.add(image);
-    }
+
 
     @Column(nullable = false)
     private String countryOfSale;
@@ -77,6 +75,13 @@ public class Product {
      */
     public String getName() { return name; }
 
+    /**
+     * Adds a single image to the Product's list of images
+     * @param image
+     */
+    public void addProductImage(Image image) {
+        this.productImages.add(image);
+    }
     /**
      * Get the description of the product
      * @return the description of the product

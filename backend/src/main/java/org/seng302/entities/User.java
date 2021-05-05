@@ -31,7 +31,6 @@ public class User extends Account {
     private String phNum;
     private Location address;
     private Date created;
-    private String role;
     private Set<Business> businessesAdministered = new HashSet<>();
     private Set<Business> businessesOwned = new HashSet<>();
 
@@ -149,7 +148,6 @@ public class User extends Account {
      * Sets the users biography - short text about themselves
      * @param bio brief description of user
      */
-    //Todo Discuss with team about what characters should be allowed in the BIO
     public void setBio(String bio) {
         if (bio == null || (bio.length() > 0 && bio.length() <= 200 && bio.matches("[ a-zA-Z0-9\\p{Punct}]*"))) {
             this.bio = bio;
@@ -260,27 +258,6 @@ public class User extends Account {
      */
     public void setCreated(Date date){
         this.created = date;
-    }
-
-    /**
-     * Authority within the system, eg: admin status and what businesses they are associated with
-     * @return role
-     */
-    @Column(nullable = false)
-    public String getRole(){
-        return this.role;
-    }
-
-    /**
-     * Change the description of their status within the system
-     * @param role admin status and what businesses they are associated with
-     */
-    public void setRole(String role){
-        if (!Set.of("user", "globalApplicationAdmin", "defaultGlobalApplicationAdmin").contains(role)) {
-            throw new IllegalArgumentException("Invalid role: \"" + role + "\"");
-        }
-
-        this.role=role;
     }
 
     /**

@@ -39,7 +39,7 @@ public class DGAAController {
         logger.info("Checking DGAA exists");
         User dgaa = this.userRepository.findByEmail(dgaaUsername);
         
-        if (dgaa != null && !dgaa.isIsDGAA()) {
+        if (dgaa != null && !dgaa.getRole().equals("defaultGlobalApplicationAdmin")) {
             userRepository.delete(dgaa);
             dgaa = null;
         }

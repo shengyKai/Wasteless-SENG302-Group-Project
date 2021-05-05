@@ -483,9 +483,33 @@ export async function makeImagePrimary(businessId: number, productId: string, im
     if (status === 401) return 'Missing/Invalid access token';
     if (status === 403) return 'Operation not permitted';
     if (status === 406) return 'Product/Business not found';
+
+    return 'Request failed: ' + status;
   }
   return undefined;
 }
+
+/**
+ * Deletes an image from a product
+ * @param businessId The ID of the business that owns the product
+ * @param productId The ID of the product that has the image
+ * @param imageId The ID of the image
+ */
+export async function deleteImage(businessId: number, productId: string, imageId: number) : Promise<MaybeError<undefined>> {
+  try {
+    await instance.delete(`/businesses/${businessId}/products/${productId}/images/${imageId}`);
+  } catch ( error ) {
+    let status: number | undefined = error.response?.status;
+    if (status === undefined) return 'Failed to reach backend';
+    if (status === 401) return 'Missing/Invalid access token';
+    if (status === 403) return 'Operation not permitted';
+    if (status === 406) return 'Product/Business not found';
+
+    return 'Request failed: ' + status;
+  }
+  return undefined;
+}
+
 
 /**
  * Get all products for that business
