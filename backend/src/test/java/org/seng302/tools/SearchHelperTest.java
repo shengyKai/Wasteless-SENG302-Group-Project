@@ -318,25 +318,6 @@ class SearchHelperTest {
     }
 
     /**
-     * Verify that when getSort is called, and the orderBy parameter is address and the reverse parameter is null,
-     * it returns a Sort which when applied to a query of UserRepository causes the results to be in alphabetical order
-     * by the user's address parameter.
-     */
-//    @Test
-//    TODO Fix the compareTo, not exactly sure how it works, contact Ella
-//    public void getSortOrderByHomeAddressTest() {
-//        Sort userSort = UserSearchHelper.getSort("address", null);
-//        List<User> queryResults = userRepository.findAll(spec, userSort);
-//        User firstUser = queryResults.get(0);
-//        Location previousAddress = firstUser.getAddress();
-//        for (int i = 1; i < queryResults.size(); i++) {
-//            Location currentAddress = queryResults.get(i).getAddress();
-//            assertTrue(currentAddress.compareTo(previousAddress) >= 0);
-//            previousAddress = currentAddress;
-//        }
-//    }
-
-    /**
      * Verify that when getSort is called with a parameter for orderBy which does not appear in orderByOptions, it returns
      * a Sort which when applied to a query of UserRepository causes the results to be in numerical order by the user's
      * id number.

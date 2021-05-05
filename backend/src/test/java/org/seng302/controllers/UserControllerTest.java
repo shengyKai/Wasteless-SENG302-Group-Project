@@ -1,6 +1,8 @@
 package org.seng302.controllers;
 
+import com.fasterxml.jackson.annotation.JsonValue;
 import com.jayway.jsonpath.JsonPath;
+import io.cucumber.core.gherkin.messages.internal.gherkin.internal.com.eclipsesource.json.Json;
 import net.minidev.json.JSONObject;
 import net.minidev.json.JSONArray;
 import net.minidev.json.parser.JSONParser;
@@ -414,40 +416,6 @@ public class UserControllerTest {
         assertEquals(7, jsonObject.getAsNumber("count"));
         assertEquals(1, jsonObject.size());
     }
-
-
-//    @Test
-//    public void getUserWhenUserExistsAndSessionValid() throws Exception{
-//        // Setup
-//        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-//        User john = new User("John", "Hector","Smith", "Jonny", "johnsmith99@gmail.com",
-//                "password", "Likes long walks on the beach", dateFormat.parse("1999-04-27"),
-//                "+64 3 555 0129", "address", false);
-//        userRepository.save(john);
-//
-///        User expectedUser = userRepository.findByEmail("johnsmith99@gmail.com");
-//        //get a cookie
-//        String loginBody = "{\"email\": \"johnsmith99@gmail.com\", \"password\": \"1337-H%nt3r2\"}";
-//
-//        MvcResult req = mockMvc.perform(post("/login")
-//                .contentType(MediaType.APPLICATION_JSON)
-//                .content(loginBody))
-//                .andReturn();
-//        Cookie cookie = req.getResponse().getCookie("test123");
-//
-//        // test
-//        MvcResult result = mockMvc.perform(get(String.format("/users/%d",expectedUser.getUserID()))
-//                .cookie(cookie))
-//                .andExpect(status().isOk())
-//                .andReturn();
-//
-//        JsonValue json = Json.parse(result.getResponse().getContentAsString());
-//
-//
-//
-//      }
-//
-
 
     /**
      * Tests if several valid users are successively registered and stored within the database
