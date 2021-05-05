@@ -928,4 +928,39 @@ class SearchHelperTest {
         assertEquals(0, matchesSingle.size());
     }
 
+    /**
+     * Tests that the DGAA filter does not remove regular users
+     */
+    @Test
+    public void removingDGAAAcountsDoesNotRemoveNormalAccounts() {
+        List<User> listCopy = new ArrayList<>(savedUserList);
+        List<User> filteredUserList = SearchHelper.removeDGAAAccountFromResults(listCopy);
+        assertEquals(savedUserList, filteredUserList);
+    }
+
+    /**
+     * Tests that the DGAA filter does not remove regular users
+     */
+    @Test
+    public void removingDGAAAcountsDoesNotRemovesDGAA() throws ParseException {
+        List<User> listCopy = new ArrayList<>(savedUserList);
+
+        User dgaa = new User.Builder()
+                .withFirstName("Caroline")
+                .withMiddleName("Jane")
+                .withLastName("Smith")
+                .withNickName("Carrie")
+                .withEmail("carriesmith@hotmail.com")
+                .withPassword("h375dj82")
+                .withDob("2001-03-11")
+                .withPhoneNumber("+64 3 748 7562")
+                .withAddress(Location.covertAddressStringToLocation("24,Albert Road,Ashburton,Auckland,Auckland,New KZealand,0624"))
+                .build();
+        dgaa.setRole("defaultGlobalApplicationAdmin");
+
+        listCopy.add(3, dgaa);
+
+        List<User> filteredUserList = SearchHelper.removeDGAAAccountFromResults(listCopy);
+        assertEquals(savedUserList, filteredUserList);
+    }
 }

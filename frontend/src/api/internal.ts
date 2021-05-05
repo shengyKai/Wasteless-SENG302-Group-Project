@@ -141,7 +141,7 @@ function isUser(obj: any): obj is User {
   if (obj.nickname !== undefined && typeof obj.nickname !== 'string') return false;
   if (obj.bio !== undefined && typeof obj.bio !== 'string') return false;
   if (typeof obj.email !== 'string') return false;
-  if (typeof obj.dateOfBirth !== 'string') return false;
+  if (obj.dateOfBirth !== undefined && typeof obj.dateOfBirth !== 'string') return false;
   if (obj.phoneNumber !== undefined && typeof obj.phoneNumber !== 'string') return false;
   if (!isLocation(obj.homeAddress)) return false;
   if (obj.created !== undefined && typeof obj.created !== 'string') return false;
@@ -214,7 +214,7 @@ function isProductsArray(obj: any): obj is Product[] {
   }
   return true;
 }
-type OrderBy = 'userId' | 'relevance' | 'firstName' | 'middleName' | 'lastName' | 'nickname' | 'email' | 'address';
+type OrderBy = 'userId' | 'relevance' | 'firstName' | 'middleName' | 'lastName' | 'nickname' | 'email';
 
 /**
  * Sends a search query to the backend.
@@ -465,6 +465,25 @@ export async function uploadProductImage(businessId: number, productCode: string
     return 'Request failed: ' + status;
   }
 
+  return undefined;
+}
+
+/**
+ * Sets an image as the primary image for a product
+ * @param businessId The ID of the business that owns the product
+ * @param productId The ID of the product that has the image
+ * @param imageId The ID of the image
+ */
+export async function makeImagePrimary(businessId: number, productId: string, imageId: number) : Promise<MaybeError<undefined>> {
+  try {
+    await instance.put(`/businesses/${businessId}/products/${productId}/images/${imageId}/makeprimary`);
+  } catch ( error ) {
+    let status: number | undefined = error.response?.status;
+    if (status === undefined) return 'Failed to reach backend';
+    if (status === 401) return 'Missing/Invalid access token';
+    if (status === 403) return 'Operation not permitted';
+    if (status === 406) return 'Product/Business not found';
+  }
   return undefined;
 }
 

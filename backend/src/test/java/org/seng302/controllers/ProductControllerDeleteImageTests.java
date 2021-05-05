@@ -13,14 +13,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.Cookie;
 import java.text.ParseException;
+import java.util.Arrays;
 import java.util.HashMap;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
@@ -65,6 +63,14 @@ public class ProductControllerDeleteImageTests {
             sessionAuthToken.put("AUTHTOKEN", "GIBBERISH");
         }
         authCookie = new Cookie("AUTHTOKEN", authCode);
+    }
+
+    /**
+     * Mocks logging in as a particular user
+     * @param userId The ID of the user to log in as
+     */
+    private void setActiveUser(Long userId) {
+        sessionAuthToken.put("accountId", userId);
     }
 
     /**
@@ -120,7 +126,7 @@ public class ProductControllerDeleteImageTests {
                 .withRecommendedRetailPrice("3.20")
                 .withBusiness(testBusiness)
                 .build();
-        testProduct.setProductImage(testImage);
+        testProduct.setProductImages(Arrays.asList(testImage));
         productRepository.save(testProduct);
 
         testUser2 = new User.Builder()
@@ -194,7 +200,7 @@ public class ProductControllerDeleteImageTests {
     void deleteProductImage_noImage_406Response() throws Exception {
         String url = String.format("/businesses/%d/products/%s/images/%d",
                 testBusiness.getId(), testProduct.getProductCode(), 999);
-        testProduct.setProductImage(null);
+        testProduct.setProductImages(Arrays.asList());
         productRepository.save(testProduct);
         mockMvc.perform( MockMvcRequestBuilders
                 .delete(url)
@@ -282,11 +288,10 @@ public class ProductControllerDeleteImageTests {
      * Tests using the delete product image method to see if a user who is not a DGAA and just a regular user cannot
      * delete the image.
      */
-    @Disabled
     @Test
     void deleteProductImage_isNotDGAA_403Response() throws Exception {
         String url = String.format("/businesses/%d/products/%s/images/%d",
-                testBusiness2.getId(), testProduct.getProductCode(), testImage.getID());
+                testBusiness.getId(), testProduct.getProductCode(), testImage.getID());
         mockMvc.perform( MockMvcRequestBuilders
                 .delete(url)
                 .sessionAttrs(sessionAuthToken)
@@ -297,7 +302,6 @@ public class ProductControllerDeleteImageTests {
     /**
      * Tests using the delete image method to see if a DGAA without being a business owner can delete images products.
      */
-    @Disabled
     @Test
     void deleteProductImage_isDGAA_imageDeleted() throws Exception {
         setUpDGAAAuthCode();
@@ -305,7 +309,7 @@ public class ProductControllerDeleteImageTests {
         userRepository.save(testUser);
 
         String url = String.format("/businesses/%d/products/%s/images/%d",
-                testBusiness2.getId(), testProduct.getProductCode(), testImage.getID());
+                testBusiness.getId(), testProduct.getProductCode(), testImage.getID());
         mockMvc.perform( MockMvcRequestBuilders
                 .delete(url)
                 .sessionAttrs(sessionAuthToken)
@@ -317,8 +321,10 @@ public class ProductControllerDeleteImageTests {
      * Tests using the delete image method to see if the business administrator can delete images within there
      * businesses product catalogue.
      */
+    //Waiting till we redo how we do DGAA checking
     @Test
     void deleteProductImage_isBusinessAdmin_imageDeleted() throws Exception {
+        setActiveUser(testUser.getUserID());
         String url = String.format("/businesses/%d/products/%s/images/%d",
                 testBusiness.getId(), testProduct.getProductCode(), testImage.getID());
         mockMvc.perform( MockMvcRequestBuilders

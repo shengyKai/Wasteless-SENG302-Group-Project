@@ -100,7 +100,7 @@ public class ProductController {
      * @return List of products in the business's catalogue
      */
     @GetMapping("/businesses/{id}/products")
-    private JSONArray retrieveCatalogue(@PathVariable Long id,
+    public JSONArray retrieveCatalogue(@PathVariable Long id,
                                 HttpServletRequest request,
                                 @RequestParam(required = false) String orderBy,
                                 @RequestParam(required = false) String page,
@@ -141,7 +141,7 @@ public class ProductController {
      * @return List of products in the business's catalogue
      */
     @GetMapping("/businesses/{id}/products/count")
-    private JSONObject retrieveCatalogueCount(@PathVariable Long id,
+    public JSONObject retrieveCatalogueCount(@PathVariable Long id,
                                 HttpServletRequest request) {
 
         AuthenticationTokenManager.checkAuthenticationToken(request);
@@ -178,7 +178,7 @@ public class ProductController {
         try {
             AuthenticationTokenManager.checkAuthenticationToken(request);
             logger.info(String.format("Adding product to business (businessId=%d).", id));
-            Business business = getBusiness(id);
+            Business business = businessRepository.getBusinessById(id);
 
             business.checkSessionPermissions(request);
 
@@ -216,28 +216,24 @@ public class ProductController {
      * @param imageId the ID of the image
      */
     @DeleteMapping("/businesses/{businessId}/products/{productId}/images/{imageId}")
-    void deleteProductImage(@PathVariable Long businessId, @PathVariable String productId, @PathVariable Long imageId,
+    public void deleteProductImage(@PathVariable Long businessId, @PathVariable String productId,
+                               @PathVariable Long imageId,
                             HttpServletRequest request) {
-        AuthenticationTokenManager.checkAuthenticationToken(request);
         logger.info(String.format("Deleting image with id %d from the product %s within the business's catalogue %d",
                 imageId, productId, businessId));
 
-        Business business = getBusiness(businessId);
-        if (!ProductController.checkProductFromCodeExists(productRepository, productId)) {
-            throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "the product does not exist");
-        }
-        Image image = imageRepository.getImage(imageId);
+        Business business = businessRepository.getBusinessById(businessId); // get the business + sanity checks
 
-        business.checkSessionPermissions(request);
+        Product product = productRepository.getProductByBusinessAndProductCode(business, productId); // get the product + sanity checks
 
-        //TODO Add DGAA check
-        if (!Business.checkProductExistsWithinCatalogue(business, productId)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "The product is not within the business's catalogue");
-        }
+        Image image = imageRepository.getImageByProductAndId(product, imageId); // get the image + sanity checks
 
-        Product product = productRepository.getProduct(business, productId);
+        business.checkSessionPermissions(request); // Can this user do this action
 
-        product.setProductImage(null);
+        product.removeProductImage(image);
+        imageRepository.delete(image);
+        storageService.deleteOne(image.getFilename());
+
         productRepository.save(product);
     }
 
@@ -260,23 +256,6 @@ public class ProductController {
         }
     }
 
-    /**
-     * Gets a business from the database matching a given Business Id
-     * Performs sanity checks to ensure the business is not null
-     * Throws ResponseStatusException if business does not exist
-     * @param businessId The id of the business to retrieve
-     * @return The business matching the given Id
-     */
-    //TODO Needs moved to the business repository
-    private Business getBusiness(Long businessId) {
-        // check business exists
-        Optional<Business> business = businessRepository.findById(businessId);
-        if (!business.isPresent()) {
-            throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE,
-                    "The given business does not exist");
-        }
-        return business.get();
-    }
 
 
     @PostMapping("/businesses/{businessId}/products/{productCode}/images")
@@ -284,7 +263,7 @@ public class ProductController {
         try {
             AuthenticationTokenManager.checkAuthenticationToken(request);
             logger.info(String.format("Adding product image to business (businessId=%d, productCode=%s).", businessId, productCode));
-            Business business = getBusiness(businessId);
+            Business business = businessRepository.getBusinessById(businessId);
 
 
             business.checkSessionPermissions(request);
@@ -306,7 +285,7 @@ public class ProductController {
             Image image = new Image(null, null);
             image.setFilename(filename);
             image = imageRepository.save(image);
-            product.setProductImage(image);
+            product.addProductImage(image);
             productRepository.save(product); 
             storageService.store(file, filename);             //store the file using storageService
 
@@ -330,18 +309,39 @@ public class ProductController {
             }
     }
     /**
-     * Checks if a product with a given product code exists within the database.
-     * @param productRepository the database that holds product objects
-     * @param productCode the code of the product
-     * @return true if the product that matches the product code exists within the database, false otherwise
+     * Sets the given image as the primary image for the given product
+     * Only business administrators can perform this action.
+     * @param businessId the ID of the business
+     * @param productId the ID of the product
+     * @param imageId the ID of the image
      */
-    //TODO add tests
-    public static boolean checkProductFromCodeExists(ProductRepository productRepository, String productCode) {
-        for (Product product: productRepository.findAll()) {
-            if (product.getProductCode().equals(productCode)) {
-                return true;
-            }
+    @PutMapping("/businesses/{businessId}/products/{productId}/images/{imageId}/makeprimary")
+    public void makeImagePrimary(@PathVariable Long businessId,@PathVariable String productId,
+                                @PathVariable Long imageId,
+                          HttpServletRequest request ) {
+        // get business + sanity
+        Business business = businessRepository.getBusinessById(businessId);
+        // check user priv
+        business.checkSessionPermissions(request);
+
+        // get product + sanity
+        Product product = productRepository.getProductByBusinessAndProductCode(business, productId);
+        // get image + sanity
+        Image image = imageRepository.getImageByProductAndId(product, imageId);
+
+        List<Image> images = product.getProductImages(); // get the images so we can manipulate them
+        // If the given image is already the primary image, return
+        if (images.get(0).getID().equals(image.getID())) {
+            return;
         }
-        return false;
+
+        images.remove(image); // pop the image from the list
+        images.add(0, image); // append to the start of the list
+        product.setProductImages(images); // apply the changes
+        productRepository.save(product);
+        logger.info(String.format("Set Image %d of product \"%s\" as the primary image", image.getID(), product.getName()));
     }
+
+
+
 }

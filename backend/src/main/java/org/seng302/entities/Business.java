@@ -265,7 +265,7 @@ public class Business {
         for (User user : getOwnerAndAdministrators()) {
             adminIds.add(user.getUserID());
         }
-        if (!AuthenticationTokenManager.sessionCanSeePrivate(request, null) && !adminIds.contains(userId)) {
+        if (!AuthenticationTokenManager.sessionIsAdmin(request) && !adminIds.contains(userId)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User does not have sufficient permissions to perform this action");
         }
     }
@@ -305,10 +305,9 @@ public class Business {
     /**
      * Removes the given product from the business's catalogue
      */
-    //TODO add unit tests
     public void removeFromCatalogue(Product product) throws Exception {
         if(!catalogue.remove(product)) {
-            throw new Exception("The product did not match any within the business's catalogue");
+            throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE,"The product did not match any within the business's catalogue");
         }
     }
 
