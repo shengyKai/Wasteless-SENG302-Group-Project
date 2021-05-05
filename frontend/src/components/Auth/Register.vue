@@ -281,7 +281,7 @@ export default {
         field => /(^[a-zA-Z0-9]*$)/.test(field) || 'Must contain numbers and alphabet only'
       ],
       nameRules: [
-        field =>  (field.length === 0 || (/^[a-z]+$/i).test(field)) || 'Naming must be valid'
+        field =>  (field.length === 0 || (/^[a-z-//.// ]+$/i).test(field)) || 'Naming must be valid'
       ],
       maxShortCharRules: [
         field => (field.length <= 16) || 'Reached max character limit: 16'
