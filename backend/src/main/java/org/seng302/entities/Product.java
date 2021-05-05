@@ -274,7 +274,6 @@ public class Product {
         }
         object.put("images", images);
         object.put("countryOfSale", countryOfSale);
-        object.put("images", productImages);
         return object;
     }
 
