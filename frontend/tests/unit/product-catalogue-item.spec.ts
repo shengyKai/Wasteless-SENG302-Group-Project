@@ -82,7 +82,9 @@ describe('ProductCatalogueItem.vue', () => {
         manufacturer: "Some Manufacturer",
         recommendedRetailPrice: 100,
         id: "Some Code",
-        readMoreActivated: false
+        readMoreActivated: false,
+        images: [],
+        countryOfSale: "someCountry",
       },
       businessId: 77,
     });
@@ -114,7 +116,15 @@ describe('ProductCatalogueItem.vue', () => {
   it("Must open dialog box with full product description upon clicking 'Read more...'", async () => {
     await wrapper.setProps({
       product: {
-        description: "Some super long description Some super long description Some super long description Some super long description"
+        name: "Some Product",
+        description: "Some super long description Some super long description Some super long description Some super long description",
+        created: "Some Date Added",
+        manufacturer: "Some Manufacturer",
+        recommendedRetailPrice: 100,
+        id: "Some Code",
+        readMoreActivated: false,
+        images: [],
+        countryOfSale: "someCountry"
       }
     });
     //the description will cut off at the 50th character

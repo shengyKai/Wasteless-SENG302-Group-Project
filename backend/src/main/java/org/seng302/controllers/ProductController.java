@@ -233,6 +233,8 @@ public class ProductController {
         business.checkSessionPermissions(request); // Can this user do this action
 
         product.removeProductImage(image);
+        imageRepository.delete(image);
+        storageService.deleteOne(image.getFilename());
 
         productRepository.save(product);
     }

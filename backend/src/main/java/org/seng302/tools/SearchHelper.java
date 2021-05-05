@@ -10,6 +10,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * This class provides static methods to help the controller classes return results from queries to the database.
@@ -18,7 +19,7 @@ public class SearchHelper {
 
     private static final int defaultResultsPerPage = 15;
     // Todo: add city, region and country as order by options once Location and User tables have been linked.
-    private static final List<String> orderByOptions = new ArrayList<>(List.of("userID", "firstName", "middleName", "lastName", "nickname", "email", "address"));
+    private static final List<String> orderByOptions = new ArrayList<>(List.of("userID", "firstName", "middleName", "lastName", "nickname", "email"));
     private static final Logger logger = LogManager.getLogger(SearchHelper.class.getName());
 
     private enum PredicateType {
@@ -446,6 +447,18 @@ public class SearchHelper {
     }
 
     /**
+     * Filters out the DGAA accounts from a list of users
+     * @param userList List of users to filter
+     * @return Filtered list of users
+     */
+    public static List<User> removeDGAAAccountFromResults(List<User> userList) {
+        return userList
+                .stream()
+                .filter(user -> !user.getRole().equals("defaultGlobalApplicationAdmin"))
+                .collect(Collectors.toList());
+    }
+
+    /**
      * This method checks addedIds to see if the given user has already been added to noDuplicatesList. If they have not,
      * the user is added to noDuplicatesList and their id is added to addedIds.
      * @param noDuplicatesList A list which users will be added to if they are not duplicates of users already in the list.
@@ -460,5 +473,7 @@ public class SearchHelper {
             }
         }
     }
+
+
 
 }
