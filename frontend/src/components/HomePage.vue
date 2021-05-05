@@ -122,7 +122,6 @@ export default {
   },
   methods: {
     viewProfile() {
-      // TODO It would probably be quite nice to merge this with the appbar implementation
       switch (this.role.type) {
       case "user":
         this.$router.push("/profile");

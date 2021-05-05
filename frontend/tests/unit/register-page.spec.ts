@@ -55,7 +55,6 @@ describe('index.vue', () => {
  * Tests in here focuses on the input of the fields, of which, Register would be used as the mount as it is the parent
  * of these fields.
  */
-// TODO Fix this test
 describe('Register.vue', () => {
   let wrapper: Wrapper<any>;
   const localVue = createLocalVue();
