@@ -68,19 +68,6 @@
                   Home
                 </v-list-item-title>
               </v-list-item>
-              <!-- Create Business -->
-              <v-list-item>
-                <v-list-item-title class="link" @click="viewCreateBusiness">
-                  Create Business
-                </v-list-item-title>
-              </v-list-item>
-
-              <!-- Catalogue -->
-              <v-list-item v-if="this.$store.state.activeRole.type==='business'">
-                <v-list-item-title class="link" @click="showCatalogue">
-                  Catalogue
-                </v-list-item-title>
-              </v-list-item>
               <!-- Logout -->
               <v-list-item>
                 <v-list-item-title class="link" @click="logout">
@@ -128,23 +115,13 @@ export default {
     showHome() {
       this.$router.push("/home");
     },
-    showCatalogue() {
-      //Should be using this
-      // this.$router.push("/business/" + this.$store.state.activeRole.id + "/products");
-      this.$router.push("/business/" + "10"+ "/products");
-      //testing the catalogue with id=10 to show product in catalogue this.$store.state.activeRole.id
-
-    },
     logout() {
       this.$store.commit("logoutUser");
       this.$router.push("/login");
     },
     viewAdmin() {
       this.$router.push("/admin");
-    },
-    viewCreateBusiness() {
-      this.$store.commit('showCreateBusiness');
-    },
+    }
   },
   computed: {
     isAdmin() {
