@@ -94,11 +94,12 @@ describe('index.vue', () => {
 
   /**
    * Tests that the created date exists as per the set data above, the date set above is the current date today, and since
-   * the number of months passed is rounded up to the nearest integer, it will always be (1 month ago)
+   * The number of months passed is rounded up to the nearest integer
+   * It should start from (0 month(s) ago as if you juz created it cant be 1 month)
    */
   it("Must contain the business created date", () => {
     expect(wrapper.text()).toContain(`${("0" + date.getDate()).slice(-2)} ` +
-    `${date.toLocaleString('default', {month: 'short'})} ${date.getFullYear()} (1 months ago)`);
+    `${date.toLocaleString('default', {month: 'short'})} ${date.getFullYear()} (0 months ago)`);
   });
 
   /**
