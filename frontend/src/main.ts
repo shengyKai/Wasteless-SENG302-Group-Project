@@ -39,7 +39,7 @@ import './plugins/vuex';
 router.afterEach((to, from) => {
   Vue.nextTick(() => {
     const title = to.meta.title;
-    document.title = title ? `${title} - Wasteless` : 'Wasteless';
+    document.title = title ? `${title} - LEFT_OVERS` : 'LEFT_OVERS';
   });
 });
 

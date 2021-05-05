@@ -1,7 +1,7 @@
 <template>
   <v-app-bar max-height="64px">
     <div class="container-outer flex-center">
-      <h1 class="link" @click="showHome">WASTELESS</h1>
+      <h1 class="link" @click="showHome">LEFT_OVERS</h1>
 
       <!-- Space between the app name and the controls -->
       <div class="spacer"/>
