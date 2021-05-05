@@ -58,7 +58,7 @@ public class LoginController {
             }
 
             // If they are a DGAA, set their permissions
-            if (matchingAccount.isIsDGAA()) {
+            if (matchingAccount.getRole().equals("defaultGlobalApplicationAdmin")) {
                 AuthenticationTokenManager.setAuthenticationToken(request, response);
                 AuthenticationTokenManager.setAuthenticationTokenDGAA(request);
             } else {
