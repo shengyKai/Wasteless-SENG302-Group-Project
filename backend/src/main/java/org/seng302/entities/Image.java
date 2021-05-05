@@ -45,7 +45,7 @@ public class Image {
         var object = new JSONObject();
         object.put("id", getID());
         object.put("filename", "/media/images/" + getFilename());
-        object.put("thumbnailFilename", "media/images/" + getFilenameThumbnail());
+        object.put("thumbnailFilename", "/media/images/" + getFilenameThumbnail());
         return object;
     }
 

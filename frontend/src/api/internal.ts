@@ -361,7 +361,7 @@ export async function createUser(user: CreateUser): Promise<MaybeError<undefined
  */
 export async function makeAdmin(userId: number): Promise<MaybeError<undefined>> {
   try {
-    await instance.post(`/users/${userId}/makeAdmin`);
+    await instance.put(`/users/${userId}/makeAdmin`);
   } catch (error) {
     let status: number | undefined = error.response?.status;
 
@@ -383,7 +383,7 @@ export async function makeAdmin(userId: number): Promise<MaybeError<undefined>> 
  */
 export async function revokeAdmin(userId: number): Promise<MaybeError<undefined>> {
   try {
-    await instance.post(`/users/${userId}/revokeAdmin`);
+    await instance.put(`/users/${userId}/revokeAdmin`);
   } catch (error) {
     let status: number | undefined = error.response?.status;
     if (status === 401) return 'Missing/Invalid access token';
@@ -409,7 +409,7 @@ export async function createBusiness(business: CreateBusiness): Promise<MaybeErr
     if (status === undefined) return 'Failed to reach backend';
     if (status === 401) return 'Missing/Invalid access token';
 
-    return 'Request failed: ' + status + ' ' + error.response.data.message;
+    return error.response.data.message;
   }
 
   return undefined;
@@ -543,6 +543,30 @@ export async function getProducts(buisnessId: number, page: number, resultsPerPa
     return 'Response is not product array';
   }
   return response.data;
+}
+
+/**
+ * Sends a query for the total number of products in the business
+ *
+ * @param buisnessId Business id to identify with the database to retrieve the product count
+ * @returns Number of products or an error message
+ */
+export async function getProductCount(buisnessId: number): Promise<MaybeError<number>> {
+  let response;
+  try {
+    response = await instance.get(`/businesses/${buisnessId}/products/count`);
+  } catch (error) {
+    let status: number | undefined = error.response?.status;
+
+    if (status === undefined) return 'Failed to reach backend';
+    return `Request failed: ${status}`;
+  }
+
+  if (typeof response.data?.count !== 'number') {
+    return 'Response is not number';
+  }
+
+  return response.data.count;
 }
 
 

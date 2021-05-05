@@ -269,9 +269,11 @@ public class Product {
         object.put("recommendedRetailPrice", recommendedRetailPrice);
         object.put("created", created);
         JSONArray images = new JSONArray();
-        object.put("images", productImages);
+        for (Image image : productImages) {
+            images.add(image.constructJSONObject());
+        }
+        object.put("images", images);
         object.put("countryOfSale", countryOfSale);
-        object.put("images", productImages);
         return object;
     }
 
