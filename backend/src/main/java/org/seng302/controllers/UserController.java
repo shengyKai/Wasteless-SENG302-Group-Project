@@ -193,7 +193,7 @@ public class UserController {
      * @param session The request
      * @param id The id of the user to promote
      */
-    @PostMapping("/users/{id}/makeAdmin")
+    @PutMapping("/users/{id}/makeAdmin")
     void makeUserAdmin(HttpServletRequest session, @PathVariable("id") long id) {
         changeUserPrivilege(session, id, "globalApplicationAdmin");
     }
@@ -204,7 +204,7 @@ public class UserController {
      * @param session The request
      * @param id The id of the user to demote
      */
-    @PostMapping("/users/{id}/revokeAdmin")
+    @PutMapping("/users/{id}/revokeAdmin")
     void revokeUserAdmin(HttpServletRequest session, @PathVariable("id") long id) {
         changeUserPrivilege(session, id, "user");
     }

@@ -703,7 +703,7 @@ public class UserControllerTest {
         User expectedUser = userRepository.findByEmail("johnsmith99@gmail.com");
 
         // perform
-        mockMvc.perform(post(String.format("/users/%d/makeAdmin",expectedUser.getUserID()))
+        mockMvc.perform(MockMvcRequestBuilders.put(String.format("/users/%d/makeAdmin",expectedUser.getUserID()))
                 .sessionAttrs(sessionAuthToken)
                 .cookie(authCookie))
                 .andExpect(status().isOk())
@@ -724,7 +724,7 @@ public class UserControllerTest {
         User expectedUser = userRepository.findByEmail("johnsmith99@gmail.com");
 
         // perform
-        mockMvc.perform(post(String.format("/users/%d/makeAdmin",expectedUser.getUserID()))
+        mockMvc.perform(MockMvcRequestBuilders.put(String.format("/users/%d/makeAdmin",expectedUser.getUserID()))
                 .sessionAttrs(sessionAuthToken)
                 .cookie(authCookie))
                 .andExpect(status().isForbidden())
@@ -742,7 +742,7 @@ public class UserControllerTest {
         User expectedUser = userRepository.findByEmail("johnsmith99@gmail.com");
 
         // perform
-        mockMvc.perform(post(String.format("/users/%d/makeAdmin",expectedUser.getUserID()))
+        mockMvc.perform(MockMvcRequestBuilders.put(String.format("/users/%d/makeAdmin",expectedUser.getUserID()))
                 .cookie(authCookie))
                 .andExpect(status().isUnauthorized())
                 .andReturn();
@@ -757,7 +757,7 @@ public class UserControllerTest {
     public void makeAdminThrowsWhenUserNotExist() throws Exception {
         setUpDGAAAuthCode(); // give us dgaa auth
         // perform
-        mockMvc.perform(post("/users/99999/makeAdmin")
+        mockMvc.perform(MockMvcRequestBuilders.put("/users/99999/makeAdmin")
                 .sessionAttrs(sessionAuthToken)
                 .cookie(authCookie))
                 .andExpect(status().isNotAcceptable())
@@ -783,7 +783,7 @@ public class UserControllerTest {
         userRepository.save(john);
 
         // perform
-        mockMvc.perform(post(String.format("/users/%d/revokeAdmin", john.getUserID()))
+        mockMvc.perform(MockMvcRequestBuilders.put(String.format("/users/%d/revokeAdmin", john.getUserID()))
                 .sessionAttrs(sessionAuthToken)
                 .cookie(authCookie))
                 .andExpect(status().isOk())
