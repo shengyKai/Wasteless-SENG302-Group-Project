@@ -13,7 +13,7 @@
       <v-row>
         <v-col cols="12" sm="6">
           <h4>Address</h4>
-          {{ business.address }}
+          {{ readableAddress }}
         </v-col>
         <v-col cols="12" sm="6">
           <h4>Category</h4>
@@ -40,6 +40,7 @@
 
 <script>
 import { getBusiness } from '../../api/internal';
+import convertAddressToReadableText from '@/components/utils/Methods/convertJsonAddressToReadableText';
 
 export default {
   name: 'BusinessProfile',
@@ -50,6 +51,7 @@ export default {
        * The business that this profile is for.
        */
       business: {},
+      readableAddress: ""
     };
   },
 
@@ -62,6 +64,7 @@ export default {
         this.$store.commit('setError', value);
       } else {
         this.business = value;
+        this.readableAddress = convertAddressToReadableText(value.address, "full");
       }
     });
   },
