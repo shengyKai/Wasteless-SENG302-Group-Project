@@ -18,7 +18,7 @@ import java.util.List;
 public class Product {
     // Product code must only contain uppercase letters, numbers and dashes
     // Product code have a length between 1-15
-    private final String productCodeRegex = "^[-A-Z0-9]{1,15}$";
+    private static final String productCodeRegex = "^[-A-Z0-9]{1,15}$";
 
 
     @Id
