@@ -185,7 +185,6 @@ export default {
         businessType: this.businessType,
       };
       let response = await createBusiness(business);
-      console.log(response);
       if (response === undefined) {
         this.closeDialog();
         this.$router.go();

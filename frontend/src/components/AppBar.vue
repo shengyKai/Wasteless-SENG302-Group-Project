@@ -77,9 +77,9 @@
               </v-list-item>
 
               <!-- Catalogue -->
-              <v-list-item>
+              <v-list-item v-if="this.$store.state.activeRole.type==='business'">
                 <v-list-item-title class="link" @click="showCatalogue">
-                  Product Catalogue
+                  Catalogue
                 </v-list-item-title>
               </v-list-item>
 
