@@ -71,27 +71,27 @@ describe('ProductCatalogueItem.vue', () => {
         $router: {
           go: () => undefined,
         }
+      },
+      propsData: {
+        product: {
+          name: "Some Product",
+          description: "Some description",
+          created: "Some Date Added",
+          manufacturer: "Some Manufacturer",
+          recommendedRetailPrice: 100,
+          id: "Some Code",
+          readMoreActivated: false,
+          images: [
+            {
+              id: 1,
+              filename: 'test_filename',
+            }
+          ],
+          countryOfSale: "someCountry",
+        },
+        businessId: 77,
       }
       //Sets up each test case with some values to ensure the Product Catalogue item component works as intended
-    });
-    await wrapper.setProps({
-      product: {
-        name: "Some Product",
-        description: "Some description",
-        created: "Some Date Added",
-        manufacturer: "Some Manufacturer",
-        recommendedRetailPrice: 100,
-        id: "Some Code",
-        readMoreActivated: false,
-        images: [
-          {
-            id: 1,
-            filename: 'test_filename',
-          }
-        ],
-        countryOfSale: "someCountry",
-      },
-      businessId: 77,
     });
     await wrapper.setData({
       currency: {
