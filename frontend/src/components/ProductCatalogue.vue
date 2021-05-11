@@ -58,7 +58,7 @@
 
 <script>
 import { getProducts, getProductCount } from '../api/internal';
-import ProductCatalogueItem from './ProductCatalogueItem.vue';
+import ProductCatalogueItem from './cards/ProductCatalogueItem.vue';
 
 export default {
   name: "ProductCatalogue",

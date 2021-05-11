@@ -120,10 +120,10 @@
 
 <script>
 //This component requires two other custom components, one to display the product image, one to view more of the product's description
-import FullProductDescription from "./utils/FullProductDescription.vue";
-import ProductImageCarousel from "./utils/ProductImageCarousel.vue";
+import FullProductDescription from "../utils/FullProductDescription.vue";
+import ProductImageCarousel from "../utils/ProductImageCarousel.vue";
 import { currencyFromCountry } from "@/api/currency";
-import ProductImageUploader from "./utils/ProductImageUploader";
+import ProductImageUploader from "../utils/ProductImageUploader";
 import { makeImagePrimary, deleteImage } from "@/api/internal";
 
 export default {

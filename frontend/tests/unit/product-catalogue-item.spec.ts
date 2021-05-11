@@ -6,7 +6,7 @@
 import Vue from 'vue';
 import Vuetify from 'vuetify';
 import { createLocalVue, mount, Wrapper } from '@vue/test-utils';
-import ProductCatalogueItem from '@/components/ProductCatalogueItem.vue';
+import ProductCatalogueItem from '@/components/cards/ProductCatalogueItem.vue';
 // import ProductImageCarousel from "@/components/utils/ProductImageCarousel.vue";
 import FullProductDescription from "@/components/utils/FullProductDescription.vue";
 

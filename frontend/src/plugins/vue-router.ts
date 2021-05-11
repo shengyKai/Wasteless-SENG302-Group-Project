@@ -8,8 +8,6 @@ import BusinessProfile from "../components/BusinessProfile/index.vue";
 import SearchResults from "../components/SearchResults.vue";
 import HomePage from "../components/HomePage.vue";
 import ProductCatalogue from "../components/ProductCatalogue.vue";
-import ProductCatalogueItem from "../components/ProductCatalogueItem.vue";
-import ProductImageUploader from "../components/utils/ProductImageUploader.vue";
 
 
 Vue.use(VueRouter);
