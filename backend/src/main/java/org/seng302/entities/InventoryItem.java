@@ -20,7 +20,6 @@ public class InventoryItem {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
     @Column(name = "product_id", nullable = false)
     //@JoinColumn(name = "product_id", nullable = false)
     private String productId; //The product code
