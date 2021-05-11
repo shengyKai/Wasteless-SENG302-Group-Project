@@ -9,7 +9,7 @@
         </v-col>
         <v-col cols="auto" md="3" sm="12" v-else>
           <!-- feed the productImages into the carousel child component -->
-          <ProductImageCarousel :productImages="product.images" :productId="product.id" v-on:change-primary-image="setPrimaryImage" @delete-image="deleteImage"/>
+          <ProductImageCarousel :productImages="product.images" :productId="product.id"/>
         </v-col>
         <v-col>
           <v-row>
@@ -26,12 +26,7 @@
               <v-card-actions
                 :class="{ 'pt-0': $vuetify.breakpoint.smAndDown }"
                 class="pb-0"
-              >
-                <!-- shows the edit button for editing product details, which supposedly links to a form -->
-                <a @click="showImageUploaderForm=true">Upload Image</a>
-                <!-- cant mutate parent props directly, so no point to send a prop to the child -->
-                <ProductImageUploader :businessId="businessId" :productCode="product.id" v-model="showImageUploaderForm"/>
-              </v-card-actions>
+              />
             </v-col>
           </v-row>
           <v-row />
@@ -123,20 +118,46 @@
 import FullProductDescription from "../utils/FullProductDescription.vue";
 import ProductImageCarousel from "../utils/ProductImageCarousel.vue";
 import { currencyFromCountry } from "@/api/currency";
-import ProductImageUploader from "../utils/ProductImageUploader";
-import { makeImagePrimary, deleteImage } from "@/api/internal";
 
 export default {
-  name: "ProductCatalogueItem",
+  name: "InventoryItem",
   props: {
-    product: Object,
-    //retrieved from ProductCatalogue
+    inventoryItem: {
+      default() {
+        return {
+          id: 101,
+          product: {
+            id: "WATT-420-BEANS",
+            name: "Watties Baked Beans - 420g can",
+            description: "Baked Beans as they should be.",
+            manufacturer: "Heinz Wattie's Limited",
+            recommendedRetailPrice: 2.2,
+            created: "2021-05-11T11:10:45.769Z",
+            images: [
+              {
+                "id": 1234,
+                "filename": "/media/images/23987192387509-123908794328.png",
+                "thumbnailFilename": "/media/images/23987192387509-123908794328_thumbnail.png"
+              }
+            ],
+            countryOfSale: "Japan",
+          },
+          quantity: 4,
+          pricePerItem: 6.5,
+          totalPrice: 21.99,
+          manufactured: "2021-05-11",
+          sellBy: "2021-05-11",
+          bestBefore: "2021-05-11",
+          expires: "2021-05-11"
+        };
+      },
+    },
+    //retrieved from Inventory page
     businessId: Number
   },
   components: {
     FullProductDescription,
     ProductImageCarousel,
-    ProductImageUploader
   },
   data() {
     return {
@@ -155,38 +176,15 @@ export default {
     // sold in. It will have blank fields if no currency can be found from the country.
     this.currency = await currencyFromCountry(this.product.countryOfSale);
   },
+  computed: {
+    product() {
+      return this.inventoryItem.product;
+    }
+  },
   methods: {
     //if the "Read more..." link if clicked, readMoreActivated becomes true and the FullProductDescription dialog box will open
     activateReadMore() {
       this.readMoreActivated = true;
-    },
-    closeDialog() {
-      this.showImageUploaderForm = false;
-    },
-    /**
-     * Sets the currently selected image as the primary image.
-     * @param imageId Id of the currently selected image
-     */
-    async setPrimaryImage(imageId) {
-      let response = await makeImagePrimary(this.businessId, this.product.id, imageId);
-      if (typeof response === 'string') {
-        this.$store.commit('setError', response);
-        return;
-      }
-      this.$router.go(); // refresh the page to see the changes
-    },
-
-    /**
-     * Deletes the provided image
-     * @param imageId Image to delete
-     */
-    async deleteImage(imageId) {
-      let response = await deleteImage(this.businessId, this.product.id, imageId);
-      if (typeof response === 'string') {
-        this.$store.commit('setError', response);
-        return;
-      }
-      this.$router.go(); // refresh the page to see the changes
     },
   },
 };
