@@ -3,6 +3,8 @@ package org.seng302.entities;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 import javax.persistence.*;
 import java.text.ParseException;
@@ -61,11 +63,11 @@ public class InventoryItem {
         return product;
     }
 
-    public void setProduct(Product product) throws Exception {
+    public void setProduct(Product product) throws ResponseStatusException {
         if (product != null) {
             this.product = product;
         } else {
-            throw new Exception("is null"); //TODO Add custom exception
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No product was provided");
         }
     }
 
@@ -77,7 +79,7 @@ public class InventoryItem {
         if (quantity > 0) {
             this.quantity = quantity;
         } else {
-            throw new Exception("is null"); //TODO Add custom exception
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A quantity less than 0 was provided");
         }
     }
 
@@ -128,11 +130,11 @@ public class InventoryItem {
         return expires;
     }
 
-    public void setExpires(Date expires) throws Exception {
+    public void setExpires(Date expires) throws ResponseStatusException {
         if (expires != null) {
             this.expires = expires;
         } else {
-            throw new Exception("is null"); //TODO Add custom exception
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No expiry date was provided");
         }
     }
 
@@ -249,6 +251,7 @@ public class InventoryItem {
             inventoryItem.setSellBy(this.sellBy);
             inventoryItem.setBestBefore(this.bestBefore);
             inventoryItem.setExpires(this.expires);
+            inventoryItem.setCreationDate();
             return inventoryItem;
         }
     }
