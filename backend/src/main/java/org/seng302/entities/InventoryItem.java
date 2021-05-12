@@ -3,6 +3,8 @@ package org.seng302.entities;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 import javax.persistence.*;
 import java.text.ParseException;
@@ -25,7 +27,7 @@ public class InventoryItem {
     private Product product;
 
     @Column(name = "quantity", nullable = false)
-    private int quantity;
+    private Integer quantity;
 
     @Column(name = "price_per_item")
     private Double pricePerItem;
@@ -61,11 +63,11 @@ public class InventoryItem {
         return product;
     }
 
-    public void setProduct(Product product) throws Exception {
+    public void setProduct(Product product) throws ResponseStatusException {
         if (product != null) {
             this.product = product;
         } else {
-            throw new Exception("is null"); //TODO Add custom exception
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No product was provided");
         }
     }
 
@@ -73,15 +75,15 @@ public class InventoryItem {
         return quantity;
     }
 
-    public void setQuantity(int quantity) throws Exception {
-        if (quantity > 0) {
+    public void setQuantity(Integer quantity) throws Exception {
+        if (quantity > 0 && quantity != null) {
             this.quantity = quantity;
         } else {
-            throw new Exception("is null"); //TODO Add custom exception
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A quantity less than 0 was provided");
         }
     }
 
-    public double getPricePerItem() {
+    public Double getPricePerItem() {
         return pricePerItem;
     }
 
@@ -89,7 +91,7 @@ public class InventoryItem {
         this.pricePerItem = pricePerItem;
     }
 
-    public double getTotalPrice() {
+    public Double getTotalPrice() {
         return totalPrice;
     }
 
@@ -97,7 +99,9 @@ public class InventoryItem {
      * Sets and calculates the total price based on the price per item and quantity
      */
     public void setTotalPrice() {
-        this.totalPrice = this.quantity * this.pricePerItem;
+        if (this.quantity != null && this.pricePerItem != null) {
+            this.totalPrice = this.quantity * this.pricePerItem;
+        }
     }
 
     public Date getManufactured() {
@@ -128,11 +132,11 @@ public class InventoryItem {
         return expires;
     }
 
-    public void setExpires(Date expires) throws Exception {
+    public void setExpires(Date expires) throws ResponseStatusException {
         if (expires != null) {
             this.expires = expires;
         } else {
-            throw new Exception("is null"); //TODO Add custom exception
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No expiry date was provided");
         }
     }
 
@@ -156,6 +160,7 @@ public class InventoryItem {
         private Product product;
         private int quantity;
         private Double pricePerItem;
+        private Double totalPrice;
         private Date manufactured;
         private Date sellBy;
         private Date bestBefore;
@@ -187,15 +192,15 @@ public class InventoryItem {
          * @param pricePerItem the cost for each singular item for this product in the inventory
          * @return Builder with the price per item set
          */
-        public Builder withPricePerItem(double pricePerItem) {
+        public Builder withPricePerItem(Double pricePerItem) {
             this.pricePerItem = pricePerItem;
             return this;
         }
 
         /**
-         * Sets the builder's total price.
-         * @param totalPrice The total price of every item in the inventory
-         * @return Builder with the total price set
+         * Set the builder's total price item.
+         * @param totalPrice the total price for the product in the item inventory
+         * @return Builder with the total price item set
          */
         public Builder withTotalPrice(Double totalPrice) {
             this.totalPrice = totalPrice;
@@ -261,12 +266,12 @@ public class InventoryItem {
             inventoryItem.setSellBy(this.sellBy);
             inventoryItem.setBestBefore(this.bestBefore);
             inventoryItem.setExpires(this.expires);
+            inventoryItem.setCreationDate();
             if (this.totalPrice == null) {
                 inventoryItem.setTotalPrice();
             } else {
                 inventoryItem.setTotalPrice(this.totalPrice);
             }
-
             return inventoryItem;
         }
     }
