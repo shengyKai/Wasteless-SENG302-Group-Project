@@ -1,8 +1,6 @@
 package org.seng302.entities;
 
-import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.ToString;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -12,9 +10,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
-@Data
 @NoArgsConstructor
-@ToString
 @Entity
 public class InventoryItem {
 
@@ -27,7 +23,7 @@ public class InventoryItem {
     private Product product;
 
     @Column(name = "quantity", nullable = false)
-    private Integer quantity;
+    private int quantity;
 
     @Column(name = "price_per_item")
     private Double pricePerItem;
@@ -76,10 +72,10 @@ public class InventoryItem {
     }
 
     public void setQuantity(Integer quantity) throws Exception {
-        if (quantity > 0 && quantity != null) {
+        if (quantity > 0) {
             this.quantity = quantity;
         } else {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A quantity less than 0 was provided");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A quantity less than 1 was provided");
         }
     }
 
@@ -99,7 +95,7 @@ public class InventoryItem {
      * Sets and calculates the total price based on the price per item and quantity
      */
     public void setTotalPrice() {
-        if (this.quantity != null && this.pricePerItem != null) {
+        if (this.pricePerItem != null) {
             this.totalPrice = this.quantity * this.pricePerItem;
         }
     }
@@ -153,8 +149,6 @@ public class InventoryItem {
         today.set(Calendar.HOUR_OF_DAY, 0);
         this.creationDate = today.getTime();
     }
-
-    //TODO Add ToString
 
     /**
      * Builder for Inventory Item
@@ -216,8 +210,10 @@ public class InventoryItem {
          * @return Builder with the sell by date set
          */
         public Builder withManufactured(String manufacturedString) throws ParseException {
-            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-            this.manufactured = dateFormat.parse(manufacturedString);
+            if (manufacturedString != null) {
+                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+                this.manufactured = dateFormat.parse(manufacturedString);
+            } else { this.manufactured = null; }
             return this;
         }
 
@@ -227,8 +223,10 @@ public class InventoryItem {
          * @return Builder with the sell by date set
          */
         public Builder withSellBy(String sellByString) throws ParseException {
-            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-            this.sellBy = dateFormat.parse(sellByString);
+            if (sellByString != null) {
+                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+                this.sellBy = dateFormat.parse(sellByString);
+            } else { this.sellBy = null; }
             return this;
         }
 
@@ -238,8 +236,10 @@ public class InventoryItem {
          * @return Builder with the best before date set
          */
         public Builder withBestBefore(String bestBeforeString) throws ParseException {
-            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-            this.bestBefore = dateFormat.parse(bestBeforeString);
+            if (bestBeforeString != null) {
+                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+                this.bestBefore = dateFormat.parse(bestBeforeString);
+            } else { this.bestBefore = null; }
             return this;
         }
 
@@ -249,6 +249,9 @@ public class InventoryItem {
          * @return Builder with the expires data set
          */
         public Builder withExpires(String expiresString) throws ParseException {
+            if (expiresString == null) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No expiry date was provided");
+            }
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
             this.expires = dateFormat.parse(expiresString);
             return this;
@@ -264,7 +267,6 @@ public class InventoryItem {
             inventoryItem.setProduct(this.product);
             inventoryItem.setQuantity(this.quantity);
             inventoryItem.setPricePerItem(this.pricePerItem);
-            inventoryItem.setTotalPrice();
             inventoryItem.setManufactured(this.manufactured);
             inventoryItem.setSellBy(this.sellBy);
             inventoryItem.setBestBefore(this.bestBefore);
@@ -279,6 +281,37 @@ public class InventoryItem {
         }
     }
 
+    @Override
+    public String toString() {
+        return String.format("There are %d %s of this inventory item. They expire on %s",
+                this.quantity, this.product.getName(), this.expires.toString());
+    }
 
+    @Override
+    public boolean equals(Object o) {
+        if (o == this) {
+            return true;
+        }
+        if (!(o instanceof InventoryItem)) {
+            return false;
+        }
+        InventoryItem invItem = (InventoryItem) o;
 
+        return
+                this.id.equals(invItem.getId()) &&
+                        this.product.getID().equals(invItem.getProduct().getID()) &&
+                        this.quantity == invItem.getQuantity() &&
+                        (this.pricePerItem == null ? invItem.getPricePerItem() == null :
+                                this.pricePerItem.equals(invItem.getPricePerItem())) &&
+                        (this.totalPrice == null ? invItem.getTotalPrice() == null :
+                                this.totalPrice.equals(invItem.getTotalPrice())) &&
+                        (this.manufactured == null ? invItem.getManufactured() == null :
+                                this.manufactured.equals(invItem.getManufactured())) &&
+                        (this.sellBy == null ? invItem.getSellBy() == null :
+                                this.sellBy.equals(invItem.getSellBy())) &&
+                        (this.bestBefore == null ? invItem.getBestBefore() == null :
+                                this.bestBefore.equals(invItem.getBestBefore())) &&
+                        this.expires.equals(invItem.getExpires()) &&
+                        this.creationDate.equals(invItem.getCreationDate());
+    }
 }
