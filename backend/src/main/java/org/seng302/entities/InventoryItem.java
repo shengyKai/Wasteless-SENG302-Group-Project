@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.persistence.*;
+import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -26,10 +27,10 @@ public class InventoryItem {
     private int quantity;
 
     @Column(name = "price_per_item")
-    private Double pricePerItem;
+    private BigDecimal pricePerItem;
 
     @Column(name = "total_price")
-    private Double totalPrice;
+    private BigDecimal totalPrice;
 
     @Column(name = "manufactured")
     private Date manufactured;
@@ -79,15 +80,15 @@ public class InventoryItem {
         }
     }
 
-    public Double getPricePerItem() {
+    public BigDecimal getPricePerItem() {
         return pricePerItem;
     }
 
-    public void setPricePerItem(Double pricePerItem) {
-        this.pricePerItem = pricePerItem;
+    public void setPricePerItem(String pricePerItem) {
+        this.pricePerItem = new BigDecimal(pricePerItem);
     }
 
-    public Double getTotalPrice() {
+    public BigDecimal getTotalPrice() {
         return totalPrice;
     }
 
@@ -96,12 +97,12 @@ public class InventoryItem {
      */
     public void setTotalPrice() {
         if (this.pricePerItem != null) {
-            this.totalPrice = this.quantity * this.pricePerItem;
+            this.totalPrice = new BigDecimal(this.quantity).multiply(this.pricePerItem);
         }
     }
 
-    public void setTotalPrice(Double totalPrice) {
-        this.totalPrice = totalPrice;
+    public void setTotalPrice(String totalPrice) {
+        this.totalPrice = new BigDecimal(totalPrice);
     }
 
     public Date getManufactured() {
@@ -157,8 +158,8 @@ public class InventoryItem {
 
         private Product product;
         private int quantity;
-        private Double pricePerItem;
-        private Double totalPrice;
+        private String pricePerItem;
+        private String totalPrice;
         private Date manufactured;
         private Date sellBy;
         private Date bestBefore;
@@ -189,7 +190,7 @@ public class InventoryItem {
          * @param pricePerItem the cost for each singular item for this product in the inventory
          * @return Builder with the price per item set
          */
-        public Builder withPricePerItem(Double pricePerItem) {
+        public Builder withPricePerItem(String pricePerItem) {
             this.pricePerItem = pricePerItem;
             return this;
         }
@@ -199,7 +200,7 @@ public class InventoryItem {
          * @param totalPrice the total price for the product in the item inventory
          * @return Builder with the total price item set
          */
-        public Builder withTotalPrice(Double totalPrice) {
+        public Builder withTotalPrice(String totalPrice) {
             this.totalPrice = totalPrice;
             return this;
         }
@@ -207,7 +208,7 @@ public class InventoryItem {
         /**
          * Sets the builder's sell by date
          * @param manufacturedString the date when the product in the inventory was manufactured
-         * @return Builder with the sell by date set
+         * @return Builder with the manufactured date set
          */
         public Builder withManufactured(String manufacturedString) throws ParseException {
             if (manufacturedString != null) {
