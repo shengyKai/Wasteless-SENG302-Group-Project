@@ -4,7 +4,7 @@ exports[`InventoryItem.vue Must match snapshot 1`] = `
 <div class="v-card v-sheet theme--light">
   <div class="container container--fluid">
     <div class="row">
-      <div align="center" justify="center" class="col-sm-12 col-md-3 col-auto"><i aria-hidden="true" class="v-icon notranslate mdi mdi-image theme--light" style="font-size: 250px;"></i></div>
+      <div align="center" justify="center" class="col-sm-12 col-md-3 col-auto" style="width: 100%;"><i aria-hidden="true" class="v-icon notranslate mdi mdi-image theme--light" style="font-size: 250px;"></i></div>
       <div class="col">
         <div class="row">
           <div class="auto pa-0 col-sm-10 col-md-10 col">

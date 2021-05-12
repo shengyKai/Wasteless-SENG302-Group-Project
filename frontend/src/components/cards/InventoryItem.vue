@@ -2,7 +2,8 @@
   <v-card>
     <v-container fluid>
       <v-row>
-        <v-col align="center" justify="center" cols="auto" md="3" sm="12" v-if="product.images.length === 0">
+        <!-- Image column -->
+        <v-col align="center" justify="center" cols="auto" md="3" sm="12" style="width: 100%;" v-if="product.images.length === 0">
           <v-icon size="250">
             mdi-image
           </v-icon>
@@ -11,6 +12,8 @@
           <!-- feed the productImages into the carousel child component -->
           <ProductImageCarousel :productImages="product.images" :productId="product.id"/>
         </v-col>
+
+        <!-- Info column -->
         <v-col>
           <v-row>
             <v-col class="auto pa-0" md="10" sm="10">
@@ -116,8 +119,9 @@
             </v-col>
           </v-row>
         </v-col>
+
+        <!-- Timeline column -->
         <v-col cols="auto">
-          <!-- Timeline of relevant inventory item dates -->
           <v-timeline
             clipped
             class="timeline"
