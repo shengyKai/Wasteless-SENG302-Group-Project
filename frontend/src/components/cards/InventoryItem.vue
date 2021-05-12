@@ -33,6 +33,17 @@
           <v-row>
             <v-col cols="auto" md="9" sm="12">
               <v-row>
+                <!-- shows the product code -->
+                <v-card-text
+                  :class="{ 'pb-0': $vuetify.breakpoint.mdAndUp }"
+                  class="product-fields"
+                >
+                  <strong>Product Code</strong>
+                  <br >
+                  {{ product.id }}
+                </v-card-text>
+              </v-row>
+              <v-row>
                 <!-- if the description length is more than or equal to 50 without slicing any words, the "Read more..." link will
                 appear which will lead the user to the FullProductDescription component  -->
                 <span v-if="product.description.length >= 50">
@@ -57,7 +68,7 @@
                 <!-- else just show the product description -->
                 <span v-else>
                   <v-card-text class="pb-0 product-fields">
-                    <strong>Description: </strong>
+                    <strong>Description</strong>
                     <br >
                     {{ product.description }}
                   </v-card-text>
@@ -71,7 +82,7 @@
                   }"
                   class="product-fields"
                 >
-                  <strong>Manufacturer: </strong>
+                  <strong>Manufacturer</strong>
                   <br >
                   {{ product.manufacturer }}
                 </v-card-text>
@@ -81,71 +92,73 @@
               <v-row>
                 <!-- shows the product price -->
                 <v-card-text class="pb-0 product-fields">
-                  <strong>RRP: </strong>
+                  <strong>Quantity</strong>
                   <br >
-                  {{ currency.symbol }}{{ product.recommendedRetailPrice }} {{ currency.code }}
+                  {{ inventoryItem.quantity }}
                 </v-card-text>
               </v-row>
-              <v-row>
-                <!-- shows the product code -->
-                <v-card-text
-                  :class="{ 'pb-0': $vuetify.breakpoint.mdAndUp }"
-                  class="product-fields"
-                >
-                  <strong>Product Code: </strong>
+              <v-row v-if="inventoryItem.pricePerItem !== undefined">
+                <!-- shows the product price -->
+                <v-card-text class="pb-0 product-fields">
+                  <strong>Price per Item</strong>
                   <br >
-                  {{ product.id }}
+                  {{ currency.symbol }}{{ inventoryItem.pricePerItem }} {{ currency.code }}
                 </v-card-text>
               </v-row>
-            </v-col>
-            <v-col>
-              <div class="timeline-container">
-                <v-timeline
-                  dense
-                  clipped
-                  class="rotated-timeline"
-                >
-                  <v-timeline-item v-if="inventoryItem.expires" small color="red">
-                    <div class="rotated-timeline-item">
-                      <strong>Expires</strong>
-                      <!--<br>-->
-                      {{ inventoryItem.expires }}
-                    </div>
-                  </v-timeline-item>
-                  <v-timeline-item v-if="inventoryItem.bestBefore" small color="orange">
-                    <div class="rotated-timeline-item">
-                      <strong>Best Before</strong>
-                      <!--<br>-->
-                      {{ inventoryItem.bestBefore }}
-                    </div>
-                  </v-timeline-item>
-                  <v-timeline-item v-if="inventoryItem.sellBy" small color="yellow">
-                    <div class="rotated-timeline-item">
-                      <strong>Sell By</strong>
-                      <!--<br>-->
-                      {{ inventoryItem.sellBy }}
-                    </div>
-                  </v-timeline-item>
-                  <v-timeline-item v-if="product.created" small color="grey">
-                    <div class="rotated-timeline-item">
-                      <strong>Created</strong>
-                      <!--<br>-->
-                      {{ product.created }}
-                    </div>
-                  </v-timeline-item>
-                  <v-timeline-item v-if="inventoryItem.manufactured" small color="green">
-                    <div class="rotated-timeline-item">
-                      <strong>Manufactured</strong>
-                      <!--<br>-->
-                      {{ inventoryItem.manufactured }}
-                    </div>
-                  </v-timeline-item>
-                </v-timeline>
-              </div>
+              <v-row v-if="inventoryItem.totalPrice !== undefined">
+                <!-- shows the product price -->
+                <v-card-text class="pb-0 product-fields">
+                  <strong>Total Price</strong>
+                  <br >
+                  {{ currency.symbol }}{{ inventoryItem.totalPrice }} {{ currency.code }}
+                </v-card-text>
+              </v-row>
             </v-col>
           </v-row>
         </v-col>
-
+        <v-col cols="auto">
+          <v-timeline
+            clipped
+            class="timeline"
+          >
+            <v-timeline-item v-if="inventoryItem.manufactured" small color="green" right>
+              <template v-slot:opposite>
+                <div class="timeline-label">Manufactured</div>
+              </template>
+              <div>
+                {{ inventoryItem.manufactured }}
+              </div>
+            </v-timeline-item>
+            <v-timeline-item v-if="product.created" small color="grey" right>
+              <template v-slot:opposite>
+                <div class="timeline-label">Created</div>
+              </template>
+              <div>
+                {{ product.created }}
+              </div>
+            </v-timeline-item>
+            <v-timeline-item v-if="inventoryItem.sellBy" small color="yellow" right>
+              <template v-slot:opposite>
+                <div class="timeline-label">Sell By</div>
+              </template>
+              <div>
+                {{ inventoryItem.sellBy }}
+              </div>
+            </v-timeline-item>
+            <v-timeline-item v-if="inventoryItem.bestBefore" small color="orange" right>
+              <template v-slot:opposite>
+                <div class="timeline-label">Best Before</div>
+              </template>
+              {{ inventoryItem.bestBefore }}
+            </v-timeline-item>
+            <v-timeline-item v-if="inventoryItem.expires" small color="red" f right>
+              <template v-slot:opposite>
+                <div class="timeline-label">Expires</div>
+              </template>
+              {{ inventoryItem.expires }}
+            </v-timeline-item>
+          </v-timeline>
+        </v-col>
       </v-row>
     </v-container>
   </v-card>
@@ -172,11 +185,6 @@ export default {
             recommendedRetailPrice: 2.2,
             created: "2021-05-11",
             images: [
-              {
-                "id": 1234,
-                "filename": "/media/images/23987192387509-123908794328.png",
-                "thumbnailFilename": "/media/images/23987192387509-123908794328_thumbnail.png"
-              }
             ],
             countryOfSale: "Japan",
           },
@@ -233,27 +241,13 @@ export default {
     padding-top: 0;
 }
 
-.timeline-container {
-  /*height: 75px;
-  width: 100%;*/
+.timeline {
+  height: 100%;
 }
 
-.rotated-timeline {
-  display: inline-block;
-  transform-origin: center center;
-  /*transform: rotate(90deg) translate(-100%, -50%);*/
-}
-.rotated-timeline-item {
-  margin: -20px -10px;
-  text-align: center;
-  display: inline-block;
-  /*background-color: red;*/
-  /*transform-origin: left center;
-  transform: rotate(-90deg) translate(-50%, 0%);*/
+.timeline-label {
+  width: 90px;
+  font-weight: bold;
 }
 
-.rotated-timeline-icon {
-  /*transform-origin: center center;
-  transform: rotate(-90deg);*/
-}
 </style>
