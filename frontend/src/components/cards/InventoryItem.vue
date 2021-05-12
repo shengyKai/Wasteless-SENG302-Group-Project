@@ -125,7 +125,7 @@
               <template v-slot:opposite>
                 <div class="timeline-label">Manufactured</div>
               </template>
-              <div>
+              <div class="timeline-content">
                 {{ inventoryItem.manufactured }}
               </div>
             </v-timeline-item>
@@ -133,7 +133,7 @@
               <template v-slot:opposite>
                 <div class="timeline-label">Created</div>
               </template>
-              <div>
+              <div class="timeline-content">
                 {{ product.created }}
               </div>
             </v-timeline-item>
@@ -141,7 +141,7 @@
               <template v-slot:opposite>
                 <div class="timeline-label">Sell By</div>
               </template>
-              <div>
+              <div class="timeline-content">
                 {{ inventoryItem.sellBy }}
               </div>
             </v-timeline-item>
@@ -149,13 +149,17 @@
               <template v-slot:opposite>
                 <div class="timeline-label">Best Before</div>
               </template>
-              {{ inventoryItem.bestBefore }}
+              <div class="timeline-content">
+                {{ inventoryItem.bestBefore }}
+              </div>
             </v-timeline-item>
             <v-timeline-item v-if="inventoryItem.expires" small color="red" f right>
               <template v-slot:opposite>
                 <div class="timeline-label">Expires</div>
               </template>
-              {{ inventoryItem.expires }}
+              <div class="timeline-content">
+                {{ inventoryItem.expires }}
+              </div>
             </v-timeline-item>
           </v-timeline>
         </v-col>
@@ -183,7 +187,7 @@ export default {
             description: "Baked Beans as they should be.",
             manufacturer: "Heinz Wattie's Limited",
             recommendedRetailPrice: 2.2,
-            created: "2021-05-11",
+            created: "2021-05-12",
             images: [
             ],
             countryOfSale: "Japan",
@@ -192,9 +196,9 @@ export default {
           pricePerItem: 6.5,
           totalPrice: 21.99,
           manufactured: "2021-05-11",
-          sellBy: "2021-05-11",
-          bestBefore: "2021-05-11",
-          expires: "2021-05-11"
+          sellBy: "2021-05-13",
+          bestBefore: "2021-05-14",
+          expires: "2021-05-15"
         };
       },
     },
@@ -236,13 +240,17 @@ export default {
 };
 </script>
 
-<style scoped>
+<style>
 .product-fields {
     padding-top: 0;
 }
 
 .timeline {
   height: 100%;
+}
+
+.timeline-content {
+  margin-left: -20px;
 }
 
 .timeline-label {
