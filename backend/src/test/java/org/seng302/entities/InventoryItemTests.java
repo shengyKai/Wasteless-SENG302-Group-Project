@@ -10,10 +10,12 @@ import org.seng302.persistence.ProductRepository;
 import org.seng302.persistence.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.text.ParseException;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -90,11 +92,8 @@ public class InventoryItemTests {
         clearDatabase();
     }
 
-    /**
-     * Creates an inventory with all the fields.
-     */
     @Test
-    void createInventoryItem_withAllFields_ObjectCreated() throws Exception {
+    void createInventoryItem_withAllFields_objectCreated() throws Exception {
         InventoryItem invItem = new InventoryItem.Builder()
                 .withProduct(testProduct)
                 .withQuantity(3)
@@ -110,11 +109,8 @@ public class InventoryItemTests {
         assertEquals(invItem.getId(), testInvItem.getId());
     }
 
-    /**
-     * Creates an inventory that only contains the required fields.
-     */
     @Test
-    void createInventoryItem_withOnlyRequiredFields_ObjectCreated() throws Exception {
+    void createInventoryItem_withOnlyRequiredFields_objectCreated() throws Exception {
         InventoryItem invItem = new InventoryItem.Builder()
                 .withProduct(testProduct)
                 .withQuantity(2)
@@ -126,8 +122,162 @@ public class InventoryItemTests {
         assertEquals(invItem.getId(), testInvItem.getId());
     }
 
-    //write tests for each individual null
+    @Test
+    void createInventoryItem_withNullProduct_exceptionThrown() throws Exception {
+        try {
+            InventoryItem invItem = new InventoryItem.Builder()
+                    .withProduct(null)
+                    .withQuantity(2)
+                    .withExpires("2021-06-01")
+                    .build();
+            fail();
+        } catch (ResponseStatusException e) {
+            assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+            assertEquals("No product was provided", e.getReason());
+        } catch (Exception e) { fail(); }
+    }
+
+    @Test
+    void createInventoryItem_withNullExpires_exceptionThrown() throws Exception {
+        try {
+            InventoryItem invItem = new InventoryItem.Builder()
+                    .withProduct(testProduct)
+                    .withQuantity(1)
+                    .withExpires(null)
+                    .build();
+        } catch (ResponseStatusException e) {
+            assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+            assertEquals("No expiry date was provided", e.getReason());
+        } catch (Exception e) { fail(); }
+    }
+
+    @Test
+    void createInventoryItem_withZeroQuantity_exceptionThrown() throws Exception {
+        try {
+            InventoryItem invItem = new InventoryItem.Builder()
+                    .withProduct(testProduct)
+                    .withQuantity(0)
+                    .withExpires("2021-06-01")
+                    .build();
+        } catch (ResponseStatusException e) {
+            assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+            assertEquals("A quantity less than 1 was provided", e.getReason());
+        } catch (Exception e) { fail(); }
+    }
+
+    @Test
+    void createInventoryItem_withNegativeQuantity_exceptionThrown() throws Exception {
+        try {
+            InventoryItem invItem = new InventoryItem.Builder()
+                    .withProduct(testProduct)
+                    .withQuantity(-69)
+                    .withExpires("2021-06-01")
+                    .build();
+        } catch (ResponseStatusException e) {
+            assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+            assertEquals("A quantity less than 1 was provided", e.getReason());
+        } catch (Exception e) { fail(); }
+    }
+
+    @Test
+    void createInventoryItem_withNullPricePerItem_objectCreated() throws Exception {
+        InventoryItem invItem = new InventoryItem.Builder()
+                .withProduct(testProduct)
+                .withQuantity(2)
+                .withExpires("2021-06-01")
+                .withPricePerItem(null)
+                .build();
+        inventoryItemRepository.save(invItem);
+        testInvItem = inventoryItemRepository.findById(invItem.getId()).get();
+        //Add custom equals to inventory item
+        assertEquals(invItem.getId(), testInvItem.getId());
+    }
+
+    @Test
+    void createInventoryItem_withNullTotalPriceAndNoPricePerItem_objectCreated() throws Exception {
+        InventoryItem invItem = new InventoryItem.Builder()
+                .withProduct(testProduct)
+                .withQuantity(2)
+                .withExpires("2021-06-01")
+                .withPricePerItem(null)
+                .withTotalPrice(null)
+                .build();
+        inventoryItemRepository.save(invItem);
+        testInvItem = inventoryItemRepository.findById(invItem.getId()).get();
+        //Add custom equals to inventory item
+        assertEquals(invItem.getId(), testInvItem.getId());
+    }
+
+    @Test
+    void createInventoryItem_withNullTotalPriceAndHasPricePerItem_objectCreated() throws Exception {
+        InventoryItem invItem = new InventoryItem.Builder()
+                .withProduct(testProduct)
+                .withQuantity(2)
+                .withExpires("2021-06-01")
+                .withPricePerItem(6.90)
+                .withTotalPrice(null)
+                .build();
+        inventoryItemRepository.save(invItem);
+        testInvItem = inventoryItemRepository.findById(invItem.getId()).get();
+        //Add custom equals to inventory item
+        assertEquals(invItem.getId(), testInvItem.getId());
+    }
+
+    @Test
+    void createInventoryItem_withTotalPrice_objectCreated() throws Exception {
+        InventoryItem invItem = new InventoryItem.Builder()
+                .withProduct(testProduct)
+                .withQuantity(2)
+                .withExpires("2021-06-01")
+                .withTotalPrice(21.69)
+                .build();
+        inventoryItemRepository.save(invItem);
+        testInvItem = inventoryItemRepository.findById(invItem.getId()).get();
+        //Add custom equals to inventory item
+        assertEquals(invItem.getId(), testInvItem.getId());
+    }
+
+    @Test
+    void createInventoryItem_withNullManufacturedDate_objectCreated() throws Exception {
+        InventoryItem invItem = new InventoryItem.Builder()
+                .withProduct(testProduct)
+                .withQuantity(2)
+                .withExpires("2021-06-01")
+                .withManufactured(null)
+                .build();
+        inventoryItemRepository.save(invItem);
+        testInvItem = inventoryItemRepository.findById(invItem.getId()).get();
+        //Add custom equals to inventory item
+        assertEquals(invItem.getId(), testInvItem.getId());
+    }
+
+    @Test
+    void createInventoryItem_withNullSellByDate_objectCreated() throws Exception {
+        InventoryItem invItem = new InventoryItem.Builder()
+                .withProduct(testProduct)
+                .withQuantity(2)
+                .withExpires("2021-06-01")
+                .withSellBy(null)
+                .build();
+        inventoryItemRepository.save(invItem);
+        testInvItem = inventoryItemRepository.findById(invItem.getId()).get();
+        //Add custom equals to inventory item
+        assertEquals(invItem.getId(), testInvItem.getId());
+    }
+
+    @Test
+    void createInventoryItem_withNullBestBefore_objectCreated() throws Exception {
+        InventoryItem invItem = new InventoryItem.Builder()
+                .withProduct(testProduct)
+                .withQuantity(2)
+                .withExpires("2021-06-01")
+                .withBestBefore(null)
+                .build();
+        inventoryItemRepository.save(invItem);
+        testInvItem = inventoryItemRepository.findById(invItem.getId()).get();
+        //Add custom equals to inventory item
+        assertEquals(invItem.getId(), testInvItem.getId());
+    }
+
     //write tests for testing many to one relationship of product
-    //write tests for testing retrieving product
-    //write tests for builder
 }
