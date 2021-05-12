@@ -105,8 +105,7 @@ public class InventoryItemTests {
                 .build();
         inventoryItemRepository.save(invItem);
         testInvItem = inventoryItemRepository.findById(invItem.getId()).get();
-        //Add custom equals to inventory item
-        assertEquals(invItem.getId(), testInvItem.getId());
+        assertEquals(invItem, testInvItem);
     }
 
     @Test
@@ -118,8 +117,7 @@ public class InventoryItemTests {
                 .build();
         inventoryItemRepository.save(invItem);
         testInvItem = inventoryItemRepository.findById(invItem.getId()).get();
-        //Add custom equals to inventory item
-        assertEquals(invItem.getId(), testInvItem.getId());
+        assertEquals(invItem, testInvItem);
     }
 
     @Test
@@ -189,8 +187,7 @@ public class InventoryItemTests {
                 .build();
         inventoryItemRepository.save(invItem);
         testInvItem = inventoryItemRepository.findById(invItem.getId()).get();
-        //Add custom equals to inventory item
-        assertEquals(invItem.getId(), testInvItem.getId());
+        assertEquals(invItem, testInvItem);
     }
 
     @Test
@@ -204,8 +201,7 @@ public class InventoryItemTests {
                 .build();
         inventoryItemRepository.save(invItem);
         testInvItem = inventoryItemRepository.findById(invItem.getId()).get();
-        //Add custom equals to inventory item
-        assertEquals(invItem.getId(), testInvItem.getId());
+        assertEquals(invItem, testInvItem);
     }
 
     @Test
@@ -219,8 +215,7 @@ public class InventoryItemTests {
                 .build();
         inventoryItemRepository.save(invItem);
         testInvItem = inventoryItemRepository.findById(invItem.getId()).get();
-        //Add custom equals to inventory item
-        assertEquals(invItem.getId(), testInvItem.getId());
+        assertEquals(invItem, testInvItem);
     }
 
     @Test
@@ -233,8 +228,7 @@ public class InventoryItemTests {
                 .build();
         inventoryItemRepository.save(invItem);
         testInvItem = inventoryItemRepository.findById(invItem.getId()).get();
-        //Add custom equals to inventory item
-        assertEquals(invItem.getId(), testInvItem.getId());
+        assertEquals(invItem, testInvItem);
     }
 
     @Test
@@ -247,8 +241,7 @@ public class InventoryItemTests {
                 .build();
         inventoryItemRepository.save(invItem);
         testInvItem = inventoryItemRepository.findById(invItem.getId()).get();
-        //Add custom equals to inventory item
-        assertEquals(invItem.getId(), testInvItem.getId());
+        assertEquals(invItem, testInvItem);
     }
 
     @Test
@@ -261,8 +254,7 @@ public class InventoryItemTests {
                 .build();
         inventoryItemRepository.save(invItem);
         testInvItem = inventoryItemRepository.findById(invItem.getId()).get();
-        //Add custom equals to inventory item
-        assertEquals(invItem.getId(), testInvItem.getId());
+        assertEquals(invItem, testInvItem);
     }
 
     @Test
@@ -275,8 +267,7 @@ public class InventoryItemTests {
                 .build();
         inventoryItemRepository.save(invItem);
         testInvItem = inventoryItemRepository.findById(invItem.getId()).get();
-        //Add custom equals to inventory item
-        assertEquals(invItem.getId(), testInvItem.getId());
+        assertEquals(invItem, testInvItem);
     }
 
     //write tests for testing many to one relationship of product

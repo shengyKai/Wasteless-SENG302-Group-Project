@@ -1,8 +1,6 @@
 package org.seng302.entities;
 
-import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.ToString;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -12,9 +10,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
-@Data
 @NoArgsConstructor
-@ToString
 @Entity
 public class InventoryItem {
 
@@ -104,6 +100,10 @@ public class InventoryItem {
         }
     }
 
+    public void setTotalPrice(Double totalPrice) {
+        this.totalPrice = totalPrice;
+    }
+
     public Date getManufactured() {
         return manufactured;
     }
@@ -149,8 +149,6 @@ public class InventoryItem {
         today.set(Calendar.HOUR_OF_DAY, 0);
         this.creationDate = today.getTime();
     }
-
-    //TODO Add ToString
 
     /**
      * Builder for Inventory Item
@@ -268,7 +266,6 @@ public class InventoryItem {
             inventoryItem.setProduct(this.product);
             inventoryItem.setQuantity(this.quantity);
             inventoryItem.setPricePerItem(this.pricePerItem);
-            inventoryItem.setTotalPrice();
             inventoryItem.setManufactured(this.manufactured);
             inventoryItem.setSellBy(this.sellBy);
             inventoryItem.setBestBefore(this.bestBefore);
@@ -283,6 +280,37 @@ public class InventoryItem {
         }
     }
 
+    @Override
+    public String toString() {
+        return String.format("There are %d %s of this inventory item. They expire on %s",
+                this.quantity, this.product.getName(), this.expires.toString());
+    }
 
+    @Override
+    public boolean equals(Object o) {
+        if (o == this) {
+            return true;
+        }
+        if (!(o instanceof InventoryItem)) {
+            return false;
+        }
+        InventoryItem invItem = (InventoryItem) o;
 
+        return
+                this.id.equals(invItem.getId()) &&
+                        this.product.getID().equals(invItem.getProduct().getID()) &&
+                        this.quantity == invItem.getQuantity() &&
+                        (this.pricePerItem == null ? invItem.getPricePerItem() == null :
+                                this.pricePerItem.equals(invItem.getPricePerItem())) &&
+                        (this.totalPrice == null ? invItem.getTotalPrice() == null :
+                                this.totalPrice.equals(invItem.getTotalPrice())) &&
+                        (this.manufactured == null ? invItem.getManufactured() == null :
+                                this.manufactured.equals(invItem.getManufactured())) &&
+                        (this.sellBy == null ? invItem.getSellBy() == null :
+                                this.sellBy.equals(invItem.getSellBy())) &&
+                        (this.bestBefore == null ? invItem.getBestBefore() == null :
+                                this.bestBefore.equals(invItem.getBestBefore())) &&
+                        this.expires.equals(invItem.getExpires()) &&
+                        this.creationDate.equals(invItem.getCreationDate());
+    }
 }
