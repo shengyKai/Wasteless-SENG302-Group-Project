@@ -180,7 +180,6 @@ public class InventoryItem {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The Best Before date cannot be in the past");
             }
         } else {
-            //Do nothing because it might be null (will clean the code before the task is done, going to ask someone)
             // throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The sellBy date has been entered incorrectly");
         }
     }
