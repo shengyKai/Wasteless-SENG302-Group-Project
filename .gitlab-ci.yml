@@ -109,7 +109,7 @@ deploy-staging-backend:
     paths:
       - backend/build/libs
   only:
-    - dev
+    - t114-fix-backend-business-error
 
 deploy-staging-frontend:
   stage: deploy
@@ -131,7 +131,7 @@ deploy-staging-frontend:
     paths:
       - frontend/dist
   only:
-    - dev
+    - t114-fix-backend-business-error
 
 deploy-production-backend:
   stage: deploy
