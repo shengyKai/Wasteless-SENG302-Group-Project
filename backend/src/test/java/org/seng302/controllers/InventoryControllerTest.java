@@ -4,10 +4,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mockito.*;
-import org.seng302.entities.Business;
-import org.seng302.entities.Location;
-import org.seng302.entities.Product;
-import org.seng302.entities.User;
+import org.mockito.junit.MockitoJUnitRunner;
+import org.seng302.entities.*;
 import org.seng302.persistence.BusinessRepository;
 import org.seng302.persistence.InventoryItemRepository;
 import org.seng302.persistence.ProductRepository;
@@ -16,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
@@ -115,7 +114,6 @@ public class InventoryControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(inventory))
                 .andExpect(status().isOk());
-
     }
 
 
@@ -172,8 +170,6 @@ public class InventoryControllerTest {
 
     @Test
     void addInventory_invalidBusinessId_406Thrown() throws Exception {
-        Business businessSpy = spy(testBusiness);
-        Product productSpy = spy(testProduct);
         when(businessRepository.getBusinessById(any())).thenCallRealMethod();
         String inventory = "{\n" +
                 "  \"productId\": \"BEANS\",\n" +
@@ -193,27 +189,97 @@ public class InventoryControllerTest {
     }
 
     @Test
-    void addInventory_noRequestBody_401Thrown() {
+    void addInventory_noRequestBody_400Thrown() throws Exception {
+        Business businessSpy = spy(testBusiness);
+        Product productSpy = spy(testProduct);
+        when(businessRepository.getBusinessById(any())).thenReturn(businessSpy); // use our business
+        when(productRepository.getProductByBusinessAndProductCode(any(), any())).thenReturn(productSpy); // use our product
+        doNothing().when(businessSpy).checkSessionPermissions(any()); // mock successful authentication
 
+
+        mockMvc.perform(MockMvcRequestBuilders
+                .post("/businesses/1/inventory"))
+                .andExpect(status().isBadRequest());
     }
 
     @Test
-    void addInventory_productNotExist_406Thrown() {
+    void addInventory_productNotExist_406Thrown() throws Exception {
+        Business businessSpy = spy(testBusiness);
+        Product productSpy = spy(testProduct);
+        when(businessRepository.getBusinessById(any())).thenReturn(businessSpy); // use our business
+        when(productRepository.getProductByBusinessAndProductCode(any(), any())).thenCallRealMethod(); // use real method
+        doNothing().when(businessSpy).checkSessionPermissions(any()); // mock successful authentication
 
+        String inventory = "{\n" +
+                "  \"productId\": \"BEANS\",\n" +
+                "  \"quantity\": 4,\n" +
+                "  \"pricePerItem\": 6.5,\n" +
+                "  \"totalPrice\": 21.99,\n" +
+                "  \"manufactured\": \"2021-05-12\",\n" +
+                "  \"sellBy\": \"2021-05-12\",\n" +
+                "  \"bestBefore\": \"2021-05-12\",\n" +
+                "  \"expires\": \"2021-05-12\"\n" +
+                "}";
+        mockMvc.perform(MockMvcRequestBuilders
+                .post("/businesses/1/inventory")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(inventory))
+                .andExpect(status().isNotAcceptable());
     }
 
     @Test
-    void addInventory_productOfWrongBusiness_403Thrown() {
+    void addInventory_productOfWrongBusiness_403Thrown() throws Exception {
+        Business businessSpy = spy(testBusiness);
+        Product productSpy = spy(testProduct);
+        Optional<Product> optionalProduct = Optional.of(productSpy);
+        when(businessRepository.getBusinessById(any())).thenReturn(businessSpy); // use our business
+        when(productRepository.getProductByBusinessAndProductCode(any(), any())).thenThrow(new ResponseStatusException(HttpStatus.FORBIDDEN)); // make this method always throw
+        doNothing().when(businessSpy).checkSessionPermissions(any()); // mock successful authentication
 
+        String inventory = "{\n" +
+                "  \"productId\": \"BEANS\",\n" +
+                "  \"quantity\": 4,\n" +
+                "  \"pricePerItem\": 6.5,\n" +
+                "  \"totalPrice\": 21.99,\n" +
+                "  \"manufactured\": \"2021-05-12\",\n" +
+                "  \"sellBy\": \"2021-05-12\",\n" +
+                "  \"bestBefore\": \"2021-05-12\",\n" +
+                "  \"expires\": \"2021-05-12\"\n" +
+                "}";
+        mockMvc.perform(MockMvcRequestBuilders
+                .post("/businesses/1/inventory")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(inventory))
+                .andExpect(status().isForbidden());
     }
 
-    @Test
-    void addInventory_validProductDetails_canCreateInventory() {
-
-    }
 
     @Test
-    void addInventory_inventoryCreated_inventorySavedToDatabase() {
+    void addInventory_inventoryCreated_inventorySavedToDatabase() throws Exception {
+        Business businessSpy = spy(testBusiness);
+        Product productSpy = spy(testProduct);
+        when(businessRepository.getBusinessById(any())).thenReturn(businessSpy); // use our business
+        when(productRepository.getProductByBusinessAndProductCode(any(), any())).thenReturn(productSpy); // use our product
+        doNothing().when(businessSpy).checkSessionPermissions(any()); // mock successful authentication
+
+
+        String inventory = "{\n" +
+                "  \"productId\": \"BEANS\",\n" +
+                "  \"quantity\": 4,\n" +
+                "  \"pricePerItem\": 6.5,\n" +
+                "  \"totalPrice\": 21.99,\n" +
+                "  \"manufactured\": \"2021-05-12\",\n" +
+                "  \"sellBy\": \"2021-05-12\",\n" +
+                "  \"bestBefore\": \"2021-05-12\",\n" +
+                "  \"expires\": \"2021-05-12\"\n" +
+                "}";
+        mockMvc.perform(MockMvcRequestBuilders
+                .post("/businesses/1/inventory")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(inventory))
+                .andExpect(status().isOk());
+
+        verify(inventoryItemRepository, times(1)).save(any(InventoryItem.class));
 
     }
 

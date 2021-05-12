@@ -29,7 +29,7 @@ public class InventoryController {
     private final ProductRepository productRepository;
     private static final Logger logger = LogManager.getLogger(InventoryController.class.getName());
 
-    @Autowired
+    //@Autowired
     public InventoryController(BusinessRepository businessRepository, InventoryItemRepository inventoryItemRepository, ProductRepository productRepository) {
         this.businessRepository = businessRepository;
         this.inventoryItemRepository = inventoryItemRepository;
