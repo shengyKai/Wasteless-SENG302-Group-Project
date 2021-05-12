@@ -373,9 +373,5 @@ public class ImageTests {
         } catch (Exception e) { assertEquals(DataIntegrityViolationException.class, e.getClass()); }
     }
 
-
-
-
-    //TODO Discuss with team if we should include tests and validation to test if the image at the directory (filename) actually exists
 }
 

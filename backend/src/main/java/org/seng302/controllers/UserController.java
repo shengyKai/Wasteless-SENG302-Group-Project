@@ -7,7 +7,6 @@ import org.apache.logging.log4j.Logger;
 import org.seng302.entities.Location;
 import org.seng302.entities.User;
 import org.seng302.exceptions.EmailInUseException;
-import org.seng302.exceptions.FailedRegisterException;
 import org.seng302.exceptions.UserNotFoundException;
 import org.seng302.persistence.UserRepository;
 import org.seng302.tools.AuthenticationTokenManager;
@@ -83,7 +82,7 @@ public class UserController {
             throw responseError;
         } catch (ParseException e) {
             e.printStackTrace();
-            throw new FailedRegisterException("Could not process date of birth.");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Could not process date of birth.");
         }
 
     }
@@ -193,7 +192,7 @@ public class UserController {
      * @param session The request
      * @param id The id of the user to promote
      */
-    @PostMapping("/users/{id}/makeAdmin")
+    @PutMapping("/users/{id}/makeAdmin")
     void makeUserAdmin(HttpServletRequest session, @PathVariable("id") long id) {
         changeUserPrivilege(session, id, "globalApplicationAdmin");
     }
@@ -204,7 +203,7 @@ public class UserController {
      * @param session The request
      * @param id The id of the user to demote
      */
-    @PostMapping("/users/{id}/revokeAdmin")
+    @PutMapping("/users/{id}/revokeAdmin")
     void revokeUserAdmin(HttpServletRequest session, @PathVariable("id") long id) {
         changeUserPrivilege(session, id, "user");
     }
@@ -230,17 +229,5 @@ public class UserController {
             user.get().setRole(newRole);
             userRepository.save(user.get());
         }
-    }
-
-    /**
-     * For development
-     * Starts a session
-     * @param request
-     * @param response
-     */
-    @GetMapping("/dev/session")
-    void experimentalGetSession(HttpServletRequest request, HttpServletResponse response) {
-        AuthenticationTokenManager.setAuthenticationToken(request, response, null);
-        AuthenticationTokenManager.setAuthenticationTokenDGAA(request);
     }
 }

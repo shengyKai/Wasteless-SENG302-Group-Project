@@ -21,7 +21,6 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class ProductTests {
-    //TODO ADD NEW TESTS FOR THE NEW IMAGE ATTRIBUTE!!!
 
     @Autowired
     ProductRepository productRepository;

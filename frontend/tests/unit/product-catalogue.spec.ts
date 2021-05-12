@@ -12,9 +12,11 @@ import { castMock, flushQueue } from './utils';
 
 jest.mock('@/api/internal', () => ({
   getProducts: jest.fn(),
+  getProductCount: jest.fn()
 }));
 
 const getProducts = castMock(api.getProducts);
+const getProductCount = castMock(api.getProductCount);
 
 Vue.use(Vuetify);
 
@@ -48,7 +50,11 @@ function createTestProducts(count: number) {
 describe('ProductCatalogue.vue', () => {
   // Container for the ProductCatalogue under test
   let wrapper: Wrapper<any>;
+  let numberOfTestProducts: number;
 
+  getProductCount.mockImplementation(async businessId => {
+    return numberOfTestProducts;
+  });
 
   /**
    * Creates the wrapper for the ProductCatalogue component.
@@ -74,8 +80,9 @@ describe('ProductCatalogue.vue', () => {
    *
    * @param products Products on the current page to use for the mock results
    */
-  function setResults(products: Product[]) {
+  function setResults(products: Product[], totalCount?: number) {
     getProducts.mockResolvedValue(products);
+    getProductCount.mockResolvedValue(totalCount !== undefined ? totalCount : products.length);
   }
 
   /**
@@ -87,11 +94,14 @@ describe('ProductCatalogue.vue', () => {
     return wrapper.findComponent({name: 'v-alert'});
   }
 
+  beforeEach(() => {
+    numberOfTestProducts = 5;
+  });
   /**
    * Tests that when initially opened that the products are queried
    */
   it('The products from the business id are queried', () => {
-    setResults(createTestProducts(5));
+    setResults(createTestProducts(numberOfTestProducts));
     createWrapper();
     expect(getProducts).toBeCalledWith(100, 1, RESULTS_PER_PAGE, 'productCode', false);
   });
@@ -100,7 +110,7 @@ describe('ProductCatalogue.vue', () => {
    * Tests that the product results are shown
    */
   it('The search results should be displayed somewhere', async () => {
-    let products = createTestProducts(5);
+    let products = createTestProducts(numberOfTestProducts);
     setResults(products);
 
     createWrapper();
@@ -145,5 +155,45 @@ describe('ProductCatalogue.vue', () => {
     await Vue.nextTick();
 
     expect(findErrorBox().exists()).toBeFalsy();
+  });
+
+  /**
+   * Tests that the pagination component exists and has the right number of pages
+   */
+  it('If there are many pages then there should be a pagination component with many pages', async () => {
+    setResults(createTestProducts(RESULTS_PER_PAGE), 100);
+    createWrapper();
+
+    await flushQueue();
+
+    let pagination = wrapper.findComponent({ name: 'v-pagination' });
+    expect(pagination.props().length).toBe(Math.ceil(100 / RESULTS_PER_PAGE));
+    expect(pagination.props().disabled).toBe(false);
+    expect(pagination.props().value).toBe(1);
+  });
+  /**
+   * Tests that the status text contains the number of results
+   */
+  it('If there are results then there should be a message informing the buisness admin how many', async () => {
+    setResults(createTestProducts(RESULTS_PER_PAGE), 100);
+
+    createWrapper();
+
+    await flushQueue();
+
+    expect(wrapper.text()).toContain(`Displaying 1 - ${RESULTS_PER_PAGE} of 100 results`);
+  });
+
+  /**
+   * Tests the status text is 'There are no results to show' when there are no results
+   */
+  it('If there are no results then there should be a message informing the buisness admin of that', async () => {
+    setResults([]);
+
+    createWrapper();
+
+    await flushQueue();
+
+    expect(wrapper.text()).toContain('There are no results to show');
   });
 });

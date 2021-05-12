@@ -2,15 +2,12 @@
 package org.seng302.entities;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
-
 import org.springframework.data.annotation.ReadOnlyProperty;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
-import javax.annotation.PreDestroy;
 import javax.persistence.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -43,7 +40,6 @@ public class User extends Account {
      */
     String phoneRegex = "^(\\+\\d{1,2}\\s)?\\(?\\d{1,3}\\)?[\\s.-]?\\d{3,4}[\\s.-]?\\d{4,5}";
     // Allows letters, numbers and selected symbols then 1 @ then some amount of other characters
-    // Todo: this regex does not match the example data from the API spec. Update regex and tests
     String emailRegex = "^[A-Za-z0-9+_.-]+@(.+)$";
 
 
@@ -64,7 +60,7 @@ public class User extends Account {
      * @param firstName users first name
      */
     public void setFirstName(String firstName) {
-        if (firstName != null && firstName.length() > 0 && firstName.length() <= 32 && firstName.matches("[ a-zA-Z]+")) {
+        if (firstName != null && firstName.length() > 0 && firstName.length() <= 32 && firstName.matches("[ a-zA-Z\\-]+")) {
             this.firstName = firstName;
         } else {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The first name must not be empty, be less then 16 characters, and only contain letters.");
@@ -83,7 +79,7 @@ public class User extends Account {
      * @param middleName
      */
     public void setMiddleName(String middleName) {
-        if (middleName == null || (middleName.length() > 0 && middleName.length() <= 32 && middleName.matches("[ a-zA-Z]+"))) {
+        if (middleName == null || (middleName.length() > 0 && middleName.length() <= 32 && middleName.matches("[ a-zA-Z\\-]+"))) {
             this.middleName = middleName;
         } else if (middleName.equals("")) {
             this.middleName = null;
@@ -107,7 +103,7 @@ public class User extends Account {
      * @param lastName users surname
      */
     public void setLastName(String lastName) {
-        if (lastName != null && lastName.length() > 0 && lastName.length() <= 32 && lastName.matches("[ a-zA-Z]+")) {
+        if (lastName != null && lastName.length() > 0 && lastName.length() <= 32 && lastName.matches("[ a-zA-Z\\-]+")) {
             this.lastName = lastName;
         } else {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The last name must not be empty, be less then 16 characters, and only contain letters.");

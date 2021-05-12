@@ -281,7 +281,7 @@ export default {
         field => /(^[a-zA-Z0-9]*$)/.test(field) || 'Must contain numbers and alphabet only'
       ],
       nameRules: [
-        field =>  (field.length === 0 || (/^[a-z]+$/i).test(field)) || 'Naming must be valid'
+        field =>  (field.length === 0 || (/^[a-z-//.// ]+$/i).test(field)) || 'Naming must be valid'
       ],
       maxShortCharRules: [
         field => (field.length <= 16) || 'Reached max character limit: 16'
@@ -307,7 +307,7 @@ export default {
       ],
       streetNumRules: [
         field => (field && field.length <= 109) || 'Reach Max chracter limit 109 ',
-        field => /^(?=.*[0-9 ])(?=.*[a-zA-Z ])([a-zA-Z0-9 ]+)$/.test(field) || 'Must have at least one number and one alphabet'
+        field => /^(?=.*[0-9])(?=.*[\s])(?=.*[a-zA-Z ])([a-zA-Z0-9 ]+)$/.test(field) || 'Must have at least one number and one alphabet'
       ],
     };
   },

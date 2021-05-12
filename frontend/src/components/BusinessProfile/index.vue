@@ -13,7 +13,7 @@
       <v-row>
         <v-col cols="12" sm="6">
           <h4>Address</h4>
-          {{ business.address }}
+          {{ readableAddress }}
         </v-col>
         <v-col cols="12" sm="6">
           <h4>Category</h4>
@@ -40,6 +40,7 @@
 
 <script>
 import { getBusiness } from '../../api/internal';
+import convertAddressToReadableText from '@/components/utils/Methods/convertJsonAddressToReadableText';
 
 export default {
   name: 'BusinessProfile',
@@ -50,20 +51,27 @@ export default {
        * The business that this profile is for.
        */
       business: {},
+      readableAddress: ""
     };
   },
 
-  mounted() {
-    const id = parseInt(this.$route.params.id);
-    if (isNaN(id)) return;
+  watch: {
+    $route: {
+      handler() {
+        const id = parseInt(this.$route.params.id);
+        if (isNaN(id)) return;
 
-    getBusiness(id).then((value) => {
-      if (typeof value === 'string') {
-        this.$store.commit('setError', value);
-      } else {
-        this.business = value;
-      }
-    });
+        getBusiness(id).then((value) => {
+          if (typeof value === 'string') {
+            this.$store.commit('setError', value);
+          } else {
+            this.business = value;
+            this.readableAddress = convertAddressToReadableText(value.address, "full");
+          }
+        });
+      },
+      immediate: true,
+    }
   },
 
   computed: {
@@ -75,7 +83,7 @@ export default {
       const parts = createdAt.toDateString().split(' ');
 
       const diffTime = now - createdAt;
-      const diffMonths = Math.ceil(diffTime / (1000 * 60 * 60 * 24 * 30));
+      const diffMonths = Math.floor(diffTime / (1000 * 60 * 60 * 24 * 30));
 
       return `${parts[2]} ${parts[1]} ${parts[3]} (${diffMonths} months ago)`;
     },

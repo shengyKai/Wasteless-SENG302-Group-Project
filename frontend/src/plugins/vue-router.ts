@@ -59,11 +59,6 @@ const routes = [
     component: SearchResults,
     meta: { title: 'Search' }
   },
-  { // TODO Remove this
-    path: "/catalogue",
-    component: ProductCatalogueItem,
-    meta: { title: 'Catalogue'}
-  },
   {
     path: "/business/:id/products",
     component: ProductCatalogue,

@@ -18,7 +18,7 @@ import java.util.List;
 public class Product {
     // Product code must only contain uppercase letters, numbers and dashes
     // Product code have a length between 1-15
-    private final String productCodeRegex = "^[-A-Z0-9]{1,15}$";
+    private static final String productCodeRegex = "^[-A-Z0-9]{1,15}$";
 
 
     @Id
@@ -269,9 +269,11 @@ public class Product {
         object.put("recommendedRetailPrice", recommendedRetailPrice);
         object.put("created", created);
         JSONArray images = new JSONArray();
-        object.put("images", productImages);
+        for (Image image : productImages) {
+            images.add(image.constructJSONObject());
+        }
+        object.put("images", images);
         object.put("countryOfSale", countryOfSale);
-        object.put("images", productImages);
         return object;
     }
 

@@ -1,10 +1,9 @@
 package org.seng302.controllers;
 
 import com.jayway.jsonpath.JsonPath;
-import net.minidev.json.JSONObject;
 import net.minidev.json.JSONArray;
+import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
-
 import org.junit.Ignore;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -14,16 +13,18 @@ import org.seng302.entities.User;
 import org.seng302.persistence.BusinessRepository;
 import org.seng302.persistence.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import javax.servlet.http.Cookie;
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -415,40 +416,6 @@ public class UserControllerTest {
         assertEquals(1, jsonObject.size());
     }
 
-
-//    @Test
-//    public void getUserWhenUserExistsAndSessionValid() throws Exception{
-//        // Setup
-//        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-//        User john = new User("John", "Hector","Smith", "Jonny", "johnsmith99@gmail.com",
-//                "password", "Likes long walks on the beach", dateFormat.parse("1999-04-27"),
-//                "+64 3 555 0129", "address", false);
-//        userRepository.save(john);
-//
-///        User expectedUser = userRepository.findByEmail("johnsmith99@gmail.com");
-//        //get a cookie
-//        String loginBody = "{\"email\": \"johnsmith99@gmail.com\", \"password\": \"1337-H%nt3r2\"}";
-//
-//        MvcResult req = mockMvc.perform(post("/login")
-//                .contentType(MediaType.APPLICATION_JSON)
-//                .content(loginBody))
-//                .andReturn();
-//        Cookie cookie = req.getResponse().getCookie("test123");
-//
-//        // test
-//        MvcResult result = mockMvc.perform(get(String.format("/users/%d",expectedUser.getUserID()))
-//                .cookie(cookie))
-//                .andExpect(status().isOk())
-//                .andReturn();
-//
-//        JsonValue json = Json.parse(result.getResponse().getContentAsString());
-//
-//
-//
-//      }
-//
-
-
     /**
      * Tests if several valid users are successively registered and stored within the database
      * @throws Exception
@@ -703,7 +670,7 @@ public class UserControllerTest {
         User expectedUser = userRepository.findByEmail("johnsmith99@gmail.com");
 
         // perform
-        mockMvc.perform(post(String.format("/users/%d/makeAdmin",expectedUser.getUserID()))
+        mockMvc.perform(MockMvcRequestBuilders.put(String.format("/users/%d/makeAdmin",expectedUser.getUserID()))
                 .sessionAttrs(sessionAuthToken)
                 .cookie(authCookie))
                 .andExpect(status().isOk())
@@ -724,7 +691,7 @@ public class UserControllerTest {
         User expectedUser = userRepository.findByEmail("johnsmith99@gmail.com");
 
         // perform
-        mockMvc.perform(post(String.format("/users/%d/makeAdmin",expectedUser.getUserID()))
+        mockMvc.perform(MockMvcRequestBuilders.put(String.format("/users/%d/makeAdmin",expectedUser.getUserID()))
                 .sessionAttrs(sessionAuthToken)
                 .cookie(authCookie))
                 .andExpect(status().isForbidden())
@@ -742,7 +709,7 @@ public class UserControllerTest {
         User expectedUser = userRepository.findByEmail("johnsmith99@gmail.com");
 
         // perform
-        mockMvc.perform(post(String.format("/users/%d/makeAdmin",expectedUser.getUserID()))
+        mockMvc.perform(MockMvcRequestBuilders.put(String.format("/users/%d/makeAdmin",expectedUser.getUserID()))
                 .cookie(authCookie))
                 .andExpect(status().isUnauthorized())
                 .andReturn();
@@ -757,7 +724,7 @@ public class UserControllerTest {
     public void makeAdminThrowsWhenUserNotExist() throws Exception {
         setUpDGAAAuthCode(); // give us dgaa auth
         // perform
-        mockMvc.perform(post("/users/99999/makeAdmin")
+        mockMvc.perform(MockMvcRequestBuilders.put("/users/99999/makeAdmin")
                 .sessionAttrs(sessionAuthToken)
                 .cookie(authCookie))
                 .andExpect(status().isNotAcceptable())
@@ -783,7 +750,7 @@ public class UserControllerTest {
         userRepository.save(john);
 
         // perform
-        mockMvc.perform(post(String.format("/users/%d/revokeAdmin", john.getUserID()))
+        mockMvc.perform(MockMvcRequestBuilders.put(String.format("/users/%d/revokeAdmin", john.getUserID()))
                 .sessionAttrs(sessionAuthToken)
                 .cookie(authCookie))
                 .andExpect(status().isOk())

@@ -3,6 +3,7 @@ import Vuetify from 'vuetify';
 import {createLocalVue, mount, Wrapper, RouterLinkStub} from '@vue/test-utils';
 import BusinessProfile from '@/components/BusinessProfile/index.vue';
 import VueRouter from "vue-router";
+import convertAddressToReadableText from '@/components/utils/Methods/convertJsonAddressToReadableText';
 
 Vue.use(Vuetify);
 
@@ -32,7 +33,15 @@ describe('index.vue', () => {
         return {
           business: {
             name: "Some Business Name",
-            address: "1 Some Street Name",
+            address: {
+              "country": "Some Country",
+              "streetName": "Some Street Name",
+              "streetNumber": "1",
+              "city": "Some City",
+              "district": "Some District",
+              "postcode": "1234",
+              "region": "Some Region"
+            },
             businessType: "Some Business Type",
             description: "Some Description",
             created: date,
@@ -49,6 +58,7 @@ describe('index.vue', () => {
               }
             ]
           },
+          readableAddress: "1 Some Street Name",
         };
       }
     });
@@ -84,11 +94,12 @@ describe('index.vue', () => {
 
   /**
    * Tests that the created date exists as per the set data above, the date set above is the current date today, and since
-   * the number of months passed is rounded up to the nearest integer, it will always be (1 month ago)
+   * The number of months passed is rounded up to the nearest integer
+   * It should start from (0 month(s) ago as if you juz created it cant be 1 month)
    */
   it("Must contain the business created date", () => {
     expect(wrapper.text()).toContain(`${("0" + date.getDate()).slice(-2)} ` +
-    `${date.toLocaleString('default', {month: 'short'})} ${date.getFullYear()} (1 months ago)`);
+    `${date.toLocaleString('default', {month: 'short'})} ${date.getFullYear()} (0 months ago)`);
   });
 
   /**
