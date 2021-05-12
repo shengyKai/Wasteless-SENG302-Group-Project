@@ -112,10 +112,6 @@ public class InventoryItem {
     /**
      * Sets the date of when the product was manufactured
      * @param manufactured the date when the product was manufactured
-     * 
-     * the return of compareTo method
-     * @return the comparator value, negative if less, positive if greater
-     * 
      */
     public void setManufactured(Date manufactured) {
         if (manufactured != null){
@@ -138,7 +134,10 @@ public class InventoryItem {
     public Date getSellBy() {
         return sellBy;
     }
-
+    /**
+     * Sets the date of when the product need to get sell by
+     * @param sellBy the date when the product need to get sell by
+     */
     public void setSellBy(Date sellBy) {
         if (sellBy != null){
             LocalDate dateOfSellBy = sellBy.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
@@ -160,7 +159,10 @@ public class InventoryItem {
     public Date getBestBefore() {
         return bestBefore;
     }
-
+    /**
+     * Sets the date of Best Before for the product
+     * @param bestBefore the date of Best Before for the product
+     */
     public void setBestBefore(Date bestBefore) {
         if (bestBefore != null) {
             LocalDate dateOfBestBefore = bestBefore.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
@@ -181,7 +183,10 @@ public class InventoryItem {
     public Date getExpires() {
         return expires;
     }
-
+    /**
+     * Sets the date of expires for the product
+     * @param expires the date of expires for the product
+     */
     public void setExpires(Date expires) throws ResponseStatusException {
         if (expires != null) {
             LocalDate dateOfExpires = expires.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
