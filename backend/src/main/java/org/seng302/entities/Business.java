@@ -22,7 +22,7 @@ public class Business {
     private static final String textRegex = "[ a-zA-Z0-9\\p{Punct}]*";
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long id;
     @Column(nullable = false)
     private String name;
