@@ -1,9 +1,6 @@
 package org.seng302.entities;
 
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.*;
 import org.seng302.persistence.BusinessRepository;
 import org.seng302.persistence.InventoryItemRepository;
 import org.seng302.persistence.ProductRepository;
@@ -32,7 +29,6 @@ public class InventoryItemTests {
 
     private Business testBusiness;
     private Product testProduct;
-    private InventoryItem testInvItem;
 
     void createTestObjects() throws ParseException {
         clearDatabase();
@@ -82,7 +78,7 @@ public class InventoryItemTests {
         userRepository.deleteAll();
     }
 
-    @BeforeEach
+    @BeforeAll
     void setUp() throws ParseException {
         createTestObjects();
     }
@@ -104,7 +100,7 @@ public class InventoryItemTests {
                 .withExpires("2021-06-01")
                 .build();
         inventoryItemRepository.save(invItem);
-        testInvItem = inventoryItemRepository.findById(invItem.getId()).get();
+        InventoryItem testInvItem = inventoryItemRepository.findById(invItem.getId()).get();
         assertEquals(invItem, testInvItem);
     }
 
@@ -116,7 +112,7 @@ public class InventoryItemTests {
                 .withExpires("2021-06-01")
                 .build();
         inventoryItemRepository.save(invItem);
-        testInvItem = inventoryItemRepository.findById(invItem.getId()).get();
+        InventoryItem testInvItem = inventoryItemRepository.findById(invItem.getId()).get();
         assertEquals(invItem, testInvItem);
     }
 
@@ -186,7 +182,7 @@ public class InventoryItemTests {
                 .withPricePerItem(null)
                 .build();
         inventoryItemRepository.save(invItem);
-        testInvItem = inventoryItemRepository.findById(invItem.getId()).get();
+        InventoryItem testInvItem = inventoryItemRepository.findById(invItem.getId()).get();
         assertEquals(invItem, testInvItem);
     }
 
@@ -200,7 +196,7 @@ public class InventoryItemTests {
                 .withTotalPrice(null)
                 .build();
         inventoryItemRepository.save(invItem);
-        testInvItem = inventoryItemRepository.findById(invItem.getId()).get();
+        InventoryItem testInvItem = inventoryItemRepository.findById(invItem.getId()).get();
         assertEquals(invItem, testInvItem);
     }
 
@@ -214,7 +210,7 @@ public class InventoryItemTests {
                 .withTotalPrice(null)
                 .build();
         inventoryItemRepository.save(invItem);
-        testInvItem = inventoryItemRepository.findById(invItem.getId()).get();
+        InventoryItem testInvItem = inventoryItemRepository.findById(invItem.getId()).get();
         assertEquals(invItem, testInvItem);
     }
 
@@ -227,7 +223,7 @@ public class InventoryItemTests {
                 .withTotalPrice(21.69)
                 .build();
         inventoryItemRepository.save(invItem);
-        testInvItem = inventoryItemRepository.findById(invItem.getId()).get();
+        InventoryItem testInvItem = inventoryItemRepository.findById(invItem.getId()).get();
         assertEquals(invItem, testInvItem);
     }
 
@@ -240,7 +236,7 @@ public class InventoryItemTests {
                 .withManufactured(null)
                 .build();
         inventoryItemRepository.save(invItem);
-        testInvItem = inventoryItemRepository.findById(invItem.getId()).get();
+        InventoryItem testInvItem = inventoryItemRepository.findById(invItem.getId()).get();
         assertEquals(invItem, testInvItem);
     }
 
@@ -253,7 +249,7 @@ public class InventoryItemTests {
                 .withSellBy(null)
                 .build();
         inventoryItemRepository.save(invItem);
-        testInvItem = inventoryItemRepository.findById(invItem.getId()).get();
+        InventoryItem testInvItem = inventoryItemRepository.findById(invItem.getId()).get();
         assertEquals(invItem, testInvItem);
     }
 
@@ -266,9 +262,35 @@ public class InventoryItemTests {
                 .withBestBefore(null)
                 .build();
         inventoryItemRepository.save(invItem);
-        testInvItem = inventoryItemRepository.findById(invItem.getId()).get();
+        InventoryItem testInvItem = inventoryItemRepository.findById(invItem.getId()).get();
         assertEquals(invItem, testInvItem);
     }
 
-    //write tests for testing many to one relationship of product
+    @Test
+    void createInventoryItem_multipleInventoryItemsHaveSameProduct_objectCreated() throws Exception {
+        InventoryItem invItem1 = new InventoryItem.Builder()
+                .withProduct(testProduct)
+                .withQuantity(2)
+                .withExpires("2021-06-01")
+                .build();
+        InventoryItem invItem2 = new InventoryItem.Builder()
+                .withProduct(testProduct)
+                .withQuantity(3)
+                .withExpires("2023-07-22")
+                .build();
+        InventoryItem invItem3 = new InventoryItem.Builder()
+                .withProduct(testProduct)
+                .withQuantity(4)
+                .withExpires("2025-11-06")
+                .build();
+        inventoryItemRepository.save(invItem1);
+        inventoryItemRepository.save(invItem2);
+        inventoryItemRepository.save(invItem3);
+        InventoryItem testInvItem1 = inventoryItemRepository.findById(invItem1.getId()).get();
+        InventoryItem testInvItem2 = inventoryItemRepository.findById(invItem2.getId()).get();
+        InventoryItem testInvItem3 = inventoryItemRepository.findById(invItem3.getId()).get();
+        assertEquals(invItem1, testInvItem1);
+        assertEquals(invItem2, testInvItem2);
+        assertEquals(invItem3, testInvItem3);
+    }
 }
