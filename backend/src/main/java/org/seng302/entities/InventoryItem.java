@@ -3,8 +3,8 @@ package org.seng302.entities;
 import lombok.NoArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
-
 import javax.persistence.*;
+import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
@@ -28,10 +28,10 @@ public class InventoryItem {
     private int quantity;
 
     @Column(name = "price_per_item")
-    private Double pricePerItem;
+    private BigDecimal pricePerItem;
 
     @Column(name = "total_price")
-    private Double totalPrice;
+    private BigDecimal totalPrice;
 
     @Column(name = "manufactured")
     private Date manufactured;
@@ -48,62 +48,41 @@ public class InventoryItem {
     @Column(name = "creation_date", nullable = false)
     private Date creationDate;
 
-    // Getters and Setters
+// Getters 
+    /**
+     * Returns id in db table
+     * @return id in db table
+     */
     public Long getId() {
         return id;
     }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
+    /**
+     * Returns the product
+     * @return product
+     */
     public Product getProduct() {
         return product;
     }
-
-    public void setProduct(Product product) throws ResponseStatusException {
-        if (product != null) {
-            this.product = product;
-        } else {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No product was provided");
-        }
-    }
-
+    /**
+     * Return the quantity of items/products
+     * @return quantity of items/products
+     */
     public int getQuantity() {
         return quantity;
     }
-
-    public void setQuantity(Integer quantity) throws Exception {
-        if (quantity > 0) {
-            this.quantity = quantity;
-        } else {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A quantity less than 1 was provided");
-        }
-    }
-
-    public Double getPricePerItem() {
+    /**
+     * Returns price of per item
+     * @return price of per item
+     */
+    public BigDecimal getPricePerItem() {
         return pricePerItem;
     }
-
-    public void setPricePerItem(Double pricePerItem) {
-        this.pricePerItem = pricePerItem;
-    }
-
-    public Double getTotalPrice() {
-        return totalPrice;
-    }
-
     /**
-     * Sets and calculates the total price based on the price per item and quantity
+     * Total price based on price per item and quantity
+     * @return total price
      */
-    public void setTotalPrice() {
-        if (this.pricePerItem != null) {
-            this.totalPrice = this.quantity * this.pricePerItem;
-        }
-    }
-
-    public void setTotalPrice(Double totalPrice) {
-        this.totalPrice = totalPrice;
+    public BigDecimal getTotalPrice() {
+        return totalPrice;
     }
     /**
      * Returns date of when the product was manufactured
@@ -111,6 +90,107 @@ public class InventoryItem {
     public Date getManufactured() {
         return manufactured;
     }
+    /**
+     * Returns date of when the product need to get sell by
+     */
+    public Date getSellBy() {
+        return sellBy;
+    }
+    /**
+     * Returns date of Best Before for the product
+     */
+    public Date getBestBefore() {
+        return bestBefore;
+    }
+    /**
+     * Returns date of expires of the product
+     */
+    public Date getExpires() {
+        return expires;
+    }
+    /**
+     * Returns creation date of the item in Inventory
+     */
+    public Date getCreationDate() {
+        return creationDate;
+    }   
+    
+//Setters
+    /**
+     * Sets the id in db table
+     * @param id
+     */
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    /**
+     * Sets the product
+     * @param product
+     */
+    public void setProduct(Product product) throws ResponseStatusException {
+        if (product != null) {
+            this.product = product;
+        } else {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No product was provided");
+        }
+    }
+    /**
+     * Sets the quantity of items/products
+     * @param quantity
+     */
+    public void setQuantity(Integer quantity) throws Exception {
+        if (quantity > 0) {
+            this.quantity = quantity;
+        } else {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A quantity less than 1 was provided");
+        }
+    }
+    /**
+     * Sets the price of per item
+     * @param pricePerItem price of per item
+     */
+    public void setPricePerItem(BigDecimal pricePerItem) {
+        if (pricePerItem != null) {  
+            if (pricePerItem.compareTo(BigDecimal.ZERO) < 0) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Total price must not be less than 0 ");
+            }
+            if (pricePerItem.compareTo(new BigDecimal(10000)) >= 0) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Total price must be less than 10000");
+            }
+            this.pricePerItem = pricePerItem;
+        } else {
+            //Do nothing? Optional?
+        }
+        }
+    /**
+     * Sets and calculates the total price based on the price per item and quantity
+     */
+    public void setTotalPrice() {
+        if (this.pricePerItem != null) {
+            
+            this.totalPrice = this.pricePerItem.multiply(new BigDecimal(this.quantity));
+        }
+    }
+    /**
+     * Sets the total price for the products
+     */
+    public void setTotalPrice(BigDecimal totalPrice) {
+    if (totalPrice != null) {
+    
+        if (totalPrice.compareTo(BigDecimal.ZERO) < 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Total price must not be less than 0 ");
+        }
+        if (totalPrice.compareTo(new BigDecimal(999999)) >= 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Total price must be less than 999999");
+        }
+        this.totalPrice = totalPrice;
+    } else {
+        //Do nothing? Optional?
+    }
+    }
+
+
     /**
      * Sets the date of when the product was manufactured
      * @param manufactured the date when the product was manufactured
@@ -132,12 +212,7 @@ public class InventoryItem {
         }
         
     }
-    /**
-     * Returns date of when the product need to get sell by
-     */
-    public Date getSellBy() {
-        return sellBy;
-    }
+
     /**
      * Sets the date of when the product need to get sell by
      * @param sellBy the date when the product need to get sell by
@@ -158,12 +233,7 @@ public class InventoryItem {
         }
         
     }
-    /**
-     * Returns date of Best Before for the product
-     */
-    public Date getBestBefore() {
-        return bestBefore;
-    }
+
     /**
      * Sets the date of Best Before for the product
      * @param bestBefore the date of Best Before for the product
@@ -183,12 +253,7 @@ public class InventoryItem {
             // throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The sellBy date has been entered incorrectly");
         }
     }
-    /**
-     * Returns date of expires of the product
-     */
-    public Date getExpires() {
-        return expires;
-    }
+
     /**
      * Sets the date of expires for the product
      * @param expires the date of expires for the product
@@ -211,12 +276,6 @@ public class InventoryItem {
             
 
     /**
-     * Returns creation date of the item in Inventory
-     */
-    public Date getCreationDate() {
-        return creationDate;
-    }
-    /**
      * Sets creation date of the item in Inventory
      */
     public void setCreationDate() {
@@ -232,8 +291,8 @@ public class InventoryItem {
 
         private Product product;
         private int quantity;
-        private Double pricePerItem;
-        private Double totalPrice;
+        private BigDecimal pricePerItem;
+        private BigDecimal totalPrice;
         private Date manufactured;
         private Date sellBy;
         private Date bestBefore;
@@ -264,7 +323,7 @@ public class InventoryItem {
          * @param pricePerItem the cost for each singular item for this product in the inventory
          * @return Builder with the price per item set
          */
-        public Builder withPricePerItem(Double pricePerItem) {
+        public Builder withPricePerItem(BigDecimal pricePerItem) {
             this.pricePerItem = pricePerItem;
             return this;
         }
@@ -274,7 +333,7 @@ public class InventoryItem {
          * @param totalPrice the total price for the product in the item inventory
          * @return Builder with the total price item set
          */
-        public Builder withTotalPrice(Double totalPrice) {
+        public Builder withTotalPrice(BigDecimal totalPrice) {
             this.totalPrice = totalPrice;
             return this;
         }
