@@ -41,7 +41,7 @@ public interface ProductRepository extends CrudRepository<Product, Long>{
          */
         default Product getProductByBusinessAndProductCode(Business business, String productCode) {
                 Optional<Product> product = this.findByProductCode(productCode);
-                if (!product.isPresent()) {
+                if (product.isEmpty()) {
                         throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE,
                                 "The given product does not exist");
                 }

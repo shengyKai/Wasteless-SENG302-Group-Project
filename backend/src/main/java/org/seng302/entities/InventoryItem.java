@@ -28,10 +28,10 @@ public class InventoryItem {
     private int quantity;
 
     @Column(name = "price_per_item")
-    private double pricePerItem;
+    private Double pricePerItem;
 
     @Column(name = "total_price")
-    private double totalPrice;
+    private Double totalPrice;
 
     @Column(name = "manufactured")
     private Date manufactured;
@@ -85,7 +85,7 @@ public class InventoryItem {
         return pricePerItem;
     }
 
-    public void setPricePerItem(double pricePerItem) {
+    public void setPricePerItem(Double pricePerItem) {
         this.pricePerItem = pricePerItem;
     }
 
@@ -155,11 +155,12 @@ public class InventoryItem {
 
         private Product product;
         private int quantity;
-        private double pricePerItem;
+        private Double pricePerItem;
         private Date manufactured;
         private Date sellBy;
         private Date bestBefore;
         private Date expires;
+        private Double totalPrice;
 
         /**
          * Sets the builder's productId. Required.
@@ -188,6 +189,16 @@ public class InventoryItem {
          */
         public Builder withPricePerItem(double pricePerItem) {
             this.pricePerItem = pricePerItem;
+            return this;
+        }
+
+        /**
+         * Sets the builder's total price.
+         * @param totalPrice The total price of every item in the inventory
+         * @return Builder with the total price set
+         */
+        public Builder withTotalPrice(Double totalPrice) {
+            this.totalPrice = totalPrice;
             return this;
         }
 
@@ -235,6 +246,7 @@ public class InventoryItem {
             return this;
         }
 
+
         /**
          * Builds the inventory item
          * @return the inventory item that has just been created
@@ -249,6 +261,12 @@ public class InventoryItem {
             inventoryItem.setSellBy(this.sellBy);
             inventoryItem.setBestBefore(this.bestBefore);
             inventoryItem.setExpires(this.expires);
+            if (this.totalPrice == null) {
+                inventoryItem.setTotalPrice();
+            } else {
+                inventoryItem.setTotalPrice(this.totalPrice);
+            }
+
             return inventoryItem;
         }
     }
