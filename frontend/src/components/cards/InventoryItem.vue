@@ -149,35 +149,35 @@
                 <v-card-text class="pb-0 product-fields">
                   <strong>Manufactured</strong>
                   <br>
-                  {{ inventoryItem.manufactured }}
+                  {{ placeholderIfEmpty(inventoryItem.manufactured) }}
                 </v-card-text>
               </v-row>
               <v-row>
                 <v-card-text class="pb-0 product-fields">
                   <strong>Created</strong>
                   <br>
-                  {{ product.created }}
+                  {{ placeholderIfEmpty(product.created) }}
                 </v-card-text>
               </v-row>
               <v-row>
                 <v-card-text class="pb-0 product-fields">
                   <strong>Sell By</strong>
                   <br>
-                  {{ inventoryItem.sellBy }}
+                  {{ placeholderIfEmpty(inventoryItem.sellBy) }}
                 </v-card-text>
               </v-row>
               <v-row>
                 <v-card-text class="pb-0 product-fields">
                   <strong>Best Before</strong>
                   <br>
-                  {{ inventoryItem.bestBefore }}
+                  {{ placeholderIfEmpty(inventoryItem.bestBefore) }}
                 </v-card-text>
               </v-row>
               <v-row>
                 <v-card-text class="pb-0 product-fields">
                   <strong>Expiry</strong>
                   <br>
-                  {{ inventoryItem.expires }}
+                  {{ placeholderIfEmpty(inventoryItem.expires) }}
                 </v-card-text>
               </v-row>
             </v-col>
@@ -308,6 +308,13 @@ export default {
     activateReadMore() {
       this.readMoreActivated = true;
     },
+
+    placeholderIfEmpty(text) {
+      if (text === undefined) {
+        return '-';
+      }
+      return text;
+    }
   },
 };
 </script>
