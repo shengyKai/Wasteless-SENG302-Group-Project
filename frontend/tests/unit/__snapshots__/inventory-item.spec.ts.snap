@@ -126,7 +126,7 @@ exports[`InventoryItem.vue Must match snapshot 1`] = `
               </div>
             </div>
             <div class="v-timeline-item__opposite">
-              <div class="timeline-label">Expires</div>
+              <div class="timeline-label">Expiry</div>
             </div>
           </div>
         </div>
