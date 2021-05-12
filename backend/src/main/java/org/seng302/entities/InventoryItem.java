@@ -104,6 +104,10 @@ public class InventoryItem {
         }
     }
 
+    public void setTotalPrice(Double totalPrice) {
+        this.totalPrice = totalPrice;
+    }
+
     public Date getManufactured() {
         return manufactured;
     }
@@ -165,7 +169,6 @@ public class InventoryItem {
         private Date sellBy;
         private Date bestBefore;
         private Date expires;
-        private Double totalPrice;
 
         /**
          * Sets the builder's productId. Required.
