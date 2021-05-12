@@ -70,6 +70,5 @@ public class InventoryController {
                 .build();
 
         inventoryItemRepository.save(item);
-
     }
 }
