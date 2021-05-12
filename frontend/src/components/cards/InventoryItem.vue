@@ -51,7 +51,7 @@
                     id="description"
                     class="pb-0 product-fields"
                   >
-                    <strong>Description: </strong>
+                    <strong>Description</strong>
                     <br >
                     {{
                       product.description.replace(
@@ -117,6 +117,7 @@
           </v-row>
         </v-col>
         <v-col cols="auto">
+          <!-- Timeline of relevant inventory item dates -->
           <v-timeline
             clipped
             class="timeline"
@@ -155,7 +156,7 @@
             </v-timeline-item>
             <v-timeline-item v-if="inventoryItem.expires" small color="red" f right>
               <template v-slot:opposite>
-                <div class="timeline-label">Expires</div>
+                <div class="timeline-label">Expiry</div>
               </template>
               <div class="timeline-content">
                 {{ inventoryItem.expires }}
@@ -227,6 +228,9 @@ export default {
     this.currency = await currencyFromCountry(this.product.countryOfSale);
   },
   computed: {
+    /**
+     * Helper property for getting the product out of the inventoryItem
+     */
     product() {
       return this.inventoryItem.product;
     }
