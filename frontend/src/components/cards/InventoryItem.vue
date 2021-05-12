@@ -64,14 +64,6 @@
                 </span>
               </v-row>
               <v-row>
-                <!-- shows the date added for the product -->
-                <v-card-text class="pb-0 product-fields">
-                  <strong>Date Added: </strong>
-                  <br >
-                  {{ product.created }}
-                </v-card-text>
-              </v-row>
-              <v-row>
                 <!-- shows the product manufacturer -->
                 <v-card-text
                   :class="{
@@ -106,8 +98,54 @@
                 </v-card-text>
               </v-row>
             </v-col>
+            <v-col>
+              <div class="timeline-container">
+                <v-timeline
+                  dense
+                  clipped
+                  class="rotated-timeline"
+                >
+                  <v-timeline-item v-if="inventoryItem.expires" small color="red">
+                    <div class="rotated-timeline-item">
+                      <strong>Expires</strong>
+                      <!--<br>-->
+                      {{ inventoryItem.expires }}
+                    </div>
+                  </v-timeline-item>
+                  <v-timeline-item v-if="inventoryItem.bestBefore" small color="orange">
+                    <div class="rotated-timeline-item">
+                      <strong>Best Before</strong>
+                      <!--<br>-->
+                      {{ inventoryItem.bestBefore }}
+                    </div>
+                  </v-timeline-item>
+                  <v-timeline-item v-if="inventoryItem.sellBy" small color="yellow">
+                    <div class="rotated-timeline-item">
+                      <strong>Sell By</strong>
+                      <!--<br>-->
+                      {{ inventoryItem.sellBy }}
+                    </div>
+                  </v-timeline-item>
+                  <v-timeline-item v-if="product.created" small color="grey">
+                    <div class="rotated-timeline-item">
+                      <strong>Created</strong>
+                      <!--<br>-->
+                      {{ product.created }}
+                    </div>
+                  </v-timeline-item>
+                  <v-timeline-item v-if="inventoryItem.manufactured" small color="green">
+                    <div class="rotated-timeline-item">
+                      <strong>Manufactured</strong>
+                      <!--<br>-->
+                      {{ inventoryItem.manufactured }}
+                    </div>
+                  </v-timeline-item>
+                </v-timeline>
+              </div>
+            </v-col>
           </v-row>
         </v-col>
+
       </v-row>
     </v-container>
   </v-card>
@@ -132,7 +170,7 @@ export default {
             description: "Baked Beans as they should be.",
             manufacturer: "Heinz Wattie's Limited",
             recommendedRetailPrice: 2.2,
-            created: "2021-05-11T11:10:45.769Z",
+            created: "2021-05-11",
             images: [
               {
                 "id": 1234,
@@ -193,5 +231,29 @@ export default {
 <style scoped>
 .product-fields {
     padding-top: 0;
+}
+
+.timeline-container {
+  /*height: 75px;
+  width: 100%;*/
+}
+
+.rotated-timeline {
+  display: inline-block;
+  transform-origin: center center;
+  /*transform: rotate(90deg) translate(-100%, -50%);*/
+}
+.rotated-timeline-item {
+  margin: -20px -10px;
+  text-align: center;
+  display: inline-block;
+  /*background-color: red;*/
+  /*transform-origin: left center;
+  transform: rotate(-90deg) translate(-50%, 0%);*/
+}
+
+.rotated-timeline-icon {
+  /*transform-origin: center center;
+  transform: rotate(-90deg);*/
 }
 </style>
