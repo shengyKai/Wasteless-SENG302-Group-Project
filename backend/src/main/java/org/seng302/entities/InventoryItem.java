@@ -27,13 +27,13 @@ public class InventoryItem {
     private Product product;
 
     @Column(name = "quantity", nullable = false)
-    private int quantity;
+    private Integer quantity;
 
     @Column(name = "price_per_item")
-    private double pricePerItem;
+    private Double pricePerItem;
 
     @Column(name = "total_price")
-    private double totalPrice;
+    private Double totalPrice;
 
     @Column(name = "manufactured")
     private Date manufactured;
@@ -75,23 +75,23 @@ public class InventoryItem {
         return quantity;
     }
 
-    public void setQuantity(int quantity) throws Exception {
-        if (quantity > 0) {
+    public void setQuantity(Integer quantity) throws Exception {
+        if (quantity > 0 && quantity != null) {
             this.quantity = quantity;
         } else {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A quantity less than 0 was provided");
         }
     }
 
-    public double getPricePerItem() {
+    public Double getPricePerItem() {
         return pricePerItem;
     }
 
-    public void setPricePerItem(double pricePerItem) {
+    public void setPricePerItem(Double pricePerItem) {
         this.pricePerItem = pricePerItem;
     }
 
-    public double getTotalPrice() {
+    public Double getTotalPrice() {
         return totalPrice;
     }
 
@@ -99,7 +99,9 @@ public class InventoryItem {
      * Sets and calculates the total price based on the price per item and quantity
      */
     public void setTotalPrice() {
-        this.totalPrice = this.quantity * this.pricePerItem;
+        if (this.quantity != null && this.pricePerItem != null) {
+            this.totalPrice = this.quantity * this.pricePerItem;
+        }
     }
 
     public Date getManufactured() {
@@ -157,7 +159,8 @@ public class InventoryItem {
 
         private Product product;
         private int quantity;
-        private double pricePerItem;
+        private Double pricePerItem;
+        private Double totalPrice;
         private Date manufactured;
         private Date sellBy;
         private Date bestBefore;
@@ -188,8 +191,18 @@ public class InventoryItem {
          * @param pricePerItem the cost for each singular item for this product in the inventory
          * @return Builder with the price per item set
          */
-        public Builder withPricePerItem(double pricePerItem) {
+        public Builder withPricePerItem(Double pricePerItem) {
             this.pricePerItem = pricePerItem;
+            return this;
+        }
+
+        /**
+         * Set the builder's total price item.
+         * @param totalPrice the total price for the product in the item inventory
+         * @return Builder with the total price item set
+         */
+        public Builder withTotalPrice(Double totalPrice) {
+            this.totalPrice = totalPrice;
             return this;
         }
 
@@ -252,6 +265,11 @@ public class InventoryItem {
             inventoryItem.setBestBefore(this.bestBefore);
             inventoryItem.setExpires(this.expires);
             inventoryItem.setCreationDate();
+            if (this.totalPrice == null) {
+                inventoryItem.setTotalPrice();
+            } else {
+                inventoryItem.setTotalPrice(this.totalPrice);
+            }
             return inventoryItem;
         }
     }
