@@ -7,6 +7,8 @@ import org.springframework.web.server.ResponseStatusException;
 import javax.persistence.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -107,9 +109,30 @@ public class InventoryItem {
     public Date getManufactured() {
         return manufactured;
     }
-
+    /**
+     * Sets the date of when the product was manufactured
+     * @param manufactured the date when the product was manufactured
+     * 
+     * the return of compareTo method
+     * @return the comparator value, negative if less, positive if greater
+     * 
+     */
     public void setManufactured(Date manufactured) {
-        this.manufactured = manufactured;
+        if (manufactured != null){
+            LocalDate dateOfManufactured = manufactured.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+            LocalDate date = LocalDate.now();
+            LocalDate acceptDate = date.minusDays(1);               //at least 1 day earlier
+
+            if (dateOfManufactured.compareTo(acceptDate) < 0) {     //is in the past
+                this.manufactured = manufactured;
+            } else {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The manufactured date cannot be in the future");
+            }
+        } else {
+            //Do nothing because it might be null (will clean the code before the task is done, going to ask someone)
+            // throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The manufactured date has been entered incorrectly");
+        }
+        
     }
 
     public Date getSellBy() {
@@ -117,7 +140,21 @@ public class InventoryItem {
     }
 
     public void setSellBy(Date sellBy) {
-        this.sellBy = sellBy;
+        if (sellBy != null){
+            LocalDate dateOfSellBy = sellBy.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+            LocalDate date = LocalDate.now();
+            LocalDate acceptDate = date.plusDays(1);                //at least 1 day later
+
+            if (dateOfSellBy.compareTo(acceptDate) > 0) {           //is in the future
+                this.sellBy = sellBy;
+            } else {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The Sell By date cannot be in the past");
+            }
+        } else {
+            //Do nothing because it might be null (will clean the code before the task is done, going to ask someone)
+            // throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The sellBy date has been entered incorrectly");
+        }
+        
     }
 
     public Date getBestBefore() {
@@ -125,7 +162,20 @@ public class InventoryItem {
     }
 
     public void setBestBefore(Date bestBefore) {
-        this.bestBefore = bestBefore;
+        if (bestBefore != null) {
+            LocalDate dateOfBestBefore = bestBefore.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+            LocalDate date = LocalDate.now();
+            LocalDate acceptDate = date.plusDays(1);                    //at least 1 day later
+
+            if (dateOfBestBefore.compareTo(acceptDate) > 0) {          //is in the future
+                this.bestBefore = bestBefore;
+            } else {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The Best Before date cannot be in the past");
+            }
+        } else {
+            //Do nothing because it might be null (will clean the code before the task is done, going to ask someone)
+            // throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The sellBy date has been entered incorrectly");
+        }
     }
 
     public Date getExpires() {
@@ -134,11 +184,21 @@ public class InventoryItem {
 
     public void setExpires(Date expires) throws ResponseStatusException {
         if (expires != null) {
-            this.expires = expires;
+            LocalDate dateOfExpires = expires.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+            LocalDate date = LocalDate.now();
+            LocalDate acceptDate = date.plusDays(1);                    //at least 1 day later
+
+            if (dateOfExpires.compareTo(acceptDate) > 0) {              //is in the future
+                this.expires = expires;
+            } else {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The Expires date cannot be in the past");
+            }
         } else {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No expiry date was provided");
         }
     }
+            
+
 
     public Date getCreationDate() {
         return creationDate;
