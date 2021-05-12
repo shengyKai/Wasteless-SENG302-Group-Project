@@ -93,23 +93,14 @@ describe('InventoryItem.vue', () => {
     });
   });
 
-  /**
-  * Tests that the same product name exists as per the set data above
-  */
   it("Must contain the product name", () => {
     expect(wrapper.text()).toContain('test_product_name');
   });
 
-  /**
-  * Tests that the same product description exists as per the set data above
-  */
   it("Must contain the product description", () => {
     expect(wrapper.text()).toContain('test_product_description');
   });
 
-  /**
-   * Tests the full user sequence when product description is above 50 characters
-   */
   it("Must open dialog box with full product description upon clicking 'Read more...'", async () => {
     await wrapper.setProps({
       inventoryItem: {
@@ -149,16 +140,10 @@ describe('InventoryItem.vue', () => {
     });
   });
 
-  /**
-  * Tests that the same product manufacturer exists as per the set data above
-  */
   it("Must contain the product manufacturer", () => {
     expect(wrapper.text()).toContain('test_product_manufacturer');
   });
 
-  /**
-  * Tests that the same product code exists as per the set data above
-  */
   it("Must contain the product code", () => {
     expect(wrapper.text()).toContain("test_product_code");
   });

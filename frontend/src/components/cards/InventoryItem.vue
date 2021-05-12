@@ -1,5 +1,5 @@
 <template>
-  <v-card>
+  <v-card max-width="1100px">
     <v-container fluid>
       <v-row>
         <!-- Image column -->
@@ -32,7 +32,6 @@
               />
             </v-col>
           </v-row>
-          <v-row />
           <v-row>
             <v-col cols="auto" md="9" sm="12">
               <v-row>
@@ -42,7 +41,7 @@
                   class="product-fields"
                 >
                   <strong>Product Code</strong>
-                  <br >
+                  <br>
                   {{ product.id }}
                 </v-card-text>
               </v-row>
@@ -55,7 +54,7 @@
                     class="pb-0 product-fields"
                   >
                     <strong>Description</strong>
-                    <br >
+                    <br>
                     {{
                       product.description.replace(
                         /^([\s\S]{50}\S*)[\s\S]*/,
@@ -72,7 +71,7 @@
                 <span v-else>
                   <v-card-text class="pb-0 product-fields">
                     <strong>Description</strong>
-                    <br >
+                    <br>
                     {{ product.description }}
                   </v-card-text>
                 </span>
@@ -86,17 +85,44 @@
                   class="product-fields"
                 >
                   <strong>Manufacturer</strong>
-                  <br >
+                  <br>
                   {{ product.manufacturer }}
                 </v-card-text>
               </v-row>
+              <!-- On small screen merge all non-date info into a single column -->
+              <template v-if="$vuetify.breakpoint.xsOnly">
+                <v-row>
+                  <!-- shows the product price -->
+                  <v-card-text class="pb-0 product-fields">
+                    <strong>Quantity</strong>
+                    <br>
+                    {{ inventoryItem.quantity }}
+                  </v-card-text>
+                </v-row>
+                <v-row v-if="inventoryItem.pricePerItem !== undefined">
+                  <!-- shows the product price -->
+                  <v-card-text class="pb-0 product-fields">
+                    <strong>Price per Item</strong>
+                    <br>
+                    {{ currency.symbol }}{{ inventoryItem.pricePerItem }} {{ currency.code }}
+                  </v-card-text>
+                </v-row>
+                <v-row v-if="inventoryItem.totalPrice !== undefined">
+                  <!-- shows the product price -->
+                  <v-card-text class="pb-0 product-fields">
+                    <strong>Total Price</strong>
+                    <br>
+                    {{ currency.symbol }}{{ inventoryItem.totalPrice }} {{ currency.code }}
+                  </v-card-text>
+                </v-row>
+              </template>
             </v-col>
-            <v-col cols="auto" md="3" sm="12">
+            <v-col cols="auto" md="3" sm="12" v-if="$vuetify.breakpoint.smAndUp">
               <v-row>
                 <!-- shows the product price -->
                 <v-card-text class="pb-0 product-fields">
                   <strong>Quantity</strong>
-                  <br >
+                  <br>
                   {{ inventoryItem.quantity }}
                 </v-card-text>
               </v-row>
@@ -104,7 +130,7 @@
                 <!-- shows the product price -->
                 <v-card-text class="pb-0 product-fields">
                   <strong>Price per Item</strong>
-                  <br >
+                  <br>
                   {{ currency.symbol }}{{ inventoryItem.pricePerItem }} {{ currency.code }}
                 </v-card-text>
               </v-row>
@@ -112,19 +138,57 @@
                 <!-- shows the product price -->
                 <v-card-text class="pb-0 product-fields">
                   <strong>Total Price</strong>
-                  <br >
+                  <br>
                   {{ currency.symbol }}{{ inventoryItem.totalPrice }} {{ currency.code }}
+                </v-card-text>
+              </v-row>
+            </v-col>
+            <!-- Narrow date view -->
+            <v-col v-if="$vuetify.breakpoint.xsOnly" cols="auto" sm="12">
+              <v-row>
+                <v-card-text class="pb-0 product-fields">
+                  <strong>Manufactured</strong>
+                  <br>
+                  {{ inventoryItem.manufactured }}
+                </v-card-text>
+              </v-row>
+              <v-row>
+                <v-card-text class="pb-0 product-fields">
+                  <strong>Created</strong>
+                  <br>
+                  {{ product.created }}
+                </v-card-text>
+              </v-row>
+              <v-row>
+                <v-card-text class="pb-0 product-fields">
+                  <strong>Sell By</strong>
+                  <br>
+                  {{ inventoryItem.sellBy }}
+                </v-card-text>
+              </v-row>
+              <v-row>
+                <v-card-text class="pb-0 product-fields">
+                  <strong>Best Before</strong>
+                  <br>
+                  {{ inventoryItem.bestBefore }}
+                </v-card-text>
+              </v-row>
+              <v-row>
+                <v-card-text class="pb-0 product-fields">
+                  <strong>Expiry</strong>
+                  <br>
+                  {{ inventoryItem.expires }}
                 </v-card-text>
               </v-row>
             </v-col>
           </v-row>
         </v-col>
-
         <!-- Timeline column -->
-        <v-col cols="auto">
+        <v-col cols="auto" >
           <v-timeline
             clipped
             class="timeline"
+            v-if="$vuetify.breakpoint.smAndUp"
           >
             <v-timeline-item v-if="inventoryItem.manufactured" small color="green" right>
               <template v-slot:opposite>
