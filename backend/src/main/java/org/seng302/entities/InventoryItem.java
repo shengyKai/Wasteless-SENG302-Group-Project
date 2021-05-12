@@ -105,7 +105,9 @@ public class InventoryItem {
     public void setTotalPrice(Double totalPrice) {
         this.totalPrice = totalPrice;
     }
-
+    /**
+     * Returns date of when the product was manufactured
+     */
     public Date getManufactured() {
         return manufactured;
     }
@@ -130,7 +132,9 @@ public class InventoryItem {
         }
         
     }
-
+    /**
+     * Returns date of when the product need to get sell by
+     */
     public Date getSellBy() {
         return sellBy;
     }
@@ -150,12 +154,13 @@ public class InventoryItem {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The Sell By date cannot be in the past");
             }
         } else {
-            //Do nothing because it might be null (will clean the code before the task is done, going to ask someone)
             // throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The sellBy date has been entered incorrectly");
         }
         
     }
-
+    /**
+     * Returns date of Best Before for the product
+     */
     public Date getBestBefore() {
         return bestBefore;
     }
@@ -179,7 +184,9 @@ public class InventoryItem {
             // throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The sellBy date has been entered incorrectly");
         }
     }
-
+    /**
+     * Returns date of expires of the product
+     */
     public Date getExpires() {
         return expires;
     }
@@ -204,11 +211,15 @@ public class InventoryItem {
     }
             
 
-
+    /**
+     * Returns creation date of the item in Inventory
+     */
     public Date getCreationDate() {
         return creationDate;
     }
-
+    /**
+     * Sets creation date of the item in Inventory
+     */
     public void setCreationDate() {
         Calendar today = Calendar.getInstance();
         today.set(Calendar.HOUR_OF_DAY, 0);
