@@ -20,9 +20,9 @@ public class InventoryItem {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "product_id", nullable = false)
-    //@JoinColumn(name = "product_id", nullable = false)
-    private String productId; //The product code
+    @ManyToOne
+    @JoinColumn(name = "product_id", nullable = false)
+    private Product product;
 
     @Column(name = "quantity", nullable = false)
     private int quantity;
@@ -57,20 +57,28 @@ public class InventoryItem {
         this.id = id;
     }
 
-    public String getProductId() {
-        return productId;
+    public Product getProduct() {
+        return product;
     }
 
-    public void setProductId(String productId) {
-        this.productId = productId;
+    public void setProduct(Product product) throws Exception {
+        if (product != null) {
+            this.product = product;
+        } else {
+            throw new Exception("is null"); //TODO Add custom exception
+        }
     }
 
     public int getQuantity() {
         return quantity;
     }
 
-    public void setQuantity(int quantity) {
-        this.quantity = quantity;
+    public void setQuantity(int quantity) throws Exception {
+        if (quantity > 0) {
+            this.quantity = quantity;
+        } else {
+            throw new Exception("is null"); //TODO Add custom exception
+        }
     }
 
     public double getPricePerItem() {
@@ -120,8 +128,12 @@ public class InventoryItem {
         return expires;
     }
 
-    public void setExpires(Date expires) {
-        this.expires = expires;
+    public void setExpires(Date expires) throws Exception {
+        if (expires != null) {
+            this.expires = expires;
+        } else {
+            throw new Exception("is null"); //TODO Add custom exception
+        }
     }
 
     public Date getCreationDate() {
@@ -141,7 +153,7 @@ public class InventoryItem {
      */
     public static class Builder {
 
-        private String productId;
+        private Product product;
         private int quantity;
         private double pricePerItem;
         private Date manufactured;
@@ -151,11 +163,11 @@ public class InventoryItem {
 
         /**
          * Sets the builder's productId. Required.
-         * @param productId The productId represents the product code within the product entity
-         * @return Builder with the productID set
+         * @param product The product in the inventory
+         * @return Builder with the product set
          */
-        public Builder withProductId(String productId) {
-            this.productId = productId;
+        public Builder withProduct(Product product) {
+            this.product = product;
             return this;
         }
 
@@ -174,7 +186,7 @@ public class InventoryItem {
          * @param pricePerItem the cost for each singular item for this product in the inventory
          * @return Builder with the price per item set
          */
-        public Builder pricePerItem(double pricePerItem) {
+        public Builder withPricePerItem(double pricePerItem) {
             this.pricePerItem = pricePerItem;
             return this;
         }
@@ -184,7 +196,7 @@ public class InventoryItem {
          * @param manufacturedString the date when the product in the inventory was manufactured
          * @return Builder with the sell by date set
          */
-        public Builder manufactured(String manufacturedString) throws ParseException {
+        public Builder withManufactured(String manufacturedString) throws ParseException {
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
             this.manufactured = dateFormat.parse(manufacturedString);
             return this;
@@ -195,7 +207,7 @@ public class InventoryItem {
          * @param sellByString the date when the product in the inventory must sell by
          * @return Builder with the sell by date set
          */
-        public Builder sellBy(String sellByString) throws ParseException {
+        public Builder withSellBy(String sellByString) throws ParseException {
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
             this.sellBy = dateFormat.parse(sellByString);
             return this;
@@ -206,7 +218,7 @@ public class InventoryItem {
          * @param bestBeforeString the date the product in the inventory is best before
          * @return Builder with the best before date set
          */
-        public Builder bestBefore(String bestBeforeString) throws ParseException {
+        public Builder withBestBefore(String bestBeforeString) throws ParseException {
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
             this.bestBefore = dateFormat.parse(bestBeforeString);
             return this;
@@ -217,7 +229,7 @@ public class InventoryItem {
          * @param expiresString the date the product in the inventory expires. Must be disposed of after this date
          * @return Builder with the expires data set
          */
-        public Builder expires(String expiresString) throws ParseException {
+        public Builder withExpires(String expiresString) throws ParseException {
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
             this.expires = dateFormat.parse(expiresString);
             return this;
@@ -227,9 +239,9 @@ public class InventoryItem {
          * Builds the inventory item
          * @return the inventory item that has just been created
          */
-        public InventoryItem build() {
+        public InventoryItem build() throws Exception {
             InventoryItem inventoryItem = new InventoryItem();
-            inventoryItem.setProductId(this.productId);
+            inventoryItem.setProduct(this.product);
             inventoryItem.setQuantity(this.quantity);
             inventoryItem.setPricePerItem(this.pricePerItem);
             inventoryItem.setTotalPrice();

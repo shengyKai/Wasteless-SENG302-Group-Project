@@ -1,2 +1,4 @@
-package org.seng302.entities;public class InventoryItemTests {
+package org.seng302.entities;
+
+public class InventoryItemTests {
 }
