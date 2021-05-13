@@ -20,7 +20,7 @@ import java.util.Map;
 public class Location {
 
     @Id // this field (attribute) is the table primary key
-    @GeneratedValue(strategy = GenerationType.AUTO) // autoincrement the ID
+    @GeneratedValue(strategy = GenerationType.SEQUENCE) // autoincrement the ID
     private Long id;
 
     @Column(name = "country", nullable = false)
