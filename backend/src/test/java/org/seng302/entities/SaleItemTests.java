@@ -7,6 +7,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.Optional;
+
 import static org.junit.Assert.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -111,7 +113,7 @@ public class SaleItemTests {
     }
 
     @Test
-    void createSaleItem_NoInventoryItem_ObjectNotCreated() throws Exception {
+    void createSaleItem_NoInventoryItem_ObjectNotCreated() {
         try {
             SaleItem saleItem = new SaleItem.Builder()
                     .withCloses("2034-12-25")
@@ -125,5 +127,21 @@ public class SaleItemTests {
             assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
             assertEquals("Cannot sell something that is not in your inventory", e.getReason());
         } catch (Exception unexpected) { Assertions.fail(); }
+    }
+
+    @Test
+    void deleteInventoryItem_SaleItemDeleted() throws Exception {
+        SaleItem saleItem = new SaleItem.Builder()
+                .withInventoryItem(invItem)
+                .withCloses("2034-12-25")
+                .withMoreInfo("This doesn't expire for a long time")
+                .withPrice("200.34")
+                .withQuantity(2)
+                .build();
+        saleItemRepository.save(saleItem);
+
+        inventoryItemRepository.deleteAll();
+        Optional<SaleItem> foundItem = saleItemRepository.findById(saleItem.getSaleId());
+        if (foundItem.isPresent()) { Assertions.fail(); }
     }
 }

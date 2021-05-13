@@ -1,6 +1,8 @@
 package org.seng302.entities;
 
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -20,6 +22,7 @@ public class SaleItem {
 
     @ManyToOne
     @JoinColumn(name = "inventory_item_id", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private InventoryItem inventoryItem;  // Item up for sale
 
     @Column(name = "quantity", nullable = false)
@@ -59,7 +62,34 @@ public class SaleItem {
      * Cannot be more than there is in the inventory
      * @param quantity that is for sale
      */
-    public void setQuantity(int quantity) { this.quantity = quantity; }
+    public void setQuantity(int quantity) {
+        try {
+            if (quantity > 0 && quantity <= inventoryItem.getRemainingQuantity()) {
+                this.quantity = quantity;
+                inventoryItem.setRemainingQuantity(inventoryItem.getRemainingQuantity()-quantity);
+            } else {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Please enter a number of items between 1 and your current stock not on sale");
+            }
+        } catch (NullPointerException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Inventory item has been removed, you have no more to sell");
+        }
+    }
+
+    /**
+     * Use this for anything but initial creation or you'll domino the quantity logic relation with inventory
+     * @param newQuantity new quantity to be sold, works out the difference in method
+     */
+    public void adjustQuantity(int newQuantity) {
+        try {
+            int diff = quantity - newQuantity;
+            if (newQuantity > 0 && diff <= inventoryItem.getRemainingQuantity()) {
+                this.quantity = newQuantity;
+                inventoryItem.setRemainingQuantity(inventoryItem.getRemainingQuantity() - diff);
+            }
+        } catch (NullPointerException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Inventory item has been removed, you have no more to sell");
+        }
+    }
 
     public BigDecimal getPrice() { return price; }
 
@@ -77,7 +107,19 @@ public class SaleItem {
 
     public String getMoreInfo() { return moreInfo; }
 
-    public void setMoreInfo(String moreInfo) { this.moreInfo = moreInfo; }
+    public void setMoreInfo(String moreInfo) {
+        if (moreInfo == null || moreInfo.length() == 0) {
+            this.moreInfo = null;
+            return;
+        }
+        if (moreInfo.length() > 200) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Extra sale information must not be longer than 200 characters");
+        }
+        if (!moreInfo.matches("^[\\p{Space}\\d\\p{Punct}\\p{L}]*$")) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Extra sale info must only contain letters, numbers, whitespace and punctuation");
+        }
+        this.moreInfo = moreInfo;
+    }
 
     public Date getCreated() { return created; }
 
@@ -89,9 +131,18 @@ public class SaleItem {
      * Defaults to expiry date of product
      * @param closes date
      */
-    public void setCloses(String closes) throws ParseException {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        this.closes = dateFormat.parse(closes);
+    public void setCloses(String closes) {
+        try {
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+            Date close = dateFormat.parse(closes);
+            if (!close.before(new Date())) {
+                this.closes = close;
+            } else {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You cannot set close dates in the past");
+            }
+        } catch (ParseException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Please set valid date");
+        }
     }
 
     public void setCloses() {

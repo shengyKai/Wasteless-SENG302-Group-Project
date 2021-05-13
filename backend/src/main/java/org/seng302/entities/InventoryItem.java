@@ -1,6 +1,8 @@
 package org.seng302.entities;
 
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -21,10 +23,14 @@ public class InventoryItem {
 
     @ManyToOne
     @JoinColumn(name = "product_id", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Product product;
 
     @Column(name = "quantity", nullable = false)
     private int quantity;
+
+    @Column(name = "remaining_quantity")
+    private int remainingQuantity;
 
     @Column(name = "price_per_item")
     private BigDecimal pricePerItem;
@@ -77,6 +83,16 @@ public class InventoryItem {
             this.quantity = quantity;
         } else {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A quantity less than 1 was provided");
+        }
+    }
+
+    public int getRemainingQuantity() { return remainingQuantity; }
+
+    public void setRemainingQuantity(int remainingQuantity) {
+        if (remainingQuantity >= 0) {
+            this.remainingQuantity = remainingQuantity;
+        } else {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot sell more items than you have");
         }
     }
 
@@ -266,6 +282,7 @@ public class InventoryItem {
             InventoryItem inventoryItem = new InventoryItem();
             inventoryItem.setProduct(this.product);
             inventoryItem.setQuantity(this.quantity);
+            inventoryItem.setRemainingQuantity(this.quantity);
             if (pricePerItem != null) {
                 inventoryItem.setPricePerItem(this.pricePerItem);
             }
