@@ -8,8 +8,7 @@ import BusinessProfile from "../components/BusinessProfile/index.vue";
 import SearchResults from "../components/SearchResults.vue";
 import HomePage from "../components/HomePage.vue";
 import ProductCatalogue from "../components/ProductCatalogue.vue";
-import ProductCatalogueItem from "../components/ProductCatalogueItem.vue";
-import ProductImageUploader from "../components/utils/ProductImageUploader.vue";
+import InventoryItem from "../components/cards/InventoryItem.vue";
 
 
 Vue.use(VueRouter);
@@ -64,12 +63,16 @@ const routes = [
     component: ProductCatalogue,
     meta: { title: 'Buisness Products' }
   },
+  { // TODO Remove once inventory page is created
+    path: "/inventoryitem",
+    component: InventoryItem,
+    meta: { title: 'Inventory Item' }
+  },
   {
     path: "*",
     component: NotFound,
     meta: { title: 'Not Found' }
   }
-
 ];
 
 

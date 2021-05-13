@@ -155,7 +155,7 @@ public class UserTests {
         for (String phone : badPhones) {
             try {
                 testUser.setPhNum(phone);
-            } catch (ResponseStatusException e) {}
+            } catch (ResponseStatusException ignored) {}
             assertEquals(goodPhone6, testUser.getPhNum()); // Bad wont change, so last good phone is current
         }
     }
@@ -172,12 +172,6 @@ public class UserTests {
         testUser.setPhNum(null);
         testUser.setPhNum("");
         assertNull(testUser.getPhNum());
-    }
-
-
-    @Test @Ignore
-    public void createUserTest() {
-
     }
 
     /**
@@ -200,7 +194,7 @@ public class UserTests {
         try {
             testUser.setFirstName("");
             fail("A Forbidden exception was expected, but not thrown");
-        } catch (ResponseStatusException expectedException) { }
+        } catch (ResponseStatusException ignored) { }
     }
 
     /**
@@ -213,7 +207,7 @@ public class UserTests {
             try {
                 testUser.setFirstName(firstName);
                 fail("A Forbidden exception was expected, but not thrown");
-            } catch (ResponseStatusException expectedException) { }
+            } catch (ResponseStatusException ignored) { }
         }
     }
 
@@ -227,7 +221,7 @@ public class UserTests {
             try {
                 testUser.setFirstName(firstName);
                 fail("A Forbidden exception was expected, but not thrown");
-            } catch (ResponseStatusException expectedException) { }
+            } catch (ResponseStatusException ignored) { }
         }
     }
 
@@ -241,7 +235,7 @@ public class UserTests {
             try {
                 testUser.setFirstName(firstName);
                 fail("A Forbidden exception was expected, but not thrown");
-            } catch (ResponseStatusException expectedException) { }
+            } catch (ResponseStatusException ignored) { }
         }
     }
 
@@ -281,7 +275,7 @@ public class UserTests {
             try {
                 testUser.setMiddleName(middleName);
                 fail("A Forbidden exception was expected, but not thrown");
-            } catch (ResponseStatusException expectedException) { }
+            } catch (ResponseStatusException ignored) { }
         }
     }
 
