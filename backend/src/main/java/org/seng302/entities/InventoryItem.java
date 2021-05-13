@@ -156,7 +156,7 @@ public class InventoryItem {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Price per item must not be less than 0");
             }
             if (pricePerItem.compareTo(new BigDecimal(10000)) >= 0) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Price per item must be less that 100,000");
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Price per item must be less that 100,00");
             }
         }
         this.pricePerItem = pricePerItem;
@@ -178,7 +178,7 @@ public class InventoryItem {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Total price must not be less than 0 ");
         }
         if (totalPrice.compareTo(new BigDecimal(1000000)) >= 0) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Total price must be less than 1000000");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Total price must be less than 1,000,000");
         }
     }
     this.totalPrice = totalPrice;

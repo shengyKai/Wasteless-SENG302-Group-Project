@@ -126,7 +126,7 @@ public class InventoryItemTests {
     // Test that check mandatory cant be null
 
     /**
-     * Create object with Null product, should not success as product is mandatory
+     * Create object with Null product, should not pass as product is mandatory
      * @throws Exception
      */
     @Test
@@ -145,7 +145,7 @@ public class InventoryItemTests {
     }
 
     /**
-     * Create object with Null expires, should not success as expires is mandatory
+     * Create object with Null expires, should not pass as expires is mandatory
      * @throws Exception
      */
     @Test
@@ -162,7 +162,7 @@ public class InventoryItemTests {
         } catch (Exception e) { fail(); }
     }
     /**
-     * Create object with quantity = 0, should not success as quantity is mandatory and need to be greater than 0
+     * Create object with quantity = 0, should not pass as quantity is mandatory and need to be greater than 0
      * @throws Exception
      */
     @Test
@@ -179,7 +179,7 @@ public class InventoryItemTests {
         } catch (Exception e) { fail(); }
     }
     /**
-     * Create object with quantity = 0, should not success as quantity is mandatory and need to be greater than 0
+     * Create object with quantity = 0, should not pass as quantity is mandatory and need to be greater than 0
      * @throws Exception
      */
     @Test
@@ -195,8 +195,16 @@ public class InventoryItemTests {
             assertEquals("A quantity less than 1 was provided", e.getReason());
         } catch (Exception e) { fail(); }
     }
+
     /**
-     * Create object with Pricer Per Item = null, should success as the attribute is not mandatory
+     * The following test section will test attributes related to price which is 
+     * Price per item, Total price
+     * Test condition will be (Null, validPriceFormat, InvalidPriceFormat, 
+     * LowerThanPriceRange, HigherThanPriceRange, ExactlyOnPriceRangeEnd)
+    /** 
+
+    /**
+     * Create object with Pricer Per Item = null, should pass as the attribute is not mandatory
      * @throws Exception
      */
     @Test
@@ -212,8 +220,8 @@ public class InventoryItemTests {
         assertEquals(invItem, testInvItem);
     }
     /**
-     * Create object with Total Price     = null, should success as the attribute is not mandatory
-     * Create object with Pricer Per Item = null, should success as the attribute is not mandatory
+     * Create object with Total Price     = null, should pass as the attribute is not mandatory
+     * Create object with Pricer Per Item = null, should pass as the attribute is not mandatory
      * @throws Exception
      */
     @Test
@@ -230,7 +238,7 @@ public class InventoryItemTests {
         assertEquals(invItem, testInvItem);
     }
     /**
-     * Create object with Total Price = null, should success as the attribute is not mandatory
+     * Create object with Total Price = null, should pass as the attribute is not mandatory
      * @throws Exception
      */
     @Test
@@ -246,7 +254,7 @@ public class InventoryItemTests {
         assertEquals(invItem, testInvItem);
     }
         /**
-     * Create object with Valid Price per item , should success
+     * Create object with Valid Price per item , should pass
      * @throws Exception
      */
     @Test
@@ -262,7 +270,7 @@ public class InventoryItemTests {
         assertEquals(invItem, testInvItem);
     }
     /**
-     * Create object with Valid Total Price, should success
+     * Create object with Valid Total Price, should pass
      * @throws Exception
      */
     @Test
@@ -278,11 +286,139 @@ public class InventoryItemTests {
         assertEquals(invItem, testInvItem);
     }
     /**
+     * Create object with a Invalid Price Per Item format, should fail
+     * @throws Exception
+     */
+    @Test
+    void createInventoryItem_withInvalidPricePerItemFormat_objectNotCreated() throws Exception {
+
+        assertThrows(ResponseStatusException.class, () -> {
+            InventoryItem invItem = new InventoryItem.Builder()
+            .withProduct(testProduct)
+            .withQuantity(2)
+            .withPricePerItem("xx0.1")
+            .withExpires("2021-06-01")
+            .build();
+        });
+    }
+    /**
+     * Create object with a Invalid Total Price format, should fail
+     * @throws Exception
+     */
+    @Test
+    void createInventoryItem_withInvalidTotalPriceFormat_objectNotCreated() throws Exception {
+
+        assertThrows(ResponseStatusException.class, () -> {
+            InventoryItem invItem = new InventoryItem.Builder()
+            .withProduct(testProduct)
+            .withQuantity(2)
+            .withTotalPrice("xx0.1")
+            .withExpires("2021-06-01")
+            .build();
+        });
+    }
+    /**
+     * Create object with a Price lower than PricePerItem range, should fail
+     * @throws Exception
+     */
+    @Test
+    void createInventoryItem_withNegativePricePerItem_objectNotCreated() throws Exception {
+
+        assertThrows(ResponseStatusException.class, () -> {
+            InventoryItem invItem = new InventoryItem.Builder()
+            .withProduct(testProduct)
+            .withQuantity(2)
+            .withPricePerItem("-2")
+            .withExpires("2021-06-01")
+            .build();
+        });
+    }
+    /**
+     * Create object with a Price lower than totalPrice range, should fail
+     * @throws Exception
+     */
+    @Test
+    void createInventoryItem_withNegativeTotalPrice_objectNotCreated() throws Exception {
+
+        assertThrows(ResponseStatusException.class, () -> {
+            InventoryItem invItem = new InventoryItem.Builder()
+            .withProduct(testProduct)
+            .withQuantity(2)
+            .withPricePerItem("-2")
+            .withExpires("2021-06-01")
+            .build();
+        });
+    }
+    /**
+     * Create object with a Price higher than PricePerItem range, should fail
+     * @throws Exception
+     */
+    @Test
+    void createInventoryItem_withHigherPricePerItem_objectNotCreated() throws Exception {
+
+        assertThrows(ResponseStatusException.class, () -> {
+            InventoryItem invItem = new InventoryItem.Builder()
+            .withProduct(testProduct)
+            .withQuantity(2)
+            .withPricePerItem("10001")
+            .withExpires("2021-06-01")
+            .build();
+        });
+    }
+    /**
+     * Create object with a Price higher than totalPrice range, should fail
+     * @throws Exception
+     */
+    @Test
+    void createInventoryItem_withHigherTotalPrice_objectNotCreated() throws Exception {
+
+        assertThrows(ResponseStatusException.class, () -> {
+            InventoryItem invItem = new InventoryItem.Builder()
+            .withProduct(testProduct)
+            .withQuantity(2)
+            .withPricePerItem("1000001")
+            .withExpires("2021-06-01")
+            .build();
+        });
+    }
+    /**
+     * Create object with a allowed highest value in PricePerItem range, should fail
+     * @throws Exception
+     */
+    @Test
+    void createInventoryItem_withHighestPricePerItem_objectNotCreated() throws Exception {
+
+        assertThrows(ResponseStatusException.class, () -> {
+            InventoryItem invItem = new InventoryItem.Builder()
+            .withProduct(testProduct)
+            .withQuantity(2)
+            .withPricePerItem("10000")
+            .withExpires("2021-06-01")
+            .build();
+        });
+    }
+    /**
+     * Create object with a allowed highest value in totalPrice range, should fail
+     * @throws Exception
+     */
+    @Test
+    void createInventoryItem_withHigestTotalPrice_objectNotCreated() throws Exception {
+        assertThrows(ResponseStatusException.class, () -> {
+            InventoryItem invItem = new InventoryItem.Builder()
+            .withProduct(testProduct)
+            .withQuantity(2)
+            .withPricePerItem("1000000")
+            .withExpires("2021-06-01")
+            .build();
+        });
+    }
+    /**
      * The following test section will test attributes related to date which is 
      * Manufactured, Sell By, best Before
      * Test condition will be ( Null, dayBeforeToday, dayAfterToday, InvalidDateFormat)
     /**
-     * Create object with Manufactured = null, should success as the attribute is not mandatory
+     * 
+     * Create object with Manufactured = null, should pass as the attribute is not mandatory
      * @throws Exception
      */
     @Test
@@ -298,7 +434,7 @@ public class InventoryItemTests {
         assertEquals(invItem, testInvItem);
     }
     /**
-     * Create Manufactured with a date from the past (1 day before), should success
+     * Create Manufactured with a date from the past (1 day before), should pass
      * @throws Exception
      */
     @Test
@@ -348,7 +484,7 @@ public class InventoryItemTests {
         });
     }
     /**
-     * Create object with SellBy = null, should success as the attribute is not mandatory
+     * Create object with SellBy = null, should pass as the attribute is not mandatory
      * @throws Exception
      */
     @Test
@@ -381,7 +517,7 @@ public class InventoryItemTests {
         });
     }
     /**
-     * Create Sell By with a date from the future ( 1 day later), should success
+     * Create Sell By with a date from the future ( 1 day later), should pass
      * @throws Exception
      */
     @Test
@@ -414,7 +550,7 @@ public class InventoryItemTests {
         });
     }
     /**
-     * Create object with BestBefore = null, should success as the attribute is not mandatory
+     * Create object with BestBefore = null, should pass as the attribute is not mandatory
      * @throws Exception
      */
     @Test
@@ -447,7 +583,7 @@ public class InventoryItemTests {
         });
     }
     /**
-     * Create Best before with a date from the future ( 1 day later), should success
+     * Create Best before with a date from the future ( 1 day later), should pass
      * @throws Exception
      */
     @Test
