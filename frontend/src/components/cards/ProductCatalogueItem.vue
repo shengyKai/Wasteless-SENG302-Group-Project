@@ -9,7 +9,12 @@
         </v-col>
         <v-col cols="auto" md="3" sm="12" v-else>
           <!-- feed the productImages into the carousel child component -->
-          <ProductImageCarousel :productImages="product.images" :productId="product.id" v-on:change-primary-image="setPrimaryImage" @delete-image="deleteImage"/>
+          <ProductImageCarousel
+            :productImages="product.images"
+            :showControls="true"
+            v-on:change-primary-image="setPrimaryImage"
+            @delete-image="deleteImage"
+          />
         </v-col>
         <v-col>
           <v-row>

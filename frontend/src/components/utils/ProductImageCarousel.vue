@@ -21,7 +21,7 @@
             <template #activator="{ on: tooltip}">
               <v-btn
                 icon
-                v-if="i !== 0"
+                v-if="i !== 0 && showControls"
                 color="primary"
                 v-on="{...tooltip}"
                 @click="makeImagePrimary(item.id)"
@@ -36,6 +36,7 @@
             <template #activator="{ on: tooltip}">
               <v-btn
                 icon
+                v-if="showControls"
                 color="error"
                 v-on="{...tooltip}"
                 @click="deleteImage(item.id)"
@@ -54,8 +55,16 @@
 <script>
 export default {
   name: "ProductImageCarousel",
-  //pass in productImages from parent compoenent
-  props: ["productImages", "productId"],
+  props: {
+    /**
+     * Array of image objects to display
+     */
+    productImages: Array,
+    /**
+     * Whether to show the make primary and delete image
+     */
+    showControls: Boolean,
+  },
   data() {
     return {
       carouselItem: 0,
