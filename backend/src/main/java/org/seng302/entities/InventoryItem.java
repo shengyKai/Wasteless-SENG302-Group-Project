@@ -151,17 +151,16 @@ public class InventoryItem {
      * @param pricePerItem price of per item
      */
     public void setPricePerItem(BigDecimal pricePerItem) {
-        if(pricePerItem == null) {
-            this.pricePerItem = null;
-        }
+        if (pricePerItem != null) {
             if (pricePerItem.compareTo(BigDecimal.ZERO) < 0) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Total price must not be less than 0 ");
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Price per item must not be less than 0");
             }
             if (pricePerItem.compareTo(new BigDecimal(10000)) >= 0) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Total price must be less than 10000");
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Price per item must be less that 100,000");
             }
-        this.pricePerItem = pricePerItem;
         }
+        this.pricePerItem = pricePerItem;
+    }
     /**
      * Sets and calculates the total price based on the price per item and quantity
      */
@@ -174,15 +173,14 @@ public class InventoryItem {
      * Sets the total price for the products
      */
     public void setTotalPrice(BigDecimal totalPrice) {
-        if(totalPrice == null) {
-            this.totalPrice = null;
-        }
+        if (totalPrice != null) {
         if (totalPrice.compareTo(BigDecimal.ZERO) < 0) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Total price must not be less than 0 ");
         }
-        if (totalPrice.compareTo(new BigDecimal(999999)) > 0) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Total price must be less than 999999");
+        if (totalPrice.compareTo(new BigDecimal(1000000)) >= 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Total price must be less than 1000000");
         }
+    }
     this.totalPrice = totalPrice;
     }
     /**
@@ -297,8 +295,16 @@ public class InventoryItem {
          * @param pricePerItem the cost for each singular item for this product in the inventory
          * @return Builder with the price per item set
          */
-        public Builder withPricePerItem(BigDecimal pricePerItem) {
-            this.pricePerItem = pricePerItem;
+        public Builder withPricePerItem(String pricePerItem) {
+            if (pricePerItem == null || pricePerItem.equals("")) {
+                this.pricePerItem = null;
+                return this;
+            }
+            try {
+                this.pricePerItem = new BigDecimal(pricePerItem);
+            } catch (NumberFormatException ignored) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The price per item is not a number");
+            }
             return this;
         }
 
@@ -307,8 +313,16 @@ public class InventoryItem {
          * @param totalPrice the total price for the product in the item inventory
          * @return Builder with the total price item set
          */
-        public Builder withTotalPrice(BigDecimal totalPrice) {
-            this.totalPrice = totalPrice;
+        public Builder withTotalPrice(String totalPrice) {
+            if (totalPrice == null || totalPrice.equals("")) {
+                this.totalPrice = null;
+                return this;
+            }
+            try {
+                this.totalPrice = new BigDecimal(totalPrice);
+            } catch (NumberFormatException ignored) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The total price is not a number");
+            }
             return this;
         }
 
