@@ -2,7 +2,7 @@ import axios, { AxiosError, AxiosInstance } from 'axios';
 
 import * as api from '@/api/internal';
 import { AxiosResponse } from 'axios';
-import { CreateProduct, CreateUser, MaybeError } from '@/api/internal';
+import { CreateProduct, CreateUser, MaybeError, Product } from '@/api/internal';
 
 jest.mock('axios', () => ({
   create: jest.fn(function() {
@@ -100,6 +100,12 @@ const testCreateProduct: CreateProduct = {
   recommendedRetailPrice: 100,
 };
 
+const testProductArray: Product[] = [{
+  id: 'ID-VALUE',
+  name: 'test_name',
+  images: []
+}]
+
 const testFile = new File([], 'test_file');
 let testFormData = new FormData();
 testFormData.append('file', testFile);
@@ -161,7 +167,22 @@ const apiCalls: Partial<ApiCalls> = {
       'Content-Type': 'multipart/form-data'
     },
     result: undefined,
-  }
+  },
+  getProducts: {
+    parameters: [666, 3, 14, 'productCode', false],
+    httpMethod: 'get',
+    url: '/businesses/666/products',
+    body: {
+      params: {
+        orderBy: "productCode",
+        page: 3,
+        resultsPerPage: 14,
+        reverse: "false",
+      }
+    },
+    apiResult: testProductArray,
+    result: testProductArray
+  },
 };
 
 describe('api', () => {
@@ -215,7 +236,7 @@ describe('api', () => {
       instance[fields.httpMethod].mockResolvedValueOnce(makeAxiosResponse(apiResult));
 
       let response = await doCall();
-
+      console.log(response);
       expect(response).toBe(fields.result);
     });
   });

@@ -264,9 +264,15 @@ public class Product {
         JSONObject object = new JSONObject();
         object.put("id", productCode);
         object.put("name", name);
-        object.put("description", description);
-        object.put("manufacturer", manufacturer);
-        object.put("recommendedRetailPrice", recommendedRetailPrice);
+        if (description != null) {
+            object.put("description", description);
+        }
+        if (manufacturer != null) {
+            object.put("manufacturer", manufacturer);
+        }
+        if (recommendedRetailPrice != null) {
+            object.put("recommendedRetailPrice", recommendedRetailPrice);
+        }
         object.put("created", created);
         JSONArray images = new JSONArray();
         for (Image image : productImages) {
