@@ -106,7 +106,7 @@ public abstract class Account {
      * @return userID
      */
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue
     @JsonProperty("id")
     public Long getUserID() {
         return userID;
