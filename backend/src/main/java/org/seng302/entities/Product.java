@@ -48,7 +48,7 @@ public class Product {
     private Business business;
 
     @OrderColumn(name="image_order")
-    @OneToMany(fetch = FetchType.LAZY)
+    @OneToMany(fetch = FetchType.EAGER)
     @JoinColumn(name="image_id")
     private List<Image> productImages = new ArrayList<>();
 

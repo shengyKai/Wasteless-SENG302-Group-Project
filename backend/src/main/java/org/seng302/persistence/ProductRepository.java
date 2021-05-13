@@ -1,6 +1,7 @@
 package org.seng302.persistence;
 
 import org.seng302.entities.Business;
+import org.seng302.entities.Image;
 import org.seng302.entities.Product;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
@@ -8,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Repository;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -23,6 +25,7 @@ public interface ProductRepository extends CrudRepository<Product, Long>{
         Optional<Product> findByBusinessAndProductCode(@Param("business") Business business,
                                                        @Param("productCode") String productCode);
 
+        List<Product> getAllByBusiness(@Param("Business") Business business);
 
         /**
          *

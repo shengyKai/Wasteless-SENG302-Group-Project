@@ -116,7 +116,7 @@ public class ProductController {
             throw notFound;
         } else {
             business.get().checkSessionPermissions(request);
-            List<Product> catalogue = business.get().getCatalogue();
+            List<Product> catalogue = productRepository.getAllByBusiness(business.get());
 //            Set<String> currentCodes = new HashSet<>();
 //            List<Product> catalogue = new ArrayList<>();
 //            for (var product : duplicateCatalogue) {
