@@ -120,51 +120,16 @@
 
 <script>
 //This component requires two other custom components, one to display the product image, one to view more of the product's description
-import FullProductDescription from "./utils/FullProductDescription.vue";
-import ProductImageCarousel from "./utils/ProductImageCarousel.vue";
+import FullProductDescription from "../utils/FullProductDescription.vue";
+import ProductImageCarousel from "../utils/ProductImageCarousel.vue";
 import { currencyFromCountry } from "@/api/currency";
-import ProductImageUploader from "./utils/ProductImageUploader";
+import ProductImageUploader from "../utils/ProductImageUploader";
 import { makeImagePrimary, deleteImage } from "@/api/internal";
 
 export default {
   name: "ProductCatalogueItem",
   props: {
-    product: {
-      default() {
-        return {
-          id: "Some Code",
-          name: "Some Product",
-          description:
-                      "Some super long description Some super long description Some super long description Some super long description",
-          recommendedRetailPrice: 100,
-          manufacturer: "Some Manufacturer",
-          created: "Some Date Added",
-          images: [
-            {
-              filename: "https://cdn.vuetifyjs.com/images/carousel/squirrel.jpg",
-              thumbnail: "https://cdn.vuetifyjs.com/images/carousel/squirrel.jpg",
-              id: 1,
-            },
-            {
-              filename: "https://cdn.vuetifyjs.com/images/carousel/sky.jpg",
-              thumbnail: "https://cdn.vuetifyjs.com/images/carousel/sky.jpg",
-              id: 2,
-            },
-            {
-              filename: "https://cdn.vuetifyjs.com/images/carousel/bird.jpg",
-              thumbnail: "https://cdn.vuetifyjs.com/images/carousel/bird.jpg",
-              id: 3,
-            },
-            {
-              filename: "https://cdn.vuetifyjs.com/images/carousel/planet.jpg",
-              thumbnail: "https://cdn.vuetifyjs.com/images/carousel/planet.jpg",
-              id: 4,
-            },
-          ],
-          countryOfSale: "Japan",
-        };
-      },
-    },
+    product: Object,
     //retrieved from ProductCatalogue
     businessId: Number
   },
