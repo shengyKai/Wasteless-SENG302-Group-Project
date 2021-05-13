@@ -319,4 +319,16 @@ public class InventoryItemTests {
             .build();
         });
     }
+    @Test
+    void createInventoryItem_withWrongBestBeforeFormat_objectCreated() throws Exception {
+
+        assertThrows(ParseException.class, () -> {
+            InventoryItem invItem = new InventoryItem.Builder()
+            .withProduct(testProduct)
+            .withQuantity(2)
+            .withExpires("2021-06-01")
+            .withBestBefore("2020-061-01")
+            .build();
+        });
+    }
 }
