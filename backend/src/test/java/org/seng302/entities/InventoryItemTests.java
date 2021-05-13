@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.text.ParseException;
+import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -292,5 +293,30 @@ public class InventoryItemTests {
         assertEquals(invItem1, testInvItem1);
         assertEquals(invItem2, testInvItem2);
         assertEquals(invItem3, testInvItem3);
+    }
+    @Test
+    void createInventoryItem_withDateBeforeBestBefore_objectCreated() throws Exception {
+        LocalDate date = LocalDate.now();
+        LocalDate acceptDate = date.plusDays(1);                    //at least 1 day later
+        InventoryItem invItem = new InventoryItem.Builder()
+                .withProduct(testProduct)
+                .withQuantity(2)
+                .withExpires("2021-06-01")
+                .withBestBefore(acceptDate.toString())
+                .build();
+        
+        assertNotNull(invItem);
+    }
+    @Test
+    void createInventoryItem_withWrongBestBeforeFormat_objectNotCreated() throws Exception {
+
+        assertThrows(ParseException.class, () -> {
+            InventoryItem invItem = new InventoryItem.Builder()
+            .withProduct(testProduct)
+            .withQuantity(2)
+            .withExpires("2021-06-01")
+            .withBestBefore("2020-061-01")
+            .build();
+        });
     }
 }
