@@ -3,7 +3,7 @@ import Vuetify from 'vuetify';
 import Vuex, { Store } from 'vuex';
 import { createLocalVue, Wrapper, mount } from '@vue/test-utils';
 import SearchResults from '@/components/SearchResults.vue';
-import SearchResultItem from '@/components/SearchResultItem.vue';
+import SearchResultItem from '@/components/cards/SearchResultItem.vue';
 import { User } from '@/api/internal';
 import * as api from '@/api/internal';
 import { castMock, flushQueue } from './utils';
