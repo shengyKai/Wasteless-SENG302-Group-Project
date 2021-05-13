@@ -455,7 +455,7 @@ public class InventoryItemTests {
      * @throws Exception
      */
     @Test
-    void createInventoryItem_withDateInFutureForManufactured_objectCreated() throws Exception {
+    void createInventoryItem_withDateInFutureForManufactured_objectNotCreated() throws Exception {
         LocalDate date = LocalDate.now();
         LocalDate acceptDate = date.plusDays(1);   
         assertThrows(ResponseStatusException.class, () -> {                 
@@ -504,7 +504,7 @@ public class InventoryItemTests {
      * @throws Exception
      */
     @Test
-    void createInventoryItem_withDateInPastForSellBy_objectCreated() throws Exception {
+    void createInventoryItem_withDateInPastForSellBy_objectNotCreated() throws Exception {
         LocalDate date = LocalDate.now();
         LocalDate acceptDate = date.minusDays(1);                    
         assertThrows(ResponseStatusException.class, () -> {
@@ -570,7 +570,7 @@ public class InventoryItemTests {
      * @throws Exception
      */
     @Test
-    void createInventoryItem_withDateInPastForBestBefore_objectCreated() throws Exception {
+    void createInventoryItem_withDateInPastForBestBefore_objectNotCreated() throws Exception {
         LocalDate date = LocalDate.now();
         LocalDate acceptDate = date.minusDays(1);                    
         assertThrows(ResponseStatusException.class, () -> {
