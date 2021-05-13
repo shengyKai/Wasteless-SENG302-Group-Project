@@ -35,7 +35,7 @@ public class Business {
     @Column
     private Date created;
 
-    @OneToMany (fetch = FetchType.EAGER, mappedBy = "business", cascade = CascadeType.REMOVE)
+    @OneToMany (fetch = FetchType.LAZY, mappedBy = "business", cascade = CascadeType.REMOVE)
     private List<Product> catalogue = new ArrayList<>();
 
     @ManyToOne
