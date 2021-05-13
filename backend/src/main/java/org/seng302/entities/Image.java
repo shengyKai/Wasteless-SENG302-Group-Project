@@ -13,7 +13,7 @@ import java.util.List;
 public class Image {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(name = "filename", nullable = false, unique = true)
