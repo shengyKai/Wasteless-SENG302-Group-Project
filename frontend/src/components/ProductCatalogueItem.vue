@@ -40,7 +40,7 @@
               <v-row>
                 <!-- if the description length is more than or equal to 50 without slicing any words, the "Read more..." link will
                 appear which will lead the user to the FullProductDescription component  -->
-                <span v-if="product.description.length >= 50">
+                <span v-if="description.length >= 50">
                   <v-card-text
                     id="description"
                     class="pb-0 product-fields"
@@ -48,14 +48,14 @@
                     <strong>Description: </strong>
                     <br >
                     {{
-                      product.description.replace(
+                      description.replace(
                         /^([\s\S]{50}\S*)[\s\S]*/,
                         "$1"
                       )
                     }}...
                     <!-- feed the productDescription into the dialog box child component -->
                     <FullProductDescription
-                      :productDescription="product.description"
+                      :productDescription="description"
                     />
                   </v-card-text>
                 </span>
@@ -64,7 +64,7 @@
                   <v-card-text class="pb-0 product-fields">
                     <strong>Description: </strong>
                     <br >
-                    {{ product.description }}
+                    {{ description }}
                   </v-card-text>
                 </span>
               </v-row>
@@ -86,7 +86,7 @@
                 >
                   <strong>Manufacturer: </strong>
                   <br >
-                  {{ product.manufacturer }}
+                  {{ manufacturer }}
                 </v-card-text>
               </v-row>
             </v-col>
@@ -96,7 +96,7 @@
                 <v-card-text class="pb-0 product-fields">
                   <strong>RRP: </strong>
                   <br >
-                  {{ currency.symbol }}{{ product.recommendedRetailPrice }} {{ currency.code }}
+                  {{ recommendedRetailPrice }}
                 </v-card-text>
               </v-row>
               <v-row>
@@ -184,6 +184,20 @@ export default {
       //component. Else it will use it and the "Read more..." link will also be shown to lead to the FullProductDescription component
       readMoreActivated: false
     };
+  },
+  computed: {
+    description() {
+      return this.product.description || "Not set";
+    },
+    recommendedRetailPrice() {
+      if (!this.product.recommendedRetailPrice) {
+        return "Not set";
+      }
+      return this.currency.symbol + this.product.recommendedRetailPrice + " " + this.currency.code;
+    },
+    manufacturer() {
+      return this.product.manufacturer || "Not set";
+    }
   },
   async created() {
     // When the catalogue item is created, the currency will be set to the currency of the country the product is being

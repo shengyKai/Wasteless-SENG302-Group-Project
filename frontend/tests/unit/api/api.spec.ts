@@ -236,7 +236,6 @@ describe('api', () => {
       instance[fields.httpMethod].mockResolvedValueOnce(makeAxiosResponse(apiResult));
 
       let response = await doCall();
-      console.log(response);
       expect(response).toBe(fields.result);
     });
   });
