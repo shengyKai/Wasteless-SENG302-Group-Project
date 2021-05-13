@@ -117,13 +117,6 @@ public class ProductController {
         } else {
             business.get().checkSessionPermissions(request);
             List<Product> catalogue = productRepository.getAllByBusiness(business.get());
-//            Set<String> currentCodes = new HashSet<>();
-//            List<Product> catalogue = new ArrayList<>();
-//            for (var product : duplicateCatalogue) {
-//                if (currentCodes.contains(product.getProductCode())) continue;
-//                currentCodes.add(product.getProductCode());
-//                catalogue.add(product);
-//            }
 
             Comparator<Product> sort = sortProducts(orderBy, reverse);
             catalogue.sort(sort);
@@ -159,10 +152,7 @@ public class ProductController {
         } else {
             business.get().checkSessionPermissions(request);
 
-            Set<String> catalogue = business.get().getCatalogue()
-                    .stream()
-                    .map(Product::getProductCode)
-                    .collect(Collectors.toSet());
+            List<Product> catalogue = productRepository.getAllByBusiness(business.get());
 
             JSONObject responseBody = new JSONObject();
             responseBody.put("count", catalogue.size());
