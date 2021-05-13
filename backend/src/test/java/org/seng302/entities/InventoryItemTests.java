@@ -78,12 +78,10 @@ public class InventoryItemTests {
         businessRepository.deleteAll();
         userRepository.deleteAll();
     }
-
     @BeforeAll
     void setUp() throws ParseException {
         createTestObjects();
     }
-
     @AfterAll
     void tearDown() {
         clearDatabase();
@@ -123,9 +121,10 @@ public class InventoryItemTests {
         assertEquals(invItem, testInvItem);
     }
 
-    // Test that check mandatory cant be null
-
     /**
+     * Test that check mandatory cant be null
+    /**
+
      * Create object with Null product, should not pass as product is mandatory
      * @throws Exception
      */
