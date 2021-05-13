@@ -136,9 +136,8 @@ public class InventoryItem {
         }
     }
     /**
-     * 
+     * Sets the quantity of items/products
      * @param quantity
-     * @throws ResponseStatusException
      */
     public void setQuantity(Integer quantity) throws ResponseStatusException {
         if (quantity > 0) {
