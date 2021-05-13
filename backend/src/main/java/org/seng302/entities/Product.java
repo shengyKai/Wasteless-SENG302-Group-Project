@@ -18,7 +18,7 @@ import java.util.List;
 public class Product {
     // Product code must only contain uppercase letters, numbers and dashes
     // Product code have a length between 1-15
-    private static final String productCodeRegex = "^[-A-Z0-9]{1,15}$";
+    private static final String PRODUCT_CODE_REGEX = "^[-A-Z0-9]{1,15}$";
 
 
     @Id
@@ -124,20 +124,6 @@ public class Product {
     public String getCountryOfSale() { return countryOfSale; }
 
     /**
-     * Sets the code of the product
-     * @param productCode the code for the product
-     */
-    private void setProductCode(String productCode) {
-        if (productCode == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Product code must be provided");
-        }
-        if (!productCode.matches(productCodeRegex)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Product code must have a valid format");
-        }
-        this.productCode = productCode;
-    }
-
-    /**
      * Sets the name of the product
      * @param name the name of the product
      */
@@ -204,21 +190,6 @@ public class Product {
             }
         }
         this.recommendedRetailPrice = recommendedRetailPrice;
-    }
-
-    /**
-     * Sets the date of when the product was created
-     * @param created the date when the product was created
-     */
-    private void setCreated(Date created) { this.created = created; }
-
-    /**
-     * Sets the business associated with the catalogue the product is in
-     * @param business the business
-     */
-    private void setBusiness(Business business) {
-        this.business = business;
-        business.addToCatalogue(this);
     }
 
     /**
@@ -370,15 +341,44 @@ public class Product {
          */
         public Product build() {
             Product product = new Product();
-            product.setProductCode(this.productCode);
+            setProductCode(product, this.productCode);
             product.setName(this.name);
             product.setDescription(this.description);
             product.setManufacturer(this.manufacturer);
             product.setRecommendedRetailPrice(this.recommendedRetailPrice);
-            product.setBusiness(this.business);
+            setBusiness(product, this.business);
             product.setCountryOfSale(this.business.getAddress().getCountry());
-            product.setCreated(new Date());
+            setCreated(product, new Date());
             return product;
+        }
+
+        /**
+         * Sets the code of the product
+         * @param productCode the code for the product
+         */
+        private void setProductCode(Product product, String productCode) {
+            if (productCode == null) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Product code must be provided");
+            }
+            if (!productCode.matches(PRODUCT_CODE_REGEX)) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Product code must have a valid format");
+            }
+            product.productCode = productCode;
+        }
+
+        /**
+         * Sets the date of when the product was created
+         * @param created the date when the product was created
+         */
+        private void setCreated(Product product, Date created) { product.created = created; }
+
+        /**
+         * Sets the business associated with the catalogue the product is in
+         * @param business the business
+         */
+        private void setBusiness(Product product, Business business) {
+            product.business = business;
+            business.addToCatalogue(product);
         }
     }
 }
