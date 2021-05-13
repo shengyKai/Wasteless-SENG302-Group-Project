@@ -36,5 +36,23 @@ module.exports = {
 
   transpileDependencies: [
     'vuetify'
-  ]
+  ],
+  /*configureWebpack: {
+    test: /\.(ts|tsx)$/,
+    loader: require.resolve('ts-loader'),
+    options: {
+      compiler: 'ttypescript'
+    }
+  }*/
+  chainWebpack: config => {
+    ['ts', 'tsx'].forEach(rule => {
+      config.module
+        .rule(rule)
+        .use('ts-loader')
+        .tap(options => Object.assign(options, {
+          compiler: 'ttypescript',
+          transpileOnly: false
+        }));
+    });
+  }
 };

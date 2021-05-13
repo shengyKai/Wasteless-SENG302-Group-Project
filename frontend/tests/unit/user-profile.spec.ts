@@ -42,8 +42,9 @@ const localVue = createLocalVue();
 function makeTestBusiness(businessId: number, administrators?: number[]) {
   let business: Business = {
     id: businessId,
+    primaryAdministratorId: 1,
     name: 'test_business_name' + businessId,
-    address: 'test_business_address' + businessId,
+    address: { country: 'test_business_country' + businessId },
     description: 'test_business_description' + businessId,
     created: '1/5/2005',
     businessType: 'Accommodation and Food Services',
