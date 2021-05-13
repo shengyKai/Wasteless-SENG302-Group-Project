@@ -266,7 +266,9 @@ public class InventoryItem {
             InventoryItem inventoryItem = new InventoryItem();
             inventoryItem.setProduct(this.product);
             inventoryItem.setQuantity(this.quantity);
-            inventoryItem.setPricePerItem(this.pricePerItem);
+            if (pricePerItem != null) {
+                inventoryItem.setPricePerItem(this.pricePerItem);
+            }
             inventoryItem.setManufactured(this.manufactured);
             inventoryItem.setSellBy(this.sellBy);
             inventoryItem.setBestBefore(this.bestBefore);

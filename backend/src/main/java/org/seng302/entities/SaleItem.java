@@ -169,7 +169,11 @@ public class SaleItem {
             SaleItem saleItem = new SaleItem();
             saleItem.setInventoryItem(this.inventoryItem);
             saleItem.setQuantity(this.quantity);
-            saleItem.setPrice(this.price);
+            if (price != null) {
+                saleItem.setPrice(this.price);
+            } else {
+                saleItem.setPrice();
+            }
             saleItem.setMoreInfo(this.moreInfo);
             saleItem.setCreated(new Date());
             if (closes != null) {
