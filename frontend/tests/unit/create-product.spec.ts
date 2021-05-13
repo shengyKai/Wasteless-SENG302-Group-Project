@@ -524,4 +524,19 @@ describe('CreateProduct.vue', () => {
     expect(rrpField.text()).toContain('Currency symbol');
     expect(rrpField.text()).toContain('Currency code');
   });
+
+  it('If the error message is not an empty string, there should be an hint message that appears in the dialog box', async () => {
+    await wrapper.setData({
+      currency: {
+        code: 'Currency code',
+        symbol: 'Currency symbol',
+        errorMsg: 'Some error message'
+      }
+    });
+    const fields = wrapper.findAllComponents({ name: 'v-text-field' });
+    const rrpFields = fields.filter(field => field.text().includes('Recommended Retail Price'));
+    const rrpField = rrpFields.at(0);
+    await rrpField.trigger("click");
+    expect(wrapper.text()).toContain("Some error message");
+  })
 });
