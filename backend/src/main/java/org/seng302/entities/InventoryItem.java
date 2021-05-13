@@ -151,24 +151,22 @@ public class InventoryItem {
      * @param pricePerItem price of per item
      */
     public void setPricePerItem(BigDecimal pricePerItem) {
-        if (pricePerItem != null) {  
+        if(pricePerItem == null) {
+            this.pricePerItem = null;
+        }
             if (pricePerItem.compareTo(BigDecimal.ZERO) < 0) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Total price must not be less than 0 ");
             }
             if (pricePerItem.compareTo(new BigDecimal(10000)) >= 0) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Total price must be less than 10000");
             }
-            this.pricePerItem = pricePerItem;
-        } else {
-            //Do nothing? Optional?
-        }
+        this.pricePerItem = pricePerItem;
         }
     /**
      * Sets and calculates the total price based on the price per item and quantity
      */
     public void setTotalPrice() {
         if (this.pricePerItem != null) {
-            
             this.totalPrice = this.pricePerItem.multiply(new BigDecimal(this.quantity));
         }
     }
@@ -176,82 +174,64 @@ public class InventoryItem {
      * Sets the total price for the products
      */
     public void setTotalPrice(BigDecimal totalPrice) {
-    if (totalPrice != null) {
-    
+        if(totalPrice == null) {
+            this.totalPrice = null;
+        }
         if (totalPrice.compareTo(BigDecimal.ZERO) < 0) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Total price must not be less than 0 ");
         }
-        if (totalPrice.compareTo(new BigDecimal(999999)) >= 0) {
+        if (totalPrice.compareTo(new BigDecimal(999999)) > 0) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Total price must be less than 999999");
         }
-        this.totalPrice = totalPrice;
-    } else {
-        //Do nothing? Optional?
+    this.totalPrice = totalPrice;
     }
-    }
-
-
     /**
      * Sets the date of when the product was manufactured
      * @param manufactured the date when the product was manufactured
      */
     public void setManufactured(Date manufactured) {
-        if (manufactured != null){
+        if (manufactured == null) {
+            this.sellBy = null;
+        }
             LocalDate dateOfManufactured = manufactured.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
             LocalDate date = LocalDate.now();
             LocalDate acceptDate = date.minusDays(1);               //at least 1 day earlier
-
-            if (dateOfManufactured.compareTo(acceptDate) < 0) {     //is in the past
-                this.manufactured = manufactured;
-            } else {
+            if (dateOfManufactured.compareTo(acceptDate) > 0) {     //is in the future
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The manufactured date cannot be in the future");
             }
-        } else {
-            //Do nothing because it might be null (will clean the code before the task is done, going to ask someone)
-            // throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The manufactured date has been entered incorrectly");
-        }
-        
+        this.manufactured = manufactured;     
     }
-
     /**
      * Sets the date of when the product need to get sell by
      * @param sellBy the date when the product need to get sell by
      */
     public void setSellBy(Date sellBy) {
-        if (sellBy != null){
+        if (sellBy == null) {
+            this.sellBy = null;
+        }
             LocalDate dateOfSellBy = sellBy.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
             LocalDate date = LocalDate.now();
             LocalDate acceptDate = date.plusDays(1);                //at least 1 day later
-
-            if (dateOfSellBy.compareTo(acceptDate) > 0) {           //is in the future
-                this.sellBy = sellBy;
-            } else {
+            if (dateOfSellBy.compareTo(acceptDate) < 0) {           //is in the past
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The Sell By date cannot be in the past");
-            }
-        } else {
-            // throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The sellBy date has been entered incorrectly");
         }
-        
+        this.sellBy = sellBy;
     }
-
     /**
      * Sets the date of Best Before for the product
      * @param bestBefore the date of Best Before for the product
      */
     public void setBestBefore(Date bestBefore) {
-        if (bestBefore != null) {
-            LocalDate dateOfBestBefore = bestBefore.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-            LocalDate date = LocalDate.now();
-            LocalDate acceptDate = date.plusDays(1);                    //at least 1 day later
-
-            if (dateOfBestBefore.compareTo(acceptDate) > 0) {          //is in the future
-                this.bestBefore = bestBefore;
-            } else {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The Best Before date cannot be in the past");
-            }
-        } else {
-            // throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The sellBy date has been entered incorrectly");
+        if(bestBefore == null) {
+            this.bestBefore = null;
         }
+        LocalDate dateOfBestBefore = bestBefore.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        LocalDate date = LocalDate.now();
+        LocalDate acceptDate = date.plusDays(1);                    //at least 1 day later
+        if (dateOfBestBefore.compareTo(acceptDate) < 0) {          //is in the past
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The Best Before date cannot be in the past");
+        }
+        this.bestBefore = bestBefore;
     }
 
     /**
@@ -259,22 +239,17 @@ public class InventoryItem {
      * @param expires the date of expires for the product
      */
     public void setExpires(Date expires) throws ResponseStatusException {
-        if (expires != null) {
-            LocalDate dateOfExpires = expires.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-            LocalDate date = LocalDate.now();
-            LocalDate acceptDate = date.plusDays(1);                    //at least 1 day later
-
-            if (dateOfExpires.compareTo(acceptDate) > 0) {              //is in the future
-                this.expires = expires;
-            } else {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The Expires date cannot be in the past");
-            }
-        } else {
+        if(expires == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No expiry date was provided");
         }
+        LocalDate dateOfExpires = expires.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        LocalDate date = LocalDate.now();
+        LocalDate acceptDate = date.plusDays(1);                    //at least 1 day later
+        if (dateOfExpires.compareTo(acceptDate) < 0) {              //is in the past
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The Expires date cannot be in the past");
+        }
+        this.expires = expires;
     }
-            
-
     /**
      * Sets creation date of the item in Inventory
      */
@@ -283,12 +258,11 @@ public class InventoryItem {
         today.set(Calendar.HOUR_OF_DAY, 0);
         this.creationDate = today.getTime();
     }
-
     /**
      * Builder for Inventory Item
      */
     public static class Builder {
-
+        
         private Product product;
         private int quantity;
         private BigDecimal pricePerItem;
