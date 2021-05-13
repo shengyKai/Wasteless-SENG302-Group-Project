@@ -58,6 +58,7 @@
                     :prefix="currency.symbol"
                     :suffix="currency.code"
                     :rules="priceRules"
+                    :hint="currency.errorMsg"
                     outlined
                   />
                 </v-col>
@@ -193,7 +194,7 @@ export default {
      * @param val
      * @returns {boolean}
      */
-    allowedDates: val => new Date(val) > new Date(),
+    allowedDates: val => new Date(val) > new Date()
   },
 };
 </script>

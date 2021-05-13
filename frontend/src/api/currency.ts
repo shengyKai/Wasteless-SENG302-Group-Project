@@ -6,7 +6,8 @@ import { MaybeError } from "@/api/internal";
 export type Currency = {
     code: string,
     name: string,
-    symbol: string
+    symbol: string,
+    errorMsg: string
 };
 
 /**
@@ -63,7 +64,8 @@ function currencyResponseHasExpectedFormat(response: any): response is [Currenci
 export const defaultCurrency : Currency = {
   code: "",
   name: "",
-  symbol: ""
+  symbol: "",
+  errorMsg: ""
 };
 
 /**
@@ -79,6 +81,7 @@ export async function currencyFromCountry(country: string) : Promise<Currency> {
 
   if (typeof response === 'string') {
     console.warn(response);
+    defaultCurrency.errorMsg = response + ", so no currency is shown";
     return defaultCurrency;
   }
 
@@ -86,6 +89,7 @@ export async function currencyFromCountry(country: string) : Promise<Currency> {
 
   if (typeof currency === 'string') {
     console.warn(currency);
+    defaultCurrency.errorMsg = currency + ", so no currency is shown";
     return defaultCurrency;
   }
 
