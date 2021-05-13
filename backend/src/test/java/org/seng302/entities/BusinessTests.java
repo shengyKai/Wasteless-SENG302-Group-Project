@@ -8,6 +8,8 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.seng302.exceptions.AccessTokenException;
 import org.seng302.persistence.BusinessRepository;
+import org.seng302.persistence.ImageRepository;
+import org.seng302.persistence.ProductRepository;
 import org.seng302.persistence.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -33,6 +35,10 @@ public class BusinessTests {
     BusinessRepository businessRepository;
     @Autowired
     UserRepository userRepository;
+    @Autowired
+    ProductRepository productRepository;
+    @Autowired
+    ImageRepository imageRepository;
     @Mock
     HttpServletRequest request;
     @Mock
@@ -870,5 +876,38 @@ public class BusinessTests {
         } catch (Exception e) {
             fail("No exception should be thrown when the user is the default global application admin");
         }
+    }
+
+    @Test
+    void getCatalogue_multipleImages_noDuplicates() {
+        Image testImage1 = imageRepository.save(new Image("filename1", "thumbnailFilename1"));
+        Image testImage2 = imageRepository.save(new Image("filename2", "thumbnailFilename2"));
+        Image testImage3 = imageRepository.save(new Image("filename3", "thumbnailFilename3"));
+        Image testImage4 = imageRepository.save(new Image("filename4", "thumbnailFilename4"));
+
+        Product testProduct1 = new Product.Builder()
+            .withName("Product 1")
+            .withProductCode("PROD1")
+            .withBusiness(testBusiness1)
+            .build();
+        testProduct1 = productRepository.save(testProduct1);      
+        testProduct1.addProductImage(testImage1);
+        testProduct1.addProductImage(testImage2);
+        testProduct1 = productRepository.save(testProduct1);
+          
+        Product testProduct2 = new Product.Builder()
+            .withName("Product 2")
+            .withProductCode("PROD2")
+            .withBusiness(testBusiness1)
+            .build();
+        testProduct2 = productRepository.save(testProduct2);
+        testProduct2.addProductImage(testImage3);
+        testProduct2.addProductImage(testImage4);
+        testProduct2 = productRepository.save(testProduct2);
+        
+
+        testBusiness1 = businessRepository.save(testBusiness1);
+        System.out.println(testBusiness1.getCatalogue());
+        assertEquals(2, testBusiness1.getCatalogue().size());
     }
 }

@@ -116,14 +116,14 @@ public class ProductController {
             throw notFound;
         } else {
             business.get().checkSessionPermissions(request);
-            List<Product> duplicateCatalogue = business.get().getCatalogue();
-            Set<String> currentCodes = new HashSet<>();
-            List<Product> catalogue = new ArrayList<>();
-            for (var product : duplicateCatalogue) {
-                if (currentCodes.contains(product.getProductCode())) continue;
-                currentCodes.add(product.getProductCode());
-                catalogue.add(product);
-            }
+            List<Product> catalogue = business.get().getCatalogue();
+//            Set<String> currentCodes = new HashSet<>();
+//            List<Product> catalogue = new ArrayList<>();
+//            for (var product : duplicateCatalogue) {
+//                if (currentCodes.contains(product.getProductCode())) continue;
+//                currentCodes.add(product.getProductCode());
+//                catalogue.add(product);
+//            }
 
             Comparator<Product> sort = sortProducts(orderBy, reverse);
             catalogue.sort(sort);
