@@ -180,7 +180,7 @@ function isProduct(obj: any): obj is Product {
 
 function isImage(obj: any): obj is Image {
   if (obj === null || typeof obj !== 'object') return false;
-  if (typeof obj.id !== 'number') return false; 
+  if (typeof obj.id !== 'number') return false;
   if (typeof obj.filename !== 'string') return false;
   if (typeof obj.thumbnailFilename !== 'string') return false;
   return true;

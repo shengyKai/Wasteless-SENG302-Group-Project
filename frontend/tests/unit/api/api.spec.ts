@@ -104,7 +104,7 @@ const testProductArray: Product[] = [{
   id: 'ID-VALUE',
   name: 'test_name',
   images: []
-}]
+}];
 
 const testFile = new File([], 'test_file');
 let testFormData = new FormData();
