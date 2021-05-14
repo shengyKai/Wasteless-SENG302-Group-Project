@@ -70,7 +70,7 @@
 </template>
 
 <script>
-import SearchResultItem from './SearchResultItem';
+import SearchResultItem from './cards/SearchResultItem';
 import { getSearchCount, search } from '../api/internal';
 import { debounce } from '../utils';
 

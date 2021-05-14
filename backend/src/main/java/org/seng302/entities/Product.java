@@ -2,6 +2,7 @@ package org.seng302.entities;
 
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
+import org.seng302.tools.JsonTools;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -18,11 +19,11 @@ import java.util.List;
 public class Product {
     // Product code must only contain uppercase letters, numbers and dashes
     // Product code have a length between 1-15
-    private static final String productCodeRegex = "^[-A-Z0-9]{1,15}$";
+    private static final String PRODUCT_CODE_REGEX = "^[-A-Z0-9]{1,15}$";
 
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false, name = "product_code")
@@ -77,7 +78,7 @@ public class Product {
 
     /**
      * Adds a single image to the Product's list of images
-     * @param image
+     * @param image An image entity to be linked to this product.
      */
     public void addProductImage(Image image) {
         this.productImages.add(image);
@@ -122,20 +123,6 @@ public class Product {
      * Get the name of the country which the product is being sold in.
      */
     public String getCountryOfSale() { return countryOfSale; }
-
-    /**
-     * Sets the code of the product
-     * @param productCode the code for the product
-     */
-    private void setProductCode(String productCode) {
-        if (productCode == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Product code must be provided");
-        }
-        if (!productCode.matches(productCodeRegex)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Product code must have a valid format");
-        }
-        this.productCode = productCode;
-    }
 
     /**
      * Sets the name of the product
@@ -207,21 +194,6 @@ public class Product {
     }
 
     /**
-     * Sets the date of when the product was created
-     * @param created the date when the product was created
-     */
-    private void setCreated(Date created) { this.created = created; }
-
-    /**
-     * Sets the business associated with the catalogue the product is in
-     * @param business the business
-     */
-    private void setBusiness(Business business) {
-        this.business = business;
-        business.addToCatalogue(this);
-    }
-
-    /**
      * Sets the images associated with the product
      * @param productImages the product images
      */
@@ -274,6 +246,7 @@ public class Product {
         }
         object.put("images", images);
         object.put("countryOfSale", countryOfSale);
+        JsonTools.removeNullsFromJson(object);
         return object;
     }
 
@@ -364,15 +337,44 @@ public class Product {
          */
         public Product build() {
             Product product = new Product();
-            product.setProductCode(this.productCode);
+            setProductCode(product, this.productCode);
             product.setName(this.name);
             product.setDescription(this.description);
             product.setManufacturer(this.manufacturer);
             product.setRecommendedRetailPrice(this.recommendedRetailPrice);
-            product.setBusiness(this.business);
+            setBusiness(product, this.business);
             product.setCountryOfSale(this.business.getAddress().getCountry());
-            product.setCreated(new Date());
+            setCreated(product, new Date());
             return product;
+        }
+
+        /**
+         * Sets the code of the product
+         * @param productCode the code for the product
+         */
+        private void setProductCode(Product product, String productCode) {
+            if (productCode == null) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Product code must be provided");
+            }
+            if (!productCode.matches(PRODUCT_CODE_REGEX)) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Product code must have a valid format");
+            }
+            product.productCode = productCode;
+        }
+
+        /**
+         * Sets the date of when the product was created
+         * @param created the date when the product was created
+         */
+        private void setCreated(Product product, Date created) { product.created = created; }
+
+        /**
+         * Sets the business associated with the catalogue the product is in
+         * @param business the business
+         */
+        private void setBusiness(Product product, Business business) {
+            product.business = business;
+            business.addToCatalogue(product);
         }
     }
 }

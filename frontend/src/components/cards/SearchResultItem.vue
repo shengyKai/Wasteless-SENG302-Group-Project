@@ -16,8 +16,8 @@
 </template>
 
 <script>
-import UserAvatar from './utils/UserAvatar';
-import convertAddressToReadableText from './utils/Methods/convertJsonAddressToReadableText';
+import UserAvatar from '../utils/UserAvatar';
+import convertAddressToReadableText from '../utils/Methods/convertJsonAddressToReadableText';
 
 export default {
   props: ['user'],
