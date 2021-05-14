@@ -725,7 +725,7 @@ export async function getInventory(buisnessId: number): Promise<MaybeError<Inven
  * @param buisnessId Business id to identify with the database to retrieve the inventory count
  * @returns Number of inventory items or an error message
  */
- export async function getInventoryCount(buisnessId: number): Promise<MaybeError<number>> {
+export async function getInventoryCount(buisnessId: number): Promise<MaybeError<number>> {
   let response;
   try {
     response = await instance.get(`/businesses/${buisnessId}/inventory/count`);
