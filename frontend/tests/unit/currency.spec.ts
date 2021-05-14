@@ -41,10 +41,6 @@ describe('currency.ts', () => {
     expect(response.errorMsg).toBe(undefined);
   });
 
-  /**
-   * Test that when no response is recieved from the API, the currencyFromCountry will print a warning to the console
-   * saying the API cannot be reached and will return no currency
-   */
   it('Returns no currency to the frontend and outputs to the console when API can\'t be reached', async () => {
     globalThis.fetch = jest.fn(() =>
       Promise.reject("API is down")
@@ -55,10 +51,6 @@ describe('currency.ts', () => {
     ]);
   });
 
-  /**
-   * Test that when a 404 response is recieved from the RESTCounties API, the currencyFromCountry method print a
-   * warning to the console which says that country cannot be found and will return no currency
-   */
   it('Returns no currency to the frontend and outputs to the console when 404 response received', async () => {
     globalThis.fetch = jest.fn().mockResolvedValue({
       status: 404
@@ -70,10 +62,6 @@ describe('currency.ts', () => {
     ]);
   });
 
-  /**
-   * Test that when a 400 response is recieved from the RESTCounties API, the currencyFromCountry method print a
-   * warning to the console with the error code 400 and will return no currency
-   */
   it('Returns no currency to the frontend and outputs to the console when 400 response received', async () => {
     globalThis.fetch = jest.fn().mockResolvedValue({
       status: 400
@@ -85,11 +73,6 @@ describe('currency.ts', () => {
     ]);
   });
 
-  /**
-   * Test that when a 200 response is recieved from the RESTCounties API and that response does not have
-   * the expected format, the currencyFromCountry method print a warning to the console which says it can't
-   * read the resopnse and will return no currency
-   */
   it('Returns no currency to the frontend and outputs to the console when 200 response received but response is not in expected format', async () => {
     globalThis.fetch = jest.fn().mockResolvedValue({
       status: 200,
@@ -102,10 +85,6 @@ describe('currency.ts', () => {
     ]);
   });
 
-  /**
-   * Test that the when a response containing a single valid currencies is returned from the RESTCounties API
-   * the currencyFromCountries method will return that currency.
-   */
   it('Return currency received from API when response list contains one currency', async () => {
     globalThis.fetch = jest.fn().mockResolvedValue({
       status: 200,
@@ -124,10 +103,6 @@ describe('currency.ts', () => {
     expect(consoleOutput).toEqual([]);
   });
 
-  /**
-   * Test that the when a response containing multiple valid currencies is returned from the RESTCounties API
-   * the currencyFromCountries method will return the first of those currencies.
-   */
   it('Return first currency received from API when response list contains multiple currencies', async () => {
     globalThis.fetch = jest.fn().mockResolvedValue({
       status: 200,
@@ -152,6 +127,4 @@ describe('currency.ts', () => {
     });
     expect(consoleOutput).toEqual([]);
   });
-
-
 });
