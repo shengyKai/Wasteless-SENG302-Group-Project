@@ -4,6 +4,7 @@ import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.tomcat.util.http.fileupload.impl.FileSizeLimitExceededException;
 import org.seng302.entities.Business;
 import org.seng302.entities.Image;
 import org.seng302.entities.Product;
@@ -18,9 +19,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
+import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -111,9 +114,7 @@ public class ProductController {
         logger.info(String.format("Retrieving catalogue from business with id %d.", id));
         Optional<Business> business = businessRepository.findById(id);
         if (business.isEmpty()) {
-            BusinessNotFoundException notFound = new BusinessNotFoundException();
-            logger.error(notFound.getMessage());
-            throw notFound;
+            throw new BusinessNotFoundException();
         } else {
             business.get().checkSessionPermissions(request);
             List<Product> duplicateCatalogue = business.get().getCatalogue();
@@ -153,8 +154,6 @@ public class ProductController {
         Optional<Business> business = businessRepository.findById(id);
 
         if(business.isEmpty()) {
-            BusinessNotFoundException notFound = new BusinessNotFoundException();
-            logger.error(notFound.getMessage());
             throw new BusinessNotFoundException();
         } else {
             business.get().checkSessionPermissions(request);
@@ -182,37 +181,32 @@ public class ProductController {
      */
     @PostMapping("/businesses/{id}/products")
     public void addProductToBusiness(@PathVariable Long id, @RequestBody JSONObject productInfo, HttpServletRequest request, HttpServletResponse response) {
-        try {
-            AuthenticationTokenManager.checkAuthenticationToken(request);
-            logger.info(String.format("Adding product to business (businessId=%d).", id));
-            Business business = businessRepository.getBusinessById(id);
+        AuthenticationTokenManager.checkAuthenticationToken(request);
+        logger.info(String.format("Adding product to business (businessId=%d).", id));
+        Business business = businessRepository.getBusinessById(id);
 
-            business.checkSessionPermissions(request);
+        business.checkSessionPermissions(request);
 
-            if (productInfo == null) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Product creation info not provided");
-            }
-            String productCode = productInfo.getAsString("id");
-
-            if (productRepository.findByBusinessAndProductCode(business, productCode).isPresent()) {
-                throw new ResponseStatusException(HttpStatus.CONFLICT, "Product already exists with product code in this catalogue \"" + productCode + "\"");
-            }
-
-            Product product = new Product.Builder()
-                    .withProductCode(productCode)
-                    .withName(productInfo.getAsString("name"))
-                    .withDescription(productInfo.getAsString("description"))
-                    .withManufacturer(productInfo.getAsString("manufacturer"))
-                    .withRecommendedRetailPrice(productInfo.getAsString("recommendedRetailPrice"))
-                    .withBusiness(business)
-                    .build();
-            productRepository.save(product);
-
-            response.setStatus(201);
-        } catch (Exception error) {
-            logger.error(error.getMessage());
-            throw error;
+        if (productInfo == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Product creation info not provided");
         }
+        String productCode = productInfo.getAsString("id");
+
+        if (productRepository.findByBusinessAndProductCode(business, productCode).isPresent()) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Product already exists with product code in this catalogue \"" + productCode + "\"");
+        }
+
+        Product product = new Product.Builder()
+                .withProductCode(productCode)
+                .withName(productInfo.getAsString("name"))
+                .withDescription(productInfo.getAsString("description"))
+                .withManufacturer(productInfo.getAsString("manufacturer"))
+                .withRecommendedRetailPrice(productInfo.getAsString("recommendedRetailPrice"))
+                .withBusiness(business)
+                .build();
+        productRepository.save(product);
+
+        response.setStatus(201);
     }
 
     /**
@@ -263,57 +257,43 @@ public class ProductController {
         }
     }
 
-
-
     @PostMapping("/businesses/{businessId}/products/{productCode}/images")
     public ResponseEntity<Void> uploadImage(@PathVariable Long businessId, @PathVariable String productCode, @RequestParam("file") MultipartFile file, HttpServletRequest request) throws IOException {
-        try {
-            AuthenticationTokenManager.checkAuthenticationToken(request);
-            logger.info(String.format("Adding product image to business (businessId=%d, productCode=%s).", businessId, productCode));
-            Business business = businessRepository.getBusinessById(businessId);
+        AuthenticationTokenManager.checkAuthenticationToken(request);
+        logger.info(String.format("Adding product image to business (businessId=%d, productCode=%s).", businessId, productCode));
+        Business business = businessRepository.getBusinessById(businessId);
 
 
-            business.checkSessionPermissions(request);
+        business.checkSessionPermissions(request);
 
-            // Will throw 406 response status exception if product does not exist
-            Product product = productRepository.getProduct(business, productCode);
+        // Will throw 406 response status exception if product does not exist
+        Product product = productRepository.getProduct(business, productCode);
 
-            validateImage(file);
+        validateImage(file);
 
-            String filename = UUID.randomUUID().toString();
-            if ("image/jpeg".equals(file.getContentType())) {
-                filename += ".jpg";
-            } else if ("image/png".equals(file.getContentType())) {
-                filename += ".png";
-            } else {
-                assert false; // We've already validated the image type so this should not be possible.
-            }
-
-            Image image = new Image(null, null);
-            image.setFilename(filename);
-            image = imageRepository.save(image);
-            product.addProductImage(image);
-            productRepository.save(product); 
-            storageService.store(file, filename);             //store the file using storageService
-
-            return new ResponseEntity<>(HttpStatus.CREATED);
-        } catch (Exception e) {
-            logger.error(e.getMessage());
-            throw e;
+        String filename = UUID.randomUUID().toString();
+        if ("image/jpeg".equals(file.getContentType())) {
+            filename += ".jpg";
+        } else if ("image/png".equals(file.getContentType())) {
+            filename += ".png";
+        } else {
+            assert false; // We've already validated the image type so this should not be possible.
         }
 
+        Image image = new Image(null, null);
+        image.setFilename(filename);
+        image = imageRepository.save(image);
+        product.addProductImage(image);
+        productRepository.save(product);
+        storageService.store(file, filename);             //store the file using storageService
 
-
+        return new ResponseEntity<>(HttpStatus.CREATED);
     }
     public void validateImage(MultipartFile file) {
-
-            if(file.getSize() >= 1048575) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Image size exceed 1048575 bytes.");
-            }
-            else if(!(file.getContentType().equals("image/jpeg") || file.getContentType().equals("image/png"))) {
-
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid image format. Must be jpeg or png");
-            }
+        String contentType = file.getContentType();
+        if(contentType == null || !(contentType.equals("image/jpeg") || contentType.equals("image/png"))) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid image format. Must be jpeg or png");
+        }
     }
     /**
      * Sets the given image as the primary image for the given product
@@ -349,6 +329,8 @@ public class ProductController {
         logger.info(String.format("Set Image %d of product \"%s\" as the primary image", image.getID(), product.getName()));
     }
 
-
-
+    @ExceptionHandler(Exception.class)
+    public void printException(Exception exc) {
+        logger.error(exc.getMessage());
+    }
 }
