@@ -73,7 +73,7 @@
                 <v-card-text class="pb-0 product-fields">
                   <strong>Date Added: </strong>
                   <br >
-                  {{dateCreated}}
+                  {{ product.created }}
                 </v-card-text>
               </v-row>
               <v-row>
@@ -162,13 +162,6 @@ export default {
     },
     closeDialog() {
       this.showImageUploaderForm = false;
-    },
-    dateCreated() {
-      if (this.product.description === undefined) return '';
-
-      const dateCreated = new Date(this..product.description);
-      const parts = dateCreated.toDateString().split(' ');
-      return `${parts[2]} ${parts[1]} ${parts[3]}`;
     },
     /**
      * Sets the currently selected image as the primary image.
