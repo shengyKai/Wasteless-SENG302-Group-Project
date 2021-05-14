@@ -101,7 +101,12 @@ public class InventoryItem {
     }
 
     public void setPricePerItem(String pricePerItem) {
-        this.pricePerItem = new BigDecimal(pricePerItem);
+        if (pricePerItem == null) {
+            this.pricePerItem = null;
+        }
+        else {
+            this.pricePerItem = new BigDecimal(pricePerItem);
+        }
     }
 
     public BigDecimal getTotalPrice() {

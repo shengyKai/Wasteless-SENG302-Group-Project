@@ -84,7 +84,9 @@ public class SaleItem {
             int diff = quantity - newQuantity;
             if (newQuantity > 0 && diff <= inventoryItem.getRemainingQuantity()) {
                 this.quantity = newQuantity;
-                inventoryItem.setRemainingQuantity(inventoryItem.getRemainingQuantity() - diff);
+                inventoryItem.setRemainingQuantity(inventoryItem.getRemainingQuantity() + diff);
+            } else {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Please enter a number of items between 1 and your current stock not on sale");
             }
         } catch (NullPointerException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Inventory item has been removed, you have no more to sell");
@@ -97,11 +99,21 @@ public class SaleItem {
      * Defaults to single price * quantity
      * @param price of sale item
      */
-    public void setPrice(String price) { this.price = new BigDecimal(price); }
+    public void setPrice(String price) {
+        try {
+            this.price = new BigDecimal(price);
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Please enter a valid number");
+        }
+    }
 
     public void setPrice() {
         try {
-            this.price = inventoryItem.getPricePerItem().multiply(new BigDecimal(this.quantity));
+            if (inventoryItem.getPricePerItem() == null) {
+                this.price = BigDecimal.ZERO;
+            } else {
+                this.price = inventoryItem.getPricePerItem().multiply(new BigDecimal(this.quantity));
+            }
         } catch (NullPointerException ignored) {} // Fails if inventory not set, has own error for that
     }
 
@@ -135,7 +147,7 @@ public class SaleItem {
         try {
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
             Date close = dateFormat.parse(closes);
-            if (!close.before(new Date())) {
+            if (close.after(new Date()) || dateFormat.format(new Date()).equals(closes)) {
                 this.closes = close;
             } else {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You cannot set close dates in the past");
