@@ -191,6 +191,105 @@ describe('ProductCatalogueItem.vue', () => {
     expect(wrapper.text()).toContain("Some Code");
   });
 
+  it("When the product's description is not defined, the computed descriptiopn will be 'Not set'", async () => {
+    await wrapper.setProps({
+      product: {
+        name: "Some Product",
+        created: "Some Date Added",
+        manufacturer: "Some Manufacturer",
+        recommendedRetailPrice: 100,
+        id: "Some Code",
+        readMoreActivated: false,
+        images: [],
+        countryOfSale: "someCountry"
+      }
+    });
+    expect(wrapper.vm.description).toEqual("Not set");
+  });
+
+  it("When the product's description is defined, the computed description will be the given product description", async () => {
+    await wrapper.setProps({
+      product: {
+        name: "Some Product",
+        created: "Some Date Added",
+        description: "Some Description",
+        manufacturer: "Some Manufacturer",
+        recommendedRetailPrice: 100,
+        id: "Some Code",
+        readMoreActivated: false,
+        images: [],
+        countryOfSale: "someCountry"
+      }
+    });
+    expect(wrapper.vm.description).toEqual("Some Description");
+  });
+
+  it("When the product's manufacturer is not defined, the computed manufacturer will be 'Not set'", async () => {
+    await wrapper.setProps({
+      product: {
+        name: "Some Product",
+        description: "Some Description",
+        created: "Some Date Added",
+        recommendedRetailPrice: 100,
+        id: "Some Code",
+        readMoreActivated: false,
+        images: [],
+        countryOfSale: "someCountry"
+      }
+    });
+    expect(wrapper.vm.manufacturer).toEqual("Not set");
+  });
+
+  it("When the product's manufacturer is defined, the computed manufacturer will be the given product manufacturer", async () => {
+    await wrapper.setProps({
+      product: {
+        name: "Some Product",
+        created: "Some Date Added",
+        description: "Some Description",
+        manufacturer: "Some Manufacturer",
+        recommendedRetailPrice: 100,
+        id: "Some Code",
+        readMoreActivated: false,
+        images: [],
+        countryOfSale: "someCountry"
+      }
+    });
+    expect(wrapper.vm.manufacturer).toEqual("Some Manufacturer");
+  });
+
+  it("When the product's RRP is not defined, the computed RRP will be 'Not set'", async () => {
+    await wrapper.setProps({
+      product: {
+        name: "Some Product",
+        created: "Some Date Added",
+        description: "Some Description",
+        manufacturer: "Some Manufacturer",
+        id: "Some Code",
+        readMoreActivated: false,
+        images: [],
+        countryOfSale: "someCountry"
+      }
+    });
+    expect(wrapper.vm.recommendedRetailPrice).toEqual("Not set");
+  });
+
+  it("When the product's RRP is defined, the computed RRP will be the given product RRP with the items currency symbol and code", async () => {
+    await wrapper.setProps({
+      product: {
+        name: "Some Product",
+        created: "Some Date Added",
+        description: "Some Description",
+        manufacturer: "Some Manufacturer",
+        recommendedRetailPrice: 100,
+        id: "Some Code",
+        readMoreActivated: false,
+        images: [],
+        countryOfSale: "someCountry"
+      }
+    });
+    expect(wrapper.vm.recommendedRetailPrice).toEqual("Currency symbol100 Currency code");
+  });
+
   /**
    * Tests that the delete-image event generated from the ProductImageCarousel is handled as expected.
    */
