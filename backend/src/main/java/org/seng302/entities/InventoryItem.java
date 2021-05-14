@@ -1,6 +1,7 @@
 package org.seng302.entities;
 
 import lombok.NoArgsConstructor;
+import net.minidev.json.JSONObject;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -149,6 +150,16 @@ public class InventoryItem {
         Calendar today = Calendar.getInstance();
         today.set(Calendar.HOUR_OF_DAY, 0);
         this.creationDate = today.getTime();
+    }
+
+    /**
+     * Construct a JSON representation of the inventory item. Attributes which are null will be omitted from the
+     * returned JSON.
+     * @return JSON representation of the inventory item.
+     * @throws Exception
+     */
+    public JSONObject constructJSONObject() throws Exception {
+        throw new Exception("Not yet implemented");
     }
 
     /**

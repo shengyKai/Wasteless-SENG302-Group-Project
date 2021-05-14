@@ -1,25 +1,25 @@
 package org.seng302.controllers;
 
+import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.seng302.entities.Business;
 import org.seng302.entities.InventoryItem;
 import org.seng302.entities.Product;
+import org.seng302.exceptions.BusinessNotFoundException;
 import org.seng302.persistence.BusinessRepository;
 import org.seng302.persistence.InventoryItemRepository;
 import org.seng302.persistence.ProductRepository;
 import org.seng302.tools.AuthenticationTokenManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.HttpServletRequest;
 import java.text.ParseException;
+import java.util.Optional;
 
 @RestController
 public class InventoryController {
@@ -61,15 +61,48 @@ public class InventoryController {
 
         InventoryItem item = new InventoryItem.Builder()
                 .withProduct(product)
-                .withPricePerItem(inventory.getAsNumber("pricePerItem").doubleValue())
+                .withPricePerItem(inventory.getAsString("pricePerItem"))
                 .withQuantity(inventory.getAsNumber("quantity").intValue())
                 .withBestBefore(inventory.getAsString("bestBefore"))
                 .withSellBy(inventory.getAsString("sellBy"))
                 .withManufactured(inventory.getAsString("manufactured"))
                 .withExpires(inventory.getAsString("expires"))
-                .withTotalPrice(inventory.getAsNumber("totalPrice").doubleValue())
+                .withTotalPrice(inventory.getAsString("totalPrice"))
                 .build();
 
         inventoryItemRepository.save(item);
     }
+
+    /**
+     * GET endpoint which will return a list of JSONs for all items in the business's inventory, provide that the request
+     * comes from an authenticated user who is an admin of the application or the business. If the request cannot be
+     * authenticated a 401 exception is returned, if the user doesn't have permission to view the inventory then a 403
+     * exception is returned, and if the business doesn't exist then a 406 exception is returned.
+     * @param businessId The id of the business to retrieve the inventory from.
+     * @param request The HTTP request, used to authenticate the user's permissions.
+     * @return Array of JSON representations of items in the business's inventory.
+     * @throws Exception
+     */
+    @GetMapping("/businesses/{id}/inventory")
+    public JSONArray getInventory(@PathVariable(name="id") Long businessId, HttpServletRequest request) throws Exception {
+        Business business = businessRepository.getBusinessById(businessId);
+        business.checkSessionPermissions(request);
+        throw new Exception("Not yet implemented");
+    }
+
+    /**
+     * GET endpoint which will return the number of items in the business's inventory, provide that the request
+     * comes from an authenticated user who is an admin of the application or the business. If the request cannot be
+     * authenticated a 401 exception is returned, if the user doesn't have permission to view the inventory then a 403
+     * exception is returned, and if the business doesn't exist then a 406 exception is returned.
+     * @param businessId The id of the business to retrieve the inventory from.
+     * @param request The HTTP request, used to authenticate the user's permissions.
+     * @return A JSONObject with the count of the number of items in the business's inventory.
+     * @throws Exception
+     */
+    @GetMapping("/businesses/{id}/inventory/count")
+    public JSONObject getInventoryCount(@PathVariable(name="id") Long businessId, HttpServletRequest request) throws Exception {
+        throw new Exception("Not yet implemented");
+    }
+
 }

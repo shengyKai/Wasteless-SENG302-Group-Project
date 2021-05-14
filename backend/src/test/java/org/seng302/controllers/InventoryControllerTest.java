@@ -1,5 +1,8 @@
 package org.seng302.controllers;
 
+import net.minidev.json.JSONArray;
+import net.minidev.json.JSONObject;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
@@ -25,9 +28,12 @@ import org.springframework.web.server.ResponseStatusException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Optional;
 
+import static org.junit.Assert.*;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 import static org.springframework.http.RequestEntity.post;
@@ -56,6 +62,8 @@ public class InventoryControllerTest {
     private User testUser;
     @Mock
     private Business testBusiness;
+    @Mock
+    private Business mockBusiness;
     @Mock
     private HttpSession session;
     private Product testProduct;
@@ -281,6 +289,110 @@ public class InventoryControllerTest {
 
         verify(inventoryItemRepository, times(1)).save(any(InventoryItem.class));
 
+    }
+
+    @Test
+    void getInventory_unverifiedAccessToken_401Thrown() throws Exception {
+        inventoryController = new InventoryController(businessRepository, inventoryItemRepository, productRepository);
+        when(businessRepository.getBusinessById(1L)).thenReturn(mockBusiness);
+        doThrow(new ResponseStatusException(HttpStatus.UNAUTHORIZED)).when(mockBusiness).checkSessionPermissions(any());
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> inventoryController.getInventory(1L, request));
+        Assertions.assertEquals(HttpStatus.UNAUTHORIZED, exception.getStatus());
+    }
+
+    @Test
+    void getInventoryCount_unverifiedAccessToken_401Thrown() {
+        inventoryController = new InventoryController(businessRepository, inventoryItemRepository, productRepository);
+        when(businessRepository.getBusinessById(1L)).thenReturn(mockBusiness);
+        doThrow(new ResponseStatusException(HttpStatus.UNAUTHORIZED)).when(mockBusiness).checkSessionPermissions(any());
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> inventoryController.getInventoryCount(1L, request));
+        Assertions.assertEquals(HttpStatus.UNAUTHORIZED, exception.getStatus());
+    }
+
+    @Test
+    void getInventory_insufficientPermissions_403Thrown() {
+        inventoryController = new InventoryController(businessRepository, inventoryItemRepository, productRepository);
+        when(businessRepository.getBusinessById(1L)).thenReturn(mockBusiness);
+        doThrow(new ResponseStatusException(HttpStatus.FORBIDDEN)).when(mockBusiness).checkSessionPermissions(any());
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> inventoryController.getInventory(1L, request));
+        Assertions.assertEquals(HttpStatus.FORBIDDEN, exception.getStatus());
+    }
+
+    @Test
+    void getInventoryCount_insufficientPermissions_403Thrown() {
+        inventoryController = new InventoryController(businessRepository, inventoryItemRepository, productRepository);
+        when(businessRepository.getBusinessById(1L)).thenReturn(mockBusiness);
+        doThrow(new ResponseStatusException(HttpStatus.FORBIDDEN)).when(mockBusiness).checkSessionPermissions(any());
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> inventoryController.getInventoryCount(1L, request));
+        Assertions.assertEquals(HttpStatus.FORBIDDEN, exception.getStatus());
+    }
+
+    @Test
+    void getInventory_businessNotFound_406Thrown() {
+        inventoryController = new InventoryController(businessRepository, inventoryItemRepository, productRepository);
+        when(businessRepository.getBusinessById(1L)).thenThrow(new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE));
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> inventoryController.getInventory(1L, request));
+        Assertions.assertEquals(HttpStatus.NOT_ACCEPTABLE, exception.getStatus());
+    }
+
+    @Test
+    void getInventoryCount_businessNotFound_406Thrown() {
+        inventoryController = new InventoryController(businessRepository, inventoryItemRepository, productRepository);
+        when(businessRepository.getBusinessById(1L)).thenThrow(new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE));
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> inventoryController.getInventoryCount(1L, request));
+        Assertions.assertEquals(HttpStatus.NOT_ACCEPTABLE, exception.getStatus());
+    }
+
+    @Test
+    void getInventory_emptyInventory_emptyArrayReturned() throws Exception {
+        List<InventoryItem> emptyInventory = new ArrayList<>();
+        inventoryController = new InventoryController(businessRepository, inventoryItemRepository, productRepository);
+        when(businessRepository.getBusinessById(1L)).thenReturn(mockBusiness);
+        when(inventoryItemRepository.findAllByBusiness(mockBusiness)).thenReturn(emptyInventory);
+        JSONArray result = inventoryController.getInventory(1L, request);
+        Assertions.assertEquals(0, result.size());
+    }
+
+    @Test
+    void getInventoryCount_emptyInventory_zeroReturned() throws Exception {
+        List<InventoryItem> emptyInventory = new ArrayList<>();
+        inventoryController = new InventoryController(businessRepository, inventoryItemRepository, productRepository);
+        when(businessRepository.getBusinessById(1L)).thenReturn(mockBusiness);
+        when(inventoryItemRepository.findAllByBusiness(mockBusiness)).thenReturn(emptyInventory);
+        JSONObject result = inventoryController.getInventoryCount(1L, request);
+        assertTrue(result.containsKey("count"));
+        assertEquals(0, result.getAsNumber("count"));
+    }
+
+    @Test
+    void getInventory_multipleItems_correctArrayReturned() throws Exception {
+        List<InventoryItem> inventory = new ArrayList<>();
+        JSONArray expectedResponse = new JSONArray();
+        inventory.add(new InventoryItem.Builder().withProduct(testProduct).withQuantity(1).withExpires("2022-01-01").build());
+        inventory.add(new InventoryItem.Builder().withProduct(testProduct).withQuantity(39).withExpires("2022-01-01").build());
+        inventory.add(new InventoryItem.Builder().withProduct(testProduct).withQuantity(54).withExpires("2022-01-01").build());
+        for (InventoryItem item : inventory) {
+            expectedResponse.add(item.constructJSONObject());
+        }
+        inventoryController = new InventoryController(businessRepository, inventoryItemRepository, productRepository);
+        when(businessRepository.getBusinessById(1L)).thenReturn(mockBusiness);
+        when(inventoryItemRepository.findAllByBusiness(mockBusiness)).thenReturn(inventory);
+        JSONArray result = inventoryController.getInventory(1L, request);
+        Assertions.assertEquals(expectedResponse, inventory);
+    }
+
+    @Test
+    void getInventoryCount_multipleItems_correctCountReturned() throws Exception {
+        List<InventoryItem> inventory = new ArrayList<>();
+        inventory.add(new InventoryItem.Builder().withProduct(testProduct).withQuantity(1).withExpires("2022-01-01").build());
+        inventory.add(new InventoryItem.Builder().withProduct(testProduct).withQuantity(39).withExpires("2022-01-01").build());
+        inventory.add(new InventoryItem.Builder().withProduct(testProduct).withQuantity(54).withExpires("2022-01-01").build());
+        inventoryController = new InventoryController(businessRepository, inventoryItemRepository, productRepository);
+        when(businessRepository.getBusinessById(1L)).thenReturn(mockBusiness);
+        when(inventoryItemRepository.findAllByBusiness(mockBusiness)).thenReturn(inventory);
+        JSONObject result = inventoryController.getInventoryCount(1L, request);
+        assertTrue(result.containsKey("count"));
+        assertEquals(3, result.getAsNumber("count"));
     }
 
 }
