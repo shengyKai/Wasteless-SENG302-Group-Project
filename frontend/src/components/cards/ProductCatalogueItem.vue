@@ -163,6 +163,9 @@ export default {
     closeDialog() {
       this.showImageUploaderForm = false;
     },
+    /**
+     * Method to change date format into a more human readable format
+     */
     dateCreated() {
       if (this.product.description === undefined) return '';
 
