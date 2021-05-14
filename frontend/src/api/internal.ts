@@ -118,16 +118,15 @@ export type Product = {
 };
 
 export type InventoryItem = {
-  id: string,
-  productId: string,
+  id: number,
+  product: Product,
   quantity: number,
   pricePerItem?: number,
   totalPrice?: number,
   manufactured?: string,
   sellBy?: string,
   bestBefore?: string,
-  expires: string,
-  creationDate: string
+  expires: string
 };
 
 export type CreateProduct = Omit<Product, 'created' | 'images'>;
@@ -199,6 +198,20 @@ function isImage(obj: any): obj is Image {
   return true;
 }
 
+function isInventoryItem(obj: any): obj is InventoryItem {
+  if (obj === null || typeof obj !== 'object') return false;
+  if (typeof obj.id !== 'number') return false;
+  if (typeof obj.product !== 'object') return false;
+  if (typeof obj.quantity !== 'number') return false;
+  if (obj.pricePerItem !== undefined && typeof obj.pricePerItem !== 'number') return false;
+  if (obj.totalPrice !== undefined && typeof obj.totalPrice !== 'number') return false;
+  if (obj.manufactured !== undefined && typeof obj.manufactured !== 'string') return false;
+  if (obj.sellBy !== undefined && typeof obj.sellBy !== 'string') return false;
+  if (obj.bestBefore !== undefined && typeof obj.bestBefore !== 'string') return false;
+  if (typeof obj.expires !== 'string') return false;
+  return true;
+}
+
 function isNumberArray(obj: any): obj is number[] {
   if (!Array.isArray(obj)) return false;
   for (let elem of obj) {
@@ -231,26 +244,19 @@ function isProductsArray(obj: any): obj is Product[] {
   return true;
 }
 
+function isInventoryArray(obj: any): obj is InventoryItem[] {
+  if (!Array.isArray(obj)) return false;
+  for (let elem of obj) {
+    if (!isInventoryItem(elem)) return false;
+  }
+  return true;
+}
+
 function isImageArray(obj: any): obj is Image[] {
   if (!Array.isArray(obj)) return false;
   for (let elem of obj) {
     if (!isImage(elem)) return false;
   }
-  return true;
-}
-
-function isInventoryItem(obj: any): obj is InventoryItem {
-  if (obj === null || typeof obj !== 'object') return false;
-  if (typeof obj.id !== 'string') return false;
-  if (typeof obj.productId !== 'string') return false;
-  if (typeof obj.quantity !== 'number') return false;
-  if (obj.pricePerItem !== undefined && typeof obj.pricePerItem !== 'number') return false;
-  if (obj.totalPrice !== undefined && typeof obj.totalPrice !== 'number') return false;
-  if (obj.manufactured !== undefined && typeof obj.manufactured !== 'string') return false;
-  if (obj.sellBy !== undefined && typeof obj.sellBy !== 'string') return false;
-  if (obj.bestBefore !== undefined && typeof obj.bestBefore !== 'string') return false;
-  if (typeof obj.expires !== 'string') return false;
-  if (typeof obj.creationDate !== 'string') return false;
   return true;
 }
 
@@ -689,24 +695,14 @@ export async function removeBusinessAdmin(businessId: number, userId: number): P
 }
 
 /**
- * Get all products for that business
+ * Get all inventory items for that business
  * @param businessId
- * @param page
- * @param resultsPerPage
- * @param orderBy
- * @param reverse
- * @return a list of products
+ * @return a list of inventory items
  */
- export async function getInventory(buisnessId: number): Promise<MaybeError<Product[]>> {
+ export async function getInventory(buisnessId: number): Promise<MaybeError<InventoryItem[]>> {
   let response;
   try {
-    response = await instance.get(`/businesses/${buisnessId}/products`, {
-      params: {
-        orderBy: orderBy,
-        page : page,
-        resultsPerPage : resultsPerPage,
-        reverse: reverse.toString(),
-      }});
+    response = await instance.get(`/businesses/${buisnessId}/inventory`);
   } catch (error) {
     let status: number | undefined = error.response?.status;
     if (status === undefined) return 'Failed to reach backend';
@@ -716,8 +712,8 @@ export async function removeBusinessAdmin(businessId: number, userId: number): P
     return 'Request failed: ' + status;
   }
 
-  if (!isProductsArray(response.data)) {
-    return 'Response is not product array';
+  if (!isInventoryArray(response.data)) {
+    return 'Response is not inventory array';
   }
   return response.data;
 }
