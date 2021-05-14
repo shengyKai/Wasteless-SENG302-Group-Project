@@ -338,9 +338,9 @@ public class User extends Account {
         object.put("lastName",    getLastName());
         object.put("email",       getEmail());
         object.put("created",     getCreated().toString());
-        if (getMiddleName() != null) { object.put("middleName",  getMiddleName()); }
-        if (getNickname() != null) { object.put("nickname",    getNickname()); }
-        if (getBio() != null) { object.put("bio", getBio()); }
+        object.put("middleName",  getMiddleName());
+        object.put("nickname",    getNickname());
+        object.put("bio", getBio());
         object.put("homeAddress", getAddress().constructPartialJson());
         if (fullBusinessDetails) {
             object.put("businessesAdministered", constructBusinessJsonArray());
@@ -368,11 +368,9 @@ public class User extends Account {
         JSONObject json = constructPublicJson(fullBusinessDetails);
         json.replace("homeAddress", getAddress().constructFullJson());
         json.appendField("dateOfBirth", dob.toString());
-        if (phNum != null) {
-            json.appendField("phoneNumber", phNum);
-        }
+        json.appendField("phoneNumber", phNum);
         json.appendField("role", role);
-
+        JsonTools.removeNullsFromJson(json);
         return json;
     }
 
