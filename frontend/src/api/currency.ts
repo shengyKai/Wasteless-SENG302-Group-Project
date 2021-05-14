@@ -4,10 +4,10 @@ import { MaybeError } from "@/api/internal";
  * Currency information for a specific country.
  */
 export type Currency = {
-    code: string,
-    name: string,
-    symbol: string,
-    errorMsg: string
+  code: string,
+  name: string,
+  symbol: string,
+  errorMsg: string
 };
 
 /**
@@ -15,7 +15,7 @@ export type Currency = {
  * to contain an array of objects of this type
  */
 type CurrenciesContainer = {
-    currencies: Currency[];
+  currencies: Currency[];
 };
 
 /**
@@ -23,7 +23,7 @@ type CurrenciesContainer = {
  * @param obj The object to be checked.
  * @returns True if the object has the attributes of a Currency object, false otherwise.
  */
-function isCurrency(obj : any): obj is Currency {
+function isCurrency(obj: any): obj is Currency {
   if (obj === null || typeof obj !== 'object') return false;
   if (typeof obj.code !== 'string') return false;
   if (typeof obj.name !== 'string') return false;
@@ -61,11 +61,11 @@ function currencyResponseHasExpectedFormat(response: any): response is [Currenci
 /**
  * Default currency when currency of current location cannot be resolved from API request.
  */
-export const defaultCurrency : Currency = {
+export const defaultCurrency: Currency = {
   code: "",
   name: "",
   symbol: "",
-  errorMsg: ""
+  errorMsg: ", so no currency is shown"
 };
 
 /**
@@ -75,22 +75,24 @@ export const defaultCurrency : Currency = {
  * @param country The name of a country to use in the API request for the currency.
  * @returns An object containing information on the currency of the given country.
  */
-export async function currencyFromCountry(country: string) : Promise<Currency> {
+export async function currencyFromCountry(country: string): Promise<Currency> {
 
   const response = await queryCurrencyAPI(country);
 
   if (typeof response === 'string') {
+    const errorDefault = { ...defaultCurrency };
     console.warn(response);
-    defaultCurrency.errorMsg = response + ", so no currency is shown";
-    return defaultCurrency;
+    errorDefault.errorMsg = response + errorDefault.errorMsg;
+    return errorDefault;
   }
 
   const currency = await getCurrencyFromAPIResponse(response);
 
   if (typeof currency === 'string') {
+    const errorDefault = { ...defaultCurrency };
     console.warn(currency);
-    defaultCurrency.errorMsg = currency + ", so no currency is shown";
-    return defaultCurrency;
+    errorDefault.errorMsg = "There was a fault with the system" + errorDefault.errorMsg;
+    return errorDefault;
   }
 
   return currency;
@@ -103,7 +105,7 @@ export async function currencyFromCountry(country: string) : Promise<Currency> {
  * @param country The name of the country to query the API for.
  * @return the response received from the RESTCounties API or a string error message.
  */
-async function queryCurrencyAPI(country: string) : Promise<MaybeError<Response>> {
+export async function queryCurrencyAPI(country: string): Promise<MaybeError<Response>> {
 
   const queryUrl = `https://restcountries.eu/rest/v2/name/${country}?fullText=true&fields=currencies`;
 
@@ -128,7 +130,7 @@ async function queryCurrencyAPI(country: string) : Promise<MaybeError<Response>>
  * if the response format is correct. If it is not correct then an error message is returned.
  * @param response A currency object extracted from the response body or an error message.
  */
-async function getCurrencyFromAPIResponse(response: Response) : Promise<MaybeError<Currency>> {
+export async function getCurrencyFromAPIResponse(response: Response): Promise<MaybeError<Currency>> {
   const responseBody = await response.json();
 
   if (!currencyResponseHasExpectedFormat(responseBody)) {
