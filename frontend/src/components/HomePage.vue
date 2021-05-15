@@ -40,6 +40,14 @@
                 <v-list-item-title>Catalogue</v-list-item-title>
               </v-list-item-content>
             </v-list-item>
+            <v-list-item v-if="isBusiness" @click="goToCataloguePage">
+              <v-list-item-icon>
+                <v-icon>mdi-view-list</v-icon>
+              </v-list-item-icon>
+              <v-list-item-content>
+                <v-list-item-title>Inventory</v-list-item-title>
+              </v-list-item-content>
+            </v-list-item>
           </v-list-item-group>
         </v-list>
       </v-card-text>
