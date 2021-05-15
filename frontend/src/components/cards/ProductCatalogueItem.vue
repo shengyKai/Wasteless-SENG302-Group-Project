@@ -196,7 +196,9 @@ export default {
     dateCreated() {
       if (this.product.created === undefined) return '';
       const dateCreated = new Date(this.product.created);
-      return `${dateCreated.toDateString()}`;
+      const parts = dateCreated.toDateString().split(' ');
+      return `${parts[2]} ${parts[1]} ${parts[3]}`;
+      // return `${dateCreated.toDateString()}`;
     }
   }
 };
