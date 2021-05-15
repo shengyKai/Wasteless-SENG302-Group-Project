@@ -164,16 +164,6 @@ export default {
       this.showImageUploaderForm = false;
     },
     /**
-     * Method to change date format into a more human readable format
-     */
-    dateCreated() {
-      if (this.product.description === undefined) return '';
-
-      const dateCreated = new Date(this..product.description);
-      const parts = dateCreated.toDateString().split(' ');
-      return `${parts[2]} ${parts[1]} ${parts[3]}`;
-    },
-    /**
      * Sets the currently selected image as the primary image.
      * @param imageId Id of the currently selected image
      */
@@ -199,7 +189,19 @@ export default {
       this.$router.go(); // refresh the page to see the changes
     },
   },
+  computed: {
+    /**
+     * Method to change date format into a more human readable format
+     */
+    dateCreated() {
+      if (this.product.created === undefined) return '';
+      const dateCreated = new Date(this.product.created);
+      return `${dateCreated.toDateString()}`;
+    }
+
+  }
 };
+
 </script>
 
 <style scoped>

@@ -422,9 +422,10 @@ export default {
     dateOfBirth() {
       if (this.user.dateOfBirth === undefined) return '';
 
-      const dateOfBirth = new Date(this.user.dateOfBirth);
-      const parts = dateOfBirth.toDateString().split(' ');
-      return `${parts[2]} ${parts[1]} ${parts[3]}`;
+      // const dateOfBirth = new Date(this.user.dateOfBirth);
+      // const parts = dateOfBirth.toDateString().split(' ');
+      // return `${parts[2]} ${parts[1]} ${parts[3]}`;
+      return this.user.dateOfBirth;
     },
     userRole() {
       return this.user.role;
