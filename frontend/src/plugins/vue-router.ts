@@ -10,6 +10,7 @@ import HomePage from "../components/HomePage.vue";
 import ProductCatalogue from "../components/ProductCatalogue.vue";
 import ProductCatalogueItem from "../components/ProductCatalogueItem.vue";
 import ProductImageUploader from "../components/utils/ProductImageUploader.vue";
+import SaleItem from "../components/SaleItem.vue";
 
 
 Vue.use(VueRouter);
@@ -63,6 +64,11 @@ const routes = [
     path: "/business/:id/products",
     component: ProductCatalogue,
     meta: { title: 'Buisness Products' }
+  },
+  {
+    path: "/saleItem",
+    component: SaleItem,
+    meta: {title: 'Example Sale Item'}
   },
   {
     path: "*",
