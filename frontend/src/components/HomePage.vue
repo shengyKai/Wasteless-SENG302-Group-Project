@@ -49,6 +49,7 @@
               </v-list-item-content>
             </v-list-item>
             <v-list-item v-if="isBusiness" @click="goInventoryItemDialogue">
+              <!-- <v-list-item v-if="isBusiness" @click="viewCreateInventory"> -->
               <v-list-item-icon>
                 <v-icon>mdi-view-list</v-icon>
               </v-list-item-icon>
@@ -164,6 +165,12 @@ export default {
      */
     viewCreateProduct() {
       this.$store.commit('showCreateProduct', this.$store.state.activeRole.id);
+    },
+    /**
+     * Shows the create Inventory dialog
+     */
+    viewCreateInventory() {
+      this.$store.commit('showCreateInventory', this.$store.state.activeRole.id);
     },
     /**
      * Shows the Catalogue page

@@ -97,7 +97,7 @@
               type="submit"
               color="primary"
               :disabled="!valid"
-              @click.prevent="createBusiness">
+              @click.prevent="CreateInventory">
               Create
             </v-btn>
           </v-card-actions>
@@ -108,10 +108,9 @@
 </template>
 
 <script>
-import {createBusiness} from '@/api/internal';
 
 export default {
-  name: 'CreateBusiness',
+  name: 'CreateInventory',
   components: {
   },
   data() {
@@ -151,37 +150,7 @@ export default {
     };
   },
   methods: {
-    async createBusiness() {
-      this.errorMessage = undefined;
-      /**
-       * Get the street number and name from the street address field.
-       */
-      const streetParts = this.street1.split(" ");
-      const streetNum = streetParts[0];
-      const streetName = streetParts.slice(1, streetParts.length).join(" ");
-      let business = {
-        primaryAdministratorId: this.$store.state.user.id,
-        name: this.business,
-        description: this.description,
-        address: {
-          streetNumber: streetNum,
-          streetName: streetName,
-          district: this.district,
-          city: this.city,
-          region: this.region,
-          country: this.country,
-          postcode: this.postcode,
-        },
-        businessType: this.businessType,
-      };
-      let response = await createBusiness(business);
-      if (response === undefined) {
-        this.closeDialog();
-        this.$router.go();
-      } else {
-        this.errorMessage = response;
-      }
-    },
+
     closeDialog() {
       this.$emit('closeDialog');
     }
