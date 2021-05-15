@@ -1,26 +1,77 @@
 <template>
-  <v-card>
-    <v-container>
+  <v-container>
+    <v-card width="600px">
       <v-row>
-        <v-col align="center" justify="center" cols="auto" md="3" sm="12" v-if="product.images.length === 0">
-          <v-icon size="250">
-            mdi-image
-          </v-icon>
+        <v-col cols="8">
+          <v-expand-transition>
+            <div v-show="!moreInfo">
+              <ProductImageCarousel :productImages="product.images" :productId="product.id" />
+              <v-card-title>{{ saleItem.quantity + " x " + product.name }}</v-card-title>
+              <v-card-subtitle>{{saleItem.price}}</v-card-subtitle>
+              <v-card-actions>
+                <v-btn color="secondary" @click="moreInfo=!moreInfo">View More</v-btn>
+              </v-card-actions>
+            </div>
+          </v-expand-transition>
+          <v-expand-transition>
+            <div v-show="moreInfo">
+              <v-divider/>
+              <v-card-subtitle>
+                Product Description
+              </v-card-subtitle>
+              <v-card-text>
+                {{product.description}}
+              </v-card-text>
+              <v-card-subtitle>
+                Additional Sale Info
+              </v-card-subtitle>
+              <v-card-text>
+                {{saleItem.moreInfo}}
+              </v-card-text>
+              <v-card-actions>
+                <v-btn color="secondary" @click="moreInfo=!moreInfo">View Less</v-btn>
+              </v-card-actions>
+            </div>
+          </v-expand-transition>
         </v-col>
-        <v-col cols="auto" md="3" sm="12" v-else>
-          <!-- feed the productImages into the carousel child component -->
-          <ProductImageCarousel :productImages="product.images" :productId="product.id"/>
+        <v-col cols="4">
+          <v-timeline dense style="height: 100%; margin-left: -30px">
+            <v-timeline-item color="grey" small>
+              <div style="margin-left: -25px">
+                <strong>Created</strong>
+                {{createdFormatted}}
+              </div>
+            </v-timeline-item>
+            <v-timeline-item color="orange" small>
+              <div style="margin-left: -25px">
+                <strong>Expires</strong>
+                {{expiresFormatted}}
+              </div>
+            </v-timeline-item>
+            <v-timeline-item color="red" small>
+              <div style="margin-left: -25px">
+                <strong>Closes</strong>
+                {{closesFormatted}}
+              </div>
+            </v-timeline-item>
+          </v-timeline>
         </v-col>
       </v-row>
-    </v-container>
-  </v-card>
+    </v-card>
+  </v-container>
 </template>
 
 <script>
 import ProductImageCarousel from "@/components/utils/ProductImageCarousel";
+
 export default {
   name: "SaleItem",
   components: {ProductImageCarousel},
+  data() {
+    return {
+      moreInfo: false,
+    };
+  },
   props: {
     saleItem: {
       default() {
@@ -38,8 +89,8 @@ export default {
               "images": [
                 {
                   "id": 1234,
-                  "filename": "/media/images/23987192387509-123908794328.png",
-                  "thumbnailFilename": "/media/images/23987192387509-123908794328_thumbnail.png"
+                  "filename": "https://i.picsum.photos/id/357/300/300.jpg?hmac=GR6zE4y7iYz5d4y-W08ZaYhDGGrLHGon4wKEQp1eYkg",
+                  "thumbnailFilename": "https://i.picsum.photos/id/357/300/300.jpg?hmac=GR6zE4y7iYz5d4y-W08ZaYhDGGrLHGon4wKEQp1eYkg"
                 }
               ]
             },
@@ -71,6 +122,18 @@ export default {
     },
     inventoryItem() {
       return this.saleItem.inventoryItem;
+    },
+    createdFormatted() {
+      let date = new Date(this.saleItem.created);
+      return date.toDateString().slice(3);
+    },
+    expiresFormatted() {
+      let date = new Date(this.saleItem.inventoryItem.expires);
+      return date.toDateString().slice(3);
+    },
+    closesFormatted() {
+      let date = new Date(this.saleItem.closes);
+      return date.toDateString().slice(3);
     }
   }
 };
