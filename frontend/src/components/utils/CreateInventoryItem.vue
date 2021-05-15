@@ -8,7 +8,7 @@
       <v-form v-model="valid">
         <v-card>
           <v-card-title>
-            <h4 class="primary--text">Create Business</h4>
+            <h4 class="primary--text">Create Inventory Item</h4>
           </v-card-title>
           <v-card-text>
             <v-container>
@@ -16,16 +16,16 @@
                 <v-col>
                   <v-text-field
                     class="required"
-                    v-model="business"
-                    label="Name of business"
+                    v-model="productCode"
+                    label="Product Code"
                     :rules="mandatoryRules.concat(maxCharRules)"
                     outlined
                   />
                 </v-col>
                 <v-col cols="12">
                   <v-textarea
-                    v-model="description"
-                    label="Description"
+                    v-model="quantity"
+                    label="Quantity"
                     :rules="maxCharDescriptionRules"
                     rows="3"
                     outlined
@@ -34,9 +34,9 @@
                 <v-col cols="12">
                   <v-select
                     class="required"
-                    v-model="businessType"
+                    v-model="pricePerItem"
                     :items="businessTypes"
-                    label="Business Type"
+                    label="Price per Item"
                     :rules="mandatoryRules.concat(maxCharRules)"
                     outlined
                   />
@@ -44,50 +44,42 @@
                 <v-col cols="12">
                   <v-text-field
                     class="required"
-                    v-model="street1"
-                    label="Company Street Address"
+                    v-model="totalPrice"
+                    label="Total Price"
                     :rules="mandatoryRules.concat(streetRules)"
                     outlined/>
                 </v-col>
                 <v-col cols="12">
-                  <LocationAutocomplete
-                    type="district"
-                    v-model="district"
-                    :rules="maxCharRules"
-                  />
-                </v-col>
-                <v-col cols="12">
-                  <LocationAutocomplete
-                    type="city"
+                  <v-text-field
                     class="required"
-                    v-model="city"
-                    :rules="mandatoryRules.concat(maxCharRules)"
-                  />
-                </v-col>
-                <v-col cols="12">
-                  <LocationAutocomplete
-                    type="region"
-                    class="required"
-                    v-model="region"
-                    :rules="mandatoryRules.concat(maxCharRules)"
-                  />
-                </v-col>
-                <v-col cols="12">
-                  <LocationAutocomplete
-                    type="country"
-                    class="required"
-                    v-model="country"
-                    :rules="mandatoryRules.concat(maxCharRules)"
-                  />
+                    v-model="manufactured"
+                    label="Manufactured"
+                    :rules="mandatoryRules.concat(streetRules)"
+                    outlined/>
                 </v-col>
                 <v-col cols="12">
                   <v-text-field
                     class="required"
-                    v-model="postcode"
-                    label="Postcode"
-                    :rules="mandatoryRules.concat(maxCharRules)"
-                    outlined
-                  />
+                    v-model="sellBy"
+                    label="Sell By"
+                    :rules="mandatoryRules.concat(streetRules)"
+                    outlined/>
+                </v-col>
+                <v-col cols="12">
+                  <v-text-field
+                    class="required"
+                    v-model="bestBefore"
+                    label="Best Before"
+                    :rules="mandatoryRules.concat(streetRules)"
+                    outlined/>
+                </v-col>
+                <v-col cols="12">
+                  <v-text-field
+                    class="required"
+                    v-model="expires"
+                    label="Expires"
+                    :rules="mandatoryRules.concat(streetRules)"
+                    outlined/>
                 </v-col>
               </v-row>
               <p class="error-text" v-if ="errorMessage !== undefined"> {{errorMessage}} </p>
@@ -116,13 +108,11 @@
 </template>
 
 <script>
-import LocationAutocomplete from '@/components/utils/LocationAutocomplete';
 import {createBusiness} from '@/api/internal';
 
 export default {
   name: 'CreateBusiness',
   components: {
-    LocationAutocomplete,
   },
   data() {
     return {
