@@ -3,6 +3,7 @@ import VueRouter from "vue-router";
 
 import Auth from "../components/Auth/index.vue";
 import admin from "../components/Admin.vue";
+import CreateInventoryItem from "../components/utils/CreateInventoryItem.vue";
 import ProfilePage from "../components/UserProfile.vue";
 import BusinessProfile from "../components/BusinessProfile/index.vue";
 import SearchResults from "../components/SearchResults.vue";
@@ -64,7 +65,7 @@ const routes = [
     component: ProductCatalogue,
     meta: { title: 'Buisness Products' }
   },
-  { // Router for inventory page (Inventory page frontend dev oplease use this and remove this line)
+  { // Router for inventory page (Inventory page frontend dev please use this and remove this line afterward)
     path: "/inventory",
     component: Inventory,
     meta: { title: 'Inventory' }
@@ -73,6 +74,11 @@ const routes = [
     path: "/inventoryitem",
     component: InventoryItem,
     meta: { title: 'Inventory Item' }
+  },
+  { // Router for inventory page dialogue(Inventory page frontend dev please use this and remove this line afterward)
+    path: "/inventoryitemdialogue",
+    component: CreateInventoryItem,
+    meta: { title: 'Inventory Item Dialogue' }
   },
   {
     path: "*",
