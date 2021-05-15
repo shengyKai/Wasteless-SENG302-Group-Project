@@ -160,7 +160,7 @@ describe('ProductCatalogueItem.vue', () => {
   * Tests that the same product date added exists as per the set data above
   */
   it("Must contain the product date added", () => {
-    expect(wrapper.text()).toContain('Sun May 06 2012');
+    expect(wrapper.text()).toContain('06 May 2012');
   });
 
   /**
