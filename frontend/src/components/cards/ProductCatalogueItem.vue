@@ -198,7 +198,6 @@ export default {
       const dateCreated = new Date(this.product.created);
       return `${dateCreated.toDateString()}`;
     }
-
   }
 };
 

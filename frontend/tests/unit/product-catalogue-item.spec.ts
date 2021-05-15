@@ -76,7 +76,7 @@ describe('ProductCatalogueItem.vue', () => {
         product: {
           name: "Some Product",
           description: "Some description",
-          created: "Some Date Added",
+          created: "2012-05-06",
           manufacturer: "Some Manufacturer",
           recommendedRetailPrice: 100,
           id: "Some Code",
@@ -123,7 +123,7 @@ describe('ProductCatalogueItem.vue', () => {
       product: {
         name: "Some Product",
         description: "Some super long description Some super long description Some super long description Some super long description",
-        created: "Some Date Added",
+        created: "2012-05-06",
         manufacturer: "Some Manufacturer",
         recommendedRetailPrice: 100,
         id: "Some Code",
@@ -160,7 +160,7 @@ describe('ProductCatalogueItem.vue', () => {
   * Tests that the same product date added exists as per the set data above
   */
   it("Must contain the product date added", () => {
-    expect(wrapper.text()).toContain('Some Date Added');
+    expect(wrapper.text()).toContain('Sun May 06 2012');
   });
 
   /**
