@@ -8,9 +8,7 @@
               <ProductImageCarousel :productImages="product.images" :productId="product.id" />
               <v-card-title>{{ saleItem.quantity + " x " + product.name }}</v-card-title>
               <v-card-subtitle>{{saleItem.price}}</v-card-subtitle>
-              <v-card-actions>
-                <v-btn color="secondary" @click="moreInfo=!moreInfo">View More</v-btn>
-              </v-card-actions>
+
             </div>
           </v-expand-transition>
           <v-expand-transition>
@@ -22,20 +20,19 @@
               <v-card-text>
                 {{product.description}}
               </v-card-text>
-              <v-card-subtitle>
-                Additional Sale Info
-              </v-card-subtitle>
-              <v-card-text>
-                {{saleItem.moreInfo}}
-              </v-card-text>
-              <v-card-actions>
-                <v-btn color="secondary" @click="moreInfo=!moreInfo">View Less</v-btn>
-              </v-card-actions>
+              <div v-if="saleItem.moreInfo.length !== null && saleItem.moreInfo.length > 0">
+                <v-card-subtitle>
+                  Additional Sale Info
+                </v-card-subtitle>
+                <v-card-text>
+                  {{saleItem.moreInfo}}
+                </v-card-text>
+              </div>
             </div>
           </v-expand-transition>
         </v-col>
         <v-col cols="4">
-          <v-timeline dense style="height: 100%; margin-left: -30px">
+          <v-timeline dense style="height: 100%; margin-left: -40%; margin-bottom: 10px">
             <v-timeline-item color="grey" small>
               <div style="margin-left: -25px">
                 <strong>Created</strong>
@@ -55,6 +52,9 @@
               </div>
             </v-timeline-item>
           </v-timeline>
+          <v-card-actions>
+            <v-btn style="position: absolute; bottom: 10px; right: 10px" color="secondary" @click="moreInfo=!moreInfo">View {{moreInfo? 'More' : 'Less'}}</v-btn>
+          </v-card-actions>
         </v-col>
       </v-row>
     </v-card>
