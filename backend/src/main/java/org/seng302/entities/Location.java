@@ -124,7 +124,7 @@ public class Location {
      * @return true if the street number is valid, false otherwise
      */
     public boolean checkValidStreetNumber(String streetNumber) {
-        if (streetNumber != null && streetNumber.length() > 0 && streetNumber.length() <= 9 && streetNumber.matches("[0-9]+|[0-9]+\\/[0-9]+")) {
+        if (streetNumber != null && streetNumber.length() > 0 && streetNumber.length() <= 9 && streetNumber.matches("^(?=.*[0-9])(?=.*[\\s])(?=.*[a-zA-Z ])([a-zA-Z0-9 ]+)$")) {
             return true;
         } else {
             return false;
@@ -268,7 +268,7 @@ public class Location {
         if (checkValidCountry(country)) {
             this.country = country;
         } else {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "The country must not be empty, be less then 32 characters, and only contain letters.");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The country must not be empty, be less then 32 characters, and only contain letters.");
         }
     }
 
@@ -276,7 +276,7 @@ public class Location {
         if (checkValidCity(city)) {
             this.city = city;
         } else {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "The city must not be empty, be less then 32 characters, and only contain letters.");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The city must not be empty, be less then 32 characters, and only contain letters.");
         }
     }
 
@@ -284,7 +284,7 @@ public class Location {
         if (checkValidRegion(region)) {
             this.region = region;
         } else {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "The region must not be empty, be less then 32 characters, and only contain letters.");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The region must not be empty, be less then 32 characters, and only contain letters.");
         }
     }
 
@@ -292,7 +292,7 @@ public class Location {
         if (checkValidStreetName(streetName)) {
             this.streetName = streetName;
         } else {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "The street name must not be empty, be less then 100 characters, and only contain letters.");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The street name must not be empty, be less then 100 characters, and only contain letters.");
         }
     }
 
@@ -300,7 +300,7 @@ public class Location {
         if (checkValidStreetNumber(streetNumber)) {
             this.streetNumber = streetNumber;
         } else {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "The street number must not be empty, be less than 10 characters, adn only contain numbers.");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The street number must not be empty, and be less than 10 characters.");
         }
     }
 
@@ -308,7 +308,7 @@ public class Location {
         if (checkValidPostCode(postCode)) {
             this.postCode = postCode;
         } else {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "The post code must be a letter or number, be " +
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The post code must be a letter or number, be " +
                     "less than 16 characters long, and at least one character long.");
         }
     }
@@ -317,7 +317,7 @@ public class Location {
         if (checkValidDistrict(district)) {
             this.district = district;
         } else {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "The district must not be more than 100 characters long.");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The district must not be more than 100 characters long.");
         }
     }
 
