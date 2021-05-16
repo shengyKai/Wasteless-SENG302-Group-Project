@@ -19,6 +19,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.HttpServletRequest;
 import java.text.ParseException;
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -81,13 +82,18 @@ public class InventoryController {
      * @param businessId The id of the business to retrieve the inventory from.
      * @param request The HTTP request, used to authenticate the user's permissions.
      * @return Array of JSON representations of items in the business's inventory.
-     * @throws Exception
      */
     @GetMapping("/businesses/{id}/inventory")
-    public JSONArray getInventory(@PathVariable(name="id") Long businessId, HttpServletRequest request) throws Exception {
-        Business business = businessRepository.getBusinessById(businessId);
-        business.checkSessionPermissions(request);
-        throw new Exception("Not yet implemented");
+    public JSONArray getInventory(@PathVariable(name="id") Long businessId, HttpServletRequest request)  {
+        //Todo add sorting and pagination (t127 and t171)
+        String statusMessage = String.format("Get inventory of business with ID %d", businessId);
+        logger.info(statusMessage);
+        List<InventoryItem> inventory = getInventoryFromRequest(businessId, request);
+        JSONArray jsonArray = new JSONArray();
+        for (InventoryItem item : inventory) {
+            jsonArray.appendElement(item.constructJSONObject());
+        }
+        return jsonArray;
     }
 
     /**
@@ -98,11 +104,36 @@ public class InventoryController {
      * @param businessId The id of the business to retrieve the inventory from.
      * @param request The HTTP request, used to authenticate the user's permissions.
      * @return A JSONObject with the count of the number of items in the business's inventory.
-     * @throws Exception
      */
     @GetMapping("/businesses/{id}/inventory/count")
-    public JSONObject getInventoryCount(@PathVariable(name="id") Long businessId, HttpServletRequest request) throws Exception {
-        throw new Exception("Not yet implemented");
+    public JSONObject getInventoryCount(@PathVariable(name="id") Long businessId, HttpServletRequest request) {
+        String statusMessage = String.format("Get inventory count of business with ID %d", businessId);
+        logger.info(statusMessage);
+        List<InventoryItem> inventory = getInventoryFromRequest(businessId, request);
+        JSONObject json = new JSONObject();
+        json.put("count", inventory.size());
+        return json;
+    }
+
+    /**
+     * This method takes the business id and the http request sent to a get endpoint, and uses them to retrieve the
+     * inventory assoicated with the business. It will also add an error to the log if one is thrown due to and invalid
+     * auth token, insufficient permissions or the business not existing.
+     * @param businessId The ID number of the business to find the inventory of.
+     * @param request The incoming HTTP request, used to check permissions.
+     * @return A list of the items in the business's inventory.
+     */
+    private List<InventoryItem> getInventoryFromRequest(Long businessId, HttpServletRequest request) {
+        try {
+            Business business = businessRepository.getBusinessById(businessId);
+            // Check user is logged in and has permission to act as the business
+            business.checkSessionPermissions(request);
+            List<Product> catalogue = productRepository.findAllByBusiness(business);
+            return inventoryItemRepository.getInventoryByCatalogue(catalogue);
+        } catch (ResponseStatusException e) {
+            logger.error(e.getMessage());
+            throw e;
+        }
     }
 
 }
