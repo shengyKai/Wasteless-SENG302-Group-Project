@@ -4,6 +4,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import net.minidev.json.JSONObject;
+import org.seng302.tools.JsonTools;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -327,15 +328,16 @@ public class Location {
      * @return JSON representation of this Location object
      */
     public JSONObject constructFullJson() {
-        Map<String, String> attributeMap = new HashMap<>();
-        attributeMap.put("streetNumber", streetNumber);
-        attributeMap.put("streetName", streetName);
-        attributeMap.put("city", city);
-        attributeMap.put("region", region);
-        attributeMap.put("country", country);
-        attributeMap.put("postcode", postCode);
-        attributeMap.put("district", district);
-        return new JSONObject(attributeMap);
+        var object = new JSONObject();
+        object.put("streetNumber", streetNumber);
+        object.put("streetName", streetName);
+        object.put("city", city);
+        object.put("region", region);
+        object.put("country", country);
+        object.put("postcode", postCode);
+        object.put("district", district);
+        JsonTools.removeNullsFromJson(object);
+        return object;
     }
 
     /**
