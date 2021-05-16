@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+import io.cucumber.java.sl.In;
 import net.minidev.json.JSONArray;
 import org.seng302.entities.*;
 import org.seng302.persistence.BusinessRepository;
@@ -12,6 +13,7 @@ import org.seng302.persistence.InventoryItemRepository;
 import org.seng302.persistence.ProductRepository;
 import org.seng302.persistence.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.context.WebApplicationContext;
@@ -23,9 +25,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static org.junit.Assert.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 public class InventoryStepDefinition  {
     @Autowired
@@ -48,6 +53,8 @@ public class InventoryStepDefinition  {
     private User actor;
     private Business business;
     private MvcResult mvcResult;
+    private String productCode;
+    private Integer quantity;
 
     @Given("a business exists")
     public void a_business_exists() throws ParseException {
@@ -178,5 +185,79 @@ public class InventoryStepDefinition  {
     public void i_cannot_view_the_inventory() throws UnsupportedEncodingException {
         assertEquals(403, mvcResult.getResponse().getStatus());
         assertEquals("", mvcResult.getResponse().getContentAsString());
+    }
+
+    @When("I create an inventory item with product code {string} and quantity {int} and expiry {string}")
+    public void i_create_inventory_with_product_code_quantity_string(String productCode, Integer quantity, String expiry) throws Exception {
+        this.quantity = quantity;
+        this.productCode = productCode;
+        String postBody = String.format(
+                "{ " +
+                    "\"productId\": \"%s\"," +
+                    "\"quantity\": %d," +
+                    "\"expires\": \"%s\"" +
+                "}"
+        , productCode, quantity, expiry);
+
+        mvcResult = mockMvc.perform(post(String.format("/businesses/%d/inventory", business.getId()))
+                .cookie(authCookie)
+                .sessionAttrs(sessionAuthToken)
+                .content(postBody)
+                .contentType(MediaType.APPLICATION_JSON)
+        ).andReturn();
+    }
+
+    @When("I create an inventory item with product code {string} and quantity {int}, expiry {string}, price per item {int} and total price {int}")
+    public void i_create_inventory_with_all_details(String productCode, Integer quantity, String expiry, Integer pricePerItem, Integer totalPrice) throws Exception {
+        this.quantity = quantity;
+        this.productCode = productCode;
+        String postBody = String.format(
+                "{ " +
+                    "\"productId\": \"%s\"," +
+                    "\"quantity\": %d," +
+                    "\"expires\": \"%s\"," +
+                    "\"pricePerItem\": %d," +
+                    "\"totalPrice\": %d" +
+                "}"
+                , productCode, quantity, expiry, pricePerItem, totalPrice);
+
+        mvcResult = mockMvc.perform(post(String.format("/businesses/%d/inventory", business.getId()))
+                .cookie(authCookie)
+                .sessionAttrs(sessionAuthToken)
+                .content(postBody)
+                .contentType(MediaType.APPLICATION_JSON)
+        ).andReturn();
+    }
+
+    @When("I create an inventory item with product code {string}, quantity {int}, expiry {string}, manufactured on {string}, sell by {string} and best before {string}")
+    public void i_create_inventory_with_all_dates(String productCode, Integer quantity, String expiry, String manufactured, String sellBy, String bestBefore) throws Exception {
+        this.quantity = quantity;
+        this.productCode = productCode;
+        String postBody = String.format(
+                "{ " +
+                        "\"productId\": \"%s\"," +
+                        "\"quantity\": %d," +
+                        "\"expires\": \"%s\"," +
+                        "\"manufactured\": \"%s\"," +
+                        "\"sellBy\": \"%s\"," +
+                        "\"bestBefore\": \"%s\"" +
+                        "}"
+                , productCode, quantity, expiry, manufactured, sellBy, bestBefore);
+
+        mvcResult = mockMvc.perform(post(String.format("/businesses/%d/inventory", business.getId()))
+                .cookie(authCookie)
+                .sessionAttrs(sessionAuthToken)
+                .content(postBody)
+                .contentType(MediaType.APPLICATION_JSON)
+        ).andReturn();
+    }
+
+    @Then("I expect the inventory item to be created")
+    public void i_expect_the_inventory_to_be_created() {
+        assertEquals(200, mvcResult.getResponse().getStatus());
+        business = businessRepository.getBusinessById(business.getId());
+        Product product = business.getCatalogue().stream().filter(x -> x.getProductCode().equals(this.productCode)).collect(Collectors.toList()).get(0);
+        List<InventoryItem> inventory = inventoryItemRepository.findAllByProduct(product);
+        assertTrue(inventory.stream().anyMatch(x-> x.getQuantity() == quantity));
     }
 }

@@ -68,6 +68,11 @@ const routes = [
     component: InventoryItem,
     meta: { title: 'Inventory Item' }
   },
+  { // TODO Remove once inventory page is created
+    path: "/inventoryitem",
+    component: InventoryItem,
+    meta: { title: 'Inventory Item' }
+  },
   {
     path: "*",
     component: NotFound,

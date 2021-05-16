@@ -24,16 +24,21 @@ Feature: U19 - Create Inventory
     When I try to access the inventory of the business
     Then I cannot view the inventory
 
-    #Can't do this until validation tasks are done
-  @Ignore
   Scenario: AC3 - Inventory items require quantity and expiry
-    Given A business exists with a catalogue item with product code "BEANS"
-    When I create an inventory item with product code "BEANS" and quantity "5" and expiry "21/08/2021"
+    Given I am an administrator of the business
+    And I am logged into my account
+    When I create an inventory item with product code "APPLE" and quantity 3 and expiry "2022-05-20"
     Then I expect the inventory item to be created
 
-  @Ignore
   Scenario: AC3 - Inventory items have additional fields
-    Given A business exists with a catalogue item with product code "BEANS"
-    When I create an inventory item with product code "BEANS" and quantity "5", expiry "21/08/2021", price per item "10" and total price "50"
+    Given I am an administrator of the business
+    And I am logged into my account
+    When I create an inventory item with product code "APPLE" and quantity 5, expiry "2022-05-20", price per item 10 and total price 50
+    Then I expect the inventory item to be created
+
+  Scenario: AC4 - Inventory items have additional dates
+    Given I am an administrator of the business
+    And I am logged into my account
+    When I create an inventory item with product code "APPLE", quantity 3, expiry "2022-05-21", manufactured on "2022-03-20", sell by "2022-05-19" and best before "2022-05-20"
     Then I expect the inventory item to be created
 
