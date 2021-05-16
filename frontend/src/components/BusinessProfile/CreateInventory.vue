@@ -13,75 +13,88 @@
           <v-card-text>
             <v-container>
               <v-row>
-                <v-col>
-                  <v-text-field
-                    class="required"
-                    v-model="productCode"
-                    label="Product Code"
-                    :rules="mandatoryRules.concat(maxCharRules)"
-                    outlined
-                  />
-                </v-col>
-                <v-col cols="12">
-                  <v-textarea
-                    v-model="quantity"
-                    label="Quantity"
-                    :rules="maxCharDescriptionRules"
-                    rows="3"
-                    outlined
-                  />
-                </v-col>
-                <v-col cols="12">
+                <!-- INPUT: Product code Currently used v-selector to reduce typo probability from user -->
+                <v-col cols="6">
                   <v-select
                     class="required"
-                    v-model="pricePerItem"
-                    :items="businessTypes"
-                    label="Price per Item"
-                    :rules="mandatoryRules.concat(maxCharRules)"
+                    solo
+                    value = "product Code"
+                    v-model="productCode"
+                    :items="mockProductList"
+                    label="Product Code"
+                    :rules="mandatoryRules"
                     outlined
                   />
                 </v-col>
-                <v-col cols="12">
+                <!-- INPUT: Quantity. Only allows number.-->
+                <v-col cols="6">
                   <v-text-field
                     class="required"
+                    solo
+                    v-model="quantity"
+                    label="Quantity"
+                    :rules="mandatoryRules.concat(numberRules)"
+                    outlined
+                  />
+                </v-col>
+                <!-- INPUT: Price per item. Only allows number or '.'but come with 2 digit -->
+                <v-col cols="6">
+                  <v-text-field
+                    v-model="pricePerItem"
+                    label="Price Per Item"
+                    prefix="$"
+                    :rules="maxCharRules.concat(priceRules)"
+                    outlined
+                  />
+                </v-col>
+                <!-- INPUT: Total Price. Only allows number or '.'but come with 2 digit -->
+                <v-col cols="6">
+                  <v-text-field
                     v-model="totalPrice"
                     label="Total Price"
-                    :rules="mandatoryRules.concat(streetRules)"
+                    prefix="$"
+                    :rules="maxCharRules.concat(priceRules)"
                     outlined/>
                 </v-col>
-                <v-col cols="12">
+                <!-- INPUT: Manufactured. Only allows Alphabet and Number.-->
+                <v-col cols="6">
                   <v-text-field
-                    class="required"
                     v-model="manufactured"
                     label="Manufactured"
-                    :rules="mandatoryRules.concat(streetRules)"
+                    append-icon="mdi-map-marker"
+                    :rules="maxCharRules.concat(alphabetNumRules)"
                     outlined/>
                 </v-col>
-                <v-col cols="12">
+                <!-- INPUT: Sell By. Only take in value in dd/mm/yyyy format.-->
+                <v-col cols="6">
                   <v-text-field
-                    class="required"
                     v-model="sellBy"
                     label="Sell By"
-                    :rules="mandatoryRules.concat(streetRules)"
+                    type="date"
                     outlined/>
                 </v-col>
-                <v-col cols="12">
+                <!-- INPUT: Best Before. Only take in value in dd/mm/yyyy format.-->
+                <v-col cols="6">
                   <v-text-field
-                    class="required"
                     v-model="bestBefore"
                     label="Best Before"
-                    :rules="mandatoryRules.concat(streetRules)"
+                    type="date"
+                    :rules="maxCharRules"
                     outlined/>
                 </v-col>
-                <v-col cols="12">
+                <!-- INPUT: Expires. Only take in value in dd/mm/yyyy format.-->
+                <v-col cols="6">
                   <v-text-field
                     class="required"
+                    solo
                     v-model="expires"
                     label="Expires"
-                    :rules="mandatoryRules.concat(streetRules)"
+                    type="date"
+                    :rules="mandatoryRules"
                     outlined/>
                 </v-col>
               </v-row>
+              <!-- Error Message if textfield.value !valid -->
               <p class="error-text" v-if ="errorMessage !== undefined"> {{errorMessage}} </p>
             </v-container>
           </v-card-text>
@@ -117,35 +130,36 @@ export default {
     return {
       errorMessage: undefined,
       dialog: true,
-      business: '',
-      description: '',
-      businessType: [],
-      street1: '',
-      district: '',
-      city: '',
-      region: '',
-      country: '',
-      postcode: '',
-      businessTypes: [
-        'Accommodation and Food Services',
-        'Charitable organisation',
-        'Non-profit organisation',
-        'Retail Trade',
-      ],
       valid: false,
+      mockProductList: [
+        'Nathan Apple',
+        'Connor Orange',
+        'Edward Banana',
+      ],
+      alphabetNumRules: [
+        field => ( field.length === 0 || /^[a-zA-Z0-9 ]+$/i.test(field)) || 'Naming must only contain alphabet or number'
+      ],
       maxCharRules: [
         field => (field.length <= 100) || 'Reached max character limit: 100'
-      ],
-      maxCharDescriptionRules: [
-        field => (field.length <= 200) || 'Reached max character limit: 200'
       ],
       mandatoryRules: [
         //All fields with the class "required" will go through this ruleset to ensure the field is not empty.
         //if it does not follow the format, display error message
         field => !!field || 'Field is required'
       ],
-      streetRules: [
-        field => /^(?=.*[0-9 ])(?=.*[\s])(?=.*[a-zA-Z ])([a-zA-Z0-9 ]+)$/.test(field) || 'Must have at least one number and one alphabet'
+      numberRules: [
+        field => /(^[0-9]*$)/.test(field) || 'Must contain numbers only'
+      ],
+      priceRules: [
+        //A price must be numbers and may contain a decimal followed by exactly two numbers
+        field => /(^\d{1,5}(\.\d{2})?$)|^$/.test(field) || 'Must be a valid price'
+      ],
+      productCodeRules: [
+        // Product code rules was not being used atm as decided to use a v-selector for this field
+        field => field.length <= 15 || 'Reached max character limit: 15',
+        field => !/ /.test(field) || 'Must not contain a space',
+        field => /^[-A-Z0-9]+$/.test(field) || 'Must be all uppercase letters, numbers and dashes.',
+        field => !this.unavailableProductCodes.includes(field) || 'Product code is unavailable',
       ]
     };
   },
