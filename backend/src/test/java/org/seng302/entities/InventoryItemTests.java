@@ -309,6 +309,7 @@ public class InventoryItemTests {
                 .withBestBefore("2021-05-28")
                 .withExpires("2021-06-01")
                 .build();
+        invItem = inventoryItemRepository.save(invItem);
         JSONObject expectedJson = new JSONObject();
         expectedJson.put("id", invItem.getId());
         expectedJson.put("product", invItem.getProduct().constructJSONObject());
@@ -330,6 +331,7 @@ public class InventoryItemTests {
                 .withQuantity(3)
                 .withExpires("2021-06-01")
                 .build();
+        invItem = inventoryItemRepository.save(invItem);
         JSONObject expectedJson = new JSONObject();
         expectedJson.put("id", invItem.getId());
         expectedJson.put("product", invItem.getProduct().constructJSONObject());
