@@ -168,7 +168,7 @@ public class InventoryItem {
         json.put("manufactured", manufactured);
         json.put("sellBy", sellBy);
         json.put("bestBefore", bestBefore);
-        json.put("expires", expires);
+        json.put("expires", expires.toString());
         JsonTools.removeNullsFromJson(json);
         return json;
     }
