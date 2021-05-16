@@ -13,13 +13,13 @@ Feature: U19 - Create Inventory
       | APPLE      | 1        | 2022-05-20 |
 
   Scenario: AC1 - When logged in as a business administrator I can see my inventory.
-    And I am an administrator of the business
+    Given I am an administrator of the business
     And I am logged into my account
     When I try to access the inventory of the business
     Then the inventory of the business is returned to me
 
   Scenario: AC1 - When logged in as a user who is not a business administrator I cannot see the business's inventory.
-    And I am an not an administrator of the business
+    Given I am an not an administrator of the business
     And I am logged into my account
     When I try to access the inventory of the business
     Then I cannot view the inventory
