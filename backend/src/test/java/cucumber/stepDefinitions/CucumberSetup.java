@@ -28,7 +28,10 @@ public class CucumberSetup {
     @Autowired
     protected UserRepository userRepository;
 
-    @Before
+    /**
+     * Set up the mockMvc object for mocking API requests, and remove everything from the repositories.
+     */
+    @Before(order = 1)
     public void Setup() {
         objectMapper.enable(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT);
         mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();

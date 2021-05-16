@@ -1,10 +1,11 @@
 package cucumber.stepDefinitions;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
-import org.junit.Assert;
+import net.minidev.json.JSONArray;
 import org.seng302.entities.*;
 import org.seng302.persistence.BusinessRepository;
 import org.seng302.persistence.InventoryItemRepository;
@@ -16,8 +17,14 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.context.WebApplicationContext;
 
 import javax.servlet.http.Cookie;
+import java.io.UnsupportedEncodingException;
+import java.text.ParseException;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
+import static org.junit.Assert.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
 public class InventoryStepDefinition  {
@@ -38,102 +45,138 @@ public class InventoryStepDefinition  {
 
     private final HashMap<String, Object> sessionAuthToken = new HashMap<>();
     private Cookie authCookie;
-
-    private Product product;
-    private User owner;
-    private User bystander;
+    private User actor;
     private Business business;
-    private InventoryItem inventoryItem;
-    private MvcResult ownerResult;
-    private MvcResult bystanderResult;
+    private MvcResult mvcResult;
 
-    /**
-     * This method creates an authentication code for sessions and cookies.
-     */
-    private void setUpAuthCode() {
-        StringBuilder authCodeBuilder = new StringBuilder();
-        authCodeBuilder.append("0".repeat(64));
-        String authCode = authCodeBuilder.toString();
-        sessionAuthToken.put("AUTHTOKEN", authCode);
-        authCookie = new Cookie("AUTHTOKEN", authCode);
-    }
-
-    private void loginAs(Long userId) {
-        sessionAuthToken.put("accountId", userId);
-    }
-
-    @Given("A business exists with one inventory item and one administrator")
-    public void businesses_exists_with_inventory_and_administrator() throws Exception {
-        owner = new User.Builder()
+    @Given("a business exists")
+    public void a_business_exists() throws ParseException {
+        User owner = new User.Builder()
                 .withFirstName("John")
-                .withMiddleName("Hector")
                 .withLastName("Smith")
-                .withNickName("nick")
-                .withEmail("here@testing")
+                .withEmail("owner@testing")
                 .withPassword("12345678abc")
-                .withBio("g")
                 .withDob("2001-03-11")
-                .withPhoneNumber("123-456-7890")
                 .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
                         "Canterbury,8041"))
                 .build();
         owner = userRepository.save(owner);
         business = new Business.Builder()
-                .withName("Some Business")
+                .withName("Business")
                 .withDescription("Sells stuff")
                 .withBusinessType("Retail Trade")
                 .withAddress(Location.covertAddressStringToLocation("1,Bob Street,Bob,Bob,Bob,Bob,1010"))
                 .withPrimaryOwner(owner)
                 .build();
         business = businessRepository.save(business);
-        product = new Product.Builder()
-                .withProductCode("BEANS")
-                .withName("Product")
-                .withBusiness(business)
-                .withDescription("A product")
-                .withManufacturer("Some stuff")
-                .build();
-        product = productRepository.save(product);
-        inventoryItem = new InventoryItem.Builder()
-                .withProduct(product)
-                .withExpires("2021-08-02")
-                .withQuantity(5)
-                .build();
-        inventoryItem = inventoryItemRepository.save(inventoryItem);
-        bystander = new User.Builder()
+    }
+
+    @Given("the business has the following products in its catalogue:")
+    public void the_business_has_the_following_products_in_its_catalogue(io.cucumber.datatable.DataTable dataTable) {
+        List<Map<String, String>> rows = dataTable.asMaps(String.class, String.class);
+        for (Map<String, String> row : rows) {
+            Product product = new Product.Builder()
+                    .withProductCode(row.get("product_id"))
+                    .withName(row.get("name"))
+                    .withBusiness(business)
+                    .build();
+            business.addToCatalogue(product);
+            productRepository.save(product);
+        }
+    }
+
+    @Given("the business has the following items in its inventory:")
+    public void the_business_has_the_following_items_in_its_inventory(io.cucumber.datatable.DataTable dataTable) throws Exception {
+        List<Map<String, String>> rows = dataTable.asMaps(String.class, String.class);
+        for (Map<String, String> row : rows) {
+            Optional<Product> product = productRepository.findByBusinessAndProductCode(business, row.get("product_id"));
+            if (product.isEmpty()) {
+                throw new Exception("Product should be saved to product repository");
+            }
+            InventoryItem item = new InventoryItem.Builder()
+                    .withProduct(product.get())
+                    .withQuantity(Integer.parseInt(row.get("quantity")))
+                    .withExpires(row.get("expires"))
+                    .build();
+            inventoryItemRepository.save(item);
+        }
+    }
+
+    @Given("I am an administrator of the business")
+    public void i_am_an_administrator_of_the_business() throws ParseException {
+        actor = new User.Builder()
                 .withFirstName("John")
-                .withMiddleName("Hector")
                 .withLastName("Smith")
-                .withNickName("Jonny")
-                .withEmail("johnsmith99@gmail.com")
-                .withPassword("1337-H%nt3r2")
-                .withBio("Likes long walks on the beach")
+                .withEmail("actor@testing")
+                .withPassword("12345678abc")
                 .withDob("2001-03-11")
-                .withPhoneNumber("+64 3 555 0129")
                 .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
                         "Canterbury,8041"))
                 .build();
-        bystander = userRepository.save(bystander);
+        actor = userRepository.save(actor);
+        business.addAdmin(actor);
+        business = businessRepository.save(business);
+        boolean checkAdmin = false;
+        for (User user : business.getAdministrators()) {
+            if (user.getUserID().equals(actor.getUserID())) {
+                checkAdmin = true;
+                break;
+            }
+        }
+        assertTrue(checkAdmin);
     }
 
-    @When("The business administrator and regular user try to fetch inventory data")
-    public void business_admin_and_regular_user_fetch_inventory_data() throws Exception {
-        setUpAuthCode();
+    @Given("I am an not an administrator of the business")
+    public void i_am_an_not_an_administrator_of_the_business() throws ParseException {
+        actor = new User.Builder()
+                .withFirstName("John")
+                .withLastName("Smith")
+                .withEmail("actor@testing")
+                .withPassword("12345678abc")
+                .withDob("2001-03-11")
+                .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
+                        "Canterbury,8041"))
+                .build();
+        actor = userRepository.save(actor);
+        for (User user : business.getAdministrators()) {
+            assertNotEquals(user.getUserID(), actor.getUserID());
+        }
+    }
 
-        loginAs(owner.getUserID());
+    @Given("I am logged into my account")
+    public void i_am_logged_into_my_account() {
+        String authCode = "0".repeat(64);
+        sessionAuthToken.put("AUTHTOKEN", authCode);
+        authCookie = new Cookie("AUTHTOKEN", authCode);
+        sessionAuthToken.put("accountId", actor.getUserID());
+    }
 
-        ownerResult = mockMvc.perform(get(String.format("/businesses/%s/inventory", business.getId()))
-        .sessionAttrs(sessionAuthToken)
-        .cookie(authCookie)).andReturn();
-
-        loginAs(bystander.getUserID());
-        bystanderResult = mockMvc.perform(get(String.format("/businesses/%s/inventory", business.getId()))
+    @When("I try to access the inventory of the business")
+    public void i_try_to_access_the_inventory_of_the_business() throws Exception {
+        mvcResult = mockMvc.perform(get(String.format("/businesses/%s/inventory", business.getId()))
                 .sessionAttrs(sessionAuthToken)
                 .cookie(authCookie)).andReturn();
     }
-    @Then("The business administrator should be able to view the inventory and the regular user should receive an error")
-    public void business_admin_can_view_inventory_and_regular_user_cannot() {
-        Assert.assertEquals(200, ownerResult.getResponse().getStatus());
-        Assert.assertEquals(403, bystanderResult.getResponse().getStatus());
+
+    @Then("the inventory of the business is returned to me")
+    public void the_inventory_of_the_business_is_returned_to_me() throws UnsupportedEncodingException, JsonProcessingException {
+        assertEquals(200, mvcResult.getResponse().getStatus());
+
+        List<Product> catalogue = productRepository.findAllByBusiness(business);
+        List<InventoryItem> inventory = inventoryItemRepository.getInventoryByCatalogue(catalogue);
+        JSONArray jsonArray = new JSONArray();
+        for (InventoryItem item : inventory) {
+            jsonArray.appendElement(item.constructJSONObject());
+        }
+        String expectedResponse = jsonArray.toJSONString();
+
+        String responseBody = mvcResult.getResponse().getContentAsString();
+        assertEquals(objectMapper.readTree(expectedResponse), objectMapper.readTree(responseBody));
+    }
+
+    @Then("I cannot view the inventory")
+    public void i_cannot_view_the_inventory() throws UnsupportedEncodingException {
+        assertEquals(403, mvcResult.getResponse().getStatus());
+        assertEquals("", mvcResult.getResponse().getContentAsString());
     }
 }
