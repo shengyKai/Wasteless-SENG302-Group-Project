@@ -50,22 +50,6 @@ public class Business {
     )
     private Set<User> administrators = new HashSet<>();
 
-
-    /**
-     *  Checks if the product exists within the business's product catalogue
-     * @param business the business
-     * @param productCode the product code of the given product
-     * @return true if the product exists within the business, false otherwise
-     */
-    public static boolean checkProductExistsWithinCatalogue(Business business, String productCode) {
-        for (Product product: business.getCatalogue()) {
-            if (product.getProductCode().equals(productCode)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     /**
      * Gets the id
      * @return Business Id
@@ -275,14 +259,6 @@ public class Business {
         ownerAdminSet.addAll(administrators);
         ownerAdminSet.add(primaryOwner);
         return ownerAdminSet;
-    }
-
-    /**
-     * The getter for the catalogue (list of products the business owns)
-     * @return the catalogue
-     */
-    public List<Product> getCatalogue() {
-        return catalogue;
     }
 
     /**

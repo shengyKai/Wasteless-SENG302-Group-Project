@@ -907,7 +907,6 @@ public class BusinessTests {
         
 
         testBusiness1 = businessRepository.save(testBusiness1);
-        System.out.println(testBusiness1.getCatalogue());
-        assertEquals(2, testBusiness1.getCatalogue().size());
+        assertEquals(2, productRepository.getAllByBusiness(testBusiness1).size());
     }
 }
