@@ -152,6 +152,14 @@ public class InventoryItem {
     }
 
     /**
+     * Gets the business owning this inventory item
+     * @return business owning this inventory item
+     */
+    public Business getBusiness() {
+        return this.product.getBusiness();
+    }
+
+    /**
      * Builder for Inventory Item
      */
     public static class Builder {
