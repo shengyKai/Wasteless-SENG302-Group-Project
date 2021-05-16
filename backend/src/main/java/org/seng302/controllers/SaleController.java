@@ -48,14 +48,11 @@ public class SaleController {
             if (saleItemInfo == null) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Sale item creation info not provided");
             }
-            Object inventoryItemIdObj = saleItemInfo.get("inventoryItemId");;
+            Object inventoryItemIdObj = saleItemInfo.get("inventoryItemId");
             if (!(inventoryItemIdObj instanceof Number)) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "inventoryItemId not a number");
             }
             long inventoryItemId = ((Number)inventoryItemIdObj).longValue();
-            if (!(inventoryItemIdObj.equals(inventoryItemId))) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "inventoryItemId not a integer");
-            }
 
             Optional<InventoryItem> inventoryItem = inventoryItemRepository.findById(inventoryItemId);
             if (
