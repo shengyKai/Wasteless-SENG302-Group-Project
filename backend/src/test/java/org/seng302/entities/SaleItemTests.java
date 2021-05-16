@@ -352,7 +352,7 @@ public class SaleItemTests {
                 .withQuantity(2)
                 .build();
         saleItemRepository.save(saleItem);
-        saleItem.adjustQuantity(3);
+        saleItem.setQuantity(3);
         assertEquals(saleItem.getQuantity(), 3);
         assertEquals(invItem.getRemainingQuantity(), 0);
     }
@@ -368,7 +368,7 @@ public class SaleItemTests {
                     .withPrice("3.57")
                     .build();
             saleItemRepository.save(saleItem);
-            saleItem.adjustQuantity(5);
+            saleItem.setQuantity(5);
         } catch (ResponseStatusException e) {
             assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
             assertEquals("Cannot sell more items than you have", e.getReason());

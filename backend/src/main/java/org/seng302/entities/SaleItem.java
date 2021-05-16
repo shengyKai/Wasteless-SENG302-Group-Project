@@ -26,7 +26,7 @@ public class SaleItem {
     private InventoryItem inventoryItem;  // Item up for sale
 
     @Column(name = "quantity", nullable = false)
-    private int quantity;
+    private int quantity = 0;
 
     @Column(name = "price", nullable = false)
     private BigDecimal price;
@@ -64,26 +64,9 @@ public class SaleItem {
      */
     public void setQuantity(int quantity) {
         try {
+            int diff = this.quantity - quantity;
             if (quantity > 0 && quantity <= inventoryItem.getRemainingQuantity()) {
                 this.quantity = quantity;
-                inventoryItem.setRemainingQuantity(inventoryItem.getRemainingQuantity()-quantity);
-            } else {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Please enter a number of items between 1 and your current stock not on sale");
-            }
-        } catch (NullPointerException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Inventory item has been removed, you have no more to sell");
-        }
-    }
-
-    /**
-     * Use this for anything but initial creation or you'll domino the quantity logic relation with inventory
-     * @param newQuantity new quantity to be sold, works out the difference in method
-     */
-    public void adjustQuantity(int newQuantity) {
-        try {
-            int diff = quantity - newQuantity;
-            if (newQuantity > 0 && diff <= inventoryItem.getRemainingQuantity()) {
-                this.quantity = newQuantity;
                 inventoryItem.setRemainingQuantity(inventoryItem.getRemainingQuantity() + diff);
             } else {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Please enter a number of items between 1 and your current stock not on sale");
@@ -110,7 +93,7 @@ public class SaleItem {
     public void setPrice() {
         try {
             if (inventoryItem.getPricePerItem() == null) {
-                this.price = BigDecimal.ZERO;
+                this.price = null;
             } else {
                 this.price = inventoryItem.getPricePerItem().multiply(new BigDecimal(this.quantity));
             }
@@ -147,7 +130,9 @@ public class SaleItem {
         try {
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
             Date close = dateFormat.parse(closes);
-            if (close.after(new Date()) || dateFormat.format(new Date()).equals(closes)) {
+            if (inventoryItem.getExpires().before(new Date())) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "This product is already expired");
+            } else if (close.after(new Date()) || dateFormat.format(new Date()).equals(closes)) {
                 this.closes = close;
             } else {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You cannot set close dates in the past");
@@ -159,7 +144,11 @@ public class SaleItem {
 
     public void setCloses() {
         try {
-            this.closes = inventoryItem.getExpires();
+            if (inventoryItem.getExpires().before(new Date())) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "This product is already expired");
+            } else {
+                this.closes = inventoryItem.getExpires();
+            }
         } catch (NullPointerException ignored) {}  // Fails if inventory item not set, which has it's own error
     }
 
@@ -231,7 +220,6 @@ public class SaleItem {
         public SaleItem build() throws Exception {
             SaleItem saleItem = new SaleItem();
             saleItem.setInventoryItem(this.inventoryItem);
-            saleItem.setQuantity(this.quantity);
             if (price != null) {
                 saleItem.setPrice(this.price);
             } else {
@@ -244,6 +232,7 @@ public class SaleItem {
             } else {
                 saleItem.setCloses();
             }
+            saleItem.setQuantity(this.quantity);  // Set last because it alters other objects so a build fail in something else causes problems
             return saleItem;
         }
     }
