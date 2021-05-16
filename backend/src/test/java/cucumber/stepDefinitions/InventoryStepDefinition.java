@@ -1,13 +1,10 @@
 package cucumber.stepDefinitions;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
-import net.minidev.json.JSONObject;
 import org.junit.Assert;
-import org.junit.Before;
 import org.seng302.entities.*;
 import org.seng302.persistence.BusinessRepository;
 import org.seng302.persistence.InventoryItemRepository;
@@ -16,16 +13,14 @@ import org.seng302.persistence.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 import javax.servlet.http.Cookie;
 import java.util.HashMap;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-public class InventoryStepDefinition {
+public class InventoryStepDefinition  {
     @Autowired
     private ObjectMapper objectMapper;
     @Autowired
@@ -52,16 +47,6 @@ public class InventoryStepDefinition {
     private MvcResult ownerResult;
     private MvcResult bystanderResult;
 
-    @Before
-    public void Setup() {
-        objectMapper.enable(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT);
-        mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
-        inventoryItemRepository.deleteAll();
-        productRepository.deleteAll();
-        businessRepository.deleteAll();
-        userRepository.deleteAll();
-        setUpAuthCode();
-    }
     /**
      * This method creates an authentication code for sessions and cookies.
      */
@@ -103,6 +88,7 @@ public class InventoryStepDefinition {
         business = businessRepository.save(business);
         product = new Product.Builder()
                 .withProductCode("BEANS")
+                .withName("Product")
                 .withBusiness(business)
                 .withDescription("A product")
                 .withManufacturer("Some stuff")
@@ -110,7 +96,7 @@ public class InventoryStepDefinition {
         product = productRepository.save(product);
         inventoryItem = new InventoryItem.Builder()
                 .withProduct(product)
-                .withExpires("02/08/2021")
+                .withExpires("2021-08-02")
                 .withQuantity(5)
                 .build();
         inventoryItem = inventoryItemRepository.save(inventoryItem);
@@ -132,19 +118,22 @@ public class InventoryStepDefinition {
 
     @When("The business administrator and regular user try to fetch inventory data")
     public void business_admin_and_regular_user_fetch_inventory_data() throws Exception {
+        setUpAuthCode();
+
         loginAs(owner.getUserID());
-        ownerResult = mockMvc.perform(get(String.format("businesses/%s/inventory", business.getId()))
+
+        ownerResult = mockMvc.perform(get(String.format("/businesses/%s/inventory", business.getId()))
         .sessionAttrs(sessionAuthToken)
         .cookie(authCookie)).andReturn();
 
         loginAs(bystander.getUserID());
-        bystanderResult = mockMvc.perform(get(String.format("businesses/%s/inventory", business.getId()))
+        bystanderResult = mockMvc.perform(get(String.format("/businesses/%s/inventory", business.getId()))
                 .sessionAttrs(sessionAuthToken)
                 .cookie(authCookie)).andReturn();
     }
     @Then("The business administrator should be able to view the inventory and the regular user should receive an error")
     public void business_admin_can_view_inventory_and_regular_user_cannot() {
-        Assert.assertEquals(404, ownerResult.getResponse().getStatus());
+        Assert.assertEquals(200, ownerResult.getResponse().getStatus());
         Assert.assertEquals(403, bystanderResult.getResponse().getStatus());
     }
 }
