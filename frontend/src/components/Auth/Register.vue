@@ -307,7 +307,7 @@ export default {
       ],
       streetNumRules: [
         field => (field && field.length <= 109) || 'Reached max character limit 109 ',
-        field => /^(?=.*[0-9])(?=.*[\s])(?=.*[a-zA-Z ])([a-zA-Z0-9 ]+)$/.test(field) || 'Must have at least one number and one alphabet'
+        field => /^(([0-9]+|[0-9]+\/[0-9]+)[a-zA-Z]?)(?=.*[\s])(?=.*[a-zA-Z ])([a-zA-Z0-9 ]+)$/.test(field) || 'Must have at least one number and one alphabet'
       ],
     };
   },

@@ -124,7 +124,7 @@ public class Location {
      * @return true if the street number is valid, false otherwise
      */
     public boolean checkValidStreetNumber(String streetNumber) {
-        if (streetNumber != null && streetNumber.length() > 0 && streetNumber.length() <= 9 && streetNumber.matches("^(?=.*[0-9])(?=.*[\\s])(?=.*[a-zA-Z ])([a-zA-Z0-9 ]+)$")) {
+        if (streetNumber != null && streetNumber.length() > 0 && streetNumber.length() <= 9 && streetNumber.matches("([0-9]+|[0-9]+\\/[0-9]+)[a-zA-Z]?")) {
             return true;
         } else {
             return false;
