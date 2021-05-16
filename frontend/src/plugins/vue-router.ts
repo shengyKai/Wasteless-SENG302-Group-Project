@@ -3,7 +3,6 @@ import VueRouter from "vue-router";
 
 import Auth from "../components/Auth/index.vue";
 import admin from "../components/Admin.vue";
-import CreateInventoryItem from "../components/BusinessProfile/CreateInventory.vue";
 import ProfilePage from "../components/UserProfile.vue";
 import BusinessProfile from "../components/BusinessProfile/index.vue";
 import SearchResults from "../components/SearchResults.vue";
@@ -74,11 +73,6 @@ const routes = [
     path: "/inventoryitem",
     component: InventoryItem,
     meta: { title: 'Inventory Item' }
-  },
-  { // Router for inventory page dialogue(Inventory page frontend dev please use this and remove this line afterward)
-    path: "/inventoryitemdialogue",
-    component: CreateInventoryItem,
-    meta: { title: 'Inventory Item Dialogue' }
   },
   {
     path: "*",

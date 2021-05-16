@@ -48,8 +48,7 @@
                 <v-list-item-title >Inventory</v-list-item-title>
               </v-list-item-content>
             </v-list-item>
-            <v-list-item v-if="isBusiness" @click="goInventoryItemDialogue">
-              <!-- <v-list-item v-if="isBusiness" @click="viewCreateInventory"> -->
+            <v-list-item v-if="isBusiness" @click="viewCreateInventory">
               <v-list-item-icon>
                 <v-icon>mdi-view-list</v-icon>
               </v-list-item-icon>
@@ -184,12 +183,6 @@ export default {
     goInventoryPage() {
       this.$router.push("/inventory");
     },
-    /**
-     * Shows the Inventory page
-     */
-    goInventoryItemDialogue() {
-      this.$router.push("/inventoryitemdialogue");
-    }
   },
   computed: {
     /**
