@@ -65,6 +65,8 @@ public class InventoryControllerTest {
     @Mock
     private Business mockBusiness;
     @Mock
+    private List<Product> mockProductList;
+    @Mock
     private HttpSession session;
     private Product testProduct;
 
@@ -348,7 +350,8 @@ public class InventoryControllerTest {
         List<InventoryItem> emptyInventory = new ArrayList<>();
         inventoryController = new InventoryController(businessRepository, inventoryItemRepository, productRepository);
         when(businessRepository.getBusinessById(1L)).thenReturn(mockBusiness);
-        when(inventoryItemRepository.findAllByBusiness(mockBusiness)).thenReturn(emptyInventory);
+        when(productRepository.findAllByBusiness(mockBusiness)).thenReturn(mockProductList);
+        when(inventoryItemRepository.getInventoryByCatalogue(mockProductList)).thenReturn(emptyInventory);
         JSONArray result = inventoryController.getInventory(1L, request);
         Assertions.assertEquals(0, result.size());
     }
@@ -358,7 +361,8 @@ public class InventoryControllerTest {
         List<InventoryItem> emptyInventory = new ArrayList<>();
         inventoryController = new InventoryController(businessRepository, inventoryItemRepository, productRepository);
         when(businessRepository.getBusinessById(1L)).thenReturn(mockBusiness);
-        when(inventoryItemRepository.findAllByBusiness(mockBusiness)).thenReturn(emptyInventory);
+        when(productRepository.findAllByBusiness(mockBusiness)).thenReturn(mockProductList);
+        when(inventoryItemRepository.getInventoryByCatalogue(mockProductList)).thenReturn(emptyInventory);
         JSONObject result = inventoryController.getInventoryCount(1L, request);
         assertTrue(result.containsKey("count"));
         assertEquals(0, result.getAsNumber("count"));
@@ -376,7 +380,8 @@ public class InventoryControllerTest {
         }
         inventoryController = new InventoryController(businessRepository, inventoryItemRepository, productRepository);
         when(businessRepository.getBusinessById(1L)).thenReturn(mockBusiness);
-        when(inventoryItemRepository.findAllByBusiness(mockBusiness)).thenReturn(inventory);
+        when(productRepository.findAllByBusiness(mockBusiness)).thenReturn(mockProductList);
+        when(inventoryItemRepository.getInventoryByCatalogue(mockProductList)).thenReturn(inventory);
         JSONArray result = inventoryController.getInventory(1L, request);
         Assertions.assertEquals(expectedResponse, inventory);
     }
@@ -389,7 +394,8 @@ public class InventoryControllerTest {
         inventory.add(new InventoryItem.Builder().withProduct(testProduct).withQuantity(54).withExpires("2022-01-01").build());
         inventoryController = new InventoryController(businessRepository, inventoryItemRepository, productRepository);
         when(businessRepository.getBusinessById(1L)).thenReturn(mockBusiness);
-        when(inventoryItemRepository.findAllByBusiness(mockBusiness)).thenReturn(inventory);
+        when(productRepository.findAllByBusiness(mockBusiness)).thenReturn(mockProductList);
+        when(inventoryItemRepository.getInventoryByCatalogue(mockProductList)).thenReturn(inventory);
         JSONObject result = inventoryController.getInventoryCount(1L, request);
         assertTrue(result.containsKey("count"));
         assertEquals(3, result.getAsNumber("count"));
