@@ -193,7 +193,7 @@ public class SaleItemTests {
                 .withMoreInfo("This doesn't expire for a long time")
                 .withQuantity(2)
                 .build();
-        assertEquals(saleItem.getPrice(), BigDecimal.ZERO);
+        Assertions.assertNull(saleItem.getPrice());
     }
 
     @Test
@@ -276,7 +276,7 @@ public class SaleItemTests {
             Assertions.fail();
         } catch (ResponseStatusException e) {
             assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
-            assertEquals("Please enter a number of items between 1 and your current stock not on sale", e.getReason());
+            assertEquals("Cannot sell more items than you have", e.getReason());
         } catch (Exception unexpected) { Assertions.fail(); }
     }
 
@@ -353,8 +353,8 @@ public class SaleItemTests {
                 .build();
         saleItemRepository.save(saleItem);
         saleItem.setQuantity(3);
-        assertEquals(saleItem.getQuantity(), 3);
-        assertEquals(invItem.getRemainingQuantity(), 0);
+        assertEquals(3, saleItem.getQuantity());
+        assertEquals(0, invItem.getRemainingQuantity());
     }
 
     @Test
@@ -373,5 +373,60 @@ public class SaleItemTests {
             assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
             assertEquals("Cannot sell more items than you have", e.getReason());
         } catch (Exception unexpected) { Assertions.fail(); }
+    }
+
+    @Test
+    void autogeneratePrice_PriceSetBasedOffInventoryPricePerItem() throws Exception {
+        SaleItem saleItem = new SaleItem.Builder()
+                .withInventoryItem(invItem)
+                .withCloses("2034-12-25")
+                .withMoreInfo("This doesn't expire for a long time")
+                .withQuantity(2)
+                .build();
+        saleItemRepository.save(saleItem);
+        assertEquals(invItem.getPricePerItem().multiply(new BigDecimal(2)), saleItem.getPrice());
+    }
+
+    @Test
+    void autogeneratePrice_InventoryHasNoPriceEither_PriceNull() throws Exception {
+        invItem.setPricePerItem(null);
+        SaleItem saleItem = new SaleItem.Builder()
+                .withInventoryItem(invItem)
+                .withCloses("2034-12-25")
+                .withMoreInfo("This doesn't expire for a long time")
+                .withQuantity(2)
+                .build();
+        saleItemRepository.save(saleItem);
+        Assertions.assertNull(saleItem.getPrice());
+    }
+
+    @Test
+    void createSaleItem_MoreInfoTooLong_ObjectNotCreated() {
+        SaleItem.Builder saleItem = new SaleItem.Builder()
+                .withInventoryItem(invItem)
+                .withCloses("2034-12-25")
+                .withMoreInfo("This description is waaaaaay too long. This description is waaaaaay too long. This description is waaaaaay too long. This description is waaaaaay too long. This description is waaaaaay too long. This description is waaaaaay too long. This description is waaaaaay too long. ")
+                .withQuantity(2);
+        assertThrows(ResponseStatusException.class, saleItem::build);
+    }
+
+    @Test
+    void createSaleItem_MoreInfoInvalid_ObjectNotCreated() {
+        SaleItem.Builder saleItem = new SaleItem.Builder()
+                .withInventoryItem(invItem)
+                .withCloses("2034-12-25")
+                .withMoreInfo("é树\n\t\uD83D\uDE02")
+                .withQuantity(2);
+        assertThrows(ResponseStatusException.class, saleItem::build);
+    }
+
+    @Test
+    void createSaleItem_CloseDateInvalidFormat_ObjectNotCreated() {
+        SaleItem.Builder saleItem = new SaleItem.Builder()
+                .withInventoryItem(invItem)
+                .withCloses("In three seconds")
+                .withMoreInfo("What's the time, Mr Wolfy?")
+                .withQuantity(2);
+        assertThrows(ResponseStatusException.class, saleItem::build);
     }
 }
