@@ -7,20 +7,15 @@ import org.apache.logging.log4j.Logger;
 import org.seng302.entities.Business;
 import org.seng302.entities.InventoryItem;
 import org.seng302.entities.Product;
-import org.seng302.exceptions.BusinessNotFoundException;
 import org.seng302.persistence.BusinessRepository;
 import org.seng302.persistence.InventoryItemRepository;
 import org.seng302.persistence.ProductRepository;
-import org.seng302.tools.AuthenticationTokenManager;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.HttpServletRequest;
-import java.text.ParseException;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 public class InventoryController {
@@ -46,7 +41,8 @@ public class InventoryController {
      */
     @PostMapping("/businesses/{id}/inventory")
     public void addInventory(@PathVariable(name="id") Long businessId, HttpServletRequest request, @RequestBody JSONObject inventory) throws Exception {
-        logger.info(String.format("Attempting to add and inventory item for business=%d", businessId));
+        String message = String.format("Attempting to add and inventory item for business=%d", businessId);
+        logger.info(message);
         // get business + sanity
         Business business = businessRepository.getBusinessById(businessId);
         // check business perms
