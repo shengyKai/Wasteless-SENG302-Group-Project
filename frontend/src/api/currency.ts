@@ -9,6 +9,8 @@ export type Currency = {
   symbol: string
 };
 
+type CurrencyOrError = Currency | { errorMessage: string }
+
 /**
  * An object which only has the attribute 'currencies', which is a list of Currency objects. The API response is expected
  * to contain an array of objects of this type
@@ -58,41 +60,30 @@ function currencyResponseHasExpectedFormat(response: any): response is [Currenci
 }
 
 /**
- * Default currency when currency of current location cannot be resolved from API request.
- */
-export const defaultCurrency: Currency = {
-  code: "",
-  name: "",
-  symbol: ""
-};
-
-/**
  * Make a request to the RESTCounties API to find the currency associated with the given country name.
  * If the request is successful the currency from the API will be returned. If it is unsuccessful then
  * a default currency object with blank code, name and symbol fields will be returned.
  * @param country The name of a country to use in the API request for the currency.
- * @returns A list containing the Currency of the country(defaultCurrency if any errors occur) at index 0, 
+ * @returns A list containing the Currency of the country(defaultCurrency if any errors occur) at index 0,
  * and an error message at index 1 if any errors occur.
  */
-export async function currencyFromCountry(country: string): Promise<(Currency | string)[]> {
+export async function currencyFromCountry(country: string): Promise<CurrencyOrError> {
 
   const response = await queryCurrencyAPI(country);
 
   if (typeof response === 'string') {
-    const errorDefaultCurrency = { ...defaultCurrency };
     console.warn(response);
-    return [errorDefaultCurrency, response];
+    return { errorMessage: response };
   }
 
   const currency = await getCurrencyFromAPIResponse(response);
 
   if (typeof currency === 'string') {
-    const errorDefaultCurrency = { ...defaultCurrency };
     console.warn(currency);
-    return [errorDefaultCurrency, currency];
+    return { errorMessage: currency };
   }
 
-  return [currency];
+  return currency;
 }
 
 /**

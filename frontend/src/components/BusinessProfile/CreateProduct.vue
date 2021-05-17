@@ -58,7 +58,7 @@
                     :prefix="currency.symbol"
                     :suffix="currency.code"
                     :rules="priceRules"
-                    :hint="currencyErrorMessage"
+                    :hint="currency.errorMessage"
                     outlined
                   />
                 </v-col>
@@ -146,11 +146,7 @@ export default {
     // sold in. It will have blank fields if no currency can be found from the country.
     const business = await getBusiness(this.$store.state.createProductDialogBusiness);
     const countryOfSale = business.address.country;
-    const currencyResult = await currencyFromCountry(countryOfSale);
-    this.currency = currencyResult[0];
-    if (currencyResult.length === 2) {
-      this.currencyErrorMessage = currencyResult[1];
-    }
+    this.currency = await currencyFromCountry(countryOfSale);
   },
   methods: {
     /**
