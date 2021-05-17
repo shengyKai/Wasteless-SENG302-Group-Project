@@ -56,13 +56,13 @@
                     :rules="maxCharRules.concat(priceRules)"
                     outlined/>
                 </v-col>
-                <!-- INPUT: Manufactured. Only allows Alphabet and Number.-->
+                <!-- INPUT: Manufactured. Only take in value in dd/mm/yyyy format.-->
                 <v-col cols="6">
                   <v-text-field
                     v-model="manufactured"
                     label="Manufactured"
-                    append-icon="mdi-map-marker"
-                    :rules="maxCharRules.concat(alphabetNumRules)"
+                    type="date"
+                    :max="today"
                     outlined/>
                 </v-col>
                 <!-- INPUT: Sell By. Only take in value in dd/mm/yyyy format.-->
@@ -71,6 +71,7 @@
                     v-model="sellBy"
                     label="Sell By"
                     type="date"
+                    :min="today"
                     outlined/>
                 </v-col>
                 <!-- INPUT: Best Before. Only take in value in dd/mm/yyyy format.-->
@@ -79,18 +80,17 @@
                     v-model="bestBefore"
                     label="Best Before"
                     type="date"
-                    :rules="maxCharRules"
+                    :min="today"
                     outlined/>
                 </v-col>
                 <!-- INPUT: Expires. Only take in value in dd/mm/yyyy format.-->
                 <v-col cols="6">
                   <v-text-field
                     class="required"
-                    solo
                     v-model="expires"
                     label="Expires"
                     type="date"
-                    :rules="mandatoryRules"
+                    :min="today"
                     outlined/>
                 </v-col>
               </v-row>
@@ -131,12 +131,22 @@ export default {
       errorMessage: undefined,
       dialog: true,
       valid: false,
+      today: '',
       mockProductList: [
         'Nathan Apple',
         'Connor Orange',
         'Edward Banana',
       ],
-      alphabetNumRules: [
+      productCode : "",
+      quantity : 0,
+      pricePerItem: "",
+      totalPrice: "",
+      manufactured: new Date().toISOString().slice(0,10),
+      sellBy: new Date().toISOString().slice(0,10),
+      bestBefore: new Date().toISOString().slice(0,10),
+      expires: new Date().toISOString().slice(0,10),
+
+      alphabetNumRules: [ //Not getting used atm
         field => ( field.length === 0 || /^[a-zA-Z0-9 ]+$/i.test(field)) || 'Naming must only contain alphabet or number'
       ],
       maxCharRules: [
@@ -167,7 +177,17 @@ export default {
 
     closeDialog() {
       this.$emit('closeDialog');
+    },
+    todayDate () {
+      // Get today date, month, year to restrick calender picker
+      let today = new Date();
+      return new Date(today.getFullYear, today.getMonth, today.getDay);
     }
+  },
+  //as any components are added to the dom, mounted() will be called
+  mounted () {
+    //sets maxDate and date of birth value
+    this.today = this.minimumDate().toISOString().slice(0, 10);
   }
 };
 </script>
