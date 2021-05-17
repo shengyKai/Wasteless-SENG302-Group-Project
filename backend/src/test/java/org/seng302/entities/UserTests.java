@@ -20,6 +20,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -530,12 +531,11 @@ public class UserTests {
     @Test
     public void checkDateofBirthGreaterThanThirteen() throws ParseException {
         String dateOfBirthString = "11-05-2000";
-        SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
-        Date dateOfBirth = dateFormat.parse(dateOfBirthString);
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        LocalDate dateOfBirth = LocalDate.parse(dateOfBirthString, dateTimeFormatter);
             
         testUser.setDob(dateOfBirth);
         assertEquals(dateOfBirth, testUser.getDob());
-
     }
 
         /**
@@ -545,14 +545,13 @@ public class UserTests {
     @Test
     public void checkDateofBirthLesserThanThirteen() throws ParseException {
         String dateOfBirthString = "11-05-2010";
-        SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
-        Date dateOfBirth = dateFormat.parse(dateOfBirthString);
-        
-        LocalDate localDateOfBirth = dateOfBirth.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        LocalDate dateOfBirth = LocalDate.parse(dateOfBirthString, dateTimeFormatter);
+
         LocalDate date = LocalDate.now();
         LocalDate minDate = date.minusYears(13);
         
-        assertTrue(localDateOfBirth.compareTo(minDate) > 0);
+        assertTrue(dateOfBirth.compareTo(minDate) > 0);
         try {
             testUser.setDob(dateOfBirth);
             fail("A Forbidden exception was expected, but not thrown");

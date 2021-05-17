@@ -34,7 +34,7 @@ public class Business {
     @Column(nullable = false)
     private String businessType;
     @Column
-    private Date created;
+    private LocalDate created;
 
     @OneToMany (fetch = FetchType.EAGER, mappedBy = "business", cascade = CascadeType.REMOVE)
     private List<Product> catalogue = new ArrayList<>();
@@ -170,7 +170,7 @@ public class Business {
      * Gets business date created
      * @param createdAt date created
      */
-    private void setCreated(Date createdAt) {
+    private void setCreated(LocalDate createdAt) {
         if (createdAt == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The date the business was created cannot be null");
         }
@@ -184,7 +184,7 @@ public class Business {
      * Gets date created
      * @return date created
      */
-    public Date getCreated() {
+    public LocalDate getCreated() {
         return this.created;
     }
 
@@ -200,7 +200,7 @@ public class Business {
 
         //Get the current date as of now and find the difference in years between the current date and the age of the user.
         long age = java.time.temporal.ChronoUnit.YEARS.between(
-            owner.getDob().toInstant().atZone(ZoneId.systemDefault()).toLocalDate(), LocalDate.now());
+            owner.getDob(), LocalDate.now());
         if (age < MinimumAge) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User is not of minimum age required to create a business");
         }
@@ -431,7 +431,7 @@ public class Business {
             business.setAddress(this.address);
             business.setBusinessType(this.businessType);
             business.setDescription(this.description);
-            business.setCreated(new Date());
+            business.setCreated(LocalDate.now());
             business.setPrimaryOwner(this.primaryOwner);
             return business;
         }

@@ -10,6 +10,8 @@ import javax.persistence.*;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -35,19 +37,19 @@ public class InventoryItem {
     private BigDecimal totalPrice;
 
     @Column(name = "manufactured")
-    private Date manufactured;
+    private LocalDate manufactured;
 
     @Column(name = "sell_by")
-    private Date sellBy;
+    private LocalDate sellBy;
 
     @Column(name = "best_before")
-    private Date bestBefore;
+    private LocalDate bestBefore;
 
     @Column(name = "expires", nullable = false)
-    private Date expires;
+    private LocalDate expires;
 
     @Column(name = "creation_date", nullable = false)
-    private Date creationDate;
+    private LocalDate creationDate;
 
     // Getters and Setters
     public Long getId() {
@@ -107,35 +109,35 @@ public class InventoryItem {
         this.totalPrice = new BigDecimal(totalPrice);
     }
 
-    public Date getManufactured() {
+    public LocalDate getManufactured() {
         return manufactured;
     }
 
-    public void setManufactured(Date manufactured) {
+    public void setManufactured(LocalDate manufactured) {
         this.manufactured = manufactured;
     }
 
-    public Date getSellBy() {
+    public LocalDate getSellBy() {
         return sellBy;
     }
 
-    public void setSellBy(Date sellBy) {
+    public void setSellBy(LocalDate sellBy) {
         this.sellBy = sellBy;
     }
 
-    public Date getBestBefore() {
+    public LocalDate getBestBefore() {
         return bestBefore;
     }
 
-    public void setBestBefore(Date bestBefore) {
+    public void setBestBefore(LocalDate bestBefore) {
         this.bestBefore = bestBefore;
     }
 
-    public Date getExpires() {
+    public LocalDate getExpires() {
         return expires;
     }
 
-    public void setExpires(Date expires) throws ResponseStatusException {
+    public void setExpires(LocalDate expires) throws ResponseStatusException {
         if (expires != null) {
             this.expires = expires;
         } else {
@@ -143,14 +145,12 @@ public class InventoryItem {
         }
     }
 
-    public Date getCreationDate() {
+    public LocalDate getCreationDate() {
         return creationDate;
     }
 
     public void setCreationDate() {
-        Calendar today = Calendar.getInstance();
-        today.set(Calendar.HOUR_OF_DAY, 0);
-        this.creationDate = today.getTime();
+        this.creationDate = LocalDate.now();
     }
 
     /**
@@ -182,10 +182,10 @@ public class InventoryItem {
         private int quantity;
         private String pricePerItem;
         private String totalPrice;
-        private Date manufactured;
-        private Date sellBy;
-        private Date bestBefore;
-        private Date expires;
+        private LocalDate manufactured;
+        private LocalDate sellBy;
+        private LocalDate bestBefore;
+        private LocalDate expires;
 
         /**
          * Sets the builder's productId. Required.
@@ -232,10 +232,10 @@ public class InventoryItem {
          * @param manufacturedString the date when the product in the inventory was manufactured
          * @return Builder with the manufactured date set
          */
-        public Builder withManufactured(String manufacturedString) throws ParseException {
+        public Builder withManufactured(String manufacturedString) {
             if (manufacturedString != null) {
-                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-                this.manufactured = dateFormat.parse(manufacturedString);
+                DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+                this.manufactured = LocalDate.parse(manufacturedString, dateTimeFormatter);
             } else { this.manufactured = null; }
             return this;
         }
@@ -245,10 +245,10 @@ public class InventoryItem {
          * @param sellByString the date when the product in the inventory must sell by
          * @return Builder with the sell by date set
          */
-        public Builder withSellBy(String sellByString) throws ParseException {
+        public Builder withSellBy(String sellByString) {
             if (sellByString != null) {
-                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-                this.sellBy = dateFormat.parse(sellByString);
+                DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+                this.sellBy = LocalDate.parse(sellByString, dateTimeFormatter);
             } else { this.sellBy = null; }
             return this;
         }
@@ -258,10 +258,10 @@ public class InventoryItem {
          * @param bestBeforeString the date the product in the inventory is best before
          * @return Builder with the best before date set
          */
-        public Builder withBestBefore(String bestBeforeString) throws ParseException {
+        public Builder withBestBefore(String bestBeforeString) {
             if (bestBeforeString != null) {
-                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-                this.bestBefore = dateFormat.parse(bestBeforeString);
+                DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+                this.bestBefore = LocalDate.parse(bestBeforeString, dateTimeFormatter);
             } else { this.bestBefore = null; }
             return this;
         }
@@ -271,12 +271,12 @@ public class InventoryItem {
          * @param expiresString the date the product in the inventory expires. Must be disposed of after this date
          * @return Builder with the expires data set
          */
-        public Builder withExpires(String expiresString) throws ParseException {
+        public Builder withExpires(String expiresString) {
             if (expiresString == null) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No expiry date was provided");
             }
-            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-            this.expires = dateFormat.parse(expiresString);
+            DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+            this.expires = LocalDate.parse(expiresString, dateTimeFormatter);
             return this;
         }
 
