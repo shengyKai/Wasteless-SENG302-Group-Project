@@ -138,7 +138,7 @@ export default {
         'Edward Banana',
       ],
       productCode : "",
-      quantity : 0,
+      quantity : '',
       pricePerItem: "",
       totalPrice: "",
       manufactured: new Date().toISOString().slice(0,10),
