@@ -39,7 +39,7 @@ public class MarketplaceCard {
      * Gets the id (will be unique among marketplace cards)
      * @return card id
      */
-    public Long getId() {
+    public Long getID() {
         return id;
     }
 
@@ -133,30 +133,6 @@ public class MarketplaceCard {
                 ", created=" + created +
                 ", closes=" + closes +
                 '}';
-    }
-
-    /**
-     * Determines whether one marketplace card is the same as another
-     * @param o Object to test against
-     * @return Whether these objects are equal
-     */
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof MarketplaceCard)) return false;
-        MarketplaceCard that = (MarketplaceCard) o;
-        return  Objects.equals(id, that.id) &&
-                Objects.equals(creator, that.creator) &&
-                section == that.section &&
-                Objects.equals(title, that.title) &&
-                Objects.equals(description, that.description) &&
-                Objects.equals(created, that.created) &&
-                Objects.equals(closes, that.closes);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, creator, section, title, description, created, closes);
     }
 
     /**
@@ -277,7 +253,7 @@ public class MarketplaceCard {
             card.setDescription(description);
             card.created = Instant.now();
             if (closes == null) {
-                card.setCloses(card.created.plus(2, ChronoUnit.WEEKS));
+                card.setCloses(card.created.plus(14, ChronoUnit.DAYS));
             } else {
                 card.setCloses(closes);
             }
