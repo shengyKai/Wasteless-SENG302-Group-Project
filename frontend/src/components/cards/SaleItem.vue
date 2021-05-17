@@ -19,18 +19,18 @@
               </v-card-subtitle>
               <v-card-text v-if="productDescription.length >= 50">
                 {{productDescription.slice(0, 50) + "..."}}
-                <FullProductDescription :product-description="productDescription"/>
+                <FullProductDescription ref="fullProductDescription" :product-description="productDescription"/>
               </v-card-text>
               <v-card-text v-else>
                 {{productDescription}}
               </v-card-text>
-              <div ref="sellerInfo" v-if="saleItem.moreInfo.length !== null && saleItem.moreInfo.length > 0">
+              <div ref="sellerInfo" v-if="saleItem.moreInfo !== undefined && saleItem.moreInfo.length > 0">
                 <v-card-subtitle>
                   Additional Sale Info
                 </v-card-subtitle>
                 <v-card-text v-if="saleItem.moreInfo.length >= 50">
                   {{saleItem.moreInfo.slice(0,50)}}
-                  <FullProductDescription :product-description="saleItem.moreInfo"/>
+                  <FullProductDescription ref="fullMoreInfo" :product-description="saleItem.moreInfo"/>
                 </v-card-text>
                 <v-card-text v-else>
                   {{saleItem.moreInfo}}
@@ -61,7 +61,7 @@
             </v-timeline-item>
           </v-timeline>
           <v-card-actions>
-            <v-btn style="position: absolute; bottom: 10px; right: 10px" color="secondary" @click="moreInfo=!moreInfo">View {{moreInfo? 'Less' : 'More'}}</v-btn>
+            <v-btn ref="viewMoreButton" style="position: absolute; bottom: 10px; right: 10px" color="secondary" @click="moreInfo=!moreInfo">View {{moreInfo? 'Less' : 'More'}}</v-btn>
           </v-card-actions>
         </v-col>
       </v-row>
@@ -119,7 +119,7 @@ export default {
           },
           "quantity": 3,
           "price": 17.99,
-          "moreInfo": "Seller may be willing to consider near offers.  SOME LONG DESCRIPTION. SOME LONG DESCRIPTION. DESCRIPTION. SOME LONG DESCRIPTION. DESCRIPTION. SOME LONG DESCRIPTION. DESCRIPTIO",
+          "moreInfo": "",
           "created": "2021-07-14T11:44:00Z",
           "closes": "2021-07-21T23:59:00Z"
         };
