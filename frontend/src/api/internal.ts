@@ -117,6 +117,17 @@ export type Product = {
   countryOfSale?: string,
 };
 
+export type CreateInventoryItem = {
+  productId: string,
+  quantity: number,
+  pricePerItem?: number,
+  totalPrice?: number,
+  manufactured?: string,
+  sellBy?: string,
+  bestBefore?: string,
+  expires: string
+};
+
 export type InventoryItem = {
   id: number,
   product: Product,
@@ -212,6 +223,19 @@ function isInventoryItem(obj: any): obj is InventoryItem {
   return true;
 }
 
+function isCreateInventoryItem(obj: any): obj is CreateInventoryItem {
+  if (obj === null || typeof obj !== 'object') return false;
+  if (typeof obj.productId !== 'string') return false;
+  if (typeof obj.quantity !== 'number') return false;
+  if (obj.pricePerItem !== undefined && typeof obj.pricePerItem !== 'number') return false;
+  if (obj.totalPrice !== undefined && typeof obj.totalPrice !== 'number') return false;
+  if (obj.manufactured !== undefined && typeof obj.manufactured !== 'string') return false;
+  if (obj.sellBy !== undefined && typeof obj.sellBy !== 'string') return false;
+  if (obj.bestBefore !== undefined && typeof obj.bestBefore !== 'string') return false;
+  if (typeof obj.expires !== 'string') return false;
+  return true;
+}
+
 function isNumberArray(obj: any): obj is number[] {
   if (!Array.isArray(obj)) return false;
   for (let elem of obj) {
@@ -248,6 +272,14 @@ function isInventoryArray(obj: any): obj is InventoryItem[] {
   if (!Array.isArray(obj)) return false;
   for (let elem of obj) {
     if (!isInventoryItem(elem)) return false;
+  }
+  return true;
+}
+
+function isCreateInventoryArray(obj: any): obj is CreateInventoryItem[] {
+  if (!Array.isArray(obj)) return false;
+  for (let elem of obj) {
+    if (!isCreateInventoryItem(elem)) return false;
   }
   return true;
 }
@@ -697,6 +729,7 @@ export async function removeBusinessAdmin(businessId: number, userId: number): P
 
 /**
  * Get all inventory items for that business
+ * 
  * @param businessId
  * @return a list of inventory items
  */
@@ -741,4 +774,47 @@ export async function getInventoryCount(buisnessId: number): Promise<MaybeError<
   }
 
   return response.data.count;
+}
+
+/**
+ * Add an inventory item to the business inventory.
+ * 
+ * @param businessId Business id to identify with the database to add the inventory to the correct business
+ * @param inventoryitem The properties to create a inventory with
+ */
+export async function createInventoryItem(businessId: number, inventoryitem: CreateInventoryItem): Promise<MaybeError<undefined>> {
+  try {
+    await instance.post(`/businesses/${businessId}/inventory`, inventoryitem);
+  } catch (error) {
+    let status: number | undefined = error.response?.status;
+    if (status === undefined) return 'Failed to reach backend';
+    if (status === 403) return 'Operation not permitted';
+    if (status === 400) return 'Invalid parameters';
+
+    return 'Request failed: ' + status;
+  }
+  return undefined;
+}
+
+/**
+ * Updates an inventory item based on its inventory item id
+ * 
+ * @param businessId Business id to identify with the database to add the inventory to the correct business
+ * @param inventoryItemId Inventory item id to identify with the database to update the correct inventory item
+ * @param inventoryitem The properties to create a inventory with
+ * @returns 
+ */
+export async function modifyInventoryItem(businessId: number, inventoryItemId: number, inventoryitem: CreateInventoryItem): Promise<MaybeError<undefined>> {
+  try {
+    await instance.put(`/businesses/${businessId}/inventory/${inventoryItemId}`);
+  } catch (error) {
+    let status: number | undefined = error.response?.status;
+
+    if (status === undefined) return 'Failed to reach backend';
+    if (status === 400) return 'Invalid parameters';
+    if (status === 403) return 'Operation not permitted';
+
+    return 'Request failed: ' + status;
+  }
+  return undefined;
 }
