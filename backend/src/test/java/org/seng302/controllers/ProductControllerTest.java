@@ -22,6 +22,7 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.Cookie;
@@ -1062,23 +1063,6 @@ class ProductControllerTest {
         addSeveralProductsToACatalogue();
 
         MockMultipartFile file = new MockMultipartFile("file", "filename.txt", "image/bad", new byte[100]);
-        mockMvc.perform(multipart(String.format("/businesses/%d/products/NATHAN-APPLE-70/images", testBusiness1.getId()))
-                .file(file)
-                .sessionAttrs(sessionAuthToken)
-                .cookie(authCookie))
-                .andExpect(status().isBadRequest())
-                .andReturn();
-    }
-
-    /**
-     * Tests that uploading an image fails with 400 response if image is greater than or equal to 1048575bytes
-     */
-    @Test
-    void uploadingImageToProductFailsIfTooLarge() throws Exception {
-        setCurrentUser(ownerUser.getUserID());
-        addSeveralProductsToACatalogue();
-
-        MockMultipartFile file = new MockMultipartFile("file", "filename.txt", "image/jpeg", new byte[1048575]);
         mockMvc.perform(multipart(String.format("/businesses/%d/products/NATHAN-APPLE-70/images", testBusiness1.getId()))
                 .file(file)
                 .sessionAttrs(sessionAuthToken)

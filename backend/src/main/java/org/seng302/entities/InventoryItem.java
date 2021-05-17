@@ -5,13 +5,18 @@ import net.minidev.json.JSONObject;
 import org.seng302.tools.JsonTools;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
-
 import javax.persistence.*;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.Calendar;
+import java.util.Date;
 
 @NoArgsConstructor
 @Entity
@@ -49,19 +54,78 @@ public class InventoryItem {
     @Column(name = "creation_date", nullable = false)
     private Instant creationDate;
 
-    // Getters and Setters
+// Getters
+    /**
+     * Returns id in db table
+     * @return id in db table
+     */
     public Long getId() {
         return id;
     }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
+    /**
+     * Returns the product
+     * @return product
+     */
     public Product getProduct() {
         return product;
     }
+    /**
+     * Return the quantity of items/products
+     * @return quantity of items/products
+     */
+    public int getQuantity() {
+        return quantity;
+    }
+    /**
+     * Returns price of per item
+     * @return price of per item
+     */
+    public BigDecimal getPricePerItem() {
+        return pricePerItem;
+    }
+    /**
+     * Total price based on price per item and quantity
+     * @return total price
+     */
+    public BigDecimal getTotalPrice() {
+        return totalPrice;
+    }
+    /**
+     * Returns date of when the product was manufactured
+     */
+    public Date getManufactured() {
+        return manufactured;
+    }
+    /**
+     * Returns date of when the product need to get sell by
+     */
+    public Date getSellBy() {
+        return sellBy;
+    }
+    /**
+     * Returns date of Best Before for the product
+     */
+    public Date getBestBefore() {
+        return bestBefore;
+    }
+    /**
+     * Returns date of expires of the product
+     */
+    public Date getExpires() {
+        return expires;
+    }
+    /**
+     * Returns creation date of the item in Inventory
+     */
+    public Date getCreationDate() {
+        return creationDate;
+    }
 
+//Setters
+    /**
+     * Sets the product
+     * @param product
+     */
     public void setProduct(Product product) throws ResponseStatusException {
         if (product != null) {
             this.product = product;
@@ -69,84 +133,125 @@ public class InventoryItem {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No product was provided");
         }
     }
-
-    public int getQuantity() {
-        return quantity;
-    }
-
-    public void setQuantity(Integer quantity) throws Exception {
+    /**
+     * Sets the quantity of items/products
+     * @param quantity
+     */
+    public void setQuantity(Integer quantity) throws ResponseStatusException {
         if (quantity > 0) {
             this.quantity = quantity;
         } else {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A quantity less than 1 was provided");
         }
     }
-
-    public BigDecimal getPricePerItem() {
-        return pricePerItem;
+    /**
+     * Sets the price of per item
+     * @param pricePerItem price of per item
+     */
+    public void setPricePerItem(BigDecimal pricePerItem) {
+        if (pricePerItem != null) {
+            if (pricePerItem.compareTo(BigDecimal.ZERO) < 0) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Price per item must not be less than 0");
+            }
+            if (pricePerItem.compareTo(new BigDecimal(10000)) >= 0) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Price per item must be less that 100,00");
+            }
+        }
+        this.pricePerItem = pricePerItem;
     }
-
-    public void setPricePerItem(String pricePerItem) {
-        this.pricePerItem = new BigDecimal(pricePerItem);
-    }
-
-    public BigDecimal getTotalPrice() {
-        return totalPrice;
-    }
-
     /**
      * Sets and calculates the total price based on the price per item and quantity
      */
     public void setTotalPrice() {
         if (this.pricePerItem != null) {
-            this.totalPrice = new BigDecimal(this.quantity).multiply(this.pricePerItem);
+            this.totalPrice = this.pricePerItem.multiply(new BigDecimal(this.quantity));
         }
     }
-
-    public void setTotalPrice(String totalPrice) {
-        this.totalPrice = new BigDecimal(totalPrice);
+    /**
+     * Sets the total price for the products
+     */
+    public void setTotalPrice(BigDecimal totalPrice) {
+        if (totalPrice != null) {
+        if (totalPrice.compareTo(BigDecimal.ZERO) < 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Total price must not be less than 0 ");
+        }
+        if (totalPrice.compareTo(new BigDecimal(1000000)) >= 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Total price must be less than 1,000,000");
+        }
     }
-
-    public LocalDate getManufactured() {
-        return manufactured;
+    this.totalPrice = totalPrice;
     }
-
-    public void setManufactured(LocalDate manufactured) {
+    /**
+     * Sets the date of when the product was manufactured
+     * @param manufactured the date when the product was manufactured
+     */
+    public void setManufactured(Date manufactured) {
+        if (manufactured == null) {
+            this.manufactured = null;
+            return;
+        }
+        LocalDate dateOfManufactured = manufactured.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        LocalDate date = LocalDate.now();
+        LocalDate acceptDate = date.minusDays(1);               //at least 1 day earlier
+        if (dateOfManufactured.compareTo(acceptDate) > 0) {     //is in the future
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The manufactured date cannot be in the future");
+        }
         this.manufactured = manufactured;
     }
-
-    public LocalDate getSellBy() {
-        return sellBy;
+    /**
+     * Sets the date of when the product need to get sell by
+     * @param sellBy the date when the product need to get sell by
+     */
+    public void setSellBy(Date sellBy) {
+        if (sellBy == null) {
+            this.sellBy = null;
+            return;
+        }
+        LocalDate dateOfSellBy = sellBy.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        LocalDate date = LocalDate.now();
+        LocalDate acceptDate = date.plusDays(1);                //at least 1 day later
+        if (dateOfSellBy.compareTo(acceptDate) < 0) {           //is in the past
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The Sell By date cannot be in the past");
     }
-
-    public void setSellBy(LocalDate sellBy) {
         this.sellBy = sellBy;
     }
-
-    public LocalDate getBestBefore() {
-        return bestBefore;
-    }
-
-    public void setBestBefore(LocalDate bestBefore) {
+    /**
+     * Sets the date of Best Before for the product
+     * @param bestBefore the date of Best Before for the product
+     */
+    public void setBestBefore(Date bestBefore) {
+        if(bestBefore == null) {
+            this.bestBefore = null;
+            return;
+        }
+        LocalDate dateOfBestBefore = bestBefore.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        LocalDate date = LocalDate.now();
+        LocalDate acceptDate = date.plusDays(1);                    //at least 1 day later
+        if (dateOfBestBefore.compareTo(acceptDate) < 0) {          //is in the past
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The Best Before date cannot be in the past");
+        }
         this.bestBefore = bestBefore;
     }
 
-    public LocalDate getExpires() {
-        return expires;
-    }
-
-    public void setExpires(LocalDate expires) throws ResponseStatusException {
-        if (expires != null) {
-            this.expires = expires;
-        } else {
+    /**
+     * Sets the date of expires for the product
+     * @param expires the date of expires for the product
+     */
+    public void setExpires(Date expires) throws ResponseStatusException {
+        if(expires == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No expiry date was provided");
         }
+        LocalDate dateOfExpires = expires.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        LocalDate date = LocalDate.now();
+        LocalDate acceptDate = date.plusDays(1);                    //at least 1 day later
+        if (dateOfExpires.compareTo(acceptDate) < 0) {              //is in the past
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The Expires date cannot be in the past");
+        }
+        this.expires = expires;
     }
-
-    public Instant getCreationDate() {
-        return creationDate;
-    }
-
+    /**
+     * Sets creation date of the item in Inventory
+     */
     public void setCreationDate() {
         this.creationDate = Instant.now();
     }
@@ -170,7 +275,6 @@ public class InventoryItem {
         JsonTools.removeNullsFromJson(json);
         return json;
     }
-
     /**
      * Builder for Inventory Item
      */
@@ -178,8 +282,8 @@ public class InventoryItem {
 
         private Product product;
         private int quantity;
-        private String pricePerItem;
-        private String totalPrice;
+        private BigDecimal pricePerItem;
+        private BigDecimal totalPrice;
         private LocalDate manufactured;
         private LocalDate sellBy;
         private LocalDate bestBefore;
@@ -211,7 +315,15 @@ public class InventoryItem {
          * @return Builder with the price per item set
          */
         public Builder withPricePerItem(String pricePerItem) {
-            this.pricePerItem = pricePerItem;
+            if (pricePerItem == null || pricePerItem.equals("")) {
+                this.pricePerItem = null;
+                return this;
+            }
+            try {
+                this.pricePerItem = new BigDecimal(pricePerItem);
+            } catch (NumberFormatException ignored) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The price per item is not a number");
+            }
             return this;
         }
 
@@ -221,7 +333,15 @@ public class InventoryItem {
          * @return Builder with the total price item set
          */
         public Builder withTotalPrice(String totalPrice) {
-            this.totalPrice = totalPrice;
+            if (totalPrice == null || totalPrice.equals("")) {
+                this.totalPrice = null;
+                return this;
+            }
+            try {
+                this.totalPrice = new BigDecimal(totalPrice);
+            } catch (NumberFormatException ignored) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The total price is not a number");
+            }
             return this;
         }
 
@@ -303,13 +423,11 @@ public class InventoryItem {
             return inventoryItem;
         }
     }
-
     @Override
     public String toString() {
         return String.format("There are %d %s of this inventory item. They expire on %s",
                 this.quantity, this.product.getName(), this.expires.toString());
     }
-
     @Override
     public boolean equals(Object o) {
         if (o == this) {

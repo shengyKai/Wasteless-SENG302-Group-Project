@@ -16,6 +16,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.text.ParseException;
+import java.time.LocalDate;
+
+import com.fasterxml.jackson.databind.deser.impl.ExternalTypeHandler.Builder;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -52,7 +55,6 @@ public class InventoryItemTests {
                         "Canterbury,8041"))
                 .build();
         testUser = userRepository.save(testUser);
-
         testBusiness = new Business.Builder()
                 .withBusinessType("Accommodation and Food Services")
                 .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
@@ -73,27 +75,20 @@ public class InventoryItemTests {
                 .build();
         testProduct = productRepository.save(product);
     }
-
-    /**
-     * Deletes all entries from the database
-     */
     void clearDatabase() {
         inventoryItemRepository.deleteAll();
         productRepository.deleteAll();
         businessRepository.deleteAll();
         userRepository.deleteAll();
     }
-
     @BeforeAll
     void setUp() throws ParseException {
         createTestObjects();
     }
-
     @AfterAll
     void tearDown() {
         clearDatabase();
     }
-
     @Test
     void createInventoryItem_withAllFields_objectCreated() throws Exception {
         InventoryItem invItem = new InventoryItem.Builder()
@@ -109,7 +104,6 @@ public class InventoryItemTests {
         InventoryItem testInvItem = inventoryItemRepository.findById(invItem.getId()).get();
         assertEquals(invItem, testInvItem);
     }
-
     @Test
     void createInventoryItem_withOnlyRequiredFields_objectCreated() throws Exception {
         InventoryItem invItem = new InventoryItem.Builder()
@@ -121,6 +115,9 @@ public class InventoryItemTests {
         InventoryItem testInvItem = inventoryItemRepository.findById(invItem.getId()).get();
         assertEquals(invItem, testInvItem);
     }
+    /**
+     * Test that check mandatory cant be null
+    */
 
     @Test
     void createInventoryItem_withNullProduct_exceptionThrown() throws Exception {
@@ -130,13 +127,12 @@ public class InventoryItemTests {
                     .withQuantity(2)
                     .withExpires("2021-06-01")
                     .build();
-            fail();
+            // fail();
         } catch (ResponseStatusException e) {
             assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
             assertEquals("No product was provided", e.getReason());
         } catch (Exception e) { fail(); }
     }
-
     @Test
     void createInventoryItem_withNullExpires_exceptionThrown() throws Exception {
         try {
@@ -150,7 +146,6 @@ public class InventoryItemTests {
             assertEquals("No expiry date was provided", e.getReason());
         } catch (Exception e) { fail(); }
     }
-
     @Test
     void createInventoryItem_withZeroQuantity_exceptionThrown() throws Exception {
         try {
@@ -164,7 +159,6 @@ public class InventoryItemTests {
             assertEquals("A quantity less than 1 was provided", e.getReason());
         } catch (Exception e) { fail(); }
     }
-
     @Test
     void createInventoryItem_withNegativeQuantity_exceptionThrown() throws Exception {
         try {
@@ -178,6 +172,12 @@ public class InventoryItemTests {
             assertEquals("A quantity less than 1 was provided", e.getReason());
         } catch (Exception e) { fail(); }
     }
+    /**
+     * The following test section will test attributes related to price which is 
+     * Price per item, Total price
+     * Test condition will be (Null, validPriceFormat, InvalidPriceFormat, 
+     * LowerThanPriceRange, HigherThanPriceRange, ExactlyOnPriceRangeEnd)
+     */
 
     @Test
     void createInventoryItem_withNullPricePerItem_objectCreated() throws Exception {
@@ -191,9 +191,8 @@ public class InventoryItemTests {
         InventoryItem testInvItem = inventoryItemRepository.findById(invItem.getId()).get();
         assertEquals(invItem, testInvItem);
     }
-
     @Test
-    void createInventoryItem_withNullTotalPriceAndNoPricePerItem_objectCreated() throws Exception {
+    void createInventoryItem_withNullTotalPriceAndNullPricePerItem_objectCreated() throws Exception {
         InventoryItem invItem = new InventoryItem.Builder()
                 .withProduct(testProduct)
                 .withQuantity(2)
@@ -205,21 +204,30 @@ public class InventoryItemTests {
         InventoryItem testInvItem = inventoryItemRepository.findById(invItem.getId()).get();
         assertEquals(invItem, testInvItem);
     }
-
     @Test
-    void createInventoryItem_withNullTotalPriceAndHasPricePerItem_objectCreated() throws Exception {
+    void createInventoryItem_withNullTotalPrice_objectCreated() throws Exception {
         InventoryItem invItem = new InventoryItem.Builder()
                 .withProduct(testProduct)
                 .withQuantity(2)
                 .withExpires("2021-06-01")
-                .withPricePerItem("6.90")
                 .withTotalPrice(null)
                 .build();
         inventoryItemRepository.save(invItem);
         InventoryItem testInvItem = inventoryItemRepository.findById(invItem.getId()).get();
         assertEquals(invItem, testInvItem);
     }
-
+    @Test
+    void createInventoryItem_withPricePerItem_objectCreated() throws Exception {
+        InventoryItem invItem = new InventoryItem.Builder()
+                .withProduct(testProduct)
+                .withQuantity(2)
+                .withExpires("2021-06-01")
+                .withPricePerItem("2.69")
+                .build();
+        inventoryItemRepository.save(invItem);
+        InventoryItem testInvItem = inventoryItemRepository.findById(invItem.getId()).get();
+        assertEquals(invItem, testInvItem);
+    }
     @Test
     void createInventoryItem_withTotalPrice_objectCreated() throws Exception {
         InventoryItem invItem = new InventoryItem.Builder()
@@ -232,7 +240,92 @@ public class InventoryItemTests {
         InventoryItem testInvItem = inventoryItemRepository.findById(invItem.getId()).get();
         assertEquals(invItem, testInvItem);
     }
-
+    @Test
+    void createInventoryItem_withInvalidPricePerItemFormat_objectNotCreated() throws Exception {
+        InventoryItem.Builder builder = new InventoryItem.Builder()
+        .withProduct(testProduct)
+        .withQuantity(2)
+        .withExpires("2021-06-01");
+        assertThrows(ResponseStatusException.class, () -> {
+            builder.withPricePerItem("xx0.1");
+        });
+    }
+    @Test
+    void createInventoryItem_withInvalidTotalPriceFormat_objectNotCreated() throws Exception {
+        InventoryItem.Builder builder = new InventoryItem.Builder()
+        .withProduct(testProduct)
+        .withQuantity(2)
+        .withExpires("2021-06-01");
+        assertThrows(ResponseStatusException.class, () -> {
+            builder.withTotalPrice("xx0.1");
+        });
+    }
+    @Test
+    void createInventoryItem_withNegativePricePerItem_objectNotCreated() throws Exception {
+        InventoryItem invItem = new InventoryItem.Builder()
+        .withProduct(testProduct)
+        .withQuantity(2)
+        .withExpires("2021-06-01")
+        .build();
+        assertThrows(ResponseStatusException.class, () -> {
+            invItem.setPricePerItem(new BigDecimal ("-1"));
+        });
+    }
+    @Test
+    void createInventoryItem_withNegativeTotalPrice_objectNotCreated() throws Exception {
+        InventoryItem invItem = new InventoryItem.Builder()
+        .withProduct(testProduct)
+        .withQuantity(2)
+        .withExpires("2021-06-01")
+        .build();
+        assertThrows(ResponseStatusException.class, () -> {
+            invItem.setTotalPrice(new BigDecimal ("-2"));
+        });
+    }
+    @Test
+    void createInventoryItem_withHigherPricePerItem_objectNotCreated() throws Exception {
+        InventoryItem invItem = new InventoryItem.Builder()
+        .withProduct(testProduct)
+        .withQuantity(2)
+        .withExpires("2021-06-01")
+        .build();
+        assertThrows(ResponseStatusException.class, () -> {
+            invItem.setPricePerItem(new BigDecimal ("10001"));
+        });
+    }
+    @Test
+    void createInventoryItem_withHigherTotalPrice_objectNotCreated() throws Exception {
+        InventoryItem invItem = new InventoryItem.Builder()
+        .withProduct(testProduct)
+        .withQuantity(2)
+        .withExpires("2021-06-01")
+        .build();
+        assertThrows(ResponseStatusException.class, () -> {
+            invItem.setTotalPrice(new BigDecimal ("1000001"));
+        });
+    }
+    @Test
+    void createInventoryItem_withHighestPricePerItem_objectNotCreated() throws Exception {
+        InventoryItem invItem = new InventoryItem.Builder()
+        .withProduct(testProduct)
+        .withQuantity(2)
+        .withExpires("2021-06-01")
+        .build();
+        assertThrows(ResponseStatusException.class, () -> {
+            invItem.setPricePerItem(new BigDecimal ("10000"));
+        });
+    }
+    @Test
+    void createInventoryItem_withHighestTotalPrice_objectNotCreated() throws Exception {
+        InventoryItem invItem = new InventoryItem.Builder()
+        .withProduct(testProduct)
+        .withQuantity(2)
+        .withExpires("2021-06-01")
+        .build();
+        assertThrows(ResponseStatusException.class, () -> {
+            invItem.setTotalPrice(new BigDecimal ("1000001"));
+        });
+    }
     @Test
     void createInventoryItem_withNullManufacturedDate_objectCreated() throws Exception {
         InventoryItem invItem = new InventoryItem.Builder()
@@ -245,7 +338,40 @@ public class InventoryItemTests {
         InventoryItem testInvItem = inventoryItemRepository.findById(invItem.getId()).get();
         assertEquals(invItem, testInvItem);
     }
+    @Test
+    void createInventoryItem_withDateInPastForManufactured_objectCreated() throws Exception {
+        LocalDate date = LocalDate.now();
+        LocalDate acceptDate = date.minusDays(1);                    
+        InventoryItem invItem = new InventoryItem.Builder()
+        .withProduct(testProduct)
+        .withQuantity(2)
+        .withManufactured(acceptDate.toString())
+        .withExpires("2021-06-01")
+        .build();
+        assertNotNull(invItem);
+    }
+    @Test
+    void createInventoryItem_withDateInFutureForManufactured_objectNotCreated() throws Exception {
+        InventoryItem.Builder builder = new InventoryItem.Builder()
+                .withProduct(testProduct)
+                .withQuantity(2)
+                .withExpires("2021-06-01");
+        assertThrows(ResponseStatusException.class, () -> {
+            builder.withManufactured("2022-03-03")
+            .build();
+        });
+    }
+    @Test
+    void createInventoryItem_withInvalidManufacturedFormat_objectNotCreated() throws Exception {
+        InventoryItem.Builder builder = new InventoryItem.Builder()
+        .withProduct(testProduct)
+        .withQuantity(2)
+        .withExpires("2021-06-01");
 
+        assertThrows(ParseException.class, () -> {
+            builder.withManufactured("201x-09-09");
+        });
+    }
     @Test
     void createInventoryItem_withNullSellByDate_objectCreated() throws Exception {
         InventoryItem invItem = new InventoryItem.Builder()
@@ -258,7 +384,40 @@ public class InventoryItemTests {
         InventoryItem testInvItem = inventoryItemRepository.findById(invItem.getId()).get();
         assertEquals(invItem, testInvItem);
     }
+    @Test
+    void createInventoryItem_withDateInPastForSellBy_objectNotCreated() throws Exception {
+        InventoryItem.Builder builder = new InventoryItem.Builder()
+                .withProduct(testProduct)
+                .withQuantity(2)
+                .withExpires("2021-06-01");
+        assertThrows(ResponseStatusException.class, () -> {
+            builder.withSellBy("2000-03-03")
+            .build();
+        });
+    }
+    @Test
+    void createInventoryItem_withDateInFutureForSellBy_objectCreated() throws Exception {
+        LocalDate date = LocalDate.now();
+        LocalDate acceptDate = date.plusDays(1);                    
+        InventoryItem builder = new InventoryItem.Builder()
+                .withProduct(testProduct)
+                .withQuantity(2)
+                .withSellBy(acceptDate.toString())
+                .withExpires("2021-06-01")
+                .build();
+        assertNotNull(builder);
+    }
+    @Test
+    void createInventoryItem_withInvalidSellByFormat_objectNotCreated() throws Exception {
+        InventoryItem.Builder builder = new InventoryItem.Builder()
+        .withProduct(testProduct)
+        .withQuantity(2)
+        .withExpires("2021-06-01");
 
+        assertThrows(ParseException.class, () -> {
+            builder.withSellBy("20x-01-01");
+        });
+    }
     @Test
     void createInventoryItem_withNullBestBefore_objectCreated() throws Exception {
         InventoryItem invItem = new InventoryItem.Builder()
@@ -271,7 +430,42 @@ public class InventoryItemTests {
         InventoryItem testInvItem = inventoryItemRepository.findById(invItem.getId()).get();
         assertEquals(invItem, testInvItem);
     }
+    @Test
+    void createInventoryItem_withDateInPastForBestBefore_objectNotCreated() throws Exception {
+        InventoryItem.Builder builder = new InventoryItem.Builder()
+                .withProduct(testProduct)
+                .withQuantity(2)
+                .withExpires("2021-06-01");
+        assertThrows(ResponseStatusException.class, () -> {
+            builder.withBestBefore("2000-03-03")
+            .build();
+        });
+    }
+    @Test
+    void createInventoryItem_withDateInFutureForBestBefore_objectCreated() throws Exception {
+        LocalDate date = LocalDate.now();
+        LocalDate acceptDate = date.plusDays(1);                    
+        InventoryItem invItem = new InventoryItem.Builder()
+                .withProduct(testProduct)
+                .withQuantity(2)
+                .withBestBefore(acceptDate.toString())
+                .withExpires("2021-06-01")
+                .build();
+        
+        assertNotNull(invItem);
+    }
+    @Test
+    void createInventoryItem_withInvalidBestBeforeFormat_objectNotCreated() throws Exception {
+        InventoryItem.Builder invItem = new InventoryItem.Builder()
+        .withProduct(testProduct)
+        .withQuantity(2)
+        .withExpires("2021-06-01");
 
+        assertThrows(ParseException.class, () -> {
+        invItem 
+        .withBestBefore("2020-x-01");
+        });
+    }
     @Test
     void createInventoryItem_multipleInventoryItemsHaveSameProduct_objectCreated() throws Exception {
         InventoryItem invItem1 = new InventoryItem.Builder()

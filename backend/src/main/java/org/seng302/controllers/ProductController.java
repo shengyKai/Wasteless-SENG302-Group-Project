@@ -99,11 +99,11 @@ public class ProductController {
      */
     @GetMapping("/businesses/{id}/products")
     public JSONArray retrieveCatalogue(@PathVariable Long id,
-                                HttpServletRequest request,
-                                @RequestParam(required = false) String orderBy,
-                                @RequestParam(required = false) String page,
-                                @RequestParam(required = false) String resultsPerPage,
-                                @RequestParam(required = false) String reverse) {
+                                       HttpServletRequest request,
+                                       @RequestParam(required = false) String orderBy,
+                                       @RequestParam(required = false) String page,
+                                       @RequestParam(required = false) String resultsPerPage,
+                                       @RequestParam(required = false) String reverse) {
 
         logger.info("Get catalogue by business id.");
         AuthenticationTokenManager.checkAuthenticationToken(request);
@@ -146,7 +146,7 @@ public class ProductController {
      */
     @GetMapping("/businesses/{id}/products/count")
     public JSONObject retrieveCatalogueCount(@PathVariable Long id,
-                                HttpServletRequest request) {
+                                             HttpServletRequest request) {
 
         AuthenticationTokenManager.checkAuthenticationToken(request);
 
@@ -224,8 +224,8 @@ public class ProductController {
      */
     @DeleteMapping("/businesses/{businessId}/products/{productId}/images/{imageId}")
     public void deleteProductImage(@PathVariable Long businessId, @PathVariable String productId,
-                               @PathVariable Long imageId,
-                            HttpServletRequest request) {
+                                   @PathVariable Long imageId,
+                                   HttpServletRequest request) {
         logger.info(String.format("Deleting image with id %d from the product %s within the business's catalogue %d",
                 imageId, productId, businessId));
 
@@ -293,7 +293,7 @@ public class ProductController {
             image.setFilename(filename);
             image = imageRepository.save(image);
             product.addProductImage(image);
-            productRepository.save(product); 
+            productRepository.save(product);
             storageService.store(file, filename);             //store the file using storageService
 
             return new ResponseEntity<>(HttpStatus.CREATED);
@@ -301,19 +301,6 @@ public class ProductController {
             logger.error(e.getMessage());
             throw e;
         }
-
-
-
-    }
-    public void validateImage(MultipartFile file) {
-
-            if(file.getSize() >= 1048575) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Image size exceed 1048575 bytes.");
-            }
-            else if(!(file.getContentType().equals("image/jpeg") || file.getContentType().equals("image/png"))) {
-
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid image format. Must be jpeg or png");
-            }
     }
     /**
      * Sets the given image as the primary image for the given product
@@ -324,8 +311,8 @@ public class ProductController {
      */
     @PutMapping("/businesses/{businessId}/products/{productId}/images/{imageId}/makeprimary")
     public void makeImagePrimary(@PathVariable Long businessId,@PathVariable String productId,
-                                @PathVariable Long imageId,
-                          HttpServletRequest request ) {
+                                 @PathVariable Long imageId,
+                                 HttpServletRequest request ) {
         // get business + sanity
         Business business = businessRepository.getBusinessById(businessId);
         // check user priv
@@ -349,6 +336,10 @@ public class ProductController {
         logger.info(String.format("Set Image %d of product \"%s\" as the primary image", image.getID(), product.getName()));
     }
 
-
-
+    public void validateImage(MultipartFile file) {
+        String contentType = file.getContentType();
+        if(contentType == null || !(contentType.equals("image/jpeg") || contentType.equals("image/png"))) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid image format. Must be jpeg or png");
+        }
+    }
 }
