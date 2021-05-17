@@ -168,7 +168,7 @@ export default {
         name: this.product,
         description: this.description,
         manufacturer: this.manufacturer,
-        retailPrice: recommendedRetailPrice,
+        recommendedRetailPrice: recommendedRetailPrice,
       });
       this.isLoading = false;
 

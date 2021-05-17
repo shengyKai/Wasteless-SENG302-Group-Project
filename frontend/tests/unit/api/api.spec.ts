@@ -97,7 +97,7 @@ const testCreateProduct: CreateProduct = {
   name: 'test_name',
   description: 'test_description',
   manufacturer: 'test_manufacturer',
-  retailPrice: 100,
+  recommendedRetailPrice: 100,
 };
 
 const testProductArray: Product[] = [{
