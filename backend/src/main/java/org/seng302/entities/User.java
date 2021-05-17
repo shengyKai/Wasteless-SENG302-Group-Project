@@ -4,6 +4,7 @@ package org.seng302.entities;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
+import org.seng302.tools.JsonTools;
 import org.springframework.data.annotation.ReadOnlyProperty;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
@@ -331,20 +332,21 @@ public class User extends Account {
      */
     // Todo: Replace email with profile picture once profile pictures added.
     public JSONObject constructPublicJson(boolean fullBusinessDetails) {
-        Map<String, Object> attributeMap = new HashMap<>();
-        attributeMap.put("id",          getUserID());
-        attributeMap.put("firstName",   getFirstName());
-        attributeMap.put("lastName",    getLastName());
-        attributeMap.put("email",       getEmail());
-        attributeMap.put("created",     getCreated().toString());
-        if (getMiddleName() != null) { attributeMap.put("middleName",  getMiddleName()); }
-        if (getNickname() != null) { attributeMap.put("nickname",    getNickname()); }
-        if (getBio() != null) { attributeMap.put("bio", getBio()); }
-        attributeMap.put("homeAddress", getAddress().constructPartialJson());
+        var object = new JSONObject();
+        object.put("id",          getUserID());
+        object.put("firstName",   getFirstName());
+        object.put("lastName",    getLastName());
+        object.put("email",       getEmail());
+        object.put("created",     getCreated().toString());
+        object.put("middleName",  getMiddleName());
+        object.put("nickname",    getNickname());
+        object.put("bio", getBio());
+        object.put("homeAddress", getAddress().constructPartialJson());
         if (fullBusinessDetails) {
-            attributeMap.put("businessesAdministered", constructBusinessJsonArray());
+            object.put("businessesAdministered", constructBusinessJsonArray());
         }
-        return new JSONObject(attributeMap);
+        JsonTools.removeNullsFromJson(object);
+        return object;
     }
 
     /**
@@ -366,11 +368,9 @@ public class User extends Account {
         JSONObject json = constructPublicJson(fullBusinessDetails);
         json.replace("homeAddress", getAddress().constructFullJson());
         json.appendField("dateOfBirth", dob.toString());
-        if (phNum != null) {
-            json.appendField("phoneNumber", phNum);
-        }
+        json.appendField("phoneNumber", phNum);
         json.appendField("role", role);
-
+        JsonTools.removeNullsFromJson(json);
         return json;
     }
 

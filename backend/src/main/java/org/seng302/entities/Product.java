@@ -2,6 +2,7 @@ package org.seng302.entities;
 
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
+import org.seng302.tools.JsonTools;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -22,7 +23,7 @@ public class Product {
 
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false, name = "product_code")
@@ -77,7 +78,7 @@ public class Product {
 
     /**
      * Adds a single image to the Product's list of images
-     * @param image
+     * @param image An image entity to be linked to this product.
      */
     public void addProductImage(Image image) {
         this.productImages.add(image);
@@ -235,15 +236,9 @@ public class Product {
         JSONObject object = new JSONObject();
         object.put("id", productCode);
         object.put("name", name);
-        if (description != null) {
-            object.put("description", description);
-        }
-        if (manufacturer != null) {
-            object.put("manufacturer", manufacturer);
-        }
-        if (recommendedRetailPrice != null) {
-            object.put("recommendedRetailPrice", recommendedRetailPrice);
-        }
+        object.put("description", description);
+        object.put("manufacturer", manufacturer);
+        object.put("recommendedRetailPrice", recommendedRetailPrice);
         object.put("created", created);
         JSONArray images = new JSONArray();
         for (Image image : productImages) {
@@ -251,6 +246,7 @@ public class Product {
         }
         object.put("images", images);
         object.put("countryOfSale", countryOfSale);
+        JsonTools.removeNullsFromJson(object);
         return object;
     }
 
