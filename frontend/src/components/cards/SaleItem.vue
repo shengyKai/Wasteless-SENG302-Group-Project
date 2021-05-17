@@ -17,14 +17,22 @@
               <v-card-subtitle>
                 Product Description
               </v-card-subtitle>
-              <v-card-text>
+              <v-card-text v-if="product.description.length >= 50">
+                {{product.description.slice(0, 50) + "..."}}
+                <FullProductDescription :product-description="product.description"/>
+              </v-card-text>
+              <v-card-text v-else>
                 {{product.description}}
               </v-card-text>
               <div v-if="saleItem.moreInfo.length !== null && saleItem.moreInfo.length > 0">
                 <v-card-subtitle>
                   Additional Sale Info
                 </v-card-subtitle>
-                <v-card-text>
+                <v-card-text v-if="saleItem.moreInfo.length >= 50">
+                  {{saleItem.moreInfo.slice(0,50)}}
+                  <FullProductDescription :product-description="saleItem.moreInfo"/>
+                </v-card-text>
+                <v-card-text v-else>
                   {{saleItem.moreInfo}}
                 </v-card-text>
               </div>
@@ -53,7 +61,7 @@
             </v-timeline-item>
           </v-timeline>
           <v-card-actions>
-            <v-btn style="position: absolute; bottom: 10px; right: 10px" color="secondary" @click="moreInfo=!moreInfo">View {{moreInfo? 'More' : 'Less'}}</v-btn>
+            <v-btn style="position: absolute; bottom: 10px; right: 10px" color="secondary" @click="moreInfo=!moreInfo">View {{moreInfo? 'Less' : 'More'}}</v-btn>
           </v-card-actions>
         </v-col>
       </v-row>
@@ -63,10 +71,11 @@
 
 <script>
 import ProductImageCarousel from "@/components/utils/ProductImageCarousel";
+import FullProductDescription from "@/components/utils/FullProductDescription";
 
 export default {
   name: "SaleItem",
-  components: {ProductImageCarousel},
+  components: {FullProductDescription, ProductImageCarousel},
   data() {
     return {
       moreInfo: false,
@@ -82,7 +91,7 @@ export default {
             "product": {
               "id": "WATT-420-BEANS",
               "name": "Watties Baked Beans - 420g can",
-              "description": "Baked Beans as they should be.",
+              "description": "Baked Beans as they should be. SOME LONG DESCRIPTION. SOME LONG DESCRIPTION. DESCRIPTION. SOME LONG DESCRIPTION. DESCRIPTION. SOME LONG DESCRIPTION. DESCRIPTION. SOME LONG DESCRIPTION. ",
               "manufacturer": "Heinz Wattie's Limited",
               "recommendedRetailPrice": 2.2,
               "created": "2021-05-15T05:55:32.808Z",
@@ -104,7 +113,7 @@ export default {
           },
           "quantity": 3,
           "price": 17.99,
-          "moreInfo": "Seller may be willing to consider near offers",
+          "moreInfo": "Seller may be willing to consider near offers.  SOME LONG DESCRIPTION. SOME LONG DESCRIPTION. DESCRIPTION. SOME LONG DESCRIPTION. DESCRIPTION. SOME LONG DESCRIPTION. DESCRIPTIO",
           "created": "2021-07-14T11:44:00Z",
           "closes": "2021-07-21T23:59:00Z"
         };

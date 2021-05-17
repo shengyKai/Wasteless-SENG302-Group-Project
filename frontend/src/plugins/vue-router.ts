@@ -9,7 +9,7 @@ import SearchResults from "../components/SearchResults.vue";
 import HomePage from "../components/HomePage.vue";
 import ProductCatalogue from "../components/ProductCatalogue.vue";
 import InventoryItem from "../components/cards/InventoryItem.vue";
-import SaleItem from "../components/SaleItem.vue";
+import SaleItem from "../components/cards/SaleItem.vue";
 
 
 Vue.use(VueRouter);
