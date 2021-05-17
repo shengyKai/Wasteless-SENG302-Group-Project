@@ -17,14 +17,14 @@
               <v-card-subtitle>
                 Product Description
               </v-card-subtitle>
-              <v-card-text v-if="product.description.length >= 50">
-                {{product.description.slice(0, 50) + "..."}}
-                <FullProductDescription :product-description="product.description"/>
+              <v-card-text v-if="productDescription.length >= 50">
+                {{productDescription.slice(0, 50) + "..."}}
+                <FullProductDescription :product-description="productDescription"/>
               </v-card-text>
               <v-card-text v-else>
-                {{product.description}}
+                {{productDescription}}
               </v-card-text>
-              <div v-if="saleItem.moreInfo.length !== null && saleItem.moreInfo.length > 0">
+              <div ref="sellerInfo" v-if="saleItem.moreInfo.length !== null && saleItem.moreInfo.length > 0">
                 <v-card-subtitle>
                   Additional Sale Info
                 </v-card-subtitle>
@@ -180,6 +180,9 @@ export default {
       }
       return this.currency.symbol + this.saleItem.price + " " + this.currency.code;
     },
+    productDescription() {
+      return this.product.description || "Not set";
+    }
   },
   async created() {
     // When the Sale item is created, the currency will be set to the currency of the country the product is being
