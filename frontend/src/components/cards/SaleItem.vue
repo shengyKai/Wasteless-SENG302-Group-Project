@@ -7,7 +7,7 @@
             <div v-show="!moreInfo">
               <ProductImageCarousel :productImages="product.images" :productId="product.id" />
               <v-card-title>{{ saleItem.quantity + " x " + product.name }}</v-card-title>
-              <v-card-subtitle>{{saleItem.price}}</v-card-subtitle>
+              <v-card-subtitle>{{ retailPrice }}</v-card-subtitle>
 
             </div>
           </v-expand-transition>
@@ -100,6 +100,7 @@ export default {
               "manufacturer": "Heinz Wattie's Limited",
               "recommendedRetailPrice": 2.2,
               "created": "2021-05-15T05:55:32.808Z",
+              "countryOfSale": "New Zealand",
               "images": [
                 {
                   "id": 1234,
@@ -168,7 +169,17 @@ export default {
     closesFormatted() {
       let date = new Date(this.saleItem.closes);
       return date.toDateString().slice(3);
-    }
+    },
+    /**
+     * Creates a nicely formatted retail price, including the currency
+     * @returns {string} RetailPrice
+     */
+    retailPrice() {
+      if (!this.saleItem.price) {
+        return "Not set";
+      }
+      return this.currency.symbol + this.saleItem.price + " " + this.currency.code;
+    },
   },
   async created() {
     // When the Sale item is created, the currency will be set to the currency of the country the product is being

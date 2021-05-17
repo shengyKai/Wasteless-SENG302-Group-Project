@@ -40,7 +40,7 @@ function createTestProducts(count: number) {
       name: 'product_name' + i,
       description: 'product_description' + i,
       manufacturer: 'product_manufacturer' + i,
-      recommendedRetailPrice: i,
+      retailPrice: i,
       images: [],
     });
   }
