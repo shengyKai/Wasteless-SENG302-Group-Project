@@ -9,6 +9,9 @@ export type Currency = {
   symbol: string
 };
 
+/**
+ * Returned value should either be of type Currency or a string which contains an error message
+ */
 type CurrencyOrError = Currency | { errorMessage: string }
 
 /**
@@ -64,8 +67,7 @@ function currencyResponseHasExpectedFormat(response: any): response is [Currenci
  * If the request is successful the currency from the API will be returned. If it is unsuccessful then
  * a default currency object with blank code, name and symbol fields will be returned.
  * @param country The name of a country to use in the API request for the currency.
- * @returns A list containing the Currency of the country(defaultCurrency if any errors occur) at index 0,
- * and an error message at index 1 if any errors occur.
+ * @returns A currency object, or an error message
  */
 export async function currencyFromCountry(country: string): Promise<CurrencyOrError> {
 

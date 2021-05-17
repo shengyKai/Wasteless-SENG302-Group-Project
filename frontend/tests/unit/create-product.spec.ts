@@ -22,14 +22,12 @@ jest.mock('@/api/internal', () => ({
 
 jest.mock('@/api/currency', () => ({
   currencyFromCountry: jest.fn(() => {
-    return [
-      {
-        code: 'Currency code',
-        name: 'Currency name',
-        symbol: 'Currency symbol',
-      },
-      "Some error message"
-    ];
+    return {
+      code: 'Currency code',
+      name: 'Currency name',
+      symbol: 'Currency symbol',
+      errorMessage: "Some error message"
+    };
   })
 }));
 
@@ -447,6 +445,6 @@ describe('CreateProduct.vue', () => {
   });
 
   it('If the error message is not undefined, there should be an hint message that appears in the dialog box', async () => {
-    expect(wrapper.vm.currencyErrorMessage).toBe("Some error message");
+    expect(wrapper.vm.currency.errorMessage).toBe("Some error message");
   })
 });

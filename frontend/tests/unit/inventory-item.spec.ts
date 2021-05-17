@@ -14,15 +14,13 @@ Vue.use(Vuetify);
 
 jest.mock('@/api/currency', () => ({
   currencyFromCountry: jest.fn(() => {
-    return [
-      {
-        code: "test_currency_code",
-        name: "test_currency_name",
-        symbol: "test_currency_symbol"
-      }
-    ]
+    return {
+      code: "test_currency_code",
+      symbol: "test_currency_symbol"
+    };
   })
 }));
+
 
 describe('InventoryItem.vue', () => {
   let wrapper: Wrapper<any>;
