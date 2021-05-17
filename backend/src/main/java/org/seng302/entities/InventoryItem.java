@@ -117,14 +117,6 @@ public class InventoryItem {
     
 //Setters
     /**
-     * Sets the id in db table
-     * @param id
-     */
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    /**
      * Sets the product
      * @param product
      */
@@ -406,13 +398,11 @@ public class InventoryItem {
             return inventoryItem;
         }
     }
-
     @Override
     public String toString() {
         return String.format("There are %d %s of this inventory item. They expire on %s",
                 this.quantity, this.product.getName(), this.expires.toString());
     }
-
     @Override
     public boolean equals(Object o) {
         if (o == this) {
