@@ -729,7 +729,7 @@ export async function removeBusinessAdmin(businessId: number, userId: number): P
 
 /**
  * Get all inventory items for that business
- * 
+ *
  * @param businessId
  * @return a list of inventory items
  */
@@ -778,7 +778,7 @@ export async function getInventoryCount(buisnessId: number): Promise<MaybeError<
 
 /**
  * Add an inventory item to the business inventory.
- * 
+ *
  * @param businessId Business id to identify with the database to add the inventory to the correct business
  * @param inventoryitem The properties to create a inventory with
  */
@@ -798,11 +798,10 @@ export async function createInventoryItem(businessId: number, inventoryitem: Cre
 
 /**
  * Updates an inventory item based on its inventory item id
- * 
+ *
  * @param businessId Business id to identify with the database to add the inventory to the correct business
  * @param inventoryItemId Inventory item id to identify with the database to update the correct inventory item
  * @param inventoryitem The properties to create a inventory with
- * @returns 
  */
 export async function modifyInventoryItem(businessId: number, inventoryItemId: number, inventoryitem: CreateInventoryItem): Promise<MaybeError<undefined>> {
   try {
