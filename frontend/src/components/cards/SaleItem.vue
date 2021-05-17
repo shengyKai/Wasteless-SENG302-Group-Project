@@ -72,6 +72,7 @@
 <script>
 import ProductImageCarousel from "@/components/utils/ProductImageCarousel";
 import FullProductDescription from "@/components/utils/FullProductDescription";
+import {currencyFromCountry} from "@/api/currency";
 
 export default {
   name: "SaleItem",
@@ -79,6 +80,10 @@ export default {
   data() {
     return {
       moreInfo: false,
+      currency: {
+        code: "",
+        symbol: ""
+      },
     };
   },
   props: {
@@ -126,24 +131,49 @@ export default {
     },
   },
   computed: {
+    /**
+     * Easier access to the product for this sale
+     * @returns the product
+     */
     product() {
       return this.saleItem.inventoryItem.product;
     },
+    /**
+     * Easier access to the inventory item for this sale
+     * @returns Inventory item
+     */
     inventoryItem() {
       return this.saleItem.inventoryItem;
     },
+    /**
+     * Creates a nicely formatted readable string for the sales creation date
+     * @returns {string} CreatedDate
+     */
     createdFormatted() {
       let date = new Date(this.saleItem.created);
       return date.toDateString().slice(3);
     },
+    /**
+     * Creates a nicely formatted readable string for the sales expiry date
+     * @returns {string} ExpiryDate
+     */
     expiresFormatted() {
       let date = new Date(this.saleItem.inventoryItem.expires);
       return date.toDateString().slice(3);
     },
+    /**
+     * Creates a nicely formatted readable string for the sales close date
+     * @returns {string} CloseDate
+     */
     closesFormatted() {
       let date = new Date(this.saleItem.closes);
       return date.toDateString().slice(3);
     }
+  },
+  async created() {
+    // When the Sale item is created, the currency will be set to the currency of the country the product is being
+    // sold in. It will have blank fields if no currency can be found from the country.
+    this.currency = await currencyFromCountry(this.product.countryOfSale);
   }
 };
 </script>
