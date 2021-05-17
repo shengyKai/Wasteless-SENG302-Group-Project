@@ -8,12 +8,10 @@ import org.springframework.web.server.ResponseStatusException;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.Calendar;
-import java.util.Date;
+import java.time.temporal.ChronoUnit;
 
 @NoArgsConstructor
 @Entity
@@ -49,7 +47,7 @@ public class InventoryItem {
     private LocalDate expires;
 
     @Column(name = "creation_date", nullable = false)
-    private LocalDate creationDate;
+    private Instant creationDate;
 
     // Getters and Setters
     public Long getId() {
@@ -145,12 +143,12 @@ public class InventoryItem {
         }
     }
 
-    public LocalDate getCreationDate() {
+    public Instant getCreationDate() {
         return creationDate;
     }
 
     public void setCreationDate() {
-        this.creationDate = LocalDate.now();
+        this.creationDate = Instant.now();
     }
 
     /**
@@ -165,9 +163,9 @@ public class InventoryItem {
         json.put("quantity", quantity);
         json.put("pricePerItem", pricePerItem);
         json.put("totalPrice", totalPrice);
-        json.put("manufactured", manufactured);
-        json.put("sellBy", sellBy);
-        json.put("bestBefore", bestBefore);
+        json.put("manufactured", manufactured != null ? manufactured.toString() : null);
+        json.put("sellBy", sellBy != null ? sellBy.toString() : null);
+        json.put("bestBefore", bestBefore != null ? bestBefore.toString() : null);
         json.put("expires", expires.toString());
         JsonTools.removeNullsFromJson(json);
         return json;
@@ -234,7 +232,7 @@ public class InventoryItem {
          */
         public Builder withManufactured(String manufacturedString) {
             if (manufacturedString != null) {
-                DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+                DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE;
                 this.manufactured = LocalDate.parse(manufacturedString, dateTimeFormatter);
             } else { this.manufactured = null; }
             return this;
@@ -247,7 +245,7 @@ public class InventoryItem {
          */
         public Builder withSellBy(String sellByString) {
             if (sellByString != null) {
-                DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+                DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE;
                 this.sellBy = LocalDate.parse(sellByString, dateTimeFormatter);
             } else { this.sellBy = null; }
             return this;
@@ -260,7 +258,7 @@ public class InventoryItem {
          */
         public Builder withBestBefore(String bestBeforeString) {
             if (bestBeforeString != null) {
-                DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+                DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE;
                 this.bestBefore = LocalDate.parse(bestBeforeString, dateTimeFormatter);
             } else { this.bestBefore = null; }
             return this;
@@ -275,7 +273,7 @@ public class InventoryItem {
             if (expiresString == null) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No expiry date was provided");
             }
-            DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+            DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE;
             this.expires = LocalDate.parse(expiresString, dateTimeFormatter);
             return this;
         }
@@ -337,6 +335,6 @@ public class InventoryItem {
                         (this.bestBefore == null ? invItem.getBestBefore() == null :
                                 this.bestBefore.equals(invItem.getBestBefore())) &&
                         this.expires.equals(invItem.getExpires()) &&
-                        this.creationDate.equals(invItem.getCreationDate());
+                        ChronoUnit.SECONDS.between(this.creationDate, invItem.getCreationDate()) < 20;
     }
 }

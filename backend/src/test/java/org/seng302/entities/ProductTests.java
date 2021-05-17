@@ -14,8 +14,9 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
 import java.text.ParseException;
+import java.time.Instant;
 import java.time.LocalDate;
-import java.util.Date;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 
@@ -161,9 +162,9 @@ class ProductTests {
                 .withBusiness(testBusiness1)
                 .build();
         productRepository.save(product);
-        LocalDate productDate = product.getCreated();
+        Instant productDate = product.getCreated();
 
-        assertEquals(now, productDate);
+        assertTrue(ChronoUnit.SECONDS.between(Instant.now(), productDate) < 20);
     }
 
     /**

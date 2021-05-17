@@ -17,10 +17,10 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -530,8 +530,8 @@ public class UserTests {
      */
     @Test
     public void checkDateofBirthGreaterThanThirteen() throws ParseException {
-        String dateOfBirthString = "11-05-2000";
-        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        String dateOfBirthString = "2000-05-11";
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE;
         LocalDate dateOfBirth = LocalDate.parse(dateOfBirthString, dateTimeFormatter);
             
         testUser.setDob(dateOfBirth);
@@ -544,8 +544,8 @@ public class UserTests {
      */
     @Test
     public void checkDateofBirthLesserThanThirteen() throws ParseException {
-        String dateOfBirthString = "11-05-2010";
-        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        String dateOfBirthString = "2010-05-11";
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE;
         LocalDate dateOfBirth = LocalDate.parse(dateOfBirthString, dateTimeFormatter);
 
         LocalDate date = LocalDate.now();
@@ -952,9 +952,7 @@ public class UserTests {
     public void setCreatedTest() {
         Date now = new Date(System.currentTimeMillis());
         User testUser = testBuilder.build();
-        // Check that the difference between the time the user was created and the time at the start of execution of
-        // this function is less than 1 second
-        assertTrue(testUser.getCreated().getTime() - now.getTime() < 1000);
+        assertTrue(ChronoUnit.SECONDS.between(Instant.now(), testUser.getCreated()) < 20);
     }
 
     /**
@@ -1250,8 +1248,8 @@ public class UserTests {
      */
     @Test
     public void buildWithDobTest() throws ParseException {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        Date dob = dateFormat.parse("2001-03-11");
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE;
+        LocalDate dob = LocalDate.parse("2001-03-11", dateTimeFormatter);
         User user = testBuilder.build();
         assertEquals(dob, user.getDob());
     }

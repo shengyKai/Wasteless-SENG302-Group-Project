@@ -9,7 +9,7 @@ Feature: User
         And their email is "connor@gmail.com"
         And their password is "gottaGetGoodGrad3$"
         And their bio is "Your average fourth year software engineer"
-        And their date of birth is "17-07-1999"
+        And their date of birth is "1999-07-17"
         And their phone number is "0271234567"
         And their address is "69,Riccarton Road,Ashburton,Christchurch,New Zealand,Canterbury,8041"
         And the user is created
@@ -22,7 +22,7 @@ Feature: User
         Then the user has the email "connor@gmail.com"
         Then the user has the password "gottaGetGoodGrad3$"
         Then the user has the bio "Your average fourth year software engineer"
-        Then the user has the date of birth "17-07-1999"
+        Then the user has the date of birth "1999-07-17"
         Then the user has the phone number "0271234567"
         Then the user has the address "69,Riccarton Road,Ashburton,Christchurch,New Zealand,Canterbury,8041"
 
@@ -35,7 +35,7 @@ Feature: User
         And their email is "roseyrose@gmail.com"
         And their password is "prettyRoseSweetP3@ch"
         And their bio is "My friends say I am as sweet as a peach with the looks of a rose"
-        And their date of birth is "01-03-1998"
+        And their date of birth is "1998-03-01"
         And their phone number is "0279876543"
         And their address is "100,Ocean View Crescent,Ashburton,Auckland,New Zealand,Rakino Island,1010"
         And the user is created
@@ -47,7 +47,7 @@ Feature: User
         Then the user has the email "roseyrose@gmail.com"
         Then the user has the password "prettyRoseSweetP3@ch"
         Then the user has the bio "My friends say I am as sweet as a peach with the looks of a rose"
-        Then the user has the date of birth "01-03-1998"
+        Then the user has the date of birth "1998-03-01"
         Then the user has the phone number "0279876543"
         Then the user has the address "100,Ocean View Crescent,Ashburton,Auckland,New Zealand,Rakino Island,1010"
 
@@ -81,7 +81,7 @@ Feature: User
         And their email is "InvalidEmailForm"
         And their password is "prettyRoseSweetP3@ch"
         And their bio is "My friends say I am as sweet as a peach with the looks of a rose"
-        And their date of birth is "01-03-1998"
+        And their date of birth is "1998-03-01"
         And their phone number is "0279876543"
         And their address is "100,Ocean View Crescent,Ashburton,Auckland,New Zealand,Rakino Island,1010"
         And the user is created
@@ -93,7 +93,7 @@ Feature: User
         And their last name is "Rose"
         And their email is "roseyrose@gmail.com"
         And their password is "prettyRoseSweetP3@ch"
-        And their date of birth is "01-03-1998"
+        And their date of birth is "1998-03-01"
         And their address is "100,Ocean View Crescent,Ashburton,Auckland,New Zealand,Rakino Island,1010"
         And no optional values are set
         And the user is created
@@ -111,7 +111,7 @@ Feature: User
         And their email is "james@hotmail.com"
         And their password is "prettyRoseSweetP3@ch"
         And their bio is "Mwhahaha your spot in the database is mine!"
-        And their date of birth is "01-03-1998"
+        And their date of birth is "1998-03-01"
         And their phone number is "0279876543"
         And their address is "100,Ocean View Crescent,Ashburton,Auckland,New Zealand,Rakino Island,1010"
         And the user is created
@@ -123,6 +123,6 @@ Feature: User
         And their last name is "Rose"
         And their email is "roseyrose@gmail.com"
         And their password is "prettyRoseSweetP3@ch"
-        And their date of birth is "01-03-2020"
+        And their date of birth is "2020-03-01"
         And their address is "100,Ocean View Crescent,Ashburton,Auckland,New Zealand,Rakino Island,1010"
         Then a user with the email "roseyrose@gmail.com" does not exist

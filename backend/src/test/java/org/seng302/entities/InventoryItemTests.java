@@ -2,7 +2,10 @@ package org.seng302.entities;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.minidev.json.JSONObject;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.seng302.persistence.BusinessRepository;
 import org.seng302.persistence.InventoryItemRepository;
 import org.seng302.persistence.ProductRepository;
@@ -12,10 +15,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.math.BigDecimal;
 import java.text.ParseException;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 @SpringBootTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -316,10 +319,10 @@ public class InventoryItemTests {
         expectedJson.put("quantity", invItem.getQuantity());
         expectedJson.put("pricePerItem", invItem.getPricePerItem());
         expectedJson.put("totalPrice", invItem.getTotalPrice());
-        expectedJson.put("manufactured", invItem.getManufactured());
-        expectedJson.put("sellBy", invItem.getSellBy());
-        expectedJson.put("bestBefore", invItem.getBestBefore());
-        expectedJson.put("expires", invItem.getExpires());
+        expectedJson.put("manufactured", invItem.getManufactured().toString());
+        expectedJson.put("sellBy", invItem.getSellBy().toString());
+        expectedJson.put("bestBefore", invItem.getBestBefore().toString());
+        expectedJson.put("expires", invItem.getExpires().toString());
         ObjectMapper mapper = new ObjectMapper();
         assertEquals(mapper.readTree(expectedJson.toJSONString()), mapper.readTree(invItem.constructJSONObject().toJSONString()));
     }
@@ -336,7 +339,7 @@ public class InventoryItemTests {
         expectedJson.put("id", invItem.getId());
         expectedJson.put("product", invItem.getProduct().constructJSONObject());
         expectedJson.put("quantity", invItem.getQuantity());
-        expectedJson.put("expires", invItem.getExpires());
+        expectedJson.put("expires", invItem.getExpires().toString());
         ObjectMapper mapper = new ObjectMapper();
         assertEquals(mapper.readTree(expectedJson.toJSONString()), mapper.readTree(invItem.constructJSONObject().toJSONString()));
     }

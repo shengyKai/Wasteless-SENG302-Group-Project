@@ -11,10 +11,9 @@ import org.springframework.web.server.ResponseStatusException;
 
 import javax.persistence.*;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.time.ZoneId;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -29,7 +28,7 @@ public class User extends Account {
     private LocalDate dob;
     private String phNum;
     private Location address;
-    private LocalDate created;
+    private Instant created;
     private Set<Business> businessesAdministered = new HashSet<>();
     private Set<Business> businessesOwned = new HashSet<>();
 
@@ -245,7 +244,7 @@ public class User extends Account {
      * @return Date the account was created
      */
     @ReadOnlyProperty
-    public LocalDate getCreated(){
+    public Instant getCreated(){
         return this.created;
     }
 
@@ -253,7 +252,7 @@ public class User extends Account {
      * Record the date when the account is created
      * @param date of account creation
      */
-    public void setCreated(LocalDate date){
+    public void setCreated(Instant date){
         this.created = date;
     }
 
@@ -498,7 +497,7 @@ public class User extends Account {
          * @return Builder with date of birth set.
          */
         public Builder withDob(String dobString) throws ParseException {
-            DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+            DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE;
             this.dob = LocalDate.parse(dobString, dateTimeFormatter);
             return this;
         }
@@ -549,7 +548,7 @@ public class User extends Account {
             user.setDob(this.dob);
             user.setPhNum(this.phNum);
             user.setAddress(this.address);
-            user.setCreated(LocalDate.now());
+            user.setCreated(Instant.now());
             user.setRole("user");
             return user;
         }

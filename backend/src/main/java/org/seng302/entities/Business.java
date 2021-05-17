@@ -10,8 +10,9 @@ import org.springframework.web.server.ResponseStatusException;
 import javax.persistence.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import java.time.Instant;
 import java.time.LocalDate;
-import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 @Entity
@@ -34,7 +35,7 @@ public class Business {
     @Column(nullable = false)
     private String businessType;
     @Column
-    private LocalDate created;
+    private Instant created;
 
     @OneToMany (fetch = FetchType.EAGER, mappedBy = "business", cascade = CascadeType.REMOVE)
     private List<Product> catalogue = new ArrayList<>();
@@ -170,7 +171,7 @@ public class Business {
      * Gets business date created
      * @param createdAt date created
      */
-    private void setCreated(LocalDate createdAt) {
+    private void setCreated(Instant createdAt) {
         if (createdAt == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The date the business was created cannot be null");
         }
@@ -184,7 +185,7 @@ public class Business {
      * Gets date created
      * @return date created
      */
-    public LocalDate getCreated() {
+    public Instant getCreated() {
         return this.created;
     }
 
@@ -431,7 +432,7 @@ public class Business {
             business.setAddress(this.address);
             business.setBusinessType(this.businessType);
             business.setDescription(this.description);
-            business.setCreated(LocalDate.now());
+            business.setCreated(Instant.now());
             business.setPrimaryOwner(this.primaryOwner);
             return business;
         }
@@ -450,7 +451,7 @@ public class Business {
                 this.id.equals(business.getId()) &&
                 this.name.equals(business.getName()) &&
                 this.description.equals(business.getDescription()) &&
-                this.created.equals(business.getCreated());
+                        ChronoUnit.SECONDS.between(this.created, business.getCreated()) < 1;
     }
 
     @Override
