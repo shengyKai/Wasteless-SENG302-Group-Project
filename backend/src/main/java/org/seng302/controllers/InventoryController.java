@@ -47,31 +47,36 @@ public class InventoryController {
     @PostMapping("/businesses/{id}/inventory")
     public void addInventory(@PathVariable(name="id") Long businessId, HttpServletRequest request, @RequestBody JSONObject inventory) throws Exception {
         logger.info(String.format("Attempting to add and inventory item for business=%d", businessId));
-        // get business + sanity
-        Business business = businessRepository.getBusinessById(businessId);
-        // check business perms
-        business.checkSessionPermissions(request);
-        // check body exists
-        if (inventory == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Inventory information not provided");
+        try {
+            // get business + sanity
+            Business business = businessRepository.getBusinessById(businessId);
+            // check business perms
+            business.checkSessionPermissions(request);
+            // check body exists
+            if (inventory == null) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Inventory information not provided");
+            }
+            // get productCode from body
+            String productCode = inventory.getAsString("productId");
+            // sanity on product
+            Product product = productRepository.getProductByBusinessAndProductCode(business, productCode);
+
+            InventoryItem item = new InventoryItem.Builder()
+                    .withProduct(product)
+                    .withPricePerItem(inventory.getAsString("pricePerItem"))
+                    .withQuantity(inventory.getAsNumber("quantity").intValue())
+                    .withBestBefore(inventory.getAsString("bestBefore"))
+                    .withSellBy(inventory.getAsString("sellBy"))
+                    .withManufactured(inventory.getAsString("manufactured"))
+                    .withExpires(inventory.getAsString("expires"))
+                    .withTotalPrice(inventory.getAsString("totalPrice"))
+                    .build();
+
+            inventoryItemRepository.save(item);
+        } catch (ResponseStatusException error) {
+            logger.warn(error.getMessage());
+            throw error;
         }
-        // get productCode from body
-        String productCode = inventory.getAsString("productId");
-        // sanity on product
-        Product product = productRepository.getProductByBusinessAndProductCode(business, productCode);
-
-        InventoryItem item = new InventoryItem.Builder()
-                .withProduct(product)
-                .withPricePerItem(inventory.getAsString("pricePerItem"))
-                .withQuantity(inventory.getAsNumber("quantity").intValue())
-                .withBestBefore(inventory.getAsString("bestBefore"))
-                .withSellBy(inventory.getAsString("sellBy"))
-                .withManufactured(inventory.getAsString("manufactured"))
-                .withExpires(inventory.getAsString("expires"))
-                .withTotalPrice(inventory.getAsString("totalPrice"))
-                .build();
-
-        inventoryItemRepository.save(item);
     }
 
     /**

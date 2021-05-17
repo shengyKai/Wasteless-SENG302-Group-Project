@@ -114,9 +114,9 @@ public class InventoryControllerTest {
                 "  \"pricePerItem\": 6.5,\n" +
                 "  \"totalPrice\": 21.99,\n" +
                 "  \"manufactured\": \"2021-05-12\",\n" +
-                "  \"sellBy\": \"2021-05-12\",\n" +
-                "  \"bestBefore\": \"2021-05-12\",\n" +
-                "  \"expires\": \"2021-05-12\"\n" +
+                "  \"sellBy\": \"2021-12-12\",\n" +
+                "  \"bestBefore\": \"2021-12-12\",\n" +
+                "  \"expires\": \"2021-12-12\"\n" +
                 "}";
         mockMvc.perform(MockMvcRequestBuilders
                 .post("/businesses/1/inventory")
@@ -278,9 +278,9 @@ public class InventoryControllerTest {
                 "  \"pricePerItem\": 6.5,\n" +
                 "  \"totalPrice\": 21.99,\n" +
                 "  \"manufactured\": \"2021-05-12\",\n" +
-                "  \"sellBy\": \"2021-05-12\",\n" +
-                "  \"bestBefore\": \"2021-05-12\",\n" +
-                "  \"expires\": \"2021-05-12\"\n" +
+                "  \"sellBy\": \"2021-12-12\",\n" +
+                "  \"bestBefore\": \"2021-12-12\",\n" +
+                "  \"expires\": \"2021-12-12\"\n" +
                 "}";
         mockMvc.perform(MockMvcRequestBuilders
                 .post("/businesses/1/inventory")

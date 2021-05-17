@@ -15,13 +15,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.math.BigDecimal;
 import java.text.ParseException;
 import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 
-import com.fasterxml.jackson.databind.deser.impl.ExternalTypeHandler.Builder;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -312,7 +311,7 @@ public class InventoryItemTests {
         .withExpires("2021-06-01")
         .build();
         assertThrows(ResponseStatusException.class, () -> {
-            invItem.setPricePerItem(new BigDecimal ("10000"));
+            invItem.setPricePerItem(new BigDecimal("10000"));
         });
     }
     @Test
@@ -368,7 +367,7 @@ public class InventoryItemTests {
         .withQuantity(2)
         .withExpires("2021-06-01");
 
-        assertThrows(ParseException.class, () -> {
+        assertThrows(DateTimeParseException.class, () -> {
             builder.withManufactured("201x-09-09");
         });
     }
@@ -414,7 +413,7 @@ public class InventoryItemTests {
         .withQuantity(2)
         .withExpires("2021-06-01");
 
-        assertThrows(ParseException.class, () -> {
+        assertThrows(DateTimeParseException.class, () -> {
             builder.withSellBy("20x-01-01");
         });
     }
@@ -461,7 +460,7 @@ public class InventoryItemTests {
         .withQuantity(2)
         .withExpires("2021-06-01");
 
-        assertThrows(ParseException.class, () -> {
+        assertThrows(DateTimeParseException.class, () -> {
         invItem 
         .withBestBefore("2020-x-01");
         });
