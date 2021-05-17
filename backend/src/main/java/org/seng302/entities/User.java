@@ -8,6 +8,7 @@ import org.seng302.tools.JsonTools;
 import org.springframework.data.annotation.ReadOnlyProperty;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
+import org.yaml.snakeyaml.error.Mark;
 
 import javax.persistence.*;
 import java.text.ParseException;
@@ -31,6 +32,7 @@ public class User extends Account {
     private Date created;
     private Set<Business> businessesAdministered = new HashSet<>();
     private Set<Business> businessesOwned = new HashSet<>();
+    private Set<MarketplaceCard> cardsCreated = new HashSet<>();
 
     /* Matches:
     123-456-7890
@@ -303,6 +305,24 @@ public class User extends Account {
             addAll(getBusinessesAdministered());
         }};
         return mergedSet;
+    }
+
+    /**
+     * Gets the set of marketplace cards this user has created
+     * @return Set of cards created
+     */
+    @OneToMany(mappedBy = "creator", fetch = FetchType.EAGER)
+    public Set<MarketplaceCard> getCardsCreated() {
+        return this.cardsCreated;
+    }
+
+    /**
+     * For JPA only
+     * Sets the marketplace cards
+     * @param cards Set of marketplace cards
+     */
+    private void setCardsCreated(Set<MarketplaceCard> cards) {
+        this.cardsCreated = cards;
     }
 
     /**
