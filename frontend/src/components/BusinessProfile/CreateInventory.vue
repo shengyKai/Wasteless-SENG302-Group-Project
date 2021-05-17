@@ -43,7 +43,7 @@
                     v-model="pricePerItem"
                     label="Price Per Item"
                     prefix="$"
-                    :rules="maxCharRules.concat(priceRules)"
+                    :rules="maxCharRules.concat(smallPriceRules)"
                     outlined
                   />
                 </v-col>
@@ -53,7 +53,7 @@
                     v-model="totalPrice"
                     label="Total Price"
                     prefix="$"
-                    :rules="maxCharRules.concat(priceRules)"
+                    :rules="maxCharRules.concat(hugePriceRules)"
                     outlined/>
                 </v-col>
                 <!-- INPUT: Manufactured. Only take in value in dd/mm/yyyy format.-->
@@ -138,17 +138,14 @@ export default {
         'Edward Banana',
       ],
       productCode : "",
-      quantity : '',
+      quantity : "",
       pricePerItem: "",
       totalPrice: "",
-      manufactured: new Date().toISOString().slice(0,10),
-      sellBy: new Date().toISOString().slice(0,10),
-      bestBefore: new Date().toISOString().slice(0,10),
-      expires: new Date().toISOString().slice(0,10),
+      manufactured: "",
+      sellBy: "",
+      bestBefore: "",
+      expires: new Date().toISOString().slice(0,10), //Keep this so the next person know what to use if he/she wan
 
-      alphabetNumRules: [ //Not getting used atm
-        field => ( field.length === 0 || /^[a-zA-Z0-9 ]+$/i.test(field)) || 'Naming must only contain alphabet or number'
-      ],
       maxCharRules: [
         field => (field.length <= 100) || 'Reached max character limit: 100'
       ],
@@ -160,17 +157,14 @@ export default {
       numberRules: [
         field => /(^[0-9]*$)/.test(field) || 'Must contain numbers only'
       ],
-      priceRules: [
-        //A price must be numbers and may contain a decimal followed by exactly two numbers
-        field => /(^\d{1,5}(\.\d{2})?$)|^$/.test(field) || 'Must be a valid price'
+      smallPriceRules: [
+        //A price must be numbers and may contain a decimal followed by exactly two numbers (4digit)
+        field => /(^\d{1,4}(\.\d{2})?$)|^$/.test(field) || 'Must be a valid price'
       ],
-      productCodeRules: [
-        // Product code rules was not being used atm as decided to use a v-selector for this field
-        field => field.length <= 15 || 'Reached max character limit: 15',
-        field => !/ /.test(field) || 'Must not contain a space',
-        field => /^[-A-Z0-9]+$/.test(field) || 'Must be all uppercase letters, numbers and dashes.',
-        field => !this.unavailableProductCodes.includes(field) || 'Product code is unavailable',
-      ]
+      hugePriceRules: [
+        //A price must be numbers and may contain a decimal followed by exactly two numbers (6digit)
+        field => /(^\d{1,6}(\.\d{2})?$)|^$/.test(field) || 'Must be a valid price'
+      ],
     };
   },
   methods: {
@@ -178,17 +172,11 @@ export default {
     closeDialog() {
       this.$emit('closeDialog');
     },
-    todayDate () {
-      // Get today date, month, year to restrick calender picker
-      let today = new Date();
-      return new Date(today.getFullYear, today.getMonth, today.getDay);
+    async CreateInventory() { //to see the attribute in console for debugging or testing, remove after this page is done
+      console.log(this.expires);
+      return;
     }
   },
-  //as any components are added to the dom, mounted() will be called
-  mounted () {
-    //sets maxDate and date of birth value
-    this.today = this.minimumDate().toISOString().slice(0, 10);
-  }
 };
 </script>
 
