@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Repository;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -31,6 +32,14 @@ public interface ProductRepository extends CrudRepository<Product, Long>{
          *          * of the product
          */
         Optional<Product> findByProductCode(@Param("productCode") String productCode);
+
+        /**
+        * Find all then products in the repository which belong to the given business.
+        * @param business The business which owns the products.
+        * @return A list of products belonging to the business.
+        */
+        public List<Product> findAllByBusiness(@Param("business") Business business);
+
         /**
          * Gets a product from the repository.
          * If the product does not exist then a 406 Not Acceptable is thrown

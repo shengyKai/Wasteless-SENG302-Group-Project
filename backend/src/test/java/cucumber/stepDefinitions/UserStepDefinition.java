@@ -1,9 +1,7 @@
 package cucumber.stepDefinitions;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.cucumber.java.Before;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
@@ -17,11 +15,11 @@ import org.seng302.persistence.AccountRepository;
 import org.seng302.persistence.UserRepository;
 import org.seng302.tools.PasswordAuthenticator;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -35,6 +33,7 @@ import java.time.temporal.ChronoUnit;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+@AutoConfigureMockMvc
 public class UserStepDefinition {
 
     @Autowired
@@ -62,14 +61,6 @@ public class UserStepDefinition {
     private Location userAddress = Location.covertAddressStringToLocation("1,Bob Street,Bob,Bob,Bob,Bob,1010");
 
     private Long userID;
-
-    @Before
-    public void Setup() {
-        objectMapper.enable(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT);
-        mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
-        userRepository.deleteAll();
-        accountRepository.deleteAll();
-    }
 
     @Given("the user with the email {string} does not exist")
     public void theUserWithTheEmailDoesNotExist(String email) {
@@ -220,7 +211,6 @@ public class UserStepDefinition {
 
              JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
              JSONObject jsonObject = (JSONObject) parser.parse(result.getResponse().getContentAsString());
-             System.out.println(jsonObject.getAsNumber("userId"));
              // Refuses to cast from integer to long. So used the below work around
              Integer userId = (Integer) jsonObject.getAsNumber("userId");
              userID = userId.longValue();
@@ -244,7 +234,6 @@ public class UserStepDefinition {
 
             JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
             JSONObject jsonObject = (JSONObject) parser.parse(result.getResponse().getContentAsString());
-            System.out.println(jsonObject.getAsNumber("userId"));
             // Refuses to cast from integer to long. So used the below work around
             Integer userId = (Integer) jsonObject.getAsNumber("userId");
             userID = userId.longValue();
