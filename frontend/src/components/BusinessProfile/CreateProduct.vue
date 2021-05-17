@@ -58,7 +58,7 @@
                     :prefix="currency.symbol"
                     :suffix="currency.code"
                     :rules="priceRules"
-                    :hint="currency.errorMsg"
+                    :hint="currencyErrorMessage"
                     outlined
                   />
                 </v-col>
@@ -108,6 +108,7 @@ export default {
       unavailableProductCodes: [],
       currency: {},
       valid: false,
+      currencyErrorMessage: "",
       maxCharRules: [
         field => (field.length <= 50) || 'Reached max character limit: 50',
       ],
@@ -145,7 +146,11 @@ export default {
     // sold in. It will have blank fields if no currency can be found from the country.
     const business = await getBusiness(this.$store.state.createProductDialogBusiness);
     const countryOfSale = business.address.country;
-    this.currency = await currencyFromCountry(countryOfSale);
+    const currencyResult = await currencyFromCountry(countryOfSale);
+    this.currency = currencyResult[0];
+    if (currencyResult.length === 2) {
+      this.currencyErrorMessage = currencyResult[1];
+    }
   },
   methods: {
     /**

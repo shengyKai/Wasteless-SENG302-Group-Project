@@ -6,8 +6,7 @@ import { MaybeError } from "@/api/internal";
 export type Currency = {
   code: string,
   name: string,
-  symbol: string,
-  errorMsg: string
+  symbol: string
 };
 
 /**
@@ -64,8 +63,7 @@ function currencyResponseHasExpectedFormat(response: any): response is [Currenci
 export const defaultCurrency: Currency = {
   code: "",
   name: "",
-  symbol: "",
-  errorMsg: ", so no currency is shown"
+  symbol: ""
 };
 
 /**
@@ -75,15 +73,14 @@ export const defaultCurrency: Currency = {
  * @param country The name of a country to use in the API request for the currency.
  * @returns An object containing information on the currency of the given country.
  */
-export async function currencyFromCountry(country: string): Promise<Currency> {
+export async function currencyFromCountry(country: string): Promise<(Currency | string)[]> {
 
   const response = await queryCurrencyAPI(country);
 
   if (typeof response === 'string') {
     const errorDefault = { ...defaultCurrency };
     console.warn(response);
-    errorDefault.errorMsg = response + errorDefault.errorMsg;
-    return errorDefault;
+    return [errorDefault, response];
   }
 
   const currency = await getCurrencyFromAPIResponse(response);
@@ -91,11 +88,10 @@ export async function currencyFromCountry(country: string): Promise<Currency> {
   if (typeof currency === 'string') {
     const errorDefault = { ...defaultCurrency };
     console.warn(currency);
-    errorDefault.errorMsg = "There was a fault with the system" + errorDefault.errorMsg;
-    return errorDefault;
+    return [errorDefault, currency];
   }
 
-  return currency;
+  return [currency];
 }
 
 /**
