@@ -15,7 +15,8 @@ describe('currency.ts', () => {
     } as any
     );
     const response = await currencyFromCountry("Some wrong country");
-    expect(response.errorMsg).toBe("No country with name Some wrong country was found, so no currency is shown");
+    expect(response.length).toBe(2);
+    expect(response[1]).toBe("No country with name Some wrong country was found");
   });
 
   it('Returns with a format error message to the frontend when API responds with a country', async () => {
@@ -25,7 +26,8 @@ describe('currency.ts', () => {
     } as any
     );
     const response = await currencyFromCountry("Australia");
-    expect(response.errorMsg).toBe("There was a fault with the system, so no currency is shown");
+    expect(response.length).toBe(2);
+    expect(response[1]).toBe("API response was not in readable format");
   });
 
   it('Returns with no error message to the frontend when API responds with a country with correct format', async () => {
@@ -38,7 +40,7 @@ describe('currency.ts', () => {
       }]}]) as any
     });
     const response = await currencyFromCountry("Some correct country");
-    expect(response.errorMsg).toBe(undefined);
+    expect(response.length).toBe(1);
   });
 
   it('Returns no currency to the frontend and outputs to the console when API can\'t be reached', async () => {
@@ -94,7 +96,7 @@ describe('currency.ts', () => {
         symbol: '$'
       }]}]) as any
     });
-    const currency = await currencyFromCountry("Australia");
+    const currency = (await currencyFromCountry("Australia"))[0];
     expect(currency).toEqual({
       code: 'AUD',
       name: 'Australian Dollar',
@@ -119,7 +121,7 @@ describe('currency.ts', () => {
         }
       ]}]) as any
     });
-    const currency = await currencyFromCountry("Bhutan");
+    const currency = (await currencyFromCountry("Bhutan"))[0];
     expect(currency).toEqual({
       "code": "BTN",
       "name": "Bhutanese ngultrum",

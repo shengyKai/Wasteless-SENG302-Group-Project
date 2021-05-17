@@ -71,24 +71,25 @@ export const defaultCurrency: Currency = {
  * If the request is successful the currency from the API will be returned. If it is unsuccessful then
  * a default currency object with blank code, name and symbol fields will be returned.
  * @param country The name of a country to use in the API request for the currency.
- * @returns An object containing information on the currency of the given country.
+ * @returns A list containing the Currency of the country(defaultCurrency if any errors occur) at index 0, 
+ * and an error message at index 1 if any errors occur.
  */
 export async function currencyFromCountry(country: string): Promise<(Currency | string)[]> {
 
   const response = await queryCurrencyAPI(country);
 
   if (typeof response === 'string') {
-    const errorDefault = { ...defaultCurrency };
+    const errorDefaultCurrency = { ...defaultCurrency };
     console.warn(response);
-    return [errorDefault, response];
+    return [errorDefaultCurrency, response];
   }
 
   const currency = await getCurrencyFromAPIResponse(response);
 
   if (typeof currency === 'string') {
-    const errorDefault = { ...defaultCurrency };
+    const errorDefaultCurrency = { ...defaultCurrency };
     console.warn(currency);
-    return [errorDefault, currency];
+    return [errorDefaultCurrency, currency];
   }
 
   return [currency];

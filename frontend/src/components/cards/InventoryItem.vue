@@ -290,8 +290,7 @@ export default {
   async created() {
     // When the catalogue item is created, the currency will be set to the currency of the country the product is being
     // sold in. It will have blank fields if no currency can be found from the country.
-    const currencyResult = await currencyFromCountry(this.product.countryOfSale);
-    this.currency = currencyResult[0];
+    this.currency = (await currencyFromCountry(this.product.countryOfSale))[0];
   },
   computed: {
     /**
