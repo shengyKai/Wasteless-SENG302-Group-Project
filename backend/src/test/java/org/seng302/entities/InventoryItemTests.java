@@ -10,6 +10,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.math.BigDecimal;
 import java.text.ParseException;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -93,7 +94,7 @@ public class InventoryItemTests {
         InventoryItem invItem = new InventoryItem.Builder()
                 .withProduct(testProduct)
                 .withQuantity(3)
-                .withPricePerItem(2.69)
+                .withPricePerItem("2.69")
                 .withManufactured("2021-03-11")
                 .withSellBy("2021-05-21")
                 .withBestBefore("2021-05-28")
@@ -206,7 +207,7 @@ public class InventoryItemTests {
                 .withProduct(testProduct)
                 .withQuantity(2)
                 .withExpires("2021-06-01")
-                .withPricePerItem(6.90)
+                .withPricePerItem("6.90")
                 .withTotalPrice(null)
                 .build();
         inventoryItemRepository.save(invItem);
@@ -220,7 +221,7 @@ public class InventoryItemTests {
                 .withProduct(testProduct)
                 .withQuantity(2)
                 .withExpires("2021-06-01")
-                .withTotalPrice(21.69)
+                .withTotalPrice("21.69")
                 .build();
         inventoryItemRepository.save(invItem);
         InventoryItem testInvItem = inventoryItemRepository.findById(invItem.getId()).get();

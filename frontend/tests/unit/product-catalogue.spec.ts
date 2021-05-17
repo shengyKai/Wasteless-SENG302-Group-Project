@@ -3,7 +3,7 @@ import Vuetify from 'vuetify';
 import Vuex, { Store } from 'vuex';
 import { createLocalVue, Wrapper, mount } from '@vue/test-utils';
 import ProductCatalogue from '@/components/ProductCatalogue.vue';
-import ProductCatalogueItem from '@/components/ProductCatalogueItem.vue';
+import ProductCatalogueItem from '@/components/cards/ProductCatalogueItem.vue';
 import { Product } from '@/api/internal';
 import * as api from '@/api/internal';
 import { castMock, flushQueue } from './utils';

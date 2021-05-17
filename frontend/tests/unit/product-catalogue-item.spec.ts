@@ -6,7 +6,7 @@
 import Vue from 'vue';
 import Vuetify from 'vuetify';
 import { createLocalVue, mount, Wrapper } from '@vue/test-utils';
-import ProductCatalogueItem from '@/components/ProductCatalogueItem.vue';
+import ProductCatalogueItem from '@/components/cards/ProductCatalogueItem.vue';
 // import ProductImageCarousel from "@/components/utils/ProductImageCarousel.vue";
 import FullProductDescription from "@/components/utils/FullProductDescription.vue";
 
@@ -71,27 +71,27 @@ describe('ProductCatalogueItem.vue', () => {
         $router: {
           go: () => undefined,
         }
+      },
+      propsData: {
+        product: {
+          name: "Some Product",
+          description: "Some description",
+          created: "Some Date Added",
+          manufacturer: "Some Manufacturer",
+          recommendedRetailPrice: 100,
+          id: "Some Code",
+          readMoreActivated: false,
+          images: [
+            {
+              id: 1,
+              filename: 'test_filename',
+            }
+          ],
+          countryOfSale: "someCountry",
+        },
+        businessId: 77,
       }
       //Sets up each test case with some values to ensure the Product Catalogue item component works as intended
-    });
-    await wrapper.setProps({
-      product: {
-        name: "Some Product",
-        description: "Some description",
-        created: "Some Date Added",
-        manufacturer: "Some Manufacturer",
-        recommendedRetailPrice: 100,
-        id: "Some Code",
-        readMoreActivated: false,
-        images: [
-          {
-            id: 1,
-            filename: 'test_filename',
-          }
-        ],
-        countryOfSale: "someCountry",
-      },
-      businessId: 77,
     });
     await wrapper.setData({
       currency: {
@@ -189,6 +189,105 @@ describe('ProductCatalogueItem.vue', () => {
   */
   it("Must contain the product code", () => {
     expect(wrapper.text()).toContain("Some Code");
+  });
+
+  it("When the product's description is not defined, the computed descriptiopn will be 'Not set'", async () => {
+    await wrapper.setProps({
+      product: {
+        name: "Some Product",
+        created: "Some Date Added",
+        manufacturer: "Some Manufacturer",
+        recommendedRetailPrice: 100,
+        id: "Some Code",
+        readMoreActivated: false,
+        images: [],
+        countryOfSale: "someCountry"
+      }
+    });
+    expect(wrapper.vm.description).toEqual("Not set");
+  });
+
+  it("When the product's description is defined, the computed description will be the given product description", async () => {
+    await wrapper.setProps({
+      product: {
+        name: "Some Product",
+        created: "Some Date Added",
+        description: "Some Description",
+        manufacturer: "Some Manufacturer",
+        recommendedRetailPrice: 100,
+        id: "Some Code",
+        readMoreActivated: false,
+        images: [],
+        countryOfSale: "someCountry"
+      }
+    });
+    expect(wrapper.vm.description).toEqual("Some Description");
+  });
+
+  it("When the product's manufacturer is not defined, the computed manufacturer will be 'Not set'", async () => {
+    await wrapper.setProps({
+      product: {
+        name: "Some Product",
+        description: "Some Description",
+        created: "Some Date Added",
+        recommendedRetailPrice: 100,
+        id: "Some Code",
+        readMoreActivated: false,
+        images: [],
+        countryOfSale: "someCountry"
+      }
+    });
+    expect(wrapper.vm.manufacturer).toEqual("Not set");
+  });
+
+  it("When the product's manufacturer is defined, the computed manufacturer will be the given product manufacturer", async () => {
+    await wrapper.setProps({
+      product: {
+        name: "Some Product",
+        created: "Some Date Added",
+        description: "Some Description",
+        manufacturer: "Some Manufacturer",
+        recommendedRetailPrice: 100,
+        id: "Some Code",
+        readMoreActivated: false,
+        images: [],
+        countryOfSale: "someCountry"
+      }
+    });
+    expect(wrapper.vm.manufacturer).toEqual("Some Manufacturer");
+  });
+
+  it("When the product's RRP is not defined, the computed RRP will be 'Not set'", async () => {
+    await wrapper.setProps({
+      product: {
+        name: "Some Product",
+        created: "Some Date Added",
+        description: "Some Description",
+        manufacturer: "Some Manufacturer",
+        id: "Some Code",
+        readMoreActivated: false,
+        images: [],
+        countryOfSale: "someCountry"
+      }
+    });
+    expect(wrapper.vm.recommendedRetailPrice).toEqual("Not set");
+  });
+
+  it("When the product's RRP is defined, the computed RRP will be the given product RRP with the items currency symbol and code", async () => {
+    await wrapper.setProps({
+      product: {
+        name: "Some Product",
+        created: "Some Date Added",
+        description: "Some Description",
+        manufacturer: "Some Manufacturer",
+        recommendedRetailPrice: 100,
+        id: "Some Code",
+        readMoreActivated: false,
+        images: [],
+        countryOfSale: "someCountry"
+      }
+    });
+    expect(wrapper.vm.recommendedRetailPrice).toEqual("Currency symbol100 Currency code");
   });
 
   /**
