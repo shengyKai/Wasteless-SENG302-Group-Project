@@ -427,7 +427,7 @@ public class Business {
                 this.id.equals(business.getId()) &&
                 this.name.equals(business.getName()) &&
                 this.description.equals(business.getDescription()) &&
-                        ChronoUnit.SECONDS.between(this.created, business.getCreated()) < 1;
+                ChronoUnit.SECONDS.between(this.created, business.getCreated()) == 0;
     }
 
     @Override
