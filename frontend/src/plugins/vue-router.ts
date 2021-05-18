@@ -8,6 +8,7 @@ import BusinessProfile from "../components/BusinessProfile/index.vue";
 import SearchResults from "../components/SearchResults.vue";
 import HomePage from "../components/HomePage.vue";
 import ProductCatalogue from "../components/ProductCatalogue.vue";
+import Inventory from "../components/Inventory.vue";
 import InventoryItem from "../components/cards/InventoryItem.vue";
 
 
@@ -62,6 +63,11 @@ const routes = [
     path: "/business/:id/products",
     component: ProductCatalogue,
     meta: { title: 'Buisness Products' }
+  },
+  { // Router for inventory page (Inventory page frontend dev please use this and remove this line afterward)
+    path: "/inventory",
+    component: Inventory,
+    meta: { title: 'Inventory' }
   },
   { // TODO Remove once inventory page is created
     path: "/inventoryitem",

@@ -208,7 +208,20 @@ export default {
       this.$router.go(); // refresh the page to see the changes
     },
   },
+  computed: {
+    /**
+     * Method to change date format into a more human readable format
+     */
+    dateCreated() {
+      if (this.product.created === undefined) return '';
+      const dateCreated = new Date(this.product.created);
+      const parts = dateCreated.toDateString().split(' ');
+      return `${parts[2]} ${parts[1]} ${parts[3]}`;
+      // return `${dateCreated.toDateString()}`;
+    }
+  }
 };
+
 </script>
 
 <style scoped>
