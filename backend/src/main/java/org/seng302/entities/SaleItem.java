@@ -1,6 +1,8 @@
 package org.seng302.entities;
 
 import lombok.NoArgsConstructor;
+import net.minidev.json.JSONObject;
+import org.seng302.tools.JsonTools;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -106,6 +108,15 @@ public class SaleItem {
      */
     public Business getBusiness() {
         return this.inventoryItem.getBusiness();
+    }
+
+    public JSONObject constructJSONObject() {
+        var object = new JSONObject();
+        object.put("id", getSaleId());
+        //object.put("", getInventoryItem().constructJSONObject());
+
+        JsonTools.removeNullsFromJson(object);
+        return object;
     }
 
     /**

@@ -1,5 +1,6 @@
 package org.seng302.controllers;
 
+import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -13,10 +14,7 @@ import org.seng302.persistence.SaleItemRepository;
 import org.seng302.persistence.UserRepository;
 import org.seng302.tools.AuthenticationTokenManager;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.HttpServletRequest;
@@ -77,6 +75,24 @@ public class SaleController {
 
 
             response.setStatus(201);
+        } catch (Exception error) {
+            logger.error(error.getMessage());
+            throw error;
+        }
+    }
+
+    @GetMapping("/businesses/{id}/listings")
+    public JSONArray getSaleItemsForBusiness(@PathVariable Long id, HttpServletRequest request) throws Exception {
+        try {
+            AuthenticationTokenManager.checkAuthenticationToken(request);
+            logger.info(String.format("Getting sales item for business (businessId=%d).", id));
+            Business business = businessRepository.getBusinessById(id);
+
+            var response = new JSONArray();
+            for (SaleItem saleItem : saleItemRepository.findAllForBusiness(business)) {
+                response.add(saleItem.constructJSONObject());
+            }
+            return response;
         } catch (Exception error) {
             logger.error(error.getMessage());
             throw error;
