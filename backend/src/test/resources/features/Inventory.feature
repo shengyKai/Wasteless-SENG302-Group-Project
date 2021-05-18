@@ -45,6 +45,6 @@ Feature: U19 - Create Inventory
   Scenario: AC4 - Inventory items have additional dates
     Given I am an administrator of the business
     And I am logged into my account
-    When I create an inventory item with product code "APPLE", quantity 3, expiry "2022-05-21", manufactured on "2022-03-20", sell by "2022-05-19" and best before "2022-05-20"
+    When I create an inventory item with product code "APPLE", quantity 3, expiry "2022-05-21", manufactured on "2020-03-20", sell by "2022-05-19" and best before "2022-05-20"
     Then I expect the inventory item to be created
 
