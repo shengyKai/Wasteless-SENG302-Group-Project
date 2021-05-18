@@ -6,9 +6,9 @@ import org.springframework.web.server.ResponseStatusException;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 @NoArgsConstructor
 @Entity
@@ -32,10 +32,10 @@ public class SaleItem {
     private String moreInfo;
 
     @Column(name = "created")
-    private Date created;
+    private Instant created;
 
     @Column(name = "closes")
-    private Date closes;  // Defaults to expiry date of product being sold
+    private LocalDate closes;  // Defaults to expiry date of product being sold
 
 
     // Getters and Setters
@@ -79,19 +79,19 @@ public class SaleItem {
 
     public void setMoreInfo(String moreInfo) { this.moreInfo = moreInfo; }
 
-    public Date getCreated() { return created; }
+    public Instant getCreated() { return created; }
 
-    public void setCreated(Date created) { this.created = created; }
+    public void setCreated(Instant created) { this.created = created; }
 
-    public Date getCloses() { return closes; }
+    public LocalDate getCloses() { return closes; }
 
     /**
      * Defaults to expiry date of product
      * @param closes date
      */
-    public void setCloses(String closes) throws ParseException {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        this.closes = dateFormat.parse(closes);
+    public void setCloses(String closes) {
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE;
+        this.closes = LocalDate.parse(closes, dateTimeFormatter);
     }
 
     public void setCloses() {
@@ -183,7 +183,7 @@ public class SaleItem {
                 saleItem.setPrice();
             }
             saleItem.setMoreInfo(this.moreInfo);
-            saleItem.setCreated(new Date());
+            saleItem.setCreated(Instant.now());
             if (closes != null) {
                 saleItem.setCloses(this.closes);
             } else {

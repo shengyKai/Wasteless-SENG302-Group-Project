@@ -8,6 +8,8 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.seng302.exceptions.AccessTokenException;
 import org.seng302.persistence.BusinessRepository;
+import org.seng302.persistence.ImageRepository;
+import org.seng302.persistence.ProductRepository;
 import org.seng302.persistence.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -19,9 +21,14 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.text.ParseException;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Locale;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
@@ -33,6 +40,10 @@ public class BusinessTests {
     BusinessRepository businessRepository;
     @Autowired
     UserRepository userRepository;
+    @Autowired
+    ProductRepository productRepository;
+    @Autowired
+    ImageRepository imageRepository;
     @Mock
     HttpServletRequest request;
     @Mock
@@ -544,13 +555,10 @@ public class BusinessTests {
      */
     @Test
     public void setCreatedInitialValueTest() {
-        Date now = new Date();
         Business testBusiness2 = new Business.Builder().withBusinessType("Non-profit organisation").withName("Zesty Business")
                 .withAddress(Location.covertAddressStringToLocation("101,My Street,Ashburton,Christchurch,Canterbury,New Zealand,1010"))
                 .withDescription("A nice place").withPrimaryOwner(testUser2).build();
-        // Check that the difference between the time the business was created and the time at the start of exection of
-        // this function is less than 1 second
-        assertTrue(testBusiness2.getCreated().getTime() - now.getTime() < 1000);
+        assertTrue(ChronoUnit.SECONDS.between(Instant.now(), testBusiness2.getCreated()) < 20);
     }
 
     /**
@@ -870,5 +878,37 @@ public class BusinessTests {
         } catch (Exception e) {
             fail("No exception should be thrown when the user is the default global application admin");
         }
+    }
+
+    @Test
+    void getCatalogue_multipleImages_noDuplicates() {
+        Image testImage1 = imageRepository.save(new Image("filename1", "thumbnailFilename1"));
+        Image testImage2 = imageRepository.save(new Image("filename2", "thumbnailFilename2"));
+        Image testImage3 = imageRepository.save(new Image("filename3", "thumbnailFilename3"));
+        Image testImage4 = imageRepository.save(new Image("filename4", "thumbnailFilename4"));
+
+        Product testProduct1 = new Product.Builder()
+            .withName("Product 1")
+            .withProductCode("PROD1")
+            .withBusiness(testBusiness1)
+            .build();
+        testProduct1 = productRepository.save(testProduct1);      
+        testProduct1.addProductImage(testImage1);
+        testProduct1.addProductImage(testImage2);
+        testProduct1 = productRepository.save(testProduct1);
+          
+        Product testProduct2 = new Product.Builder()
+            .withName("Product 2")
+            .withProductCode("PROD2")
+            .withBusiness(testBusiness1)
+            .build();
+        testProduct2 = productRepository.save(testProduct2);
+        testProduct2.addProductImage(testImage3);
+        testProduct2.addProductImage(testImage4);
+        testProduct2 = productRepository.save(testProduct2);
+        
+
+        testBusiness1 = businessRepository.save(testBusiness1);
+        assertEquals(2, productRepository.getAllByBusiness(testBusiness1).size());
     }
 }

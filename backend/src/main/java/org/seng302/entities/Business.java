@@ -10,8 +10,9 @@ import org.springframework.web.server.ResponseStatusException;
 import javax.persistence.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import java.time.Instant;
 import java.time.LocalDate;
-import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 @Entity
@@ -34,7 +35,7 @@ public class Business {
     @Column(nullable = false)
     private String businessType;
     @Column
-    private Date created;
+    private Instant created;
 
     @OneToMany (fetch = FetchType.EAGER, mappedBy = "business", cascade = CascadeType.REMOVE)
     private List<Product> catalogue = new ArrayList<>();
@@ -50,22 +51,6 @@ public class Business {
             inverseJoinColumns = {@JoinColumn(name="user_id")}
     )
     private Set<User> administrators = new HashSet<>();
-
-
-    /**
-     *  Checks if the product exists within the business's product catalogue
-     * @param business the business
-     * @param productCode the product code of the given product
-     * @return true if the product exists within the business, false otherwise
-     */
-    public static boolean checkProductExistsWithinCatalogue(Business business, String productCode) {
-        for (Product product: business.getCatalogue()) {
-            if (product.getProductCode().equals(productCode)) {
-                return true;
-            }
-        }
-        return false;
-    }
 
     /**
      * Gets the id
@@ -170,7 +155,7 @@ public class Business {
      * Gets business date created
      * @param createdAt date created
      */
-    private void setCreated(Date createdAt) {
+    private void setCreated(Instant createdAt) {
         if (createdAt == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The date the business was created cannot be null");
         }
@@ -184,7 +169,7 @@ public class Business {
      * Gets date created
      * @return date created
      */
-    public Date getCreated() {
+    public Instant getCreated() {
         return this.created;
     }
 
@@ -200,7 +185,7 @@ public class Business {
 
         //Get the current date as of now and find the difference in years between the current date and the age of the user.
         long age = java.time.temporal.ChronoUnit.YEARS.between(
-            owner.getDob().toInstant().atZone(ZoneId.systemDefault()).toLocalDate(), LocalDate.now());
+            owner.getDob(), LocalDate.now());
         if (age < MinimumAge) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User is not of minimum age required to create a business");
         }
@@ -276,14 +261,6 @@ public class Business {
         ownerAdminSet.addAll(administrators);
         ownerAdminSet.add(primaryOwner);
         return ownerAdminSet;
-    }
-
-    /**
-     * The getter for the catalogue (list of products the business owns)
-     * @return the catalogue
-     */
-    public List<Product> getCatalogue() {
-        return catalogue;
     }
 
     /**
@@ -431,7 +408,7 @@ public class Business {
             business.setAddress(this.address);
             business.setBusinessType(this.businessType);
             business.setDescription(this.description);
-            business.setCreated(new Date());
+            business.setCreated(Instant.now());
             business.setPrimaryOwner(this.primaryOwner);
             return business;
         }
@@ -450,7 +427,7 @@ public class Business {
                 this.id.equals(business.getId()) &&
                 this.name.equals(business.getName()) &&
                 this.description.equals(business.getDescription()) &&
-                this.created.equals(business.getCreated());
+                        ChronoUnit.SECONDS.between(this.created, business.getCreated()) < 1;
     }
 
     @Override

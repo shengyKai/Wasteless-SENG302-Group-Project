@@ -35,9 +35,9 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.AdditionalMatchers.not;
 import static org.mockito.ArgumentMatchers.any;
-import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -92,7 +92,7 @@ class SaleControllerTest {
         object.put("quantity", 3);
         object.put("price", 10.5);
         object.put("moreInfo", "This is some more info about the product");
-        object.put("closes", "2021-07-21T23:59:00Z");
+        object.put("closes", "2021-07-21");
         return object;
     }
 
@@ -247,12 +247,10 @@ class SaleControllerTest {
         verify(saleItemRepository).save(captor.capture());
         SaleItem saleItem = captor.getValue();
 
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-
         assertSame(inventoryItem, saleItem.getInventoryItem());
         assertEquals(object.get("quantity"), saleItem.getQuantity());
         assertEquals(new BigDecimal(object.getString("price")), saleItem.getPrice());
         assertEquals(object.get("moreInfo"), saleItem.getMoreInfo());
-        assertEquals(dateFormat.parse(object.getString("closes")), saleItem.getCloses());
+        assertEquals(object.getString("closes"), saleItem.getCloses().toString());
     }
 }
