@@ -19,9 +19,9 @@ import java.util.*;
 public class Business {
 
     //Minimum age to create a business
-    private final int MinimumAge = 16;
-    private static final List<String> businessTypes = new ArrayList<>(Arrays.asList("Accommodation and Food Services", "Retail Trade", "Charitable organisation", "Non-profit organisation"));
-    private static final String textRegex = "[ a-zA-Z0-9\\p{Punct}]*";
+    private static final int MINIMUM_AGE = 16;
+    private static final List<String> BUSINESS_TYPES = Arrays.asList("Accommodation and Food Services", "Retail Trade", "Charitable organisation", "Non-profit organisation");
+    private static final String TEXT_REGEX = "[ a-zA-Z0-9\\p{Punct}]*";
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -71,7 +71,7 @@ public class Business {
         if (name.length() > 100) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The business name must be 100 characters or fewer");
         }
-        if (!name.matches(textRegex)) {
+        if (!name.matches(TEXT_REGEX)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The business name can contain only letters, " +
                     "numbers, and the special characters !\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~");
         }
@@ -98,7 +98,7 @@ public class Business {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The business description must be 200 characters" +
                     " or fewer");
         }
-        if (!description.matches(textRegex)) {
+        if (!description.matches(TEXT_REGEX)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The business description can contain only letters, " +
                     "numbers, and the special characters @ $ % & - _ , . : ;");
         }
@@ -137,8 +137,8 @@ public class Business {
      * @param businessType business type
      */
     public void setBusinessType(String businessType) {
-        if (businessType == null || businessType.isEmpty() || !businessTypes.contains(businessType)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The business type must not be empty and must be one of: " + businessTypes.toString());
+        if (businessType == null || businessType.isEmpty() || !BUSINESS_TYPES.contains(businessType)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The business type must not be empty and must be one of: " + BUSINESS_TYPES.toString());
         }
         this.businessType = businessType;
     }
@@ -186,7 +186,7 @@ public class Business {
         //Get the current date as of now and find the difference in years between the current date and the age of the user.
         long age = java.time.temporal.ChronoUnit.YEARS.between(
             owner.getDob(), LocalDate.now());
-        if (age < MinimumAge) {
+        if (age < MINIMUM_AGE) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User is not of minimum age required to create a business");
         }
         this.primaryOwner = owner;
