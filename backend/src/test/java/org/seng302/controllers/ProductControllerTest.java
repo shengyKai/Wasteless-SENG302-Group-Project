@@ -22,12 +22,11 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.Cookie;
 import java.text.ParseException;
-import java.time.Instant;
-import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -248,10 +247,8 @@ class ProductControllerTest {
             String productCode = productJSON.getAsString("id");
             Product storedProduct = productRepository.findByBusinessAndProductCode(testBusiness1, productCode).get();
 
-            Instant actualCreatedDate = Instant.from(DateTimeFormatter.ISO_DATE_TIME.parse(productJSON.getAsString("created")));
-
             assertEquals(storedProduct.getProductCode(), productCode);
-            assertEquals(storedProduct.getCreated().toInstant(), actualCreatedDate);
+            assertEquals(storedProduct.getCreated().toString(), productJSON.getAsString("created"));
             assertEquals(storedProduct.getRecommendedRetailPrice().toString(), productJSON.getAsString("recommendedRetailPrice"));
             assertEquals(storedProduct.getName(), productJSON.getAsString("name"));
             assertEquals(storedProduct.getDescription(), productJSON.getAsString("description"));
@@ -957,7 +954,7 @@ class ProductControllerTest {
     public void makeImagePrimary_valid_sets_image_primary() throws Exception {
         setCurrentUser(ownerUser.getUserID());
         addSeveralProductsToACatalogue();
-        Product product = testBusiness1.getCatalogue().get(0); // get product 1
+        Product product = productRepository.getAllByBusiness(testBusiness1).get(0); // get product 1
         product = addImagesToProduct(product);
         Image image1 = product.getProductImages().get(0);
         Image image2 = product.getProductImages().get(1);
@@ -980,7 +977,7 @@ class ProductControllerTest {
     public void makeImagePrimary_InvalidBusinessId_406Response() throws Exception{
         setCurrentUser(ownerUser.getUserID());
         addSeveralProductsToACatalogue();
-        Product product = testBusiness1.getCatalogue().get(0); // get product 1
+        Product product = productRepository.getAllByBusiness(testBusiness1).get(0); // get product 1
         product = addImagesToProduct(product);
         Image image2 = product.getProductImages().get(1);
         mockMvc.perform(
@@ -997,7 +994,7 @@ class ProductControllerTest {
     public void makeImagePrimary_InvalidProductId_406Response() throws Exception{
         setCurrentUser(ownerUser.getUserID());
         addSeveralProductsToACatalogue();
-        Product product = testBusiness1.getCatalogue().get(0); // get product 1
+        Product product = productRepository.getAllByBusiness(testBusiness1).get(0); // get product 1
         product = addImagesToProduct(product);
         Image image2 = product.getProductImages().get(1);
         mockMvc.perform(
@@ -1015,7 +1012,7 @@ class ProductControllerTest {
     public void makeImagePrimary_InvalidImageId_406Response() throws Exception {
         setCurrentUser(ownerUser.getUserID());
         addSeveralProductsToACatalogue();
-        Product product = testBusiness1.getCatalogue().get(0); // get product 1
+        Product product = productRepository.getAllByBusiness(testBusiness1).get(0); // get product 1
         product = addImagesToProduct(product);
         Image image2 = product.getProductImages().get(1);
         mockMvc.perform(
@@ -1075,23 +1072,6 @@ class ProductControllerTest {
     }
 
     /**
-     * Tests that uploading an image fails with 400 response if image is greater than or equal to 1048575bytes
-     */
-    @Test
-    void uploadingImageToProductFailsIfTooLarge() throws Exception {
-        setCurrentUser(ownerUser.getUserID());
-        addSeveralProductsToACatalogue();
-
-        MockMultipartFile file = new MockMultipartFile("file", "filename.txt", "image/jpeg", new byte[1048575]);
-        mockMvc.perform(multipart(String.format("/businesses/%d/products/NATHAN-APPLE-70/images", testBusiness1.getId()))
-                .file(file)
-                .sessionAttrs(sessionAuthToken)
-                .cookie(authCookie))
-                .andExpect(status().isBadRequest())
-                .andReturn();
-    }
-
-    /**
      * Tests that uploading an image with a valid content type returns a created response.
      */
     @Test
@@ -1132,7 +1112,7 @@ class ProductControllerTest {
     public void makeImagePrimary_NotBusinessAdmin_403Response() throws Exception{
         setCurrentUser(bystanderUser.getUserID());
         addSeveralProductsToACatalogue();
-        Product product = testBusiness1.getCatalogue().get(0); // get product 1
+        Product product = productRepository.getAllByBusiness(testBusiness1).get(0); // get product 1
         product = addImagesToProduct(product);
         Image image2 = product.getProductImages().get(1);
         mockMvc.perform(
@@ -1149,7 +1129,7 @@ class ProductControllerTest {
     @Test
     public void makeImagePrimary_NoSession_401Response() throws Exception{
         addSeveralProductsToACatalogue();
-        Product product = testBusiness1.getCatalogue().get(0); // get product 1
+        Product product = productRepository.getAllByBusiness(testBusiness1).get(0); // get product 1
         product = addImagesToProduct(product);
         Image image2 = product.getProductImages().get(1);
         mockMvc.perform(
@@ -1166,7 +1146,7 @@ class ProductControllerTest {
     void makeImagePrimary_isBusinessAdminForWrongCatalogue_403Response() throws Exception{
         setCurrentUser(bystanderUser.getUserID());
         addSeveralProductsToACatalogue();
-        Product product = testBusiness1.getCatalogue().get(0); // get product 1
+        Product product = productRepository.getAllByBusiness(testBusiness1).get(0); // get product 1
         product = addImagesToProduct(product);
         Image image2 = product.getProductImages().get(1);
         mockMvc.perform(
@@ -1185,7 +1165,7 @@ class ProductControllerTest {
     void makeImagePrimary_isBusinessAdmin_200Response() throws Exception {
         setCurrentUser(administratorUser.getUserID());
         addSeveralProductsToACatalogue();
-        Product product = testBusiness1.getCatalogue().get(0); // get product 1
+        Product product = productRepository.getAllByBusiness(testBusiness1).get(0); // get product 1
         product = addImagesToProduct(product);
         Image image2 = product.getProductImages().get(1);
         mockMvc.perform(

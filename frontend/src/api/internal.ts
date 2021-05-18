@@ -519,6 +519,7 @@ export async function uploadProductImage(businessId: number, productCode: string
     if (status === 401) return 'Missing/Invalid access token';
     if (status === 403) return 'Operation not permitted';
     if (status === 406) return 'Product/Business not found';
+    if (status === 413) return 'Image too large';
     return 'Request failed: ' + status;
   }
 

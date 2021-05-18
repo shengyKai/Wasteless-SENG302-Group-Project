@@ -14,7 +14,9 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
 import java.text.ParseException;
-import java.util.Date;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 
@@ -150,7 +152,7 @@ class ProductTests {
      */
     @Test
     void checkDate() {
-        Date before = new Date();
+        LocalDate now = LocalDate.now();
         Product product = new Product.Builder()
                 .withProductCode("NATHAN-APPLE-69")
                 .withName("The Nathan Apple")
@@ -160,11 +162,9 @@ class ProductTests {
                 .withBusiness(testBusiness1)
                 .build();
         productRepository.save(product);
-        Date after = new Date();
-        Date productDate = product.getCreated();
+        Instant productDate = product.getCreated();
 
-        assertFalse(productDate.after(after));
-        assertFalse(productDate.before(before));
+        assertTrue(ChronoUnit.SECONDS.between(Instant.now(), productDate) < 20);
     }
 
     /**
@@ -262,7 +262,7 @@ class ProductTests {
                 .build();
         productRepository.save(product1);
         testBusiness1 = businessRepository.findByName("BusinessName1");
-        List<Product> catalogue = testBusiness1.getCatalogue();
+        List<Product> catalogue = productRepository.getAllByBusiness(testBusiness1);
 
         assertEquals(product1.getID(), catalogue.get(0).getID());
     }
@@ -300,7 +300,7 @@ class ProductTests {
         productRepository.save(product2);
         productRepository.save(product3);
         testBusiness1 = businessRepository.findByName("BusinessName1");
-        List<Product> catalogue = testBusiness1.getCatalogue();
+        List<Product> catalogue = productRepository.getAllByBusiness(testBusiness1);
 
         assertEquals(3, catalogue.size());
     }

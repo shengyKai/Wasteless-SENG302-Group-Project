@@ -23,7 +23,7 @@ public interface BusinessRepository extends CrudRepository<Business, Long> {
     default Business getBusinessById(Long businessId) {
         // check business exists
         Optional<Business> business = this.findById(businessId);
-        if (!business.isPresent()) {
+        if (business.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE,
                     "The given business does not exist");
         }
