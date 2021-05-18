@@ -3,6 +3,7 @@ package org.seng302.entities;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import org.seng302.tools.AuthenticationTokenManager;
+import org.seng302.tools.JsonTools;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -49,22 +50,6 @@ public class Business {
             inverseJoinColumns = {@JoinColumn(name="user_id")}
     )
     private Set<User> administrators = new HashSet<>();
-
-
-    /**
-     *  Checks if the product exists within the business's product catalogue
-     * @param business the business
-     * @param productCode the product code of the given product
-     * @return true if the product exists within the business, false otherwise
-     */
-    public static boolean checkProductExistsWithinCatalogue(Business business, String productCode) {
-        for (Product product: business.getCatalogue()) {
-            if (product.getProductCode().equals(productCode)) {
-                return true;
-            }
-        }
-        return false;
-    }
 
     /**
      * Gets the id
@@ -278,14 +263,6 @@ public class Business {
     }
 
     /**
-     * The getter for the catalogue (list of products the business owns)
-     * @return the catalogue
-     */
-    public List<Product> getCatalogue() {
-        return catalogue;
-    }
-
-    /**
      * Add the given product to the business's catalogue.
      * This function is only expected to be called from "Product.setBusiness"
      *
@@ -318,18 +295,19 @@ public class Business {
      * @return A JSON representation of this business.
      */
     public JSONObject constructJson(boolean fullAdminDetails) {
-        Map<String, Object> attributeMap = new HashMap<>();
-        attributeMap.put("id", getId());
-        attributeMap.put("name", name);
-        attributeMap.put("description", description);
+        var object = new JSONObject();
+        object.put("id", getId());
+        object.put("name", name);
+        object.put("description", description);
         if (fullAdminDetails) {
-            attributeMap.put("administrators", constructAdminJsonArray());
+            object.put("administrators", constructAdminJsonArray());
         }
-        attributeMap.put("primaryAdministratorId", primaryOwner.getUserID());
-        attributeMap.put("address", getAddress().constructFullJson());
-        attributeMap.put("businessType", businessType);
-        attributeMap.put("created", created.toString());
-        return new JSONObject(attributeMap);
+        object.put("primaryAdministratorId", primaryOwner.getUserID());
+        object.put("address", getAddress().constructFullJson());
+        object.put("businessType", businessType);
+        object.put("created", created.toString());
+        JsonTools.removeNullsFromJson(object);
+        return object;
     }
 
     /**

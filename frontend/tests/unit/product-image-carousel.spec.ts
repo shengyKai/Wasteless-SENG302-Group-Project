@@ -30,7 +30,7 @@ describe('ProductImageCarousel.vue', () => {
     // Creating wrapper around ProductImageCarousel with data-app to appease vuetify
     const App = localVue.component('App', {
       components: { ProductImageCarousel },
-      template: `<div data-app><ProductImageCarousel :productImages="[{id: 7, filename:'test_filename'}, {id: 11, filename: 'test_filename2'}]" productId="TEST-PRODUCT"/></div>`,
+      template: `<div data-app><ProductImageCarousel :productImages="[{id: 7, filename:'test_filename'}, {id: 11, filename: 'test_filename2'}]" :showControls="showControls"/></div>`,
     });
 
     // Put the ProductImageCarousel component inside a div in the global document,
@@ -42,6 +42,10 @@ describe('ProductImageCarousel.vue', () => {
       localVue,
       vuetify,
       attachTo: elem,
+      props: ['showControls'],
+      propsData: {
+        showControls: true,
+      }
     });
 
     wrapper = appWrapper.getComponent(ProductImageCarousel);
@@ -96,5 +100,27 @@ describe('ProductImageCarousel.vue', () => {
     button.trigger('click');
 
     expect(wrapper.emitted()['change-primary-image']).toEqual([[11]]);
+  });
+
+  it('Expect delete image control not to exist if "showControls" is false', async () => {
+    await appWrapper.setProps({
+      showControls: false,
+    });
+    const button = wrapper.findAllComponents({ref: 'deleteImageButton'});
+    expect(button.length).toBe(0);
+  });
+
+  it('Expect make primary image control not to exist if "showControls" is false', async () => {
+    await wrapper.setData({
+      carouselItem: 1,
+    });
+
+    await Vue.nextTick();
+
+    await appWrapper.setProps({
+      showControls: false,
+    });
+    const button = wrapper.findAllComponents({ref: 'makePrimaryImageButton'});
+    expect(button.length).toBe(0);
   });
 });

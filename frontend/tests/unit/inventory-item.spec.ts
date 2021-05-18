@@ -21,6 +21,7 @@ jest.mock('@/api/currency', () => ({
   })
 }));
 
+
 describe('InventoryItem.vue', () => {
   let wrapper: Wrapper<any>;
   let vuetify: Vuetify;
