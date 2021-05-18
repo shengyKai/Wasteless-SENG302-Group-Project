@@ -113,8 +113,12 @@ public class SaleItem {
     public JSONObject constructJSONObject() {
         var object = new JSONObject();
         object.put("id", getSaleId());
-        //object.put("", getInventoryItem().constructJSONObject());
-
+        object.put("inventoryItem", getInventoryItem().constructJSONObject());
+        object.put("quantity", getQuantity());
+        object.put("price", getPrice());
+        object.put("moreInfo", getMoreInfo());
+        object.put("created", getCreated().toString());
+        object.put("closes", getCloses().toString());
         JsonTools.removeNullsFromJson(object);
         return object;
     }
