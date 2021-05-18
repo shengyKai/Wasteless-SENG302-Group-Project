@@ -167,6 +167,16 @@ export default {
     },
     manufacturer() {
       return this.product.manufacturer || "Not set";
+    },
+    /**
+     * Method to change date format into a more human readable format
+     */
+    dateCreated() {
+      if (this.product.created === undefined) return '';
+      const dateCreated = new Date(this.product.created);
+      const parts = dateCreated.toDateString().split(' ');
+      return `${parts[2]} ${parts[1]} ${parts[3]}`;
+      // return `${dateCreated.toDateString()}`;
     }
   },
   async created() {
@@ -209,6 +219,7 @@ export default {
     },
   },
 };
+
 </script>
 
 <style scoped>

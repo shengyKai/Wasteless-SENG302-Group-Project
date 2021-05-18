@@ -12,6 +12,9 @@
           <div v-if="$store.state.createProductDialogBusiness !== undefined">
             <CreateProduct @closeDialog="$store.commit('hideCreateProduct')"/>
           </div>
+          <div v-if="$store.state.createInventoryDialog !== undefined">
+            <CreateInventory @closeDialog="$store.commit('hideCreateInventory')"/>
+          </div>
 
           <AppBar />
 
@@ -67,6 +70,7 @@ import Auth from "./components/Auth";
 import AppBar from "./components/AppBar";
 import AppFooter from "./components/AppFooter";
 import CreateBusiness from "./components/BusinessProfile/CreateBusiness";
+import CreateInventory from "./components/BusinessProfile/CreateInventory";
 
 import { getStore } from "./store";
 import router from "./plugins/vue-router";
@@ -89,6 +93,7 @@ export default {
     AppFooter,
     CreateBusiness,
     CreateProduct,
+    CreateInventory
   },
   async created() {
     const cookie = getCookie(COOKIE.USER);

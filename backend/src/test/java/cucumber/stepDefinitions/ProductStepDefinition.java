@@ -1,6 +1,5 @@
 package cucumber.stepDefinitions;
 
-import io.cucumber.java.Before;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
@@ -19,8 +18,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
 import java.text.ParseException;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
+import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 
 public class ProductStepDefinition {
@@ -38,14 +36,6 @@ public class ProductStepDefinition {
     private User owner;
     private Business business;
     private Business secondBusiness;
-
-    @Before
-    public void Setup() {
-        productRepository.deleteAll();
-        businessRepository.deleteAll();
-        userRepository.deleteAll();
-        accountRepository.deleteAll();
-    }
 
     @Given("the business {string} exists")
     public void businessExists(String name) throws ParseException {
@@ -93,9 +83,8 @@ public class ProductStepDefinition {
     @And("the time of {string} created is set to now")
     public void timeSetNow(String prodCode) {
         product = productRepository.findByBusinessAndProductCode(business, prodCode).get();
-        LocalDateTime created = LocalDateTime.ofInstant(product.getCreated().toInstant(),
-                ZoneId.systemDefault());
-        assert(ChronoUnit.SECONDS.between(LocalDateTime.now(), created) < 20);
+        Instant created = product.getCreated();
+        assert(ChronoUnit.SECONDS.between(Instant.now(), created) < 20);
     }
 
     @And("the description {string}, manufacturer {string}, and retail price {string} is provided")
