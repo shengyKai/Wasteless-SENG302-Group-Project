@@ -121,7 +121,7 @@
 </template>
 
 <script>
-
+import {createInventoryItem} from '@/api/internal';
 export default {
   name: 'CreateInventory',
   components: {
@@ -132,8 +132,13 @@ export default {
       dialog: true,
       valid: false,
       today: '',
+      /**
+       * This will be replaced with a list of Products
+       * For now, only nathanApple will work when logged in as 123andyelliot@gmail.com
+       * todo T119
+       */
       mockProductList: [
-        'Nathan Apple',
+        'NATHAN-APPLE-70',
         'Connor Orange',
         'Edward Banana',
       ],
@@ -172,10 +177,31 @@ export default {
     closeDialog() {
       this.$emit('closeDialog');
     },
+    /**
+     * Called when the form is submitted
+     * Requests backend to create an inventory item
+     * Empty attributes are set to undefined
+     */
     async CreateInventory() { //to see the attribute in console for debugging or testing, remove after this page is done
-      console.log(this.expires);
-      return;
-    }
+      const businessId = this.$store.state.createInventoryDialog;
+      const inventoryItem = {
+        productId: this.productCode,
+        quantity: this.quantity,
+        pricePerItem: this.pricePerItem.length ? this.pricePerItem : undefined,
+        totalPrice: this.totalPrice ? this.totalPrice : undefined,
+        manufactured: this.manufactured ? this.manufactured : undefined,
+        sellBy: this.sellBy ? this.sellBy : undefined,
+        bestBefore: this.bestBefore ? this.bestBefore : undefined,
+        expires: this.expires
+      };
+      const result = await createInventoryItem(businessId, inventoryItem);
+      if (typeof result === 'string') {
+        this.errorMessage = result;
+      } else {
+        this.errorMessage = undefined;
+        this.closeDialog();
+      }
+    },
   },
 };
 </script>
