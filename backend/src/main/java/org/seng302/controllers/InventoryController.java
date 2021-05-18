@@ -55,11 +55,18 @@ public class InventoryController {
         String productCode = inventory.getAsString("productId");
         // sanity on product
         Product product = productRepository.getProductByBusinessAndProductCode(business, productCode);
+        Integer quantity;
+        try {
+            quantity = Integer.parseInt(inventory.getAsString("quantity"));
+        } catch (NumberFormatException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The provided quantity is not a valid number");
+        }
+
 
         InventoryItem item = new InventoryItem.Builder()
                 .withProduct(product)
                 .withPricePerItem(inventory.getAsString("pricePerItem"))
-                .withQuantity(inventory.getAsNumber("quantity").intValue())
+                .withQuantity(quantity)
                 .withBestBefore(inventory.getAsString("bestBefore"))
                 .withSellBy(inventory.getAsString("sellBy"))
                 .withManufactured(inventory.getAsString("manufactured"))

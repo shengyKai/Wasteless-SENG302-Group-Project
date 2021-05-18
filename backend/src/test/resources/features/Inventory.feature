@@ -30,6 +30,12 @@ Feature: U19 - Create Inventory
     When I create an inventory item with product code "APPLE" and quantity 3 and expiry "2022-05-20"
     Then I expect the inventory item to be created
 
+  Scenario: AC3 - Inventory items cannot be created without quantity and expiry
+    Given I am an administrator of the business
+    And I am logged into my account
+    When I create an inventory item with product code "APPLE" and no other fields
+    Then I expect to be prevented from creating the inventory item
+
   Scenario: AC3 - Inventory items have additional fields
     Given I am an administrator of the business
     And I am logged into my account
