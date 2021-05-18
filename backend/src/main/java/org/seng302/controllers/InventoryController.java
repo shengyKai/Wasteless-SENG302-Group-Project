@@ -16,6 +16,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
+import java.util.Comparator;
 
 @RestController
 public class InventoryController {
@@ -25,22 +26,25 @@ public class InventoryController {
     private final ProductRepository productRepository;
     private static final Logger logger = LogManager.getLogger(InventoryController.class.getName());
 
-    //@Autowired
-    public InventoryController(BusinessRepository businessRepository, InventoryItemRepository inventoryItemRepository, ProductRepository productRepository) {
+    // @Autowired
+    public InventoryController(BusinessRepository businessRepository, InventoryItemRepository inventoryItemRepository,
+            ProductRepository productRepository) {
         this.businessRepository = businessRepository;
         this.inventoryItemRepository = inventoryItemRepository;
         this.productRepository = productRepository;
     }
 
-
     /**
-     * POST endpoint for creating an inventory item from an existing product.
-     * Only Business administrators and System administrators can perform this action
+     * POST endpoint for creating an inventory item from an existing product. Only
+     * Business administrators and System administrators can perform this action
+     * 
      * @param businessId The ID of the business to add the Inventory Item to
-     * @param inventory The request body containing information about to new Inventory Item
+     * @param inventory  The request body containing information about to new
+     *                   Inventory Item
      */
     @PostMapping("/businesses/{id}/inventory")
-    public void addInventory(@PathVariable(name="id") Long businessId, HttpServletRequest request, @RequestBody JSONObject inventory) throws Exception {
+    public void addInventory(@PathVariable(name = "id") Long businessId, HttpServletRequest request,
+            @RequestBody JSONObject inventory) throws Exception {
         String message = String.format("Attempting to add and inventory item for business=%d", businessId);
         logger.info(message);
         try {
@@ -58,16 +62,11 @@ public class InventoryController {
             Product product = productRepository.getProductByBusinessAndProductCode(business, productCode);
             Integer quantity = getQuantityFromInventoryJson(inventory);
 
-
-            InventoryItem item = new InventoryItem.Builder()
-                    .withProduct(product)
-                    .withPricePerItem(inventory.getAsString("pricePerItem"))
-                    .withQuantity(quantity)
-                    .withBestBefore(inventory.getAsString("bestBefore"))
-                    .withSellBy(inventory.getAsString("sellBy"))
+            InventoryItem item = new InventoryItem.Builder().withProduct(product)
+                    .withPricePerItem(inventory.getAsString("pricePerItem")).withQuantity(quantity)
+                    .withBestBefore(inventory.getAsString("bestBefore")).withSellBy(inventory.getAsString("sellBy"))
                     .withManufactured(inventory.getAsString("manufactured"))
-                    .withExpires(inventory.getAsString("expires"))
-                    .withTotalPrice(inventory.getAsString("totalPrice"))
+                    .withExpires(inventory.getAsString("expires")).withTotalPrice(inventory.getAsString("totalPrice"))
                     .build();
 
             inventoryItemRepository.save(item);
@@ -78,8 +77,9 @@ public class InventoryController {
     }
 
     /**
-     * Parse the inventory JSON to get quantity as an integer, or throw a response status exception if quantity is not an
-     * integer.
+     * Parse the inventory JSON to get quantity as an integer, or throw a response
+     * status exception if quantity is not an integer.
+     * 
      * @param inventory A JSON object representing an inventory item.
      * @return The number from the quantity field of the JSON.
      */
@@ -94,17 +94,21 @@ public class InventoryController {
     }
 
     /**
-     * GET endpoint which will return a list of JSONs for all items in the business's inventory, provide that the request
-     * comes from an authenticated user who is an admin of the application or the business. If the request cannot be
-     * authenticated a 401 exception is returned, if the user doesn't have permission to view the inventory then a 403
-     * exception is returned, and if the business doesn't exist then a 406 exception is returned.
+     * GET endpoint which will return a list of JSONs for all items in the
+     * business's inventory, provide that the request comes from an authenticated
+     * user who is an admin of the application or the business. If the request
+     * cannot be authenticated a 401 exception is returned, if the user doesn't have
+     * permission to view the inventory then a 403 exception is returned, and if the
+     * business doesn't exist then a 406 exception is returned.
+     * 
      * @param businessId The id of the business to retrieve the inventory from.
-     * @param request The HTTP request, used to authenticate the user's permissions.
+     * @param request    The HTTP request, used to authenticate the user's
+     *                   permissions.
      * @return Array of JSON representations of items in the business's inventory.
      */
     @GetMapping("/businesses/{id}/inventory")
-    public JSONArray getInventory(@PathVariable(name="id") Long businessId, HttpServletRequest request)  {
-        //Todo add sorting and pagination (t127 and t171)
+    public JSONArray getInventory(@PathVariable(name = "id") Long businessId, HttpServletRequest request) {
+        // Todo add sorting and pagination (t127 and t171)
         String statusMessage = String.format("Get inventory of business with ID %d", businessId);
         logger.info(statusMessage);
         List<InventoryItem> inventory = getInventoryFromRequest(businessId, request);
@@ -116,16 +120,21 @@ public class InventoryController {
     }
 
     /**
-     * GET endpoint which will return the number of items in the business's inventory, provide that the request
-     * comes from an authenticated user who is an admin of the application or the business. If the request cannot be
-     * authenticated a 401 exception is returned, if the user doesn't have permission to view the inventory then a 403
-     * exception is returned, and if the business doesn't exist then a 406 exception is returned.
+     * GET endpoint which will return the number of items in the business's
+     * inventory, provide that the request comes from an authenticated user who is
+     * an admin of the application or the business. If the request cannot be
+     * authenticated a 401 exception is returned, if the user doesn't have
+     * permission to view the inventory then a 403 exception is returned, and if the
+     * business doesn't exist then a 406 exception is returned.
+     * 
      * @param businessId The id of the business to retrieve the inventory from.
-     * @param request The HTTP request, used to authenticate the user's permissions.
-     * @return A JSONObject with the count of the number of items in the business's inventory.
+     * @param request    The HTTP request, used to authenticate the user's
+     *                   permissions.
+     * @return A JSONObject with the count of the number of items in the business's
+     *         inventory.
      */
     @GetMapping("/businesses/{id}/inventory/count")
-    public JSONObject getInventoryCount(@PathVariable(name="id") Long businessId, HttpServletRequest request) {
+    public JSONObject getInventoryCount(@PathVariable(name = "id") Long businessId, HttpServletRequest request) {
         String statusMessage = String.format("Get inventory count of business with ID %d", businessId);
         logger.info(statusMessage);
         List<InventoryItem> inventory = getInventoryFromRequest(businessId, request);
@@ -135,11 +144,13 @@ public class InventoryController {
     }
 
     /**
-     * This method takes the business id and the http request sent to a get endpoint, and uses them to retrieve the
-     * inventory assoicated with the business. It will also add an error to the log if one is thrown due to and invalid
-     * auth token, insufficient permissions or the business not existing.
+     * This method takes the business id and the http request sent to a get
+     * endpoint, and uses them to retrieve the inventory assoicated with the
+     * business. It will also add an error to the log if one is thrown due to and
+     * invalid auth token, insufficient permissions or the business not existing.
+     * 
      * @param businessId The ID number of the business to find the inventory of.
-     * @param request The incoming HTTP request, used to check permissions.
+     * @param request    The incoming HTTP request, used to check permissions.
      * @return A list of the items in the business's inventory.
      */
     private List<InventoryItem> getInventoryFromRequest(Long businessId, HttpServletRequest request) {
@@ -155,4 +166,76 @@ public class InventoryController {
         }
     }
 
+    /**
+     * Sort inventory by a key. Can reverse results.
+     * 
+     * @param key     Key to order products by.
+     * @param reverse Reverse results.
+     * @return Inventory Comparator
+     */
+    Comparator<InventoryItem> sortInventory(String key, String reverse) {
+        key = key == null ? "productCode" : key;
+        reverse = reverse == null ? "false" : reverse;
+
+        Comparator<InventoryItem> sort;
+        switch (key) {
+            case "name":
+                sort = Comparator.comparing(inventoryItem -> inventoryItem.getProduct().getName());
+                break;
+
+            case "description":
+                sort = Comparator.comparing(inventoryItem -> inventoryItem.getProduct().getDescription());
+                break;
+
+            case "manufacturer":
+                sort = Comparator.comparing(inventoryItem -> inventoryItem.getProduct().getManufacturer());
+                break;
+
+            case "recommendedRetailPrice":
+                sort = Comparator.comparing(inventoryItem -> inventoryItem.getProduct().getRecommendedRetailPrice());
+                break;
+
+            case "created":
+                sort = Comparator.comparing(inventoryItem -> inventoryItem.getProduct().getCreated());
+                break;
+
+            case "quantity":
+                sort = Comparator.comparing(InventoryItem::getQuantity);
+                break;
+
+            case "pricePerItem":
+                sort = Comparator.comparing(InventoryItem::getPricePerItem);
+                break;
+
+            case "totalPrice":
+                sort = Comparator.comparing(InventoryItem::getTotalPrice);
+                break;
+
+            case "manufactured":
+                sort = Comparator.comparing(InventoryItem::getManufactured);
+                break;
+
+            case "sellBy":
+                sort = Comparator.comparing(InventoryItem::getSellBy);
+                break;
+
+            case "bestBefore":
+                sort = Comparator.comparing(InventoryItem::getBestBefore);
+                break;
+
+            case "expiry":
+                sort = Comparator.comparing(InventoryItem::getExpires);
+                break;
+
+            default:
+                sort = Comparator.comparing(inventoryItem -> inventoryItem.getProduct().getProductCode());
+                break;
+        }
+
+        if (!reverse.isEmpty() && reverse.equals("true")) {
+            sort = sort.reversed();
+        }
+
+        return sort;
+    }
 }
