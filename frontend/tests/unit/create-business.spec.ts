@@ -142,7 +142,7 @@ describe('CreateBusiness.vue', () => {
     await wrapper.setData({
       business: 'Business Name',
       businessType: 'Business Type',
-      street1: 'Street 1',
+      street1: '1 Street',
       city: 'City',
       region: 'Region',
       country: 'Country',
@@ -410,8 +410,8 @@ describe('CreateBusiness.vue', () => {
       description: '',
       businessType: 'Business Type',
       address: {
-        streetNumber: 'Street',
-        streetName: '1',
+        streetNumber: '1',
+        streetName: 'Street',
         district: '',
         city: 'City',
         region: 'Region',
