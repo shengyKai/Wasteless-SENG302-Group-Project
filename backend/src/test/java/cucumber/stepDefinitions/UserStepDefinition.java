@@ -25,9 +25,9 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -56,7 +56,7 @@ public class UserStepDefinition {
     private String userEmail = "Bob@bob.com";
     private String userPassword = "B0bbbbbbb76#bb";
     private String userBio = "I am Bob";
-    private String userDob = "10-10-1999";
+    private String userDob = "1999-01-01";
     private String userPhNum = "0270000000";
     private Location userAddress = Location.covertAddressStringToLocation("1,Bob Street,Bob,Bob,Bob,Bob,1010");
 
@@ -166,12 +166,8 @@ public class UserStepDefinition {
     @Then("the user has the date of birth {string}")
     public void theUserHasTheDob(String dob) {
         User user = userRepository.findByEmail(userEmail);
-        try {
-            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-            Assert.assertEquals(user.getDob().getTime(), dateFormat.parse(dob).getTime());
-        } catch (ParseException parseException) {
-            Assert.fail();
-        }
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE;
+        Assert.assertEquals(user.getDob(), LocalDate.parse(dob, dateTimeFormatter));
     }
 
     @Then("the user has the phone number {string}")
@@ -273,8 +269,7 @@ public class UserStepDefinition {
     @Then("the user {string} was created now")
     public void theUserWasCreatedNow(String email) {
         theUser = userRepository.findByEmail(email);
-        LocalDateTime created = LocalDateTime.ofInstant(theUser.getCreated().toInstant(),
-                ZoneId.systemDefault());
-        assert(ChronoUnit.SECONDS.between(LocalDateTime.now(), created) < 20);
+        Instant created = theUser.getCreated();
+        assert(ChronoUnit.SECONDS.between(Instant.now(), created) < 20);
     }
 }

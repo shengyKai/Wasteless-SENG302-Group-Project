@@ -9,11 +9,7 @@ import org.springframework.web.server.ResponseStatusException;
 import javax.persistence.*;
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.format.FormatStyle;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 @Table(uniqueConstraints={
@@ -46,7 +42,7 @@ public class Product {
     private BigDecimal recommendedRetailPrice;
 
     @Column(nullable = false)
-    private Date created;
+    private Instant created;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "business_id")
@@ -109,7 +105,7 @@ public class Product {
      * Get the date of when the product was created
      * @return the date of when the product was created
      */
-    public Date getCreated() { return created; }
+    public Instant getCreated() { return created; }
 
     /**
      * Get the business associated with the catalogue the product is in
@@ -348,7 +344,7 @@ public class Product {
             product.setRecommendedRetailPrice(this.recommendedRetailPrice);
             setBusiness(product, this.business);
             product.setCountryOfSale(this.business.getAddress().getCountry());
-            setCreated(product, new Date());
+            setCreated(product, Instant.now());
             return product;
         }
 
@@ -370,7 +366,7 @@ public class Product {
          * Sets the date of when the product was created
          * @param created the date when the product was created
          */
-        private void setCreated(Product product, Date created) { product.created = created; }
+        private void setCreated(Product product, Instant created) { product.created = created; }
 
         /**
          * Sets the business associated with the catalogue the product is in

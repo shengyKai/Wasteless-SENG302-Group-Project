@@ -27,8 +27,6 @@ import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.Cookie;
 import java.text.ParseException;
-import java.time.Instant;
-import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 
 import static org.junit.jupiter.api.Assertions.*;
