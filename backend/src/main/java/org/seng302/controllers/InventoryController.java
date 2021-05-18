@@ -13,6 +13,7 @@ import org.seng302.persistence.ProductRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
+import org.seng302.tools.SearchHelper;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
@@ -99,19 +100,33 @@ public class InventoryController {
      * user who is an admin of the application or the business. If the request
      * cannot be authenticated a 401 exception is returned, if the user doesn't have
      * permission to view the inventory then a 403 exception is returned, and if the
-     * business doesn't exist then a 406 exception is returned.
+     * business doesn't exist then a 406 exception is returned. Also includes the sorting
+     * and pagination of the inventory items based on the search requirements provided
+     * by the user.
      * 
      * @param businessId The id of the business to retrieve the inventory from.
      * @param request    The HTTP request, used to authenticate the user's
      *                   permissions.
-     * @return Array of JSON representations of items in the business's inventory.
+     * @return Array of JSON representations of sorted and paginated items in the 
+     * business's inventory.
      */
     @GetMapping("/businesses/{id}/inventory")
-    public JSONArray getInventory(@PathVariable(name = "id") Long businessId, HttpServletRequest request) {
+    public JSONArray getInventory(@PathVariable(name = "id") Long businessId,
+                                HttpServletRequest request,
+                                @RequestParam(required = false) String orderBy,
+                                @RequestParam(required = false) String page,
+                                @RequestParam(required = false) String resultsPerPage,
+                                @RequestParam(required = false) String reverse) {
         // Todo add sorting and pagination (t127 and t171)
         String statusMessage = String.format("Get inventory of business with ID %d", businessId);
         logger.info(statusMessage);
         List<InventoryItem> inventory = getInventoryFromRequest(businessId, request);
+        
+        Comparator<InventoryItem> sort = sortInventory(orderBy, reverse);
+        inventory.sort(sort);
+
+        inventory = SearchHelper.getPageInResults(inventory, page, resultsPerPage);
+            
         JSONArray jsonArray = new JSONArray();
         for (InventoryItem item : inventory) {
             jsonArray.appendElement(item.constructJSONObject());
