@@ -297,7 +297,7 @@ public class InventoryControllerTest {
         inventoryController = new InventoryController(businessRepository, inventoryItemRepository, productRepository);
         when(businessRepository.getBusinessById(1L)).thenReturn(mockBusiness);
         doThrow(new AccessTokenException()).when(mockBusiness).checkSessionPermissions(any());
-        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> inventoryController.getInventory(1L, request));
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> inventoryController.getInventory(1L, request, "", "", "", ""));
         Assertions.assertEquals(HttpStatus.UNAUTHORIZED, exception.getStatus());
     }
 
@@ -315,7 +315,7 @@ public class InventoryControllerTest {
         inventoryController = new InventoryController(businessRepository, inventoryItemRepository, productRepository);
         when(businessRepository.getBusinessById(1L)).thenReturn(mockBusiness);
         doThrow(new ResponseStatusException(HttpStatus.FORBIDDEN)).when(mockBusiness).checkSessionPermissions(any());
-        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> inventoryController.getInventory(1L, request));
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> inventoryController.getInventory(1L, request, "", "", "", ""));
         Assertions.assertEquals(HttpStatus.FORBIDDEN, exception.getStatus());
     }
 
@@ -332,7 +332,7 @@ public class InventoryControllerTest {
     void getInventory_businessNotFound_406Thrown() {
         inventoryController = new InventoryController(businessRepository, inventoryItemRepository, productRepository);
         when(businessRepository.getBusinessById(1L)).thenThrow(new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE));
-        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> inventoryController.getInventory(1L, request));
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> inventoryController.getInventory(1L, request, "", "", "", ""));
         Assertions.assertEquals(HttpStatus.NOT_ACCEPTABLE, exception.getStatus());
     }
 
@@ -351,7 +351,7 @@ public class InventoryControllerTest {
         when(businessRepository.getBusinessById(1L)).thenReturn(mockBusiness);
         when(productRepository.findAllByBusiness(mockBusiness)).thenReturn(mockProductList);
         when(inventoryItemRepository.getInventoryByCatalogue(mockProductList)).thenReturn(emptyInventory);
-        JSONArray result = inventoryController.getInventory(1L, request);
+        JSONArray result = inventoryController.getInventory(1L, request, "", "", "", "");
         Assertions.assertEquals(0, result.size());
     }
 
@@ -381,7 +381,7 @@ public class InventoryControllerTest {
         when(businessRepository.getBusinessById(1L)).thenReturn(mockBusiness);
         when(productRepository.findAllByBusiness(mockBusiness)).thenReturn(mockProductList);
         when(inventoryItemRepository.getInventoryByCatalogue(mockProductList)).thenReturn(inventory);
-        JSONArray result = inventoryController.getInventory(1L, request);
+        JSONArray result = inventoryController.getInventory(1L, request, "", "", "", "");
         Assertions.assertEquals(expectedResponse, result);
     }
 
