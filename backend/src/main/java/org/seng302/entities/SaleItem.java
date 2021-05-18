@@ -8,9 +8,11 @@ import org.springframework.web.server.ResponseStatusException;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+
+import static java.time.temporal.ChronoUnit.DAYS;
 
 @NoArgsConstructor
 @Entity
@@ -35,10 +37,10 @@ public class SaleItem {
     private String moreInfo;
 
     @Column(name = "created")
-    private Date created;
+    private Instant created;
 
     @Column(name = "closes")
-    private Date closes;  // Defaults to expiry date of product being sold
+    private LocalDate closes;  // Defaults to expiry date of product being sold
 
 
     // Getters and Setters
@@ -156,55 +158,43 @@ public class SaleItem {
         }
         this.moreInfo = moreInfo;
     }
-
     /**
      * Get the creation date
      * @return creation date
      */
-    public Date getCreated() { return created; }
-
+    public Instant getCreated() { return created; }
     /**
      * Set the creation date to today (set in builder)
      * @param created date
      */
-    public void setCreated(Date created) { this.created = created; }
-
+    public void setCreated(Instant created) { this.created = created; }
     /**
      * Get the close date
      * @return close date
      */
-    public Date getCloses() { return closes; }
+    public LocalDate getCloses() { return closes; }
 
     /**
      * Defaults to expiry date of product
      * @param closes date
      */
     public void setCloses(String closes) {
-        try {
-            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-            Date close = dateFormat.parse(closes);
-            if (inventoryItem.getExpires().before(new Date())) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "This product is already expired");
-            } else if (close.after(new Date()) || dateFormat.format(new Date()).equals(closes)) {
-                this.closes = close;
-            } else {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You cannot set close dates in the past");
-            }
-        } catch (ParseException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Please set valid date");
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE;
+        LocalDate closeDate = LocalDate.parse(closes, dateTimeFormatter);
+        if (inventoryItem.getExpires().isBefore(LocalDate.now())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "This product is already expired");
+        } else if (closeDate.isAfter(LocalDate.now().minus(1, DAYS))) {
+            this.closes = closeDate;
+        } else {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You cannot set close dates in the past");
         }
     }
 
-    /**
-     * Set the close date to be the expiry date of the inventory item
-     * @throws NullPointerException if inventory item not there
-     */
-    public void setCloses() throws NullPointerException {
-        if (inventoryItem.getExpires().before(new Date())) {
+    public void setCloses() {
+        if (inventoryItem.getExpires().isBefore(LocalDate.now())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "This product is already expired");
-        } else {
-            this.closes = inventoryItem.getExpires();
         }
+        this.closes = inventoryItem.getExpires();
     }
 
     /**
@@ -276,7 +266,7 @@ public class SaleItem {
             SaleItem saleItem = new SaleItem();
             saleItem.setInventoryItem(this.inventoryItem);
             saleItem.setMoreInfo(this.moreInfo);
-            saleItem.setCreated(new Date());
+            saleItem.setCreated(Instant.now());
             if (closes != null) {
                 saleItem.setCloses(this.closes);
             } else {

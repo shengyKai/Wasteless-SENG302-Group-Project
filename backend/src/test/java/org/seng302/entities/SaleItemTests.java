@@ -9,6 +9,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
+import java.time.format.DateTimeParseException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Optional;
@@ -401,6 +402,6 @@ public class SaleItemTests {
                 .withCloses("In three seconds")
                 .withMoreInfo("What's the time, Mr Wolfy?")
                 .withQuantity(2);
-        assertThrows(ResponseStatusException.class, saleItem::build);
+        assertThrows(DateTimeParseException.class, saleItem::build);
     }
 }

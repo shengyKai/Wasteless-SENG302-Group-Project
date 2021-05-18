@@ -58,6 +58,7 @@
                     :prefix="currency.symbol"
                     :suffix="currency.code"
                     :rules="priceRules"
+                    :hint="currency.errorMessage"
                     outlined
                   />
                 </v-col>
@@ -107,6 +108,7 @@ export default {
       unavailableProductCodes: [],
       currency: {},
       valid: false,
+      currencyErrorMessage: "",
       maxCharRules: [
         field => (field.length <= 50) || 'Reached max character limit: 50',
       ],
@@ -193,7 +195,7 @@ export default {
      * @param val
      * @returns {boolean}
      */
-    allowedDates: val => new Date(val) > new Date(),
+    allowedDates: val => new Date(val) > new Date()
   },
 };
 </script>

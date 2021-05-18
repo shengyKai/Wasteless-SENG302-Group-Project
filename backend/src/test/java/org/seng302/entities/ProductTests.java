@@ -1,5 +1,7 @@
 package org.seng302.entities;
 
+import net.minidev.json.JSONArray;
+import net.minidev.json.JSONObject;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -12,7 +14,9 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
 import java.text.ParseException;
-import java.util.Date;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 
@@ -148,7 +152,7 @@ class ProductTests {
      */
     @Test
     void checkDate() {
-        Date before = new Date();
+        LocalDate now = LocalDate.now();
         Product product = new Product.Builder()
                 .withProductCode("NATHAN-APPLE-69")
                 .withName("The Nathan Apple")
@@ -158,11 +162,9 @@ class ProductTests {
                 .withBusiness(testBusiness1)
                 .build();
         productRepository.save(product);
-        Date after = new Date();
-        Date productDate = product.getCreated();
+        Instant productDate = product.getCreated();
 
-        assertFalse(productDate.after(after));
-        assertFalse(productDate.before(before));
+        assertTrue(ChronoUnit.SECONDS.between(Instant.now(), productDate) < 20);
     }
 
     /**
@@ -260,7 +262,7 @@ class ProductTests {
                 .build();
         productRepository.save(product1);
         testBusiness1 = businessRepository.findByName("BusinessName1");
-        List<Product> catalogue = testBusiness1.getCatalogue();
+        List<Product> catalogue = productRepository.getAllByBusiness(testBusiness1);
 
         assertEquals(product1.getID(), catalogue.get(0).getID());
     }
@@ -298,7 +300,7 @@ class ProductTests {
         productRepository.save(product2);
         productRepository.save(product3);
         testBusiness1 = businessRepository.findByName("BusinessName1");
-        List<Product> catalogue = testBusiness1.getCatalogue();
+        List<Product> catalogue = productRepository.getAllByBusiness(testBusiness1);
 
         assertEquals(3, catalogue.size());
     }
@@ -792,6 +794,126 @@ class ProductTests {
             assertThrows(ResponseStatusException.class, ()  -> testProduct.setCountryOfSale(country));
             assertEquals(testBusiness1.getAddress().getCountry(), testProduct.getCountryOfSale());
         }
+    }
+
+    @Test
+    void constructJsonObject_noNullAttributes_allExpectedFieldsPresent() {
+        Product testProduct = new Product.Builder()
+                .withProductCode("NATHAN-APPLE-70")
+                .withName("The Nathan Apple")
+                .withDescription("Ever wonder why Nathan has an apple")
+                .withManufacturer("Apple")
+                .withRecommendedRetailPrice("9000.03")
+                .withBusiness(testBusiness1)
+                .build();
+        JSONObject testJson = testProduct.constructJSONObject();
+        assertTrue(testJson.containsKey("id"));
+        assertTrue(testJson.containsKey("name"));
+        assertTrue(testJson.containsKey("description"));
+        assertTrue(testJson.containsKey("manufacturer"));
+        assertTrue(testJson.containsKey("recommendedRetailPrice"));
+        assertTrue(testJson.containsKey("created"));
+        assertTrue(testJson.containsKey("images"));
+        assertTrue(testJson.containsKey("countryOfSale"));
+    }
+
+    @Test
+    void constructJsonObject_noNullAttributes_noUnexpectedFieldsPresent() {
+        Product testProduct = new Product.Builder()
+                .withProductCode("NATHAN-APPLE-70")
+                .withName("The Nathan Apple")
+                .withDescription("Ever wonder why Nathan has an apple")
+                .withManufacturer("Apple")
+                .withRecommendedRetailPrice("9000.03")
+                .withBusiness(testBusiness1)
+                .build();
+        JSONObject testJson = testProduct.constructJSONObject();
+        testJson.remove("id");
+        testJson.remove("name");
+        testJson.remove("description");
+        testJson.remove("manufacturer");
+        testJson.remove("recommendedRetailPrice");
+        testJson.remove("created");
+        testJson.remove("images");
+        testJson.remove("countryOfSale");
+        assertTrue(testJson.isEmpty());
+    }
+
+    @Test
+    void constructJsonObject_noNullAttributes_allHaveExpectedValue() {
+        Product testProduct = new Product.Builder()
+                .withProductCode("NATHAN-APPLE-70")
+                .withName("The Nathan Apple")
+                .withDescription("Ever wonder why Nathan has an apple")
+                .withManufacturer("Apple")
+                .withRecommendedRetailPrice("9000.03")
+                .withBusiness(testBusiness1)
+                .build();
+        JSONArray images = new JSONArray();
+        for (Image image : testProduct.getProductImages()) {
+            images.add(image.constructJSONObject());
+        }
+        String imageString = images.toString();
+        JSONObject testJson = testProduct.constructJSONObject();
+        assertEquals(testProduct.getProductCode(), testJson.getAsString("id"));
+        assertEquals(testProduct.getName(), testJson.getAsString("name"));
+        assertEquals(testProduct.getDescription(), testJson.getAsString("description"));
+        assertEquals(testProduct.getManufacturer(), testJson.getAsString("manufacturer"));
+        assertEquals(testProduct.getRecommendedRetailPrice().toString(), testJson.getAsString("recommendedRetailPrice"));
+        assertEquals(testProduct.getCreated().toString(), testJson.getAsString("created"));
+        assertEquals(imageString, testJson.getAsString("images"));
+        assertEquals(testProduct.getCountryOfSale(), testJson.getAsString("countryOfSale"));
+    }
+
+    @Test
+    void constructJsonObject_optionalAttributesNull_allExpectedFieldsPresent() {
+        Product testProduct = new Product.Builder()
+                .withProductCode("NATHAN-APPLE-70")
+                .withName("The Nathan Apple")
+                .withBusiness(testBusiness1)
+                .build();
+        JSONObject testJson = testProduct.constructJSONObject();
+        assertTrue(testJson.containsKey("id"));
+        assertTrue(testJson.containsKey("name"));
+        assertTrue(testJson.containsKey("created"));
+        assertTrue(testJson.containsKey("images"));
+        assertTrue(testJson.containsKey("countryOfSale"));
+    }
+
+    @Test
+    void constructJsonObject_optionalAttributesNull_noUnexpectedFieldsPresent() {
+        Product testProduct = new Product.Builder()
+                .withProductCode("NATHAN-APPLE-70")
+                .withName("The Nathan Apple")
+                .withBusiness(testBusiness1)
+                .build();
+        JSONObject testJson = testProduct.constructJSONObject();
+        testJson.remove("id");
+        testJson.remove("name");
+        testJson.remove("created");
+        testJson.remove("images");
+        testJson.remove("countryOfSale");
+        assertTrue(testJson.isEmpty());
+    }
+
+    @Test
+    void constructJsonObject_optionalAttributesNull_allHaveExpectedValue() {
+        Product testProduct = new Product.Builder()
+                .withProductCode("NATHAN-APPLE-70")
+                .withName("The Nathan Apple")
+                .withBusiness(testBusiness1)
+                .build();
+        JSONArray images = new JSONArray();
+        for (Image image : testProduct.getProductImages()) {
+            images.add(image.constructJSONObject());
+        }
+        String imageString = images.toString();
+        JSONObject testJson = testProduct.constructJSONObject();
+        assertEquals(testProduct.getProductCode(), testJson.getAsString("id"));
+        assertEquals(testProduct.getName(), testJson.getAsString("name"));
+        assertEquals(testProduct.getCreated().toString(), testJson.getAsString("created"));
+        assertEquals(imageString, testJson.getAsString("images"));
+        assertEquals(testProduct.getCountryOfSale(), testJson.getAsString("countryOfSale"));
     }
 
 }
