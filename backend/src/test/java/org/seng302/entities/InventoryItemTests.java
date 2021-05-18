@@ -1,5 +1,7 @@
 package org.seng302.entities;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import net.minidev.json.JSONObject;
 import org.junit.jupiter.api.*;
 import org.seng302.persistence.BusinessRepository;
 import org.seng302.persistence.InventoryItemRepository;
@@ -487,5 +489,49 @@ public class InventoryItemTests {
         assertEquals(invItem1, testInvItem1);
         assertEquals(invItem2, testInvItem2);
         assertEquals(invItem3, testInvItem3);
+    }
+
+    @Test
+    void constructJSONObject_noNullAttributes_returnsExpectedJson() throws Exception {
+        InventoryItem invItem = new InventoryItem.Builder()
+                .withProduct(testProduct)
+                .withQuantity(3)
+                .withPricePerItem("2.69")
+                .withTotalPrice("5.32")
+                .withManufactured("2021-03-11")
+                .withSellBy("2021-05-21")
+                .withBestBefore("2021-05-28")
+                .withExpires("2021-06-01")
+                .build();
+        invItem = inventoryItemRepository.save(invItem);
+        JSONObject expectedJson = new JSONObject();
+        expectedJson.put("id", invItem.getId());
+        expectedJson.put("product", invItem.getProduct().constructJSONObject());
+        expectedJson.put("quantity", invItem.getQuantity());
+        expectedJson.put("pricePerItem", invItem.getPricePerItem());
+        expectedJson.put("totalPrice", invItem.getTotalPrice());
+        expectedJson.put("manufactured", invItem.getManufactured());
+        expectedJson.put("sellBy", invItem.getSellBy());
+        expectedJson.put("bestBefore", invItem.getBestBefore());
+        expectedJson.put("expires", invItem.getExpires());
+        ObjectMapper mapper = new ObjectMapper();
+        assertEquals(mapper.readTree(expectedJson.toJSONString()), mapper.readTree(invItem.constructJSONObject().toJSONString()));
+    }
+
+    @Test
+    void constructJSONObject_optionalAttributesNull_returnsExpectedJson() throws Exception {
+        InventoryItem invItem = new InventoryItem.Builder()
+                .withProduct(testProduct)
+                .withQuantity(3)
+                .withExpires("2021-06-01")
+                .build();
+        invItem = inventoryItemRepository.save(invItem);
+        JSONObject expectedJson = new JSONObject();
+        expectedJson.put("id", invItem.getId());
+        expectedJson.put("product", invItem.getProduct().constructJSONObject());
+        expectedJson.put("quantity", invItem.getQuantity());
+        expectedJson.put("expires", invItem.getExpires());
+        ObjectMapper mapper = new ObjectMapper();
+        assertEquals(mapper.readTree(expectedJson.toJSONString()), mapper.readTree(invItem.constructJSONObject().toJSONString()));
     }
 }

@@ -8,6 +8,10 @@ import org.springframework.web.server.ResponseStatusException;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
+import java.time.Instant;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -239,7 +243,7 @@ public class Product {
         object.put("description", description);
         object.put("manufacturer", manufacturer);
         object.put("recommendedRetailPrice", recommendedRetailPrice);
-        object.put("created", created);
+        object.put("created", created.toString());
         JSONArray images = new JSONArray();
         for (Image image : productImages) {
             images.add(image.constructJSONObject());

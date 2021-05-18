@@ -1,6 +1,5 @@
 package cucumber.stepDefinitions;
 
-import io.cucumber.java.Before;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
@@ -38,14 +37,6 @@ public class ProductStepDefinition {
     private User owner;
     private Business business;
     private Business secondBusiness;
-
-    @Before
-    public void Setup() {
-        productRepository.deleteAll();
-        businessRepository.deleteAll();
-        userRepository.deleteAll();
-        accountRepository.deleteAll();
-    }
 
     @Given("the business {string} exists")
     public void businessExists(String name) throws ParseException {

@@ -249,10 +249,8 @@ class ProductControllerTest {
             String productCode = productJSON.getAsString("id");
             Product storedProduct = productRepository.findByBusinessAndProductCode(testBusiness1, productCode).get();
 
-            Instant actualCreatedDate = Instant.from(DateTimeFormatter.ISO_DATE_TIME.parse(productJSON.getAsString("created")));
-
             assertEquals(storedProduct.getProductCode(), productCode);
-            assertEquals(storedProduct.getCreated().toInstant(), actualCreatedDate);
+            assertEquals(storedProduct.getCreated().toString(), productJSON.getAsString("created"));
             assertEquals(storedProduct.getRecommendedRetailPrice().toString(), productJSON.getAsString("recommendedRetailPrice"));
             assertEquals(storedProduct.getName(), productJSON.getAsString("name"));
             assertEquals(storedProduct.getDescription(), productJSON.getAsString("description"));
