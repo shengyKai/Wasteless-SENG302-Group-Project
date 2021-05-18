@@ -43,38 +43,54 @@ public class InventoryController {
     public void addInventory(@PathVariable(name="id") Long businessId, HttpServletRequest request, @RequestBody JSONObject inventory) throws Exception {
         String message = String.format("Attempting to add and inventory item for business=%d", businessId);
         logger.info(message);
-        // get business + sanity
-        Business business = businessRepository.getBusinessById(businessId);
-        // check business perms
-        business.checkSessionPermissions(request);
-        // check body exists
-        if (inventory == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Inventory information not provided");
+        try {
+            // get business + sanity
+            Business business = businessRepository.getBusinessById(businessId);
+            // check business perms
+            business.checkSessionPermissions(request);
+            // check body exists
+            if (inventory == null) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Inventory information not provided");
+            }
+            // get productCode from body
+            String productCode = inventory.getAsString("productId");
+            // sanity on product
+            Product product = productRepository.getProductByBusinessAndProductCode(business, productCode);
+            Integer quantity = getQuantityFromInventoryJson(inventory);
+
+
+            InventoryItem item = new InventoryItem.Builder()
+                    .withProduct(product)
+                    .withPricePerItem(inventory.getAsString("pricePerItem"))
+                    .withQuantity(quantity)
+                    .withBestBefore(inventory.getAsString("bestBefore"))
+                    .withSellBy(inventory.getAsString("sellBy"))
+                    .withManufactured(inventory.getAsString("manufactured"))
+                    .withExpires(inventory.getAsString("expires"))
+                    .withTotalPrice(inventory.getAsString("totalPrice"))
+                    .build();
+
+            inventoryItemRepository.save(item);
+        } catch (ResponseStatusException exception) {
+            logger.warn(exception);
+            throw exception;
         }
-        // get productCode from body
-        String productCode = inventory.getAsString("productId");
-        // sanity on product
-        Product product = productRepository.getProductByBusinessAndProductCode(business, productCode);
-        Integer quantity;
+    }
+
+    /**
+     * Parse the inventory JSON to get quantity as an integer, or throw a response status exception if quantity is not an
+     * integer.
+     * @param inventory A JSON object representing an inventory item.
+     * @return The number from the quantity field of the JSON.
+     */
+    private Integer getQuantityFromInventoryJson(JSONObject inventory) {
+        int quantity;
         try {
             quantity = Integer.parseInt(inventory.getAsString("quantity"));
         } catch (NumberFormatException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The provided quantity is not a valid number");
         }
-
-
-        InventoryItem item = new InventoryItem.Builder()
-                .withProduct(product)
-                .withPricePerItem(inventory.getAsString("pricePerItem"))
-                .withQuantity(quantity)
-                .withBestBefore(inventory.getAsString("bestBefore"))
-                .withSellBy(inventory.getAsString("sellBy"))
-                .withManufactured(inventory.getAsString("manufactured"))
-                .withExpires(inventory.getAsString("expires"))
-                .withTotalPrice(inventory.getAsString("totalPrice"))
-                .build();
-
-        inventoryItemRepository.save(item);
+        return quantity;
     }
 
     /**

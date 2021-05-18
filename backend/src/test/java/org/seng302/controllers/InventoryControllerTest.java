@@ -6,8 +6,10 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
-import org.mockito.*;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.Mock;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 import org.seng302.entities.*;
 import org.seng302.exceptions.AccessTokenException;
 import org.seng302.persistence.BusinessRepository;
@@ -23,7 +25,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.HttpServletRequest;
@@ -34,11 +35,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.Assert.*;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
-import static org.springframework.http.RequestEntity.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
@@ -116,9 +114,9 @@ public class InventoryControllerTest {
                 "  \"pricePerItem\": 6.5,\n" +
                 "  \"totalPrice\": 21.99,\n" +
                 "  \"manufactured\": \"2021-05-12\",\n" +
-                "  \"sellBy\": \"2021-05-12\",\n" +
-                "  \"bestBefore\": \"2021-05-12\",\n" +
-                "  \"expires\": \"2021-05-12\"\n" +
+                "  \"sellBy\": \"2021-12-12\",\n" +
+                "  \"bestBefore\": \"2021-12-12\",\n" +
+                "  \"expires\": \"2021-12-12\"\n" +
                 "}";
         mockMvc.perform(MockMvcRequestBuilders
                 .post("/businesses/1/inventory")
@@ -280,9 +278,9 @@ public class InventoryControllerTest {
                 "  \"pricePerItem\": 6.5,\n" +
                 "  \"totalPrice\": 21.99,\n" +
                 "  \"manufactured\": \"2021-05-12\",\n" +
-                "  \"sellBy\": \"2021-05-12\",\n" +
-                "  \"bestBefore\": \"2021-05-12\",\n" +
-                "  \"expires\": \"2021-05-12\"\n" +
+                "  \"sellBy\": \"2021-12-12\",\n" +
+                "  \"bestBefore\": \"2021-12-12\",\n" +
+                "  \"expires\": \"2021-12-12\"\n" +
                 "}";
         mockMvc.perform(MockMvcRequestBuilders
                 .post("/businesses/1/inventory")
