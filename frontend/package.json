@@ -16,6 +16,7 @@
     "axios": "^0.21.1",
     "core-js": "^3.8.3",
     "serve": "^11.3.2",
+    "typescript-is": "^0.18.2",
     "vue": "^2.6.12",
     "vue-router": "^3.5.1",
     "vuejs-logger": "^1.5.5",
@@ -46,6 +47,7 @@
     "sass": "^1.32.0",
     "sass-loader": "^10.0.0",
     "sonarqube-scanner": "^2.8.0",
+    "ttypescript": "^1.5.12",
     "typescript": "~3.9.3",
     "vue-cli-plugin-vuetify": "~2.2.0",
     "vue-jest": "^3.0.7",
@@ -138,6 +140,11 @@
   ],
   "jest": {
     "testEnvironment": "jsdom",
+    "globals": {
+      "ts-jest": {
+        "compiler": "ttypescript"
+      }
+    },
     "coveragePathIgnorePatterns": [
       "/node_modules/"
     ],
