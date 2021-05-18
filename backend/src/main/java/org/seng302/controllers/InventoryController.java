@@ -7,20 +7,15 @@ import org.apache.logging.log4j.Logger;
 import org.seng302.entities.Business;
 import org.seng302.entities.InventoryItem;
 import org.seng302.entities.Product;
-import org.seng302.exceptions.BusinessNotFoundException;
 import org.seng302.persistence.BusinessRepository;
 import org.seng302.persistence.InventoryItemRepository;
 import org.seng302.persistence.ProductRepository;
-import org.seng302.tools.AuthenticationTokenManager;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.HttpServletRequest;
-import java.text.ParseException;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 public class InventoryController {
@@ -46,7 +41,8 @@ public class InventoryController {
      */
     @PostMapping("/businesses/{id}/inventory")
     public void addInventory(@PathVariable(name="id") Long businessId, HttpServletRequest request, @RequestBody JSONObject inventory) throws Exception {
-        logger.info(String.format("Attempting to add and inventory item for business=%d", businessId));
+        String message = String.format("Attempting to add and inventory item for business=%d", businessId);
+        logger.info(message);
         try {
             // get business + sanity
             Business business = businessRepository.getBusinessById(businessId);
@@ -60,11 +56,13 @@ public class InventoryController {
             String productCode = inventory.getAsString("productId");
             // sanity on product
             Product product = productRepository.getProductByBusinessAndProductCode(business, productCode);
+            Integer quantity = getQuantityFromInventoryJson(inventory);
+
 
             InventoryItem item = new InventoryItem.Builder()
                     .withProduct(product)
                     .withPricePerItem(inventory.getAsString("pricePerItem"))
-                    .withQuantity(inventory.getAsNumber("quantity").intValue())
+                    .withQuantity(quantity)
                     .withBestBefore(inventory.getAsString("bestBefore"))
                     .withSellBy(inventory.getAsString("sellBy"))
                     .withManufactured(inventory.getAsString("manufactured"))
@@ -73,10 +71,26 @@ public class InventoryController {
                     .build();
 
             inventoryItemRepository.save(item);
-        } catch (ResponseStatusException error) {
-            logger.warn(error.getMessage());
-            throw error;
+        } catch (ResponseStatusException exception) {
+            logger.warn(exception);
+            throw exception;
         }
+    }
+
+    /**
+     * Parse the inventory JSON to get quantity as an integer, or throw a response status exception if quantity is not an
+     * integer.
+     * @param inventory A JSON object representing an inventory item.
+     * @return The number from the quantity field of the JSON.
+     */
+    private Integer getQuantityFromInventoryJson(JSONObject inventory) {
+        int quantity;
+        try {
+            quantity = Integer.parseInt(inventory.getAsString("quantity"));
+        } catch (NumberFormatException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The provided quantity is not a valid number");
+        }
+        return quantity;
     }
 
     /**
