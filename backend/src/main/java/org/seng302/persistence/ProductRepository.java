@@ -34,6 +34,14 @@ public interface ProductRepository extends CrudRepository<Product, Long>{
          *          * of the product
          */
         Optional<Product> findByProductCode(@Param("productCode") String productCode);
+
+        /**
+        * Find all then products in the repository which belong to the given business.
+        * @param business The business which owns the products.
+        * @return A list of products belonging to the business.
+        */
+        public List<Product> findAllByBusiness(@Param("business") Business business);
+
         /**
          * Gets a product from the repository.
          * If the product does not exist then a 406 Not Acceptable is thrown
@@ -44,7 +52,7 @@ public interface ProductRepository extends CrudRepository<Product, Long>{
          */
         default Product getProductByBusinessAndProductCode(Business business, String productCode) {
                 Optional<Product> product = this.findByProductCode(productCode);
-                if (!product.isPresent()) {
+                if (product.isEmpty()) {
                         throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE,
                                 "The given product does not exist");
                 }
