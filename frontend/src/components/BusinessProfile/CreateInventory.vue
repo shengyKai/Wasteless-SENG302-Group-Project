@@ -131,7 +131,7 @@ export default {
       errorMessage: undefined,
       dialog: true,
       valid: false,
-      today: '',
+      today: new Date().toISOString().slice(0,10),
       /**
        * This will be replaced with a list of Products
        * For now, only nathanApple will work when logged in as 123andyelliot@gmail.com
@@ -173,7 +173,9 @@ export default {
     };
   },
   methods: {
-
+    /**
+     * Closes the dialog
+     */
     closeDialog() {
       this.$emit('closeDialog');
     },
