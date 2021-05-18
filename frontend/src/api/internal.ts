@@ -29,6 +29,8 @@
  * Declare all available services here
  */
 import axios from 'axios';
+import { is } from 'typescript-is';
+
 const SERVER_URL = process.env.VUE_APP_SERVER_ADD;
 
 const instance = axios.create({
@@ -47,7 +49,7 @@ export type User = {
   nickname?: string,
   bio?: string,
   email: string,
-  dateOfBirth: string,
+  dateOfBirth?: string, // TODO This should actually be a required field (according to the spec)
   phoneNumber?: string,
   homeAddress: Location,
   created?: string,
@@ -84,10 +86,11 @@ export const BUSINESS_TYPES: BusinessType[] = ['Accommodation and Food Services'
 
 export type Business = {
   id: number,
+  primaryAdministratorId: number,
   administrators?: User[],
   name: string,
   description?: string,
-  address: string,
+  address: Location,
   businessType: BusinessType,
   created?: string,
 };
@@ -130,73 +133,6 @@ export type CreateInventoryItem = {
 
 export type CreateProduct = Omit<Product, 'created' | 'images'>;
 
-function isLocation(obj: any): obj is Location {
-  if (obj === null || typeof obj !== 'object') return false;
-  if (obj.streetNumber !== undefined && typeof obj.streetNumber !== 'string') return false;
-  if (obj.streetName !== undefined && typeof obj.streetName !== 'string') return false;
-  if (obj.city !== undefined && typeof obj.city !== 'string') return false;
-  if (obj.region !== undefined && typeof obj.region !== 'string') return false;
-  if (typeof obj.country !== 'string') return false;
-  if (obj.postcode !== undefined && typeof obj.postcode !== 'string') return false;
-  if (obj.district === null) return true;
-  if (obj.district !== undefined && typeof obj.district !== 'string') return false;
-  return true;
-}
-
-function isUser(obj: any): obj is User {
-  if (obj === null || typeof obj !== 'object') return false;
-  if (typeof obj.id !== 'number') return false;
-  if (typeof obj.firstName !== 'string') return false;
-  if (typeof obj.lastName !== 'string') return false;
-  if (obj.middleName !== undefined && typeof obj.middleName !== 'string') return false;
-  if (obj.nickname !== undefined && typeof obj.nickname !== 'string') return false;
-  if (obj.bio !== undefined && typeof obj.bio !== 'string') return false;
-  if (typeof obj.email !== 'string') return false;
-  if (obj.dateOfBirth !== undefined && typeof obj.dateOfBirth !== 'string') return false;
-  if (obj.phoneNumber !== undefined && typeof obj.phoneNumber !== 'string') return false;
-  if (!isLocation(obj.homeAddress)) return false;
-  if (obj.created !== undefined && typeof obj.created !== 'string') return false;
-  if (obj.role !== undefined && !['user', 'globalApplicationAdmin', 'defaultGlobalApplicationAdmin'].includes(obj.role))
-    return false;
-  if (obj.businessesAdministered !== undefined && !isBusinessArray(obj.businessesAdministered)) return false;
-
-  return true;
-}
-
-function isBusiness(obj: any): obj is Business {
-  if (obj === null || typeof obj !== 'object') return false;
-  if (typeof obj.id !== 'number') return false;
-  if (obj.administrators !== undefined && !isUserArray(obj.administrators)) return false;
-  if (typeof obj.name !== 'string') return false;
-  if (obj.description !== undefined && typeof obj.description !== 'string') return false;
-  if (typeof obj.address !== 'object') return false;
-  if (!BUSINESS_TYPES.includes(obj.businessType)) return false;
-  if (obj.created !== undefined && typeof obj.created !== 'string') return false;
-
-  return true;
-}
-
-function isProduct(obj: any): obj is Product {
-
-  if (obj === null || typeof obj !== 'object') return false;
-  if (typeof obj.id !== 'string') return false;   //BACKEND response productCode as product.id
-  if (typeof obj.name !== 'string') return false;
-  if (obj.description !== undefined && typeof obj.description !== 'string') return false;
-
-  if (obj.manufacturer !== undefined && typeof obj.manufacturer !== 'string') return false;
-  if (obj.recommendedRetailPrice !== undefined && typeof obj.recommendedRetailPrice !== 'number') return false;
-  if (!isImageArray(obj.images)) return false;
-  return true;
-}
-
-function isImage(obj: any): obj is Image {
-  if (obj === null || typeof obj !== 'object') return false;
-  if (typeof obj.id !== 'number') return false;
-  if (typeof obj.filename !== 'string') return false;
-  if (typeof obj.thumbnailFilename !== 'string') return false;
-  return true;
-}
-
 function isCreateInventoryItem(obj: any): obj is CreateInventoryItem {
   if (obj === null || typeof obj !== 'object') return false;
   if (typeof obj.productId !== 'string') return false;
@@ -207,46 +143,6 @@ function isCreateInventoryItem(obj: any): obj is CreateInventoryItem {
   if (obj.sellBy !== undefined && typeof obj.sellBy !== 'string') return false;
   if (obj.bestBefore !== undefined && typeof obj.bestBefore !== 'string') return false;
   if (typeof obj.expires !== 'string') return false;
-  return true;
-}
-
-function isNumberArray(obj: any): obj is number[] {
-  if (!Array.isArray(obj)) return false;
-  for (let elem of obj) {
-    if (typeof elem !== 'number') return false;
-  }
-  return true;
-}
-
-function isUserArray(obj: any): obj is User[] {
-  if (!Array.isArray(obj)) return false;
-  for (let elem of obj) {
-    if (!isUser(elem)) return false;
-  }
-  return true;
-}
-
-function isBusinessArray(obj: any): obj is Business[] {
-  if (!Array.isArray(obj)) return false;
-  for (let elem of obj) {
-    if (!isBusiness(elem)) return false;
-  }
-  return true;
-}
-
-function isProductsArray(obj: any): obj is Product[] {
-  if (!Array.isArray(obj)) return false;
-  for (let elem of obj) {
-    if (!isProduct(elem)) return false;
-  }
-  return true;
-}
-
-function isImageArray(obj: any): obj is Image[] {
-  if (!Array.isArray(obj)) return false;
-  for (let elem of obj) {
-    if (!isImage(elem)) return false;
-  }
   return true;
 }
 
@@ -281,7 +177,7 @@ export async function search(query: string, pageIndex: number, resultsPerPage: n
     return `Request failed: ${status}`;
   }
 
-  if (!isUserArray(response.data)) {
+  if (!is<User[]>(response.data)) {
     return 'Response is not user array';
   }
 
@@ -309,7 +205,7 @@ export async function getSearchCount(query: string): Promise<MaybeError<number>>
     return `Request failed: ${status}`;
   }
 
-  if (typeof response.data?.count !== 'number') {
+  if (!is<number>(response.data.count)) {
     return 'Response is not number';
   }
 
@@ -333,7 +229,7 @@ export async function getUser(id: number): Promise<MaybeError<User>> {
     return `Request failed: ${status}`;
   }
 
-  if (!isUser(response.data)) {
+  if (!is<User>(response.data)) {
     return 'Response is not user';
   }
 
@@ -362,7 +258,7 @@ export async function login(email: string, password: string): Promise<MaybeError
     return `Request failed: ${status}`;
   }
   let id = response.data.userId;
-  if (typeof id !== 'number') return 'Invalid response';
+  if (!is<number>(id)) return 'Invalid response';
 
   return id;
 }
@@ -576,7 +472,7 @@ export async function getProducts(buisnessId: number, page: number, resultsPerPa
     return 'Request failed: ' + status;
   }
 
-  if (!isProductsArray(response.data)) {
+  if (!is<Product[]>(response.data)) {
     return 'Response is not product array';
   }
   return response.data;
@@ -626,7 +522,7 @@ export async function getBusiness(businessId: number): Promise<MaybeError<Busine
     return 'Request failed: ' + status;
   }
 
-  if (!isBusiness(response.data)) {
+  if (!is<Business>(response.data)) {
     return 'Invalid response type';
   }
 
