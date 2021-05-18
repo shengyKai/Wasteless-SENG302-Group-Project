@@ -11,9 +11,9 @@ import org.springframework.web.server.ResponseStatusException;
 
 import javax.persistence.*;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.time.LocalDate;
-import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -25,10 +25,10 @@ public class User extends Account {
     private String lastName;
     private String nickname;
     private String bio;
-    private Date dob;
+    private LocalDate dob;
     private String phNum;
     private Location address;
-    private Date created;
+    private Instant created;
     private Set<Business> businessesAdministered = new HashSet<>();
     private Set<Business> businessesOwned = new HashSet<>();
 
@@ -162,7 +162,7 @@ public class User extends Account {
      */
     @Column(nullable = false)
     @JsonProperty("dateOfBirth")
-    public Date getDob() {
+    public LocalDate getDob() {
         return dob;
     }
 
@@ -174,13 +174,12 @@ public class User extends Account {
      * LocalDate class can be used but come with time zone -- over complicated
      * @param dob date of birth (used to verify age)
      */
-    public void setDob(Date dob) {
+    public void setDob(LocalDate dob) {
         if (dob != null) {
-            LocalDate dateOfBirth = dob.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-            LocalDate date = LocalDate.now();
-            LocalDate minDate = date.minusYears(13);
+            LocalDate now = LocalDate.now();
+            LocalDate minDate = now.minusYears(13);
             
-            if (dateOfBirth.compareTo(minDate) < 0) {
+            if (dob.compareTo(minDate) < 0) {
                 this.dob = dob;
             } else {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You must be at least 13 years old to create an account");
@@ -245,7 +244,7 @@ public class User extends Account {
      * @return Date the account was created
      */
     @ReadOnlyProperty
-    public Date getCreated(){
+    public Instant getCreated(){
         return this.created;
     }
 
@@ -253,7 +252,7 @@ public class User extends Account {
      * Record the date when the account is created
      * @param date of account creation
      */
-    public void setCreated(Date date){
+    public void setCreated(Instant date){
         this.created = date;
     }
 
@@ -427,7 +426,7 @@ public class User extends Account {
         private String nickname;
         private String email;
         private String bio;
-        private Date dob;
+        private LocalDate dob;
         private String phNum;
         private Location address;
         private String password;
@@ -498,8 +497,8 @@ public class User extends Account {
          * @return Builder with date of birth set.
          */
         public Builder withDob(String dobString) throws ParseException {
-            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-            this.dob = dateFormat.parse(dobString);
+            DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE;
+            this.dob = LocalDate.parse(dobString, dateTimeFormatter);
             return this;
         }
 
@@ -549,7 +548,7 @@ public class User extends Account {
             user.setDob(this.dob);
             user.setPhNum(this.phNum);
             user.setAddress(this.address);
-            user.setCreated(new Date(System.currentTimeMillis()));
+            user.setCreated(Instant.now());
             user.setRole("user");
             return user;
         }

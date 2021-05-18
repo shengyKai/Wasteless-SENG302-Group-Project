@@ -109,7 +109,7 @@ deploy-staging-backend:
     paths:
       - backend/build/libs
   only:
-    - t160-product-catalogue-backend-duplicates
+    - dev
 
 deploy-staging-frontend:
   stage: deploy
@@ -131,7 +131,7 @@ deploy-staging-frontend:
     paths:
       - frontend/dist
   only:
-    - t160-product-catalogue-backend-duplicates
+    - dev
 
 deploy-production-backend:
   stage: deploy

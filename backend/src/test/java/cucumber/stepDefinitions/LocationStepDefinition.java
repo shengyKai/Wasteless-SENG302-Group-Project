@@ -52,7 +52,6 @@ public class LocationStepDefinition {
 
     @Then("the address has the region name {string}")
     public void theAddressHasTheRegionName(String region) {
-        System.out.println(theAddress);
         Assert.assertEquals(theAddress.getRegion(), region); }
 
     @Then("the address has the country name {string}")

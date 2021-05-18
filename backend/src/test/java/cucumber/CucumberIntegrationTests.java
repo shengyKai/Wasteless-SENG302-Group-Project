@@ -12,7 +12,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 @RunWith(Cucumber.class)
 @CucumberContextConfiguration
 @SpringBootTest(classes = { Main.class, CucumberIntegrationTests.class }, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@CucumberOptions(plugin = { "pretty" }, tags = "", features = "src/test/resources/features")
+@CucumberOptions(plugin = { "pretty" }, tags = "not @Ignore", features = "src/test/resources/features")
 @AutoConfigureMockMvc
 public class CucumberIntegrationTests {
 }
