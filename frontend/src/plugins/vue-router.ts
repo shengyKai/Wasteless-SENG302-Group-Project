@@ -69,6 +69,7 @@ const routes = [
     path: "/saleItem",
     component: SaleItem,
     meta: {title: 'Example Sale Item'}
+  },
   { // Router for inventory page (Inventory page frontend dev please use this and remove this line afterward)
     path: "/inventory",
     component: Inventory,
