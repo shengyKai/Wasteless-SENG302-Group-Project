@@ -30,45 +30,69 @@ junit:
   script:
     - cd backend
     - ./gradlew test
+  only:
+    changes:
+      - backend/*.gradle
+      - backend/src/**/application.properties
+      - backend/src/main/**/*
+      - backend/src/test/**/*.csv
+      - backend/src/test/java/org/**/*.java
 
 cucumber:
-   stage: test
-   artifacts:
-     paths:
-       - backend/build
-   script:
-     - cd backend
-     - ./gradlew cucumber
+  stage: test
+  artifacts:
+    paths:
+      - backend/build
+  script:
+    - cd backend
+    - ./gradlew cucumber
+  only:
+    changes:
+      - backend/*.gradle
+      - backend/src/**/application.properties
+      - backend/src/main/**/*
+      - backend/src/test/**/*.csv
+      - backend/src/test/**/*.feature
+      - backend/src/test/java/cucumber/**/*.java
 
 jest:
-   stage: test
-   cache:
-     key: node-modules
-     paths:
-       - frontend/node_modules
-     policy: pull
-   artifacts:
-     paths:
-       - frontend/coverage
-   script:
-     - cd frontend
-     - npm run test
+  stage: test
+  cache:
+    key: node-modules
+    paths:
+      - frontend/node_modules
+    policy: pull
+  artifacts:
+    paths:
+      - frontend/coverage
+  script:
+    - cd frontend
+    - npm run test
+  only:
+    changes:
+      - frontend/package.json
+      - frontend/package-lock.json
+      - frontend/babel.config.js
+      - frontend/tsconfig.json
+      - frontend/vue.config.js
+      - frontend/tests/**/*
+      - frontend/src/**/*
 
 # Export sonarqube (static code analysis) reports
 dev-sonarqube:
-   stage: sonarqube
-   cache:
-     key: node-modules
-     paths:
-       - frontend/node_modules
-     policy: pull
-   script:
-     - cd frontend
-     - npm run sonarqube
-     - cd ../backend
-     - ./gradlew jacocoTestReport jacocoTestCoverageVerification sonarqube
-   only:
-     - dev
+  stage: sonarqube
+  cache:
+    key: node-modules
+    paths:
+      - frontend/node_modules
+    policy: pull
+  script:
+    - cd frontend
+    - npm run sonarqube
+    - cd ../backend
+    - ./gradlew jacocoTestReport jacocoTestCoverageVerification sonarqube
+  only:
+    - dev
 
 # builds all branches, except dev and master
 branch-build:
