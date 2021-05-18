@@ -1,6 +1,8 @@
 package org.seng302.entities;
 
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 import net.minidev.json.JSONObject;
 import org.seng302.tools.JsonTools;
 import org.springframework.http.HttpStatus;
@@ -22,10 +24,14 @@ public class InventoryItem {
 
     @ManyToOne
     @JoinColumn(name = "product_id", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Product product;
 
     @Column(name = "quantity", nullable = false)
     private int quantity;
+
+    @Column(name = "remaining_quantity")
+    private int remainingQuantity;
 
     @Column(name = "price_per_item")
     private BigDecimal pricePerItem;
@@ -114,11 +120,19 @@ public class InventoryItem {
     public Instant getCreationDate() {
         return creationDate;
     }
+    /**
+     * Get the quantity that's not currently up for sale
+     * @return remaining quantity
+     */
+    public int getRemainingQuantity() {
+        return remainingQuantity;
+    }
+
 
 //Setters
     /**
      * Sets the product
-     * @param product
+     * @param product in inventory
      */
     public void setProduct(Product product) throws ResponseStatusException {
         if (product != null) {
@@ -129,13 +143,25 @@ public class InventoryItem {
     }
     /**
      * Sets the quantity of items/products
-     * @param quantity
+     * @param quantity of item
      */
     public void setQuantity(Integer quantity) throws ResponseStatusException {
         if (quantity > 0) {
             this.quantity = quantity;
         } else {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A quantity less than 1 was provided");
+        }
+    }
+
+    /**
+     * Set the remaining quantity
+     * @param remainingQuantity not currently for sale
+     */
+    public void setRemainingQuantity(int remainingQuantity) {
+        if (remainingQuantity >= 0) {
+            this.remainingQuantity = remainingQuantity;
+        } else {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot sell more items than you have");
         }
     }
     /**
@@ -166,14 +192,14 @@ public class InventoryItem {
      */
     public void setTotalPrice(BigDecimal totalPrice) {
         if (totalPrice != null) {
-        if (totalPrice.compareTo(BigDecimal.ZERO) < 0) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Total price must not be less than 0 ");
+            if (totalPrice.compareTo(BigDecimal.ZERO) < 0) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Total price must not be less than 0 ");
+            }
+            if (totalPrice.compareTo(new BigDecimal(1000000)) >= 0) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Total price must be less than 1,000,000");
+            }
         }
-        if (totalPrice.compareTo(new BigDecimal(1000000)) >= 0) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Total price must be less than 1,000,000");
-        }
-    }
-    this.totalPrice = totalPrice;
+        this.totalPrice = totalPrice;
     }
     /**
      * Sets the date of when the product was manufactured
@@ -405,6 +431,7 @@ public class InventoryItem {
             InventoryItem inventoryItem = new InventoryItem();
             inventoryItem.setProduct(this.product);
             inventoryItem.setQuantity(this.quantity);
+            inventoryItem.setRemainingQuantity(this.quantity);
             if (pricePerItem != null) {
                 inventoryItem.setPricePerItem(this.pricePerItem);
             }
