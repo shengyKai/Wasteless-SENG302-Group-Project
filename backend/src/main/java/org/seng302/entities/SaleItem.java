@@ -28,7 +28,7 @@ public class SaleItem {
     @Column(name = "quantity", nullable = false)
     private int quantity = 0;
 
-    @Column(name = "price")
+    @Column(name = "price", nullable = false)
     private BigDecimal price;
 
     @Column(name = "more_info")
@@ -110,21 +110,26 @@ public class SaleItem {
      */
     public void setPrice(String price) {
         try {
-            this.price = new BigDecimal(price);
+            BigDecimal newPrice = new BigDecimal(price);
+            if (newPrice.compareTo(BigDecimal.ZERO) >= 0) {
+                this.price = newPrice;
+            } else {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Please enter a positive number");
+            }
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Please enter a valid number");
         }
     }
 
     /**
-     * Set the price automatically to be price per item * quantity
+     * Automatically suggest price to be price per item * quantity
      * @throws NullPointerException if inventory item not there
      */
-    public void setPrice() throws NullPointerException {
+    public BigDecimal autoPrice() throws NullPointerException {
         if (inventoryItem.getPricePerItem() == null) {
-            this.price = null;
+            return null;
         } else {
-            this.price = inventoryItem.getPricePerItem().multiply(new BigDecimal(this.quantity));
+            return inventoryItem.getPricePerItem().multiply(new BigDecimal(this.quantity));
         }
     }
 
@@ -277,13 +282,8 @@ public class SaleItem {
             } else {
                 saleItem.setCloses();
             }
-            if (price != null) {
-                saleItem.setPrice(this.price);
-            }
+            saleItem.setPrice(this.price);
             saleItem.setQuantity(this.quantity);  // Set last because it alters other objects so a build fail in something else causes problems
-            if (price == null) {
-                saleItem.setPrice();  // Separated because setQuantity has to come after every manual set but before the auto price set
-            }
             return saleItem;
         }
     }

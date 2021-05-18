@@ -121,6 +121,7 @@ public class SaleItemTests {
         SaleItem saleItem = new SaleItem.Builder()
                 .withInventoryItem(invItem)
                 .withQuantity(2)
+                .withPrice("200.34")
                 .build();
         saleItemRepository.save(saleItem);
         Assertions.assertNotNull(saleItemRepository.findById(saleItem.getSaleId()));
@@ -185,28 +186,26 @@ public class SaleItemTests {
     }
 
     @Test
-    void createSaleItem_NoInventoryPriceAndNoSalePrice_SalePriceSetToZero() throws Exception {
+    void createSaleItem_SalePriceNegative_ObjectNotCreated() throws Exception {
         invItem.setPricePerItem(null);
-        SaleItem saleItem = new SaleItem.Builder()
+        SaleItem.Builder saleItem = new SaleItem.Builder()
                 .withInventoryItem(invItem)
                 .withCloses("2034-12-25")
                 .withMoreInfo("This doesn't expire for a long time")
-                .withQuantity(2)
-                .build();
-        Assertions.assertNull(saleItem.getPrice());
+                .withPrice("-200.34")
+                .withQuantity(2);
+        assertThrows(ResponseStatusException.class, saleItem::build);
     }
 
     @Test
-    void createSaleItem_SalePriceNull_ObjectCreated() throws Exception {
-        SaleItem saleItem = new SaleItem.Builder()
+    void createSaleItem_SalePriceNull_ObjectNotCreated() throws Exception {
+        SaleItem.Builder saleItem = new SaleItem.Builder()
                 .withInventoryItem(invItem)
                 .withCloses("2034-12-25")
                 .withMoreInfo("This doesn't expire for a long time")
                 .withPrice(null)
-                .withQuantity(2)
-                .build();
-        saleItemRepository.save(saleItem);
-        Assertions.assertNotNull(saleItemRepository.findById(saleItem.getSaleId()));
+                .withQuantity(2);
+        assertThrows(ResponseStatusException.class, saleItem::build);
     }
 
     @Test
@@ -373,31 +372,6 @@ public class SaleItemTests {
             assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
             assertEquals("Cannot sell more items than you have", e.getReason());
         } catch (Exception unexpected) { Assertions.fail(); }
-    }
-
-    @Test
-    void autogeneratePrice_PriceSetBasedOffInventoryPricePerItem() throws Exception {
-        SaleItem saleItem = new SaleItem.Builder()
-                .withInventoryItem(invItem)
-                .withCloses("2034-12-25")
-                .withMoreInfo("This doesn't expire for a long time")
-                .withQuantity(2)
-                .build();
-        saleItemRepository.save(saleItem);
-        assertEquals(invItem.getPricePerItem().multiply(new BigDecimal(2)), saleItem.getPrice());
-    }
-
-    @Test
-    void autogeneratePrice_InventoryHasNoPriceEither_PriceNull() throws Exception {
-        invItem.setPricePerItem(null);
-        SaleItem saleItem = new SaleItem.Builder()
-                .withInventoryItem(invItem)
-                .withCloses("2034-12-25")
-                .withMoreInfo("This doesn't expire for a long time")
-                .withQuantity(2)
-                .build();
-        saleItemRepository.save(saleItem);
-        Assertions.assertNull(saleItem.getPrice());
     }
 
     @Test
