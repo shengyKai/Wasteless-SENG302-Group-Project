@@ -87,16 +87,12 @@ public class SaleItem {
      * @param quantity that is for sale
      */
     public void setQuantity(int quantity) {
-        try {
-            int diff = this.quantity - quantity;
-            if (quantity > 0 && diff <= inventoryItem.getRemainingQuantity()) {
-                this.quantity = quantity;
-                inventoryItem.setRemainingQuantity(inventoryItem.getRemainingQuantity() + diff);
-            } else {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Please enter a number of items between 1 and your current stock not on sale");
-            }
-        } catch (NullPointerException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Inventory item has been removed, you have no more to sell");
+        int diff = this.quantity - quantity;
+        if (quantity > 0 && diff <= inventoryItem.getRemainingQuantity()) {
+            this.quantity = quantity;
+            inventoryItem.setRemainingQuantity(inventoryItem.getRemainingQuantity() + diff);
+        } else {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Please enter a number of items between 1 and your current stock not on sale");
         }
     }
 
@@ -125,9 +121,8 @@ public class SaleItem {
 
     /**
      * Automatically suggest price to be price per item * quantity
-     * @throws NullPointerException if inventory item not there
      */
-    public BigDecimal autoPrice() throws NullPointerException {
+    public BigDecimal autoPrice() {
         if (inventoryItem.getPricePerItem() == null) {
             return null;
         } else {
@@ -260,9 +255,8 @@ public class SaleItem {
         /**
          * Builds the Sale Item
          * @return Sale Item
-         * @throws Exception from required value not being set or some other violation
          */
-        public SaleItem build() throws Exception {
+        public SaleItem build() {
             SaleItem saleItem = new SaleItem();
             saleItem.setInventoryItem(this.inventoryItem);
             saleItem.setMoreInfo(this.moreInfo);
