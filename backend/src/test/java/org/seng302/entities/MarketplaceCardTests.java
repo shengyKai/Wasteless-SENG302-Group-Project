@@ -14,6 +14,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -159,18 +162,26 @@ class MarketplaceCardTests {
 
     @Test
     void marketplaceRepository_saveCard_addsToUserCardsCreated() {
-        var card = new MarketplaceCard.Builder()
+        var card1 = new MarketplaceCard.Builder()
                 .withCreator(testUser)
                 .withSection(MarketplaceCard.Section.EXCHANGE)
-                .withTitle("test_title")
-                .withDescription("test_description")
+                .withTitle("test_title1")
+                .withDescription("test_description1")
                 .build();
-        card = marketplaceCardRepository.save(card);
+        card1 = marketplaceCardRepository.save(card1);
+        var card2 = new MarketplaceCard.Builder()
+                .withCreator(testUser)
+                .withSection(MarketplaceCard.Section.FOR_SALE)
+                .withTitle("test_title2")
+                .withDescription("test_description2")
+                .build();
+        card2 = marketplaceCardRepository.save(card2);
 
-        testUser = userRepository.findById(testUser.getUserID()).orElseThrow();
+        Set<Long> addedIds = Set.of(card1.getID(), card2.getID());
 
-        assertEquals(testUser.getCardsCreated().size(), 1);
-        var addedCard = testUser.getCardsCreated().stream().findFirst().orElseThrow();
-        assertEquals(card.getID(), addedCard.getID());
+        List<MarketplaceCard> cardList = marketplaceCardRepository.getAllByCreator(testUser);
+        Set<Long> foundIds = cardList.stream().map(MarketplaceCard::getID).collect(Collectors.toSet());
+
+        assertEquals(addedIds, foundIds);
     }
 }
