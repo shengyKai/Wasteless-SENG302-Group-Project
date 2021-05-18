@@ -10,7 +10,7 @@
         </v-col>
         <v-col cols="auto" md="3" sm="12" v-else>
           <!-- feed the productImages into the carousel child component -->
-          <ProductImageCarousel :productImages="product.images" :productId="product.id"/>
+          <ProductImageCarousel :productImages="product.images" :showControls="false"/>
         </v-col>
 
         <!-- Info column -->
@@ -258,6 +258,10 @@ export default {
             recommendedRetailPrice: 2.2,
             created: "2021-05-12",
             images: [
+              {
+                id: 1,
+                filename: '/media/images/8c8bae63-ae18-4881-8e72-d5bfcf57153f.png'
+              }
             ],
             countryOfSale: "Japan",
           },
@@ -280,10 +284,7 @@ export default {
   },
   data() {
     return {
-      currency: {
-        code: "",
-        symbol: ""
-      },
+      currency: {},
       showImageUploaderForm: false,
       //If readMoreActivated is false, the product description is less than 50 words, so it wont have to use the FullProductDescription
       //component. Else it will use it and the "Read more..." link will also be shown to lead to the FullProductDescription component

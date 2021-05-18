@@ -8,6 +8,7 @@ import BusinessProfile from "../components/BusinessProfile/index.vue";
 import SearchResults from "../components/SearchResults.vue";
 import HomePage from "../components/HomePage.vue";
 import ProductCatalogue from "../components/ProductCatalogue.vue";
+import Inventory from "../components/Inventory.vue";
 import InventoryItem from "../components/cards/InventoryItem.vue";
 import SaleItem from "../components/cards/SaleItem.vue";
 
@@ -68,6 +69,10 @@ const routes = [
     path: "/saleItem",
     component: SaleItem,
     meta: {title: 'Example Sale Item'}
+  { // Router for inventory page (Inventory page frontend dev please use this and remove this line afterward)
+    path: "/inventory",
+    component: Inventory,
+    meta: { title: 'Inventory' }
   },
   { // TODO Remove once inventory page is created
     path: "/inventoryitem",

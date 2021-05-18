@@ -262,7 +262,7 @@ class ProductTests {
                 .build();
         productRepository.save(product1);
         testBusiness1 = businessRepository.findByName("BusinessName1");
-        List<Product> catalogue = testBusiness1.getCatalogue();
+        List<Product> catalogue = productRepository.getAllByBusiness(testBusiness1);
 
         assertEquals(product1.getID(), catalogue.get(0).getID());
     }
@@ -300,7 +300,7 @@ class ProductTests {
         productRepository.save(product2);
         productRepository.save(product3);
         testBusiness1 = businessRepository.findByName("BusinessName1");
-        List<Product> catalogue = testBusiness1.getCatalogue();
+        List<Product> catalogue = productRepository.getAllByBusiness(testBusiness1);
 
         assertEquals(3, catalogue.size());
     }

@@ -9,7 +9,12 @@
         </v-col>
         <v-col cols="auto" md="3" sm="12" v-else>
           <!-- feed the productImages into the carousel child component -->
-          <ProductImageCarousel :productImages="product.images" :productId="product.id" v-on:change-primary-image="setPrimaryImage" @delete-image="deleteImage"/>
+          <ProductImageCarousel
+            :productImages="product.images"
+            :showControls="true"
+            v-on:change-primary-image="setPrimaryImage"
+            @delete-image="deleteImage"
+          />
         </v-col>
         <v-col>
           <v-row>
@@ -162,6 +167,16 @@ export default {
     },
     manufacturer() {
       return this.product.manufacturer || "Not set";
+    },
+    /**
+     * Method to change date format into a more human readable format
+     */
+    dateCreated() {
+      if (this.product.created === undefined) return '';
+      const dateCreated = new Date(this.product.created);
+      const parts = dateCreated.toDateString().split(' ');
+      return `${parts[2]} ${parts[1]} ${parts[3]}`;
+      // return `${dateCreated.toDateString()}`;
     }
   },
   async created() {
@@ -204,6 +219,7 @@ export default {
     },
   },
 };
+
 </script>
 
 <style scoped>

@@ -956,7 +956,7 @@ class ProductControllerTest {
     public void makeImagePrimary_valid_sets_image_primary() throws Exception {
         setCurrentUser(ownerUser.getUserID());
         addSeveralProductsToACatalogue();
-        Product product = testBusiness1.getCatalogue().get(0); // get product 1
+        Product product = productRepository.getAllByBusiness(testBusiness1).get(0); // get product 1
         product = addImagesToProduct(product);
         Image image1 = product.getProductImages().get(0);
         Image image2 = product.getProductImages().get(1);
@@ -979,7 +979,7 @@ class ProductControllerTest {
     public void makeImagePrimary_InvalidBusinessId_406Response() throws Exception{
         setCurrentUser(ownerUser.getUserID());
         addSeveralProductsToACatalogue();
-        Product product = testBusiness1.getCatalogue().get(0); // get product 1
+        Product product = productRepository.getAllByBusiness(testBusiness1).get(0); // get product 1
         product = addImagesToProduct(product);
         Image image2 = product.getProductImages().get(1);
         mockMvc.perform(
@@ -996,7 +996,7 @@ class ProductControllerTest {
     public void makeImagePrimary_InvalidProductId_406Response() throws Exception{
         setCurrentUser(ownerUser.getUserID());
         addSeveralProductsToACatalogue();
-        Product product = testBusiness1.getCatalogue().get(0); // get product 1
+        Product product = productRepository.getAllByBusiness(testBusiness1).get(0); // get product 1
         product = addImagesToProduct(product);
         Image image2 = product.getProductImages().get(1);
         mockMvc.perform(
@@ -1014,7 +1014,7 @@ class ProductControllerTest {
     public void makeImagePrimary_InvalidImageId_406Response() throws Exception {
         setCurrentUser(ownerUser.getUserID());
         addSeveralProductsToACatalogue();
-        Product product = testBusiness1.getCatalogue().get(0); // get product 1
+        Product product = productRepository.getAllByBusiness(testBusiness1).get(0); // get product 1
         product = addImagesToProduct(product);
         Image image2 = product.getProductImages().get(1);
         mockMvc.perform(
@@ -1114,7 +1114,7 @@ class ProductControllerTest {
     public void makeImagePrimary_NotBusinessAdmin_403Response() throws Exception{
         setCurrentUser(bystanderUser.getUserID());
         addSeveralProductsToACatalogue();
-        Product product = testBusiness1.getCatalogue().get(0); // get product 1
+        Product product = productRepository.getAllByBusiness(testBusiness1).get(0); // get product 1
         product = addImagesToProduct(product);
         Image image2 = product.getProductImages().get(1);
         mockMvc.perform(
@@ -1131,7 +1131,7 @@ class ProductControllerTest {
     @Test
     public void makeImagePrimary_NoSession_401Response() throws Exception{
         addSeveralProductsToACatalogue();
-        Product product = testBusiness1.getCatalogue().get(0); // get product 1
+        Product product = productRepository.getAllByBusiness(testBusiness1).get(0); // get product 1
         product = addImagesToProduct(product);
         Image image2 = product.getProductImages().get(1);
         mockMvc.perform(
@@ -1148,7 +1148,7 @@ class ProductControllerTest {
     void makeImagePrimary_isBusinessAdminForWrongCatalogue_403Response() throws Exception{
         setCurrentUser(bystanderUser.getUserID());
         addSeveralProductsToACatalogue();
-        Product product = testBusiness1.getCatalogue().get(0); // get product 1
+        Product product = productRepository.getAllByBusiness(testBusiness1).get(0); // get product 1
         product = addImagesToProduct(product);
         Image image2 = product.getProductImages().get(1);
         mockMvc.perform(
@@ -1167,7 +1167,7 @@ class ProductControllerTest {
     void makeImagePrimary_isBusinessAdmin_200Response() throws Exception {
         setCurrentUser(administratorUser.getUserID());
         addSeveralProductsToACatalogue();
-        Product product = testBusiness1.getCatalogue().get(0); // get product 1
+        Product product = productRepository.getAllByBusiness(testBusiness1).get(0); // get product 1
         product = addImagesToProduct(product);
         Image image2 = product.getProductImages().get(1);
         mockMvc.perform(
