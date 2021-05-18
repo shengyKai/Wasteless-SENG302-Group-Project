@@ -153,8 +153,8 @@ class MarketplaceCardTests {
         assertEquals(card.getSection(), foundCard.get().getSection());
         assertEquals(card.getTitle(), foundCard.get().getTitle());
         assertEquals(card.getDescription(), foundCard.get().getDescription());
-        assertEquals(card.getCreated(), foundCard.get().getCreated());
-        assertEquals(card.getCloses(), foundCard.get().getCloses());
+        assertEquals(0, ChronoUnit.SECONDS.between(card.getCreated(), foundCard.get().getCreated()));
+        assertEquals(0, ChronoUnit.SECONDS.between(card.getCloses(), foundCard.get().getCloses()));
     }
 
     @Test
