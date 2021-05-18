@@ -559,6 +559,7 @@ public class BusinessControllerTest {
                 .andExpect(status().isOk());
 
         testAdmin = userRepository.findById(testAdmin.getUserID()).get();
+        System.out.println("Businesses administered:");
         assertTrue(testAdmin.getBusinessesAdministered().contains(testBusiness));
     }
 
