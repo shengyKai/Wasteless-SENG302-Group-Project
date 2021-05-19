@@ -32,6 +32,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Optional;
@@ -78,6 +79,7 @@ class SaleControllerTest {
 
         // Setup mock inventory item
         when(inventoryItem.getId()).thenReturn(2L);
+        when(inventoryItem.getExpires()).thenReturn(LocalDate.now());
         when(inventoryItem.getBusiness()).thenReturn(business);
 
         when(inventoryItemRepository.findById(2L)).thenReturn(Optional.of(inventoryItem));
