@@ -30,6 +30,7 @@
  */
 import axios from 'axios';
 import { is } from 'typescript-is';
+import InventoryItem from "@/components/cards/InventoryItem.vue";
 
 const SERVER_URL = process.env.VUE_APP_SERVER_ADD;
 
@@ -119,6 +120,16 @@ export type Product = {
   images: Image[],
   countryOfSale?: string,
 };
+
+export type Sale = {
+  id: number,
+  inventoryItem: { },
+  quantity: number,
+  price: Number,
+  moreInfo?: String,
+  created: String,
+  closes?: String,
+}
 
 export type CreateProduct = Omit<Product, 'created' | 'images'>;
 
@@ -555,4 +566,25 @@ export async function removeBusinessAdmin(businessId: number, userId: number): P
   }
 
   return undefined;
+}
+
+/**
+ * Gets all of the sale listings for a given business
+ * @param businessId The ID of the business
+ */
+export async function getBusinessSales(businessId: number): Promise<MaybeError<Sale>> {
+  let response;
+  try {
+    response = await instance.put(`/businesses/${businessId}/listings`);
+  } catch ( error ) {
+    let status: number | undefined = error.response?.status;
+    if (status === undefined) return 'Failed to reach backend';
+    if (status === 401) return 'Missing/Invalid access token';
+    if (status === 406) return 'The given business does not exist';
+    return 'Request failed:' + status;
+  }
+  if (!is<Sale>(response.data)) {
+    return 'Invalid response type';
+  }
+  return response.data;
 }
