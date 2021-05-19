@@ -26,6 +26,9 @@
       "dom",
       "dom.iterable",
       "scripthost"
+    ],
+    "plugins": [
+      { "transform": "typescript-is/lib/transform-inline/transformer" }
     ]
   },
   "include": [
