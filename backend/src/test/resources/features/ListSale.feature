@@ -22,10 +22,16 @@ Feature: U22 - List Sale
     Given I am an not an administrator of the business
     And I am logged into my account
     When I create a sale item for product code "FISH", quantity 10, price 100.0
-    Then I expect the sale item not to be created
+    Then I expect the sale item not to be created, due to being forbidden
 
   Scenario: AC2 - When logged in as a business administrator I can add a sale item with more info and a closing time
     Given I am an administrator of the business
     And I am logged into my account
     When I create a sale item for product code "FISH", quantity 10, price 100.0, more info "This is fish", closing "2022-01-10"
     Then I expect the sale item to be created
+
+  Scenario: AC2 - When logged in as a business administrator I cannot add a sale item with invalid info
+    Given I am an administrator of the business
+    And I am logged into my account
+    When I create a sale item for product code "FISH", quantity -10, price 100.0
+    Then I expect the sale item not to be created, due to being a bad request

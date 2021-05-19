@@ -112,9 +112,15 @@ public class SaleItemStepDefinition {
         }
     }
 
-    @Then("I expect the sale item not to be created")
-    public void i_expect_the_sale_item_not_to_be_created() {
+    @Then("I expect the sale item not to be created, due to being forbidden")
+    public void i_expect_the_sale_item_not_to_be_created_forbidden() {
         assertEquals(403, mvcResult.getResponse().getStatus());
+        assertEquals(0, saleItemRepository.count());
+    }
+
+    @Then("I expect the sale item not to be created, due to being a bad request")
+    public void i_expect_the_sale_item_not_to_be_created_bad_request() {
+        assertEquals(400, mvcResult.getResponse().getStatus());
         assertEquals(0, saleItemRepository.count());
     }
 }
