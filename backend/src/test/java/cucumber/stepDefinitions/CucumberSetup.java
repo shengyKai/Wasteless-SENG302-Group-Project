@@ -27,6 +27,8 @@ public class CucumberSetup {
     protected ProductRepository productRepository;
     @Autowired
     protected UserRepository userRepository;
+    @Autowired
+    protected SaleItemRepository saleItemRepository;
 
     /**
      * Set up the mockMvc object for mocking API requests, and remove everything from the repositories.
@@ -36,6 +38,7 @@ public class CucumberSetup {
         objectMapper.enable(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT);
         mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
 
+        saleItemRepository.deleteAll();
         inventoryItemRepository.deleteAll();
         productRepository.deleteAll();
         businessRepository.deleteAll();
