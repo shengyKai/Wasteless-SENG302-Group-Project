@@ -131,6 +131,18 @@ export type CreateInventoryItem = {
   expires: string
 };
 
+export type InventoryItem = {
+  id: number,
+  product: Product,
+  quantity: number,
+  pricePerItem?: number,
+  totalPrice?: number,
+  manufactured?: string,
+  sellBy?: string,
+  bestBefore?: string,
+  expires: string
+};
+
 export type CreateProduct = Omit<Product, 'created' | 'images'>;
 
 function isCreateInventoryItem(obj: any): obj is CreateInventoryItem {
@@ -356,7 +368,7 @@ export async function createBusiness(business: CreateBusiness): Promise<MaybeErr
  */
 export async function createProduct(businessId: number, product: CreateProduct): Promise<MaybeError<undefined>> {
   try {
-    await  instance.post(`/businesses/${businessId}/products`, product);
+    await instance.post(`/businesses/${businessId}/products`, product);
   } catch (error) {
     let status: number | undefined = error.response?.status;
     if (status === undefined) return 'Failed to reach backend';
@@ -407,10 +419,10 @@ export async function uploadProductImage(businessId: number, productCode: string
  * @param productId The ID of the product that has the image
  * @param imageId The ID of the image
  */
-export async function makeImagePrimary(businessId: number, productId: string, imageId: number) : Promise<MaybeError<undefined>> {
+export async function makeImagePrimary(businessId: number, productId: string, imageId: number): Promise<MaybeError<undefined>> {
   try {
     await instance.put(`/businesses/${businessId}/products/${productId}/images/${imageId}/makeprimary`);
-  } catch ( error ) {
+  } catch (error) {
     let status: number | undefined = error.response?.status;
     if (status === undefined) return 'Failed to reach backend';
     if (status === 401) return 'Missing/Invalid access token';
@@ -428,10 +440,10 @@ export async function makeImagePrimary(businessId: number, productId: string, im
  * @param productId The ID of the product that has the image
  * @param imageId The ID of the image
  */
-export async function deleteImage(businessId: number, productId: string, imageId: number) : Promise<MaybeError<undefined>> {
+export async function deleteImage(businessId: number, productId: string, imageId: number): Promise<MaybeError<undefined>> {
   try {
     await instance.delete(`/businesses/${businessId}/products/${productId}/images/${imageId}`);
-  } catch ( error ) {
+  } catch (error) {
     let status: number | undefined = error.response?.status;
     if (status === undefined) return 'Failed to reach backend';
     if (status === 401) return 'Missing/Invalid access token';
@@ -459,10 +471,11 @@ export async function getProducts(buisnessId: number, page: number, resultsPerPa
     response = await instance.get(`/businesses/${buisnessId}/products`, {
       params: {
         orderBy: orderBy,
-        page : page,
-        resultsPerPage : resultsPerPage,
+        page: page,
+        resultsPerPage: resultsPerPage,
         reverse: reverse.toString(),
-      }});
+      }
+    });
   } catch (error) {
     let status: number | undefined = error.response?.status;
     if (status === undefined) return 'Failed to reach backend';
@@ -579,6 +592,55 @@ export async function removeBusinessAdmin(businessId: number, userId: number): P
   }
 
   return undefined;
+}
+
+/**
+ * Get all inventory items for that business
+ *
+ * @param businessId
+ * @return a list of inventory items
+ */
+export async function getInventory(buisnessId: number): Promise<MaybeError<InventoryItem[]>> {
+  let response;
+  try {
+    response = await instance.get(`/businesses/${buisnessId}/inventory`);
+  } catch (error) {
+    let status: number | undefined = error.response?.status;
+    if (status === undefined) return 'Failed to reach backend';
+    if (status === 401) return 'Missing/Invalid access token';
+    if (status === 403) return 'Not an admin of the business';
+    if (status === 406) return 'Business not found';
+    return 'Request failed: ' + status;
+  }
+
+  if (!is<InventoryItem[]>(response.data)) {
+    return 'Response is not inventory array';
+  }
+  return response.data;
+}
+
+/**
+ * Sends a query for the total number of inventory items in the business
+ *
+ * @param buisnessId Business id to identify with the database to retrieve the inventory count
+ * @returns Number of inventory items or an error message
+ */
+export async function getInventoryCount(buisnessId: number): Promise<MaybeError<number>> {
+  let response;
+  try {
+    response = await instance.get(`/businesses/${buisnessId}/inventory/count`);
+  } catch (error) {
+    let status: number | undefined = error.response?.status;
+
+    if (status === undefined) return 'Failed to reach backend';
+    return `Request failed: ${status}`;
+  }
+
+  if (typeof response.data?.count !== 'number') {
+    return 'Response is not number';
+  }
+
+  return response.data.count;
 }
 
 /**
