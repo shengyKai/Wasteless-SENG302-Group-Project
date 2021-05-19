@@ -21,47 +21,15 @@ import java.text.ParseException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 
+import static cucumber.stepDefinitions.BusinessStepDefinition.getBusinessByName;
+import static cucumber.stepDefinitions.BusinessStepDefinition.getLastBusiness;
+
 public class ProductStepDefinition {
 
     @Autowired
     private ProductRepository productRepository;
-    @Autowired
-    private UserRepository userRepository;
-    @Autowired
-    private AccountRepository accountRepository;
-    @Autowired
-    private BusinessRepository businessRepository;
 
     private Product product;
-    private User owner;
-    private Business business;
-    private Business secondBusiness;
-
-    @Given("the business {string} exists")
-    public void businessExists(String name) throws ParseException {
-        owner = new User.Builder()
-                .withFirstName("John")
-                .withMiddleName("Hector")
-                .withLastName("Smith")
-                .withNickName("nick")
-                .withEmail("here@testing")
-                .withPassword("12345678abc")
-                .withBio("g")
-                .withDob("2001-03-11")
-                .withPhoneNumber("123-456-7890")
-                .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
-                        "Canterbury,8041"))
-                .build();
-        userRepository.save(owner);
-        business = new Business.Builder()
-                .withName(name)
-                .withDescription("Sells stuff")
-                .withBusinessType("Retail Trade")
-                .withAddress(Location.covertAddressStringToLocation("1,Bob Street,Bob,Bob,Bob,Bob,1010"))
-                .withPrimaryOwner(owner)
-                .build();
-        businessRepository.save(business);
-    }
 
     @When("the product code {string} and the name {string} is provided")
     public void theProductCodeAndTheNameIsProvided(String productCode, String name) {
@@ -69,7 +37,7 @@ public class ProductStepDefinition {
             product = new Product.Builder()
                     .withProductCode(productCode)
                     .withName(name)
-                    .withBusiness(business)
+                    .withBusiness(getLastBusiness())
                     .build();
         } catch (ResponseStatusException | NullPointerException ignored) {}
     }
@@ -77,14 +45,14 @@ public class ProductStepDefinition {
     @Then("the product {string} exists for the business")
     public void theProductExists(String prodCode) {
         productRepository.save(product);
-        Assertions.assertNotNull(productRepository.findByBusinessAndProductCode(business, prodCode));
+        Assertions.assertNotNull(productRepository.findByBusinessAndProductCode(getLastBusiness(), prodCode));
     }
 
     @And("the time of {string} created is set to now")
     public void timeSetNow(String prodCode) {
-        product = productRepository.findByBusinessAndProductCode(business, prodCode).get();
+        product = productRepository.findByBusinessAndProductCode(getLastBusiness(), prodCode).orElseThrow();
         Instant created = product.getCreated();
-        assert(ChronoUnit.SECONDS.between(Instant.now(), created) < 20);
+        Assertions.assertTrue(ChronoUnit.SECONDS.between(Instant.now(), created) < 20);
     }
 
     @And("the description {string}, manufacturer {string}, and retail price {string} is provided")
@@ -120,12 +88,7 @@ public class ProductStepDefinition {
 
     @Then("the product {string} does not exist for the business")
     public void theProductDoesNotExistForTheBusiness(String prodCode) {
-        Assertions.assertTrue(productRepository.findByBusinessAndProductCode(business, prodCode).isEmpty());
-    }
-
-    @Given("the business does not exist")
-    public void theBusinessDoesNotExist() {
-        business = null;
+        Assertions.assertTrue(productRepository.findByBusinessAndProductCode(getLastBusiness(), prodCode).isEmpty());
     }
 
     @And("a business has a product {string} with name {string}")
@@ -133,55 +96,31 @@ public class ProductStepDefinition {
         product = new Product.Builder()
                 .withProductCode(prodCode)
                 .withName(prodName)
-                .withBusiness(business)
+                .withBusiness(getLastBusiness())
                 .build();
-        productRepository.save(product);
+        product = productRepository.save(product);
     }
 
-    @And("a second business {string} exists")
-    public void aSecondBusinessExists(String name) throws ParseException {
-        owner = new User.Builder()
-                .withFirstName("John")
-                .withMiddleName("Hector")
-                .withLastName("Smith")
-                .withNickName("nick")
-                .withEmail("here@testing2")
-                .withPassword("12345678abc")
-                .withBio("g")
-                .withDob("2001-03-11")
-                .withPhoneNumber("123-456-7890")
-                .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
-                        "Canterbury,8041"))
-                .build();
-        userRepository.save(owner);
-        secondBusiness = new Business.Builder()
-                .withName(name)
-                .withDescription("Sells stuff")
-                .withAddress(Location.covertAddressStringToLocation("1,Bob Street,Bob,Bob,Bob,Bob,1010"))
-                .withBusinessType("Retail Trade")
-                .withPrimaryOwner(owner)
-                .build();
-        businessRepository.save(secondBusiness);
-    }
 
-    @When("the second business creates a product {string}")
-    public void theSecondBusinessCreatesAProduct(String prodCode) {
-        product = new Product.Builder()
-                .withProductCode(prodCode)
-                .withName("New Product")
-                .withBusiness(secondBusiness)
-                .build();
-    }
-
-    @And("the product {string} exists for the second business")
-    public void theProductExistsForTheSecondBusiness(String prodCode) {
-        productRepository.save(product);
-        Assertions.assertNotNull(productRepository.findByBusinessAndProductCode(secondBusiness, prodCode));
+    @And("the product {string} exists for the business {string}")
+    public void theProductExistsForTheSecondBusiness(String productCode, String businessName) {
+        var business = getBusinessByName(businessName);
+        Assertions.assertTrue(productRepository.findByBusinessAndProductCode(business, productCode).isPresent());
     }
 
     @Then("only the first product {string} exists, not with name {string}")
     public void onlyTheFirstProductExists(String prodCode, String desc) {
-        product = productRepository.findByBusinessAndProductCode(business, prodCode).get();
+        product = productRepository.findByBusinessAndProductCode(getLastBusiness(), prodCode).orElseThrow();
         Assertions.assertNotEquals(desc, product.getDescription());
+    }
+
+    @When("the business {string} creates a product {string}")
+    public void theBusinessCreatesAProduct(String businessName, String productCode) {
+        var product = new Product.Builder()
+                .withProductCode(productCode)
+                .withName("New Product")
+                .withBusiness(getBusinessByName(businessName))
+                .build();
+        productRepository.save(product);
     }
 }
