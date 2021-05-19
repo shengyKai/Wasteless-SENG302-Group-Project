@@ -64,18 +64,13 @@ const routes = [
     component: ProductCatalogue,
     meta: { title: 'Buisness Products' }
   },
-  { // Router for inventory page (Inventory page frontend dev please use this and remove this line afterward)
-    path: "/inventory",
+  {
+    path: "/business/:id/inventory",
     component: Inventory,
     meta: { title: 'Inventory' }
   },
-  { // TODO Remove once inventory page is created
-    path: "/inventoryitem",
-    component: InventoryItem,
-    meta: { title: 'Inventory Item' }
-  },
-  { // TODO Remove once inventory page is created
-    path: "/inventoryitem",
+  {
+    path: "/business/:businessID/inventory/:inventoryitemID",
     component: InventoryItem,
     meta: { title: 'Inventory Item' }
   },

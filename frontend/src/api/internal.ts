@@ -117,6 +117,19 @@ export type Product = {
   countryOfSale?: string,
 };
 
+export type InventoryItem = {
+  id: string,
+  product: Product,
+  quantity: number,
+  pricePerItem?: number,
+  totalPrice?: number,
+  manufactured?: string,
+  sellBy?: string,
+  bestBefore?: string,
+  expires: string,
+  creationDate: string,
+};
+
 export type CreateProduct = Omit<Product, 'created' | 'images'>;
 
 function isLocation(obj: any): obj is Location {
@@ -171,10 +184,24 @@ function isProduct(obj: any): obj is Product {
   if (typeof obj.id !== 'string') return false;   //BACKEND response productCode as product.id
   if (typeof obj.name !== 'string') return false;
   if (obj.description !== undefined && typeof obj.description !== 'string') return false;
-
   if (obj.manufacturer !== undefined && typeof obj.manufacturer !== 'string') return false;
   if (obj.recommendedRetailPrice !== undefined && typeof obj.recommendedRetailPrice !== 'number') return false;
   if (!isImageArray(obj.images)) return false;
+  return true;
+}
+
+function isInventoryItem(obj: any): obj is InventoryItem {
+  if (obj === null || typeof obj !== 'object') return false;
+  if (typeof obj.id !== 'string') return false;
+  if (obj.product === undefined) return false;
+  if (typeof obj.quantity !== 'number') return false;
+  if (obj.pricePerItem !== undefined && typeof obj.pricePerItem !== 'string') return false;
+  if (obj.totalPrice !== undefined && typeof obj.totalPrice !== 'string') return false;
+  if (obj.manufactured !== undefined && typeof obj.manufactured !== 'string') return false;
+  if (obj.sellBy !== undefined && typeof obj.sellBy !== 'string') return false;
+  if (obj.bestBefore !== undefined && typeof obj.bestBefore !== 'string') return false;
+  if (typeof obj.expires !== 'string') return false;
+  if (typeof obj.creationDate !== 'string') return false;
   return true;
 }
 
@@ -214,6 +241,14 @@ function isProductsArray(obj: any): obj is Product[] {
   if (!Array.isArray(obj)) return false;
   for (let elem of obj) {
     if (!isProduct(elem)) return false;
+  }
+  return true;
+}
+
+function isInventoryArray(obj: any): obj is InventoryItem[] {
+  if (!Array.isArray(obj)) return false;
+  for (let elem of obj) {
+    if (!isInventoryItem(elem)) return false;
   }
   return true;
 }
@@ -533,10 +568,10 @@ export async function deleteImage(businessId: number, productId: string, imageId
  * @param reverse
  * @return a list of products
  */
-export async function getProducts(buisnessId: number, page: number, resultsPerPage: number, orderBy: string, reverse: boolean): Promise<MaybeError<Product[]>> {
+export async function getProducts(businessId: number, page: number, resultsPerPage: number, orderBy: string, reverse: boolean): Promise<MaybeError<Product[]>> {
   let response;
   try {
-    response = await instance.get(`/businesses/${buisnessId}/products`, {
+    response = await instance.get(`/businesses/${businessId}/products`, {
       params: {
         orderBy: orderBy,
         page : page,
@@ -582,6 +617,60 @@ export async function getProductCount(buisnessId: number): Promise<MaybeError<nu
   return response.data.count;
 }
 
+/**
+ * Get all inventory items for that business
+ * @param buisnessId
+ * @param page
+ * @param resultsPerPage
+ * @param orderBy
+ * @param reverse
+ */
+export async function getInventoryItem(buisnessId: number, page: number, resultsPerPage: number, orderBy: string, reverse: boolean): Promise<MaybeError<InventoryItem[]>> {
+  let response;
+  try {
+    response = await instance.get(`/businesses/${buisnessId}/inventory`, {
+      params: {
+        orderBy: orderBy,
+        page : page,
+        resultsPerPage : resultsPerPage,
+        reverse: reverse.toString(),
+      }});
+  } catch (error) {
+    let status: number | undefined = error.response?.status;
+    if (status === undefined) return 'Failed to reach backend';
+    if (status === 401) return 'Missing/Invalid access token';
+    if (status === 403) return 'Not an admin of the business';
+    if (status === 406) return 'Business not found';
+    return 'Request failed: ' + status;
+  }
+
+  if (!isInventoryArray(response.data)) {
+    return 'Response is not inventory array';
+  }
+  return response.data;
+}
+
+/**
+ * Get total number of inventory items that business has
+ * @param buisnessId id of business you want to check inventory items for
+ */
+export async function getInventoryCount(buisnessId: number): Promise<MaybeError<number>> {
+  let response;
+  try {
+    response = await instance.get(`/businesses/${buisnessId}/inventory/count`);
+  } catch (error) {
+    let status: number | undefined = error.response?.status;
+
+    if (status === undefined) return 'Failed to reach backend';
+    return `Request failed: ${status}`;
+  }
+
+  if (typeof response.data?.count !== 'number') {
+    return 'Response is not number';
+  }
+
+  return response.data.count;
+}
 
 /**
  * Fetches a business with the given id.
