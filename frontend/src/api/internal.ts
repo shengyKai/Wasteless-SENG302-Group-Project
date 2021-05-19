@@ -123,12 +123,12 @@ export type Product = {
 
 export type Sale = {
   id: number,
-  inventoryItem: { },
+  inventoryItem: InventoryItem,
   quantity: number,
-  price: Number,
-  moreInfo?: String,
-  created: String,
-  closes?: String,
+  price: number,
+  moreInfo?: string,
+  created: string,
+  closes?: string,
 }
 export type InventoryItem = {
   id: number,
@@ -582,12 +582,11 @@ export async function removeBusinessAdmin(businessId: number, userId: number): P
 }
 
 /**
-
-/**
  * Gets all of the sale listings for a given business
+ *
  * @param businessId The ID of the business
  */
-export async function getBusinessSales(businessId: number): Promise<MaybeError<Sale>> {
+export async function getBusinessSales(businessId: number): Promise<MaybeError<Sale[]>> {
   let response;
   try {
     response = await instance.put(`/businesses/${businessId}/listings`);
@@ -598,8 +597,8 @@ export async function getBusinessSales(businessId: number): Promise<MaybeError<S
     if (status === 406) return 'The given business does not exist';
     return 'Request failed:' + status;
   }
-  if (!is<Sale>(response.data)) {
-    return 'Invalid response type';
+  if (!is<Sale[]>(response.data)) {
+    return "Response is not Sale array";
   }
   return response.data;
 }
@@ -610,10 +609,10 @@ export async function getBusinessSales(businessId: number): Promise<MaybeError<S
    * @param businessId
    * @return a list of inventory items
    */
-export async function getInventory(buisnessId: number): Promise<MaybeError<InventoryItem[]>> {
+export async function getInventory(businessId: number): Promise<MaybeError<InventoryItem[]>> {
   let response;
   try {
-    response = await instance.get(`/businesses/${buisnessId}/inventory`);
+    response = await instance.get(`/businesses/${businessId}/inventory`);
   } catch (error) {
     let status: number | undefined = error.response?.status;
     if (status === undefined) return 'Failed to reach backend';
@@ -635,10 +634,10 @@ export async function getInventory(buisnessId: number): Promise<MaybeError<Inven
    * @param buisnessId Business id to identify with the database to retrieve the inventory count
    * @returns Number of inventory items or an error message
    */
-export async function getInventoryCount(buisnessId: number): Promise<MaybeError<number>> {
+export async function getInventoryCount(businessId: number): Promise<MaybeError<number>> {
   let response;
   try {
-    response = await instance.get(`/businesses/${buisnessId}/inventory/count`);
+    response = await instance.get(`/businesses/${businessId}/inventory/count`);
   } catch (error) {
     let status: number | undefined = error.response?.status;
 
