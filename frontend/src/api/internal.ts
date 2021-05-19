@@ -30,7 +30,6 @@
  */
 import axios from 'axios';
 import { is } from 'typescript-is';
-import InventoryItem from "@/components/cards/InventoryItem.vue";
 
 const SERVER_URL = process.env.VUE_APP_SERVER_ADD;
 
@@ -129,7 +128,8 @@ export type Sale = {
   moreInfo?: string,
   created: string,
   closes?: string,
-}
+};
+
 export type InventoryItem = {
   id: number,
   product: Product,
@@ -141,7 +141,6 @@ export type InventoryItem = {
   bestBefore?: string,
   expires: string
 };
-
 
 export type CreateProduct = Omit<Product, 'created' | 'images'>;
 
@@ -452,10 +451,10 @@ export async function deleteImage(businessId: number, productId: string, imageId
  * @param reverse
  * @return a list of products
  */
-export async function getProducts(buisnessId: number, page: number, resultsPerPage: number, orderBy: string, reverse: boolean): Promise<MaybeError<Product[]>> {
+export async function getProducts(businessId: number, page: number, resultsPerPage: number, orderBy: string, reverse: boolean): Promise<MaybeError<Product[]>> {
   let response;
   try {
-    response = await instance.get(`/businesses/${buisnessId}/products`, {
+    response = await instance.get(`/businesses/${businessId}/products`, {
       params: {
         orderBy: orderBy,
         page: page,
@@ -589,13 +588,13 @@ export async function removeBusinessAdmin(businessId: number, userId: number): P
 export async function getBusinessSales(businessId: number): Promise<MaybeError<Sale[]>> {
   let response;
   try {
-    response = await instance.put(`/businesses/${businessId}/listings`);
+    response = await instance.get(`/businesses/${businessId}/listings`);
   } catch (error) {
     let status: number | undefined = error.response?.status;
     if (status === undefined) return 'Failed to reach backend';
     if (status === 401) return 'Missing/Invalid access token';
     if (status === 406) return 'The given business does not exist';
-    return 'Request failed:' + status;
+    return 'Request failed: ' + status;
   }
   if (!is<Sale[]>(response.data)) {
     return "Response is not Sale array";
