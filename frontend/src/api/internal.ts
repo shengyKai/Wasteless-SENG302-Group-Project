@@ -117,17 +117,6 @@ export type Product = {
   countryOfSale?: string,
 };
 
-export type CreateInventoryItem = {
-  productId: string,
-  quantity: number,
-  pricePerItem?: number,
-  totalPrice?: number,
-  manufactured?: string,
-  sellBy?: string,
-  bestBefore?: string,
-  expires: string
-};
-
 export type InventoryItem = {
   id: number,
   product: Product,
@@ -755,25 +744,3 @@ export async function getInventoryCount(buisnessId: number): Promise<MaybeError<
 
   return response.data.count;
 }
-
-// /**
-//  * Updates an inventory item based on its inventory item id
-//  *
-//  * @param businessId Business id to identify with the database to add the inventory to the correct business
-//  * @param inventoryItemId Inventory item id to identify with the database to update the correct inventory item
-//  * @param inventoryitem The properties to create a inventory with
-//  */
-// export async function modifyInventoryItem(businessId: number, inventoryItemId: number, inventoryitem: CreateInventoryItem): Promise<MaybeError<undefined>> {
-//   try {
-//     await instance.put(`/businesses/${businessId}/inventory/${inventoryItemId}`);
-//   } catch (error) {
-//     let status: number | undefined = error.response?.status;
-
-//     if (status === undefined) return 'Failed to reach backend';
-//     if (status === 400) return 'Invalid parameters';
-//     if (status === 403) return 'Operation not permitted';
-
-//     return 'Request failed: ' + status;
-//   }
-//   return undefined;
-// }
