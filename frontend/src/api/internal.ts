@@ -591,7 +591,7 @@ export async function getBusinessSales(businessId: number): Promise<MaybeError<S
   let response;
   try {
     response = await instance.put(`/businesses/${businessId}/listings`);
-  } catch ( error ) {
+  } catch (error) {
     let status: number | undefined = error.response?.status;
     if (status === undefined) return 'Failed to reach backend';
     if (status === 401) return 'Missing/Invalid access token';
@@ -602,14 +602,14 @@ export async function getBusinessSales(businessId: number): Promise<MaybeError<S
     return 'Invalid response type';
   }
   return response.data;
+}
 
-
-  /**
- * Get all inventory items for that business
- *
- * @param businessId
- * @return a list of inventory items
- */
+/**
+   * Get all inventory items for that business
+   *
+   * @param businessId
+   * @return a list of inventory items
+   */
 export async function getInventory(buisnessId: number): Promise<MaybeError<InventoryItem[]>> {
   let response;
   try {
@@ -628,13 +628,13 @@ export async function getInventory(buisnessId: number): Promise<MaybeError<Inven
   }
   return response.data;
 }
-  
+
 /**
- * Sends a query for the total number of inventory items in the business
- *
- * @param buisnessId Business id to identify with the database to retrieve the inventory count
- * @returns Number of inventory items or an error message
- */
+   * Sends a query for the total number of inventory items in the business
+   *
+   * @param buisnessId Business id to identify with the database to retrieve the inventory count
+   * @returns Number of inventory items or an error message
+   */
 export async function getInventoryCount(buisnessId: number): Promise<MaybeError<number>> {
   let response;
   try {
