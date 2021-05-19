@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.text.ParseException;
 
-public class BusinessStepDefinitions {
+public class BusinessStepDefinition {
     @Autowired
     private BusinessContext businessContext;
 

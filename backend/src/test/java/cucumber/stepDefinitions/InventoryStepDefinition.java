@@ -3,6 +3,7 @@ package cucumber.stepDefinitions;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import cucumber.BusinessContext;
+import cucumber.RequestContext;
 import cucumber.UserContext;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
@@ -50,9 +51,9 @@ public class InventoryStepDefinition  {
     private BusinessContext businessContext;
     @Autowired
     private UserContext userContext;
+    @Autowired
+    private RequestContext requestContext;
 
-    private final HashMap<String, Object> sessionAuthToken = new HashMap<>();
-    private Cookie authCookie;
     private MvcResult mvcResult;
     private String productCode;
     private Integer quantity;
@@ -136,17 +137,16 @@ public class InventoryStepDefinition  {
 
     @Given("I am logged into my account")
     public void i_am_logged_into_my_account() {
-        String authCode = "0".repeat(64);
-        sessionAuthToken.put("AUTHTOKEN", authCode);
-        authCookie = new Cookie("AUTHTOKEN", authCode);
-        sessionAuthToken.put("accountId", userContext.getLast().getUserID());
+        requestContext.setLoggedInAccount(userContext.getLast().getUserID());
     }
 
     @When("I try to access the inventory of the business")
     public void i_try_to_access_the_inventory_of_the_business() throws Exception {
-        mvcResult = mockMvc.perform(get(String.format("/businesses/%s/inventory", businessContext.getLast().getId()))
-                .sessionAttrs(sessionAuthToken)
-                .cookie(authCookie)).andReturn();
+        mvcResult = mockMvc.perform(
+                requestContext.addAuthorisationToken(
+                        get(String.format("/businesses/%s/inventory", businessContext.getLast().getId()))
+                )
+        ).andReturn();
     }
 
     @Then("the inventory of the business is returned to me")
@@ -183,9 +183,10 @@ public class InventoryStepDefinition  {
                 "}"
         , productCode, quantity, expiry);
 
-        mvcResult = mockMvc.perform(post(String.format("/businesses/%d/inventory", businessContext.getLast().getId()))
-                .cookie(authCookie)
-                .sessionAttrs(sessionAuthToken)
+        mvcResult = mockMvc.perform(
+                requestContext.addAuthorisationToken(
+                        post(String.format("/businesses/%d/inventory", businessContext.getLast().getId()))
+                )
                 .content(postBody)
                 .contentType(MediaType.APPLICATION_JSON)
         ).andReturn();
@@ -205,10 +206,10 @@ public class InventoryStepDefinition  {
                 "}"
                 , productCode, quantity, expiry, pricePerItem, totalPrice);
 
-        mvcResult = mockMvc.perform(post(String.format("/businesses/%d/inventory", businessContext.getLast().getId()))
-                .cookie(authCookie)
-                .sessionAttrs(sessionAuthToken)
-                .content(postBody)
+        mvcResult = mockMvc.perform(
+                requestContext.addAuthorisationToken(
+                    post(String.format("/businesses/%d/inventory", businessContext.getLast().getId()))
+                ).content(postBody)
                 .contentType(MediaType.APPLICATION_JSON)
         ).andReturn();
     }
@@ -228,10 +229,10 @@ public class InventoryStepDefinition  {
                         "}"
                 , productCode, quantity, expiry, manufactured, sellBy, bestBefore);
 
-        mvcResult = mockMvc.perform(post(String.format("/businesses/%d/inventory", businessContext.getLast().getId()))
-                .cookie(authCookie)
-                .sessionAttrs(sessionAuthToken)
-                .content(postBody)
+        mvcResult = mockMvc.perform(
+                requestContext.addAuthorisationToken(
+                    post(String.format("/businesses/%d/inventory", businessContext.getLast().getId()))
+                ).content(postBody)
                 .contentType(MediaType.APPLICATION_JSON)
         ).andReturn();
     }
@@ -245,10 +246,10 @@ public class InventoryStepDefinition  {
                 "}"
                 , productCode);
 
-        mvcResult = mockMvc.perform(post(String.format("/businesses/%d/inventory", businessContext.getLast().getId()))
-                .cookie(authCookie)
-                .sessionAttrs(sessionAuthToken)
-                .content(postBody)
+        mvcResult = mockMvc.perform(
+                requestContext.addAuthorisationToken(
+                    post(String.format("/businesses/%d/inventory", businessContext.getLast().getId()))
+                ).content(postBody)
                 .contentType(MediaType.APPLICATION_JSON)
         ).andReturn();
     }

@@ -38,7 +38,7 @@ public class SaleController {
     }
 
     @PostMapping("/businesses/{id}/listings")
-    public void addSaleItemToBusiness(@PathVariable Long id, @RequestBody JSONObject saleItemInfo, HttpServletRequest request, HttpServletResponse response) throws Exception {
+    public JSONObject addSaleItemToBusiness(@PathVariable Long id, @RequestBody JSONObject saleItemInfo, HttpServletRequest request, HttpServletResponse response) throws Exception {
         try {
             AuthenticationTokenManager.checkAuthenticationToken(request);
             logger.info(String.format("Adding sales item to business (businessId=%d).", id));
@@ -73,10 +73,12 @@ public class SaleController {
                     .withMoreInfo(saleItemInfo.getAsString("moreInfo"))
                     .withCloses(saleItemInfo.getAsString("closes"))
                     .build();
-            saleItemRepository.save(saleItem);
-
+            saleItem = saleItemRepository.save(saleItem);
 
             response.setStatus(201);
+            var object = new JSONObject();
+            object.put("listingId", saleItem.getSaleId());
+            return object;
         } catch (Exception error) {
             logger.error(error.getMessage());
             throw error;
