@@ -2,7 +2,7 @@ package cucumber.stepDefinitions;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.cucumber.java.Before;
+import cucumber.UserContext;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
@@ -10,7 +10,6 @@ import io.cucumber.java.en.When;
 import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
 import org.junit.Assert;
-import org.seng302.entities.Business;
 import org.seng302.entities.Location;
 import org.seng302.entities.User;
 import org.seng302.persistence.AccountRepository;
@@ -31,8 +30,6 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
-import java.util.HashMap;
-import java.util.Map;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -40,7 +37,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 public class UserStepDefinition {
 
-    private static User lastUser = null;
+    @Autowired
+    private UserContext userContext;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -68,15 +66,6 @@ public class UserStepDefinition {
 
     private Long userID;
 
-    @Before
-    public void setup() {
-        lastUser = null;
-    }
-
-    public static User getLastUser() {
-        return lastUser;
-    }
-
     @Given("a user exists")
     public void a_user_exists() throws ParseException {
         var user = new User.Builder()
@@ -92,7 +81,7 @@ public class UserStepDefinition {
                 .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
                         "Canterbury,8041"))
                 .build();
-        lastUser = userRepository.save(user);
+        userContext.save(user);
     }
 
     @Given("the user with the email {string} does not exist")

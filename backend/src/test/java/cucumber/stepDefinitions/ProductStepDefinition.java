@@ -1,30 +1,24 @@
 package cucumber.stepDefinitions;
 
+import cucumber.BusinessContext;
+import cucumber.UserContext;
 import io.cucumber.java.en.And;
-import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import org.junit.jupiter.api.Assertions;
-import org.seng302.entities.Business;
-import org.seng302.entities.Location;
 import org.seng302.entities.Product;
-import org.seng302.entities.User;
-import org.seng302.persistence.AccountRepository;
-import org.seng302.persistence.BusinessRepository;
 import org.seng302.persistence.ProductRepository;
-import org.seng302.persistence.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
-import java.text.ParseException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 
-import static cucumber.stepDefinitions.BusinessStepDefinition.getBusinessByName;
-import static cucumber.stepDefinitions.BusinessStepDefinition.getLastBusiness;
-
 public class ProductStepDefinition {
+
+    @Autowired
+    private BusinessContext businessContext;
 
     @Autowired
     private ProductRepository productRepository;
@@ -37,7 +31,7 @@ public class ProductStepDefinition {
             product = new Product.Builder()
                     .withProductCode(productCode)
                     .withName(name)
-                    .withBusiness(getLastBusiness())
+                    .withBusiness(businessContext.getLast())
                     .build();
         } catch (ResponseStatusException | NullPointerException ignored) {}
     }
@@ -45,12 +39,12 @@ public class ProductStepDefinition {
     @Then("the product {string} exists for the business")
     public void theProductExists(String prodCode) {
         productRepository.save(product);
-        Assertions.assertNotNull(productRepository.findByBusinessAndProductCode(getLastBusiness(), prodCode));
+        Assertions.assertNotNull(productRepository.findByBusinessAndProductCode(businessContext.getLast(), prodCode));
     }
 
     @And("the time of {string} created is set to now")
     public void timeSetNow(String prodCode) {
-        product = productRepository.findByBusinessAndProductCode(getLastBusiness(), prodCode).orElseThrow();
+        product = productRepository.findByBusinessAndProductCode(businessContext.getLast(), prodCode).orElseThrow();
         Instant created = product.getCreated();
         Assertions.assertTrue(ChronoUnit.SECONDS.between(Instant.now(), created) < 20);
     }
@@ -88,7 +82,7 @@ public class ProductStepDefinition {
 
     @Then("the product {string} does not exist for the business")
     public void theProductDoesNotExistForTheBusiness(String prodCode) {
-        Assertions.assertTrue(productRepository.findByBusinessAndProductCode(getLastBusiness(), prodCode).isEmpty());
+        Assertions.assertTrue(productRepository.findByBusinessAndProductCode(businessContext.getLast(), prodCode).isEmpty());
     }
 
     @And("a business has a product {string} with name {string}")
@@ -96,7 +90,7 @@ public class ProductStepDefinition {
         product = new Product.Builder()
                 .withProductCode(prodCode)
                 .withName(prodName)
-                .withBusiness(getLastBusiness())
+                .withBusiness(businessContext.getLast())
                 .build();
         product = productRepository.save(product);
     }
@@ -104,13 +98,13 @@ public class ProductStepDefinition {
 
     @And("the product {string} exists for the business {string}")
     public void theProductExistsForTheSecondBusiness(String productCode, String businessName) {
-        var business = getBusinessByName(businessName);
+        var business = businessContext.getByName(businessName);
         Assertions.assertTrue(productRepository.findByBusinessAndProductCode(business, productCode).isPresent());
     }
 
     @Then("only the first product {string} exists, not with name {string}")
     public void onlyTheFirstProductExists(String prodCode, String desc) {
-        product = productRepository.findByBusinessAndProductCode(getLastBusiness(), prodCode).orElseThrow();
+        product = productRepository.findByBusinessAndProductCode(businessContext.getLast(), prodCode).orElseThrow();
         Assertions.assertNotEquals(desc, product.getDescription());
     }
 
@@ -119,7 +113,7 @@ public class ProductStepDefinition {
         var product = new Product.Builder()
                 .withProductCode(productCode)
                 .withName("New Product")
-                .withBusiness(getBusinessByName(businessName))
+                .withBusiness(businessContext.getByName(businessName))
                 .build();
         productRepository.save(product);
     }

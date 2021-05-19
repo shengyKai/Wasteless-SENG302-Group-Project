@@ -2,6 +2,8 @@ package cucumber.stepDefinitions;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import cucumber.BusinessContext;
+import cucumber.UserContext;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
@@ -40,46 +42,24 @@ public class InventoryStepDefinition  {
     @Autowired
     private MockMvc mockMvc;
     @Autowired
-    private UserRepository userRepository;
-    @Autowired
     private InventoryItemRepository inventoryItemRepository;
     @Autowired
     private ProductRepository productRepository;
+
     @Autowired
-    private BusinessRepository businessRepository;
+    private BusinessContext businessContext;
+    @Autowired
+    private UserContext userContext;
 
     private final HashMap<String, Object> sessionAuthToken = new HashMap<>();
     private Cookie authCookie;
-    private User actor;
-    private Business business;
     private MvcResult mvcResult;
     private String productCode;
     private Integer quantity;
 
-    @Given("a business exists")
-    public void a_business_exists() throws ParseException {
-        User owner = new User.Builder()
-                .withFirstName("John")
-                .withLastName("Smith")
-                .withEmail("owner@testing")
-                .withPassword("12345678abc")
-                .withDob("2001-03-11")
-                .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
-                        "Canterbury,8041"))
-                .build();
-        owner = userRepository.save(owner);
-        business = new Business.Builder()
-                .withName("Business")
-                .withDescription("Sells stuff")
-                .withBusinessType("Retail Trade")
-                .withAddress(Location.covertAddressStringToLocation("1,Bob Street,Bob,Bob,Bob,Bob,1010"))
-                .withPrimaryOwner(owner)
-                .build();
-        business = businessRepository.save(business);
-    }
-
     @Given("the business has the following products in its catalogue:")
     public void the_business_has_the_following_products_in_its_catalogue(io.cucumber.datatable.DataTable dataTable) {
+        var business = businessContext.getLast();
         List<Map<String, String>> rows = dataTable.asMaps(String.class, String.class);
         for (Map<String, String> row : rows) {
             Product product = new Product.Builder()
@@ -90,13 +70,14 @@ public class InventoryStepDefinition  {
             business.addToCatalogue(product);
             productRepository.save(product);
         }
+        businessContext.save(business);
     }
 
     @Given("the business has the following items in its inventory:")
     public void the_business_has_the_following_items_in_its_inventory(io.cucumber.datatable.DataTable dataTable) throws Exception {
         List<Map<String, String>> rows = dataTable.asMaps(String.class, String.class);
         for (Map<String, String> row : rows) {
-            Optional<Product> product = productRepository.findByBusinessAndProductCode(business, row.get("product_id"));
+            Optional<Product> product = productRepository.findByBusinessAndProductCode(businessContext.getLast(), row.get("product_id"));
             if (product.isEmpty()) {
                 throw new Exception("Product should be saved to product repository");
             }
@@ -111,7 +92,7 @@ public class InventoryStepDefinition  {
 
     @Given("I am an administrator of the business")
     public void i_am_an_administrator_of_the_business() throws ParseException {
-        actor = new User.Builder()
+        var actor = new User.Builder()
                 .withFirstName("John")
                 .withLastName("Smith")
                 .withEmail("actor@testing")
@@ -120,9 +101,12 @@ public class InventoryStepDefinition  {
                 .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
                         "Canterbury,8041"))
                 .build();
-        actor = userRepository.save(actor);
+        userContext.save(actor);
+
+        var business = businessContext.getLast();
         business.addAdmin(actor);
-        business = businessRepository.save(business);
+        business = businessContext.save(business);
+
         boolean checkAdmin = false;
         for (User user : business.getAdministrators()) {
             if (user.getUserID().equals(actor.getUserID())) {
@@ -135,7 +119,7 @@ public class InventoryStepDefinition  {
 
     @Given("I am an not an administrator of the business")
     public void i_am_an_not_an_administrator_of_the_business() throws ParseException {
-        actor = new User.Builder()
+        var actor = new User.Builder()
                 .withFirstName("John")
                 .withLastName("Smith")
                 .withEmail("actor@testing")
@@ -144,8 +128,8 @@ public class InventoryStepDefinition  {
                 .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
                         "Canterbury,8041"))
                 .build();
-        actor = userRepository.save(actor);
-        for (User user : business.getAdministrators()) {
+        actor = userContext.save(actor);
+        for (User user : businessContext.getLast().getAdministrators()) {
             assertNotEquals(user.getUserID(), actor.getUserID());
         }
     }
@@ -155,12 +139,12 @@ public class InventoryStepDefinition  {
         String authCode = "0".repeat(64);
         sessionAuthToken.put("AUTHTOKEN", authCode);
         authCookie = new Cookie("AUTHTOKEN", authCode);
-        sessionAuthToken.put("accountId", actor.getUserID());
+        sessionAuthToken.put("accountId", userContext.getLast().getUserID());
     }
 
     @When("I try to access the inventory of the business")
     public void i_try_to_access_the_inventory_of_the_business() throws Exception {
-        mvcResult = mockMvc.perform(get(String.format("/businesses/%s/inventory", business.getId()))
+        mvcResult = mockMvc.perform(get(String.format("/businesses/%s/inventory", businessContext.getLast().getId()))
                 .sessionAttrs(sessionAuthToken)
                 .cookie(authCookie)).andReturn();
     }
@@ -169,7 +153,7 @@ public class InventoryStepDefinition  {
     public void the_inventory_of_the_business_is_returned_to_me() throws UnsupportedEncodingException, JsonProcessingException {
         assertEquals(200, mvcResult.getResponse().getStatus());
 
-        List<Product> catalogue = productRepository.findAllByBusiness(business);
+        List<Product> catalogue = productRepository.findAllByBusiness(businessContext.getLast());
         List<InventoryItem> inventory = inventoryItemRepository.getInventoryByCatalogue(catalogue);
         JSONArray jsonArray = new JSONArray();
         for (InventoryItem item : inventory) {
@@ -199,7 +183,7 @@ public class InventoryStepDefinition  {
                 "}"
         , productCode, quantity, expiry);
 
-        mvcResult = mockMvc.perform(post(String.format("/businesses/%d/inventory", business.getId()))
+        mvcResult = mockMvc.perform(post(String.format("/businesses/%d/inventory", businessContext.getLast().getId()))
                 .cookie(authCookie)
                 .sessionAttrs(sessionAuthToken)
                 .content(postBody)
@@ -221,7 +205,7 @@ public class InventoryStepDefinition  {
                 "}"
                 , productCode, quantity, expiry, pricePerItem, totalPrice);
 
-        mvcResult = mockMvc.perform(post(String.format("/businesses/%d/inventory", business.getId()))
+        mvcResult = mockMvc.perform(post(String.format("/businesses/%d/inventory", businessContext.getLast().getId()))
                 .cookie(authCookie)
                 .sessionAttrs(sessionAuthToken)
                 .content(postBody)
@@ -244,7 +228,7 @@ public class InventoryStepDefinition  {
                         "}"
                 , productCode, quantity, expiry, manufactured, sellBy, bestBefore);
 
-        mvcResult = mockMvc.perform(post(String.format("/businesses/%d/inventory", business.getId()))
+        mvcResult = mockMvc.perform(post(String.format("/businesses/%d/inventory", businessContext.getLast().getId()))
                 .cookie(authCookie)
                 .sessionAttrs(sessionAuthToken)
                 .content(postBody)
@@ -261,7 +245,7 @@ public class InventoryStepDefinition  {
                 "}"
                 , productCode);
 
-        mvcResult = mockMvc.perform(post(String.format("/businesses/%d/inventory", business.getId()))
+        mvcResult = mockMvc.perform(post(String.format("/businesses/%d/inventory", businessContext.getLast().getId()))
                 .cookie(authCookie)
                 .sessionAttrs(sessionAuthToken)
                 .content(postBody)
@@ -272,8 +256,7 @@ public class InventoryStepDefinition  {
     @Then("I expect to be prevented from creating the inventory item")
     public void i_expect_to_be_prevented_from_creating_inventory_item() {
         assertEquals(400, mvcResult.getResponse().getStatus());
-        business = businessRepository.getBusinessById(business.getId());
-        Product product = productRepository.getAllByBusiness(business).stream().filter(x -> x.getProductCode().equals(this.productCode)).collect(Collectors.toList()).get(0);
+        Product product = productRepository.getAllByBusiness(businessContext.getLast()).stream().filter(x -> x.getProductCode().equals(this.productCode)).collect(Collectors.toList()).get(0);
         List<InventoryItem> inventory = inventoryItemRepository.findAllByProduct(product);
         assertEquals(1, inventory.size());
 
@@ -282,8 +265,7 @@ public class InventoryStepDefinition  {
     @Then("I expect the inventory item to be created")
     public void i_expect_the_inventory_to_be_created() {
         assertEquals(200, mvcResult.getResponse().getStatus());
-        business = businessRepository.getBusinessById(business.getId());
-        Product product = productRepository.getAllByBusiness(business).stream().filter(x -> x.getProductCode().equals(this.productCode)).collect(Collectors.toList()).get(0);
+        Product product = productRepository.getAllByBusiness(businessContext.getLast()).stream().filter(x -> x.getProductCode().equals(this.productCode)).collect(Collectors.toList()).get(0);
         List<InventoryItem> inventory = inventoryItemRepository.findAllByProduct(product);
         assertTrue(inventory.stream().anyMatch(x-> x.getQuantity() == quantity));
     }
