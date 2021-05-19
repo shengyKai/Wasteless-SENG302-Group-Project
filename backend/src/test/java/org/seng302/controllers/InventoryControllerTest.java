@@ -26,6 +26,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.test.web.servlet.MvcResult;
+import net.minidev.json.parser.JSONParser;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -36,6 +38,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -400,6 +403,56 @@ public class InventoryControllerTest {
         Assertions.assertEquals(3, result.getAsNumber("count"));
     }
 
+    /**
+     * Checks that the API returns the first page of paginated products in the businesses catalogue.
+     */
+    @Test
+    void retrievePaginatedInventoryFirstPage() throws Exception {
+        List<InventoryItem> inventory = new ArrayList<>();
+        addSeveralInventoryItemsToAnInventory(inventory);
+        Business businessSpy = spy(testBusiness);
+        Product productSpy = spy(testProduct);
+        when(businessRepository.getBusinessById(any())).thenReturn(businessSpy); // use our business
+        when(productRepository.getProductByBusinessAndProductCode(any(), any())).thenReturn(productSpy); // use our product
+        doNothing().when(businessSpy).checkSessionPermissions(any()); // mock successful authentication
+        when(inventoryItemRepository.getInventoryByCatalogue(mockProductList)).thenReturn(inventory);
+
+        MvcResult result = mockMvc.perform(MockMvcRequestBuilders
+                .get("/businesses/1/inventory")
+                .contentType(MediaType.APPLICATION_JSON)
+                .param("page", "1")
+                .param("resultsPerPage", "2"))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        System.out.println(result);
+
+        JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
+        JSONArray responseBody = (JSONArray) parser.parse(result.getResponse().getContentAsString());
+
+        // Check length should be 2 products
+        assertEquals(2, responseBody.size());
+
+        // Check the two products are the expected ones
+        JSONObject firstInventory = (JSONObject) responseBody.get(0);
+        JSONObject secondInventory = (JSONObject) responseBody.get(1);
+
+        assertEquals("1", firstInventory.getAsString("quantity"));
+        assertEquals("2", secondInventory.getAsString("quantity"));
+    }
+
+    /**
+     * Creates several inventory items based on a product.
+     * @throws Exception
+     */
+    public void addSeveralInventoryItemsToAnInventory(List<InventoryItem> inventory) throws Exception {
+        inventory.add(new InventoryItem.Builder().withProduct(testProduct).withQuantity(1).withExpires("2022-01-01").build());
+        inventory.add(new InventoryItem.Builder().withProduct(testProduct).withQuantity(2).withExpires("2022-01-01").build());
+        inventory.add(new InventoryItem.Builder().withProduct(testProduct).withQuantity(3).withExpires("2022-01-01").build());
+        inventory.add(new InventoryItem.Builder().withProduct(testProduct).withQuantity(4).withExpires("2022-01-01").build());
+        inventory.add(new InventoryItem.Builder().withProduct(testProduct).withQuantity(5).withExpires("2022-01-01").build());
+        inventory.add(new InventoryItem.Builder().withProduct(testProduct).withQuantity(6).withExpires("2022-01-01").build());
+    }
 }
 
 
