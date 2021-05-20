@@ -1,4 +1,5 @@
 import { MaybeError } from "@/api/internal";
+import { is } from "typescript-is";
 
 /**
  * Currency information for a specific country.
@@ -6,7 +7,7 @@ import { MaybeError } from "@/api/internal";
 export type Currency = {
   code: string,
   name: string,
-  symbol: string
+  symbol: string,
 };
 
 /**
@@ -21,46 +22,6 @@ type CurrencyOrError = Currency | { errorMessage: string }
 type CurrenciesContainer = {
   currencies: Currency[];
 };
-
-/**
- * Determines if the given object is an instance of Currency.
- * @param obj The object to be checked.
- * @returns True if the object has the attributes of a Currency object, false otherwise.
- */
-function isCurrency(obj: any): obj is Currency {
-  if (obj === null || typeof obj !== 'object') return false;
-  if (typeof obj.code !== 'string') return false;
-  if (typeof obj.name !== 'string') return false;
-  if (typeof obj.symbol !== 'string') return false;
-  return true;
-}
-
-/**
- * Determines if the given object is an array of object of type Currency.
- * @param obj The object to be checked.
- * @returns True if the object is an array where all elements are Currency objects, false otherwise.
- */
-function isCurrencyArray(obj: any): obj is Currency[] {
-  if (!Array.isArray(obj)) return false;
-  for (let elem of obj) {
-    if (!isCurrency(elem)) return false;
-  }
-  return true;
-}
-
-/**
- * Check that the body of the API response has the expected format. It should be an array of length 1, where they
- * entry in the array is a JSON with a "currencies" field, and that field contains an array of currency objects.
- * @param response The body of the response received from the API.
- * @returns True if the response is in the expected format, false otherwise.
- */
-function currencyResponseHasExpectedFormat(response: any): response is [CurrenciesContainer] {
-  if (!Array.isArray(response)) return false;
-  if (response.length !== 1) return false;
-  const country = response[0];
-  if (!isCurrencyArray(country.currencies)) return false;
-  return true;
-}
 
 /**
  * Make a request to the RESTCounties API to find the currency associated with the given country name.
@@ -123,7 +84,7 @@ export async function queryCurrencyAPI(country: string): Promise<MaybeError<Resp
 export async function getCurrencyFromAPIResponse(response: Response): Promise<MaybeError<Currency>> {
   const responseBody = await response.json();
 
-  if (!currencyResponseHasExpectedFormat(responseBody)) {
+  if (!is<[CurrenciesContainer]>(responseBody)) {
     return 'API response was not in readable format';
   }
 
