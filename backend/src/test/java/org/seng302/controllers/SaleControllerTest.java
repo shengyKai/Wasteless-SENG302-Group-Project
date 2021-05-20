@@ -33,6 +33,7 @@ import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Optional;
@@ -99,7 +100,7 @@ class SaleControllerTest {
         object.put("quantity", 3);
         object.put("price", 10.5);
         object.put("moreInfo", "This is some more info about the product");
-        object.put("closes", "2021-07-21");
+        object.put("closes", LocalDate.now().plus(100, ChronoUnit.DAYS).toString());
         return object;
     }
 
