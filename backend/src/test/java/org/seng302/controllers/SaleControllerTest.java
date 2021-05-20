@@ -32,6 +32,10 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.*;
+import java.time.temporal.ChronoUnit;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.AdditionalMatchers.not;
@@ -94,7 +98,7 @@ class SaleControllerTest {
         object.put("quantity", 3);
         object.put("price", 10.5);
         object.put("moreInfo", "This is some more info about the product");
-        object.put("closes", "2021-07-21");
+        object.put("closes", LocalDate.now().plus(100, ChronoUnit.DAYS).toString());
         return object;
     }
 
@@ -332,28 +336,29 @@ class SaleControllerTest {
                 .withBusiness(business)
                 .build();
 
+        LocalDate today = LocalDate.now();
         InventoryItem inventoryItem = new InventoryItem.Builder()
                 .withProduct(product)
                 .withQuantity(300)
                 .withPricePerItem("2.69")
                 .withManufactured("2021-03-11")
-                .withSellBy("2021-05-21")
-                .withBestBefore("2021-05-28")
-                .withExpires("2021-06-01")
+                .withSellBy(today.plus(2, ChronoUnit.DAYS).toString())
+                .withBestBefore(today.plus(3, ChronoUnit.DAYS).toString())
+                .withExpires(today.plus(4, ChronoUnit.DAYS).toString())
                 .build();
 
 
         List<SaleItem> saleItems = new ArrayList<>();
         saleItems.add(new SaleItem.Builder()
                 .withInventoryItem(inventoryItem)
-                .withCloses("2034-12-25")
+                .withCloses(today.plus(200, ChronoUnit.DAYS).toString())
                 .withMoreInfo("This doesn't expire for a long time")
                 .withPrice("200.34")
                 .withQuantity(2)
                 .build());
         saleItems.add(new SaleItem.Builder()
                 .withInventoryItem(inventoryItem)
-                .withCloses("2034-12-25")
+                .withCloses(today.plus(400, ChronoUnit.DAYS).toString())
                 .withMoreInfo("This shouldn't expire for a long time")
                 .withPrice("200.34")
                 .withQuantity(2)
