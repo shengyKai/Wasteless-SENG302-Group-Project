@@ -63,8 +63,7 @@
                     v-model="manufactured"
                     label="Manufactured"
                     type="date"
-                    :max="today"
-                    @click=checkDatesFieldsAreValid()
+                    @input=checkDatesFieldsAreValid()
                     outlined/>
                 </v-col>
                 <!-- INPUT: Sell By. Only take in value in dd/mm/yyyy format.-->
@@ -73,8 +72,7 @@
                     v-model="sellBy"
                     label="Sell By"
                     type="date"
-                    :min="today"
-                    @click=checkDatesFieldsAreValid()
+                    @input=checkDatesFieldsAreValid()
                     outlined/>
                 </v-col>
                 <!-- INPUT: Best Before. Only take in value in dd/mm/yyyy format.-->
@@ -83,8 +81,7 @@
                     v-model="bestBefore"
                     label="Best Before"
                     type="date"
-                    :min="today"
-                    @click=checkDatesFieldsAreValid()
+                    @input=checkDatesFieldsAreValid()
                     outlined/>
                 </v-col>
                 <!-- INPUT: Expires. Only take in value in dd/mm/yyyy format.-->
@@ -94,8 +91,7 @@
                     v-model="expires"
                     label="Expires"
                     type="date"
-                    :min="today"
-                    @click=checkDatesFieldsAreValid()
+                    @input=checkDatesFieldsAreValid()
                     outlined/>
                 </v-col>
               </v-row>
@@ -126,6 +122,7 @@
 </template>
 
 <script>
+//import moment from 'moment';
 
 export default {
   name: 'CreateInventory',
@@ -183,9 +180,12 @@ export default {
       return;
     },
     checkDatesFieldsAreValid() {
-      //checks the sell by, best before and expires dates are after today
       let today = new Date();
-      if (this.sellBy < today && this.sellBy !== "") {
+      //checks manufactured cannot be after today
+      if (this.manufactured > today && this.manufactured !== "") {
+        this.errorMessage = "The manufactured date is after today!";
+      //checks the sell by, best before and expires dates are after today
+      } else if (this.sellBy < today && this.sellBy !== "") {
         this.errorMessage = "The sell by date is before today!";
       } else if (this.bestBefore < today && this.bestBefore !== "") {
         this.errorMessage = "The best before date is before today!";
