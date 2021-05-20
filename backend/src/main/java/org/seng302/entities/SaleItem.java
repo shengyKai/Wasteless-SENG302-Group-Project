@@ -193,6 +193,14 @@ public class SaleItem {
     }
 
     /**
+     * Gets the business owning this sales item
+     * @return business owning this sales item
+     */
+    public Business getBusiness() {
+        return this.inventoryItem.getBusiness();
+    }
+
+    /**
      * Builder for Sale Item
      */
     public static class Builder {
