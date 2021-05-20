@@ -9,7 +9,9 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
+import java.time.temporal.ChronoUnit;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Optional;
@@ -71,14 +73,16 @@ public class SaleItemTests {
                 .build();
         Product testProduct = productRepository.save(product);
 
+        LocalDate today = LocalDate.now();
+
         invItem = new InventoryItem.Builder()
                 .withProduct(testProduct)
                 .withQuantity(3)
                 .withPricePerItem("2.69")
                 .withManufactured("2021-03-11")
-                .withSellBy("2021-05-21")
-                .withBestBefore("2021-05-28")
-                .withExpires("2021-06-01")
+                .withSellBy(today.plus(2, ChronoUnit.DAYS).toString())
+                .withBestBefore(today.plus(3, ChronoUnit.DAYS).toString())
+                .withExpires(today.plus(4, ChronoUnit.DAYS).toString())
                 .build();
         inventoryItemRepository.save(invItem);
     }
@@ -108,7 +112,7 @@ public class SaleItemTests {
     void createSaleItem_AllFieldsCorrect_ObjectCreated() throws Exception {
         SaleItem saleItem = new SaleItem.Builder()
                 .withInventoryItem(invItem)
-                .withCloses("2034-12-25")
+                .withCloses(LocalDate.now().plus(1000, ChronoUnit.DAYS).toString())
                 .withMoreInfo("This doesn't expire for a long time")
                 .withPrice("200.34")
                 .withQuantity(2)
@@ -173,7 +177,7 @@ public class SaleItemTests {
     void createSaleItem_NoInventoryItem_ObjectNotCreated() {
         try {
             SaleItem saleItem = new SaleItem.Builder()
-                    .withCloses("2034-12-25")
+                    .withCloses(LocalDate.now().plus(1000, ChronoUnit.DAYS).toString())
                     .withMoreInfo("This doesn't expire for a long time")
                     .withPrice("200.34")
                     .withQuantity(2)
@@ -191,7 +195,7 @@ public class SaleItemTests {
         invItem.setPricePerItem(null);
         SaleItem.Builder saleItem = new SaleItem.Builder()
                 .withInventoryItem(invItem)
-                .withCloses("2034-12-25")
+                .withCloses(LocalDate.now().plus(1000, ChronoUnit.DAYS).toString())
                 .withMoreInfo("This doesn't expire for a long time")
                 .withPrice("-200.34")
                 .withQuantity(2);
@@ -202,7 +206,7 @@ public class SaleItemTests {
     void createSaleItem_SalePriceNull_ObjectNotCreated() throws Exception {
         SaleItem.Builder saleItem = new SaleItem.Builder()
                 .withInventoryItem(invItem)
-                .withCloses("2034-12-25")
+                .withCloses(LocalDate.now().plus(1000, ChronoUnit.DAYS).toString())
                 .withMoreInfo("This doesn't expire for a long time")
                 .withPrice(null)
                 .withQuantity(2);
@@ -214,7 +218,7 @@ public class SaleItemTests {
         try {
             SaleItem saleItem = new SaleItem.Builder()
                     .withInventoryItem(invItem)
-                    .withCloses("2034-12-25")
+                    .withCloses(LocalDate.now().plus(1000, ChronoUnit.DAYS).toString())
                     .withMoreInfo("This doesn't expire for a long time")
                     .withPrice("three dollars")
                     .withQuantity(2)
@@ -232,7 +236,7 @@ public class SaleItemTests {
         try {
             SaleItem saleItem = new SaleItem.Builder()
                     .withInventoryItem(invItem)
-                    .withCloses("2034-12-25")
+                    .withCloses(LocalDate.now().plus(1000, ChronoUnit.DAYS).toString())
                     .withMoreInfo("This doesn't expire for a long time")
                     .withPrice("3.57")
                     .build();
@@ -249,7 +253,7 @@ public class SaleItemTests {
         try {
             SaleItem saleItem = new SaleItem.Builder()
                     .withInventoryItem(invItem)
-                    .withCloses("2034-12-25")
+                    .withCloses(LocalDate.now().plus(1000, ChronoUnit.DAYS).toString())
                     .withMoreInfo("This doesn't expire for a long time")
                     .withQuantity(0)
                     .withPrice("3.57")
@@ -267,7 +271,7 @@ public class SaleItemTests {
         try {
             SaleItem saleItem = new SaleItem.Builder()
                     .withInventoryItem(invItem)
-                    .withCloses("2034-12-25")
+                    .withCloses(LocalDate.now().plus(1000, ChronoUnit.DAYS).toString())
                     .withMoreInfo("This doesn't expire for a long time")
                     .withQuantity(2000)
                     .withPrice("3.57")
@@ -286,7 +290,7 @@ public class SaleItemTests {
         invItem.setRemainingQuantity(10);
         SaleItem saleItem = new SaleItem.Builder()
                 .withInventoryItem(invItem)
-                .withCloses("2034-12-25")
+                .withCloses(LocalDate.now().plus(1000, ChronoUnit.DAYS).toString())
                 .withMoreInfo("This doesn't expire for a long time")
                 .withQuantity(5)
                 .withPrice("3.57")
@@ -294,7 +298,7 @@ public class SaleItemTests {
         saleItemRepository.save(saleItem);
         SaleItem saleItem2 = new SaleItem.Builder()
                 .withInventoryItem(invItem)
-                .withCloses("2034-12-25")
+                .withCloses(LocalDate.now().plus(1000, ChronoUnit.DAYS).toString())
                 .withMoreInfo("This doesn't expire for a long time")
                 .withQuantity(5)
                 .withPrice("3.57")
@@ -310,7 +314,7 @@ public class SaleItemTests {
         invItem.setRemainingQuantity(10);
         SaleItem saleItem = new SaleItem.Builder()
                 .withInventoryItem(invItem)
-                .withCloses("2034-12-25")
+                .withCloses(LocalDate.now().plus(1000, ChronoUnit.DAYS).toString())
                 .withMoreInfo("This doesn't expire for a long time")
                 .withQuantity(5)
                 .withPrice("3.57")
@@ -319,7 +323,7 @@ public class SaleItemTests {
         Assertions.assertNotNull(saleItemRepository.findById(saleItem.getSaleId()));
         SaleItem.Builder saleItem2 = new SaleItem.Builder()
                 .withInventoryItem(invItem)
-                .withCloses("2034-12-25")
+                .withCloses(LocalDate.now().plus(1000, ChronoUnit.DAYS).toString())
                 .withMoreInfo("This doesn't expire for a long time")
                 .withQuantity(6)
                 .withPrice("3.57");
@@ -330,7 +334,7 @@ public class SaleItemTests {
     void deleteInventoryItem_SaleItemDeleted() throws Exception {
         SaleItem saleItem = new SaleItem.Builder()
                 .withInventoryItem(invItem)
-                .withCloses("2034-12-25")
+                .withCloses(LocalDate.now().plus(1000, ChronoUnit.DAYS).toString())
                 .withMoreInfo("This doesn't expire for a long time")
                 .withPrice("200.34")
                 .withQuantity(2)
@@ -346,7 +350,7 @@ public class SaleItemTests {
     void editSaleItem_QuantityStillWithinLimits_SaleItemAndInventoryItemQuantitiesUpdated() throws Exception {
         SaleItem saleItem = new SaleItem.Builder()
                 .withInventoryItem(invItem)
-                .withCloses("2034-12-25")
+                .withCloses(LocalDate.now().plus(1000, ChronoUnit.DAYS).toString())
                 .withMoreInfo("This doesn't expire for a long time")
                 .withPrice("200.34")
                 .withQuantity(2)
@@ -362,7 +366,7 @@ public class SaleItemTests {
         try {
             SaleItem saleItem = new SaleItem.Builder()
                     .withInventoryItem(invItem)
-                    .withCloses("2034-12-25")
+                    .withCloses(LocalDate.now().plus(1000, ChronoUnit.DAYS).toString())
                     .withMoreInfo("This doesn't expire for a long time")
                     .withQuantity(2)
                     .withPrice("3.57")
@@ -379,7 +383,7 @@ public class SaleItemTests {
     void createSaleItem_MoreInfoTooLong_ObjectNotCreated() {
         SaleItem.Builder saleItem = new SaleItem.Builder()
                 .withInventoryItem(invItem)
-                .withCloses("2034-12-25")
+                .withCloses(LocalDate.now().plus(1000, ChronoUnit.DAYS).toString())
                 .withMoreInfo("This description is waaaaaay too long. This description is waaaaaay too long. This description is waaaaaay too long. This description is waaaaaay too long. This description is waaaaaay too long. This description is waaaaaay too long. This description is waaaaaay too long. ")
                 .withQuantity(2);
         assertThrows(ResponseStatusException.class, saleItem::build);
@@ -389,7 +393,7 @@ public class SaleItemTests {
     void createSaleItem_MoreInfoInvalid_ObjectNotCreated() {
         SaleItem.Builder saleItem = new SaleItem.Builder()
                 .withInventoryItem(invItem)
-                .withCloses("2034-12-25")
+                .withCloses(LocalDate.now().plus(1000, ChronoUnit.DAYS).toString())
                 .withMoreInfo("é树\n\t\uD83D\uDE02")
                 .withQuantity(2);
         assertThrows(ResponseStatusException.class, saleItem::build);
