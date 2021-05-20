@@ -215,7 +215,8 @@ public class InventoryController {
                 break;
 
             case "pricePerItem":
-                sort = Comparator.comparing(InventoryItem::getPricePerItem);
+                sort = Comparator.comparing(InventoryItem::getPricePerItem, 
+                Comparator.nullsLast(Comparator.naturalOrder()));
                 break;
 
             case "totalPrice":
