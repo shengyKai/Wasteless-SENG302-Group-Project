@@ -25,6 +25,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.test.web.servlet.MvcResult;
 import net.minidev.json.parser.JSONParser;
@@ -410,22 +411,24 @@ public class InventoryControllerTest {
     void retrievePaginatedInventoryFirstPage() throws Exception {
         List<InventoryItem> inventory = new ArrayList<>();
         addSeveralInventoryItemsToAnInventory(inventory);
+
         Business businessSpy = spy(testBusiness);
-        Product productSpy = spy(testProduct);
+        
+        when(businessSpy.getId()).thenReturn(1L);
         when(businessRepository.getBusinessById(any())).thenReturn(businessSpy); // use our business
-        when(productRepository.getProductByBusinessAndProductCode(any(), any())).thenReturn(productSpy); // use our product
         doNothing().when(businessSpy).checkSessionPermissions(any()); // mock successful authentication
-        when(inventoryItemRepository.getInventoryByCatalogue(mockProductList)).thenReturn(inventory);
+        when(productRepository.findAllByBusiness(any())).thenReturn(mockProductList);
+        when(inventoryItemRepository.getInventoryByCatalogue(any())).thenReturn(inventory);
+
+        var controller = new InventoryController(businessRepository, inventoryItemRepository, productRepository); 
+        mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
 
         MvcResult result = mockMvc.perform(MockMvcRequestBuilders
                 .get("/businesses/1/inventory")
-                .contentType(MediaType.APPLICATION_JSON)
                 .param("page", "1")
                 .param("resultsPerPage", "2"))
                 .andExpect(status().isOk())
                 .andReturn();
-
-        System.out.println(result);
 
         JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
         JSONArray responseBody = (JSONArray) parser.parse(result.getResponse().getContentAsString());

@@ -111,7 +111,7 @@ public class InventoryController {
      * business's inventory.
      */
     @GetMapping("/businesses/{id}/inventory")
-    public JSONArray getInventory(@PathVariable(name = "id") Long businessId,
+    public List<InventoryItem> getInventory(@PathVariable(name = "id") Long businessId,
                                 HttpServletRequest request,
                                 @RequestParam(required = false) String orderBy,
                                 @RequestParam(required = false) String page,
@@ -127,11 +127,7 @@ public class InventoryController {
 
         inventory = SearchHelper.getPageInResults(inventory, page, resultsPerPage);
             
-        JSONArray jsonArray = new JSONArray();
-        for (InventoryItem item : inventory) {
-            jsonArray.appendElement(item.constructJSONObject());
-        }
-        return jsonArray;
+        return inventory;
     }
 
     /**
