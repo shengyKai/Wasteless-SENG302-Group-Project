@@ -30,15 +30,16 @@ junit:
   script:
     - cd backend
     - ./gradlew test
-  only:
-    refs:
-      - dev
-    changes:
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH == "dev"'
+      when: always
+    - changes:
       - backend/*.gradle
       - backend/src/**/application.properties
       - backend/src/main/**/*
       - backend/src/test/**/*.csv
       - backend/src/test/java/org/**/*.java
+      when: always
 
 cucumber:
   stage: test
@@ -48,16 +49,17 @@ cucumber:
   script:
     - cd backend
     - ./gradlew cucumber
-  only:
-    refs:
-      - dev
-    changes:
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH == "dev"'
+      when: always
+    - changes:
       - backend/*.gradle
       - backend/src/**/application.properties
       - backend/src/main/**/*
       - backend/src/test/**/*.csv
       - backend/src/test/**/*.feature
       - backend/src/test/java/cucumber/**/*.java
+      when: always
 
 jest:
   stage: test
@@ -72,10 +74,10 @@ jest:
   script:
     - cd frontend
     - npm run test
-  only:
-    refs:
-      - dev
-    changes:
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH == "dev"'
+      when: always
+    - changes:
       - frontend/package.json
       - frontend/package-lock.json
       - frontend/babel.config.js
@@ -83,6 +85,7 @@ jest:
       - frontend/vue.config.js
       - frontend/tests/**/*
       - frontend/src/**/*
+      when: always
 
 # Export sonarqube (static code analysis) reports
 dev-sonarqube:
