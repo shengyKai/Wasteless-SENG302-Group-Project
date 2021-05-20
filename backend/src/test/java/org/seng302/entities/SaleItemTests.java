@@ -1,5 +1,6 @@
 package org.seng302.entities;
 
+import net.minidev.json.JSONObject;
 import org.junit.jupiter.api.*;
 import org.seng302.persistence.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,12 +15,11 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class SaleItemTests {
+class SaleItemTests {
 
     @Autowired
     UserRepository userRepository;
@@ -151,39 +151,30 @@ public class SaleItemTests {
 
     @Test
     void createSaleItem_ClosesSetYesterday_ObjectNotCreated() {
-        try {
-            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
-            String yesterday = formatter.format(yesterday());
-            SaleItem saleItem = new SaleItem.Builder()
-                    .withInventoryItem(invItem)
-                    .withCloses(yesterday)
-                    .withMoreInfo("This has already closed")
-                    .withPrice("200.34")
-                    .withQuantity(2)
-                    .build();
-            saleItemRepository.save(saleItem);
-            Assertions.fail();
-        } catch (ResponseStatusException e) {
-            assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
-            assertEquals("You cannot set close dates in the past", e.getReason());
-        } catch (Exception unexpected) { Assertions.fail(); }
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+        String yesterday = formatter.format(yesterday());
+        SaleItem.Builder builder = new SaleItem.Builder()
+                .withInventoryItem(invItem)
+                .withCloses(yesterday)
+                .withMoreInfo("This has already closed")
+                .withPrice("200.34")
+                .withQuantity(2);
+
+        var exception = assertThrows(ResponseStatusException.class, builder::build);
+        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
+        assertEquals("You cannot set close dates in the past", exception.getReason());
     }
 
     @Test
     void createSaleItem_NoInventoryItem_ObjectNotCreated() {
-        try {
-            SaleItem saleItem = new SaleItem.Builder()
+        SaleItem.Builder builder = new SaleItem.Builder()
                     .withCloses("2034-12-25")
                     .withMoreInfo("This doesn't expire for a long time")
                     .withPrice("200.34")
-                    .withQuantity(2)
-                    .build();
-            saleItemRepository.save(saleItem);
-            Assertions.fail();
-        } catch (ResponseStatusException e) {
-            assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
-            assertEquals("Cannot sell something that is not in your inventory", e.getReason());
-        } catch (Exception unexpected) { Assertions.fail(); }
+                    .withQuantity(2);
+        var exception = assertThrows(ResponseStatusException.class, builder::build);
+        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
+        assertEquals("Cannot sell something that is not in your inventory", exception.getReason());
     }
 
     @Test
@@ -211,73 +202,55 @@ public class SaleItemTests {
 
     @Test
     void createSaleItem_SalePriceUnexpectedInput_ObjectNotCreated() {
-        try {
-            SaleItem saleItem = new SaleItem.Builder()
-                    .withInventoryItem(invItem)
-                    .withCloses("2034-12-25")
-                    .withMoreInfo("This doesn't expire for a long time")
-                    .withPrice("three dollars")
-                    .withQuantity(2)
-                    .build();
-            saleItemRepository.save(saleItem);
-            Assertions.fail();
-        } catch (ResponseStatusException e) {
-            assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
-            assertEquals("Please enter a valid number", e.getReason());
-        } catch (Exception unexpected) { Assertions.fail(); }
+        SaleItem.Builder builder = new SaleItem.Builder()
+                .withInventoryItem(invItem)
+                .withCloses("2034-12-25")
+                .withMoreInfo("This doesn't expire for a long time")
+                .withPrice("three dollars")
+                .withQuantity(2);
+
+        var exception = assertThrows(ResponseStatusException.class, builder::build);
+        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
+        assertEquals("Please enter a valid number", exception.getReason());
     }
 
     @Test
     void createSaleItem_QuantityNull_ObjectNotCreated() {
-        try {
-            SaleItem saleItem = new SaleItem.Builder()
-                    .withInventoryItem(invItem)
-                    .withCloses("2034-12-25")
-                    .withMoreInfo("This doesn't expire for a long time")
-                    .withPrice("3.57")
-                    .build();
-            saleItemRepository.save(saleItem);
-            Assertions.fail();
-        } catch (ResponseStatusException e) {
-            assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
-            assertEquals("Please enter a number of items between 1 and your current stock not on sale", e.getReason());
-        } catch (Exception unexpected) { Assertions.fail(); }
+        SaleItem.Builder builder = new SaleItem.Builder()
+                .withInventoryItem(invItem)
+                .withCloses("2034-12-25")
+                .withMoreInfo("This doesn't expire for a long time")
+                .withPrice("3.57");
+
+        var exception = assertThrows(ResponseStatusException.class, builder::build);
+        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
+        assertEquals("Please enter a number of items between 1 and your current stock not on sale", exception.getReason());
     }
 
     @Test
     void createSaleItem_QuantityZero_ObjectNotCreated() {
-        try {
-            SaleItem saleItem = new SaleItem.Builder()
-                    .withInventoryItem(invItem)
-                    .withCloses("2034-12-25")
-                    .withMoreInfo("This doesn't expire for a long time")
-                    .withQuantity(0)
-                    .withPrice("3.57")
-                    .build();
-            saleItemRepository.save(saleItem);
-            Assertions.fail();
-        } catch (ResponseStatusException e) {
-            assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
-            assertEquals("Please enter a number of items between 1 and your current stock not on sale", e.getReason());
-        } catch (Exception unexpected) { Assertions.fail(); }
+        SaleItem.Builder builder = new SaleItem.Builder()
+                .withInventoryItem(invItem)
+                .withCloses("2034-12-25")
+                .withMoreInfo("This doesn't expire for a long time")
+                .withQuantity(0)
+                .withPrice("3.57");
+        var exception = assertThrows(ResponseStatusException.class, builder::build);
+        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
+        assertEquals("Please enter a number of items between 1 and your current stock not on sale", exception.getReason());
     }
 
     @Test
     void createSaleItem_QuantityGreaterThanInventoryTotal_ObjectNotCreated() {
-        try {
-            SaleItem saleItem = new SaleItem.Builder()
-                    .withInventoryItem(invItem)
-                    .withCloses("2034-12-25")
-                    .withMoreInfo("This doesn't expire for a long time")
-                    .withQuantity(2000)
-                    .withPrice("3.57")
-                    .build();
-            saleItemRepository.save(saleItem);
-            Assertions.fail();
-        } catch (ResponseStatusException e) {
-            assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
-            assertEquals("Cannot sell more items than you have", e.getReason());
-        } catch (Exception unexpected) { Assertions.fail(); }
+        SaleItem.Builder builder = new SaleItem.Builder()
+                .withInventoryItem(invItem)
+                .withCloses("2034-12-25")
+                .withMoreInfo("This doesn't expire for a long time")
+                .withQuantity(2000)
+                .withPrice("3.57");
+        var exception = assertThrows(ResponseStatusException.class, builder::build);
+        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
+        assertEquals("Cannot sell more items than you have", exception.getReason());
     }
 
     @Test
@@ -403,5 +376,47 @@ public class SaleItemTests {
                 .withMoreInfo("What's the time, Mr Wolfy?")
                 .withQuantity(2);
         assertThrows(DateTimeParseException.class, saleItem::build);
+    }
+
+    @Test
+    void constructJSONObject_hasAllProperties_expectPropertiesPresent() {
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+        String today = formatter.format(new Date());
+        SaleItem saleItem = new SaleItem.Builder()
+                .withInventoryItem(invItem)
+                .withCloses(today)
+                .withMoreInfo("This expires really soon")
+                .withPrice("200.34")
+                .withQuantity(2)
+                .build();
+        saleItem = saleItemRepository.save(saleItem);
+
+        JSONObject object = saleItem.constructJSONObject();
+
+        assertEquals(saleItem.getSaleId(), object.get("id"));
+        assertEquals(saleItem.getInventoryItem().constructJSONObject(), object.get("inventoryItem"));
+        assertEquals(saleItem.getQuantity(), object.get("quantity"));
+        assertEquals(saleItem.getPrice(), object.get("price"));
+        assertEquals(saleItem.getMoreInfo(), object.get("moreInfo"));
+        assertEquals(saleItem.getCreated().toString(), object.get("created"));
+        assertEquals(saleItem.getCloses().toString(), object.get("closes"));
+        assertEquals(7, object.size()); // No extra properties
+    }
+
+    @Test
+    void constructJSONObject_hasSomeProperties_expectRequiredPropertiesPresent() {
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+        String today = formatter.format(new Date());
+        SaleItem saleItem = new SaleItem.Builder()
+                .withInventoryItem(invItem)
+                .withCloses(today)
+                .withPrice("200.34")
+                .withQuantity(2)
+                .build();
+        saleItem = saleItemRepository.save(saleItem);
+
+        JSONObject object = saleItem.constructJSONObject();
+        assertFalse(object.containsKey("moreInfo"));
+        assertEquals(6, object.size());
     }
 }
