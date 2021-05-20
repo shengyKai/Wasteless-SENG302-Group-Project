@@ -86,10 +86,9 @@ public class SaleController {
 
     @GetMapping("/businesses/{id}/listings")
     public JSONArray getSaleItemsForBusiness(@PathVariable Long id, HttpServletRequest request) throws Exception {
-        logger.info("Woo");
         try {
             AuthenticationTokenManager.checkAuthenticationToken(request);
-            logger.info(String.format("Getting sales item for business (businessId=%d).", id));
+            logger.info(() -> String.format("Getting sales item for business (businessId=%d).", id));
             Business business = businessRepository.getBusinessById(id);
 
             var response = new JSONArray();
