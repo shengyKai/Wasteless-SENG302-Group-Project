@@ -7,7 +7,7 @@ import { is } from "typescript-is";
 export type Currency = {
   code: string,
   name: string,
-  symbol: string
+  symbol: string,
 };
 
 /**
