@@ -52,14 +52,15 @@ public class SaleController {
             if (!(inventoryItemIdObj instanceof Number)) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "inventoryItemId not a number");
             }
-            long inventoryItemId = ((Number)inventoryItemIdObj).longValue();
-
-            Optional<InventoryItem> inventoryItem = inventoryItemRepository.findById(inventoryItemId);
-            if (
-                    inventoryItem.isEmpty() ||
-                    !inventoryItem.get().getBusiness().getId().equals(business.getId())
-            ) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "inventory item does not exist for this business");
+            InventoryItem inventoryItem;
+            try {
+                inventoryItem = inventoryItemRepository.getInventoryItemByBusinessAndId(
+                        business,
+                        ((Number)inventoryItemIdObj).longValue()
+                );
+            } catch (ResponseStatusException exception) {
+                // Make sure to return a 400 instead of a 406
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, exception.getReason());
             }
 
             if (!(saleItemInfo.get("quantity") instanceof Integer)) {
@@ -67,7 +68,7 @@ public class SaleController {
             }
 
             SaleItem saleItem = new SaleItem.Builder()
-                    .withInventoryItem(inventoryItem.get())
+                    .withInventoryItem(inventoryItem)
                     .withQuantity((Integer)saleItemInfo.get("quantity"))
                     .withPrice(saleItemInfo.getAsString("price"))
                     .withMoreInfo(saleItemInfo.getAsString("moreInfo"))
