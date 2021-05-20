@@ -1,8 +1,8 @@
 package org.seng302.controllers;
 
+import net.minidev.json.JSONObject;
+import net.minidev.json.parser.JSONParser;
 import org.hamcrest.Matchers;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.junit.Ignore;
 import org.junit.function.ThrowingRunnable;
 import org.junit.jupiter.api.*;
@@ -23,6 +23,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -30,10 +31,12 @@ import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.time.LocalDate;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.AdditionalMatchers.not;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -75,22 +78,27 @@ class SaleControllerTest {
 
         // Setup mock inventory item
         when(inventoryItem.getId()).thenReturn(2L);
+        when(inventoryItem.getExpires()).thenReturn(LocalDate.now());
         when(inventoryItem.getBusiness()).thenReturn(business);
 
+        when(inventoryItemRepository.getInventoryItemByBusinessAndId(any(Business.class), anyLong())).thenCallRealMethod();
         when(inventoryItemRepository.findById(2L)).thenReturn(Optional.of(inventoryItem));
         when(inventoryItemRepository.findById(not(eq(2L)))).thenReturn(Optional.empty());
+
+        // Setup mock sale item repository
+        when(saleItemRepository.save(any(SaleItem.class))).thenAnswer(x -> x.getArgument(0));
 
         var controller = new SaleController(businessRepository, saleItemRepository, inventoryItemRepository);
         mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
     }
 
-    private JSONObject generateSalesItemInfo() throws JSONException {
+    private JSONObject generateSalesItemInfo() {
         var object = new JSONObject();
         object.put("inventoryItemId", 2);
         object.put("quantity", 3);
         object.put("price", 10.5);
         object.put("moreInfo", "This is some more info about the product");
-        object.put("closes", "2021-07-21T23:59:00Z");
+        object.put("closes", "2021-07-21");
         return object;
     }
 
@@ -116,7 +124,7 @@ class SaleControllerTest {
         authenticationTokenManager.verify(() -> AuthenticationTokenManager.checkAuthenticationToken(any()));
     }
 
-    @Test @Disabled
+    @Test
     void addSaleItemToBusiness_validAuthToken_not401Response() throws Exception {
         mockMvc.perform(post("/businesses/1/listings")
                     .contentType(MediaType.APPLICATION_JSON)
@@ -232,7 +240,7 @@ class SaleControllerTest {
                 .andReturn();
     }
 
-    @Test @Disabled
+    @Test
     void addSaleItemToBusiness_validInput_201Response() throws Exception {
         var object = generateSalesItemInfo();
         mockMvc.perform(post("/businesses/1/listings")
@@ -245,12 +253,32 @@ class SaleControllerTest {
         verify(saleItemRepository).save(captor.capture());
         SaleItem saleItem = captor.getValue();
 
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-
         assertSame(inventoryItem, saleItem.getInventoryItem());
         assertEquals(object.get("quantity"), saleItem.getQuantity());
-        assertEquals(new BigDecimal(object.getString("price")), saleItem.getPrice());
+        assertEquals(new BigDecimal(object.getAsString("price")), saleItem.getPrice());
         assertEquals(object.get("moreInfo"), saleItem.getMoreInfo());
-        assertEquals(dateFormat.parse(object.getString("closes")), saleItem.getCloses());
+        assertEquals(object.getAsString("closes"), saleItem.getCloses().toString());
+    }
+
+    @Test
+    void addSaleItemToBusiness_validInput_ReturnsId() throws Exception {
+        SaleItem mockItem = mock(SaleItem.class);
+        when(mockItem.getSaleId()).thenReturn(400L);
+        when(saleItemRepository.save(any(SaleItem.class))).thenReturn(mockItem);
+
+        var object = generateSalesItemInfo();
+        MvcResult result = mockMvc.perform(post("/businesses/1/listings")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(object.toString()))
+                .andExpect(status().isCreated())
+                .andReturn();
+
+        JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
+        JSONObject actualResponse = (JSONObject) parser.parse(result.getResponse().getContentAsString());
+
+        JSONObject expectedResponse = new JSONObject();
+        expectedResponse.put("listingId", 400);
+
+        assertEquals(expectedResponse, actualResponse);
     }
 }

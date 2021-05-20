@@ -36,7 +36,7 @@ public class SaleController {
     }
 
     @PostMapping("/businesses/{id}/listings")
-    public void addSaleItemToBusiness(@PathVariable Long id, @RequestBody JSONObject saleItemInfo, HttpServletRequest request, HttpServletResponse response) throws Exception {
+    public JSONObject addSaleItemToBusiness(@PathVariable Long id, @RequestBody JSONObject saleItemInfo, HttpServletRequest request, HttpServletResponse response) throws Exception {
         try {
             AuthenticationTokenManager.checkAuthenticationToken(request);
             logger.info(String.format("Adding sales item to business (businessId=%d).", id));
@@ -50,14 +50,15 @@ public class SaleController {
             if (!(inventoryItemIdObj instanceof Number)) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "inventoryItemId not a number");
             }
-            long inventoryItemId = ((Number)inventoryItemIdObj).longValue();
-
-            Optional<InventoryItem> inventoryItem = inventoryItemRepository.findById(inventoryItemId);
-            if (
-                    inventoryItem.isEmpty() ||
-                    !inventoryItem.get().getBusiness().getId().equals(business.getId())
-            ) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "inventory item does not exist for this business");
+            InventoryItem inventoryItem;
+            try {
+                inventoryItem = inventoryItemRepository.getInventoryItemByBusinessAndId(
+                        business,
+                        ((Number)inventoryItemIdObj).longValue()
+                );
+            } catch (ResponseStatusException exception) {
+                // Make sure to return a 400 instead of a 406
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, exception.getReason());
             }
 
             if (!(saleItemInfo.get("quantity") instanceof Integer)) {
@@ -65,16 +66,18 @@ public class SaleController {
             }
 
             SaleItem saleItem = new SaleItem.Builder()
-                    .withInventoryItem(inventoryItem.get())
+                    .withInventoryItem(inventoryItem)
                     .withQuantity((Integer)saleItemInfo.get("quantity"))
                     .withPrice(saleItemInfo.getAsString("price"))
                     .withMoreInfo(saleItemInfo.getAsString("moreInfo"))
                     .withCloses(saleItemInfo.getAsString("closes"))
                     .build();
-            saleItemRepository.save(saleItem);
-
+            saleItem = saleItemRepository.save(saleItem);
 
             response.setStatus(201);
+            var object = new JSONObject();
+            object.put("listingId", saleItem.getSaleId());
+            return object;
         } catch (Exception error) {
             logger.error(error.getMessage());
             throw error;
