@@ -160,7 +160,7 @@ public class InventoryStepDefinition  {
 
     @When("I try to access the inventory of the business")
     public void i_try_to_access_the_inventory_of_the_business() throws Exception {
-        mvcResult = mockMvc.perform(get(String.format("/businesses/%s/inventory", business.getId()))
+        mvcResult = mockMvc.perform(get(String.format("/businesses/%d/inventory", business.getId()))
                 .sessionAttrs(sessionAuthToken)
                 .cookie(authCookie)).andReturn();
     }

@@ -95,9 +95,9 @@ public class InventoryItemTests {
                 .withQuantity(3)
                 .withPricePerItem("2.69")
                 .withManufactured("2021-03-11")
-                .withSellBy("2021-05-21")
-                .withBestBefore("2021-05-28")
-                .withExpires("2021-06-01")
+                .withSellBy("2021-11-21")
+                .withBestBefore("2021-11-28")
+                .withExpires("2021-12-01")
                 .build();
         inventoryItemRepository.save(invItem);
         InventoryItem testInvItem = inventoryItemRepository.findById(invItem.getId()).get();
@@ -501,9 +501,9 @@ public class InventoryItemTests {
                 .withPricePerItem("2.69")
                 .withTotalPrice("5.32")
                 .withManufactured("2021-03-11")
-                .withSellBy("2021-05-21")
-                .withBestBefore("2021-05-28")
-                .withExpires("2021-06-01")
+                .withSellBy("2021-11-21")
+                .withBestBefore("2021-11-28")
+                .withExpires("2021-12-01")
                 .build();
         invItem = inventoryItemRepository.save(invItem);
         JSONObject expectedJson = new JSONObject();
