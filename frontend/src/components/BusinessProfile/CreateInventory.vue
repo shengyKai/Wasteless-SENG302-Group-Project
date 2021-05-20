@@ -45,6 +45,7 @@
                     prefix="$"
                     :rules="maxCharRules.concat(smallPriceRules)"
                     outlined
+                    @click=manufacturedBeforeSellBy()
                   />
                 </v-col>
                 <!-- INPUT: Total Price. Only allows number or '.'but come with 2 digit -->
@@ -63,6 +64,7 @@
                     label="Manufactured"
                     type="date"
                     :max="today"
+                    @click=checkDatesFieldsAreValid()
                     outlined/>
                 </v-col>
                 <!-- INPUT: Sell By. Only take in value in dd/mm/yyyy format.-->
@@ -72,6 +74,7 @@
                     label="Sell By"
                     type="date"
                     :min="today"
+                    @click=checkDatesFieldsAreValid()
                     outlined/>
                 </v-col>
                 <!-- INPUT: Best Before. Only take in value in dd/mm/yyyy format.-->
@@ -81,6 +84,7 @@
                     label="Best Before"
                     type="date"
                     :min="today"
+                    @click=checkDatesFieldsAreValid()
                     outlined/>
                 </v-col>
                 <!-- INPUT: Expires. Only take in value in dd/mm/yyyy format.-->
@@ -91,6 +95,7 @@
                     label="Expires"
                     type="date"
                     :min="today"
+                    @click=checkDatesFieldsAreValid()
                     outlined/>
                 </v-col>
               </v-row>
@@ -144,7 +149,8 @@ export default {
       manufactured: "",
       sellBy: "",
       bestBefore: "",
-      expires: new Date().toISOString().slice(0,10), //Keep this so the next person know what to use if he/she wan
+      expires: "",
+      //expires: new Date().toISOString().slice(0,10), //Keep this so the next person know what to use if he/she wan
 
       maxCharRules: [
         field => (field.length <= 100) || 'Reached max character limit: 100'
@@ -175,6 +181,26 @@ export default {
     async CreateInventory() { //to see the attribute in console for debugging or testing, remove after this page is done
       console.log(this.expires);
       return;
+    },
+    checkDatesFieldsAreValid() {
+      //checks the sell by, best before and expires dates are after today
+      let today = new Date();
+      if (this.sellBy < today && this.sellBy !== "") {
+        this.errorMessage = "The sell by date is before today!";
+      } else if (this.bestBefore < today && this.bestBefore !== "") {
+        this.errorMessage = "The best before date is before today!";
+      } else if (this.expires < today && this.expires !== "") {
+        this.errorMessage = "The expires date is before today!";
+      //checks that manufactured < sell by < best before < expires
+      } else if (this.manufactured > this.sellBy && this.manufactured !== "" && this.sellBy !== "") {
+        this.errorMessage = "The manufactured date cannot be after the sell by date!";
+      } else if (this.sellBy > this.bestBefore && this.sellBy !== "" && this.bestBefore !== "") {
+        this.errorMessage = "The sell by date cannot be after the best before date!";
+      } else if (this.bestBefore > this.expires && this.bestBefore !== "" && this.expires !== "") {
+        this.errorMessage = "The best before date cannot be before the expires date!";
+      } else {
+        this.errorMessage = undefined;
+      }
     }
   },
 };
