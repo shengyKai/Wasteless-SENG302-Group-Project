@@ -134,6 +134,17 @@ class MarketplaceCardTests {
     }
 
     @Test
+    void marketplaceCardBuild_withoutCreator_throws400Exception() {
+        var builder = new MarketplaceCard.Builder()
+                .withSection(MarketplaceCard.Section.EXCHANGE)
+                .withTitle("test_title")
+                .withDescription("test_description");
+        var exception = assertThrows(ResponseStatusException.class, builder::build);
+        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
+        assertEquals("Card creator not provided", exception.getReason());
+    }
+
+    @Test
     void marketplaceCardBuild_withoutTitle_throws400Exception() {
         var builder = new MarketplaceCard.Builder()
                 .withCreator(testUser)
