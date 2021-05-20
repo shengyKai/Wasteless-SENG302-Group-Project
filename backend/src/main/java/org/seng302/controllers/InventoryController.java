@@ -178,7 +178,8 @@ public class InventoryController {
     }
 
     /**
-     * Sort inventory by a key. Can reverse results.
+     * Sort inventory by a key. Can reverse results. If the inventory item attribute is null, it will be 
+     * sorted to the last. If reversed, the null related inventory item will be the first.
      * 
      * @param key     Key to order products by.
      * @param reverse Reverse results.
@@ -195,15 +196,18 @@ public class InventoryController {
                 break;
 
             case "description":
-                sort = Comparator.comparing(inventoryItem -> inventoryItem.getProduct().getDescription());
+                sort = Comparator.comparing(inventoryItem -> inventoryItem.getProduct().getDescription(), 
+                Comparator.nullsLast(Comparator.naturalOrder()));
                 break;
 
             case "manufacturer":
-                sort = Comparator.comparing(inventoryItem -> inventoryItem.getProduct().getManufacturer());
+                sort = Comparator.comparing(inventoryItem -> inventoryItem.getProduct().getManufacturer(), 
+                Comparator.nullsLast(Comparator.naturalOrder()));
                 break;
 
             case "recommendedRetailPrice":
-                sort = Comparator.comparing(inventoryItem -> inventoryItem.getProduct().getRecommendedRetailPrice());
+                sort = Comparator.comparing(inventoryItem -> inventoryItem.getProduct().getRecommendedRetailPrice(), 
+                Comparator.nullsLast(Comparator.naturalOrder()));
                 break;
 
             case "created":
@@ -220,22 +224,26 @@ public class InventoryController {
                 break;
 
             case "totalPrice":
-                sort = Comparator.comparing(InventoryItem::getTotalPrice);
+                sort = Comparator.comparing(InventoryItem::getTotalPrice, 
+                Comparator.nullsLast(Comparator.naturalOrder()));
                 break;
 
             case "manufactured":
-                sort = Comparator.comparing(InventoryItem::getManufactured);
+                sort = Comparator.comparing(InventoryItem::getManufactured, 
+                Comparator.nullsLast(Comparator.naturalOrder()));
                 break;
 
             case "sellBy":
-                sort = Comparator.comparing(InventoryItem::getSellBy);
+                sort = Comparator.comparing(InventoryItem::getSellBy, 
+                Comparator.nullsLast(Comparator.naturalOrder()));
                 break;
 
             case "bestBefore":
-                sort = Comparator.comparing(InventoryItem::getBestBefore);
+                sort = Comparator.comparing(InventoryItem::getBestBefore, 
+                Comparator.nullsLast(Comparator.naturalOrder()));
                 break;
 
-            case "expiry":
+            case "expires":
                 sort = Comparator.comparing(InventoryItem::getExpires);
                 break;
 
