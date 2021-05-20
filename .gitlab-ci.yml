@@ -31,6 +31,8 @@ junit:
     - cd backend
     - ./gradlew test
   only:
+    refs:
+      - dev
     changes:
       - backend/*.gradle
       - backend/src/**/application.properties
@@ -47,6 +49,8 @@ cucumber:
     - cd backend
     - ./gradlew cucumber
   only:
+    refs:
+      - dev
     changes:
       - backend/*.gradle
       - backend/src/**/application.properties
@@ -69,6 +73,8 @@ jest:
     - cd frontend
     - npm run test
   only:
+    refs:
+      - dev
     changes:
       - frontend/package.json
       - frontend/package-lock.json
