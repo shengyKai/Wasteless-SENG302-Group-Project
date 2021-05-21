@@ -10,8 +10,7 @@ import HomePage from "../components/HomePage.vue";
 import ProductCatalogue from "../components/ProductCatalogue.vue";
 import Inventory from "../components/Inventory.vue";
 import InventoryItem from "../components/cards/InventoryItem.vue";
-import SaleItem from "../components/cards/SaleItem.vue";
-
+import SalePage from "../components/SalePage.vue";
 
 Vue.use(VueRouter);
 
@@ -66,9 +65,9 @@ const routes = [
     meta: { title: 'Buisness Products' }
   },
   {
-    path: "/saleItem",
-    component: SaleItem,
-    meta: {title: 'Example Sale Item'}
+    path: "/business/:id/listings",
+    component: SalePage,
+    meta: {title: 'Sales'}
   },
   { // Router for inventory page (Inventory page frontend dev please use this and remove this line afterward)
     path: "/inventory",

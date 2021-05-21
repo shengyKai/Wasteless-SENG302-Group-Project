@@ -1,72 +1,70 @@
 <template>
-  <v-container>
-    <v-card width="600px">
-      <v-row>
-        <v-col cols="8">
-          <v-expand-transition>
-            <div v-show="!moreInfo">
-              <ProductImageCarousel :productImages="product.images" :productId="product.id" />
-              <v-card-title>{{ saleItem.quantity + " x " + product.name }}</v-card-title>
-              <v-card-subtitle>{{ retailPrice }}</v-card-subtitle>
+  <v-card width="600px" style="margin: 1em">
+    <v-row>
+      <v-col cols="8">
+        <v-expand-transition>
+          <div v-show="!moreInfo">
+            <ProductImageCarousel :productImages="product.images" :productId="product.id" />
+            <v-card-title>{{ saleItem.quantity + " x " + product.name }}</v-card-title>
+            <v-card-subtitle>{{ retailPrice }}</v-card-subtitle>
 
-            </div>
-          </v-expand-transition>
-          <v-expand-transition>
-            <div v-show="moreInfo">
-              <v-divider/>
+          </div>
+        </v-expand-transition>
+        <v-expand-transition>
+          <div v-show="moreInfo">
+            <v-divider/>
+            <v-card-subtitle>
+              Product Description
+            </v-card-subtitle>
+            <v-card-text v-if="productDescription.length >= 50">
+              {{productDescription.slice(0, 50) + "..."}}
+              <FullProductDescription ref="fullProductDescription" :product-description="productDescription"/>
+            </v-card-text>
+            <v-card-text v-else>
+              {{productDescription}}
+            </v-card-text>
+            <div ref="sellerInfo" v-if="saleItem.moreInfo !== undefined && saleItem.moreInfo.length > 0">
               <v-card-subtitle>
-                Product Description
+                Additional Sale Info
               </v-card-subtitle>
-              <v-card-text v-if="productDescription.length >= 50">
-                {{productDescription.slice(0, 50) + "..."}}
-                <FullProductDescription ref="fullProductDescription" :product-description="productDescription"/>
+              <v-card-text v-if="saleItem.moreInfo.length >= 50">
+                {{saleItem.moreInfo.slice(0,50)}}
+                <FullProductDescription ref="fullMoreInfo" :product-description="saleItem.moreInfo"/>
               </v-card-text>
               <v-card-text v-else>
-                {{productDescription}}
+                {{saleItem.moreInfo}}
               </v-card-text>
-              <div ref="sellerInfo" v-if="saleItem.moreInfo !== undefined && saleItem.moreInfo.length > 0">
-                <v-card-subtitle>
-                  Additional Sale Info
-                </v-card-subtitle>
-                <v-card-text v-if="saleItem.moreInfo.length >= 50">
-                  {{saleItem.moreInfo.slice(0,50)}}
-                  <FullProductDescription ref="fullMoreInfo" :product-description="saleItem.moreInfo"/>
-                </v-card-text>
-                <v-card-text v-else>
-                  {{saleItem.moreInfo}}
-                </v-card-text>
-              </div>
             </div>
-          </v-expand-transition>
-        </v-col>
-        <v-col cols="4">
-          <v-timeline dense style="height: 100%; margin-left: -40%; margin-bottom: 10px">
-            <v-timeline-item color="grey" small>
-              <div style="margin-left: -25px">
-                <strong>Created</strong>
-                {{createdFormatted}}
-              </div>
-            </v-timeline-item>
-            <v-timeline-item color="orange" small>
-              <div style="margin-left: -25px">
-                <strong>Expires</strong>
-                {{expiresFormatted}}
-              </div>
-            </v-timeline-item>
-            <v-timeline-item color="red" small>
-              <div style="margin-left: -25px">
-                <strong>Closes</strong>
-                {{closesFormatted}}
-              </div>
-            </v-timeline-item>
-          </v-timeline>
-          <v-card-actions>
-            <v-btn ref="viewMoreButton" style="position: absolute; bottom: 10px; right: 10px" color="secondary" @click="moreInfo=!moreInfo">View {{moreInfo? 'Less' : 'More'}}</v-btn>
-          </v-card-actions>
-        </v-col>
-      </v-row>
-    </v-card>
-  </v-container>
+          </div>
+        </v-expand-transition>
+      </v-col>
+      <v-col cols="4">
+        <v-timeline dense style="height: 100%; margin-left: -40%; margin-bottom: 10px">
+          <v-timeline-item color="grey" small>
+            <div style="margin-left: -25px">
+              <strong>Created</strong>
+              {{createdFormatted}}
+            </div>
+          </v-timeline-item>
+          <v-timeline-item color="orange" small>
+            <div style="margin-left: -25px">
+              <strong>Expires</strong>
+              {{expiresFormatted}}
+            </div>
+          </v-timeline-item>
+          <v-timeline-item color="red" small>
+            <div style="margin-left: -25px">
+              <strong>Closes</strong>
+              {{closesFormatted}}
+            </div>
+          </v-timeline-item>
+        </v-timeline>
+        <v-card-actions>
+          <v-btn ref="viewMoreButton" style="position: absolute; bottom: 10px; right: 10px" color="secondary" @click="moreInfo=!moreInfo">View {{moreInfo? 'Less' : 'More'}}</v-btn>
+        </v-card-actions>
+      </v-col>
+    </v-row>
+  </v-card>
 </template>
 
 <script>
