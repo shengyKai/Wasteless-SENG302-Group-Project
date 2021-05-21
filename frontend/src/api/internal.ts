@@ -512,7 +512,6 @@ export async function getProductCount(buisnessId: number): Promise<MaybeError<nu
   return response.data.count;
 }
 
-
 /**
  * Fetches a business with the given id.
  *
