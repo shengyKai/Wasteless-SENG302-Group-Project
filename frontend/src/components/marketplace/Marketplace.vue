@@ -4,11 +4,9 @@
       <v-row align="center">
         <v-col
           class="d-flex"
-          cols="6"
-          sm="4"
+          cols="auto"
         >
           <v-select
-            v-model="orderBy"
             flat
             solo-inverted
             hide-details
@@ -19,8 +17,8 @@
             label="Sort by"
           />
         </v-col>
-        <v-col cols="1">
-          <v-btn-toggle class="toggle" v-model="reverse" mandatory>
+        <v-col cols="auto">
+          <v-btn-toggle class="toggle" mandatory>
             <v-btn depressed color="primary" :value="false">
               <v-icon>mdi-arrow-up</v-icon>
             </v-btn>
@@ -31,8 +29,8 @@
         </v-col>
         <v-col
           class="d-flex"
-          cols="6"
-          sm="4">
+          cols="auto"
+        >
           <v-text-field
             clearable
             flat
@@ -43,7 +41,8 @@
             autofocus
           />
         </v-col>
-        <v-col cols="1" class="text-right" >
+        <v-spacer/>
+        <v-col cols="auto" class="text-right" >
           <v-btn type="button" color="primary" rounded>
             Create card
           </v-btn>
@@ -60,24 +59,42 @@
       >
         {{ section }}
       </v-tab>
-      <v-tabs-items>
-        <v-tab-item
-          v-for="section in sections"
-          :key="section"
-        >
-          <v-card/>
-        </v-tab-item>
-      </v-tabs-items>
     </v-tabs>
+
+    <v-tabs-items v-model="tab">
+      <v-tab-item
+        v-for="section in sections"
+        :key="section"
+      >
+        <v-container class="grey lighten-2">
+          <v-row>
+            <v-col v-for="card in cards[section]" :key="card.id" cols="auto">
+              <MarketplaceCard :content="card"/>
+            </v-col>
+          </v-row>
+        </v-container>
+      </v-tab-item>
+    </v-tabs-items>
   </div>
 </template>
 
 <script>
+import MarketplaceCard from "../cards/MarketplaceCard";
+
 export default {
   data() {
     return {
-      sections: ["For sale", "Wanted", "Exchange"]
+      tab: null,
+      sections: ["For sale", "Wanted", "Exchange"],
+      cards: {
+        "For sale": [{id: 0}, {id: 1}, {id: 2}, {id: 3}, {id: 4}, {id: 5}, {id: 6}],
+        "Wanted": [],
+        "Exchange": [{id: 0}, {id: 1}, {id: 2}, {id: 3}, {id: 4}]
+      }
     };
+  },
+  components: {
+    MarketplaceCard
   }
 };
 </script>
