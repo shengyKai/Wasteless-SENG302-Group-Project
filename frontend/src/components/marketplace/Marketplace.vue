@@ -6,18 +6,20 @@
           class="d-flex"
           cols="auto"
         >
+          <!---Select component for the order in which the cards should be displayed--->
           <v-select
             flat
             solo-inverted
             hide-details
             :items="[
-              { text: 'Date Added',                 value: 'created'},
+              { text: 'Date Added', value: 'created'},
             ]"
             prepend-inner-icon="mdi-sort-variant"
             label="Sort by"
           />
         </v-col>
         <v-col cols="auto">
+          <!---Reverse the order in which the cards should be displayed--->
           <v-btn-toggle class="toggle" mandatory>
             <v-btn depressed color="primary" :value="false">
               <v-icon>mdi-arrow-up</v-icon>
@@ -31,6 +33,7 @@
           class="d-flex"
           cols="auto"
         >
+          <!---Search for cards by their keywords--->
           <v-text-field
             clearable
             flat
@@ -43,6 +46,7 @@
         </v-col>
         <v-spacer/>
         <v-col cols="auto" class="text-right" >
+          <!---Link to modal for creating new card--->
           <v-btn type="button" color="primary" rounded>
             Create card
           </v-btn>
@@ -53,6 +57,7 @@
       v-model="tab"
       grow
     >
+      <!---Tabs for dividing marketplace into for sale, wanted and exchange sections--->
       <v-tab
         v-for="section in sections"
         :key="section"
@@ -66,6 +71,7 @@
         v-for="section in sections"
         :key="section"
       >
+        <!---Grid of cards for one section--->
         <v-container class="grey lighten-2">
           <v-row>
             <v-col v-for="card in cards[section]" :key="card.id" cols="auto">
@@ -86,6 +92,7 @@ export default {
     return {
       tab: null,
       sections: ["For sale", "Wanted", "Exchange"],
+      // TODO Get cards for each section with API call when that has been implemented.
       cards: {
         "For sale": [{id: 0}, {id: 1}, {id: 2}, {id: 3}, {id: 4}, {id: 5}, {id: 6}],
         "Wanted": [],
