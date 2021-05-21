@@ -13,12 +13,15 @@ import org.seng302.persistence.InventoryItemRepository;
 import org.seng302.persistence.SaleItemRepository;
 import org.seng302.persistence.UserRepository;
 import org.seng302.tools.AuthenticationTokenManager;
+import org.seng302.tools.SearchHelper;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -35,11 +38,31 @@ public class SaleController {
         this.inventoryItemRepository = inventoryItemRepository;
     }
 
+    private Comparator<SaleItem> getSaleItemComparator(String orderBy) {
+        if (orderBy == null) orderBy = "created";
+        switch (orderBy) {
+            case "created":
+                return Comparator.comparing(SaleItem::getCreated);
+            case "closing":
+                return Comparator.comparing(SaleItem::getCloses);
+            case "productCode":
+                return Comparator.comparing(saleItem -> saleItem.getProduct().getProductCode());
+            case "productName":
+                return Comparator.comparing(saleItem -> saleItem.getProduct().getName());
+            case "quantity":
+                return Comparator.comparing(SaleItem::getQuantity);
+            case "price":
+                return Comparator.comparing(SaleItem::getPrice);
+            default:
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid sort order");
+        }
+    }
+
     @PostMapping("/businesses/{id}/listings")
     public JSONObject addSaleItemToBusiness(@PathVariable Long id, @RequestBody JSONObject saleItemInfo, HttpServletRequest request, HttpServletResponse response) throws Exception {
         try {
             AuthenticationTokenManager.checkAuthenticationToken(request);
-            logger.info(String.format("Adding sales item to business (businessId=%d).", id));
+            logger.info(() -> String.format("Adding sales item to business (businessId=%d).", id));
             Business business = businessRepository.getBusinessById(id);
             business.checkSessionPermissions(request);
 
@@ -91,20 +114,60 @@ public class SaleController {
      * @return List of sale items the business is listing
      */
     @GetMapping("/businesses/{id}/listings")
-    public JSONArray getSaleItemsForBusiness(@PathVariable Long id, HttpServletRequest request) {
+    public JSONArray getSaleItemsForBusiness(@PathVariable Long id,
+                                             HttpServletRequest request,
+                                             @RequestParam(required = false) String orderBy,
+                                             @RequestParam(required = false) Long page,
+                                             @RequestParam(required = false) Long resultsPerPage,
+                                             @RequestParam(required = false) Boolean reverse) {
         try {
             AuthenticationTokenManager.checkAuthenticationToken(request);
             logger.info(() -> String.format("Getting sales item for business (businessId=%d).", id));
             Business business = businessRepository.getBusinessById(id);
 
+            List<SaleItem> listings = saleItemRepository.findAllForBusiness(business);
+
+            Comparator<SaleItem> comparator = getSaleItemComparator(orderBy);
+            if (Boolean.TRUE.equals(reverse)) {
+                comparator = comparator.reversed();
+            }
+            listings.sort(comparator);
+
+            listings = SearchHelper.getPageInResults(listings, page, resultsPerPage);
+
             var response = new JSONArray();
-            for (SaleItem saleItem : saleItemRepository.findAllForBusiness(business)) {
+            for (SaleItem saleItem : listings) {
                 response.add(saleItem.constructJSONObject());
             }
             return response;
         } catch (Exception error) {
             logger.error(error.getMessage());
             throw error;
+        }
+    }
+
+    /**
+     * REST GET method to retrieve the sale item count for the business
+     * @param id the id of the business
+     * @param request the HTTP request
+     * @return JSON object containing a single "count" field with the sales item count
+     */
+    @GetMapping("/businesses/{id}/listings/count")
+    public JSONObject getSalesItemForBusinessCount(@PathVariable Long id, HttpServletRequest request) {
+        try {
+            AuthenticationTokenManager.checkAuthenticationToken(request);
+            logger.info(() -> String.format("Getting sales item count for business (businessId=%d", id));
+            Business business = businessRepository.getBusinessById(id);
+
+            List<SaleItem> listings = saleItemRepository.findAllForBusiness(business);
+
+            var response = new JSONObject();
+            response.put("count", listings.size());
+
+            return response;
+        } catch (Exception e) {
+            logger.error(e);
+            throw e;
         }
     }
 }
