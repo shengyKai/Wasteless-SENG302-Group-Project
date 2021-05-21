@@ -71,7 +71,7 @@ public class Keyword {
         if (name.isEmpty() || name.length() > 25) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Keyword name must be between 1-25 characters long");
         }
-        if (!name.matches("^[\\p{L}]*$")) {
+        if (!name.matches("^[ \\p{L}]*$")) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Keyword name must only contain letters");
         }
         this.name = name;

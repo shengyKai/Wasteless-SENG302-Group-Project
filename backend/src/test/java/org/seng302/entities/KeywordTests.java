@@ -244,10 +244,16 @@ class KeywordTests {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {" ", "\n", "\t", ",", ".", "+", "\uD83D\uDE02", "\uFFFF"})
+    @ValueSource(strings = {"\n", "\t", ",", ".", "+", "\uD83D\uDE02", "\uFFFF"})
     void keywordConstructor_invalidCharacters_throws400Exception(String name) {
         var exception = assertThrows(ResponseStatusException.class, () -> new Keyword(name));
         assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
         assertEquals("Keyword name must only contain letters", exception.getReason());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {" ", "a", "A", "é", "树"})
+    void keywordConstructor_validCharacters_createsSuccessfully(String name) {
+        assertDoesNotThrow(() -> new Keyword(name));
     }
 }
