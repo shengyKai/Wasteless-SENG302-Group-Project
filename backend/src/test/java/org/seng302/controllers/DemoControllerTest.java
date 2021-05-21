@@ -7,15 +7,9 @@ import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-import org.seng302.entities.Business;
-import org.seng302.entities.Location;
-import org.seng302.entities.Product;
-import org.seng302.entities.User;
+import org.seng302.entities.*;
 import org.seng302.exceptions.AccessTokenException;
-import org.seng302.persistence.BusinessRepository;
-import org.seng302.persistence.ImageRepository;
-import org.seng302.persistence.ProductRepository;
-import org.seng302.persistence.UserRepository;
+import org.seng302.persistence.*;
 import org.seng302.tools.AuthenticationTokenManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -27,6 +21,7 @@ import org.springframework.web.server.ResponseStatusException;
 import javax.servlet.http.HttpServletRequest;
 import java.text.ParseException;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -50,6 +45,10 @@ class DemoControllerTest {
     @Mock
     private ProductRepository productRepository;
     @Mock
+    private InventoryItemRepository inventoryItemRepository;
+    @Mock
+    private SaleItemRepository saleItemRepository;
+    @Mock
     private ImageRepository imageRepository;
 
     private User testUser;
@@ -58,7 +57,7 @@ class DemoControllerTest {
     @BeforeEach
     public void setUp() throws ParseException {
         MockitoAnnotations.openMocks(this);
-        demoController = new DemoController(userRepository, businessRepository, productRepository, imageRepository);
+        demoController = new DemoController(userRepository, businessRepository, productRepository, inventoryItemRepository, saleItemRepository, imageRepository);
         testUser = new User.Builder()
                 .withFirstName("Andy")
                 .withMiddleName("Percy")
@@ -109,7 +108,8 @@ class DemoControllerTest {
         verify(userRepository, times(0)).save(any(User.class));
         verify(businessRepository, times(0)).save(any(Business.class));
         verify(productRepository, times(0)).save(any(Product.class));
-
+        verify(inventoryItemRepository, times(0)).save(any(InventoryItem.class));
+        verify(saleItemRepository, times(0)).save(any(SaleItem.class));
     }
 
     /**
@@ -148,6 +148,8 @@ class DemoControllerTest {
         verify(userRepository, times(0)).save(any(User.class));
         verify(businessRepository, times(0)).save(any(Business.class));
         verify(productRepository, times(0)).save(any(Product.class));
+        verify(inventoryItemRepository, times(0)).save(any(InventoryItem.class));
+        verify(saleItemRepository, times(0)).save(any(SaleItem.class));
     }
 
     /**
@@ -183,13 +185,18 @@ class DemoControllerTest {
             when(userRepository.findByEmail("123andyelliot@gmail.com")).thenReturn(null).thenReturn(testUser);
             when(businessRepository.save(any(Business.class))).thenReturn(testBusiness);
             when(productRepository.save(any(Product.class))).thenAnswer(x->x.getArgument(0));
+            when(inventoryItemRepository.save(any(InventoryItem.class))).thenAnswer(x->x.getArgument(0));
+            when(saleItemRepository.save(any(SaleItem.class))).thenAnswer(x->x.getArgument(0));
 
-            demoController.loadDemoData(request);
+
+            assertDoesNotThrow(() -> demoController.loadDemoData(request));
         }
         // Verify that expected number of entities were loaded to the database
         verify(userRepository, times(8)).save(any(User.class));
         verify(businessRepository, times(1)).save(any(Business.class));
         verify(productRepository, times(2)).save(any(Product.class));
+        verify(inventoryItemRepository, times(1)).save(any(InventoryItem.class));
+        verify(saleItemRepository, times(1)).save(any(SaleItem.class));
     }
 
 }

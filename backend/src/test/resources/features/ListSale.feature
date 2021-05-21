@@ -12,6 +12,24 @@ Feature: U22 - List Sale
       | FISH       | 17       | 2022-01-19 |
       | APPLE      | 1        | 2022-05-20 |
 
+  Scenario: AC1 - When not logged in I cannot view sale items
+    Given the business is listing the following items
+      | product_id | price | quantity |
+      | FISH       | 10    | 5        |
+    When I look a the business sale listings
+    Then I expect to be unauthorised
+
+  Scenario: AC1 - When logged in I can view sale items
+    Given the business is listing the following items
+      | product_id | price | quantity |
+      | FISH       | 10    | 5        |
+      | FISH       | 100   | 2        |
+      | APPLE      | 1     | 1        |
+    And I am an not an administrator of the business
+    And I am logged into my account
+    When I look a the business sale listings
+    Then I expect to be see the sales listings
+
   Scenario: AC2 - When logged in as a business administrator I can add a sale item
     Given I am an administrator of the business
     And I am logged into my account

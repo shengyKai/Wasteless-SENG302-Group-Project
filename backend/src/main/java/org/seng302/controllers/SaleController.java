@@ -1,5 +1,6 @@
 package org.seng302.controllers;
 
+import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -13,10 +14,7 @@ import org.seng302.persistence.SaleItemRepository;
 import org.seng302.persistence.UserRepository;
 import org.seng302.tools.AuthenticationTokenManager;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.HttpServletRequest;
@@ -80,6 +78,30 @@ public class SaleController {
             var object = new JSONObject();
             object.put("listingId", saleItem.getSaleId());
             return object;
+        } catch (Exception error) {
+            logger.error(error.getMessage());
+            throw error;
+        }
+    }
+
+    /**
+     * REST GET method to retrieve all the sale items for a given business
+     * @param id the id of the business
+     * @param request the HTTP request
+     * @return List of sale items the business is listing
+     */
+    @GetMapping("/businesses/{id}/listings")
+    public JSONArray getSaleItemsForBusiness(@PathVariable Long id, HttpServletRequest request) {
+        try {
+            AuthenticationTokenManager.checkAuthenticationToken(request);
+            logger.info(() -> String.format("Getting sales item for business (businessId=%d).", id));
+            Business business = businessRepository.getBusinessById(id);
+
+            var response = new JSONArray();
+            for (SaleItem saleItem : saleItemRepository.findAllForBusiness(business)) {
+                response.add(saleItem.constructJSONObject());
+            }
+            return response;
         } catch (Exception error) {
             logger.error(error.getMessage());
             throw error;
