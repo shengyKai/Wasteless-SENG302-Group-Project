@@ -179,7 +179,7 @@ export default {
       console.log(this.expires);
       return;
     },
-    checkManufacterDateValid() {
+    async checkManufacterDateValid() {
       //checks manufactured cannot be after today and is before sell by
       let sellByDate = new Date(this.manufactured);
       let manufacturedDate = new Date(this.manufactured);
@@ -191,7 +191,7 @@ export default {
         this.errorMessage = undefined;
       }
     },
-    checkSellByDateValid() {
+    async checkSellByDateValid() {
       //checks sell by date cannot be before today and is after manufactured and before best before
       let bestBeforeDate = new Date(this.bestBefore);
       let sellByDate = new Date(this.sellBy);
@@ -206,7 +206,7 @@ export default {
         this.errorMessage = undefined;
       }
     },
-    checkBestBeforeDateValid() {
+    async checkBestBeforeDateValid() {
       //checks best before date cannot be before today and is after sell by date
       let expiresDate = new Date(this.expires);
       let bestBeforeDate = new Date(this.bestBefore);
@@ -221,7 +221,7 @@ export default {
         this.errorMessage = undefined;
       }
     },
-    checkExpiresDateVaild() {
+    async checkExpiresDateVaild() {
       //checks expires date cannot be before today and is after best before date
       let expiresDate = new Date(this.expires);
       let bestBeforeDate = new Date(this.bestBefore);

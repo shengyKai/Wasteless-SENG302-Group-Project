@@ -275,4 +275,118 @@ describe("CreateInventory.vue", () => {
             expect(wrapper.vm.valid).toBeFalsy();
         }
     );
+
+    describe("Date Validation", () => {
+        it("Valid when manufactured date before today", async () => {
+
+        })
+
+        it("Invalid when manufactured date after today", async () => {
+            
+        })
+
+        it("Valid when manufactured date before sell by date", async () => {
+            
+        })
+
+        it("Invalid when manufactured date after sell by date", async () => {
+            
+        })
+
+        it("Invalid when manufactured date before 1000 AD", async () => {
+            
+        })
+
+        it("Invalid when manufactured date after 10000 AD", async () => {
+            
+        })
+
+        it("Valid when sell by date after today", async () => {
+
+        })
+
+        it("Invalid when sell by date before today", async () => {
+            
+        })
+
+        it("Valid when sell by date after manufactured date", async () => {
+            
+        })
+
+        it("Invalid when sell by date before manufactured date", async () => {
+            
+        })
+
+        it("Valid when sell by date before best before date", async () => {
+            
+        })
+
+        it("Invalid when sell by date after best before date", async () => {
+            
+        })
+
+        it("Invalid when sell by date before 1000 AD", async () => {
+            
+        })
+
+        it("Invalid when sell by date after 10000 AD", async () => {
+            
+        })
+
+        it("Valid when best before date after today", async () => {
+
+        })
+
+        it("Invalid when best before date before today", async () => {
+            
+        })
+
+        it("Valid when best before date after sell by date", async () => {
+            
+        })
+
+        it("Invalid when best before date before sell by date", async () => {
+            
+        })
+
+        it("Valid when best before date before expires date", async () => {
+            
+        })
+
+        it("Invalid when best before date after expires date", async () => {
+            
+        })
+
+        it("Invalid when best before date before 1000 AD", async () => {
+            
+        })
+
+        it("Invalid when best before date after 10000 AD", async () => {
+            
+        })
+
+        it("Valid when expires date after today", async () => {
+
+        })
+
+        it("Invalid when expires date before today", async () => {
+            
+        })
+
+        it("Valid when expires date after best before date", async () => {
+            
+        })
+
+        it("Invalid when expires date before best before date", async () => {
+            
+        })
+
+        it("Invalid when expires date before 1000 AD", async () => {
+            
+        })
+
+        it("Invalid when expires date after 10000 AD", async () => {
+            
+        })
+    })
 });
