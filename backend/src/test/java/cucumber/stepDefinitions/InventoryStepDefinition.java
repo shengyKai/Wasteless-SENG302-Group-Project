@@ -144,7 +144,7 @@ public class InventoryStepDefinition  {
     public void i_try_to_access_the_inventory_of_the_business() throws Exception {
         mvcResult = mockMvc.perform(
                 requestContext.addAuthorisationToken(
-                        get(String.format("/businesses/%d/inventory", businessContext.getLast().getId()))
+                        get(String.format("/businesses/%s/inventory", businessContext.getLast().getId()))
                 )
         ).andReturn();
     }

@@ -1,19 +1,17 @@
 package org.seng302.controllers;
 
+import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
 import org.hamcrest.Matchers;
+import org.junit.Ignore;
 import org.junit.function.ThrowingRunnable;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.runner.RunWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.seng302.entities.Business;
-import org.seng302.entities.InventoryItem;
-import org.seng302.entities.SaleItem;
+import org.seng302.entities.*;
 import org.seng302.exceptions.AccessTokenException;
 import org.seng302.persistence.*;
 import org.seng302.tools.AuthenticationTokenManager;
@@ -33,6 +31,8 @@ import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.util.*;
+import java.time.temporal.ChronoUnit;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Optional;
@@ -41,8 +41,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.AdditionalMatchers.not;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
@@ -99,7 +98,7 @@ class SaleControllerTest {
         object.put("quantity", 3);
         object.put("price", 10.5);
         object.put("moreInfo", "This is some more info about the product");
-        object.put("closes", "2021-07-21");
+        object.put("closes", LocalDate.now().plus(100, ChronoUnit.DAYS).toString());
         return object;
     }
 
@@ -281,5 +280,106 @@ class SaleControllerTest {
         expectedResponse.put("listingId", 400);
 
         assertEquals(expectedResponse, actualResponse);
+    }
+
+    @Test
+    void getSaleItemsForBusiness_noAuthToken_401Response() throws Exception {
+        // Mock the AuthenticationTokenManager to respond as it would when the authentication token is missing or invalid
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.checkAuthenticationToken(any()))
+                .thenThrow(new AccessTokenException());
+
+        // Verify that a 401 response is received in response to the GET request
+        mockMvc.perform(get("/businesses/1/listings"))
+                .andExpect(status().isUnauthorized())
+                .andReturn();
+
+        // Check that the authentication token manager was called
+        authenticationTokenManager.verify(() -> AuthenticationTokenManager.checkAuthenticationToken(any()));
+    }
+
+    @Test
+    void getSaleItemsForBusiness_invalidBusiness_406Response() throws Exception {
+        mockMvc.perform(get("/businesses/999/listings"))
+                .andExpect(status().isNotAcceptable())
+                .andReturn();
+    }
+
+    @Test
+    void getSaleItemsForBusiness_validBusiness_doesNotCheckSessionPermissions() throws Exception {
+        mockMvc.perform(get("/businesses/1/listings"))
+                .andReturn();
+
+        verify(business, times(0)).checkSessionPermissions(any(HttpServletRequest.class));
+    }
+
+    @Test
+    void getSaleItemsForBusiness_validBusinessNoSalesItem_returnsEmptyList() throws Exception {
+        MvcResult result = mockMvc.perform(get("/businesses/1/listings"))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
+        Object response = parser.parse(result.getResponse().getContentAsString());
+
+        assertEquals(new JSONArray(), response);
+    }
+
+    @Test
+    void getSaleItemsForBusiness_validBusinessNoSales_returnsSaleItems() throws Exception {
+        when(business.getAddress()).thenReturn(Location.covertAddressStringToLocation("6,Help Street,Place,Dunedin,New Zelaand,Otago,6959"));
+        Product product = new Product.Builder()
+                .withProductCode("ORANGE-69")
+                .withName("Fresh Orange")
+                .withDescription("This is a fresh orange")
+                .withManufacturer("Apple")
+                .withRecommendedRetailPrice("2.01")
+                .withBusiness(business)
+                .build();
+
+        LocalDate today = LocalDate.now();
+        InventoryItem inventoryItem = new InventoryItem.Builder()
+                .withProduct(product)
+                .withQuantity(300)
+                .withPricePerItem("2.69")
+                .withManufactured("2021-03-11")
+                .withSellBy(today.plus(2, ChronoUnit.DAYS).toString())
+                .withBestBefore(today.plus(3, ChronoUnit.DAYS).toString())
+                .withExpires(today.plus(4, ChronoUnit.DAYS).toString())
+                .build();
+
+
+        List<SaleItem> saleItems = new ArrayList<>();
+        saleItems.add(new SaleItem.Builder()
+                .withInventoryItem(inventoryItem)
+                .withCloses(today.plus(200, ChronoUnit.DAYS).toString())
+                .withMoreInfo("This doesn't expire for a long time")
+                .withPrice("200.34")
+                .withQuantity(2)
+                .build());
+        saleItems.add(new SaleItem.Builder()
+                .withInventoryItem(inventoryItem)
+                .withCloses(today.plus(400, ChronoUnit.DAYS).toString())
+                .withMoreInfo("This shouldn't expire for a long time")
+                .withPrice("200.34")
+                .withQuantity(2)
+                .build());
+
+
+        when(saleItemRepository.findAllForBusiness(any(Business.class))).thenReturn(Collections.unmodifiableList(saleItems));
+        MvcResult result = mockMvc.perform(get("/businesses/1/listings"))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
+        Object response = parser.parse(result.getResponse().getContentAsString());
+
+        JSONArray expected = new JSONArray();
+        for (SaleItem item : saleItems) {
+            expected.add(item.constructJSONObject());
+        }
+        // This will normalise out the big decimals into doubles and such
+        expected = (JSONArray) parser.parse(expected.toString());
+
+        assertEquals(expected, response);
     }
 }

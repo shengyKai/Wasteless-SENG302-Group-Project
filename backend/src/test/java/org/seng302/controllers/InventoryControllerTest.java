@@ -40,6 +40,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.text.ParseException;
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -129,6 +131,23 @@ public class InventoryControllerTest {
         mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
     }
 
+    /**
+     * Generates a valid inventory item creation request body
+     * @return JSONObject for a valid creation request
+     */
+    private JSONObject generateInventoryCreateInfo() {
+        var inventory = new JSONObject();
+        inventory.put("productId", "BEANS");
+        inventory.put("quantity", 4);
+        inventory.put("pricePerItem", 6.5);
+        inventory.put("totalPrice", 21.99);
+        inventory.put("manufactured", "2021-05-12");
+        inventory.put("sellBy",     LocalDate.now().plus(10, ChronoUnit.DAYS).toString());
+        inventory.put("bestBefore", LocalDate.now().plus(20, ChronoUnit.DAYS).toString());
+        inventory.put("expires",    LocalDate.now().plus(30, ChronoUnit.DAYS).toString());
+        return inventory;
+    }
+
     @Test
     void addInventory_validPermission_canAddInventory() throws Exception {
         Business businessSpy = spy(testBusiness);
@@ -138,12 +157,11 @@ public class InventoryControllerTest {
                                                                                                          // product
         doNothing().when(businessSpy).checkSessionPermissions(any()); // mock successful authentication
 
-        String inventory = "{\n" + "  \"productId\": \"BEANS\",\n" + "  \"quantity\": 4,\n"
-                + "  \"pricePerItem\": 6.5,\n" + "  \"totalPrice\": 21.99,\n" + "  \"manufactured\": \"2021-05-12\",\n"
-                + "  \"sellBy\": \"2021-12-12\",\n" + "  \"bestBefore\": \"2021-12-12\",\n"
-                + "  \"expires\": \"2021-12-12\"\n" + "}";
-        mockMvc.perform(MockMvcRequestBuilders.post("/businesses/1/inventory").contentType(MediaType.APPLICATION_JSON)
-                .content(inventory)).andExpect(status().isOk());
+        mockMvc.perform(MockMvcRequestBuilders
+                .post("/businesses/1/inventory")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(generateInventoryCreateInfo().toString()))
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -156,12 +174,11 @@ public class InventoryControllerTest {
             when(businessRepository.getBusinessById(any())).thenReturn(businessSpy);
             sessionAuthToken.put("accountId", 1L); // use a random account
 
-            String inventory = "{\n" + "  \"productId\": \"BEANS\",\n" + "  \"quantity\": 4,\n"
-                    + "  \"pricePerItem\": 6.5,\n" + "  \"totalPrice\": 21.99,\n"
-                    + "  \"manufactured\": \"2021-05-12\",\n" + "  \"sellBy\": \"2021-05-12\",\n"
-                    + "  \"bestBefore\": \"2021-05-12\",\n" + "  \"expires\": \"2021-05-12\"\n" + "}";
-            mockMvc.perform(MockMvcRequestBuilders.post("/businesses/1/inventory")
-                    .contentType(MediaType.APPLICATION_JSON).content(inventory).sessionAttrs(sessionAuthToken))
+            mockMvc.perform(MockMvcRequestBuilders
+                    .post("/businesses/1/inventory")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(generateInventoryCreateInfo().toString())
+                    .sessionAttrs(sessionAuthToken))
                     .andExpect(status().isForbidden());
         }
     }
@@ -170,23 +187,23 @@ public class InventoryControllerTest {
     void addInventory_notLoggedIn_cannotAddInventory401() throws Exception {
         Business businessSpy = spy(testBusiness);
         when(businessRepository.getBusinessById(any())).thenReturn(businessSpy);
-        String inventory = "{\n" + "  \"productId\": \"BEANS\",\n" + "  \"quantity\": 4,\n"
-                + "  \"pricePerItem\": 6.5,\n" + "  \"totalPrice\": 21.99,\n" + "  \"manufactured\": \"2021-05-12\",\n"
-                + "  \"sellBy\": \"2021-05-12\",\n" + "  \"bestBefore\": \"2021-05-12\",\n"
-                + "  \"expires\": \"2021-05-12\"\n" + "}";
-        mockMvc.perform(MockMvcRequestBuilders.post("/businesses/1/inventory").contentType(MediaType.APPLICATION_JSON)
-                .content(inventory)).andExpect(status().isUnauthorized());
+
+        mockMvc.perform(MockMvcRequestBuilders
+                .post("/businesses/1/inventory")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(generateInventoryCreateInfo().toString()))
+                .andExpect(status().isUnauthorized());
     }
 
     @Test
     void addInventory_invalidBusinessId_406Thrown() throws Exception {
         when(businessRepository.getBusinessById(any())).thenCallRealMethod();
-        String inventory = "{\n" + "  \"productId\": \"BEANS\",\n" + "  \"quantity\": 4,\n"
-                + "  \"pricePerItem\": 6.5,\n" + "  \"totalPrice\": 21.99,\n" + "  \"manufactured\": \"2021-05-12\",\n"
-                + "  \"sellBy\": \"2021-05-12\",\n" + "  \"bestBefore\": \"2021-05-12\",\n"
-                + "  \"expires\": \"2021-05-12\"\n" + "}";
-        mockMvc.perform(MockMvcRequestBuilders.post("/businesses/999/inventory").contentType(MediaType.APPLICATION_JSON)
-                .content(inventory)).andExpect(status().isNotAcceptable());
+
+        mockMvc.perform(MockMvcRequestBuilders
+                .post("/businesses/999/inventory")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(generateInventoryCreateInfo().toString()))
+                .andExpect(status().isNotAcceptable());
     }
 
     @Test
@@ -210,12 +227,11 @@ public class InventoryControllerTest {
                                                                                                        // method
         doNothing().when(businessSpy).checkSessionPermissions(any()); // mock successful authentication
 
-        String inventory = "{\n" + "  \"productId\": \"BEANS\",\n" + "  \"quantity\": 4,\n"
-                + "  \"pricePerItem\": 6.5,\n" + "  \"totalPrice\": 21.99,\n" + "  \"manufactured\": \"2021-05-12\",\n"
-                + "  \"sellBy\": \"2021-05-12\",\n" + "  \"bestBefore\": \"2021-05-12\",\n"
-                + "  \"expires\": \"2021-05-12\"\n" + "}";
-        mockMvc.perform(MockMvcRequestBuilders.post("/businesses/1/inventory").contentType(MediaType.APPLICATION_JSON)
-                .content(inventory)).andExpect(status().isNotAcceptable());
+        mockMvc.perform(MockMvcRequestBuilders
+                .post("/businesses/1/inventory")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(generateInventoryCreateInfo().toString()))
+                .andExpect(status().isNotAcceptable());
     }
 
     @Test
@@ -228,12 +244,11 @@ public class InventoryControllerTest {
                 .thenThrow(new ResponseStatusException(HttpStatus.FORBIDDEN)); // make this method always throw
         doNothing().when(businessSpy).checkSessionPermissions(any()); // mock successful authentication
 
-        String inventory = "{\n" + "  \"productId\": \"BEANS\",\n" + "  \"quantity\": 4,\n"
-                + "  \"pricePerItem\": 6.5,\n" + "  \"totalPrice\": 21.99,\n" + "  \"manufactured\": \"2021-05-12\",\n"
-                + "  \"sellBy\": \"2021-05-12\",\n" + "  \"bestBefore\": \"2021-05-12\",\n"
-                + "  \"expires\": \"2021-05-12\"\n" + "}";
-        mockMvc.perform(MockMvcRequestBuilders.post("/businesses/1/inventory").contentType(MediaType.APPLICATION_JSON)
-                .content(inventory)).andExpect(status().isForbidden());
+        mockMvc.perform(MockMvcRequestBuilders
+                .post("/businesses/1/inventory")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(generateInventoryCreateInfo().toString()))
+                .andExpect(status().isForbidden());
     }
 
     @Test
@@ -245,12 +260,11 @@ public class InventoryControllerTest {
                                                                                                          // product
         doNothing().when(businessSpy).checkSessionPermissions(any()); // mock successful authentication
 
-        String inventory = "{\n" + "  \"productId\": \"BEANS\",\n" + "  \"quantity\": 4,\n"
-                + "  \"pricePerItem\": 6.5,\n" + "  \"totalPrice\": 21.99,\n" + "  \"manufactured\": \"2021-05-12\",\n"
-                + "  \"sellBy\": \"2021-12-12\",\n" + "  \"bestBefore\": \"2021-12-12\",\n"
-                + "  \"expires\": \"2021-12-12\"\n" + "}";
-        mockMvc.perform(MockMvcRequestBuilders.post("/businesses/1/inventory").contentType(MediaType.APPLICATION_JSON)
-                .content(inventory)).andExpect(status().isOk());
+        mockMvc.perform(MockMvcRequestBuilders
+                .post("/businesses/1/inventory")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(generateInventoryCreateInfo().toString()))
+                .andExpect(status().isOk());
 
         verify(inventoryItemRepository, times(1)).save(any(InventoryItem.class));
 
@@ -339,17 +353,16 @@ public class InventoryControllerTest {
 
     @Test
     void getInventory_multipleItems_correctArrayReturned() throws Exception {
+        String futureDate = LocalDate.now().plus(50, ChronoUnit.DAYS).toString();
         List<InventoryItem> inventory = new ArrayList<>();
         JSONArray expectedResponse = new JSONArray();
-        inventory.add(
-                new InventoryItem.Builder().withProduct(testProduct).withQuantity(1).withExpires("2022-01-01").build());
-        inventory.add(new InventoryItem.Builder().withProduct(testProduct).withQuantity(39).withExpires("2022-01-01")
-                .build());
-        inventory.add(new InventoryItem.Builder().withProduct(testProduct).withQuantity(54).withExpires("2022-01-01")
-                .build());
+        inventory.add(new InventoryItem.Builder().withProduct(testProduct).withQuantity(1).withExpires(futureDate).build());
+        inventory.add(new InventoryItem.Builder().withProduct(testProduct).withQuantity(39).withExpires(futureDate).build());
+        inventory.add(new InventoryItem.Builder().withProduct(testProduct).withQuantity(54).withExpires(futureDate).build());
         for (InventoryItem item : inventory) {
             expectedResponse.add(item);
         }
+
         inventoryController = new InventoryController(businessRepository, inventoryItemRepository, productRepository);
         when(businessRepository.getBusinessById(1L)).thenReturn(mockBusiness);
         when(productRepository.findAllByBusiness(mockBusiness)).thenReturn(mockProductList);
@@ -360,17 +373,18 @@ public class InventoryControllerTest {
 
     @Test
     void getInventoryCount_multipleItems_correctCountReturned() throws Exception {
+        String futureDate = LocalDate.now().plus(50, ChronoUnit.DAYS).toString();
+
         List<InventoryItem> inventory = new ArrayList<>();
-        inventory.add(
-                new InventoryItem.Builder().withProduct(testProduct).withQuantity(1).withExpires("2022-01-01").build());
-        inventory.add(new InventoryItem.Builder().withProduct(testProduct).withQuantity(39).withExpires("2022-01-01")
-                .build());
-        inventory.add(new InventoryItem.Builder().withProduct(testProduct).withQuantity(54).withExpires("2022-01-01")
-                .build());
+        inventory.add(new InventoryItem.Builder().withProduct(testProduct).withQuantity(1).withExpires(futureDate).build());
+        inventory.add(new InventoryItem.Builder().withProduct(testProduct).withQuantity(39).withExpires(futureDate).build());
+        inventory.add(new InventoryItem.Builder().withProduct(testProduct).withQuantity(54).withExpires(futureDate).build());
+
         inventoryController = new InventoryController(businessRepository, inventoryItemRepository, productRepository);
         when(businessRepository.getBusinessById(1L)).thenReturn(mockBusiness);
         when(productRepository.findAllByBusiness(mockBusiness)).thenReturn(mockProductList);
         when(inventoryItemRepository.getInventoryByCatalogue(mockProductList)).thenReturn(inventory);
+
         JSONObject result = inventoryController.getInventoryCount(1L, request);
         Assertions.assertTrue(result.containsKey("count"));
         Assertions.assertEquals(3, result.getAsNumber("count"));

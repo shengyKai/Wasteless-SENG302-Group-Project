@@ -299,6 +299,7 @@ public class InventoryItem {
         JsonTools.removeNullsFromJson(json);
         return json;
     }
+
     /**
      * Builder for Inventory Item
      */

@@ -19,6 +19,7 @@ import java.math.BigDecimal;
 import java.text.ParseException;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
+import java.time.temporal.ChronoUnit;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -90,14 +91,16 @@ public class InventoryItemTests {
     }
     @Test
     void createInventoryItem_withAllFields_objectCreated() throws Exception {
+        LocalDate today = LocalDate.now();
+
         InventoryItem invItem = new InventoryItem.Builder()
                 .withProduct(testProduct)
                 .withQuantity(3)
                 .withPricePerItem("2.69")
                 .withManufactured("2021-03-11")
-                .withSellBy("2021-11-21")
-                .withBestBefore("2021-11-28")
-                .withExpires("2021-12-01")
+                .withSellBy(today.plus(2, ChronoUnit.DAYS).toString())
+                .withBestBefore(today.plus(3, ChronoUnit.DAYS).toString())
+                .withExpires(today.plus(4, ChronoUnit.DAYS).toString())
                 .build();
         inventoryItemRepository.save(invItem);
         InventoryItem testInvItem = inventoryItemRepository.findById(invItem.getId()).get();
@@ -108,7 +111,7 @@ public class InventoryItemTests {
         InventoryItem invItem = new InventoryItem.Builder()
                 .withProduct(testProduct)
                 .withQuantity(2)
-                .withExpires("2021-06-01")
+                .withExpires(LocalDate.now().plus(50, ChronoUnit.DAYS).toString())
                 .build();
         inventoryItemRepository.save(invItem);
         InventoryItem testInvItem = inventoryItemRepository.findById(invItem.getId()).get();
@@ -124,7 +127,7 @@ public class InventoryItemTests {
             InventoryItem invItem = new InventoryItem.Builder()
                     .withProduct(null)
                     .withQuantity(2)
-                    .withExpires("2021-06-01")
+                    .withExpires(LocalDate.now().plus(50, ChronoUnit.DAYS).toString())
                     .build();
             // fail();
         } catch (ResponseStatusException e) {
@@ -151,7 +154,7 @@ public class InventoryItemTests {
             InventoryItem invItem = new InventoryItem.Builder()
                     .withProduct(testProduct)
                     .withQuantity(0)
-                    .withExpires("2021-06-01")
+                    .withExpires(LocalDate.now().plus(50, ChronoUnit.DAYS).toString())
                     .build();
         } catch (ResponseStatusException e) {
             assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
@@ -164,7 +167,7 @@ public class InventoryItemTests {
             InventoryItem invItem = new InventoryItem.Builder()
                     .withProduct(testProduct)
                     .withQuantity(-69)
-                    .withExpires("2021-06-01")
+                    .withExpires(LocalDate.now().plus(50, ChronoUnit.DAYS).toString())
                     .build();
         } catch (ResponseStatusException e) {
             assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
@@ -183,7 +186,7 @@ public class InventoryItemTests {
         InventoryItem invItem = new InventoryItem.Builder()
                 .withProduct(testProduct)
                 .withQuantity(2)
-                .withExpires("2021-06-01")
+                .withExpires(LocalDate.now().plus(50, ChronoUnit.DAYS).toString())
                 .withPricePerItem(null)
                 .build();
         inventoryItemRepository.save(invItem);
@@ -195,7 +198,7 @@ public class InventoryItemTests {
         InventoryItem invItem = new InventoryItem.Builder()
                 .withProduct(testProduct)
                 .withQuantity(2)
-                .withExpires("2021-06-01")
+                .withExpires(LocalDate.now().plus(50, ChronoUnit.DAYS).toString())
                 .withPricePerItem(null)
                 .withTotalPrice(null)
                 .build();
@@ -208,7 +211,7 @@ public class InventoryItemTests {
         InventoryItem invItem = new InventoryItem.Builder()
                 .withProduct(testProduct)
                 .withQuantity(2)
-                .withExpires("2021-06-01")
+                .withExpires(LocalDate.now().plus(50, ChronoUnit.DAYS).toString())
                 .withTotalPrice(null)
                 .build();
         inventoryItemRepository.save(invItem);
@@ -220,7 +223,7 @@ public class InventoryItemTests {
         InventoryItem invItem = new InventoryItem.Builder()
                 .withProduct(testProduct)
                 .withQuantity(2)
-                .withExpires("2021-06-01")
+                .withExpires(LocalDate.now().plus(50, ChronoUnit.DAYS).toString())
                 .withPricePerItem("2.69")
                 .build();
         inventoryItemRepository.save(invItem);
@@ -232,7 +235,7 @@ public class InventoryItemTests {
         InventoryItem invItem = new InventoryItem.Builder()
                 .withProduct(testProduct)
                 .withQuantity(2)
-                .withExpires("2021-06-01")
+                .withExpires(LocalDate.now().plus(50, ChronoUnit.DAYS).toString())
                 .withTotalPrice("21.69")
                 .build();
         inventoryItemRepository.save(invItem);
@@ -244,7 +247,7 @@ public class InventoryItemTests {
         InventoryItem.Builder builder = new InventoryItem.Builder()
         .withProduct(testProduct)
         .withQuantity(2)
-        .withExpires("2021-06-01");
+        .withExpires(LocalDate.now().plus(50, ChronoUnit.DAYS).toString());
         assertThrows(ResponseStatusException.class, () -> {
             builder.withPricePerItem("xx0.1");
         });
@@ -254,7 +257,7 @@ public class InventoryItemTests {
         InventoryItem.Builder builder = new InventoryItem.Builder()
         .withProduct(testProduct)
         .withQuantity(2)
-        .withExpires("2021-06-01");
+        .withExpires(LocalDate.now().plus(50, ChronoUnit.DAYS).toString());
         assertThrows(ResponseStatusException.class, () -> {
             builder.withTotalPrice("xx0.1");
         });
@@ -264,7 +267,7 @@ public class InventoryItemTests {
         InventoryItem invItem = new InventoryItem.Builder()
         .withProduct(testProduct)
         .withQuantity(2)
-        .withExpires("2021-06-01")
+        .withExpires(LocalDate.now().plus(50, ChronoUnit.DAYS).toString())
         .build();
         assertThrows(ResponseStatusException.class, () -> {
             invItem.setPricePerItem(new BigDecimal ("-1"));
@@ -275,7 +278,7 @@ public class InventoryItemTests {
         InventoryItem invItem = new InventoryItem.Builder()
         .withProduct(testProduct)
         .withQuantity(2)
-        .withExpires("2021-06-01")
+        .withExpires(LocalDate.now().plus(50, ChronoUnit.DAYS).toString())
         .build();
         assertThrows(ResponseStatusException.class, () -> {
             invItem.setTotalPrice(new BigDecimal ("-2"));
@@ -286,7 +289,7 @@ public class InventoryItemTests {
         InventoryItem invItem = new InventoryItem.Builder()
         .withProduct(testProduct)
         .withQuantity(2)
-        .withExpires("2021-06-01")
+        .withExpires(LocalDate.now().plus(50, ChronoUnit.DAYS).toString())
         .build();
         assertThrows(ResponseStatusException.class, () -> {
             invItem.setPricePerItem(new BigDecimal ("10001"));
@@ -308,7 +311,7 @@ public class InventoryItemTests {
         InventoryItem invItem = new InventoryItem.Builder()
         .withProduct(testProduct)
         .withQuantity(2)
-        .withExpires("2021-06-01")
+        .withExpires(LocalDate.now().plus(50, ChronoUnit.DAYS).toString())
         .build();
         assertThrows(ResponseStatusException.class, () -> {
             invItem.setPricePerItem(new BigDecimal("10000"));
@@ -319,7 +322,7 @@ public class InventoryItemTests {
         InventoryItem invItem = new InventoryItem.Builder()
         .withProduct(testProduct)
         .withQuantity(2)
-        .withExpires("2021-06-01")
+        .withExpires(LocalDate.now().plus(50, ChronoUnit.DAYS).toString())
         .build();
         assertThrows(ResponseStatusException.class, () -> {
             invItem.setTotalPrice(new BigDecimal ("1000001"));
@@ -330,7 +333,7 @@ public class InventoryItemTests {
         InventoryItem invItem = new InventoryItem.Builder()
                 .withProduct(testProduct)
                 .withQuantity(2)
-                .withExpires("2021-06-01")
+                .withExpires(LocalDate.now().plus(50, ChronoUnit.DAYS).toString())
                 .withManufactured(null)
                 .build();
         inventoryItemRepository.save(invItem);
@@ -345,7 +348,7 @@ public class InventoryItemTests {
         .withProduct(testProduct)
         .withQuantity(2)
         .withManufactured(acceptDate.toString())
-        .withExpires("2021-06-01")
+        .withExpires(LocalDate.now().plus(50, ChronoUnit.DAYS).toString())
         .build();
         assertNotNull(invItem);
     }
@@ -354,7 +357,7 @@ public class InventoryItemTests {
         InventoryItem.Builder builder = new InventoryItem.Builder()
                 .withProduct(testProduct)
                 .withQuantity(2)
-                .withExpires("2021-06-01");
+                .withExpires(LocalDate.now().plus(50, ChronoUnit.DAYS).toString());
         assertThrows(ResponseStatusException.class, () -> {
             builder.withManufactured("2022-03-03")
             .build();
@@ -365,7 +368,7 @@ public class InventoryItemTests {
         InventoryItem.Builder builder = new InventoryItem.Builder()
         .withProduct(testProduct)
         .withQuantity(2)
-        .withExpires("2021-06-01");
+        .withExpires(LocalDate.now().plus(50, ChronoUnit.DAYS).toString());
 
         assertThrows(DateTimeParseException.class, () -> {
             builder.withManufactured("201x-09-09");
@@ -376,7 +379,7 @@ public class InventoryItemTests {
         InventoryItem invItem = new InventoryItem.Builder()
                 .withProduct(testProduct)
                 .withQuantity(2)
-                .withExpires("2021-06-01")
+                .withExpires(LocalDate.now().plus(50, ChronoUnit.DAYS).toString())
                 .withSellBy(null)
                 .build();
         inventoryItemRepository.save(invItem);
@@ -388,7 +391,7 @@ public class InventoryItemTests {
         InventoryItem.Builder builder = new InventoryItem.Builder()
                 .withProduct(testProduct)
                 .withQuantity(2)
-                .withExpires("2021-06-01");
+                .withExpires(LocalDate.now().plus(50, ChronoUnit.DAYS).toString());
         assertThrows(ResponseStatusException.class, () -> {
             builder.withSellBy("2000-03-03")
             .build();
@@ -402,7 +405,7 @@ public class InventoryItemTests {
                 .withProduct(testProduct)
                 .withQuantity(2)
                 .withSellBy(acceptDate.toString())
-                .withExpires("2021-06-01")
+                .withExpires(LocalDate.now().plus(50, ChronoUnit.DAYS).toString())
                 .build();
         assertNotNull(builder);
     }
@@ -411,7 +414,7 @@ public class InventoryItemTests {
         InventoryItem.Builder builder = new InventoryItem.Builder()
         .withProduct(testProduct)
         .withQuantity(2)
-        .withExpires("2021-06-01");
+        .withExpires(LocalDate.now().plus(50, ChronoUnit.DAYS).toString());
 
         assertThrows(DateTimeParseException.class, () -> {
             builder.withSellBy("20x-01-01");
@@ -422,7 +425,7 @@ public class InventoryItemTests {
         InventoryItem invItem = new InventoryItem.Builder()
                 .withProduct(testProduct)
                 .withQuantity(2)
-                .withExpires("2021-06-01")
+                .withExpires(LocalDate.now().plus(50, ChronoUnit.DAYS).toString())
                 .withBestBefore(null)
                 .build();
         inventoryItemRepository.save(invItem);
@@ -434,7 +437,7 @@ public class InventoryItemTests {
         InventoryItem.Builder builder = new InventoryItem.Builder()
                 .withProduct(testProduct)
                 .withQuantity(2)
-                .withExpires("2021-06-01");
+                .withExpires(LocalDate.now().plus(50, ChronoUnit.DAYS).toString());
         assertThrows(ResponseStatusException.class, () -> {
             builder.withBestBefore("2000-03-03")
             .build();
@@ -448,7 +451,7 @@ public class InventoryItemTests {
                 .withProduct(testProduct)
                 .withQuantity(2)
                 .withBestBefore(acceptDate.toString())
-                .withExpires("2021-06-01")
+                .withExpires(LocalDate.now().plus(50, ChronoUnit.DAYS).toString())
                 .build();
         
         assertNotNull(invItem);
@@ -458,7 +461,7 @@ public class InventoryItemTests {
         InventoryItem.Builder invItem = new InventoryItem.Builder()
         .withProduct(testProduct)
         .withQuantity(2)
-        .withExpires("2021-06-01");
+        .withExpires(LocalDate.now().plus(50, ChronoUnit.DAYS).toString());
 
         assertThrows(DateTimeParseException.class, () -> {
         invItem 
@@ -470,17 +473,17 @@ public class InventoryItemTests {
         InventoryItem invItem1 = new InventoryItem.Builder()
                 .withProduct(testProduct)
                 .withQuantity(2)
-                .withExpires("2021-06-01")
+                .withExpires(LocalDate.now().plus(50, ChronoUnit.DAYS).toString())
                 .build();
         InventoryItem invItem2 = new InventoryItem.Builder()
                 .withProduct(testProduct)
                 .withQuantity(3)
-                .withExpires("2023-07-22")
+                .withExpires(LocalDate.now().plus(100, ChronoUnit.DAYS).toString())
                 .build();
         InventoryItem invItem3 = new InventoryItem.Builder()
                 .withProduct(testProduct)
                 .withQuantity(4)
-                .withExpires("2025-11-06")
+                .withExpires(LocalDate.now().plus(150, ChronoUnit.DAYS).toString())
                 .build();
         inventoryItemRepository.save(invItem1);
         inventoryItemRepository.save(invItem2);
@@ -501,9 +504,9 @@ public class InventoryItemTests {
                 .withPricePerItem("2.69")
                 .withTotalPrice("5.32")
                 .withManufactured("2021-03-11")
-                .withSellBy("2021-11-21")
-                .withBestBefore("2021-11-28")
-                .withExpires("2021-12-01")
+                .withSellBy(LocalDate.now().plus(10, ChronoUnit.DAYS).toString())
+                .withBestBefore(LocalDate.now().plus(20, ChronoUnit.DAYS).toString())
+                .withExpires(LocalDate.now().plus(30, ChronoUnit.DAYS).toString())
                 .build();
         invItem = inventoryItemRepository.save(invItem);
         JSONObject expectedJson = new JSONObject();
@@ -525,7 +528,7 @@ public class InventoryItemTests {
         InventoryItem invItem = new InventoryItem.Builder()
                 .withProduct(testProduct)
                 .withQuantity(3)
-                .withExpires("2021-06-01")
+                .withExpires(LocalDate.now().plus(50, ChronoUnit.DAYS).toString())
                 .build();
         invItem = inventoryItemRepository.save(invItem);
         JSONObject expectedJson = new JSONObject();

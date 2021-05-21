@@ -1,6 +1,8 @@
 package org.seng302.entities;
 
 import lombok.NoArgsConstructor;
+import net.minidev.json.JSONObject;
+import org.seng302.tools.JsonTools;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import org.springframework.http.HttpStatus;
@@ -158,6 +160,7 @@ public class SaleItem {
      * @return creation date
      */
     public Instant getCreated() { return created; }
+
     /**
      * Set the creation date to today (set in builder)
      * @param created date
@@ -198,6 +201,24 @@ public class SaleItem {
      */
     public Business getBusiness() {
         return this.inventoryItem.getBusiness();
+    }
+
+    /**
+     * Construct a JSON representation of the sale item. Attributes which are null will be omitted from the
+     * returned JSON.
+     * @return JSON representation of the sale item.
+     */
+    public JSONObject constructJSONObject() {
+        var object = new JSONObject();
+        object.put("id", getSaleId());
+        object.put("inventoryItem", getInventoryItem().constructJSONObject());
+        object.put("quantity", getQuantity());
+        object.put("price", getPrice());
+        object.put("moreInfo", getMoreInfo());
+        object.put("created", getCreated().toString());
+        object.put("closes", getCloses().toString());
+        JsonTools.removeNullsFromJson(object);
+        return object;
     }
 
     /**
