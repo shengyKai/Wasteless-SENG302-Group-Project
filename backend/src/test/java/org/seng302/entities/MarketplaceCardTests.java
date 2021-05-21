@@ -184,4 +184,24 @@ class MarketplaceCardTests {
 
         assertEquals(addedIds, foundIds);
     }
+
+    @Test
+    void marketplaceCardRepository_saveMultipleCards_differentIds() {
+        var card1 = new MarketplaceCard.Builder()
+                .withCreator(testUser)
+                .withSection(MarketplaceCard.Section.EXCHANGE)
+                .withTitle("test_title1")
+                .withDescription("test_description1")
+                .build();
+        card1 = marketplaceCardRepository.save(card1);
+        var card2 = new MarketplaceCard.Builder()
+                .withCreator(testUser)
+                .withSection(MarketplaceCard.Section.FOR_SALE)
+                .withTitle("test_title2")
+                .withDescription("test_description2")
+                .build();
+        card2 = marketplaceCardRepository.save(card2);
+
+        assertNotEquals(card1.getID(), card2.getID());
+    }
 }

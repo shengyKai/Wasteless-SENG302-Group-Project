@@ -4,6 +4,8 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 
 @NoArgsConstructor
 @Entity
@@ -13,11 +15,14 @@ public class Keyword {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(unique = true, nullable = false)
     private String name;
 
     @Column(nullable = false)
     private Instant created;
+
+    @ManyToMany(mappedBy = "keywords")
+    private List<MarketplaceCard> cards = new ArrayList<>();
 
     /**
      * Constructs a keyword with the given name
@@ -32,7 +37,7 @@ public class Keyword {
      * Gets the id (will be unique among keywords)
      * @return keyword id
      */
-    public Long getId() {
+    public Long getID() {
         return id;
     }
 
