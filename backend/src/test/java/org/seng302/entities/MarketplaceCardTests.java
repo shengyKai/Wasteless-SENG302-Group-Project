@@ -1,8 +1,6 @@
 package org.seng302.entities;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -36,12 +34,15 @@ class MarketplaceCardTests {
 
     User testUser;
 
-    @BeforeEach
-    void setUp() throws Exception{
+    @BeforeAll
+    void initialise() {
         businessRepository.deleteAll();
         marketplaceCardRepository.deleteAll();
         userRepository.deleteAll();
+    }
 
+    @BeforeEach
+    void setUp() throws Exception{
         testUser = new User.Builder()
                 .withFirstName("John")
                 .withMiddleName("Hector")
@@ -56,6 +57,13 @@ class MarketplaceCardTests {
                         "Canterbury,8041"))
                 .build();
         testUser = userRepository.save(testUser);
+    }
+
+    @AfterEach
+    void tearDown() {
+        businessRepository.deleteAll();
+        marketplaceCardRepository.deleteAll();
+        userRepository.deleteAll();
     }
 
     @Test

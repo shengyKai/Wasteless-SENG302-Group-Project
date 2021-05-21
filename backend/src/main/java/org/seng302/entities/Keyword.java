@@ -1,6 +1,9 @@
 package org.seng302.entities;
 
 import lombok.NoArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.util.StringUtils;
+import org.springframework.web.server.ResponseStatusException;
 
 import javax.persistence.*;
 import java.time.Instant;
@@ -62,6 +65,15 @@ public class Keyword {
      * @param name new keyword name
      */
     public void setName(String name) {
+        if (name == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Keyword name must be provided");
+        }
+        if (name.isEmpty() || name.length() > 25) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Keyword name must be between 1-25 characters long");
+        }
+        if (!name.matches("^[\\p{L}]*$")) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Keyword name must only contain letters");
+        }
         this.name = name;
     }
 

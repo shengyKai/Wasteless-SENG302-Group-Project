@@ -1,12 +1,17 @@
 package org.seng302.entities;
 
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.seng302.persistence.BusinessRepository;
 import org.seng302.persistence.KeywordRepository;
 import org.seng302.persistence.MarketplaceCardRepository;
 import org.seng302.persistence.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,14 +28,18 @@ class KeywordTests {
     KeywordRepository keywordRepository;
 
     @Autowired
+    BusinessRepository businessRepository;
+
+    @Autowired
     UserRepository userRepository;
 
     User testUser;
 
     @BeforeAll
     void initialise() {
-        marketplaceCardRepository.deleteAll();
+        businessRepository.deleteAll(); // If a previous test hasn't cleaned up
         userRepository.deleteAll();
+        marketplaceCardRepository.deleteAll();
         keywordRepository.deleteAll();
     }
 
@@ -61,7 +70,7 @@ class KeywordTests {
 
     @Test
     void getAllByKeywords_marketplaceCardWithKeywordExists_findsCard() {
-        var keyword = new Keyword("keyword_name");
+        var keyword = new Keyword("keywordName");
         keyword = keywordRepository.save(keyword);
 
         var card = new MarketplaceCard.Builder()
@@ -84,11 +93,11 @@ class KeywordTests {
 
     @Test
     void getAllByKeywords_marketplaceCardWithKeywordManyExist_findsManyCardsNoDuplicates() {
-        var keyword = new Keyword("keyword_name");
+        var keyword = new Keyword("keywordName");
         keyword = keywordRepository.save(keyword);
 
         // Check for duplicates
-        var otherKeyword = new Keyword("other_keyword_name");
+        var otherKeyword = new Keyword("otherKeywordName");
         otherKeyword = keywordRepository.save(otherKeyword);
 
         List<MarketplaceCard> cards = new ArrayList<>();
@@ -114,7 +123,7 @@ class KeywordTests {
 
     @Test
     void getAllByCards_marketplaceCardWithKeywordExists_findsKeyword() {
-        var keyword = new Keyword("keyword_name");
+        var keyword = new Keyword("keywordName");
         keyword = keywordRepository.save(keyword);
 
         var card = new MarketplaceCard.Builder()
@@ -143,8 +152,8 @@ class KeywordTests {
                 .withDescription("test_description");
 
         List<Keyword> keywords = new ArrayList<>();
-        for (int i = 0; i<10; i++) {
-            var keyword = new Keyword("keyword_name" + i);
+        for (char c : "abcdefghij".toCharArray()) {
+            var keyword = new Keyword("keywordName" + c);
             keyword = keywordRepository.save(keyword);
             builder.addKeyword(keyword);
             keywords.add(keyword);
@@ -172,18 +181,49 @@ class KeywordTests {
 
     @Test
     void keywordRepositorySave_duplicateKeywordNames_failsToSave() {
-        var keyword0 = new Keyword("keyword_name");
+        var keyword0 = new Keyword("keywordName");
         assertDoesNotThrow(() -> keywordRepository.save(keyword0));
 
-        var keyword1 = new Keyword("keyword_name");
+        var keyword1 = new Keyword("keywordName");
         assertThrows(DataIntegrityViolationException.class, () -> keywordRepository.save(keyword1));
     }
 
     @Test
     void keywordRepositorySave_multipleKeywords_differentIds() {
-        var keyword0 = keywordRepository.save(new Keyword("keyword_name0"));
-        var keyword1 = keywordRepository.save(new Keyword("keyword_name1"));
+        var keyword0 = keywordRepository.save(new Keyword("keywordNameA"));
+        var keyword1 = keywordRepository.save(new Keyword("keywordNameB"));
 
         assertNotEquals(keyword0.getID(), keyword1.getID());
+    }
+
+    @Test
+    void keywordConstructor_nullName_throws400Exception() {
+        var exception = assertThrows(ResponseStatusException.class, () -> new Keyword(null));
+        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
+        assertEquals("Keyword name must be provided", exception.getReason());
+    }
+
+    @Test
+    void keywordConstructor_emptyName_throws400Exception() {
+        var exception = assertThrows(ResponseStatusException.class, () -> new Keyword(""));
+        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
+        assertEquals("Keyword name must be between 1-25 characters long", exception.getReason());
+    }
+
+    @Test
+    void keywordConstructor_tooLongName_throws400Exception() {
+        String name = "a".repeat(26);
+
+        var exception = assertThrows(ResponseStatusException.class, () -> new Keyword(name));
+        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
+        assertEquals("Keyword name must be between 1-25 characters long", exception.getReason());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {" ", "\n", "\t", ",", ".", "+", "\uD83D\uDE02", "\uFFFF"})
+    void keywordConstructor_invalidCharacters_throws400Exception(String name) {
+        var exception = assertThrows(ResponseStatusException.class, () -> new Keyword(name));
+        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
+        assertEquals("Keyword name must only contain letters", exception.getReason());
     }
 }
