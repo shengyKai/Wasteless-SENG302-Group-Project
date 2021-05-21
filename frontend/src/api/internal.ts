@@ -155,19 +155,6 @@ export type InventoryItem = {
 
 export type CreateProduct = Omit<Product, 'created' | 'images'>;
 
-function isCreateInventoryItem(obj: any): obj is CreateInventoryItem {
-  if (obj === null || typeof obj !== 'object') return false;
-  if (typeof obj.productId !== 'string') return false;
-  if (typeof obj.quantity !== 'number') return false;
-  if (obj.pricePerItem !== undefined && typeof obj.pricePerItem !== 'number') return false;
-  if (obj.totalPrice !== undefined && typeof obj.totalPrice !== 'number') return false;
-  if (obj.manufactured !== undefined && typeof obj.manufactured !== 'string') return false;
-  if (obj.sellBy !== undefined && typeof obj.sellBy !== 'string') return false;
-  if (obj.bestBefore !== undefined && typeof obj.bestBefore !== 'string') return false;
-  if (typeof obj.expires !== 'string') return false;
-  return true;
-}
-
 type OrderBy = 'userId' | 'relevance' | 'firstName' | 'middleName' | 'lastName' | 'nickname' | 'email';
 
 /**
@@ -688,7 +675,6 @@ export async function createInventoryItem(businessId: number, inventoryItem: Cre
     let status: number | undefined = error.response?.status;
     if (status === undefined) return 'Failed to reach backend';
     if (status === 403) return 'Operation not permitted';
-    console.log(error.response);
 
     return 'Request failed: ' + error.response?.data.message;
   }

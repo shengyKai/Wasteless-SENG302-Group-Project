@@ -186,9 +186,17 @@ export default {
      */
     async CreateInventory() { //to see the attribute in console for debugging or testing, remove after this page is done
       const businessId = this.$store.state.createInventoryDialog;
+      this.errorMessage = undefined;
+      let quantity;
+      try {
+        quantity = parseInt(this.quantity);
+      } catch ( error ) {
+        this.errorMessage = 'Could not parse field \'Quantity\'';
+        return;
+      }
       const inventoryItem = {
         productId: this.productCode,
-        quantity: this.quantity,
+        quantity: quantity,
         pricePerItem: this.pricePerItem.length ? this.pricePerItem : undefined,
         totalPrice: this.totalPrice ? this.totalPrice : undefined,
         manufactured: this.manufactured ? this.manufactured : undefined,
@@ -200,7 +208,6 @@ export default {
       if (typeof result === 'string') {
         this.errorMessage = result;
       } else {
-        this.errorMessage = undefined;
         this.closeDialog();
       }
     },
