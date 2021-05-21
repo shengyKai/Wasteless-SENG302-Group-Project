@@ -24,6 +24,14 @@
                 <v-list-item-title>Add Business</v-list-item-title>
               </v-list-item-content>
             </v-list-item>
+            <v-list-item @click="viewMarketplace">
+              <v-list-item-icon>
+                <v-icon>mdi-store</v-icon>
+              </v-list-item-icon>
+              <v-list-item-content>
+                <v-list-item-title>Marketplace</v-list-item-title>
+              </v-list-item-content>
+            </v-list-item>
           </v-list-item-group>
         </v-list>
       </v-card-text>
@@ -36,6 +44,9 @@
       </v-btn>
       <v-btn icon @click="viewCreateBusiness" class="action-button">
         <v-icon large>mdi-briefcase-plus</v-icon>
+      </v-btn>
+      <v-btn icon @click="viewMarketplace" class="action-button">
+        <v-icon large>mdi-store</v-icon>
       </v-btn>
     </v-card>
   </div>
@@ -57,6 +68,12 @@ export default {
     viewCreateBusiness() {
       this.$store.commit('showCreateBusiness');
     },
+    /**
+     * Redirect to marketplace page
+     */
+    viewMarketplace() {
+      this.$router.push("/marketplace");
+    }
   }
 };
 </script>
