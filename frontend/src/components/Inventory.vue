@@ -61,7 +61,7 @@
 
 <script>
 import InventoryItem from "./cards/InventoryItem.vue";
-import {getInventoryItem, getInventoryCount} from "@/api/internal";
+import {getInventory, getInventoryCount} from "@/api/internal";
 
 export default {
   name: "Inventory",
