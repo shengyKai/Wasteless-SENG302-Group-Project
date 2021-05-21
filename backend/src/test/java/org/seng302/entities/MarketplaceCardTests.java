@@ -9,9 +9,12 @@ import org.seng302.persistence.MarketplaceCardRepository;
 import org.seng302.persistence.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -125,6 +128,19 @@ class MarketplaceCardTests {
                 .build();
 
         assertEquals(section, card.getSection());
+    }
+
+    @Test
+    void marketplaceCardBuild_withNullKeyword_throws400Exception() {
+        var builder = new MarketplaceCard.Builder()
+                .withCreator(testUser)
+                .withSection(MarketplaceCard.Section.EXCHANGE)
+                .withTitle("test_title")
+                .withDescription("test_description")
+                .addKeyword(null);
+        var exception = assertThrows(ResponseStatusException.class, builder::build);
+        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
+        assertEquals("Keyword cannot be null", exception.getReason());
     }
 
     @Test

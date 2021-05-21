@@ -122,7 +122,7 @@ class KeywordTests {
     }
 
     @Test
-    void getAllByCards_marketplaceCardWithKeywordExists_findsKeyword() {
+    void getAllByCards_marketplaceCardWithKeyword_findsKeyword() {
         var keyword = new Keyword("keywordName");
         keyword = keywordRepository.save(keyword);
 
@@ -141,6 +141,30 @@ class KeywordTests {
         Keyword foundKeyword = keywords.get(0);
         assertEquals(keyword.getID(), foundKeyword.getID());
         assertEquals(keyword.getName(), foundKeyword.getName());
+    }
+
+    @Test
+    void getAllByCards_marketplaceCardWithManyKeywordsFromAddKeywords_findsKeywords() {
+        var keywords = List.of(
+                keywordRepository.save(new Keyword("keywordNameA")),
+                keywordRepository.save(new Keyword("keywordNameB"))
+        );
+
+        var card = new MarketplaceCard.Builder()
+                .withCreator(testUser)
+                .withSection(MarketplaceCard.Section.EXCHANGE)
+                .withTitle("test_title")
+                .withDescription("test_description")
+                .addKeywords(keywords)
+                .build();
+        card = marketplaceCardRepository.save(card);
+
+        List<Keyword> foundKeywords = keywordRepository.getAllByCards(card);
+        assertEquals(2, keywords.size());
+
+        for (Keyword foundKeyword : foundKeywords) {
+            assertTrue(keywords.stream().anyMatch(keyword -> keyword.getID().equals(foundKeyword.getID())));
+        }
     }
 
     @Test

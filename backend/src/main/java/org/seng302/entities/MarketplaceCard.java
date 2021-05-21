@@ -130,6 +130,9 @@ public class MarketplaceCard {
      * @param keyword Keyword to add to card
      */
     public void addKeyword(Keyword keyword) {
+        if (keyword == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Keyword cannot be null");
+        }
         keywords.add(keyword);
     }
 
