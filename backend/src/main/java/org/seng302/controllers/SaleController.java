@@ -39,7 +39,7 @@ public class SaleController {
         this.inventoryItemRepository = inventoryItemRepository;
     }
 
-    private Comparator<SaleItem> getSaleItemComparator(String orderBy) {
+    public Comparator<SaleItem> getSaleItemComparator(String orderBy) {
         if (orderBy == null) orderBy = "created";
         switch (orderBy) {
             case "created":
