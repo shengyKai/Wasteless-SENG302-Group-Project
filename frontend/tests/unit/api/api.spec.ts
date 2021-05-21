@@ -32,7 +32,7 @@ const instance: Mocked<Pick<AxiosInstance, 'get' | 'post' | 'patch' | 'delete' |
  * @param status The status for the response, if not provided then 200 is used
  * @returns An axios response with the value inside
  */
-function makeAxiosResponse<T>(value: T, status = 200): AxiosResponse<T> {
+export function makeAxiosResponse<T>(value: T, status = 200): AxiosResponse<T> {
   return {
     data: value,
     status: status,
@@ -47,7 +47,7 @@ function makeAxiosResponse<T>(value: T, status = 200): AxiosResponse<T> {
  *
  * @returns An axios error with an empty response field.
  */
-function makeNoResponseError(): AxiosError<unknown> {
+export function makeNoResponseError(): AxiosError<unknown> {
   return {
     name: 'test_no_response_name',
     message: 'test_no_response_message',
@@ -66,7 +66,7 @@ function makeNoResponseError(): AxiosError<unknown> {
  * @param status The status code for this error
  * @returns An axios error
  */
-function makeAxiosError<T>(value: T, status = 400): AxiosError<T> {
+export function makeAxiosError<T>(value: T, status = 400): AxiosError<T> {
   return {
     name: 'test_error_name',
     message: 'test_error_message',
