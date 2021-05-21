@@ -7,6 +7,9 @@ import javax.persistence.*;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalUnit;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 
 @Entity
@@ -33,6 +36,10 @@ public class MarketplaceCard {
 
     @Column(nullable = false)
     private Instant closes;
+
+    @ManyToMany
+    @JoinTable(name = "card_keywords")
+    private List<Keyword> keywords = new ArrayList<>();
 
 
     /**
@@ -119,6 +126,17 @@ public class MarketplaceCard {
     }
 
     /**
+     * Adds and validates a keyword to this Marketplace Card
+     * @param keyword Keyword to add to card
+     */
+    public void addKeyword(Keyword keyword) {
+        if (keyword == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Keyword cannot be null");
+        }
+        keywords.add(keyword);
+    }
+
+    /**
      * Creates a string representation of the marketplace card
      * @return string representation
      */
@@ -168,6 +186,7 @@ public class MarketplaceCard {
         private String title;
         private String description;
         private Instant closes;
+        private List<Keyword> keywords = new ArrayList<>();
 
         /**
          * Sets the builder's creator.
@@ -242,6 +261,26 @@ public class MarketplaceCard {
         }
 
         /**
+         * Adds a single keyword to this builder
+         * @param keyword keyword to add
+         * @return Builder with keyword added
+         */
+        public Builder addKeyword(Keyword keyword) {
+            keywords.add(keyword);
+            return this;
+        }
+
+        /**
+         * Adds all the keywords in the keyword collection to this builder
+         * @param keywords keywords to add
+         * @return Builder with keywords added
+         */
+        public Builder addKeywords(Collection<Keyword> keywords) {
+            this.keywords.addAll(keywords);
+            return this;
+        }
+
+        /**
          * Builds the marketplace card
          * @return Newly created marketplace card
          */
@@ -256,6 +295,9 @@ public class MarketplaceCard {
                 card.setCloses(card.created.plus(14, ChronoUnit.DAYS));
             } else {
                 card.setCloses(closes);
+            }
+            for (Keyword keyword : keywords) {
+                card.addKeyword(keyword);
             }
             return card;
         }

@@ -1,8 +1,6 @@
 package org.seng302.entities;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -11,9 +9,12 @@ import org.seng302.persistence.MarketplaceCardRepository;
 import org.seng302.persistence.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -36,12 +37,15 @@ class MarketplaceCardTests {
 
     User testUser;
 
-    @BeforeEach
-    void setUp() throws Exception{
+    @BeforeAll
+    void initialise() {
         businessRepository.deleteAll();
         marketplaceCardRepository.deleteAll();
         userRepository.deleteAll();
+    }
 
+    @BeforeEach
+    void setUp() throws Exception{
         testUser = new User.Builder()
                 .withFirstName("John")
                 .withMiddleName("Hector")
@@ -56,6 +60,13 @@ class MarketplaceCardTests {
                         "Canterbury,8041"))
                 .build();
         testUser = userRepository.save(testUser);
+    }
+
+    @AfterEach
+    void tearDown() {
+        businessRepository.deleteAll();
+        marketplaceCardRepository.deleteAll();
+        userRepository.deleteAll();
     }
 
     @Test
@@ -117,6 +128,19 @@ class MarketplaceCardTests {
                 .build();
 
         assertEquals(section, card.getSection());
+    }
+
+    @Test
+    void marketplaceCardBuild_withNullKeyword_throws400Exception() {
+        var builder = new MarketplaceCard.Builder()
+                .withCreator(testUser)
+                .withSection(MarketplaceCard.Section.EXCHANGE)
+                .withTitle("test_title")
+                .withDescription("test_description")
+                .addKeyword(null);
+        var exception = assertThrows(ResponseStatusException.class, builder::build);
+        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
+        assertEquals("Keyword cannot be null", exception.getReason());
     }
 
     @Test
@@ -183,5 +207,25 @@ class MarketplaceCardTests {
         Set<Long> foundIds = cardList.stream().map(MarketplaceCard::getID).collect(Collectors.toSet());
 
         assertEquals(addedIds, foundIds);
+    }
+
+    @Test
+    void marketplaceCardRepository_saveMultipleCards_differentIds() {
+        var card1 = new MarketplaceCard.Builder()
+                .withCreator(testUser)
+                .withSection(MarketplaceCard.Section.EXCHANGE)
+                .withTitle("test_title1")
+                .withDescription("test_description1")
+                .build();
+        card1 = marketplaceCardRepository.save(card1);
+        var card2 = new MarketplaceCard.Builder()
+                .withCreator(testUser)
+                .withSection(MarketplaceCard.Section.FOR_SALE)
+                .withTitle("test_title2")
+                .withDescription("test_description2")
+                .build();
+        card2 = marketplaceCardRepository.save(card2);
+
+        assertNotEquals(card1.getID(), card2.getID());
     }
 }
