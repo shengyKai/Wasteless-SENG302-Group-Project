@@ -3,6 +3,7 @@ package org.seng302.entities;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.seng302.persistence.BusinessRepository;
 import org.seng302.persistence.MarketplaceCardRepository;
@@ -128,6 +129,165 @@ class MarketplaceCardTests {
                 .build();
 
         assertEquals(section, card.getSection());
+    }
+
+    @ParameterizedTest
+    @NullSource
+    @ValueSource(strings = {"", "not a section name"})
+    void marketplaceCardBuild_withInvalidSectionName_throws400Exception(String sectionName) {
+        var builder = new MarketplaceCard.Builder();
+
+        var exception = assertThrows(ResponseStatusException.class, () -> builder.withSection(sectionName));
+        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
+        assertEquals("Invalid section name", exception.getReason());
+    }
+
+    @Test
+    void marketplaceCardBuild_withoutCreator_throws400Exception() {
+        var builder = new MarketplaceCard.Builder()
+                .withSection(MarketplaceCard.Section.EXCHANGE)
+                .withTitle("test_title")
+                .withDescription("test_description");
+        var exception = assertThrows(ResponseStatusException.class, builder::build);
+        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
+        assertEquals("Card creator not provided", exception.getReason());
+    }
+
+    @Test
+    void marketplaceCardBuild_withoutTitle_throws400Exception() {
+        var builder = new MarketplaceCard.Builder()
+                .withCreator(testUser)
+                .withSection(MarketplaceCard.Section.EXCHANGE)
+                .withDescription("test_description");
+        var exception = assertThrows(ResponseStatusException.class, builder::build);
+        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
+        assertEquals("Card title must be provided", exception.getReason());
+    }
+
+    @Test
+    void marketplaceCardBuild_withEmptyTitle_throws400Exception() {
+        var builder = new MarketplaceCard.Builder()
+                .withCreator(testUser)
+                .withSection(MarketplaceCard.Section.EXCHANGE)
+                .withTitle("")
+                .withDescription("test_description");
+        var exception = assertThrows(ResponseStatusException.class, builder::build);
+        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
+        assertEquals("Card title must be between 1-50 characters long", exception.getReason());
+    }
+
+    @Test
+    void marketplaceCardBuild_withTooLongTitle_throws400Exception() {
+        var builder = new MarketplaceCard.Builder()
+                .withCreator(testUser)
+                .withSection(MarketplaceCard.Section.EXCHANGE)
+                .withTitle("a".repeat(51))
+                .withDescription("test_description");
+        var exception = assertThrows(ResponseStatusException.class, builder::build);
+        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
+        assertEquals("Card title must be between 1-50 characters long", exception.getReason());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"\n", "\t", "\uD83D\uDE02", "\uFFFF"})
+    void marketplaceCardBuild_withInvalidTitleCharacters_throws400Exception(String title) {
+        var builder = new MarketplaceCard.Builder()
+                .withCreator(testUser)
+                .withSection(MarketplaceCard.Section.EXCHANGE)
+                .withTitle(title)
+                .withDescription("test_description");
+        var exception = assertThrows(ResponseStatusException.class, builder::build);
+        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
+        assertEquals("Card title must only contain letters, numbers, spaces and punctuation", exception.getReason());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {":", ",", "7", "é", "树"})
+    void marketplaceCardBuild_withValidTitleCharacters_createsCard(String title) {
+        var builder = new MarketplaceCard.Builder()
+                .withCreator(testUser)
+                .withSection(MarketplaceCard.Section.EXCHANGE)
+                .withTitle(title)
+                .withDescription("test_description");
+        var card = assertDoesNotThrow(builder::build);
+        assertEquals(title, card.getTitle());
+    }
+
+    @Test
+    void marketplaceCardBuild_withEmptyDescription_setsDescriptionToNull() {
+        var card = new MarketplaceCard.Builder()
+                .withCreator(testUser)
+                .withSection(MarketplaceCard.Section.EXCHANGE)
+                .withTitle("test_title")
+                .withDescription("")
+                .build();
+        assertNull(card.getDescription());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"\uD83D\uDE02", "\uFFFF"})
+    void marketplaceCardBuild_withInvalidDescriptionCharacter_throws400Exception(String description) {
+        var builder = new MarketplaceCard.Builder()
+                .withCreator(testUser)
+                .withSection(MarketplaceCard.Section.EXCHANGE)
+                .withTitle("test_title")
+                .withDescription(description);
+
+        var exception = assertThrows(ResponseStatusException.class, builder::build);
+        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
+        assertEquals("Card description must only contain letters, numbers, whitespace and punctuation", exception.getReason());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {" ", "\n", "\t",  ":", ",", "7", "é", "树"})
+    void marketplaceCardBuild_withValidCharacters_createsCard(String description) {
+        var builder = new MarketplaceCard.Builder()
+                .withCreator(testUser)
+                .withSection(MarketplaceCard.Section.EXCHANGE)
+                .withTitle("test_title")
+                .withDescription(description);
+        var card = assertDoesNotThrow(builder::build);
+        assertEquals(description, card.getDescription());
+    }
+
+    @Test
+    void marketplaceCardBuild_withTooLongDescription_throws400Exception() {
+        var builder = new MarketplaceCard.Builder()
+                .withCreator(testUser)
+                .withSection(MarketplaceCard.Section.EXCHANGE)
+                .withTitle("test_title")
+                .withDescription("a".repeat(201));
+
+        var exception = assertThrows(ResponseStatusException.class, builder::build);
+        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
+        assertEquals("Card description must not be longer than 200 characters", exception.getReason());
+    }
+
+    @Test
+    void marketplaceCardBuild_withNullCloses_throws400Exception() {
+        var card = new MarketplaceCard.Builder()
+                .withCreator(testUser)
+                .withSection(MarketplaceCard.Section.EXCHANGE)
+                .withTitle("test_title")
+                .withDescription("test_description")
+                .build();
+
+        var exception = assertThrows(ResponseStatusException.class, () -> card.setCloses(null));
+        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
+        assertEquals("Closing time cannot be null", exception.getReason());
+    }
+
+    @Test
+    void marketplaceCardBuild_withClosingInPast_throws400Exception() {
+        var builder = new MarketplaceCard.Builder()
+                .withCreator(testUser)
+                .withSection(MarketplaceCard.Section.EXCHANGE)
+                .withTitle("test_title")
+                .withDescription("test_description")
+                .withCloses(Instant.now().minus(1, ChronoUnit.DAYS));
+        var exception = assertThrows(ResponseStatusException.class, builder::build);
+        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
+        assertEquals("Closing time cannot be before creation", exception.getReason());
     }
 
     @Test

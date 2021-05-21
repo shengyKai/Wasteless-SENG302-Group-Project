@@ -106,6 +106,15 @@ public class MarketplaceCard {
      * @param title New title
      */
     public void setTitle(String title) {
+        if (title == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Card title must be provided");
+        }
+        if (title.isEmpty() || title.length() > 50) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Card title must be between 1-50 characters long");
+        }
+        if (!title.matches("^[ \\d\\p{Punct}\\p{L}]*$")) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Card title must only contain letters, numbers, spaces and punctuation");
+        }
         this.title = title;
     }
 
@@ -114,6 +123,16 @@ public class MarketplaceCard {
      * @param description New description
      */
     public void setDescription(String description) {
+        if (description == null || description.isEmpty()) {
+            this.description = null;
+            return;
+        }
+        if (description.length() > 200) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Card description must not be longer than 200 characters");
+        }
+        if (!description.matches("^[\\p{Space}\\d\\p{Punct}\\p{L}]*$")) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Card description must only contain letters, numbers, whitespace and punctuation");
+        }
         this.description = description;
     }
 
@@ -122,6 +141,12 @@ public class MarketplaceCard {
      * @param closes New closing date and time
      */
     public void setCloses(Instant closes) {
+        if (closes == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Closing time cannot be null");
+        }
+        if (closes.isBefore(Instant.now())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Closing time cannot be before creation");
+        }
         this.closes = closes;
     }
 
@@ -169,7 +194,7 @@ public class MarketplaceCard {
 
         /**
          * Gets the name of the section.
-         * Compatible with api
+         * Same as in api spec
          * @return section name
          */
         public String getName() {
@@ -286,6 +311,10 @@ public class MarketplaceCard {
          */
         public MarketplaceCard build() {
             var card = new MarketplaceCard();
+
+            if (creator == null) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Card creator not provided");
+            }
             card.creator = creator;
             card.setSection(section);
             card.setTitle(title);
