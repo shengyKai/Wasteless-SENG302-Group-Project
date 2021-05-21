@@ -27,10 +27,34 @@ describe("Test POST /cards endpoint", () => {
     keywordIds: [1],
   };
 
-  it('When API request is successfully resolved, response is undefined', async ()=>{
-    instance.post.mockResolvedValueOnce(undefined);
+  it('When API request is successfully resolved and contains cardId field which has a number, response is the integer value of cardId', async ()=>{
+    instance.post.mockResolvedValueOnce({
+      data: {
+        cardId: 15
+      }
+    });
     const response = await api.createMarketplaceCard(marketplaceCard);
-    expect(response).toEqual(undefined);
+    expect(response).toEqual(15);
+  });
+
+  it('When API request is successfully resolved does not contain cardId field, message is returned saying response format was invalid', async ()=>{
+    instance.post.mockResolvedValueOnce({
+      data: {
+        notCardId: 15
+      }
+    });
+    const response = await api.createMarketplaceCard(marketplaceCard);
+    expect(response).toEqual('Invalid response format');
+  });
+
+  it('When API request is successfully resolved and has cardId field which is not a number, message is returned saying response format was invalid', async ()=>{
+    instance.post.mockResolvedValueOnce({
+      data: {
+        cardId: "Not a number"
+      }
+    });
+    const response = await api.createMarketplaceCard(marketplaceCard);
+    expect(response).toEqual('Invalid response format');
   });
 
   it('When API response has a 400 status code, an error message saying the request was incorrectly formatted will be returned', async () =>{

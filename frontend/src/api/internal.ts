@@ -156,7 +156,6 @@ export type InventoryItem = {
 export type CreateMarketplaceCard = {
   creatorId: number,
   section: "ForSale" | "Wanted" | "Exchange",
-  displayPeriodEnd?: string,
   title: string,
   description?: string,
   keywordIds: number[],
@@ -693,11 +692,12 @@ export async function createInventoryItem(businessId: number, inventoryItem: Cre
  * Create a card for the community marketplace
  *
  * @param marketplaceCard The attributes to use when creating the marketplace card
- * @return undefined if card is successfully created, an error string otherwise
+ * @return id of card if card is successfully created, an error string otherwise
  */
-export async function createMarketplaceCard(marketplaceCard: CreateMarketplaceCard) : Promise<MaybeError<undefined>> {
+export async function createMarketplaceCard(marketplaceCard: CreateMarketplaceCard) : Promise<MaybeError<Number>> {
+  let response;
   try {
-    await instance.post('/cards', marketplaceCard);
+    response = await instance.post('/cards', marketplaceCard);
   } catch (error) {
     let status: number | undefined = error.response?.status;
     if (status === undefined) return 'Failed to reach backend';
@@ -707,6 +707,8 @@ export async function createMarketplaceCard(marketplaceCard: CreateMarketplaceCa
 
     return 'Request failed: ' + error.response?.data.message;
   }
-
-  return undefined;
+  if (!is<number>(response.data.cardId)) {
+    return 'Invalid response format';
+  }
+  return response.data.cardId;
 }
