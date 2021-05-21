@@ -120,6 +120,16 @@ export type Product = {
   countryOfSale?: string,
 };
 
+export type CreateInventoryItem = {
+  productId: string,
+  quantity: number,
+  pricePerItem?: number,
+  totalPrice?: number,
+  manufactured?: string,
+  sellBy?: string,
+  bestBefore?: string,
+  expires: string
+};
 export type Sale = {
   id: number,
   inventoryItem: InventoryItem,
@@ -129,6 +139,7 @@ export type Sale = {
   created: string,
   closes?: string,
 };
+
 
 export type InventoryItem = {
   id: number,
@@ -501,7 +512,6 @@ export async function getProductCount(buisnessId: number): Promise<MaybeError<nu
   return response.data.count;
 }
 
-
 /**
  * Fetches a business with the given id.
  *
@@ -649,4 +659,23 @@ export async function getInventoryCount(businessId: number): Promise<MaybeError<
   }
 
   return response.data.count;
+}
+
+/**
+ * Add an inventory item to the business inventory.
+ *
+ * @param businessId Business id to identify with the database to add the inventory to the correct business
+ * @param inventoryItem The properties to create a inventory with
+ */
+export async function createInventoryItem(businessId: number, inventoryItem: CreateInventoryItem): Promise<MaybeError<undefined>> {
+  try {
+    await instance.post(`/businesses/${businessId}/inventory`, inventoryItem);
+  } catch (error) {
+    let status: number | undefined = error.response?.status;
+    if (status === undefined) return 'Failed to reach backend';
+    if (status === 403) return 'Operation not permitted';
+
+    return 'Request failed: ' + error.response?.data.message;
+  }
+  return undefined;
 }
