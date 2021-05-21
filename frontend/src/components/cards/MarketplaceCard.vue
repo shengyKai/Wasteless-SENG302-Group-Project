@@ -1,7 +1,7 @@
 <template>
   <v-card width="300px" height="200px">
     <v-card-title>
-      Placeholder
+      Placeholder {{content.id}}
     </v-card-title>
   </v-card>
 </template>
@@ -10,7 +10,9 @@
 export default {
   name: "MarketplaceCard",
   props: {
-    content: Object
+    content: {
+      id: Number
+    }
   }
 };
 </script>
