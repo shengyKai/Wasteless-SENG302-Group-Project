@@ -20,6 +20,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -117,15 +118,15 @@ public class SaleController {
     public JSONArray getSaleItemsForBusiness(@PathVariable Long id,
                                              HttpServletRequest request,
                                              @RequestParam(required = false) String orderBy,
-                                             @RequestParam(required = false) Long page,
-                                             @RequestParam(required = false) Long resultsPerPage,
+                                             @RequestParam(required = false) Integer page,
+                                             @RequestParam(required = false) Integer resultsPerPage,
                                              @RequestParam(required = false) Boolean reverse) {
         try {
             AuthenticationTokenManager.checkAuthenticationToken(request);
             logger.info(() -> String.format("Getting sales item for business (businessId=%d).", id));
             Business business = businessRepository.getBusinessById(id);
 
-            List<SaleItem> listings = saleItemRepository.findAllForBusiness(business);
+            List<SaleItem> listings = new ArrayList<>(saleItemRepository.findAllForBusiness(business));
 
             Comparator<SaleItem> comparator = getSaleItemComparator(orderBy);
             if (Boolean.TRUE.equals(reverse)) {

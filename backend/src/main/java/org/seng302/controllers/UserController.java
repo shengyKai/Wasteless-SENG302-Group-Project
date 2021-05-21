@@ -88,15 +88,6 @@ public class UserController {
     }
 
     /**
-     * Parses the user object into the SQLite database
-     */
-    public void parseUserIntoDatabase(User user) {
-
-    }
-
-
-
-    /**
      * REST GET method to fetch a singular User
      * @param id The ID of the user
      * @return User with corresponding Id
@@ -132,7 +123,7 @@ public class UserController {
         AuthenticationTokenManager.checkAuthenticationToken(session);
         logger.info(String.format("Performing search for \"%s\" and getting search count", searchQuery));
         List<User> queryResults;
-        queryResults = SearchHelper.getSearchResultsOrderedByRelevance(searchQuery, userRepository, "false");
+        queryResults = SearchHelper.getSearchResultsOrderedByRelevance(searchQuery, userRepository, false);
 
         queryResults = SearchHelper.removeDGAAAccountFromResults(queryResults);
 
@@ -154,14 +145,14 @@ public class UserController {
     @GetMapping("/users/search")
     JSONArray searchUsersByName(HttpServletRequest session,
                                 @RequestParam("searchQuery") String searchQuery,
-                                @RequestParam(required = false) String page,
-                                @RequestParam(required = false) String resultsPerPage,
+                                @RequestParam(required = false) Integer page,
+                                @RequestParam(required = false) Integer resultsPerPage,
                                 @RequestParam(required = false) String orderBy,
-                                @RequestParam(required = false) String reverse) {
+                                @RequestParam(required = false) Boolean reverse) {
 
         AuthenticationTokenManager.checkAuthenticationToken(session); // Check user auth
 
-        logger.info(String.format("Performing search for \"%s\"", searchQuery));
+        logger.info(() -> String.format("Performing search for \"%s\"", searchQuery));
         List<User> queryResults;
         if (orderBy == null || orderBy.equals("relevance")) {
             queryResults = SearchHelper.getSearchResultsOrderedByRelevance(searchQuery, userRepository, reverse);
