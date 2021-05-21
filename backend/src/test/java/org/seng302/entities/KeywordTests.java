@@ -38,8 +38,8 @@ class KeywordTests {
     @BeforeAll
     void initialise() {
         businessRepository.deleteAll(); // If a previous test hasn't cleaned up
-        userRepository.deleteAll();
         marketplaceCardRepository.deleteAll();
+        userRepository.deleteAll();
         keywordRepository.deleteAll();
     }
 
