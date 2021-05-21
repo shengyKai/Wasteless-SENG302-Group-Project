@@ -57,7 +57,7 @@ const options = {
   showLogLevel : true,
   showMethodName : false,
   separator: '|',
-  showConsoleColors: true
+  showConsoleColors: true,
 };
 
 Vue.use(VueLogger as any /* Hackish fix for now */ , options);
@@ -68,5 +68,5 @@ new Vue({
   components: { App },
   vuetify,
   router,
-  template: '<App/>'
+  template: '<App/>',
 });

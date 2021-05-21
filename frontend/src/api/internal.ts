@@ -120,6 +120,28 @@ export type Product = {
   countryOfSale?: string,
 };
 
+export type Sale = {
+  id: number,
+  inventoryItem: InventoryItem,
+  quantity: number,
+  price: number,
+  moreInfo?: string,
+  created: string,
+  closes?: string,
+};
+
+export type InventoryItem = {
+  id: number,
+  product: Product,
+  quantity: number,
+  pricePerItem?: number,
+  totalPrice?: number,
+  manufactured?: string,
+  sellBy?: string,
+  bestBefore?: string,
+  expires: string
+};
+
 export type CreateProduct = Omit<Product, 'created' | 'images'>;
 
 type OrderBy = 'userId' | 'relevance' | 'firstName' | 'middleName' | 'lastName' | 'nickname' | 'email';
@@ -332,7 +354,7 @@ export async function createBusiness(business: CreateBusiness): Promise<MaybeErr
  */
 export async function createProduct(businessId: number, product: CreateProduct): Promise<MaybeError<undefined>> {
   try {
-    await  instance.post(`/businesses/${businessId}/products`, product);
+    await instance.post(`/businesses/${businessId}/products`, product);
   } catch (error) {
     let status: number | undefined = error.response?.status;
     if (status === undefined) return 'Failed to reach backend';
@@ -383,10 +405,10 @@ export async function uploadProductImage(businessId: number, productCode: string
  * @param productId The ID of the product that has the image
  * @param imageId The ID of the image
  */
-export async function makeImagePrimary(businessId: number, productId: string, imageId: number) : Promise<MaybeError<undefined>> {
+export async function makeImagePrimary(businessId: number, productId: string, imageId: number): Promise<MaybeError<undefined>> {
   try {
     await instance.put(`/businesses/${businessId}/products/${productId}/images/${imageId}/makeprimary`);
-  } catch ( error ) {
+  } catch (error) {
     let status: number | undefined = error.response?.status;
     if (status === undefined) return 'Failed to reach backend';
     if (status === 401) return 'Missing/Invalid access token';
@@ -404,10 +426,10 @@ export async function makeImagePrimary(businessId: number, productId: string, im
  * @param productId The ID of the product that has the image
  * @param imageId The ID of the image
  */
-export async function deleteImage(businessId: number, productId: string, imageId: number) : Promise<MaybeError<undefined>> {
+export async function deleteImage(businessId: number, productId: string, imageId: number): Promise<MaybeError<undefined>> {
   try {
     await instance.delete(`/businesses/${businessId}/products/${productId}/images/${imageId}`);
-  } catch ( error ) {
+  } catch (error) {
     let status: number | undefined = error.response?.status;
     if (status === undefined) return 'Failed to reach backend';
     if (status === 401) return 'Missing/Invalid access token';
@@ -429,16 +451,17 @@ export async function deleteImage(businessId: number, productId: string, imageId
  * @param reverse
  * @return a list of products
  */
-export async function getProducts(buisnessId: number, page: number, resultsPerPage: number, orderBy: string, reverse: boolean): Promise<MaybeError<Product[]>> {
+export async function getProducts(businessId: number, page: number, resultsPerPage: number, orderBy: string, reverse: boolean): Promise<MaybeError<Product[]>> {
   let response;
   try {
-    response = await instance.get(`/businesses/${buisnessId}/products`, {
+    response = await instance.get(`/businesses/${businessId}/products`, {
       params: {
         orderBy: orderBy,
-        page : page,
-        resultsPerPage : resultsPerPage,
+        page: page,
+        resultsPerPage: resultsPerPage,
         reverse: reverse.toString(),
-      }});
+      }
+    });
   } catch (error) {
     let status: number | undefined = error.response?.status;
     if (status === undefined) return 'Failed to reach backend';
@@ -555,4 +578,75 @@ export async function removeBusinessAdmin(businessId: number, userId: number): P
   }
 
   return undefined;
+}
+
+/**
+ * Gets all of the sale listings for a given business
+ *
+ * @param businessId The ID of the business
+ */
+export async function getBusinessSales(businessId: number): Promise<MaybeError<Sale[]>> {
+  let response;
+  try {
+    response = await instance.get(`/businesses/${businessId}/listings`);
+  } catch (error) {
+    let status: number | undefined = error.response?.status;
+    if (status === undefined) return 'Failed to reach backend';
+    if (status === 401) return 'Missing/Invalid access token';
+    if (status === 406) return 'The given business does not exist';
+    return 'Request failed: ' + status;
+  }
+  if (!is<Sale[]>(response.data)) {
+    return "Response is not Sale array";
+  }
+  return response.data;
+}
+
+/**
+   * Get all inventory items for that business
+   *
+   * @param businessId
+   * @return a list of inventory items
+   */
+export async function getInventory(businessId: number): Promise<MaybeError<InventoryItem[]>> {
+  let response;
+  try {
+    response = await instance.get(`/businesses/${businessId}/inventory`);
+  } catch (error) {
+    let status: number | undefined = error.response?.status;
+    if (status === undefined) return 'Failed to reach backend';
+    if (status === 401) return 'Missing/Invalid access token';
+    if (status === 403) return 'Not an admin of the business';
+    if (status === 406) return 'Business not found';
+    return 'Request failed: ' + status;
+  }
+
+  if (!is<InventoryItem[]>(response.data)) {
+    return 'Response is not inventory array';
+  }
+  return response.data;
+}
+
+/**
+   * Sends a query for the total number of inventory items in the business
+   *
+   * @param buisnessId Business id to identify with the database to retrieve the inventory count
+   * @returns Number of inventory items or an error message
+   */
+export async function getInventoryCount(businessId: number): Promise<MaybeError<number>> {
+  let response;
+  try {
+    response = await instance.get(`/businesses/${businessId}/inventory/count`);
+  } catch (error) {
+    let status: number | undefined = error.response?.status;
+
+    if (status === undefined) return 'Failed to reach backend';
+    return `Request failed: ${status}`;
+  }
+
+  if (typeof response.data?.count !== 'number') {
+    return 'Response is not number';
+  }
+
+  return response.data.count;
 }

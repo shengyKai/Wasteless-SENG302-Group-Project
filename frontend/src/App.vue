@@ -93,7 +93,7 @@ export default {
     AppFooter,
     CreateBusiness,
     CreateProduct,
-    CreateInventory
+    CreateInventory,
   },
   async created() {
     const cookie = getCookie(COOKIE.USER);
