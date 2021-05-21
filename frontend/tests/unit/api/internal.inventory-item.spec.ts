@@ -143,7 +143,7 @@ describe("Test GET /businesses/:businessId/inventory endpoint", () => {
     const message = await api.getInventory(7);
     expect(message).toEqual('Failed to reach backend');
   });
-})
+});
 
 describe("Test GET /businesses/:businessId/inventory/count endpoint", () => {
   it('When response is a number containing the total number of results, the result will be a number', async () => {
@@ -198,4 +198,4 @@ describe("Test GET /businesses/:businessId/inventory/count endpoint", () => {
     const inventories = await api.getInventoryCount(7);
     expect(inventories).toEqual("Request failed: 999");
   });
-})
+});
