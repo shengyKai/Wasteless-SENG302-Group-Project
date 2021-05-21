@@ -45,6 +45,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Optional;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.AdditionalMatchers.not;
@@ -352,39 +353,145 @@ class SaleControllerTest {
         verify(saleController).getSaleItemComparator(null);
     }
 
-    @Test
-    void getSaleItemsForBusiness_reverseNotProvided_noReverse() throws Exception {
-        Comparator<SaleItem> comparatorSpy = spy(Comparator.comparing(SaleItem::getSaleId));
-        when(saleController.getSaleItemComparator(any(String.class))).thenReturn(comparatorSpy);
+    /**
+     * Generates a consistently shuffled list of mock sale items
+     * @return Mock sale item list
+     */
+    List<SaleItem> generateMockSaleItems() {
+        List<SaleItem> mockItems = new ArrayList<>();
+        for (long i = 0; i<6; i++) {
+            SaleItem saleItem = mock(SaleItem.class);
+            when(saleItem.getSaleId()).thenReturn(i);
 
-        mockMvc.perform(get("/businesses/1/listings"))
-                .andReturn();
+            var json = new JSONObject();
+            json.put("id", i);
+            when(saleItem.constructJSONObject()).thenReturn(json);
 
-        verify(comparatorSpy, times(0)).reversed();
+            mockItems.add(saleItem);
+        }
+        // Ensure determinism
+        Collections.shuffle(mockItems, new Random(7));
+        return mockItems;
     }
 
     @Test
-    void getSaleItemsForBusiness_reverseFalse_noReverse() throws Exception {
-        Comparator<SaleItem> comparatorSpy = spy(Comparator.comparing(SaleItem::getSaleId));
-        when(saleController.getSaleItemComparator(any(String.class))).thenReturn(comparatorSpy);
+    void getSaleItemsForBusiness_noReverse_itemsAscending() throws Exception {
+        var items = generateMockSaleItems();
+        when(saleItemRepository.findAllForBusiness(any(Business.class))).thenReturn(items);
+        when(saleController.getSaleItemComparator(nullable(String.class)))
+                .thenReturn(Comparator.comparing(SaleItem::getSaleId));
 
-        mockMvc.perform(get("/businesses/1/listings")
+        MvcResult result = mockMvc.perform(get("/businesses/1/listings"))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
+        Object response = parser.parse(result.getResponse().getContentAsString());
+
+        JSONArray expected = new JSONArray();
+        for (int i = 0; i<6; i++) {
+            var object = new JSONObject();
+            object.put("id", i);
+            expected.add(object);
+        }
+        assertEquals(expected, response);
+    }
+
+    @Test
+    void getSaleItemsForBusiness_reverseFalse_itemsAscending() throws Exception {
+        var items = generateMockSaleItems();
+        when(saleItemRepository.findAllForBusiness(any(Business.class))).thenReturn(items);
+        when(saleController.getSaleItemComparator(nullable(String.class)))
+                .thenReturn(Comparator.comparing(SaleItem::getSaleId));
+
+        MvcResult result = mockMvc.perform(get("/businesses/1/listings")
                 .param("reverse", "false"))
+                .andExpect(status().isOk())
                 .andReturn();
 
-        verify(comparatorSpy, times(0)).reversed();
+        JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
+        Object response = parser.parse(result.getResponse().getContentAsString());
+
+        JSONArray expected = new JSONArray();
+        for (int i = 0; i<6; i++) {
+            var object = new JSONObject();
+            object.put("id", i);
+            expected.add(object);
+        }
+        assertEquals(expected, response);
     }
 
     @Test
-    void getSaleItemsForBusiness_reverseTrue_reversed() throws Exception {
-        Comparator<SaleItem> comparatorSpy = spy(Comparator.comparing(SaleItem::getSaleId));
-        when(saleController.getSaleItemComparator(any(String.class))).thenReturn(comparatorSpy);
+    void getSaleItemsForBusiness_reverseTrue_itemsDescending() throws Exception {
+        var items = generateMockSaleItems();
+        when(saleItemRepository.findAllForBusiness(any(Business.class))).thenReturn(items);
+        when(saleController.getSaleItemComparator(nullable(String.class)))
+                .thenReturn(Comparator.comparing(SaleItem::getSaleId));
 
-        mockMvc.perform(get("/businesses/1/listings")
+        MvcResult result = mockMvc.perform(get("/businesses/1/listings")
                 .param("reverse", "true"))
+                .andExpect(status().isOk())
                 .andReturn();
 
-        verify(comparatorSpy, times(1)).reversed();
+        JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
+        Object response = parser.parse(result.getResponse().getContentAsString());
+
+        JSONArray expected = new JSONArray();
+        for (int i = 0; i<6; i++) {
+            var object = new JSONObject();
+            object.put("id", 5 - i);
+            expected.add(object);
+        }
+        assertEquals(expected, response);
+    }
+
+    @Test
+    void getSaleItemsForBusiness_resultsPerPageSet_firstPageReturned() throws Exception {
+        var items = generateMockSaleItems();
+        when(saleItemRepository.findAllForBusiness(any(Business.class))).thenReturn(items);
+        when(saleController.getSaleItemComparator(nullable(String.class)))
+                .thenReturn(Comparator.comparing(SaleItem::getSaleId));
+
+        MvcResult result = mockMvc.perform(get("/businesses/1/listings")
+                .param("resultsPerPage", "4"))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
+        Object response = parser.parse(result.getResponse().getContentAsString());
+
+        JSONArray expected = new JSONArray();
+        for (int i = 0; i<4; i++) {
+            var object = new JSONObject();
+            object.put("id", i);
+            expected.add(object);
+        }
+        assertEquals(expected, response);
+    }
+
+    @Test
+    void getSaleItemsForBusiness_secondPageRequested_secondPageReturned() throws Exception {
+        var items = generateMockSaleItems();
+        when(saleItemRepository.findAllForBusiness(any(Business.class))).thenReturn(items);
+        when(saleController.getSaleItemComparator(nullable(String.class)))
+                .thenReturn(Comparator.comparing(SaleItem::getSaleId));
+
+        MvcResult result = mockMvc.perform(get("/businesses/1/listings")
+                .param("resultsPerPage", "4")
+                .param("page", "2"))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
+        Object response = parser.parse(result.getResponse().getContentAsString());
+
+        JSONArray expected = new JSONArray();
+        for (int i = 4; i<6; i++) {
+            var object = new JSONObject();
+            object.put("id", i);
+            expected.add(object);
+        }
+        assertEquals(expected, response);
     }
 
     @Test
