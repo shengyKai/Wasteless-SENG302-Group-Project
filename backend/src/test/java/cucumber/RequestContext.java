@@ -30,11 +30,15 @@ public class RequestContext {
     }
 
     /**
-     * Adds authentication to the provided request builder
+     * Adds authentication to the provided request builder, if already set
      * @param builder Builder to add authentication to
      * @return Modified builder with authentication
      */
     public MockHttpServletRequestBuilder addAuthorisationToken(MockHttpServletRequestBuilder builder) {
+        if (authCookie == null) {
+            return builder; // If no authorisation then do nothing
+        }
+
         return builder
                 .sessionAttrs(sessionAuthToken)
                 .cookie(authCookie);
