@@ -203,6 +203,11 @@ public class SaleItem {
         return this.inventoryItem.getBusiness();
     }
 
+    /**
+     * Construct a JSON representation of the sale item. Attributes which are null will be omitted from the
+     * returned JSON.
+     * @return JSON representation of the sale item.
+     */
     public JSONObject constructJSONObject() {
         var object = new JSONObject();
         object.put("id", getSaleId());

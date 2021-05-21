@@ -84,8 +84,14 @@ public class SaleController {
         }
     }
 
+    /**
+     * REST GET method to retrieve all the sale items for a given business
+     * @param id the id of the business
+     * @param request the HTTP request
+     * @return List of sale items the business is listing
+     */
     @GetMapping("/businesses/{id}/listings")
-    public JSONArray getSaleItemsForBusiness(@PathVariable Long id, HttpServletRequest request) throws Exception {
+    public JSONArray getSaleItemsForBusiness(@PathVariable Long id, HttpServletRequest request) {
         try {
             AuthenticationTokenManager.checkAuthenticationToken(request);
             logger.info(() -> String.format("Getting sales item for business (businessId=%d).", id));
