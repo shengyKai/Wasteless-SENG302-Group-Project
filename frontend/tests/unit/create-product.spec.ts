@@ -446,5 +446,5 @@ describe('CreateProduct.vue', () => {
 
   it('If the error message is not undefined, there should be an hint message that appears in the dialog box', async () => {
     expect(wrapper.vm.currency.errorMessage).toBe("Some error message");
-  })
+  });
 });

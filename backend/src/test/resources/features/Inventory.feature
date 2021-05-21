@@ -1,7 +1,8 @@
 Feature: U19 - Create Inventory
 
   Background:
-    Given a business exists
+    Given a user exists
+    And the business "Biz" exists
     And the business has the following products in its catalogue:
       | product_id | name  |
       | FISH       | fish  |

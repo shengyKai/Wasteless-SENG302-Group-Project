@@ -120,6 +120,27 @@ export type Product = {
   countryOfSale?: string,
 };
 
+export type CreateInventoryItem = {
+  productId: string,
+  quantity: number,
+  pricePerItem?: number,
+  totalPrice?: number,
+  manufactured?: string,
+  sellBy?: string,
+  bestBefore?: string,
+  expires: string
+};
+export type Sale = {
+  id: number,
+  inventoryItem: InventoryItem,
+  quantity: number,
+  price: number,
+  moreInfo?: string,
+  created: string,
+  closes?: string,
+};
+
+
 export type InventoryItem = {
   id: number,
   product: Product,
@@ -570,15 +591,37 @@ export async function removeBusinessAdmin(businessId: number, userId: number): P
 }
 
 /**
- * Get all inventory items for that business
+ * Gets all of the sale listings for a given business
  *
- * @param businessId
- * @return a list of inventory items
+ * @param businessId The ID of the business
  */
-export async function getInventory(buisnessId: number): Promise<MaybeError<InventoryItem[]>> {
+export async function getBusinessSales(businessId: number): Promise<MaybeError<Sale[]>> {
   let response;
   try {
-    response = await instance.get(`/businesses/${buisnessId}/inventory`);
+    response = await instance.get(`/businesses/${businessId}/listings`);
+  } catch (error) {
+    let status: number | undefined = error.response?.status;
+    if (status === undefined) return 'Failed to reach backend';
+    if (status === 401) return 'Missing/Invalid access token';
+    if (status === 406) return 'The given business does not exist';
+    return 'Request failed: ' + status;
+  }
+  if (!is<Sale[]>(response.data)) {
+    return "Response is not Sale array";
+  }
+  return response.data;
+}
+
+/**
+   * Get all inventory items for that business
+   *
+   * @param businessId
+   * @return a list of inventory items
+   */
+export async function getInventory(businessId: number): Promise<MaybeError<InventoryItem[]>> {
+  let response;
+  try {
+    response = await instance.get(`/businesses/${businessId}/inventory`);
   } catch (error) {
     let status: number | undefined = error.response?.status;
     if (status === undefined) return 'Failed to reach backend';
@@ -595,15 +638,15 @@ export async function getInventory(buisnessId: number): Promise<MaybeError<Inven
 }
 
 /**
- * Sends a query for the total number of inventory items in the business
- *
- * @param buisnessId Business id to identify with the database to retrieve the inventory count
- * @returns Number of inventory items or an error message
- */
-export async function getInventoryCount(buisnessId: number): Promise<MaybeError<number>> {
+   * Sends a query for the total number of inventory items in the business
+   *
+   * @param buisnessId Business id to identify with the database to retrieve the inventory count
+   * @returns Number of inventory items or an error message
+   */
+export async function getInventoryCount(businessId: number): Promise<MaybeError<number>> {
   let response;
   try {
-    response = await instance.get(`/businesses/${buisnessId}/inventory/count`);
+    response = await instance.get(`/businesses/${businessId}/inventory/count`);
   } catch (error) {
     let status: number | undefined = error.response?.status;
 
@@ -616,4 +659,23 @@ export async function getInventoryCount(buisnessId: number): Promise<MaybeError<
   }
 
   return response.data.count;
+}
+
+/**
+ * Add an inventory item to the business inventory.
+ *
+ * @param businessId Business id to identify with the database to add the inventory to the correct business
+ * @param inventoryItem The properties to create a inventory with
+ */
+export async function createInventoryItem(businessId: number, inventoryItem: CreateInventoryItem): Promise<MaybeError<undefined>> {
+  try {
+    await instance.post(`/businesses/${businessId}/inventory`, inventoryItem);
+  } catch (error) {
+    let status: number | undefined = error.response?.status;
+    if (status === undefined) return 'Failed to reach backend';
+    if (status === 403) return 'Operation not permitted';
+
+    return 'Request failed: ' + error.response?.data.message;
+  }
+  return undefined;
 }
