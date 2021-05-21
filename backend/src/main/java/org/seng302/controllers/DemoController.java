@@ -3,10 +3,7 @@ package org.seng302.controllers;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.seng302.entities.*;
-import org.seng302.persistence.BusinessRepository;
-import org.seng302.persistence.ImageRepository;
-import org.seng302.persistence.ProductRepository;
-import org.seng302.persistence.UserRepository;
+import org.seng302.persistence.*;
 import org.seng302.tools.AuthenticationTokenManager;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -16,6 +13,7 @@ import org.springframework.web.server.ResponseStatusException;
 import javax.servlet.http.HttpServletRequest;
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -29,13 +27,17 @@ public class DemoController {
     private final UserRepository userRepository;
     private final BusinessRepository businessRepository;
     private final ProductRepository productRepository;
+    private final InventoryItemRepository inventoryItemRepository;
+    private final SaleItemRepository saleItemRepository;
     private final ImageRepository imageRepository;
     private static final Logger logger = LogManager.getLogger(DemoController.class.getName());
 
-    public DemoController(UserRepository userRepository, BusinessRepository businessRepository, ProductRepository productRepository, ImageRepository imageRepository) {
+    public DemoController(UserRepository userRepository, BusinessRepository businessRepository, ProductRepository productRepository, InventoryItemRepository inventoryItemRepository, SaleItemRepository saleItemRepository, ImageRepository imageRepository) {
         this.userRepository = userRepository;
         this.businessRepository = businessRepository;
         this.productRepository = productRepository;
+        this.inventoryItemRepository = inventoryItemRepository;
+        this.saleItemRepository = saleItemRepository;
         this.imageRepository = imageRepository;
     }
 
@@ -49,63 +51,93 @@ public class DemoController {
      * @param request The HTTP request to use for verifying the account's credentials.
      */
     @PutMapping("/demo/load")
-    public void loadDemoData(HttpServletRequest request) {
-        AuthenticationTokenManager.checkAuthenticationToken(request);
-        if (!AuthenticationTokenManager.sessionIsAdmin(request)) {
-            ResponseStatusException error = new ResponseStatusException(HttpStatus.FORBIDDEN, "Only admin accounts can perform demo actions.");
-            logger.error(error.getMessage());
-            throw error;
-        }
-        logger.info("Loading demo data...");
-
-        // Load demo users from demo data file and save them to the repository
-        List<User> demoUsers = readUserFile();
-        for (User user : demoUsers) {
-            if (userRepository.findByEmail(user.getEmail()) == null) {
-                userRepository.save(user);
+    public void loadDemoData(HttpServletRequest request) throws Exception {
+        try {
+            AuthenticationTokenManager.checkAuthenticationToken(request);
+            if (!AuthenticationTokenManager.sessionIsAdmin(request)) {
+                ResponseStatusException error = new ResponseStatusException(HttpStatus.FORBIDDEN, "Only admin accounts can perform demo actions.");
+                logger.error(error.getMessage());
+                throw error;
             }
-        }
+            logger.info("Loading demo data...");
 
-        User user = userRepository.findByEmail("123andyelliot@gmail.com");
-
-        // Check if the business has already been added to the user's businesses to avoid adding it again
-        Business business = null;
-        Set<Business> businessesOwned = user.getBusinessesOwned();
-        for (Business owned: businessesOwned) {
-            if (owned.getName().equals("BUSINESS_NAME")) {
-                business = owned;
+            // Load demo users from demo data file and save them to the repository
+            List<User> demoUsers = readUserFile();
+            for (User user : demoUsers) {
+                if (userRepository.findByEmail(user.getEmail()) == null) {
+                    userRepository.save(user);
+                }
             }
-        }
 
-        // Construct demo business and save it to the repository
-        if (business == null) {
-            business = new Business.Builder()
-                    .withBusinessType("Accommodation and Food Services")
-                    .withDescription("DESCRIPTION")
-                    .withName("BUSINESS_NAME")
-                    .withAddress(Location.covertAddressStringToLocation("108,Albert Road,Ashburton,Christchurch,New Zealand,Canterbury,8041"))
-                    .withPrimaryOwner(user)
+            User user = userRepository.findByEmail("123andyelliot@gmail.com");
+
+            // Check if the business has already been added to the user's businesses to avoid adding it again
+            Business business = null;
+            Set<Business> businessesOwned = user.getBusinessesOwned();
+            for (Business owned : businessesOwned) {
+                if (owned.getName().equals("BUSINESS_NAME")) {
+                    business = owned;
+                }
+            }
+
+            // Construct demo business and save it to the repository
+            if (business == null) {
+                business = new Business.Builder()
+                        .withBusinessType("Accommodation and Food Services")
+                        .withDescription("DESCRIPTION")
+                        .withName("BUSINESS_NAME")
+                        .withAddress(Location.covertAddressStringToLocation("108,Albert Road,Ashburton,Christchurch,New Zealand,Canterbury,8041"))
+                        .withPrimaryOwner(user)
+                        .build();
+                business = businessRepository.save(business);
+            }
+
+            // Construct demo product and save it to the repository
+            Product product = new Product.Builder()
+                    .withProductCode("NATHAN-APPLE-70")
+                    .withName("The Nathan Apple")
+                    .withDescription("Ever wonder why Nathan has an apple")
+                    .withManufacturer("Apple")
+                    .withRecommendedRetailPrice("9000.03")
+                    .withBusiness(business)
                     .build();
-            business = businessRepository.save(business);
-        }
+            product = productRepository.save(product);
+            Image image = new Image("https://i.picsum.photos/id/376/200/200.jpg?hmac=lM2SnAPO9nDnPBP5FjJOFIJSaRoPKUJRovk6goT_nA4", "https://i.picsum.photos/id/376/200/200.jpg?hmac=lM2SnAPO9nDnPBP5FjJOFIJSaRoPKUJRovk6goT_nA4");
+            image = imageRepository.save(image);
+            product.addProductImage(image);
+            Image image2 = new Image("https://i.picsum.photos/id/650/200/200.jpg?hmac=gu3C13pBxCSHokbnumczMYlmWRLt3CFGx1sDaPpfRnk", "https://i.picsum.photos/id/650/200/200.jpg?hmac=gu3C13pBxCSHokbnumczMYlmWRLt3CFGx1sDaPpfRnk");
+            image2 = imageRepository.save(image2);
+            product.addProductImage(image2);
+            product = productRepository.save(product);
 
-        // Construct demo product and save it to the repository
-        Product product = new Product.Builder()
-                .withProductCode("NATHAN-APPLE-70")
-                .withName("The Nathan Apple")
-                .withDescription("Ever wonder why Nathan has an apple")
-                .withManufacturer("Apple")
-                .withRecommendedRetailPrice("9000.03")
-                .withBusiness(business)
-                .build();
-        product = productRepository.save(product);
-        Image image = new Image("https://i.picsum.photos/id/376/200/200.jpg?hmac=lM2SnAPO9nDnPBP5FjJOFIJSaRoPKUJRovk6goT_nA4", "https://i.picsum.photos/id/376/200/200.jpg?hmac=lM2SnAPO9nDnPBP5FjJOFIJSaRoPKUJRovk6goT_nA4");
-        image = imageRepository.save(image);
-        product.addProductImage(image);
-        Image image2 = new Image("https://i.picsum.photos/id/650/200/200.jpg?hmac=gu3C13pBxCSHokbnumczMYlmWRLt3CFGx1sDaPpfRnk", "https://i.picsum.photos/id/650/200/200.jpg?hmac=gu3C13pBxCSHokbnumczMYlmWRLt3CFGx1sDaPpfRnk");
-        image2 = imageRepository.save(image2);
-        product.addProductImage(image2);
-        productRepository.save(product);
+
+            // Construct a demo inventory item for said product
+            LocalDate today = LocalDate.now();
+            InventoryItem inventoryItem = new InventoryItem.Builder()
+                    .withProduct(product)
+                    .withQuantity(1000)
+                    .withPricePerItem("10")
+                    .withTotalPrice(null)
+                    .withManufactured(today.minusDays(1).toString())
+                    .withSellBy(today.plusDays(1).toString())
+                    .withBestBefore(today.plusDays(2).toString())
+                    .withExpires(today.plusDays(3).toString())
+                    .build();
+            inventoryItem = inventoryItemRepository.save(inventoryItem);
+
+            // Construct a demo sale item for the inventory item
+            SaleItem saleItem = new SaleItem.Builder()
+                    .withInventoryItem(inventoryItem)
+                    .withQuantity(10)
+                    .withMoreInfo("Some more info")
+                    .withCloses(today.plusDays(1).toString())
+                    .withPrice("1")
+                    .build();
+            saleItemRepository.save(saleItem);
+        } catch (Exception e) {
+            logger.error(e);
+            throw e;
+        }
     }
 
     /**

@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.seng302.entities.Location;
 import org.seng302.entities.User;
 import org.seng302.persistence.BusinessRepository;
+import org.seng302.persistence.InventoryItemRepository;
 import org.seng302.persistence.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -24,11 +25,15 @@ public class DGAAControllerTest {
     private BusinessRepository businessRepository;
 
     @Autowired
+    private InventoryItemRepository inventoryItemRepository;
+
+    @Autowired
     private DGAAController dgaaController;
 
     @BeforeEach
     public void clean() {
         //because business repo has a foreign key in user repo, it needs to be cleared too
+        inventoryItemRepository.deleteAll();
         businessRepository.deleteAll();
         userRepository.deleteAll();
     }

@@ -2,6 +2,7 @@ package cucumber.stepDefinitions;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import cucumber.UserContext;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
@@ -37,6 +38,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class UserStepDefinition {
 
     @Autowired
+    private UserContext userContext;
+
+    @Autowired
     private ObjectMapper objectMapper;
 
     @Autowired
@@ -61,6 +65,24 @@ public class UserStepDefinition {
     private Location userAddress = Location.covertAddressStringToLocation("1,Bob Street,Bob,Bob,Bob,Bob,1010");
 
     private Long userID;
+
+    @Given("a user exists")
+    public void a_user_exists() throws ParseException {
+        var user = new User.Builder()
+                .withFirstName("John")
+                .withMiddleName("Hector")
+                .withLastName("Smith")
+                .withNickName("nick")
+                .withEmail("here@testing")
+                .withPassword("12345678abc")
+                .withBio("g")
+                .withDob("2001-03-11")
+                .withPhoneNumber("123-456-7890")
+                .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
+                        "Canterbury,8041"))
+                .build();
+        userContext.save(user);
+    }
 
     @Given("the user with the email {string} does not exist")
     public void theUserWithTheEmailDoesNotExist(String email) {

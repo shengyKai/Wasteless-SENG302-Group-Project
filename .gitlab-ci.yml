@@ -30,45 +30,78 @@ junit:
   script:
     - cd backend
     - ./gradlew test
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH == "dev"'
+      when: always
+    - changes:
+      - backend/*.gradle
+      - backend/src/**/application.properties
+      - backend/src/main/**/*
+      - backend/src/test/**/*.csv
+      - backend/src/test/java/org/**/*.java
+      when: always
 
 cucumber:
-   stage: test
-   artifacts:
-     paths:
-       - backend/build
-   script:
-     - cd backend
-     - ./gradlew cucumber
+  stage: test
+  artifacts:
+    paths:
+      - backend/build
+  script:
+    - cd backend
+    - ./gradlew cucumber
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH == "dev"'
+      when: always
+    - changes:
+      - backend/*.gradle
+      - backend/src/**/application.properties
+      - backend/src/main/**/*
+      - backend/src/test/**/*.csv
+      - backend/src/test/**/*.feature
+      - backend/src/test/java/cucumber/**/*.java
+      when: always
 
 jest:
-   stage: test
-   cache:
-     key: node-modules
-     paths:
-       - frontend/node_modules
-     policy: pull
-   artifacts:
-     paths:
-       - frontend/coverage
-   script:
-     - cd frontend
-     - npm run test
+  stage: test
+  cache:
+    key: node-modules
+    paths:
+      - frontend/node_modules
+    policy: pull
+  artifacts:
+    paths:
+      - frontend/coverage
+  script:
+    - cd frontend
+    - npm run test
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH == "dev"'
+      when: always
+    - changes:
+      - frontend/package.json
+      - frontend/package-lock.json
+      - frontend/babel.config.js
+      - frontend/tsconfig.json
+      - frontend/vue.config.js
+      - frontend/tests/**/*
+      - frontend/src/**/*
+      when: always
 
 # Export sonarqube (static code analysis) reports
 dev-sonarqube:
-   stage: sonarqube
-   cache:
-     key: node-modules
-     paths:
-       - frontend/node_modules
-     policy: pull
-   script:
-     - cd frontend
-     - npm run sonarqube
-     - cd ../backend
-     - ./gradlew jacocoTestReport jacocoTestCoverageVerification sonarqube
-   only:
-     - dev
+  stage: sonarqube
+  cache:
+    key: node-modules
+    paths:
+      - frontend/node_modules
+    policy: pull
+  script:
+    - cd frontend
+    - npm run sonarqube
+    - cd ../backend
+    - ./gradlew jacocoTestReport jacocoTestCoverageVerification sonarqube
+  only:
+    - dev
 
 # builds all branches, except dev and master
 branch-build:
