@@ -88,8 +88,6 @@ public class InventoryControllerTest {
     private Product testProduct3;
     private Product testProductNull;
 
-    private static final BigDecimal ONE_BILLION = new BigDecimal(1000000000L);
-
     @BeforeEach
     public void setup() throws Exception {
         MockitoAnnotations.openMocks(this);
@@ -335,7 +333,7 @@ public class InventoryControllerTest {
         when(businessRepository.getBusinessById(1L)).thenReturn(mockBusiness);
         when(productRepository.findAllByBusiness(mockBusiness)).thenReturn(mockProductList);
         when(inventoryItemRepository.getInventoryByCatalogue(mockProductList)).thenReturn(emptyInventory);
-        List<InventoryItem> result = inventoryController.getInventory(1L, request, "", "", "", "");
+        JSONArray result = inventoryController.getInventory(1L, request, "", "", "", "");
         Assertions.assertEquals(0, result.size());
     }
 
@@ -360,14 +358,14 @@ public class InventoryControllerTest {
         inventory.add(new InventoryItem.Builder().withProduct(testProduct).withQuantity(39).withExpires(futureDate).build());
         inventory.add(new InventoryItem.Builder().withProduct(testProduct).withQuantity(54).withExpires(futureDate).build());
         for (InventoryItem item : inventory) {
-            expectedResponse.add(item);
+            expectedResponse.appendElement(item.constructJSONObject());
         }
 
         inventoryController = new InventoryController(businessRepository, inventoryItemRepository, productRepository);
         when(businessRepository.getBusinessById(1L)).thenReturn(mockBusiness);
         when(productRepository.findAllByBusiness(mockBusiness)).thenReturn(mockProductList);
         when(inventoryItemRepository.getInventoryByCatalogue(mockProductList)).thenReturn(inventory);
-        List<InventoryItem> result = inventoryController.getInventory(1L, request, "", "", "", "");
+        JSONArray result = inventoryController.getInventory(1L, request, "", "", "", "");
         Assertions.assertEquals(expectedResponse, result);
     }
 
@@ -687,15 +685,10 @@ public class InventoryControllerTest {
         JSONObject secondInventory = (JSONObject) responseBody.get(2);
         JSONObject thirdInventory = (JSONObject) responseBody.get(4);
 
-        // get the respective created dates in BigDecimal format
-        BigDecimal firstInventoryCreated = (BigDecimal) ((JSONObject) firstInventory.get("product")).get("created");
-        BigDecimal secondInventoryCreated = (BigDecimal) ((JSONObject) secondInventory.get("product")).get("created");
-        BigDecimal thirdInventoryCreated = (BigDecimal) ((JSONObject) thirdInventory.get("product")).get("created");
-
         // same idea as the above tests
-        assertEquals(testProduct.getCreated().toString(), bigDecimalToInstant(firstInventoryCreated).toString());
-        assertEquals(testProduct2.getCreated().toString(), bigDecimalToInstant(secondInventoryCreated).toString());
-        assertEquals(testProduct3.getCreated().toString(), bigDecimalToInstant(thirdInventoryCreated).toString());
+        assertEquals(testProduct.getCreated().toString(), ((JSONObject) firstInventory.get("product")).get("created"));
+        assertEquals(testProduct2.getCreated().toString(), ((JSONObject) secondInventory.get("product")).get("created"));
+        assertEquals(testProduct3.getCreated().toString(), ((JSONObject) thirdInventory.get("product")).get("created"));
     }
 
     @Test
@@ -715,17 +708,11 @@ public class InventoryControllerTest {
         JSONObject thirdInventory = (JSONObject) responseBody.get(3);
         JSONObject fourthInventory = (JSONObject) responseBody.get(5);
 
-        // get the respective created dates in BigDecimal format
-        BigDecimal firstInventoryCreated = (BigDecimal) ((JSONObject) firstInventory.get("product")).get("created");
-        BigDecimal secondInventoryCreated = (BigDecimal) ((JSONObject) secondInventory.get("product")).get("created");
-        BigDecimal thirdInventoryCreated = (BigDecimal) ((JSONObject) thirdInventory.get("product")).get("created");
-        BigDecimal fourthInventoryCreated = (BigDecimal) ((JSONObject) fourthInventory.get("product")).get("created");
-
         // same idea as the above tests
-        assertEquals(testProductNull.getCreated().toString(), bigDecimalToInstant(firstInventoryCreated).toString());
-        assertEquals(testProduct3.getCreated().toString(), bigDecimalToInstant(secondInventoryCreated).toString());
-        assertEquals(testProduct2.getCreated().toString(), bigDecimalToInstant(thirdInventoryCreated).toString());
-        assertEquals(testProduct.getCreated().toString(), bigDecimalToInstant(fourthInventoryCreated).toString());
+        assertEquals(testProductNull.getCreated().toString(), ((JSONObject) firstInventory.get("product")).get("created"));
+        assertEquals(testProduct3.getCreated().toString(), ((JSONObject) secondInventory.get("product")).get("created"));
+        assertEquals(testProduct2.getCreated().toString(), ((JSONObject) thirdInventory.get("product")).get("created"));
+        assertEquals(testProduct.getCreated().toString(), ((JSONObject) fourthInventory.get("product")).get("created"));
     }
 
     @Test
@@ -896,9 +883,9 @@ public class InventoryControllerTest {
         // the dates below correspond to the dates created in
         // addSeveralInventoryItemsToAnInventory(),
         // just that it is in the JSON format from the database
-        assertEquals("[2020,1,1]", firstInventory.get("manufactured").toString());
-        assertEquals("[2020,3,1]", secondInventory.get("manufactured").toString());
-        assertEquals("[2020,6,6]", thirdInventory.get("manufactured").toString());
+        assertEquals("2020-01-01", firstInventory.get("manufactured").toString());
+        assertEquals("2020-03-01", secondInventory.get("manufactured").toString());
+        assertEquals("2020-06-06", thirdInventory.get("manufactured").toString());
         assertEquals(null, fourthInventory.get("manufactured"));
     }
 
@@ -924,9 +911,9 @@ public class InventoryControllerTest {
         // the dates below correspond to the dates created in
         // addSeveralInventoryItemsToAnInventory(),
         // just that it is in the JSON format from the database
-        assertEquals("[2020,6,6]", secondInventory.get("manufactured").toString());
-        assertEquals("[2020,3,1]", thirdInventory.get("manufactured").toString());
-        assertEquals("[2020,1,1]", fourthInventory.get("manufactured").toString());
+        assertEquals("2020-06-06", secondInventory.get("manufactured").toString());
+        assertEquals("2020-03-01", thirdInventory.get("manufactured").toString());
+        assertEquals("2020-01-01", fourthInventory.get("manufactured").toString());
     }
 
     @Test
@@ -950,9 +937,9 @@ public class InventoryControllerTest {
         // the dates below correspond to the dates created in
         // addSeveralInventoryItemsToAnInventory(),
         // just that it is in the JSON format from the database
-        assertEquals("[2026,2,1]", firstInventory.get("sellBy").toString());
-        assertEquals("[2027,2,1]", secondInventory.get("sellBy").toString());
-        assertEquals("[2028,2,1]", thirdInventory.get("sellBy").toString());
+        assertEquals("2026-02-01", firstInventory.get("sellBy").toString());
+        assertEquals("2027-02-01", secondInventory.get("sellBy").toString());
+        assertEquals("2028-02-01", thirdInventory.get("sellBy").toString());
         assertEquals(null, fourthInventory.get("sellBy"));
     }
 
@@ -978,9 +965,9 @@ public class InventoryControllerTest {
         // the dates below correspond to the dates created in
         // addSeveralInventoryItemsToAnInventory(),
         // just that it is in the JSON format from the database
-        assertEquals("[2028,2,1]", secondInventory.get("sellBy").toString());
-        assertEquals("[2027,2,1]", thirdInventory.get("sellBy").toString());
-        assertEquals("[2026,2,1]", fourthInventory.get("sellBy").toString());
+        assertEquals("2028-02-01", secondInventory.get("sellBy").toString());
+        assertEquals("2027-02-01", thirdInventory.get("sellBy").toString());
+        assertEquals("2026-02-01", fourthInventory.get("sellBy").toString());
     }
 
     @Test
@@ -1004,9 +991,9 @@ public class InventoryControllerTest {
         // the dates below correspond to the dates created in
         // addSeveralInventoryItemsToAnInventory(),
         // just that it is in the JSON format from the database
-        assertEquals("[2027,3,1]", firstInventory.get("bestBefore").toString());
-        assertEquals("[2028,3,1]", secondInventory.get("bestBefore").toString());
-        assertEquals("[2029,2,1]", thirdInventory.get("bestBefore").toString());
+        assertEquals("2027-03-01", firstInventory.get("bestBefore").toString());
+        assertEquals("2028-03-01", secondInventory.get("bestBefore").toString());
+        assertEquals("2029-02-01", thirdInventory.get("bestBefore").toString());
         assertEquals(null, fourthInventory.get("bestBefore"));
     }
 
@@ -1032,9 +1019,9 @@ public class InventoryControllerTest {
         // the dates below correspond to the dates created in
         // addSeveralInventoryItemsToAnInventory(),
         // just that it is in the JSON format from the database
-        assertEquals("[2029,2,1]", secondInventory.get("bestBefore").toString());
-        assertEquals("[2028,3,1]", thirdInventory.get("bestBefore").toString());
-        assertEquals("[2027,3,1]", fourthInventory.get("bestBefore").toString());
+        assertEquals("2029-02-01", secondInventory.get("bestBefore").toString());
+        assertEquals("2028-03-01", thirdInventory.get("bestBefore").toString());
+        assertEquals("2027-03-01", fourthInventory.get("bestBefore").toString());
     }
 
     @Test
@@ -1058,10 +1045,10 @@ public class InventoryControllerTest {
         // the dates below correspond to the dates created in
         // addSeveralInventoryItemsToAnInventory(),
         // just that it is in the JSON format from the database
-        assertEquals("[2028,1,1]", firstInventory.get("expires").toString());
-        assertEquals("[2029,1,1]", secondInventory.get("expires").toString());
-        assertEquals("[2030,6,6]", thirdInventory.get("expires").toString());
-        assertEquals("[2031,6,6]", fourthInventory.get("expires").toString());
+        assertEquals("2028-01-01", firstInventory.get("expires").toString());
+        assertEquals("2029-01-01", secondInventory.get("expires").toString());
+        assertEquals("2030-06-06", thirdInventory.get("expires").toString());
+        assertEquals("2031-06-06", fourthInventory.get("expires").toString());
     }
 
     @Test
@@ -1082,13 +1069,13 @@ public class InventoryControllerTest {
         JSONObject fourthInventory = (JSONObject) responseBody.get(5);
 
         // same idea as the above tests
-        assertEquals("[2031,6,6]", firstInventory.get("expires").toString());
+        assertEquals("2031-06-06", firstInventory.get("expires").toString());
         // the dates below correspond to the dates created in
         // addSeveralInventoryItemsToAnInventory(),
         // just that it is in the JSON format from the database
-        assertEquals("[2030,6,6]", secondInventory.get("expires").toString());
-        assertEquals("[2029,1,1]", thirdInventory.get("expires").toString());
-        assertEquals("[2028,1,1]", fourthInventory.get("expires").toString());
+        assertEquals("2030-06-06", secondInventory.get("expires").toString());
+        assertEquals("2029-01-01", thirdInventory.get("expires").toString());
+        assertEquals("2028-01-01", fourthInventory.get("expires").toString());
     }
 
     @Test
@@ -1108,11 +1095,11 @@ public class InventoryControllerTest {
         JSONObject thirdInventory = (JSONObject) responseBody.get(4);
 
         assertEquals(testProduct.getProductCode(),
-                ((JSONObject) firstInventory.get("product")).getAsString("productCode"));
+                ((JSONObject) firstInventory.get("product")).getAsString("id"));
         assertEquals(testProduct2.getProductCode(),
-                ((JSONObject) secondInventory.get("product")).getAsString("productCode"));
+                ((JSONObject) secondInventory.get("product")).getAsString("id"));
         assertEquals(testProduct3.getProductCode(),
-                ((JSONObject) thirdInventory.get("product")).getAsString("productCode"));
+                ((JSONObject) thirdInventory.get("product")).getAsString("id"));
     }
 
     @Test
@@ -1134,13 +1121,13 @@ public class InventoryControllerTest {
         JSONObject fourthInventory = (JSONObject) responseBody.get(5);
 
         assertEquals(testProductNull.getProductCode(),
-                ((JSONObject) firstInventory.get("product")).getAsString("productCode"));
+                ((JSONObject) firstInventory.get("product")).getAsString("id"));
         assertEquals(testProduct3.getProductCode(),
-                ((JSONObject) secondInventory.get("product")).getAsString("productCode"));
+                ((JSONObject) secondInventory.get("product")).getAsString("id"));
         assertEquals(testProduct2.getProductCode(),
-                ((JSONObject) thirdInventory.get("product")).getAsString("productCode"));
+                ((JSONObject) thirdInventory.get("product")).getAsString("id"));
         assertEquals(testProduct.getProductCode(),
-                ((JSONObject) fourthInventory.get("product")).getAsString("productCode"));
+                ((JSONObject) fourthInventory.get("product")).getAsString("id"));
     }
 
     /**
@@ -1171,19 +1158,5 @@ public class InventoryControllerTest {
         // inventory item with the bare minimum to exist as an inventory item
         inventory.add(new InventoryItem.Builder().withProduct(testProductNull).withQuantity(7).withExpires("2031-06-06")
                 .build());
-    }
-
-    /**
-     * Converts a BigDecimal object to an Instant Object
-     * 
-     * @param bigDecimalObject
-     * @return Instant Object representing the time in seconds and nanosecond
-     */
-    public Instant bigDecimalToInstant(BigDecimal bigDecimalObject) {
-        BigDecimal value = bigDecimalObject;
-
-        long seconds = value.longValue();
-        int nanoseconds = value.subtract(new BigDecimal(seconds)).multiply(ONE_BILLION).intValue();
-        return Instant.ofEpochSecond(seconds, nanoseconds);
     }
 }
