@@ -137,7 +137,7 @@ public class MarketplaceCard {
         if (closes == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Closing time cannot be null");
         }
-        if (closes.isBefore(created)) {
+        if (closes.isBefore(Instant.now())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Closing time cannot be before creation");
         }
         this.closes = closes;
