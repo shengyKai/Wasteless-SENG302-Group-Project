@@ -1,6 +1,7 @@
 package cucumber.stepDefinitions;
 
 import cucumber.RequestContext;
+import io.cucumber.java.bs.A;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
@@ -13,6 +14,7 @@ import org.seng302.entities.Keyword;
 import org.seng302.entities.MarketplaceCard;
 import org.seng302.persistence.KeywordRepository;
 import org.seng302.persistence.MarketplaceCardRepository;
+import org.seng302.persistence.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
@@ -40,6 +42,8 @@ public class CardCreationStepDefinition {
     private RequestContext requestContext;
     @Autowired
     private MarketplaceCardRepository marketplaceCardRepository;
+    @Autowired
+    private UserRepository userRepository;
     private KeywordRepository keywordRepository;
     private MvcResult mvcResult;
     private MarketplaceCard createdCard;
@@ -79,7 +83,7 @@ public class CardCreationStepDefinition {
             Keyword keyword = new Keyword(keywordProperties.get("name"));
             when(keywordRepository.findById(Long.parseLong(keywordProperties.get("id")))).thenReturn(Optional.of(keyword));
         }
-        CardController controller = new CardController(marketplaceCardRepository, keywordRepository);
+        CardController controller = new CardController(marketplaceCardRepository, keywordRepository, userRepository);
         mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
     }
 
