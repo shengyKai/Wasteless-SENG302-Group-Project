@@ -1,5 +1,10 @@
 package org.seng302.tools;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.JsonNodeType;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import net.minidev.json.JSONObject;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
@@ -38,7 +43,11 @@ public class JsonTools {
      */
     public static long parseLongFromJsonField(JSONObject json, String fieldName) {
         try {
-            return Long.parseLong(json.getAsString(fieldName));
+            if (json.containsKey(fieldName)) {
+                return Long.parseLong(json.getAsString(fieldName));
+            } else {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, String.format("%s is not present", fieldName));
+            }
         } catch (NumberFormatException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, String.format("%s must be a number", fieldName));
         }
@@ -52,27 +61,32 @@ public class JsonTools {
      * @return The value from the field
      */
     public static long[] parseLongArrayFromJsonField(JSONObject json, String fieldName) {
+        ResponseStatusException invalidFormatException = new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                String.format("%s must be an array of numbers", fieldName));
+        ResponseStatusException notPresentException = new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                String.format("%s is not present", fieldName));
+
         try {
-            Object object = json.get(fieldName);
-            if (object instanceof long[]) {
-                return (long[]) object;
-            }
-            if (object instanceof int[]) {
-                int[] intArray = (int[]) object;
-                long[] longArray = new long[intArray.length];
-                for (int i = 0; i < intArray.length; i++) {
-                    longArray[i] = intArray[i];
+            final ObjectNode node = new ObjectMapper().readValue(json.toJSONString(), ObjectNode.class);
+            if (node.has(fieldName)) {
+                JsonNode value = node.get(fieldName);
+                if (value.getNodeType() != JsonNodeType.ARRAY) {
+                    throw invalidFormatException;
+                }
+                int arrayLength = value.size();
+                long[] longArray = new long[arrayLength];
+                for (int i = 0; i < arrayLength; i++) {
+                    if (value.get(i).getNodeType() != JsonNodeType.NUMBER) {
+                        throw invalidFormatException;
+                    }
+                    longArray[i] = value.get(i).asLong();
                 }
                 return longArray;
+            } else {
+                throw notPresentException;
             }
-            List<Integer> list = (List<Integer>) object;
-            long[] array = new long[list.size()];
-            for (int i = 0; i < list.size(); i++) {
-                array[i] = list.get(i);
-            }
-            return array;
-        } catch (ClassCastException | NullPointerException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, String.format("%s must be an array of numbers", fieldName));
+        } catch (JsonProcessingException e) {
+            throw invalidFormatException;
         }
     }
 }
