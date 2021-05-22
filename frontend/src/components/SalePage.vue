@@ -1,7 +1,12 @@
 <template>
-  <v-row style="margin-top: 2em;" justify="space-around" align="center">
-    <SaleItem :business-id="businessId" :sale-item="sale" v-for="sale in salesList" v-bind:key="sale.id"/>
-  </v-row>
+  <div>
+    <v-row justify="space-around" style="margin: 2em">
+      <h1><strong>{{business.name}}</strong></h1>
+    </v-row>
+    <v-row style="margin-top: 2em; margin-bottom: 2em" justify="space-around" align="center">
+      <SaleItem :business-id="businessId" :sale-item="sale" v-for="sale in salesList" v-bind:key="sale.id"/>
+    </v-row>
+  </div>
 </template>
 
 <script>
@@ -37,12 +42,13 @@ export default {
   },
   computed: {
     businessId() {
-      return this.$route.params.id;
+      return parseInt(this.$route.params.id);
     }
   },
   async created() {
     this.$store.commit('clearError');
     await this.populateSales();
+    await this.populateBusinessData();
   }
 };
 </script>

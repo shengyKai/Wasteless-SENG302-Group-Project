@@ -5,7 +5,7 @@
         <v-expand-transition>
           <div v-show="!moreInfo">
             <ProductImageCarousel :productImages="product.images" :productId="product.id" />
-            <v-card-title>{{ saleItem.quantity + " x " + product.name }}</v-card-title>
+            <v-card-title>{{ saleItem.quantity + " × " + product.name }}</v-card-title>
             <v-card-subtitle>{{ retailPrice }}</v-card-subtitle>
 
           </div>
@@ -85,49 +85,8 @@ export default {
     };
   },
   props: {
-    saleItem: {
-      default() {
-        return {
-          "id": 57,
-          "inventoryItem": {
-            "id": 101,
-            "product": {
-              "id": "WATT-420-BEANS",
-              "name": "Watties Baked Beans - 420g can",
-              "description": "Baked Beans as they should be. SOME LONG DESCRIPTION. SOME LONG DESCRIPTION. DESCRIPTION. SOME LONG DESCRIPTION. DESCRIPTION. SOME LONG DESCRIPTION. DESCRIPTION. SOME LONG DESCRIPTION. ",
-              "manufacturer": "Heinz Wattie's Limited",
-              "recommendedRetailPrice": 2.2,
-              "created": "2021-05-15T05:55:32.808Z",
-              "countryOfSale": "New Zealand",
-              "images": [
-                {
-                  "id": 1234,
-                  "filename": "https://i.picsum.photos/id/357/300/300.jpg?hmac=GR6zE4y7iYz5d4y-W08ZaYhDGGrLHGon4wKEQp1eYkg",
-                  "thumbnailFilename": "https://i.picsum.photos/id/357/300/300.jpg?hmac=GR6zE4y7iYz5d4y-W08ZaYhDGGrLHGon4wKEQp1eYkg"
-                }
-              ]
-            },
-            "quantity": 4,
-            "pricePerItem": 6.5,
-            "totalPrice": 21.99,
-            "manufactured": "2021-05-15",
-            "sellBy": "2021-05-15",
-            "bestBefore": "2021-05-15",
-            "expires": "2021-05-15"
-          },
-          "quantity": 3,
-          "price": 17.99,
-          "moreInfo": "",
-          "created": "2021-07-14T11:44:00Z",
-          "closes": "2021-07-21T23:59:00Z"
-        };
-      }
-    },
-    businessId: {
-      default() {
-        return 1;
-      }
-    },
+    saleItem: Object,
+    businessId: Number,
   },
   computed: {
     /**
