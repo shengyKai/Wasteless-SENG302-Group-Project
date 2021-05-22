@@ -194,7 +194,7 @@ export default {
     closeDialog() {
       this.$emit('closeDialog');
     },
-    
+
     /**
      * Populates the products array for the dropdown select for selecting a product
      * @returns {Promise<void>}
@@ -204,7 +204,6 @@ export default {
       const result = await getProducts(this.$store.state.createInventoryDialog, null, null, null, false);
       if (typeof result === 'string') {
         this.errorMessage = result;
-        console.log(result);
         return;
       } else {
         this.productList = result;
@@ -215,11 +214,11 @@ export default {
      * Filters the list of products based on the value of the search term
      * value must be passed to ensure products are refreshed when input is cleared
      */
-    filterProducts: function() {
+    filterProducts: function () {
       if (this.productFilter === null) this.productFilter = '';
       this.filteredProductList = this.productList.filter(x => this.filterPredicate(x));
     },
-    resetSearch: function() {
+    resetSearch: function () {
       this.productFilter = '';
       this.filterProducts();
     },
@@ -234,7 +233,7 @@ export default {
           product.name.toLowerCase().includes(this.productFilter?.toLowerCase()) ||
           product.manufacturer?.toLowerCase().includes(this.productFilter?.toLowerCase()) ||
           product.description?.toLowerCase().includes(this.productFilter?.toLowerCase());
-      },
+    },
     /**
      * Called when the form is submitted
      * Requests backend to create an inventory item
@@ -246,10 +245,10 @@ export default {
       let quantity;
       try {
         quantity = parseInt(this.quantity);
-      } catch ( error ) {
+      } catch (error) {
         this.errorMessage = 'Could not parse field \'Quantity\'';
         return;
-        }
+      }
       const inventoryItem = {
         productId: this.productCode,
         quantity: quantity,
@@ -267,9 +266,9 @@ export default {
         this.closeDialog();
       }
     },
-      async created() {
+  },
+  async created() {
     await this.fetchProducts();
-
   },
 };
 </script>
