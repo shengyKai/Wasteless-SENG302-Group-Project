@@ -1,19 +1,58 @@
 <template>
-  <div style="margin-top: 2em;">
-    <v-row justify="space-around">
-      <h1><strong>{{business.name}}</strong></h1>
-    </v-row>
-    <v-row justify="space-around">
-      <h3>Sales</h3>
-    </v-row>
-    <v-row justify="space-around">
-      <v-card width="80%" height="4em">
-        Controls go here
-      </v-card>
-    </v-row>
-    <v-row style="margin-top: 2em; margin-bottom: 2em" justify="space-around" align="center">
-      <SaleItem :business-id="businessId" :sale-item="sale" v-for="sale in salesList" v-bind:key="sale.id"/>
-    </v-row>
+  <div>
+    <v-container fluid>
+      <v-row align="center">
+        <v-col
+          class="d-flex"
+        >
+          <!---Select component for the order in which the cards should be displayed--->
+          <v-select
+            flat
+            solo-inverted
+            hide-details
+            :items="[
+              { text: 'Date Added', value: 'created'},
+              { text: 'Closing Date', value: 'closes'},
+            ]"
+            prepend-inner-icon="mdi-sort-variant"
+            label="Sort by"
+          />
+        </v-col>
+        <v-col cols="auto">
+          <!---Reverse the order in which the cards should be displayed--->
+          <v-btn-toggle class="toggle" mandatory>
+            <v-btn depressed color="primary" :value="false">
+              <v-icon>mdi-arrow-up</v-icon>
+            </v-btn>
+            <v-btn depressed color="primary" :value="true">
+              <v-icon>mdi-arrow-down</v-icon>
+            </v-btn>
+          </v-btn-toggle>
+        </v-col>
+        <v-col
+          class="d-flex"
+          cols="auto"
+        >
+          <!---Search for cards by their keywords--->
+          <v-text-field
+            clearable
+            flat
+            solo-inverted
+            hide-details
+            prepend-inner-icon="mdi-magnify"
+            label="Keywords"
+            autofocus
+          />
+        </v-col>
+      </v-row>
+    </v-container>
+    <v-container class="grey lighten-2">
+      <v-row justify="space-around">
+        <v-col v-for="sale in salesList" v-bind:key="sale.id" cols="auto">
+          <SaleItem :business-id="businessId" :sale-item="sale" />
+        </v-col>
+      </v-row>
+    </v-container>
   </div>
 </template>
 
