@@ -132,7 +132,7 @@ public class Product {
         if (name == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Product name must be provided");
         }
-        if (name.length() == 0 || name.length() > 50) {
+        if (name.isEmpty() || name.length() > 50) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Product name must be between 1-50 characters long");
         }
         if (!name.matches("^[ \\d\\p{Punct}\\p{L}]*$")) {

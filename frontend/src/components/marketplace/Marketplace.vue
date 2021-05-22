@@ -73,7 +73,7 @@
       >
         <!---Grid of cards for one section--->
         <v-container class="grey lighten-2">
-          <v-row>
+          <v-row justify="space-around">
             <v-col v-for="card in cards[section]" :key="card.id" cols="auto">
               <MarketplaceCard :content="card"/>
             </v-col>

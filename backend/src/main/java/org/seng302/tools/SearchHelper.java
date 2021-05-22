@@ -17,9 +17,9 @@ import java.util.stream.Collectors;
  */
 public class SearchHelper {
 
-    private static final int defaultResultsPerPage = 15;
-    private static final List<String> orderByOptions = new ArrayList<>(List.of("userID", "firstName", "middleName", "lastName", "nickname", "email"));
-    private static final Logger logger = LogManager.getLogger(SearchHelper.class.getName());
+    private static final int DEFAULT_RESULTS_PER_PAGE = 15;
+    private static final List<String> ORDER_BY_OPTIONS = List.of("userID", "firstName", "middleName", "lastName", "nickname", "email");
+    private static final Logger logger = LogManager.getLogger(SearchHelper.class);
 
     private enum PredicateType {
         OR, AND
@@ -30,14 +30,14 @@ public class SearchHelper {
      * a single page to be displayed on client side of the application. The page number and number of results per page
      * can be specified or left as null, in which case the default values will be used for these parameters.
      * @param queryResults An ordered list of User objects resulting from a query of the database.
-     * @param requestedPageString The page number in the results which has been requested. Defaults to 1.
-     * @param resultsPerPageString The number of results which will be returned. Defaults to 15.
+     * @param requestedPageOrNull The page number in the results which has been requested. Defaults to 1.
+     * @param resultsPerPageOrNull The number of results which will be returned. Defaults to 15.
      * @return An ordered list of Users with length resultsPerPage.
      */
-    public static <T>List<T> getPageInResults(List<T> queryResults, String requestedPageString, String resultsPerPageString) {
+    public static <T>List<T> getPageInResults(List<T> queryResults, Integer requestedPageOrNull, Integer resultsPerPageOrNull) {
 
-        int resultsPerPage = getResultsPerPageInt(resultsPerPageString);
-        int requestedPage = getRequestedPageInt(requestedPageString);
+        int resultsPerPage = getResultsPerPageInt(resultsPerPageOrNull);
+        int requestedPage = getRequestedPageInt(requestedPageOrNull);
 
         int numResults = queryResults.size();
         int maxPageNum = (int) Math.ceil((double) numResults / resultsPerPage);
@@ -49,41 +49,31 @@ public class SearchHelper {
     }
 
     /**
-     * This method parses a string for the number of results per page and returns the integer corresponding to
-     * that string, or the default value of 15 if the results per page string is unparsable, negative or null.
-     * @param resultsPerPageString A string representation of the requested number of results per page.
+     * Normalises the results per page to a valid results per page value.
+     * If null or less then one returns 15
+     * @param resultsPerPage A integer for the number of results per page or null
      * @return An int representing the requested number of results per page.
      */
-    private static int getResultsPerPageInt(String resultsPerPageString) {
-        int resultsPerPage;
-        try {
-            resultsPerPage = Integer.parseInt(resultsPerPageString);
-            if (resultsPerPage < 1) {
-                resultsPerPage = defaultResultsPerPage;
-            }
-        } catch (NumberFormatException | NullPointerException e) {
-            resultsPerPage = defaultResultsPerPage;
+    private static int getResultsPerPageInt(Integer resultsPerPage) {
+        if (resultsPerPage == null || resultsPerPage < 1) {
+            return DEFAULT_RESULTS_PER_PAGE;
+        } else {
+            return resultsPerPage;
         }
-        return resultsPerPage;
     }
 
     /**
-     * This method parses a string for the requested page number and returns the integer corresponding to
-     * that string, or the default value of 1 if the requested page string is unparsable, negative or null.
-     * @param requestedPageString A string representation of the requested page number.
-     * @return An int representing the requested page number.
+     * Normalises the requested page to a valid page value.
+     * If null or less then one returns 1
+     * @param requestedPage A integer for the number of results per page or null
+     * @return An int representing the requested number of results per page.
      */
-    private static int getRequestedPageInt(String requestedPageString) {
-        int requestedPage;
-        try {
-            requestedPage = Integer.parseInt(requestedPageString);
-            if (requestedPage < 1) {
-                requestedPage = 1;
-            }
-        } catch (NumberFormatException | NullPointerException e) {
-            requestedPage = 1;
+    private static int getRequestedPageInt(Integer requestedPage) {
+        if (requestedPage == null || requestedPage < 1) {
+            return 1;
+        } else {
+            return requestedPage;
         }
-        return requestedPage;
     }
 
     /**
@@ -110,22 +100,15 @@ public class SearchHelper {
      * This method constructs a Sort object to be passed into a query for searching the UserRepository. The attribute
      * which Users should be sorted by and whether that order should be reversed are specified.
      * @param orderBy The attribute which query results will be ordered by.
-     * @param reverseString Results will be in descending order if true, ascending order if false or null.
+     * @param reverse Results will be in descending order if true, ascending order if false or null.
      * @return A Sort which can then be applied to queries of the UserRepository.
      */
-    public static Sort getSort(String orderBy, String reverseString) {
-        if (orderBy == null || !orderByOptions.contains(orderBy)) {
+    public static Sort getSort(String orderBy, Boolean reverse) {
+        if (orderBy == null || !ORDER_BY_OPTIONS.contains(orderBy)) {
             orderBy = "userID";
         }
 
-        boolean reverse;
-        if (reverseString == null) {
-            reverse = false;
-        } else {
-            reverse = Boolean.parseBoolean(reverseString);
-        }
-
-        if (reverse) {
+        if (Boolean.TRUE.equals(reverse)) {
             return Sort.by(Sort.Direction.DESC, orderBy);
         } else {
             return Sort.by(Sort.Direction.ASC, orderBy);
@@ -418,8 +401,8 @@ public class SearchHelper {
      * @param userRepository The repository containing all the User entities.
      * @return
      */
-    public static List<User> getSearchResultsOrderedByRelevance(String originalSearchQuery, UserRepository userRepository, String reverse) {
-        Sort idSort = getSort("userID", "false");
+    public static List<User> getSearchResultsOrderedByRelevance(String originalSearchQuery, UserRepository userRepository, Boolean reverse) {
+        Sort idSort = getSort("userID", false);
 
         String fullMatchSomeTermsQuery = getFullMatchesQueryString(originalSearchQuery);
         String fullMatchAllTermsQuery = getQueryStringWithoutOr(fullMatchSomeTermsQuery);
@@ -438,7 +421,7 @@ public class SearchHelper {
         addNewToList(matchList, addedIds, fullMatchesSomeTerms);
         addNewToList(matchList, addedIds, partialMatchesSomeTerms);
 
-        if (Boolean.parseBoolean(reverse)) {
+        if (Boolean.TRUE.equals(reverse)) {
             Collections.reverse(matchList);
         }
 
