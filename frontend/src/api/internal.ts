@@ -153,6 +153,14 @@ export type InventoryItem = {
   expires: string
 };
 
+export type CreateMarketplaceCard = {
+  creatorId: number,
+  section: "ForSale" | "Wanted" | "Exchange",
+  title: string,
+  description?: string,
+  keywordIds: number[],
+}
+
 export type CreateProduct = Omit<Product, 'created' | 'images'>;
 
 type OrderBy = 'userId' | 'relevance' | 'firstName' | 'middleName' | 'lastName' | 'nickname' | 'email';
@@ -678,4 +686,29 @@ export async function createInventoryItem(businessId: number, inventoryItem: Cre
     return 'Request failed: ' + error.response?.data.message;
   }
   return undefined;
+}
+
+/**
+ * Create a card for the community marketplace
+ *
+ * @param marketplaceCard The attributes to use when creating the marketplace card
+ * @return id of card if card is successfully created, an error string otherwise
+ */
+export async function createMarketplaceCard(marketplaceCard: CreateMarketplaceCard) : Promise<MaybeError<Number>> {
+  let response;
+  try {
+    response = await instance.post('/cards', marketplaceCard);
+  } catch (error) {
+    let status: number | undefined = error.response?.status;
+    if (status === undefined) return 'Failed to reach backend';
+    if (status === 400) return 'Incorrect marketplace card format: ' + error.response?.data.message;
+    if (status === 401) return 'Missing/Invalid access token';
+    if (status === 403) return 'A user cannot create a marketplace card for another user';
+
+    return 'Request failed: ' + error.response?.data.message;
+  }
+  if (!is<number>(response.data.cardId)) {
+    return 'Invalid response format';
+  }
+  return response.data.cardId;
 }
