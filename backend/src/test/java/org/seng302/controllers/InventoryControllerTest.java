@@ -945,7 +945,7 @@ public class InventoryControllerTest {
     @Test
     void retrieveSortedInventory_bySellBy_correctOrderOfInventoryWithNullBottom() throws Exception {
         MvcResult result = mockMvc
-                .perform(MockMvcRequestBuilders.get("/businesses/1/inventory").param("orderBy", "SellBy"))
+                .perform(MockMvcRequestBuilders.get("/businesses/1/inventory").param("orderBy", "sellBy"))
                 .andExpect(status().isOk()).andReturn();
 
         JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
@@ -972,7 +972,7 @@ public class InventoryControllerTest {
     @Test
     void retrieveSortedInventory_bySellByReverse_correctOrderOfInventoryWithNullTop() throws Exception {
         MvcResult result = mockMvc.perform(MockMvcRequestBuilders.get("/businesses/1/inventory")
-                .param("reverse", "true").param("orderBy", "SellBy")).andExpect(status().isOk()).andReturn();
+                .param("reverse", "true").param("orderBy", "sellBy")).andExpect(status().isOk()).andReturn();
 
         JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
         JSONArray responseBody = (JSONArray) parser.parse(result.getResponse().getContentAsString());
