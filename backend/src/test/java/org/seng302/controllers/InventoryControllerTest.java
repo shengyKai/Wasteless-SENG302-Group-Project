@@ -92,28 +92,53 @@ public class InventoryControllerTest {
     public void setup() throws Exception {
         MockitoAnnotations.openMocks(this);
 
-        testUser = new User.Builder().withFirstName("Andy").withMiddleName("Percy").withLastName("Elliot")
-                .withNickName("Ando").withEmail("123andyelliot@gmail.com").withPassword("password123")
-                .withDob("1987-04-12").withAddress(Location.covertAddressStringToLocation(
-                        "108,Albert Road,Ashburton,Christchurch,New Zealand,Canterbury,8041"))
+        testUser = new User.Builder()
+                .withFirstName("Andy")
+                .withMiddleName("Percy")
+                .withLastName("Elliot")
+                .withNickName("Ando")
+                .withEmail("123andyelliot@gmail.com")
+                .withPassword("password123")
+                .withDob("1987-04-12")
+                .withAddress(Location.covertAddressStringToLocation("108,Albert Road,Ashburton,Christchurch,New Zealand,Canterbury,8041"))
                 .build();
-        testBusiness = new Business.Builder().withBusinessType("Accommodation and Food Services")
-                .withDescription("DESCRIPTION").withName("BUSINESS_NAME")
-                .withAddress(Location.covertAddressStringToLocation(
-                        "108,Albert Road,Ashburton,Christchurch,New Zealand,Canterbury,8041"))
-                .withPrimaryOwner(testUser).build();
-        testProduct = new Product.Builder().withProductCode("BEANS").withBusiness(testBusiness)
-                .withDescription("some description").withManufacturer("manufacturer").withName("some Name")
-                .withRecommendedRetailPrice("15").build();
-        testProduct2 = new Product.Builder().withProductCode("HAM").withBusiness(testBusiness)
-                .withDescription("some description 2").withManufacturer("manufacturer 2").withName("some Name 2")
-                .withRecommendedRetailPrice("16").build();
-        testProduct3 = new Product.Builder().withProductCode("VEGE").withBusiness(testBusiness)
-                .withDescription("another description").withManufacturer("another manufacturer")
-                .withName("another Name").withRecommendedRetailPrice("17").build();
+        testBusiness = new Business.Builder()
+                .withBusinessType("Accommodation and Food Services")
+                .withDescription("DESCRIPTION")
+                .withName("BUSINESS_NAME")
+                .withAddress(Location.covertAddressStringToLocation("108,Albert Road,Ashburton,Christchurch,New Zealand,Canterbury,8041"))
+                .withPrimaryOwner(testUser)
+                .build();
+        testProduct = new Product.Builder()
+                .withProductCode("BEANS")
+                .withBusiness(testBusiness)
+                .withDescription("some description")
+                .withManufacturer("manufacturer")
+                .withName("some Name")
+                .withRecommendedRetailPrice("15")
+                .build();
+        testProduct2 = new Product.Builder()
+                .withProductCode("HAM")
+                .withBusiness(testBusiness)
+                .withDescription("some description 2")
+                .withManufacturer("manufacturer 2")
+                .withName("some Name 2")
+                .withRecommendedRetailPrice("16")
+                .build();
+        testProduct3 = new Product.Builder()
+                .withProductCode("VEGE")
+                .withBusiness(testBusiness)
+                .withDescription("another description")
+                .withManufacturer("another manufacturer")
+                .withName("another Name")
+                .withRecommendedRetailPrice("17")
+                .build();
         // this product will only have the bare minimum details to test null values for
         // sorting(some sort options are optional fields)
-        testProductNull = new Product.Builder().withProductCode("ZZZ").withBusiness(testBusiness).withName("zzz")
+        testProductNull = new Product.Builder()
+                .withProductCode("ZZZ")
+                .withBusiness(testBusiness)
+                .withName("zzz")
                 .build();
 
         List<InventoryItem> inventory = new ArrayList<>();
@@ -151,8 +176,7 @@ public class InventoryControllerTest {
         Business businessSpy = spy(testBusiness);
         Product productSpy = spy(testProduct);
         when(businessRepository.getBusinessById(any())).thenReturn(businessSpy); // use our business
-        when(productRepository.getProductByBusinessAndProductCode(any(), any())).thenReturn(productSpy); // use our
-                                                                                                         // product
+        when(productRepository.getProductByBusinessAndProductCode(any(), any())).thenReturn(productSpy); // use our product
         doNothing().when(businessSpy).checkSessionPermissions(any()); // mock successful authentication
 
         mockMvc.perform(MockMvcRequestBuilders
@@ -162,11 +186,13 @@ public class InventoryControllerTest {
                 .andExpect(status().isOk());
     }
 
+
     @Test
     void addInventory_normalUser_cannotAddInventory403() throws Exception {
-        try (MockedStatic<AuthenticationTokenManager> authenticationTokenManager = Mockito
-                .mockStatic(AuthenticationTokenManager.class)) {
-            authenticationTokenManager.when(() -> AuthenticationTokenManager.checkAuthenticationToken(any()))
+        try (MockedStatic<AuthenticationTokenManager> authenticationTokenManager = Mockito.mockStatic(AuthenticationTokenManager.class)) {
+            authenticationTokenManager
+                    .when(() -> AuthenticationTokenManager
+                            .checkAuthenticationToken(any()))
                     .then(invocation -> null); // mock a valid session
             Business businessSpy = spy(testBusiness);
             when(businessRepository.getBusinessById(any())).thenReturn(businessSpy);
@@ -209,11 +235,13 @@ public class InventoryControllerTest {
         Business businessSpy = spy(testBusiness);
         Product productSpy = spy(testProduct);
         when(businessRepository.getBusinessById(any())).thenReturn(businessSpy); // use our business
-        when(productRepository.getProductByBusinessAndProductCode(any(), any())).thenReturn(productSpy); // use our
-                                                                                                         // product
+        when(productRepository.getProductByBusinessAndProductCode(any(), any())).thenReturn(productSpy); // use our product
         doNothing().when(businessSpy).checkSessionPermissions(any()); // mock successful authentication
 
-        mockMvc.perform(MockMvcRequestBuilders.post("/businesses/1/inventory")).andExpect(status().isBadRequest());
+
+        mockMvc.perform(MockMvcRequestBuilders
+                .post("/businesses/1/inventory"))
+                .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -221,8 +249,7 @@ public class InventoryControllerTest {
         Business businessSpy = spy(testBusiness);
         Product productSpy = spy(testProduct);
         when(businessRepository.getBusinessById(any())).thenReturn(businessSpy); // use our business
-        when(productRepository.getProductByBusinessAndProductCode(any(), any())).thenCallRealMethod(); // use real
-                                                                                                       // method
+        when(productRepository.getProductByBusinessAndProductCode(any(), any())).thenCallRealMethod(); // use real method
         doNothing().when(businessSpy).checkSessionPermissions(any()); // mock successful authentication
 
         mockMvc.perform(MockMvcRequestBuilders
@@ -238,8 +265,7 @@ public class InventoryControllerTest {
         Product productSpy = spy(testProduct);
         Optional<Product> optionalProduct = Optional.of(productSpy);
         when(businessRepository.getBusinessById(any())).thenReturn(businessSpy); // use our business
-        when(productRepository.getProductByBusinessAndProductCode(any(), any()))
-                .thenThrow(new ResponseStatusException(HttpStatus.FORBIDDEN)); // make this method always throw
+        when(productRepository.getProductByBusinessAndProductCode(any(), any())).thenThrow(new ResponseStatusException(HttpStatus.FORBIDDEN)); // make this method always throw
         doNothing().when(businessSpy).checkSessionPermissions(any()); // mock successful authentication
 
         mockMvc.perform(MockMvcRequestBuilders
@@ -249,13 +275,13 @@ public class InventoryControllerTest {
                 .andExpect(status().isForbidden());
     }
 
+
     @Test
     void addInventory_inventoryCreated_inventorySavedToDatabase() throws Exception {
         Business businessSpy = spy(testBusiness);
         Product productSpy = spy(testProduct);
         when(businessRepository.getBusinessById(any())).thenReturn(businessSpy); // use our business
-        when(productRepository.getProductByBusinessAndProductCode(any(), any())).thenReturn(productSpy); // use our
-                                                                                                         // product
+        when(productRepository.getProductByBusinessAndProductCode(any(), any())).thenReturn(productSpy); // use our product
         doNothing().when(businessSpy).checkSessionPermissions(any()); // mock successful authentication
 
         mockMvc.perform(MockMvcRequestBuilders
@@ -944,7 +970,7 @@ public class InventoryControllerTest {
     }
 
     @Test
-    void retrieveSortedInventory_bySellBy_correctOrderOfInventoryWithNullTop() throws Exception {
+    void retrieveSortedInventory_bySellByReverse_correctOrderOfInventoryWithNullTop() throws Exception {
         MvcResult result = mockMvc.perform(MockMvcRequestBuilders.get("/businesses/1/inventory")
                 .param("reverse", "true").param("orderBy", "SellBy")).andExpect(status().isOk()).andReturn();
 
@@ -998,7 +1024,7 @@ public class InventoryControllerTest {
     }
 
     @Test
-    void retrieveSortedInventory_byBestBefore_correctOrderOfInventoryWithNullTop() throws Exception {
+    void retrieveSortedInventory_byBestBeforeReverse_correctOrderOfInventoryWithNullTop() throws Exception {
         MvcResult result = mockMvc.perform(MockMvcRequestBuilders.get("/businesses/1/inventory")
                 .param("reverse", "true").param("orderBy", "bestBefore")).andExpect(status().isOk()).andReturn();
 
@@ -1052,7 +1078,7 @@ public class InventoryControllerTest {
     }
 
     @Test
-    void retrieveSortedInventory_byExpiry_correctOrderOfInventoryWithNullTop() throws Exception {
+    void retrieveSortedInventory_byExpiryReverse_correctOrderOfInventoryWithNullTop() throws Exception {
         MvcResult result = mockMvc.perform(MockMvcRequestBuilders.get("/businesses/1/inventory")
                 .param("reverse", "true").param("orderBy", "expires")).andExpect(status().isOk()).andReturn();
 

@@ -117,7 +117,6 @@ public class InventoryController {
                                 @RequestParam(required = false) String page,
                                 @RequestParam(required = false) String resultsPerPage,
                                 @RequestParam(required = false) String reverse) {
-        // Todo add sorting and pagination (t127 and t171)
         String statusMessage = String.format("Get inventory of business with ID %d", businessId);
         logger.info(statusMessage);
         List<InventoryItem> inventory = getInventoryFromRequest(businessId, request);
