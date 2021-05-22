@@ -39,6 +39,12 @@
           <SaleItem :business-id="businessId" :sale-item="sale" />
         </v-col>
       </v-row>
+      <v-row justify="center">
+        <v-pagination
+          v-model="page"
+          :length="totalPages"
+        />
+      </v-row>
     </v-container>
   </div>
 </template>
@@ -54,6 +60,8 @@ export default {
     return {
       salesList: [],
       business: Object,
+      page: 1,
+      totalPages: 3,
     };
   },
   methods: {
