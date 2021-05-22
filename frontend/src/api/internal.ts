@@ -120,6 +120,16 @@ export type Product = {
   countryOfSale?: string,
 };
 
+export type CreateInventoryItem = {
+  productId: string,
+  quantity: number,
+  pricePerItem?: number,
+  totalPrice?: number,
+  manufactured?: string,
+  sellBy?: string,
+  bestBefore?: string,
+  expires: string
+};
 export type Sale = {
   id: number,
   inventoryItem: InventoryItem,
@@ -129,6 +139,7 @@ export type Sale = {
   created: string,
   closes?: string,
 };
+
 
 export type InventoryItem = {
   id: number,
@@ -142,9 +153,17 @@ export type InventoryItem = {
   expires: string
 };
 
+export type CreateMarketplaceCard = {
+  creatorId: number,
+  section: "ForSale" | "Wanted" | "Exchange",
+  title: string,
+  description?: string,
+  keywordIds: number[],
+}
+
 export type CreateProduct = Omit<Product, 'created' | 'images'>;
 
-type OrderBy = 'userId' | 'relevance' | 'firstName' | 'middleName' | 'lastName' | 'nickname' | 'email';
+type UserOrderBy = 'userId' | 'relevance' | 'firstName' | 'middleName' | 'lastName' | 'nickname' | 'email';
 
 /**
  * Sends a search query to the backend.
@@ -156,7 +175,7 @@ type OrderBy = 'userId' | 'relevance' | 'firstName' | 'middleName' | 'lastName' 
  * @param reverse Specifies whether to reverse the search results (default order is descending for relevance and ascending for all other orders)
  * @returns List of user infos for the current page or an error message
  */
-export async function search(query: string, pageIndex: number, resultsPerPage: number, orderBy: OrderBy, reverse: boolean): Promise<MaybeError<User[]>> {
+export async function search(query: string, pageIndex: number, resultsPerPage: number, orderBy: UserOrderBy, reverse: boolean): Promise<MaybeError<User[]>> {
   let response;
   try {
     response = await instance.get('/users/search', {
@@ -441,6 +460,7 @@ export async function deleteImage(businessId: number, productId: string, imageId
   return undefined;
 }
 
+type ProductOrderBy = 'name' | 'description' | 'manufacturer' | 'recommendedRetailPrice' | 'created' | 'productCode'
 
 /**
  * Get all products for that business
@@ -451,7 +471,7 @@ export async function deleteImage(businessId: number, productId: string, imageId
  * @param reverse
  * @return a list of products
  */
-export async function getProducts(businessId: number, page: number, resultsPerPage: number, orderBy: string, reverse: boolean): Promise<MaybeError<Product[]>> {
+export async function getProducts(businessId: number, page: number, resultsPerPage: number, orderBy: ProductOrderBy, reverse: boolean): Promise<MaybeError<Product[]>> {
   let response;
   try {
     response = await instance.get(`/businesses/${businessId}/products`, {
@@ -500,7 +520,6 @@ export async function getProductCount(buisnessId: number): Promise<MaybeError<nu
 
   return response.data.count;
 }
-
 
 /**
  * Fetches a business with the given id.
@@ -580,15 +599,28 @@ export async function removeBusinessAdmin(businessId: number, userId: number): P
   return undefined;
 }
 
+type SalesOrderBy = 'created' | 'closing' | 'productCode' | 'productName' | 'quantity' | 'price'
+
 /**
- * Gets all of the sale listings for a given business
- *
+ * Fetches a page of sale listings for the given business
  * @param businessId The ID of the business
+ * @param page Page to fetch (1 indexed)
+ * @param resultsPerPage Maximum number of results per page
+ * @param orderBy Parameter to order the results by
+ * @param reverse Whether to reverse the results (default ascending)
+ * @returns List of sales or a string error message
  */
-export async function getBusinessSales(businessId: number): Promise<MaybeError<Sale[]>> {
+export async function getBusinessSales(businessId: number, page: number, resultsPerPage: number, orderBy: SalesOrderBy, reverse: boolean): Promise<MaybeError<Sale[]>> {
   let response;
   try {
-    response = await instance.get(`/businesses/${businessId}/listings`);
+    response = await instance.get(`/businesses/${businessId}/listings`, {
+      params: {
+        orderBy,
+        page,
+        resultsPerPage,
+        reverse,
+      }
+    });
   } catch (error) {
     let status: number | undefined = error.response?.status;
     if (status === undefined) return 'Failed to reach backend';
@@ -600,6 +632,28 @@ export async function getBusinessSales(businessId: number): Promise<MaybeError<S
     return "Response is not Sale array";
   }
   return response.data;
+}
+
+/**
+ * Queries the total number of sale listings
+ * @param businessId Business ID to query
+ * @returns Total sale listing count or a string error
+ */
+export async function getBusinessSalesCount(businessId: number): Promise<MaybeError<number>> {
+  let response;
+  try {
+    response = await instance.get(`/businesses/${businessId}/listings/count`);
+  } catch (error) {
+    let status: number | undefined = error.response?.status;
+    if (status === undefined) return 'Failed to reach backend';
+    if (status === 401) return 'Missing/Invalid access token';
+    if (status === 406) return 'The given business does not exist';
+    return 'Request failed: ' + status;
+  }
+  if (!is<number>(response.data?.count)) {
+    return "Response is not a number";
+  }
+  return response.data.count;
 }
 
 /**
@@ -649,4 +703,48 @@ export async function getInventoryCount(businessId: number): Promise<MaybeError<
   }
 
   return response.data.count;
+}
+
+/**
+ * Add an inventory item to the business inventory.
+ *
+ * @param businessId Business id to identify with the database to add the inventory to the correct business
+ * @param inventoryItem The properties to create a inventory with
+ */
+export async function createInventoryItem(businessId: number, inventoryItem: CreateInventoryItem): Promise<MaybeError<undefined>> {
+  try {
+    await instance.post(`/businesses/${businessId}/inventory`, inventoryItem);
+  } catch (error) {
+    let status: number | undefined = error.response?.status;
+    if (status === undefined) return 'Failed to reach backend';
+    if (status === 403) return 'Operation not permitted';
+
+    return 'Request failed: ' + error.response?.data.message;
+  }
+  return undefined;
+}
+
+/**
+ * Create a card for the community marketplace
+ *
+ * @param marketplaceCard The attributes to use when creating the marketplace card
+ * @return id of card if card is successfully created, an error string otherwise
+ */
+export async function createMarketplaceCard(marketplaceCard: CreateMarketplaceCard) : Promise<MaybeError<Number>> {
+  let response;
+  try {
+    response = await instance.post('/cards', marketplaceCard);
+  } catch (error) {
+    let status: number | undefined = error.response?.status;
+    if (status === undefined) return 'Failed to reach backend';
+    if (status === 400) return 'Incorrect marketplace card format: ' + error.response?.data.message;
+    if (status === 401) return 'Missing/Invalid access token';
+    if (status === 403) return 'A user cannot create a marketplace card for another user';
+
+    return 'Request failed: ' + error.response?.data.message;
+  }
+  if (!is<number>(response.data.cardId)) {
+    return 'Invalid response format';
+  }
+  return response.data.cardId;
 }

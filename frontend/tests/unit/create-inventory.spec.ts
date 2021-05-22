@@ -5,9 +5,14 @@ import { createLocalVue, Wrapper, mount } from "@vue/test-utils";
 import CreateInventory from "@/components/BusinessProfile/CreateInventory.vue";
 import { castMock, flushQueue } from "./utils";
 import { getStore, resetStoreForTesting } from "@/store";
+import * as api from '@/api/internal';
 
 Vue.use(Vuetify);
 
+jest.mock('@/api/internal', () => ({
+  createInventoryItem: jest.fn(),
+}));
+const createInventoryItem = castMock(api.createInventoryItem);
 // Characters that are in the set of letters, numbers, spaces and punctuation.
 const validQuantityCharacters = [
   "0",
@@ -73,6 +78,7 @@ describe("CreateInventory.vue", () => {
   beforeEach(() => {
     localVue.use(Vuex);
     const vuetify = new Vuetify();
+    jest.clearAllMocks();
 
     // Creating wrapper around CreateInventory with data-app to appease vuetify
     const App = localVue.component("App", {
@@ -275,4 +281,36 @@ describe("CreateInventory.vue", () => {
       expect(wrapper.vm.valid).toBeFalsy();
     }
   );
+
+  it("calls api endpoint with value when create button pressed", async ()=> {
+    await populateRequiredFields();
+    createInventoryItem.mockResolvedValue(undefined); // pretend everything is A-OK
+    await Vue.nextTick();
+    await findCreateButton().trigger('click');
+    await Vue.nextTick();
+
+    expect(createInventoryItem).toBeCalledWith(90, {
+      productId: "ABC-XYZ-012-789",
+      quantity: 2,
+      expires: "2030-05-17",
+    });
+    expect(wrapper.emitted().closeDialog).toBeTruthy();
+  });
+
+  it("Closes the dialog when close button pressed", async ()=> {
+    await findCloseButton().trigger('click');
+    await  Vue.nextTick();
+    expect(createInventoryItem).toBeCalledTimes(0);
+    expect(wrapper.emitted().closeDialog).toBeTruthy();
+  });
+
+  it("displays an error code when an error is raised", async ()=>{
+    await populateRequiredFields();
+    createInventoryItem.mockResolvedValue("Hey there was an error");
+    await Vue.nextTick();
+    await findCreateButton().trigger('click');
+    await Vue.nextTick();
+    expect(appWrapper.text()).toContain("Hey there was an error");
+    expect(wrapper.emitted().closeDialog).toBeFalsy();
+  });
 });

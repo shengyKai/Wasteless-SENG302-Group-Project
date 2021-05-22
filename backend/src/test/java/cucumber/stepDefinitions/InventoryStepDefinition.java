@@ -24,6 +24,7 @@ import org.springframework.web.context.WebApplicationContext;
 import javax.servlet.http.Cookie;
 import java.io.UnsupportedEncodingException;
 import java.text.ParseException;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -155,6 +156,11 @@ public class InventoryStepDefinition  {
 
         List<Product> catalogue = productRepository.findAllByBusiness(businessContext.getLast());
         List<InventoryItem> inventory = inventoryItemRepository.getInventoryByCatalogue(catalogue);
+
+        //because now the inventory sorts by product code on default, so it has to be sorted before comparing
+        Comparator<InventoryItem> sort = Comparator.comparing(inventoryItem -> inventoryItem.getProduct().getProductCode());
+        inventory.sort(sort);
+        
         JSONArray jsonArray = new JSONArray();
         for (InventoryItem item : inventory) {
             jsonArray.appendElement(item.constructJSONObject());

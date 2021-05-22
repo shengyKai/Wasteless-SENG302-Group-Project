@@ -7,6 +7,9 @@ import javax.persistence.*;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalUnit;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 
 @Entity
@@ -33,6 +36,10 @@ public class MarketplaceCard {
 
     @Column(nullable = false)
     private Instant closes;
+
+    @ManyToMany
+    @JoinTable(name = "card_keywords")
+    private List<Keyword> keywords = new ArrayList<>();
 
 
     /**
@@ -99,6 +106,15 @@ public class MarketplaceCard {
      * @param title New title
      */
     public void setTitle(String title) {
+        if (title == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Card title must be provided");
+        }
+        if (title.isEmpty() || title.length() > 50) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Card title must be between 1-50 characters long");
+        }
+        if (!title.matches("^[ \\d\\p{Punct}\\p{L}]*$")) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Card title must only contain letters, numbers, spaces and punctuation");
+        }
         this.title = title;
     }
 
@@ -107,6 +123,16 @@ public class MarketplaceCard {
      * @param description New description
      */
     public void setDescription(String description) {
+        if (description == null || description.isEmpty()) {
+            this.description = null;
+            return;
+        }
+        if (description.length() > 200) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Card description must not be longer than 200 characters");
+        }
+        if (!description.matches("^[\\p{Space}\\d\\p{Punct}\\p{L}]*$")) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Card description must only contain letters, numbers, whitespace and punctuation");
+        }
         this.description = description;
     }
 
@@ -115,7 +141,24 @@ public class MarketplaceCard {
      * @param closes New closing date and time
      */
     public void setCloses(Instant closes) {
+        if (closes == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Closing time cannot be null");
+        }
+        if (closes.isBefore(Instant.now())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Closing time cannot be before creation");
+        }
         this.closes = closes;
+    }
+
+    /**
+     * Adds and validates a keyword to this Marketplace Card
+     * @param keyword Keyword to add to card
+     */
+    public void addKeyword(Keyword keyword) {
+        if (keyword == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Keyword cannot be null");
+        }
+        keywords.add(keyword);
     }
 
     /**
@@ -151,7 +194,7 @@ public class MarketplaceCard {
 
         /**
          * Gets the name of the section.
-         * Compatible with api
+         * Same as in api spec
          * @return section name
          */
         public String getName() {
@@ -168,6 +211,7 @@ public class MarketplaceCard {
         private String title;
         private String description;
         private Instant closes;
+        private List<Keyword> keywords = new ArrayList<>();
 
         /**
          * Sets the builder's creator.
@@ -242,11 +286,35 @@ public class MarketplaceCard {
         }
 
         /**
+         * Adds a single keyword to this builder
+         * @param keyword keyword to add
+         * @return Builder with keyword added
+         */
+        public Builder addKeyword(Keyword keyword) {
+            keywords.add(keyword);
+            return this;
+        }
+
+        /**
+         * Adds all the keywords in the keyword collection to this builder
+         * @param keywords keywords to add
+         * @return Builder with keywords added
+         */
+        public Builder addKeywords(Collection<Keyword> keywords) {
+            this.keywords.addAll(keywords);
+            return this;
+        }
+
+        /**
          * Builds the marketplace card
          * @return Newly created marketplace card
          */
         public MarketplaceCard build() {
             var card = new MarketplaceCard();
+
+            if (creator == null) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Card creator not provided");
+            }
             card.creator = creator;
             card.setSection(section);
             card.setTitle(title);
@@ -256,6 +324,9 @@ public class MarketplaceCard {
                 card.setCloses(card.created.plus(14, ChronoUnit.DAYS));
             } else {
                 card.setCloses(closes);
+            }
+            for (Keyword keyword : keywords) {
+                card.addKeyword(keyword);
             }
             return card;
         }
