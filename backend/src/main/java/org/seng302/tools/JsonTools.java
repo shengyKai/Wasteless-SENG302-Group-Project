@@ -29,6 +29,13 @@ public class JsonTools {
         }
     }
 
+    /**
+     * This method will return the field with the given name from the given json as a long if it can be converted to
+     * that format, or will throw a bad request exception if the field cannot be converted to that format.
+     * @param json The JSONObject to retrieve the field from.
+     * @param fieldName The name of the field to retrieve.
+     * @return The value from the field
+     */
     public static long parseLongFromJsonField(JSONObject json, String fieldName) {
         try {
             return Long.parseLong(json.getAsString(fieldName));
@@ -37,16 +44,34 @@ public class JsonTools {
         }
     }
 
+    /**
+     * This method will return the field with the given name from the given json as a long[] if it can be converted to
+     * that format, or will throw a bad request exception if the field cannot be converted to that format.
+     * @param json The JSONObject to retrieve the field from.
+     * @param fieldName The name of the field to retrieve.
+     * @return The value from the field
+     */
     public static long[] parseLongArrayFromJsonField(JSONObject json, String fieldName) {
         try {
             Object object = json.get(fieldName);
+            if (object instanceof long[]) {
+                return (long[]) object;
+            }
+            if (object instanceof int[]) {
+                int[] intArray = (int[]) object;
+                long[] longArray = new long[intArray.length];
+                for (int i = 0; i < intArray.length; i++) {
+                    longArray[i] = intArray[i];
+                }
+                return longArray;
+            }
             List<Integer> list = (List<Integer>) object;
             long[] array = new long[list.size()];
             for (int i = 0; i < list.size(); i++) {
                 array[i] = list.get(i);
             }
             return array;
-        } catch (ClassCastException e) {
+        } catch (ClassCastException | NullPointerException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, String.format("%s must be an array of numbers", fieldName));
         }
     }

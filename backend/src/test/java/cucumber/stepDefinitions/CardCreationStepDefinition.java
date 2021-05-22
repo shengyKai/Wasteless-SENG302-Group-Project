@@ -49,6 +49,11 @@ public class CardCreationStepDefinition {
     private MvcResult mvcResult;
     private MarketplaceCard createdCard;
 
+    /**
+     * Take a string of keyword names and return an array with the id number of those keywords
+     * @param keywordString A string of comma seperated names
+     * @return An array of long keyword ids
+     */
     private long[] convertKeywordStringToIdArray(String keywordString) {
         List<Keyword> allKeywords = (List<Keyword>) keywordRepository.findAll();
         String[] keywordNames = keywordString.split(",");
@@ -63,6 +68,13 @@ public class CardCreationStepDefinition {
         return keywordIds;
     }
 
+    /**
+     * Create a marketplace card from a map object where the key is the name of the attribute and the value is the
+     * value of the attribute
+     * @param cardProperties A map of string representing the properties of the card
+     * @return A card constructed from the given properties
+     * @throws Exception
+     */
     private MarketplaceCard createCardFromMap(Map<String, String> cardProperties) throws Exception {
         Optional<User> optionalUser = userRepository.findById(requestContext.getLoggedInId());
         if (optionalUser.isEmpty()) {
