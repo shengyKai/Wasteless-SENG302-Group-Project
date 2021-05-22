@@ -152,6 +152,8 @@ export default {
       expires: "",
       expiresValid: true,
       datesValid: true,
+      minDate: new Date("1500-01-01"),
+      maxDate: new Date("5000-01-01"),
       //expires: new Date().toISOString().slice(0,10), //Keep this so the next person know what to use if he/she wan
 
       maxCharRules: [
@@ -197,7 +199,9 @@ export default {
       let sellByDate = new Date(this.manufactured);
       let manufacturedDate = new Date(this.manufactured);
       this.manufacturedValid = false;
-      if (manufacturedDate > this.today) {
+      if (manufacturedDate < this.minDate || manufacturedDate > this.maxDate) {
+        this.errorMessage = "The manufactured date cannot be before 1500 AD or after 5000 AD";
+      } else if (manufacturedDate > this.today) {
         this.errorMessage = "The manufactured date is after today!";
       } else if (manufacturedDate > sellByDate) {
         this.errorMessage = "The manufactured date cannot be after the sell by date!";
@@ -213,7 +217,9 @@ export default {
       let sellByDate = new Date(this.sellBy);
       let manufacturedDate = new Date(this.manufactured);
       this.sellByValid = false;
-      if (sellByDate < this.today) {
+      if (sellByDate < this.minDate || sellByDate > this.maxDate) {
+        this.errorMessage = "The sell by date cannot be before 1500 AD or after 5000 AD";
+      } else if (sellByDate < this.today) {
         this.errorMessage = "The sell by date is before today!";
       } else if (sellByDate < manufacturedDate) {
         this.errorMessage = "The sell by date cannot be before the manufactured date!";
@@ -231,7 +237,9 @@ export default {
       let bestBeforeDate = new Date(this.bestBefore);
       let sellByDate = new Date(this.sellBy);
       this.bestBeforeValid = false;
-      if (bestBeforeDate < this.today) {
+      if (bestBeforeDate < this.minDate || bestBeforeDate > this.maxDate) {
+        this.errorMessage = "The best before date cannot be before 1500 AD or after 5000 AD";
+      } else if (bestBeforeDate < this.today) {
         this.errorMessage = "The best before date is before today!";
       } else if (bestBeforeDate < sellByDate) {
         this.errorMessage = "The best before date cannot be before the sell by date!";
@@ -248,7 +256,9 @@ export default {
       let expiresDate = new Date(this.expires);
       let bestBeforeDate = new Date(this.bestBefore);
       this.expiresValid = false;
-      if (expiresDate < this.today) {
+      if (expiresDate < this.minDate || expiresDate > this.maxDate) {
+        this.errorMessage = "The expires date cannot be before 1500 AD or after 5000 AD";
+      } else if (expiresDate < this.today) {
         this.errorMessage = "The expires date is before today!";
       } else if (expiresDate < bestBeforeDate) {
         this.errorMessage = "The expires date cannot be before the best before date!";
