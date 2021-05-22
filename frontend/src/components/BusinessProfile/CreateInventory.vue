@@ -45,7 +45,6 @@
                     prefix="$"
                     :rules="maxCharRules.concat(smallPriceRules)"
                     outlined
-                    @click=manufacturedBeforeSellBy()
                   />
                 </v-col>
                 <!-- INPUT: Total Price. Only allows number or '.'but come with 2 digit -->
@@ -109,8 +108,9 @@
             </v-btn>
             <v-btn
               type="submit"
+              label="submit"
               color="primary"
-              :disabled="!valid"
+              :disabled="!valid || !datesValid"
               @click.prevent="CreateInventory">
               Create
             </v-btn>
@@ -144,9 +144,14 @@ export default {
       pricePerItem: "",
       totalPrice: "",
       manufactured: "",
+      manufacturedValid: true,
       sellBy: "",
+      sellByValid: true,
       bestBefore: "",
+      bestBeforeValid: true,
       expires: "",
+      expiresValid: true,
+      datesValid: true,
       //expires: new Date().toISOString().slice(0,10), //Keep this so the next person know what to use if he/she wan
 
       maxCharRules: [
@@ -179,23 +184,35 @@ export default {
       console.log(this.expires);
       return;
     },
+    async checkAllDatesValid() {
+      //checks the booleans for all the dates are valid
+      if (this.manufacturedValid && this.sellByValid && this.bestBeforeValid && this.expiresValid) {
+        this.datesValid = true;
+      } else {
+        this.datesValid = false;
+      }
+    },
     async checkManufacterDateValid() {
       //checks manufactured cannot be after today and is before sell by
       let sellByDate = new Date(this.manufactured);
       let manufacturedDate = new Date(this.manufactured);
+      this.manufacturedValid = false;
       if (manufacturedDate > this.today) {
         this.errorMessage = "The manufactured date is after today!";
       } else if (manufacturedDate > sellByDate) {
         this.errorMessage = "The manufactured date cannot be after the sell by date!";
       } else {
         this.errorMessage = undefined;
+        this.manufacturedValid = true;
       }
+      await this.checkAllDatesValid();
     },
     async checkSellByDateValid() {
       //checks sell by date cannot be before today and is after manufactured and before best before
       let bestBeforeDate = new Date(this.bestBefore);
       let sellByDate = new Date(this.sellBy);
       let manufacturedDate = new Date(this.manufactured);
+      this.sellByValid = false;
       if (sellByDate < this.today) {
         this.errorMessage = "The sell by date is before today!";
       } else if (sellByDate < manufacturedDate) {
@@ -204,13 +221,16 @@ export default {
         this.errorMessage = "The sell by date cannot be after the best before date!";
       } else {
         this.errorMessage = undefined;
+        this.sellByValid = true;
       }
+      await this.checkAllDatesValid();
     },
     async checkBestBeforeDateValid() {
       //checks best before date cannot be before today and is after sell by date
       let expiresDate = new Date(this.expires);
       let bestBeforeDate = new Date(this.bestBefore);
       let sellByDate = new Date(this.sellBy);
+      this.bestBeforeValid = false;
       if (bestBeforeDate < this.today) {
         this.errorMessage = "The best before date is before today!";
       } else if (bestBeforeDate < sellByDate) {
@@ -219,19 +239,24 @@ export default {
         this.errorMessage = "The best before date cannot be after the expires date!";
       } else {
         this.errorMessage = undefined;
+        this.bestBeforeValid = true;
       }
+      await this.checkAllDatesValid();
     },
     async checkExpiresDateVaild() {
       //checks expires date cannot be before today and is after best before date
       let expiresDate = new Date(this.expires);
       let bestBeforeDate = new Date(this.bestBefore);
+      this.expiresValid = false;
       if (expiresDate < this.today) {
         this.errorMessage = "The expires date is before today!";
       } else if (expiresDate < bestBeforeDate) {
         this.errorMessage = "The expires date cannot be before the best before date!";
       } else {
         this.errorMessage = undefined;
+        this.expiresValid = true;
       }
+      await this.checkAllDatesValid();
     }
   },
 };

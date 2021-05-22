@@ -302,7 +302,8 @@ describe("CreateInventory.vue", () => {
                 expires: expiresDate
             });
             await Vue.nextTick();
-            expect(wrapper.vm.valid).toBeTruthy();
+            const buttonWrapper = wrapper.find("button[label='submit']") as any;
+            expect(buttonWrapper.element.disabled).toBeFalsy();
         })
 
         it("Valid when manufactured date before today", async () => {
@@ -312,7 +313,8 @@ describe("CreateInventory.vue", () => {
                 manufactured: manufacturedDate
             });
             await Vue.nextTick();
-            expect(wrapper.vm.valid).toBeTruthy();
+            const buttonWrapper = wrapper.find("button[label='submit']") as any;
+            expect(buttonWrapper.element.disabled).toBeFalsy();
         })
 
         it("Invalid when manufactured date after today", async () => {
@@ -322,7 +324,8 @@ describe("CreateInventory.vue", () => {
                 manufactured: manufacturedDate
             });
             await Vue.nextTick();
-            expect(wrapper.vm.valid).toBeFalsy();
+            const buttonWrapper = wrapper.find("button[label='submit']") as any;
+            expect(buttonWrapper.element.disabled).toBeTruthy();
         })
 
         it("Valid when manufactured date before sell by date", async () => {
@@ -334,7 +337,8 @@ describe("CreateInventory.vue", () => {
                 sellBy: sellByDate
             });
             await Vue.nextTick();
-            expect(wrapper.vm.valid).toBeTruthy();
+            const buttonWrapper = wrapper.find("button[label='submit']") as any;
+            expect(buttonWrapper.element.disabled).toBeFalsy();
         })
 
         it("Invalid when manufactured date after sell by date", async () => {
@@ -346,7 +350,8 @@ describe("CreateInventory.vue", () => {
                 sellBy: sellByDate
             });
             await Vue.nextTick();
-            expect(wrapper.vm.valid).toBeFalsy();
+            const buttonWrapper = wrapper.find("button[label='submit']") as any;
+            expect(buttonWrapper.element.disabled).toBeTruthy();
         })
 
         it("Invalid when manufactured date before 1000 AD", async () => {
@@ -356,7 +361,8 @@ describe("CreateInventory.vue", () => {
                 manufactured: manufacturedDate
             });
             await Vue.nextTick();
-            expect(wrapper.vm.valid).toBeFalsy();
+            const buttonWrapper = wrapper.find("button[label='submit']") as any;
+            expect(buttonWrapper.element.disabled).toBeTruthy();
         })
 
         it("Invalid when manufactured date after 10000 AD", async () => {
@@ -366,7 +372,8 @@ describe("CreateInventory.vue", () => {
                 manufactured: manufacturedDate
             });
             await Vue.nextTick();
-            expect(wrapper.vm.valid).toBeFalsy();
+            const buttonWrapper = wrapper.find("button[label='submit']") as any;
+            expect(buttonWrapper.element.disabled).toBeTruthy();
         })
 
         it("Valid when sell by date after today", async () => {
@@ -376,7 +383,8 @@ describe("CreateInventory.vue", () => {
                 sellBy: sellByDate
             });
             await Vue.nextTick();
-            expect(wrapper.vm.valid).toBeTruthy();
+            const buttonWrapper = wrapper.find("button[label='submit']") as any;
+            expect(buttonWrapper.element.disabled).toBeFalsy();
         })
 
         it("Invalid when sell by date before today", async () => {
@@ -386,7 +394,8 @@ describe("CreateInventory.vue", () => {
                 sellBy: sellByDate
             });
             await Vue.nextTick();
-            expect(wrapper.vm.valid).toBeFalsy();
+            const buttonWrapper = wrapper.find("button[label='submit']") as any;
+            expect(buttonWrapper.element.disabled).toBeTruthy();
         })
 
         it("Valid when sell by date after manufactured date", async () => {
@@ -398,7 +407,8 @@ describe("CreateInventory.vue", () => {
                 sellBy: sellByDate
             });
             await Vue.nextTick();
-            expect(wrapper.vm.valid).toBeTruthy();
+            const buttonWrapper = wrapper.find("button[label='submit']") as any;
+            expect(buttonWrapper.element.disabled).toBeFalsy();
         })
 
         it("Invalid when sell by date before manufactured date", async () => {
@@ -410,7 +420,8 @@ describe("CreateInventory.vue", () => {
                 sellBy: sellByDate
             });
             await Vue.nextTick();
-            expect(wrapper.vm.valid).toBeFalsy();
+            const buttonWrapper = wrapper.find("button[label='submit']") as any;
+            expect(buttonWrapper.element.disabled).toBeTruthy();
         })
 
         it("Valid when sell by date before best before date", async () => {
@@ -422,7 +433,8 @@ describe("CreateInventory.vue", () => {
                 sellBy: sellByDate
             });
             await Vue.nextTick();
-            expect(wrapper.vm.valid).toBeTruthy();
+            const buttonWrapper = wrapper.find("button[label='submit']") as any;
+            expect(buttonWrapper.element.disabled).toBeFalsy();
         })
 
         it("Invalid when sell by date after best before date", async () => {
@@ -434,7 +446,8 @@ describe("CreateInventory.vue", () => {
                 sellBy: sellByDate
             });
             await Vue.nextTick();
-            expect(wrapper.vm.valid).toBeFalsy();
+            const buttonWrapper = wrapper.find("button[label='submit']") as any;
+            expect(buttonWrapper.element.disabled).toBeTruthy();
         })
 
         it("Invalid when sell by date before 1000 AD", async () => {
@@ -444,7 +457,8 @@ describe("CreateInventory.vue", () => {
                 sellBy: sellByDate
             });
             await Vue.nextTick();
-            expect(wrapper.vm.valid).toBeFalsy();
+            const buttonWrapper = wrapper.find("button[label='submit']") as any;
+            expect(buttonWrapper.element.disabled).toBeTruthy();
         })
 
         it("Invalid when sell by date after 10000 AD", async () => {
@@ -454,7 +468,8 @@ describe("CreateInventory.vue", () => {
                 sellBy: sellByDate
             });
             await Vue.nextTick();
-            expect(wrapper.vm.valid).toBeFalsy();
+            const buttonWrapper = wrapper.find("button[label='submit']") as any;
+            expect(buttonWrapper.element.disabled).toBeTruthy();
         })
 
         it("Valid when best before date after today", async () => {
@@ -464,7 +479,8 @@ describe("CreateInventory.vue", () => {
                 bestBefore: bestBeforeDate
             });
             await Vue.nextTick();
-            expect(wrapper.vm.valid).toBeTruthy();
+            const buttonWrapper = wrapper.find("button[label='submit']") as any;
+            expect(buttonWrapper.element.disabled).toBeFalsy();
         })
 
         it("Invalid when best before date before today", async () => {
@@ -474,7 +490,8 @@ describe("CreateInventory.vue", () => {
                 bestBefore: bestBeforeDate
             });
             await Vue.nextTick();
-            expect(wrapper.vm.valid).toBeFalsy();
+            const buttonWrapper = wrapper.find("button[label='submit']") as any;
+            expect(buttonWrapper.element.disabled).toBeTruthy();
         })
 
         it("Valid when best before date after sell by date", async () => {
@@ -486,7 +503,8 @@ describe("CreateInventory.vue", () => {
                 sellBy: sellByDate
             });
             await Vue.nextTick();
-            expect(wrapper.vm.valid).toBeTruthy();
+            const buttonWrapper = wrapper.find("button[label='submit']") as any;
+            expect(buttonWrapper.element.disabled).toBeFalsy();
         })
 
         it("Invalid when best before date before sell by date", async () => {
@@ -498,7 +516,8 @@ describe("CreateInventory.vue", () => {
                 sellBy: sellByDate
             });
             await Vue.nextTick();
-            expect(wrapper.vm.valid).toBeFalsy();
+            const buttonWrapper = wrapper.find("button[label='submit']") as any;
+            expect(buttonWrapper.element.disabled).toBeTruthy();
         })
 
         it("Valid when best before date before expires date", async () => {
@@ -510,7 +529,8 @@ describe("CreateInventory.vue", () => {
                 expires: expiresDate
             });
             await Vue.nextTick();
-            expect(wrapper.vm.valid).toBeTruthy();
+            const buttonWrapper = wrapper.find("button[label='submit']") as any;
+            expect(buttonWrapper.element.disabled).toBeFalsy();
         })
 
         it("Invalid when best before date after expires date", async () => {
@@ -522,7 +542,8 @@ describe("CreateInventory.vue", () => {
                 expires: expiresDate
             });
             await Vue.nextTick();
-            expect(wrapper.vm.valid).toBeFalsy();
+            const buttonWrapper = wrapper.find("button[label='submit']") as any;
+            expect(buttonWrapper.element.disabled).toBeTruthy();
         })
 
         it("Invalid when best before date before 1000 AD", async () => {
@@ -532,7 +553,8 @@ describe("CreateInventory.vue", () => {
                 bestBefore: bestBeforeDate
             });
             await Vue.nextTick();
-            expect(wrapper.vm.valid).toBeFalsy();
+            const buttonWrapper = wrapper.find("button[label='submit']") as any;
+            expect(buttonWrapper.element.disabled).toBeTruthy();
         })
 
         it("Invalid when best before date after 10000 AD", async () => {
@@ -542,7 +564,8 @@ describe("CreateInventory.vue", () => {
                 bestBefore: bestBeforeDate
             });
             await Vue.nextTick();
-            expect(wrapper.vm.valid).toBeFalsy();
+            const buttonWrapper = wrapper.find("button[label='submit']") as any;
+            expect(buttonWrapper.element.disabled).toBeTruthy();
         })
 
         it("Valid when expires date after today", async () => {
@@ -552,7 +575,8 @@ describe("CreateInventory.vue", () => {
                 expires: expiresDate
             });
             await Vue.nextTick();
-            expect(wrapper.vm.valid).toBeTruthy();
+            const buttonWrapper = wrapper.find("button[label='submit']") as any;
+            expect(buttonWrapper.element.disabled).toBeFalsy();
         })
 
         it("Invalid when expires date before today", async () => {
@@ -562,7 +586,8 @@ describe("CreateInventory.vue", () => {
                 expires: expiresDate
             });
             await Vue.nextTick();
-            expect(wrapper.vm.valid).toBeFalsy();
+            const buttonWrapper = wrapper.find("button[label='submit']") as any;
+            expect(buttonWrapper.element.disabled).toBeTruthy();
         })
 
         it("Valid when expires date after best before date", async () => {
@@ -574,7 +599,8 @@ describe("CreateInventory.vue", () => {
                 expires: expiresDate
             });
             await Vue.nextTick();
-            expect(wrapper.vm.valid).toBeTruthy();
+            const buttonWrapper = wrapper.find("button[label='submit']") as any;
+            expect(buttonWrapper.element.disabled).toBeFalsy();
         })
 
         it("Invalid when expires date before best before date", async () => {
@@ -586,7 +612,8 @@ describe("CreateInventory.vue", () => {
                 expires: expiresDate
             });
             await Vue.nextTick();
-            expect(wrapper.vm.valid).toBeFalsy();
+            const buttonWrapper = wrapper.find("button[label='submit']") as any;
+            expect(buttonWrapper.element.disabled).toBeTruthy();
         })
 
         it("Invalid when expires date before 1000 AD", async () => {
@@ -596,7 +623,8 @@ describe("CreateInventory.vue", () => {
                 expires: expiresDate
             });
             await Vue.nextTick();
-            expect(wrapper.vm.valid).toBeFalsy();
+            const buttonWrapper = wrapper.find("button[label='submit']") as any;
+            expect(buttonWrapper.element.disabled).toBeTruthy();
         })
 
         it("Invalid when expires date after 10000 AD", async () => {
@@ -606,7 +634,8 @@ describe("CreateInventory.vue", () => {
                 expires: expiresDate
             });
             await Vue.nextTick();
-            expect(wrapper.vm.valid).toBeFalsy();
+            const buttonWrapper = wrapper.find("button[label='submit']") as any;
+            expect(buttonWrapper.element.disabled).toBeTruthy();
         })
     })
 });
