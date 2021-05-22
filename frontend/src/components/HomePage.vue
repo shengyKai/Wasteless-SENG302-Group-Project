@@ -181,7 +181,7 @@ export default {
      * Shows the Inventory page
      */
     goInventoryPage() {
-      this.$router.push("/inventory");
+      this.$router.push(`/business/${this.$store.state.activeRole.id}/inventory`);
     },
   },
   computed: {

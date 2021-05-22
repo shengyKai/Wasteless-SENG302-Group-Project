@@ -19,7 +19,7 @@
       />
     </v-form>
 
-    <!-- Hidden component, only appear when theres errror and show the respond from backend -->
+    <!-- Hidden component, only appear when there's an error and show the response from backend -->
     <p class="login-error-text" v-if ="errorMessage !== undefined"> {{errorMessage}} </p>
 
     <!-- Login Button Direct user into the home page. Invalid credential will trigger a pop up error message -->

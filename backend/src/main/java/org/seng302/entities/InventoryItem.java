@@ -273,6 +273,14 @@ public class InventoryItem {
     }
 
     /**
+     * Gets the business owning this inventory item
+     * @return business owning this inventory item
+     */
+    public Business getBusiness() {
+        return this.product.getBusiness();
+    }
+
+    /**
      * Construct a JSON representation of the inventory item. Attributes which are null will be omitted from the
      * returned JSON.
      * @return JSON representation of the inventory item.
@@ -291,6 +299,7 @@ public class InventoryItem {
         JsonTools.removeNullsFromJson(json);
         return json;
     }
+
     /**
      * Builder for Inventory Item
      */

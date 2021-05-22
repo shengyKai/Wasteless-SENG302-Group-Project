@@ -141,7 +141,7 @@
 </template>
 
 <script>
-
+import {createInventoryItem} from '@/api/internal';
 import {getProducts} from "@/api/internal";
 
 export default {
@@ -153,7 +153,7 @@ export default {
       errorMessage: undefined,
       dialog: true,
       valid: false,
-      today: '',
+      today: new Date().toISOString().slice(0,10),
       productList: [],
       filteredProductList: [],
       productFilter: '',
@@ -188,14 +188,13 @@ export default {
     };
   },
   methods: {
-
+    /**
+     * Closes the dialog
+     */
     closeDialog() {
       this.$emit('closeDialog');
     },
-    async CreateInventory() { //to see the attribute in console for debugging or testing, remove after this page is done
-      console.log(this.expires);
-      return;
-    },
+    
     /**
      * Populates the products array for the dropdown select for selecting a product
      * @returns {Promise<void>}
@@ -235,10 +234,42 @@ export default {
           product.name.toLowerCase().includes(this.productFilter?.toLowerCase()) ||
           product.manufacturer?.toLowerCase().includes(this.productFilter?.toLowerCase()) ||
           product.description?.toLowerCase().includes(this.productFilter?.toLowerCase());
-    }
-  },
-  async created() {
+      },
+    /**
+     * Called when the form is submitted
+     * Requests backend to create an inventory item
+     * Empty attributes are set to undefined
+     */
+    async CreateInventory() { //to see the attribute in console for debugging or testing, remove after this page is done
+      const businessId = this.$store.state.createInventoryDialog;
+      this.errorMessage = undefined;
+      let quantity;
+      try {
+        quantity = parseInt(this.quantity);
+      } catch ( error ) {
+        this.errorMessage = 'Could not parse field \'Quantity\'';
+        return;
+        }
+      const inventoryItem = {
+        productId: this.productCode,
+        quantity: quantity,
+        pricePerItem: this.pricePerItem.length ? this.pricePerItem : undefined,
+        totalPrice: this.totalPrice ? this.totalPrice : undefined,
+        manufactured: this.manufactured ? this.manufactured : undefined,
+        sellBy: this.sellBy ? this.sellBy : undefined,
+        bestBefore: this.bestBefore ? this.bestBefore : undefined,
+        expires: this.expires
+      };
+      const result = await createInventoryItem(businessId, inventoryItem);
+      if (typeof result === 'string') {
+        this.errorMessage = result;
+      } else {
+        this.closeDialog();
+      }
+    },
+      async created() {
     await this.fetchProducts();
+
   },
 };
 </script>
