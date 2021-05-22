@@ -11,8 +11,10 @@ Vue.use(Vuetify);
 
 jest.mock('@/api/internal', () => ({
   createInventoryItem: jest.fn(),
+  getProducts: jest.fn()
 }));
 const createInventoryItem = castMock(api.createInventoryItem);
+const getProducts = castMock(api.getProducts);
 // Characters that are in the set of letters, numbers, spaces and punctuation.
 const validQuantityCharacters = [
   "0",
@@ -182,6 +184,17 @@ describe("CreateInventory.vue", () => {
     return filtered.at(0);
   }
 
+  /**
+   * Finds the product select dropdown
+   *
+   * @returns A Wrapper around the product select dropdown
+   */
+  function findProductSelect() {
+    const select = wrapper.findAllComponents({name:"v-select"});
+    expect(select.length).toBe(1);
+    return select.at(0);
+  }
+
   it("Valid if all required fields are provided", async () => {
     await populateRequiredFields();
     await Vue.nextTick();
@@ -313,4 +326,24 @@ describe("CreateInventory.vue", () => {
     expect(appWrapper.text()).toContain("Hey there was an error");
     expect(wrapper.emitted().closeDialog).toBeFalsy();
   });
+
+  // it("Product dropdown contains a list of products", async ()=>{
+  //   const value = [
+  //     {
+  //       "id": "WATT-420-BEANS",
+  //       "name": "Watties Baked Beans - 420g can",
+  //       "description": "Baked Beans as they should be.",
+  //       "manufacturer": "Heinz Wattie's Limited",
+  //       "recommendedRetailPrice": 2.2,
+  //       "created": "2021-05-22T02:06:27.767Z",
+  //       "images": [
+  //         {
+  //           "id": 1234,
+  //           "filename": "/media/images/23987192387509-123908794328.png",
+  //           "thumbnailFilename": "/media/images/23987192387509-123908794328_thumbnail.png"
+  //         }
+  //       ]
+  //     }
+  //   ];
+  // });
 });
