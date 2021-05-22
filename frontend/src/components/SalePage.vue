@@ -4,6 +4,7 @@
       <v-row align="center">
         <v-col
           class="d-flex"
+          cols="auto"
         >
           <!---Select component for the order in which the cards should be displayed--->
           <v-select
@@ -13,6 +14,7 @@
             :items="[
               { text: 'Date Added', value: 'created'},
               { text: 'Closing Date', value: 'closes'},
+              { text: 'Product Name', value: 'productName'},
             ]"
             prepend-inner-icon="mdi-sort-variant"
             label="Sort by"
@@ -29,25 +31,10 @@
             </v-btn>
           </v-btn-toggle>
         </v-col>
-        <v-col
-          class="d-flex"
-          cols="auto"
-        >
-          <!---Search for cards by their keywords--->
-          <v-text-field
-            clearable
-            flat
-            solo-inverted
-            hide-details
-            prepend-inner-icon="mdi-magnify"
-            label="Keywords"
-            autofocus
-          />
-        </v-col>
       </v-row>
     </v-container>
     <v-container class="grey lighten-2">
-      <v-row justify="space-around">
+      <v-row justify="space-between">
         <v-col v-for="sale in salesList" v-bind:key="sale.id" cols="auto">
           <SaleItem :business-id="businessId" :sale-item="sale" />
         </v-col>
