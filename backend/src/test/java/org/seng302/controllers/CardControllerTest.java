@@ -8,7 +8,6 @@ import org.junit.runner.RunWith;
 import org.mockito.*;
 import org.seng302.entities.Keyword;
 import org.seng302.entities.MarketplaceCard;
-import org.seng302.entities.SaleItem;
 import org.seng302.entities.User;
 import org.seng302.exceptions.AccessTokenException;
 import org.seng302.persistence.KeywordRepository;
@@ -26,9 +25,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import javax.servlet.http.HttpServletRequest;
-
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -45,8 +42,6 @@ class CardControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
-    @Mock
-    private HttpServletRequest request;
     @Mock
     private KeywordRepository keywordRepository;
     @Mock
@@ -84,8 +79,9 @@ class CardControllerTest {
         when(keywordRepository.findById(keywordId2)).thenReturn(Optional.of(mockKeyword2));
         when(marketplaceCardRepository.save(any())).thenReturn(mockCard);
 
-        // Set up marketplace card to return set id when getter called
-        Mockito.when(mockCard.getID()).thenReturn(cardId);
+        // Set up entitis to return set id when getter called
+        when(mockCard.getID()).thenReturn(cardId);
+        when(mockUser.getUserID()).thenReturn(userId);
 
         // Tell MockMvc to use controller with mocked repositories for tests
         CardController cardController = new CardController(marketplaceCardRepository, keywordRepository, userRepository);
@@ -138,7 +134,7 @@ class CardControllerTest {
                 .content(createCardJson.toString()))
                 .andExpect(status().isBadRequest())
                 .andReturn();
-        assertEquals("400 Bad Request: Card title must be provided", result.getResponse().getErrorMessage());
+        assertEquals("Card title must be provided", result.getResponse().getErrorMessage());
         verify(marketplaceCardRepository, times(0)).save(any(MarketplaceCard.class));
     }
 
@@ -151,7 +147,7 @@ class CardControllerTest {
                 .content(createCardJson.toString()))
                 .andExpect(status().isBadRequest())
                 .andReturn();
-        assertEquals("400 Bad Request: Card title must be between 1-50 characters long", result.getResponse().getErrorMessage());
+        assertEquals("Card title must be between 1-50 characters long", result.getResponse().getErrorMessage());
         verify(marketplaceCardRepository, times(0)).save(any(MarketplaceCard.class));
     }
 
@@ -283,6 +279,67 @@ class CardControllerTest {
         assertArrayEquals(expectedKeywords, actualKeywords.toArray());
         assertTrue(before.isBefore(savedCard.getCreated()));
         assertTrue(after.isAfter(savedCard.getCreated()));
+    }
+
+    @Test
+    void createCard_creatorIdNotNumber_cardNotCreated() throws Exception {
+        createCardJson.remove("creatorId");
+        createCardJson.appendField("creatorId", "notValid");
+
+        MvcResult result = mockMvc.perform(post("/cards")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(createCardJson.toString()))
+                .andExpect(status().isBadRequest())
+                .andReturn();
+
+        assertEquals("creatorId must be a number", result.getResponse().getErrorMessage());
+        verify(marketplaceCardRepository, times(0)).save(any(MarketplaceCard.class));
+    }
+
+    @Test
+    void createCard_creatorIdNotInRepository_cardNotCreated() throws Exception {
+        when(userRepository.findById(userId)).thenReturn(Optional.empty());
+
+        MvcResult result = mockMvc.perform(post("/cards")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(createCardJson.toString()))
+                .andExpect(status().isBadRequest())
+                .andReturn();
+
+        assertEquals(String.format("User with ID %d does not exist", userId), result.getResponse().getErrorMessage());
+        verify(marketplaceCardRepository, times(0)).save(any(MarketplaceCard.class));
+    }
+
+    @Test
+    void createCard_keywordIdsNotNumberArray_cardNotCreated() throws Exception {
+        createCardJson.remove("keywordIds");
+        createCardJson.appendField("keywordIds", "notValid");
+
+        MvcResult result = mockMvc.perform(post("/cards")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(createCardJson.toString()))
+                .andExpect(status().isBadRequest())
+                .andReturn();
+
+        assertEquals("keywordIds must be an array of numbers", result.getResponse().getErrorMessage());
+        verify(marketplaceCardRepository, times(0)).save(any(MarketplaceCard.class));
+    }
+
+    @Test
+    void createCard_keywordIdNotInRepository_cardNotCreated() throws Exception {
+        createCardJson.remove("keywordIds");
+        int[] keywordIds = new int[] {(int) keywordId1};
+        createCardJson.appendField("keywordIds", keywordIds);
+        when(keywordRepository.findById(keywordId1)).thenReturn(Optional.empty());
+
+        MvcResult result = mockMvc.perform(post("/cards")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(createCardJson.toString()))
+                .andExpect(status().isBadRequest())
+                .andReturn();
+
+        assertEquals(String.format("Keyword with ID %d does not exist", keywordId1), result.getResponse().getErrorMessage());
+        verify(marketplaceCardRepository, times(0)).save(any(MarketplaceCard.class));
     }
 
 }

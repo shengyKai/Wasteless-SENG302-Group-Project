@@ -1,6 +1,8 @@
 package org.seng302.tools;
 
 import net.minidev.json.JSONObject;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,6 +26,28 @@ public class JsonTools {
         }
         for (String key : keysToRemove) {
             json.remove(key);
+        }
+    }
+
+    public static long parseLongFromJsonField(JSONObject json, String fieldName) {
+        try {
+            return Long.parseLong(json.getAsString(fieldName));
+        } catch (NumberFormatException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, String.format("%s must be a number", fieldName));
+        }
+    }
+
+    public static long[] parseLongArrayFromJsonField(JSONObject json, String fieldName) {
+        try {
+            Object object = json.get(fieldName);
+            List<Integer> list = (List<Integer>) object;
+            long[] array = new long[list.size()];
+            for (int i = 0; i < list.size(); i++) {
+                array[i] = list.get(i);
+            }
+            return array;
+        } catch (ClassCastException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, String.format("%s must be an array of numbers", fieldName));
         }
     }
 }
