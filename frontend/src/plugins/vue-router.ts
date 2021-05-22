@@ -10,6 +10,7 @@ import HomePage from "../components/HomePage.vue";
 import ProductCatalogue from "../components/ProductCatalogue.vue";
 import Inventory from "../components/Inventory.vue";
 import SaleItem from "../components/cards/SaleItem.vue";
+import Marketplace from "../components/marketplace/Marketplace.vue";
 
 
 Vue.use(VueRouter);
@@ -73,6 +74,11 @@ const routes = [
     path: "/business/:id/inventory",
     component: Inventory,
     meta: { title: 'Inventory' }
+  },
+  {
+    path: "/marketplace",
+    component: Marketplace,
+    meta: { title: 'Marketplace' }
   },
   {
     path: "*",

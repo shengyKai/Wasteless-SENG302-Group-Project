@@ -114,9 +114,9 @@ public class InventoryController {
     public JSONArray getInventory(@PathVariable(name = "id") Long businessId,
                                 HttpServletRequest request,
                                 @RequestParam(required = false) String orderBy,
-                                @RequestParam(required = false) String page,
-                                @RequestParam(required = false) String resultsPerPage,
-                                @RequestParam(required = false) String reverse) {
+                                @RequestParam(required = false) Integer page,
+                                @RequestParam(required = false) Integer resultsPerPage,
+                                @RequestParam(required = false) Boolean reverse) {
         String statusMessage = String.format("Get inventory of business with ID %d", businessId);
         logger.info(statusMessage);
         List<InventoryItem> inventory = getInventoryFromRequest(businessId, request);
@@ -188,9 +188,8 @@ public class InventoryController {
      * @param reverse Reverse results.
      * @return Inventory Comparator
      */
-    Comparator<InventoryItem> sortInventory(String key, String reverse) {
+    Comparator<InventoryItem> sortInventory(String key, Boolean reverse) {
         key = key == null ? "productCode" : key;
-        reverse = reverse == null ? "false" : reverse;
 
         Comparator<InventoryItem> sort;
         switch (key) {
@@ -255,7 +254,7 @@ public class InventoryController {
                 break;
         }
 
-        if (!reverse.isEmpty() && reverse.equals("true")) {
+        if (Boolean.TRUE.equals(reverse)) {
             sort = sort.reversed();
         }
 
