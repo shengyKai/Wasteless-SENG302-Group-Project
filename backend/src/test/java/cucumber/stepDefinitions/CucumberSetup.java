@@ -32,6 +32,8 @@ public class CucumberSetup {
     protected SaleItemRepository saleItemRepository;
     @Autowired
     protected MarketplaceCardRepository marketplaceCardRepository;
+    @Autowired
+    protected KeywordRepository keywordRepository;
 
     /**
      * Set up the mockMvc object for mocking API requests, and remove everything from the repositories.
@@ -46,6 +48,7 @@ public class CucumberSetup {
         productRepository.deleteAll();
         businessRepository.deleteAll();
         marketplaceCardRepository.deleteAll();
+        keywordRepository.deleteAll();
         userRepository.deleteAll();
         accountRepository.deleteAll();
     }
