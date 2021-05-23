@@ -299,6 +299,7 @@ public class InventoryItem {
         json.put("sellBy", sellBy != null ? sellBy.toString() : null);
         json.put("bestBefore", bestBefore != null ? bestBefore.toString() : null);
         json.put("expires", expires.toString());
+        json.put("remainingQuantity", remainingQuantity);
         JsonTools.removeNullsFromJson(json);
         return json;
     }

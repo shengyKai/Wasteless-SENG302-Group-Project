@@ -514,6 +514,7 @@ public class InventoryItemTests {
         expectedJson.put("id", invItem.getId());
         expectedJson.put("product", invItem.getProduct().constructJSONObject());
         expectedJson.put("quantity", invItem.getQuantity());
+        expectedJson.put("remainingQuantity", invItem.getRemainingQuantity());
         expectedJson.put("pricePerItem", invItem.getPricePerItem());
         expectedJson.put("totalPrice", invItem.getTotalPrice());
         expectedJson.put("manufactured", invItem.getManufactured().toString());
@@ -536,6 +537,7 @@ public class InventoryItemTests {
         expectedJson.put("id", invItem.getId());
         expectedJson.put("product", invItem.getProduct().constructJSONObject());
         expectedJson.put("quantity", invItem.getQuantity());
+        expectedJson.put("remainingQuantity", invItem.getRemainingQuantity());
         expectedJson.put("expires", invItem.getExpires().toString());
         ObjectMapper mapper = new ObjectMapper();
         assertEquals(mapper.readTree(expectedJson.toJSONString()), mapper.readTree(invItem.constructJSONObject().toJSONString()));
