@@ -95,7 +95,7 @@ describe('SaleItem.vue', () => {
   });
 
   it("Must contain the product name and quantity", () => {
-    expect(wrapper.text()).toContain("3 x Watties Baked Beans - 420g can");
+    expect(wrapper.text()).toContain("3 × Watties Baked Beans - 420g can");
   });
 
   it("Must contain the sale price", () => {
