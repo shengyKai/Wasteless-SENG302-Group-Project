@@ -378,6 +378,4 @@ class CardControllerTest {
                 .andExpect(status().isOk());
         verify(marketplaceCardRepository, times(1)).getAllBySection(any(MarketplaceCard.Section.class));
     }
-    
-
 }
