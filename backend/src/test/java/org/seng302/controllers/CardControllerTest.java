@@ -25,6 +25,8 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.time.Instant;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -32,6 +34,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
@@ -77,6 +80,7 @@ class CardControllerTest {
         when(keywordRepository.findById(keywordId1)).thenReturn(Optional.of(mockKeyword1));
         when(keywordRepository.findById(keywordId2)).thenReturn(Optional.of(mockKeyword2));
         when(marketplaceCardRepository.save(any())).thenReturn(mockCard);
+        when(marketplaceCardRepository.getAllBySection(any())).thenReturn(Collections.singletonList(mockCard));
 
         // Set up entitis to return set id when getter called
         when(mockCard.getID()).thenReturn(cardId);
@@ -340,5 +344,40 @@ class CardControllerTest {
         assertEquals(String.format("Keyword with ID %d does not exist", keywordId1), result.getResponse().getErrorMessage());
         verify(marketplaceCardRepository, times(0)).save(any(MarketplaceCard.class));
     }
+
+    // GET CARDS TESTS
+
+    @Test
+    void getCards_invalidAuthToken_CannotViewCards() throws Exception {
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.checkAuthenticationToken(any())).thenThrow(new AccessTokenException());
+        mockMvc.perform(get("/cards")
+                .param("section", "Wanted"))
+                .andExpect(status().isUnauthorized());
+        verify(marketplaceCardRepository, times(0)).getAllBySection(any(MarketplaceCard.Section.class));
+    }
+
+    @Test
+    void getCards_invalidSection_CannotViewCards() throws Exception {
+        mockMvc.perform(get("/cards")
+                .param("section", "invalidSectionName"))
+                .andExpect(status().isBadRequest());
+        verify(marketplaceCardRepository, times(0)).getAllBySection(any(MarketplaceCard.Section.class));
+    }
+
+    @Test
+    void getCards_noSectionGiven_CannotViewCards() throws Exception {
+        mockMvc.perform(get("/cards"))
+                .andExpect(status().isBadRequest());
+        verify(marketplaceCardRepository, times(0)).getAllBySection(any(MarketplaceCard.Section.class));
+    }
+
+    @Test
+    void getCards_validAuthToken_CanViewCards() throws Exception {
+        mockMvc.perform(get("/cards")
+                .param("section", "Wanted"))
+                .andExpect(status().isOk());
+        verify(marketplaceCardRepository, times(1)).getAllBySection(any(MarketplaceCard.Section.class));
+    }
+    
 
 }
