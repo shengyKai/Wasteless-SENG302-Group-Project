@@ -40,6 +40,16 @@ public class CardController {
         this.userRepository = userRepository;
     }
 
+    /**
+     * Endpoint to create a card with the properties given in the json body of the request.
+     * Will return a 401 error if the request is unauthorized, a 403 error if the user does not have perimssion to create
+     * a card with the given creatorId, or a 400 error if the json body is not formatted as expected.
+     * Will return a 201 response and a json with the id of the created card if the request is successful.
+     * @param request The HTTP request, used for checking permissions.
+     * @param response The HTTP response, used for changing response status.
+     * @param cardProperties The JSON body of the request with data for creating the cards.
+     * @return A json with a cardId attribute if the request is successful.
+     */
     @PostMapping("/cards")
     public JSONObject createCard(HttpServletRequest request, HttpServletResponse response, @RequestBody JSONObject cardProperties) {
         logger.info("Request to create marketplace card received");
@@ -68,6 +78,13 @@ public class CardController {
         }
     }
 
+    /**
+     * Retrieve the User and Keywords associated with this card from the database and use them to construct the
+     * marketplace card with the properties given by the json object. A response status exception with 400 status
+     * will be thrown if any part of the given json has invalid format.
+     * @param cardProperties A json with the properites to be used when constructing the card.
+     * @return A marketplace card constructed with the given properties.
+     */
     private MarketplaceCard constructCardFromJson(JSONObject cardProperties) {
         // Retrieve the user from their id
         long creatorId = JsonTools.parseLongFromJsonField(cardProperties, "creatorId");
