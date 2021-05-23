@@ -1,9 +1,13 @@
 package org.seng302.entities;
 
+import net.minidev.json.JSONArray;
+import net.minidev.json.JSONObject;
+import org.seng302.tools.AuthenticationTokenManager;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.persistence.*;
+import javax.servlet.http.HttpServletRequest;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalUnit;
@@ -94,6 +98,11 @@ public class MarketplaceCard {
     }
 
     /**
+     * @return Cards keywords
+     */
+    public List<Keyword> getKeywords() {return this.keywords;}
+
+    /**
      * Sets the card section
      * @param section New section
      */
@@ -162,6 +171,38 @@ public class MarketplaceCard {
     }
 
     /**
+     * Constructs the JSON representation of this card
+     * The creator is able to see their private details
+     * @param request The HttpServletRequest of the request
+     * @return A JSONObject containing this cards data
+     */
+    public JSONObject constructJSONObject(HttpServletRequest request) {
+        JSONObject json = new JSONObject();
+        JSONArray keywords = new JSONArray();
+
+        // jsonify the keywords
+        for (Keyword keyword : this.getKeywords()) {
+            keywords.appendElement(keyword.constructJSONObject());
+        }
+
+        json.appendField("id", this.getID());
+        if(AuthenticationTokenManager.sessionCanSeePrivate(request, this.creator.getUserID())) {
+            json.appendField("creator", this.creator.constructPrivateJson());
+        } else {
+            json.appendField("creator", this.creator.constructPublicJson());
+        }
+        json.appendField("section", this.section.getName());
+        json.appendField("created", this.created);
+        json.appendField("displayPeriodEnd", this.closes);
+        json.appendField("title", this.title);
+        json.appendField("description", this.description);
+        json.appendField("keywords", keywords);
+
+
+        return json;
+    }
+
+    /**
      * Creates a string representation of the marketplace card
      * @return string representation
      */
@@ -200,6 +241,20 @@ public class MarketplaceCard {
         public String getName() {
             return this.name;
         }
+    }
+
+    /**
+     * Given a string, returns the matching section Enum
+     * @param sectionName The section name to get
+     * @return Matching section or ResponseStatusException if none
+     */
+    public static Section sectionFromString(String sectionName) {
+        for (Section possibleSection : Section.values()) {
+            if (possibleSection.getName().equals(sectionName)) {
+                return possibleSection;
+            }
+        }
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid section name");
     }
 
     /**
@@ -242,13 +297,8 @@ public class MarketplaceCard {
          * @return Builder with the section set
          */
         public Builder withSection(String sectionName) {
-            for (Section possibleSection : Section.values()) {
-                if (possibleSection.getName().equals(sectionName)) {
-                    this.section = possibleSection;
-                    return this;
-                }
-            }
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid section name");
+            this.section = MarketplaceCard.sectionFromString(sectionName);
+            return this;
         }
 
         /**
