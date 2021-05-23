@@ -56,6 +56,22 @@
 							</v-row>
 						</v-container>
 					</v-card-text>
+					<v-card-actions>
+            <v-spacer/>
+            <v-btn
+              color="primary"
+              text
+              @click="closeDialog">
+              Close
+            </v-btn>
+            <v-btn
+              type="submit"
+              color="primary"
+              :disabled="!valid"
+              @click.prevent="CreateSaleItem">
+              Create
+            </v-btn>
+          </v-card-actions>
 				</v-card>	
 			<v-form>	
 		</v-dialog>
