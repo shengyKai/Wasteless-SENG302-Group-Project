@@ -53,9 +53,11 @@ public class ProductController {
      * @param reverse Reverse results.
      * @return Product Comparator
      */
-    Comparator<Product> sortProducts(String key, String reverse) {
+    Comparator<Product> sortProducts(String key, Boolean reverse) {
         key = key == null ? "productCode" : key;
-        reverse = reverse == null ? "false" : reverse;
+        if (reverse == null) {
+            reverse = false;
+        }
 
         Comparator<Product> sort;
         switch (key) {
@@ -84,7 +86,7 @@ public class ProductController {
                 break;
         }
 
-        if (!reverse.isEmpty() && reverse.equals("true")) {
+        if (reverse) {
             sort = sort.reversed();
         }
 
@@ -101,14 +103,14 @@ public class ProductController {
     public JSONArray retrieveCatalogue(@PathVariable Long id,
                                        HttpServletRequest request,
                                        @RequestParam(required = false) String orderBy,
-                                       @RequestParam(required = false) String page,
-                                       @RequestParam(required = false) String resultsPerPage,
-                                       @RequestParam(required = false) String reverse) {
+                                       @RequestParam(required = false) Integer page,
+                                       @RequestParam(required = false) Integer resultsPerPage,
+                                       @RequestParam(required = false) Boolean reverse) {
 
         logger.info("Get catalogue by business id.");
         AuthenticationTokenManager.checkAuthenticationToken(request);
 
-        logger.info(String.format("Retrieving catalogue from business with id %d.", id));
+        logger.info(() -> String.format("Retrieving catalogue from business with id %d.", id));
         Optional<Business> business = businessRepository.findById(id);
         if (business.isEmpty()) {
             BusinessNotFoundException notFound = new BusinessNotFoundException();

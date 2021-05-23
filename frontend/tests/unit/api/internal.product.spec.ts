@@ -42,7 +42,7 @@ describe('Test GET /businesses/:id/products endpoint', () => {
     instance.get.mockResolvedValueOnce({
       data: responseData
     });
-    const products = await getProducts(1, 1, 1, "", false);
+    const products = await getProducts(1, 1, 1, "created", false);
     expect(products).toEqual(responseData);
   });
 
@@ -57,7 +57,7 @@ describe('Test GET /businesses/:id/products endpoint', () => {
     instance.get.mockResolvedValueOnce({
       data: responseData
     });
-    const products = await getProducts(1, 1, 1, "", false);
+    const products = await getProducts(1, 1, 1, "created", false);
     expect(products).toEqual(responseData);
   });
 
@@ -71,7 +71,7 @@ describe('Test GET /businesses/:id/products endpoint', () => {
     instance.get.mockResolvedValueOnce({
       data: responseData
     });
-    const products = await getProducts(1, 1, 1, "", false);
+    const products = await getProducts(1, 1, 1, "created", false);
     expect(products).toEqual('Response is not product array');
   });
 
@@ -80,7 +80,7 @@ describe('Test GET /businesses/:id/products endpoint', () => {
       response: {
         status: 401,
       }});
-    const message = await getProducts(1, 1, 1, "", false);
+    const message = await getProducts(1, 1, 1, "created", false);
     expect(message).toEqual('Missing/Invalid access token');
   });
 
@@ -89,7 +89,7 @@ describe('Test GET /businesses/:id/products endpoint', () => {
       response: {
         status: 403,
       }});
-    const message = await getProducts(1, 1, 1, "", false);
+    const message = await getProducts(1, 1, 1, "created", false);
     expect(message).toEqual('Not an admin of the business');
   });
 
@@ -98,13 +98,13 @@ describe('Test GET /businesses/:id/products endpoint', () => {
       response: {
         status: 406,
       }});
-    const message = await getProducts(1, 1, 1, "", false);
+    const message = await getProducts(1, 1, 1, "created", false);
     expect(message).toEqual('Business not found');
   });
 
   it('When a response without a status is received, getProducts returns an error message indicating that the server could not be reached', async () => {
     instance.get.mockRejectedValueOnce("Server is down");
-    const message = await getProducts(1, 1, 1, "", false);
+    const message = await getProducts(1, 1, 1, "created", false);
     expect(message).toEqual('Failed to reach backend');
   });
 
@@ -113,7 +113,7 @@ describe('Test GET /businesses/:id/products endpoint', () => {
       response: {
         status: 732,
       }});
-    const message = await getProducts(1, 1, 1, "", false);
+    const message = await getProducts(1, 1, 1, "created", false);
     expect(message).toEqual('Request failed: 732');
   });
 });

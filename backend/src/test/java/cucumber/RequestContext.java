@@ -2,7 +2,6 @@ package cucumber;
 
 import io.cucumber.java.Before;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import javax.servlet.http.Cookie;
 import java.util.HashMap;
 import java.util.Map;
@@ -11,6 +10,7 @@ public class RequestContext {
 
     private Cookie authCookie;
     private final Map<String, Object> sessionAuthToken = new HashMap<>();
+    private long loggedInId;
 
     @Before
     public void setup() {
@@ -27,6 +27,7 @@ public class RequestContext {
         authCookie = new Cookie("AUTHTOKEN", authCode);
         sessionAuthToken.put("AUTHTOKEN", authCode);
         sessionAuthToken.put("accountId", id);
+        loggedInId = id;
     }
 
     /**
@@ -42,5 +43,14 @@ public class RequestContext {
         return builder
                 .sessionAttrs(sessionAuthToken)
                 .cookie(authCookie);
+    }
+
+    /**
+     * Get the ID number of the user who is currently authenticated in this class's authentication token and request
+     * cookie.
+     * @return The ID number of the authenticated user
+     */
+    public long getLoggedInId() {
+        return loggedInId;
     }
 }

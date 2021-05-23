@@ -115,7 +115,7 @@ describe("Test POST /cards endpoint", () => {
 
   it('When a response without a status is received, an error message stating unable to reach backend will be returned', async () => {
     instance.post.mockRejectedValueOnce(undefined);
-    const message = await api.getBusinessSales(7);
+    const message = await api.getBusinessSales(7, 1, 1, 'created', false);
     expect(message).toEqual('Failed to reach backend');
   });
 });

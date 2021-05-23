@@ -196,6 +196,14 @@ public class SaleItem {
     }
 
     /**
+     * Gets the product owning this sales item
+     * @return product owning this sales item
+     */
+    public Product getProduct() {
+        return this.inventoryItem.getProduct();
+    }
+
+    /**
      * Gets the business owning this sales item
      * @return business owning this sales item
      */
