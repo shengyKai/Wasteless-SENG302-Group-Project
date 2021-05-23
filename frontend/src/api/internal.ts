@@ -140,7 +140,6 @@ export type Sale = {
   closes?: string,
 };
 
-
 export type InventoryItem = {
   id: number,
   product: Product,
@@ -151,6 +150,15 @@ export type InventoryItem = {
   sellBy?: string,
   bestBefore?: string,
   expires: string
+};
+
+export type CreateSaleItem = {
+  id: number,
+  inventoryItem: InventoryItem,
+  quantity: number,
+  pricePerItem: number,
+  info?: string,
+  cloes?: string
 };
 
 export type CreateMarketplaceCard = {
@@ -381,6 +389,21 @@ export async function createProduct(businessId: number, product: CreateProduct):
     if (status === 403) return 'Operation not permitted';
     if (status === 400) return 'Invalid parameters';
     if (status === 409) return 'Product code unavailable';
+
+    return 'Request failed: ' + status;
+  }
+  return undefined;
+}
+
+
+export async function createSaleItem(businessId: number, SaleItem: CreateSaleItem): Promise<MaybeError<undefined>> {
+  try {
+    await instance.post(`/businesses/${businessId}/listings`, SaleItem);
+  } catch (error) {
+    let status: number | undefined = error.response?.status;
+    if (status === undefined) return 'Failed to reach backend';
+    if (status === 400) return 'Invalid data with the Sale Item';
+    if (status === 403) return 'Operation not permitted';
 
     return 'Request failed: ' + status;
   }
