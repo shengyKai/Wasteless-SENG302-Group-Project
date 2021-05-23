@@ -38,7 +38,6 @@
                             clearable
                             :autofocus="true"
                             @click:clear="resetSearch"
-                            v-on:keyup="filterProducts"
                             hint="Id, Name, Description, Manufacturer"
                           />
                         </v-list-item-content>
@@ -155,7 +154,6 @@ export default {
       valid: false,
       today: new Date().toISOString().slice(0,10),
       productList: [],
-      filteredProductList: [],
       productFilter: '',
       productCode : "",
       quantity : "",
@@ -204,23 +202,12 @@ export default {
       const result = await getProducts(this.$store.state.createInventoryDialog, null, null, null, false);
       if (typeof result === 'string') {
         this.errorMessage = result;
-        return;
       } else {
         this.productList = result;
-        this.filteredProductList = result;
       }
-    },
-    /**
-     * Filters the list of products based on the value of the search term
-     * value must be passed to ensure products are refreshed when input is cleared
-     */
-    filterProducts: function () {
-      if (this.productFilter === null) this.productFilter = '';
-      this.filteredProductList = this.productList.filter(x => this.filterPredicate(x));
     },
     resetSearch: function () {
       this.productFilter = '';
-      this.filterProducts();
     },
     /**
      * Defines a predicate used for filtering the available products
@@ -229,10 +216,11 @@ export default {
      * @returns {boolean|undefined}
      */
     filterPredicate(product) {
-      return product.id.toLowerCase().includes(this.productFilter?.toLowerCase()) ||
-          product.name.toLowerCase().includes(this.productFilter?.toLowerCase()) ||
-          product.manufacturer?.toLowerCase().includes(this.productFilter?.toLowerCase()) ||
-          product.description?.toLowerCase().includes(this.productFilter?.toLowerCase());
+      const filterText = this.productFilter ?? '';
+      return product.id.toLowerCase().includes(filterText.toLowerCase()) ||
+          product.name.toLowerCase().includes(filterText.toLowerCase()) ||
+          product.manufacturer?.toLowerCase().includes(filterText.toLowerCase()) ||
+          product.description?.toLowerCase().includes(filterText.toLowerCase());
     },
     /**
      * Called when the form is submitted
@@ -266,6 +254,20 @@ export default {
         this.closeDialog();
       }
     },
+  },
+  computed: {
+    /**
+     * Filters the list of products based on the value of the search term
+     * value must be passed to ensure products are refreshed when input is cleared
+     */
+    filteredProductList() {
+      return this.productList.filter(x => this.filterPredicate(x));
+    },
+  },
+  watch: {
+    productFilter() {
+      console.log(this.productFilter);
+    }
   },
   async created() {
     await this.fetchProducts();

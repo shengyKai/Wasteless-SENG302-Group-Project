@@ -15,6 +15,7 @@ jest.mock('@/api/internal', () => ({
 }));
 const createInventoryItem = castMock(api.createInventoryItem);
 const getProducts = castMock(api.getProducts);
+getProducts.mockResolvedValue([]);
 // Characters that are in the set of letters, numbers, spaces and punctuation.
 const validQuantityCharacters = [
   "0",
@@ -58,6 +59,23 @@ const invalidCharacters = [
   "A",
   "-1",
   "-99",
+];
+const testProducts = [
+  {
+    "id": "WATT-420-BEANS",
+    "name": "Watties Baked Beans - 420g can",
+    "description": "Baked Beans as they should be.",
+    "manufacturer": "Heinz Wattie's Limited",
+    "recommendedRetailPrice": 2.2,
+    "created": "2021-05-22T02:06:27.767Z",
+    "images": [
+      {
+        "id": 1234,
+        "filename": "/media/images/23987192387509-123908794328.png",
+        "thumbnailFilename": "/media/images/23987192387509-123908794328_thumbnail.png"
+      }
+    ]
+  }
 ];
 // Characters that are whitespace not including the space character.
 const whitespaceCharacters = ["\n", "\t"];
@@ -327,23 +345,37 @@ describe("CreateInventory.vue", () => {
     expect(wrapper.emitted().closeDialog).toBeFalsy();
   });
 
-  // it("Product dropdown contains a list of products", async ()=>{
-  //   const value = [
-  //     {
-  //       "id": "WATT-420-BEANS",
-  //       "name": "Watties Baked Beans - 420g can",
-  //       "description": "Baked Beans as they should be.",
-  //       "manufacturer": "Heinz Wattie's Limited",
-  //       "recommendedRetailPrice": 2.2,
-  //       "created": "2021-05-22T02:06:27.767Z",
-  //       "images": [
-  //         {
-  //           "id": 1234,
-  //           "filename": "/media/images/23987192387509-123908794328.png",
-  //           "thumbnailFilename": "/media/images/23987192387509-123908794328_thumbnail.png"
-  //         }
-  //       ]
-  //     }
-  //   ];
-  // });
+  it("Product dropdown contains a list of products", async ()=>{
+
+    await wrapper.setData({productList:testProducts});
+    await Vue.nextTick();
+    const selectbox = findProductSelect();
+    (selectbox.vm as any).activateMenu();
+    await flushQueue();
+    expect(appWrapper.text()).toContain("Watties");
+  });
+
+  it("Product dropdown contains a search box", async ()=>{
+    const selectbox = findProductSelect();
+    (selectbox.vm as any).activateMenu();
+    await Vue.nextTick();
+    const input = selectbox.findComponent({name:"v-text-field"});
+    expect(input.exists()).toBeTruthy();
+  });
+
+  it('Product search limits results', async ()=>{
+    await wrapper.setData({productList:testProducts});
+
+    const selectbox = findProductSelect();
+    (selectbox.vm as any).activateMenu();
+
+    await flushQueue();
+
+    expect(appWrapper.text()).toContain("Watties");
+    await wrapper.setData({productFilter: "Not watties"});
+
+    await Vue.nextTick();
+
+    expect(appWrapper.text()).not.toContain("Watties");
+  });
 });
