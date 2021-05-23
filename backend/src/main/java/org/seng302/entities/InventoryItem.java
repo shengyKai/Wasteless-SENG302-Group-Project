@@ -54,6 +54,9 @@ public class InventoryItem {
     @Column(name = "creation_date", nullable = false)
     private Instant creationDate;
 
+    @Version
+    private int version;
+
 // Getters
     /**
      * Returns id in db table
