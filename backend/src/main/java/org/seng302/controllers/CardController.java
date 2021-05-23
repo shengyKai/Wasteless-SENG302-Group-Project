@@ -13,20 +13,13 @@ import org.seng302.persistence.UserRepository;
 import org.seng302.tools.AuthenticationTokenManager;
 import org.seng302.tools.JsonTools;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 /**
  * This controller handles requests involving marketplace cards
@@ -122,7 +115,7 @@ public class CardController {
     }
 
     @GetMapping("/cards")
-    public JSONArray getCards(HttpServletRequest request, @Param("section") String sectionName) {
+    public JSONArray getCards(HttpServletRequest request, @RequestParam(name = "section") String sectionName) {
         AuthenticationTokenManager.checkAuthenticationToken(request);
 
         // parse the section
