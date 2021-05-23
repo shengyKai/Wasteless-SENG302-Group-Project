@@ -232,7 +232,7 @@ class SaleItemTests {
 
         var exception = assertThrows(ResponseStatusException.class, builder::build);
         assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
-        assertEquals("Please enter a number of items between 1 and your current stock not on sale", exception.getReason());
+        assertEquals("Quantity must be greater than 0", exception.getReason());
     }
 
     @Test
@@ -245,7 +245,7 @@ class SaleItemTests {
                 .withPrice("3.57");
         var exception = assertThrows(ResponseStatusException.class, builder::build);
         assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
-        assertEquals("Please enter a number of items between 1 and your current stock not on sale", exception.getReason());
+        assertEquals("Quantity must be greater than 0", exception.getReason());
     }
 
     @Test
