@@ -199,7 +199,7 @@ export default {
      */
     async fetchProducts() {
       // get the list of products for this business
-      const result = await getProducts(this.$store.state.createInventoryDialog, null, null, null, false);
+      const result = await getProducts(this.$store.state.createInventoryDialog, null, 10000, 'name', false);
       if (typeof result === 'string') {
         this.errorMessage = result;
       } else {
