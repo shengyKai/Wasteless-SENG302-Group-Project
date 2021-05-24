@@ -24,14 +24,6 @@
                 <v-list-item-title>Add Product</v-list-item-title>
               </v-list-item-content>
             </v-list-item>
-            <v-list-item v-if="isBusiness" @click="viewCreateInventory">
-              <v-list-item-icon>
-                <v-icon>mdi-tooltip-plus</v-icon>
-              </v-list-item-icon>
-              <v-list-item-content>
-                <v-list-item-title >Add Inventory Item</v-list-item-title>
-              </v-list-item-content>
-            </v-list-item>
 
             <v-list-item v-if="!isBusiness" @click="viewCreateBusiness">
               <v-list-item-icon>
