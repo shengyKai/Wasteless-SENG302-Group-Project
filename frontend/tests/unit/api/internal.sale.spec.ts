@@ -40,6 +40,7 @@ describe("Test GET /businesses/:businessId/sales endpoint", () => {
             ]
           },
           "quantity": 4,
+          "remainingQuantity": 1,
           "pricePerItem": 6.5,
           "totalPrice": 21.99,
           "manufactured": "2021-05-19",
@@ -83,6 +84,7 @@ describe("Test GET /businesses/:businessId/sales endpoint", () => {
             ]
           },
           "quantity": 4,
+          "remainingQuantity": 1,
           "pricePerItem": 6.5,
           "totalPrice": 21.99,
           "manufactured": "2021-05-19",

@@ -117,6 +117,7 @@ const testInventoryItem: InventoryItem = {
   id: 7,
   product: testProduct,
   quantity: 100,
+  remainingQuantity: 96,
   expires: '10-10-2021',
 };
 

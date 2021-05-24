@@ -145,6 +145,7 @@ export type InventoryItem = {
   id: number,
   product: Product,
   quantity: number,
+  remainingQuantity: number,
   pricePerItem?: number,
   totalPrice?: number,
   manufactured?: string,
