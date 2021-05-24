@@ -6,11 +6,11 @@ import admin from "../components/Admin.vue";
 import ProfilePage from "../components/UserProfile.vue";
 import BusinessProfile from "../components/BusinessProfile/index.vue";
 import SearchResults from "../components/SearchResults.vue";
-import HomePage from "../components/HomePage.vue";
+import HomePage from "../components/home/HomePage.vue";
 import ProductCatalogue from "../components/ProductCatalogue.vue";
 import Inventory from "../components/Inventory.vue";
-import SaleItem from "../components/cards/SaleItem.vue";
-
+import SalePage from "../components/SalePage.vue";
+import Marketplace from "../components/marketplace/Marketplace.vue";
 
 Vue.use(VueRouter);
 
@@ -65,14 +65,19 @@ const routes = [
     meta: { title: 'Business Products' }
   },
   {
-    path: "/saleItem",
-    component: SaleItem,
-    meta: {title: 'Example Sale Item'}
+    path: "/business/:id/listings",
+    component: SalePage,
+    meta: {title: 'Sales'}
   },
   { // Router for inventory page (Inventory page frontend dev please use this and remove this line afterward)
     path: "/business/:id/inventory",
     component: Inventory,
     meta: { title: 'Inventory' }
+  },
+  {
+    path: "/marketplace",
+    component: Marketplace,
+    meta: { title: 'Marketplace' }
   },
   {
     path: "*",

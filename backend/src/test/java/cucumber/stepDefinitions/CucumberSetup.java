@@ -3,6 +3,7 @@ package cucumber.stepDefinitions;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.cucumber.java.Before;
+import io.cucumber.java.bs.A;
 import org.seng302.persistence.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.web.servlet.MockMvc;
@@ -29,6 +30,10 @@ public class CucumberSetup {
     protected UserRepository userRepository;
     @Autowired
     protected SaleItemRepository saleItemRepository;
+    @Autowired
+    protected MarketplaceCardRepository marketplaceCardRepository;
+    @Autowired
+    protected KeywordRepository keywordRepository;
 
     /**
      * Set up the mockMvc object for mocking API requests, and remove everything from the repositories.
@@ -42,6 +47,8 @@ public class CucumberSetup {
         inventoryItemRepository.deleteAll();
         productRepository.deleteAll();
         businessRepository.deleteAll();
+        marketplaceCardRepository.deleteAll();
+        keywordRepository.deleteAll();
         userRepository.deleteAll();
         accountRepository.deleteAll();
     }
