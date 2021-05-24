@@ -62,7 +62,7 @@
                     v-model="manufactured"
                     label="Manufactured"
                     type="date"
-                    @input=checkManufacterDateValid()
+                    @input=checkManufacturedDateValid()
                     outlined/>
                 </v-col>
                 <!-- INPUT: Sell By. Only take in value in dd/mm/yyyy format.-->
@@ -194,7 +194,7 @@ export default {
         this.datesValid = false;
       }
     },
-    async checkManufacterDateValid() {
+    async checkManufacturedDateValid() {
       //checks manufactured cannot be after today and is before sell by
       let sellByDate = new Date(this.manufactured);
       let manufacturedDate = new Date(this.manufactured);
