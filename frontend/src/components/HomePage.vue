@@ -56,6 +56,14 @@
                 <v-list-item-title >Create Inventory Item (temporary)</v-list-item-title>
               </v-list-item-content>
             </v-list-item>
+            <v-list-item v-if="isBusiness" @click="goSalePage">
+              <v-list-item-icon>
+                <v-icon>mdi-view-list</v-icon>
+              </v-list-item-icon>
+              <v-list-item-content>
+                <v-list-item-title >Sale Page</v-list-item-title>
+              </v-list-item-content>
+            </v-list-item>
           </v-list-item-group>
         </v-list>
       </v-card-text>
@@ -183,6 +191,9 @@ export default {
     goInventoryPage() {
       this.$router.push(`/business/${this.$store.state.activeRole.id}/inventory`);
     },
+    goSalePage() {
+      this.$router.push(`/business/${this.$store.state.activeRole.id}/sales`);
+    },
   },
   computed: {
     /**
@@ -269,7 +280,7 @@ pre {
 
 .action-pane {
   margin-right: 10px;
-  max-height: 350px;
+  max-height: 400px;
 }
 
 
