@@ -114,6 +114,11 @@ public class CardController {
         return card;
     }
 
+    /**
+     * Retrieve all of the Marketplace Cards for a given section.
+     * @param sectionName The name of the section to retrieve
+     * @return A JSON Array of Marketplace cards
+     */
     @GetMapping("/cards")
     public JSONArray getCards(HttpServletRequest request, @RequestParam(name = "section") String sectionName) {
         AuthenticationTokenManager.checkAuthenticationToken(request);
