@@ -122,7 +122,6 @@
 </template>
 
 <script>
-import {createInventoryItem} from '@/api/internal';
 export default {
   name: 'CreateInventory',
   components: {
@@ -273,32 +272,6 @@ export default {
         this.expiresValid = true;
       }
       await this.checkAllDatesValid();
-    }
-      const businessId = this.$store.state.createInventoryDialog;
-      this.errorMessage = undefined;
-      let quantity;
-      try {
-        quantity = parseInt(this.quantity);
-      } catch ( error ) {
-        this.errorMessage = 'Could not parse field \'Quantity\'';
-        return;
-      }
-      const inventoryItem = {
-        productId: this.productCode,
-        quantity: quantity,
-        pricePerItem: this.pricePerItem.length ? this.pricePerItem : undefined,
-        totalPrice: this.totalPrice ? this.totalPrice : undefined,
-        manufactured: this.manufactured ? this.manufactured : undefined,
-        sellBy: this.sellBy ? this.sellBy : undefined,
-        bestBefore: this.bestBefore ? this.bestBefore : undefined,
-        expires: this.expires
-      };
-      const result = await createInventoryItem(businessId, inventoryItem);
-      if (typeof result === 'string') {
-        this.errorMessage = result;
-      } else {
-        this.closeDialog();
-      }
     },
   },
 };
