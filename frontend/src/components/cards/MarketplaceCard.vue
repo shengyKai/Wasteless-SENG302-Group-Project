@@ -1,22 +1,30 @@
 <template>
-  <v-card width="300px">
+  <v-card min-height="250px" class="d-flex flex-column">
     <v-card-title class="my-n1 title">
       {{ content.title }}
     </v-card-title>
-    <v-card-text class="my-n4">
-      <strong v-if="location">From {{ location.district }}, {{ location.city }} </strong>
-      <br>
-      <em v-if="creator">By {{ creator.firstName }} {{ creator.lastName }}</em>
-      <br>
-      {{ content.description }}
-    </v-card-text>
-    <v-card-actions>
-      <div class="v-flex">
-        <v-chip v-for="keyword in content.keywords" :key="keyword.id" small color="primary" class="mx-1 my-1">
+    <v-card-text class="my-n2 flex-grow-1 d-flex flex-column justify-space-between">
+      <div>
+        <strong v-if="location"
+        >From {{ location.district }}, {{ location.city }}
+        </strong>
+        <br >
+        <em v-if="creator">By {{ creator.firstName }} {{ creator.lastName }}</em>
+        <br >
+        {{ content.description }}
+      </div>
+      <div class="v-flex mx-n1">
+        <v-chip
+          v-for="keyword in content.keywords"
+          :key="keyword.id"
+          small
+          color="primary"
+          class="mx-1 my-1"
+        >
           {{ keyword.name }}
         </v-chip>
       </div>
-    </v-card-actions>
+    </v-card-text>
   </v-card>
 </template>
 
@@ -31,7 +39,7 @@ export default {
       creator: Object,
       created: String,
       keywords: Array,
-    }
+    },
   },
 
   computed: {
@@ -41,16 +49,14 @@ export default {
     location() {
       return this.creator?.location;
     },
-  }
+  },
 };
 </script>
 
 
 <style scoped>
-
 .title {
   line-height: 1.25;
-  word-break: normal;
+  word-break: break-word;
 }
-
 </style>

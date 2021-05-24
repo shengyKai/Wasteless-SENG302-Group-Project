@@ -73,8 +73,8 @@
       >
         <!---Grid of cards for one section--->
         <v-container class="grey lighten-2">
-          <v-row justify="space-around">
-            <v-col v-for="card in cards[section]" :key="card.id" cols="auto">
+          <v-row>
+            <v-col v-for="card in cards[section]" :key="card.id" cols="12" sm="6" md="4" lg="3">
               <MarketplaceCard :content="card"/>
             </v-col>
           </v-row>
@@ -97,7 +97,7 @@ export default {
         "For sale": [
           {id: 0, creator: {firstName: 'Tim'   , lastName: 'Tam'       , location: { country: 'New Zealand', city: 'Auckland',     district: 'Wherever'       }}, created: '2021-05-19', title: 'Tim Tams from Timmy',             description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus hendrerit nisl ac pharetra cursus.', keywords: [{name: 'Home Made'}, {name: 'Organic'}]},
           {id: 1, creator: {firstName: 'Andy'  , lastName: 'Elliot'    , location: { country: 'New Zealand', city: 'Auckland',     district: 'Wherever'       }}, created: '2021-05-20', title: 'Dunno what to do for this title', description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus hendrerit nisl ac pharetra cursus. Vestibulum gravida varius purus, in maximus ante fermentum sed. Curabitur ultrices accumsan metus ia', keywords: [{name: 'Fresh'}]},
-          {id: 2, creator: {firstName: 'Dave'  , lastName: 'Daniel'    , location: { country: 'New Zealand', city: 'Auckland',     district: 'Wherever'       }}, created: '2021-05-21', title: 'Jack Daniels',                    description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus hendrerit nisl ac pharetra cursus. Vestibulum gravida varius purus, in maximus ante fermentum sed. Curabitur ultrices accumsan metus ia', keywords: [{name: 'Vegan'}, {name: 'Vegitarian'}, {name: 'Locally Produced'}, {name: 'Other'}]},
+          {id: 2, creator: {firstName: 'Dave'  , lastName: 'Daniel'    , location: { country: 'New Zealand', city: 'Auckland',     district: 'Wherever'       }}, created: '2021-05-21', title: 'Jack Daniels',                    description: 'Short description', keywords: [{name: 'Vegan'}, {name: 'Vegitarian'}, {name: 'Locally Produced'}, {name: 'Other'}]},
           {id: 3, creator: {firstName: 'Jeff'  , lastName: 'Bezos'     , location: { country: 'New Zealand', city: 'Auckland',     district: 'Wherever'       }}, created: '2021-05-22', title: 'Amazon Treats',                   description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus hendrerit nisl ac pharetra cursus. Vestibulum gravida varius purus, in maximus ante fermentum sed. Curabitur ultrices accumsan metus ia', keywords: []},
           {id: 4, creator: {firstName: 'Mark'  , lastName: 'Zuckerburg', location: { country: 'New Zealand', city: 'Christchurch', district: 'Upper Riccarton'}}, created: '2021-05-23', title: 'Facecook',                        description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus hendrerit nisl ac pharetra cursus. Vestibulum gravida varius purus, in maximus ante fermentum sed. Curabitur ultrices accumsan metus ia', keywords: [{name: 'Spicy'}]},
           {id: 5, creator: {firstName: 'Connor', lastName: 'Hitchcock' , location: { country: 'New Zealand', city: 'Christchurch', district: 'Upper Riccarton'}}, created: '2021-05-24', title: 'Connor\'s magic stuff',           description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus hendrerit nisl ac pharetra cursus. Vestibulum gravida varius purus, in maximus ante fermentum sed. Curabitur ultrices accumsan metus ia', keywords: []},
