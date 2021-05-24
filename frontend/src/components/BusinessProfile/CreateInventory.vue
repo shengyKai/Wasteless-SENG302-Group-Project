@@ -122,8 +122,7 @@
 </template>
 
 <script>
-//import moment from 'moment';
-
+import {createInventoryItem} from '@/api/internal';
 export default {
   name: 'CreateInventory',
   components: {
@@ -135,7 +134,7 @@ export default {
       valid: false,
       today: new Date(),
       mockProductList: [
-        'Nathan Apple',
+        'NATHAN-APPLE-70',
         'Connor Orange',
         'Edward Banana',
       ],
@@ -178,10 +177,17 @@ export default {
     };
   },
   methods: {
-
+    /**
+     * Closes the dialog
+     */
     closeDialog() {
       this.$emit('closeDialog');
     },
+    /**
+     * Called when the form is submitted
+     * Requests backend to create an inventory item
+     * Empty attributes are set to undefined
+     */
     async CreateInventory() { //to see the attribute in console for debugging or testing, remove after this page is done
       console.log(this.expires);
       return;
@@ -268,6 +274,32 @@ export default {
       }
       await this.checkAllDatesValid();
     }
+      const businessId = this.$store.state.createInventoryDialog;
+      this.errorMessage = undefined;
+      let quantity;
+      try {
+        quantity = parseInt(this.quantity);
+      } catch ( error ) {
+        this.errorMessage = 'Could not parse field \'Quantity\'';
+        return;
+      }
+      const inventoryItem = {
+        productId: this.productCode,
+        quantity: quantity,
+        pricePerItem: this.pricePerItem.length ? this.pricePerItem : undefined,
+        totalPrice: this.totalPrice ? this.totalPrice : undefined,
+        manufactured: this.manufactured ? this.manufactured : undefined,
+        sellBy: this.sellBy ? this.sellBy : undefined,
+        bestBefore: this.bestBefore ? this.bestBefore : undefined,
+        expires: this.expires
+      };
+      const result = await createInventoryItem(businessId, inventoryItem);
+      if (typeof result === 'string') {
+        this.errorMessage = result;
+      } else {
+        this.closeDialog();
+      }
+    },
   },
 };
 </script>
