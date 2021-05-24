@@ -18,11 +18,13 @@
                   <v-select
                     no-data-text="No products found"
                     class="required"
+                    solo
+                    value = "product Code"
                     v-model="productCode"
-                    :items="filteredProductList"
+                    :items="mockProductList"
+                    label="Product Code"
                     item-text="name"
                     item-value="id"
-                    label="Product"
                     :rules="mandatoryRules"
                     :hint="productCode"
                     @click="productCode=undefined"
@@ -240,9 +242,33 @@ export default {
      * Empty attributes are set to undefined
      */
     async CreateInventory() { //to see the attribute in console for debugging or testing, remove after this page is done
-      console.log(this.expires);
-      return;
+      const businessId = this.$store.state.createInventoryDialog;
+      this.errorMessage = undefined;
+      let quantity;
+      try {
+        quantity = parseInt(this.quantity);
+      } catch (error) {
+        this.errorMessage = 'Could not parse field \'Quantity\'';
+        return;
+      }
+      const inventoryItem = {
+        productId: this.productCode,
+        quantity: quantity,
+        pricePerItem: this.pricePerItem.length ? this.pricePerItem : undefined,
+        totalPrice: this.totalPrice ? this.totalPrice : undefined,
+        manufactured: this.manufactured ? this.manufactured : undefined,
+        sellBy: this.sellBy ? this.sellBy : undefined,
+        bestBefore: this.bestBefore ? this.bestBefore : undefined,
+        expires: this.expires
+      };
+      const result = await createInventoryItem(businessId, inventoryItem);
+      if (typeof result === 'string') {
+        this.errorMessage = result;
+      } else {
+        this.closeDialog();
+      }
     },
+
     async checkAllDatesValid() {
       //checks the booleans for all the dates are valid
       if (this.manufacturedValid && this.sellByValid && this.bestBeforeValid && this.expiresValid) {
