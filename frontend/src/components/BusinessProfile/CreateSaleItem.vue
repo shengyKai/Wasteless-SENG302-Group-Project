@@ -73,7 +73,7 @@
             </v-btn>
           </v-card-actions>
 				</v-card>	
-			<v-form>	
+			</v-form>	
 		</v-dialog>
   </v-row>
 </template>
@@ -94,6 +94,15 @@ export default {
 			pricePerItem: "",
 			info: "",
 			closes: "",
+
+			maxCharRules: [
+        field => (field.length <= 100) || 'Reached max character limit: 100'
+      ],
+			mandatoryRules: [
+        //All fields with the class "required" will go through this ruleset to ensure the field is not empty.
+        //if it does not follow the format, display error message
+        field => !!field || 'Field is required'
+      ],  
 
 			numberRules: [
 				field => /(^[0-9]*$)/.test(field) || 'Must contain numbers only'

@@ -116,7 +116,7 @@ describe("CreateSaleItem.vue", () => {
 		await wrapper.setData({
 			//TODO: the inventory item will need to be provided
 			quantity: 3,
-			pricePerItem: 10.10 //Need to retrieve this from the inventory item
+			pricePerItem: "10" //Need to retrieve this from the inventory item
 		});
 	}
 
@@ -197,18 +197,6 @@ describe("CreateSaleItem.vue", () => {
     }
   );
 
-	it.each(validPriceCharacters.concat(validHugePriceCharacters))(
-    'Valid when TOTAL PRICE contain valid price [e.g 999 or 999.99] & <10000, TOTAL PRICE =  "%s"',
-    async (totalPrice) => {
-      await populateAllFields();
-      await wrapper.setData({
-        totalPrice,
-      });
-      await Vue.nextTick();
-      expect(wrapper.vm.valid).toBeTruthy();
-    }
-  );
-
 	it.each(invalidCharacters.concat(whitespaceCharacters))(
     'invalid if QUANTITY contain space, tab, symbol, other language QUANTITY = "%s"',
     async (quantity) => {
@@ -233,10 +221,10 @@ describe("CreateSaleItem.vue", () => {
 
 	it.each(invalidCharacters.concat(whitespaceCharacters))(
     'Invalid if TOTAL PRICE contain space, tab, symbol, other language, TOTAL PRICE = "%s"',
-    async (totalPrice) => {
+    async (pricePerItem) => {
       await populateAllFields();
       await wrapper.setData({
-        totalPrice,
+        pricePerItem,
       });
       await Vue.nextTick();
       expect(wrapper.vm.valid).toBeFalsy();
