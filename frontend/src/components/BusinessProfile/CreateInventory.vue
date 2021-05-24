@@ -139,8 +139,8 @@ export default {
        */
       mockProductList: [
         'NATHAN-APPLE-70',
-        'Connor Orange',
-        'Edward Banana',
+        'CONNOR-ORAN-80',
+        'EDWARD-BANA-78',
       ],
       productCode : "",
       quantity : "",
