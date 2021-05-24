@@ -4,21 +4,9 @@ import Vuetify from 'vuetify';
 import { createLocalVue, mount, Wrapper } from '@vue/test-utils';
 import MarketplaceCard from '@/components/cards/MarketplaceCard.vue';
 
-import Vuex, { Store } from 'vuex';
-import { getStore, resetStoreForTesting, StoreData } from '@/store';
 import { User } from '@/api/internal';
 
 Vue.use(Vuetify);
-
-
-jest.mock('@/api/currency', () => ({
-  currencyFromCountry: jest.fn(() => {
-    return {
-      code: "test_currency_code",
-      symbol: "test_currency_symbol"
-    };
-  })
-}));
 
 const testUser: User = {
   id: 2,
@@ -46,13 +34,7 @@ describe('MarketplaceCard.vue', () => {
     const localVue = createLocalVue();
     vuetify = new Vuetify();
 
-    localVue.use(Vuex);
-
-    const app = document.createElement ("div");
-    app.setAttribute("data-app", "true");
-    document.body.append(app);
-
-    wrapper = mount(MarketplaceCard, {
+    wrapper = mount(MarketplaceCard as any, {
       localVue,
       vuetify,
       propsData: {
@@ -116,5 +98,13 @@ describe('MarketplaceCard.vue', () => {
   it("Must contain keyword names", () => {
     expect(wrapper.text()).toContain("test_keyword_1");
     expect(wrapper.text()).toContain("test_keyword_2");
+  });
+
+  it("Must contain posted date", () => {
+    expect(wrapper.text()).toContain(`Posted ${wrapper.vm.creationString}`);
+  });
+
+  it("Posted date must be formatted correctly", () => {
+    expect(wrapper.vm.creationString).toBe('10/03/2021');
   });
 });

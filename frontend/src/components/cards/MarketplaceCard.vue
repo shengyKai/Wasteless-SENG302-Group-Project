@@ -9,8 +9,14 @@
           {{ locationString }}
           <br>
         </strong>
-        <em v-if="creator">By {{ creator.firstName }} {{ creator.lastName }}</em>
-        <br >
+        <div class="d-flex justify-space-between flex-wrap">
+          <span class="mr-1">
+            <em v-if="creator">By {{ creator.firstName }} {{ creator.lastName }}</em>
+          </span>
+          <span>
+            Posted {{ creationString }}
+          </span>
+        </div>
         {{ content.description }}
       </div>
       <div class="v-flex mx-n1">
@@ -57,6 +63,9 @@ export default {
       } else {
         return `From ${this.location.country}`;
       }
+    },
+    creationString() {
+      return new Date(this.content.created).toLocaleDateString();
     }
   },
 };
