@@ -5,10 +5,10 @@
     </v-card-title>
     <v-card-text class="my-n2 flex-grow-1 d-flex flex-column justify-space-between">
       <div>
-        <strong v-if="location"
-        >From {{ location.district }}, {{ location.city }}
+        <strong v-if="location">
+          {{ locationString }}
+          <br>
         </strong>
-        <br >
         <em v-if="creator">By {{ creator.firstName }} {{ creator.lastName }}</em>
         <br >
         {{ content.description }}
@@ -47,8 +47,17 @@ export default {
       return this.content.creator;
     },
     location() {
-      return this.creator?.location;
+      return this.creator?.homeAddress;
     },
+    locationString() {
+      if (this.location.district !== undefined && this.location.city !== undefined) {
+        return `From ${this.location.district}, ${this.location.city}`;
+      } else if (this.location.city !== undefined) {
+        return `From ${this.location.city}, ${this.location.country}`;
+      } else {
+        return `From ${this.location.country}`;
+      }
+    }
   },
 };
 </script>
