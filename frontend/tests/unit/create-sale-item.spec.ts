@@ -5,12 +5,12 @@ import { createLocalVue, Wrapper, mount } from "@vue/test-utils";
 import CreateSaleItem from "@/components/BusinessProfile/CreateSaleItem.vue";
 import { castMock, flushQueue } from "./utils";
 import { getStore, resetStoreForTesting } from "@/store";
-import * as api from "@/api/internal"
+import * as api from "@/api/internal";
 
 Vue.use(Vuetify);
 
 jest.mock('@/api/internal', () => ({
-    createSaleItem: jest.fn(),
+  createSaleItem: jest.fn(),
 }));
 const createSaleItem = castMock(api.createSaleItem);
 // Characters that are in the set of letters, numbers, spaces and punctuation.
@@ -63,76 +63,76 @@ const whitespaceCharacters = ["\n", "\t"];
 const localVue = createLocalVue();
 
 describe("CreateSaleItem.vue", () => {
-	// Container for the wrapper around CreateSaleItem
-	let appWrapper: Wrapper<any>;
+  // Container for the wrapper around CreateSaleItem
+  let appWrapper: Wrapper<any>;
 
-	// Container for the CreateSaleItem under test
-	let wrapper: Wrapper<any>;
+  // Container for the CreateSaleItem under test
+  let wrapper: Wrapper<any>;
 
-	/**
+  /**
 	 * Sets up the test CreateSaleItem instance
 	 */
-	beforeEach(() => {
-		localVue.use(Vuex);
-		const vuetify = new Vuetify();
-		jest.clearAllMocks();
+  beforeEach(() => {
+    localVue.use(Vuex);
+    const vuetify = new Vuetify();
+    jest.clearAllMocks();
 
-		// Creating wrapper around CreateSaleItem with data-app appease vuetify
-		const App = localVue.component("App", {
-			components: { CreateSaleItem },
-			template: "<div data-app><CreateSaleItem/></div>",
-		});
+    // Creating wrapper around CreateSaleItem with data-app appease vuetify
+    const App = localVue.component("App", {
+      components: { CreateSaleItem },
+      template: "<div data-app><CreateSaleItem/></div>",
+    });
 
-		// Put the CreateSaleItem component inside a div in the global document,
-		// this seems to make vuetify work correctly, but necessitates calling appWrapper.destroy
-		const elem = document.createElement("div");
-		document.body.appendChild(elem);
+    // Put the CreateSaleItem component inside a div in the global document,
+    // this seems to make vuetify work correctly, but necessitates calling appWrapper.destroy
+    const elem = document.createElement("div");
+    document.body.appendChild(elem);
 
-		resetStoreForTesting();
-		let store = getStore();
-		store.state.createInventoryDialog = 90;
+    resetStoreForTesting();
+    let store = getStore();
+    store.state.createInventoryDialog = 90;
 
-		appWrapper = mount(App, {
-			localVue,
-			vuetify,
-			store: store,
-			attachTo: elem,
-		})
+    appWrapper = mount(App, {
+      localVue,
+      vuetify,
+      store: store,
+      attachTo: elem,
+    });
 
-		wrapper = appWrapper.getComponent(CreateSaleItem);
-	})
+    wrapper = appWrapper.getComponent(CreateSaleItem);
+  });
 
-	/**
+  /**
 	 * Ensures the CreateSaleItem component is removed from the global document
 	 */
-	afterEach(() => {
-		appWrapper.destroy();
-	});
+  afterEach(() => {
+    appWrapper.destroy();
+  });
 
-	/**
+  /**
 	 * Populates the required fields within the CreateSaleItem form
 	 */
-	async function populateRequiredFields() {
-		await wrapper.setData({
-			//TODO: the inventory item will need to be provided
-			quantity: 3,
-			pricePerItem: "10" //Need to retrieve this from the inventory item
-		});
-	}
+  async function populateRequiredFields() {
+    await wrapper.setData({
+      //TODO: the inventory item will need to be provided
+      quantity: 3,
+      pricePerItem: "10" //Need to retrieve this from the inventory item
+    });
+  }
 
-	/**
+  /**
 	 * Populates all the fields within the CreateSaleItem form
 	 */
-	async function populateAllFields() {
-		await populateRequiredFields();
-		await wrapper.setData({
-			info: "Today is gonna be a ehhh maybe hopefully a good day",
-			closes: "2030-06-21",
-		});
-	}
+  async function populateAllFields() {
+    await populateRequiredFields();
+    await wrapper.setData({
+      info: "Today is gonna be a ehhh maybe hopefully a good day",
+      closes: "2030-06-21",
+    });
+  }
 
-	// `findClose and findCreate` function will only be used when api is implemented
-	/**
+  // `findClose and findCreate` function will only be used when api is implemented
+  /**
      * Finds the close button in the CreateProduct form
      *
      * @returns A Wrapper around the close button
@@ -161,7 +161,7 @@ describe("CreateSaleItem.vue", () => {
   }
 
 
-	it("Valid if all required fields are provided", async () => {
+  it("Valid if all required fields are provided", async () => {
     await populateRequiredFields();
     await Vue.nextTick();
     expect(wrapper.vm.valid).toBeTruthy();
@@ -173,7 +173,7 @@ describe("CreateSaleItem.vue", () => {
     expect(wrapper.vm.valid).toBeTruthy();
   });
 
-	it.each(validQuantityCharacters)(
+  it.each(validQuantityCharacters)(
     'Valid when quantity contain numbers from 1 to 9 digit, QUANTITY = "%s"',
     async (quantity) => {
       await populateAllFields();
@@ -185,7 +185,7 @@ describe("CreateSaleItem.vue", () => {
     }
   );
 
-	it.each(validPriceCharacters)(
+  it.each(validPriceCharacters)(
     'Valid when PRICE PER ITEM contain valid price [e.g 999 or 999.99] & <10000, Price per Item =  "%s"',
     async (pricePerItem) => {
       await populateAllFields();
@@ -197,7 +197,7 @@ describe("CreateSaleItem.vue", () => {
     }
   );
 
-	it.each(invalidCharacters.concat(whitespaceCharacters))(
+  it.each(invalidCharacters.concat(whitespaceCharacters))(
     'invalid if QUANTITY contain space, tab, symbol, other language QUANTITY = "%s"',
     async (quantity) => {
       await populateAllFields();
@@ -209,8 +209,8 @@ describe("CreateSaleItem.vue", () => {
     }
   );
 
-	it.each(invalidCharacters.concat(whitespaceCharacters).concat(validHugePriceCharacters))
-	('Invalid if PRICE PER ITEM contain space, tab, symbol, other language, number  >= 10000, PRICE PER ITEM = "%s"', async (pricePerItem) => {
+  it.each(invalidCharacters.concat(whitespaceCharacters).concat(validHugePriceCharacters))
+  ('Invalid if PRICE PER ITEM contain space, tab, symbol, other language, number  >= 10000, PRICE PER ITEM = "%s"', async (pricePerItem) => {
     await populateAllFields();
     await wrapper.setData({
       pricePerItem,
@@ -219,7 +219,7 @@ describe("CreateSaleItem.vue", () => {
     expect(wrapper.vm.valid).toBeFalsy();
   });
 
-	it.each(invalidCharacters.concat(whitespaceCharacters))(
+  it.each(invalidCharacters.concat(whitespaceCharacters))(
     'Invalid if TOTAL PRICE contain space, tab, symbol, other language, TOTAL PRICE = "%s"',
     async (pricePerItem) => {
       await populateAllFields();
@@ -231,18 +231,18 @@ describe("CreateSaleItem.vue", () => {
     }
   );
 
-	it("calls api endpoint with value when create button pressed", async ()=> {
+  it("calls api endpoint with value when create button pressed", async ()=> {
     //TODO Implement
   });
 
-	it("Closes the dialog when close button pressed", async ()=> {
+  it("Closes the dialog when close button pressed", async ()=> {
     await findCloseButton().trigger('click');
     await  Vue.nextTick();
     expect(createSaleItem).toBeCalledTimes(0);
     expect(wrapper.emitted().closeDialog).toBeTruthy();
   });
 
-	it("displays an error code when an error is raised", async ()=>{
+  it("displays an error code when an error is raised", async ()=>{
     await populateRequiredFields();
     createSaleItem.mockResolvedValue("Hey there was an error");
     await Vue.nextTick();
@@ -251,4 +251,4 @@ describe("CreateSaleItem.vue", () => {
     expect(appWrapper.text()).toContain("Hey there was an error");
     expect(wrapper.emitted().closeDialog).toBeFalsy();
   });
-})
+});
