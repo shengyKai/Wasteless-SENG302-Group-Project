@@ -34,6 +34,7 @@ describe("Test GET /businesses/:businessId/inventory endpoint", () => {
           countryOfSale: "test_country",
         },
         quantity: 1,
+        remainingQuantity: 1,
         pricePerItem: 1,
         totalPrice: 1,
         manufactured: "test_manufacturer",
@@ -59,6 +60,7 @@ describe("Test GET /businesses/:businessId/inventory endpoint", () => {
           images: []
         },
         quantity: 9,
+        remainingQuantity: 5,
         expires: "test_date"
       }
     ];

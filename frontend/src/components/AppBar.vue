@@ -68,6 +68,14 @@
                   Home
                 </v-list-item-title>
               </v-list-item>
+
+              <!-- View marketplace -->
+              <v-list-item v-if="isUser">
+                <v-list-item-title class="link" @click="viewMarketplace">
+                  Marketplace
+                </v-list-item-title>
+              </v-list-item>
+
               <!-- Logout -->
               <v-list-item>
                 <v-list-item-title class="link" @click="logout">
@@ -115,6 +123,9 @@ export default {
     showHome() {
       this.$router.push("/home");
     },
+    viewMarketplace() {
+      this.$router.push("/marketplace");
+    },
     logout() {
       this.$store.commit("logoutUser");
       this.$router.push("/login");
@@ -131,6 +142,9 @@ export default {
     },
     isDGAA() {
       return this.$store.getters.role === USER_ROLES.DGAA;
+    },
+    isUser() {
+      return this.$store.state.activeRole.type === "user";
     },
     user() {
       return this.$store.state.user;
