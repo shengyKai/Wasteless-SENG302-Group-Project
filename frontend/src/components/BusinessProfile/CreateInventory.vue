@@ -66,7 +66,10 @@
                     prefix="$"
                     :rules="maxCharRules.concat(smallPriceRules)"
                     outlined
-                  />
+                  >
+                    <!-- TODO: Needs to be supplied by inventory item at a later date -->
+                    {{ pricePerItem }}
+                  </v-text-field>
                 </v-col>
                 <!-- INPUT: Total Price. Only allows number or '.'but come with 2 digit -->
                 <v-col cols="6">
@@ -158,8 +161,6 @@ export default {
       today: new Date(),
       mockProductList: [
         'NATHAN-APPLE-70',
-        'Connor Orange',
-        'Edward Banana',
       ],
       productCode : "",
       quantity : "",
