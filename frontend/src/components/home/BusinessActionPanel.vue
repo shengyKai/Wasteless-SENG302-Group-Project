@@ -24,14 +24,6 @@
                 <v-list-item-title>Add Product</v-list-item-title>
               </v-list-item-content>
             </v-list-item>
-            <v-list-item @click="viewCreateInventory">
-              <v-list-item-icon>
-                <v-icon>mdi-tooltip-plus</v-icon>
-              </v-list-item-icon>
-              <v-list-item-content>
-                <v-list-item-title>Add Inventory Item</v-list-item-title>
-              </v-list-item-content>
-            </v-list-item>
             <v-list-item @click="goToCataloguePage">
               <v-list-item-icon>
                 <v-icon>mdi-view-list</v-icon>
@@ -94,12 +86,7 @@ export default {
     viewCreateProduct() {
       this.$store.commit('showCreateProduct', this.$store.state.activeRole.id);
     },
-    /**
-     * Shows the create Inventory dialog
-     */
-    viewCreateInventory() {
-      this.$store.commit('showCreateInventory', this.$store.state.activeRole.id);
-    },
+
     /**
      * Shows the Catalogue page
      */
