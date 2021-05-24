@@ -242,7 +242,7 @@ describe("CreateSaleItem.vue", () => {
     expect(wrapper.emitted().closeDialog).toBeTruthy();
   });
 
-  it("displays an error code when an error is raised", async ()=>{
+  it.skip("displays an error code when an error is raised", async ()=>{
     await populateRequiredFields();
     createSaleItem.mockResolvedValue("Hey there was an error");
     await Vue.nextTick();
