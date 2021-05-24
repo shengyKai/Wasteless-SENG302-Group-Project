@@ -16,15 +16,34 @@
                 <!-- INPUT: Product code Currently used v-selector to reduce typo probability from user -->
                 <v-col cols="6">
                   <v-select
+                    no-data-text="No products found"
                     class="required"
-                    solo
-                    value = "product Code"
                     v-model="productCode"
-                    :items="mockProductList"
-                    label="Product Code"
+                    :items="filteredProductList"
+                    item-text="name"
+                    item-value="id"
+                    label="Product"
                     :rules="mandatoryRules"
+                    :hint="productCode"
+                    @click="productCode=undefined"
+                    persistent-hint
                     outlined
-                  />
+                  >
+                    <template v-slot:prepend-item>
+                      <v-list-item>
+                        <v-list-item-content>
+                          <v-text-field
+                            label="Search for a product"
+                            v-model="productFilter"
+                            clearable
+                            :autofocus="true"
+                            @click:clear="resetSearch"
+                            hint="Id, Name, Description, Manufacturer"
+                          />
+                        </v-list-item-content>
+                      </v-list-item>
+                    </template>
+                  </v-select>
                 </v-col>
                 <!-- INPUT: Quantity. Only allows number.-->
                 <v-col cols="6">
@@ -122,6 +141,8 @@
 
 <script>
 import {createInventoryItem} from '@/api/internal';
+import {getProducts} from "@/api/internal";
+
 export default {
   name: 'CreateInventory',
   components: {
@@ -132,16 +153,8 @@ export default {
       dialog: true,
       valid: false,
       today: new Date().toISOString().slice(0,10),
-      /**
-       * This will be replaced with a list of Products
-       * For now, only nathanApple will work when logged in as 123andyelliot@gmail.com
-       * todo T119
-       */
-      mockProductList: [
-        'NATHAN-APPLE-70',
-        'Connor Orange',
-        'Edward Banana',
-      ],
+      productList: [],
+      productFilter: '',
       productCode : "",
       quantity : "",
       pricePerItem: "",
@@ -179,6 +192,36 @@ export default {
     closeDialog() {
       this.$emit('closeDialog');
     },
+
+    /**
+     * Populates the products array for the dropdown select for selecting a product
+     * @returns {Promise<void>}
+     */
+    async fetchProducts() {
+      // get the list of products for this business
+      const result = await getProducts(this.$store.state.createInventoryDialog, null, 10000, 'name', false);
+      if (typeof result === 'string') {
+        this.errorMessage = result;
+      } else {
+        this.productList = result;
+      }
+    },
+    resetSearch: function () {
+      this.productFilter = '';
+    },
+    /**
+     * Defines a predicate used for filtering the available products
+     * Predicate matches Id, Name, Manufacturer and Description
+     * @param product The product to compare
+     * @returns {boolean|undefined}
+     */
+    filterPredicate(product) {
+      const filterText = this.productFilter ?? '';
+      return product.id.toLowerCase().includes(filterText.toLowerCase()) ||
+          product.name.toLowerCase().includes(filterText.toLowerCase()) ||
+          product.manufacturer?.toLowerCase().includes(filterText.toLowerCase()) ||
+          product.description?.toLowerCase().includes(filterText.toLowerCase());
+    },
     /**
      * Called when the form is submitted
      * Requests backend to create an inventory item
@@ -190,7 +233,7 @@ export default {
       let quantity;
       try {
         quantity = parseInt(this.quantity);
-      } catch ( error ) {
+      } catch (error) {
         this.errorMessage = 'Could not parse field \'Quantity\'';
         return;
       }
@@ -211,6 +254,23 @@ export default {
         this.closeDialog();
       }
     },
+  },
+  computed: {
+    /**
+     * Filters the list of products based on the value of the search term
+     * value must be passed to ensure products are refreshed when input is cleared
+     */
+    filteredProductList() {
+      return this.productList.filter(x => this.filterPredicate(x));
+    },
+  },
+  watch: {
+    productFilter() {
+      console.log(this.productFilter);
+    }
+  },
+  async created() {
+    await this.fetchProducts();
   },
 };
 </script>
