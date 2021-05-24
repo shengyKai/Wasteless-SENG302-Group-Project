@@ -192,7 +192,6 @@ pre {
   margin-bottom: 10px;
 }
 
-<<<<<<< HEAD:frontend/src/components/HomePage.vue
 .action-pane {
   margin-right: 10px;
   max-height: 400px;
@@ -210,6 +209,4 @@ pre {
   margin: 10px;
 }
 
-=======
->>>>>>> dev:frontend/src/components/home/HomePage.vue
 </style>
