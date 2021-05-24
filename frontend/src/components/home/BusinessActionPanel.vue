@@ -24,6 +24,14 @@
                 <v-list-item-title>Add Product</v-list-item-title>
               </v-list-item-content>
             </v-list-item>
+            <v-list-item @click="viewCreateInventory">
+              <v-list-item-icon>
+                <v-icon>mdi-tooltip-plus</v-icon>
+              </v-list-item-icon>
+              <v-list-item-content>
+                <v-list-item-title>Add Inventory Item</v-list-item-title>
+              </v-list-item-content>
+            </v-list-item>
             <v-list-item @click="goToCataloguePage">
               <v-list-item-icon>
                 <v-icon>mdi-view-list</v-icon>
@@ -40,12 +48,12 @@
                 <v-list-item-title >Inventory</v-list-item-title>
               </v-list-item-content>
             </v-list-item>
-            <v-list-item @click="viewCreateInventory">
+            <v-list-item @click="goSalePage">
               <v-list-item-icon>
                 <v-icon>mdi-view-list</v-icon>
               </v-list-item-icon>
               <v-list-item-content>
-                <v-list-item-title >Create Inventory Item (temporary)</v-list-item-title>
+                <v-list-item-title >Sale Listing</v-list-item-title>
               </v-list-item-content>
             </v-list-item>
           </v-list-item-group>
@@ -104,6 +112,9 @@ export default {
     goInventoryPage() {
       this.$router.push(`/business/${this.$store.state.activeRole.id}/inventory`);
     },
+    goSalePage() {
+      this.$router.push(`/business/${this.$store.state.activeRole.id}/sales`);
+    },
   },
 };
 </script>
@@ -124,7 +135,7 @@ export default {
 
 .action-pane {
   margin-right: 10px;
-  max-height: 350px;
+  max-height: 400px;
 }
 
 
