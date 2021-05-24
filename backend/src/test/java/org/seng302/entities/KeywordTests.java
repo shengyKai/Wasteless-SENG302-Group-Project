@@ -15,6 +15,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -255,5 +256,17 @@ class KeywordTests {
     @ValueSource(strings = {" ", "a", "A", "é", "树"})
     void keywordConstructor_validCharacters_createsSuccessfully(String name) {
         assertDoesNotThrow(() -> new Keyword(name));
+    }
+
+    @Test
+    void findByOrderByNameAsc_keywordsExist_keywordsReturnedOrderedByName() {
+        List<String> keywordNames = List.of("Cat", "Fish", "Dog", "Zebra", "Rabbit");
+
+        List<Keyword> keywords = keywordNames.stream().map(Keyword::new).collect(Collectors.toList());
+        keywordRepository.saveAll(keywords);
+
+        List<String> sortedNames = keywordNames.stream().sorted().collect(Collectors.toList());
+        List<String> resultNames = keywordRepository.findByOrderByNameAsc().stream().map(Keyword::getName).collect(Collectors.toList());
+        assertEquals(sortedNames, resultNames);
     }
 }

@@ -20,7 +20,7 @@ import java.util.List;
  */
 @Component
 public class MainApplicationRunner implements ApplicationRunner {
-    private static final List<String> DEFAULT_KEYWORD_NAMES = List.of("Free", "Home Baking", "With Love", "Inspired", "Bulk", "Gluten Free", "Vegan", "Vegetarian", "Fun", "Keto", "Plant Based", "Fat Free", "Italian", "French", "Local Produce", "Fresh", "Eco", "Sustainable", "Asian", "Curry", "Dairy", "Perishable", "Non Perishable", "Free Range");
+    private static final List<String> DEFAULT_KEYWORD_NAMES = List.of("Free", "Home Baking", "With Love", "Inspired", "Bulk", "Gluten Free", "Vegan", "Vegetarian", "Fun", "Keto", "Plant Based", "Fat Free", "Italian", "French", "Local Produce", "Fresh", "Eco", "Sustainable", "Asian", "Curry", "Dairy", "Perishable", "Non Perishable", "Free Range", "Natural", "Organic", "Connor", "Kosher", "Paleo", "Home Grown");
 
     @Resource
     private StorageService storageService;
@@ -49,6 +49,9 @@ public class MainApplicationRunner implements ApplicationRunner {
     }
 
 
+    /**
+     * Adds the default keywords to the keyword repository if no keywords currently exist
+     */
     private void addDemoKeywordsIfNoneExist() {
         if (keywordRepository.count() != 0) return;
 

@@ -10,6 +10,8 @@ import java.util.List;
 @Repository
 public interface KeywordRepository extends CrudRepository<Keyword, Long> {
 
+    List<Keyword> findByOrderByNameAsc();
+
     /**
      * Finds all the keywords for the given card
      * @param card Cards to get keywords for

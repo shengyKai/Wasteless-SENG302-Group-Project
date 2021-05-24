@@ -110,11 +110,13 @@ class KeywordControllerTest {
             keywords.add(mockKeyword);
         }
 
-        when(keywordRepository.findAll()).thenReturn(keywords);
+        when(keywordRepository.findByOrderByNameAsc()).thenReturn(keywords);
 
         MvcResult result = mockMvc.perform(get("/keywords/search"))
                 .andExpect(status().isOk())
                 .andReturn();
+
+        verify(keywordRepository).findByOrderByNameAsc();
 
         JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
         Object response = parser.parse(result.getResponse().getContentAsString());

@@ -23,6 +23,11 @@ public class KeywordController {
         this.keywordRepository = keywordRepository;
     }
 
+    /**
+     * REST GET method to retrieve all the global keyword entities
+     * @param request the HTTP request
+     * @return List of all the keyword entities
+     */
     @GetMapping("/keywords/search")
     public JSONArray searchKeywords(HttpServletRequest request) {
         try {
@@ -30,7 +35,7 @@ public class KeywordController {
             AuthenticationTokenManager.checkAuthenticationToken(request);
 
             JSONArray result = new JSONArray();
-            for (Keyword keyword : keywordRepository.findAll()) {
+            for (Keyword keyword : keywordRepository.findByOrderByNameAsc()) {
                 result.add(keyword.constructJSONObject());
             }
             return result;
