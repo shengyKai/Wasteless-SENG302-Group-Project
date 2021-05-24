@@ -16,14 +16,6 @@
                 <v-list-item-title>Profile</v-list-item-title>
               </v-list-item-content>
             </v-list-item>
-            <v-list-item v-if="!isBusiness" @click="viewCreateBusiness">
-              <v-list-item-icon>
-                <v-icon>mdi-briefcase-plus</v-icon>
-              </v-list-item-icon>
-              <v-list-item-content>
-                <v-list-item-title>Add Business</v-list-item-title>
-              </v-list-item-content>
-            </v-list-item>
             <v-list-item v-if="isBusiness" @click="viewCreateProduct">
               <v-list-item-icon>
                 <v-icon>mdi-tooltip-plus</v-icon>
@@ -32,6 +24,24 @@
                 <v-list-item-title>Add Product</v-list-item-title>
               </v-list-item-content>
             </v-list-item>
+            <v-list-item v-if="isBusiness" @click="viewCreateInventory">
+              <v-list-item-icon>
+                <v-icon>mdi-tooltip-plus</v-icon>
+              </v-list-item-icon>
+              <v-list-item-content>
+                <v-list-item-title >Add Inventory Item (temporary)</v-list-item-title>
+              </v-list-item-content>
+            </v-list-item>
+
+            <v-list-item v-if="!isBusiness" @click="viewCreateBusiness">
+              <v-list-item-icon>
+                <v-icon>mdi-briefcase-plus</v-icon>
+              </v-list-item-icon>
+              <v-list-item-content>
+                <v-list-item-title>Add Business</v-list-item-title>
+              </v-list-item-content>
+            </v-list-item>
+
             <v-list-item v-if="isBusiness" @click="goToCataloguePage">
               <v-list-item-icon>
                 <v-icon>mdi-view-list</v-icon>
@@ -48,14 +58,7 @@
                 <v-list-item-title >Inventory</v-list-item-title>
               </v-list-item-content>
             </v-list-item>
-            <v-list-item v-if="isBusiness" @click="viewCreateInventory">
-              <v-list-item-icon>
-                <v-icon>mdi-view-list</v-icon>
-              </v-list-item-icon>
-              <v-list-item-content>
-                <v-list-item-title >Create Inventory Item (temporary)</v-list-item-title>
-              </v-list-item-content>
-            </v-list-item>
+
             <v-list-item v-if="isBusiness" @click="goSalePage">
               <v-list-item-icon>
                 <v-icon>mdi-view-list</v-icon>
@@ -64,6 +67,7 @@
                 <v-list-item-title >Sale Page</v-list-item-title>
               </v-list-item-content>
             </v-list-item>
+
           </v-list-item-group>
         </v-list>
       </v-card-text>
