@@ -13,6 +13,7 @@ import org.seng302.persistence.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
@@ -513,6 +514,7 @@ public class InventoryItemTests {
         expectedJson.put("id", invItem.getId());
         expectedJson.put("product", invItem.getProduct().constructJSONObject());
         expectedJson.put("quantity", invItem.getQuantity());
+        expectedJson.put("remainingQuantity", invItem.getRemainingQuantity());
         expectedJson.put("pricePerItem", invItem.getPricePerItem());
         expectedJson.put("totalPrice", invItem.getTotalPrice());
         expectedJson.put("manufactured", invItem.getManufactured().toString());
@@ -535,8 +537,48 @@ public class InventoryItemTests {
         expectedJson.put("id", invItem.getId());
         expectedJson.put("product", invItem.getProduct().constructJSONObject());
         expectedJson.put("quantity", invItem.getQuantity());
+        expectedJson.put("remainingQuantity", invItem.getRemainingQuantity());
         expectedJson.put("expires", invItem.getExpires().toString());
         ObjectMapper mapper = new ObjectMapper();
         assertEquals(mapper.readTree(expectedJson.toJSONString()), mapper.readTree(invItem.constructJSONObject().toJSONString()));
+    }
+
+    @Test
+    void saveInventoryItem_saveMultipleWithSameVersion_throwsException() throws Exception {
+        InventoryItem originalItem = new InventoryItem.Builder()
+                .withProduct(testProduct)
+                .withQuantity(3)
+                .withExpires(LocalDate.now().plus(50, ChronoUnit.DAYS).toString())
+                .build();
+        originalItem = inventoryItemRepository.save(originalItem);
+
+
+        InventoryItem copy1 = inventoryItemRepository.findById(originalItem.getId()).orElseThrow();
+        InventoryItem copy2 = inventoryItemRepository.findById(originalItem.getId()).orElseThrow();
+
+        copy1.setQuantity(4);
+        copy2.setQuantity(5);
+
+        assertDoesNotThrow(() -> inventoryItemRepository.save(copy1));
+        assertThrows(ObjectOptimisticLockingFailureException.class, () -> inventoryItemRepository.save(copy2));
+    }
+
+    @Test
+    void saveInventoryItem_saveMultipleWithDifferentVersion_savesCorrectly() throws Exception {
+        InventoryItem originalItem = new InventoryItem.Builder()
+                .withProduct(testProduct)
+                .withQuantity(3)
+                .withExpires(LocalDate.now().plus(50, ChronoUnit.DAYS).toString())
+                .build();
+        originalItem = inventoryItemRepository.save(originalItem);
+
+
+        InventoryItem copy1 = inventoryItemRepository.findById(originalItem.getId()).orElseThrow();
+        copy1.setQuantity(4);
+        assertDoesNotThrow(() -> inventoryItemRepository.save(copy1));
+
+        InventoryItem copy2 = inventoryItemRepository.findById(originalItem.getId()).orElseThrow();
+        copy2.setQuantity(5);
+        assertDoesNotThrow( () -> inventoryItemRepository.save(copy2));
     }
 }

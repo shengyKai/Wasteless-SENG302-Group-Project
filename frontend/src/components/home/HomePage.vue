@@ -1,91 +1,7 @@
 <template>
   <div class="page-container">
-    <!-- User actions - Wide version -->
-    <v-card
-      rounded="lg"
-      class="action-pane small-no-display "
-    >
-      <v-card-text>
-        <v-list>
-          <v-list-item-group>
-            <v-list-item @click="viewProfile">
-              <v-list-item-icon>
-                <v-icon>mdi-account-circle</v-icon>
-              </v-list-item-icon>
-              <v-list-item-content>
-                <v-list-item-title>Profile</v-list-item-title>
-              </v-list-item-content>
-            </v-list-item>
-            <v-list-item v-if="isBusiness" @click="viewCreateProduct">
-              <v-list-item-icon>
-                <v-icon>mdi-tooltip-plus</v-icon>
-              </v-list-item-icon>
-              <v-list-item-content>
-                <v-list-item-title>Add Product</v-list-item-title>
-              </v-list-item-content>
-            </v-list-item>
-            <v-list-item v-if="isBusiness" @click="viewCreateInventory">
-              <v-list-item-icon>
-                <v-icon>mdi-tooltip-plus</v-icon>
-              </v-list-item-icon>
-              <v-list-item-content>
-                <v-list-item-title >Add Inventory Item</v-list-item-title>
-              </v-list-item-content>
-            </v-list-item>
-
-            <v-list-item v-if="!isBusiness" @click="viewCreateBusiness">
-              <v-list-item-icon>
-                <v-icon>mdi-briefcase-plus</v-icon>
-              </v-list-item-icon>
-              <v-list-item-content>
-                <v-list-item-title>Add Business</v-list-item-title>
-              </v-list-item-content>
-            </v-list-item>
-
-            <v-list-item v-if="isBusiness" @click="goToCataloguePage">
-              <v-list-item-icon>
-                <v-icon>mdi-view-list</v-icon>
-              </v-list-item-icon>
-              <v-list-item-content>
-                <v-list-item-title>Catalogue</v-list-item-title>
-              </v-list-item-content>
-            </v-list-item>
-            <v-list-item v-if="isBusiness" @click="goInventoryPage">
-              <v-list-item-icon>
-                <v-icon>mdi-view-list</v-icon>
-              </v-list-item-icon>
-              <v-list-item-content>
-                <v-list-item-title >Inventory</v-list-item-title>
-              </v-list-item-content>
-            </v-list-item>
-
-            <v-list-item v-if="isBusiness" @click="goSalePage">
-              <v-list-item-icon>
-                <v-icon>mdi-view-list</v-icon>
-              </v-list-item-icon>
-              <v-list-item-content>
-                <v-list-item-title >Sale Listing</v-list-item-title>
-              </v-list-item-content>
-            </v-list-item>
-
-          </v-list-item-group>
-        </v-list>
-      </v-card-text>
-    </v-card>
-
-    <!-- User actions - Narrow version -->
-    <v-card class="action-pane large-no-display">
-      <v-btn icon @click="viewProfile" class="action-button">
-        <v-icon large>mdi-account-circle</v-icon>
-      </v-btn>
-      <v-btn v-if="!isBusiness" icon @click="viewCreateBusiness" class="action-button">
-        <v-icon large>mdi-briefcase-plus</v-icon>
-      </v-btn>
-      <v-btn v-if="isBusiness" icon @click="viewCreateProduct" class="action-button">
-        <v-icon large>mdi-tooltip-plus</v-icon>
-      </v-btn>
-    </v-card>
-
+    <BusinessActionPanel v-if="isBusiness" />
+    <UserActionPanel v-else />
     <div class="newsfeed">
       <!-- Inventory items -->
       <v-card
@@ -132,6 +48,9 @@
 </template>
 
 <script>
+import BusinessActionPanel from "./BusinessActionPanel";
+import UserActionPanel from "./UserActionPanel";
+
 export default {
   data() {
     return {
@@ -147,6 +66,10 @@ export default {
         },
       ],
     };
+  },
+  components: {
+    BusinessActionPanel,
+    UserActionPanel,
   },
   methods: {
     /**
@@ -225,19 +148,6 @@ export default {
 
 <style scoped>
 
-
-@media all and (min-width: 992px) {
-  .large-no-display {
-    display: none !important;
-  }
-}
-
-@media not all and (min-width: 992px) {
-  .small-no-display {
-    display: none !important;
-  }
-}
-
 pre {
   white-space: pre-wrap;
 }
@@ -282,6 +192,7 @@ pre {
   margin-bottom: 10px;
 }
 
+<<<<<<< HEAD:frontend/src/components/HomePage.vue
 .action-pane {
   margin-right: 10px;
   max-height: 400px;
@@ -299,4 +210,6 @@ pre {
   margin: 10px;
 }
 
+=======
+>>>>>>> dev:frontend/src/components/home/HomePage.vue
 </style>
