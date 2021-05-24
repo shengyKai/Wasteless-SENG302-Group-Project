@@ -29,7 +29,7 @@
                 <v-icon>mdi-tooltip-plus</v-icon>
               </v-list-item-icon>
               <v-list-item-content>
-                <v-list-item-title >Add Inventory Item (temporary)</v-list-item-title>
+                <v-list-item-title >Add Inventory Item</v-list-item-title>
               </v-list-item-content>
             </v-list-item>
 
@@ -64,7 +64,7 @@
                 <v-icon>mdi-view-list</v-icon>
               </v-list-item-icon>
               <v-list-item-content>
-                <v-list-item-title >Sale Page</v-list-item-title>
+                <v-list-item-title >Sale Listing</v-list-item-title>
               </v-list-item-content>
             </v-list-item>
 
