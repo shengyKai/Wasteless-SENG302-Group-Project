@@ -744,7 +744,7 @@ export async function getKeywords(): Promise<MaybeError<Keyword[]>> {
   } catch (error) {
     let status: number | undefined = error.response?.status;
     if (status === undefined) return 'Failed to reach backend';
-    if (status === 401) return 'Unauthorised';
+    if (status === 401) return 'Missing/Invalid access token';
     return `Request failed: ${status}`;
   }
   if (!is<Keyword[]>(response.data)) {

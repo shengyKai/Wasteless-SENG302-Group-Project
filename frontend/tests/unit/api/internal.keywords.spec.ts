@@ -41,4 +41,14 @@ describe("Test GET /keywords/search endpoint", () => {
     const keywords = await api.getKeywords();
     expect(keywords).toEqual("Failed to reach backend");
   });
+
+  it("Unauthorised call to keywords", async () => {
+    instance.get.mockRejectedValueOnce({
+      response: {
+        status: 401,
+      }
+    });
+    const keywords = await api.getKeywords();
+    expect(keywords).toEqual('Missing/Invalid access token');
+  });
 });
