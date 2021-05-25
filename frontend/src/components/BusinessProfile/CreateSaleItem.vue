@@ -21,6 +21,7 @@
                     v-model="quantity"
                     label="Quantity"
                     :rules="mandatoryRules.concat(numberRules)"
+                    :min=1
                     outlined
                   />
                 </v-col>
@@ -179,6 +180,8 @@ export default {
     inventoryItem() {
       if (this.$store.state.createSaleItemDialog !== undefined) {
         return this.$store.state.createSaleItemDialog.inventoryItem;
+      } else {
+        return undefined;
       }
     },
     businessId() {

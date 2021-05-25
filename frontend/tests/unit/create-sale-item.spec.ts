@@ -279,9 +279,33 @@ describe("CreateSaleItem.vue", () => {
 
   it("Valid when the info field contains a sentence", async () => {
     await populateRequiredFields();
-    await Vue.nextTick();
     await wrapper.setData({
       info: "Today's gonna be a good day"
+    });
+    await Vue.nextTick();
+    expect(findCreateButton().props().disabled).toBeFalsy();
+  })
+
+  it("Invalid when quantity is zero", async () => {
+    await populateRequiredFields();
+    await wrapper.setData({
+      quantity: 0
+    });
+    expect(findCreateButton().props().disabled).toBeFalsy();
+  })
+
+  it("Invalid when quantity is negative one", async () => {
+    await populateRequiredFields();
+    await wrapper.setData({
+      quantity: -1
+    });
+    expect(findCreateButton().props().disabled).toBeFalsy();
+  })
+
+  it("Invalid when quantity is negative 10000", async () => {
+    await populateRequiredFields();
+    await wrapper.setData({
+      quantity: -10000
     });
     expect(findCreateButton().props().disabled).toBeFalsy();
   })
