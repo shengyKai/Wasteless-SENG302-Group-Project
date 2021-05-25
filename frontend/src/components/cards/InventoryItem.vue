@@ -56,10 +56,7 @@
                     <strong>Description</strong>
                     <br>
                     {{
-                      product.description.replace(
-                        /^([\s\S]{50}\S*)[\s\S]*/,
-                        "$1"
-                      )
+                      descriptionString
                     }}...
                     <!-- feed the productDescription into the dialog box child component -->
                     <FullProductDescription
@@ -302,6 +299,13 @@ export default {
      */
     product() {
       return this.inventoryItem.product;
+    },
+    descriptionString() {
+      if (this.product.description === undefined) return undefined;
+      return this.product.description.replace(
+        /^([\s\S]{50}\S*)[\s\S]*/,
+        "$1"
+      );
     }
   },
   methods: {
