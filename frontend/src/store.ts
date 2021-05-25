@@ -1,9 +1,9 @@
-import {User, Business, getUser, login, InventoryItem} from './api/internal';
+import { User, Business, getUser, login, InventoryItem } from './api/internal';
 import Vuex, { Store, StoreOptions } from 'vuex';
 import { COOKIE, deleteCookie, getCookie, isTesting, setCookie } from './utils';
 
-type UserRole = { type: "user" | "business", id: number};
-type SaleItemInfo = {businessId: number, inventoryItem: InventoryItem};
+type UserRole = { type: "user" | "business", id: number };
+type SaleItemInfo = { businessId: number, inventoryItem: InventoryItem };
 
 export type StoreData = {
   /**
@@ -44,7 +44,11 @@ export type StoreData = {
   /**
    * Whether or not the dialog for registering a business is being shown.
    */
-   createSaleItemDialog: SaleItemInfo | undefined,
+  createSaleItemDialog: SaleItemInfo | undefined,
+  /**
+   * Whether or not the dialog for creating a marketplace card is being shown.
+   */
+  createMarketplaceCardDialog: User | undefined,
 };
 
 function createOptions(): StoreOptions<StoreData> {
@@ -57,9 +61,10 @@ function createOptions(): StoreOptions<StoreData> {
       createProductDialogBusiness: undefined,
       createInventoryDialog: undefined,
       createSaleItemDialog: undefined,
+      createMarketplaceCardDialog: undefined,
     },
     mutations: {
-      setUser (state, payload: User) {
+      setUser(state, payload: User) {
         state.user = payload;
 
         // Ensures that when we log in we always have a role.
@@ -94,7 +99,7 @@ function createOptions(): StoreOptions<StoreData> {
         state.globalError = null;
       },
 
-      logoutUser (state) {
+      logoutUser(state) {
         state.user = null;
         deleteCookie(COOKIE.USER);
       },
@@ -171,6 +176,23 @@ function createOptions(): StoreOptions<StoreData> {
       },
 
       /**
+       * Creates a modal create card dialog for addin a card to the marketplace
+       *
+       * @param state Current store state
+       */
+      showCreateMarketplaceCard(state, user : User) {
+        state.createMarketplaceCardDialog = user;
+      },
+      /**
+       * Hides the create marketplace card dialog
+       *
+       * @param state Current store state
+       */
+      hideCreateMarketplaceCard(state) {
+        state.createMarketplaceCardDialog = undefined;
+      },
+
+      /**
        * Sets the current user role
        *
        * @param state Current store state
@@ -182,10 +204,10 @@ function createOptions(): StoreOptions<StoreData> {
       }
     },
     getters: {
-      isLoggedIn (state) {
+      isLoggedIn(state) {
         return state.user !== null;
       },
-      role (state) {
+      role(state) {
         return state.user?.role;
       },
     },

@@ -47,7 +47,7 @@
         <v-spacer/>
         <v-col cols="auto" class="text-right" >
           <!---Link to modal for creating new card--->
-          <v-btn type="button" color="primary" rounded>
+          <v-btn type="button" color="primary" @click="showCreateCard" rounded>
             Create card
           </v-btn>
         </v-col>
@@ -110,6 +110,12 @@ export default {
   },
   components: {
     MarketplaceCard
+  },
+  methods: {
+    showCreateCard() {
+      console.log('Show create card');
+      this.$store.commit('showCreateMarketplaceCard', this.$store.state.user);
+    }
   }
 };
 </script>
