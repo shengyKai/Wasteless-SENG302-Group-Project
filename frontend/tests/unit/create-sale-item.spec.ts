@@ -88,9 +88,27 @@ describe("CreateSaleItem.vue", () => {
     const elem = document.createElement("div");
     document.body.appendChild(elem);
 
+    const testProducts = 
+      {
+        id: "WATT-420-BEANS",
+        name: "Watties Baked Beans - 420g can",
+        description: "Baked Beans as they should be.",
+        manufacturer: "Heinz Wattie's Limited",
+        recommendedRetailPrice: 2.2,
+        created: "2021-05-22T02:06:27.767Z",
+        images: [
+          {
+            id: 1234,
+            filename: "/media/images/23987192387509-123908794328.png",
+            thumbnailFilename: "/media/images/23987192387509-123908794328_thumbnail.png"
+          }
+        ]
+      };
+
     resetStoreForTesting();
     let store = getStore();
     store.state.createInventoryDialog = 90;
+    store.state.createSaleItemDialog = {businessId: 1, inventoryItem: {id: 1, product: testProducts, quantity: 5, remainingQuantity: 3, expires: "somedate"}};
 
     appWrapper = mount(App, {
       localVue,
@@ -232,7 +250,10 @@ describe("CreateSaleItem.vue", () => {
   );
 
   it("calls api endpoint with value when create button pressed", async ()=> {
-    //TODO Implement
+    await populateRequiredFields();
+    await findCreateButton().trigger('click');
+    await Vue.nextTick();
+    expect(createSaleItem).toBeCalledTimes(1);
   });
 
   it("Closes the dialog when close button pressed", async ()=> {
@@ -242,13 +263,11 @@ describe("CreateSaleItem.vue", () => {
     expect(wrapper.emitted().closeDialog).toBeTruthy();
   });
 
-  it.skip("displays an error code when an error is raised", async ()=>{
+  it("Shows error message if there is any error received from the api endpoint", async ()=> {
+    createSaleItem.mockResolvedValueOnce("some error message");
     await populateRequiredFields();
-    createSaleItem.mockResolvedValue("Hey there was an error");
-    await Vue.nextTick();
     await findCreateButton().trigger('click');
-    await Vue.nextTick();
-    expect(appWrapper.text()).toContain("Hey there was an error");
-    expect(wrapper.emitted().closeDialog).toBeFalsy();
+    await  Vue.nextTick();
+    expect(wrapper.vm.errorMessage).toEqual('some error message');
   });
 });
