@@ -89,13 +89,13 @@ public class SaleItem {
      * @param quantity that is for sale
      */
     public void setQuantity(int quantity) {
-        int diff = this.quantity - quantity;
-        if (quantity > 0 && diff <= inventoryItem.getRemainingQuantity()) {
-            this.quantity = quantity;
-            inventoryItem.setRemainingQuantity(inventoryItem.getRemainingQuantity() + diff);
-        } else {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Please enter a number of items between 1 and your current stock not on sale");
+        if (quantity <= 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Quantity must be greater than 0");
         }
+
+        int diff = this.quantity - quantity;
+        inventoryItem.setRemainingQuantity(inventoryItem.getRemainingQuantity() + diff);
+        this.quantity = quantity;
     }
 
     /**

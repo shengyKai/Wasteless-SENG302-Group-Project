@@ -21,7 +21,13 @@
         prepend-inner-icon="mdi-sort-variant"
         label="Sort by"
       />
+      <v-col >
+        <v-btn outlined  @click="viewCreateInventory" :value="false">
+          Add Inventory
+        </v-btn>
+      </v-col>
       <v-col class="text-right">
+
         <v-btn-toggle class="toggle" v-model="reverse" mandatory>
           <v-btn depressed color="primary" :value="false">
             <v-icon>mdi-arrow-up</v-icon>
@@ -153,6 +159,12 @@ export default {
         this.inventoryItems = value;
         this.error = undefined;
       }
+    },
+    /**
+     * Shows the create Inventory dialog
+     */
+    viewCreateInventory() {
+      this.$store.commit('showCreateInventory', this.businessId);
     },
   },
 

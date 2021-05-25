@@ -11,8 +11,11 @@ Vue.use(Vuetify);
 
 jest.mock('@/api/internal', () => ({
   createInventoryItem: jest.fn(),
+  getProducts: jest.fn()
 }));
 const createInventoryItem = castMock(api.createInventoryItem);
+const getProducts = castMock(api.getProducts);
+getProducts.mockResolvedValue([]);
 // Characters that are in the set of letters, numbers, spaces and punctuation.
 const validQuantityCharacters = [
   "0",
@@ -57,6 +60,23 @@ const invalidCharacters = [
   "-1",
   "-99",
 ];
+const testProducts = [
+  {
+    "id": "WATT-420-BEANS",
+    "name": "Watties Baked Beans - 420g can",
+    "description": "Baked Beans as they should be.",
+    "manufacturer": "Heinz Wattie's Limited",
+    "recommendedRetailPrice": 2.2,
+    "created": "2021-05-22T02:06:27.767Z",
+    "images": [
+      {
+        "id": 1234,
+        "filename": "/media/images/23987192387509-123908794328.png",
+        "thumbnailFilename": "/media/images/23987192387509-123908794328_thumbnail.png"
+      }
+    ]
+  }
+];
 // Characters that are whitespace not including the space character.
 const whitespaceCharacters = ["\n", "\t"];
 
@@ -78,7 +98,6 @@ describe("CreateInventory.vue", () => {
   beforeEach(() => {
     localVue.use(Vuex);
     const vuetify = new Vuetify();
-    jest.clearAllMocks();
 
     // Creating wrapper around CreateInventory with data-app to appease vuetify
     const App = localVue.component("App", {
@@ -182,6 +201,17 @@ describe("CreateInventory.vue", () => {
     return filtered.at(0);
   }
 
+  /**
+   * Finds the product select dropdown
+   *
+   * @returns A Wrapper around the product select dropdown
+   */
+  function findProductSelect() {
+    const select = wrapper.findAllComponents({name:"v-select"});
+    expect(select.length).toBe(1);
+    return select.at(0);
+  }
+
   it("Valid if all required fields are provided", async () => {
     await populateRequiredFields();
     await Vue.nextTick();
@@ -282,35 +312,394 @@ describe("CreateInventory.vue", () => {
     }
   );
 
-  it("calls api endpoint with value when create button pressed", async ()=> {
-    await populateRequiredFields();
-    createInventoryItem.mockResolvedValue(undefined); // pretend everything is A-OK
-    await Vue.nextTick();
-    await findCreateButton().trigger('click');
-    await Vue.nextTick();
+  describe("Date Validation", () => {
+    /**
+         * Gets todays date and adds on a certain number of years
+         *
+         * @param years the number of years to add onto today
+         * @returns Todays date with x more years
+         */
+    async function todayPlusYears(years: number) {
+      let today = new Date();
+      let currentYears = today.getFullYear() + years;
+      return currentYears + "-" + today.getMonth() + "-" + today.getDay();
+    }
 
-    expect(createInventoryItem).toBeCalledWith(90, {
-      productId: "ABC-XYZ-012-789",
-      quantity: 2,
-      expires: "2030-05-17",
+    it("Valid when all date fields are today", async () => {
+      await populateRequiredFields();
+      let manufacturedDate = await todayPlusYears(0);
+      let sellByDate = await todayPlusYears(0);
+      let bestBeforeDate = await todayPlusYears(0);
+      let expiresDate = await todayPlusYears(0);
+      await wrapper.setData({
+        manufactured: manufacturedDate,
+        sellBy: sellByDate,
+        bestBefore: bestBeforeDate,
+        expires: expiresDate
+      });
+      await Vue.nextTick();
+
+      expect(findCreateButton().props().disabled).toBeFalsy();
     });
-    expect(wrapper.emitted().closeDialog).toBeTruthy();
+
+    it("Valid when manufactured date before today", async () => {
+      await populateRequiredFields();
+      let manufacturedDate = await todayPlusYears(-1);
+      await wrapper.setData({
+        manufactured: manufacturedDate
+      });
+      wrapper.vm.checkManufacturedDateValid();
+      await Vue.nextTick();
+      expect(findCreateButton().props().disabled).toBeFalsy();
+    });
+
+    it("Invalid when manufactured date after today", async () => {
+      await populateRequiredFields();
+      let manufacturedDate = await todayPlusYears(1);
+      await wrapper.setData({
+        manufactured: manufacturedDate
+      });
+      wrapper.vm.checkManufacturedDateValid();
+      await Vue.nextTick();
+      expect(findCreateButton().props().disabled).toBeTruthy();
+    });
+
+    it("Valid when manufactured date before sell by date", async () => {
+      await populateRequiredFields();
+      let manufacturedDate = await todayPlusYears(-1);
+      let sellByDate = await todayPlusYears(1);
+      await wrapper.setData({
+        manufactured: manufacturedDate,
+        sellBy: sellByDate
+      });
+      wrapper.vm.checkManufacturedDateValid();
+      wrapper.vm.checkSellByDateValid();
+      await Vue.nextTick();
+      expect(findCreateButton().props().disabled).toBeFalsy();
+    });
+
+    it("Invalid when manufactured date after sell by date", async () => {
+      await populateRequiredFields();
+      let manufacturedDate = await todayPlusYears(-1);
+      let sellByDate = await todayPlusYears(-2);
+      await wrapper.setData({
+        manufactured: manufacturedDate,
+        sellBy: sellByDate
+      });
+      wrapper.vm.checkManufacturedDateValid();
+      wrapper.vm.checkSellByDateValid();
+      await Vue.nextTick();
+      expect(findCreateButton().props().disabled).toBeTruthy();
+    });
+
+    it("Invalid when manufactured date before 1000 AD", async () => {
+      await populateRequiredFields();
+      let manufacturedDate = await todayPlusYears(-1500);
+      await wrapper.setData({
+        manufactured: manufacturedDate
+      });
+      wrapper.vm.checkManufacturedDateValid();
+      await Vue.nextTick();
+      expect(findCreateButton().props().disabled).toBeTruthy();
+    });
+
+    it("Invalid when manufactured date after 10000 AD", async () => {
+      await populateRequiredFields();
+      let manufacturedDate = await todayPlusYears(10000);
+      await wrapper.setData({
+        manufactured: manufacturedDate
+      });
+      wrapper.vm.checkManufacturedDateValid();
+      await Vue.nextTick();
+      expect(findCreateButton().props().disabled).toBeTruthy();
+    });
+
+    it("Valid when sell by date after today", async () => {
+      await populateRequiredFields();
+      let sellByDate = await todayPlusYears(1);
+      await wrapper.setData({
+        sellBy: sellByDate
+      });
+      wrapper.vm.checkSellByDateValid();
+      await Vue.nextTick();
+      expect(findCreateButton().props().disabled).toBeFalsy();
+    });
+
+    it("Invalid when sell by date before today", async () => {
+      await populateRequiredFields();
+      let sellByDate = await todayPlusYears(-1);
+      await wrapper.setData({
+        sellBy: sellByDate
+      });
+      wrapper.vm.checkSellByDateValid();
+      await Vue.nextTick();
+      expect(findCreateButton().props().disabled).toBeTruthy();
+    });
+
+    it("Valid when sell by date after manufactured date", async () => {
+      await populateRequiredFields();
+      let manufacturedDate = await todayPlusYears(-1);
+      let sellByDate = await todayPlusYears(1);
+      await wrapper.setData({
+        manufactured: manufacturedDate,
+        sellBy: sellByDate
+      });
+      wrapper.vm.checkManufacturedDateValid();
+      wrapper.vm.checkSellByDateValid();
+      await Vue.nextTick();
+      expect(findCreateButton().props().disabled).toBeFalsy();
+    });
+
+    it("Valid when sell by date before best before date", async () => {
+      await populateRequiredFields();
+      let bestBeforeDate = await todayPlusYears(2);
+      let sellByDate = await todayPlusYears(1);
+      await wrapper.setData({
+        bestBefore: bestBeforeDate,
+        sellBy: sellByDate
+      });
+      wrapper.vm.checkBestBeforeDateValid();
+      wrapper.vm.checkSellByDateValid();
+      await Vue.nextTick();
+      expect(findCreateButton().props().disabled).toBeFalsy();
+    });
+
+    it("Invalid when sell by date after best before date", async () => {
+      await populateRequiredFields();
+      let bestBeforeDate = await todayPlusYears(1);
+      let sellByDate = await todayPlusYears(2);
+      await wrapper.setData({
+        bestBefore: bestBeforeDate,
+        sellBy: sellByDate
+      });
+      wrapper.vm.checkBestBeforeDateValid();
+      wrapper.vm.checkSellByDateValid();
+      await Vue.nextTick();
+      expect(findCreateButton().props().disabled).toBeTruthy();
+    });
+
+    it("Invalid when sell by date before 1000 AD", async () => {
+      await populateRequiredFields();
+      let sellByDate = await todayPlusYears(-1500);
+      await wrapper.setData({
+        sellBy: sellByDate
+      });
+      wrapper.vm.checkSellByDateValid();
+      await Vue.nextTick();
+      expect(findCreateButton().props().disabled).toBeTruthy();
+    });
+
+    it("Invalid when sell by date after 10000 AD", async () => {
+      await populateRequiredFields();
+      let sellByDate = await todayPlusYears(10000);
+      await wrapper.setData({
+        sellBy: sellByDate
+      });
+      wrapper.vm.checkSellByDateValid();
+      await Vue.nextTick();
+      expect(findCreateButton().props().disabled).toBeTruthy();
+    });
+
+    it("Valid when best before date after today", async () => {
+      await populateRequiredFields();
+      let bestBeforeDate = await todayPlusYears(1);
+      await wrapper.setData({
+        bestBefore: bestBeforeDate
+      });
+      wrapper.vm.checkBestBeforeDateValid();
+      await Vue.nextTick();
+      expect(findCreateButton().props().disabled).toBeFalsy();
+    });
+
+    it("Invalid when best before date before today", async () => {
+      await populateRequiredFields();
+      let bestBeforeDate = await todayPlusYears(-1);
+      await wrapper.setData({
+        bestBefore: bestBeforeDate
+      });
+      wrapper.vm.checkBestBeforeDateValid();
+      await Vue.nextTick();
+      expect(findCreateButton().props().disabled).toBeTruthy();
+    });
+
+    it("Valid when best before date after sell by date", async () => {
+      await populateRequiredFields();
+      let bestBeforeDate = await todayPlusYears(2);
+      let sellByDate = await todayPlusYears(1);
+      await wrapper.setData({
+        bestBefore: bestBeforeDate,
+        sellBy: sellByDate
+      });
+      wrapper.vm.checkBestBeforeDateValid();
+      wrapper.vm.checkSellByDateValid();
+      await Vue.nextTick();
+      expect(findCreateButton().props().disabled).toBeFalsy();
+    });
+
+    it("Invalid when best before date before sell by date", async () => {
+      await populateRequiredFields();
+      let bestBeforeDate = await todayPlusYears(1);
+      let sellByDate = await todayPlusYears(2);
+      await wrapper.setData({
+        bestBefore: bestBeforeDate,
+        sellBy: sellByDate
+      });
+      wrapper.vm.checkBestBeforeDateValid();
+      wrapper.vm.checkSellByDateValid();
+      await Vue.nextTick();
+      expect(findCreateButton().props().disabled).toBeTruthy();
+    });
+
+    it("Valid when best before date before expires date", async () => {
+      await populateRequiredFields();
+      let bestBeforeDate = await todayPlusYears(1);
+      let expiresDate = await todayPlusYears(2);
+      await wrapper.setData({
+        bestBefore: bestBeforeDate,
+        expires: expiresDate
+      });
+      wrapper.vm.checkBestBeforeDateValid();
+      wrapper.vm.checkExpiresDateVaild();
+      await Vue.nextTick();
+      expect(findCreateButton().props().disabled).toBeFalsy();
+    });
+
+    it("Invalid when best before date after expires date", async () => {
+      await populateRequiredFields();
+      let bestBeforeDate = await todayPlusYears(2);
+      let expiresDate = await todayPlusYears(1);
+      await wrapper.setData({
+        bestBefore: bestBeforeDate,
+        expires: expiresDate
+      });
+      wrapper.vm.checkBestBeforeDateValid();
+      wrapper.vm.checkExpiresDateVaild();
+      await Vue.nextTick();
+      expect(findCreateButton().props().disabled).toBeTruthy();
+    });
+
+    it("Invalid when best before date before 1000 AD", async () => {
+      await populateRequiredFields();
+      let bestBeforeDate = await todayPlusYears(-1500);
+      await wrapper.setData({
+        bestBefore: bestBeforeDate
+      });
+      wrapper.vm.checkBestBeforeDateValid();
+      await Vue.nextTick();
+      expect(findCreateButton().props().disabled).toBeTruthy();
+    });
+
+    it("Invalid when best before date after 10000 AD", async () => {
+      await populateRequiredFields();
+      let bestBeforeDate = await todayPlusYears(10000);
+      await wrapper.setData({
+        bestBefore: bestBeforeDate
+      });
+      wrapper.vm.checkBestBeforeDateValid();
+      await Vue.nextTick();
+      expect(findCreateButton().props().disabled).toBeTruthy();
+    });
+
+    it("Valid when expires date after today", async () => {
+      await populateRequiredFields();
+      let expiresDate = await todayPlusYears(1);
+      await wrapper.setData({
+        expires: expiresDate
+      });
+      wrapper.vm.checkExpiresDateVaild();
+      await Vue.nextTick();
+      expect(findCreateButton().props().disabled).toBeFalsy();
+    });
+
+    it("Invalid when expires date before today", async () => {
+      await populateRequiredFields();
+      let expiresDate = await todayPlusYears(-1);
+      await wrapper.setData({
+        expires: expiresDate
+      });
+      wrapper.vm.checkExpiresDateVaild();
+      await Vue.nextTick();
+      expect(findCreateButton().props().disabled).toBeTruthy();
+    });
+
+    it("Valid when expires date after best before date", async () => {
+      await populateRequiredFields();
+      let bestBeforeDate = await todayPlusYears(1);
+      let expiresDate = await todayPlusYears(2);
+      await wrapper.setData({
+        bestBefore: bestBeforeDate,
+        expires: expiresDate
+      });
+      wrapper.vm.checkBestBeforeDateValid();
+      wrapper.vm.checkExpiresDateVaild();
+      await Vue.nextTick();
+      expect(findCreateButton().props().disabled).toBeFalsy();
+    });
+
+    it("Invalid when expires date before best before date", async () => {
+      await populateRequiredFields();
+      let bestBeforeDate = await todayPlusYears(2);
+      let expiresDate = await todayPlusYears(1);
+      await wrapper.setData({
+        bestBefore: bestBeforeDate,
+        expires: expiresDate
+      });
+      wrapper.vm.checkBestBeforeDateValid();
+      wrapper.vm.checkExpiresDateVaild();
+      await Vue.nextTick();
+      expect(findCreateButton().props().disabled).toBeTruthy();
+    });
+
+    it("Invalid when expires date before 1000 AD", async () => {
+      await populateRequiredFields();
+      let expiresDate = await todayPlusYears(-1500);
+      await wrapper.setData({
+        expires: expiresDate
+      });
+      wrapper.vm.checkExpiresDateVaild();
+      await Vue.nextTick();
+      expect(findCreateButton().props().disabled).toBeTruthy();
+    });
+
+    it("Invalid when expires date after 10000 AD", async () => {
+      await populateRequiredFields();
+      let expiresDate = await todayPlusYears(10000);
+      await wrapper.setData({
+        expires: expiresDate
+      });
+      wrapper.vm.checkExpiresDateVaild();
+      await Vue.nextTick();
+      expect(findCreateButton().props().disabled).toBeTruthy();
+    });
   });
 
-  it("Closes the dialog when close button pressed", async ()=> {
-    await findCloseButton().trigger('click');
-    await  Vue.nextTick();
-    expect(createInventoryItem).toBeCalledTimes(0);
-    expect(wrapper.emitted().closeDialog).toBeTruthy();
+  //Needs addressed with bug associated with t170
+  it.skip("Product dropdown contains a list of products", async ()=>{
+    await wrapper.setData({productList:testProducts});
+    await Vue.nextTick();
+    const selectbox = findProductSelect();
+    (selectbox.vm as any).activateMenu();
+    await flushQueue();
+    expect(appWrapper.text()).toContain("Watties");
   });
 
-  it("displays an error code when an error is raised", async ()=>{
-    await populateRequiredFields();
-    createInventoryItem.mockResolvedValue("Hey there was an error");
+  it("Product dropdown contains a search box", async ()=>{
+    const selectbox = findProductSelect();
+    (selectbox.vm as any).activateMenu();
     await Vue.nextTick();
-    await findCreateButton().trigger('click');
+    const input = selectbox.findComponent({name:"v-text-field"});
+    expect(input.exists()).toBeTruthy();
+  });
+
+  //Associated with bug on t170
+  it.skip('Product search limits results', async ()=>{
+    await wrapper.setData({productList:testProducts});
+    const selectbox = findProductSelect();
+    (selectbox.vm as any).activateMenu();
+    await flushQueue();
+    expect(appWrapper.text()).toContain("Watties");
+    await wrapper.setData({productFilter: "Not watties"});
     await Vue.nextTick();
-    expect(appWrapper.text()).toContain("Hey there was an error");
-    expect(wrapper.emitted().closeDialog).toBeFalsy();
+    expect(appWrapper.text()).not.toContain("Watties");
   });
 });

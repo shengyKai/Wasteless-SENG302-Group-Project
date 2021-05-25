@@ -17,7 +17,7 @@ type Mocked<T extends { [k: string]: (...args: any[]) => any }> = { [k in keyof 
 // @ts-ignore - We've added an instance attribute in the mock declaration that mimics a AxiosInstance
 const instance: Mocked<Pick<AxiosInstance, 'get'>> = axios.instance;
 
-describe("Test GET /businesses/:businessId/sales endpoint", () => {
+describe("Test GET /businesses/:businessId/listings endpoint", () => {
   it('When response is a sale array with all fields, the response will be an sale array', async ()=>{
     const responseData = [
       {
@@ -40,6 +40,7 @@ describe("Test GET /businesses/:businessId/sales endpoint", () => {
             ]
           },
           "quantity": 4,
+          "remainingQuantity": 1,
           "pricePerItem": 6.5,
           "totalPrice": 21.99,
           "manufactured": "2021-05-19",
@@ -83,6 +84,7 @@ describe("Test GET /businesses/:businessId/sales endpoint", () => {
             ]
           },
           "quantity": 4,
+          "remainingQuantity": 1,
           "pricePerItem": 6.5,
           "totalPrice": 21.99,
           "manufactured": "2021-05-19",
