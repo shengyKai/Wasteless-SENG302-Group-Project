@@ -131,7 +131,7 @@ public class CardController {
         //return JSON Object
         JSONArray responseBody = new JSONArray();
         for (MarketplaceCard card : cards) {
-            responseBody.appendElement(card.constructJSONObject(request));
+            responseBody.appendElement(card.constructJSONObject());
         }
         return responseBody;
     }

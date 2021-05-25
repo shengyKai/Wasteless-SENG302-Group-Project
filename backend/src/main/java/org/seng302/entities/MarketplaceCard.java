@@ -172,32 +172,25 @@ public class MarketplaceCard {
 
     /**
      * Constructs the JSON representation of this card
-     * The creator is able to see their private details
-     * @param request The HttpServletRequest of the request
      * @return A JSONObject containing this cards data
      */
-    public JSONObject constructJSONObject(HttpServletRequest request) {
+    public JSONObject constructJSONObject() {
         JSONObject json = new JSONObject();
-        JSONArray keywords = new JSONArray();
-
-        // jsonify the keywords
-        for (Keyword keyword : this.getKeywords()) {
-            keywords.appendElement(keyword.constructJSONObject());
-        }
 
         json.appendField("id", this.getID());
-        if(AuthenticationTokenManager.sessionCanSeePrivate(request, this.creator.getUserID())) {
-            json.appendField("creator", this.creator.constructPrivateJson());
-        } else {
-            json.appendField("creator", this.creator.constructPublicJson());
-        }
+        json.appendField("creator", this.creator.constructPublicJson());
         json.appendField("section", this.section.getName());
         json.appendField("created", this.created);
         json.appendField("displayPeriodEnd", this.closes);
         json.appendField("title", this.title);
         json.appendField("description", this.description);
-        json.appendField("keywords", keywords);
 
+        JSONArray keywordArray = new JSONArray();
+        // jsonify the keywords
+        for (Keyword keyword : this.getKeywords()) {
+            keywordArray.appendElement(keyword.constructJSONObject());
+        }
+        json.appendField("keywords", keywordArray);
 
         return json;
     }
