@@ -18,7 +18,7 @@
           <div v-if="$store.state.createSaleItemDialog !== undefined">
             <CreateSaleItem @closeDialog="$store.commit('hideCreateSaleItem')"/>
           </div>
-          <div v-if="$store.state.createMarketplaceCardDialog">
+          <div v-if="$store.state.createMarketplaceCardDialog !== undefined">
             <CreateCard @closeDialog="$store.commit('hideCreateMarketplaceCard')" />
           </div>
 
