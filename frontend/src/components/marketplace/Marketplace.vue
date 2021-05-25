@@ -79,17 +79,18 @@
             </v-col>
           </v-row>
         </v-container>
+        <v-pagination
+          v-model="currentPage[section]"
+          :length="totalPages(section)"
+          circle
+        />
+        <!--Text to display range of results out of total number of results-->
+        <v-row justify="center" no-gutters>
+          {{ resultsMessage(section) }}
+        </v-row>
       </v-tab-item>
     </v-tabs-items>
-    <v-pagination
-      v-model="currentPage"
-      :length="totalPages"
-      circle
-    />
-    <!--Text to display range of results out of total number of results-->
-    <v-row justify="center" no-gutters>
-      {{ resultsMessage }}
-    </v-row>
+
   </div>
 </template>
 
@@ -115,46 +116,57 @@ export default {
         "Wanted": [],
         "Exchange": [{id: 0, title: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'}, {id: 1}, {id: 2}, {id: 3}, {id: 4}]
       },
-      currentPage: 1,
+      currentPage: {
+        "For sale": 1,
+        "Wanted": 1,
+        "Exchange": 1,
+      },
       /**
        * Number of results per a result page
        */
-      resultsPerPage: 10,
+      resultsPerPage: 8,
       /**
        * Total number of results for all pages
+       * For now, it is hard coded to suit the above aesthetic. once the api method to retrieve the count is created, it can
+       * be replaced with dynamic values.
        */
-      totalResults: 0,
+      totalResults: {
+        "For sale": 7,
+        "Wanted": 0,
+        "Exchange": 5,
+      },
     };
   },
-  computed: {
+  methods: {
     /**
      * The total number of pages required to show all the users
      * May be 0 if there are no results
      */
-    totalPages () {
-      return Math.ceil(this.totalResults / this.resultsPerPage);
+    totalPages (section) {
+      return Math.ceil(this.totalResults[section] / this.resultsPerPage);
     },
     /**
      * The message displayed at the bottom of the page to show how many results there are
      */
-    resultsMessage() {
-      if (this.cards["For sale"].length === 0) return 'There are no results to show';
+    resultsMessage(section) {
+      if (this.cards[section].length === 0) return 'There are no results to show';
 
-      const pageStartIndex = (this.currentPage - 1) * this.resultsPerPage;
-      const pageEndIndex = pageStartIndex + this.cards["For sale"].length;
-      return`Displaying ${pageStartIndex + 1} - ${pageEndIndex} of ${this.totalResults} results`;
-    },
-    watch: {
-      currentPage() {
-        this.updateResults();
-      },
-      resultsPerPage() {
-        this.updateResults();
-      },
+      const pageStartIndex = (this.currentPage[section] - 1) * this.resultsPerPage;
+      const pageEndIndex = pageStartIndex + this.cards[section].length;
+      return`Displaying ${pageStartIndex + 1} - ${pageEndIndex} of ${this.totalResults[section]} results`;
     },
   },
   components: {
     MarketplaceCard
-  }
+  },
+  //bottom is for when the api method gets created
+  // watch: {
+  //   currentPage() {
+  //     this.updateResults();
+  //   },
+  //   resultsPerPage() {
+  //     this.updateResults();
+  //   },
+  // },
 };
 </script>
