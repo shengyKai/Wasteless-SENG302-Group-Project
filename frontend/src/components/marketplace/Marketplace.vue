@@ -114,6 +114,7 @@ export default {
   methods: {
     showCreateCard() {
       console.log('Show create card');
+      console.log(this.$store.state.user);
       this.$store.commit('showCreateMarketplaceCard', this.$store.state.user);
     }
   }

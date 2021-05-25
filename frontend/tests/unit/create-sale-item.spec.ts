@@ -88,7 +88,7 @@ describe("CreateSaleItem.vue", () => {
     const elem = document.createElement("div");
     document.body.appendChild(elem);
 
-    const testProducts = 
+    const testProducts =
       {
         id: "WATT-420-BEANS",
         name: "Watties Baked Beans - 420g can",
@@ -284,7 +284,7 @@ describe("CreateSaleItem.vue", () => {
     });
     await Vue.nextTick();
     expect(findCreateButton().props().disabled).toBeFalsy();
-  })
+  });
 
   it("Invalid when quantity is zero", async () => {
     await populateRequiredFields();
@@ -292,7 +292,7 @@ describe("CreateSaleItem.vue", () => {
       quantity: 0
     });
     expect(findCreateButton().props().disabled).toBeFalsy();
-  })
+  });
 
   it("Invalid when quantity is negative one", async () => {
     await populateRequiredFields();
@@ -300,7 +300,7 @@ describe("CreateSaleItem.vue", () => {
       quantity: -1
     });
     expect(findCreateButton().props().disabled).toBeFalsy();
-  })
+  });
 
   it("Invalid when quantity is negative 10000", async () => {
     await populateRequiredFields();
@@ -308,7 +308,7 @@ describe("CreateSaleItem.vue", () => {
       quantity: -10000
     });
     expect(findCreateButton().props().disabled).toBeFalsy();
-  })
+  });
 
   describe("Closing date validation", () => {
     /**

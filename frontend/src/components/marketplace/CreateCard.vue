@@ -1,61 +1,79 @@
 <template>
-  <v-card min-height="250px" class="d-flex flex-column">
-    <v-card-title class="my-n1 title">
-      <textarea rows="1" v-model="title" ref="titleField" class="field"/>
-    </v-card-title>
-    <v-card-text class="my-n2 flex-grow-1 d-flex flex-column justify-space-between">
-      <div>
-        <strong v-if="location">
-          {{ locationString }}
-          <br>
-        </strong>
-        <div class="d-flex justify-space-between flex-wrap">
-          <span class="mr-1">
-            <em v-if="creator">By {{ creator.firstName }} {{ creator.lastName }}</em>
-          </span>
-          <span>
-            Posted {{ creationString }}
-          </span>
-        </div>
-        <textarea ref="descriptionField" v-model="description" class="field"/>
-      </div>
-      <div class="v-flex mx-n1">
-        <v-chip
-          v-for="keyword in content.keywords"
-          :key="keyword.id"
-          small
-          color="primary"
-          class="mx-1 my-1"
-        >
-          {{ keyword.name }}
-        </v-chip>
-      </div>
-    </v-card-text>
-  </v-card>
+  <v-row justify="center">
+    <v-dialog
+      v-model="dialog"
+      persistent
+      max-width="600px"
+    >
+      <v-card min-height="250px" class="d-flex flex-column">
+        <v-card-title class="my-n1 title">
+          <textarea rows="1" v-model="title" ref="titleField" class="field"/>
+        </v-card-title>
+        <v-card-text class="my-n2 flex-grow-1 d-flex flex-column justify-space-between">
+          <div>
+            <strong>
+              {{ locationString }}
+              <br>
+            </strong>
+            <div class="d-flex justify-space-between flex-wrap">
+              <span class="mr-1">
+                <em v-if="creator">By {{ user.firstName }} {{ user.lastName }}</em>
+              </span>
+              <span>
+                Posted {{ creationString }}
+              </span>
+            </div>
+            <textarea ref="descriptionField" v-model="description" class="field"/>
+          </div>
+          <v-select
+            v-model="selectedKeywords"
+            :items="allKeywords"
+            item-text="name"
+            item-value="id"
+            label="Select keywords"
+            multiple
+            small-chips
+            color="primary"
+          />
+          <v-select
+            v-model="selectedSection"
+            :items="sections"
+            item-text="text"
+            item-value="value"
+            label="Select section"
+            color="primary"
+          />
+          <p class="error-text" v-if ="errorMessage !== undefined"> {{errorMessage}} </p>
+        </v-card-text>
+        <v-card-actions>
+          <v-btn text color="primary" @click="createCard">
+            Create Card
+          </v-btn>
+          <v-btn text color="primary" @click="closeDialog">
+            Cancel
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+  </v-row>
 </template>
 
 <script>
+import { createMarketplaceCard } from '../../api/internal';
 import { getKeywords } from '../../api/internal.ts';
 
 export default {
   name: "MarketplaceCard",
-  props: {
-    // content: {
-    //   id: Number,
-    //   title: String,
-    //   description: String,
-    //   creator: Object,
-    //   created: String,
-    //   keywords: Array,
-    // },
-    user: Object
-  },
   data() {
     return {
       title: "",
       description: "",
       allKeywords: [],
-      selectedKeywords: []
+      selectedKeywords: [],
+      dialog: true,
+      errorMessage: undefined,
+      sections: [{text: "For Sale", value: "ForSale"}, {text: "Wanted", value: "Wanted"}, {text: "Exchange", value: "Exchange"}],
+      selectedSection: undefined,
     };
   },
   async mounted() {
@@ -70,6 +88,7 @@ export default {
     this.titleField.setAttribute("style", "height:" + (this.titleField.scrollHeight) + "px;overflow-y:hidden;");
     this.titleField.addEventListener("input", OnInput);
 
+    console.log(this.locationString);
     this.allKeywords = await getKeywords();
   },
   computed: {
@@ -78,6 +97,13 @@ export default {
     },
     titleField() {
       return this.$refs.titleField;
+    },
+    user() {
+      if (this.$store.state.createMarketplaceCardDialog !== undefined) {
+        return this.$store.state.createMarketplaceCardDialog;
+      } else {
+        return undefined;
+      }
     },
     creator() {
       return this.user.firstName + ' ' + this.user.lastName;
@@ -98,6 +124,29 @@ export default {
       return new Date().toLocaleDateString();
     },
   },
+  methods: {
+    closeDialog() {
+      this.$emit('closeDialog');
+    },
+    async createCard() {
+      this.errorMessage = undefined;
+
+      let card = {
+        creatorId: this.user.id,
+        section: "ForSale" | "Wanted" | "Exchange",
+        title: this.title,
+        description: this.description,
+        keywordIds: this.selectedKeywords,
+      };
+      let response = await createMarketplaceCard(card);
+      if (response === undefined) {
+        this.closeDialog();
+        this.$router.go();
+      } else {
+        this.errorMessage = response;
+      }
+    },
+  }
 };
 </script>
 
