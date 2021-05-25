@@ -3,7 +3,6 @@ package org.seng302.entities;
 import lombok.NoArgsConstructor;
 import net.minidev.json.JSONObject;
 import org.springframework.http.HttpStatus;
-import org.springframework.util.StringUtils;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.persistence.*;

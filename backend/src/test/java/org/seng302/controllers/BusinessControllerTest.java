@@ -34,7 +34,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @AutoConfigureMockMvc
-public class BusinessControllerTest {
+class BusinessControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
@@ -56,7 +56,7 @@ public class BusinessControllerTest {
      * @throws ParseException
      */
     @BeforeEach
-    public void setUp() throws ParseException, IOException {
+    void setUp() throws ParseException, IOException {
         businessRepository.deleteAll();
         userRepository.deleteAll();
         setUpAuthCode();
@@ -182,7 +182,7 @@ public class BusinessControllerTest {
      * @throws Exception
      */
     @Test
-    public void RegisterBusinessTest() throws Exception {
+    void RegisterBusinessTest() throws Exception {
         String businessJsonString =
                 String.format("{\n" +
                         "  \"primaryAdministratorId\": %s,\n" +
@@ -221,7 +221,7 @@ public class BusinessControllerTest {
      * @throws Exception
      */
     @Test
-    public void RegisterBusinessInvalidBusinessTypeTest() throws Exception {
+    void RegisterBusinessInvalidBusinessTypeTest() throws Exception {
         String businessJsonString =
                 String.format("{\n" +
                         "  \"primaryAdministratorId\": %s,\n" +
@@ -257,7 +257,7 @@ public class BusinessControllerTest {
      * @throws Exception
      */
     @Test
-    public void RegisterBusinessWhenNotLoggedIn() throws Exception {
+    void RegisterBusinessWhenNotLoggedIn() throws Exception {
         String businessJsonString =
                 String.format("{\n" +
                         "  \"primaryAdministratorId\": %s,\n" +
@@ -292,7 +292,7 @@ public class BusinessControllerTest {
      * @throws Exception
      */
     @Test
-    public void RegisterBusinessInvalidIdTest() throws Exception {
+    void RegisterBusinessInvalidIdTest() throws Exception {
         String businessJsonString =
                 "{\n" +
                         "  \"primaryAdministratorId\": 999,\n" +
@@ -328,7 +328,7 @@ public class BusinessControllerTest {
      * @throws Exception
      */
     @Test
-    public void RegisterBusinessNoPermissionTest() throws Exception {
+    void RegisterBusinessNoPermissionTest() throws Exception {
         String businessJsonString =
                 String.format("{\n" +
                         "  \"primaryAdministratorId\": %s,\n" +
@@ -357,7 +357,7 @@ public class BusinessControllerTest {
      * is returned and no business is added to the database.
      */
     @Test
-    public void registerBusinessNoBodyTest() throws Exception {
+    void registerBusinessNoBodyTest() throws Exception {
         setCurrentUser(owner.getUserID());
         mockMvc.perform(MockMvcRequestBuilders.post("/businesses")
                 .sessionAttrs(sessionAuthToken)
@@ -372,7 +372,7 @@ public class BusinessControllerTest {
      * status code 400 is returned and no business is added to the database.
      */
     @Test
-    public void registerBusinessInvalidBodyTest() throws Exception {
+    void registerBusinessInvalidBodyTest() throws Exception {
         String businessJsonString =
                 String.format("{\n" +
                         "  \"primaryAdministratorId\": %s,\n" +
@@ -397,7 +397,7 @@ public class BusinessControllerTest {
      * is not logged in, the response has a 401 status code and an empty body.
      */
     @Test
-    public void getBusinessByIdUnauthorizedTest() throws Exception {
+    void getBusinessByIdUnauthorizedTest() throws Exception {
         MvcResult result = mockMvc.perform(get(String.format("/businesses/%d", testBusiness.getId() + 1)))
         .andExpect(status().isUnauthorized()).andReturn();
         assertTrue(result.getResponse().getContentAsString().isEmpty());
@@ -410,7 +410,7 @@ public class BusinessControllerTest {
      * body.
      */
     @Test
-    public void getBusinessByIdDoesNotExistTest() throws Exception{
+    void getBusinessByIdDoesNotExistTest() throws Exception{
         setCurrentUser(owner.getUserID());
         MvcResult result = mockMvc.perform(get(String.format("/businesses/%d", testBusiness.getId() + 1))
                 .sessionAttrs(sessionAuthToken).cookie(authCookie)).andExpect(status().isNotAcceptable()).andReturn();
@@ -426,7 +426,7 @@ public class BusinessControllerTest {
      * @throws Exception
      */
     @Test
-    public void getBusinessLoggedInAsOwnerTest() throws Exception {
+    void getBusinessLoggedInAsOwnerTest() throws Exception {
         testBusiness = businessRepository.findById(testBusiness.getId()).get();
         setCurrentUser(owner.getUserID());
         MvcResult result = mockMvc.perform(get(String.format("/businesses/%d", testBusiness.getId()))
@@ -448,7 +448,7 @@ public class BusinessControllerTest {
      * with the given id.
      */
     @Test
-    public void getBusinessLoggedInAsAdminTest() throws Exception {
+    void getBusinessLoggedInAsAdminTest() throws Exception {
         testBusiness = businessRepository.findById(testBusiness.getId()).get();
         setCurrentUser(admin.getUserID());
         MvcResult result = mockMvc.perform(get(String.format("/businesses/%d", testBusiness.getId()))
@@ -470,7 +470,7 @@ public class BusinessControllerTest {
      * JSON representation of the business with the given id.
      */
     @Test
-    public void getBusinessLoggedInAsOtherTest() throws Exception {
+    void getBusinessLoggedInAsOtherTest() throws Exception {
         testBusiness = businessRepository.findById(testBusiness.getId()).get();
         setCurrentUser(otherUser.getUserID());
         MvcResult result = mockMvc.perform(get(String.format("/businesses/%d", testBusiness.getId()))
@@ -494,7 +494,7 @@ public class BusinessControllerTest {
      * @throws Exception
      */
     @Test
-    public void addAdminTest() throws Exception {
+    void addAdminTest() throws Exception {
         User testAdmin = new User.Builder()
                 .withFirstName("Bob")
                 .withMiddleName("The")
@@ -530,7 +530,7 @@ public class BusinessControllerTest {
      * @throws Exception
      */
     @Test
-    public void addAdminWhenDGAATest() throws Exception {
+    void addAdminWhenDGAATest() throws Exception {
         User testAdmin = new User.Builder()
                 .withFirstName("Bob")
                 .withMiddleName("The")
@@ -568,7 +568,7 @@ public class BusinessControllerTest {
      * @throws Exception
      */
     @Test
-    public void addAdminWhenGlobalApplicationAdminTest() throws Exception {
+    void addAdminWhenGlobalApplicationAdminTest() throws Exception {
         User testAdmin = new User.Builder()
                 .withFirstName("Bob")
                 .withMiddleName("The")
@@ -607,7 +607,7 @@ public class BusinessControllerTest {
      * @throws Exception
      */
     @Test
-    public void addAdminWhenNotPrimaryOwnerTest() throws Exception {
+    void addAdminWhenNotPrimaryOwnerTest() throws Exception {
         User testAdmin = new User.Builder()
                 .withFirstName("Bob")
                 .withMiddleName("The")
@@ -642,7 +642,7 @@ public class BusinessControllerTest {
      * @throws Exception
      */
     @Test
-    public void addAdminWhenNotLoggedInTest() throws Exception {
+    void addAdminWhenNotLoggedInTest() throws Exception {
         User testAdmin = new User.Builder()
                 .withFirstName("Bob")
                 .withMiddleName("The")
@@ -673,7 +673,7 @@ public class BusinessControllerTest {
      * @throws Exception
      */
     @Test
-    public void addAdminWhenUserNotExistTest() throws Exception {
+    void addAdminWhenUserNotExistTest() throws Exception {
         Long unusedId = owner.getUserID() + admin.getUserID() + otherUser.getUserID();
         String jsonString = String.format("{\"userId\": %d}", unusedId);
         setCurrentUser(owner.getUserID());
@@ -694,7 +694,7 @@ public class BusinessControllerTest {
      * @throws Exception
      */
     @Test
-    public void addAdminWhenBusinessNotExistTest() throws Exception {
+    void addAdminWhenBusinessNotExistTest() throws Exception {
         User testAdmin = new User.Builder()
                 .withFirstName("Bob")
                 .withMiddleName("The")
@@ -729,7 +729,7 @@ public class BusinessControllerTest {
      * @throws Exception
      */
     @Test
-    public void addAdminWhenUserAlreadyAdminTest() throws Exception {
+    void addAdminWhenUserAlreadyAdminTest() throws Exception {
         User testAdmin = new User.Builder()
                 .withFirstName("Bob")
                 .withMiddleName("The")
@@ -767,7 +767,7 @@ public class BusinessControllerTest {
      * @throws Exception
      */
     @Test
-    public void removeAdminTest() throws Exception {
+    void removeAdminTest() throws Exception {
         User testAdmin = new User.Builder()
                 .withFirstName("Bob")
                 .withMiddleName("The")
@@ -808,7 +808,7 @@ public class BusinessControllerTest {
      * @throws Exception
      */
     @Test
-    public void removeAdminWhenUserNotAdminTest() throws Exception {
+    void removeAdminWhenUserNotAdminTest() throws Exception {
         User testAdmin = new User.Builder()
                 .withFirstName("Bob")
                 .withMiddleName("The")
@@ -843,7 +843,7 @@ public class BusinessControllerTest {
      * @throws Exception
      */
     @Test
-    public void removeAdminWhenUserNotExistTest() throws Exception {
+    void removeAdminWhenUserNotExistTest() throws Exception {
         String jsonString = String.format("{\"userId\": %d}", 99999L);
         setCurrentUser(owner.getUserID());
 
@@ -862,7 +862,7 @@ public class BusinessControllerTest {
      * @throws Exception
      */
     @Test
-    public void removeAdminWhenDGAATest() throws Exception {
+    void removeAdminWhenDGAATest() throws Exception {
         User testAdmin = new User.Builder()
                 .withFirstName("Bob")
                 .withMiddleName("The")
@@ -903,7 +903,7 @@ public class BusinessControllerTest {
      * @throws Exception
      */
     @Test
-    public void removeAdminWhenGlobalApplicationAdminTest() throws Exception {
+    void removeAdminWhenGlobalApplicationAdminTest() throws Exception {
         User testAdmin = new User.Builder()
                 .withFirstName("Bob")
                 .withMiddleName("The")

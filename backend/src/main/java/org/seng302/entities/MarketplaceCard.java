@@ -2,15 +2,12 @@ package org.seng302.entities;
 
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
-import org.seng302.tools.AuthenticationTokenManager;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.persistence.*;
-import javax.servlet.http.HttpServletRequest;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.time.temporal.TemporalUnit;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;

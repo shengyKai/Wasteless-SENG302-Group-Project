@@ -9,14 +9,14 @@ import org.springframework.web.server.ResponseStatusException;
  */
 public class UserNotFoundException extends ResponseStatusException {
 
-    private static final String reason = "User not found.";
-    private static final HttpStatus status = HttpStatus.NOT_ACCEPTABLE;
+    private static final String REASON = "User not found.";
+    private static final HttpStatus HTTP_STATUS = HttpStatus.NOT_ACCEPTABLE;
 
     public UserNotFoundException() {
-        super(status, reason);
+        super(HTTP_STATUS, REASON);
     }
 
     public UserNotFoundException(String reason) {
-        super(status, reason);
+        super(HTTP_STATUS, reason);
     }
 }

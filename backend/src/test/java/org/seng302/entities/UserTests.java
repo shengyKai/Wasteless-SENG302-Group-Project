@@ -29,8 +29,8 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
-public class UserTests {
-    public User testUser;
+class UserTests {
+    private User testUser;
     private User.Builder testBuilder;
     @Autowired
     private UserRepository userRepository;
@@ -38,7 +38,7 @@ public class UserTests {
     private BusinessRepository businessRepository;
 
     @BeforeEach
-    public void setup() throws ParseException {
+    void setup() throws ParseException {
         // Example user object for tests
         testUser = new User.Builder()
                 .withFirstName("John")
@@ -73,7 +73,7 @@ public class UserTests {
      * user repository and creates two businesses, making the user a primary admin of one and a secondary
      * admin of the other.
      */
-    public void addBusinessesAdministeredToTestUser() {
+    void addBusinessesAdministeredToTestUser() {
         businessRepository.deleteAll();
         userRepository.deleteAll();
         userRepository.save(testUser);
@@ -93,9 +93,9 @@ public class UserTests {
     }
 
     @Test
-    public void emailTest() {
+    void emailTest() {
         testUser.setEmail("Hi_123@testing.com");
-        assertEquals(testUser.getEmail(), "Hi_123@testing.com");
+        assertEquals("Hi_123@testing.com", testUser.getEmail());
 
         List<String> badEmails = new ArrayList<String>();
         String badEmail1 = "$%#@qwer";
@@ -113,15 +113,9 @@ public class UserTests {
             } catch (ResponseStatusException | NullPointerException e) {
 
             }
-            assertEquals(testUser.getEmail(), "Hi_123@testing.com");
+            assertEquals("Hi_123@testing.com", testUser.getEmail());
             //None of these should work, so email will be unchanged from last success case
         }
-    }
-
-    //Test hashing - not implemented yet
-    @Test @Ignore
-    public void passwordTest() {
-
     }
 
     @Test
@@ -166,7 +160,7 @@ public class UserTests {
      * phone number is null or a non-empty string before setPhNum is called
      */
     @Test
-    public void checkPhNumEmptyStringTest() {
+    void checkPhNumEmptyStringTest() {
         testUser.setPhNum("6494456719");
         testUser.setPhNum("");
         assertNull(testUser.getPhNum());
@@ -179,7 +173,7 @@ public class UserTests {
      * Checks several real life first names will be set as the user's first name
      */
     @Test
-    public void checkValidFirstNames() {
+    void checkValidFirstNames() {
         String[] validFirstNames = { "Connor", "Ella", "Johnny", "Richard", "Ned", "Jefferson", "Jackson", "Oliver" };
         for (String firstName : validFirstNames) {
             testUser.setFirstName(firstName);
@@ -191,7 +185,7 @@ public class UserTests {
      * Checks an empty first name will not be set as the user's first name
      */
     @Test
-    public void checkInvalidFirstNameEmpty() {
+    void checkInvalidFirstNameEmpty() {
         try {
             testUser.setFirstName("");
             fail("A Forbidden exception was expected, but not thrown");
@@ -202,7 +196,7 @@ public class UserTests {
      * Checks several first names that are too long (above 16 letters long) will not be set as the user's first name
      */
     @Test
-    public void checkInvalidFirstNameTooLong() {
+    void checkInvalidFirstNameTooLong() {
         String[] invalidFirstNames = { "HippoTooLongPotamusHippoTooLongPotamus", "ConnnnnnnnnnnnnnnnnnnnnorConnnnnnnnnnnnnnnnnnnnnor", "MrsMagicalMagicalMrsMagicalMagical" };
         for (String firstName : invalidFirstNames) {
             try {
@@ -216,7 +210,7 @@ public class UserTests {
      * Checks several first names with numbers in them will not be set as the user's first name
      */
     @Test
-    public void checkInvalidFirstNameNumbers() {
+    void checkInvalidFirstNameNumbers() {
         String[] invalidFirstNames = { "C0nn0r", "E11a", "123456789", "1", "0", "Mohammad1" };
         for (String firstName : invalidFirstNames) {
             try {
@@ -230,7 +224,7 @@ public class UserTests {
      * Checks several first names with characters in them will not be set as the user's first name
      */
     @Test
-    public void checkInvalidFirstNameCharacters() {
+    void checkInvalidFirstNameCharacters() {
         String[] invalidFirstNames = { "C#nn#r", "E!!@", "!@#$%^&*()", "!", "@", "Mohammad*" };
         for (String firstName : invalidFirstNames) {
             try {
@@ -244,7 +238,7 @@ public class UserTests {
      * Checks several real life middle names will be set as the user's middle name
      */
     @Test
-    public void checkValidMiddleNames() {
+    void checkValidMiddleNames() {
         String[] validMiddleNames = { "Connor", "Ella", "Johnny", "Richard", "Ned", "Jefferson", "Jackson", "Oliver" };
         for (String middleName : validMiddleNames) {
             testUser.setMiddleName(middleName);
@@ -257,7 +251,7 @@ public class UserTests {
      * name is null or a non-null string before setMiddleName is called.
      */
     @Test
-    public void checkMiddleNameEmpty() {
+    void checkMiddleNameEmpty() {
         testUser.setMiddleName("Bert");
         testUser.setMiddleName("");
         assertNull(testUser.getMiddleName());
@@ -270,7 +264,7 @@ public class UserTests {
      * Checks several middle names that are too long (above 16 letters long) will not be set as the user's middle name
      */
     @Test
-    public void checkInvalidMiddleNameTooLong() {
+    void checkInvalidMiddleNameTooLong() {
         String[] invalidMiddleNames = { "HippoTooLongPotamusqwertyuiopasdfg", "Connnnnnnnnnnnnnnnnnnnnorqwertyui", "MrsMagicalMagicalqwertyuiopqwerty" };
         for (String middleName : invalidMiddleNames) {
             try {
@@ -284,7 +278,7 @@ public class UserTests {
      * Checks several middle names with numbers in them will not be set as the user's middle name
      */
     @Test
-    public void checkInvalidMiddleNameNumbers() {
+    void checkInvalidMiddleNameNumbers() {
         String[] invalidMiddleNames = { "C0nn0r", "E11a", "123456789", "1", "0", "Mohammad1" };
         for (String middleName : invalidMiddleNames) {
             try {
@@ -298,7 +292,7 @@ public class UserTests {
      * Checks several middle names with characters in them will not be set as the user's middle name
      */
     @Test
-    public void checkInvalidMiddleNameCharacters() {
+    void checkInvalidMiddleNameCharacters() {
         String[] invalidMiddleNames = { "C#nn#r", "E!!@", "!@#$%^&*()", "!", "@", "Mohammad*" };
         for (String middleName : invalidMiddleNames) {
             try {
@@ -312,7 +306,7 @@ public class UserTests {
      * Checks several real life last names will be set as the user's last name
      */
     @Test
-    public void checkValidLastNames() {
+    void checkValidLastNames() {
         String[] validLastNames = { "Smith", "Johnson", "Williams", "Brown", "Jones", "Garcia", "Miller", "Davis" };
         for (String lastName : validLastNames) {
             testUser.setLastName(lastName);
@@ -324,7 +318,7 @@ public class UserTests {
      * Checks an empty last name will not be set as the user's last name
      */
     @Test
-    public void checkInvalidLastNameEmpty() {
+    void checkInvalidLastNameEmpty() {
         try {
             testUser.setLastName("");
             fail("A Forbidden exception was expected, but not thrown");
@@ -335,7 +329,7 @@ public class UserTests {
      * Checks several last names that are too long (above 16 letters long) will not be set as the user's last name
      */
     @Test
-    public void checkInvalidLastNameTooLong() {
+    void checkInvalidLastNameTooLong() {
         String[] invalidLastNames = { "HippoTooLongPotamusHippoTooLongPotamus", "HippoTooLongPotamusConnnnnnnnnnnnnnnnnnnnnor", "HippoTooLongPotamusMrsMagicalMagical" };
         for (String lastName : invalidLastNames) {
             try {
@@ -349,7 +343,7 @@ public class UserTests {
      * Checks several last names with numbers in them will not be set as the user's last name
      */
     @Test
-    public void checkInvalidLastNameNumbers() {
+    void checkInvalidLastNameNumbers() {
         String[] invalidLastNames = { "Sm1th", "J0hns0n", "123456789", "1", "0", "Mohammad1" };
         for (String lastName : invalidLastNames) {
             try {
@@ -363,7 +357,7 @@ public class UserTests {
      * Checks several last names with characters in them will not be set as the user's last name
      */
     @Test
-    public void checkInvalidLastNameCharacters() {
+    void checkInvalidLastNameCharacters() {
         String[] invalidLastNames = { "Sm!th", "J#hn$#n", "!@#$%^&*()", "!", "@", "Mohammad*" };
         for (String lastName : invalidLastNames) {
             try {
@@ -377,7 +371,7 @@ public class UserTests {
      * Checks several nicknames will be set as the user's nickname
      */
     @Test
-    public void checkValidNicknames() {
+    void checkValidNicknames() {
         String[] validNicknames = { "Peach", "Rose", "Built Different", "God", "That Guy", "Officer", "Pebble" };
         for (String nickname : validNicknames) {
             testUser.setNickname(nickname);
@@ -390,7 +384,7 @@ public class UserTests {
      * nickname is null or a non-null string before setNickname is called
      */
     @Test
-    public void checkNicknameEmptyStringTest() {
+    void checkNicknameEmptyStringTest() {
         testUser.setNickname("Fred");
         testUser.setNickname("");
         assertNull(testUser.getNickname());
@@ -403,7 +397,7 @@ public class UserTests {
      * Checks several nicknames that are too long (above 16 letters long) will not be set as the user's nickname
      */
     @Test
-    public void checkInvalidNicknameTooLong() {
+    void checkInvalidNicknameTooLong() {
         String[] invalidNicknames = { "HippoTooLongPotamusHippoTooLongPotamus", "HippoTooLongPotamusConnnnnnnnnnnnnnnnnnnnnor", "HippoTooLongPotamusMrsMagicalMagical" };
         for (String nickname : invalidNicknames) {
             try {
@@ -417,7 +411,7 @@ public class UserTests {
      * Checks several nicknames with numbers in them will not be set as the user's nickname
      */
     @Test
-    public void checkInvalidNicknameNumbers() {
+    void checkInvalidNicknameNumbers() {
         String[] invalidNicknames = { "Sm1th", "J0hns0n", "123456789", "1", "0", "Mohammad1" };
         for (String nickname : invalidNicknames) {
             try {
@@ -431,7 +425,7 @@ public class UserTests {
      * Checks several nicknames with characters in them will not be set as the user's nickname
      */
     @Test
-    public void checkInvalidNicknameCharacters() {
+    void checkInvalidNicknameCharacters() {
         String[] invalidNicknames = { "Sm!th", "J#hn$#n", "!@#$%^&*()", "!", "@", "Mohammad*" };
         for (String nickname : invalidNicknames) {
             try {
@@ -445,7 +439,7 @@ public class UserTests {
      * Checks several bios will be set as the user's bio
      */
     @Test
-    public void checkValidBio() {
+    void checkValidBio() {
         String[] validBios = { "I am a happy person when I am not studying",
                 "I am a University student meaning I have no free time",
                 "Do you like cats cause I like cats" };
@@ -460,7 +454,7 @@ public class UserTests {
      * null or a non-null string before setBio is called.
      */
     @Test
-    public void checkBioEmptyStringTest() {
+    void checkBioEmptyStringTest() {
         testUser.setBio("My name is Inigo Montoya You killed my father Prepare to die");
         testUser.setBio("");
         assertNull(testUser.getBio());
@@ -473,7 +467,7 @@ public class UserTests {
      * Checks several bios that are too long (above 255 letters long) will not be set as the user's bio
      */
     @Test
-    public void checkInvalidBioTooLong() {
+    void checkInvalidBioTooLong() {
         String[] invalidBios = { "This is the story of a student hoping one day to become a developer he sat here writing this long sentence hoping to reach exactly two hundred and fifty six characters however this was a challenge if he wanted to make a sentence that would read well nicely",
         "This is the story of a student hoping one day to become a developer he sat here writing this long sentence hoping to reach exactly two hundred and fifty six characters however this was a challenge if he wanted to make a sentence that would read well nicely This is the story of a student hoping one day to become a developer he sat here writing this long sentence hoping to reach exactly two hundred and fifty six characters however this was a challenge if he wanted to make a sentence that would read well nicely"};
         for (String bio : invalidBios) {
@@ -488,7 +482,7 @@ public class UserTests {
      * Checks several bios with numbers in them will be set as the user's bio
      */
     @Test
-    public void checkValidBioNumbers() {
+    void checkValidBioNumbers() {
         String[] invalidBios = { "I am a happy p3rs0n when 1 am n0t study1ng",
                 "1 am a Un1vers1ty stud3nt meaning I have n0 fr33 t1m3",
                 "D0 y0u l1k3 cats caus3 1 l1k3 cats", "0", "1", "0123456789" };
@@ -502,7 +496,7 @@ public class UserTests {
      * Checks several bios with characters in , only set when it satisfy the condition
      */
     @Test
-    public void checkValidBioCharacters() {
+    void checkValidBioCharacters() {
         String[] validBios = { "! @m @ h@ppy per$on when ! @m not study!ng",
                 "! @m @ Un!ver$ity $tudent meaning I have no &ree ime",
                 "Do you li%e ca(s cause ) lke cats", "!", "@", "!@#$%&()" };
@@ -515,7 +509,7 @@ public class UserTests {
      * Checks several bios with non ASCII chracter in them will not be set as the user's bio
      */
     @Test
-    public void checkInvalidBioCharacters() {
+    void checkInvalidBioCharacters() {
         String[] invalidBios = {"dummy भारतभारत", "bladummy网络网络", "hahadummy.קום.קום" };
         for (String bio : invalidBios) {
             try {
@@ -529,7 +523,7 @@ public class UserTests {
      * @throws ParseException
      */
     @Test
-    public void checkDateofBirthGreaterThanThirteen() throws ParseException {
+    void checkDateofBirthGreaterThanThirteen() throws ParseException {
         String dateOfBirthString = "2000-05-11";
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE;
         LocalDate dateOfBirth = LocalDate.parse(dateOfBirthString, dateTimeFormatter);
@@ -543,7 +537,7 @@ public class UserTests {
      * @throws ParseException
      */
     @Test
-    public void checkDateofBirthLesserThanThirteen() throws ParseException {
+    void checkDateofBirthLesserThanThirteen() throws ParseException {
         String dateOfBirthString = "2010-05-11";
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE;
         LocalDate dateOfBirth = LocalDate.parse(dateOfBirthString, dateTimeFormatter);
@@ -563,7 +557,7 @@ public class UserTests {
      * Checks several address strings will be set as the user's address
      */
     @Test
-    public void checkValidAddress() {
+    void checkValidAddress() {
         String[] validAddresses = { "20,Elizabeth Street,Ashburton,Christchurch,New Zealand,Canterbury,8041",
                 "10,Made Up Street,Ashburton,Los Angeles,United States of Not Real,Fakeland,99999",
                 "49,You Would Not,Ashburton,Believe,Your,Eyes,11111",
@@ -579,7 +573,7 @@ public class UserTests {
      * Checks several passwords will be set as the user's password
      */
     @Test @Ignore
-    public void checkValidPassword() throws NoSuchAlgorithmException {
+    void checkValidPassword() throws NoSuchAlgorithmException {
         String[] validPasswords = { "SAASDJ3KAasdasdsa$*#", "asdjaskdj383", "77asjdksajk&&&",
                 "ASJDKLASJLKDJASKLDJK234567890123", "SKLDJASKD*(*(@*(#@*(8238283999" };
         for (String password : validPasswords) {
@@ -592,7 +586,7 @@ public class UserTests {
      * Checks an empty password will not be set as the user's password
      */
     @Test
-    public void checkInvalidPasswordEmpty() {
+    void checkInvalidPasswordEmpty() {
         try {
             testUser.setAuthenticationCodeFromPassword("");
             fail("A Forbidden exception was expected, but not thrown");
@@ -603,7 +597,7 @@ public class UserTests {
      * Checks several passwords that are too short (below 8 characters long) will not be set as the user's password
      */
     @Test
-    public void checkInvalidPasswordTooShort() {
+    void checkInvalidPasswordTooShort() {
         String[] invalidPasswords = { "1", "12", "123", "1234", "12345", "123456", "1234567", "YaBoi#d", "@", "HEy" };
         for (String password : invalidPasswords) {
             try {
@@ -617,7 +611,7 @@ public class UserTests {
      * Checks several passwords that are too long (above 64 characters long) will not be set as the user's password
      */
     @Test
-    public void checkInvalidPasswordTooLong() {
+    void checkInvalidPasswordTooLong() {
         String[] invalidPasswords = { "this password will be exactly 65 characters long seeeeeeeeeeeeeee", "" +
                 "asjdklasjkldjaslkdjlasjdklasjlkd^*&$#(*&#*(W$&(*#&#*(&(*3798427329847293874982378932480923490",
                 "asdjkl;asdasjkdsjakljaslkdjsa k        37498823094*()(#*()*($)#)*()#$*(#)$*()$#*DKLDJSL"};
@@ -634,7 +628,7 @@ public class UserTests {
      * to the user repository.
      */
     @Test
-    public void checkEmailUniquenessUniqueTest() {
+    void checkEmailUniquenessUniqueTest() {
         String testEmail = "johnsmith99@gmail.com";
         businessRepository.deleteAll();
         userRepository.deleteAll();
@@ -647,10 +641,10 @@ public class UserTests {
     }
 
     /**
-     * Verify that constructPublicJSON returns a JSON with the public attributes present.
+     * Verify that constructPublicJSON returns a JSON with the attributes present.
      */
     @Test
-    public void constructPublicJsonPublicAttributesPresentTest() {
+    void constructPublicJsonPublicAttributesPresentTest() {
         testUser.setUserID(1L);
         JSONObject json = testUser.constructPublicJson(true);
         assertTrue(json.containsKey("id"));
@@ -668,7 +662,7 @@ public class UserTests {
      * Verify that constructPublicJson returns a JSON with none of the hidden attributes present.
      */
     @Test
-    public void constructPublicJsonHiddenAttributesNotPresentTest() {
+    void constructPublicJsonHiddenAttributesNotPresentTest() {
         testUser.setUserID(1L);
         JSONObject json = testUser.constructPublicJson(true);
         json.remove("id");
@@ -690,7 +684,7 @@ public class UserTests {
      * and the list of businesses it administers is empty, all of the attributes in the JSON have the expected value.
      */
     @Test
-    public void constructPublicJsonNoAttributesNullTest() {
+    void constructPublicJsonNoAttributesNullTest() {
         testUser.setUserID(1L);
         JSONObject json = testUser.constructPublicJson(true);
         assertEquals(testUser.getUserID().toString(), json.getAsString("id"));
@@ -711,7 +705,7 @@ public class UserTests {
      * and the list of businesses it administers is empty, all of the attributes in the JSON have the expected value.
      */
     @Test
-    public void constructPublicJsonOptionalAttributesNullTest() {
+    void constructPublicJsonOptionalAttributesNullTest() {
         testUser.setUserID(1L);
         testUser.setMiddleName(null);
         testUser.setNickname(null);
@@ -734,7 +728,7 @@ public class UserTests {
      * Verify that constructPrivateJSON returns a JSON with all expected attributes present.
      */
     @Test
-    public void constructPrivateJsonAllExpectedAttributesPresentTest() {
+    void constructPrivateJsonAllExpectedAttributesPresentTest() {
         testUser.setUserID(1L);
         JSONObject json = testUser.constructPrivateJson(true);
         assertTrue(json.containsKey("id"));
@@ -755,7 +749,7 @@ public class UserTests {
      * Verify that constructPrivateJson returns a JSON with no unexpected attributes present.
      */
     @Test
-    public void constructPrivateJsonNoUnexpectedAttributesPresentTest() {
+    void constructPrivateJsonNoUnexpectedAttributesPresentTest() {
         testUser.setUserID(1L);
         JSONObject json = testUser.constructPrivateJson(true);
         json.remove("id");
@@ -779,7 +773,7 @@ public class UserTests {
      * and the list of businesses it administers is empty, all of the attributes in the JSON have the expected value.
      */
     @Test
-    public void constructPrivateJsonNoAttributesNullTest() {
+    void constructPrivateJsonNoAttributesNullTest() {
         testUser.setUserID(1L);
         JSONObject json = testUser.constructPrivateJson(true);
         assertEquals(testUser.getUserID().toString(), json.getAsString("id"));
@@ -803,7 +797,7 @@ public class UserTests {
      * and the list of businesses it administers is empty, all of the attributes in the JSON have the expected value.
      */
     @Test
-    public void constructPrivateJsonOptionalAttributesNullTest() {
+    void constructPrivateJsonOptionalAttributesNullTest() {
         testUser.setUserID(1L);
         testUser.setMiddleName(null);
         testUser.setNickname(null);
@@ -832,7 +826,7 @@ public class UserTests {
      * resulting json will have the correct details for every business administered by the user
      */
     @Test
-    public void constructPublicJsonBusinessesAdministeredTrueTest() {
+    void constructPublicJsonBusinessesAdministeredTrueTest() {
         addBusinessesAdministeredToTestUser();
         List<Business> testBusinesses = new ArrayList<>();
         testBusinesses.addAll(testUser.getBusinessesAdministeredAndOwned());
@@ -854,7 +848,7 @@ public class UserTests {
      * field.
      */
     @Test
-    public void constructPublicJsonBusinessesAdministeredFalseTest() {
+    void constructPublicJsonBusinessesAdministeredFalseTest() {
         addBusinessesAdministeredToTestUser();
         JSONObject json = testUser.constructPublicJson(false);
         assertNull(json.get("businessesAdministered"));
@@ -866,7 +860,7 @@ public class UserTests {
      * in the resulting JSON.
      */
     @Test
-    public void constructPublicJsonBusinessesAdministeredNullTest() {
+    void constructPublicJsonBusinessesAdministeredNullTest() {
         addBusinessesAdministeredToTestUser();
         JSONObject json = testUser.constructPublicJson();
         assertNull(json.get("businessesAdministered"));
@@ -878,7 +872,7 @@ public class UserTests {
      * resulting json will have the correct details for every business administered by the user
      */
     @Test
-    public void constructPrivateJsonBusinessesAdministeredTrueTest() {
+    void constructPrivateJsonBusinessesAdministeredTrueTest() {
         addBusinessesAdministeredToTestUser();
         List<Business> testBusinesses = new ArrayList<>();
         testBusinesses.addAll(testUser.getBusinessesAdministeredAndOwned());
@@ -899,7 +893,7 @@ public class UserTests {
      * businessesAdministered field.
      */
     @Test
-    public void constructPrivateJsonBusinessesAdministeredFalseTest() {
+    void constructPrivateJsonBusinessesAdministeredFalseTest() {
         addBusinessesAdministeredToTestUser();
         JSONObject json = testUser.constructPrivateJson(false);
         assertNull(json.get("businessesAdministered"));
@@ -911,7 +905,7 @@ public class UserTests {
      * field.
      */
     @Test
-    public void constructPrivateJsonBusinessesAdministeredNullTest() {
+    void constructPrivateJsonBusinessesAdministeredNullTest() {
         addBusinessesAdministeredToTestUser();
         JSONObject json = testUser.constructPrivateJson();
         assertNull(json.get("businessesAdministered"));
@@ -922,7 +916,7 @@ public class UserTests {
      * the user repository.
      */
     @Test
-    public void checkEmailUniquenessNonUniqueTest() throws ParseException {
+    void checkEmailUniquenessNonUniqueTest() throws ParseException {
         String testEmail = "johnsmith99@gmail.com";
         User testUser = new User.Builder()
                 .withFirstName("John")
@@ -949,7 +943,7 @@ public class UserTests {
      * Verify that when user is instantiated, its created attribute is set to the current system time.
      */
     @Test
-    public void setCreatedTest() {
+    void setCreatedTest() {
         Date now = new Date(System.currentTimeMillis());
         User testUser = testBuilder.build();
         assertTrue(ChronoUnit.SECONDS.between(Instant.now(), testUser.getCreated()) < 20);
@@ -959,7 +953,7 @@ public class UserTests {
      * Verify that when User.Builder.build() is used without setting first name a ResponseStatusException is thrown
      */
     @Test
-    public void buildWithoutFirstNameTest() throws ParseException {
+    void buildWithoutFirstNameTest() throws ParseException {
         User.Builder testBuilder = new User.Builder()
                 .withMiddleName("Hector")
                 .withLastName("Smith")
@@ -978,7 +972,7 @@ public class UserTests {
      * Verify that when User.Builder.build() is used without setting last name a ResponseStatusException is thrown
      */
     @Test
-    public void buildWithoutLastNameTest() throws ParseException {
+    void buildWithoutLastNameTest() throws ParseException {
         User.Builder testBuilder = new User.Builder()
                 .withFirstName("Joe")
                 .withMiddleName("Hector")
@@ -997,7 +991,7 @@ public class UserTests {
      * Verify that when User.Builder.build() is used without setting email a ResponseStatusException is thrown
      */
     @Test
-    public void buildWithoutEmailTest() throws ParseException {
+    void buildWithoutEmailTest() throws ParseException {
         User.Builder testBuilder = new User.Builder()
                 .withFirstName("Joe")
                 .withMiddleName("Hector")
@@ -1016,7 +1010,7 @@ public class UserTests {
      * Verify that when User.Builder.build() is used without setting password a ResponseStatusException is thrown
      */
     @Test
-    public void buildWithoutPasswordTest() throws ParseException {
+    void buildWithoutPasswordTest() throws ParseException {
         User.Builder testBuilder = new User.Builder()
                 .withFirstName("Joe")
                 .withMiddleName("Hector")
@@ -1035,7 +1029,7 @@ public class UserTests {
      * Verify that when User.Builder.build() is used without setting home address a ResponseStatusException is thrown
      */
     @Test
-    public void buildWithoutAddressTest() throws ParseException {
+    void buildWithoutAddressTest() throws ParseException {
         User.Builder testBuilder = new User.Builder()
                 .withFirstName("Joe")
                 .withMiddleName("Hector")
@@ -1053,7 +1047,7 @@ public class UserTests {
      * Verify that when User.Builder.build() is used without setting date of birth a ResponseStatusException is thrown
      */
     @Test
-    public void buildWithoutDateOfBirthTest() {
+    void buildWithoutDateOfBirthTest() {
         User.Builder testBuilder = new User.Builder()
                 .withFirstName("Joe")
                 .withMiddleName("Hector")
@@ -1073,7 +1067,7 @@ public class UserTests {
      * name set to null
      */
     @Test
-    public void buildWithoutMiddleNameTest() throws ParseException {
+    void buildWithoutMiddleNameTest() throws ParseException {
         User.Builder testBuilder = new User.Builder()
                 .withFirstName("Joe")
                 .withLastName("Smith")
@@ -1094,7 +1088,7 @@ public class UserTests {
      * set to null
      */
     @Test
-    public void buildWithoutNickNameTest() throws ParseException {
+    void buildWithoutNickNameTest() throws ParseException {
         User.Builder testBuilder = new User.Builder()
                 .withFirstName("Joe")
                 .withMiddleName("Hector")
@@ -1114,7 +1108,7 @@ public class UserTests {
      * Verify that when User.Builder.build is used without setting a bio, a user is constructed with their bio set to null
      */
     @Test
-    public void buildWithoutBioTest() throws ParseException {
+    void buildWithoutBioTest() throws ParseException {
         User.Builder testBuilder = new User.Builder()
                 .withFirstName("Joe")
                 .withMiddleName("Hector")
@@ -1135,7 +1129,7 @@ public class UserTests {
      * number set to null
      */
     @Test
-    public void buildWithoutPhoneNumberTest() throws ParseException{
+    void buildWithoutPhoneNumberTest() throws ParseException{
         User.Builder testBuilder = new User.Builder()
                 .withFirstName("Joe")
                 .withMiddleName("Hector")
@@ -1156,7 +1150,7 @@ public class UserTests {
      * be the same as the one set in the builder.
      */
     @Test
-    public void buildWithFirstNameTest() {
+    void buildWithFirstNameTest() {
         User user = testBuilder.build();
         assertEquals("Joe", user.getFirstName());
     }
@@ -1166,7 +1160,7 @@ public class UserTests {
      * be the same as the one set in the builder.
      */
     @Test
-    public void buildWithMiddleNameTest() {
+    void buildWithMiddleNameTest() {
         User user = testBuilder.build();
         assertEquals("Hector", user.getMiddleName());
     }
@@ -1176,7 +1170,7 @@ public class UserTests {
      * be the same as the one set in the builder.
      */
     @Test
-    public void buildWithLastNameTest() {
+    void buildWithLastNameTest() {
         User user = testBuilder.build();
         assertEquals("Smith", user.getLastName());
     }
@@ -1186,7 +1180,7 @@ public class UserTests {
      * be the same as the one set in the builder.
      */
     @Test
-    public void buildWithNickNameTest() {
+    void buildWithNickNameTest() {
         User user = testBuilder.build();
         assertEquals("Jonny", user.getNickname());
     }
@@ -1196,7 +1190,7 @@ public class UserTests {
      * be the same as the one set in the builder.
      */
     @Test
-    public void buildWithEmailTest() {
+    void buildWithEmailTest() {
         User user = testBuilder.build();
         assertEquals("johnsmith99@gmail.com", user.getEmail());
     }
@@ -1206,7 +1200,7 @@ public class UserTests {
      * will be the same as the one generated from the password set in the builder.
      */
     @Test
-    public void buildWithPasswordTest() throws NoSuchAlgorithmException {
+    void buildWithPasswordTest() throws NoSuchAlgorithmException {
         User user = testBuilder.build();
         assertEquals(PasswordAuthenticator.generateAuthenticationCode("1337-H%nt3r2"), user.getAuthenticationCode());
     }
@@ -1216,7 +1210,7 @@ public class UserTests {
      * the one set in the builder.
      */
     @Test
-    public void buildWithBioTest() {
+    void buildWithBioTest() {
         User user = testBuilder.build();
         assertEquals("Likes long walks on the beach", user.getBio());
     }
@@ -1226,7 +1220,7 @@ public class UserTests {
      * be the same as the one set in the builder.
      */
     @Test
-    public void buildWithAddressTest() {
+    void buildWithAddressTest() {
         User user = testBuilder.build();
         //ReflectionEquals.match() matches the contents of the object instead of the object itself.
         assertTrue(new ReflectionEquals(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand,Canterbury,8041")).matches(user.getAddress()));
@@ -1237,7 +1231,7 @@ public class UserTests {
      * be the same as the one set in the builder.
      */
     @Test
-    public void buildWithPhoneNumberTest() {
+    void buildWithPhoneNumberTest() {
         User user = testBuilder.build();
         assertEquals("+64 3 555 0129", user.getPhNum());
     }
@@ -1247,7 +1241,7 @@ public class UserTests {
      * be equivalent to the one set in the builder.
      */
     @Test
-    public void buildWithDobTest() throws ParseException {
+    void buildWithDobTest() throws ParseException {
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE;
         LocalDate dob = LocalDate.parse("2001-03-11", dateTimeFormatter);
         User user = testBuilder.build();

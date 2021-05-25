@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class ProductRepositoryTest {
+class ProductRepositoryTest {
 
     @Autowired
     private UserRepository userRepository;

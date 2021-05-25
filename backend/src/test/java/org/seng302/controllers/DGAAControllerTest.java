@@ -16,7 +16,7 @@ import java.text.ParseException;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest
-public class DGAAControllerTest {
+class DGAAControllerTest {
 
     @Autowired
     private UserRepository userRepository;
@@ -42,7 +42,7 @@ public class DGAAControllerTest {
      * DGAA repo is empty, ensure a new DGAA is generated
      */
     @Test @Ignore
-    public void dgaaNotPresent() {
+    void dgaaNotPresent() {
         dgaaController.checkDGAA();
         assert(userRepository.findByEmail("wasteless@seng302.com") != null);
     }
@@ -52,7 +52,7 @@ public class DGAAControllerTest {
      * @throws ParseException
      */
     @Test @Ignore
-    public void dgaaPresent() throws ParseException {
+    void dgaaPresent() throws ParseException {
         dgaaController.checkDGAA();
         User dgaa;
         Location adminAddress;
@@ -76,7 +76,7 @@ public class DGAAControllerTest {
             dgaa.setRole("defaultGlobalApplicationAdmin");
             userRepository.save(dgaa);
         } catch (IllegalArgumentException e) {
-            assertEquals(e.getMessage(), "Tried creating new DGAA");
+            assertEquals("Tried creating new DGAA", e.getMessage());
         }
 
     }

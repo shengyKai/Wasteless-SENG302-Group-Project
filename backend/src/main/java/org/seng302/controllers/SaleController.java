@@ -6,12 +6,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.seng302.entities.Business;
 import org.seng302.entities.InventoryItem;
-import org.seng302.entities.Product;
 import org.seng302.entities.SaleItem;
 import org.seng302.persistence.BusinessRepository;
 import org.seng302.persistence.InventoryItemRepository;
 import org.seng302.persistence.SaleItemRepository;
-import org.seng302.persistence.UserRepository;
 import org.seng302.tools.AuthenticationTokenManager;
 import org.seng302.tools.SearchHelper;
 import org.springframework.http.HttpStatus;
@@ -23,7 +21,6 @@ import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 public class SaleController {
@@ -60,7 +57,7 @@ public class SaleController {
     }
 
     @PostMapping("/businesses/{id}/listings")
-    public JSONObject addSaleItemToBusiness(@PathVariable Long id, @RequestBody JSONObject saleItemInfo, HttpServletRequest request, HttpServletResponse response) throws Exception {
+    public JSONObject addSaleItemToBusiness(@PathVariable Long id, @RequestBody JSONObject saleItemInfo, HttpServletRequest request, HttpServletResponse response) {
         try {
             AuthenticationTokenManager.checkAuthenticationToken(request);
             logger.info(() -> String.format("Adding sales item to business (businessId=%d).", id));

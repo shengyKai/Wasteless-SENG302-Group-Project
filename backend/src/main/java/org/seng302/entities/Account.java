@@ -22,7 +22,7 @@ public abstract class Account {
     private Long userID;
     protected String role;
     // Allows letters, numbers and selected symbols then 1 @ then some amount of other characters
-    String emailRegex = "^[A-Za-z0-9+_.-]+@(.+)$";
+    private static final String EMAIL_REGEX = "^[A-Za-z0-9+_.-]+@(.+)$";
 
     /**
      * Returns email associated with the account, also works as username
@@ -39,7 +39,7 @@ public abstract class Account {
      * @param email to be associated with account and used as username
      */
     public void setEmail(String email) {
-        boolean validEmail = (email != null && Pattern.matches(emailRegex, email));
+        boolean validEmail = (email != null && Pattern.matches(EMAIL_REGEX, email));
         if (validEmail && !email.trim().isEmpty() && email.length() <= 100) {
             this.email = email;
         } else {

@@ -34,7 +34,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest
-public class BusinessTests {
+class BusinessTests {
 
     @Autowired
     BusinessRepository businessRepository;
@@ -60,7 +60,7 @@ public class BusinessTests {
      * @throws ParseException
      */
     @BeforeEach
-    public void setUp() throws ParseException {
+    void setUp() throws ParseException {
         LocalDateTime ldt = LocalDateTime.now().minusYears(15);
         String ageBelow16 = DateTimeFormatter.ofPattern("yyyy-MM-dd", Locale.ENGLISH).format(ldt);
         businessRepository.deleteAll();
@@ -126,7 +126,7 @@ public class BusinessTests {
      * @throws Exception
      */
     @Test
-    public void getAdministratorsReturnsAdministrators() throws Exception {
+    void getAdministratorsReturnsAdministrators() throws Exception {
         testBusiness1.addAdmin(testUser2);
         testBusiness1 = businessRepository.save(testBusiness1);
         assertTrue(testBusiness1.getAdministrators().stream().anyMatch(user -> user.getUserID() == testUser2.getUserID()));
@@ -137,7 +137,7 @@ public class BusinessTests {
      * @throws Exception
      */
     @Test
-    public void getPrimaryOwnerReturnsPrimaryOwner() throws Exception {
+    void getPrimaryOwnerReturnsPrimaryOwner() throws Exception {
         assertEquals(testUser1.getUserID(), testBusiness1.getPrimaryOwner().getUserID());
     }
 
@@ -146,7 +146,7 @@ public class BusinessTests {
      * @throws ResponseStatusException
      */
     @Test
-    public void setBusinessTypeWhenValid() throws ResponseStatusException {
+    void setBusinessTypeWhenValid() throws ResponseStatusException {
         testBusiness1.setBusinessType("Retail Trade");
         assertEquals("Retail Trade", testBusiness1.getBusinessType());
     }
@@ -156,7 +156,7 @@ public class BusinessTests {
      * @throws ResponseStatusException
      */
     @Test
-    public void setBusinessTypeThrowsWhenInvalid() throws ResponseStatusException {
+    void setBusinessTypeThrowsWhenInvalid() throws ResponseStatusException {
         try {
             testBusiness1.setBusinessType("invalid type");
             fail(); // shouldnt get here
@@ -169,7 +169,7 @@ public class BusinessTests {
      * Test that setting the business name changes the business name
      */
     @Test
-    public void setNameSetsName() {
+    void setNameSetsName() {
         String newName = "Cool Business";
         testBusiness1.setName(newName);
         assertEquals(newName, testBusiness1.getName());
@@ -179,7 +179,7 @@ public class BusinessTests {
      * test that setting the business description sets the business description
      */
     @Test
-    public void setDescriptionSetsDescription() {
+    void setDescriptionSetsDescription() {
         String newDesc = "Some description";
         testBusiness1.setDescription(newDesc);
         assertEquals(newDesc, testBusiness1.getDescription());
@@ -189,7 +189,7 @@ public class BusinessTests {
      * tests that if user is above or equal 16 years old, the user's data will be stored as the primary owner
      */
     @Test
-    public void setAboveMinimumAge() {
+    void setAboveMinimumAge() {
         assertNotNull(testBusiness1.getPrimaryOwner());
     }
 
@@ -197,7 +197,7 @@ public class BusinessTests {
      * tests that if user is below 16 years old, an exception will be thrown
      */
     @Test
-    public void setBelowMinimumAge() {
+    void setBelowMinimumAge() {
         Exception thrown = assertThrows(ResponseStatusException.class, () -> {
             Business testBusiness2 = new Business.Builder()
                     .withBusinessType("Accommodation and Food Services")
@@ -233,7 +233,7 @@ public class BusinessTests {
      * the characters "@ $ % & . , ' ; : - _", and is not empty, the businesses name is set to that value.
      */
     @Test
-    public void setNameValidNameTest() {
+    void setNameValidNameTest() {
         String[] testNames = getTestNames();
         for (String name : testNames) {
             testBusiness1.setName(name);
@@ -246,7 +246,7 @@ public class BusinessTests {
      * the name associated with the saved entity is updated.
      */
     @Test
-    public void setNameSavedToRepositoryTest() {
+    void setNameSavedToRepositoryTest() {
         String[] testNames = getTestNames();
         for (String name : testNames) {
             testBusiness1.setName(name);
@@ -263,7 +263,7 @@ public class BusinessTests {
      * business's name will not be changed.
      */
     @Test
-    public void setNameInvalidCharacterTest() {
+    void setNameInvalidCharacterTest() {
         String originalName = testBusiness1.getName();
         String[] invalidCharacterNames = {"\n", "»»»»»", "business¢", "½This is not allowed", "¡or this¡"};
         for (String name : invalidCharacterNames) {
@@ -280,7 +280,7 @@ public class BusinessTests {
      * exception with status code 400 will be thrown and the business's name will not be changed.
      */
     @Test
-    public void setNameTooLongTest() {
+    void setNameTooLongTest() {
         String originalName = testBusiness1.getName();
 
         StringBuilder justOver = new StringBuilder();
@@ -307,7 +307,7 @@ public class BusinessTests {
      * status code 400 and the business's name will not be changed.
      */
     @Test
-    public void setNameNullTest() {
+    void setNameNullTest() {
         String originalName = testBusiness1.getName();
         ResponseStatusException e = assertThrows(ResponseStatusException.class, () -> {
             testBusiness1.setName(null);
@@ -321,7 +321,7 @@ public class BusinessTests {
      * with status code 400 and the business's name will not be changed.
      */
     @Test
-    public void setNameEmptyStringTest() {
+    void setNameEmptyStringTest() {
         String originalName = testBusiness1.getName();
         ResponseStatusException e = assertThrows(ResponseStatusException.class, () -> {
             testBusiness1.setName("");
@@ -335,7 +335,7 @@ public class BusinessTests {
      * with status code 400 and the business's name will not be changed.
      */
     @Test
-    public void setNameBlankStringTest() {
+    void setNameBlankStringTest() {
         String originalName = testBusiness1.getName();
         ResponseStatusException e = assertThrows(ResponseStatusException.class, () -> {
             testBusiness1.setName("      ");
@@ -368,7 +368,7 @@ public class BusinessTests {
      * and the characters "@ $ % & . , ; : - _", and is not empty, the businesses description is set to that value.
      */
     @Test
-    public void setDescriptionValidDescriptionTest() {
+    void setDescriptionValidDescriptionTest() {
         String[] testDescriptions = getTestDescriptions();
         for (String description : testDescriptions) {
             testBusiness1.setDescription(description);
@@ -381,7 +381,7 @@ public class BusinessTests {
      * the description associated with the saved entity is updated.
      */
     @Test
-    public void setDescriptionSavedToRepositoryTest() {
+    void setDescriptionSavedToRepositoryTest() {
         String[] testDescriptions = getTestDescriptions();
         for (String description : testDescriptions) {
             testBusiness1.setDescription(description);
@@ -397,7 +397,7 @@ public class BusinessTests {
      * business's description will not be changed.
      */
     @Test
-    public void setDescriptionInvalidCharacterTest() {
+    void setDescriptionInvalidCharacterTest() {
         String originalDescription = testBusiness1.getDescription();
         String[] invalidCharacterDescriptions = {"ƒ", "»»»»»", "business¢", "½This is not allowed", "¡or this¡"};
         for (String description : invalidCharacterDescriptions) {
@@ -414,7 +414,7 @@ public class BusinessTests {
      * exception with status code 400 will be thrown and the business's description will not be changed.
      */
     @Test
-    public void setDescriptionTooLongTest() {
+    void setDescriptionTooLongTest() {
         String originalDescription = testBusiness1.getDescription();
 
         StringBuilder justOver = new StringBuilder();
@@ -440,7 +440,7 @@ public class BusinessTests {
      * Check that when setDescription is called with null as its argument, the description becomes an empty string
      */
     @Test
-    public void setDescriptionNullTest() {
+    void setDescriptionNullTest() {
         testBusiness1.setDescription(null);
         assertEquals("", testBusiness1.getDescription());
     }
@@ -450,7 +450,7 @@ public class BusinessTests {
      * an expection is thrown and the user is not removed from the database.
      */
     @Test
-    public void primaryOwnerCantBeDeletedTest() {
+    void primaryOwnerCantBeDeletedTest() {
         User primaryOwner = testBusiness1.getPrimaryOwner();
         assertThrows(ResponseStatusException.class, () -> {
             userRepository.deleteById(primaryOwner.getUserID());
@@ -463,7 +463,7 @@ public class BusinessTests {
      * with status code 400 is thrown adn the admin is not added.
      */
     @Test
-    public void addAdminCurrentAdminTest() {
+    void addAdminCurrentAdminTest() {
         testBusiness1.addAdmin(testUser2);
         ResponseStatusException e = assertThrows(ResponseStatusException.class, () -> {
             testBusiness1.addAdmin(testUser2);
@@ -478,7 +478,7 @@ public class BusinessTests {
      * expection with status code 400 is thrown and the admin is not added.
      */
     @Test
-    public void addAdminPrimaryOwnerTest() {
+    void addAdminPrimaryOwnerTest() {
         ResponseStatusException e = assertThrows(ResponseStatusException.class, () -> {
             testBusiness1.addAdmin(testUser1);
         });
@@ -491,7 +491,7 @@ public class BusinessTests {
      * the businesses list of administrators.
      */
     @Test
-    public void addAdminNewAdminTest() {
+    void addAdminNewAdminTest() {
         testBusiness1.addAdmin(testUser2);
         assertEquals(1, testBusiness1.getAdministrators().size());
         assertTrue(testBusiness1.getAdministrators().contains(testUser2));
@@ -502,7 +502,7 @@ public class BusinessTests {
      * a DataIntegrityVioloationException will be thrown, and the user and business will not be changed.
      */
     @Test
-    public void adminDeletedTest() {
+    void adminDeletedTest() {
         testBusiness1.addAdmin(testUser2);
         testBusiness1 = businessRepository.save(testBusiness1);
         long adminId = testUser2.getUserID();
@@ -519,7 +519,7 @@ public class BusinessTests {
      * but its primary owner entity is not deleted.
      */
     @Test
-    public void deleteBusinessWithoutAdminsTest() {
+    void deleteBusinessWithoutAdminsTest() {
         long businessId = testBusiness1.getId();
         long ownerId = testBusiness1.getPrimaryOwner().getUserID();
         businessRepository.deleteById(businessId);
@@ -532,7 +532,7 @@ public class BusinessTests {
      * Test that when delete is called on a business which has administrators, a DataIntegrityViolationException
      * is thrown and the business and its admins remain in the database.
      */
-    public void deleteBusinessWithAdminsTest() {
+    private void deleteBusinessWithAdminsTest() {
         testBusiness1.addAdmin(testUser2);
         testBusiness1 = businessRepository.save(testBusiness1);
         long adminId = testUser2.getUserID();
@@ -554,7 +554,7 @@ public class BusinessTests {
      * the business's created attribute will be set to the current date and time
      */
     @Test
-    public void setCreatedInitialValueTest() {
+    void setCreatedInitialValueTest() {
         Business testBusiness2 = new Business.Builder().withBusinessType("Non-profit organisation").withName("Zesty Business")
                 .withAddress(Location.covertAddressStringToLocation("101,My Street,Ashburton,Christchurch,Canterbury,New Zealand,1010"))
                 .withDescription("A nice place").withPrimaryOwner(testUser2).build();
@@ -566,7 +566,7 @@ public class BusinessTests {
      * will be thrown and the business's address will not be changed.
      */
     @Test
-    public void setAddressNullTest() {
+    void setAddressNullTest() {
         Location originalAddress = testBusiness1.getAddress();
         ResponseStatusException e = assertThrows(ResponseStatusException.class, () -> {
             testBusiness1.setAddress(null);
@@ -580,7 +580,7 @@ public class BusinessTests {
      * the given location.
      */
     @Test
-    public void setAddressValidTest() {
+    void setAddressValidTest() {
         Location address = Location.covertAddressStringToLocation("44,Humbug Ave,Ashburton,Hamilton,Waikato,New Zealand,1000");
         testBusiness1.setAddress(address);
         assertEquals(address, testBusiness1.getAddress());
@@ -606,7 +606,7 @@ public class BusinessTests {
      * called with true as its arguement.
      */
     @Test
-    public void constructJsonHasExpectedFieldsFullDetailsTrueTest() {
+    void constructJsonHasExpectedFieldsFullDetailsTrueTest() {
        JSONObject json = testBusiness1.constructJson(true);
        assertTrue(json.containsKey("name"));
        assertTrue(json.containsKey("description"));
@@ -624,7 +624,7 @@ public class BusinessTests {
      * called with false or no argument.
      */
     @Test
-    public void constructJsonHasExpectedFieldsFullDetailsFalseTest() {
+    void constructJsonHasExpectedFieldsFullDetailsFalseTest() {
         List<JSONObject> testJsons = new ArrayList<>();
         testJsons.add(testBusiness1.constructJson(false));
         testJsons.add(testBusiness1.constructJson());
@@ -645,7 +645,7 @@ public class BusinessTests {
      * whether constructJson is called with true as its argument.
      */
     @Test
-    public void constructJsonDoesntHaveUnexpectedFieldsFullDetailsTrueTest() {
+    void constructJsonDoesntHaveUnexpectedFieldsFullDetailsTrueTest() {
         JSONObject json = testBusiness1.constructJson(true);
         json.remove("name");
         json.remove("description");
@@ -664,7 +664,7 @@ public class BusinessTests {
      * whether constructJson is called with false or no argument.
      */
     @Test
-    public void constructJsonDoesntHaveUnexpectedFieldsFullDetailsFalseTest() {
+    void constructJsonDoesntHaveUnexpectedFieldsFullDetailsFalseTest() {
         List<JSONObject> testJsons = new ArrayList<>();
         testJsons.add(testBusiness1.constructJson(false));
         testJsons.add(testBusiness1.constructJson());
@@ -686,7 +686,7 @@ public class BusinessTests {
      * called with true, false or no argument.
      */
     @Test
-    public void constructJsonSimpleFieldsHaveExpectedValueTest() {
+    void constructJsonSimpleFieldsHaveExpectedValueTest() {
         List<JSONObject> testJsons = getTestJsons(testBusiness1);
         for (JSONObject json : testJsons) {
             assertEquals(testBusiness1.getName(), json.getAsString("name"));
@@ -704,7 +704,7 @@ public class BusinessTests {
      * contains a list of User JSONs with the details of the business's administrators.
      */
     @Test
-    public void constructJsonAdministratorsFullDetailsTest() {
+    void constructJsonAdministratorsFullDetailsTest() {
         testBusiness1.addAdmin(testUser2);
         assertEquals(2, testBusiness1.getOwnerAndAdministrators().size());
         List<User> admins = new ArrayList<>();
@@ -725,7 +725,7 @@ public class BusinessTests {
      * method will return a set containing just the business's primary owner.
      */
     @Test
-    public void getOwnerAndAdministratorsNoAdministratorsTest() {
+    void getOwnerAndAdministratorsNoAdministratorsTest() {
         assertEquals(1, testBusiness1.getOwnerAndAdministrators().size());
         assertTrue(testBusiness1.getOwnerAndAdministrators().contains(testUser1));
     }
@@ -736,7 +736,7 @@ public class BusinessTests {
      * of the business.
      */
     @Test
-    public void getOwnerAndAdministratorsAdminsAddedTest() {
+    void getOwnerAndAdministratorsAdminsAddedTest() {
         testBusiness1.addAdmin(testUser2);
         assertEquals(2, testBusiness1.getOwnerAndAdministrators().size());
         assertTrue(testBusiness1.getOwnerAndAdministrators().contains(testUser1));
@@ -751,7 +751,7 @@ public class BusinessTests {
      * with a HTTP request that does not contain an authentication token (i.e. the user has not logged in).
      */
     @Test
-    public void checkSessionPermissionsNoAuthenticationTokenTest() {
+    void checkSessionPermissionsNoAuthenticationTokenTest() {
         when(request.getSession()).thenAnswer(
                 invocation -> session);
         when(session.getAttribute("AUTHTOKEN")).thenAnswer(
@@ -767,7 +767,7 @@ public class BusinessTests {
      * application admin.
      */
     @Test
-    public void checkSessionPermissionsUserWithoutPermissionTest() {
+    void checkSessionPermissionsUserWithoutPermissionTest() {
         Long user2Id = userRepository.findByEmail("dave@gmail.com").getUserID();
         when(request.getSession()).thenAnswer(
                 invocation -> session);
@@ -796,7 +796,7 @@ public class BusinessTests {
      * an admin of the business, no exception is thrown.
      */
     @Test
-    public void checkSessionPermissionsBusinessAdminTest() {
+    void checkSessionPermissionsBusinessAdminTest() {
         Long user1Id = userRepository.findByEmail("johnsmith99@gmail.com").getUserID();
         when(request.getSession()).thenAnswer(
                 invocation -> session);
@@ -826,7 +826,7 @@ public class BusinessTests {
      * a global application admin, no exception is thrown.
      */
     @Test
-    public void checkSessionPermissionsGlobalApplicationAdminTest() {
+    void checkSessionPermissionsGlobalApplicationAdminTest() {
         Long user2Id = userRepository.findByEmail("dave@gmail.com").getUserID();
         when(request.getSession()).thenAnswer(
                 invocation -> session);
@@ -856,7 +856,7 @@ public class BusinessTests {
      * a global application admin, no exception is thrown.
      */
     @Test
-    public void checkSessionPermissionsDefaultGlobalApplicationAdminTest() {
+    void checkSessionPermissionsDefaultGlobalApplicationAdminTest() {
         when(request.getSession()).thenAnswer(
                 invocation -> session);
         when(request.getSession(false)).thenAnswer(

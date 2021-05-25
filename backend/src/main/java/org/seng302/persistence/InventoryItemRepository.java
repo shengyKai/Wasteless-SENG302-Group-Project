@@ -3,8 +3,6 @@ package org.seng302.persistence;
 import org.seng302.entities.Business;
 import org.seng302.entities.InventoryItem;
 import org.seng302.entities.Product;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
