@@ -685,7 +685,7 @@ describe("CreateInventory.vue", () => {
   });
 
   //Needs addressed with bug associated with t170
-  it.skip("Product dropdown contains a list of products", async ()=>{
+  it("Product dropdown contains a list of products", async ()=>{
     await wrapper.setData({productList:testProducts});
     await Vue.nextTick();
     const selectbox = findProductSelect();
@@ -703,7 +703,7 @@ describe("CreateInventory.vue", () => {
   });
 
   //Associated with bug on t170
-  it.skip('Product search limits results', async ()=>{
+  it('Product search limits results', async ()=>{
     await wrapper.setData({productList:testProducts});
     const selectbox = findProductSelect();
     (selectbox.vm as any).activateMenu();

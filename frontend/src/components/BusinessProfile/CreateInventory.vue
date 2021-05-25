@@ -21,7 +21,7 @@
                     solo
                     value = "product Code"
                     v-model="productCode"
-                    :items="mockProductList"
+                    :items="filteredProductList"
                     label="Product Code"
                     item-text="name"
                     item-value="id"
@@ -161,12 +161,8 @@ export default {
       dialog: true,
       valid: false,
       today: new Date(),
-      mockProductList: [
-        'NATHAN-APPLE-70',
-        'CONNOR-ORAN-80',
-        'EDWARD-BANA-78',
-      ],
       productCode : "",
+      productList: [],
       quantity : "",
       pricePerItem: "",
       totalPrice: "",
