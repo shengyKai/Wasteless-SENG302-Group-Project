@@ -1,4 +1,4 @@
-# Leftovers
+# LEFT_OVERS
 ## Team Internal Error (500)
 
 An application for buying and selling products which are close to their expiration date.
@@ -12,7 +12,7 @@ A frontend sub-project (web GUI):
 - `frontend/src/components` Vue components of application UI (Vue.js)
 - `frontend/src/plugins` State control and navigation (Typescript)
 - `frontend/tests/unit` Jest tests (Typescript)
-- `frontend/public` publicly accessible web assets (e.g., icons, images, style sheets)
+- `frontend/public` Publicly accessible web assets (e.g., icons, images, style sheets)
 - `frontend/dist` Frontend production build
 
 A backend sub-project (business logic and persistence server):
@@ -46,7 +46,6 @@ Running on: http://localhost:9499/ by default
 ## Contributors
 
 - SENG302 Team 500
-    - Ben Smith
     - Connor Hitchcock
     - Edward Wong
     - Ella Johnson
