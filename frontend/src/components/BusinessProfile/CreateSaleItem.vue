@@ -32,7 +32,6 @@
                     label="Price Per Item"
                     prefix="$"
                     :rules="mandatoryRules.concat(mandatoryRules).concat(priceRules)"
-                    :disabled="inventoryItem.pricePerItem != undefined"
                     outlined
                   />
                 </v-col>
@@ -178,14 +177,20 @@ export default {
   },
   computed: {
     inventoryItem() {
-      return this.$store.state.createSaleItemDialog.inventoryItem;
+      if (this.$store.state.createSaleItemDialog !== undefined) {
+        return this.$store.state.createSaleItemDialog.inventoryItem;
+      }
     },
     businessId() {
       return this.$store.state.createSaleItemDialog.businessId;
     }
   },
   mounted () {
-    this.price = this.inventoryItem.pricePerItem;
+    if (this.inventoryItem !== undefined) {
+      if (this.inventoryItem.pricePerItem !== undefined) {
+        this.price = this.inventoryItem.pricePerItem;
+      }
+    }
   }
 };
 </script>
