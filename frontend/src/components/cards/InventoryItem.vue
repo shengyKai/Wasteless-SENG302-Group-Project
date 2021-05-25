@@ -252,6 +252,17 @@
           </v-tooltip>
         </v-col>
       </v-row>
+      <v-row justify="end">
+        <v-btn
+          rounded
+          outlined
+          color="primary"
+          class="sale-item-but"
+          @click="viewCreateSaleItem"
+        >
+          Create Sale Item
+        </v-btn>
+      </v-row>
     </v-container>
   </v-card>
 </template>
@@ -348,7 +359,7 @@ export default {
 
 <style>
 .product-fields {
-    padding-top: 0;
+  padding-top: 0;
 }
 
 .timeline {
@@ -361,6 +372,11 @@ export default {
 
 .timeline-label {
   width: 90px;
+  font-weight: bold;
+}
+
+.sale-item-but {
+  margin: 10px;
   font-weight: bold;
 }
 
