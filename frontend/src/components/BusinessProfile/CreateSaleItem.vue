@@ -51,6 +51,7 @@
                     v-model="closes"
                     label="Closes"
                     type="date"
+                    @input=checkClosesDateValid()
                     outlined
                   />
                 </v-col>
@@ -69,7 +70,7 @@
             <v-btn
               type="submit"
               color="primary"
-              :disabled="!valid"
+              :disabled="!valid || !closesValid"
               @click.prevent="CreateSaleItem">
               Create
             </v-btn>
@@ -90,11 +91,13 @@ export default {
       errorMessage: undefined,
       dialog: true,
       valid: false,
-      today: new Date().toISOString().slice(0,10),
+      today: new Date(),
       quantity: "",
       price: '',
       info: "",
       closes: "",
+      closesValid: true,
+      maxDate: new Date("5000-01-01"),
 
       maxCharRules: [
         field => (field.length <= 100) || 'Reached max character limit: 100'
@@ -154,6 +157,21 @@ export default {
         this.errorMessage = result;
       } else {
         this.closeDialog();
+      }
+    },
+    /**
+     * Checks the closing date is valid
+     */
+    async checkClosesDateValid() {
+      let closesDate = new Date(this.closes);
+      this.closesValid = false;
+      if (closesDate < this.today) {
+        this.errorMessage = "The closing date cannot be before today!";
+      } else if (closesDate > this.maxDate) {
+        this.errorMessage = "The closing date cannot be thousands of years into the future!";
+      } else {
+        this.errorMessage = undefined;
+        this.closesValid = true;
       }
     },
   },
