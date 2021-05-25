@@ -8,11 +8,16 @@
         >
           <!---Select component for the order in which the cards should be displayed--->
           <v-select
+            v-model="orderBy"
             flat
             solo-inverted
             hide-details
             :items="[
               { text: 'Date Added', value: 'created'},
+              { text: 'Date Closing', value: 'closes'},
+              { text: 'Title', value: 'title'},
+              { text: 'Author First Name', value: 'creatorFirstName'},
+              { text: 'Author Last Name', value: 'creatorLastName'},
             ]"
             prepend-inner-icon="mdi-sort-variant"
             label="Sort by"
@@ -20,7 +25,7 @@
         </v-col>
         <v-col cols="auto">
           <!---Reverse the order in which the cards should be displayed--->
-          <v-btn-toggle class="toggle" mandatory>
+          <v-btn-toggle class="toggle" v-model="reverse" mandatory>
             <v-btn depressed color="primary" :value="false">
               <v-icon>mdi-arrow-up</v-icon>
             </v-btn>
@@ -103,7 +108,7 @@ export default {
     return {
       tab: null,
       sections: ["For Sale", "Wanted", "Exchange"],
-      // TODO Get cards for each section with API call when that has been implemented.
+      // Commented for the moment in case the implementation breaks.
       // cards: {
       //   "For Sale": [
       //     {id: 0, creator: {firstName: 'Tim'   , lastName: 'Tam'       , homeAddress: { country: 'New Zealand', city: 'Auckland',     district: 'Wherever'       }}, created: '2021-05-19', title: 'Tim Tams from Timmy',             description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus hendrerit nisl ac pharetra cursus.', keywords: [{name: 'Home Made'}, {name: 'Organic'}]},
@@ -141,7 +146,13 @@ export default {
         "Wanted": 0,
         "Exchange": 0,
       },
-      error: ""
+      error: "",
+      orderBy: "created",
+      /**
+       * Note: change the default here to true because backlog states that
+       * creation date should be descending by default.
+       */
+      reverse: true
     };
   },
   methods: {
@@ -153,7 +164,9 @@ export default {
         const value = await getCardsBySection (
           this.sections[index],
           this.currentPage[this.sections[index]],
-          this.resultsPerPage
+          this.resultsPerPage,
+          this.orderBy,
+          this.reverse
         );
         this.totalResults[this.sections[index]] = await getCardCount(this.sections[index]);
         if (typeof value === 'string') {
@@ -188,11 +201,17 @@ export default {
     MarketplaceCard
   },
   watch: {
+    orderBy() {
+      this.updateResults();
+    },
+    reverse() {
+      this.updateResults();
+    },
     currentPage: {
       handler() {
-        console.log("here");
         this.updateResults();
       },
+      //this will enable the watcher to watch nested data
       deep: true
     },
     resultsPerPage() {

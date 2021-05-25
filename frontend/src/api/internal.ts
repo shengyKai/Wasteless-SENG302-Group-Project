@@ -824,9 +824,11 @@ export async function getCardCount(section: String): Promise<MaybeError<number>>
  * @param section The ID of the business
  * @param page Page to fetch (1 indexed)
  * @param resultsPerPage Maximum number of results per page
+ * @param orderBy Parameter to order the results by
+ * @param reverse Whether to reverse the results (default ascending)
  * @returns List of sales or a string error message
  */
-export async function getCardsBySection(section: string, page: number, resultsPerPage: number): Promise<MaybeError<MarketplaceCard[]>> {
+export async function getCardsBySection(section: string, page: number, resultsPerPage: number, orderBy: string, reverse: boolean): Promise<MaybeError<MarketplaceCard[]>> {
   //convert the for sale to suit the api spec
   if (section === "For Sale") { section = "ForSale";}
   let response;
@@ -835,7 +837,9 @@ export async function getCardsBySection(section: string, page: number, resultsPe
       params: {
         section,
         page,
-        resultsPerPage
+        resultsPerPage,
+        orderBy,
+        reverse
       }
     });
   } catch (error) {
