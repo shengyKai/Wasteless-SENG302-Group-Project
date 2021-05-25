@@ -2,15 +2,13 @@ package org.seng302.entities;
 
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
-import org.seng302.tools.AuthenticationTokenManager;
+import org.seng302.tools.JsonTools;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.persistence.*;
-import javax.servlet.http.HttpServletRequest;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.time.temporal.TemporalUnit;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -172,33 +170,26 @@ public class MarketplaceCard {
 
     /**
      * Constructs the JSON representation of this card
-     * The creator is able to see their private details
-     * @param request The HttpServletRequest of the request
      * @return A JSONObject containing this cards data
      */
-    public JSONObject constructJSONObject(HttpServletRequest request) {
+    public JSONObject constructJSONObject() {
         JSONObject json = new JSONObject();
-        JSONArray keywords = new JSONArray();
-
-        // jsonify the keywords
-        for (Keyword keyword : this.getKeywords()) {
-            keywords.appendElement(keyword.constructJSONObject());
-        }
 
         json.appendField("id", this.getID());
-        if(AuthenticationTokenManager.sessionCanSeePrivate(request, this.creator.getUserID())) {
-            json.appendField("creator", this.creator.constructPrivateJson());
-        } else {
-            json.appendField("creator", this.creator.constructPublicJson());
-        }
+        json.appendField("creator", this.creator.constructPublicJson());
         json.appendField("section", this.section.getName());
         json.appendField("created", this.created);
         json.appendField("displayPeriodEnd", this.closes);
         json.appendField("title", this.title);
         json.appendField("description", this.description);
-        json.appendField("keywords", keywords);
 
-
+        JSONArray keywordArray = new JSONArray();
+        // jsonify the keywords
+        for (Keyword keyword : this.getKeywords()) {
+            keywordArray.appendElement(keyword.constructJSONObject());
+        }
+        json.appendField("keywords", keywordArray);
+        JsonTools.removeNullsFromJson(json);
         return json;
     }
 

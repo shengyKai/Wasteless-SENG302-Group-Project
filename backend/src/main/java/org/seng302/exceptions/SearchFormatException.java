@@ -5,14 +5,14 @@ import org.springframework.web.server.ResponseStatusException;
 
 public class SearchFormatException extends ResponseStatusException {
 
-    private static final String reason = "The search query was not formatted correctly.";
-    private static final HttpStatus status = HttpStatus.BAD_REQUEST;
+    private static final String REASON = "The search query was not formatted correctly.";
+    private static final HttpStatus HTTP_STATUS = HttpStatus.BAD_REQUEST;
 
     public SearchFormatException() {
-        super(status, reason);
+        super(HTTP_STATUS, REASON);
     }
 
     public SearchFormatException(String reason) {
-        super(status, reason);
+        super(HTTP_STATUS, reason);
     }
 }

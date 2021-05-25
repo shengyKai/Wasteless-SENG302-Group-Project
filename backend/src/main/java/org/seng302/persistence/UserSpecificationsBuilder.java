@@ -16,7 +16,7 @@ public class UserSpecificationsBuilder {
     private final List<SearchCriteria> params;
 
     public UserSpecificationsBuilder() {
-        params = new ArrayList<SearchCriteria>();
+        params = new ArrayList<>();
     }
 
     /**
@@ -37,15 +37,15 @@ public class UserSpecificationsBuilder {
      * @return A chained set of predicates
      */
     public Specification<User> build() {
-        if (params.size() == 0) {
+        if (params.isEmpty()) {
             return null;
         }
 
-        List<Specification> specs = params.stream()
+        List<Specification<User>> specs = params.stream()
                 .map(UserSpecification::new)
                 .collect(Collectors.toList());
 
-        Specification result = specs.get(0);
+        Specification<User> result = specs.get(0);
 
         for (int i = 1; i < params.size(); i++) {
             result = params.get(i)

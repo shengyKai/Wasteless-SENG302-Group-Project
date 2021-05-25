@@ -279,7 +279,7 @@ public class Business {
     /**
      * Removes the given product from the business's catalogue
      */
-    public void removeFromCatalogue(Product product) throws Exception {
+    public void removeFromCatalogue(Product product) throws ResponseStatusException {
         if(!catalogue.remove(product)) {
             throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE,"The product did not match any within the business's catalogue");
         }

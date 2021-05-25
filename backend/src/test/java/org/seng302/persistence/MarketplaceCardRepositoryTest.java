@@ -19,7 +19,7 @@ import java.util.stream.Stream;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class MarketplaceCardRepositoryTest {
+class MarketplaceCardRepositoryTest {
     @Autowired
     private MarketplaceCardRepository marketplaceCardRepository;
     @Autowired

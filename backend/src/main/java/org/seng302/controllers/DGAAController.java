@@ -48,28 +48,24 @@ public class DGAAController {
         if (dgaa == null) {
             logger.warn(() -> "DGAA does not exist, creating one (" + dgaaUsername + ")");
             Location dgaaAddress;
-            try {
-                dgaaAddress = new Location.Builder()
-                            .atStreetNumber("1")
-                            .onStreet("wasteless")
-                            .inCity("wasteless")
-                            .inRegion("wasteless")
-                            .inCountry("wasteless")
-                            .withPostCode("1111")
-                            .build();
-                dgaa = new User.Builder()
-                    .withEmail(dgaaUsername)
-                    .withFirstName("DGAA")
-                    .withLastName("DGAA")
-                    .withPassword(dgaaPassword)
-                    .withDob("2000-03-11")
-                    .withAddress(dgaaAddress)
-                    .build();
-                dgaa.setRole("defaultGlobalApplicationAdmin");
-                userRepository.save(dgaa);
-            } catch (ParseException e) {
-                logger.error(e);
-            }
+            dgaaAddress = new Location.Builder()
+                        .atStreetNumber("1")
+                        .onStreet("wasteless")
+                        .inCity("wasteless")
+                        .inRegion("wasteless")
+                        .inCountry("wasteless")
+                        .withPostCode("1111")
+                        .build();
+            dgaa = new User.Builder()
+                .withEmail(dgaaUsername)
+                .withFirstName("DGAA")
+                .withLastName("DGAA")
+                .withPassword(dgaaPassword)
+                .withDob("2000-03-11")
+                .withAddress(dgaaAddress)
+                .build();
+            dgaa.setRole("defaultGlobalApplicationAdmin");
+            userRepository.save(dgaa);
         }
     }
 }

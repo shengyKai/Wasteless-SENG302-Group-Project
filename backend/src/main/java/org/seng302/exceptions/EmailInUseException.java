@@ -8,14 +8,14 @@ import org.springframework.web.server.ResponseStatusException;
  */
 public class EmailInUseException extends ResponseStatusException {
 
-    private static final String reason = "There is already an account associated with that email.";
-    private static final HttpStatus status = HttpStatus.CONFLICT;
+    private static final String REASON = "There is already an account associated with that email.";
+    private static final HttpStatus HTTP_STATUS = HttpStatus.CONFLICT;
 
     public EmailInUseException() {
-        super(status, reason);
+        super(HTTP_STATUS, REASON);
     }
 
     public EmailInUseException(String reason) {
-        super(status, reason);
+        super(HTTP_STATUS, reason);
     }
 }
