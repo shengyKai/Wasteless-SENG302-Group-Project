@@ -148,7 +148,7 @@ public class CardController {
      * REST GET method to retrieve the number of cards in the marketplace.
      * @param request the HTTP request
      * @param sectionName the requested section name
-     * @return List of products in the business's catalogue
+     * @return the card count by the requested section
      */
     @GetMapping("/cards/count")
     public JSONObject retrieveCardCount(HttpServletRequest request,
