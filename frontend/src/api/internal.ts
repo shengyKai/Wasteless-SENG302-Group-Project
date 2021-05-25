@@ -795,7 +795,7 @@ export async function createMarketplaceCard(marketplaceCard: CreateMarketplaceCa
    * @param section section name to identify which section of the marketplace to acquire the card count from
    * @returns Number of cards or an error message
    */
-export async function getCardCount(section: String): Promise<MaybeError<number>> {
+export async function getMarketplaceCardCount(section: String): Promise<MaybeError<number>> {
   //convert the for sale to suit the api spec
   if (section === "For Sale") { section = "ForSale";}
   let response;
@@ -828,7 +828,7 @@ export async function getCardCount(section: String): Promise<MaybeError<number>>
  * @param reverse Whether to reverse the results (default ascending)
  * @returns List of sales or a string error message
  */
-export async function getCardsBySection(section: string, page: number, resultsPerPage: number, orderBy: string, reverse: boolean): Promise<MaybeError<MarketplaceCard[]>> {
+export async function getMarketplaceCardsBySection(section: string, page: number, resultsPerPage: number, orderBy: string, reverse: boolean): Promise<MaybeError<MarketplaceCard[]>> {
   //convert the for sale to suit the api spec
   if (section === "For Sale") { section = "ForSale";}
   let response;
