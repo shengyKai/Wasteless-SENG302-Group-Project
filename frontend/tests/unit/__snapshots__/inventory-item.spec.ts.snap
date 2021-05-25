@@ -132,6 +132,7 @@ exports[`InventoryItem.vue Must match snapshot 1`] = `
           </div>
         </div>
       </div>
+      <div class="col col-auto"><button type="button" class="v-btn v-btn--icon v-btn--round theme--light v-size--default primary--text"><span class="v-btn__content"><i aria-hidden="true" class="v-icon notranslate mdi mdi-plus theme--light"></i></span></button><span class="v-tooltip v-tooltip--right"><!----></span></div>
     </div>
   </div>
 </div>

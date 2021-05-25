@@ -237,6 +237,7 @@
             <template #activator="{on: tooltip}">
               <!--:disabled="...inventoryItem quantity remaining..."-->
               <v-btn
+                ref="createSaleItemButton"
                 icon
                 color="primary"
                 v-on="tooltip"
