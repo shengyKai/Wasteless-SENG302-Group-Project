@@ -17,10 +17,10 @@
                 <v-col cols="6">
                   <v-text-field
                     class="required"
-                    solo
                     v-model="quantity"
                     label="Quantity"
-                    :rules="mandatoryRules.concat(numberRules)"
+                    :rules="mandatoryRules.concat(quantityRules)"
+                    :suffix="'/'+inventoryItem.remainingQuantity"
                     :min=1
                     outlined
                   />
@@ -109,8 +109,10 @@ export default {
         field => !!field || 'Field is required'
       ],
 
-      numberRules: [
-        field => /(^[0-9]*$)/.test(field) || 'Must contain numbers only'
+      quantityRules: [
+        field => /(^[0-9]*$)/.test(field) || 'Must be a valid number',
+        field => parseInt(field) !== 0 || 'Must not be zero',
+        field => parseInt(field) <= this.inventoryItem.remainingQuantity || 'Must not be greater than remaining quantity',
       ],
 
       priceRules: [
