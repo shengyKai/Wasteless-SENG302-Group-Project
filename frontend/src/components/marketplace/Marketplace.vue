@@ -174,6 +174,9 @@ export default {
       }
 
     },
+    showCreateCard() {
+      this.$store.commit('showCreateMarketplaceCard', this.$store.state.user);
+    },
     /**
      * The total number of pages required to show all the users
      * May be 0 if there are no results
@@ -216,11 +219,5 @@ export default {
   async created() {
     await this.updateResults();
   },
-  },
-  methods: {
-    showCreateCard() {
-      this.$store.commit('showCreateMarketplaceCard', this.$store.state.user);
-    }
-  }
 };
 </script>
