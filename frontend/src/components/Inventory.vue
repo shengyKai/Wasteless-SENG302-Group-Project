@@ -22,8 +22,8 @@
         label="Sort by"
       />
       <v-col >
-        <v-btn dark color="primary" @click="viewCreateInventory" :value="false">
-          <v-icon>mdi-tooltip-plus</v-icon>
+        <v-btn outlined  @click="viewCreateInventory" :value="false">
+          Add Inventory
         </v-btn>
       </v-col>
       <v-col class="text-right">
@@ -164,7 +164,7 @@ export default {
      * Shows the create Inventory dialog
      */
     viewCreateInventory() {
-      this.$store.commit('showCreateInventory', this.$store.state.activeRole.id);
+      this.$store.commit('showCreateInventory', this.businessId);
     },
   },
 
