@@ -378,7 +378,11 @@ public class MarketplaceCard {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         MarketplaceCard that = (MarketplaceCard) o;
-        return id.equals(that.id) && section == that.section && title.equals(that.title) && Objects.equals(description, that.description) && created.equals(that.created) && closes.equals(that.closes);
+        return id.equals(that.id) && section == that.section &&
+                title.equals(that.title) &&
+                Objects.equals(description, that.description) &&
+                ChronoUnit.SECONDS.between(this.created, that.created) == 0 &&
+                ChronoUnit.SECONDS.between(this.closes, that.closes) == 0;
     }
 
     @Override
