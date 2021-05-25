@@ -278,7 +278,7 @@ describe("CreateSaleItem.vue", () => {
 
     it("Valid when the closing date is in a year", async () => {
       await populateRequiredFields();
-      let closesDate = await todayPlusYears(-1);
+      let closesDate = await todayPlusYears(1);
       await wrapper.setData({
         closes: closesDate
       });
@@ -298,8 +298,7 @@ describe("CreateSaleItem.vue", () => {
       expect(findCreateButton().props().disabled).toBeFalsy();
     });
 
-    //NOT working from test suite? works when manually tested
-    it.skip("Invalid when the closing date is last year", async () => {
+    it("Invalid when the closing date is last year", async () => {
       await populateRequiredFields();
       let closesDate = await todayPlusYears(-1);
       await wrapper.setData({
@@ -310,8 +309,7 @@ describe("CreateSaleItem.vue", () => {
       expect(findCreateButton().props().disabled).toBeTruthy();
     });
 
-    //NOT working from test suite? works when manually tested
-    it.skip("Invalid when the closing date is 100 years ago", async () => {
+    it("Invalid when the closing date is 100 years ago", async () => {
       await populateRequiredFields();
       let closesDate = await todayPlusYears(-100);
       await wrapper.setData({
@@ -322,8 +320,7 @@ describe("CreateSaleItem.vue", () => {
       expect(findCreateButton().props().disabled).toBeTruthy();
     });
 
-    //NOT working from test suite? works when manually tested
-    it.skip("Invalid when the closing date is 10,000 years ago", async () => {
+    it("Invalid when the closing date is 10,000 years ago", async () => {
       await populateRequiredFields();
       let closesDate = await todayPlusYears(-10000);
       await wrapper.setData({

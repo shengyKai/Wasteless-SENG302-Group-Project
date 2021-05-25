@@ -55,6 +55,8 @@
                   />
                 </v-col>
               </v-row>
+              <!-- Error Message if textfield.value !valid -->
+              <p class="error-text" v-if ="errorMessage !== undefined"> {{errorMessage}} </p>
             </v-container>
           </v-card-text>
           <v-card-actions>
@@ -89,7 +91,7 @@ export default {
       errorMessage: undefined,
       dialog: true,
       valid: false,
-      today: new Date().toISOString().slice(0,10),
+      today: new Date(),
       inventoryItem: "",
       quantity: "",
       pricePerItem: "",
