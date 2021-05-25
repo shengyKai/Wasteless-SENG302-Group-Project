@@ -158,6 +158,8 @@ export default {
       today: new Date(),
       mockProductList: [
         'NATHAN-APPLE-70',
+        'CONNOR-ORAN-80',
+        'EDWARD-BANA-78',
       ],
       productCode : "",
       quantity : "",
