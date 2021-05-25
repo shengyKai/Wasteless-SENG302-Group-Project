@@ -79,7 +79,7 @@ export default {
       selectedSection: undefined,
     };
   },
-  async mounted() {
+  mounted() {
     function OnInput() {
       this.style.height = "auto";
       this.style.height = (this.scrollHeight) + "px";

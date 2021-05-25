@@ -43,9 +43,11 @@ function makeTestUser(userId: number) {
 }
 
 jest.mock('@/api/internal', () => ({
+  getKeywords: jest.fn(),
   createMarketplaceCard: jest.fn(),
 }));
 
+const getKeywords = castMock(api.getKeywords);
 const createMarketplaceCard = castMock(api.createMarketplaceCard);
 Vue.use(Vuetify);
 const localVue = createLocalVue();
@@ -57,10 +59,10 @@ const localVue = createLocalVue();
    * work.
    */
 describe('CreateCard.vue', () => {
-  // Container for the wrapper around CreateBusiness
+  // Container for the wrapper around CreateCard
   let appWrapper: Wrapper<any>;
 
-  // Container for the CreateBusiness under test
+  // Container for the CreateCard under test
   let wrapper: Wrapper<any>;
 
   beforeEach(() => {
@@ -69,16 +71,19 @@ describe('CreateCard.vue', () => {
     resetStoreForTesting();
     let store = getStore();
     store.state.user = makeTestUser(1); // log in as user 1
-    // Creating wrapper around CreateBusiness with data-app to appease vuetify
+    store.state.createMarketplaceCardDialog = store.state.user;
+    // Creating wrapper around CreateCard with data-app to appease vuetify
     const App = localVue.component('App', {
       components: { CreateCard },
-      template: '<div data-app><CreateBusiness/></div>',
+      template: '<div data-app><CreateCard/></div>',
     });
 
-    // Put the CreateBusiness component inside a div in the global document,
+    // Put the CreateCard component inside a div in the global document,
     // this seems to make vuetify work correctly, but necessitates calling appWrapper.destroy
     const elem = document.createElement('div');
     document.body.appendChild(elem);
+
+    getKeywords.mockResolvedValue([]);
 
     // We have to mock the $router.go method to prevent errors.
     appWrapper = mount(App, {
@@ -130,12 +135,20 @@ describe('CreateCard.vue', () => {
     return filtered.at(0);
   }
 
-  /**
-   * Tests that the CreateCard dialog is valid if all required fields are provided
-   */
   it('Valid if all required fields are provided', async () => {
     await wrapper.setData({
       title: "Title",
+      selectedSection: "ForSale",
+    });
+
+    await Vue.nextTick();
+
+    expect(wrapper.vm.valid).toBeTruthy();
+  });
+
+  it('Invalid if title not provided', async () => {
+    await wrapper.setData({
+      title: "",
       selectedSection: "ForSale",
     });
 
