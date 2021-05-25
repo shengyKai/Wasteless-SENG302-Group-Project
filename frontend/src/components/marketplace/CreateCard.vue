@@ -130,20 +130,21 @@ export default {
     },
     async createCard() {
       this.errorMessage = undefined;
-
+      console.log(this.selectedKeywords);
+      console.log(this.selectedSection);
       let card = {
         creatorId: this.user.id,
-        section: "ForSale" | "Wanted" | "Exchange",
+        section: this.selectedSection,
         title: this.title,
         description: this.description,
         keywordIds: this.selectedKeywords,
       };
       let response = await createMarketplaceCard(card);
-      if (response === undefined) {
+      if (typeof response === 'string') {
+        this.errorMessage = response;
+      } else {
         this.closeDialog();
         this.$router.go();
-      } else {
-        this.errorMessage = response;
       }
     },
   }
