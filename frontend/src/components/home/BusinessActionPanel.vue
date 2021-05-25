@@ -88,12 +88,6 @@ export default {
     },
 
     /**
-     * Shows the create Sale Item dialog
-     */
-    viewCreateSaleItem() {
-      this.$store.commit('showCreateSaleItem', this.$store.state.activeRole.id);
-    },
-    /**
      * Shows the Catalogue page
      */
     goToCataloguePage() {
@@ -106,7 +100,7 @@ export default {
       this.$router.push(`/business/${this.$store.state.activeRole.id}/inventory`);
     },
     goSalePage() {
-      this.$router.push(`/business/${this.$store.state.activeRole.id}/sales`);
+      this.$router.push(`/business/${this.businessId}/listings`);
     },
   },
 };

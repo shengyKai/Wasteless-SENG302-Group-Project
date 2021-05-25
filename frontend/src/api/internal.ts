@@ -154,12 +154,11 @@ export type InventoryItem = {
 };
 
 export type CreateSaleItem = {
-  id: number,
-  inventoryItem: InventoryItem,
+  inventoryItemId: number,
   quantity: number,
-  pricePerItem: number,
+  price: number,
   info?: string,
-  cloes?: string
+  closes?: string
 };
 
 export type CreateMarketplaceCard = {

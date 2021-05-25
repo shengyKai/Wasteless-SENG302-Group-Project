@@ -25,4 +25,6 @@ public interface MarketplaceCardRepository extends CrudRepository<MarketplaceCar
      * @return List of cards with the keyword
      */
     List<MarketplaceCard> getAllByKeywords(@Param("keywords") Keyword keyword);
+
+    List<MarketplaceCard> getAllBySection(@Param("section") MarketplaceCard.Section section);
 }

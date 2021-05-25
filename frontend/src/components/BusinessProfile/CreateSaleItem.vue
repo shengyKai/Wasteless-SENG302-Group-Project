@@ -27,10 +27,11 @@
                 <!-- INPUT: Price per item. Auto generated.-->
                 <v-col cols="6">
                   <v-text-field
-                    v-model="pricePerItem"
+                    v-model="price"
+                    class="required"
                     label="Price Per Item"
                     prefix="$"
-                    :rules="maxCharRules.concat(priceRules)"
+                    :rules="mandatoryRules.concat(mandatoryRules).concat(priceRules)"
                     outlined
                   />
                 </v-col>
@@ -50,17 +51,15 @@
                     v-model="closes"
                     label="Closes"
                     type="date"
-                    @input=checkClosesDateValid()
                     outlined
                   />
                 </v-col>
               </v-row>
-              <!-- Error Message if textfield.value !valid -->
-              <p class="error-text" v-if ="errorMessage !== undefined"> {{errorMessage}} </p>
             </v-container>
           </v-card-text>
           <v-card-actions>
             <v-spacer/>
+            <div class="error--text" v-if="errorMessage">{{errorMessage}}</div>
             <v-btn
               color="primary"
               text
@@ -70,7 +69,7 @@
             <v-btn
               type="submit"
               color="primary"
-              :disabled="!valid || !closesValid"
+              :disabled="!valid"
               @click.prevent="CreateSaleItem">
               Create
             </v-btn>
@@ -91,14 +90,11 @@ export default {
       errorMessage: undefined,
       dialog: true,
       valid: false,
-      today: new Date(),
-      inventoryItem: "",
+      today: new Date().toISOString().slice(0,10),
       quantity: "",
-      pricePerItem: "",
+      price: '',
       info: "",
       closes: "",
-      closesValid: true,
-      maxDate: new Date("5000-01-01"),
 
       maxCharRules: [
         field => (field.length <= 100) || 'Reached max character limit: 100'
@@ -138,41 +134,37 @@ export default {
     async CreateSaleItem() {
       this.errorMessage = undefined;
       let quantity;
+      let price;
       try {
         quantity = parseInt(this.quantity);
+        price = parseFloat(this.price);
       } catch ( error ) {
         this.errorMessage = 'Could not parse field \'Quantity\'';
         return;
       }
       const saleItem = {
+        inventoryItemId: this.inventoryItem.id,
         quantity: quantity,
-        pricePerItem: this.pricePerItem,
+        price: price,
         info: this.info ? this.info : undefined,
         closes: this.closes ? this.closes : undefined
       };
-      const result = await createSaleItem(saleItem);
+      const result = await createSaleItem(this.businessId, saleItem);
       if (typeof result === 'string') {
         this.errorMessage = result;
       } else {
         this.closeDialog();
       }
     },
-    /**
-     * Checks the closing date is valid
-     */
-    async checkClosesDateValid() {
-      let closesDate = new Date(this.closes);
-      this.closesValid = false;
-      if (closesDate < this.today) {
-        this.errorMessage = "The closing date cannot be before today!";
-      } else if (closesDate > this.maxDate) {
-        this.errorMessage = "The closing date cannot be thousands of years into the future!";
-      } else {
-        this.errorMessage = undefined;
-        this.closesValid = true;
-      }
-    }
   },
+  computed: {
+    inventoryItem() {
+      return this.$store.state.createSaleItemDialog.inventoryItem;
+    },
+    businessId() {
+      return this.$store.state.createSaleItemDialog.businessId;
+    }
+  }
 };
 </script>
 
