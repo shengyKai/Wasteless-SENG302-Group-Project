@@ -61,7 +61,7 @@ const validCharacters = [
   ":",
   ",",
   "é",
-]
+];
 
 // Characters that are not a letter, number, space or punctuation.
 const invalidCharacters = [

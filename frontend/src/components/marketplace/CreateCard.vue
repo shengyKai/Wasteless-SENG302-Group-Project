@@ -155,13 +155,13 @@ export default {
         return 'Card title must not be longer than 50 characters';
       }
       if (!this.allowedCharsRegex.test(this.title)) {
-        return 'Card title must only contain letters, numbers, punctuation and whitespace'
+        return 'Card title must only contain letters, numbers, punctuation and whitespace';
       }
       if (this.description && this.description.length > 200) {
         return 'Card description must not be longer than 200 characters';
       }
       if (this.description && !this.allowedCharsRegex.matches(this.description)) {
-        return 'Card description must only contain letters, numbers, punctuation and whitespace'
+        return 'Card description must only contain letters, numbers, punctuation and whitespace';
       }
       if (!this.selectedSection) {
         return 'Section must be selected';
