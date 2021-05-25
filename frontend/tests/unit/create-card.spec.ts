@@ -52,6 +52,23 @@ const createMarketplaceCard = castMock(api.createMarketplaceCard);
 Vue.use(Vuetify);
 const localVue = createLocalVue();
 
+//Characters that are in the set of letters, numbers, spaces and punctuation
+const validCharacters = [
+  "A",
+  "7",
+  " ",
+  "树",
+  ":",
+  ",",
+  "é",
+]
+
+// Characters that are not a letter, number, space or punctuation.
+const invalidCharacters = [
+  "\uD83D\uDE02",
+  "♔",
+];
+
 /**
    * Sets up the test CreateCard instance
    *
@@ -144,6 +161,7 @@ describe('CreateCard.vue', () => {
     await Vue.nextTick();
 
     expect(wrapper.vm.valid).toBeTruthy();
+    expect(findCreateButton().props().disabled).toBeFalsy();
   });
 
   it('Invalid if title not provided', async () => {
@@ -154,6 +172,55 @@ describe('CreateCard.vue', () => {
 
     await Vue.nextTick();
 
+    expect(wrapper.vm.valid).toBeFalsy();
+    expect(findCreateButton().props().disabled).toBeTruthy();
+  });
+
+  it.each(validCharacters)('Valid if title contains valid characters %s', async (character) => {
+    await wrapper.setData({
+      title: character,
+      selectedSection: "ForSale",
+    });
+
+    await Vue.nextTick();
+
     expect(wrapper.vm.valid).toBeTruthy();
+    expect(findCreateButton().props().disabled).toBeFalsy();
+  });
+
+  it.each(invalidCharacters)('Invalid if title contains invalid characters %s', async (character) => {
+    await wrapper.setData({
+      title: character,
+      selectedSection: "ForSale",
+    });
+
+    await Vue.nextTick();
+
+    expect(wrapper.vm.valid).toBeFalsy();
+    expect(findCreateButton().props().disabled).toBeTruthy();
+  });
+
+  it('Invalid if title has over 50 characters', async () => {
+    await wrapper.setData({
+      title: "a".repeat(51),
+      selectedSection: "ForSale",
+    });
+
+    await Vue.nextTick();
+
+    expect(wrapper.vm.valid).toBeFalsy();
+    expect(findCreateButton().props().disabled).toBeTruthy();
+  });
+
+  it('Invalid if section not provided', async () => {
+    await wrapper.setData({
+      title: "Title",
+      selectedSection: undefined,
+    });
+
+    await Vue.nextTick();
+
+    expect(wrapper.vm.valid).toBeFalsy();
+    expect(findCreateButton().props().disabled).toBeTruthy();
   });
 });

@@ -77,6 +77,7 @@ export default {
       errorMessage: undefined,
       sections: [{text: "For Sale", value: "ForSale"}, {text: "Wanted", value: "Wanted"}, {text: "Exchange", value: "Exchange"}],
       selectedSection: undefined,
+      allowedCharsRegex: /^[\s\d\p{L}\p{P}]*$/u,
     };
   },
   mounted() {
@@ -131,13 +132,13 @@ export default {
       return (this.validTitle && this.validDescription && this.validSection);
     },
     validTitle() {
-      return (this.title && this.title.length > 0 && this.title.length < 50);
+      return (this.title && this.title.length > 0 && this.title.length < 50 && this.allowedCharsRegex.test(this.title));
     },
     validDescription() {
       if (!this.description) {
         return true;
       } else {
-        return this.description.length < 200;
+        return (this.description.length < 200 && this.allowedCharsRegex.test(this.description));
       }
     },
     validSection() {
@@ -153,8 +154,14 @@ export default {
       if (this.title.length > 50) {
         return 'Card title must not be longer than 50 characters';
       }
+      if (!this.allowedCharsRegex.test(this.title)) {
+        return 'Card title must only contain letters, numbers, punctuation and whitespace'
+      }
       if (this.description && this.description.length > 200) {
         return 'Card description must not be longer than 200 characters';
+      }
+      if (this.description && !this.allowedCharsRegex.matches(this.description)) {
+        return 'Card description must only contain letters, numbers, punctuation and whitespace'
       }
       if (!this.selectedSection) {
         return 'Section must be selected';
