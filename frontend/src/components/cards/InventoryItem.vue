@@ -234,34 +234,24 @@
             </v-timeline-item>
           </v-timeline>
         </v-col>
-        <v-col cols="auto">
-          <v-tooltip right>
-            <template #activator="{on: tooltip}">
-              <!--:disabled="...inventoryItem quantity remaining..."-->
-              <v-btn
-                ref="createSaleItemButton"
-                icon
-                color="primary"
-                v-on="tooltip"
-                @click="viewCreateSaleItem"
-              >
-                <v-icon>mdi-plus</v-icon>
-              </v-btn>
-            </template>
-            <span>Create Sale</span>
-          </v-tooltip>
-        </v-col>
       </v-row>
       <v-row justify="end">
-        <v-btn
-          rounded
-          outlined
-          color="primary"
-          class="sale-item-but"
-          @click="viewCreateSaleItem"
-        >
-          Create Sale Item
-        </v-btn>
+        <v-tooltip top>
+          <template #activator="{on: tooltip}">
+            <v-btn
+              ref="createSaleItemButton"
+              rounded
+              outlined
+              v-on="tooltip"
+              color="primary"
+              class="sale-item-but"
+              @click="viewCreateSaleItem"
+            >
+              Create Sale Item
+            </v-btn>
+          </template>
+          <span>Create a Sale from this inventory item</span>
+        </v-tooltip>
       </v-row>
     </v-container>
   </v-card>
