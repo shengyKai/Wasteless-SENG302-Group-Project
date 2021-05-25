@@ -9,10 +9,19 @@ import * as api from "@/api/internal";
 
 Vue.use(Vuetify);
 
+jest.mock('@/api/currency', () => ({
+  currencyFromCountry: jest.fn().mockResolvedValue({
+    code: 'NZD',
+    name: 'New Zealand dollar',
+    symbol: '$',
+  }),
+}));
+
 jest.mock('@/api/internal', () => ({
   createSaleItem: jest.fn(),
 }));
 const createSaleItem = castMock(api.createSaleItem);
+
 // Characters that are in the set of number, decimal, number with decimal
 const validPriceCharacters = [
   "0",

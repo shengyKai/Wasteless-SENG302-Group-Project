@@ -31,7 +31,9 @@
                     v-model="price"
                     class="required"
                     label="Price Per Item"
-                    prefix="$"
+                    :prefix="currency.symbol"
+                    :suffix="currency.code"
+                    :hint="currency.errorMessage"
                     :rules="mandatoryRules.concat(mandatoryRules).concat(priceRules)"
                     outlined
                   />
@@ -84,6 +86,8 @@
 
 <script>
 import {createSaleItem} from '@/api/internal';
+import { currencyFromCountry } from "@/api/currency";
+
 export default {
   name: 'CreateSaleItem',
   components: {},
@@ -99,7 +103,7 @@ export default {
       closes: "",
       closesValid: true,
       maxDate: new Date("5000-01-01"),
-
+      currency: {},
       maxCharRules: [
         field => (field.length <= 100) || 'Reached max character limit: 100'
       ],
@@ -125,6 +129,10 @@ export default {
       ],
     };
   },
+  created() {
+    const country = this.inventoryItem.product.countryOfSale;
+    currencyFromCountry(country).then(currency => this.currency = currency);
+  },
   methods: {
     /**
 		 * Closes the dialog
@@ -145,7 +153,7 @@ export default {
         quantity = parseInt(this.quantity);
         price = parseFloat(this.price);
       } catch ( error ) {
-        this.errorMessage = 'Could not parse field \'Quantity\'';
+        this.errorMessage = 'Could not parse field \'Quantity\' or \'Price\'';
         return;
       }
       const saleItem = {
