@@ -80,7 +80,7 @@ describe("CreateSaleItem.vue", () => {
     // Creating wrapper around CreateSaleItem with data-app appease vuetify
     const App = localVue.component("App", {
       components: { CreateSaleItem },
-      template: "<div data-app><CreateSaleItem/></div>",
+      template: "<div data-app><CreateSaleItem :inventoryItem='{id: 1}'/></div>",
     });
 
     // Put the CreateSaleItem component inside a div in the global document,
@@ -232,7 +232,10 @@ describe("CreateSaleItem.vue", () => {
   );
 
   it("calls api endpoint with value when create button pressed", async ()=> {
-    //TODO Implement
+    await populateRequiredFields();
+    await findCreateButton().trigger('click');
+    await Vue.nextTick();
+    expect(createSaleItem).toBeCalledTimes(1);
   });
 
   it("Closes the dialog when close button pressed", async ()=> {

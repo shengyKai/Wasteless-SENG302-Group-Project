@@ -235,7 +235,7 @@ describe("Test GET /businesses/:businessId/sales endpoint", () => {
       }
     });
     const errorResponse = await api.createSaleItem(1, salesItem);
-    expect(errorResponse).toEqual('Invalid Create Sale Item request');
+    expect(errorResponse).toEqual('Invalid data with the Sale Item');
   });
 
   it("When the unsucessful response returns a forbidden error, an 403 error message is returned", async() => {
@@ -274,13 +274,10 @@ describe("Test GET /businesses/:businessId/sales endpoint", () => {
     }
     instance.post.mockRejectedValueOnce({
       response: {
-        status: 500,
-        data: {
-          message: "some error"
-        }
+        status: 500
       }
     });
     const errorResponse = await api.createSaleItem(1, salesItem);
-    expect(errorResponse).toEqual('Request failed: some error');
+    expect(errorResponse).toEqual('Request failed: 500');
   });
 });
