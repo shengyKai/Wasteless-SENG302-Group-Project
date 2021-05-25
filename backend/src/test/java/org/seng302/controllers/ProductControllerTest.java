@@ -90,7 +90,7 @@ class ProductControllerTest {
     /**
      * Created a business object for testing
      */
-    public void createTestBusiness() {
+    void createTestBusiness() {
         businessRepository.deleteAll();
         testBusiness1 = new Business.Builder()
                 .withBusinessType("Accommodation and Food Services")
@@ -119,7 +119,7 @@ class ProductControllerTest {
     }
 
     @BeforeEach
-    public void setUp() throws ParseException {
+    void setUp() throws ParseException {
         productRepository.deleteAll();
         businessRepository.deleteAll();
         userRepository.deleteAll();
@@ -185,7 +185,7 @@ class ProductControllerTest {
     /**
      * Adds several products to a catalogue
      */
-    public void addSeveralProductsToACatalogue() {
+    void addSeveralProductsToACatalogue() {
         Product product1 = new Product.Builder()
                 .withProductCode("NATHAN-APPLE-70")
                 .withName("The Nathan Apple")
@@ -951,7 +951,7 @@ class ProductControllerTest {
      * Tests using the make image primary method will make the given image the primary image
      */
     @Test
-    public void makeImagePrimary_valid_sets_image_primary() throws Exception {
+    void makeImagePrimary_valid_sets_image_primary() throws Exception {
         setCurrentUser(ownerUser.getUserID());
         addSeveralProductsToACatalogue();
         Product product = productRepository.getAllByBusiness(testBusiness1).get(0); // get product 1
@@ -974,7 +974,7 @@ class ProductControllerTest {
      * a 406 response is thrown
      */
     @Test
-    public void makeImagePrimary_InvalidBusinessId_406Response() throws Exception{
+    void makeImagePrimary_InvalidBusinessId_406Response() throws Exception{
         setCurrentUser(ownerUser.getUserID());
         addSeveralProductsToACatalogue();
         Product product = productRepository.getAllByBusiness(testBusiness1).get(0); // get product 1
@@ -991,7 +991,7 @@ class ProductControllerTest {
      * a 406 response is thrown
      */
     @Test
-    public void makeImagePrimary_InvalidProductId_406Response() throws Exception{
+    void makeImagePrimary_InvalidProductId_406Response() throws Exception{
         setCurrentUser(ownerUser.getUserID());
         addSeveralProductsToACatalogue();
         Product product = productRepository.getAllByBusiness(testBusiness1).get(0); // get product 1
@@ -1009,7 +1009,7 @@ class ProductControllerTest {
      * a 406 response is thrown
      */
     @Test
-    public void makeImagePrimary_InvalidImageId_406Response() throws Exception {
+    void makeImagePrimary_InvalidImageId_406Response() throws Exception {
         setCurrentUser(ownerUser.getUserID());
         addSeveralProductsToACatalogue();
         Product product = productRepository.getAllByBusiness(testBusiness1).get(0); // get product 1
@@ -1109,7 +1109,7 @@ class ProductControllerTest {
      * a 403 response is thrown
      */
     @Test
-    public void makeImagePrimary_NotBusinessAdmin_403Response() throws Exception{
+    void makeImagePrimary_NotBusinessAdmin_403Response() throws Exception{
         setCurrentUser(bystanderUser.getUserID());
         addSeveralProductsToACatalogue();
         Product product = productRepository.getAllByBusiness(testBusiness1).get(0); // get product 1
@@ -1127,7 +1127,7 @@ class ProductControllerTest {
      * a 401 response is thrown
      */
     @Test
-    public void makeImagePrimary_NoSession_401Response() throws Exception{
+    void makeImagePrimary_NoSession_401Response() throws Exception{
         addSeveralProductsToACatalogue();
         Product product = productRepository.getAllByBusiness(testBusiness1).get(0); // get product 1
         product = addImagesToProduct(product);

@@ -63,7 +63,9 @@
                   <v-text-field
                     v-model="pricePerItem"
                     label="Price Per Item"
-                    prefix="$"
+                    :prefix="currency.symbol"
+                    :suffix="currency.code"
+                    :hint="currency.errorMessage"
                     :rules="maxCharRules.concat(smallPriceRules)"
                     outlined
                   />
@@ -73,7 +75,9 @@
                   <v-text-field
                     v-model="totalPrice"
                     label="Total Price"
-                    prefix="$"
+                    :prefix="currency.symbol"
+                    :suffix="currency.code"
+                    :hint="currency.errorMessage"
                     :rules="maxCharRules.concat(hugePriceRules)"
                     outlined/>
                 </v-col>
@@ -143,8 +147,9 @@
 </template>
 
 <script>
-import {createInventoryItem} from '@/api/internal';
-import {getProducts} from "@/api/internal";
+import { createInventoryItem, getBusiness } from '@/api/internal';
+import { getProducts } from "@/api/internal";
+import { currencyFromCountry } from "@/api/currency";
 
 export default {
   name: 'CreateInventory',
@@ -158,6 +163,8 @@ export default {
       today: new Date(),
       mockProductList: [
         'NATHAN-APPLE-70',
+        'CONNOR-ORAN-80',
+        'EDWARD-BANA-78',
       ],
       productCode : "",
       quantity : "",
@@ -172,10 +179,11 @@ export default {
       expires: "",
       expiresValid: true,
       datesValid: true,
+      productFilter: '',
       minDate: new Date("1500-01-01"),
       maxDate: new Date("5000-01-01"),
       //expires: new Date().toISOString().slice(0,10), //Keep this so the next person know what to use if he/she wan
-
+      currency: {},
       maxCharRules: [
         field => (field.length <= 100) || 'Reached max character limit: 100'
       ],
@@ -211,7 +219,7 @@ export default {
      */
     async fetchProducts() {
       // get the list of products for this business
-      const result = await getProducts(this.$store.state.createInventoryDialog, null, 10000, 'name', false);
+      const result = await getProducts(this.businessId, null, 10000, 'name', false);
       if (typeof result === 'string') {
         this.errorMessage = result;
       } else {
@@ -349,6 +357,11 @@ export default {
       }
       await this.checkAllDatesValid();
     },
+
+    async fetchCurrency() {
+      const business = await getBusiness(this.businessId);
+      this.currency = await currencyFromCountry(business.address.country);
+    }
   },
   computed: {
     /**
@@ -358,14 +371,17 @@ export default {
     filteredProductList() {
       return this.productList.filter(x => this.filterPredicate(x));
     },
-  },
-  watch: {
-    productFilter() {
-      console.log(this.productFilter);
+
+    /**
+     * Gets the business ID from the store
+     */
+    businessId() {
+      return this.$store.state.createInventoryDialog;
     }
   },
-  async created() {
-    await this.fetchProducts();
+  created() {
+    this.fetchCurrency();
+    this.fetchProducts();
   },
 };
 </script>

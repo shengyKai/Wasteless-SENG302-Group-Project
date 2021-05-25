@@ -15,7 +15,7 @@ class PasswordAuthenticatorTest {
      * Test that generateAuthenticationCode returns the expected code for a password less than 32 bytes long.
      */
     @Test
-    public void generateAuthenticationCodeShortPasswordTest() {
+    void generateAuthenticationCodeShortPasswordTest() {
         String expectedCode = PasswordAuthenticator.byteArrayToHexString(new byte[] {-97, -122, -48, -127, -120, 76, 125, 101, -102, 47, -22, -96, -59, 90, -48, 21, -93, -65,
                 79, 27, 43, 11, -126, 44, -47, 93, 108, 21, -80, -16, 10, 8});
         try {
@@ -30,7 +30,7 @@ class PasswordAuthenticatorTest {
      * Test that generateAuthenticationCode returns the expected code for a password more than 32 bytes long.
      */
     @Test
-    public void generateAuthenticationCodeLongPasswordTest() {
+    void generateAuthenticationCodeLongPasswordTest() {
         StringBuilder testPassword = new StringBuilder();
         testPassword.append("thisisaverylongpassword".repeat(100));
         String expectedCode = PasswordAuthenticator.byteArrayToHexString(new byte[] {16, 16, -13, 81, 44, -127, 39, 73, -76, 104, 127, -16, -43, 114, 7, -110, -46, 71, -59,
@@ -48,7 +48,7 @@ class PasswordAuthenticatorTest {
      * stored authentication code.
      */
     @Test
-    public void verifyPasswordShouldMatchTest() {
+    void verifyPasswordShouldMatchTest() {
         try {
             String authenticationCode = PasswordAuthenticator.generateAuthenticationCode("password123");
             PasswordAuthenticator.verifyPassword("password123", authenticationCode);
@@ -62,7 +62,7 @@ class PasswordAuthenticatorTest {
      * does not match stored authentication code.
      */
     @Test
-    public void verifyPasswordShouldNotMatchTest() {
+    void verifyPasswordShouldNotMatchTest() {
         try {
             String authenticationCode = PasswordAuthenticator.generateAuthenticationCode("password123");
             assertThrows(ResponseStatusException.class, () -> {
@@ -77,7 +77,7 @@ class PasswordAuthenticatorTest {
      * Test that byteArrayToHexString generates the expected hexidecimal string when an empty byte array is given.
      */
     @Test
-    public void byteArrayToHexStringEmptyArrayTest() {
+    void byteArrayToHexStringEmptyArrayTest() {
         byte[] testBytes = new byte[0];
         String result = PasswordAuthenticator.byteArrayToHexString(testBytes);
         assertEquals("", result);
@@ -87,7 +87,7 @@ class PasswordAuthenticatorTest {
      * Test that byteArray to hex string generates the expected hexidecimal string from a 16 byte array.
      */
     @Test
-    public void byteArrayToHexString32ByteTest() {
+    void byteArrayToHexString32ByteTest() {
         byte[] testBytes = new byte[] {-126, 53, 122, 107, 11, 66, -105, 12, 33, -31, 107, 71, -124, 101, 88, -42};
         String expectedString = "82357a6b0b42970c21e16b47846558d6";
         assertEquals(expectedString, PasswordAuthenticator.byteArrayToHexString(testBytes));

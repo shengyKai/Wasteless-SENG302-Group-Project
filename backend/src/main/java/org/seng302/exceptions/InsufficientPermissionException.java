@@ -9,14 +9,14 @@ import org.springframework.web.server.ResponseStatusException;
 
 public class InsufficientPermissionException extends ResponseStatusException {
 
-    private static final HttpStatus status = HttpStatus.FORBIDDEN;
-    private static final String reason = "Invalid access token.";
+    private static final HttpStatus HTTP_STATUS = HttpStatus.FORBIDDEN;
+    private static final String REASON = "Invalid access token.";
 
     public InsufficientPermissionException() {
-        super(status, reason);
+        super(HTTP_STATUS, REASON);
     }
 
     public InsufficientPermissionException(String reason) {
-        super(status, reason);
+        super(HTTP_STATUS, reason);
     }
 }

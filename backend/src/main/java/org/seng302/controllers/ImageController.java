@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.HttpServletRequest;
-import java.io.IOException;
 import java.util.Optional;
 
 @RestController
@@ -31,8 +30,8 @@ public class ImageController {
     private StorageService storageService;
 
     @GetMapping("/media/images/{imageName}")
-    public ResponseEntity<Resource> getImage(@PathVariable("imageName") String imageName, HttpServletRequest session) throws IOException {
-        logger.info("Fetching image with name=" + imageName);
+    public ResponseEntity<Resource> getImage(@PathVariable("imageName") String imageName, HttpServletRequest session) {
+        logger.info(() -> String.format("Fetching image with name=%s", imageName));
         AuthenticationTokenManager.checkAuthenticationToken(session);
 
         final Optional<Image> retrievedImage = imageRepository.findByFilename(imageName);

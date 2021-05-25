@@ -38,7 +38,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @AutoConfigureMockMvc
-public class UserControllerTest {
+class UserControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -60,7 +60,7 @@ public class UserControllerTest {
      * @throws ParseException
      */
     @BeforeEach
-    public void setUp() throws ParseException, IOException {
+    void setUp() throws ParseException, IOException {
         setUpAuthCode();
         setUpTestUser();
     }
@@ -217,7 +217,7 @@ public class UserControllerTest {
      * @throws Exception
      */
     @Test
-    public void getUserWhenUserExistsAndSessionValid() throws Exception {
+    void getUserWhenUserExistsAndSessionValid() throws Exception {
         User expectedUser = userRepository.findByEmail("johnsmith99@gmail.com");
 
         MvcResult result = mockMvc.perform(get(String.format("/users/%d", expectedUser.getUserID()))
@@ -241,7 +241,7 @@ public class UserControllerTest {
      * their firstName attribute.
      */
     @Test
-    public void getUserSearchOrderByFirstNameReverseTrueTest() throws Exception {
+    void getUserSearchOrderByFirstNameReverseTrueTest() throws Exception {
         List<User> userList = readUsersFromTestFile("src/test/testFiles/UsersControllerTestData.csv");
         userRepository.deleteAll();
         for (User user : userList) {
@@ -275,7 +275,7 @@ public class UserControllerTest {
      * email attribute.
      */
     @Test
-    public void getUserSearchOrderByEmailReverseFalseTest() throws Exception {
+    void getUserSearchOrderByEmailReverseFalseTest() throws Exception {
         List<User> userList = readUsersFromTestFile("src/test/testFiles/UsersControllerTestData.csv");
         userRepository.deleteAll();
         for (User user : userList) {
@@ -308,7 +308,7 @@ public class UserControllerTest {
      * matching the search term is returned ordered by their relevance, and then their id for users with the same relevance
      */
     @Test
-    public void getUserSearchOrderByRelevanceTest() throws Exception {
+    void getUserSearchOrderByRelevanceTest() throws Exception {
         List<User> userList = readUsersFromTestFile("src/test/testFiles/UsersControllerTestData.csv");
         userRepository.deleteAll();
         for (User user : userList) {
@@ -341,7 +341,7 @@ public class UserControllerTest {
      * results will be returned.
      */
     @Test
-    public void getUserSearchPageTwoTest() throws Exception {
+    void getUserSearchPageTwoTest() throws Exception {
         List<User> userList = readUsersFromTestFile("src/test/testFiles/UsersControllerTestData.csv");
         userRepository.deleteAll();
         for (User user : userList) {
@@ -371,7 +371,7 @@ public class UserControllerTest {
      * more than 5 results matching the search term, 5 results will be returned.
      */
     @Test
-    public void getUserSearchFiveResultsPerPageTest() throws Exception {
+    void getUserSearchFiveResultsPerPageTest() throws Exception {
         List<User> userList = readUsersFromTestFile("src/test/testFiles/UsersControllerTestData.csv");
         userRepository.deleteAll();
         for (User user : userList) {
@@ -397,7 +397,7 @@ public class UserControllerTest {
      * Where this count field is equal to the number of users matching the query.
      */
     @Test
-    public void getUserSearchCountTest() throws Exception {
+    void getUserSearchCountTest() throws Exception {
         List<User> userList = readUsersFromTestFile("src//test//testFiles//UsersControllerTestData.csv");
         userRepository.deleteAll();
         userRepository.saveAll(userList);
@@ -421,7 +421,7 @@ public class UserControllerTest {
      */
     //Getting a strange error where a date is being created after the for loop has concluded?
     @Test @Ignore
-    public void registerAccountWithValidRequest() throws Exception {
+    void registerAccountWithValidRequest() throws Exception {
         userRepository.deleteAll();
         List<User> userList = readUsersFromTestFile("src/test/testFiles/UsersControllerTestData.csv");
         List<JSONObject> jsonObjectList = readJSONFromTestFile("src/test/testFiles/UsersControllerTestData.csv");
@@ -444,7 +444,7 @@ public class UserControllerTest {
      * @throws Exception
      */
     @Test @Ignore
-    public void testConflictErrorOnRegisterWithSameEmail() throws Exception {
+    void testConflictErrorOnRegisterWithSameEmail() throws Exception {
         userRepository.deleteAll();
         List<User> userList = readUsersFromTestFile("src/test/testFiles/UsersControllerTestData.csv");
         List<JSONObject> jsonObjectList = readJSONFromTestFile("src/test/testFiles/UsersControllerTestData.csv");
@@ -472,7 +472,7 @@ public class UserControllerTest {
      * @throws Exception
      */
     @Test
-    public void testRegisteringUserWithInvalidFirstName() throws Exception {
+    void testRegisteringUserWithInvalidFirstName() throws Exception {
         userRepository.deleteAll();
         List<User> userList = readUsersFromTestFile("src/test/testFiles/UsersControllerTestDataInvalidFirstName" +
                 ".csv");
@@ -495,7 +495,7 @@ public class UserControllerTest {
      * @throws Exception
      */
     @Test
-    public void testRegisteringUserWithInvalidMiddleName() throws Exception {
+    void testRegisteringUserWithInvalidMiddleName() throws Exception {
         userRepository.deleteAll();
         List<User> userList = readUsersFromTestFile("src/test/testFiles/UsersControllerTestDataInvalidMiddleName" +
                 ".csv");
@@ -519,7 +519,7 @@ public class UserControllerTest {
      * @throws Exception
      */
     @Test
-    public void testRegisteringUserWithInvalidLastName() throws Exception {
+    void testRegisteringUserWithInvalidLastName() throws Exception {
         userRepository.deleteAll();
         List<User> userList = readUsersFromTestFile("src/test/testFiles/UsersControllerTestDataInvalidLastName" +
                 ".csv");
@@ -543,7 +543,7 @@ public class UserControllerTest {
      * @throws Exception
      */
     @Test
-    public void testRegisteringUserWithInvalidNickname() throws Exception {
+    void testRegisteringUserWithInvalidNickname() throws Exception {
         userRepository.deleteAll();
         List<User> userList = readUsersFromTestFile("src/test/testFiles/UsersControllerTestDataInvalidNickname" +
                 ".csv");
@@ -567,7 +567,7 @@ public class UserControllerTest {
      * @throws Exception
      */
     @Test
-    public void testRegisteringUserWithInvalidBio() throws Exception {
+    void testRegisteringUserWithInvalidBio() throws Exception {
         userRepository.deleteAll();
         List<User> userList = readUsersFromTestFile("src/test/testFiles/UsersControllerTestDataInvalidBio" +
                 ".csv");
@@ -591,7 +591,7 @@ public class UserControllerTest {
      * @throws Exception
      */
     @Test
-    public void testRegisteringUserWithInvalidDOB() throws Exception {
+    void testRegisteringUserWithInvalidDOB() throws Exception {
         userRepository.deleteAll();
         List<User> userList = readUsersFromTestFile("src/test/testFiles/UsersControllerTestDataInvalidDOB" +
                 ".csv");
@@ -614,7 +614,7 @@ public class UserControllerTest {
      * @throws Exception
      */
     @Test
-    public void testRegisteringUserWithInvalidPhNum() throws Exception {
+    void testRegisteringUserWithInvalidPhNum() throws Exception {
         userRepository.deleteAll();
         List<User> userList = readUsersFromTestFile("src/test/testFiles/UsersControllerTestDataInvalidPhoneNumber" +
                 ".csv");
@@ -637,7 +637,7 @@ public class UserControllerTest {
      * @throws Exception
      */
     @Test
-    public void testRegisteringUserWithInvalidAddress() throws Exception {
+    void testRegisteringUserWithInvalidAddress() throws Exception {
         userRepository.deleteAll();
         List<User> userList = readUsersFromTestFile("src/test/testFiles/UsersControllerTestDataInvalidAddress" +
                 ".csv");
@@ -664,7 +664,7 @@ public class UserControllerTest {
      * @throws Exception
      */
     @Test
-    public void makeAdminMakesUserAdminWhenPrivilege() throws Exception {
+    void makeAdminMakesUserAdminWhenPrivilege() throws Exception {
         setUpDGAAAuthCode(); // give us DGAA auth priv
         User expectedUser = userRepository.findByEmail("johnsmith99@gmail.com");
 
@@ -686,7 +686,7 @@ public class UserControllerTest {
      * @throws Exception
      */
     @Test
-    public void makeAdminThrowsWhenNoDGAAPrivilege() throws Exception {
+    void makeAdminThrowsWhenNoDGAAPrivilege() throws Exception {
         User expectedUser = userRepository.findByEmail("johnsmith99@gmail.com");
 
         // perform
@@ -703,7 +703,7 @@ public class UserControllerTest {
      * @throws Exception
      */
     @Test
-    public void makeAdminThrowsWhenNoAuth() throws Exception {
+    void makeAdminThrowsWhenNoAuth() throws Exception {
 
         User expectedUser = userRepository.findByEmail("johnsmith99@gmail.com");
 
@@ -720,7 +720,7 @@ public class UserControllerTest {
      * @throws Exception
      */
     @Test
-    public void makeAdminThrowsWhenUserNotExist() throws Exception {
+    void makeAdminThrowsWhenUserNotExist() throws Exception {
         setUpDGAAAuthCode(); // give us dgaa auth
         // perform
         mockMvc.perform(MockMvcRequestBuilders.put("/users/99999/makeAdmin")
@@ -741,7 +741,7 @@ public class UserControllerTest {
      * @throws Exception
      */
     @Test
-    public void revokeAdminRevokesUserWhenValidAuth() throws Exception {
+    void revokeAdminRevokesUserWhenValidAuth() throws Exception {
         setUpDGAAAuthCode(); // give us dgaa auth
         // Set up our user to have admin rights
         User john = userRepository.findByEmail("johnsmith99@gmail.com");
@@ -768,7 +768,7 @@ public class UserControllerTest {
      * @throws Exception
      */
     @Test
-    public void UserCanSeeOwnPrivateDetails() throws Exception {
+    void UserCanSeeOwnPrivateDetails() throws Exception {
         User user = userRepository.findByEmail("johnsmith99@gmail.com");
         setUpSessionAccountId(user.getUserID());
 
@@ -787,7 +787,7 @@ public class UserControllerTest {
      * @throws Exception
      */
     @Test
-    public void UserCantSeePrivateDetailsOfAnotherUser() throws Exception {
+    void UserCantSeePrivateDetailsOfAnotherUser() throws Exception {
         User user = userRepository.findByEmail("johnsmith99@gmail.com");
 
 
@@ -806,7 +806,7 @@ public class UserControllerTest {
      * @throws Exception
      */
     @Test
-    public void adminCanSeePrivateDetailsOfUser() throws Exception {
+    void adminCanSeePrivateDetailsOfUser() throws Exception {
         User user = userRepository.findByEmail("johnsmith99@gmail.com");
         setUpSessionAsAdmin();
         // perform

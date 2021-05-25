@@ -8,7 +8,6 @@ import org.seng302.tools.JsonTools;
 import org.springframework.data.annotation.ReadOnlyProperty;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
-import org.yaml.snakeyaml.error.Mark;
 
 import javax.persistence.*;
 import java.text.ParseException;
@@ -40,12 +39,10 @@ public class User extends Account {
     123.456.7890
     +91 (123) 456-7890
      */
-    String phoneRegex = "^(\\+\\d{1,2}\\s)?\\(?\\d{1,3}\\)?[\\s.-]?\\d{3,4}[\\s.-]?\\d{4,5}";
-    // Allows letters, numbers and selected symbols then 1 @ then some amount of other characters
-    String emailRegex = "^[A-Za-z0-9+_.-]+@(.+)$";
+    private static final String PHONE_REGEX = "^(\\+\\d{1,2}\\s)?\\(?\\d{1,3}\\)?[\\s.-]?\\d{3,4}[\\s.-]?\\d{4,5}";
 
 
-    protected User(){};
+    protected User() {}
 
     /**
      * Returns users first name
@@ -205,7 +202,7 @@ public class User extends Account {
      */
     public void setPhNum(String phNum) {
         boolean validPhone = false;
-        if (phNum == null || Pattern.matches(phoneRegex, phNum)) {
+        if (phNum == null || Pattern.matches(PHONE_REGEX, phNum)) {
             validPhone = true;
         }
         if (validPhone) {
@@ -298,10 +295,9 @@ public class User extends Account {
      */
     @Transient
     public Set<Business> getBusinessesAdministeredAndOwned() {
-        Set<Business> mergedSet = new HashSet<>() {{
-            addAll(getBusinessesOwned());
-            addAll(getBusinessesAdministered());
-        }};
+        Set<Business> mergedSet = new HashSet<>();
+        mergedSet.addAll(getBusinessesOwned());
+        mergedSet.addAll(getBusinessesAdministered());
         return mergedSet;
     }
 
@@ -497,7 +493,7 @@ public class User extends Account {
          * @param dobString a string representing the user's date of birth in format yyyy-MM-dd.
          * @return Builder with date of birth set.
          */
-        public Builder withDob(String dobString) throws ParseException {
+        public Builder withDob(String dobString) {
             DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE;
             this.dob = LocalDate.parse(dobString, dateTimeFormatter);
             return this;

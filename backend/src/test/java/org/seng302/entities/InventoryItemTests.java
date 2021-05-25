@@ -26,7 +26,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class InventoryItemTests {
+class InventoryItemTests {
 
     @Autowired
     UserRepository userRepository;

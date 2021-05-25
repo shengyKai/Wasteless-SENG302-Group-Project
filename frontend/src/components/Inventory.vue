@@ -50,7 +50,7 @@
       <!--users would produce the results for each page, and then it will show each result with
       SearchResultItem-->
       <template v-for="inventoryItem in inventoryItems">
-        <InventoryItem :businessId="businessId" :key="inventoryItem.id" :inventoryItem="inventoryItem"/>
+        <InventoryItem :businessId="businessId" :key="inventoryItem.id" :inventoryItem="inventoryItem" class="dirty-centre"/>
       </template>
     </v-list>
     <v-pagination
@@ -150,6 +150,10 @@ export default {
 
       const value = await getInventory(
         this.businessId,
+        this.currentPage,
+        this.resultsPerPage,
+        this.orderBy,
+        this.reverse
       );
       this.totalResults = await getInventoryCount(this.businessId);
       if (typeof value === 'string') {
@@ -185,4 +189,9 @@ export default {
 };
 </script>
 
-<style scoped></style>
+<style scoped>
+.dirty-centre {
+  left: 50%;
+  transform: translate(-50%, 0%);
+}
+</style>

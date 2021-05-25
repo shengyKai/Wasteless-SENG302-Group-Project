@@ -2,7 +2,6 @@ package org.seng302;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.seng302.controllers.DGAAController;
 import org.seng302.entities.Keyword;
 import org.seng302.persistence.KeywordRepository;
 import org.seng302.service.StorageService;
@@ -28,13 +27,7 @@ public class MainApplicationRunner implements ApplicationRunner {
     @Autowired
     private KeywordRepository keywordRepository;
 
-    private DGAAController dgaaController;
     private static final Logger logger = LogManager.getLogger(MainApplicationRunner.class.getName());
-
-    @Autowired
-    public MainApplicationRunner(DGAAController dgaaController) {
-        this.dgaaController = dgaaController;
-    }
 
 
     /**

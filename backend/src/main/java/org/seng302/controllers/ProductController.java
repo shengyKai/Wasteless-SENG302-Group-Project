@@ -23,9 +23,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * This class handles requests for retrieving and saving products
@@ -176,7 +174,7 @@ public class ProductController {
     public void addProductToBusiness(@PathVariable Long id, @RequestBody JSONObject productInfo, HttpServletRequest request, HttpServletResponse response) {
         try {
             AuthenticationTokenManager.checkAuthenticationToken(request);
-            logger.info(String.format("Adding product to business (businessId=%d).", id));
+            logger.info(() -> String.format("Adding product to business (businessId=%d).", id));
             Business business = businessRepository.getBusinessById(id);
 
             business.checkSessionPermissions(request);
@@ -218,7 +216,7 @@ public class ProductController {
     public void deleteProductImage(@PathVariable Long businessId, @PathVariable String productId,
                                    @PathVariable Long imageId,
                                    HttpServletRequest request) {
-        logger.info(String.format("Deleting image with id %d from the product %s within the business's catalogue %d",
+        logger.info(() -> String.format("Deleting image with id %d from the product %s within the business's catalogue %d",
                 imageId, productId, businessId));
 
         Business business = businessRepository.getBusinessById(businessId); // get the business + sanity checks
@@ -236,32 +234,11 @@ public class ProductController {
         productRepository.save(product);
     }
 
-
-    /**
-     * Checks that the provided JSON object exists and has all the fields that are required
-     * @param requestBody The request body to validate
-     * @param requiredFields The fields that are required to exist in the request body
-     * @throws ResponseStatusException If the requestBody is invalid
-     */
-    private void checkObjectHasFields(JSONObject requestBody, List<String> requiredFields) throws ResponseStatusException {
-        if (requestBody == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Request must contain a JSON body");
-        }
-
-        for (String field : requiredFields) {
-            if (requestBody.get(field) == null) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Request must have a \"" + field + "\" field");
-            }
-        }
-    }
-
-
-
     @PostMapping("/businesses/{businessId}/products/{productCode}/images")
-    public ResponseEntity<Void> uploadImage(@PathVariable Long businessId, @PathVariable String productCode, @RequestParam("file") MultipartFile file, HttpServletRequest request) throws IOException {
+    public ResponseEntity<Void> uploadImage(@PathVariable Long businessId, @PathVariable String productCode, @RequestParam("file") MultipartFile file, HttpServletRequest request) {
         try {
             AuthenticationTokenManager.checkAuthenticationToken(request);
-            logger.info(String.format("Adding product image to business (businessId=%d, productCode=%s).", businessId, productCode));
+            logger.info(() -> String.format("Adding product image to business (businessId=%d, productCode=%s).", businessId, productCode));
             Business business = businessRepository.getBusinessById(businessId);
 
 
@@ -325,7 +302,7 @@ public class ProductController {
         images.add(0, image); // append to the start of the list
         product.setProductImages(images); // apply the changes
         productRepository.save(product);
-        logger.info(String.format("Set Image %d of product \"%s\" as the primary image", image.getID(), product.getName()));
+        logger.info(() -> String.format("Set Image %d of product \"%s\" as the primary image", image.getID(), product.getName()));
     }
 
     public void validateImage(MultipartFile file) {

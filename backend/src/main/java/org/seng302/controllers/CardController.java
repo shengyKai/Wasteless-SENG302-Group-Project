@@ -16,10 +16,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
+import org.seng302.tools.SearchHelper;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.Optional;
+import java.util.Comparator;
 
 /**
  * This controller handles requests involving marketplace cards
@@ -117,22 +119,96 @@ public class CardController {
     /**
      * Retrieve all of the Marketplace Cards for a given section.
      * @param sectionName The name of the section to retrieve
+     * @param page The page number of the current requested section
+     * @param resultsPerPage Maximum number of results to retrieve
      * @return A JSON Array of Marketplace cards
      */
     @GetMapping("/cards")
-    public JSONArray getCards(HttpServletRequest request, @RequestParam(name = "section") String sectionName) {
+    public JSONArray getCards(HttpServletRequest request,
+                              @RequestParam(name = "section") String sectionName,
+                              @RequestParam(required = false) String orderBy,
+                              @RequestParam(required = false) Integer page,
+                              @RequestParam(required = false) Integer resultsPerPage,
+                              @RequestParam(required = false) Boolean reverse) {
+        
+        logger.info("Request to get marketplace cards for " + sectionName);
         AuthenticationTokenManager.checkAuthenticationToken(request);
 
         // parse the section
         MarketplaceCard.Section section = MarketplaceCard.sectionFromString(sectionName);
 
+        Comparator<MarketplaceCard> sort = getMarketPlaceCardComparator(orderBy, reverse);
+
         // database call for section
         var cards = marketplaceCardRepository.getAllBySection(section);
+
+        cards.sort(sort);
+
+        cards = SearchHelper.getPageInResults(cards, page, resultsPerPage);
         //return JSON Object
         JSONArray responseBody = new JSONArray();
         for (MarketplaceCard card : cards) {
-            responseBody.appendElement(card.constructJSONObject(request));
+            responseBody.appendElement(card.constructJSONObject());
         }
         return responseBody;
+    }
+
+    /**
+     * REST GET method to retrieve the number of cards in the marketplace.
+     * @param request the HTTP request
+     * @param sectionName the requested section name
+     * @return the card count by the requested section
+     */
+    @GetMapping("/cards/count")
+    public JSONObject retrieveCardCount(HttpServletRequest request,
+                                        @RequestParam(name = "section") String sectionName) {
+
+        AuthenticationTokenManager.checkAuthenticationToken(request);
+
+        //if the section is invalid, an error would already be thrown.
+        MarketplaceCard.Section section = MarketplaceCard.sectionFromString(sectionName);
+
+        var cards = marketplaceCardRepository.getAllBySection(section);
+
+        JSONObject responseBody = new JSONObject();
+        responseBody.put("count", cards.size());
+
+        return responseBody;
+    }
+
+    /**
+     * Sort marketplace cards by a key. Can reverse results.
+     * 
+     * @param orderBy Key to order marketplace cards by.
+     * @param reverse Reverse results.
+     * @return MarketplaceCard Comparator
+     */
+    public Comparator<MarketplaceCard> getMarketPlaceCardComparator(String orderBy, Boolean reverse) {
+        if (orderBy == null) orderBy = "created";
+
+        Comparator<MarketplaceCard> sort;
+        switch (orderBy) {
+            case "title":
+                sort = Comparator.comparing(MarketplaceCard::getTitle);
+                break;
+            case "closes":
+                sort = Comparator.comparing(MarketplaceCard::getCloses);
+                break;
+            case "creatorFirstName":
+                sort = Comparator.comparing(marketPlaceCard -> marketPlaceCard.getCreator().getFirstName());
+                break;
+            case "creatorLastName":
+                sort = Comparator.comparing(marketPlaceCard -> marketPlaceCard.getCreator().getLastName());
+                break;
+            case "created":
+            default:
+                sort = Comparator.comparing(MarketplaceCard::getCreated);
+                break;
+        }
+        if (Boolean.TRUE.equals(reverse)) {
+            sort = sort.reversed();
+        }
+
+        return sort;
     }
 }

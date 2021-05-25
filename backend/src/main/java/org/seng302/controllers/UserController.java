@@ -4,6 +4,7 @@ import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.seng302.entities.Account;
 import org.seng302.entities.Location;
 import org.seng302.entities.User;
 import org.seng302.exceptions.EmailInUseException;
@@ -20,6 +21,7 @@ import org.springframework.web.server.ResponseStatusException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.text.ParseException;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -44,14 +46,14 @@ public class UserController {
         logger.info("Register");
         logger.info(userinfo.getAsString("bio"));
         try {
-            User.checkEmailUniqueness(userinfo.getAsString("email"), userRepository);
+            Account.checkEmailUniqueness(userinfo.getAsString("email"), userRepository);
         } catch (EmailInUseException inUseException) {
             logger.error(inUseException.getMessage());
             throw inUseException;
         }
         try {
             JSONObject rawAddress;
-            try{
+            try {
                 rawAddress = new JSONObject((Map<String, ?>) userinfo.get("homeAddress"));
             } catch (ClassCastException e) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
@@ -80,8 +82,8 @@ public class UserController {
         } catch (ResponseStatusException responseError) {
             logger.error(responseError.getMessage());
             throw responseError;
-        } catch (ParseException e) {
-            e.printStackTrace();
+        } catch (DateTimeParseException e) {
+            logger.error(e.getMessage());
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Could not process date of birth.");
         }
 
@@ -93,11 +95,11 @@ public class UserController {
      * @return User with corresponding Id
      */
     @GetMapping("/users/{id}")
-    JSONObject getUserById(@PathVariable Long id, HttpServletRequest session) {
+    public JSONObject getUserById(@PathVariable Long id, HttpServletRequest session) {
         logger.info("Get user by id");
         AuthenticationTokenManager.checkAuthenticationToken(session);
 
-        logger.info(String.format("Retrieving user with ID %d.", id));
+        logger.info(() -> String.format("Retrieving user with ID %d.", id));
         Optional<User> user = userRepository.findById(id);
         if (user.isEmpty()) {
             UserNotFoundException notFound = new UserNotFoundException();
@@ -119,9 +121,9 @@ public class UserController {
      * @return The total number of users
      */
     @GetMapping("/users/search/count")
-    JSONObject getSearchCount(HttpServletRequest session, @RequestParam("searchQuery") String searchQuery) {
+    public JSONObject getSearchCount(HttpServletRequest session, @RequestParam("searchQuery") String searchQuery) {
         AuthenticationTokenManager.checkAuthenticationToken(session);
-        logger.info(String.format("Performing search for \"%s\" and getting search count", searchQuery));
+        logger.info(() -> String.format("Performing search for \"%s\" and getting search count", searchQuery));
         List<User> queryResults;
         queryResults = SearchHelper.getSearchResultsOrderedByRelevance(searchQuery, userRepository, false);
 
@@ -143,7 +145,7 @@ public class UserController {
      * @return List of matching Users
      */
     @GetMapping("/users/search")
-    JSONArray searchUsersByName(HttpServletRequest session,
+    public JSONArray searchUsersByName(HttpServletRequest session,
                                 @RequestParam("searchQuery") String searchQuery,
                                 @RequestParam(required = false) Integer page,
                                 @RequestParam(required = false) Integer resultsPerPage,
@@ -184,7 +186,7 @@ public class UserController {
      * @param id The id of the user to promote
      */
     @PutMapping("/users/{id}/makeAdmin")
-    void makeUserAdmin(HttpServletRequest session, @PathVariable("id") long id) {
+    public void makeUserAdmin(HttpServletRequest session, @PathVariable("id") long id) {
         changeUserPrivilege(session, id, "globalApplicationAdmin");
     }
 
@@ -195,7 +197,7 @@ public class UserController {
      * @param id The id of the user to demote
      */
     @PutMapping("/users/{id}/revokeAdmin")
-    void revokeUserAdmin(HttpServletRequest session, @PathVariable("id") long id) {
+    public void revokeUserAdmin(HttpServletRequest session, @PathVariable("id") long id) {
         changeUserPrivilege(session, id, "user");
     }
 
@@ -209,7 +211,7 @@ public class UserController {
         AuthenticationTokenManager.checkAuthenticationToken(request); // Ensure user is logged on
         AuthenticationTokenManager.checkAuthenticationTokenDGAA(request); // Ensure user is the DGAA
 
-        logger.info(String.format("Changing user %d role to %s.", id, newRole));
+        logger.info(() -> String.format("Changing user %d role to %s.", id, newRole));
         long userId = id;
         Optional<User> user = userRepository.findById(userId);
         if (user.isEmpty()) {

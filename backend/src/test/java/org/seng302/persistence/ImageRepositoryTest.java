@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class ImageRepositoryTest {
+class ImageRepositoryTest {
 
     @Autowired
     private ImageRepository imageRepository;
@@ -51,8 +51,9 @@ public class ImageRepositoryTest {
     @Test
     void getImage_ImageDoesNotExist_406ResponseException() {
         imageRepository.delete(testImage);
+        long id = testImage.getID();
         assertThrows(ResponseStatusException.class, () -> {
-            imageRepository.getImageById(testImage.getID());;
+            imageRepository.getImageById(id);
         });
     }
 

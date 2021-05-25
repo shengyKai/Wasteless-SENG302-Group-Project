@@ -9,14 +9,14 @@ import org.springframework.web.server.ResponseStatusException;
  */
 public class BusinessNotFoundException extends ResponseStatusException {
 
-    private static final String reason = "Business not found.";
-    private static final HttpStatus status = HttpStatus.NOT_ACCEPTABLE;
+    private static final String REASON = "Business not found.";
+    private static final HttpStatus HTTP_STATUS = HttpStatus.NOT_ACCEPTABLE;
 
     public BusinessNotFoundException() {
-        super(status, reason);
+        super(HTTP_STATUS, REASON);
     }
 
     public BusinessNotFoundException(String reason) {
-        super(status, reason);
+        super(HTTP_STATUS, reason);
     }
 }
