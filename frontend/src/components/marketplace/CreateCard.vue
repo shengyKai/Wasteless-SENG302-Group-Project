@@ -23,7 +23,7 @@
                 Posted {{ creationString }}
               </span>
             </div>
-            <textarea ref="descriptionField" v-model="description" class="field"/>
+            <textarea ref="descriptionField" v-model="description" rows="3" class="field"/>
           </div>
           <v-select
             v-model="selectedKeywords"
@@ -36,6 +36,7 @@
             color="primary"
           />
           <v-select
+            class="required"
             v-model="selectedSection"
             :items="sections"
             item-text="text"
@@ -43,10 +44,10 @@
             label="Select section"
             color="primary"
           />
-          <p class="error-text" v-if ="errorMessage !== undefined"> {{errorMessage}} </p>
+          <p class="error-text text-center" v-if ="errorMessage !== undefined"> {{errorMessage}} </p>
         </v-card-text>
         <v-card-actions>
-          <v-btn text color="primary" @click="createCard">
+          <v-btn text color="primary" :disabled="!valid" @click="createCard">
             Create Card
           </v-btn>
           <v-btn text color="primary" @click="closeDialog">
@@ -74,6 +75,17 @@ export default {
       errorMessage: undefined,
       sections: [{text: "For Sale", value: "ForSale"}, {text: "Wanted", value: "Wanted"}, {text: "Exchange", value: "Exchange"}],
       selectedSection: undefined,
+      maxCharTitleRules: [
+        field => (field.length <= 50) || 'Reached max character limit: 50'
+      ],
+      maxCharDescriptionRules: [
+        field => (field.length <= 200) || 'Reached max character limit: 200'
+      ],
+      mandatoryRules: [
+        //All fields with the class "required" will go through this ruleset to ensure the field is not empty.
+        //if it does not follow the format, display error message
+        field => !!field || 'Field is required'
+      ],
     };
   },
   async mounted() {
@@ -88,7 +100,6 @@ export default {
     this.titleField.setAttribute("style", "height:" + (this.titleField.scrollHeight) + "px;overflow-y:hidden;");
     this.titleField.addEventListener("input", OnInput);
 
-    console.log(this.locationString);
     this.allKeywords = await getKeywords();
   },
   computed: {
@@ -123,6 +134,25 @@ export default {
     creationString() {
       return new Date().toLocaleDateString();
     },
+    valid() {
+      return (this.validTitle && this.validDescription && this.validSection);
+    },
+    validTitle() {
+      return (this.title && this.title.length > 0 && this.title.length < 50);
+    },
+    validDescription() {
+      if (!this.description) {
+        return true;
+      } else {
+        return this.description.length < 200;
+      }
+    },
+    validSection() {
+      if (this.selectedSection) {
+        return true;
+      }
+      return false;
+    }
   },
   methods: {
     closeDialog() {
