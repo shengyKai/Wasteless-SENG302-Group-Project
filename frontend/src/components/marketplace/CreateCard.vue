@@ -55,6 +55,7 @@ export default {
       title: "",
       description: "",
       allKeywords: [],
+      selectedKeywords: []
     };
   },
   async mounted() {
