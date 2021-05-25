@@ -24,8 +24,8 @@ exports[`InventoryItem.vue Must match snapshot 1`] = `
               </div>
             </div>
             <div class="row"><span><div class="v-card__text pb-0 product-fields"><strong>Description</strong> <br>
-                  test_product_description
-                </div></span></div>
+                    test_product_description
+                  </div></span></div>
             <div class="row">
               <div class="v-card__text product-fields"><strong>Manufacturer</strong> <br>
                 test_product_manufacturer
