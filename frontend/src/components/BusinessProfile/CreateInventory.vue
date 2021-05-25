@@ -176,13 +176,12 @@ export default {
       sellByValid: true,
       bestBefore: "",
       bestBeforeValid: true,
-      expires: "",
+      expires: new Date().toISOString().slice(0,10),
       expiresValid: true,
       datesValid: true,
       productFilter: '',
       minDate: new Date("1500-01-01"),
       maxDate: new Date("5000-01-01"),
-      //expires: new Date().toISOString().slice(0,10), //Keep this so the next person know what to use if he/she wan
       currency: {},
       maxCharRules: [
         field => (field.length <= 100) || 'Reached max character limit: 100'
