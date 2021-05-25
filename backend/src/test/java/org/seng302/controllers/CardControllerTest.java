@@ -21,6 +21,7 @@ import org.seng302.tools.AuthenticationTokenManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -28,6 +29,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.text.ParseException;
 import java.time.Instant;
@@ -37,6 +39,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+
+import javax.servlet.http.HttpServletRequest;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -66,9 +70,13 @@ class CardControllerTest {
     private Keyword mockKeyword1;
     @Mock
     private Keyword mockKeyword2;
+    @Mock
+    private HttpServletRequest request;
 
     private User testUser;
     private User testUser1;
+    private CardController cardController;
+    private List<MarketplaceCard> cards = new ArrayList<>();
 
     private MockedStatic<AuthenticationTokenManager> authenticationTokenManager;
     private JSONObject createCardJson;
@@ -119,12 +127,11 @@ class CardControllerTest {
         when(mockUser.getUserID()).thenReturn(userId);
 
         // Tell MockMvc to use controller with mocked repositories for tests
-        CardController cardController = new CardController(marketplaceCardRepository, keywordRepository, userRepository);
+        cardController = new CardController(marketplaceCardRepository, keywordRepository, userRepository);
         mockMvc = MockMvcBuilders.standaloneSetup(cardController).build();
 
         constructValidCreateCardJson();
 
-        List<MarketplaceCard> cards = new ArrayList<>();
         addSeveralMarketplaceCards(cards);
         when(marketplaceCardRepository.getAllBySection(any())).thenReturn(cards);
     }
@@ -452,6 +459,22 @@ class CardControllerTest {
 
         assertEquals("ijkl", firstCard.getAsString("title"));
         assertEquals("mnop", secondCard.getAsString("title"));
+    }
+    
+    @Test
+    void getMarketplaceCardCount_emptyCardList_zeroReturned() {
+        when(marketplaceCardRepository.getAllBySection(MarketplaceCard.Section.FOR_SALE)).thenReturn(new ArrayList<MarketplaceCard>());
+        JSONObject result = cardController.retrieveCardCount(request, "ForSale");
+        assertTrue(result.containsKey("count"));
+        assertEquals(0, result.getAsNumber("count"));
+    }
+
+    @Test
+    void getMarketplaceCardCount_multipleCards_correctCountReturned() throws Exception {
+        when(marketplaceCardRepository.getAllBySection(MarketplaceCard.Section.FOR_SALE)).thenReturn(cards);
+        JSONObject result = cardController.retrieveCardCount(request, "ForSale");
+        assertTrue(result.containsKey("count"));
+        assertEquals(4, result.getAsNumber("count"));
     }
 
     /**
