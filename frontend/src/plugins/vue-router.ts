@@ -65,7 +65,7 @@ const routes = [
     meta: { title: 'Business Products' }
   },
   {
-    path: "/business/:id/sales",
+    path: "/business/:id/listings",
     component: SalePage,
     meta: {title: 'Sales'}
   },
