@@ -48,30 +48,35 @@
               <v-row>
                 <!-- if the description length is more than or equal to 50 without slicing any words, the "Read more..." link will
                 appear which will lead the user to the FullProductDescription component  -->
-                <span v-if="product.description.length >= 50">
-                  <v-card-text
-                    id="description"
-                    class="pb-0 product-fields"
-                  >
-                    <strong>Description</strong>
-                    <br>
-                    {{
-                      descriptionString
-                    }}...
-                    <!-- feed the productDescription into the dialog box child component -->
-                    <FullProductDescription
-                      :productDescription="product.description"
-                    />
-                  </v-card-text>
-                </span>
-                <!-- else just show the product description -->
-                <span v-else>
-                  <v-card-text class="pb-0 product-fields">
-                    <strong>Description</strong>
-                    <br>
-                    {{ product.description }}
-                  </v-card-text>
-                </span>
+                <template v-if="product.description !== undefined">
+                  <span v-if="product.description.length >= 50">
+                    <v-card-text
+                      id="description"
+                      class="pb-0 product-fields"
+                    >
+                      <strong>Description</strong>
+                      <br>
+                      {{
+                        product.description.replace(
+                          /^([\s\S]{50}\S*)[\s\S]*/,
+                          "$1"
+                        )
+                      }}...
+                      <!-- feed the productDescription into the dialog box child component -->
+                      <FullProductDescription
+                        :productDescription="product.description"
+                      />
+                    </v-card-text>
+                  </span>
+                  <!-- else just show the product description -->
+                  <span v-else>
+                    <v-card-text class="pb-0 product-fields">
+                      <strong>Description</strong>
+                      <br>
+                      {{ product.description }}
+                    </v-card-text>
+                  </span>
+                </template>
               </v-row>
               <v-row>
                 <!-- shows the product manufacturer -->
@@ -300,13 +305,6 @@ export default {
     product() {
       return this.inventoryItem.product;
     },
-    descriptionString() {
-      if (this.product.description === undefined) return undefined;
-      return this.product.description.replace(
-        /^([\s\S]{50}\S*)[\s\S]*/,
-        "$1"
-      );
-    }
   },
   methods: {
     //if the "Read more..." link if clicked, readMoreActivated becomes true and the FullProductDescription dialog box will open
