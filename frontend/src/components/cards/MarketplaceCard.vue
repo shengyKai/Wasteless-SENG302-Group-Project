@@ -13,8 +13,8 @@
           <span class="mr-1">
             <em v-if="creator">By {{ creator.firstName }} {{ creator.lastName }}</em>
           </span>
-          <span>
-            Posted {{ creationString }}
+          <span v-if="content.created !== undefined">
+            Posted {{ formatDate(content.created) }}
           </span>
         </div>
         {{ content.description }}
@@ -35,6 +35,8 @@
 </template>
 
 <script>
+import { formatDate } from '@/utils';
+
 export default {
   name: "MarketplaceCard",
   props: {
@@ -64,10 +66,11 @@ export default {
         return `From ${this.location.country}`;
       }
     },
-    creationString() {
-      return new Date(this.content.created).toLocaleDateString();
-    }
   },
+
+  methods: {
+    formatDate,
+  }
 };
 </script>
 
