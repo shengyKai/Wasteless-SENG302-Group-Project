@@ -40,6 +40,10 @@ export type StoreData = {
    * Whether or not the dialog for registering a business is being shown.
    */
   createInventoryDialog: number | undefined,
+  /**
+   * Whether or not the dialog for registering a business is being shown.
+   */
+   createSaleItemDialog: number | undefined,
 };
 
 function createOptions(): StoreOptions<StoreData> {
@@ -51,6 +55,7 @@ function createOptions(): StoreOptions<StoreData> {
       createBusinessDialogShown: false,
       createProductDialogBusiness: undefined,
       createInventoryDialog: undefined,
+      createSaleItemDialog: undefined,
     },
     mutations: {
       setUser (state, payload: User) {
@@ -138,7 +143,6 @@ function createOptions(): StoreOptions<StoreData> {
       showCreateInventory(state, businessId: number) {
         state.createInventoryDialog = businessId;
       },
-
       /**
        * Hides the create inventory dialog
        *
@@ -147,6 +151,24 @@ function createOptions(): StoreOptions<StoreData> {
       hideCreateInventory(state) {
         state.createInventoryDialog = undefined;
       },
+      /**
+       * Creates a modal create inventory dialog for adding a inventory item to the provided business
+       *
+       * @param state Current store state
+       * @param businessId Business to create the sale item for
+       */
+      showCreateSaleItem(state, businessId: number) {
+        state.createSaleItemDialog = businessId;
+      },
+      /**
+       * Hides the create inventory dialog
+       *
+       * @param state Current store state
+       */
+      hideCreateSaleItem(state) {
+        state.createSaleItemDialog = undefined;
+      },
+
       /**
        * Sets the current user role
        *

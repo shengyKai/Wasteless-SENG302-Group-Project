@@ -107,6 +107,12 @@ export default {
       this.$store.commit('showCreateInventory', this.$store.state.activeRole.id);
     },
     /**
+     * Shows the create Sale Item dialog
+     */
+    viewCreateSaleItem() {
+      this.$store.commit('showCreateSaleItem', this.$store.state.activeRole.id);
+    },
+    /**
      * Shows the Catalogue page
      */
     goToCataloguePage() {
