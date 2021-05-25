@@ -75,17 +75,6 @@ export default {
       errorMessage: undefined,
       sections: [{text: "For Sale", value: "ForSale"}, {text: "Wanted", value: "Wanted"}, {text: "Exchange", value: "Exchange"}],
       selectedSection: undefined,
-      maxCharTitleRules: [
-        field => (field.length <= 50) || 'Reached max character limit: 50'
-      ],
-      maxCharDescriptionRules: [
-        field => (field.length <= 200) || 'Reached max character limit: 200'
-      ],
-      mandatoryRules: [
-        //All fields with the class "required" will go through this ruleset to ensure the field is not empty.
-        //if it does not follow the format, display error message
-        field => !!field || 'Field is required'
-      ],
     };
   },
   async mounted() {
@@ -100,7 +89,9 @@ export default {
     this.titleField.setAttribute("style", "height:" + (this.titleField.scrollHeight) + "px;overflow-y:hidden;");
     this.titleField.addEventListener("input", OnInput);
 
-    this.allKeywords = await getKeywords();
+    getKeywords()
+      .then((response) => (this.allKeywords = response))
+      .catch(() => (this.allKeywords = []));
   },
   computed: {
     descriptionField() {
