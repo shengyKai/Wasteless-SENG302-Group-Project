@@ -20,8 +20,11 @@ const instance: Mocked<Pick<AxiosInstance, 'get'>> = axios.instance;
 
 describe("Test GET /keywords/search endpoint", () => {
   it("Get keywords", async () => {
-    const wordList = ["Free", "Home Baking", "With Love", "Inspired", "Bulk", "Gluten Free"];
-    const defaultWords = {wordList};
+    const defaultWords = [{
+      id: 1,
+      name: "Gluten Free",
+      created: "2002-02-02"
+    }];
     instance.get.mockResolvedValueOnce({
       data: defaultWords
     });
