@@ -187,12 +187,6 @@ export type MarketplaceCard = {
   keywords: Keyword[]
 }
 
-export type Keyword = {
-  id: number,
-  name: string,
-  created: string
-}
-
 export type CreateProduct = Omit<Product, 'created' | 'images'>;
 
 type UserOrderBy = 'userId' | 'relevance' | 'firstName' | 'middleName' | 'lastName' | 'nickname' | 'email';
@@ -820,15 +814,15 @@ export async function createMarketplaceCard(marketplaceCard: CreateMarketplaceCa
   return response.data.cardId;
 }
 
+type SectionType = 'ForSale' | 'Wanted' | 'Exchange'
+
 /**
    * Sends a query for the total number of cards by section in the marketplace
    *
    * @param section section name to identify which section of the marketplace to acquire the card count from
    * @returns Number of cards or an error message
    */
-export async function getMarketplaceCardCount(section: String): Promise<MaybeError<number>> {
-  //convert the for sale to suit the api spec
-  if (section === "For Sale") { section = "ForSale";}
+export async function getMarketplaceCardCount(section: SectionType): Promise<MaybeError<number>> {
   let response;
   try {
     response = await instance.get(`/cards/count`, {
@@ -850,6 +844,8 @@ export async function getMarketplaceCardCount(section: String): Promise<MaybeErr
   return response.data.count;
 }
 
+type CardOrderBy = 'created' | 'title' | 'closes' | 'creatorFirstName' | 'creatorLastName'
+
 /**
  * Fetches a page of cards by section in the marketplace
  * @param section The ID of the business
@@ -859,9 +855,7 @@ export async function getMarketplaceCardCount(section: String): Promise<MaybeErr
  * @param reverse Whether to reverse the results (default ascending)
  * @returns List of sales or a string error message
  */
-export async function getMarketplaceCardsBySection(section: string, page: number, resultsPerPage: number, orderBy: string, reverse: boolean): Promise<MaybeError<MarketplaceCard[]>> {
-  //convert the for sale to suit the api spec
-  if (section === "For Sale") { section = "ForSale";}
+export async function getMarketplaceCardsBySection(section: SectionType, page: number, resultsPerPage: number, orderBy: CardOrderBy, reverse: boolean): Promise<MaybeError<MarketplaceCard[]>> {
   let response;
   try {
     response = await instance.get(`/cards`, {
