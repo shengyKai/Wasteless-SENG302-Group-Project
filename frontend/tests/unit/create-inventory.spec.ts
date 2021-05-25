@@ -9,12 +9,23 @@ import * as api from '@/api/internal';
 
 Vue.use(Vuetify);
 
+// Makes sure that fetching the currency doesn't crash
+jest.mock('@/api/currency', () => ({
+  currencyFromCountry: jest.fn().mockResolvedValue({
+    code: 'NZD',
+    name: 'New Zealand dollar',
+    symbol: '$',
+  }),
+}));
+
 jest.mock('@/api/internal', () => ({
   createInventoryItem: jest.fn(),
-  getProducts: jest.fn()
+  getProducts: jest.fn(),
+  getBusiness: jest.fn().mockReturnValue({address: {}}), // Makes sure that fetching the currency doesn't crash
 }));
 const createInventoryItem = castMock(api.createInventoryItem);
 const getProducts = castMock(api.getProducts);
+
 getProducts.mockResolvedValue([]);
 // Characters that are in the set of letters, numbers, spaces and punctuation.
 const validQuantityCharacters = [
