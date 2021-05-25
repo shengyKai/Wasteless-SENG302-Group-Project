@@ -7,7 +7,8 @@ jest.mock('axios', () => ({
   }
   ),
   instance: {
-    get: jest.fn()
+    get: jest.fn(),
+    post: jest.fn()
   },
 }));
 
@@ -15,7 +16,7 @@ jest.mock('axios', () => ({
 type Mocked<T extends { [k: string]: (...args: any[]) => any }> = { [k in keyof T]: jest.Mock<ReturnType<T[k]>, Parameters<T[k]>> }
 
 // @ts-ignore - We've added an instance attribute in the mock declaration that mimics a AxiosInstance
-const instance: Mocked<Pick<AxiosInstance, 'get'>> = axios.instance;
+const instance: Mocked<Pick<AxiosInstance, 'get', 'post'>> = axios.instance;
 
 describe("Test GET /businesses/:businessId/listings endpoint", () => {
   it('When response is a sale array with all fields, the response will be an sale array', async ()=>{
@@ -186,5 +187,101 @@ describe("Test GET /businesses/:businessId/listings endpoint", () => {
     instance.get.mockRejectedValueOnce("Server is down");
     const message = await api.getBusinessSales(7, 1, 1, 'created', false);
     expect(message).toEqual('Failed to reach backend');
+  });
+
+  it("When the user tries to create a sales item with all the fields, the result returns 'undefined'", async() => {
+    const salesItem = {
+      inventoryItemId: 1,
+      quantity: 1,
+      price: 1,
+      moreInfo: 'Some Info',
+      closes: 'Some Date',
+    }
+    instance.post.mockResolvedValueOnce({
+      data: {
+        "listingId": 1
+      }
+    });
+    const salesItemResponse = await api.createSaleItem(1, salesItem);
+    expect(salesItemResponse).toEqual({
+      "listingId": 1
+    });
+  });
+
+  it("When the user tries to create a sales item with only the required fields, the result returns 'undefined'", async() => {
+    const salesItem = {
+      inventoryItemId: 1,
+      quantity: 1,
+      price: 1
+    }
+    instance.post.mockResolvedValueOnce({
+      data: {
+        "listingId": 1
+      }
+    });
+    const salesItemResponse = await api.createSaleItem(1, salesItem);
+    expect(salesItemResponse).toEqual({
+      "listingId": 1
+    });
+  });
+
+  it("When the unsucessful response returns an incorrect request error, an 400 error message is returned", async() => {
+    //the sales item below is technically still in the correct format, because we still need to feed the correct 
+    //format for the salesItem in order for the mocking of createSaleItem to work. 
+    const salesItem = {
+      inventoryItemId: 1,
+      quantity: 1,
+      price: 1
+    }
+    instance.post.mockRejectedValueOnce({
+      response: {
+        status: 400
+      }
+    });
+    const errorResponse = await api.createSaleItem(1, salesItem);
+    expect(errorResponse).toEqual('Invalid data with the Sale Item');
+  });
+
+  it("When the unsucessful response returns a forbidden error, an 403 error message is returned", async() => {
+    const salesItem = {
+      inventoryItemId: 1,
+      quantity: 1,
+      price: 1
+    }
+    instance.post.mockRejectedValueOnce({
+      response: {
+        status: 403
+      }
+    });
+    const errorResponse = await api.createSaleItem(1, salesItem);
+    expect(errorResponse).toEqual('Operation not permitted');
+  });
+
+  it("When the unsucessful response returns something other than an error message, an error message is returned", async() => {
+    const salesItem = {
+      inventoryItemId: 1,
+      quantity: 1,
+      price: 1
+    }
+    instance.post.mockRejectedValueOnce({
+      response: {}
+    });
+    const errorResponse = await api.createSaleItem(1, salesItem);
+    expect(errorResponse).toEqual('Failed to reach backend');
+  });
+
+  it("When the unsucessful response returns an error other than 400 and 403, an error message is returned", async() => {
+    const salesItem = {
+      inventoryItemId: 1,
+      quantity: 1,
+      price: 1
+    }
+    instance.post.mockRejectedValueOnce({
+      response: {
+        status: 500
+      }
+    });
+    const errorResponse = await api.createSaleItem(1, salesItem);
+    expect(errorResponse).toEqual('Request failed: 500');
   });
 });
