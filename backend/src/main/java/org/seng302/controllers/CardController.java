@@ -127,14 +127,23 @@ public class CardController {
                               @RequestParam(name = "section") String sectionName,
                               @RequestParam(required = false) Integer page,
                               @RequestParam(required = false) Integer resultsPerPage) {
+        
+        logger.info(sectionName);
+        logger.info(page);
+        logger.info(resultsPerPage);
+        
+        logger.info("Request to get marketplace cards in " + sectionName);
         AuthenticationTokenManager.checkAuthenticationToken(request);
 
+        logger.info("Parsing " + sectionName);
         // parse the section
         MarketplaceCard.Section section = MarketplaceCard.sectionFromString(sectionName);
 
+        logger.info("Database retrieval for " + sectionName);
         // database call for section
         var cards = marketplaceCardRepository.getAllBySection(section);
 
+        logger.info("Pagination results for " + sectionName);
         cards = SearchHelper.getPageInResults(cards, page, resultsPerPage);
         //return JSON Object
         JSONArray responseBody = new JSONArray();

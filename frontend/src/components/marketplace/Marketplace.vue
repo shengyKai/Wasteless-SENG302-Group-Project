@@ -96,28 +96,34 @@
 
 <script>
 import MarketplaceCard from "../cards/MarketplaceCard";
+import {getCardsBySection, getCardCount} from "../../api/internal.ts";
 
 export default {
   data() {
     return {
       tab: null,
-      sections: ["For sale", "Wanted", "Exchange"],
+      sections: ["For Sale", "Wanted", "Exchange"],
       // TODO Get cards for each section with API call when that has been implemented.
+      // cards: {
+      //   "For Sale": [
+      //     {id: 0, creator: {firstName: 'Tim'   , lastName: 'Tam'       , homeAddress: { country: 'New Zealand', city: 'Auckland',     district: 'Wherever'       }}, created: '2021-05-19', title: 'Tim Tams from Timmy',             description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus hendrerit nisl ac pharetra cursus.', keywords: [{name: 'Home Made'}, {name: 'Organic'}]},
+      //     {id: 1, creator: {firstName: 'Andy'  , lastName: 'Elliot'    , homeAddress: { country: 'New Zealand', city: 'Auckland',     district: 'Wherever'       }}, created: '2021-05-20', title: 'Dunno what to do for this title', description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus hendrerit nisl ac pharetra cursus. Vestibulum gravida varius purus, in maximus ante fermentum sed. Curabitur ultrices accumsan metus ia', keywords: [{name: 'Fresh'}]},
+      //     {id: 2, creator: {firstName: 'Dave'  , lastName: 'Daniel'    , homeAddress: { country: 'New Zealand', city: 'Auckland',     district: 'Wherever'       }}, created: '2021-05-21', title: 'Jack Daniels',                    description: 'Short description', keywords: [{name: 'Vegan'}, {name: 'Vegitarian'}, {name: 'Locally Produced'}, {name: 'Other'}]},
+      //     {id: 3, creator: {firstName: 'Jeff'  , lastName: 'Bezos'     , homeAddress: { country: 'New Zealand', city: 'Auckland',     district: 'Wherever'       }}, created: '2021-05-22', title: 'Amazon Treats',                   description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus hendrerit nisl ac pharetra cursus. Vestibulum gravida varius purus, in maximus ante fermentum sed. Curabitur ultrices accumsan metus ia', keywords: []},
+      //     {id: 4, creator: {firstName: 'Mark'  , lastName: 'Zuckerburg', homeAddress: { country: 'New Zealand', city: 'Christchurch', district: 'Upper Riccarton'}}, created: '2021-05-23', title: 'Facecook',                        description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus hendrerit nisl ac pharetra cursus. Vestibulum gravida varius purus, in maximus ante fermentum sed. Curabitur ultrices accumsan metus ia', keywords: [{name: 'Spicy'}]},
+      //     {id: 5, creator: {firstName: 'Connor', lastName: 'Hitchcock' , homeAddress: { country: 'New Zealand', city: 'Christchurch', district: 'Upper Riccarton'}}, created: '2021-05-24', title: 'Connor\'s magic stuff',           description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus hendrerit nisl ac pharetra cursus. Vestibulum gravida varius purus, in maximus ante fermentum sed. Curabitur ultrices accumsan metus ia', keywords: []},
+      //     {id: 6, creator: {firstName: 'Nathan', lastName: 'Smithies'  , homeAddress: { country: 'New Zealand', city: 'Christchurch', district: 'Hoon Hay'       }}, created: '2021-05-25', title: 'The Nathan Apple',                description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus hendrerit nisl ac pharetra cursus. Vestibulum gravida varius purus, in maximus ante fermentum sed. Curabitur ultrices accumsan metus ia', keywords: []}
+      //   ],
+      //   "Wanted": [],
+      //   "Exchange": [{id: 0, title: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'}, {id: 1}, {id: 2}, {id: 3}, {id: 4}]
+      // },
       cards: {
-        "For sale": [
-          {id: 0, creator: {firstName: 'Tim'   , lastName: 'Tam'       , homeAddress: { country: 'New Zealand', city: 'Auckland',     district: 'Wherever'       }}, created: '2021-05-19', title: 'Tim Tams from Timmy',             description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus hendrerit nisl ac pharetra cursus.', keywords: [{name: 'Home Made'}, {name: 'Organic'}]},
-          {id: 1, creator: {firstName: 'Andy'  , lastName: 'Elliot'    , homeAddress: { country: 'New Zealand', city: 'Auckland',     district: 'Wherever'       }}, created: '2021-05-20', title: 'Dunno what to do for this title', description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus hendrerit nisl ac pharetra cursus. Vestibulum gravida varius purus, in maximus ante fermentum sed. Curabitur ultrices accumsan metus ia', keywords: [{name: 'Fresh'}]},
-          {id: 2, creator: {firstName: 'Dave'  , lastName: 'Daniel'    , homeAddress: { country: 'New Zealand', city: 'Auckland',     district: 'Wherever'       }}, created: '2021-05-21', title: 'Jack Daniels',                    description: 'Short description', keywords: [{name: 'Vegan'}, {name: 'Vegitarian'}, {name: 'Locally Produced'}, {name: 'Other'}]},
-          {id: 3, creator: {firstName: 'Jeff'  , lastName: 'Bezos'     , homeAddress: { country: 'New Zealand', city: 'Auckland',     district: 'Wherever'       }}, created: '2021-05-22', title: 'Amazon Treats',                   description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus hendrerit nisl ac pharetra cursus. Vestibulum gravida varius purus, in maximus ante fermentum sed. Curabitur ultrices accumsan metus ia', keywords: []},
-          {id: 4, creator: {firstName: 'Mark'  , lastName: 'Zuckerburg', homeAddress: { country: 'New Zealand', city: 'Christchurch', district: 'Upper Riccarton'}}, created: '2021-05-23', title: 'Facecook',                        description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus hendrerit nisl ac pharetra cursus. Vestibulum gravida varius purus, in maximus ante fermentum sed. Curabitur ultrices accumsan metus ia', keywords: [{name: 'Spicy'}]},
-          {id: 5, creator: {firstName: 'Connor', lastName: 'Hitchcock' , homeAddress: { country: 'New Zealand', city: 'Christchurch', district: 'Upper Riccarton'}}, created: '2021-05-24', title: 'Connor\'s magic stuff',           description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus hendrerit nisl ac pharetra cursus. Vestibulum gravida varius purus, in maximus ante fermentum sed. Curabitur ultrices accumsan metus ia', keywords: []},
-          {id: 6, creator: {firstName: 'Nathan', lastName: 'Smithies'  , homeAddress: { country: 'New Zealand', city: 'Christchurch', district: 'Hoon Hay'       }}, created: '2021-05-25', title: 'The Nathan Apple',                description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus hendrerit nisl ac pharetra cursus. Vestibulum gravida varius purus, in maximus ante fermentum sed. Curabitur ultrices accumsan metus ia', keywords: []}
-        ],
+        "For Sale": [],
         "Wanted": [],
-        "Exchange": [{id: 0, title: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'}, {id: 1}, {id: 2}, {id: 3}, {id: 4}]
+        "Exchange": []
       },
       currentPage: {
-        "For sale": 1,
+        "For Sale": 1,
         "Wanted": 1,
         "Exchange": 1,
       },
@@ -131,13 +137,35 @@ export default {
        * be replaced with dynamic values.
        */
       totalResults: {
-        "For sale": 7,
+        "For Sale": 0,
         "Wanted": 0,
-        "Exchange": 5,
+        "Exchange": 0,
       },
+      error: ""
     };
   },
   methods: {
+    /**
+     * Iterates through the 3 sections and gets all the cards and card count
+     */
+    async updateResults() {
+      for (const index in this.sections) {
+        const value = await getCardsBySection (
+          this.sections[index],
+          this.currentPage[this.sections[index]],
+          this.resultsPerPage
+        );
+        this.totalResults[this.sections[index]] = await getCardCount(this.sections[index]);
+        if (typeof value === 'string') {
+          this.cards[this.sections[index]] = {};
+          this.error = value;
+        } else {
+          this.cards[this.sections[index]] = value;
+          this.error = undefined;
+        }
+      }
+
+    },
     /**
      * The total number of pages required to show all the users
      * May be 0 if there are no results
@@ -159,14 +187,20 @@ export default {
   components: {
     MarketplaceCard
   },
-  //bottom is for when the api method gets created
-  // watch: {
-  //   currentPage() {
-  //     this.updateResults();
-  //   },
-  //   resultsPerPage() {
-  //     this.updateResults();
-  //   },
-  // },
+  watch: {
+    currentPage: {
+      handler() {
+        console.log("here");
+        this.updateResults();
+      },
+      deep: true
+    },
+    resultsPerPage() {
+      this.updateResults();
+    },
+  },
+  async created() {
+    await this.updateResults();
+  },
 };
 </script>

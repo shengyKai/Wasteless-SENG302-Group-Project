@@ -173,17 +173,17 @@ export type MarketplaceCard = {
   id: number,
   creator: User,
   section: "ForSale" | "Wanted" | "Exchange",
-  created: String,
-  displayPeriodEnd?: String,
+  created: string,
+  displayPeriodEnd?: string,
   title: string,
   description?: string,
-  keywords: keyword[]
+  keywords: Keyword[]
 }
 
-export type keyword = {
+export type Keyword = {
   id: number,
-  name: String,
-  created: String
+  name: string,
+  created: string
 }
 
 export type CreateProduct = Omit<Product, 'created' | 'images'>;
@@ -792,13 +792,19 @@ export async function createMarketplaceCard(marketplaceCard: CreateMarketplaceCa
 /**
    * Sends a query for the total number of cards by section in the marketplace
    *
-   * @param sectionName section name to identify which section of the marketplace to acquire the card count from
+   * @param section section name to identify which section of the marketplace to acquire the card count from
    * @returns Number of cards or an error message
    */
- export async function getCardCount(sectionName: String): Promise<MaybeError<number>> {
+export async function getCardCount(section: String): Promise<MaybeError<number>> {
+  //convert the for sale to suit the api spec
+  if (section === "For Sale") { section = "ForSale";}
   let response;
   try {
-    response = await instance.get(`/cards/count`);
+    response = await instance.get(`/cards/count`, {
+      params: {
+        section
+      }
+    });
   } catch (error) {
     let status: number | undefined = error.response?.status;
 
@@ -815,16 +821,19 @@ export async function createMarketplaceCard(marketplaceCard: CreateMarketplaceCa
 
 /**
  * Fetches a page of cards by section in the marketplace
- * @param sectionName The ID of the business
+ * @param section The ID of the business
  * @param page Page to fetch (1 indexed)
  * @param resultsPerPage Maximum number of results per page
  * @returns List of sales or a string error message
  */
- export async function getCardsBySection(sectionName: String, page: number, resultsPerPage: number): Promise<MaybeError<MarketplaceCard[]>> {
+export async function getCardsBySection(section: string, page: number, resultsPerPage: number): Promise<MaybeError<MarketplaceCard[]>> {
+  //convert the for sale to suit the api spec
+  if (section === "For Sale") { section = "ForSale";}
   let response;
   try {
     response = await instance.get(`/cards`, {
       params: {
+        section,
         page,
         resultsPerPage
       }
