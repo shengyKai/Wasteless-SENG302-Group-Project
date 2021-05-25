@@ -234,6 +234,23 @@
             </v-timeline-item>
           </v-timeline>
         </v-col>
+        <v-col cols="auto">
+          <v-tooltip right>
+            <template #activator="{on: tooltip}">
+              <!--:disabled="...inventoryItem quantity remaining..."-->
+              <v-btn
+                ref="createSaleItemButton"
+                icon
+                color="primary"
+                v-on="tooltip"
+                @click="viewCreateSaleItem"
+              >
+                <v-icon>mdi-plus</v-icon>
+              </v-btn>
+            </template>
+            <span>Create Sale</span>
+          </v-tooltip>
+        </v-col>
       </v-row>
     </v-container>
   </v-card>
@@ -317,7 +334,14 @@ export default {
         return '-';
       }
       return text;
-    }
+    },
+
+    /**
+     * Shows the create Sale Item dialog
+     */
+    viewCreateSaleItem() {
+      this.$store.commit('showCreateSaleItem', {businessId: this.businessId, inventoryItem: this.inventoryItem});
+    },
   },
 };
 </script>

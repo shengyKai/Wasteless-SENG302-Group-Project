@@ -27,10 +27,11 @@
                 <!-- INPUT: Price per item. Auto generated.-->
                 <v-col cols="6">
                   <v-text-field
-                    v-model="pricePerItem"
+                    v-model="price"
+                    class="required"
                     label="Price Per Item"
                     prefix="$"
-                    :rules="maxCharRules.concat(priceRules)"
+                    :rules="mandatoryRules.concat(mandatoryRules).concat(priceRules)"
                     outlined
                   />
                 </v-col>
@@ -58,6 +59,7 @@
           </v-card-text>
           <v-card-actions>
             <v-spacer/>
+            <div class="error--text" v-if="errorMessage">{{errorMessage}}</div>
             <v-btn
               color="primary"
               text
@@ -89,9 +91,8 @@ export default {
       dialog: true,
       valid: false,
       today: new Date().toISOString().slice(0,10),
-      inventoryItem: "",
       quantity: "",
-      pricePerItem: "",
+      price: '',
       info: "",
       closes: "",
 
@@ -133,19 +134,22 @@ export default {
     async CreateSaleItem() {
       this.errorMessage = undefined;
       let quantity;
+      let price;
       try {
         quantity = parseInt(this.quantity);
+        price = parseFloat(this.price);
       } catch ( error ) {
         this.errorMessage = 'Could not parse field \'Quantity\'';
         return;
       }
       const saleItem = {
+        inventoryItemId: this.inventoryItem.id,
         quantity: quantity,
-        pricePerItem: this.pricePerItem,
+        price: price,
         info: this.info ? this.info : undefined,
         closes: this.closes ? this.closes : undefined
       };
-      const result = await createSaleItem(saleItem);
+      const result = await createSaleItem(this.businessId, saleItem);
       if (typeof result === 'string') {
         this.errorMessage = result;
       } else {
@@ -153,6 +157,14 @@ export default {
       }
     },
   },
+  computed: {
+    inventoryItem() {
+      return this.$store.state.createSaleItemDialog.inventoryItem;
+    },
+    businessId() {
+      return this.$store.state.createSaleItemDialog.businessId;
+    }
+  }
 };
 </script>
 

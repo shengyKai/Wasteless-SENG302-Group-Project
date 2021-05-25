@@ -116,7 +116,7 @@ describe("CreateSaleItem.vue", () => {
     await wrapper.setData({
       //TODO: the inventory item will need to be provided
       quantity: 3,
-      pricePerItem: "10" //Need to retrieve this from the inventory item
+      price: "10" //Need to retrieve this from the inventory item
     });
   }
 
@@ -187,10 +187,10 @@ describe("CreateSaleItem.vue", () => {
 
   it.each(validPriceCharacters)(
     'Valid when PRICE PER ITEM contain valid price [e.g 999 or 999.99] & <10000, Price per Item =  "%s"',
-    async (pricePerItem) => {
+    async (price) => {
       await populateAllFields();
       await wrapper.setData({
-        pricePerItem,
+        price,
       });
       await Vue.nextTick();
       expect(wrapper.vm.valid).toBeTruthy();
@@ -209,22 +209,22 @@ describe("CreateSaleItem.vue", () => {
     }
   );
 
-  it.each(invalidCharacters.concat(whitespaceCharacters).concat(validHugePriceCharacters))
-  ('Invalid if PRICE PER ITEM contain space, tab, symbol, other language, number  >= 10000, PRICE PER ITEM = "%s"', async (pricePerItem) => {
-    await populateAllFields();
-    await wrapper.setData({
-      pricePerItem,
+  it.each(invalidCharacters.concat(whitespaceCharacters).concat(validHugePriceCharacters))(
+    'Invalid if PRICE PER ITEM contain space, tab, symbol, other language, number  >= 10000, PRICE PER ITEM = "%s"', async (price) => {
+      await populateAllFields();
+      await wrapper.setData({
+        price,
+      });
+      await Vue.nextTick();
+      expect(wrapper.vm.valid).toBeFalsy();
     });
-    await Vue.nextTick();
-    expect(wrapper.vm.valid).toBeFalsy();
-  });
 
   it.each(invalidCharacters.concat(whitespaceCharacters))(
     'Invalid if TOTAL PRICE contain space, tab, symbol, other language, TOTAL PRICE = "%s"',
-    async (pricePerItem) => {
+    async (price) => {
       await populateAllFields();
       await wrapper.setData({
-        pricePerItem,
+        price,
       });
       await Vue.nextTick();
       expect(wrapper.vm.valid).toBeFalsy();
