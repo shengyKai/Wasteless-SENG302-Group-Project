@@ -56,6 +56,14 @@
                 <v-list-item-title >Sale Listing</v-list-item-title>
               </v-list-item-content>
             </v-list-item>
+            <v-list-item @click="viewCreateSaleItem">
+              <v-list-item-icon>
+                <v-icon>mdi-view-list</v-icon>
+              </v-list-item-icon>
+              <v-list-item-content>
+                <v-list-item-title >Create Sale Item (temporary)</v-list-item-title>
+              </v-list-item-content>
+            </v-list-item>
           </v-list-item-group>
         </v-list>
       </v-card-text>
@@ -99,6 +107,12 @@ export default {
      */
     viewCreateInventory() {
       this.$store.commit('showCreateInventory', this.$store.state.activeRole.id);
+    },
+    /**
+     * Shows the create Sale Item dialog
+     */
+    viewCreateSaleItem() {
+      this.$store.commit('showCreateSaleItem', this.$store.state.activeRole.id);
     },
     /**
      * Shows the Catalogue page
