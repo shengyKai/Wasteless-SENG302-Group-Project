@@ -47,6 +47,8 @@
           <p class="error-text text-center" v-if ="errorMessage !== undefined"> {{errorMessage}} </p>
         </v-card-text>
         <v-card-actions>
+          <v-spacer/>
+          <div class="error--text" v-if="feedback !== undefined">{{ feedback }}</div>
           <v-btn text color="primary" :disabled="!valid" @click="createCard">
             Create Card
           </v-btn>
@@ -143,6 +145,21 @@ export default {
         return true;
       }
       return false;
+    },
+    feedback() {
+      if (!this.title || this.title.length === 0) {
+        return 'Card title must be provided';
+      }
+      if (this.title.length > 50) {
+        return 'Card title must not be longer than 50 characters';
+      }
+      if (this.description && this.description.length > 200) {
+        return 'Card description must not be longer than 200 characters';
+      }
+      if (!this.selectedSection) {
+        return 'Section must be selected';
+      }
+      return undefined;
     }
   },
   methods: {
