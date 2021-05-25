@@ -13,6 +13,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
+import java.util.Objects;
 
 @NoArgsConstructor
 @Entity
@@ -484,5 +485,10 @@ public class InventoryItem {
                                 this.bestBefore.equals(invItem.getBestBefore())) &&
                         this.expires.equals(invItem.getExpires()) &&
                         ChronoUnit.SECONDS.between(this.creationDate, invItem.getCreationDate()) < 20;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, product, quantity, remainingQuantity, pricePerItem, totalPrice, manufactured, sellBy, bestBefore, expires);
     }
 }
