@@ -130,6 +130,15 @@ export type CreateInventoryItem = {
   bestBefore?: string,
   expires: string
 };
+
+export type CreateSaleItem = {
+  inventoryItemId: number,
+  quantity: number,
+  price: number,
+  moreInfo?: string,
+  closes?: string,
+};
+
 export type Sale = {
   id: number,
   inventoryItem: InventoryItem,
@@ -153,21 +162,19 @@ export type InventoryItem = {
   expires: string
 };
 
-export type CreateSaleItem = {
-  inventoryItemId: number,
-  quantity: number,
-  price: number,
-  info?: string,
-  closes?: string
-};
-
 export type CreateMarketplaceCard = {
   creatorId: number,
   section: "ForSale" | "Wanted" | "Exchange",
   title: string,
   description?: string,
   keywordIds: number[],
-}
+};
+
+export type Keyword = {
+  id: number,
+  name: string,
+  created: string
+};
 
 export type CreateProduct = Omit<Product, 'created' | 'images'>;
 
@@ -395,10 +402,16 @@ export async function createProduct(businessId: number, product: CreateProduct):
   return undefined;
 }
 
-
-export async function createSaleItem(businessId: number, SaleItem: CreateSaleItem): Promise<MaybeError<undefined>> {
+/**
+ * Adds a sale item to the business sales listing
+ *
+ * @param businessId Business id to identify with the database to add the sales item to the correct business
+ * @param saleItem The properties to create a sales item with
+ */
+export async function createSaleItem(businessId: number, saleItem: CreateSaleItem): Promise<MaybeError<undefined>> {
   try {
-    await instance.post(`/businesses/${businessId}/listings`, SaleItem);
+    const response = await instance.post(`/businesses/${businessId}/listings`, saleItem);
+    return response.data;
   } catch (error) {
     let status: number | undefined = error.response?.status;
     if (status === undefined) return 'Failed to reach backend';
@@ -407,7 +420,6 @@ export async function createSaleItem(businessId: number, SaleItem: CreateSaleIte
 
     return 'Request failed: ' + status;
   }
-  return undefined;
 }
 
 
@@ -707,7 +719,7 @@ export async function getInventory(businessId: number): Promise<MaybeError<Inven
 /**
    * Sends a query for the total number of inventory items in the business
    *
-   * @param buisnessId Business id to identify with the database to retrieve the inventory count
+   * @param businessId Business id to identify with the database to retrieve the inventory count
    * @returns Number of inventory items or an error message
    */
 export async function getInventoryCount(businessId: number): Promise<MaybeError<number>> {
@@ -726,6 +738,25 @@ export async function getInventoryCount(businessId: number): Promise<MaybeError<
   }
 
   return response.data.count;
+}
+
+/**
+ * Calls backend for list of keywords to be used in Marketplace Card creation
+ */
+export async function getKeywords(): Promise<MaybeError<Keyword[]>> {
+  let response;
+  try {
+    response = await instance.get(`/keywords/search`);
+  } catch (error) {
+    let status: number | undefined = error.response?.status;
+    if (status === undefined) return 'Failed to reach backend';
+    if (status === 401) return 'Missing/Invalid access token';
+    return `Request failed: ${status}`;
+  }
+  if (!is<Keyword[]>(response.data)) {
+    return 'Response is not a keyword';
+  }
+  return response.data;
 }
 
 /**

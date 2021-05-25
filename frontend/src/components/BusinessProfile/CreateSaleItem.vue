@@ -149,7 +149,7 @@ export default {
         inventoryItemId: this.inventoryItem.id,
         quantity: quantity,
         price: price,
-        info: this.info ? this.info : undefined,
+        moreInfo: this.info ? this.info : undefined,
         closes: this.closes ? this.closes : undefined
       };
       const result = await createSaleItem(this.businessId, saleItem);

@@ -69,9 +69,10 @@ public class Keyword {
         JSONObject json = new JSONObject();
         json.appendField("id", this.getID());
         json.appendField("name", this.getName());
-        json.appendField("created", this.getCreated());
+        json.appendField("created", this.getCreated().toString());
         return json;
     }
+
 
     /**
      * Sets and validates the keyword name
