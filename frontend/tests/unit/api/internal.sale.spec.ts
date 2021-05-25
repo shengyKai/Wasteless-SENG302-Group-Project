@@ -203,7 +203,9 @@ describe("Test GET /businesses/:businessId/listings endpoint", () => {
       }
     });
     const salesItemResponse = await api.createSaleItem(1, salesItem);
-    expect(salesItemResponse).toEqual(undefined);
+    expect(salesItemResponse).toEqual({
+      "listingId": 1
+    });
   });
 
   it("When the user tries to create a sales item with only the required fields, the result returns 'undefined'", async() => {
@@ -218,7 +220,9 @@ describe("Test GET /businesses/:businessId/listings endpoint", () => {
       }
     });
     const salesItemResponse = await api.createSaleItem(1, salesItem);
-    expect(salesItemResponse).toEqual(undefined);
+    expect(salesItemResponse).toEqual({
+      "listingId": 1
+    });
   });
 
   it("When the unsucessful response returns an incorrect request error, an 400 error message is returned", async() => {
