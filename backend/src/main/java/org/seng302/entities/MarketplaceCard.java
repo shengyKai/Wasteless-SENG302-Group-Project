@@ -381,4 +381,17 @@ public class MarketplaceCard {
             return card;
         }
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        MarketplaceCard that = (MarketplaceCard) o;
+        return id.equals(that.id) && section == that.section && title.equals(that.title) && Objects.equals(description, that.description) && created.equals(that.created) && closes.equals(that.closes);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
 }
