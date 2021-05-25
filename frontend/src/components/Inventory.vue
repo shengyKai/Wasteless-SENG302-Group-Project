@@ -150,6 +150,10 @@ export default {
 
       const value = await getInventory(
         this.businessId,
+        this.currentPage,
+        this.resultsPerPage,
+        this.orderBy,
+        this.reverse
       );
       this.totalResults = await getInventoryCount(this.businessId);
       if (typeof value === 'string') {
