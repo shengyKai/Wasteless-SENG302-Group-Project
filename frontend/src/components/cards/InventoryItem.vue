@@ -151,35 +151,60 @@
                 <v-card-text class="pb-0 product-fields">
                   <strong>Manufactured</strong>
                   <br>
-                  {{ placeholderIfEmpty(inventoryItem.manufactured) }}
+                  <template v-if="inventoryItem.manufactured === undefined">
+                    -
+                  </template>
+                  <template v-else>
+                    {{ formatDate(inventoryItem.manufactured) }}
+                  </template>
                 </v-card-text>
               </v-row>
               <v-row>
                 <v-card-text class="pb-0 product-fields">
                   <strong>Created</strong>
                   <br>
-                  {{ placeholderIfEmpty(product.created) }}
+                  <template v-if="inventoryItem.created === undefined">
+                    -
+                  </template>
+                  <template v-else>
+                    {{ formatDate(inventoryItem.created) }}
+                  </template>
                 </v-card-text>
               </v-row>
               <v-row>
                 <v-card-text class="pb-0 product-fields">
                   <strong>Sell By</strong>
                   <br>
-                  {{ placeholderIfEmpty(inventoryItem.sellBy) }}
+                  <template v-if="inventoryItem.sellBy === undefined">
+                    -
+                  </template>
+                  <template v-else>
+                    {{ formatDate(inventoryItem.sellBy) }}
+                  </template>
                 </v-card-text>
               </v-row>
               <v-row>
                 <v-card-text class="pb-0 product-fields">
                   <strong>Best Before</strong>
                   <br>
-                  {{ placeholderIfEmpty(inventoryItem.bestBefore) }}
+                  <template v-if="inventoryItem.bestBefore === undefined">
+                    -
+                  </template>
+                  <template v-else>
+                    {{ formatDate(inventoryItem.bestBefore) }}
+                  </template>
                 </v-card-text>
               </v-row>
               <v-row>
                 <v-card-text class="pb-0 product-fields">
                   <strong>Expiry</strong>
                   <br>
-                  {{ placeholderIfEmpty(inventoryItem.expires) }}
+                  <template v-if="inventoryItem.expires === undefined">
+                    -
+                  </template>
+                  <template v-else>
+                    {{ formatDate(inventoryItem.expires) }}
+                  </template>
                 </v-card-text>
               </v-row>
             </v-col>
@@ -197,7 +222,7 @@
                 <div class="timeline-label">Manufactured</div>
               </template>
               <div class="timeline-content">
-                {{ inventoryItem.manufactured }}
+                {{ formatDate(inventoryItem.manufactured) }}
               </div>
             </v-timeline-item>
             <v-timeline-item v-if="product.created" small color="grey" right>
@@ -205,7 +230,7 @@
                 <div class="timeline-label">Created</div>
               </template>
               <div class="timeline-content">
-                {{ product.created }}
+                {{ formatDate(product.created) }}
               </div>
             </v-timeline-item>
             <v-timeline-item v-if="inventoryItem.sellBy" small color="yellow" right>
@@ -213,7 +238,7 @@
                 <div class="timeline-label">Sell By</div>
               </template>
               <div class="timeline-content">
-                {{ inventoryItem.sellBy }}
+                {{ formatDate(inventoryItem.sellBy) }}
               </div>
             </v-timeline-item>
             <v-timeline-item v-if="inventoryItem.bestBefore" small color="orange" right>
@@ -221,7 +246,7 @@
                 <div class="timeline-label">Best Before</div>
               </template>
               <div class="timeline-content">
-                {{ inventoryItem.bestBefore }}
+                {{ formatDate(inventoryItem.bestBefore) }}
               </div>
             </v-timeline-item>
             <v-timeline-item v-if="inventoryItem.expires" small color="red" f right>
@@ -229,7 +254,7 @@
                 <div class="timeline-label">Expiry</div>
               </template>
               <div class="timeline-content">
-                {{ inventoryItem.expires }}
+                {{ formatDate(inventoryItem.expires) }}
               </div>
             </v-timeline-item>
           </v-timeline>
@@ -272,6 +297,7 @@
 import FullProductDescription from "../utils/FullProductDescription.vue";
 import ProductImageCarousel from "../utils/ProductImageCarousel.vue";
 import { currencyFromCountry } from "@/api/currency";
+import { formatDate } from '@/utils';
 
 export default {
   name: "InventoryItem",
@@ -325,6 +351,7 @@ export default {
     viewCreateSaleItem() {
       this.$store.commit('showCreateSaleItem', {businessId: this.businessId, inventoryItem: this.inventoryItem});
     },
+    formatDate,
   },
 };
 </script>

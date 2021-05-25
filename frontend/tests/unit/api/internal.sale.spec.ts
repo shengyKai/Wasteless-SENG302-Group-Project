@@ -196,7 +196,7 @@ describe("Test GET /businesses/:businessId/listings endpoint", () => {
       price: 1,
       moreInfo: 'Some Info',
       closes: 'Some Date',
-    }
+    };
     instance.post.mockResolvedValueOnce({
       data: {
         "listingId": 1
@@ -213,7 +213,7 @@ describe("Test GET /businesses/:businessId/listings endpoint", () => {
       inventoryItemId: 1,
       quantity: 1,
       price: 1
-    }
+    };
     instance.post.mockResolvedValueOnce({
       data: {
         "listingId": 1
@@ -226,13 +226,13 @@ describe("Test GET /businesses/:businessId/listings endpoint", () => {
   });
 
   it("When the unsucessful response returns an incorrect request error, an 400 error message is returned", async() => {
-    //the sales item below is technically still in the correct format, because we still need to feed the correct 
-    //format for the salesItem in order for the mocking of createSaleItem to work. 
+    //the sales item below is technically still in the correct format, because we still need to feed the correct
+    //format for the salesItem in order for the mocking of createSaleItem to work.
     const salesItem = {
       inventoryItemId: 1,
       quantity: 1,
       price: 1
-    }
+    };
     instance.post.mockRejectedValueOnce({
       response: {
         status: 400
@@ -247,7 +247,7 @@ describe("Test GET /businesses/:businessId/listings endpoint", () => {
       inventoryItemId: 1,
       quantity: 1,
       price: 1
-    }
+    };
     instance.post.mockRejectedValueOnce({
       response: {
         status: 403
@@ -262,7 +262,7 @@ describe("Test GET /businesses/:businessId/listings endpoint", () => {
       inventoryItemId: 1,
       quantity: 1,
       price: 1
-    }
+    };
     instance.post.mockRejectedValueOnce({
       response: {}
     });
@@ -275,7 +275,7 @@ describe("Test GET /businesses/:businessId/listings endpoint", () => {
       inventoryItemId: 1,
       quantity: 1,
       price: 1
-    }
+    };
     instance.post.mockRejectedValueOnce({
       response: {
         status: 500

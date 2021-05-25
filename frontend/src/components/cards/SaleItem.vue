@@ -70,7 +70,8 @@
 <script>
 import ProductImageCarousel from "@/components/utils/ProductImageCarousel";
 import FullProductDescription from "@/components/utils/FullProductDescription";
-import {currencyFromCountry} from "@/api/currency";
+import { currencyFromCountry } from "@/api/currency";
+import { formatDate } from '@/utils';
 
 export default {
   name: "SaleItem",
@@ -109,7 +110,7 @@ export default {
      */
     createdFormatted() {
       let date = new Date(this.saleItem.created);
-      return date.toDateString().slice(3);
+      return formatDate(date);
     },
     /**
      * Creates a nicely formatted readable string for the sales expiry date
@@ -117,7 +118,7 @@ export default {
      */
     expiresFormatted() {
       let date = new Date(this.saleItem.inventoryItem.expires);
-      return date.toDateString().slice(3);
+      return formatDate(date);
     },
     /**
      * Creates a nicely formatted readable string for the sales close date
@@ -125,7 +126,7 @@ export default {
      */
     closesFormatted() {
       let date = new Date(this.saleItem.closes);
-      return date.toDateString().slice(3);
+      return formatDate(date);
     },
     /**
      * Creates a nicely formatted retail price, including the currency

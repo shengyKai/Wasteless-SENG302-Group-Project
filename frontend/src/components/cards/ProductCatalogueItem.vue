@@ -78,7 +78,7 @@
                 <v-card-text class="pb-0 product-fields">
                   <strong>Date Added: </strong>
                   <br >
-                  {{ product.created }}
+                  {{ formatDate(product.created) }}
                 </v-card-text>
               </v-row>
               <v-row>
@@ -130,6 +130,7 @@ import ProductImageCarousel from "../utils/ProductImageCarousel.vue";
 import { currencyFromCountry } from "@/api/currency";
 import ProductImageUploader from "../utils/ProductImageUploader";
 import { makeImagePrimary, deleteImage } from "@/api/internal";
+import { formatDate } from '@/utils';
 
 export default {
   name: "ProductCatalogueItem",
@@ -168,16 +169,6 @@ export default {
     manufacturer() {
       return this.product.manufacturer || "Not set";
     },
-    /**
-     * Method to change date format into a more human readable format
-     */
-    dateCreated() {
-      if (this.product.created === undefined) return '';
-      const dateCreated = new Date(this.product.created);
-      const parts = dateCreated.toDateString().split(' ');
-      return `${parts[2]} ${parts[1]} ${parts[3]}`;
-      // return `${dateCreated.toDateString()}`;
-    }
   },
   async created() {
     // When the catalogue item is created, the currency will be set to the currency of the country the product is being
@@ -217,6 +208,8 @@ export default {
       }
       this.$router.go(); // refresh the page to see the changes
     },
+
+    formatDate,
   },
 };
 
