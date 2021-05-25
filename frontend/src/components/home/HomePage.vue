@@ -71,54 +71,6 @@ export default {
     BusinessActionPanel,
     UserActionPanel,
   },
-  methods: {
-    /**
-     * Shows the profile page
-     * base on the current active role
-     */
-    viewProfile() {
-      switch (this.role.type) {
-      case "user":
-        this.$router.push("/profile");
-        break;
-      case "business":
-        this.$router.push("/business/" + this.$store.state.activeRole.id);
-        break;
-      default:
-        this.$router.push("/profile");
-      }
-    },
-    /**
-     * Shows the create business dialog
-     */
-    viewCreateBusiness() {
-      this.$store.commit('showCreateBusiness');
-    },
-    /**
-     * Shows the create product dialog
-     */
-    viewCreateProduct() {
-      this.$store.commit('showCreateProduct', this.$store.state.activeRole.id);
-    },
-    /**
-     * Shows the create Inventory dialog
-     */
-    viewCreateInventory() {
-      this.$store.commit('showCreateInventory', this.$store.state.activeRole.id);
-    },
-    /**
-     * Shows the Catalogue page
-     */
-    goToCataloguePage() {
-      this.$router.push(`/business/${this.$store.state.activeRole.id}/products`);
-    },
-    /**
-     * Shows the Inventory page
-     */
-    goInventoryPage() {
-      this.$router.push(`/business/${this.$store.state.activeRole.id}/inventory`);
-    },
-  },
   computed: {
     /**
      * Current active user role
@@ -187,6 +139,23 @@ pre {
 
 .newsfeed-item {
   margin-bottom: 10px;
+}
+
+.action-pane {
+  margin-right: 10px;
+  max-height: 400px;
+}
+
+
+@media not all and (min-width: 992px) {
+  .action-pane {
+    display: block;
+  }
+}
+
+.action-button {
+  display: block;
+  margin: 10px;
 }
 
 </style>

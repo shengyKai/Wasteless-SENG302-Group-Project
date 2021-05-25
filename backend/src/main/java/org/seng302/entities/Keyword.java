@@ -1,6 +1,7 @@
 package org.seng302.entities;
 
 import lombok.NoArgsConstructor;
+import net.minidev.json.JSONObject;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.StringUtils;
 import org.springframework.web.server.ResponseStatusException;
@@ -59,6 +60,19 @@ public class Keyword {
     public Instant getCreated() {
         return created;
     }
+
+    /**
+     * Constructs a JSON representation of the keyword
+     * @return JSON object containing keyword data
+     */
+    public JSONObject constructJSONObject() {
+        JSONObject json = new JSONObject();
+        json.appendField("id", this.getID());
+        json.appendField("name", this.getName());
+        json.appendField("created", this.getCreated().toString());
+        return json;
+    }
+
 
     /**
      * Sets and validates the keyword name

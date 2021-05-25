@@ -1,8 +1,9 @@
-import {User,  Business, getUser, login} from './api/internal';
+import {User, Business, getUser, login, InventoryItem} from './api/internal';
 import Vuex, { Store, StoreOptions } from 'vuex';
 import { COOKIE, deleteCookie, getCookie, isTesting, setCookie } from './utils';
 
 type UserRole = { type: "user" | "business", id: number};
+type SaleItemInfo = {businessId: number, inventoryItem: InventoryItem};
 
 export type StoreData = {
   /**
@@ -40,6 +41,10 @@ export type StoreData = {
    * Whether or not the dialog for registering a business is being shown.
    */
   createInventoryDialog: number | undefined,
+  /**
+   * Whether or not the dialog for registering a business is being shown.
+   */
+   createSaleItemDialog: SaleItemInfo | undefined,
 };
 
 function createOptions(): StoreOptions<StoreData> {
@@ -51,6 +56,7 @@ function createOptions(): StoreOptions<StoreData> {
       createBusinessDialogShown: false,
       createProductDialogBusiness: undefined,
       createInventoryDialog: undefined,
+      createSaleItemDialog: undefined,
     },
     mutations: {
       setUser (state, payload: User) {
@@ -138,7 +144,6 @@ function createOptions(): StoreOptions<StoreData> {
       showCreateInventory(state, businessId: number) {
         state.createInventoryDialog = businessId;
       },
-
       /**
        * Hides the create inventory dialog
        *
@@ -147,6 +152,24 @@ function createOptions(): StoreOptions<StoreData> {
       hideCreateInventory(state) {
         state.createInventoryDialog = undefined;
       },
+      /**
+       * Creates a modal create inventory dialog for adding a sale item to the provided business
+       *
+       * @param state Current store state
+       * @param businessId Business to create the sale item for
+       */
+      showCreateSaleItem(state, saleItemInfo: SaleItemInfo) {
+        state.createSaleItemDialog = saleItemInfo;
+      },
+      /**
+       * Hides the create inventory dialog
+       *
+       * @param state Current store state
+       */
+      hideCreateSaleItem(state) {
+        state.createSaleItemDialog = undefined;
+      },
+
       /**
        * Sets the current user role
        *

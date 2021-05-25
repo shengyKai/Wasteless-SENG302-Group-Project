@@ -1,5 +1,6 @@
 package org.seng302.controllers;
 
+import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -13,9 +14,7 @@ import org.seng302.tools.AuthenticationTokenManager;
 import org.seng302.tools.JsonTools;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.HttpServletRequest;
@@ -113,5 +112,27 @@ public class CardController {
         }
 
         return card;
+    }
+
+    /**
+     * Retrieve all of the Marketplace Cards for a given section.
+     * @param sectionName The name of the section to retrieve
+     * @return A JSON Array of Marketplace cards
+     */
+    @GetMapping("/cards")
+    public JSONArray getCards(HttpServletRequest request, @RequestParam(name = "section") String sectionName) {
+        AuthenticationTokenManager.checkAuthenticationToken(request);
+
+        // parse the section
+        MarketplaceCard.Section section = MarketplaceCard.sectionFromString(sectionName);
+
+        // database call for section
+        var cards = marketplaceCardRepository.getAllBySection(section);
+        //return JSON Object
+        JSONArray responseBody = new JSONArray();
+        for (MarketplaceCard card : cards) {
+            responseBody.appendElement(card.constructJSONObject(request));
+        }
+        return responseBody;
     }
 }

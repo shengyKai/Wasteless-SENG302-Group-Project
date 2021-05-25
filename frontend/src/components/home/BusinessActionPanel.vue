@@ -40,12 +40,12 @@
                 <v-list-item-title >Inventory</v-list-item-title>
               </v-list-item-content>
             </v-list-item>
-            <v-list-item @click="viewCreateInventory">
+            <v-list-item @click="goSalePage">
               <v-list-item-icon>
                 <v-icon>mdi-view-list</v-icon>
               </v-list-item-icon>
               <v-list-item-content>
-                <v-list-item-title >Create Inventory Item (temporary)</v-list-item-title>
+                <v-list-item-title >Sale Listing</v-list-item-title>
               </v-list-item-content>
             </v-list-item>
           </v-list-item-group>
@@ -86,12 +86,7 @@ export default {
     viewCreateProduct() {
       this.$store.commit('showCreateProduct', this.$store.state.activeRole.id);
     },
-    /**
-     * Shows the create Inventory dialog
-     */
-    viewCreateInventory() {
-      this.$store.commit('showCreateInventory', this.$store.state.activeRole.id);
-    },
+
     /**
      * Shows the Catalogue page
      */
@@ -103,6 +98,9 @@ export default {
      */
     goInventoryPage() {
       this.$router.push(`/business/${this.$store.state.activeRole.id}/inventory`);
+    },
+    goSalePage() {
+      this.$router.push(`/business/${this.businessId}/listings`);
     },
   },
 };
@@ -124,7 +122,7 @@ export default {
 
 .action-pane {
   margin-right: 10px;
-  max-height: 350px;
+  max-height: 400px;
 }
 
 
