@@ -48,14 +48,6 @@
                 <v-list-item-title >Sale Listing</v-list-item-title>
               </v-list-item-content>
             </v-list-item>
-            <v-list-item @click="viewCreateSaleItem">
-              <v-list-item-icon>
-                <v-icon>mdi-view-list</v-icon>
-              </v-list-item-icon>
-              <v-list-item-content>
-                <v-list-item-title >Create Sale Item (temporary)</v-list-item-title>
-              </v-list-item-content>
-            </v-list-item>
           </v-list-item-group>
         </v-list>
       </v-card-text>
@@ -96,12 +88,6 @@ export default {
     },
 
     /**
-     * Shows the create Sale Item dialog
-     */
-    viewCreateSaleItem() {
-      this.$store.commit('showCreateSaleItem', this.$store.state.activeRole.id);
-    },
-    /**
      * Shows the Catalogue page
      */
     goToCataloguePage() {
@@ -114,7 +100,7 @@ export default {
       this.$router.push(`/business/${this.$store.state.activeRole.id}/inventory`);
     },
     goSalePage() {
-      this.$router.push(`/business/${this.$store.state.activeRole.id}/sales`);
+      this.$router.push(`/business/${this.businessId}/listings`);
     },
   },
 };

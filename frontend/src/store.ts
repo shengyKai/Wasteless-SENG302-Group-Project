@@ -1,8 +1,9 @@
-import {User,  Business, getUser, login} from './api/internal';
+import {User, Business, getUser, login, InventoryItem} from './api/internal';
 import Vuex, { Store, StoreOptions } from 'vuex';
 import { COOKIE, deleteCookie, getCookie, isTesting, setCookie } from './utils';
 
 type UserRole = { type: "user" | "business", id: number};
+type SaleItemInfo = {businessId: number, inventoryItem: InventoryItem};
 
 export type StoreData = {
   /**
@@ -43,7 +44,7 @@ export type StoreData = {
   /**
    * Whether or not the dialog for registering a business is being shown.
    */
-   createSaleItemDialog: number | undefined,
+   createSaleItemDialog: SaleItemInfo | undefined,
 };
 
 function createOptions(): StoreOptions<StoreData> {
@@ -152,13 +153,13 @@ function createOptions(): StoreOptions<StoreData> {
         state.createInventoryDialog = undefined;
       },
       /**
-       * Creates a modal create inventory dialog for adding a inventory item to the provided business
+       * Creates a modal create inventory dialog for adding a sale item to the provided business
        *
        * @param state Current store state
        * @param businessId Business to create the sale item for
        */
-      showCreateSaleItem(state, businessId: number) {
-        state.createSaleItemDialog = businessId;
+      showCreateSaleItem(state, saleItemInfo: SaleItemInfo) {
+        state.createSaleItemDialog = saleItemInfo;
       },
       /**
        * Hides the create inventory dialog

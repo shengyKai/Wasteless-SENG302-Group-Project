@@ -184,4 +184,17 @@ describe('InventoryItem.vue', () => {
   it('Must match snapshot', () => {
     expect(wrapper).toMatchSnapshot();
   });
+
+  it('Must have a button to create a sale', () => {
+    const button = wrapper.findComponent({ref:'createSaleItemButton'});
+    expect(button.exists()).toBeTruthy();
+  });
+
+  it('Clicking the create sale button opens a dialog to create a sale', async () => {
+    const button = wrapper.findComponent({ref:'createSaleItemButton'});
+    expect(store.state.createSaleItemDialog).toBeUndefined();
+    button.trigger('click');
+    await Vue.nextTick();
+    expect(store.state.createSaleItemDialog).not.toBeUndefined();
+  });
 });

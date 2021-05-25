@@ -80,7 +80,7 @@ describe("CreateSaleItem.vue", () => {
     // Creating wrapper around CreateSaleItem with data-app appease vuetify
     const App = localVue.component("App", {
       components: { CreateSaleItem },
-      template: "<div data-app><CreateSaleItem :inventoryItem='{id: 1}'/></div>",
+      template: "<div data-app><CreateSaleItem/></div>",
     });
 
     // Put the CreateSaleItem component inside a div in the global document,
@@ -88,9 +88,27 @@ describe("CreateSaleItem.vue", () => {
     const elem = document.createElement("div");
     document.body.appendChild(elem);
 
+    const testProducts = 
+      {
+        id: "WATT-420-BEANS",
+        name: "Watties Baked Beans - 420g can",
+        description: "Baked Beans as they should be.",
+        manufacturer: "Heinz Wattie's Limited",
+        recommendedRetailPrice: 2.2,
+        created: "2021-05-22T02:06:27.767Z",
+        images: [
+          {
+            id: 1234,
+            filename: "/media/images/23987192387509-123908794328.png",
+            thumbnailFilename: "/media/images/23987192387509-123908794328_thumbnail.png"
+          }
+        ]
+      };
+
     resetStoreForTesting();
     let store = getStore();
     store.state.createInventoryDialog = 90;
+    store.state.createSaleItemDialog = {businessId: 1, inventoryItem: {id: 1, product: testProducts, quantity: 5, remainingQuantity: 3, expires: "somedate"}};
 
     appWrapper = mount(App, {
       localVue,
@@ -116,7 +134,7 @@ describe("CreateSaleItem.vue", () => {
     await wrapper.setData({
       //TODO: the inventory item will need to be provided
       quantity: 3,
-      pricePerItem: "10" //Need to retrieve this from the inventory item
+      price: "10" //Need to retrieve this from the inventory item
     });
   }
 
@@ -187,10 +205,10 @@ describe("CreateSaleItem.vue", () => {
 
   it.each(validPriceCharacters)(
     'Valid when PRICE PER ITEM contain valid price [e.g 999 or 999.99] & <10000, Price per Item =  "%s"',
-    async (pricePerItem) => {
+    async (price) => {
       await populateAllFields();
       await wrapper.setData({
-        pricePerItem,
+        price,
       });
       await Vue.nextTick();
       expect(wrapper.vm.valid).toBeTruthy();
@@ -209,22 +227,22 @@ describe("CreateSaleItem.vue", () => {
     }
   );
 
-  it.each(invalidCharacters.concat(whitespaceCharacters).concat(validHugePriceCharacters))
-  ('Invalid if PRICE PER ITEM contain space, tab, symbol, other language, number  >= 10000, PRICE PER ITEM = "%s"', async (pricePerItem) => {
-    await populateAllFields();
-    await wrapper.setData({
-      pricePerItem,
+  it.each(invalidCharacters.concat(whitespaceCharacters).concat(validHugePriceCharacters))(
+    'Invalid if PRICE PER ITEM contain space, tab, symbol, other language, number  >= 10000, PRICE PER ITEM = "%s"', async (price) => {
+      await populateAllFields();
+      await wrapper.setData({
+        price,
+      });
+      await Vue.nextTick();
+      expect(wrapper.vm.valid).toBeFalsy();
     });
-    await Vue.nextTick();
-    expect(wrapper.vm.valid).toBeFalsy();
-  });
 
   it.each(invalidCharacters.concat(whitespaceCharacters))(
     'Invalid if TOTAL PRICE contain space, tab, symbol, other language, TOTAL PRICE = "%s"',
-    async (pricePerItem) => {
+    async (price) => {
       await populateAllFields();
       await wrapper.setData({
-        pricePerItem,
+        price,
       });
       await Vue.nextTick();
       expect(wrapper.vm.valid).toBeFalsy();
@@ -243,15 +261,5 @@ describe("CreateSaleItem.vue", () => {
     await  Vue.nextTick();
     expect(createSaleItem).toBeCalledTimes(0);
     expect(wrapper.emitted().closeDialog).toBeTruthy();
-  });
-
-  it.skip("displays an error code when an error is raised", async ()=>{
-    await populateRequiredFields();
-    createSaleItem.mockResolvedValue("Hey there was an error");
-    await Vue.nextTick();
-    await findCreateButton().trigger('click');
-    await Vue.nextTick();
-    expect(appWrapper.text()).toContain("Hey there was an error");
-    expect(wrapper.emitted().closeDialog).toBeFalsy();
   });
 });
