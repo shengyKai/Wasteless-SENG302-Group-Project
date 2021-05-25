@@ -27,7 +27,7 @@
                 <!-- INPUT: Price per item. Auto generated.-->
                 <v-col cols="6">
                   <v-text-field
-                    v-model="inventoryItem.pricePerItem"
+                    v-model="price"
                     class="required"
                     label="Price Per Item"
                     prefix="$"
@@ -94,7 +94,7 @@ export default {
       valid: false,
       today: new Date(),
       quantity: "",
-      price: '',
+      price: "",
       info: "",
       closes: "",
       closesValid: true,
@@ -183,6 +183,9 @@ export default {
     businessId() {
       return this.$store.state.createSaleItemDialog.businessId;
     }
+  },
+  mounted () {
+    this.price = this.inventoryItem.pricePerItem;
   }
 };
 </script>

@@ -252,6 +252,21 @@ describe("CreateSaleItem.vue", () => {
     expect(wrapper.emitted().closeDialog).toBeFalsy();
   });
 
+  it("Valid when the info field is undefined", async () => {
+    await populateRequiredFields();
+    await Vue.nextTick();
+    expect(findCreateButton().props().disabled).toBeFalsy();
+  });
+
+  it("Valid when the info field contains a sentence", async () => {
+    await populateRequiredFields();
+    await Vue.nextTick();
+    await wrapper.setData({
+      info: "Today's gonna be a good day"
+    });
+    expect(findCreateButton().props().disabled).toBeFalsy();
+  })
+
   describe("Closing date validation", () => {
     /**
      * Gets todays date and adds on a certain number of years
