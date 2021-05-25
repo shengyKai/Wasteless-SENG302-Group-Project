@@ -160,7 +160,7 @@ export default {
       if (this.description && this.description.length > 200) {
         return 'Card description must not be longer than 200 characters';
       }
-      if (this.description && !this.allowedCharsRegex.matches(this.description)) {
+      if (this.description && !this.allowedCharsRegex.test(this.description)) {
         return 'Card description must only contain letters, numbers, punctuation and whitespace';
       }
       if (!this.selectedSection) {

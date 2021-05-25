@@ -164,6 +164,19 @@ describe('CreateCard.vue', () => {
     expect(findCreateButton().props().disabled).toBeFalsy();
   });
 
+  it('Valid if all fields are provided', async () => {
+    await wrapper.setData({
+      title: "Title",
+      selectedSection: "ForSale",
+      description: "Description"
+    });
+
+    await Vue.nextTick();
+
+    expect(wrapper.vm.valid).toBeTruthy();
+    expect(findCreateButton().props().disabled).toBeFalsy();
+  });
+
   it('Invalid if title not provided', async () => {
     await wrapper.setData({
       title: "",
@@ -204,6 +217,45 @@ describe('CreateCard.vue', () => {
     await wrapper.setData({
       title: "a".repeat(51),
       selectedSection: "ForSale",
+    });
+
+    await Vue.nextTick();
+
+    expect(wrapper.vm.valid).toBeFalsy();
+    expect(findCreateButton().props().disabled).toBeTruthy();
+  });
+
+  it.each(validCharacters)('Valid if description contains valid characters %s', async (character) => {
+    await wrapper.setData({
+      title: "Title",
+      selectedSection: "ForSale",
+      description: character
+    });
+
+    await Vue.nextTick();
+
+    expect(wrapper.vm.valid).toBeTruthy();
+    expect(findCreateButton().props().disabled).toBeFalsy();
+  });
+
+  it.each(invalidCharacters)('Invalid if description contains invalid characters %s', async (character) => {
+    await wrapper.setData({
+      title: "Title",
+      selectedSection: "ForSale",
+      description: character
+    });
+
+    await Vue.nextTick();
+
+    expect(wrapper.vm.valid).toBeFalsy();
+    expect(findCreateButton().props().disabled).toBeTruthy();
+  });
+
+  it('Invalid if description has over 200 characters', async () => {
+    await wrapper.setData({
+      title: "Title",
+      selectedSection: "ForSale",
+      description: "a".repeat(201),
     });
 
     await Vue.nextTick();
