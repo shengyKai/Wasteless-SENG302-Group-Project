@@ -167,7 +167,13 @@ export type CreateMarketplaceCard = {
   title: string,
   description?: string,
   keywordIds: number[],
-}
+};
+
+export type Keyword = {
+  id: number,
+  name: string,
+  created: string
+};
 
 export type CreateProduct = Omit<Product, 'created' | 'images'>;
 
@@ -731,15 +737,18 @@ export async function getInventoryCount(businessId: number): Promise<MaybeError<
 /**
  * Calls backend for list of keywords to be used in Marketplace Card creation
  */
-export async function getKeywords(): Promise<MaybeError<string[]>> {
+export async function getKeywords(): Promise<MaybeError<Keyword[]>> {
   let response;
   try {
     response = await instance.get(`/keywords/search`);
   } catch (error) {
     let status: number | undefined = error.response?.status;
-
     if (status === undefined) return 'Failed to reach backend';
+    if (status === 401) return 'Unauthorised';
     return `Request failed: ${status}`;
+  }
+  if (!is<Keyword[]>(response.data)) {
+    return 'Response is not a keyword';
   }
   return response.data;
 }
