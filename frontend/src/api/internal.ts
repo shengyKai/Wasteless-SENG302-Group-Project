@@ -404,7 +404,8 @@ export async function createProduct(businessId: number, product: CreateProduct):
  */
 export async function createSaleItem(businessId: number, saleItem: CreateSaleItem): Promise<MaybeError<undefined>> {
   try {
-    await instance.post(`/businesses/${businessId}/listings`, saleItem);
+    const response = await instance.post(`/businesses/${businessId}/listings`, saleItem);
+    return response.data;
   } catch (error) {
     let status: number | undefined = error.response?.status;
     if (status === undefined) return 'Failed to reach backend';
@@ -413,7 +414,6 @@ export async function createSaleItem(businessId: number, saleItem: CreateSaleIte
 
     return 'Request failed: ' + status;
   }
-  return undefined;
 }
 
 

@@ -262,4 +262,12 @@ describe("CreateSaleItem.vue", () => {
     expect(createSaleItem).toBeCalledTimes(0);
     expect(wrapper.emitted().closeDialog).toBeTruthy();
   });
+
+  it("Shows error message if there is any error received from the api endpoint", async ()=> {
+    createSaleItem.mockResolvedValueOnce("some error message");
+    await populateRequiredFields();
+    await findCreateButton().trigger('click');
+    await  Vue.nextTick();
+    expect(wrapper.vm.errorMessage).toEqual('some error message');
+  });
 });
