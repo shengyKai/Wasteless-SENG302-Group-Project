@@ -27,11 +27,12 @@
                 <!-- INPUT: Price per item. Auto generated.-->
                 <v-col cols="6">
                   <v-text-field
-                    v-model="price"
+                    v-model="inventoryItem.pricePerItem"
                     class="required"
                     label="Price Per Item"
                     prefix="$"
                     :rules="mandatoryRules.concat(mandatoryRules).concat(priceRules)"
+                    :disabled="inventoryItem.pricePerItem != undefined"
                     outlined
                   />
                 </v-col>
