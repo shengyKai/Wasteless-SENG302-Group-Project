@@ -83,13 +83,15 @@ import {createSaleItem} from '@/api/internal';
 export default {
   name: 'CreateSaleItem',
   components: {},
+  props: {
+    inventoryItem: Object
+  },
   data() {
     return {
       errorMessage: undefined,
       dialog: true,
       valid: false,
       today: new Date().toISOString().slice(0,10),
-      inventoryItem: "",
       quantity: "",
       pricePerItem: "",
       info: "",
@@ -140,6 +142,7 @@ export default {
         return;
       }
       const saleItem = {
+        inventoryItemId: this.inventoryItem.id,
         quantity: quantity,
         pricePerItem: this.pricePerItem,
         info: this.info ? this.info : undefined,

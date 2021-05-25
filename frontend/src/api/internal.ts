@@ -131,7 +131,7 @@ export type CreateInventoryItem = {
   expires: string
 };
 
-export type CreateSale = {
+export type CreateSaleItem = {
   inventoryItemId: number,
   quantity: number,
   price: number,
@@ -160,15 +160,6 @@ export type InventoryItem = {
   sellBy?: string,
   bestBefore?: string,
   expires: string
-};
-
-export type CreateSaleItem = {
-  id: number,
-  inventoryItem: InventoryItem,
-  quantity: number,
-  pricePerItem: number,
-  info?: string,
-  cloes?: string
 };
 
 export type CreateMarketplaceCard = {
@@ -405,10 +396,15 @@ export async function createProduct(businessId: number, product: CreateProduct):
   return undefined;
 }
 
-
-export async function createSaleItem(businessId: number, SaleItem: CreateSaleItem): Promise<MaybeError<undefined>> {
+/**
+ * Adds a sale item to the business sales listing
+ *
+ * @param businessId Business id to identify with the database to add the sales item to the correct business
+ * @param saleItem The properties to create a sales item with
+ */
+export async function createSaleItem(businessId: number, saleItem: CreateSaleItem): Promise<MaybeError<undefined>> {
   try {
-    await instance.post(`/businesses/${businessId}/listings`, SaleItem);
+    await instance.post(`/businesses/${businessId}/listings`, saleItem);
   } catch (error) {
     let status: number | undefined = error.response?.status;
     if (status === undefined) return 'Failed to reach backend';
@@ -780,24 +776,4 @@ export async function createMarketplaceCard(marketplaceCard: CreateMarketplaceCa
     return 'Invalid response format';
   }
   return response.data.cardId;
-}
-
-/**
- * Adds a sale item to the business sales listing
- *
- * @param businessId Business id to identify with the database to add the sales item to the correct business
- * @param saleItem The properties to create a sales item with
- */
- export async function createSaleItem(businessId: number, saleItem: CreateSale): Promise<MaybeError<undefined>> {
-  try {
-    await instance.post(`/businesses/${businessId}/listings`, saleItem);
-  } catch (error) {
-    let status: number | undefined = error.response?.status;
-    if (status === undefined) return 'Failed to reach backend';
-    if (status === 400) return 'Invalid Create Sale Item request'
-    if (status === 403) return 'Operation not permitted';
-
-    return 'Request failed: ' + error.response?.data.message;
-  }
-  return undefined;
 }
