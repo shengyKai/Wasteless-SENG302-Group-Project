@@ -708,10 +708,17 @@ export async function getBusinessSalesCount(businessId: number): Promise<MaybeEr
    * @param businessId
    * @return a list of inventory items
    */
-export async function getInventory(businessId: number): Promise<MaybeError<InventoryItem[]>> {
+export async function getInventory(businessId: number, page: number, resultsPerPage: number, orderBy: ProductOrderBy, reverse: boolean): Promise<MaybeError<InventoryItem[]>> {
   let response;
   try {
-    response = await instance.get(`/businesses/${businessId}/inventory`);
+    response = await instance.get(`/businesses/${businessId}/inventory`, {
+      params: {
+        orderBy: orderBy,
+        page: page,
+        resultsPerPage: resultsPerPage,
+        reverse: reverse.toString(),
+      }
+    });
   } catch (error) {
     let status: number | undefined = error.response?.status;
     if (status === undefined) return 'Failed to reach backend';
