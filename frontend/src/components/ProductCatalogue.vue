@@ -41,7 +41,12 @@
       <!--users would produce the results for each page, and then it will show each result with
       SearchResultItem-->
       <template v-for="product in products">
-        <ProductCatalogueItem :businessId="businessId" :key="product.id" :product="product"/>
+        <ProductCatalogueItem
+          :businessId="businessId"
+          :key="product.id"
+          :product="product"
+          @content-changed="updateResults"
+        />
       </template>
     </v-list>
     <v-pagination

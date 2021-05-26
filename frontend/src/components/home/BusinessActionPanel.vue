@@ -66,6 +66,9 @@
       <v-btn icon @click="goInventoryPage" class="action-button">
         <v-icon large>mdi-view-list</v-icon>
       </v-btn>
+      <v-btn icon @click="goSalePage" class="action-button">
+        <v-icon large>mdi-view-list</v-icon>
+      </v-btn>
     </v-card>
   </div>
 </template>

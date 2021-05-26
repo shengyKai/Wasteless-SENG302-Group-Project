@@ -3,31 +3,6 @@
     <BusinessActionPanel v-if="isBusiness" />
     <UserActionPanel v-else />
     <div class="newsfeed">
-      <!-- Inventory items -->
-      <v-card
-        v-if="isBusiness"
-        outlined
-        rounded="lg"
-        class="newsfeed-item"
-      >
-        <v-card-title>
-          Inventory
-        </v-card-title>
-        <v-card-text class="inventory-container">
-          <v-card
-            v-for="(item, index) in inventoryItems"
-            :key="index"
-            class="inventory-item"
-          >
-            <v-img
-              src="https://edit.co.uk/uploads/2016/12/Image-1-Alternatives-to-stock-photography-Thinkstock.jpg"
-              height="50px"
-            />
-            {{ item }}
-          </v-card>
-        </v-card-text>
-      </v-card>
-
       <!-- Newsfeed -->
       <v-card
         v-for="(item, index) in newsfeedItems"
