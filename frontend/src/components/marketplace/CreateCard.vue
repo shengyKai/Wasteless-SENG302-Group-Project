@@ -27,11 +27,11 @@
                 <v-card-title class="my-n1 title">
                   <textarea rows="1" v-model="title" ref="titleField" class="field" placeholder="Insert Title"/>
                 </v-card-title>
-                <v-card-text class="my-n2 flex-grow-1 d-flex flex-column justify-space-between">
+                <v-card-text class="my-n2 flex-grow-1 d-flex flex-column">
                   <strong>
                     {{ locationString }}
                   </strong>
-                  <div class="d-flex justify-space-between flex-wrap mt-n2">
+                  <div class="d-flex justify-space-between flex-wrap">
                     <span class="mr-1">
                       <em v-if="creator">By {{ user.firstName }} {{ user.lastName }}</em>
                     </span>

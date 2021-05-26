@@ -189,16 +189,16 @@ public class CardController {
         Comparator<MarketplaceCard> sort;
         switch (orderBy) {
             case "title":
-                sort = Comparator.comparing(MarketplaceCard::getTitle);
+                sort = Comparator.comparing(MarketplaceCard::getTitle, String.CASE_INSENSITIVE_ORDER);
                 break;
             case "closes":
                 sort = Comparator.comparing(MarketplaceCard::getCloses);
                 break;
             case "creatorFirstName":
-                sort = Comparator.comparing(marketPlaceCard -> marketPlaceCard.getCreator().getFirstName());
+                sort = Comparator.comparing(marketPlaceCard -> marketPlaceCard.getCreator().getFirstName(), String.CASE_INSENSITIVE_ORDER);
                 break;
             case "creatorLastName":
-                sort = Comparator.comparing(marketPlaceCard -> marketPlaceCard.getCreator().getLastName());
+                sort = Comparator.comparing(marketPlaceCard -> marketPlaceCard.getCreator().getLastName(), String.CASE_INSENSITIVE_ORDER);
                 break;
             case "created":
             default:

@@ -60,17 +60,18 @@ public class ProductController {
         Comparator<Product> sort;
         switch (key) {
             case "name":
-                sort = Comparator.comparing(Product::getName);
+                sort = Comparator.comparing(Product::getName,
+                        String.CASE_INSENSITIVE_ORDER);
                 break;
 
             case "description":
                 sort = Comparator.comparing(Product::getDescription,
-                        Comparator.nullsLast(Comparator.naturalOrder()));
+                        Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER));
                 break;
 
             case "manufacturer":
                 sort = Comparator.comparing(Product::getManufacturer,
-                        Comparator.nullsLast(Comparator.naturalOrder()));
+                        Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER));
                 break;
 
             case "recommendedRetailPrice":

@@ -3,6 +3,16 @@
 
 An application for buying and selling products which are close to their expiration date.
 
+## Deployed application
+
+The application is running in the staging environment at https://csse-s302g5.canterbury.ac.nz/prod.
+
+You can create and account or login to the example account with the following credentials:
+Username: example@seng302.com
+Password: password123
+
+You can also find the DGAA credentials on the git repository https://eng-git.canterbury.ac.nz/seng302-2021/team-500 by navigating to Settings -> CI/CD -> Variables. You must have maintainer access to the repository to do this.
+
 ## Basic Project Structure
 
 A frontend sub-project (web GUI):
