@@ -185,6 +185,11 @@ export default {
     resultsPerPage() {
       this.updateResults();
     },
+    '$store.state.createInventoryDialog': function () {
+      if (this.$store.state.createInventoryDialog === undefined) {
+        this.updateResults();
+      }
+    }
   },
 };
 </script>
