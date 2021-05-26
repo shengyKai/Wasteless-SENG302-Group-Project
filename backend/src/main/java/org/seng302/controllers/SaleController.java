@@ -46,7 +46,7 @@ public class SaleController {
             case "productCode":
                 return Comparator.comparing(saleItem -> saleItem.getProduct().getProductCode());
             case "productName":
-                return Comparator.comparing(saleItem -> saleItem.getProduct().getName());
+                return Comparator.comparing(saleItem -> saleItem.getProduct().getName(), String.CASE_INSENSITIVE_ORDER);
             case "quantity":
                 return Comparator.comparing(SaleItem::getQuantity);
             case "price":
