@@ -35,7 +35,12 @@
                 <!-- shows the edit button for editing product details, which supposedly links to a form -->
                 <a @click="showImageUploaderForm=true">Upload Image</a>
                 <!-- cant mutate parent props directly, so no point to send a prop to the child -->
-                <ProductImageUploader :businessId="businessId" :productCode="product.id" v-model="showImageUploaderForm"/>
+                <ProductImageUploader
+                  :businessId="businessId"
+                  :productCode="product.id"
+                  v-model="showImageUploaderForm"
+                  @image-added="imageAdded"
+                />
               </v-card-actions>
             </v-col>
           </v-row>
@@ -193,7 +198,7 @@ export default {
         this.$store.commit('setError', response);
         return;
       }
-      this.$router.go(); // refresh the page to see the changes
+      this.$emit('content-changed');
     },
 
     /**
@@ -206,9 +211,14 @@ export default {
         this.$store.commit('setError', response);
         return;
       }
-      this.$router.go(); // refresh the page to see the changes
+      this.$emit('content-changed');
     },
-
+    /**
+     * Handler for when a new image is added
+     */
+    async imageAdded() {
+      this.$emit('content-changed');
+    },
     formatDate,
   },
 };
