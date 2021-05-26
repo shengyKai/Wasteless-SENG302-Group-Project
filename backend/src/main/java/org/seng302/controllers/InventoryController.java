@@ -194,17 +194,17 @@ public class InventoryController {
         Comparator<InventoryItem> sort;
         switch (key) {
             case "name":
-                sort = Comparator.comparing(inventoryItem -> inventoryItem.getProduct().getName());
+                sort = Comparator.comparing(inventoryItem -> inventoryItem.getProduct().getName(), String.CASE_INSENSITIVE_ORDER);
                 break;
 
             case "description":
                 sort = Comparator.comparing(inventoryItem -> inventoryItem.getProduct().getDescription(), 
-                Comparator.nullsLast(Comparator.naturalOrder()));
+                Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER));
                 break;
 
             case "manufacturer":
-                sort = Comparator.comparing(inventoryItem -> inventoryItem.getProduct().getManufacturer(), 
-                Comparator.nullsLast(Comparator.naturalOrder()));
+                sort = Comparator.comparing(inventoryItem -> inventoryItem.getProduct().getManufacturer(),
+                        Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER));
                 break;
 
             case "recommendedRetailPrice":
