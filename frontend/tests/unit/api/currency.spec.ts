@@ -19,7 +19,7 @@ describe('currency.ts', () => {
     );
     const response = await currencyFromCountry("Some wrong country");
     expect('errorMessage' in response).toBeTruthy();
-    expect(response).toStrictEqual({"errorMessage": "No country with name Some wrong country was found"});
+    expect(response).toStrictEqual({"errorMessage": "No currency for country with name Some wrong country was found"});
   });
 
   it('Returns with a format error message to the frontend when API responds with a country', async () => {
@@ -69,7 +69,7 @@ describe('currency.ts', () => {
     );
     const currency = await currencyFromCountry("Australia");
     expect(consoleOutput).toEqual([
-      "No country with name Australia was found"
+      "No currency for country with name Australia was found"
     ]);
   });
 
