@@ -629,7 +629,7 @@ class SearchHelperTest {
         assertEquals(1, matches.size());
         User user = matches.get(0);
         assertTrue(user.getMiddleName().equalsIgnoreCase("peter"));
-        assertTrue(user.getLastName().equals("Graham"));
+        assertEquals("Graham", user.getLastName());
     }
 
     /**

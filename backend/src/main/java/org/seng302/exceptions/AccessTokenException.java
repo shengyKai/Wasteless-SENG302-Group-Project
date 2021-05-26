@@ -10,14 +10,14 @@ import org.springframework.web.server.ResponseStatusException;
 
 public class AccessTokenException extends ResponseStatusException {
 
-    private static final HttpStatus status = HttpStatus.UNAUTHORIZED;
-    private static final String reason = "Invalid access token.";
+    private static final HttpStatus HTTP_STATUS = HttpStatus.UNAUTHORIZED;
+    private static final String REASON = "Invalid access token.";
 
     public AccessTokenException() {
-        super(status, reason);
+        super(HTTP_STATUS, REASON);
     }
 
     public AccessTokenException(String reason) {
-        super(status, reason);
+        super(HTTP_STATUS, reason);
     }
 }

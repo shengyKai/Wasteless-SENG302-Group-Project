@@ -1,9 +1,7 @@
 package org.seng302.persistence;
 
 import org.seng302.entities.Business;
-import org.seng302.entities.Product;
 import org.seng302.entities.SaleItem;
-import org.seng302.entities.User;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;

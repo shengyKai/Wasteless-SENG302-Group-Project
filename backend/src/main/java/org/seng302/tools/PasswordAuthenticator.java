@@ -12,6 +12,7 @@ import java.security.NoSuchAlgorithmException;
  * authentication code.
  */
 public class PasswordAuthenticator {
+    private PasswordAuthenticator() {}
 
     /**
      * This method generates a hash authentication code for the given password using algorithm SHA-256.

@@ -7,7 +7,6 @@ import org.seng302.entities.Business;
 import org.seng302.entities.Location;
 import org.seng302.entities.User;
 import org.seng302.persistence.BusinessRepository;
-import org.seng302.persistence.ProductRepository;
 import org.seng302.persistence.UserRepository;
 import org.seng302.tools.AuthenticationTokenManager;
 import org.springframework.http.HttpStatus;
@@ -24,13 +23,11 @@ import java.util.Optional;
 public class BusinessController {
     private final BusinessRepository businessRepository;
     private final UserRepository userRepository;
-    private final ProductRepository productRepository;
     private static final Logger logger = LogManager.getLogger(BusinessController.class.getName());
 
-    public BusinessController(BusinessRepository businessRepository, UserRepository userRepository, ProductRepository productRepository) {
+    public BusinessController(BusinessRepository businessRepository, UserRepository userRepository) {
         this.businessRepository = businessRepository;
         this.userRepository = userRepository;
-        this.productRepository = productRepository;
     }
 
     /**
@@ -40,8 +37,7 @@ public class BusinessController {
      */
     private Location parseLocation(JSONObject businessInfo) {
         JSONObject businessLocation = new JSONObject((Map<String, ?>) businessInfo.get("address")) ;
-        Location address = Location.parseLocationFromJson(businessLocation);
-        return address;
+        return Location.parseLocationFromJson(businessLocation);
     }
 
     /**
@@ -69,13 +65,13 @@ public class BusinessController {
      * @param businessInfo A Json object containing all of the business's details from the registration form.
      */
     @PostMapping("/businesses")
-    public ResponseEntity register(@RequestBody JSONObject businessInfo, HttpServletRequest req) {
+    public ResponseEntity<Void> register(@RequestBody JSONObject businessInfo, HttpServletRequest req) {
         try {
             AuthenticationTokenManager.checkAuthenticationToken(req);
             // Make sure this is an existing user ID
             Optional<User> primaryOwner = userRepository.findById(Long.parseLong((businessInfo.getAsString("primaryAdministratorId"))));
 
-            if (!primaryOwner.isPresent()) {
+            if (primaryOwner.isEmpty()) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                         "The given PrimaryBusinessOwner does not exist");
             } else if (!AuthenticationTokenManager.sessionCanSeePrivate(req, primaryOwner.get().getUserID())) {
@@ -96,7 +92,7 @@ public class BusinessController {
 
             businessRepository.save(newBusiness); // Save the new business
             logger.info("Business has been registered");
-            return new ResponseEntity(HttpStatus.CREATED);
+            return new ResponseEntity<>(HttpStatus.CREATED);
 
         } catch (Exception err) {
             logger.error(err.getMessage());
@@ -110,9 +106,9 @@ public class BusinessController {
      * @return JSON representation of the business.
      */
     @GetMapping("/businesses/{id}")
-    JSONObject getBusinessById(@PathVariable Long id, HttpServletRequest request) {
+    public JSONObject getBusinessById(@PathVariable Long id, HttpServletRequest request) {
         AuthenticationTokenManager.checkAuthenticationToken(request);
-        logger.info(String.format("Retrieving business with ID %d.", id));
+        logger.info(() -> String.format("Retrieving business with ID %d.", id));
         Optional<Business> business = businessRepository.findById(id);
         if (business.isEmpty()) {
             ResponseStatusException notFoundException = new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, String.format("No business with ID %d.", id));
@@ -120,7 +116,7 @@ public class BusinessController {
             throw notFoundException;
         }
         return business.get().constructJson(true);
-    };
+    }
 
 
     /**
@@ -139,7 +135,7 @@ public class BusinessController {
 
             business.addAdmin(user);
             businessRepository.save(business);
-            logger.info("Added user " + user.getUserID() + " as admin of business " + businessId);
+            logger.info(() -> String.format("Added user %d as admin of business %d", user.getUserID(), businessId));
         } catch (Exception err) {
             logger.error(err.getMessage());
             throw err;
@@ -162,7 +158,7 @@ public class BusinessController {
 
             business.removeAdmin(user);
             businessRepository.save(business);
-            logger.info("Removed user " + user.getUserID() + " as admin of business " + businessId);
+            logger.info(() -> String.format("Removed user %d as admin of business %d", user.getUserID(), businessId));
         } catch (Exception err) {
             logger.error(err.getMessage());
             throw err;

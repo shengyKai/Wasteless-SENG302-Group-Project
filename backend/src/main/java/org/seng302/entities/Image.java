@@ -53,7 +53,7 @@ public class Image {
      * @param filename the name of the directory
      * @return true if the image format is accepted, false otherwise
      */
-    private Boolean checkImageFormats(String filename) {
+    private boolean checkImageFormats(String filename) {
         // List of all the image formats an image can be
         final List<String> imageFormats = Arrays.asList(".png", ".jpg");
         if (filename.length() > 4) {
@@ -72,12 +72,11 @@ public class Image {
      * @param filenameThumbnail the thumbnail filename
      * @return true if the thumbnail filename contains "_thumbnail" before the image type
      */
-    private Boolean checkContainsUnderscoreThumbnail(String filenameThumbnail) {
-        if (filenameThumbnail.length() > 14) {
-            if ("_thumbnail".equals(filenameThumbnail.substring(
-                    filenameThumbnail.length() - 14, filenameThumbnail.length() - 4))) {
-                return true;
-            }
+    private boolean checkContainsUnderscoreThumbnail(String filenameThumbnail) {
+        if (filenameThumbnail.length() > 14 &&
+            "_thumbnail".equals(filenameThumbnail.substring(filenameThumbnail.length() - 14, filenameThumbnail.length() - 4))
+        ) {
+            return true;
         }
         return false;
     }
@@ -87,7 +86,7 @@ public class Image {
      * @param filename the name of the directory
      * @return true if the the filename does not contain any illegal characters, false otherwise
      */
-    private Boolean checkContainsIllegalCharacters(String filename) {
+    private boolean checkContainsIllegalCharacters(String filename) {
         // A list of illegal characters that cannot exist within a filename directory string
         final List<String> illegalCharacters = Arrays.asList(".", "\n", "\t", "\\", ",");
 

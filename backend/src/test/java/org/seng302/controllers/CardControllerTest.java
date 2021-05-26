@@ -1,12 +1,16 @@
 package org.seng302.controllers;
 
+import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
+import net.minidev.json.parser.JSONParser;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mockito.*;
 import org.seng302.entities.Keyword;
+import org.seng302.entities.Location;
 import org.seng302.entities.MarketplaceCard;
 import org.seng302.entities.User;
 import org.seng302.exceptions.AccessTokenException;
@@ -17,18 +21,26 @@ import org.seng302.tools.AuthenticationTokenManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.server.ResponseStatusException;
 
+import java.text.ParseException;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+
+import javax.servlet.http.HttpServletRequest;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -58,6 +70,13 @@ class CardControllerTest {
     private Keyword mockKeyword1;
     @Mock
     private Keyword mockKeyword2;
+    @Mock
+    private HttpServletRequest request;
+
+    private User testUser;
+    private User testUser1;
+    private CardController cardController;
+    private List<MarketplaceCard> cards = new ArrayList<>();
 
     private MockedStatic<AuthenticationTokenManager> authenticationTokenManager;
     private JSONObject createCardJson;
@@ -67,7 +86,28 @@ class CardControllerTest {
     private final long keywordId2 = 71L;
 
     @BeforeEach
-    private void setUp() {
+    private void setUp() throws Exception {
+        testUser = new User.Builder()
+                .withFirstName("Andy")
+                .withMiddleName("Percy")
+                .withLastName("Cory")
+                .withNickName("Ando")
+                .withEmail("123andyelliot@gmail.com")
+                .withPassword("password123")
+                .withDob("1987-04-12")
+                .withAddress(Location.covertAddressStringToLocation("108,Albert Road,Ashburton,Christchurch,New Zealand,Canterbury,8041"))
+                .build();
+        testUser1 = new User.Builder()
+                .withFirstName("Bobby")
+                .withMiddleName("Percy")
+                .withLastName("David")
+                .withNickName("Ando")
+                .withEmail("456andyelliot@gmail.com")
+                .withPassword("password123")
+                .withDob("1987-04-12")
+                .withAddress(Location.covertAddressStringToLocation("108,Albert Road,Ashburton,Christchurch,New Zealand,Canterbury,8041"))
+                .build();
+                
         MockitoAnnotations.openMocks(this);
 
         // Set up authentication manager respond as if user has correct permissions to create card
@@ -87,10 +127,13 @@ class CardControllerTest {
         when(mockUser.getUserID()).thenReturn(userId);
 
         // Tell MockMvc to use controller with mocked repositories for tests
-        CardController cardController = new CardController(marketplaceCardRepository, keywordRepository, userRepository);
+        cardController = new CardController(marketplaceCardRepository, keywordRepository, userRepository);
         mockMvc = MockMvcBuilders.standaloneSetup(cardController).build();
 
         constructValidCreateCardJson();
+
+        addSeveralMarketplaceCards(cards);
+        when(marketplaceCardRepository.getAllBySection(any())).thenReturn(cards);
     }
 
     @AfterEach
@@ -378,4 +421,77 @@ class CardControllerTest {
                 .andExpect(status().isOk());
         verify(marketplaceCardRepository, times(1)).getAllBySection(any(MarketplaceCard.Section.class));
     }
+
+
+    @Test
+    void retrievePaginatedCards_firstPage_firstPageOfMarketplaceCards() throws Exception {
+        MvcResult result = mockMvc.perform(
+            MockMvcRequestBuilders.get("/cards").param("section", "ForSale").param("page", "1").param("resultsPerPage", "2"))
+            .andExpect(status().isOk()).andReturn();
+        
+        JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
+        JSONArray responseBody = (JSONArray) parser.parse(result.getResponse().getContentAsString());
+        // Check length should be 2 cards
+        assertEquals(2, responseBody.size());
+
+        // Check the two products are the expected ones
+        JSONObject firstCard = (JSONObject) responseBody.get(0);
+        JSONObject secondCard = (JSONObject) responseBody.get(1);
+
+        assertEquals("abcd", firstCard.getAsString("title"));
+        assertEquals("efgh", secondCard.getAsString("title"));
+    }
+
+    @Test
+    void retrievePaginatedCards_secondPage_secondPageOfMarketplaceCards() throws Exception {
+        MvcResult result = mockMvc.perform(
+            MockMvcRequestBuilders.get("/cards").param("section", "ForSale").param("page", "2").param("resultsPerPage", "2"))
+            .andExpect(status().isOk()).andReturn();
+        
+        JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
+        JSONArray responseBody = (JSONArray) parser.parse(result.getResponse().getContentAsString());
+        // Check length should be 2 cards
+        assertEquals(2, responseBody.size());
+
+        // Check the two products are the expected ones
+        JSONObject firstCard = (JSONObject) responseBody.get(0);
+        JSONObject secondCard = (JSONObject) responseBody.get(1);
+
+        assertEquals("ijkl", firstCard.getAsString("title"));
+        assertEquals("mnop", secondCard.getAsString("title"));
+    }
+    
+    @Test
+    void getMarketplaceCardCount_emptyCardList_zeroReturned() {
+        when(marketplaceCardRepository.getAllBySection(MarketplaceCard.Section.FOR_SALE)).thenReturn(new ArrayList<MarketplaceCard>());
+        JSONObject result = cardController.retrieveCardCount(request, "ForSale");
+        assertTrue(result.containsKey("count"));
+        assertEquals(0, result.getAsNumber("count"));
+    }
+
+    @Test
+    void getMarketplaceCardCount_multipleCards_correctCountReturned() throws Exception {
+        when(marketplaceCardRepository.getAllBySection(MarketplaceCard.Section.FOR_SALE)).thenReturn(cards);
+        JSONObject result = cardController.retrieveCardCount(request, "ForSale");
+        assertTrue(result.containsKey("count"));
+        assertEquals(4, result.getAsNumber("count"));
+    }
+
+    /**
+     * Creates several marketplace cards based on a product. These items have
+     * differing attributes to identify them.
+     * 
+     * @throws Exception
+     */
+    public void addSeveralMarketplaceCards(List<MarketplaceCard> cards) throws Exception {
+        cards.add(new MarketplaceCard.Builder().withCreator(testUser).withCloses(Instant.now().plus(1, ChronoUnit.HOURS))
+            .withSection("ForSale").withTitle("abcd").build());
+        cards.add(new MarketplaceCard.Builder().withCreator(testUser1).withCloses(Instant.now().plus(2, ChronoUnit.HOURS))
+            .withSection("ForSale").withTitle("efgh").build());
+        cards.add(new MarketplaceCard.Builder().withCreator(testUser).withCloses(Instant.now().plus(3, ChronoUnit.HOURS))
+            .withSection("ForSale").withTitle("ijkl").build());
+        cards.add(new MarketplaceCard.Builder().withCreator(testUser1).withCloses(Instant.now().plus(4, ChronoUnit.HOURS))
+            .withSection("ForSale").withTitle("mnop").build());
+    }
+    
 }

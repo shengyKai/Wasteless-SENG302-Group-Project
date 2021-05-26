@@ -181,6 +181,7 @@ describe('InventoryItem.vue', () => {
     expect(wrapper.text()).toContain("2021-05-15");
   });
 
+  //TODO Needs examined
   it.skip('Must match snapshot', () => {
     expect(wrapper).toMatchSnapshot();
   });
