@@ -175,7 +175,7 @@ describe('CreateBusiness.vue', () => {
   }
 
   it('Valid if all required fields are provided', async () => {
-    await populateRequiredFields()
+    await populateRequiredFields();
     await Vue.nextTick();
     expect(wrapper.vm.valid).toBeTruthy();
   });

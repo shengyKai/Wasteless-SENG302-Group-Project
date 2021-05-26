@@ -153,6 +153,7 @@ export default {
       }
       this.showDialog = false;
       this.file = undefined;
+      this.$emit('image-added');
     }
   },
 
