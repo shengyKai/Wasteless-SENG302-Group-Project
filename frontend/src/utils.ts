@@ -40,8 +40,18 @@ export const COOKIE = {
   USER: 'user'
 };
 
-
-
+/**
+ * Converts a date to a human readable string
+ *
+ * @param date Date to format, either a date object or a parsable date string
+ * @returns Date in a human readable string
+ */
+export function formatDate(date: Date | string) {
+  if (typeof date === 'string') date = new Date(date);
+  console.log(date);
+  const parts = date.toDateString().split(' ');
+  return `${parts[2]} ${parts[1]} ${parts[3]}`;
+}
 
 /**
  * User roles.
