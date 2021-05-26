@@ -189,7 +189,12 @@ export default {
       if (this.$store.state.createInventoryDialog === undefined) {
         this.updateResults();
       }
-    }
+    },
+    '$store.state.createSaleItemDialog': function () {
+      if (this.$store.state.createInventoryDialog === undefined) {
+        this.updateResults();
+      }
+    },
   },
 };
 </script>
