@@ -243,9 +243,7 @@ describe("CreateInventory.vue", () => {
       await wrapper.setData({
         quantity,
       });
-
       await Vue.nextTick();
-
       expect(wrapper.vm.valid).toBeTruthy();
     }
   );
@@ -284,9 +282,7 @@ describe("CreateInventory.vue", () => {
       await wrapper.setData({
         pricePerItem,
       });
-
       await Vue.nextTick();
-
       expect(wrapper.vm.valid).toBeTruthy();
     }
   );
@@ -298,9 +294,7 @@ describe("CreateInventory.vue", () => {
       await wrapper.setData({
         totalPrice,
       });
-
       await Vue.nextTick();
-
       expect(wrapper.vm.valid).toBeTruthy();
     }
   );
@@ -314,9 +308,7 @@ describe("CreateInventory.vue", () => {
       await wrapper.setData({
         quantity,
       });
-
       await Vue.nextTick();
-
       expect(wrapper.vm.valid).toBeFalsy();
     }
   );
@@ -329,9 +321,7 @@ describe("CreateInventory.vue", () => {
     await wrapper.setData({
       pricePerItem,
     });
-
     await Vue.nextTick();
-
     expect(wrapper.vm.valid).toBeFalsy();
   });
 
@@ -342,9 +332,7 @@ describe("CreateInventory.vue", () => {
       await wrapper.setData({
         totalPrice,
       });
-
       await Vue.nextTick();
-
       expect(wrapper.vm.valid).toBeFalsy();
     }
   );
@@ -375,7 +363,6 @@ describe("CreateInventory.vue", () => {
         expires: expiresDate
       });
       await Vue.nextTick();
-
       expect(findCreateButton().props().disabled).toBeFalsy();
     });
 

@@ -174,236 +174,150 @@ describe('CreateBusiness.vue', () => {
     return filtered.at(0);
   }
 
-  /**
-   * Tests that the CreateBusiness is valid if all required fields are provided
-   */
   it('Valid if all required fields are provided', async () => {
-    await populateRequiredFields();
-
+    await populateRequiredFields()
     await Vue.nextTick();
-
     expect(wrapper.vm.valid).toBeTruthy();
   });
 
-  /**
-   * Tests that the CreateBusiness is invalid if description field is too long (> 200 characters)
-   */
   it('Invalid if description too long', async () => {
     await populateRequiredFields();
     await wrapper.setData({
       description: 'a'.repeat(201),
     });
-
     await Vue.nextTick();
-
     expect(wrapper.vm.valid).toBeFalsy();
   });
 
-  /**
-   * Tests that the CreateBusiness is invalid if no business name field is provided
-   */
   it('Invalid if business name not provided', async () => {
     await populateRequiredFields();
     await wrapper.setData({
       business: '',
     });
-
     await Vue.nextTick(() => {
       expect(wrapper.vm.valid).toBeFalsy();
     });
   });
 
-  /**
-   * Tests that the CreateBusiness is invalid if business name field is too long (> 100 characters)
-   */
   it('Invalid if business name too long', async () => {
     await populateRequiredFields();
     await wrapper.setData({
       business: 'a'.repeat(101),
     });
-
     await Vue.nextTick();
-
     expect(wrapper.vm.valid).toBeFalsy();
   });
 
-  /**
-   * Tests that the CreateBusiness is invalid if no business type field is provided
-   */
   it('Invalid if business type not provided', async () => {
     await populateRequiredFields();
     await wrapper.setData({
       businessType: '',
     });
-
     await Vue.nextTick();
-
     expect(wrapper.vm.valid).toBeFalsy();
   });
 
-  /**
-   * Tests that the CreateBusiness is invalid if no street line 1 field is provided
-   */
   it('Invalid if street line 1 not provided', async () => {
     await populateRequiredFields();
     await wrapper.setData({
       street1: '',
     });
-
     await Vue.nextTick();
-
     expect(wrapper.vm.valid).toBeFalsy();
   });
 
-  /**
-   * Tests that the CreateBusiness is invalid if district field is too long (> 100 characters)
-   */
   it('Invalid if district too long', async () => {
     await populateRequiredFields();
     await wrapper.setData({
       district: 'a'.repeat(101),
     });
-
     await Vue.nextTick();
-
     expect(wrapper.vm.valid).toBeFalsy();
   });
 
-  /**
-   * Tests that the CreateBusiness is invalid if no city field is provided
-   */
   it('Invalid if city not provided', async () => {
     await populateRequiredFields();
     await wrapper.setData({
       city: '',
     });
-
     await Vue.nextTick();
-
     expect(wrapper.vm.valid).toBeFalsy();
   });
 
-  /**
-   * Tests that the CreateBusiness is invalid if city field is too long (> 100 characters)
-   */
   it('Invalid if city too long', async () => {
     await populateRequiredFields();
     await wrapper.setData({
       city: 'a'.repeat(101),
     });
-
     await Vue.nextTick();
-
     expect(wrapper.vm.valid).toBeFalsy();
   });
 
-  /**
-   * Tests that the CreateBusiness is invalid if no region field is provided
-   */
   it('Invalid if region not provided', async () => {
     await populateRequiredFields();
     await wrapper.setData({
       region: '',
     });
-
     await Vue.nextTick();
-
     expect(wrapper.vm.valid).toBeFalsy();
   });
 
-  /**
-   * Tests that the CreateBusiness is invalid if region field is too long (> 100 characters)
-   */
   it('Invalid if region too long', async () => {
     await populateRequiredFields();
     await wrapper.setData({
       region: 'a'.repeat(101),
     });
-
     await Vue.nextTick();
-
     expect(wrapper.vm.valid).toBeFalsy();
   });
 
-  /**
-   * Tests that the CreateBusiness is invalid if no country field is provided
-   */
   it('Invalid if country not provided', async () => {
     await populateRequiredFields();
     await wrapper.setData({
       country: '',
     });
-
     await Vue.nextTick();
-
     expect(wrapper.vm.valid).toBeFalsy();
   });
 
-  /**
-   * Tests that the CreateBusiness is invalid if country field is too long (> 100 characters)
-   */
   it('Invalid if country too long', async () => {
     await populateRequiredFields();
     await wrapper.setData({
       country: 'a'.repeat(101),
     });
-
     await Vue.nextTick();
-
     expect(wrapper.vm.valid).toBeFalsy();
   });
 
-  /**
-   * Tests that the CreateBusiness is invalid if no postcode field is provided
-   */
   it('Invalid if postcode not provided', async () => {
     await populateRequiredFields();
     await wrapper.setData({
       postcode: '',
     });
-
     await Vue.nextTick();
-
     expect(wrapper.vm.valid).toBeFalsy();
   });
 
-  /**
-   * Tests that the CreateBusiness is invalid if postcode field is too long (> 100 characters)
-   */
   it('Invalid if postcode too long', async () => {
     await populateRequiredFields();
     await wrapper.setData({
       postcode: 'a'.repeat(101),
     });
-
     await Vue.nextTick();
-
     expect(wrapper.vm.valid).toBeFalsy();
   });
 
-  /**
-   * Tests that when the close button is pressed the "closeDialog" event is emitted, this should
-   * also result in the dialog getting closed.
-   */
   it('Test that when the close button is pressed, then the "closeDialog" event should be emitted', async () => {
     await findCloseButton().trigger('click');
     expect(wrapper.emitted().closeDialog).toBeTruthy();
   });
 
-  /**
-   * Tests that when the create button is pressed and the api call is successful that the parameters
-   * are passed to the api function and the dialog is closed.
-   */
   it('When the create button is pressed then an api call should be made and is successful', async () => {
     await populateRequiredFields();
     createBusiness.mockResolvedValue(undefined); // Ensure that the operation is successful
-
     await Vue.nextTick();
-
     await findCreateButton().trigger('click'); // Click create button
-
     await Vue.nextTick();
-
     expect(createBusiness).toBeCalledWith({
       primaryAdministratorId: 1,
       name: 'Business Name',

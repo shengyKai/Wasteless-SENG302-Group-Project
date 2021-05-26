@@ -56,9 +56,7 @@ describe('GlobalError', () => {
    */
   it('If there is an error then there should be an error component with the right message', async () => {
     store.commit('setError', 'test_error_message');
-
     await Vue.nextTick();
-
     let errorBox = findErrorBox();
     expect(errorBox.exists()).toBeTruthy();
     expect(errorBox.text()).toBe('test_error_message');
@@ -72,7 +70,6 @@ describe('GlobalError', () => {
     await Vue.nextTick();
     store.commit('clearError');
     await Vue.nextTick();
-
     expect(findErrorBox().exists()).toBeFalsy();
   });
 
@@ -85,7 +82,6 @@ describe('GlobalError', () => {
     expect(findErrorBox().exists()).toBeTruthy();
     router.push('/unimportant');
     await Vue.nextTick();
-
     expect(findErrorBox().exists()).toBeFalsy();
     expect(store.state.globalError).toBeNull();
   });
@@ -95,16 +91,11 @@ describe('GlobalError', () => {
    */
   it('If there is an error then we should be able to dismiss it', async () => {
     store.commit('setError', 'test_error_message');
-
     await Vue.nextTick();
-
     let errorBox = findErrorBox();
     expect(errorBox.exists()).toBeTruthy();
-
     errorBox.findComponent({name: 'v-btn' }).trigger('click');
-
     await Vue.nextTick();
-
     errorBox = findErrorBox();
     expect(errorBox.exists()).toBeFalsy();
     expect(store.state.globalError).toBeNull();

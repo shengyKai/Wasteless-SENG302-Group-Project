@@ -111,40 +111,31 @@ describe('Login.vue', () => {
     "after inputting valid formats for both fields", async () => {
     //find the login button by the component
     const loginButton = wrapper.find(".v-btn");
-
     expect(loginButton.props().disabled).toBeFalsy();
   });
 
   it("Testing for invalid email format, with less than two characters after each '.'", async () => {
     const loginButton = wrapper.find(".v-btn");
-
     await wrapper.setData({
       email: "someemail@gmail.c"
     });
-
     //Docs from the vue api:
     //nextTick() Defers the callback to be executed after the next DOM update cycle.
     //Use it immediately after you’ve changed some data to wait for the DOM update.
     //In this case, we just changed some data on the email and password field, so we need to call nextTick for a DOM
     //update.
     await Vue.nextTick();
-
     validateForm();
-
     await Vue.nextTick();
-
     expect(loginButton.props().disabled).toBeTruthy();
   });
 
   it("Testing for invalid email format,with no '@'", async () => {
     const loginButton = wrapper.find(".v-btn");
-
     await wrapper.setData({
       email: "someemail.com"
     });
-
     validateForm();
-
     await Vue.nextTick(() => {
       expect(loginButton.props().disabled).toBeTruthy();
     });
@@ -152,13 +143,10 @@ describe('Login.vue', () => {
 
   it("Testing for invalid email format, with no characters before '@'", async () => {
     const loginButton = wrapper.find(".v-btn");
-
     await wrapper.setData({
       email: "@gmail.com"
     });
-
     validateForm();
-
     await Vue.nextTick(() => {
       expect(loginButton.props().disabled).toBeTruthy();
     });
@@ -166,13 +154,10 @@ describe('Login.vue', () => {
 
   it("Testing for invalid email format, with no '.'", async () => {
     const loginButton = wrapper.find(".v-btn");
-
     await wrapper.setData({
       email: "fsefsgr@gmailcom"
     });
-
     validateForm();
-
     await Vue.nextTick(() => {
       expect(loginButton.props().disabled).toBeTruthy();
     });
@@ -180,13 +165,10 @@ describe('Login.vue', () => {
 
   it("Testing for invalid email format, empty email field", async () => {
     const loginButton = wrapper.find(".v-btn");
-
     await wrapper.setData({
       email: ""
     });
-
     validateForm();
-
     await Vue.nextTick(() => {
       expect(loginButton.props().disabled).toBeTruthy();
     });
@@ -194,13 +176,10 @@ describe('Login.vue', () => {
 
   it("Testing for invalid email format, over character limit", async () => {
     const loginButton = wrapper.find(".v-btn");
-
     await wrapper.setData({
       email: 'a'.repeat(101)
     });
-
     validateForm();
-
     await Vue.nextTick(() => {
       expect(loginButton.props().disabled).toBeTruthy();
     });
@@ -210,7 +189,6 @@ describe('Login.vue', () => {
     await wrapper.setData({
       errorMessage: 'test_error_message',
     });
-
     expect(wrapper.text()).toContain('test_error_message');
   });
 });

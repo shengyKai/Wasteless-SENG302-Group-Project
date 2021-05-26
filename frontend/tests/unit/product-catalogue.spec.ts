@@ -8,8 +8,6 @@ import { Product } from '@/api/internal';
 import * as api from '@/api/internal';
 import { castMock, flushQueue } from './utils';
 
-
-
 jest.mock('@/api/internal', () => ({
   getProducts: jest.fn(),
   getProductCount: jest.fn()
@@ -106,19 +104,13 @@ describe('ProductCatalogue.vue', () => {
     expect(getProducts).toBeCalledWith(100, 1, RESULTS_PER_PAGE, 'productCode', false);
   });
 
-  /**
-   * Tests that the product results are shown
-   */
   it('The search results should be displayed somewhere', async () => {
     let products = createTestProducts(numberOfTestProducts);
     setResults(products);
-
     createWrapper();
-
     // Flush queue is used instead of Vue.nextTick() since this will wait for everything to finish
     // instead of a single event.
     await flushQueue();
-
     const shownProducts = wrapper
       .findAllComponents(ProductCatalogueItem)
       .wrappers
@@ -126,74 +118,44 @@ describe('ProductCatalogue.vue', () => {
     expect(shownProducts).toStrictEqual(products);
   });
 
-  /**
-   * Tests that errors are shown
-   */
   it('If there is an error then the error should be displayed', async () => {
     getProducts.mockResolvedValue('test_error');
-
     createWrapper();
-
     await flushQueue();
-
     expect(findErrorBox().text()).toEqual('test_error');
   });
 
-  /**
-   * Tests that errors are dismissable
-   */
   it('If the error is dismissed then the error should disappear', async () => {
     getProducts.mockResolvedValue('test_error');
-
     createWrapper();
-
     await flushQueue();
-
     // Finds dismiss button and clicks it
     findErrorBox().findComponent({name: 'v-btn' }).trigger('click');
-
     await Vue.nextTick();
-
     expect(findErrorBox().exists()).toBeFalsy();
   });
 
-  /**
-   * Tests that the pagination component exists and has the right number of pages
-   */
   it('If there are many pages then there should be a pagination component with many pages', async () => {
     setResults(createTestProducts(RESULTS_PER_PAGE), 100);
     createWrapper();
-
     await flushQueue();
-
     let pagination = wrapper.findComponent({ name: 'v-pagination' });
     expect(pagination.props().length).toBe(Math.ceil(100 / RESULTS_PER_PAGE));
     expect(pagination.props().disabled).toBe(false);
     expect(pagination.props().value).toBe(1);
   });
-  /**
-   * Tests that the status text contains the number of results
-   */
+
   it('If there are results then there should be a message informing the buisness admin how many', async () => {
     setResults(createTestProducts(RESULTS_PER_PAGE), 100);
-
     createWrapper();
-
     await flushQueue();
-
     expect(wrapper.text()).toContain(`Displaying 1 - ${RESULTS_PER_PAGE} of 100 results`);
   });
 
-  /**
-   * Tests the status text is 'There are no results to show' when there are no results
-   */
   it('If there are no results then there should be a message informing the buisness admin of that', async () => {
     setResults([]);
-
     createWrapper();
-
     await flushQueue();
-
     expect(wrapper.text()).toContain('There are no results to show');
   });
 });

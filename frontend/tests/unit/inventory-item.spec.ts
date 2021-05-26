@@ -11,7 +11,6 @@ import { getStore, resetStoreForTesting, StoreData } from '@/store';
 
 Vue.use(Vuetify);
 
-
 jest.mock('@/api/currency', () => ({
   currencyFromCountry: jest.fn(() => {
     return {

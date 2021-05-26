@@ -51,10 +51,6 @@ describe('index.vue', () => {
   });
 });
 
-/**
- * Tests in here focuses on the input of the fields, of which, Register would be used as the mount as it is the parent
- * of these fields.
- */
 describe('Register.vue', () => {
   let wrapper: Wrapper<any>;
   const localVue = createLocalVue();
@@ -108,9 +104,6 @@ describe('Register.vue', () => {
     };
   });
 
-  /**
-   * Test to check that the register button is not disabled, because the preset data from above is all valid.
-   */
   it("Testing out all inputs, such that the user can only press the register button " +
     "after inputting valid formats for all fields", () => {
     //find the register button by the component
@@ -120,14 +113,8 @@ describe('Register.vue', () => {
     expect(registerButton.props().disabled).toBeFalsy();
   });
 
-  /**
-   * The series of tests here is to check if the register button is disabled when an INVALID format is provided in any of the
-   * input fields. The fields checked are email, password, confirmPassword, name, nickname, bio, dob, countryCode, phone, streetAddres, district, city, region,
-   * country and postcode.
-   */
   it("Testing for invalid email format, with less than two characters after each '.'", async () => {
     const registerButton = wrapper.find(".v-btn");
-
     await wrapper.setData({
       email: "someemail@gmail.c"
     });
@@ -137,7 +124,6 @@ describe('Register.vue', () => {
 
   it("Testing for invalid email format,with no '@'", async () => {
     const registerButton = wrapper.find(".v-btn");
-
     await wrapper.setData({
       email: "someemail.com"
     });
@@ -147,7 +133,6 @@ describe('Register.vue', () => {
 
   it("Testing for invalid email format, with no characters before '@'", async () => {
     const registerButton = wrapper.find(".v-btn");
-
     await wrapper.setData({
       email: "@gmail.com"
     });
@@ -157,7 +142,6 @@ describe('Register.vue', () => {
 
   it("Testing for invalid email format, with no '.'", async () => {
     const registerButton = wrapper.find(".v-btn");
-
     await wrapper.setData({
       email: "fsefsgr@gmailcom"
     });
@@ -167,7 +151,6 @@ describe('Register.vue', () => {
 
   it("Testing for invalid email format, empty email field", async () => {
     const registerButton = wrapper.find(".v-btn");
-
     await wrapper.setData({
       email: ""
     });
@@ -177,7 +160,6 @@ describe('Register.vue', () => {
 
   it("Testing for invalid email format, over character limit", async () => {
     const registerButton = wrapper.find(".v-btn");
-
     await wrapper.setData({
       email: 'a'.repeat(101)
     });
@@ -187,7 +169,6 @@ describe('Register.vue', () => {
 
   it("Testing for invalid password format, with no numbers", async () => {
     const registerButton = wrapper.find(".v-btn");
-
     await wrapper.setData({
       password: "hello"
     });
@@ -197,7 +178,6 @@ describe('Register.vue', () => {
 
   it("Testing for invalid password format, with no alphabets", async () => {
     const registerButton = wrapper.find(".v-btn");
-
     await wrapper.setData({
       password: "123455678"
     });
@@ -207,7 +187,6 @@ describe('Register.vue', () => {
 
   it("Testing for invalid password format, with less than 7 characters", async () => {
     const registerButton = wrapper.find(".v-btn");
-
     await wrapper.setData({
       password: "abcd1"
     });
@@ -217,7 +196,6 @@ describe('Register.vue', () => {
 
   it("Testing for invalid password format, empty password field", async () => {
     const registerButton = wrapper.find(".v-btn");
-
     await wrapper.setData({
       password: ""
     });
@@ -227,7 +205,6 @@ describe('Register.vue', () => {
 
   it("Testing for invalid password format, over character limit", async () => {
     const registerButton = wrapper.find(".v-btn");
-
     await wrapper.setData({
       password: 'a'.repeat(101)
     });
@@ -237,8 +214,6 @@ describe('Register.vue', () => {
 
   it("Testing for invalid confirm password format, different input value from password field", async () => {
     const registerButton = wrapper.find(".v-btn");
-
-    //password field is "somepassword1"
     await wrapper.setData({
       confirmPassword: "somepassword2"
     });
@@ -248,7 +223,6 @@ describe('Register.vue', () => {
 
   it("Testing for invalid confirm password format, empty confirm password field", async () => {
     const registerButton = wrapper.find(".v-btn");
-
     await wrapper.setData({
       confirmPassword: ""
     });
@@ -258,7 +232,6 @@ describe('Register.vue', () => {
 
   it("Testing for invalid first name format, empty first name field", async () => {
     const registerButton = wrapper.find(".v-btn");
-
     await wrapper.setData({
       firstName: ""
     });
@@ -268,7 +241,6 @@ describe('Register.vue', () => {
 
   it("Testing for invalid first name format, first name with numbers", async () => {
     const registerButton = wrapper.find(".v-btn");
-
     await wrapper.setData({
       firstName: "somename1"
     });
@@ -278,7 +250,6 @@ describe('Register.vue', () => {
 
   it("Testing for invalid first name format, over character limit", async () => {
     const registerButton = wrapper.find(".v-btn");
-
     await wrapper.setData({
       firstName: 'a'.repeat(101)
     });
@@ -288,7 +259,6 @@ describe('Register.vue', () => {
 
   it("Testing that empty middle name field is not invalid because middle name is not mandatory", async () => {
     const registerButton = wrapper.find(".v-btn");
-
     await wrapper.setData({
       middleName: ""
     });
@@ -298,7 +268,6 @@ describe('Register.vue', () => {
 
   it("Testing for invalid middle name format, middle name with numbers", async () => {
     const registerButton = wrapper.find(".v-btn");
-
     await wrapper.setData({
       middleName: "somename1"
     });
@@ -308,7 +277,6 @@ describe('Register.vue', () => {
 
   it("Testing for invalid middle name format, middle name over character limit", async () => {
     const registerButton = wrapper.find(".v-btn");
-
     await wrapper.setData({
       middleName: 'a'.repeat(101)
     });
@@ -318,7 +286,6 @@ describe('Register.vue', () => {
 
   it("Testing for invalid last name format, empty last name field", async () => {
     const registerButton = wrapper.find(".v-btn");
-
     await wrapper.setData({
       lastName: ""
     });
@@ -328,7 +295,6 @@ describe('Register.vue', () => {
 
   it("Testing for invalid last name format, last name with numbers", async () => {
     const registerButton = wrapper.find(".v-btn");
-
     await wrapper.setData({
       lastName: "somename1"
     });
@@ -338,7 +304,6 @@ describe('Register.vue', () => {
 
   it("Testing for invalid last name format, over character limit", async () => {
     const registerButton = wrapper.find(".v-btn");
-
     await wrapper.setData({
       lastName: 'a'.repeat(101)
     });
@@ -348,7 +313,6 @@ describe('Register.vue', () => {
 
   it("Testing for invalid nickname format, name with numbers", async () => {
     const registerButton = wrapper.find(".v-btn");
-
     await wrapper.setData({
       nickname: "somename1"
     });
@@ -358,7 +322,6 @@ describe('Register.vue', () => {
 
   it("Testing for invalid nickname format, over character limit", async () => {
     const registerButton = wrapper.find(".v-btn");
-
     await wrapper.setData({
       nickname: 'a'.repeat(101)
     });
@@ -368,7 +331,6 @@ describe('Register.vue', () => {
 
   it("Testing for invalid bio format, over character limit", async () => {
     const registerButton = wrapper.find(".v-btn");
-
     await wrapper.setData({
       bio: 'a'.repeat(201)
     });
@@ -378,7 +340,6 @@ describe('Register.vue', () => {
 
   it("Testing for invalid date format, empty date field", async () => {
     const registerButton = wrapper.find(".v-btn");
-
     await wrapper.setData({
       dob: ""
     });
@@ -388,7 +349,6 @@ describe('Register.vue', () => {
 
   it("Testing for invalid country code format, no country code", async () => {
     const registerButton = wrapper.find(".v-btn");
-
     await wrapper.setData({
       countryCode: ""
     });
@@ -398,7 +358,6 @@ describe('Register.vue', () => {
 
   it("Testing for invalid country code format, alphabets in country code", async () => {
     const registerButton = wrapper.find(".v-btn");
-
     await wrapper.setData({
       countryCode: "a1"
     });
@@ -408,7 +367,6 @@ describe('Register.vue', () => {
 
   it("Testing for invalid country code format, more than three numbers in country code", async () => {
     const registerButton = wrapper.find(".v-btn");
-
     await wrapper.setData({
       countryCode: "1234"
     });
@@ -418,7 +376,6 @@ describe('Register.vue', () => {
 
   it("Testing for invalid country code format, less than two numbers in country code", async () => {
     const registerButton = wrapper.find(".v-btn");
-
     await wrapper.setData({
       countryCode: "1"
     });
@@ -428,7 +385,6 @@ describe('Register.vue', () => {
 
   it("Testing for invalid phone format, alphabets in field", async () => {
     const registerButton = wrapper.find(".v-btn");
-
     await wrapper.setData({
       phone: "123456789a"
     });
@@ -438,7 +394,6 @@ describe('Register.vue', () => {
 
   it("Testing for invalid phone format, over character limit", async () => {
     const registerButton = wrapper.find(".v-btn");
-
     await wrapper.setData({
       phone: '1'.repeat(101)
     });
@@ -448,7 +403,6 @@ describe('Register.vue', () => {
 
   it("Testing for invalid phone format, spaces at the start of the phone number", async () => {
     const registerButton = wrapper.find(".v-btn");
-
     await wrapper.setData({
       phone: " 1234567890"
     });
@@ -458,7 +412,6 @@ describe('Register.vue', () => {
 
   it("Testing for invalid phone format, spaces at the end of the phone number", async () => {
     const registerButton = wrapper.find(".v-btn");
-
     await wrapper.setData({
       phone: "1234567890 "
     });
@@ -468,7 +421,6 @@ describe('Register.vue', () => {
 
   it("Testing for invalid street format, empty street field", async () => {
     const registerButton = wrapper.find(".v-btn");
-
     await wrapper.setData({
       streetAddress: ""
     });
@@ -478,7 +430,6 @@ describe('Register.vue', () => {
 
   it("Testing for invalid district format, over character limit", async () => {
     const registerButton = wrapper.find(".v-btn");
-
     await wrapper.setData({
       district: 'a'.repeat(256)
     });
@@ -488,7 +439,6 @@ describe('Register.vue', () => {
 
   it("Testing for invalid city format, empty city field", async () => {
     const registerButton = wrapper.find(".v-btn");
-
     await wrapper.setData({
       city: ""
     });
@@ -498,7 +448,6 @@ describe('Register.vue', () => {
 
   it("Testing for invalid city format, over character limit", async () => {
     const registerButton = wrapper.find(".v-btn");
-
     await wrapper.setData({
       city: 'a'.repeat(256)
     });
@@ -508,7 +457,6 @@ describe('Register.vue', () => {
 
   it("Testing for invalid region format, empty region field", async () => {
     const registerButton = wrapper.find(".v-btn");
-
     await wrapper.setData({
       region: ""
     });
@@ -518,7 +466,6 @@ describe('Register.vue', () => {
 
   it("Testing for invalid region format, over character limit", async () => {
     const registerButton = wrapper.find(".v-btn");
-
     await wrapper.setData({
       region: 'a'.repeat(256)
     });
@@ -528,7 +475,6 @@ describe('Register.vue', () => {
 
   it("Testing for invalid country format, empty country field", async () => {
     const registerButton = wrapper.find(".v-btn");
-
     await wrapper.setData({
       country: ""
     });
@@ -538,7 +484,6 @@ describe('Register.vue', () => {
 
   it("Testing for invalid country format, over character limit", async () => {
     const registerButton = wrapper.find(".v-btn");
-
     await wrapper.setData({
       country: 'a'.repeat(256)
     });
@@ -546,13 +491,9 @@ describe('Register.vue', () => {
     expect(registerButton.props().disabled).toBeTruthy();
   });
 
-  /**
-  * Tests the show password icon works if the user clicks on it
-  */
   it("Testing the password field's mdi-eye icon to show user input", () => {
     //originally it should be false
     expect(wrapper.vm.showPassword).toBeFalsy();
-
     let showPasswordInput = wrapper.findComponent({ ref: "password" });
     let eyeButton = showPasswordInput.findComponent({ name: "v-icon" });
     //clicking on the icon would allow the user to see the password, thus making showPassword true
@@ -562,13 +503,9 @@ describe('Register.vue', () => {
     });
   });
 
-  /**
-  * Tests the show confirm password icon works if the user clicks on it
-  */
   it("Testing the confirm password field's mdi-eye icon to show user input", () => {
     //originally it should be false
     expect(wrapper.vm.showConfirmPassword).toBeFalsy();
-
     let showConfirmPasswordInput = wrapper.findComponent({ ref: "confirmPassword" });
     let eyeButton = showConfirmPasswordInput.findComponent({ name: "v-icon" });
     //clicking on the icon would allow the user to see the password, thus making showConfirmPassword true
