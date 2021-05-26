@@ -3,64 +3,71 @@
     <v-dialog
       v-model="dialog"
       persistent
-      max-width="600px"
+      max-width="400px"
     >
-      <v-card min-height="250px" width="400px" class="d-flex flex-column">
-
-        <v-card-text class="my-n2 flex-grow-1 d-flex flex-column justify-space-between">
-          <v-card>
-            <v-card>
-              <v-card-title class="my-n1 title">
-                <textarea rows="1" v-model="title" ref="titleField" class="field"/>
-              </v-card-title>
-            </v-card>
-            <strong>
-              {{ locationString }}
-              <br>
-            </strong>
-            <div class="d-flex justify-space-between flex-wrap">
-              <span class="mr-1">
-                <em v-if="creator">By {{ user.firstName }} {{ user.lastName }}</em>
-              </span>
-              <span>
-                Posted {{ creationString }}
-              </span>
-            </div>
-            <v-card >
-              <textarea ref="descriptionField" v-model="description" rows="3" class="field"/>
-            </v-card>
-          </v-card>
-          <v-select
-            v-model="selectedKeywords"
-            :items="allKeywords"
-            item-text="name"
-            item-value="id"
-            label="Select keywords"
-            multiple
-            small-chips
-            color="primary"
-          />
-          <v-select
-            class="required"
-            v-model="selectedSection"
-            :items="sections"
-            item-text="text"
-            item-value="value"
-            label="Select section"
-            color="primary"
-          />
-          <p class="error-text text-center" v-if ="errorMessage !== undefined"> {{errorMessage}} </p>
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer/>
-          <div class="error--text" v-if="feedback !== undefined">{{ feedback }}</div>
-          <v-btn text color="primary" :disabled="!valid" @click="createCard">
-            Create Card
-          </v-btn>
-          <v-btn text color="primary" @click="closeDialog">
-            Cancel
-          </v-btn>
-        </v-card-actions>
+      <v-card>
+        <v-card-title>
+          Create Marketplace Card
+        </v-card-title>
+        <v-container class="pa-6">
+          <v-row>
+            <v-select
+              class="required"
+              v-model="selectedSection"
+              :items="sections"
+              item-text="text"
+              item-value="value"
+              label="Select section"
+              color="primary"
+            />
+          </v-row>
+          <v-row class="justify-center">
+            <v-col cols="auto">
+              <v-card elevation="4" class="px-4 pb-2 d-flex flex-column" min-height="250px">
+                <v-card-title class="my-n1 title">
+                  <textarea rows="1" v-model="title" ref="titleField" class="field" placeholder="Insert Title"/>
+                </v-card-title>
+                <v-card-text class="my-n2 flex-grow-1 d-flex flex-column justify-space-between">
+                  <strong>
+                    {{ locationString }}
+                  </strong>
+                  <div class="d-flex justify-space-between flex-wrap mt-n2">
+                    <span class="mr-1">
+                      <em v-if="creator">By {{ user.firstName }} {{ user.lastName }}</em>
+                    </span>
+                    <span>
+                      Posted {{ creationString }}
+                    </span>
+                  </div>
+                  <textarea ref="descriptionField" v-model="description" rows="3" class="field" placeholder="Insert Description"/>
+                </v-card-text>
+              </v-card>
+            </v-col>
+          </v-row>
+          <v-row>
+            <v-select
+              v-model="selectedKeywords"
+              :items="allKeywords"
+              item-text="name"
+              item-value="id"
+              label="Select keywords"
+              multiple
+              small-chips
+              color="primary"
+            />
+            <p class="error-text text-center" v-if ="errorMessage !== undefined"> {{errorMessage}} </p>
+            <v-card-actions>
+              <v-spacer/>
+              <div class="error--text" v-if="feedback !== undefined">{{ feedback }}</div>
+              <v-btn text color="primary" :disabled="!valid" @click="createCard">
+                Create Card
+              </v-btn>
+              <v-btn text color="primary" @click="closeDialog">
+                Cancel
+              </v-btn>
+            </v-card-actions>
+          </v-row>
+        </v-container>
       </v-card>
     </v-dialog>
   </v-row>
@@ -96,7 +103,6 @@ export default {
 
     this.titleField.setAttribute("style", "height:" + (this.titleField.scrollHeight) + "px;overflow-y:hidden;");
     this.titleField.addEventListener("input", OnInput);
-
     getKeywords()
       .then((response) => {
         if (typeof response === 'string') {
@@ -185,8 +191,6 @@ export default {
     },
     async createCard() {
       this.errorMessage = undefined;
-      console.log(this.selectedKeywords);
-      console.log(this.selectedSection);
       let card = {
         creatorId: this.user.id,
         section: this.selectedSection,
