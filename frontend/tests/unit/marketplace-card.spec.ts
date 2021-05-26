@@ -43,6 +43,10 @@ describe('MarketplaceCard.vue', () => {
     });
   });
 
+  it('Must match snapshot', () => {
+    expect(wrapper).toMatchSnapshot();
+  });
+
   it("Must contain the creator name", () => {
     expect(wrapper.text()).toContain('By test_firstname test_lastname');
   });
@@ -97,6 +101,6 @@ describe('MarketplaceCard.vue', () => {
   });
 
   it("Must contain posted date", () => {
-    expect(wrapper.text()).toContain(`Posted ${wrapper.vm.creationString}`);
+    expect(wrapper.text()).toContain('Posted 10 Mar 2021');
   });
 });

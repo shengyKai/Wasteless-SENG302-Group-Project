@@ -162,27 +162,26 @@ describe('InventoryItem.vue', () => {
   });
 
   it('Must contain manufactured date', () => {
-    expect(wrapper.text()).toContain("2021-05-11");
+    expect(wrapper.text()).toContain("11 May 2021");
   });
 
   it('Must contain created date', () => {
-    expect(wrapper.text()).toContain("2021-05-12");
+    expect(wrapper.text()).toContain("12 May 2021");
   });
 
   it('Must contain sell by date', () => {
-    expect(wrapper.text()).toContain("2021-05-13");
+    expect(wrapper.text()).toContain("13 May 2021");
   });
 
   it('Must contain best before date', () => {
-    expect(wrapper.text()).toContain("2021-05-14");
+    expect(wrapper.text()).toContain("14 May 2021");
   });
 
   it('Must contain expiry date', () => {
-    expect(wrapper.text()).toContain("2021-05-15");
+    expect(wrapper.text()).toContain("15 May 2021");
   });
 
-  //TODO Needs examined
-  it.skip('Must match snapshot', () => {
+  it('Must match snapshot', () => {
     expect(wrapper).toMatchSnapshot();
   });
 

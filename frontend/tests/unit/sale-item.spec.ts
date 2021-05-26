@@ -103,15 +103,15 @@ describe('SaleItem.vue', () => {
   });
 
   it("Must contain a formatted created date", () => {
-    expect(wrapper.text()).toContain("Jul 14 2021");
+    expect(wrapper.text()).toContain("14 Jul 2021");
   });
 
   it("Must contain a formatted expiry date", () => {
-    expect(wrapper.text()).toContain("May 15 2021");
+    expect(wrapper.text()).toContain("15 May 2021");
   });
 
   it("Must contain a formatted close date", () => {
-    expect(wrapper.text()).toContain("Jul 22 2021");
+    expect(wrapper.text()).toContain("22 Jul 2021");
   });
 
   it("Must contain seller info if seller info present and under 50 chars", () => {
