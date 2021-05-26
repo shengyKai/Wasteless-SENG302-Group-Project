@@ -174,7 +174,6 @@ describe("CreateSaleItem.vue", () => {
     return filtered.at(0);
   }
 
-
   it("Valid if all required fields are provided", async () => {
     await populateRequiredFields();
     await Vue.nextTick();

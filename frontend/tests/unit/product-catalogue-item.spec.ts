@@ -156,37 +156,22 @@ describe('ProductCatalogueItem.vue', () => {
     });
   });
 
-  /**
-  * Tests that the same product date added exists as per the set data above
-  */
   it("Must contain the product date added", () => {
     expect(wrapper.text()).toContain('2012-05-06');
   });
 
-  /**
-  * Tests that the same product manufacturer exists as per the set data above
-  */
   it("Must contain the product manufacturer", () => {
     expect(wrapper.text()).toContain('Some Manufacturer');
   });
 
-  /**
-  * Tests that the same product RRP exists as per the set data above
-  */
   it("Must contain the product RRP", () => {
     expect(wrapper.text()).toContain(100);
   });
 
-  /**
-   * Test that the product RRP is formatted with the currency symbol and code
-   */
   it("RRP must be formatted with symbol and code", () => {
     expect(wrapper.text()).toContain("Currency symbol100 Currency code");
   });
 
-  /**
-  * Tests that the same product code exists as per the set data above
-  */
   it("Must contain the product code", () => {
     expect(wrapper.text()).toContain("Some Code");
   });
@@ -290,25 +275,16 @@ describe('ProductCatalogueItem.vue', () => {
     expect(wrapper.vm.recommendedRetailPrice).toEqual("Currency symbol100 Currency code");
   });
 
-  /**
-   * Tests that the delete-image event generated from the ProductImageCarousel is handled as expected.
-   */
   it('If "delete-image" is emitted from ProductImageCarousel then the corresponding image is deleted', () => {
     deleteImage.mockResolvedValue(undefined);
     wrapper.findComponent({name: 'ProductImageCarousel' }).vm.$emit('delete-image', 33);
-
     expect(deleteImage).toBeCalledWith(77, 'Some Code', 33);
   });
 
-  /**
-   * Tests that the delete-image event handler sets the global error if the delete image api request fails.
-   */
   it('If "delete-image" handler fails to delete the image then the global error should be set', async () => {
     deleteImage.mockResolvedValue('test_error_message');
     wrapper.findComponent({name: 'ProductImageCarousel' }).vm.$emit('delete-image', 33);
-
     await flushQueue();
-
     expect(store.state.globalError).toBe('test_error_message');
   });
 });

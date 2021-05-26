@@ -9,7 +9,6 @@ import { castMock, flushQueue } from './utils';
 import Vuex, { Store } from 'vuex';
 import { getStore, resetStoreForTesting, StoreData } from '@/store';
 
-
 Vue.use(Vuetify);
 
 jest.mock('@/api/currency', () => ({

@@ -43,26 +43,16 @@ describe('utils.ts', () => {
       jest.resetAllMocks();
     });
 
-    /**
-     * Tests that cookies can be retrieved correctly from a cookie string that without spaces between cookies.
-     * Also tests that the cookie is not updated.
-     */
     it.each(cookieMapping)('Cookie with key "%s" should be parsed from a cookie string without spaces', (key: string, value: string | null) => {
       cookieGetter.mockReturnValue(cookieString);
       expect(getCookie(key)).toBe(value);
-
       expect(cookieGetter).toBeCalled();
       expect(cookieSetter).not.toBeCalled();
     });
 
-    /**
-     * Tests that cookies can be retrieved correctly from a cookie string that contains spaces between cookies.
-     * Also tests that the cookie is not updated.
-     */
     it.each(cookieMapping)('Cookie with key "%s" should be parsed from a cookie string without spaces', (key: string, value: string | null) => {
       cookieGetter.mockReturnValue(cookieStringWithSpaces);
       expect(getCookie(key)).toBe(value);
-
       expect(cookieGetter).toBeCalled();
       expect(cookieSetter).not.toBeCalled();
     });

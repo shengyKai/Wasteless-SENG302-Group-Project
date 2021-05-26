@@ -133,24 +133,14 @@ describe('ProductImageUploader.vue', () => {
     return filtered.length === 1 ? filtered.at(0) : undefined;
   }
 
-  /**
-   * Tests that the submit button triggers the "openFileDialog" method.
-   */
   it('Clicking the select button should trigger the "openFileDialog" method', async () => {
     findSelectButton().trigger('click');
-
     expect(openFileDialogMock).toHaveBeenCalled();
   });
 
-  /**
-   * Tests that dropping a file sets the "file" attribute to the dropped file.
-   * Also checks that the event.prevenDefault is called and the dragging state is turned off.
-   */
   it('Dropping a file should set the file attribute', async () => {
     wrapper.vm.isDragging = true;
-
     const testFile = new File([], 'test_file');
-
     const event = { // Mock version of the dragOver event.
       dataTransfer: {
         files: [
@@ -160,19 +150,13 @@ describe('ProductImageUploader.vue', () => {
       preventDefault: jest.fn(),
     };
     wrapper.vm.onDrop(event);
-
     expect(wrapper.vm.file).toBe(testFile);
     expect(wrapper.vm.isDragging).toBeFalsy();
     expect(event.preventDefault).toBeCalled();
   });
 
-  /**
-   * Tests that the initial dragging state is false and that the onDragOver method sets this to
-   * true if the event is valid.
-   */
   it('Dragging state should be enabled when the "onDragOver" event is triggered with a valid file', async () => {
     expect(wrapper.vm.isDragging).toBeFalsy();
-
     const matchFn = jest.fn().mockReturnValue(true);
     const event = { // Mock version of the dragOver event.
       dataTransfer: {
@@ -188,19 +172,13 @@ describe('ProductImageUploader.vue', () => {
       preventDefault: jest.fn(),
     };
     wrapper.vm.onDragOver(event);
-
     expect(matchFn).toBeCalledWith('^image/');
-
     expect(wrapper.vm.isDragging).toBeTruthy();
     expect(event.preventDefault).toBeCalled();
   });
 
-  /**
-   * Tests that the onDragOver method does not set "isDragging" to true if the file is invalid.
-   */
   it('Dragging state should not be enabled when the "onDragOver" event is triggered with a invalid file', async () => {
     wrapper.vm.isDragging = false;
-
     const matchFn = jest.fn().mockReturnValue(false); // Non-matching file
     const event = { // Mock version of the dragOver event.
       dataTransfer: {
@@ -216,19 +194,13 @@ describe('ProductImageUploader.vue', () => {
       preventDefault: jest.fn(),
     };
     wrapper.vm.onDragOver(event);
-
     expect(matchFn).toBeCalledWith('^image/');
-
     expect(wrapper.vm.isDragging).toBeFalsy();
     expect(event.preventDefault).not.toHaveBeenCalled();
   });
 
-  /**
-   * Tests that the onDragOver method does not set "isDragging" to true if the drag type is not a file.
-   */
   it('Dragging state should not be enabled when the "onDragOver" event is triggered with a invalid drag type', async () => {
     wrapper.vm.isDragging = false;
-
     const matchFn = jest.fn().mockReturnValue(true); // Non-matching file
     const event = { // Mock version of the dragOver event.
       dataTransfer: {
@@ -244,86 +216,50 @@ describe('ProductImageUploader.vue', () => {
       preventDefault: jest.fn(),
     };
     wrapper.vm.onDragOver(event);
-
     expect(wrapper.vm.isDragging).toBeFalsy();
     expect(event.preventDefault).not.toHaveBeenCalled();
   });
 
-  /**
-   * Tests that the discard image button does not exist if an image is not selected.
-   */
   it('When no image is selected then the discard image button should not exist', () => {
     expect(findDiscardImageButton()).toBeUndefined();
   });
 
-  /**
-   * Tests that the discard image button should exist if an image is selected.
-   * Then if it is clicked then the image is discarded and discard image button is deleted.
-   */
   it('When an image is selected the discard image button should exist and clicking it should discard the image', async () => {
     const testFile = new File([], 'test_file');
     wrapper.vm.file = testFile;
-
     await Vue.nextTick();
-
     const discardImage = findDiscardImageButton();
     expect(discardImage).not.toBeUndefined();
-
     discardImage!.trigger('click');
-
     await Vue.nextTick();
-
     expect(wrapper.vm.file).toBeUndefined();
     expect(findDiscardImageButton()).toBeUndefined();
   });
 
-  /**
-   * Tests that when the close button is pressed the "showImageUploaderForm" boolean should be changed to false, this should
-   * also result in the dialog getting closed.
-   */
   it('When the close button is pressed then the "showImageUploaderForm" boolean should be false', async () => {
     await findCloseButton().trigger('click'); // Click close button
-
     expect(appWrapper.vm.showImageUploaderForm).toBeFalsy();
   });
 
-  /**
-   * Tests that if there is no image then the "create button" should be disabled.
-   */
   it('When there is no image selected then the create button should be disabled', async () => {
     await Vue.nextTick();
-
     expect(findCreateButton().props().disabled).toBeTruthy();
   });
 
-  /**
-   * Tests that if there is an image then the "create button" should be enabled.
-   */
   it('When there is an image selected then the create button should be enabled', async () => {
     const testFile = new File([], 'test_file');
     wrapper.vm.file = testFile;
-
     await Vue.nextTick();
-
     expect(findCreateButton().props().disabled).toBeFalsy();
   });
 
-  /**
-   * Tests that when the create button is pressed and the api call is successful that the parameters
-   * are passed to the api function and the dialog is closed.
-   */
   it('When the create button is pressed then an api call should be made and is successful', async () => {
     const testFile = new File([], 'test_file');
     wrapper.vm.file = testFile;
-
     uploadProductImage.mockResolvedValue(undefined); // Ensure that the operation is successful
-
     await Vue.nextTick();
-
     await findCreateButton().trigger('click'); // Click create button
-
     await Vue.nextTick();
-
     expect(uploadProductImage).toBeCalledWith(
       100,
       'PRODUCT-ID',
@@ -332,22 +268,13 @@ describe('ProductImageUploader.vue', () => {
     expect(appWrapper.vm.showImageUploaderForm).toBeFalsy();
   });
 
-  /**
-   * Tests that if the create button is pressed, but the api returns an error. Then this error
-   * should be shown
-   */
   it('When the create button is pressed and the api returns an error then the error should be shown', async () => {
     const testFile = new File([], 'test_file');
     wrapper.vm.file = testFile;
-
     uploadProductImage.mockResolvedValue('test_error_message'); // Ensure that the operation fails
-
     await Vue.nextTick();
-
     await findCreateButton().trigger('click'); // Click create button
-
     await flushQueue();
-
     // The appWrapper is tested for the text, because the dialog content is not in the dialog
     // element.
     expect(appWrapper.text()).toContain('test_error_message');

@@ -16,7 +16,6 @@ describe('ProductImageCarousel.vue', () => {
   // Container for the ProductImageCarousel under test
   let wrapper: Wrapper<any>;
 
-
   /**
    * Sets up the test ProductImageCarousel instance
    *
@@ -64,9 +63,6 @@ describe('ProductImageCarousel.vue', () => {
     appWrapper.destroy();
   });
 
-  /**
-   * Expect that the delete-image event is triggered for the current image when the delete button is pressed.
-   */
   it('Expect product image carousel emits "delete-image" when make delete button is pressed', async () => {
     const button = wrapper.getComponent({ ref: 'deleteImageButton' });
     expect(button.exists()).toBeTruthy();
@@ -76,29 +72,19 @@ describe('ProductImageCarousel.vue', () => {
     expect(wrapper.emitted()['delete-image']).toEqual([[7]]);
   });
 
-  /**
-   * Expect that the make primary button does not exist when looking at the primary image
-   */
   it('Expect product image carousel does not have a makePrimary button when looking at primary image', async () => {
     const button = wrapper.findAllComponents({ref: 'makePrimaryImageButton'});
     expect(button.length).toBe(0);
   });
 
-  /**
-   * Expect that the make primary button exists when looking at the second image and clicking it
-   * results in a "change-primary-image" event.
-   */
   it('Expect product image carousel has a make primary button when looking at second item and clicking it results in a change-primary-image event', async () => {
     await wrapper.setData({
       carouselItem: 1,
     });
-
     await Vue.nextTick();
-
     const button = wrapper.getComponent({ ref: 'makePrimaryImageButton' });
     expect(button.exists()).toBeTruthy();
     button.trigger('click');
-
     expect(wrapper.emitted()['change-primary-image']).toEqual([[11]]);
   });
 
@@ -114,9 +100,7 @@ describe('ProductImageCarousel.vue', () => {
     await wrapper.setData({
       carouselItem: 1,
     });
-
     await Vue.nextTick();
-
     await appWrapper.setProps({
       showControls: false,
     });
