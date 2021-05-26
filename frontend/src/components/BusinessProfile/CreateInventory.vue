@@ -21,7 +21,7 @@
                     solo
                     value = "product Code"
                     v-model="productCode"
-                    :items="mockProductList"
+                    :items="filteredProductList"
                     label="Product Code"
                     item-text="name"
                     item-value="id"
@@ -54,7 +54,7 @@
                     solo
                     v-model="quantity"
                     label="Quantity"
-                    :rules="mandatoryRules.concat(numberRules)"
+                    :rules="mandatoryRules.concat(quantityRules)"
                     outlined
                   />
                 </v-col>
@@ -161,12 +161,8 @@ export default {
       dialog: true,
       valid: false,
       today: new Date(),
-      mockProductList: [
-        'NATHAN-APPLE-70',
-        'CONNOR-ORAN-80',
-        'EDWARD-BANA-78',
-      ],
       productCode : "",
+      productList: [],
       quantity : "",
       pricePerItem: "",
       totalPrice: "",
@@ -176,13 +172,12 @@ export default {
       sellByValid: true,
       bestBefore: "",
       bestBeforeValid: true,
-      expires: "",
+      expires: new Date().toISOString().slice(0,10),
       expiresValid: true,
       datesValid: true,
       productFilter: '',
       minDate: new Date("1500-01-01"),
       maxDate: new Date("5000-01-01"),
-      //expires: new Date().toISOString().slice(0,10), //Keep this so the next person know what to use if he/she wan
       currency: {},
       maxCharRules: [
         field => (field.length <= 100) || 'Reached max character limit: 100'
@@ -194,6 +189,9 @@ export default {
       ],
       numberRules: [
         field => /(^[0-9]*$)/.test(field) || 'Must contain numbers only'
+      ],
+      quantityRules: [
+        field => /(^[1-9][0-9]*$)/.test(field) || 'Must contain numbers only above zero'
       ],
       smallPriceRules: [
         //A price must be numbers and may contain a decimal followed by exactly two numbers (4digit)
