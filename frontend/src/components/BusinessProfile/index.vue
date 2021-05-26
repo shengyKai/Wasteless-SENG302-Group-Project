@@ -6,6 +6,9 @@
           {{ business.name }}
         </h1>
         <p><b>Created:</b> {{ createdMsg }}</p>
+        <v-btn outlined  @click="goSalePage" :value="false">
+          Sale listings
+        </v-btn>
       </div>
     </div>
 
@@ -92,6 +95,12 @@ export default {
       return this.business?.administrators || [];
     },
   },
+
+  methods: {
+    goSalePage() {
+      this.$router.push(`/business/${this.business.id}/listings`);
+    },
+  }
 };
 </script>
 
