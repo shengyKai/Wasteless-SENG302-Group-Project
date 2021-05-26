@@ -155,7 +155,7 @@ describe("Test GET /businesses/:businessId/inventory/count endpoint", () => {
     instance.get.mockResolvedValueOnce({
       data: responseData
     });
-    const inventories = await api.getInventory(7, 1, 10, 'name', false);
+    const inventories = await api.getInventoryCount(7);
     expect(inventories).toEqual(responseData.count);
   });
 
@@ -166,7 +166,7 @@ describe("Test GET /businesses/:businessId/inventory/count endpoint", () => {
     instance.get.mockResolvedValueOnce({
       data: responseData
     });
-    const inventories = await api.getInventory(7, 1, 10, 'name', false);
+    const inventories = await api.getInventoryCount(7);
     expect(inventories).toEqual("Response is not number");
   });
 
@@ -177,7 +177,7 @@ describe("Test GET /businesses/:businessId/inventory/count endpoint", () => {
     instance.get.mockResolvedValueOnce({
       data: responseData
     });
-    const inventories = await api.getInventory(7, 1, 10, 'name', false);
+    const inventories = await api.getInventoryCount(7);
     expect(inventories).toEqual("Response is not number");
   });
 
@@ -187,7 +187,7 @@ describe("Test GET /businesses/:businessId/inventory/count endpoint", () => {
         status: undefined,
       }
     });
-    const inventories = await api.getInventory(7, 1, 10, 'name', false);
+    const inventories = await api.getInventoryCount(7);
     expect(inventories).toEqual("Failed to reach backend");
   });
 
@@ -197,7 +197,7 @@ describe("Test GET /businesses/:businessId/inventory/count endpoint", () => {
         status: 999,
       }
     });
-    const inventories = await api.getInventory(7, 1, 10, 'name', false);
+    const inventories = await api.getInventoryCount(7);
     expect(inventories).toEqual("Request failed: 999");
   });
 });
