@@ -5,12 +5,15 @@
       persistent
       max-width="600px"
     >
-      <v-card min-height="250px" class="d-flex flex-column">
-        <v-card-title class="my-n1 title">
-          <textarea rows="1" v-model="title" ref="titleField" class="field"/>
-        </v-card-title>
+      <v-card min-height="250px" width="400px" class="d-flex flex-column">
+
         <v-card-text class="my-n2 flex-grow-1 d-flex flex-column justify-space-between">
-          <div>
+          <v-card>
+            <v-card>
+              <v-card-title class="my-n1 title">
+                <textarea rows="1" v-model="title" ref="titleField" class="field"/>
+              </v-card-title>
+            </v-card>
             <strong>
               {{ locationString }}
               <br>
@@ -23,8 +26,10 @@
                 Posted {{ creationString }}
               </span>
             </div>
-            <textarea ref="descriptionField" v-model="description" rows="3" class="field"/>
-          </div>
+            <v-card >
+              <textarea ref="descriptionField" v-model="description" rows="3" class="field"/>
+            </v-card>
+          </v-card>
           <v-select
             v-model="selectedKeywords"
             :items="allKeywords"
@@ -93,7 +98,12 @@ export default {
     this.titleField.addEventListener("input", OnInput);
 
     getKeywords()
-      .then((response) => (this.allKeywords = response))
+      .then((response) => {
+        if (typeof response === 'string') {
+          this.allKeywords = [];
+        } else {
+          this.allKeywords = response;
+        }})
       .catch(() => (this.allKeywords = []));
   },
   computed: {
