@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class ImageTests {
+class ImageTests {
     @Autowired
     ImageRepository imageRepository;
 

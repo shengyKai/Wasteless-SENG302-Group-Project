@@ -30,7 +30,7 @@ public class LocationTests {
    * Checks all integers between 1 and 999 return true when passed into the checkValidStreetNumber method
    */
   @Test
-  public void checkValidStreetNumberValidNumbers() {
+  void checkValidStreetNumberValidNumbers() {
     for (int i = 1; i <= 999; i++) {
       assertTrue(testLocation.checkValidStreetNumber(Integer.toString(i)));
     }
@@ -40,7 +40,7 @@ public class LocationTests {
    * Checks several street numbers with a single slash return true when passed into the checkValidStreetNumber method
    */
   @Test
-  public void checkValidStreetNumberWithSlash() {
+  void checkValidStreetNumberWithSlash() {
     String[] streetNumbers = new String[]{ "1/1", "2/2", "6/9", "11/11", "1/111", "111/1", "111/111", "9999/9999" };
     for (String streetNumber : streetNumbers) {
       assertTrue(testLocation.checkValidStreetNumber(streetNumber));
@@ -51,7 +51,7 @@ public class LocationTests {
    * Checks several street numbers with two forward slashes return false when passed into the checkValidStreetNumber method
    */
   @Test
-  public void checkInvalidStreetNumberWithDoubleSlash() {
+  void checkInvalidStreetNumberWithDoubleSlash() {
     String[] streetNumbers = new String[]{ "1//1", "/1/", "//", "111/1/111", "1111//111" };
     for (String streetNumber : streetNumbers) {
       assertFalse(testLocation.checkValidStreetNumber(streetNumber));
@@ -62,7 +62,7 @@ public class LocationTests {
    * Checks several large integers above 999 return false when passed into the checkValidStreetNumber method
    */
   @Test
-  public void checkInvalidStreetNumberTooLargeNumbers() {
+  void checkInvalidStreetNumberTooLargeNumbers() {
     int[] streetNumbers = new int[]{ 1000000000, 1000000001, 1000000002, 1000000003, 2000000000, 1234500000, 1234560000,
             1234567000, 1234567890 };
     for (int streetNumber : streetNumbers) {
@@ -74,7 +74,7 @@ public class LocationTests {
    * Checks negative integers fail when passed into the checkValidStreetNumber method
    */
   @Test
-  public void checkInvalidStreetNumberNegativeNumbers() {
+  void checkInvalidStreetNumberNegativeNumbers() {
     int[] streetNumbers = new int[]{ -1, -2, -3, -1001, -1002, -1003, -2000, -3000, -4000, -5000, -12345, -123456,
             -1234567, -12345678, -123456789, -1234567890 };
     for (int streetNumber : streetNumbers) {
@@ -86,7 +86,7 @@ public class LocationTests {
    * Checks several names pass return true when passed into the checkValidStreetName method
    */
   @Test
-  public void checkValidStreetNameLetters() {
+  void checkValidStreetNameLetters() {
     String[] streetNames = new String[]{ "Abby Park Street", "Barn Street", "California Street", "Danish Avenue",
                                           "Eastern Cesta", "Farmers Lane", "Galghard Road", "Hazlett Avenue" };
     for (String streetName : streetNames) {
@@ -98,7 +98,7 @@ public class LocationTests {
    * Checks several names with numbers in them fail when passed into the checkValidStreetName method
    */
   @Test
-  public void checkValidStreetNameNumbers() {
+  void checkValidStreetNameNumbers() {
     String[] streetNames = new String[]{ "Over 9000 Avenue", "69th Street", "0 Lane", "333 Road" };
     for (String streetName : streetNames) {
       assertFalse(testLocation.checkValidStreetName(streetName));
@@ -109,7 +109,7 @@ public class LocationTests {
    * Checks several names with characters in them fail when passed into the checkValidStreetName method
    */
   @Test
-  public void checkValidStreetNameCharacters() {
+  void checkValidStreetNameCharacters() {
     String[] streetNames = new String[]{ "Hashtag # Lane", "Dollar $ Avenue", "Me & The Bois Road", "@ Me Street" };
     for (String streetName : streetNames) {
       assertFalse(testLocation.checkValidStreetName(streetName));
@@ -120,7 +120,7 @@ public class LocationTests {
    * Checks several names with over 100 characters fail when passed into the checkValidStreetName method
    */
   @Test
-  public void checkValidStreetNameOverHundredNine() {
+  void checkValidStreetNameOverHundredNine() {
     String[] streetNames = new String[]{
             " abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz",
             "helphelphelphelphelphelphelphelphelphelphelphelphelphelphelphelphelphelphelphelphelphelphelphelphelphelphelphelp",
@@ -134,7 +134,7 @@ public class LocationTests {
    * Check an empty string fail when passed into the checkValidStreetName method
    */
   @Test
-  public void checkValidStreetNameEmpty() {
+  void checkValidStreetNameEmpty() {
     assertFalse(testLocation.checkValidStreetName(""));
   }
 
@@ -142,7 +142,7 @@ public class LocationTests {
    * Checks several names pass return true when passed into the checkValidCity method
    */
   @Test
-  public void checkValidCityLetters() {
+  void checkValidCityLetters() {
     String[] cities = new String[]{ "Christchurch", "Dunedin", "Nelson", "Wellington", "Hamilton", "Auckland",
                                     "Nightcaps", "Sendai", "Tokyo", "Osaka", "Akihabara", "New York", "London" };
     for (String city : cities) {
@@ -154,7 +154,7 @@ public class LocationTests {
    * Checks several names with numbers in them fail when passed into the checkValidCity method
    */
   @Test
-  public void checkValidCityNumbers() {
+  void checkValidCityNumbers() {
     String[] cities = new String[]{ "Chr1stchurch", "Dun3d1n", "N3ls0n", "W3ll1ngt0n", "Ham1lt0n", "Auck1and",
                                     "N1ghtcaps", "S3nda1", "T0ky0", "0saka", "Ak1habara", "N3w Y0rk", "L0nd0n" };
     for (String city : cities) {
@@ -166,7 +166,7 @@ public class LocationTests {
    * Checks several names with characters in them fail when passed into the checkValidCity method
    */
   @Test
-  public void checkValidCityCharacters() {
+  void checkValidCityCharacters() {
     String[] cities = new String[]{ "Chr!stchurch", "Duned!n", "Ne!son", "Well!ngton", "H@m!lton", "@uck!@nd",
                                     "N!ghtc@p$", "$end@!", "To&yo", "Os@&@", "@k!h@b@r@", "New Yor&", "Lon)on" };
     for (String city : cities) {
@@ -178,7 +178,7 @@ public class LocationTests {
    * Checks several names with over 50 characters fail when passed into the checkValidCity method
    */
   @Test
-  public void checkValidCityOverHundred() {
+  void checkValidCityOverHundred() {
     String[] cities = new String[]{ "this city string contains exactly fifty characters this city string contains exactly fifty characters",
                                     "helpppppppppppppppppppppppppppppppppppppppppppppppppppppp helpppppppppppppppppppppppppppppppppppppppppppppppppppppp",
                                     "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
@@ -192,7 +192,7 @@ public class LocationTests {
    * Check an empty string fail when passed into the checkValidCity method
    */
   @Test
-  public void checkValidCityEmpty() {
+  void checkValidCityEmpty() {
     assertFalse(testLocation.checkValidCity(""));
   }
 
@@ -200,7 +200,7 @@ public class LocationTests {
    * Checks several names pass return true when passed into the checkValidRegion method
    */
   @Test
-  public void checkValidRegionLetters() {
+  void checkValidRegionLetters() {
     String[] regions = new String[]{ "Southland", "Otago", "West Coast", "Cantebury", "Clutha", "Marlborough", "Selwyn",
                                       "Tasman", "Waimakariri", "Waimate"};
     for (String region : regions) {
@@ -212,7 +212,7 @@ public class LocationTests {
    * Checks several names with numbers in them fail when passed into the checkValidRegion method
    */
   @Test
-  public void checkValidRegionNumbers() {
+  void checkValidRegionNumbers() {
     String[] regions = new String[]{ "S0uthland", "0tago", "W3st C0ast", "Cant3bury", "C!utha", "Marlb0r0ugh", "S3lwyn",
                                       "5asman", "Wa1makar1r1", "Wa1mat3"};
     for (String region : regions) {
@@ -224,7 +224,7 @@ public class LocationTests {
    * Checks several names with characters in them fail when passed into the checkValidRegion method
    */
   @Test
-  public void checkValidRegionCharacters() {
+  void checkValidRegionCharacters() {
     String[] regions = new String[]{ "Southl@nd", "Ot@go", "We$t Co@st", "C@ntebury", "Cluth@", "M@rlborough", "Se!wyn",
                                       "T@sm@n", "W@!m@kar!r!", "W@!m@te" };
     for (String region : regions) {
@@ -236,7 +236,7 @@ public class LocationTests {
    * Checks several names with over 100 characters fail when passed into the checkValidRegion method
    */
   @Test
-  public void checkValidRegionOverHundred() {
+  void checkValidRegionOverHundred() {
     String[] regions = new String[]{ "this region abcdefghijklmnopqrstuvwxyz abcdefghijklmnopqrstuvwxyz abcdefghijklmnopqrstuvwxyz abcdefghijklmnopqrstuvwxyz",
                                       "helpppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppp",
                                       "this region is full of surprises you should come have a lookkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk" };
@@ -249,7 +249,7 @@ public class LocationTests {
    * Check an empty string fail when passed into the checkValidRegion method
    */
   @Test
-  public void checkValidRegionEmpty() {
+  void checkValidRegionEmpty() {
     assertFalse(testLocation.checkValidRegion(""));
   }
 
@@ -257,7 +257,7 @@ public class LocationTests {
    * Checks several names pass return true when passed into the checkValidCountry method
    */
   @Test
-  public void checkValidCountryLetters() {
+  void checkValidCountryLetters() {
     String[] countries = new String[]{ "New Zealand", "Australia", "Fiji", "Tonga", "Japan", "Korea", "United Kingdom",
                                         "Great Britan", "England", "Scotland" };
     for (String country : countries) {
@@ -269,7 +269,7 @@ public class LocationTests {
    * Checks several names with numbers in them fail when passed into the checkValidCountry method
    */
   @Test
-  public void checkValidCountryNumbers() {
+  void checkValidCountryNumbers() {
     String[] countries = new String[]{ "N3w Z3aland", "Austral1a", "F1j1", "T0nga", "Ja9an", "K0r3a", "Un1t3d K1ngd0m",
                                         "Gr3at Br1tan", "3ngland", "Sc0tland" };
     for (String country : countries) {
@@ -281,7 +281,7 @@ public class LocationTests {
    * Checks several names with characters in them fail when passed into the checkValidCountry method
    */
   @Test
-  public void checkValidCountryCharacters() {
+  void checkValidCountryCharacters() {
     String[] countries = new String[]{ "New Ze@l@nd", "@ustr@l!@", "F!j!", "Tong@", "J@p@n", "K0r3@", "Un!ted K!ngdom",
                                         "Gre@t Br!t@n", "Engl@nd", "Scotl@nd" };
     for (String country : countries) {
@@ -293,7 +293,7 @@ public class LocationTests {
    * Checks several names with over 50 characters fail when passed into the checkValidCountry method
    */
   @Test
-  public void checkValidCountryOverHundred() {
+  void checkValidCountryOverHundred() {
     String[] countries = new String[]{ "This country is exactlyyyyyy fifty characters long This country is exactlyyyyyy fifty characters long",
                                         "helppppppppppppppppppppppppppppppppppppppppppppppp helppppppppppppppppppppppppppppppppppppppppppppppp",
                                         "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
@@ -307,7 +307,7 @@ public class LocationTests {
    * Check an empty string fail when passed into the checkValidCountry method
    */
   @Test
-  public void checkValidCountryEmpty() {
+  void checkValidCountryEmpty() {
     assertFalse(testLocation.checkValidCountry(""));
   }
 
@@ -315,7 +315,7 @@ public class LocationTests {
    * Checks several numeric zipcodes return true when passed into the checkValidZipCode method
    */
   @Test
-  public void checkValidZipCodeNumeric() {
+  void checkValidZipCodeNumeric() {
     String[] zipcodes = new String[]{ "1", "2", "3", "4", "5", "10", "20", "30", "40", "100", "1000", "12345", "123456",
                                       "1234567", "12345678", "123456789" };
     for (String zipcode : zipcodes) {
@@ -327,7 +327,7 @@ public class LocationTests {
    * Checks several numeric zipcodes return true when passed into the checkValidZipCode method
    */
   @Test
-  public void checkValidZipCodeAlphaNumeric() {
+  void checkValidZipCodeAlphaNumeric() {
     String[] zipcodes = new String[]{ "a1", "b2", "c3", "d4", "e5", "f10", "g20", "h30", "i40", "j100", "k1000",
                                       "l12345", "m123456", "o1234567", "p12345678", "q12345678" };
     for (String zipcode : zipcodes) {
@@ -339,7 +339,7 @@ public class LocationTests {
    * Checks several zipcodes with characters in them that fail when passed into the checkValidZipCode method
    */
   @Test
-  public void checkValidZipCodeCharacters() {
+  void checkValidZipCodeCharacters() {
     String[] zipcodes = new String[]{ "!1", "@2", "#3", "$4", "%5", "^10", "&20", "*30", "(40", ")100", "=1000",
                                       "_12345", "[123456", "]1234567", "{12345678", "}123456789" };
     for (String zipcode : zipcodes) {
@@ -351,7 +351,7 @@ public class LocationTests {
    * Checks several zipcodes over ten characters fail when passed into the checkValidZipCode method
    */
   @Test
-  public void checkValidZipCodeOverSixteen() {
+  void checkValidZipCodeOverSixteen() {
     String[] zipcodes = new String[]{ "12345678901234567", "99123456789123456789", "456123456789000000" };
     for (String zipcode : zipcodes) {
       assertFalse(testLocation.checkValidPostCode(zipcode));
@@ -362,7 +362,7 @@ public class LocationTests {
    * Checks an empty string fail when passed into the checkValidZipCode method
    */
   @Test
-  public void checkValidZipCodeEmpty() {
+  void checkValidZipCodeEmpty() {
     assertFalse(testLocation.checkValidPostCode(""));
   }
 
@@ -371,7 +371,7 @@ public class LocationTests {
    * Checks several names with over 50 characters fail when passed into the checkValidDistrict method
    */
   @Test
-  public void checkValidDistrictOverHundredChar() {
+  void checkValidDistrictOverHundredChar() {
     String[] districts = new String[]{"this district string contains above one hundred characters from start to end inclusive of spacessssss",
                                     "this district string contains way above one hundred characters from start to end inclusive of spacessssss" +
                                     "this district string contains way above one hundred characters from start to end inclusive of spacessssss" };
@@ -384,7 +384,7 @@ public class LocationTests {
    * Checks if Location object is still valid even if district field is an empty string
    */
   @Test
-  public void checkLocationValidIfNoDistrict() {
+  void checkLocationValidIfNoDistrict() {
     Location location = new Location.Builder().atStreetNumber("1").onStreet("Elizabeth Street").inCity("Christchurch")
                                       .inRegion("Canterbury").inCountry("New Zealand").withPostCode("8041").atDistrict("")
                                       .build();
@@ -396,7 +396,7 @@ public class LocationTests {
    * checkValidAllLocationParameters method
    */
   @Test
-  public void checkValidAllLocationParametersEverythingValid() {
+  void checkValidAllLocationParametersEverythingValid() {
     Location location = new Location.Builder().atStreetNumber("1").onStreet("Elizabeth Street").inCity("Christchurch")
                                       .inRegion("Canterbury").inCountry("New Zealand").withPostCode("8041").atDistrict("Ashburton")
                                       .build();
@@ -408,7 +408,7 @@ public class LocationTests {
    * checkValidAllLocationParameters method
    */
   @Test
-  public void checkValidAllLocationParametersStreetNumberInvalid() {
+  void checkValidAllLocationParametersStreetNumberInvalid() {
     assertThrows(ResponseStatusException.class, () -> {
       Location location = new Location.Builder().atStreetNumber("1234567890").onStreet("Elizabeth Street").inCity("Christchurch")
                       .inRegion("Canterbury").inCountry("New Zealand").withPostCode("8041").atDistrict("Ashburton").build();
@@ -420,7 +420,7 @@ public class LocationTests {
    * checkValidAllLocationParameters method
    */
   @Test
-  public void checkValidAllLocationParametersStreetNameInvalid() {
+  void checkValidAllLocationParametersStreetNameInvalid() {
     assertThrows(ResponseStatusException.class, () -> {
       Location location = new Location.Builder().atStreetNumber("1").onStreet("Eliz@beth Str33t").inCity("Christchurch")
             .inRegion("Canterbury").inCountry("New Zealand").withPostCode("8041").atDistrict("Ashburton").atDistrict("Ashburton")
@@ -433,7 +433,7 @@ public class LocationTests {
    * checkValidAllLocationParameters method
    */
   @Test
-  public void checkValidAllLocationParametersCityInvalid() {
+  void checkValidAllLocationParametersCityInvalid() {
     assertThrows(ResponseStatusException.class, () -> {
       Location location = new Location.Builder().atStreetNumber("1").onStreet("Elizabeth Street").inCity("Chr!$stchurch")
               .inRegion("Canterbury").inCountry("New Zealand").withPostCode("8041").atDistrict("Ashburton").build();
@@ -445,7 +445,7 @@ public class LocationTests {
    * checkValidAllLocationParameters method
    */
   @Test
-  public void checkValidAllLocationParametersRegionInvalid() {
+  void checkValidAllLocationParametersRegionInvalid() {
     assertThrows(ResponseStatusException.class, () -> {
       Location location = new Location.Builder().atStreetNumber("1").onStreet("Elizabeth Street").inCity("Christchurch")
               .inRegion("C@nt3rbury").inCountry("New Zealand").withPostCode("8041").atDistrict("Ashburton").build();
@@ -457,7 +457,7 @@ public class LocationTests {
    * checkValidAllLocationParameters method
    */
   @Test
-  public void checkValidAllLocationParametersCountryInvalid() {
+  void checkValidAllLocationParametersCountryInvalid() {
     assertThrows(ResponseStatusException.class, () -> {
       Location location = new Location.Builder().atStreetNumber("1").onStreet("Elizabeth Street").inCity("Christchurch")
               .inRegion("Canterbury").inCountry("N3w Z3@l@nd").withPostCode("8041").atDistrict("Ashburton").build();
@@ -469,7 +469,7 @@ public class LocationTests {
    * checkValidAllLocationParameters method
    */
   @Test
-  public void checkValidAllLocationParametersZipCodeInvalid() {
+  void checkValidAllLocationParametersZipCodeInvalid() {
     assertThrows(ResponseStatusException.class, () -> {
       Location location = new Location.Builder().atStreetNumber("1").onStreet("Elizabeth Street").inCity("Christchurch")
                       .inRegion("Canterbury").inCountry("New Zealand").withPostCode("80999999999999941").atDistrict("Ashburton")
@@ -482,7 +482,7 @@ public class LocationTests {
    * checkValidAllLocationParameters method
    */
   @Test
-  public void checkValidAllLocationParametersDistrictInvalid() {
+  void checkValidAllLocationParametersDistrictInvalid() {
     assertThrows(ResponseStatusException.class, () -> {
       Location location = new Location.Builder().atStreetNumber("1").onStreet("Elizabeth Street").inCity("Christchurch")
                       .inRegion("Canterbury").inCountry("New Zealand").withPostCode("8041")
@@ -496,7 +496,7 @@ public class LocationTests {
    * been set.
    */
   @Test
-  public void buildWithoutStreetNumberTest() {
+  void buildWithoutStreetNumberTest() {
     Location.Builder locationBuilder = new Location.Builder()
             .onStreet("Elizabeth Street")
             .inSuburb("Riccarton")
@@ -513,7 +513,7 @@ public class LocationTests {
    * been set.
    */
   @Test
-  public void buildWithoutStreetNameTest() {
+  void buildWithoutStreetNameTest() {
     Location.Builder locationBuilder = new Location.Builder()
             .atStreetNumber("1")
             .inSuburb("Riccarton")
@@ -529,7 +529,7 @@ public class LocationTests {
    * Verify that Location.Builder.build() throws a ResponseStatusException when it is called before city has been set.
    */
   @Test
-  public void buildWithoutCityTest() {
+  void buildWithoutCityTest() {
     Location.Builder locationBuilder = new Location.Builder()
             .atStreetNumber("1")
             .onStreet("Elizabeth Street")
@@ -546,7 +546,7 @@ public class LocationTests {
    * been set.
    */
   @Test
-  public void buildWithoutRegionTest() {
+  void buildWithoutRegionTest() {
     Location.Builder locationBuilder = new Location.Builder()
             .atStreetNumber("1")
             .onStreet("Elizabeth Street")
@@ -563,7 +563,7 @@ public class LocationTests {
    * been set.
    */
   @Test
-  public void buildWithoutCountryTest() {
+  void buildWithoutCountryTest() {
     Location.Builder locationBuilder = new Location.Builder()
             .atStreetNumber("1")
             .onStreet("Elizabeth Street")
@@ -580,7 +580,7 @@ public class LocationTests {
    * been set.
    */
   @Test
-  public void buildWithoutZipCodeTest() {
+  void buildWithoutZipCodeTest() {
     Location.Builder locationBuilder = new Location.Builder()
             .atStreetNumber("1")
             .onStreet("Elizabeth Street")
@@ -596,7 +596,7 @@ public class LocationTests {
    * Verify that Location.Builder.build() builds successfully even with no district.
    */
   @Test
-  public void buildWithoutDistrictTest() {
+  void buildWithoutDistrictTest() {
     Location.Builder locationBuilder = new Location.Builder()
             .atStreetNumber("1")
             .onStreet("Elizabeth Street")
@@ -614,7 +614,7 @@ public class LocationTests {
    * location is the same as value set for the builder.
    */
   @Test
-  public void buildStreetNumberTest() {
+  void buildStreetNumberTest() {
     Location location = locationBuilder.build();
     assertEquals("1", location.getStreetNumber());
   }
@@ -624,7 +624,7 @@ public class LocationTests {
    * location is the same as value set for the builder.
    */
   @Test
-  public void buildStreetNameTest() {
+  void buildStreetNameTest() {
     Location location = locationBuilder.build();
     assertEquals("Elizabeth Street", location.getStreetName());
   }
@@ -634,7 +634,7 @@ public class LocationTests {
    * location is the same as value set for the builder.
    */
   @Test
-  public void buildCityTest() {
+  void buildCityTest() {
     Location location = locationBuilder.build();
     assertEquals("Christchurch", location.getCity());
   }
@@ -644,7 +644,7 @@ public class LocationTests {
    * location is the same as value set for the builder.
    */
   @Test
-  public void buildRegionTest() {
+  void buildRegionTest() {
     Location location = locationBuilder.build();
     assertEquals("Canterbury", location.getRegion());
   }
@@ -654,7 +654,7 @@ public class LocationTests {
    * location is the same as value set for the builder.
    */
   @Test
-  public void buildCountryTest() {
+  void buildCountryTest() {
     Location location = locationBuilder.build();
     assertEquals("New Zealand", location.getCountry());
   }
@@ -665,7 +665,7 @@ public class LocationTests {
    * location is the same as value set for the builder.
    */
   @Test
-  public void buildDistrictTest() {
+  void buildDistrictTest() {
     Location location = locationBuilder.build();
     assertEquals("Ashburton", location.getDistrict());
   }
@@ -675,7 +675,7 @@ public class LocationTests {
    * city, region, country and postcode of the location object.
    */
   @Test
-  public void constructFullJsonIncludesAllExpectedFieldsTest() {
+  void constructFullJsonIncludesAllExpectedFieldsTest() {
     Location location = locationBuilder.build();
     JSONObject json = location.constructFullJson();
     assertTrue(json.containsKey("streetNumber"));
@@ -692,7 +692,7 @@ public class LocationTests {
    * number, street name, city, region, country and postcode.
    */
   @Test
-  public void constructFullJsonOnlyIncludesExpectedFieldsTest() {
+  void constructFullJsonOnlyIncludesExpectedFieldsTest() {
     Location location = locationBuilder.build();
     JSONObject json = location.constructFullJson();
     json.remove("streetNumber");
@@ -709,7 +709,7 @@ public class LocationTests {
    * Test that all fields of the JSON produced by constuctFullJson have the expected value.
    */
   @Test
-  public void constructFullJsonFieldsHaveExpectedValueTest() {
+  void constructFullJsonFieldsHaveExpectedValueTest() {
     Location location = locationBuilder.build();
     JSONObject json = location.constructFullJson();
     assertEquals(location.getStreetNumber(), json.getAsString("streetNumber"));
@@ -726,7 +726,7 @@ public class LocationTests {
    * of the location object.
    */
   @Test
-  public void constructPartialJsonIncludesAllExpectedFieldsTest() {
+  void constructPartialJsonIncludesAllExpectedFieldsTest() {
     Location location = locationBuilder.build();
     JSONObject json = location.constructPartialJson();
     assertTrue(json.containsKey("city"));
@@ -739,7 +739,7 @@ public class LocationTests {
    * city, region and country.
    */
   @Test
-  public void constructPartialJsonOnlyIncludesExpectedFieldsTest() {
+  void constructPartialJsonOnlyIncludesExpectedFieldsTest() {
     Location location = locationBuilder.build();
     JSONObject json = location.constructPartialJson();
     json.remove("city");
@@ -752,7 +752,7 @@ public class LocationTests {
    * Test that all fields of the JSON produced by constuctPartialJson have the expected value.
    */
   @Test
-  public void constructPartialJsonFieldsHaveExpectedValueTest() {
+  void constructPartialJsonFieldsHaveExpectedValueTest() {
     Location location = locationBuilder.build();
     JSONObject json = location.constructPartialJson();
     assertEquals(location.getCity(), json.getAsString("city"));

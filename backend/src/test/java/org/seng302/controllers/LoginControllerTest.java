@@ -41,7 +41,7 @@ class LoginControllerTest {
     private UserRepository userRepository;
 
     @BeforeEach
-    public void setUp() throws ParseException {
+    void setUp() throws ParseException {
         businessRepository.deleteAll(); // Do this to prevent table constraint issues
         User john = new User.Builder()
                 .withFirstName("John")
@@ -69,7 +69,7 @@ class LoginControllerTest {
      * @throws Exception
      */
     @Test
-    public void loginWithValidUsernameAndPasswordTest() throws Exception {
+    void loginWithValidUsernameAndPasswordTest() throws Exception {
         String loginBody = "{\"email\": \"johnsmith99@gmail.com\", \"password\": \"1337-H%nt3r2\"}";
 
         MvcResult result = mockMvc.perform(post("/login")
@@ -78,7 +78,7 @@ class LoginControllerTest {
                 .andExpect(status().isOk())
                 .andReturn();
         String authToken = result.getResponse().getCookie("AUTHTOKEN").getValue();
-        assertTrue(authToken.length() == 32);
+        assertEquals(32, authToken.length());
         // Might change to cookies within the future
     }
 
@@ -88,7 +88,7 @@ class LoginControllerTest {
      * @throws Exception
      */
     @Test
-    public void loginWithIncorrectPasswordTest() throws Exception {
+    void loginWithIncorrectPasswordTest() throws Exception {
         String loginBody = "{\"email\": \"johnsmith99@gmail.com\", \"password\": \"Wrong password\"}";
 
         mockMvc.perform(post("/login")
@@ -104,7 +104,7 @@ class LoginControllerTest {
      * @throws Exception
      */
     @Test
-    public void loginWithIncorrectEmailTest() throws Exception {
+    void loginWithIncorrectEmailTest() throws Exception {
         String loginBody = "{\"email\": \"johnsmith100@gmail.com\", \"password\": \"1337-H%nt3r2\"}";
 
         mockMvc.perform(post("/login")
@@ -120,7 +120,7 @@ class LoginControllerTest {
      * @throws Exception
      */
     @Test
-    public void loginWithDefaultUserSessionRoleIsUser() throws Exception {
+    void loginWithDefaultUserSessionRoleIsUser() throws Exception {
         String loginBody = "{\"email\": \"johnsmith99@gmail.com\", \"password\": \"1337-H%nt3r2\"}";
 
         MvcResult result = mockMvc.perform(post("/login")
@@ -138,7 +138,7 @@ class LoginControllerTest {
      * @throws Exception
      */
     @Test
-    public void loginWithDefaultUserSessionIdIsUserId() throws Exception {
+    void loginWithDefaultUserSessionIdIsUserId() throws Exception {
         String loginBody = "{\"email\": \"johnsmith99@gmail.com\", \"password\": \"1337-H%nt3r2\"}";
         Account user = accountRepository.findByEmail("johnsmith99@gmail.com");
         MvcResult result = mockMvc.perform(post("/login")
@@ -156,7 +156,7 @@ class LoginControllerTest {
      * @throws Exception
      */
     @Test
-    public void loginWithAdminUserSessionRoleIsAdmin() throws Exception {
+    void loginWithAdminUserSessionRoleIsAdmin() throws Exception {
         String loginBody = "{\"email\": \"johnsmith99@gmail.com\", \"password\": \"1337-H%nt3r2\"}";
         User user = userRepository.findByEmail("johnsmith99@gmail.com");
         user.setRole("globalApplicationAdmin");

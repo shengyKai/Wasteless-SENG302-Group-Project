@@ -176,6 +176,17 @@ export type Keyword = {
   created: string
 };
 
+export type MarketplaceCard = {
+  id: number,
+  creator: User,
+  section: "ForSale" | "Wanted" | "Exchange",
+  created: string,
+  displayPeriodEnd?: string,
+  title: string,
+  description?: string,
+  keywords: Keyword[]
+}
+
 export type CreateProduct = Omit<Product, 'created' | 'images'>;
 
 type UserOrderBy = 'userId' | 'relevance' | 'firstName' | 'middleName' | 'lastName' | 'nickname' | 'email';
@@ -801,4 +812,70 @@ export async function createMarketplaceCard(marketplaceCard: CreateMarketplaceCa
     return 'Invalid response format';
   }
   return response.data.cardId;
+}
+
+type SectionType = 'ForSale' | 'Wanted' | 'Exchange'
+
+/**
+   * Sends a query for the total number of cards by section in the marketplace
+   *
+   * @param section section name to identify which section of the marketplace to acquire the card count from
+   * @returns Number of cards or an error message
+   */
+export async function getMarketplaceCardCount(section: SectionType): Promise<MaybeError<number>> {
+  let response;
+  try {
+    response = await instance.get(`/cards/count`, {
+      params: {
+        section
+      }
+    });
+  } catch (error) {
+    let status: number | undefined = error.response?.status;
+
+    if (status === undefined) return 'Failed to reach backend';
+    return `Request failed: ${status}`;
+  }
+
+  if (typeof response.data?.count !== 'number') {
+    return 'Response is not number';
+  }
+
+  return response.data.count;
+}
+
+type CardOrderBy = 'created' | 'title' | 'closes' | 'creatorFirstName' | 'creatorLastName'
+
+/**
+ * Fetches a page of cards by section in the marketplace
+ * @param section The ID of the business
+ * @param page Page to fetch (1 indexed)
+ * @param resultsPerPage Maximum number of results per page
+ * @param orderBy Parameter to order the results by
+ * @param reverse Whether to reverse the results (default ascending)
+ * @returns List of sales or a string error message
+ */
+export async function getMarketplaceCardsBySection(section: SectionType, page: number, resultsPerPage: number, orderBy: CardOrderBy, reverse: boolean): Promise<MaybeError<MarketplaceCard[]>> {
+  let response;
+  try {
+    response = await instance.get(`/cards`, {
+      params: {
+        section,
+        page,
+        resultsPerPage,
+        orderBy,
+        reverse
+      }
+    });
+  } catch (error) {
+    let status: number | undefined = error.response?.status;
+    if (status === undefined) return 'Failed to reach backend';
+    if (status === 400) return 'The given section does not exist';
+    if (status === 401) return 'Missing/Invalid access token';
+    return 'Request failed: ' + status;
+  }
+  if (!is<MarketplaceCard[]>(response.data)) {
+    return "Response is not card array";
+  }
+  return response.data;
 }

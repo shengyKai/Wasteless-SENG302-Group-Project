@@ -58,7 +58,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @AutoConfigureMockMvc
-public class InventoryControllerTest {
+class InventoryControllerTest {
     @Autowired
     private MockMvc mockMvc;
 

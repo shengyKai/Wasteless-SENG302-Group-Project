@@ -9,22 +9,19 @@ import * as api from "@/api/internal";
 
 Vue.use(Vuetify);
 
+jest.mock('@/api/currency', () => ({
+  currencyFromCountry: jest.fn().mockResolvedValue({
+    code: 'NZD',
+    name: 'New Zealand dollar',
+    symbol: '$',
+  }),
+}));
+
 jest.mock('@/api/internal', () => ({
   createSaleItem: jest.fn(),
 }));
 const createSaleItem = castMock(api.createSaleItem);
-// Characters that are in the set of letters, numbers, spaces and punctuation.
-const validQuantityCharacters = [
-  "0",
-  "11",
-  "2123",
-  "1231423",
-  "987654321",
-  "123",
-  "21233",
-  "412345",
-  "98765432",
-];
+
 // Characters that are in the set of number, decimal, number with decimal
 const validPriceCharacters = [
   "0",
@@ -108,7 +105,7 @@ describe("CreateSaleItem.vue", () => {
     resetStoreForTesting();
     let store = getStore();
     store.state.createInventoryDialog = 90;
-    store.state.createSaleItemDialog = {businessId: 1, inventoryItem: {id: 1, product: testProducts, quantity: 5, remainingQuantity: 3, expires: "somedate"}};
+    store.state.createSaleItemDialog = {businessId: 1, inventoryItem: {id: 1, product: testProducts, quantity: 10, remainingQuantity: 5, expires: "somedate"}};
 
     appWrapper = mount(App, {
       localVue,
@@ -132,8 +129,7 @@ describe("CreateSaleItem.vue", () => {
 	 */
   async function populateRequiredFields() {
     await wrapper.setData({
-      //TODO: the inventory item will need to be provided
-      quantity: 3,
+      quantity: '3',
       price: "10" //Need to retrieve this from the inventory item
     });
   }
@@ -182,26 +178,14 @@ describe("CreateSaleItem.vue", () => {
   it("Valid if all required fields are provided", async () => {
     await populateRequiredFields();
     await Vue.nextTick();
-    expect(wrapper.vm.valid).toBeTruthy();
+    expect(findCreateButton().props().disabled).toBeFalsy();
   });
 
   it("Valid if all fields are provided", async () => {
     await populateAllFields();
     await Vue.nextTick();
-    expect(wrapper.vm.valid).toBeTruthy();
+    expect(findCreateButton().props().disabled).toBeFalsy();
   });
-
-  it.each(validQuantityCharacters)(
-    'Valid when quantity contain numbers from 1 to 9 digit, QUANTITY = "%s"',
-    async (quantity) => {
-      await populateAllFields();
-      await wrapper.setData({
-        quantity,
-      });
-      await Vue.nextTick();
-      expect(wrapper.vm.valid).toBeTruthy();
-    }
-  );
 
   it.each(validPriceCharacters)(
     'Valid when PRICE PER ITEM contain valid price [e.g 999 or 999.99] & <10000, Price per Item =  "%s"',
@@ -211,19 +195,19 @@ describe("CreateSaleItem.vue", () => {
         price,
       });
       await Vue.nextTick();
-      expect(wrapper.vm.valid).toBeTruthy();
+      expect(findCreateButton().props().disabled).toBeFalsy();
     }
   );
 
   it.each(invalidCharacters.concat(whitespaceCharacters))(
-    'invalid if QUANTITY contain space, tab, symbol, other language QUANTITY = "%s"',
+    'Invalid if QUANTITY contain space, tab, symbol, other language QUANTITY = "%s"',
     async (quantity) => {
       await populateAllFields();
       await wrapper.setData({
         quantity,
       });
       await Vue.nextTick();
-      expect(wrapper.vm.valid).toBeFalsy();
+      expect(findCreateButton().props().disabled).toBeTruthy();
     }
   );
 
@@ -234,7 +218,7 @@ describe("CreateSaleItem.vue", () => {
         price,
       });
       await Vue.nextTick();
-      expect(wrapper.vm.valid).toBeFalsy();
+      expect(findCreateButton().props().disabled).toBeTruthy();
     });
 
   it.each(invalidCharacters.concat(whitespaceCharacters))(
@@ -245,7 +229,7 @@ describe("CreateSaleItem.vue", () => {
         price,
       });
       await Vue.nextTick();
-      expect(wrapper.vm.valid).toBeFalsy();
+      expect(findCreateButton().props().disabled).toBeTruthy();
     }
   );
 
@@ -258,7 +242,7 @@ describe("CreateSaleItem.vue", () => {
 
   it("Closes the dialog when close button pressed", async ()=> {
     await findCloseButton().trigger('click');
-    await  Vue.nextTick();
+    await Vue.nextTick();
     expect(createSaleItem).toBeCalledTimes(0);
     expect(wrapper.emitted().closeDialog).toBeTruthy();
   });
@@ -267,7 +251,7 @@ describe("CreateSaleItem.vue", () => {
     createSaleItem.mockResolvedValueOnce("some error message");
     await populateRequiredFields();
     await findCreateButton().trigger('click');
-    await  Vue.nextTick();
+    await Vue.nextTick();
     expect(wrapper.vm.errorMessage).toEqual('some error message');
   });
 
@@ -286,28 +270,58 @@ describe("CreateSaleItem.vue", () => {
     expect(findCreateButton().props().disabled).toBeFalsy();
   });
 
+  it("Valid if quantity is positive and less than remaining quantity", async () => {
+    await populateRequiredFields();
+    await wrapper.setData({
+      quantity: '2'
+    });
+    await Vue.nextTick();
+    expect(findCreateButton().props().disabled).toBeFalsy();
+  });
+
+  it("Valid if quantity is equal to remaining quantity", async () => {
+    await populateRequiredFields();
+    await wrapper.setData({
+      quantity: '5'
+    });
+    await Vue.nextTick();
+    expect(findCreateButton().props().disabled).toBeFalsy();
+  });
+
+  it("Valid if quantity is greater than remaining quantity", async () => {
+    await populateRequiredFields();
+    await wrapper.setData({
+      quantity: '6'
+    });
+    await Vue.nextTick();
+    expect(findCreateButton().props().disabled).toBeTruthy();
+  });
+
   it("Invalid when quantity is zero", async () => {
     await populateRequiredFields();
     await wrapper.setData({
-      quantity: 0
+      quantity: '0'
     });
-    expect(findCreateButton().props().disabled).toBeFalsy();
+    await Vue.nextTick();
+    expect(findCreateButton().props().disabled).toBeTruthy();
   });
 
   it("Invalid when quantity is negative one", async () => {
     await populateRequiredFields();
     await wrapper.setData({
-      quantity: -1
+      quantity: '-1'
     });
-    expect(findCreateButton().props().disabled).toBeFalsy();
+    await Vue.nextTick();
+    expect(findCreateButton().props().disabled).toBeTruthy();
   });
 
   it("Invalid when quantity is negative 10000", async () => {
     await populateRequiredFields();
     await wrapper.setData({
-      quantity: -10000
+      quantity: '-10000'
     });
-    expect(findCreateButton().props().disabled).toBeFalsy();
+    await Vue.nextTick();
+    expect(findCreateButton().props().disabled).toBeTruthy();
   });
 
   describe("Closing date validation", () => {

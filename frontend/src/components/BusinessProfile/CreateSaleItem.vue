@@ -17,10 +17,10 @@
                 <v-col cols="6">
                   <v-text-field
                     class="required"
-                    solo
                     v-model="quantity"
                     label="Quantity"
-                    :rules="mandatoryRules.concat(numberRules)"
+                    :rules="mandatoryRules.concat(quantityRules)"
+                    :suffix="'/'+inventoryItem.remainingQuantity"
                     :min=1
                     outlined
                   />
@@ -31,7 +31,9 @@
                     v-model="price"
                     class="required"
                     label="Price Per Item"
-                    prefix="$"
+                    :prefix="currency.symbol"
+                    :suffix="currency.code"
+                    :hint="currency.errorMessage"
                     :rules="mandatoryRules.concat(mandatoryRules).concat(priceRules)"
                     outlined
                   />
@@ -84,6 +86,8 @@
 
 <script>
 import {createSaleItem} from '@/api/internal';
+import { currencyFromCountry } from "@/api/currency";
+
 export default {
   name: 'CreateSaleItem',
   components: {},
@@ -99,7 +103,7 @@ export default {
       closes: "",
       closesValid: true,
       maxDate: new Date("5000-01-01"),
-
+      currency: {},
       maxCharRules: [
         field => (field.length <= 100) || 'Reached max character limit: 100'
       ],
@@ -109,8 +113,10 @@ export default {
         field => !!field || 'Field is required'
       ],
 
-      numberRules: [
-        field => /(^[0-9]*$)/.test(field) || 'Must contain numbers only'
+      quantityRules: [
+        field => /(^[0-9]*$)/.test(field) || 'Must be a valid number',
+        field => parseInt(field) !== 0 || 'Must not be zero',
+        field => parseInt(field) <= this.inventoryItem.remainingQuantity || 'Must not be greater than remaining quantity',
       ],
 
       priceRules: [
@@ -122,6 +128,10 @@ export default {
         field => /(^[ a-zA-Z0-9@//$%&!'//#,//.//(//)//:;_-]*$)/.test(field) || 'Bio must only contain letters, numbers, and valid special characters'
       ],
     };
+  },
+  created() {
+    const country = this.inventoryItem.product.countryOfSale;
+    currencyFromCountry(country).then(currency => this.currency = currency);
   },
   methods: {
     /**
@@ -143,7 +153,7 @@ export default {
         quantity = parseInt(this.quantity);
         price = parseFloat(this.price);
       } catch ( error ) {
-        this.errorMessage = 'Could not parse field \'Quantity\'';
+        this.errorMessage = 'Could not parse field \'Quantity\' or \'Price\'';
         return;
       }
       const saleItem = {

@@ -19,16 +19,20 @@ import java.util.stream.Stream;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class MarketplaceCardRepositoryTest {
+class MarketplaceCardRepositoryTest {
     @Autowired
     private MarketplaceCardRepository marketplaceCardRepository;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private BusinessRepository businessRepository;
     private MarketplaceCard card;
     private User user;
 
     @BeforeAll
     private void setUp() throws ParseException {
+        businessRepository.deleteAll();
+        marketplaceCardRepository.deleteAll();
         userRepository.deleteAll();
         Location address = new Location.Builder()
                 .inCity("city")
@@ -47,7 +51,6 @@ public class MarketplaceCardRepositoryTest {
                 .withDob("2000-08-04")
                 .build();
         user = userRepository.save(user);
-        marketplaceCardRepository.deleteAll();
         card = new MarketplaceCard.Builder()
                 .withTitle("Some Title")
                 .withDescription("Some description")

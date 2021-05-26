@@ -125,7 +125,7 @@
                 <v-card-text class="pb-0 product-fields">
                   <strong>Quantity</strong>
                   <br>
-                  {{ inventoryItem.quantity }}
+                  {{inventoryItem.remainingQuantity}}/{{ inventoryItem.quantity }}
                 </v-card-text>
               </v-row>
               <v-row v-if="inventoryItem.pricePerItem !== undefined">
@@ -276,35 +276,7 @@ import { currencyFromCountry } from "@/api/currency";
 export default {
   name: "InventoryItem",
   props: {
-    inventoryItem: {
-      default() {
-        return {
-          id: 101,
-          product: {
-            id: "WATT-420-BEANS",
-            name: "Watties Baked Beans - 420g can",
-            description: "Baked Beans as they should be.",
-            manufacturer: "Heinz Wattie's Limited",
-            recommendedRetailPrice: 2.2,
-            created: "2021-05-12",
-            images: [
-              {
-                id: 1,
-                filename: '/media/images/8c8bae63-ae18-4881-8e72-d5bfcf57153f.png'
-              }
-            ],
-            countryOfSale: "Japan",
-          },
-          quantity: 4,
-          pricePerItem: 6.5,
-          totalPrice: 21.99,
-          manufactured: "2021-05-11",
-          sellBy: "2021-05-13",
-          bestBefore: "2021-05-14",
-          expires: "2021-05-15"
-        };
-      },
-    },
+    inventoryItem: Object,
     //retrieved from Inventory page
     businessId: Number
   },

@@ -13,14 +13,6 @@ import java.util.Optional;
 @Repository
 public interface ImageRepository extends CrudRepository<Image, Long> {
 
-    /**
-     *
-     * @param filename the directory at which the image is stored
-     * @return a image found by its associated directory location
-     */
-    //Image findByDirectory(@Param("filename") String filename);
-
-
     Optional<Image> findByFilename(@Param("filename") String filename);
     /**
      * Gets an image from the database that matches a given image Id. This method preforms a sanity check to ensure the

@@ -28,7 +28,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @AutoConfigureMockMvc
-public class ProductControllerDeleteImageTests {
+class ProductControllerDeleteImageTests {
 
     @Autowired
     private MockMvc mockMvc;

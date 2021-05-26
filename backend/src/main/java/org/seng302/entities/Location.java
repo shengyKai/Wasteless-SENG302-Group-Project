@@ -445,7 +445,7 @@ public class Location {
          * @return Builder with post code parameter set.
          */
         public Builder atDistrict(String district)  {
-            if (district.equals("")) {
+            if (district == null || district.equals("")) {
                 district = null;
             }
             this.district = district;

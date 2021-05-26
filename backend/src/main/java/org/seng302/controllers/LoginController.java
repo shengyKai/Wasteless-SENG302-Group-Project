@@ -1,8 +1,6 @@
 package org.seng302.controllers;
 
 import net.minidev.json.JSONObject;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.seng302.entities.Account;
 import org.seng302.entities.User;
 import org.seng302.persistence.AccountRepository;
@@ -29,7 +27,6 @@ public class LoginController {
 
     private final AccountRepository accountRepository;
     private final UserRepository userRepository;
-    private static final Logger logger = LogManager.getLogger(LoginController.class.getName());
 
     @Autowired
     public LoginController(AccountRepository accountRepository, UserRepository userRepository) {
@@ -51,11 +48,7 @@ public class LoginController {
         if (matchingAccount == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "There is no account associated with this email");
         } else {
-            try {
-                PasswordAuthenticator.verifyPassword(password, matchingAccount.getAuthenticationCode());
-            } catch (ResponseStatusException responseError) {
-                throw responseError;
-            }
+            PasswordAuthenticator.verifyPassword(password, matchingAccount.getAuthenticationCode());
 
             // If they are a DGAA, set their permissions
             if (matchingAccount.getRole().equals("defaultGlobalApplicationAdmin")) {
@@ -64,12 +57,11 @@ public class LoginController {
             } else {
                 // Must be a user
                 Optional<User> accountAsUser = userRepository.findById(matchingAccount.getUserID());
-                AuthenticationTokenManager.setAuthenticationToken(request, response, accountAsUser.get());
+                AuthenticationTokenManager.setAuthenticationToken(request, response, accountAsUser.orElseThrow());
             }
             try {
                 response.setStatus(200);
                 response.setContentType("application/json");
-                String authToken = AuthenticationTokenManager.setAuthenticationToken(request, response);
                 response.getWriter().write("{\"userId\":" + matchingAccount.getUserID() + "}");
                 response.getWriter().flush();
             } catch (IOException e) {
