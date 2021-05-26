@@ -29,7 +29,6 @@ const getProducts = castMock(api.getProducts);
 getProducts.mockResolvedValue([]);
 // Characters that are in the set of letters, numbers, spaces and punctuation.
 const validQuantityCharacters = [
-  "0",
   "11",
   "2123",
   "1231423",
@@ -250,6 +249,33 @@ describe("CreateInventory.vue", () => {
       expect(wrapper.vm.valid).toBeTruthy();
     }
   );
+
+  it('Invalid when quantity is 0', async () => {
+    await populateAllFields();
+    await wrapper.setData({
+      quantity: 0
+    });
+    await Vue.nextTick();
+    expect(findCreateButton().props().disabled).toBeTruthy();
+  });
+
+  it('Invalid when quantity is -1', async () => {
+    await populateAllFields();
+    await wrapper.setData({
+      quantity: -1
+    });
+    await Vue.nextTick();
+    expect(findCreateButton().props().disabled).toBeTruthy();
+  });
+
+  it('Invalid when quantity is -10000', async () => {
+    await populateAllFields();
+    await wrapper.setData({
+      quantity: -10000
+    });
+    await Vue.nextTick();
+    expect(findCreateButton().props().disabled).toBeTruthy();
+  });
 
   it.each(validPriceCharacters)(
     'Valid when PRICE PER ITEM contain valid price [e.g 999 or 999.99] & <10000, Price per Item =  "%s"',

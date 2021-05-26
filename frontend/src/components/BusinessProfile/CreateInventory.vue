@@ -54,7 +54,7 @@
                     solo
                     v-model="quantity"
                     label="Quantity"
-                    :rules="mandatoryRules.concat(numberRules)"
+                    :rules="mandatoryRules.concat(quantityRules)"
                     outlined
                   />
                 </v-col>
@@ -189,6 +189,9 @@ export default {
       ],
       numberRules: [
         field => /(^[0-9]*$)/.test(field) || 'Must contain numbers only'
+      ],
+      quantityRules: [
+        field => /(^[1-9][0-9]*$)/.test(field) || 'Must contain numbers only above zero'
       ],
       smallPriceRules: [
         //A price must be numbers and may contain a decimal followed by exactly two numbers (4digit)
