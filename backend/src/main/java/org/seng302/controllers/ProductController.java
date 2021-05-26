@@ -64,15 +64,18 @@ public class ProductController {
                 break;
 
             case "description":
-                sort = Comparator.comparing(Product::getDescription);
+                sort = Comparator.comparing(Product::getDescription,
+                        Comparator.nullsLast(Comparator.naturalOrder()));
                 break;
 
             case "manufacturer":
-                sort = Comparator.comparing(Product::getManufacturer);
+                sort = Comparator.comparing(Product::getManufacturer,
+                        Comparator.nullsLast(Comparator.naturalOrder()));
                 break;
 
             case "recommendedRetailPrice":
-                sort = Comparator.comparing(Product::getRecommendedRetailPrice);
+                sort = Comparator.comparing(Product::getRecommendedRetailPrice,
+                        Comparator.nullsLast(Comparator.naturalOrder()));
                 break;
 
             case "created":
