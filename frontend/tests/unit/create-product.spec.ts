@@ -52,7 +52,6 @@ describe('CreateProduct.vue', () => {
   // Container for the CreateProduct under test
   let wrapper: Wrapper<any>;
 
-
   /**
    * Sets up the test CreateProduct instance
    *
@@ -156,17 +155,13 @@ describe('CreateProduct.vue', () => {
 
   it('Valid if all required fields are provided', async () => {
     await populateRequiredFields();
-
     await Vue.nextTick();
-
     expect(wrapper.vm.valid).toBeTruthy();
   });
 
   it('Valid if all fields are provided', async () => {
     await populateAllFields();
-
     await Vue.nextTick();
-
     expect(wrapper.vm.valid).toBeTruthy();
   });
 
@@ -175,9 +170,7 @@ describe('CreateProduct.vue', () => {
     await wrapper.setData({
       product: name,
     });
-
     await Vue.nextTick();
-
     expect(wrapper.vm.valid).toBeTruthy();
   });
 
@@ -186,9 +179,7 @@ describe('CreateProduct.vue', () => {
     await wrapper.setData({
       product: name,
     });
-
     await Vue.nextTick();
-
     expect(wrapper.vm.valid).toBeFalsy();
   });
 
@@ -197,9 +188,7 @@ describe('CreateProduct.vue', () => {
     await wrapper.setData({
       product: '',
     });
-
     await Vue.nextTick();
-
     expect(wrapper.vm.valid).toBeFalsy();
   });
 
@@ -208,9 +197,7 @@ describe('CreateProduct.vue', () => {
     await wrapper.setData({
       product: 'a'.repeat(101),
     });
-
     await Vue.nextTick();
-
     expect(wrapper.vm.valid).toBeFalsy();
   });
 
@@ -219,9 +206,7 @@ describe('CreateProduct.vue', () => {
     await wrapper.setData({
       description,
     });
-
     await Vue.nextTick();
-
     expect(wrapper.vm.valid).toBeTruthy();
   });
 
@@ -230,9 +215,7 @@ describe('CreateProduct.vue', () => {
     await wrapper.setData({
       description,
     });
-
     await Vue.nextTick();
-
     expect(wrapper.vm.valid).toBeFalsy();
   });
 
@@ -241,9 +224,7 @@ describe('CreateProduct.vue', () => {
     await wrapper.setData({
       description: 'a'.repeat(201),
     });
-
     await Vue.nextTick();
-
     expect(wrapper.vm.valid).toBeFalsy();
   });
 
@@ -252,9 +233,7 @@ describe('CreateProduct.vue', () => {
     await wrapper.setData({
       manufacturer,
     });
-
     await Vue.nextTick();
-
     expect(wrapper.vm.valid).toBeTruthy();
   });
 
@@ -263,9 +242,7 @@ describe('CreateProduct.vue', () => {
     await wrapper.setData({
       manufacturer,
     });
-
     await Vue.nextTick();
-
     expect(wrapper.vm.valid).toBeFalsy();
   });
 
@@ -274,9 +251,7 @@ describe('CreateProduct.vue', () => {
     await wrapper.setData({
       manufacturer: 'a'.repeat(101),
     });
-
     await Vue.nextTick();
-
     expect(wrapper.vm.valid).toBeFalsy();
   });
 
@@ -285,9 +260,7 @@ describe('CreateProduct.vue', () => {
     await wrapper.setData({
       recommendedRetailPrice: 'not a number',
     });
-
     await Vue.nextTick();
-
     expect(wrapper.vm.valid).toBeFalsy();
   });
 
@@ -296,9 +269,7 @@ describe('CreateProduct.vue', () => {
     await wrapper.setData({
       recommendedRetailPrice: '-10',
     });
-
     await Vue.nextTick();
-
     expect(wrapper.vm.valid).toBeFalsy();
   });
 
@@ -307,9 +278,7 @@ describe('CreateProduct.vue', () => {
     await wrapper.setData({
       recommendedRetailPrice: '100001',
     });
-
     await Vue.nextTick();
-
     expect(wrapper.vm.valid).toBeFalsy();
   });
 
@@ -318,9 +287,7 @@ describe('CreateProduct.vue', () => {
     await wrapper.setData({
       recommendedRetailPrice: '3.141',
     });
-
     await Vue.nextTick();
-
     expect(wrapper.vm.valid).toBeFalsy();
   });
 
@@ -329,9 +296,7 @@ describe('CreateProduct.vue', () => {
     await wrapper.setData({
       recommendedRetailPrice: '3.1',
     });
-
     await Vue.nextTick();
-
     expect(wrapper.vm.valid).toBeFalsy();
   });
 
@@ -340,9 +305,7 @@ describe('CreateProduct.vue', () => {
     await wrapper.setData({
       productCode: '',
     });
-
     await Vue.nextTick();
-
     expect(wrapper.vm.valid).toBeFalsy();
   });
 
@@ -351,9 +314,7 @@ describe('CreateProduct.vue', () => {
     await wrapper.setData({
       productCode: 'a'.repeat(16),
     });
-
     await Vue.nextTick();
-
     expect(wrapper.vm.valid).toBeFalsy();
   });
 
@@ -362,9 +323,7 @@ describe('CreateProduct.vue', () => {
     await wrapper.setData({
       productCode: 'aaaaaaaaa',
     });
-
     await Vue.nextTick();
-
     expect(wrapper.vm.valid).toBeFalsy();
   });
 
@@ -373,28 +332,21 @@ describe('CreateProduct.vue', () => {
     await wrapper.setData({
       productCode: '          ',
     });
-
     await Vue.nextTick();
-
     expect(wrapper.vm.valid).toBeFalsy();
   });
 
   it('When the close button is pressed then the "closeDialog" event should be emitted', async () => {
     await findCloseButton().trigger('click'); // Click close button
-
     expect(wrapper.emitted().closeDialog).toBeTruthy();
   });
 
   it('When the create button is pressed then an api call should be made and is successful', async () => {
     await populateAllFields();
     createProduct.mockResolvedValue(undefined); // Ensure that the operation is successful
-
     await Vue.nextTick();
-
     await findCreateButton().trigger('click'); // Click create button
-
     await Vue.nextTick();
-
     expect(createProduct).toBeCalledWith(90, {
       id: 'ABC-XYZ-012-789',
       name: 'Product Name',
@@ -408,13 +360,9 @@ describe('CreateProduct.vue', () => {
   it('When the create button is pressed and the api returns an error then the error should be shown', async () => {
     await populateAllFields();
     createProduct.mockResolvedValue('test_error_message'); // Ensure that the operation fails
-
     await Vue.nextTick();
-
     await findCreateButton().trigger('click'); // Click create button
-
     await flushQueue();
-
     // The appWrapper is tested for the text, because the dialog content is not in the dialog
     // element.
     expect(appWrapper.text()).toContain('test_error_message');
@@ -424,13 +372,9 @@ describe('CreateProduct.vue', () => {
   it('When the create button is pressed and the api says that the product code is unavailable then the form should become invalid', async () => {
     await populateAllFields();
     createProduct.mockResolvedValue('Product code unavailable'); // Ensure that the operation fails
-
     await Vue.nextTick();
-
     await findCreateButton().trigger('click'); // Click create button
-
     await flushQueue();
-
     expect(wrapper.vm.valid).toBeFalsy();
     expect(wrapper.emitted().closeDialog).toBeFalsy(); // The dialog should stay open
   });

@@ -48,7 +48,6 @@ export const COOKIE = {
  */
 export function formatDate(date: Date | string) {
   if (typeof date === 'string') date = new Date(date);
-  console.log(date);
   const parts = date.toDateString().split(' ');
   return `${parts[2]} ${parts[1]} ${parts[3]}`;
 }
