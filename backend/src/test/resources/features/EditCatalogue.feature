@@ -78,7 +78,7 @@ Feature: U17 - Modify catalogue entries
     Then The request fails due to bad request
 
 
-  Scenario: Non administrators cannot alter the product
+  Scenario: Non administrators cannot edit the product
     Given I am an not an administrator of the business
     And I am logged into my account
     When I update the fields of the "FISH" product to:
@@ -86,3 +86,10 @@ Feature: U17 - Modify catalogue entries
       | id                     | APPLE     |
       | name                   | Not apple |
     Then The request fails due to forbidden
+
+  Scenario: Users that are not logged in cannot edit the product
+    When I update the fields of the "FISH" product to:
+      | property               | value     |
+      | id                     | APPLE     |
+      | name                   | Not apple |
+    Then The request fails due to not authorised
