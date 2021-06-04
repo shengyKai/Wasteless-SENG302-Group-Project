@@ -1,4 +1,4 @@
-package cucumber;
+package cucumber.context;
 
 import io.cucumber.java.Before;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;

@@ -1,7 +1,7 @@
 package cucumber.stepDefinitions;
 
-import cucumber.BusinessContext;
-import cucumber.UserContext;
+import cucumber.context.BusinessContext;
+import cucumber.context.UserContext;
 import io.cucumber.java.en.Given;
 import org.seng302.entities.Business;
 import org.seng302.entities.Location;

@@ -1,7 +1,6 @@
 package cucumber.stepDefinitions;
 
-import cucumber.BusinessContext;
-import cucumber.UserContext;
+import cucumber.context.BusinessContext;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;

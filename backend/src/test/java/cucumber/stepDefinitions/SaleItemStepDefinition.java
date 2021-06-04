@@ -1,8 +1,8 @@
 package cucumber.stepDefinitions;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import cucumber.BusinessContext;
-import cucumber.RequestContext;
+import cucumber.context.BusinessContext;
+import cucumber.context.RequestContext;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
@@ -20,9 +20,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
-import java.io.UnsupportedEncodingException;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.jupiter.api.Assertions.*;
