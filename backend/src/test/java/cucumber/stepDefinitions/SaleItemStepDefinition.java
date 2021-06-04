@@ -79,7 +79,7 @@ public class SaleItemStepDefinition {
 
     @When("I create a sale item for product code {string}, quantity {int}, price {double}")
     public void i_create_a_sale_item_for_product_code_quantity_price(String productCode, int quantity, double price) throws Exception {
-        Product product = productRepository.findByProductCode(productCode).orElseThrow();
+        Product product = productRepository.findByBusinessAndProductCode(businessContext.getLast(), productCode).orElseThrow();
         InventoryItem inventoryItem = inventoryItemRepository.findAllByProduct(product).stream().findFirst().orElseThrow();
         this.inventoryItemId = inventoryItem.getId();
         this.quantity = quantity;
@@ -100,7 +100,7 @@ public class SaleItemStepDefinition {
 
     @When("I create a sale item for product code {string}, quantity {int}, price {double}, more info {string}, closing {string}")
     public void i_create_a_sale_item_for_product_code_quantity_price_more_info_closing(String productCode, int quantity, double price, String moreInfo, String closing) throws Exception {
-        Product product = productRepository.findByProductCode(productCode).orElseThrow();
+        Product product = productRepository.findByBusinessAndProductCode(businessContext.getLast(), productCode).orElseThrow();
         InventoryItem inventoryItem = inventoryItemRepository.findAllByProduct(product).stream().findFirst().orElseThrow();
         this.inventoryItemId = inventoryItem.getId();
         this.quantity = quantity;

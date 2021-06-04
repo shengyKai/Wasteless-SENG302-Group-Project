@@ -963,7 +963,7 @@ class ProductControllerTest {
                 .sessionAttrs(sessionAuthToken)
                 .cookie(authCookie))
                 .andExpect(status().isOk());
-        product = productRepository.findByProductCode(product.getProductCode()).get();
+        product = productRepository.findByBusinessAndProductCode(testBusiness1, product.getProductCode()).orElseThrow();
         assertEquals(image2.getID(), product.getProductImages().get(0).getID()); // they should have switched
         assertEquals(image1.getID(), product.getProductImages().get(1).getID());
 

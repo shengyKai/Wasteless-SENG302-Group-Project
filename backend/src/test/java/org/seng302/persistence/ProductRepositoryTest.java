@@ -144,7 +144,7 @@ class ProductRepositoryTest {
      */
     @Test
     void getProduct_productExists_getExpectedProduct() {
-        Product actualProduct = productRepository.getProductByBusinessAndProductCode(testBusiness, testProduct.getProductCode());
+        Product actualProduct = productRepository.getProduct(testBusiness, testProduct.getProductCode());
         assertEquals(testProduct.getProductCode(), actualProduct.getProductCode());
     }
 
@@ -153,8 +153,9 @@ class ProductRepositoryTest {
      */
     @Test
     void getProduct_productExistsInDifferentCatalogue_406ResponseException() {
+        String productCode = testProduct.getProductCode();
         assertThrows(ResponseStatusException.class, () -> {
-            productRepository.getProductByBusinessAndProductCode(testBusiness2, testProduct.getProductCode());
+            productRepository.getProduct(testBusiness2, productCode);
         });
     }
 
@@ -165,8 +166,9 @@ class ProductRepositoryTest {
     void getProduct_productDoesNotExist_406ResponseException() throws Exception {
         productRepository.delete(testProduct);
         testBusiness = businessRepository.getBusinessById(testBusiness.getId());
+        String productCode = testProduct.getProductCode();
         assertThrows(ResponseStatusException.class, () -> {
-            productRepository.getProductByBusinessAndProductCode(testBusiness, testProduct.getProductCode());
+            productRepository.getProduct(testBusiness, productCode);
         });
     }
 }

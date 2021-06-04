@@ -209,6 +209,27 @@ public class ProductController {
         }
     }
 
+    @PutMapping("/businesses/{businessId}/products/{productCode}")
+    public void modifyProduct(@PathVariable Long businessId, @PathVariable String productCode, @RequestBody JSONObject productInfo, HttpServletRequest request, HttpServletResponse response) {
+        logger.info(() -> String.format("Modifying product in business (businessId=%d, productCode=%s).", businessId, productCode));
+        AuthenticationTokenManager.checkAuthenticationToken(request);
+
+        Business business = businessRepository.getBusinessById(businessId);
+        business.checkSessionPermissions(request);
+
+        if (productRepository.findByBusinessAndProductCode(business, productInfo.getAsString("id")).isPresent()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Product code already in use");
+        }
+
+        Product product = productRepository.getProduct(business, productCode);
+        product.setProductCode(productInfo.getAsString("id"));
+        product.setName(productInfo.getAsString("name"));
+        product.setDescription(productInfo.getAsString("description"));
+        product.setManufacturer(productInfo.getAsString("manufacturer"));
+        product.setRecommendedRetailPrice(productInfo.getAsString("recommendedRetailPrice"));
+        productRepository.save(product);
+    }
+
     /**
      * Matches up the businessID, productID and imageID to find the image of a product to be deleted. Only business
      * owners can delete product images and they must be within their own product catalogue.
@@ -224,12 +245,10 @@ public class ProductController {
                 imageId, productId, businessId));
 
         Business business = businessRepository.getBusinessById(businessId); // get the business + sanity checks
-
-        Product product = productRepository.getProductByBusinessAndProductCode(business, productId); // get the product + sanity checks
-
-        Image image = imageRepository.getImageByProductAndId(product, imageId); // get the image + sanity checks
-
         business.checkSessionPermissions(request); // Can this user do this action
+
+        Product product = productRepository.getProduct(business, productId); // get the product + sanity checks
+        Image image = imageRepository.getImageByProductAndId(product, imageId); // get the image + sanity checks
 
         product.removeProductImage(image);
         imageRepository.delete(image);
@@ -292,7 +311,7 @@ public class ProductController {
         business.checkSessionPermissions(request);
 
         // get product + sanity
-        Product product = productRepository.getProductByBusinessAndProductCode(business, productId);
+        Product product = productRepository.getProduct(business, productId);
         // get image + sanity
         Image image = imageRepository.getImageByProductAndId(product, imageId);
 
