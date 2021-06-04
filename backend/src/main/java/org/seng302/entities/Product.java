@@ -208,6 +208,10 @@ public class Product {
         this.recommendedRetailPrice = recommendedRetailPrice;
     }
 
+    /**
+     * Convenience method for setting the recommended retail price from a string
+     * @param recommendedRetailPrice The new RRP of the product as a string
+     */
     public void setRecommendedRetailPrice(String recommendedRetailPrice) {
         if (recommendedRetailPrice == null || recommendedRetailPrice.equals("")) {
             this.recommendedRetailPrice = null;
