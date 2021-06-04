@@ -7,7 +7,7 @@ Feature: U17 - Modify catalogue entries
       | FISH       | Fish  |
       | APPLE      | Apple |
 
-  Scenario: AC1 - I can edit any of the catalogue entry attributes
+  Scenario: AC1/AC3 - I can edit any of the catalogue entry attributes and the modification is saved
     Given I am an administrator of the business
     And I am logged into my account
     When I update the fields of the "FISH" product to:
