@@ -209,25 +209,37 @@ public class ProductController {
         }
     }
 
+    /**
+     * PUT endpoint for modifying an existing product in a businesses catalogue.
+     * @param businessId The business ID to select a product from
+     * @param productCode Product to modify
+     * @param productInfo Replacement product data
+     * @param request Additional information about the request
+     */
     @PutMapping("/businesses/{businessId}/products/{productCode}")
-    public void modifyProduct(@PathVariable Long businessId, @PathVariable String productCode, @RequestBody JSONObject productInfo, HttpServletRequest request, HttpServletResponse response) {
-        logger.info(() -> String.format("Modifying product in business (businessId=%d, productCode=%s).", businessId, productCode));
-        AuthenticationTokenManager.checkAuthenticationToken(request);
+    public void modifyProduct(@PathVariable Long businessId, @PathVariable String productCode, @RequestBody JSONObject productInfo, HttpServletRequest request) {
+        try {
+            logger.info(() -> String.format("Modifying product in business (businessId=%d, productCode=%s).", businessId, productCode));
+            AuthenticationTokenManager.checkAuthenticationToken(request);
 
-        Business business = businessRepository.getBusinessById(businessId);
-        business.checkSessionPermissions(request);
+            Business business = businessRepository.getBusinessById(businessId);
+            business.checkSessionPermissions(request);
 
-        if (productRepository.findByBusinessAndProductCode(business, productInfo.getAsString("id")).isPresent()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Product code already in use");
+            if (productRepository.findByBusinessAndProductCode(business, productInfo.getAsString("id")).isPresent()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Product code already in use");
+            }
+
+            Product product = productRepository.getProduct(business, productCode);
+            product.setProductCode(productInfo.getAsString("id"));
+            product.setName(productInfo.getAsString("name"));
+            product.setDescription(productInfo.getAsString("description"));
+            product.setManufacturer(productInfo.getAsString("manufacturer"));
+            product.setRecommendedRetailPrice(productInfo.getAsString("recommendedRetailPrice"));
+            productRepository.save(product);
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            throw e;
         }
-
-        Product product = productRepository.getProduct(business, productCode);
-        product.setProductCode(productInfo.getAsString("id"));
-        product.setName(productInfo.getAsString("name"));
-        product.setDescription(productInfo.getAsString("description"));
-        product.setManufacturer(productInfo.getAsString("manufacturer"));
-        product.setRecommendedRetailPrice(productInfo.getAsString("recommendedRetailPrice"));
-        productRepository.save(product);
     }
 
     /**
