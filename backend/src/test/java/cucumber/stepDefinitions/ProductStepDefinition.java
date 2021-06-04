@@ -1,20 +1,32 @@
 package cucumber.stepDefinitions;
 
 import cucumber.context.BusinessContext;
+import cucumber.context.RequestContext;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+import net.minidev.json.JSONObject;
 import org.junit.jupiter.api.Assertions;
 import org.seng302.entities.Product;
 import org.seng302.persistence.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.Map;
+
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 
 public class ProductStepDefinition {
+
+    @Autowired
+    private RequestContext requestContext;
 
     @Autowired
     private BusinessContext businessContext;
@@ -23,6 +35,7 @@ public class ProductStepDefinition {
     private ProductRepository productRepository;
 
     private Product product;
+    private JSONObject productJSON;
 
     @When("the product code {string} and the name {string} is provided")
     public void theProductCodeAndTheNameIsProvided(String productCode, String name) {
@@ -115,5 +128,37 @@ public class ProductStepDefinition {
                 .withBusiness(businessContext.getByName(businessName))
                 .build();
         productRepository.save(product);
+    }
+
+    @When("I update the fields of the {string} product to:")
+    public void i_update_the_fields_of_the_product_to(String name, Map<String, String> dataTable) throws Exception {
+        productJSON = new JSONObject(dataTable);
+        productJSON.remove("property");
+
+        product = productRepository.getProduct(businessContext.getLast(), name);
+
+        requestContext.performRequest(
+                        put(String.format("/businesses/%d/products/%s", businessContext.getLast().getId(), name))
+                        .content(productJSON.toString())
+                        .contentType(MediaType.APPLICATION_JSON));
+        product = productRepository.findById(product.getID()).orElseThrow();
+    }
+
+    @Then("The product is updated")
+    public void the_product_is_updated() {
+        Assertions.assertEquals(200, requestContext.getLastResult().getResponse().getStatus());
+
+        Assertions.assertEquals(productJSON.get("id"), product.getProductCode());
+        Assertions.assertEquals(productJSON.get("name"), product.getName());
+        Assertions.assertEquals(productJSON.get("description"), product.getDescription());
+        Assertions.assertEquals(productJSON.get("manufacturer"), product.getManufacturer());
+
+        Number expectedPrice = productJSON.getAsNumber("recommendedRetailPrice");
+        if (expectedPrice == null) {
+            Assertions.assertNull(product.getRecommendedRetailPrice());
+        } else {
+            Assertions.assertNotNull(product.getRecommendedRetailPrice());
+            Assertions.assertEquals(expectedPrice.doubleValue(), product.getRecommendedRetailPrice().doubleValue(), 1e-8);
+        }
     }
 }

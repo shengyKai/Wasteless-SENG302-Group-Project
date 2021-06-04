@@ -1,6 +1,10 @@
 package cucumber.context;
 
 import io.cucumber.java.Before;
+import org.junit.jupiter.api.Assertions;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import javax.servlet.http.Cookie;
 import java.util.HashMap;
@@ -11,11 +15,16 @@ public class RequestContext {
     private Cookie authCookie;
     private final Map<String, Object> sessionAuthToken = new HashMap<>();
     private long loggedInId;
+    private MvcResult lastResult;
+
+    @Autowired
+    private MockMvc mockMvc;
 
     @Before
     public void setup() {
         authCookie = null;
         sessionAuthToken.clear();
+        lastResult = null;
     }
 
     /**
@@ -46,11 +55,30 @@ public class RequestContext {
     }
 
     /**
+     * Adds authentication and performs a request from the provided builder
+     * The result will also be saved and be accessible from "getLastRequest"
+     * @param builder Request to execute
+     * @return Result of the request
+     */
+    public MvcResult performRequest(MockHttpServletRequestBuilder builder) {
+        lastResult = Assertions.assertDoesNotThrow(() -> mockMvc.perform(addAuthorisationToken(builder)).andReturn());
+        return lastResult;
+    }
+
+    /**
      * Get the ID number of the user who is currently authenticated in this class's authentication token and request
      * cookie.
      * @return The ID number of the authenticated user
      */
     public long getLoggedInId() {
         return loggedInId;
+    }
+
+    /**
+     * Get the last result from perform request
+     * @return MvcResult of the last performed request
+     */
+    public MvcResult getLastResult() {
+        return lastResult;
     }
 }
