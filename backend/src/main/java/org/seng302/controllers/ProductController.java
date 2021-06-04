@@ -204,7 +204,7 @@ public class ProductController {
 
             response.setStatus(201);
         } catch (Exception error) {
-            logger.error(error.getMessage());
+            logger.error(error);
             throw error;
         }
     }
@@ -225,12 +225,18 @@ public class ProductController {
             Business business = businessRepository.getBusinessById(businessId);
             business.checkSessionPermissions(request);
 
-            if (productRepository.findByBusinessAndProductCode(business, productInfo.getAsString("id")).isPresent()) {
+            Product product = productRepository.getProduct(business, productCode);
+
+            if (productInfo == null) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No request body provided");
+            }
+
+            String newProductCode = productInfo.getAsString("id");
+            if (!Objects.equals(productCode, newProductCode) && productRepository.findByBusinessAndProductCode(business, newProductCode).isPresent()) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Product code already in use");
             }
 
-            Product product = productRepository.getProduct(business, productCode);
-            product.setProductCode(productInfo.getAsString("id"));
+            product.setProductCode(newProductCode);
             product.setName(productInfo.getAsString("name"));
             product.setDescription(productInfo.getAsString("description"));
             product.setManufacturer(productInfo.getAsString("manufacturer"));
