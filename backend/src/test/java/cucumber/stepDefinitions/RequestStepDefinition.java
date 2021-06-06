@@ -23,4 +23,9 @@ public class RequestStepDefinition {
     public void the_request_fails_due_to_forbidden() {
         Assertions.assertEquals(403, requestContext.getLastResult().getResponse().getStatus());
     }
+
+    @Then("The request fails due to conflict")
+    public void the_request_fails_due_to_conflict() {
+        Assertions.assertEquals(409, requestContext.getLastResult().getResponse().getStatus());
+    }
 }

@@ -188,7 +188,7 @@ class ProductControllerEditTest {
     }
 
     @Test
-    void editProduct_productCodeInUse_400Response() throws Exception {
+    void editProduct_productCodeInUse_409Response() throws Exception {
         var otherProduct = mock(Product.class);
 
         var object = generateProductCreationInfo();
@@ -197,7 +197,7 @@ class ProductControllerEditTest {
         mockMvc.perform(put("/businesses/1/products/APPLE-1")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(object.toString()))
-                .andExpect(status().isBadRequest())
+                .andExpect(status().isConflict())
                 .andReturn();
     }
 

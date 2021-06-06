@@ -26,7 +26,7 @@ Feature: U17 - Modify catalogue entries
       | property | value     |
       | id       | APPLE     |
       | name     | Not apple |
-    Then The request fails due to bad request
+    Then The request fails due to conflict
 
   Scenario: AC2 - Product codes must stay valid
     Given I am an administrator of the business
