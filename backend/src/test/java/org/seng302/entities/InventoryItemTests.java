@@ -301,7 +301,7 @@ class InventoryItemTests {
         InventoryItem invItem = new InventoryItem.Builder()
         .withProduct(testProduct)
         .withQuantity(2)
-        .withExpires("2021-06-01")
+        .withExpires(LocalDate.now().plus(50, ChronoUnit.DAYS).toString())
         .build();
         assertThrows(ResponseStatusException.class, () -> {
             invItem.setTotalPrice(new BigDecimal ("1000001"));
