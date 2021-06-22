@@ -92,7 +92,7 @@
                 Create
               </template>
               <template v-else>
-                Update
+                Save
               </template>
             </v-btn>
           </v-card-actions>

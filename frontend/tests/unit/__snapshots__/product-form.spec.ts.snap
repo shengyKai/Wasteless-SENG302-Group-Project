@@ -116,7 +116,7 @@ exports[`ProductForm.vue - Modify Matches snapshot 1`] = `
               <div class="spacer"></div> <button type="button" class="v-btn v-btn--text theme--light v-size--default primary--text"><span class="v-btn__content">
             Close
           </span></button> <button type="submit" class="v-btn v-btn--is-elevated v-btn--has-bg theme--light v-size--default primary"><span class="v-btn__content">
-              Update
+              Save
             </span></button>
             </div>
           </div>
