@@ -10,7 +10,14 @@
       >
         <v-card>
           <v-card-title>
-            <span class="headline create-product">Create new Product</span>
+            <span class="headline create-product">
+              <template v-if="isCreate">
+                Create new Product
+              </template>
+              <template v-else>
+                Update {{ previousProduct.id }}
+              </template>
+            </span>
           </v-card-title>
           <v-card-text>
             <v-container>
@@ -81,7 +88,12 @@
               :disabled="!valid"
               :loading="isLoading"
               @click.prevent="createProduct">
-              Create
+              <template v-if="isCreate">
+                Create
+              </template>
+              <template v-else>
+                Update
+              </template>
             </v-btn>
           </v-card-actions>
         </v-card>
@@ -96,10 +108,7 @@ import {currencyFromCountry} from "@/api/currency";
 export default {
   name: 'ProductForm',
   props: {
-    isCreate: {
-      type: Boolean,
-      required: true,
-    },
+    previousProduct: Object,
     businessId: {
       type: Number,
       required: true,
@@ -108,11 +117,11 @@ export default {
   data() {
     return {
       dialog: true,
-      productCode: '',
-      product: '',
-      description: '',
-      manufacturer: '',
-      recommendedRetailPrice: '',
+      productCode: this.previousProduct?.id ?? '',
+      product: this.previousProduct?.name ?? '',
+      description: this.previousProduct?.description ?? '',
+      manufacturer: this.previousProduct?.manufacturer ?? '',
+      recommendedRetailPrice: this.previousProduct?.recommendedRetailPrice ?? '',
       errorMessage: undefined,
       isLoading: false,
       unavailableProductCodes: [],
@@ -173,13 +182,21 @@ export default {
 
       this.errorMessage = undefined;
       this.isLoading = true;
-      let response = await createProduct(this.businessId, {
-        id: productCode,
-        name: this.product,
-        description: this.description,
-        manufacturer: this.manufacturer,
-        recommendedRetailPrice: recommendedRetailPrice,
-      });
+
+      let response;
+      if (!this.isCreate) {
+        // TODO Implement
+        throw 'Not implemented';
+      } else {
+        response = await createProduct(this.businessId, {
+          id: productCode,
+          name: this.product,
+          description: this.description,
+          manufacturer: this.manufacturer,
+          recommendedRetailPrice: recommendedRetailPrice,
+        });
+      }
+
       this.isLoading = false;
 
       if (response === undefined) {
@@ -204,6 +221,11 @@ export default {
      * @returns {boolean}
      */
     allowedDates: val => new Date(val) > new Date()
+  },
+  computed: {
+    isCreate() {
+      return this.previousProduct === undefined;
+    }
   },
 };
 </script>

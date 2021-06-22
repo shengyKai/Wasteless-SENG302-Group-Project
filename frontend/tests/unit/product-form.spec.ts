@@ -62,10 +62,10 @@ describe('ProductForm.vue', () => {
     // Creating wrapper around ProductForm with data-app to appease vuetify
     const App = localVue.component('App', {
       components: { ProductForm },
-      template: '<div data-app><ProductForm :isCreate="isCreate" :businessId="90"/></div>',
+      template: '<div data-app><ProductForm :previousProduct="previousProduct" :businessId="90"/></div>',
       data() {
         return {
-          isCreate: true,
+          previousProduct: undefined,
         };
       }
     });
