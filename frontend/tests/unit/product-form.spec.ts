@@ -1,12 +1,10 @@
 import Vue from 'vue';
-import Vuex from 'vuex';
 import Vuetify from 'vuetify';
 import { createLocalVue, Wrapper, mount } from '@vue/test-utils';
 
 import ProductForm from '@/components/BusinessProfile/ProductForm.vue';
 import { castMock, flushQueue } from './utils';
 import * as api from '@/api/internal';
-import { getStore, resetStoreForTesting } from '@/store';
 import { currencyFromCountry } from '@/api/currency';
 
 jest.mock('@/api/internal', () => ({
@@ -59,13 +57,17 @@ describe('ProductForm.vue', () => {
    * work.
    */
   beforeEach(() => {
-    localVue.use(Vuex);
     const vuetify = new Vuetify();
 
     // Creating wrapper around ProductForm with data-app to appease vuetify
     const App = localVue.component('App', {
       components: { ProductForm },
-      template: '<div data-app><ProductForm/></div>',
+      template: '<div data-app><ProductForm :isCreate="isCreate" :businessId="90"/></div>',
+      data() {
+        return {
+          isCreate: true,
+        };
+      }
     });
 
     // Put the ProductForm component inside a div in the global document,
@@ -73,14 +75,9 @@ describe('ProductForm.vue', () => {
     const elem = document.createElement('div');
     document.body.appendChild(elem);
 
-    resetStoreForTesting();
-    let store = getStore();
-    store.state.productFormDialogBusiness = 90;
-
     appWrapper = mount(App, {
       localVue,
       vuetify,
-      store: store,
       attachTo: elem,
     });
 

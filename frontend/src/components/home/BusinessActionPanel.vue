@@ -3,7 +3,7 @@
     <!-- Business actions - Wide version -->
     <v-card
       rounded="lg"
-      class="action-pane small-no-display "
+      class="action-pane d-none d-md-block"
     >
       <v-card-text>
         <v-list>
@@ -16,7 +16,7 @@
                 <v-list-item-title>Profile</v-list-item-title>
               </v-list-item-content>
             </v-list-item>
-            <v-list-item @click="viewProductForm">
+            <v-list-item @click="viewCreateProduct">
               <v-list-item-icon>
                 <v-icon>mdi-tooltip-plus</v-icon>
               </v-list-item-icon>
@@ -53,11 +53,11 @@
       </v-card-text>
     </v-card>
     <!-- Business actions - Narrow version -->
-    <v-card class="action-pane large-no-display">
+    <v-card class="action-pane d-block d-md-none">
       <v-btn icon @click="viewProfile" class="action-button">
         <v-icon large>mdi-account-circle</v-icon>
       </v-btn>
-      <v-btn icon @click="viewProductForm" class="action-button">
+      <v-btn icon @click="viewCreateProduct" class="action-button">
         <v-icon large>mdi-tooltip-plus</v-icon>
       </v-btn>
       <v-btn icon @click="goToCataloguePage" class="action-button">
@@ -70,12 +70,26 @@
         <v-icon large>mdi-view-list</v-icon>
       </v-btn>
     </v-card>
+
+    <template v-if="showingCreateProduct">
+      <ProductForm :isCreate="true" :businessId="this.$store.state.activeRole.id" @closeDialog="showingCreateProduct=false"/>
+    </template>
   </div>
 </template>
 
 <script>
+import ProductForm from '@/components/BusinessProfile/ProductForm.vue';
+
 export default {
   name: "BusinessActionPanel",
+  components: {
+    ProductForm,
+  },
+  data() {
+    return {
+      showingCreateProduct: false,
+    };
+  },
   methods: {
     /**
      * Shows the business profile page
@@ -86,8 +100,8 @@ export default {
     /**
      * Shows the create product dialog
      */
-    viewProductForm() {
-      this.$store.commit('showProductForm', this.$store.state.activeRole.id);
+    viewCreateProduct() {
+      this.showingCreateProduct = true;
     },
 
     /**
@@ -111,28 +125,9 @@ export default {
 
 <style scoped>
 
-@media all and (min-width: 992px) {
-  .large-no-display {
-    display: none !important;
-  }
-}
-
-@media not all and (min-width: 992px) {
-  .small-no-display {
-    display: none !important;
-  }
-}
-
 .action-pane {
   margin-right: 10px;
   max-height: 400px;
-}
-
-
-@media not all and (min-width: 992px) {
-  .action-pane {
-    display: block;
-  }
 }
 
 .action-button {

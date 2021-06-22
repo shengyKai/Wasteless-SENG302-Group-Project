@@ -89,12 +89,22 @@
     </v-dialog>
   </v-row>
 </template>
-../../internal
+
 <script>
 import {createProduct, getBusiness} from '@/api/internal';
 import {currencyFromCountry} from "@/api/currency";
 export default {
   name: 'ProductForm',
+  props: {
+    isCreate: {
+      type: Boolean,
+      required: true,
+    },
+    businessId: {
+      type: Number,
+      required: true,
+    },
+  },
   data() {
     return {
       dialog: true,
@@ -144,7 +154,7 @@ export default {
   async created() {
     // When the create product dialogue, the currency will be set to the currency of the country the product is being
     // sold in. It will have blank fields if no currency can be found from the country.
-    const business = await getBusiness(this.$store.state.productFormDialogBusiness);
+    const business = await getBusiness(this.businessId);
     const countryOfSale = business.address.country;
     this.currency = await currencyFromCountry(countryOfSale);
   },
@@ -153,8 +163,6 @@ export default {
      * Creates the product by calling the API
      **/
     async createProduct() {
-      const businessId = this.$store.state.productFormDialogBusiness;
-
       // Ensures that we have a reference to the original product code.
       const productCode = this.productCode;
 
@@ -165,7 +173,7 @@ export default {
 
       this.errorMessage = undefined;
       this.isLoading = true;
-      let response = await createProduct(businessId, {
+      let response = await createProduct(this.businessId, {
         id: productCode,
         name: this.product,
         description: this.description,

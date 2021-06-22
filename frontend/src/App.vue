@@ -9,9 +9,6 @@
           <div v-if="$store.state.createBusinessDialogShown">
             <CreateBusiness @closeDialog="$store.commit('hideCreateBusiness')" />
           </div>
-          <div v-if="$store.state.productFormDialogBusiness !== undefined">
-            <ProductForm @closeDialog="$store.commit('hideProductForm')"/>
-          </div>
           <div v-if="$store.state.createInventoryDialog !== undefined">
             <CreateInventory @closeDialog="$store.commit('hideCreateInventory')"/>
           </div>
@@ -83,7 +80,6 @@ import CreateCard from "./components/marketplace/CreateCard";
 import { getStore } from "./store";
 import router from "./plugins/vue-router";
 import { COOKIE, getCookie } from './utils';
-import ProductForm from "@/components/BusinessProfile/ProductForm";
 
 const store = getStore();
 
@@ -100,7 +96,6 @@ export default {
     AppBar,
     AppFooter,
     CreateBusiness,
-    ProductForm,
     CreateInventory,
     CreateSaleItem,
     CreateCard,
