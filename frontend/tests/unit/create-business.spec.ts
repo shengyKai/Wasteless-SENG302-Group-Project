@@ -151,7 +151,7 @@ describe('CreateBusiness.vue', () => {
   }
 
   /**
-   * Finds the close button in the CreateProduct form
+   * Finds the close button in the ProductForm form
    *
    * @returns A Wrapper around the close button
    */
@@ -163,7 +163,7 @@ describe('CreateBusiness.vue', () => {
   }
 
   /**
-   * Finds the create button in the CreateProduct form
+   * Finds the create button in the ProductForm form
    *
    * @returns A Wrapper around the create button
    */

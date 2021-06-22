@@ -36,7 +36,7 @@ export type StoreData = {
    * The current business the create product dialog is being applied to.
    * If undefined then the create product dialog is hidden.
    */
-  createProductDialogBusiness: number | undefined,
+  productFormDialogBusiness: number | undefined,
   /**
    * Whether or not the dialog for registering a business is being shown.
    */
@@ -58,7 +58,7 @@ function createOptions(): StoreOptions<StoreData> {
       activeRole: null,
       globalError: null,
       createBusinessDialogShown: false,
-      createProductDialogBusiness: undefined,
+      productFormDialogBusiness: undefined,
       createInventoryDialog: undefined,
       createSaleItemDialog: undefined,
       createMarketplaceCardDialog: undefined,
@@ -128,8 +128,8 @@ function createOptions(): StoreOptions<StoreData> {
        * @param state Current store state
        * @param businessId Business to create the product for
        */
-      showCreateProduct(state, businessId: number) {
-        state.createProductDialogBusiness = businessId;
+      showProductForm(state, businessId: number) {
+        state.productFormDialogBusiness = businessId;
       },
 
       /**
@@ -137,8 +137,8 @@ function createOptions(): StoreOptions<StoreData> {
        *
        * @param state Current store state
        */
-      hideCreateProduct(state) {
-        state.createProductDialogBusiness = undefined;
+      hideProductForm(state) {
+        state.productFormDialogBusiness = undefined;
       },
       /**
        * Creates a modal create inventory dialog for adding a inventory item to the provided business

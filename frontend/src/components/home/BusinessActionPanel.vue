@@ -16,7 +16,7 @@
                 <v-list-item-title>Profile</v-list-item-title>
               </v-list-item-content>
             </v-list-item>
-            <v-list-item @click="viewCreateProduct">
+            <v-list-item @click="viewProductForm">
               <v-list-item-icon>
                 <v-icon>mdi-tooltip-plus</v-icon>
               </v-list-item-icon>
@@ -57,7 +57,7 @@
       <v-btn icon @click="viewProfile" class="action-button">
         <v-icon large>mdi-account-circle</v-icon>
       </v-btn>
-      <v-btn icon @click="viewCreateProduct" class="action-button">
+      <v-btn icon @click="viewProductForm" class="action-button">
         <v-icon large>mdi-tooltip-plus</v-icon>
       </v-btn>
       <v-btn icon @click="goToCataloguePage" class="action-button">
@@ -86,8 +86,8 @@ export default {
     /**
      * Shows the create product dialog
      */
-    viewCreateProduct() {
-      this.$store.commit('showCreateProduct', this.$store.state.activeRole.id);
+    viewProductForm() {
+      this.$store.commit('showProductForm', this.$store.state.activeRole.id);
     },
 
     /**
