@@ -1,0 +1,128 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ProductForm.vue - Modify Matches snapshot 1`] = `
+<div data-app="">
+  <div class="v-overlay theme--dark" style="z-index: 5;">
+    <div class="v-overlay__scrim" style="opacity: 0; background-color: rgb(33, 33, 33); border-color: #212121;"></div>
+  </div>
+  <div class="row justify-center">
+    <div role="dialog" class="v-dialog__container"></div>
+  </div>
+  <div role="document" tabindex="0" class="v-dialog__content v-dialog__content--active" style="z-index: 202;">
+    <transition-stub name="dialog-transition" appear="true">
+      <div class="v-dialog v-dialog--active v-dialog--persistent" style="transform-origin: center center; max-width: 600px;">
+        <form novalidate="novalidate" class="v-form">
+          <div class="v-card v-sheet theme--light">
+            <div class="v-card__title"><span class="headline create-product">
+              Update TEST-ID
+            </span></div>
+            <div class="v-card__text">
+              <div class="container">
+                <div class="row">
+                  <div class="col">
+                    <div class="v-input required v-input--is-label-active v-input--is-dirty theme--light v-text-field v-text-field--enclosed v-text-field--outlined">
+                      <div class="v-input__control">
+                        <div class="v-input__slot">
+                          <fieldset aria-hidden="true">
+                            <legend style="width: 0px;"><span>​</span></legend>
+                          </fieldset>
+                          <div class="v-text-field__slot"><label for="input-1467" class="v-label v-label--active theme--light" style="left: 0px; position: absolute;">Short-hand Product Code</label><input id="input-1467" type="text"></div>
+                        </div>
+                        <div class="v-text-field__details">
+                          <div class="v-messages theme--light">
+                            <transition-group-stub tag="div" name="message-transition" class="v-messages__wrapper"></transition-group-stub>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col">
+                    <div class="v-input required v-input--is-label-active v-input--is-dirty theme--light v-text-field v-text-field--enclosed v-text-field--outlined">
+                      <div class="v-input__control">
+                        <div class="v-input__slot">
+                          <fieldset aria-hidden="true">
+                            <legend style="width: 0px;"><span>​</span></legend>
+                          </fieldset>
+                          <div class="v-text-field__slot"><label for="input-1470" class="v-label v-label--active theme--light" style="left: 0px; position: absolute;">Name of product</label><input id="input-1470" type="text"></div>
+                        </div>
+                        <div class="v-text-field__details">
+                          <div class="v-messages theme--light">
+                            <transition-group-stub tag="div" name="message-transition" class="v-messages__wrapper"></transition-group-stub>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col col-12">
+                    <div class="v-input v-textarea v-input--is-label-active v-input--is-dirty theme--light v-text-field v-text-field--enclosed v-text-field--outlined">
+                      <div class="v-input__control">
+                        <div class="v-input__slot">
+                          <fieldset aria-hidden="true">
+                            <legend style="width: 0px;"><span>​</span></legend>
+                          </fieldset>
+                          <div class="v-text-field__slot"><label for="input-1473" class="v-label v-label--active theme--light" style="left: 0px; position: absolute;">Description</label><textarea id="input-1473" rows="3"></textarea></div>
+                        </div>
+                        <div class="v-text-field__details">
+                          <div class="v-messages theme--light">
+                            <transition-group-stub tag="div" name="message-transition" class="v-messages__wrapper"></transition-group-stub>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col col-6">
+                    <div class="v-input v-input--is-label-active v-input--is-dirty theme--light v-text-field v-text-field--enclosed v-text-field--outlined">
+                      <div class="v-input__control">
+                        <div class="v-input__slot">
+                          <fieldset aria-hidden="true">
+                            <legend style="width: 0px;"><span>​</span></legend>
+                          </fieldset>
+                          <div class="v-text-field__slot"><label for="input-1476" class="v-label v-label--active theme--light" style="left: 0px; position: absolute;">Manufacturer</label><input id="input-1476" type="text"></div>
+                        </div>
+                        <div class="v-text-field__details">
+                          <div class="v-messages theme--light">
+                            <transition-group-stub tag="div" name="message-transition" class="v-messages__wrapper"></transition-group-stub>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col col-6">
+                    <div class="v-input v-input--is-label-active v-input--is-dirty theme--light v-text-field v-text-field--prefix v-text-field--enclosed v-text-field--outlined">
+                      <div class="v-input__control">
+                        <div class="v-input__slot">
+                          <fieldset aria-hidden="true">
+                            <legend style="width: 0px;"><span>​</span></legend>
+                          </fieldset>
+                          <div class="v-text-field__slot"><label for="input-1479" class="v-label v-label--active theme--light" style="left: 0px; position: absolute;">Recommended Retail Price</label>
+                            <div class="v-text-field__prefix">Currency symbol</div><input id="input-1479" type="text">
+                            <div class="v-text-field__suffix">Currency code</div>
+                          </div>
+                        </div>
+                        <div class="v-text-field__details">
+                          <div class="v-messages theme--light">
+                            <transition-group-stub tag="div" name="message-transition" class="v-messages__wrapper"></transition-group-stub>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="v-card__actions">
+              <div class="spacer"></div>
+              <!---->
+              <div class="spacer"></div> <button type="button" class="v-btn v-btn--text theme--light v-size--default primary--text"><span class="v-btn__content">
+            Close
+          </span></button> <button type="submit" class="v-btn v-btn--is-elevated v-btn--has-bg theme--light v-size--default primary"><span class="v-btn__content">
+              Update
+            </span></button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </transition-stub>
+  </div>
+</div>
+`;
