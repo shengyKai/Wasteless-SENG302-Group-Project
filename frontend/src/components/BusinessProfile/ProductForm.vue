@@ -108,7 +108,14 @@ import {currencyFromCountry} from "@/api/currency";
 export default {
   name: 'ProductForm',
   props: {
+    /**
+     * Product to modify.
+     * If not provided then a new product is made.
+     */
     previousProduct: Object,
+    /**
+     * Business the product will be created / updated for.
+     */
     businessId: {
       type: Number,
       required: true,
@@ -223,6 +230,9 @@ export default {
     allowedDates: val => new Date(val) > new Date()
   },
   computed: {
+    /**
+     * Whether this ProductForm is creating a product
+     */
     isCreate() {
       return this.previousProduct === undefined;
     }
