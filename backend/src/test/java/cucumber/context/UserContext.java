@@ -1,4 +1,4 @@
-package cucumber;
+package cucumber.context;
 
 import io.cucumber.java.Before;
 import org.seng302.entities.Business;

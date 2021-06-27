@@ -1,8 +1,8 @@
 package cucumber.stepDefinitions;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import cucumber.BusinessContext;
-import cucumber.RequestContext;
+import cucumber.context.BusinessContext;
+import cucumber.context.RequestContext;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
@@ -20,9 +20,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
-import java.io.UnsupportedEncodingException;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.jupiter.api.Assertions.*;
@@ -79,7 +77,7 @@ public class SaleItemStepDefinition {
 
     @When("I create a sale item for product code {string}, quantity {int}, price {double}")
     public void i_create_a_sale_item_for_product_code_quantity_price(String productCode, int quantity, double price) throws Exception {
-        Product product = productRepository.findByProductCode(productCode).orElseThrow();
+        Product product = productRepository.findByBusinessAndProductCode(businessContext.getLast(), productCode).orElseThrow();
         InventoryItem inventoryItem = inventoryItemRepository.findAllByProduct(product).stream().findFirst().orElseThrow();
         this.inventoryItemId = inventoryItem.getId();
         this.quantity = quantity;
@@ -100,7 +98,7 @@ public class SaleItemStepDefinition {
 
     @When("I create a sale item for product code {string}, quantity {int}, price {double}, more info {string}, closing {string}")
     public void i_create_a_sale_item_for_product_code_quantity_price_more_info_closing(String productCode, int quantity, double price, String moreInfo, String closing) throws Exception {
-        Product product = productRepository.findByProductCode(productCode).orElseThrow();
+        Product product = productRepository.findByBusinessAndProductCode(businessContext.getLast(), productCode).orElseThrow();
         InventoryItem inventoryItem = inventoryItemRepository.findAllByProduct(product).stream().findFirst().orElseThrow();
         this.inventoryItemId = inventoryItem.getId();
         this.quantity = quantity;

@@ -1,8 +1,8 @@
 package cucumber.stepDefinitions;
 
-import cucumber.CardContext;
-import cucumber.RequestContext;
-import cucumber.UserContext;
+import cucumber.context.CardContext;
+import cucumber.context.RequestContext;
+import cucumber.context.UserContext;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;

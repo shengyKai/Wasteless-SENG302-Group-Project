@@ -168,6 +168,7 @@ class ProductControllerDeleteImageTests {
 
     @BeforeEach
     void setUp() throws ParseException {
+        sessionAuthToken.clear();
         setUpAuthCode(true);
         setUpTestObjects();
     }
@@ -188,6 +189,7 @@ class ProductControllerDeleteImageTests {
     void deleteProductImage_hasImage_imageDeleted() throws Exception {
         String url = String.format("/businesses/%d/products/%s/images/%d",
                 testBusiness.getId(), testProduct.getProductCode(), testImage.getID());
+        setActiveUser(testUser.getUserID());
         mockMvc.perform( MockMvcRequestBuilders
                 .delete(url)
                 .sessionAttrs(sessionAuthToken)
@@ -205,6 +207,8 @@ class ProductControllerDeleteImageTests {
                 testBusiness.getId(), testProduct.getProductCode(), 999);
         testProduct.setProductImages(Arrays.asList());
         productRepository.save(testProduct);
+
+        setActiveUser(testUser.getUserID());
         mockMvc.perform( MockMvcRequestBuilders
                 .delete(url)
                 .sessionAttrs(sessionAuthToken)
@@ -235,6 +239,7 @@ class ProductControllerDeleteImageTests {
     void deleteProductImage_invalidProductID_406Response() throws Exception {
         String url = String.format("/businesses/%d/products/%s/images/%d",
                 testBusiness.getId(), "NOTAPRODUCT999", testImage.getID());
+        setActiveUser(testUser.getUserID());
         mockMvc.perform( MockMvcRequestBuilders
                 .delete(url)
                 .sessionAttrs(sessionAuthToken)
@@ -250,6 +255,7 @@ class ProductControllerDeleteImageTests {
     void deleteProductImage_validAuthToken_hasPermission() throws Exception {
         String url = String.format("/businesses/%d/products/%s/images/%d",
                 testBusiness.getId(), testProduct.getProductCode(), testImage.getID());
+        setActiveUser(testUser.getUserID());
         mockMvc.perform( MockMvcRequestBuilders
                 .delete(url)
                 .sessionAttrs(sessionAuthToken)
@@ -344,7 +350,7 @@ class ProductControllerDeleteImageTests {
     @Test
     void deleteProductImage_notBusinessAdmin_403Response() throws Exception {
         String url = String.format("/businesses/%d/products/%s/images/%d",
-                testBusiness2.getId(), testProduct.getProductCode(), testImage.getID());
+                testBusiness.getId(), testProduct.getProductCode(), testImage.getID());
         mockMvc.perform( MockMvcRequestBuilders
                 .delete(url)
                 .sessionAttrs(sessionAuthToken)
@@ -359,7 +365,8 @@ class ProductControllerDeleteImageTests {
     @Test
     void deleteProductImage_isBusinessAdminForWrongCatalogue_403Response() throws Exception {
         String url = String.format("/businesses/%d/products/%s/images/%d",
-                testBusiness.getId(), testProduct2.getProductCode(), testImage.getID());
+                testBusiness2.getId(), testProduct2.getProductCode(), testImage.getID());
+        setActiveUser(testUser.getUserID());
         mockMvc.perform( MockMvcRequestBuilders
                 .delete(url)
                 .sessionAttrs(sessionAuthToken)

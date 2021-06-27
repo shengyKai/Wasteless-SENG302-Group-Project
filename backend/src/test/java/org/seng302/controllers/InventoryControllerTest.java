@@ -176,7 +176,7 @@ class InventoryControllerTest {
         Business businessSpy = spy(testBusiness);
         Product productSpy = spy(testProduct);
         when(businessRepository.getBusinessById(any())).thenReturn(businessSpy); // use our business
-        when(productRepository.getProductByBusinessAndProductCode(any(), any())).thenReturn(productSpy); // use our product
+        when(productRepository.getProduct(any(), any())).thenReturn(productSpy); // use our product
         doNothing().when(businessSpy).checkSessionPermissions(any()); // mock successful authentication
 
         mockMvc.perform(MockMvcRequestBuilders
@@ -235,7 +235,7 @@ class InventoryControllerTest {
         Business businessSpy = spy(testBusiness);
         Product productSpy = spy(testProduct);
         when(businessRepository.getBusinessById(any())).thenReturn(businessSpy); // use our business
-        when(productRepository.getProductByBusinessAndProductCode(any(), any())).thenReturn(productSpy); // use our product
+        when(productRepository.getProduct(any(), any())).thenReturn(productSpy); // use our product
         doNothing().when(businessSpy).checkSessionPermissions(any()); // mock successful authentication
 
 
@@ -249,7 +249,7 @@ class InventoryControllerTest {
         Business businessSpy = spy(testBusiness);
         Product productSpy = spy(testProduct);
         when(businessRepository.getBusinessById(any())).thenReturn(businessSpy); // use our business
-        when(productRepository.getProductByBusinessAndProductCode(any(), any())).thenCallRealMethod(); // use real method
+        when(productRepository.getProduct(any(), any())).thenCallRealMethod(); // use real method
         doNothing().when(businessSpy).checkSessionPermissions(any()); // mock successful authentication
 
         mockMvc.perform(MockMvcRequestBuilders
@@ -265,7 +265,7 @@ class InventoryControllerTest {
         Product productSpy = spy(testProduct);
         Optional<Product> optionalProduct = Optional.of(productSpy);
         when(businessRepository.getBusinessById(any())).thenReturn(businessSpy); // use our business
-        when(productRepository.getProductByBusinessAndProductCode(any(), any())).thenThrow(new ResponseStatusException(HttpStatus.FORBIDDEN)); // make this method always throw
+        when(productRepository.getProduct(any(), any())).thenThrow(new ResponseStatusException(HttpStatus.FORBIDDEN)); // make this method always throw
         doNothing().when(businessSpy).checkSessionPermissions(any()); // mock successful authentication
 
         mockMvc.perform(MockMvcRequestBuilders
@@ -281,7 +281,7 @@ class InventoryControllerTest {
         Business businessSpy = spy(testBusiness);
         Product productSpy = spy(testProduct);
         when(businessRepository.getBusinessById(any())).thenReturn(businessSpy); // use our business
-        when(productRepository.getProductByBusinessAndProductCode(any(), any())).thenReturn(productSpy); // use our product
+        when(productRepository.getProduct(any(), any())).thenReturn(productSpy); // use our product
         doNothing().when(businessSpy).checkSessionPermissions(any()); // mock successful authentication
 
         mockMvc.perform(MockMvcRequestBuilders

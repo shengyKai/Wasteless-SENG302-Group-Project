@@ -673,10 +673,11 @@ class ProductTests {
                 .withName("The Nathan Apple")
                 .withDescription("Ever wonder why Nathan has an apple")
                 .withManufacturer("Apple")
-                .withBusiness(testBusiness1);
+                .withBusiness(testBusiness1)
+                .withRecommendedRetailPrice("pricen't");
 
         // Maybe it is worth delaying this exception until build
-        assertThrows(ResponseStatusException.class, () -> builder.withRecommendedRetailPrice("pricen't"));
+        assertThrows(ResponseStatusException.class, builder::build);
     }
 
     /**
