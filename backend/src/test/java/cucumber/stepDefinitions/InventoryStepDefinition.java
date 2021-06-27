@@ -130,11 +130,6 @@ public class InventoryStepDefinition  {
         }
     }
 
-    @Given("I am logged into my account")
-    public void i_am_logged_into_my_account() {
-        requestContext.setLoggedInAccount(userContext.getLast().getUserID());
-    }
-
     @When("I try to access the inventory of the business")
     public void i_try_to_access_the_inventory_of_the_business() throws Exception {
         mvcResult = mockMvc.perform(
