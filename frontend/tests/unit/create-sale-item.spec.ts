@@ -3,7 +3,7 @@ import Vuex from "vuex";
 import Vuetify from "vuetify";
 import { createLocalVue, Wrapper, mount } from "@vue/test-utils";
 import CreateSaleItem from "@/components/BusinessProfile/CreateSaleItem.vue";
-import { castMock, flushQueue } from "./utils";
+import { castMock, flushQueue, todayPlusYears } from "./utils";
 import { getStore, resetStoreForTesting } from "@/store";
 import * as api from "@/api/internal";
 
@@ -324,18 +324,6 @@ describe("CreateSaleItem.vue", () => {
   });
 
   describe("Closing date validation", () => {
-    /**
-     * Gets todays date and adds on a certain number of years
-     *
-     * @param years the number of years to add onto today
-     * @returns Todays date with x more years
-     */
-    async function todayPlusYears(years: number) {
-      let today = new Date();
-      let currentYears = today.getFullYear() + years;
-      return currentYears + "-" + today.getMonth() + "-" + today.getDay();
-    }
-
     it("Valid when the closing date is today", async () => {
       await populateRequiredFields();
       let today = new Date();
@@ -349,7 +337,7 @@ describe("CreateSaleItem.vue", () => {
 
     it("Valid when the closing date is in a year", async () => {
       await populateRequiredFields();
-      let closesDate = await todayPlusYears(1);
+      let closesDate = todayPlusYears(1);
       await wrapper.setData({
         closes: closesDate
       });
@@ -360,7 +348,7 @@ describe("CreateSaleItem.vue", () => {
 
     it("Valid when the closing date is in a thousand years", async () => {
       await populateRequiredFields();
-      let closesDate = await todayPlusYears(1000);
+      let closesDate = todayPlusYears(1000);
       await wrapper.setData({
         closes: closesDate
       });
@@ -371,7 +359,7 @@ describe("CreateSaleItem.vue", () => {
 
     it("Invalid when the closing date is last year", async () => {
       await populateRequiredFields();
-      let closesDate = await todayPlusYears(-1);
+      let closesDate = todayPlusYears(-1);
       await wrapper.setData({
         closes: closesDate
       });
@@ -382,7 +370,7 @@ describe("CreateSaleItem.vue", () => {
 
     it("Invalid when the closing date is 100 years ago", async () => {
       await populateRequiredFields();
-      let closesDate = await todayPlusYears(-100);
+      let closesDate = todayPlusYears(-100);
       await wrapper.setData({
         closes: closesDate
       });
@@ -393,7 +381,7 @@ describe("CreateSaleItem.vue", () => {
 
     it("Invalid when the closing date is 10,000 years ago", async () => {
       await populateRequiredFields();
-      let closesDate = await todayPlusYears(-10000);
+      let closesDate = todayPlusYears(-10000);
       await wrapper.setData({
         closes: closesDate
       });
@@ -404,7 +392,7 @@ describe("CreateSaleItem.vue", () => {
 
     it("Invalid when the closing date is 10,000 years in the future", async () => {
       await populateRequiredFields();
-      let closesDate = await todayPlusYears(10000);
+      let closesDate = todayPlusYears(10000);
       await wrapper.setData({
         closes: closesDate
       });
