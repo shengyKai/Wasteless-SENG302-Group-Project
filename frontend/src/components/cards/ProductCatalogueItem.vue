@@ -47,7 +47,7 @@
                   v-if="showModifyProduct"
                   :businessId="businessId"
                   :previousProduct="product"
-                  @closeDialog="showModifyProduct=false"
+                  @closeDialog="productFormClosed"
                 />
               </v-card-actions>
             </v-col>
@@ -228,6 +228,13 @@ export default {
      * Handler for when a new image is added
      */
     async imageAdded() {
+      this.$emit('content-changed');
+    },
+    /**
+     * Handler for ProductForm close event
+     */
+    productFormClosed() {
+      this.showModifyProduct = false;
       this.$emit('content-changed');
     },
     formatDate,
