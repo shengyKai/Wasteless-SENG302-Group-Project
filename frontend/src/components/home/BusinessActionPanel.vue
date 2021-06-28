@@ -72,7 +72,7 @@
     </v-card>
 
     <template v-if="showingCreateProduct">
-      <ProductForm :isCreate="true" :businessId="this.$store.state.activeRole.id" @closeDialog="showingCreateProduct=false"/>
+      <ProductForm :businessId="this.$store.state.activeRole.id" @closeDialog="showingCreateProduct=false"/>
     </template>
   </div>
 </template>
