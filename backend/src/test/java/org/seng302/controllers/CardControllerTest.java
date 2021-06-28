@@ -43,10 +43,10 @@ import java.util.Optional;
 import javax.servlet.http.HttpServletRequest;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.AdditionalMatchers.not;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
@@ -121,9 +121,13 @@ class CardControllerTest {
         when(keywordRepository.findById(keywordId2)).thenReturn(Optional.of(mockKeyword2));
         when(marketplaceCardRepository.save(any())).thenReturn(mockCard);
         when(marketplaceCardRepository.getAllBySection(any())).thenReturn(Collections.singletonList(mockCard));
+        when(marketplaceCardRepository.findById(1L)).thenReturn(Optional.of(mockCard));
+        when(marketplaceCardRepository.findById(not(eq(1L)))).thenReturn(Optional.empty());
+        when(marketplaceCardRepository.getCard(any())).thenCallRealMethod();
 
         // Set up entitis to return set id when getter called
         when(mockCard.getID()).thenReturn(cardId);
+        when(mockCard.getCreator()).thenReturn(mockUser);
         when(mockUser.getUserID()).thenReturn(userId);
 
         // Tell MockMvc to use controller with mocked repositories for tests
@@ -493,5 +497,36 @@ class CardControllerTest {
         cards.add(new MarketplaceCard.Builder().withCreator(testUser1).withCloses(Instant.now().plus(4, ChronoUnit.HOURS))
             .withSection("ForSale").withTitle("mnop").build());
     }
-    
+
+
+    @Test
+    void extendCardDisplayPeriod_noAuthToken_401Response() throws Exception {
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.checkAuthenticationToken(any())).thenThrow(new AccessTokenException());
+        mockMvc.perform(put("/cards/1/extenddisplayperiod")).andExpect(status().isUnauthorized());
+        verify(mockCard, times(0)).delayCloses();
+        verify(marketplaceCardRepository, times(0)).save(any());
+    }
+
+    @Test
+    void extendCardDisplayPeriod_cardDoesNotExist_404Response() throws Exception {
+        mockMvc.perform(put("/cards/2/extenddisplayperiod")).andExpect(status().isNotFound());
+        verify(mockCard, times(0)).delayCloses();
+        verify(marketplaceCardRepository, times(0)).save(any());
+    }
+
+    @Test
+    void extendCardDisplayPeriod_doesNotHavePermission_403Response() throws Exception {
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), any())).thenReturn(false);
+        mockMvc.perform(put("/cards/1/extenddisplayperiod")).andExpect(status().isForbidden());
+        authenticationTokenManager.verify(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), eq(userId)));
+        verify(mockCard, times(0)).delayCloses();
+        verify(marketplaceCardRepository, times(0)).save(any());
+    }
+
+    @Test
+    void extendCardDisplayPeriod_cardExistsAndIsAuthorised_200ResponseAndDeleted() throws Exception {
+        mockMvc.perform(put("/cards/1/extenddisplayperiod")).andExpect(status().isOk());
+        verify(mockCard, times(1)).delayCloses();
+        verify(marketplaceCardRepository, times(1)).save(mockCard);
+    }
 }

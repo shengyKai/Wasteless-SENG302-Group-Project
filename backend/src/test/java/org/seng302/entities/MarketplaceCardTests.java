@@ -71,6 +71,23 @@ class MarketplaceCardTests {
     }
 
     @Test
+    void marketplaceCardDelayCloses_called_delaysClosesBy1Day() {
+        var closes = Instant.now().plus(10, ChronoUnit.DAYS);
+        var card = new MarketplaceCard.Builder()
+                .withCreator(testUser)
+                .withSection(MarketplaceCard.Section.EXCHANGE)
+                .withTitle("test_title")
+                .withDescription("test_description")
+                .withCloses(closes)
+                .build();
+
+        card.delayCloses();
+
+        var expectedExtendedCloses = closes.plus(1, ChronoUnit.DAYS);
+        assertEquals(expectedExtendedCloses, card.getCloses());
+    }
+
+    @Test
     void marketplaceCardBuild_withParameters_propertiesSet() {
         var closes = Instant.now().plus(1000, ChronoUnit.DAYS);
 
