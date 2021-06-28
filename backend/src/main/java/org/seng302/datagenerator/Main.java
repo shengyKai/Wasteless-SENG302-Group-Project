@@ -1,5 +1,6 @@
 package org.seng302.datagenerator;
 
+import javax.swing.plaf.nimbus.State;
 import java.sql.*;
 import java.util.Scanner;
 import java.util.Random;
@@ -32,7 +33,7 @@ public class Main {
      */
     public static Connection connectToDatabase() throws SQLException {
         String url = "jdbc:mariadb://localhost/seng302-2021-team500-prod";
-        Connection conn = DriverManager.getConnection(url, "seng302-team500", "Shhh");
+        Connection conn = DriverManager.getConnection(url, "seng302-team500", "changeMeBoi");
         return conn;
     }
 
@@ -109,11 +110,13 @@ public class Main {
     private long createInsertAddressSQL(String[] address) throws SQLException {
         PreparedStatement stmt = conn.prepareStatement(
                 "INSERT INTO location (street_number, street_name, city, region, country, post_code, district) "
-                + "VALUES (?, ?, ?, ?, ?, ?, ?);"
+                + "VALUES (?, ?, ?, ?, ?, ?, ?);",
+                Statement.RETURN_GENERATED_KEYS
         );
         for (int i=0; i<7; i++) {
             stmt.setObject(i+1, address[i]);
         }
+        stmt.executeUpdate();
         ResultSet keys = stmt.getGeneratedKeys();
         keys.next();
         return keys.getLong(1);
@@ -127,7 +130,8 @@ public class Main {
         String role = "user";
         PreparedStatement stmt = conn.prepareStatement(
                 "INSERT INTO account (email, role, authentication_code) "
-                + "VALUES (?, ?, ?);"
+                + "VALUES (?, ?, ?);",
+                Statement.RETURN_GENERATED_KEYS
         );
         stmt.setObject(1, email);
         stmt.setObject(2, role);
@@ -150,9 +154,9 @@ public class Main {
         stmt.setObject(2, FNAMES[random.nextInt(FNAMES.length)]); //middle name
         stmt.setObject(3, LNAMES[random.nextInt(LNAMES.length)]); //last name
         stmt.setObject(4, NICKNAMES[random.nextInt(NICKNAMES.length)]); //nickname
-        stmt.setObject(5, BIOS[random.nextInt(BIOS.length)]); //bio
-        stmt.setObject(6, generatePhNum()); //phone number
-        stmt.setObject(7, generateDOB()); //date of birth
+        stmt.setObject(5, generatePhNum()); //phone number
+        stmt.setObject(6, generateDOB()); //date of birth
+        stmt.setObject(7, BIOS[random.nextInt(BIOS.length)]); //bio
         stmt.setObject(8, userId);
         stmt.setObject(9, addressId);
         stmt.executeUpdate();
@@ -163,7 +167,7 @@ public class Main {
      * @return the number of users to be generated
      */
     private int GetUsersFromInput(Scanner scanner) {
-        int users = 0;
+        int users = 10;
         while (users <= 0) {
             clear();
             try {
