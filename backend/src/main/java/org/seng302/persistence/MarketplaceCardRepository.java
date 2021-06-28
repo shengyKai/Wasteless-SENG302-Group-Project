@@ -5,7 +5,9 @@ import org.seng302.entities.MarketplaceCard;
 import org.seng302.entities.User;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Repository;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -26,4 +28,14 @@ public interface MarketplaceCardRepository extends CrudRepository<MarketplaceCar
     List<MarketplaceCard> getAllByKeywords(@Param("keywords") Keyword keyword);
 
     List<MarketplaceCard> getAllBySection(@Param("section") MarketplaceCard.Section section);
+
+    /**
+     * Fetches a marketplace card from the database for the given card id. This method will also check that
+     * the card exists and will throw a 404 response exception if no card exists with the given id.
+     * @param id Card id to filter by
+     * @return Marketplace card with the given id
+     */
+    default MarketplaceCard getCard(Long id) {
+        return findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No card exists with the given id"));
+    }
 }

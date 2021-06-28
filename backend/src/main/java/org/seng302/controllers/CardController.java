@@ -116,6 +116,33 @@ public class CardController {
         return card;
     }
 
+
+    /**
+     *
+     * @param request The HTTP request, used for checking permissions.
+     * @param id Card ID to delete
+     */
+    @PutMapping("/cards/{id}/extenddisplayperiod")
+    private void extendCardDisplayPeriod(HttpServletRequest request, @PathVariable Long id) {
+        logger.info("Request to extend card display period (id={})", id);
+        try {
+            // Check that authentication token is present and valid
+            AuthenticationTokenManager.checkAuthenticationToken(request);
+
+            MarketplaceCard card = marketplaceCardRepository.getCard(id);
+
+            if (!AuthenticationTokenManager.sessionCanSeePrivate(request, card.getCreator().getUserID())) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Current user does not have permission to delete this card");
+            }
+
+            card.delayCloses();
+            marketplaceCardRepository.save(card);
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            throw e;
+        }
+    }
+
     /**
      * Retrieve all of the Marketplace Cards for a given section.
      * @param sectionName The name of the section to retrieve

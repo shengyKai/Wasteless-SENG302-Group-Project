@@ -158,6 +158,13 @@ public class MarketplaceCard {
     }
 
     /**
+     * Delays the closing date for this card by a day (exactly 24h)
+     */
+    public void delayCloses() {
+        closes = closes.plus(1, ChronoUnit.DAYS);
+    }
+
+    /**
      * Adds and validates a keyword to this Marketplace Card
      * @param keyword Keyword to add to card
      */
