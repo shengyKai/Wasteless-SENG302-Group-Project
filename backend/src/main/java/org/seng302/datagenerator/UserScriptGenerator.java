@@ -2,8 +2,22 @@ import java.util.Scanner;
 import java.util.Random;
 import java.io.File;
 import java.io.FileWriter;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.sql.ResultSet;
+import java.sql.Statement;
 
 public class UserScriptGenerator {
+    /**
+     * Connects to Marinadb production environment
+     */
+    public void connectToDatabase() {
+        String url = "jdbc:mariadb://localhost/seng302-2021-team500-prod";
+        var conn = DriverManager.getConnection(url, "seng302-team500", "Shhh");
+        System.out.println(conn);
+    }
+
     /**
      * Randomly generates the date of birth of the user
      * @return the user's date of birth
