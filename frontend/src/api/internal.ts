@@ -429,7 +429,7 @@ export async function modifyProduct(businessId: number, productCode: string, pro
     if (status === undefined) return 'Failed to reach backend';
     if (status === 401) return 'Missing/Invalid access token';
     if (status === 403) return 'Operation not permitted';
-    if (status === 404) return 'Product not found';
+    if (status === 406) return 'Product/Business not found';
     if (status === 400) return 'Invalid parameters';
     if (status === 409) return 'Product code unavailable';
 
