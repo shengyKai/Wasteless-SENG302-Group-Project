@@ -36,9 +36,9 @@ public class UserScriptGenerator {
      * the current user being generate to keep each individual email unique
      * @return the user's email
      */
-    public static String GenerateEmail(Random random, int counter, String[] fnames) {
+    public static String GenerateEmail(Random random, int counter, PersonNameGenerator.FullName fullName) {
         String[] suffixes = {"@gmail.com", "@hotmail.com", "@yahoo.com", "@uclive.ac.nz", "@xtra.co.nz"};
-        String emailStart = fnames[random.nextInt(fnames.length)] + fnames[random.nextInt(fnames.length)];
+        String emailStart = fullName.getFirstName() + fullName.getLastName();
         String counterStr = String.valueOf(counter);
         String suffix = suffixes[random.nextInt(suffixes.length)];
         return emailStart + counterStr + suffix;
@@ -109,11 +109,11 @@ public class UserScriptGenerator {
      * @param email the user's email
      * @return SQL commands for inserting the user
      */
-    public static String CreateInsertUsersSQL(Random random, String streetNum, String streetName, String email, String[] fnames, String[] lnames, String[] nicknames, String[] bios) {
-        String firstName = fnames[random.nextInt(fnames.length)];
-        String middleName = fnames[random.nextInt(fnames.length)];
-        String lastName = lnames[random.nextInt(lnames.length)];
-        String nickname = nicknames[random.nextInt(nicknames.length)];
+    public static String CreateInsertUsersSQL(Random random, String streetNum, String streetName, String email, PersonNameGenerator.FullName fullName, String[] bios) {
+        String firstName = fullName.getFirstName();
+        String middleName = fullName.getMiddleName();
+        String lastName = fullName.getLastName();
+        String nickname = fullName.getNickname();
         String bio = bios[random.nextInt(bios.length)];
         String phNum = GeneratePhNum(random);
         String dob = GenerateDOB(random);
@@ -172,14 +172,12 @@ public class UserScriptGenerator {
      */
     public static void main(String[] args) {
         //predefined lists
-        String[] fnames = {"Connor", "Josh", "Ella", "Henry", "Kai", "Ben", "Edward", "April", "May", "June", "Emila", "Frank", "Fergus", "Rose", "Jacob", "Jack", "Danielle"};
-        String[] lnames = {"Jordan", "Mungus", "Smith", "Johnson", "Williams", "Brown", "Jones", "Garcia", "Davis", "Thomas", "Taylor", "Lee", "Jackson", "Lewis"};
-        String[] nicknames = {"Nathan Apple", "EDDDD", "Get Some Sleep", "Protractor", "Cat", "Dog", "Gugu", "Believer", "Posh Petrol Head"};
         String[] bios = {"I enjoy running on the weekends", "Beaches are fun", "Got to focus on my career", "If only I went to a better university", "Read documentation yeah right", "My cats keep me going", "All I need is food"};
 
         //Instance of random and scanner
         Random random = new Random();
         Scanner scanner = new Scanner(System.in);
+        PersonNameGenerator personNameGenerator = PersonNameGenerator.getInstance();
 
         int users = GetUsersFromInput(scanner);
         Clear();
@@ -193,7 +191,8 @@ public class UserScriptGenerator {
 
             for (int i=0; i < users; i++) {
                 //neccessary variable to be generated
-                String email = GenerateEmail(random, i, fnames);
+                PersonNameGenerator.FullName fullName = personNameGenerator.generateName();
+                String email = GenerateEmail(random, i, fullName);
                 String password = GeneratePassword(random);
                 String streetNum = address[0];
                 String streetName = address[1];
@@ -203,7 +202,7 @@ public class UserScriptGenerator {
                 int progress = (int) (((float)(i+1) / (float)users) * 100);
                 System.out.println(String.format("Progress: %d%%", progress));
                 writer.write(CreateInsertAccountSQL(email, password));
-                writer.write(CreateInsertUsersSQL(random, streetNum, streetName, email, fnames, lnames, nicknames, bios));
+                writer.write(CreateInsertUsersSQL(random, streetNum, streetName, email, fullName, bios));
                 writer.write("\n");
             }
             
