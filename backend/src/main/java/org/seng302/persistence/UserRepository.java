@@ -1,5 +1,6 @@
 package org.seng302.persistence;
 
+import org.seng302.entities.Event;
 import org.seng302.entities.User;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -40,9 +41,12 @@ public interface UserRepository extends CrudRepository<User, Long>, JpaSpecifica
     @Query("SELECT u from User u WHERE lower(concat(u.firstName, u.lastName, u.middleName, u.nickname)) like concat('%',lower(:query), '%') or lower(concat(u.firstName, ' ', u.lastName)) like concat('%',lower(:query), '%') or lower(concat(u.firstName, ' ', u.middleName, ' ', u.lastName)) like concat('%',lower(:query), '%')")
     List<User> findAllByQuery(@Param("query") String query);
 
-
-
-
+    /**
+     * Finds all the users for a given event
+     * @param event Event to filter users by
+     * @return List of users that should be notified by the given event
+     */
+    List<User> getAllByEvents(Event event);
 }
 
 

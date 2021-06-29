@@ -31,6 +31,7 @@ public class User extends Account {
     private Instant created;
     private Set<Business> businessesAdministered = new HashSet<>();
     private Set<Business> businessesOwned = new HashSet<>();
+    private Set<Event> events = new HashSet<>();
 
     /* Matches:
     123-456-7890
@@ -288,6 +289,11 @@ public class User extends Account {
     private void setBusinessesAdministered(Set<Business> businesses) {
         this.businessesAdministered = businesses;
     }
+
+    @ManyToMany(mappedBy = "notifiedUsers", fetch = FetchType.LAZY)
+    public Set<Event> getEvents() { return this.events;}
+
+    private void setEvents(Set<Event> events) { this.events = events; }
 
     /**
      * Gets the set of businesses that the user is an admin of OR is the owner of
