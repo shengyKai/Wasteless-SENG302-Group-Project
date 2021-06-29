@@ -22,17 +22,28 @@ import java.util.*;
 public class EventController {
     private static final Logger LOGGER = LogManager.getLogger(EventController.class);
 
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
+
+    private final EventService eventService;
 
     @Autowired
-    private EventService eventService;
+    public EventController(UserRepository userRepository, EventService eventService) {
+        this.userRepository = userRepository;
+        this.eventService = eventService;
+    }
 
+    /**
+     * Gets the event stream for the given user id.
+     * For a successful response the client must first be authenticated as the user or as an admin.
+     * @param userId User to get event stream of
+     */
     @GetMapping("/events/emitter")
     public synchronized SseEmitter eventEmitter(@RequestParam long userId, HttpServletRequest request) {
         try {
             AuthenticationTokenManager.checkAuthenticationToken(request);
-            AuthenticationTokenManager.sessionCanSeePrivate(request, userId);
+            if (!AuthenticationTokenManager.sessionCanSeePrivate(request, userId)) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Cannot subscribe to other user's event stream");
+            }
 
             User user = userRepository.findById(userId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "User not found"));
             return eventService.createEmitterForUser(user);
@@ -42,13 +53,20 @@ public class EventController {
         }
     }
 
+    /**
+     * Posts a message to all users of the application.
+     * This endpoint is only available to admin accounts
+     * @param messageInfo Object containing message to send
+     */
     @PostMapping("/events/globalmessage")
     public void postDemoEvent(@RequestBody JSONObject messageInfo, HttpServletRequest request) {
         LOGGER.info("Posting a message to all users");
 
         try {
             AuthenticationTokenManager.checkAuthenticationToken(request);
-            AuthenticationTokenManager.sessionCanSeePrivate(request, null);
+            if (!AuthenticationTokenManager.sessionIsAdmin(request)) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Insufficient permissions to send global message");
+            }
 
             Event event = new MessageEvent(messageInfo.getAsString("message"));
 
