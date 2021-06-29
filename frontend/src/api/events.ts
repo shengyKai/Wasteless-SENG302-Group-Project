@@ -3,6 +3,19 @@ const EMITTER_URL = process.env.VUE_APP_SERVER_ADD + '/emitter';
 let eventSource: EventSource;
 let lastErrorTime = Number.MIN_VALUE;
 
+type Event = DemoEvent
+
+type BaseEvent = {
+  id: number,
+  created: string,
+  type: string,
+}
+
+type DemoEvent = BaseEvent & {
+  type: 'demo',
+  message: string
+}
+
 export function initialiseEventSourceForUser(userId: number): void {
   eventSource?.close();
 
@@ -22,6 +35,6 @@ export function initialiseEventSourceForUser(userId: number): void {
   });
 }
 
-export function addEventMessageHandler(handler: (event: MessageEvent) => void): void {
-  eventSource.addEventListener('newsfeed' as any, handler);
+export function addEventMessageHandler(handler: (event: Event) => void): void {
+  eventSource.addEventListener('newsfeed' as any, (event) => handler(JSON.parse(event.data)));
 }

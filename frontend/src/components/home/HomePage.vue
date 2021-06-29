@@ -5,18 +5,23 @@
     <div class="newsfeed">
       <!-- Newsfeed -->
       <v-card
-        v-for="(item, index) in newsfeedItems"
-        :key="index"
+        v-for="event in newsfeedItems"
+        :key="event.id"
         outlined
         rounded="lg"
         class="newsfeed-item"
       >
-        <v-card-title>
-          {{ item.title }}
-        </v-card-title>
-        <v-card-text>
-          <pre>{{ item.content }}</pre>
-        </v-card-text>
+        <template v-if="event.type == 'demo'">
+          <GlobalMessage :event="event"/>
+        </template>
+        <template v-else>
+          <v-card-title>
+            {{ event.type }}
+          </v-card-title>
+          <v-card-text>
+            <pre>{{ event }}</pre>
+          </v-card-text>
+        </template>
       </v-card>
     </div>
   </div>
@@ -25,26 +30,25 @@
 <script>
 import BusinessActionPanel from "./BusinessActionPanel";
 import UserActionPanel from "./UserActionPanel";
+import GlobalMessage from "./newsfeed/GlobalMessage.vue";
+import { addEventMessageHandler, initialiseEventSourceForUser } from '@/api/events';
 
 export default {
   data() {
     return {
-      newsfeedItems: [
-        {
-          title: "Somebody commented on your post",
-          content: "Hey this is a comment",
-        },
-        {
-          title: "10 Shocking FACTS, Number 7 will...",
-          content:
-            "1. The sky is blue\n2. All squares have 4 corners\n3. Exposure to PHP decreases lifespan by 10 years\n4. I'm out of ideas",
-        },
-      ],
+      newsfeedItems: [],
     };
   },
   components: {
     BusinessActionPanel,
     UserActionPanel,
+    GlobalMessage,
+  },
+  created() {
+    initialiseEventSourceForUser(this.$store.state.user.id);
+    addEventMessageHandler(event => {
+      this.newsfeedItems.push(event);
+    });
   },
   computed: {
     /**

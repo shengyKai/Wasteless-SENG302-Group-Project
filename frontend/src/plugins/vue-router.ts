@@ -11,7 +11,6 @@ import ProductCatalogue from "../components/ProductCatalogue.vue";
 import Inventory from "../components/Inventory.vue";
 import SalePage from "../components/SalePage.vue";
 import Marketplace from "../components/marketplace/Marketplace.vue";
-import EventDemo from "../components/EventDemo.vue";
 
 Vue.use(VueRouter);
 
@@ -79,11 +78,6 @@ const routes = [
     path: "/marketplace",
     component: Marketplace,
     meta: { title: 'Marketplace' }
-  },
-  {
-    path: "/eventdemo",
-    component: EventDemo,
-    meta: { title: 'Event Demo' },
   },
   {
     path: "*",
