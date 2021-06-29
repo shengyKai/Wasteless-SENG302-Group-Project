@@ -60,7 +60,7 @@ public class InventoryController {
             // get productCode from body
             String productCode = inventory.getAsString("productId");
             // sanity on product
-            Product product = productRepository.getProductByBusinessAndProductCode(business, productCode);
+            Product product = productRepository.getProduct(business, productCode);
             Integer quantity = getQuantityFromInventoryJson(inventory);
 
             InventoryItem item = new InventoryItem.Builder().withProduct(product)

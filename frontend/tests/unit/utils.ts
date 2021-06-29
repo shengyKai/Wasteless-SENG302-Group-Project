@@ -22,3 +22,15 @@ export function castMock<T, Y extends any[]>(func: (...args: Y) => T) {
   }
   return <jest.Mock<T, Y>>func;
 }
+
+/**
+ * Gets todays date and adds on a certain number of years
+ *
+ * @param years the number of years to add onto today
+ * @returns Todays date with x more years
+ */
+export function todayPlusYears(years: number): string {
+  let today = new Date();
+  let currentYears = today.getFullYear() + years;
+  return `${currentYears}-${today.getMonth()}-${today.getDate()}`;
+}

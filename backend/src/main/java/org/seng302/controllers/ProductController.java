@@ -204,8 +204,47 @@ public class ProductController {
 
             response.setStatus(201);
         } catch (Exception error) {
-            logger.error(error.getMessage());
+            logger.error(error);
             throw error;
+        }
+    }
+
+    /**
+     * PUT endpoint for modifying an existing product in a businesses catalogue.
+     * @param businessId The business ID to select a product from
+     * @param productCode Product to modify
+     * @param productInfo Replacement product data
+     * @param request Additional information about the request
+     */
+    @PutMapping("/businesses/{businessId}/products/{productCode}")
+    public void modifyProduct(@PathVariable Long businessId, @PathVariable String productCode, @RequestBody JSONObject productInfo, HttpServletRequest request) {
+        try {
+            logger.info(() -> String.format("Modifying product in business (businessId=%d, productCode=%s).", businessId, productCode));
+            AuthenticationTokenManager.checkAuthenticationToken(request);
+
+            Business business = businessRepository.getBusinessById(businessId);
+            business.checkSessionPermissions(request);
+
+            Product product = productRepository.getProduct(business, productCode);
+
+            if (productInfo == null) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No request body provided");
+            }
+
+            String newProductCode = productInfo.getAsString("id");
+            if (!Objects.equals(productCode, newProductCode) && productRepository.findByBusinessAndProductCode(business, newProductCode).isPresent()) {
+                throw new ResponseStatusException(HttpStatus.CONFLICT, "Product already exists with product code in this catalogue \"" + productCode + "\"");
+            }
+
+            product.setProductCode(newProductCode);
+            product.setName(productInfo.getAsString("name"));
+            product.setDescription(productInfo.getAsString("description"));
+            product.setManufacturer(productInfo.getAsString("manufacturer"));
+            product.setRecommendedRetailPrice(productInfo.getAsString("recommendedRetailPrice"));
+            productRepository.save(product);
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            throw e;
         }
     }
 
@@ -224,12 +263,10 @@ public class ProductController {
                 imageId, productId, businessId));
 
         Business business = businessRepository.getBusinessById(businessId); // get the business + sanity checks
-
-        Product product = productRepository.getProductByBusinessAndProductCode(business, productId); // get the product + sanity checks
-
-        Image image = imageRepository.getImageByProductAndId(product, imageId); // get the image + sanity checks
-
         business.checkSessionPermissions(request); // Can this user do this action
+
+        Product product = productRepository.getProduct(business, productId); // get the product + sanity checks
+        Image image = imageRepository.getImageByProductAndId(product, imageId); // get the image + sanity checks
 
         product.removeProductImage(image);
         imageRepository.delete(image);
@@ -292,7 +329,7 @@ public class ProductController {
         business.checkSessionPermissions(request);
 
         // get product + sanity
-        Product product = productRepository.getProductByBusinessAndProductCode(business, productId);
+        Product product = productRepository.getProduct(business, productId);
         // get image + sanity
         Image image = imageRepository.getImageByProductAndId(product, imageId);
 

@@ -124,6 +124,21 @@ public class Product {
      */
     public String getCountryOfSale() { return countryOfSale; }
 
+
+    /**
+     * Sets the code of the product
+     * @param productCode the code for the product
+     */
+    public void setProductCode(String productCode) {
+        if (productCode == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Product code must be provided");
+        }
+        if (!productCode.matches(PRODUCT_CODE_REGEX)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Product code must have a valid format");
+        }
+        this.productCode = productCode;
+    }
+
     /**
      * Sets the name of the product
      * @param name the name of the product
@@ -194,6 +209,22 @@ public class Product {
     }
 
     /**
+     * Convenience method for setting the recommended retail price from a string
+     * @param recommendedRetailPrice The new RRP of the product as a string
+     */
+    public void setRecommendedRetailPrice(String recommendedRetailPrice) {
+        if (recommendedRetailPrice == null || recommendedRetailPrice.equals("")) {
+            this.recommendedRetailPrice = null;
+            return;
+        }
+        try {
+            this.setRecommendedRetailPrice(new BigDecimal(recommendedRetailPrice));
+        } catch (NumberFormatException ignored) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The recommended retail price is not a number");
+        }
+    }
+
+    /**
      * Sets the images associated with the product
      * @param productImages the product images
      */
@@ -258,7 +289,7 @@ public class Product {
         private String name;
         private String description;
         private String manufacturer;
-        private BigDecimal recommendedRetailPrice;
+        private String recommendedRetailPrice;
         private Business business;
 
         /**
@@ -309,15 +340,7 @@ public class Product {
          * @return Builder with the recommended retail price set
          */
         public Builder withRecommendedRetailPrice(String recommendedRetailPrice) {
-            if (recommendedRetailPrice == null || recommendedRetailPrice.equals("")) {
-                this.recommendedRetailPrice = null;
-                return this;
-            }
-            try {
-                this.recommendedRetailPrice = new BigDecimal(recommendedRetailPrice);
-            } catch (NumberFormatException ignored) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The recommended retail price is not a number");
-            }
+            this.recommendedRetailPrice = recommendedRetailPrice;
             return this;
         }
 
@@ -337,7 +360,7 @@ public class Product {
          */
         public Product build() {
             Product product = new Product();
-            setProductCode(product, this.productCode);
+            product.setProductCode(this.productCode);
             product.setName(this.name);
             product.setDescription(this.description);
             product.setManufacturer(this.manufacturer);
@@ -346,20 +369,6 @@ public class Product {
             product.setCountryOfSale(this.business.getAddress().getCountry());
             setCreated(product, Instant.now());
             return product;
-        }
-
-        /**
-         * Sets the code of the product
-         * @param productCode the code for the product
-         */
-        private void setProductCode(Product product, String productCode) {
-            if (productCode == null) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Product code must be provided");
-            }
-            if (!productCode.matches(PRODUCT_CODE_REGEX)) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Product code must have a valid format");
-            }
-            product.productCode = productCode;
         }
 
         /**

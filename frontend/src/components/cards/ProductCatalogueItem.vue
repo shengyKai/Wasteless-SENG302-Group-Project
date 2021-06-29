@@ -41,6 +41,14 @@
                   v-model="showImageUploaderForm"
                   @image-added="imageAdded"
                 />
+
+                <a @click="showModifyProduct=true">Modify (Temp)</a>
+                <ProductForm
+                  v-if="showModifyProduct"
+                  :businessId="businessId"
+                  :previousProduct="product"
+                  @closeDialog="showModifyProduct=false"
+                />
               </v-card-actions>
             </v-col>
           </v-row>
@@ -134,6 +142,7 @@ import FullProductDescription from "../utils/FullProductDescription.vue";
 import ProductImageCarousel from "../utils/ProductImageCarousel.vue";
 import { currencyFromCountry } from "@/api/currency";
 import ProductImageUploader from "../utils/ProductImageUploader";
+import ProductForm from "../BusinessProfile/ProductForm.vue";
 import { makeImagePrimary, deleteImage } from "@/api/internal";
 import { formatDate } from '@/utils';
 
@@ -147,7 +156,8 @@ export default {
   components: {
     FullProductDescription,
     ProductImageCarousel,
-    ProductImageUploader
+    ProductImageUploader,
+    ProductForm,
   },
   data() {
     return {
@@ -156,9 +166,10 @@ export default {
         symbol: ""
       },
       showImageUploaderForm: false,
+      showModifyProduct: false,
       //If readMoreActivated is false, the product description is less than 50 words, so it wont have to use the FullProductDescription
       //component. Else it will use it and the "Read more..." link will also be shown to lead to the FullProductDescription component
-      readMoreActivated: false
+      readMoreActivated: false,
     };
   },
   computed: {

@@ -3,7 +3,7 @@ import Vuex from "vuex";
 import Vuetify from "vuetify";
 import { createLocalVue, Wrapper, mount } from "@vue/test-utils";
 import CreateInventory from "@/components/BusinessProfile/CreateInventory.vue";
-import { castMock, flushQueue } from "./utils";
+import { castMock, flushQueue, todayPlusYears } from "./utils";
 import { getStore, resetStoreForTesting } from "@/store";
 import * as api from '@/api/internal';
 
@@ -338,24 +338,12 @@ describe("CreateInventory.vue", () => {
   );
 
   describe("Date Validation", () => {
-    /**
-         * Gets todays date and adds on a certain number of years
-         *
-         * @param years the number of years to add onto today
-         * @returns Todays date with x more years
-         */
-    async function todayPlusYears(years: number) {
-      let today = new Date();
-      let currentYears = today.getFullYear() + years;
-      return currentYears + "-" + today.getMonth() + "-" + today.getDay();
-    }
-
     it("Valid when all date fields are today", async () => {
       await populateRequiredFields();
-      let manufacturedDate = await todayPlusYears(0);
-      let sellByDate = await todayPlusYears(0);
-      let bestBeforeDate = await todayPlusYears(0);
-      let expiresDate = await todayPlusYears(0);
+      let manufacturedDate = todayPlusYears(0);
+      let sellByDate = todayPlusYears(0);
+      let bestBeforeDate = todayPlusYears(0);
+      let expiresDate = todayPlusYears(0);
       await wrapper.setData({
         manufactured: manufacturedDate,
         sellBy: sellByDate,
@@ -368,7 +356,7 @@ describe("CreateInventory.vue", () => {
 
     it("Valid when manufactured date before today", async () => {
       await populateRequiredFields();
-      let manufacturedDate = await todayPlusYears(-1);
+      let manufacturedDate = todayPlusYears(-1);
       await wrapper.setData({
         manufactured: manufacturedDate
       });
@@ -379,7 +367,7 @@ describe("CreateInventory.vue", () => {
 
     it("Invalid when manufactured date after today", async () => {
       await populateRequiredFields();
-      let manufacturedDate = await todayPlusYears(1);
+      let manufacturedDate = todayPlusYears(1);
       await wrapper.setData({
         manufactured: manufacturedDate
       });
@@ -390,8 +378,8 @@ describe("CreateInventory.vue", () => {
 
     it("Valid when manufactured date before sell by date", async () => {
       await populateRequiredFields();
-      let manufacturedDate = await todayPlusYears(-1);
-      let sellByDate = await todayPlusYears(1);
+      let manufacturedDate = todayPlusYears(-1);
+      let sellByDate = todayPlusYears(1);
       await wrapper.setData({
         manufactured: manufacturedDate,
         sellBy: sellByDate
@@ -404,8 +392,8 @@ describe("CreateInventory.vue", () => {
 
     it("Invalid when manufactured date after sell by date", async () => {
       await populateRequiredFields();
-      let manufacturedDate = await todayPlusYears(-1);
-      let sellByDate = await todayPlusYears(-2);
+      let manufacturedDate = todayPlusYears(-1);
+      let sellByDate = todayPlusYears(-2);
       await wrapper.setData({
         manufactured: manufacturedDate,
         sellBy: sellByDate
@@ -418,7 +406,7 @@ describe("CreateInventory.vue", () => {
 
     it("Invalid when manufactured date before 1000 AD", async () => {
       await populateRequiredFields();
-      let manufacturedDate = await todayPlusYears(-1500);
+      let manufacturedDate = todayPlusYears(-1500);
       await wrapper.setData({
         manufactured: manufacturedDate
       });
@@ -429,7 +417,7 @@ describe("CreateInventory.vue", () => {
 
     it("Invalid when manufactured date after 10000 AD", async () => {
       await populateRequiredFields();
-      let manufacturedDate = await todayPlusYears(10000);
+      let manufacturedDate = todayPlusYears(10000);
       await wrapper.setData({
         manufactured: manufacturedDate
       });
@@ -440,7 +428,7 @@ describe("CreateInventory.vue", () => {
 
     it("Valid when sell by date after today", async () => {
       await populateRequiredFields();
-      let sellByDate = await todayPlusYears(1);
+      let sellByDate = todayPlusYears(1);
       await wrapper.setData({
         sellBy: sellByDate
       });
@@ -451,7 +439,7 @@ describe("CreateInventory.vue", () => {
 
     it("Invalid when sell by date before today", async () => {
       await populateRequiredFields();
-      let sellByDate = await todayPlusYears(-1);
+      let sellByDate = todayPlusYears(-1);
       await wrapper.setData({
         sellBy: sellByDate
       });
@@ -462,8 +450,8 @@ describe("CreateInventory.vue", () => {
 
     it("Valid when sell by date after manufactured date", async () => {
       await populateRequiredFields();
-      let manufacturedDate = await todayPlusYears(-1);
-      let sellByDate = await todayPlusYears(1);
+      let manufacturedDate = todayPlusYears(-1);
+      let sellByDate = todayPlusYears(1);
       await wrapper.setData({
         manufactured: manufacturedDate,
         sellBy: sellByDate
@@ -476,8 +464,8 @@ describe("CreateInventory.vue", () => {
 
     it("Valid when sell by date before best before date", async () => {
       await populateRequiredFields();
-      let bestBeforeDate = await todayPlusYears(2);
-      let sellByDate = await todayPlusYears(1);
+      let bestBeforeDate = todayPlusYears(2);
+      let sellByDate = todayPlusYears(1);
       await wrapper.setData({
         bestBefore: bestBeforeDate,
         sellBy: sellByDate
@@ -490,8 +478,8 @@ describe("CreateInventory.vue", () => {
 
     it("Invalid when sell by date after best before date", async () => {
       await populateRequiredFields();
-      let bestBeforeDate = await todayPlusYears(1);
-      let sellByDate = await todayPlusYears(2);
+      let bestBeforeDate = todayPlusYears(1);
+      let sellByDate = todayPlusYears(2);
       await wrapper.setData({
         bestBefore: bestBeforeDate,
         sellBy: sellByDate
@@ -504,7 +492,7 @@ describe("CreateInventory.vue", () => {
 
     it("Invalid when sell by date before 1000 AD", async () => {
       await populateRequiredFields();
-      let sellByDate = await todayPlusYears(-1500);
+      let sellByDate = todayPlusYears(-1500);
       await wrapper.setData({
         sellBy: sellByDate
       });
@@ -515,7 +503,7 @@ describe("CreateInventory.vue", () => {
 
     it("Invalid when sell by date after 10000 AD", async () => {
       await populateRequiredFields();
-      let sellByDate = await todayPlusYears(10000);
+      let sellByDate = todayPlusYears(10000);
       await wrapper.setData({
         sellBy: sellByDate
       });
@@ -526,7 +514,7 @@ describe("CreateInventory.vue", () => {
 
     it("Valid when best before date after today", async () => {
       await populateRequiredFields();
-      let bestBeforeDate = await todayPlusYears(1);
+      let bestBeforeDate = todayPlusYears(1);
       await wrapper.setData({
         bestBefore: bestBeforeDate
       });
@@ -537,7 +525,7 @@ describe("CreateInventory.vue", () => {
 
     it("Invalid when best before date before today", async () => {
       await populateRequiredFields();
-      let bestBeforeDate = await todayPlusYears(-1);
+      let bestBeforeDate = todayPlusYears(-1);
       await wrapper.setData({
         bestBefore: bestBeforeDate
       });
@@ -548,8 +536,8 @@ describe("CreateInventory.vue", () => {
 
     it("Valid when best before date after sell by date", async () => {
       await populateRequiredFields();
-      let bestBeforeDate = await todayPlusYears(2);
-      let sellByDate = await todayPlusYears(1);
+      let bestBeforeDate = todayPlusYears(2);
+      let sellByDate = todayPlusYears(1);
       await wrapper.setData({
         bestBefore: bestBeforeDate,
         sellBy: sellByDate
@@ -562,8 +550,8 @@ describe("CreateInventory.vue", () => {
 
     it("Invalid when best before date before sell by date", async () => {
       await populateRequiredFields();
-      let bestBeforeDate = await todayPlusYears(1);
-      let sellByDate = await todayPlusYears(2);
+      let bestBeforeDate = todayPlusYears(1);
+      let sellByDate = todayPlusYears(2);
       await wrapper.setData({
         bestBefore: bestBeforeDate,
         sellBy: sellByDate
@@ -576,8 +564,8 @@ describe("CreateInventory.vue", () => {
 
     it("Valid when best before date before expires date", async () => {
       await populateRequiredFields();
-      let bestBeforeDate = await todayPlusYears(1);
-      let expiresDate = await todayPlusYears(2);
+      let bestBeforeDate = todayPlusYears(1);
+      let expiresDate = todayPlusYears(2);
       await wrapper.setData({
         bestBefore: bestBeforeDate,
         expires: expiresDate
@@ -590,8 +578,8 @@ describe("CreateInventory.vue", () => {
 
     it("Invalid when best before date after expires date", async () => {
       await populateRequiredFields();
-      let bestBeforeDate = await todayPlusYears(2);
-      let expiresDate = await todayPlusYears(1);
+      let bestBeforeDate = todayPlusYears(2);
+      let expiresDate = todayPlusYears(1);
       await wrapper.setData({
         bestBefore: bestBeforeDate,
         expires: expiresDate
@@ -604,7 +592,7 @@ describe("CreateInventory.vue", () => {
 
     it("Invalid when best before date before 1000 AD", async () => {
       await populateRequiredFields();
-      let bestBeforeDate = await todayPlusYears(-1500);
+      let bestBeforeDate = todayPlusYears(-1500);
       await wrapper.setData({
         bestBefore: bestBeforeDate
       });
@@ -615,7 +603,7 @@ describe("CreateInventory.vue", () => {
 
     it("Invalid when best before date after 10000 AD", async () => {
       await populateRequiredFields();
-      let bestBeforeDate = await todayPlusYears(10000);
+      let bestBeforeDate = todayPlusYears(10000);
       await wrapper.setData({
         bestBefore: bestBeforeDate
       });
@@ -626,7 +614,7 @@ describe("CreateInventory.vue", () => {
 
     it("Valid when expires date after today", async () => {
       await populateRequiredFields();
-      let expiresDate = await todayPlusYears(1);
+      let expiresDate = todayPlusYears(1);
       await wrapper.setData({
         expires: expiresDate
       });
@@ -637,7 +625,7 @@ describe("CreateInventory.vue", () => {
 
     it("Invalid when expires date before today", async () => {
       await populateRequiredFields();
-      let expiresDate = await todayPlusYears(-1);
+      let expiresDate = todayPlusYears(-1);
       await wrapper.setData({
         expires: expiresDate
       });
@@ -648,8 +636,8 @@ describe("CreateInventory.vue", () => {
 
     it("Valid when expires date after best before date", async () => {
       await populateRequiredFields();
-      let bestBeforeDate = await todayPlusYears(1);
-      let expiresDate = await todayPlusYears(2);
+      let bestBeforeDate = todayPlusYears(1);
+      let expiresDate = todayPlusYears(2);
       await wrapper.setData({
         bestBefore: bestBeforeDate,
         expires: expiresDate
@@ -662,8 +650,8 @@ describe("CreateInventory.vue", () => {
 
     it("Invalid when expires date before best before date", async () => {
       await populateRequiredFields();
-      let bestBeforeDate = await todayPlusYears(2);
-      let expiresDate = await todayPlusYears(1);
+      let bestBeforeDate = todayPlusYears(2);
+      let expiresDate = todayPlusYears(1);
       await wrapper.setData({
         bestBefore: bestBeforeDate,
         expires: expiresDate
@@ -676,7 +664,7 @@ describe("CreateInventory.vue", () => {
 
     it("Invalid when expires date before 1000 AD", async () => {
       await populateRequiredFields();
-      let expiresDate = await todayPlusYears(-1500);
+      let expiresDate = todayPlusYears(-1500);
       await wrapper.setData({
         expires: expiresDate
       });
@@ -687,7 +675,7 @@ describe("CreateInventory.vue", () => {
 
     it("Invalid when expires date after 10000 AD", async () => {
       await populateRequiredFields();
-      let expiresDate = await todayPlusYears(10000);
+      let expiresDate = todayPlusYears(10000);
       await wrapper.setData({
         expires: expiresDate
       });

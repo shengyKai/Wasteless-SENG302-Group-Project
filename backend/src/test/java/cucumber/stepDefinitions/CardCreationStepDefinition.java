@@ -1,14 +1,11 @@
 package cucumber.stepDefinitions;
 
-import cucumber.RequestContext;
-import io.cucumber.java.bs.A;
+import cucumber.context.RequestContext;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
-import net.minidev.json.parser.ParseException;
-import org.mockito.MockitoAnnotations;
 import org.seng302.controllers.CardController;
 import org.seng302.entities.Keyword;
 import org.seng302.entities.MarketplaceCard;
@@ -17,21 +14,17 @@ import org.seng302.persistence.KeywordRepository;
 import org.seng302.persistence.MarketplaceCardRepository;
 import org.seng302.persistence.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.server.ResponseStatusException;
 
-import java.io.UnsupportedEncodingException;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
 public class CardCreationStepDefinition {

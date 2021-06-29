@@ -1,12 +1,10 @@
 import Vue from 'vue';
-import Vuex from 'vuex';
 import Vuetify from 'vuetify';
 import { createLocalVue, Wrapper, mount } from '@vue/test-utils';
 
-import CreateProduct from '@/components/BusinessProfile/CreateProduct.vue';
+import ProductForm from '@/components/BusinessProfile/ProductForm.vue';
 import { castMock, flushQueue } from './utils';
 import * as api from '@/api/internal';
-import { getStore, resetStoreForTesting } from '@/store';
 import { currencyFromCountry } from '@/api/currency';
 
 jest.mock('@/api/internal', () => ({
@@ -45,52 +43,51 @@ const whitespaceCharacters = ["\n", "\t"];
 
 const localVue = createLocalVue();
 
-describe('CreateProduct.vue', () => {
-  // Container for the wrapper around CreateProduct
+describe('ProductForm.vue - Create', () => {
+  // Container for the wrapper around ProductForm
   let appWrapper: Wrapper<any>;
 
-  // Container for the CreateProduct under test
+  // Container for the ProductForm under test
   let wrapper: Wrapper<any>;
 
   /**
-   * Sets up the test CreateProduct instance
+   * Sets up the test ProductForm instance
    *
    * Because the element we're testing has a v-dialog we need to take some extra sets to make it
    * work.
    */
   beforeEach(() => {
-    localVue.use(Vuex);
     const vuetify = new Vuetify();
 
-    // Creating wrapper around CreateProduct with data-app to appease vuetify
+    // Creating wrapper around ProductForm with data-app to appease vuetify
     const App = localVue.component('App', {
-      components: { CreateProduct },
-      template: '<div data-app><CreateProduct/></div>',
+      components: { ProductForm },
+      template: '<div data-app><ProductForm :previousProduct="previousProduct" :businessId="90"/></div>',
+      data() {
+        return {
+          previousProduct: undefined,
+        };
+      }
     });
 
-    // Put the CreateProduct component inside a div in the global document,
+    // Put the ProductForm component inside a div in the global document,
     // this seems to make vuetify work correctly, but necessitates calling appWrapper.destroy
     const elem = document.createElement('div');
     document.body.appendChild(elem);
 
-    resetStoreForTesting();
-    let store = getStore();
-    store.state.createProductDialogBusiness = 90;
-
     appWrapper = mount(App, {
       localVue,
       vuetify,
-      store: store,
       attachTo: elem,
     });
 
-    wrapper = appWrapper.getComponent(CreateProduct);
+    wrapper = appWrapper.getComponent(ProductForm);
   });
 
   /**
    * Executes after every test case.
    *
-   * This function makes sure that the CreateProduct component is removed from the global document
+   * This function makes sure that the ProductForm component is removed from the global document
    */
   afterEach(() => {
     appWrapper.destroy();
@@ -111,7 +108,7 @@ describe('CreateProduct.vue', () => {
   }
 
   /**
-   * Populates all fields of the CreateProduct form
+   * Populates all fields of the ProductForm form
    *
    * Which include the product's:
    *  - Name
@@ -130,7 +127,7 @@ describe('CreateProduct.vue', () => {
   }
 
   /**
-   * Finds the close button in the CreateProduct form
+   * Finds the close button in the ProductForm form
    *
    * @returns A Wrapper around the close button
    */
@@ -142,7 +139,7 @@ describe('CreateProduct.vue', () => {
   }
 
   /**
-   * Finds the create button in the CreateProduct form
+   * Finds the create button in the ProductForm form
    *
    * @returns A Wrapper around the create button
    */
@@ -392,3 +389,92 @@ describe('CreateProduct.vue', () => {
     expect(wrapper.vm.currency.errorMessage).toBe("Some error message");
   });
 });
+
+
+describe('ProductForm.vue - Modify', () => {
+  // Container for the wrapper around ProductForm
+  let appWrapper: Wrapper<any>;
+
+  // Container for the ProductForm under test
+  let wrapper: Wrapper<any>;
+
+  const previousProduct: api.Product = {
+    id: 'TEST-ID',
+    name: 'Test product name',
+    description: 'Test product description',
+    manufacturer: 'Test product manufacturer',
+    recommendedRetailPrice: 199,
+    images: [],
+  };
+
+  /**
+   * Sets up the test ProductForm instance
+   *
+   * Because the element we're testing has a v-dialog we need to take some extra sets to make it
+   * work.
+   */
+  beforeEach(() => {
+    const vuetify = new Vuetify();
+
+    // Creating wrapper around ProductForm with data-app to appease vuetify
+    const App = localVue.component('App', {
+      components: { ProductForm },
+      template: '<div data-app><ProductForm :previousProduct="previousProduct" :businessId="90"/></div>',
+      data() {
+        return {
+          previousProduct,
+        };
+      }
+    });
+
+    // Put the ProductForm component inside a div in the global document,
+    // this seems to make vuetify work correctly, but necessitates calling appWrapper.destroy
+    const elem = document.createElement('div');
+    document.body.appendChild(elem);
+
+    appWrapper = mount(App, {
+      localVue,
+      vuetify,
+      attachTo: elem,
+    });
+
+    wrapper = appWrapper.getComponent(ProductForm);
+  });
+
+  /**
+   * Executes after every test case.
+   *
+   * This function makes sure that the ProductForm component is removed from the global document
+   */
+  afterEach(() => {
+    appWrapper.destroy();
+  });
+
+  /**
+   * Finds the modify button in the ProductForm form
+   *
+   * @returns A Wrapper around the create button
+   */
+  function findModifyButton() {
+    const buttons = wrapper.findAllComponents({ name: 'v-btn' });
+    const filtered = buttons.filter(button => button.text().includes('Modify'));
+    expect(filtered.length).toBe(1);
+    return filtered.at(0);
+  }
+
+  it('Form has the correct title', () => {
+    expect(appWrapper.text()).toContain(`Update ${previousProduct.id}`);
+  });
+
+  it('Product fields are populated', () => {
+    expect(wrapper.vm.productCode).toBe(previousProduct.id);
+    expect(wrapper.vm.product).toBe(previousProduct.name);
+    expect(wrapper.vm.description).toBe(previousProduct.description);
+    expect(wrapper.vm.manufacturer).toBe(previousProduct.manufacturer);
+  });
+
+  it('Matches snapshot', () => {
+    expect(appWrapper).toMatchSnapshot();
+  });
+});
+
