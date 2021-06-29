@@ -1,6 +1,5 @@
-import java.util.Scanner;
-
-public class LocationScriptGenerator {
+import java.util.Random;
+public class LocationGenerator {
     /**
      * Randomly generates the address of the user/business
      * @return the elements of a location object (user's/business's address) in an array

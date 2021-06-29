@@ -45,29 +45,6 @@ public class UserScriptGenerator {
     }
 
     /**
-     * Randomly generates the address of the user
-     * @return the elements of a location object (user's address) in an array
-     */
-    public static String[] GenerateAddress(Random random) {
-        //predefined lists for the location components
-        String[] streetNames = {"Hillary Cresenct", "Elizabeth Street", "Alice Avenue", "Racheal Road", "Peveral Street", "Moorhouse Avenue", "Riccarton Road", "Clyde Road", "Angelic Avenue"};
-        String[] cities = {"Dunedin", "Nightcaps", "Gore", "Tapanui", "Wellington", "Christchurch", "Auckland", "Melbourne", "Brisbance", "Sydeny", "Perth", "Darwin", "Alice Springs"};
-        String[] regions = {"Otago", "Southland", "Canterbury", "Victoria", "Tasman", "Upper Hutt"};
-        String[] countries = {"New Zealand", "Zealand", "Australia", "England", "United Kingdom", "Japan", "Korea", "Singapore", "France", "Germany", "Norway"};
-        String[] districts = {"Alpha", "Beta", "Charlie", "Delta", "Echo", "Foxtrot"};
-
-        String streetNum = String.valueOf(random.nextInt(998) + 1);
-        String streetName = streetNames[random.nextInt(streetNames.length)];
-        String city = cities[random.nextInt(cities.length)];
-        String region = regions[random.nextInt(regions.length)];
-        String country = countries[random.nextInt(countries.length)];
-        String postcode = String.valueOf(random.nextInt(98999) + 1000);
-        String district = districts[random.nextInt(districts.length)];
-        String[] address = {streetNum, streetName, city, region, country, postcode, district};
-        return address;
-    }
-
-    /**
      * Clears the console on windows and linux
      */
     public static void Clear() {
@@ -188,7 +165,7 @@ public class UserScriptGenerator {
         CreateFile(scanner, filename);
         try {
             FileWriter writer = new FileWriter(filename);
-            String[] address = GenerateAddress(random);
+            String[] address = LocationGenerator.GenerateAddress(random);
             writer.write(CreateInsertAddressSQL(address));
 
             for (int i=0; i < users; i++) {
