@@ -9,10 +9,10 @@ import java.util.Set;
 public interface EventService {
     /**
      * Creates an event emitter for the given user
-     * @param userId User id to make emitter for
+     * @param user User to make emitter for
      * @return Event emitter for the provided user
      */
-    SseEmitter createEmitterForUser(long userId);
+    SseEmitter createEmitterForUser(User user);
 
     /**
      * Adds users to an event and notifies them if they are connected.

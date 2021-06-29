@@ -5,13 +5,13 @@
     <div class="newsfeed">
       <!-- Newsfeed -->
       <v-card
-        v-for="event in newsfeedItems"
+        v-for="event in $store.getters.events"
         :key="event.id"
         outlined
         rounded="lg"
         class="newsfeed-item"
       >
-        <template v-if="event.type == 'demo'">
+        <template v-if="event.type == 'message'">
           <GlobalMessage :event="event"/>
         </template>
         <template v-else>
@@ -31,7 +31,6 @@
 import BusinessActionPanel from "./BusinessActionPanel";
 import UserActionPanel from "./UserActionPanel";
 import GlobalMessage from "./newsfeed/GlobalMessage.vue";
-import { addEventMessageHandler, initialiseEventSourceForUser } from '@/api/events';
 
 export default {
   data() {
@@ -43,12 +42,6 @@ export default {
     BusinessActionPanel,
     UserActionPanel,
     GlobalMessage,
-  },
-  created() {
-    initialiseEventSourceForUser(this.$store.state.user.id);
-    addEventMessageHandler(event => {
-      this.newsfeedItems.push(event);
-    });
   },
   computed: {
     /**

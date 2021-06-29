@@ -1,9 +1,9 @@
-const EMITTER_URL = process.env.VUE_APP_SERVER_ADD + '/emitter';
+const EMITTER_URL = process.env.VUE_APP_SERVER_ADD + '/events/emitter';
 
 let eventSource: EventSource;
 let lastErrorTime = Number.MIN_VALUE;
 
-type Event = DemoEvent
+export type Event = MessageEvent
 
 type BaseEvent = {
   id: number,
@@ -11,8 +11,8 @@ type BaseEvent = {
   type: string,
 }
 
-type DemoEvent = BaseEvent & {
-  type: 'demo',
+type MessageEvent = BaseEvent & {
+  type: 'message',
   message: string
 }
 

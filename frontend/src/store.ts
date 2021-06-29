@@ -1,6 +1,8 @@
 import { User, Business, getUser, login, InventoryItem } from './api/internal';
+import { Event, initialiseEventSourceForUser, addEventMessageHandler } from './api/events';
 import Vuex, { Store, StoreOptions } from 'vuex';
 import { COOKIE, deleteCookie, getCookie, isTesting, setCookie } from './utils';
+import Vue from 'vue';
 
 type UserRole = { type: "user" | "business", id: number };
 type SaleItemInfo = { businessId: number, inventoryItem: InventoryItem };
@@ -44,6 +46,11 @@ export type StoreData = {
    * Whether or not the dialog for creating a marketplace card is being shown.
    */
   createMarketplaceCardDialog: User | undefined,
+  /**
+   * Map from event ids to events.
+   * This is a sparse array
+   */
+  eventMap: Record<number, Event>,
 };
 
 function createOptions(): StoreOptions<StoreData> {
@@ -56,10 +63,12 @@ function createOptions(): StoreOptions<StoreData> {
       createInventoryDialog: undefined,
       createSaleItemDialog: undefined,
       createMarketplaceCardDialog: undefined,
+      eventMap: [],
     },
     mutations: {
       setUser(state, payload: User) {
         state.user = payload;
+        state.eventMap = []; // Clear events
 
         // Ensures that when we log in we always have a role.
         state.activeRole = { type: "user", id: payload.id };
@@ -69,7 +78,20 @@ function createOptions(): StoreOptions<StoreData> {
           deleteCookie(COOKIE.USER.toUpperCase());
           deleteCookie(COOKIE.USER.toLowerCase());
           setCookie(COOKIE.USER, payload.id);
+
+          initialiseEventSourceForUser(state.user.id); // Make event handler
+          // Not too happy with this solution, but I don't see anything better
+          addEventMessageHandler(event => getStore().commit('addEvent', event));
         }
+      },
+      /**
+       * Adds or replaces a event in the event list
+       * This method is only expected to be called from the event message handler
+       * @param state Current state
+       * @param payload New event
+       */
+      addEvent(state, payload: Event) {
+        Vue.set(state.eventMap, payload.id, payload);
       },
       /**
        * Displays an error message at the top of the screen.
@@ -185,6 +207,16 @@ function createOptions(): StoreOptions<StoreData> {
       },
       role(state) {
         return state.user?.role;
+      },
+      /**
+       * Gets a list of all events sorted by creation date
+       * @param state Current state
+       * @returns List of events
+       */
+      events(state) {
+        let events = Object.values(state.eventMap);
+        events.sort((a, b) => +new Date(b.created) - +new Date(a.created));
+        return events;
       },
     },
     actions: {

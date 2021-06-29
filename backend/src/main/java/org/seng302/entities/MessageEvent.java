@@ -9,13 +9,13 @@ import javax.persistence.Entity;
 import java.lang.module.ResolutionException;
 
 @Entity
-public class DemoEvent extends Event {
+public class MessageEvent extends Event {
     @Column(nullable = false)
     private String message;
 
-    protected DemoEvent() {}
+    protected MessageEvent() {}
 
-    public DemoEvent(String message) {
+    public MessageEvent(String message) {
         setMessage(message);
     }
 
@@ -34,7 +34,7 @@ public class DemoEvent extends Event {
     @Override
     public JSONObject constructJSONObject() {
         JSONObject json = super.constructJSONObject();
-        json.put("type", "demo");
+        json.put("type", "message");
         json.put("message", message);
         return json;
     }

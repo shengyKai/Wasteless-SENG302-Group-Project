@@ -35,12 +35,10 @@ public class EventServiceImpl implements EventService {
     private final Map<Long, List<SseEmitter>> connections = new ConcurrentHashMap<>();
 
     @Override
-    public SseEmitter createEmitterForUser(long userId) {
-        User user = userRepository.findById(userId).orElseThrow();
+    public SseEmitter createEmitterForUser(User user) {
+        SseEmitter emitter = new SseEmitter(60000L);
 
-        SseEmitter emitter = new SseEmitter(Long.MAX_VALUE);
-
-        List<SseEmitter> userConnections = connections.computeIfAbsent(userId, k -> new ArrayList<>());
+        List<SseEmitter> userConnections = connections.computeIfAbsent(user.getUserID(), k -> new ArrayList<>());
         userConnections.add(emitter);
         emitter.onCompletion(() -> {
             LOGGER.info("Emitter done");
@@ -51,7 +49,7 @@ public class EventServiceImpl implements EventService {
             userConnections.remove(emitter);
         });
 
-        LOGGER.info("Adding event emitter for user (id={})", userId);
+        LOGGER.info("Adding event emitter for user (id={}) total for user {}", user.getUserID(), userConnections.size());
 
         for (Event event : eventRepository.getAllByNotifiedUsersOrderByCreated(user)) {
             emitEvent(emitter, event);
