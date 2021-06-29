@@ -128,9 +128,8 @@ class PersonNameGenerator {
      */
     private String nicknameFromFirstName(String firstName) {
         if (random.nextBoolean() && nicknameLookup.containsKey(firstName)) {
-                List<String> potentialNicknames = nicknameLookup.get(firstName);
-                return randomNameFromList(potentialNicknames);
-            }
+            List<String> potentialNicknames = nicknameLookup.get(firstName);
+            return randomNameFromList(potentialNicknames);
         }
         return "";
     }
