@@ -83,6 +83,18 @@ export function debounce(func: (() => void), wait: number) {
 }
 
 /**
+ * Trims the input string such that it is always less than or equal to the provided length
+ * This function will try to avoid breaking up words unless there is no alternative
+ * @param str String to trim
+ * @param length Maximum length
+ * @returns Trimmed string
+ */
+export function trimToLength(str: string, length: number) {
+  const re = new RegExp(`^(.{0,${length}})(\\s.*|$)`);
+  return str.replace(re, "$1").slice(0, length);
+}
+
+/**
  * Checks whether we are executing in the test enviroment
  *
  * @returns true if we're testing false otherwise

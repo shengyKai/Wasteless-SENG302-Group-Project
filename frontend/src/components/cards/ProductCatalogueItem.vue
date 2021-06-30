@@ -80,10 +80,7 @@
                     <strong>Description: </strong>
                     <br >
                     {{
-                      description.replace(
-                        /^([\s\S]{50}\S*)[\s\S]*/,
-                        "$1"
-                      )
+                      trimToLength(description, 50)
                     }}...
                     <!-- feed the productDescription into the dialog box child component -->
                     <FullProductDescription
@@ -158,7 +155,7 @@ import { currencyFromCountry } from "@/api/currency";
 import ProductImageUploader from "../utils/ProductImageUploader";
 import ProductForm from "../BusinessProfile/ProductForm.vue";
 import { makeImagePrimary, deleteImage } from "@/api/internal";
-import { formatDate } from '@/utils';
+import { formatDate, trimToLength } from '@/utils';
 
 export default {
   name: "ProductCatalogueItem",
@@ -252,6 +249,7 @@ export default {
       this.$emit('content-changed');
     },
     formatDate,
+    trimToLength,
   },
 };
 
