@@ -14,6 +14,7 @@ import * as api from "@/api/internal";
 import { castMock, flushQueue } from './utils';
 import Vuex, { Store } from 'vuex';
 import { getStore, resetStoreForTesting, StoreData } from '@/store';
+import { trimToLength } from '@/utils';
 
 Vue.use(Vuetify);
 
@@ -142,8 +143,8 @@ describe('ProductCatalogueItem.vue', () => {
         countryOfSale: "someCountry"
       }
     });
-    //the description will cut off at the 50th character
-    expect(wrapper.text()).toContain(wrapper.vm.product.description.slice(0,50));
+    //the description will be trimmed
+    expect(wrapper.text()).toContain(trimToLength(wrapper.vm.product.description, 50));
     //Full description should not exist
     expect(wrapper.text()).not.toContain(wrapper.vm.product.description);
     Vue.nextTick(() => {
