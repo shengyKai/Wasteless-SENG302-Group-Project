@@ -174,18 +174,7 @@ public class UserGenerator {
                 System.out.println("and put into the database?");
                 System.out.println("------------------------------------");
                 users = Integer.parseInt(scanner.nextLine());
-            } catch (NoSuchElementException e) {
-                System.out.println("You are using the gradle generate function");
-                System.out.println("This console does not support scanner inputs");
-                System.out.println("To input your own number of users");
-                System.out.println("Compile and run this java file in a local terminal");
-                System.out.println("10 users will be creating in...");
-                for (int i=5; i>0; i--) {
-                    TimeUnit.SECONDS.sleep(1);
-                    System.out.println(i);
-                }
-                users = 10;
-            } catch (Exception e) {
+            } catch (NumberFormatException e) {
                 System.out.println("Please enter a number! (above 0)");
             }
         }
