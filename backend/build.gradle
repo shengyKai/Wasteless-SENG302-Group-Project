@@ -90,6 +90,7 @@ dependencies {
 
 task(generateUser, dependsOn: 'classes', type: JavaExec) {
     main = 'org.seng302.datagenerator.UserGenerator'
+    standardInput = System.in
     classpath = sourceSets.main.runtimeClasspath
 }
 

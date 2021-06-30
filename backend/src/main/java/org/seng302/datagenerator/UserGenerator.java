@@ -21,9 +21,6 @@ public class UserGenerator {
     static Scanner scanner = new Scanner(System.in);
 
     //predefined lists
-    String[] FNAMES = {"Nathan", "Connor", "Josh", "Ella", "Henry", "Kai", "Ben", "Edward", "April", "May", "June", "Emila", "Frank", "Fergus", "Rose", "Jacob", "Jack", "Danielle"};
-    String[] LNAMES = {"Jordan", "Mungus", "Smith", "Johnson", "Williams", "Brown", "Jones", "Garcia", "Davis", "Thomas", "Taylor", "Lee", "Jackson", "Lewis"};
-    String[] NICKNAMES = {"Nathan Apple", "EDDDD", "Get Some Sleep", "Protractor", "Cat", "Dog", "Gugu", "Believer", "Posh Petrol Head"};
     String[] BIOS = {"I enjoy running on the weekends", "Beaches are fun", "Got to focus on my career", "If only I went to a better university", "Read documentation yeah right", "My cats keep me going", "All I need is food"};
     
     public UserGenerator(Connection conn) {
@@ -62,9 +59,9 @@ public class UserGenerator {
      * the current user being generate to keep each individual email unique
      * @return the user's email
      */
-    private String generateEmail(int counter) {
+    private String generateEmail(int counter, PersonNameGenerator.FullName fullName) {
         String[] suffixes = {"@gmail.com", "@hotmail.com", "@yahoo.com", "@uclive.ac.nz", "@xtra.co.nz"};
-        String emailStart = FNAMES[random.nextInt(FNAMES.length)] + FNAMES[random.nextInt(FNAMES.length)];
+        String emailStart = fullName.getFirstName() + fullName.getLastName();
         String counterStr = String.valueOf(counter);
         String suffix = suffixes[random.nextInt(suffixes.length)];
         return emailStart + counterStr + suffix;
@@ -103,15 +100,15 @@ public class UserGenerator {
     /**
      * Creates the SQL commands required to insert the user's account into the database
      */
-    private void createInsertUsersSQL(long userId, long addressId) throws SQLException {
+    private void createInsertUsersSQL(long userId, long addressId, PersonNameGenerator.FullName fullName) throws SQLException {
         PreparedStatement stmt = conn.prepareStatement(
                 "INSERT INTO user (first_name, middle_name, last_name, nickname, ph_num, dob, bio, created, userid, address_id) "
                         + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
         );
-        stmt.setObject(1,  FNAMES[random.nextInt(FNAMES.length)]); //first name
-        stmt.setObject(2, FNAMES[random.nextInt(FNAMES.length)]); //middle name
-        stmt.setObject(3, LNAMES[random.nextInt(LNAMES.length)]); //last name
-        stmt.setObject(4, NICKNAMES[random.nextInt(NICKNAMES.length)]); //nickname
+        stmt.setObject(1, fullName.getFirstName()); //first name
+        stmt.setObject(2, fullName.getMiddleName()); //middle name
+        stmt.setObject(3, fullName.getLastName()); //last name
+        stmt.setObject(4, fullName.getNickname()); //nickname
         stmt.setObject(5, generatePhNum()); //phone number
         stmt.setObject(6, generateDOB()); //date of birth
         stmt.setObject(7, BIOS[random.nextInt(BIOS.length)]); //bio
@@ -136,18 +133,7 @@ public class UserGenerator {
                 System.out.println("and put into the database?");
                 System.out.println("------------------------------------");
                 users = Integer.parseInt(scanner.nextLine());
-            } catch (NoSuchElementException e) {
-                System.out.println("You are using the gradle generate function");
-                System.out.println("This console does not support scanner inputs");
-                System.out.println("To input your own number of users");
-                System.out.println("Compile and run this java file in a local terminal");
-                System.out.println("10 users will be creating in...");
-                for (int i=5; i>0; i--) {
-                    TimeUnit.SECONDS.sleep(1);
-                    System.out.println(i);
-                }
-                users = 10;
-            } catch (Exception e) {
+            } catch (NumberFormatException e) {
                 System.out.println("Please enter a number! (above 0)");
             }
         }
@@ -188,8 +174,10 @@ public class UserGenerator {
         clear();
 
         try {
+            PersonNameGenerator personNameGenerator = PersonNameGenerator.getInstance();
             for (int i=0; i < users; i++) {
-                String email = generateEmail(i);
+                PersonNameGenerator.FullName fullName = personNameGenerator.generateName();
+                String email = generateEmail(i, fullName);
                 String password = generatePassword();
                 String[] address = locationGenerator.generateAddress(random);
                 long addressId = locationGenerator.createInsertAddressSQL(address, conn);
@@ -199,7 +187,7 @@ public class UserGenerator {
                 int progress = (int) (((float)(i+1) / (float)users) * 100);
                 System.out.println(String.format("Progress: %d%%", progress));
                 long userId = createInsertAccountSQL(email, password);
-                createInsertUsersSQL(userId, addressId);
+                createInsertUsersSQL(userId, addressId, fullName);
             }
 
         } catch (Exception e) {

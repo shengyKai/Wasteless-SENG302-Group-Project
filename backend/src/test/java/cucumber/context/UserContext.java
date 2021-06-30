@@ -12,6 +12,7 @@ import java.util.Map;
 
 public class UserContext {
     private User lastUser = null;
+    private final Map<String, User> userMap = new HashMap<>();
 
     @Autowired
     private UserRepository userRepository;
@@ -19,6 +20,7 @@ public class UserContext {
     @Before
     public void setup() {
         lastUser = null;
+        userMap.clear();
     }
 
     /**
@@ -30,6 +32,15 @@ public class UserContext {
     }
 
     /**
+     * Finds a user by their first name
+     * @param firstName First name to select
+     * @return User with matching first name, if none exist then null
+     */
+    public User getByName(String firstName) {
+        return userMap.get(firstName);
+    }
+
+    /**
      * Saves a user using the user repository
      * Also sets the last user
      * @param user User to save
@@ -37,6 +48,7 @@ public class UserContext {
      */
     public User save(User user) {
         lastUser = userRepository.save(user);
+        userMap.put(user.getFirstName(), user);
         return lastUser;
     }
 

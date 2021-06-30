@@ -1,17 +1,29 @@
-import { getCookie } from "@/utils";
+import { getCookie, trimToLength } from "@/utils";
 
 
 describe('utils.ts', () => {
-  const cookieString = 'test=7;test2=value;test3=that';
-  const cookieStringWithSpaces = 'test=7; test2=value; test3=that';
-  const cookieMapping: [string, string | null][] = [
-    ['test', 'test=7'],
-    ['test2', 'test2=value'],
-    ['test3', 'test3=that'],
-    ['nowhere', null],
-  ];
+  it.each([
+    ['Hello world', 4, 'Hell' ],
+    ['Hello world', 8, 'Hello' ],
+    ['Hello world', 50, 'Hello world' ],
+    ['a'.repeat(10), 5, 'a'.repeat(5) ],
+    ['', 5, '' ],
+    ['Hello world', 0, '' ],
+  ])('Trimming "%s" to %i characters should return "%s"', (input, length, expected) => {
+    const actual = trimToLength(input, length);
+    expect(actual).toBe(expected);
+  });
 
   describe('cookie tests', () => {
+    const cookieString = 'test=7;test2=value;test3=that';
+    const cookieStringWithSpaces = 'test=7; test2=value; test3=that';
+    const cookieMapping: [string, string | null][] = [
+      ['test', 'test=7'],
+      ['test2', 'test2=value'],
+      ['test3', 'test3=that'],
+      ['nowhere', null],
+    ];
+
     let originalDocument: Document;
     const cookieGetter = jest.fn();
     const cookieSetter = jest.fn();
