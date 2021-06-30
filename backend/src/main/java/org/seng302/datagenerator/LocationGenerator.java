@@ -102,4 +102,13 @@ public class LocationGenerator {
       keys.next();
       return keys.getLong(1);
     }
+
+    /**
+     * Randomly select and return a street name from the list of street names.
+     * @return The randomly selected street name.
+     */
+    public String randomStreetName() {
+        return streetNames.get(random.nextInt(streetNames.size()));
+    }
+
 }

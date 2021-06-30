@@ -185,8 +185,6 @@ public class UserGenerator {
         clear();
 
         try {
-            String[] address = generateAddress();
-            long addressId = createInsertAddressSQL(address);
             PersonNameGenerator personNameGenerator = PersonNameGenerator.getInstance();
 
             for (int i=0; i < users; i++) {

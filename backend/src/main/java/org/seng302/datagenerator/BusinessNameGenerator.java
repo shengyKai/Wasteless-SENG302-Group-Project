@@ -1,5 +1,7 @@
 package org.seng302.datagenerator;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.List;
 import java.util.Random;
 
@@ -21,6 +23,7 @@ public class BusinessNameGenerator {
     private final List<String> productNouns;
 
     private final PersonNameGenerator personNameGenerator;
+    private final LocationGenerator locationGenerator;
     private final Random random;
 
     /**
@@ -33,6 +36,7 @@ public class BusinessNameGenerator {
         productAdjectives = ExampleDataFileReader.readExampleDataFile(PRODUCT_ADJECTIVE_FILE);
         productNouns = ExampleDataFileReader.readExampleDataFile(PRODUCT_NOUN_FILE);
         personNameGenerator = PersonNameGenerator.getInstance();
+        locationGenerator = LocationGenerator.getInstance();
         random = new Random();
     }
 
@@ -41,7 +45,7 @@ public class BusinessNameGenerator {
      * @return A randomly generated business name.
      */
     public String randomBusinessName() {
-        String street = "Riccarton Road"; //TODO change to a randomly generated street name after merging in location generator
+        String street = locationGenerator.randomStreetName();
         int suffixIndex = random.nextInt(businessSuffixes.size());
         return String.format("%s %s", street, businessSuffixes.get(suffixIndex));
     }
@@ -75,6 +79,38 @@ public class BusinessNameGenerator {
             instance = new BusinessNameGenerator();
         }
         return instance;
+    }
+
+
+    //Todo delete before merging to dev
+    public static void main(String[] args) {
+        BusinessNameGenerator businessNameGenerator = BusinessNameGenerator.getInstance();
+        businessNameGenerator.printTest();
+    }
+
+    //Todo delete before merging to dev
+    public void printTest() {
+
+        Instant startTime = Instant.now();
+        for (int i = 0; i < 10000; i++) {
+            randomBusinessName();
+            randomManufacturerName();
+            randomProductName();
+        }
+        Instant endTime = Instant.now();
+        System.out.println("Exectution time for generating 10000 business, manufacturer and product names: " + Duration.between(startTime, endTime).getNano());
+
+        for (int i = 0; i < 5; i++) {
+            System.out.println("Random business name: " + randomBusinessName());
+        }
+        System.out.println();
+        for (int i = 0; i < 5; i++) {
+            System.out.println("Random manufacturer name: " + randomManufacturerName());
+        }
+        System.out.println();
+        for (int i = 0; i < 5; i++) {
+            System.out.println("Random product name: " + randomProductName());
+        }
     }
 
 }
