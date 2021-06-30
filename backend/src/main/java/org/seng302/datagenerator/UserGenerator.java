@@ -17,7 +17,7 @@ import static org.seng302.datagenerator.Main.connectToDatabase;
 public class UserGenerator {
     private Random random = new Random();
     private Connection conn;
-    private LocationGenerator locationGenerator = new LocationGenerator();
+    private LocationGenerator locationGenerator = LocationGenerator.getInstance();
     static Scanner scanner = new Scanner(System.in);
 
     //predefined lists

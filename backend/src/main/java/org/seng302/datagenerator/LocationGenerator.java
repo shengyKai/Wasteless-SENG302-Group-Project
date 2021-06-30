@@ -1,29 +1,85 @@
 package org.seng302.datagenerator;
 
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
+import java.io.BufferedReader;
+import java.io.FileReader;
 
 public class LocationGenerator {
-    //predefined list of location elements
-    String[] STREETNAMES = {"Hillary Cresenct", "Elizabeth Street", "Alice Avenue", "Racheal Road", "Peveral Street", "Moorhouse Avenue", "Riccarton Road", "Clyde Road", "Angelic Avenue", "Henley Road", "Sandspit Road", "Dinglebank Road", "Waipa Street", "Ranui Avenue", "Marywil Crescent"};
-    String[] CITIES = {"Dunedin", "Nightcaps", "Gore", "Tapanui", "Wellington", "Christchurch", "Auckland", "Melbourne", "Brisbance", "Sydeny", "Perth", "Darwin", "Alice Springs", "Tokyo", "London"};
-    String[] REGIONS = {"Otago", "Southland", "Canterbury", "Victoria", "Tasman", "Upper Hutt", "Alaska", "California", "Florida", "Hubei Province", "Fujian Province", "Hainan Province", "Munster", "Ulster", "Leinster"};
-    String[] COUNTRIES = {"New Zealand", "Malaysia", "Australia", "England", "United Kingdom", "Japan", "Korea", "Singapore", "France", "Germany", "Norway", "Ireland", "Belgium", "Iceland", "Thailand"};
-    //The district can be left empty, thus there is a null as an option
-    String[] DISTRICTS = {null, "Kaipara District", "New Plymouth District", "Carterton District", "Beaver County", "Big Lakes County", "Camrose County", "Cardston County", "Gambir", "Menteng", "Senen", "Johor Bahru District", "Jeli District", "Raub District", "Ruapehu District"};
-  
+
+    private static LocationGenerator instance;
+
+    private static final String EXAMPLE_DATA_FILE_PATH = "backend/example-data/";
+    private static final String STREET_NAMES_FILE = "street-names.txt";
+    private static final String CITIES_FILE = "cities.txt";
+    private static final String REGIONS_FILE = "regions.txt";
+    private static final String COUNTRIES_FILE = "countries.txt";
+    private static final String DISTRICTS_FILE = "districts.txt";
+
+    private List<String> streetNames;
+    private List<String> cities;
+    private List<String> regions;
+    private List<String> countries;
+    private List<String> districts;
+
+    private Random random;
+
+    private LocationGenerator() {
+      streetNames = readLocationFile(STREET_NAMES_FILE);
+      cities = readLocationFile(CITIES_FILE);
+      regions = readLocationFile(REGIONS_FILE);
+      countries = readLocationFile(COUNTRIES_FILE);
+      districts = readLocationFile(DISTRICTS_FILE);
+      random = new Random();
+    }
+
+    /**
+     * This method creates (if necessary) and returns the singleton instance of the LocationGenerator class.
+     * @return The LocationGenerator singleton.
+     */
+    public static LocationGenerator getInstance() {
+      if (instance == null) {
+          instance = new LocationGenerator();
+      }
+      return instance;
+    }
+
+
+    /**
+     * Reads a text file with a list of a part of a location and returns a list where each entry in the list is a part
+     * of location from the file.
+     * @param filename The name of the file to be read.
+     * @return A list of all the names of the part of the location in the file.
+     */
+    private List<String> readLocationFile(String filename) {
+      List<String> locations = new ArrayList<>();
+      try (BufferedReader bufferedReader = new BufferedReader(new FileReader(EXAMPLE_DATA_FILE_PATH + filename))) {
+          String line;
+          while ((line = bufferedReader.readLine()) != null) {
+              String location = line.strip();
+              locations.add(location);
+          }
+      } catch (Exception e) {
+          e.printStackTrace();
+      }
+      return locations;
+  }
+
+
     /**
      * Randomly generates the address of the user/business
      * @return the elements of a location object (user/business's address) in an array
      */
     public String[] generateAddress(Random random) {
       String streetNum = String.valueOf(random.nextInt(998) + 1);
-      String streetName = STREETNAMES[random.nextInt(STREETNAMES.length)];
-      String city = CITIES[random.nextInt(CITIES.length)];
-      String region = REGIONS[random.nextInt(REGIONS.length)];
-      String country = COUNTRIES[random.nextInt(COUNTRIES.length)];
+      String streetName = streetNames.get(random.nextInt(streetNames.size()));
+      String city = cities.get(random.nextInt(cities.size()));
+      String region = regions.get(random.nextInt(regions.size()));
+      String country = countries.get(random.nextInt(countries.size()));
       String postcode = String.valueOf(random.nextInt(98999) + 1000);
-      String district = DISTRICTS[random.nextInt(DISTRICTS.length)];
+      String district = districts.get(random.nextInt(districts.size()));
       String[] address = {streetNum, streetName, city, region, country, postcode, district};
       return address;
     }
