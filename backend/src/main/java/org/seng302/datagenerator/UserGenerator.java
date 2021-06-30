@@ -20,6 +20,9 @@ public class UserGenerator {
     private Connection conn;
     static Scanner scanner = new Scanner(System.in);
 
+    ArrayList<Long> userIds = new ArrayList<Long>();
+    long addressId;
+
     //predefined lists
     String[] FNAMES = {"Nathan", "Connor", "Josh", "Ella", "Henry", "Kai", "Ben", "Edward", "April", "May", "June", "Emila", "Frank", "Fergus", "Rose", "Jacob", "Jack", "Danielle"};
     String[] LNAMES = {"Jordan", "Mungus", "Smith", "Johnson", "Williams", "Brown", "Jones", "Garcia", "Davis", "Thomas", "Taylor", "Lee", "Jackson", "Lewis"};
@@ -135,7 +138,7 @@ public class UserGenerator {
     /**
      * Creates the SQL commands required to insert the user's account into the database
      */
-    private void createInsertUsersSQL(long userId, long addressId) throws SQLException {
+    private void createInsertUsersSQL(long userId) throws SQLException {
         PreparedStatement stmt = conn.prepareStatement(
                 "INSERT INTO user (first_name, middle_name, last_name, nickname, ph_num, dob, bio, created, userid, address_id) "
                         + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
@@ -198,17 +201,15 @@ public class UserGenerator {
     /**
      * Generates the users
      */
-    private ArrayList<Long> generateUsers(Integer users) throws InterruptedException {
+    public void generateUsers(Integer users) throws InterruptedException {
         if (users == null) {
             users = getUsersFromInput();
         }
-        ArrayList<Long> userIds = new ArrayList<Long>();
-
         clear();
 
         try {
             String[] address = generateAddress();
-            long addressId = createInsertAddressSQL(address);
+            this.addressId = createInsertAddressSQL(address);
 
             for (int i=0; i < users; i++) {
                 String email = generateEmail(i);
@@ -219,14 +220,21 @@ public class UserGenerator {
                 int progress = (int) (((float)(i+1) / (float)users) * 100);
                 System.out.println(String.format("Progress: %d%%", progress));
                 long userId = createInsertAccountSQL(email, password);
-                createInsertUsersSQL(userId, addressId);
-                userIds.add(userId);
+                createInsertUsersSQL(userId);
+                this.userIds.add(userId);
             }
 
         } catch (Exception e) {
             e.printStackTrace();
         }
         scanner.close();
+    }
+
+    public long getAddressId() {
+        return addressId;
+    }
+
+    public ArrayList<Long> getUserIds() {
         return userIds;
     }
 }

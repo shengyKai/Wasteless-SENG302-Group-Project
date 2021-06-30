@@ -1,7 +1,5 @@
 package org.seng302.datagenerator;
 
-import org.seng302.entities.Business;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -22,9 +20,12 @@ public class BusinessGenerator {
     static Scanner scanner = new Scanner(System.in);
 
     //predefined lists
-    String[] BUSINESSTYPES = {};
-    String[] DESCRIPTIONS = {};
-    String[] NAMES = {};
+    String[] BUSINESSTYPES = {"Accommodation and Food Services", "Retail Trade", "Charitable organisation", "Non-profit organisation"};
+    String[] DESCRIPTIONS = {"This is a Japanese restaurant, the best Ramen and Sake.", "We are non-profit organisation focused on bringing New Zealand's extreme housing unaffordability down to a managable unaffordable housing market.",
+    "We are a non-profit focused on making sure all SENG302 students get enough sleep"};
+    String[] NAMES = {"Japan Food", "Sleep Saviour", "Ed Sheeran Church", "Unaffordable Housing"};
+
+    ArrayList<Long> businessIds = new ArrayList<Long>();
 
     public BusinessGenerator(Connection conn) { this.conn = conn; }
 
@@ -99,10 +100,21 @@ public class BusinessGenerator {
     private void generateBusinesses() throws InterruptedException {
         int businesses = getBusinessesFromInput();
         var userGenerator = new UserGenerator(conn);
+        long ownerId = userGenerator.getUserIds().get(0);
+        long addressId = userGenerator.getAddressId();
 
-        clear();
-
-
-
+        try {
+            for (int i=0; i < businesses; i++) {
+                clear();
+                System.out.println(String.format("Creating User %d / %d", i+1, businesses));
+                int progress = (int) (((float)(i+1) / (float)businesses) * 100);
+                System.out.println(String.format("Progress: %d%%", progress));
+                long businessId = createInsertBusinessSQL(addressId, ownerId);
+                this.businessIds.add(businessId);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        scanner.close();
     }
 }
