@@ -1,17 +1,17 @@
+package org.seng302.datagenerator;
+
 import java.io.BufferedReader;
 import java.io.FileReader;
-import java.time.Duration;
-import java.time.Instant;
 import java.util.*;
 
 /**
  * Class responsible for generating random person names for use in example data.
  */
-class PersonNameGenerator {
+public class PersonNameGenerator {
 
     private static PersonNameGenerator instance;
 
-    private static final String EXAMPLE_DATA_FILE_PATH = "./example-data/";
+    private static final String EXAMPLE_DATA_FILE_PATH = "backend/example-data/";
     private static final String NICKNAME_FILE = "nicknames.csv";
     private static final String FEMALE_FIRST_NAMES_FILE = "first-names-female.txt";
     private static final String MALE_FIRST_NAMES_FILE = "first-names-male.txt";
