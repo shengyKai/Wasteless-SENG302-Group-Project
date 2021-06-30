@@ -1,8 +1,6 @@
 package org.seng302.persistence;
 
-import org.seng302.entities.Keyword;
-import org.seng302.entities.MarketplaceCard;
-import org.seng302.entities.User;
+import org.seng302.entities.*;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
@@ -27,6 +25,11 @@ public interface MarketplaceCardRepository extends CrudRepository<MarketplaceCar
      */
     List<MarketplaceCard> getAllByKeywords(@Param("keywords") Keyword keyword);
 
+    /**
+     * Finds all the marketplace cards that are in the given section
+     * @param section Section to filter by
+     * @return List of cards within that section
+     */
     List<MarketplaceCard> getAllBySection(@Param("section") MarketplaceCard.Section section);
 
     /**

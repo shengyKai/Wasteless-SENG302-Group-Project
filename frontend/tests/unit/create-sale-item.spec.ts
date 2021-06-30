@@ -147,7 +147,7 @@ describe("CreateSaleItem.vue", () => {
 
   // `findClose and findCreate` function will only be used when api is implemented
   /**
-     * Finds the close button in the CreateProduct form
+     * Finds the close button in the ProductForm form
      *
      * @returns A Wrapper around the close button
      */
@@ -161,7 +161,7 @@ describe("CreateSaleItem.vue", () => {
   }
 
   /**
-     * Finds the create button in the CreateProduct form
+     * Finds the create button in the ProductForm form
      *
      * @returns A Wrapper around the create button
      */

@@ -10,7 +10,14 @@
       >
         <v-card>
           <v-card-title>
-            <span class="headline create-product">Create new Product</span>
+            <span class="headline create-product">
+              <template v-if="isCreate">
+                Create new Product
+              </template>
+              <template v-else>
+                Update {{ previousProduct.id }}
+              </template>
+            </span>
           </v-card-title>
           <v-card-text>
             <v-container>
@@ -81,7 +88,12 @@
               :disabled="!valid"
               :loading="isLoading"
               @click.prevent="createProduct">
-              Create
+              <template v-if="isCreate">
+                Create
+              </template>
+              <template v-else>
+                Save
+              </template>
             </v-btn>
           </v-card-actions>
         </v-card>
@@ -89,20 +101,34 @@
     </v-dialog>
   </v-row>
 </template>
-../../internal
+
 <script>
 import {createProduct, getBusiness} from '@/api/internal';
 import {currencyFromCountry} from "@/api/currency";
 export default {
-  name:'CreateProduct',
+  name: 'ProductForm',
+  props: {
+    /**
+     * Product to modify.
+     * If not provided then a new product is made.
+     */
+    previousProduct: Object,
+    /**
+     * Business the product will be created / updated for.
+     */
+    businessId: {
+      type: Number,
+      required: true,
+    },
+  },
   data() {
     return {
       dialog: true,
-      productCode: '',
-      product: '',
-      description: '',
-      manufacturer: '',
-      recommendedRetailPrice: '',
+      productCode: this.previousProduct?.id ?? '',
+      product: this.previousProduct?.name ?? '',
+      description: this.previousProduct?.description ?? '',
+      manufacturer: this.previousProduct?.manufacturer ?? '',
+      recommendedRetailPrice: this.previousProduct?.recommendedRetailPrice ?? '',
       errorMessage: undefined,
       isLoading: false,
       unavailableProductCodes: [],
@@ -144,7 +170,7 @@ export default {
   async created() {
     // When the create product dialogue, the currency will be set to the currency of the country the product is being
     // sold in. It will have blank fields if no currency can be found from the country.
-    const business = await getBusiness(this.$store.state.createProductDialogBusiness);
+    const business = await getBusiness(this.businessId);
     const countryOfSale = business.address.country;
     this.currency = await currencyFromCountry(countryOfSale);
   },
@@ -153,8 +179,6 @@ export default {
      * Creates the product by calling the API
      **/
     async createProduct() {
-      const businessId = this.$store.state.createProductDialogBusiness;
-
       // Ensures that we have a reference to the original product code.
       const productCode = this.productCode;
 
@@ -165,13 +189,21 @@ export default {
 
       this.errorMessage = undefined;
       this.isLoading = true;
-      let response = await createProduct(businessId, {
-        id: productCode,
-        name: this.product,
-        description: this.description,
-        manufacturer: this.manufacturer,
-        recommendedRetailPrice: recommendedRetailPrice,
-      });
+
+      let response;
+      if (!this.isCreate) {
+        // TODO Implement
+        throw 'Not implemented';
+      } else {
+        response = await createProduct(this.businessId, {
+          id: productCode,
+          name: this.product,
+          description: this.description,
+          manufacturer: this.manufacturer,
+          recommendedRetailPrice: recommendedRetailPrice,
+        });
+      }
+
       this.isLoading = false;
 
       if (response === undefined) {
@@ -196,6 +228,14 @@ export default {
      * @returns {boolean}
      */
     allowedDates: val => new Date(val) > new Date()
+  },
+  computed: {
+    /**
+     * Whether this ProductForm is creating a product
+     */
+    isCreate() {
+      return this.previousProduct === undefined;
+    }
   },
 };
 </script>

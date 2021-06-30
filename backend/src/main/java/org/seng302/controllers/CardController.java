@@ -80,6 +80,36 @@ public class CardController {
     }
 
     /**
+     * Endpoint to delete the marketplace card with the provided card id.
+     * If the user is unauthorised then a 401 response is returned
+     * If the user is not allowed to modify the card then a 403 response is returned
+     * If the card does not exist then a 404 response is returned
+     * Otherwise if the operation is successful then a 200 response is returned
+     * @param request The HTTP request, used for checking permissions.
+     * @param id Card ID to delete
+     */
+    @DeleteMapping("/cards/{id}")
+    private void deleteCard(HttpServletRequest request, @PathVariable Long id) {
+        logger.info("Request to delete marketplace card (id={})", id);
+        try {
+            // Check that authentication token is present and valid
+            AuthenticationTokenManager.checkAuthenticationToken(request);
+
+            MarketplaceCard card = marketplaceCardRepository.getCard(id);
+
+            if (!AuthenticationTokenManager.sessionCanSeePrivate(request, card.getCreator().getUserID())) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Current user does not have permission to delete this card");
+            }
+
+            marketplaceCardRepository.delete(card);
+
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            throw e;
+        }
+    }
+
+    /**
      * Retrieve the User and Keywords associated with this card from the database and use them to construct the
      * marketplace card with the properties given by the json object. A response status exception with 400 status
      * will be thrown if any part of the given json has invalid format.

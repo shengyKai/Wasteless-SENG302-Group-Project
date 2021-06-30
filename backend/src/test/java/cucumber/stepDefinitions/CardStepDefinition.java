@@ -12,6 +12,7 @@ import net.minidev.json.parser.JSONParser;
 import net.minidev.json.parser.ParseException;
 import org.junit.jupiter.api.Assertions;
 import org.seng302.entities.MarketplaceCard;
+import org.seng302.persistence.MarketplaceCardRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -19,10 +20,14 @@ import org.springframework.test.web.servlet.MvcResult;
 import java.io.UnsupportedEncodingException;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
 
 public class CardStepDefinition {
+
+    @Autowired
+    private MarketplaceCardRepository marketplaceCardRepository;
 
     @Autowired
     private CardContext cardContext;
@@ -32,11 +37,6 @@ public class CardStepDefinition {
 
     @Autowired
     private RequestContext requestContext;
-
-    @Autowired
-    private MockMvc mockMvc;
-
-    private MvcResult mvcResult;
 
     @Given("a card exists")
     public void a_card_exists() {
@@ -66,16 +66,16 @@ public class CardStepDefinition {
 
     @When("I request cards in the {string} section")
     public void when_i_request_cards_in_section(String sectionName) throws Exception {
-        mvcResult = mockMvc.perform(requestContext.addAuthorisationToken(get("/cards")
-                .param("section", sectionName)) ).andReturn();
+        requestContext.performRequest(get("/cards")
+                .param("section", sectionName));
     }
 
     @Then("I expect the card to be returned")
     public void i_expect_the_card_to_be_returned() throws UnsupportedEncodingException, ParseException {
         var expectedCard = cardContext.getLast();
-        Assertions.assertEquals(200, mvcResult.getResponse().getStatus());
+        Assertions.assertEquals(200, requestContext.getLastResult().getResponse().getStatus());
         JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
-        JSONArray response = (JSONArray) parser.parse(mvcResult.getResponse().getContentAsString());
+        JSONArray response = (JSONArray) parser.parse(requestContext.getLastResult().getResponse().getContentAsString());
 
         var item = (JSONObject) response.get(0);
         Assertions.assertEquals(((Number)item.get("id")).longValue(), expectedCard.getID());
@@ -83,5 +83,22 @@ public class CardStepDefinition {
         Assertions.assertEquals(item.getAsString("section"), expectedCard.getSection().getName());
         Assertions.assertEquals(item.getAsString("description"), expectedCard.getDescription());
         Assertions.assertEquals(item.getAsString("created").substring(0,19), expectedCard.getCreated().toString().substring(0,19));
+    }
+
+    @When("I try to delete the card")
+    public void i_try_to_delete_the_card() {
+        requestContext.performRequest(delete("/cards/" + cardContext.getLast().getID()));
+    }
+
+    @Then("I expect the card to be deleted")
+    public void i_expect_the_card_to_be_deleted() {
+        Long cardId = cardContext.getLast().getID();
+        Assertions.assertFalse(marketplaceCardRepository.existsById(cardId));
+    }
+
+    @Then("I expect the card to still exist")
+    public void i_expect_the_card_to_still_exist() {
+        Long cardId = cardContext.getLast().getID();
+        Assertions.assertTrue(marketplaceCardRepository.existsById(cardId));
     }
 }

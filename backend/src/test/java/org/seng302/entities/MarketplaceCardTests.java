@@ -405,4 +405,44 @@ class MarketplaceCardTests {
 
         assertNotEquals(card1.getID(), card2.getID());
     }
+
+    @Test
+    void marketplaceCardRepositoryGetCard_cardDoesNotExist_throws404Exception() {
+        var card = new MarketplaceCard.Builder()
+                .withCreator(testUser)
+                .withSection(MarketplaceCard.Section.EXCHANGE)
+                .withTitle("test_title1")
+                .withDescription("test_description1")
+                .build();
+        card = marketplaceCardRepository.save(card);
+        marketplaceCardRepository.delete(card);
+        Long id = card.getID();
+
+        var exception = assertThrows(ResponseStatusException.class, () -> marketplaceCardRepository.getCard(id));
+        assertEquals(HttpStatus.NOT_FOUND, exception.getStatus());
+        assertEquals("No card exists with the given id", exception.getReason());
+    }
+
+    @Test
+    void marketplaceCardRepositoryGetCard_cardExists_cardReturned() {
+        var card = new MarketplaceCard.Builder()
+                .withCreator(testUser)
+                .withSection(MarketplaceCard.Section.EXCHANGE)
+                .withTitle("test_title1")
+                .withDescription("test_description1")
+                .build();
+        card = marketplaceCardRepository.save(card);
+        Long id = card.getID();
+
+        var foundCard = assertDoesNotThrow(() -> marketplaceCardRepository.getCard(id));
+
+        // Valid contents
+        assertEquals(card.getID(), foundCard.getID());
+        assertEquals(card.getCreator().getUserID(), foundCard.getCreator().getUserID());
+        assertEquals(card.getSection(), foundCard.getSection());
+        assertEquals(card.getTitle(), foundCard.getTitle());
+        assertEquals(card.getDescription(), foundCard.getDescription());
+        assertEquals(0, ChronoUnit.SECONDS.between(card.getCreated(), foundCard.getCreated()));
+        assertEquals(0, ChronoUnit.SECONDS.between(card.getCloses(), foundCard.getCloses()));
+    }
 }
