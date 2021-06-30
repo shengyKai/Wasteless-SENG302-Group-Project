@@ -83,7 +83,7 @@ class MarketplaceCardTests {
 
         card.delayCloses();
 
-        var expectedExtendedCloses = closes.plus(1, ChronoUnit.DAYS);
+        var expectedExtendedCloses = closes.plus(14, ChronoUnit.DAYS);
         assertEquals(expectedExtendedCloses, card.getCloses());
     }
 

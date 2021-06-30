@@ -7,8 +7,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.persistence.*;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalUnit;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -16,6 +18,8 @@ import java.util.Objects;
 
 @Entity
 public class MarketplaceCard {
+    private static final Duration DISPLAY_PERIOD = Duration.ofDays(14);
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -158,10 +162,10 @@ public class MarketplaceCard {
     }
 
     /**
-     * Delays the closing date for this card by a day (exactly 24h)
+     * Delays the closing date for this card by the display period (2 weeks)
      */
     public void delayCloses() {
-        closes = closes.plus(1, ChronoUnit.DAYS);
+        closes = closes.plus(DISPLAY_PERIOD);
     }
 
     /**
@@ -369,7 +373,7 @@ public class MarketplaceCard {
             card.setDescription(description);
             card.created = Instant.now();
             if (closes == null) {
-                card.setCloses(card.created.plus(14, ChronoUnit.DAYS));
+                card.setCloses(card.created.plus(DISPLAY_PERIOD));
             } else {
                 card.setCloses(closes);
             }

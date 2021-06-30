@@ -18,10 +18,11 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 import java.io.UnsupportedEncodingException;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 
 
 public class CardStepDefinition {
@@ -90,6 +91,11 @@ public class CardStepDefinition {
         requestContext.performRequest(delete("/cards/" + cardContext.getLast().getID()));
     }
 
+    @When("I try to extend the display period of my card")
+    public void i_try_to_extend_the_display_period_of_my_card() {
+        requestContext.performRequest(put("/cards/" + cardContext.getLast().getID() + "/extenddisplayperiod"));
+    }
+
     @Then("I expect the card to be deleted")
     public void i_expect_the_card_to_be_deleted() {
         Long cardId = cardContext.getLast().getID();
@@ -100,5 +106,23 @@ public class CardStepDefinition {
     public void i_expect_the_card_to_still_exist() {
         Long cardId = cardContext.getLast().getID();
         Assertions.assertTrue(marketplaceCardRepository.existsById(cardId));
+    }
+
+    @Then("I expect the display period of my card to be extended")
+    public void i_expect_the_display_period_of_my_card_to_be_extended() {
+        MarketplaceCard previouslyLoaded = cardContext.getLast();
+        Instant expectedCloses = previouslyLoaded.getCloses().plus(14, ChronoUnit.DAYS);
+
+        MarketplaceCard card = cardContext.save(marketplaceCardRepository.getCard(previouslyLoaded.getID()));
+
+        Assertions.assertEquals(0, ChronoUnit.SECONDS.between(expectedCloses, card.getCloses()));
+    }
+
+    @Then("I expect the display period of my card to not be extended")
+    public void i_expect_the_display_period_of_my_card_to_not_be_extended() {
+        MarketplaceCard previouslyLoaded = cardContext.getLast();
+        MarketplaceCard card = cardContext.save(marketplaceCardRepository.getCard(previouslyLoaded.getID()));
+
+        Assertions.assertEquals(0, ChronoUnit.SECONDS.between(previouslyLoaded.getCloses(), card.getCloses()));
     }
 }
