@@ -2,6 +2,7 @@ package cucumber.context;
 
 import io.cucumber.java.Before;
 import org.junit.jupiter.api.Assertions;
+import org.seng302.entities.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -14,7 +15,7 @@ public class RequestContext {
 
     private Cookie authCookie;
     private final Map<String, Object> sessionAuthToken = new HashMap<>();
-    private long loggedInId;
+    private User loggedInUser;
     private MvcResult lastResult;
 
     @Autowired
@@ -25,18 +26,25 @@ public class RequestContext {
         authCookie = null;
         sessionAuthToken.clear();
         lastResult = null;
+        loggedInUser = null;
     }
 
     /**
-     * Sets the currently logged in user id
-     * @param id User id to log in as
+     * Sets the currently logged in user
+     * @param user User to login as or null to logout
      */
-    public void setLoggedInAccount(long id) {
-        String authCode = "0".repeat(64);
-        authCookie = new Cookie("AUTHTOKEN", authCode);
-        sessionAuthToken.put("AUTHTOKEN", authCode);
-        sessionAuthToken.put("accountId", id);
-        loggedInId = id;
+    public void setLoggedInAccount(User user) {
+        if (user == null) {
+            authCookie = null;
+            sessionAuthToken.clear();
+        } else {
+            String authCode = "0".repeat(64);
+            authCookie = new Cookie("AUTHTOKEN", authCode);
+            sessionAuthToken.put("AUTHTOKEN", authCode);
+            sessionAuthToken.put("accountId", user.getUserID());
+            sessionAuthToken.put("role", user.getRole());
+        }
+        loggedInUser = user;
     }
 
     /**
@@ -71,7 +79,7 @@ public class RequestContext {
      * @return The ID number of the authenticated user
      */
     public long getLoggedInId() {
-        return loggedInId;
+        return loggedInUser.getUserID();
     }
 
     /**
