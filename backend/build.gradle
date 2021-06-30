@@ -88,8 +88,8 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-web'
 }
 
-task(generate, dependsOn: 'classes', type: JavaExec) {
-    main = 'org.seng302.datagenerator.Main'
+task(generateUser, dependsOn: 'classes', type: JavaExec) {
+    main = 'org.seng302.datagenerator.UserGenerator'
     classpath = sourceSets.main.runtimeClasspath
 }
 
