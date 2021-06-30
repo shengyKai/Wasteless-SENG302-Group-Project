@@ -1,14 +1,22 @@
 package org.seng302.datagenerator;
 
+/**
+ * If you are running this function from gradle generate then it will not
+ */
+
 import javax.swing.plaf.nimbus.State;
 import java.sql.*;
+import java.time.Instant;
+import java.util.NoSuchElementException;
 import java.util.Scanner;
 import java.util.Random;
 import java.io.File;
+import java.util.concurrent.TimeUnit;
 
 public class Main {
     private Random random = new Random();
     private Connection conn;
+    static Scanner scanner = new Scanner(System.in);
 
     //predefined lists
     String[] FNAMES = {"Nathan", "Connor", "Josh", "Ella", "Henry", "Kai", "Ben", "Edward", "April", "May", "June", "Emila", "Frank", "Fergus", "Rose", "Jacob", "Jack", "Danielle"};
@@ -33,7 +41,7 @@ public class Main {
      */
     public static Connection connectToDatabase() throws SQLException {
         String url = "jdbc:mariadb://localhost/seng302-2021-team500-prod";
-        Connection conn = DriverManager.getConnection(url, "seng302-team500", "changeMeBoi");
+        Connection conn = DriverManager.getConnection(url, "seng302-team500", "ListenDirectly6053");
         return conn;
     }
 
@@ -147,8 +155,8 @@ public class Main {
      */
     private void createInsertUsersSQL(long userId, long addressId) throws SQLException {
         PreparedStatement stmt = conn.prepareStatement(
-                "INSERT INTO user (first_name, middle_name, last_name, nickname, ph_num, dob, bio, userid, address_id) "
-                        + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
+                "INSERT INTO user (first_name, middle_name, last_name, nickname, ph_num, dob, bio, created, userid, address_id) "
+                        + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
         );
         stmt.setObject(1,  FNAMES[random.nextInt(FNAMES.length)]); //first name
         stmt.setObject(2, FNAMES[random.nextInt(FNAMES.length)]); //middle name
@@ -157,8 +165,9 @@ public class Main {
         stmt.setObject(5, generatePhNum()); //phone number
         stmt.setObject(6, generateDOB()); //date of birth
         stmt.setObject(7, BIOS[random.nextInt(BIOS.length)]); //bio
-        stmt.setObject(8, userId);
-        stmt.setObject(9, addressId);
+        stmt.setObject(8, Instant.now());
+        stmt.setObject(9, userId);
+        stmt.setObject(10, addressId);
         stmt.executeUpdate();
     }
 
@@ -166,8 +175,9 @@ public class Main {
      * Asks the user how many users that want generated
      * @return the number of users to be generated
      */
-    private int GetUsersFromInput(Scanner scanner) {
-        int users = 10;
+    private int GetUsersFromInput() throws InterruptedException {
+
+        int users = 0; //Change users
         while (users <= 0) {
             clear();
             try {
@@ -176,6 +186,17 @@ public class Main {
                 System.out.println("and put into the database?");
                 System.out.println("------------------------------------");
                 users = Integer.parseInt(scanner.nextLine());
+            } catch (NoSuchElementException e) {
+                System.out.println("You are using the gradle generate function");
+                System.out.println("This console does not support scanner inputs");
+                System.out.println("To input your own number of users");
+                System.out.println("Compile and run this java file in a local terminal");
+                System.out.println("10 users will be creating in...");
+                for (int i=5; i>0; i--) {
+                    TimeUnit.SECONDS.sleep(1);
+                    System.out.println(i);
+                }
+                users = 10;
             } catch (Exception e) {
                 System.out.println("Please enter a number! (above 0)");
             }
@@ -188,7 +209,7 @@ public class Main {
      * the existing file
      * @param filename the name of the file that will be created
      */
-    private void CreateFile(Scanner scanner, String filename) {
+    private void CreateFile(String filename) {
         File file = new File(filename);
         try {
             while (!file.createNewFile()) {
@@ -205,7 +226,7 @@ public class Main {
      * Main program
      * @param args no arguments should be provided
      */
-    public static void main(String[] args) throws SQLException {
+    public static void main(String[] args) throws SQLException, InterruptedException {
         Random random = new Random();
         Connection conn = connectToDatabase();
 
@@ -213,9 +234,8 @@ public class Main {
         generator.generate();
     }
 
-    private void generate() {
-        Scanner scanner = new Scanner(System.in);
-        int users = GetUsersFromInput(scanner);
+    private void generate() throws InterruptedException {
+        int users = GetUsersFromInput();
         clear();
 
         try {
@@ -237,5 +257,6 @@ public class Main {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        scanner.close();
     }
 }
