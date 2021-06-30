@@ -104,12 +104,15 @@ class PersonNameGenerator {
 
     /**
      * This function randomly generates a middle name string from the given list of first names. The middle name string
-     * can contain be empty, contain one middle name, or contain two middle names seperated by a space.
+     * can contain be None, contain one middle name, or contain two middle names seperated by a space.
      * @param names The list of names to select middle name from.
      * @return A string of 0, 1 or 2 names from the list.
      */
     private String randomMiddleName(List<String> names) {
         int numMiddleNames = random.nextInt(3);
+        if (numMiddleNames == 0) {
+            return null;
+        }
         List<String> middleNames = new ArrayList<>();
         for (int i = 0; i < numMiddleNames; i++) {
             middleNames.add(randomNameFromList(names));
@@ -131,7 +134,7 @@ class PersonNameGenerator {
             List<String> potentialNicknames = nicknameLookup.get(firstName);
             return randomNameFromList(potentialNicknames);
         }
-        return "";
+        return null;
     }
 
     /**
@@ -217,28 +220,6 @@ class PersonNameGenerator {
         public String toString() {
             String[] namelist = new String[] {firstName, middleName, lastName, nickname};
             return String.join(",", namelist);
-        }
-    }
-
-    /**
-     * This method exists only for the purpose of manual testing and reviewing. Remove before merging to dev.
-     */
-    public static void main(String[] args) {
-
-        PersonNameGenerator nameGenerator = PersonNameGenerator.getInstance();
-        Instant startTime = Instant.now();
-
-        List<FullName> randomNames = new ArrayList<>();
-        for (int i = 0; i < 1000000; i++) {
-            randomNames.add(nameGenerator.generateName());
-        }
-
-        Instant endTime = Instant.now();
-
-        System.out.println("Execution time: " + Duration.between(startTime, endTime).getNano());
-
-        for (int i = 0; i < 20; i++) {
-            System.out.println(randomNames.get(i));
         }
     }
 
