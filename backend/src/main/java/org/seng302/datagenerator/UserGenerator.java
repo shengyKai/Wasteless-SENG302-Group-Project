@@ -6,13 +6,14 @@ package org.seng302.datagenerator;
 
 import java.sql.*;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
 import java.util.Random;
 import java.io.File;
 import java.util.concurrent.TimeUnit;
 
-import static org.seng302.datagenerator.Main.connectToDatabase;
+import static org.seng302.datagenerator.Main.*;
 
 public class UserGenerator {
     private Random random = new Random();
@@ -93,16 +94,6 @@ public class UserGenerator {
     }
 
     /**
-     * Clears the console on windows and linux
-     */
-    private void clear() {
-        final String ANSI_CLS = "\u001b[2J";
-        final String ANSI_HOME = "\u001b[H";
-        System.out.print(ANSI_CLS + ANSI_HOME);
-        System.out.flush();
-    }
-
-    /**
      * Creates the SQL commands required to insert the user's address into the database
      * @return the id of the location entity (addressid)
      */
@@ -149,25 +140,24 @@ public class UserGenerator {
                 "INSERT INTO user (first_name, middle_name, last_name, nickname, ph_num, dob, bio, created, userid, address_id) "
                         + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
         );
-        stmt.setObject(1,  FNAMES[random.nextInt(FNAMES.length)]); //first name
+        stmt.setObject(1, FNAMES[random.nextInt(FNAMES.length)]); //first name
         stmt.setObject(2, FNAMES[random.nextInt(FNAMES.length)]); //middle name
         stmt.setObject(3, LNAMES[random.nextInt(LNAMES.length)]); //last name
         stmt.setObject(4, NICKNAMES[random.nextInt(NICKNAMES.length)]); //nickname
         stmt.setObject(5, generatePhNum()); //phone number
         stmt.setObject(6, generateDOB()); //date of birth
         stmt.setObject(7, BIOS[random.nextInt(BIOS.length)]); //bio
-        stmt.setObject(8, Instant.now());
+        stmt.setObject(8, Instant.now()); //date created
         stmt.setObject(9, userId);
         stmt.setObject(10, addressId);
         stmt.executeUpdate();
     }
 
     /**
-     * Asks the user how many users that want generated
+     * Asks the user how many users they want generated
      * @return the number of users to be generated
      */
-    private int GetUsersFromInput() throws InterruptedException {
-
+    private int getUsersFromInput() throws InterruptedException {
         int users = 0; //Change users
         while (users <= 0) {
             clear();
@@ -196,37 +186,24 @@ public class UserGenerator {
     }
 
     /**
-     * Creates the file. If the file already exists, prompts the user to delete
-     * the existing file
-     * @param filename the name of the file that will be created
-     */
-    private void CreateFile(String filename) {
-        File file = new File(filename);
-        try {
-            while (!file.createNewFile()) {
-                System.out.println(String.format("The file '%s' already exists. Please delete that file to continue", filename));
-                System.out.println("Press any key to continue...");
-                scanner.nextLine();
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    /**
      * Main program
      * @param args no arguments should be provided
      */
     public static void main(String[] args) throws SQLException, InterruptedException {
-        Random random = new Random();
         Connection conn = connectToDatabase();
-
         var generator = new UserGenerator(conn);
-        generator.generate();
+        generator.generateUsers(null);
     }
 
-    private void generate() throws InterruptedException {
-        int users = GetUsersFromInput();
+    /**
+     * Generates the users
+     */
+    private ArrayList<Long> generateUsers(Integer users) throws InterruptedException {
+        if (users == null) {
+            users = getUsersFromInput();
+        }
+        ArrayList<Long> userIds = new ArrayList<Long>();
+
         clear();
 
         try {
@@ -243,11 +220,13 @@ public class UserGenerator {
                 System.out.println(String.format("Progress: %d%%", progress));
                 long userId = createInsertAccountSQL(email, password);
                 createInsertUsersSQL(userId, addressId);
+                userIds.add(userId);
             }
 
         } catch (Exception e) {
             e.printStackTrace();
         }
         scanner.close();
+        return userIds;
     }
 }
