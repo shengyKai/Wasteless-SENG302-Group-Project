@@ -26,7 +26,7 @@ public abstract class Event {
     /**
      * Constructs a JSON representation of this event
      * Subclasses are expected to override this method and add their own attributes
-     * @return JSON object containing keyword data
+     * @return JSON object containing event data
      */
     public JSONObject constructJSONObject() {
         JSONObject json = new JSONObject();

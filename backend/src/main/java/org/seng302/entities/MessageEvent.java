@@ -15,10 +15,18 @@ public class MessageEvent extends Event {
 
     protected MessageEvent() {}
 
+    /**
+     * Constructs a message event with the given initial message
+     * @param message Initial event message
+     */
     public MessageEvent(String message) {
         setMessage(message);
     }
 
+    /**
+     * Sets this event's message
+     * @param message Message to set
+     */
     public void setMessage(String message) {
         if (message == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Message cannot be null");
@@ -26,11 +34,18 @@ public class MessageEvent extends Event {
         this.message = message;
     }
 
+    /**
+     * Gets the message for this event
+     * @return Event message
+     */
     public String getMessage() {
         return message;
     }
 
-
+    /**
+     * Constructs a JSON representation of this event
+     * @return JSON object containing message event data
+     */
     @Override
     public JSONObject constructJSONObject() {
         JSONObject json = super.constructJSONObject();
