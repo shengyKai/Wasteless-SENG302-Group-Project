@@ -20,8 +20,8 @@ public class UserGenerator {
     private Connection conn;
     static Scanner scanner = new Scanner(System.in);
 
-    ArrayList<Long> userIds = new ArrayList<Long>();
-    long addressId;
+    public ArrayList<Long> userIds = new ArrayList<Long>();
+    public long addressId;
 
     //predefined lists
     String[] FNAMES = {"Nathan", "Connor", "Josh", "Ella", "Henry", "Kai", "Ben", "Edward", "April", "May", "June", "Emila", "Frank", "Fergus", "Rose", "Jacob", "Jack", "Danielle"};
@@ -152,7 +152,7 @@ public class UserGenerator {
         stmt.setObject(7, BIOS[random.nextInt(BIOS.length)]); //bio
         stmt.setObject(8, Instant.now()); //date created
         stmt.setObject(9, userId);
-        stmt.setObject(10, addressId);
+        stmt.setObject(10, this.addressId);
         stmt.executeUpdate();
     }
 
@@ -231,10 +231,10 @@ public class UserGenerator {
     }
 
     public long getAddressId() {
-        return addressId;
+        return this.addressId;
     }
 
     public ArrayList<Long> getUserIds() {
-        return userIds;
+        return this.userIds;
     }
 }

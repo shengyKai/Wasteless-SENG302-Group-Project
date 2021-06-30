@@ -25,17 +25,14 @@ public class BusinessGenerator {
     "We are a non-profit focused on making sure all SENG302 students get enough sleep"};
     String[] NAMES = {"Japan Food", "Sleep Saviour", "Ed Sheeran Church", "Unaffordable Housing"};
 
-    ArrayList<Long> businessIds = new ArrayList<Long>();
-
     public BusinessGenerator(Connection conn) { this.conn = conn; }
 
     /**
      * Creates and inserts the buiness into the database
      * @param addressId the id associated with the location entity representing the business's address
      * @param ownerId the id associated with the user entity representing the user who owns the business
-     * @return the id of the business that got created
      */
-    private long createInsertBusinessSQL(long addressId, long ownerId) throws SQLException {
+    private void createInsertBusinessSQL(long addressId, long ownerId) throws SQLException {
         PreparedStatement stmt = conn.prepareStatement(
             "INSERT INTO business (business_type, created, description, name, address_id, owner_id)"
                 + "VALUES (?, ?, ?, ?, ?, ?)"
@@ -47,9 +44,6 @@ public class BusinessGenerator {
         stmt.setObject(5, addressId);
         stmt.setObject(6, ownerId);
         stmt.executeUpdate();
-        ResultSet keys = stmt.getGeneratedKeys();
-        keys.next();
-        return keys.getLong(1);
     }
 
     /**
@@ -100,17 +94,17 @@ public class BusinessGenerator {
     private void generateBusinesses() throws InterruptedException {
         int businesses = getBusinessesFromInput();
         var userGenerator = new UserGenerator(conn);
-        long ownerId = userGenerator.getUserIds().get(0);
-        long addressId = userGenerator.getAddressId();
 
         try {
             for (int i=0; i < businesses; i++) {
                 clear();
-                System.out.println(String.format("Creating User %d / %d", i+1, businesses));
+                userGenerator.generateUsers(1);
+                long ownerId = userGenerator.getUserIds().get(0);
+                long addressId = userGenerator.getAddressId();
+                System.out.println(String.format("Creating Business %d / %d", i+1, businesses));
                 int progress = (int) (((float)(i+1) / (float)businesses) * 100);
                 System.out.println(String.format("Progress: %d%%", progress));
-                long businessId = createInsertBusinessSQL(addressId, ownerId);
-                this.businessIds.add(businessId);
+                createInsertBusinessSQL(addressId, ownerId);
             }
         } catch (Exception e) {
             e.printStackTrace();
