@@ -4,7 +4,11 @@
     <UserActionPanel v-else />
     <div class="newsfeed">
       <!-- Newsfeed -->
+      <div v-if="$store.getters.events.length === 0" class="text-center">
+        No items in your feed
+      </div>
       <v-card
+        v-else
         v-for="event in $store.getters.events"
         :key="event.id"
         outlined
@@ -33,11 +37,6 @@ import UserActionPanel from "./UserActionPanel";
 import GlobalMessage from "./newsfeed/GlobalMessage.vue";
 
 export default {
-  data() {
-    return {
-      newsfeedItems: [],
-    };
-  },
   components: {
     BusinessActionPanel,
     UserActionPanel,

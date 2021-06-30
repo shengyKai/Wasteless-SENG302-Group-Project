@@ -68,7 +68,6 @@ function createOptions(): StoreOptions<StoreData> {
     mutations: {
       setUser(state, payload: User) {
         state.user = payload;
-        state.eventMap = []; // Clear events
 
         // Ensures that when we log in we always have a role.
         state.activeRole = { type: "user", id: payload.id };
@@ -78,10 +77,6 @@ function createOptions(): StoreOptions<StoreData> {
           deleteCookie(COOKIE.USER.toUpperCase());
           deleteCookie(COOKIE.USER.toLowerCase());
           setCookie(COOKIE.USER, payload.id);
-
-          initialiseEventSourceForUser(state.user.id); // Make event handler
-          // Not too happy with this solution, but I don't see anything better
-          addEventMessageHandler(event => getStore().commit('addEvent', event));
         }
       },
       /**
@@ -221,6 +216,16 @@ function createOptions(): StoreOptions<StoreData> {
     },
     actions: {
       /**
+       * Starts listening to notification events which are placed in state.eventMap
+       * This is expected to be called just after logging in
+       * @param context The store context
+       */
+      startUserFeed(context) {
+        context.state.eventMap = []; // Clear events
+        initialiseEventSourceForUser(context.state.user!.id); // Make event handler
+        addEventMessageHandler(event => context.commit('addEvent', event));
+      },
+      /**
        * Attempts to automatically log in the provided user id with the current authentication cookies.
        * Will also set the current role to the previously selected role.
        *
@@ -234,6 +239,7 @@ function createOptions(): StoreOptions<StoreData> {
           return;
         }
         context.commit('setUser', response);
+        context.dispatch('startUserFeed');
 
         let rawRole = getCookie('role');
         if (rawRole !== null) {
@@ -283,6 +289,7 @@ function createOptions(): StoreOptions<StoreData> {
           return user;
         }
         context.commit('setUser', user);
+        context.dispatch('startUserFeed');
 
         return undefined;
       }

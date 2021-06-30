@@ -37,6 +37,10 @@ describe('HomePage.vue', () => {
     expect(newsfeedItem.exists()).toBeFalsy();
   });
 
+  it('If no events are posted then the message "No items in your feed" should be shown', () => {
+    expect(wrapper.text()).toContain('No items in your feed');
+  });
+
   it('If an event is posted to the store then it should be displayed in the newsfeed', async () => {
     const event: Event = {
       type: 'message',
@@ -50,5 +54,18 @@ describe('HomePage.vue', () => {
     let newsfeedItem = wrapper.findComponent({name: 'GlobalMessage'});
     expect(newsfeedItem.exists()).toBeTruthy();
     expect(newsfeedItem.props().event).toBe(event);
+  });
+
+  it('If an event is posted to the store then the message "No items in your feed" should not be shown', async () => {
+    const event: Event = {
+      type: 'message',
+      id: 7,
+      created: new Date().toString(),
+      message: 'Hello world',
+    };
+    store.commit('addEvent', event);
+    await Vue.nextTick();
+
+    expect(wrapper.text()).not.toContain('No items in your feed');
   });
 });
