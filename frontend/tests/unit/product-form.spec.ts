@@ -9,6 +9,7 @@ import { currencyFromCountry } from '@/api/currency';
 
 jest.mock('@/api/internal', () => ({
   createProduct: jest.fn(),
+  modifyProduct: jest.fn(),
   getBusiness: jest.fn(() => {
     return {
       address: {
@@ -31,6 +32,7 @@ jest.mock('@/api/currency', () => ({
 
 
 const createProduct = castMock(api.createProduct);
+const modifyProduct = castMock(api.modifyProduct);
 
 Vue.use(Vuetify);
 
@@ -451,13 +453,13 @@ describe('ProductForm.vue - Modify', () => {
   });
 
   /**
-   * Finds the modify button in the ProductForm form
+   * Finds the save button in the ProductForm form
    *
-   * @returns A Wrapper around the create button
+   * @returns A Wrapper around the save button
    */
-  function findModifyButton() {
+  function findSaveButton() {
     const buttons = wrapper.findAllComponents({ name: 'v-btn' });
-    const filtered = buttons.filter(button => button.text().includes('Modify'));
+    const filtered = buttons.filter(button => button.text().includes('Save'));
     expect(filtered.length).toBe(1);
     return filtered.at(0);
   }
@@ -473,8 +475,43 @@ describe('ProductForm.vue - Modify', () => {
     expect(wrapper.vm.manufacturer).toBe(previousProduct.manufacturer);
   });
 
-  it('Matches snapshot', () => {
-    expect(appWrapper).toMatchSnapshot();
+  it('When the save button is pressed then an api call should be made and is successful', async () => {
+    modifyProduct.mockResolvedValue(undefined); // Ensure that the operation is successful
+    await wrapper.setData({
+      productCode: 'FOO-BAR',
+    });
+    await Vue.nextTick();
+
+    await findSaveButton().trigger('click'); // Press save
+
+    await flushQueue();
+
+    expect(modifyProduct).toBeCalledWith(90, previousProduct.id, {
+      id: 'FOO-BAR',
+      name: previousProduct.name,
+      description: previousProduct.description,
+      manufacturer: previousProduct.manufacturer,
+      recommendedRetailPrice: previousProduct.recommendedRetailPrice,
+    });
+    expect(wrapper.emitted().closeDialog).toBeTruthy(); // The dialog should close
+  });
+
+  it('When the save button is pressed and the api returns an error then the error should be shown', async () => {
+    modifyProduct.mockResolvedValue('test_error_message'); // Ensure that the operation fails
+    await findSaveButton().trigger('click'); // Click save button
+    await flushQueue();
+    // The appWrapper is tested for the text, because the dialog content is not in the dialog
+    // element.
+    expect(appWrapper.text()).toContain('test_error_message');
+    expect(wrapper.emitted().closeDialog).toBeFalsy(); // The dialog should stay open
+  });
+
+  it('When the save button is pressed and the api says that the product code is unavailable then the form should become invalid', async () => {
+    modifyProduct.mockResolvedValue('Product code unavailable'); // Ensure that the operation fails
+    await findSaveButton().trigger('click'); // Click save button
+    await flushQueue();
+    expect(wrapper.vm.valid).toBeFalsy();
+    expect(wrapper.emitted().closeDialog).toBeFalsy(); // The dialog should stay open
   });
 });
 

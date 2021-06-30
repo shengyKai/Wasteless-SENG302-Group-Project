@@ -414,6 +414,31 @@ export async function createProduct(businessId: number, product: CreateProduct):
 }
 
 /**
+ * Updates an existing product's properties
+ *
+ * @param businessId The business for which the product belongs
+ * @param productCode The product's product code
+ * @param product The product's new properties
+ * @return undefined if operation is successful, otherwise a string error
+ */
+export async function modifyProduct(businessId: number, productCode: string, product: CreateProduct): Promise<MaybeError<undefined>> {
+  try {
+    await instance.put(`/businesses/${businessId}/products/${productCode}`, product);
+  } catch (error) {
+    let status: number | undefined = error.response?.status;
+    if (status === undefined) return 'Failed to reach backend';
+    if (status === 401) return 'Missing/Invalid access token';
+    if (status === 403) return 'Operation not permitted';
+    if (status === 406) return 'Product/Business not found';
+    if (status === 400) return 'Invalid parameters';
+    if (status === 409) return 'Product code unavailable';
+
+    return 'Request failed: ' + status;
+  }
+  return undefined;
+}
+
+/**
  * Adds a sale item to the business sales listing
  *
  * @param businessId Business id to identify with the database to add the sales item to the correct business
