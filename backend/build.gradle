@@ -88,6 +88,11 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-web'
 }
 
+task(generateUser, dependsOn: 'classes', type: JavaExec) {
+    main = 'org.seng302.datagenerator.UserGenerator'
+    classpath = sourceSets.main.runtimeClasspath
+}
+
 // create a specific task to run cucumber tests
 task cucumber(type: Test) {
     excludes = ['**/org/seng302/**']
