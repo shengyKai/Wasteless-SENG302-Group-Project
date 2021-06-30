@@ -2,6 +2,7 @@ package cucumber.stepDefinitions;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import cucumber.context.RequestContext;
 import cucumber.context.UserContext;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
@@ -39,6 +40,8 @@ public class UserStepDefinition {
 
     @Autowired
     private UserContext userContext;
+    @Autowired
+    private RequestContext requestContext;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -66,7 +69,7 @@ public class UserStepDefinition {
 
     private Long userID;
 
-    @Given("a user exists")
+    @Given("A user exists")
     public void a_user_exists() throws ParseException {
         var user = new User.Builder()
                 .withFirstName("John")
@@ -81,6 +84,43 @@ public class UserStepDefinition {
                 .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
                         "Canterbury,8041"))
                 .build();
+        userContext.save(user);
+    }
+
+    @Given("A user exists with name {string}")
+    public void a_user_exists_with_name(String name) throws ParseException {
+        var user = new User.Builder()
+                .withFirstName(name)
+                .withMiddleName("Hector")
+                .withLastName("Smith")
+                .withNickName("nick")
+                .withEmail(name + "@testing")
+                .withPassword("12345678abc")
+                .withBio("g")
+                .withDob("2001-03-11")
+                .withPhoneNumber("123-456-7890")
+                .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
+                        "Canterbury,8041"))
+                .build();
+        userContext.save(user);
+    }
+
+    @Given("A admin exists with name {string}")
+    public void a_admin_exists_with_name(String name) {
+        var user = new User.Builder()
+                .withFirstName(name)
+                .withMiddleName("Hector")
+                .withLastName("Smith")
+                .withNickName("nick")
+                .withEmail(name + "@testing")
+                .withPassword("12345678abc")
+                .withBio("g")
+                .withDob("2001-03-11")
+                .withPhoneNumber("123-456-7890")
+                .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
+                        "Canterbury,8041"))
+                .build();
+        user.setRole("globalApplicationAdmin");
         userContext.save(user);
     }
 
@@ -293,5 +333,15 @@ public class UserStepDefinition {
         theUser = userRepository.findByEmail(email);
         Instant created = theUser.getCreated();
         assert(ChronoUnit.SECONDS.between(Instant.now(), created) < 20);
+    }
+
+    @Given("I am logged into my account")
+    public void i_am_logged_into_my_account() {
+        requestContext.setLoggedInAccount(userContext.getLast());
+    }
+
+    @Given("I am logged into {string} account")
+    public void i_am_logged_into_account(String name) {
+        requestContext.setLoggedInAccount(userContext.getByName(name));
     }
 }
