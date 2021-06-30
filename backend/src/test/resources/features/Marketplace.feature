@@ -1,7 +1,7 @@
 Feature: UCM1 - Community Marketplace
 
   Background:
-    Given a user exists
+    Given A user exists
     And a card exists
 
   Scenario: AC3 - Cards in section Wanted populate in the wanted table

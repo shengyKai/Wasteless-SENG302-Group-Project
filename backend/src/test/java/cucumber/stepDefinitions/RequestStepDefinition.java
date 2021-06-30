@@ -28,4 +28,14 @@ public class RequestStepDefinition {
     public void the_request_fails_due_to_conflict() {
         Assertions.assertEquals(409, requestContext.getLastResult().getResponse().getStatus());
     }
+
+    @Then("The request succeeds and a entity is created")
+    public void the_request_succeeds_and_entity_is_created() {
+        Assertions.assertEquals(201, requestContext.getLastResult().getResponse().getStatus());
+    }
+
+    @Then("The request succeeds")
+    public void the_request_succeeds() {
+        Assertions.assertEquals(200, requestContext.getLastResult().getResponse().getStatus());
+    }
 }
