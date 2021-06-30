@@ -23,17 +23,25 @@ import java.util.concurrent.ConcurrentHashMap;
 public class EventServiceImpl implements EventService {
     private static final Logger LOGGER = LogManager.getLogger(EventServiceImpl.class);
 
-    @Autowired
-    private EventRepository eventRepository;
-
-    @Autowired
-    private UserRepository userRepository;
+    private final EventRepository eventRepository;
 
     /**
      * Mapping between user id and all their active SseEmitters
      */
     private final Map<Long, List<SseEmitter>> connections = new ConcurrentHashMap<>();
 
+    @Autowired
+    public EventServiceImpl(EventRepository eventRepository) {
+        this.eventRepository = eventRepository;
+    }
+
+    /**
+     * Creates a SseEmitter for the provided user
+     * This function will also immediately send all the user's events through the returned emitter
+     * This is only expected to be called from EventController
+     * @param user User to make emitter for
+     * @return Newly created SseEmitter
+     */
     @Override
     public SseEmitter createEmitterForUser(User user) {
         SseEmitter emitter = new SseEmitter(60000L);
@@ -58,6 +66,15 @@ public class EventServiceImpl implements EventService {
         return emitter;
     }
 
+    /**
+     * Adds a set of users to the provided event.
+     * It will also immediately notify connected users of the event
+     * This method should be used in place of eventRepository.save
+     *
+     * @param users Set of users to notify
+     * @param event Event to notify users of
+     * @return Updated event
+     */
     @Override
     public Event addUsersToEvent(Set<User> users, Event event) {
         event.addUsers(users);
@@ -74,6 +91,11 @@ public class EventServiceImpl implements EventService {
         return event;
     }
 
+    /**
+     * Emits an event through the provided emitter
+     * @param emitter Emitter to send event to
+     * @param event Event to send
+     */
     private void emitEvent(SseEmitter emitter, Event event) {
         try {
             emitter.send(SseEmitter.event()
