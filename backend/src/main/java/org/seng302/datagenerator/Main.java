@@ -9,7 +9,7 @@ public class Main {
      */
     public static Connection connectToDatabase() throws SQLException {
         String url = "jdbc:mariadb://localhost/seng302-2021-team500-prod";
-        Connection conn = DriverManager.getConnection(url, "seng302-team500", "changeMe");
+        Connection conn = DriverManager.getConnection(url, "seng302-team500", "ListenDirectly6053");
         return conn;
     }
 }

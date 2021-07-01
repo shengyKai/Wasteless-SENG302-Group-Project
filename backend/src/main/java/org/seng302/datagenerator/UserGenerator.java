@@ -12,22 +12,18 @@ import java.util.Random;
 import java.io.File;
 import java.util.concurrent.TimeUnit;
 
+import org.seng302.datagenerator.LocationGenerator.Location;
+
 import static org.seng302.datagenerator.Main.connectToDatabase;
 
 public class UserGenerator {
     private Random random = new Random();
     private Connection conn;
+    private LocationGenerator locationGenerator = LocationGenerator.getInstance();
     static Scanner scanner = new Scanner(System.in);
 
     //predefined lists
     String[] BIOS = {"I enjoy running on the weekends", "Beaches are fun", "Got to focus on my career", "If only I went to a better university", "Read documentation yeah right", "My cats keep me going", "All I need is food"};
-
-    //predefined list of location elements
-    String[] STREETNAMES = {"Hillary Cresenct", "Elizabeth Street", "Alice Avenue", "Racheal Road", "Peveral Street", "Moorhouse Avenue", "Riccarton Road", "Clyde Road", "Angelic Avenue"};
-    String[] CITIES = {"Dunedin", "Nightcaps", "Gore", "Tapanui", "Wellington", "Christchurch", "Auckland", "Melbourne", "Brisbance", "Sydeny", "Perth", "Darwin", "Alice Springs"};
-    String[] REGIONS = {"Otago", "Southland", "Canterbury", "Victoria", "Tasman", "Upper Hutt"};
-    String[] COUNTRIES = {"New Zealand", "Zealand", "Australia", "England", "United Kingdom", "Japan", "Korea", "Singapore", "France", "Germany", "Norway"};
-    String[] DISTRICTS = {"Alpha", "Beta", "Charlie", "Delta", "Echo", "Foxtrot"};
 
     public UserGenerator(Connection conn) {
         this.conn = conn;
@@ -74,22 +70,6 @@ public class UserGenerator {
     }
 
     /**
-     * Randomly generates the address of the user
-     * @return the elements of a location object (user's address) in an array
-     */
-    private String[] generateAddress() {
-        String streetNum = String.valueOf(random.nextInt(998) + 1);
-        String streetName = STREETNAMES[random.nextInt(STREETNAMES.length)];
-        String city = CITIES[random.nextInt(CITIES.length)];
-        String region = REGIONS[random.nextInt(REGIONS.length)];
-        String country = COUNTRIES[random.nextInt(COUNTRIES.length)];
-        String postcode = String.valueOf(random.nextInt(98999) + 1000);
-        String district = DISTRICTS[random.nextInt(DISTRICTS.length)];
-        String[] address = {streetNum, streetName, city, region, country, postcode, district};
-        return address;
-    }
-
-    /**
      * Clears the console on windows and linux
      */
     private void clear() {
@@ -97,25 +77,6 @@ public class UserGenerator {
         final String ANSI_HOME = "\u001b[H";
         System.out.print(ANSI_CLS + ANSI_HOME);
         System.out.flush();
-    }
-
-    /**
-     * Creates the SQL commands required to insert the user's address into the database
-     * @return the id of the location entity (addressid)
-     */
-    private long createInsertAddressSQL(String[] address) throws SQLException {
-        PreparedStatement stmt = conn.prepareStatement(
-                "INSERT INTO location (street_number, street_name, city, region, country, post_code, district) "
-                        + "VALUES (?, ?, ?, ?, ?, ?, ?);",
-                Statement.RETURN_GENERATED_KEYS
-        );
-        for (int i=0; i<7; i++) {
-            stmt.setObject(i+1, address[i]);
-        }
-        stmt.executeUpdate();
-        ResultSet keys = stmt.getGeneratedKeys();
-        keys.next();
-        return keys.getLong(1);
     }
 
     /**
@@ -204,7 +165,6 @@ public class UserGenerator {
      * @param args no arguments should be provided
      */
     public static void main(String[] args) throws SQLException, InterruptedException {
-        Random random = new Random();
         Connection conn = connectToDatabase();
 
         var generator = new UserGenerator(conn);
@@ -216,14 +176,13 @@ public class UserGenerator {
         clear();
 
         try {
-            String[] address = generateAddress();
-            long addressId = createInsertAddressSQL(address);
             PersonNameGenerator personNameGenerator = PersonNameGenerator.getInstance();
-
             for (int i=0; i < users; i++) {
                 PersonNameGenerator.FullName fullName = personNameGenerator.generateName();
                 String email = generateEmail(i, fullName);
                 String password = generatePassword();
+                Location address = locationGenerator.generateAddress(random);
+                long addressId = locationGenerator.createInsertAddressSQL(address, conn);
 
                 clear();
                 System.out.println(String.format("Creating User %d / %d", i+1, users));
