@@ -920,7 +920,7 @@ export async function getMarketplaceCardsBySection(section: SectionType, page: n
  * Deletes a card from the community marketplace
  * @param marketplaceCardId The id of the community marketplace card
  */
- export async function deleteMarketplaceCard(marketplaceCardId: number) : Promise<MaybeError<undefined>> {
+export async function deleteMarketplaceCard(marketplaceCardId: number) : Promise<MaybeError<undefined>> {
   try {
     await instance.delete(`/cards/${marketplaceCardId}`);
   } catch (error) {
