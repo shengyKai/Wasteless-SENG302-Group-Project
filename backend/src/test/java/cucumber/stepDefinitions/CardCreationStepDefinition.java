@@ -39,7 +39,6 @@ public class CardCreationStepDefinition {
     private UserRepository userRepository;
     @Autowired
     private KeywordRepository keywordRepository;
-    private MvcResult mvcResult;
     private MarketplaceCard createdCard;
 
     /**
@@ -118,10 +117,9 @@ public class CardCreationStepDefinition {
          createCardJson.appendField("creatorId", requestContext.getLoggedInId());
          if (!createCardJson.containsKey("keywordIds")) {createCardJson.appendField("keywordIds", new int[0]);}
 
-         mvcResult = mockMvc.perform(requestContext.addAuthorisationToken(post("/cards"))
+         requestContext.performRequest(post("/cards")
                  .content(createCardJson.toString())
-                 .contentType(MediaType.APPLICATION_JSON))
-                 .andReturn();
+                 .contentType(MediaType.APPLICATION_JSON));
 
          try {
              createdCard = createCardFromMap(cardProperties);
@@ -132,16 +130,10 @@ public class CardCreationStepDefinition {
          }
     }
 
-    @Then("I expect to receive a successful response")
-    public void i_expect_to_receive_a_successful_response() {
-        System.out.println(mvcResult.getResponse().getErrorMessage());
-        assertEquals(201, mvcResult.getResponse().getStatus());
-    }
-
     @Then("I expect the card to be saved to the application")
     public void i_expect_the_card_to_be_saved_to_the_application() throws Exception {
         JSONParser jsonParser = new JSONParser(JSONParser.MODE_PERMISSIVE);
-        JSONObject responseBody = (JSONObject) jsonParser.parse(mvcResult.getResponse().getContentAsString());
+        JSONObject responseBody = (JSONObject) jsonParser.parse(requestContext.getLastResult().getResponse().getContentAsString());
         String cardId = responseBody.getAsString("cardId");
         Optional<MarketplaceCard> optional = marketplaceCardRepository.findById(Long.parseLong(cardId));
         if (optional.isEmpty()) {
@@ -154,18 +146,6 @@ public class CardCreationStepDefinition {
         assertEquals(0, ChronoUnit.SECONDS.between(createdCard.getCreated(), savedCard.getCreated()));
         assertEquals(0, ChronoUnit.SECONDS.between(createdCard.getCloses(), savedCard.getCloses()));
         assertEquals(createdCard.getSection(), savedCard.getSection());
-    }
-
-    @Then("I expect to receive a {string} error")
-    public void i_expect_to_receive_a_error(String errorMessage) {
-        int expectedStatus;
-        switch (errorMessage) {
-            case "Bad request":
-                expectedStatus = 400;
-            default:
-                expectedStatus = 400;
-        }
-        assertEquals(expectedStatus, mvcResult.getResponse().getStatus());
     }
 
     @Then("I expect the card to not be created")

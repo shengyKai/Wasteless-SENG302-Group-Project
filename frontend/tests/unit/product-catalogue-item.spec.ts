@@ -14,6 +14,7 @@ import * as api from "@/api/internal";
 import { castMock, flushQueue } from './utils';
 import Vuex, { Store } from 'vuex';
 import { getStore, resetStoreForTesting, StoreData } from '@/store';
+import { trimToLength } from '@/utils';
 
 Vue.use(Vuetify);
 
@@ -58,14 +59,12 @@ describe('ProductCatalogueItem.vue', () => {
       vuetify,
       store,
       components: {
-        //ProductImageCarousel will not be tested yet because its part of another task.
-        // ProductImageCarousel,
         FullProductDescription
       },
       stubs: {
-        //stub ProductImageCarousel because its not related to this test for now.
-        //remove stub if testing ProductCatalogueItem as a whole
-        ProductImageCarousel: true
+        ProductImageCarousel: true,
+        ProductForm: true,
+        ProductImageUploader: true,
       },
       mocks: {
         $router: {
@@ -102,6 +101,18 @@ describe('ProductCatalogueItem.vue', () => {
   });
 
   /**
+   * Finds the edit button in the ProductCatalogueItem
+   *
+   * @returns A Wrapper around the edit button
+   */
+  function findEditButton() {
+    const buttons = wrapper.findAllComponents({ name: 'v-chip' });
+    const filtered = buttons.filter(button => button.text().includes('Edit'));
+    expect(filtered.length).toBe(1);
+    return filtered.at(0);
+  }
+
+  /**
   * Tests that the same product name exists as per the set data above
   */
   it("Must contain the product name", () => {
@@ -132,8 +143,8 @@ describe('ProductCatalogueItem.vue', () => {
         countryOfSale: "someCountry"
       }
     });
-    //the description will cut off at the 50th character
-    expect(wrapper.text()).toContain(wrapper.vm.product.description.slice(0,50));
+    //the description will be trimmed
+    expect(wrapper.text()).toContain(trimToLength(wrapper.vm.product.description, 50));
     //Full description should not exist
     expect(wrapper.text()).not.toContain(wrapper.vm.product.description);
     Vue.nextTick(() => {
@@ -286,5 +297,34 @@ describe('ProductCatalogueItem.vue', () => {
     wrapper.findComponent({name: 'ProductImageCarousel' }).vm.$emit('delete-image', 33);
     await flushQueue();
     expect(store.state.globalError).toBe('test_error_message');
+  });
+
+  it('If edit button has not been pressed then the ProductForm should not be open', async () => {
+    expect(wrapper.findComponent({name: 'ProductForm'}).exists()).toBeFalsy();
+  });
+
+  it('If edit button is pressed then the ProductForm should open', async () => {
+    findEditButton().trigger('click');
+
+    await Vue.nextTick();
+
+    expect(wrapper.findComponent({name: 'ProductForm'}).exists()).toBeTruthy();
+  });
+
+  it('If the ProductForm is closed then the ProductForm should disappear and a "content-changed" event should be emitted', async () => {
+    findEditButton().trigger('click');
+
+    await Vue.nextTick();
+
+    let form = wrapper.findComponent({name: 'ProductForm'});
+    expect(form.exists()).toBeTruthy();
+
+    form.vm.$emit('closeDialog');
+
+    await Vue.nextTick();
+
+    form = wrapper.findComponent({name: 'ProductForm'});
+    expect(form.exists()).toBeFalsy();
+    expect(wrapper.emitted()['content-changed']).toBeTruthy();
   });
 });
