@@ -19,13 +19,13 @@ public interface MarketplaceCardRepository extends CrudRepository<MarketplaceCar
      * @return List of created cards
      */
     List<MarketplaceCard> getAllByCreator(@Param("Creator") User user);
-//
-//    /**
-//     * Finds all the marketplace cards with the given keyword
-//     * @param keyword Keyword to search for
-//     * @return List of cards with the keyword
-//     */
-//    List<MarketplaceCard> getAllByKeywords(@Param("keywords") Keyword keyword);
+
+    /**
+     * Finds all the marketplace cards with the given keyword
+     * @param keyword Keyword to search for
+     * @return List of cards with the keyword
+     */
+    List<MarketplaceCard> getAllByKeywords(@Param("keywords") Keyword keyword);
 
     /**
      * Finds all the marketplace cards that are in the given section
@@ -44,6 +44,12 @@ public interface MarketplaceCardRepository extends CrudRepository<MarketplaceCar
         return findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No card exists with the given id"));
     }
 
+    /**
+     * Return all cards which have an closing data after the given cutoff data and which do not already have an associated
+     * expiry event.
+     * @param cutOff Cards with a closing date later than this date will be returned.
+     * @return a list of all marketplace cards which need to have an expiry event sent.
+     */
     @Query("SELECT c FROM MarketplaceCard c left join ExpiryEvent e ON e.expiringCard.id = c.id WHERE c.closes > :cutOff AND e is null")
     List<MarketplaceCard> getAllExpiringAfter(Instant cutOff);
 }

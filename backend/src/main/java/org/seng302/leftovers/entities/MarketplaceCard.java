@@ -43,7 +43,7 @@ public class MarketplaceCard {
     @Column(nullable = false)
     private Instant closes;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "card_keywords")
     private List<Keyword> keywords = new ArrayList<>();
 
