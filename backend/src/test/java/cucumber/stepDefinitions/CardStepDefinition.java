@@ -41,10 +41,19 @@ public class CardStepDefinition {
 
     @Given("a card exists")
     public void a_card_exists() {
-        var card = new MarketplaceCard.Builder().withCreator(userContext.getLast())
+        var card = new MarketplaceCard.Builder()
+                .withCreator(userContext.getLast())
                 .withSection("Wanted")
                 .withTitle("Vintage car")
-                .withDescription("A cool vintage car").build();
+                .withDescription("A cool vintage car")
+                .build();
+        cardContext.save(card);
+    }
+
+    @Given("The card expiry is changed to less than a day from now")
+    public void the_card_expiry_is_changed_to_less_than_a_day_from_now() {
+        var card = cardContext.getLast();
+        card.setCloses(Instant.now().plus(23, ChronoUnit.HOURS));
         cardContext.save(card);
     }
 
