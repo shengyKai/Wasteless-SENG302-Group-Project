@@ -1,10 +1,10 @@
-package org.seng302.tools;
+package org.seng302.leftovers.tools;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.seng302.entities.User;
-import org.seng302.exceptions.AccessTokenException;
-import org.seng302.exceptions.InsufficientPermissionException;
+import org.seng302.leftovers.entities.User;
+import org.seng302.leftovers.exceptions.AccessTokenException;
+import org.seng302.leftovers.exceptions.InsufficientPermissionException;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;

@@ -13,11 +13,14 @@ import java.util.Random;
 import java.io.File;
 import java.util.concurrent.TimeUnit;
 
-import static org.seng302.datagenerator.Main.*;
+import org.seng302.datagenerator.LocationGenerator.Location;
+
+import static org.seng302.datagenerator.Main.connectToDatabase;
 
 public class UserGenerator {
     private Random random = new Random();
     private Connection conn;
+    private LocationGenerator locationGenerator = LocationGenerator.getInstance();
     static Scanner scanner = new Scanner(System.in);
 
     public ArrayList<Long> userIds = new ArrayList<Long>();
@@ -25,13 +28,6 @@ public class UserGenerator {
 
     //predefined lists
     String[] BIOS = {"I enjoy running on the weekends", "Beaches are fun", "Got to focus on my career", "If only I went to a better university", "Read documentation yeah right", "My cats keep me going", "All I need is food"};
-
-    //predefined list of location elements
-    String[] STREETNAMES = {"Hillary Cresenct", "Elizabeth Street", "Alice Avenue", "Racheal Road", "Peveral Street", "Moorhouse Avenue", "Riccarton Road", "Clyde Road", "Angelic Avenue"};
-    String[] CITIES = {"Dunedin", "Nightcaps", "Gore", "Tapanui", "Wellington", "Christchurch", "Auckland", "Melbourne", "Brisbance", "Sydeny", "Perth", "Darwin", "Alice Springs"};
-    String[] REGIONS = {"Otago", "Southland", "Canterbury", "Victoria", "Tasman", "Upper Hutt"};
-    String[] COUNTRIES = {"New Zealand", "Zealand", "Australia", "England", "United Kingdom", "Japan", "Korea", "Singapore", "France", "Germany", "Norway"};
-    String[] DISTRICTS = {"Alpha", "Beta", "Charlie", "Delta", "Echo", "Foxtrot"};
 
     public UserGenerator(Connection conn) {
         this.conn = conn;
@@ -44,7 +40,8 @@ public class UserGenerator {
     private String generateDOB() {
         String day = String.valueOf(random.nextInt(27) + 1); // +1 as the day cannot be zero
         String month = String.valueOf(random.nextInt(11) + 1); // +1 as the month cannot be zero
-        String year = String.valueOf(random.nextInt(9998) + 1); // +1 as the year cannot be zero
+        //year must be more than a year in the past
+        String year = String.valueOf(random.nextInt(2006) + 1); // +1 as the year cannot be zero
         return year +"-"+ month +"-"+ day;
     }
 
@@ -110,6 +107,16 @@ public class UserGenerator {
         ResultSet keys = stmt.getGeneratedKeys();
         keys.next();
         return keys.getLong(1);
+    }
+
+    /**
+     * Clears the console on windows and linux
+     */
+    private void clear() {
+        final String ANSI_CLS = "\u001b[2J";
+        final String ANSI_HOME = "\u001b[H";
+        System.out.print(ANSI_CLS + ANSI_HOME);
+        System.out.flush();
     }
 
     /**
@@ -205,14 +212,13 @@ public class UserGenerator {
         clear();
 
         try {
-            String[] address = generateAddress();
             PersonNameGenerator personNameGenerator = PersonNameGenerator.getInstance();
-            this.addressId = createInsertAddressSQL(address);
-
             for (int i=0; i < users; i++) {
                 PersonNameGenerator.FullName fullName = personNameGenerator.generateName();
                 String email = generateEmail(i, fullName);
                 String password = generatePassword();
+                Location address = locationGenerator.generateAddress(random);
+                long this.addressId = locationGenerator.createInsertAddressSQL(address, conn);
 
                 clear();
                 System.out.println(String.format("Creating User %d / %d", i+1, users));

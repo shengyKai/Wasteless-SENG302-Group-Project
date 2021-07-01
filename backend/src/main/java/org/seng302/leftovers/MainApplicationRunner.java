@@ -1,10 +1,10 @@
-package org.seng302;
+package org.seng302.leftovers;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.seng302.entities.Keyword;
-import org.seng302.persistence.KeywordRepository;
-import org.seng302.service.StorageService;
+import org.seng302.leftovers.entities.Keyword;
+import org.seng302.leftovers.persistence.KeywordRepository;
+import org.seng302.leftovers.service.StorageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
