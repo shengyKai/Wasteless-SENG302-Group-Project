@@ -16,10 +16,11 @@ import org.seng302.leftovers.persistence.MarketplaceCardRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.UnsupportedEncodingException;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 
 
 public class CardStepDefinition {
@@ -38,10 +39,19 @@ public class CardStepDefinition {
 
     @Given("a card exists")
     public void a_card_exists() {
-        var card = new MarketplaceCard.Builder().withCreator(userContext.getLast())
+        var card = new MarketplaceCard.Builder()
+                .withCreator(userContext.getLast())
                 .withSection("Wanted")
                 .withTitle("Vintage car")
-                .withDescription("A cool vintage car").build();
+                .withDescription("A cool vintage car")
+                .build();
+        cardContext.save(card);
+    }
+
+    @Given("The card expiry is changed to less than a day from now")
+    public void the_card_expiry_is_changed_to_less_than_a_day_from_now() {
+        var card = cardContext.getLast();
+        card.setCloses(Instant.now().plus(23, ChronoUnit.HOURS));
         cardContext.save(card);
     }
 
@@ -88,6 +98,11 @@ public class CardStepDefinition {
         requestContext.performRequest(delete("/cards/" + cardContext.getLast().getID()));
     }
 
+    @When("I try to extend the display period of my card")
+    public void i_try_to_extend_the_display_period_of_my_card() {
+        requestContext.performRequest(put("/cards/" + cardContext.getLast().getID() + "/extenddisplayperiod"));
+    }
+
     @Then("I expect the card to be deleted")
     public void i_expect_the_card_to_be_deleted() {
         Long cardId = cardContext.getLast().getID();
@@ -98,5 +113,23 @@ public class CardStepDefinition {
     public void i_expect_the_card_to_still_exist() {
         Long cardId = cardContext.getLast().getID();
         Assertions.assertTrue(marketplaceCardRepository.existsById(cardId));
+    }
+
+    @Then("I expect the display period of my card to be extended")
+    public void i_expect_the_display_period_of_my_card_to_be_extended() {
+        MarketplaceCard previouslyLoaded = cardContext.getLast();
+        Instant expectedCloses = previouslyLoaded.getCloses().plus(14, ChronoUnit.DAYS);
+
+        MarketplaceCard card = cardContext.save(marketplaceCardRepository.getCard(previouslyLoaded.getID()));
+
+        Assertions.assertEquals(0, ChronoUnit.SECONDS.between(expectedCloses, card.getCloses()));
+    }
+
+    @Then("I expect the display period of my card to not be extended")
+    public void i_expect_the_display_period_of_my_card_to_not_be_extended() {
+        MarketplaceCard previouslyLoaded = cardContext.getLast();
+        MarketplaceCard card = cardContext.save(marketplaceCardRepository.getCard(previouslyLoaded.getID()));
+
+        Assertions.assertEquals(0, ChronoUnit.SECONDS.between(previouslyLoaded.getCloses(), card.getCloses()));
     }
 }

@@ -494,6 +494,47 @@ class CardControllerTest {
             .withSection("ForSale").withTitle("mnop").build());
     }
 
+
+    @Test
+    void extendCardDisplayPeriod_noAuthToken_401Response() throws Exception {
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.checkAuthenticationToken(any())).thenThrow(new AccessTokenException());
+        mockMvc.perform(put("/cards/1/extenddisplayperiod")).andExpect(status().isUnauthorized());
+        verify(mockCard, times(0)).delayCloses();
+        verify(marketplaceCardRepository, times(0)).save(any());
+    }
+
+    @Test
+    void extendCardDisplayPeriod_cardDoesNotExist_404Response() throws Exception {
+        mockMvc.perform(put("/cards/2/extenddisplayperiod")).andExpect(status().isNotFound());
+        verify(mockCard, times(0)).delayCloses();
+        verify(marketplaceCardRepository, times(0)).save(any());
+    }
+
+    @Test
+    void extendCardDisplayPeriod_doesNotHavePermission_403Response() throws Exception {
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), any())).thenReturn(false);
+        mockMvc.perform(put("/cards/1/extenddisplayperiod")).andExpect(status().isForbidden());
+        authenticationTokenManager.verify(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), eq(userId)));
+        verify(mockCard, times(0)).delayCloses();
+        verify(marketplaceCardRepository, times(0)).save(any());
+    }
+
+    @Test
+    void extendCardDisplayPeriod_cardExistsAndIsAuthorised_200ResponseAndExtended() throws Exception {
+        mockMvc.perform(put("/cards/1/extenddisplayperiod")).andExpect(status().isOk());
+        verify(mockCard, times(1)).delayCloses();
+        verify(marketplaceCardRepository, times(1)).save(mockCard);
+    }
+
+    @Test
+    void extendCardDisplayPeriod_cardExistsAndFailsToClose_400() throws Exception {
+        doThrow(new ResponseStatusException(HttpStatus.BAD_REQUEST)).when(mockCard).delayCloses();
+
+        mockMvc.perform(put("/cards/1/extenddisplayperiod")).andExpect(status().isBadRequest());
+        verify(mockCard, times(1)).delayCloses();
+        verify(marketplaceCardRepository, times(0)).save(mockCard);
+    }
+
     @Test
     void deleteCard_noAuthToken_401Response() throws Exception {
         authenticationTokenManager.when(() -> AuthenticationTokenManager.checkAuthenticationToken(any())).thenThrow(new AccessTokenException());
