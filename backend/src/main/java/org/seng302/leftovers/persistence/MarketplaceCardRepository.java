@@ -1,12 +1,14 @@
 package org.seng302.leftovers.persistence;
 
 import org.seng302.leftovers.entities.*;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Repository;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.Instant;
 import java.util.List;
 
 @Repository
@@ -17,13 +19,13 @@ public interface MarketplaceCardRepository extends CrudRepository<MarketplaceCar
      * @return List of created cards
      */
     List<MarketplaceCard> getAllByCreator(@Param("Creator") User user);
-
-    /**
-     * Finds all the marketplace cards with the given keyword
-     * @param keyword Keyword to search for
-     * @return List of cards with the keyword
-     */
-    List<MarketplaceCard> getAllByKeywords(@Param("keywords") Keyword keyword);
+//
+//    /**
+//     * Finds all the marketplace cards with the given keyword
+//     * @param keyword Keyword to search for
+//     * @return List of cards with the keyword
+//     */
+//    List<MarketplaceCard> getAllByKeywords(@Param("keywords") Keyword keyword);
 
     /**
      * Finds all the marketplace cards that are in the given section
@@ -41,4 +43,7 @@ public interface MarketplaceCardRepository extends CrudRepository<MarketplaceCar
     default MarketplaceCard getCard(Long id) {
         return findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No card exists with the given id"));
     }
+
+    @Query("SELECT c FROM MarketplaceCard c left join ExpiryEvent e ON e.expiringCard.id = c.id WHERE c.closes > :cutOff AND e is null")
+    List<MarketplaceCard> getAllExpiringAfter(Instant cutOff);
 }
