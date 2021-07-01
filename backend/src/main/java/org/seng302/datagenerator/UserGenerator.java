@@ -36,7 +36,8 @@ public class UserGenerator {
     private String generateDOB() {
         String day = String.valueOf(random.nextInt(27) + 1); // +1 as the day cannot be zero
         String month = String.valueOf(random.nextInt(11) + 1); // +1 as the month cannot be zero
-        String year = String.valueOf(random.nextInt(9998) + 1); // +1 as the year cannot be zero
+        //year must be more than a year in the past
+        String year = String.valueOf(random.nextInt(2006) + 1); // +1 as the year cannot be zero
         return year +"-"+ month +"-"+ day;
     }
 
