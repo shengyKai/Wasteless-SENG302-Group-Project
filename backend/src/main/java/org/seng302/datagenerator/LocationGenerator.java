@@ -73,9 +73,6 @@ public class LocationGenerator {
                       + "VALUES (?, ?, ?, ?, ?, ?, ?);",
               Statement.RETURN_GENERATED_KEYS
       );
-      for (int i=0; i<7; i++) {
-          stmt.setObject(i+1, address.streetNum);
-      }
       stmt.setObject(1, address.streetNum);
       stmt.setObject(2, address.streetName);
       stmt.setObject(3, address.city);
