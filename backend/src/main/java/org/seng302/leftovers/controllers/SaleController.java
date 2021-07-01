@@ -1,17 +1,17 @@
-package org.seng302.controllers;
+package org.seng302.leftovers.controllers;
 
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.seng302.entities.Business;
-import org.seng302.entities.InventoryItem;
-import org.seng302.entities.SaleItem;
-import org.seng302.persistence.BusinessRepository;
-import org.seng302.persistence.InventoryItemRepository;
-import org.seng302.persistence.SaleItemRepository;
-import org.seng302.tools.AuthenticationTokenManager;
-import org.seng302.tools.SearchHelper;
+import org.seng302.leftovers.entities.Business;
+import org.seng302.leftovers.entities.InventoryItem;
+import org.seng302.leftovers.entities.SaleItem;
+import org.seng302.leftovers.persistence.BusinessRepository;
+import org.seng302.leftovers.persistence.InventoryItemRepository;
+import org.seng302.leftovers.persistence.SaleItemRepository;
+import org.seng302.leftovers.tools.AuthenticationTokenManager;
+import org.seng302.leftovers.tools.SearchHelper;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
@@ -164,7 +164,7 @@ public class SaleController {
 
             return response;
         } catch (Exception e) {
-            logger.error(e);
+            logger.error(e.getMessage());
             throw e;
         }
     }

@@ -1,7 +1,7 @@
-package org.seng302.persistence;
+package org.seng302.leftovers.persistence;
 
-import org.seng302.entities.Business;
-import org.seng302.entities.SaleItem;
+import org.seng302.leftovers.entities.Business;
+import org.seng302.leftovers.entities.SaleItem;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;

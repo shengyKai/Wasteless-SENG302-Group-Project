@@ -1,16 +1,15 @@
 /* Subtype of Account for individual users */
-package org.seng302.entities;
+package org.seng302.leftovers.entities;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
-import org.seng302.tools.JsonTools;
+import org.seng302.leftovers.tools.JsonTools;
 import org.springframework.data.annotation.ReadOnlyProperty;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.persistence.*;
-import java.text.ParseException;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;

@@ -1,22 +1,22 @@
-package org.seng302.controllers;
+package org.seng302.leftovers.controllers;
 
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.seng302.entities.Keyword;
-import org.seng302.entities.MarketplaceCard;
-import org.seng302.entities.User;
-import org.seng302.persistence.KeywordRepository;
-import org.seng302.persistence.MarketplaceCardRepository;
-import org.seng302.persistence.UserRepository;
-import org.seng302.tools.AuthenticationTokenManager;
-import org.seng302.tools.JsonTools;
+import org.seng302.leftovers.entities.Keyword;
+import org.seng302.leftovers.entities.MarketplaceCard;
+import org.seng302.leftovers.entities.User;
+import org.seng302.leftovers.persistence.KeywordRepository;
+import org.seng302.leftovers.persistence.MarketplaceCardRepository;
+import org.seng302.leftovers.persistence.UserRepository;
+import org.seng302.leftovers.tools.AuthenticationTokenManager;
+import org.seng302.leftovers.tools.JsonTools;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
-import org.seng302.tools.SearchHelper;
+import org.seng302.leftovers.tools.SearchHelper;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;

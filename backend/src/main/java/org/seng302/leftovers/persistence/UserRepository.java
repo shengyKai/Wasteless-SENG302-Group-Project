@@ -1,7 +1,7 @@
-package org.seng302.persistence;
+package org.seng302.leftovers.persistence;
 
-import org.seng302.entities.Event;
-import org.seng302.entities.User;
+import org.seng302.leftovers.entities.Event;
+import org.seng302.leftovers.entities.User;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;

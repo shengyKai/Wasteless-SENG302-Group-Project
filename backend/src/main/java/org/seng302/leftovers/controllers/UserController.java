@@ -1,17 +1,17 @@
-package org.seng302.controllers;
+package org.seng302.leftovers.controllers;
 
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.seng302.entities.Account;
-import org.seng302.entities.Location;
-import org.seng302.entities.User;
-import org.seng302.exceptions.EmailInUseException;
-import org.seng302.exceptions.UserNotFoundException;
-import org.seng302.persistence.UserRepository;
-import org.seng302.tools.AuthenticationTokenManager;
-import org.seng302.tools.SearchHelper;
+import org.seng302.leftovers.entities.Account;
+import org.seng302.leftovers.entities.Location;
+import org.seng302.leftovers.entities.User;
+import org.seng302.leftovers.exceptions.EmailInUseException;
+import org.seng302.leftovers.exceptions.UserNotFoundException;
+import org.seng302.leftovers.persistence.UserRepository;
+import org.seng302.leftovers.tools.AuthenticationTokenManager;
+import org.seng302.leftovers.tools.SearchHelper;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
@@ -20,7 +20,6 @@ import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.text.ParseException;
 import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Map;
