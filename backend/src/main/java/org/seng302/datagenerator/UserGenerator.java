@@ -135,7 +135,7 @@ public class UserGenerator {
     /**
      * Creates the SQL commands required to insert the user's account into the database
      */
-    private void createInsertUsersSQL(long userId, long addressId, PersonNameGenerator.FullName fullName) throws SQLException {
+    private void createInsertUsersSQL(long userId, PersonNameGenerator.FullName fullName) throws SQLException {
         PreparedStatement stmt = conn.prepareStatement(
                 "INSERT INTO user (first_name, middle_name, last_name, nickname, ph_num, dob, bio, created, userid, address_id) "
                         + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
