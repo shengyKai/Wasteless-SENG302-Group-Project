@@ -1,9 +1,11 @@
+import { MarketplaceCard } from "./internal";
+
 const EMITTER_URL = process.env.VUE_APP_SERVER_ADD + '/events/emitter';
 
 let eventSource: EventSource;
 let lastErrorTime = Number.MIN_VALUE;
 
-export type AnyEvent = MessageEvent
+export type AnyEvent = MessageEvent | ExpiryEvent
 
 type BaseEvent = {
   id: number,
@@ -14,6 +16,11 @@ type BaseEvent = {
 type MessageEvent = BaseEvent & {
   type: 'MessageEvent',
   message: string
+}
+
+type ExpiryEvent = BaseEvent & {
+  type: 'ExpiryEvent',
+  card: MarketplaceCard,
 }
 
 /**
