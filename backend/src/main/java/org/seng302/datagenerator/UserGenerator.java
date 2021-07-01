@@ -12,6 +12,8 @@ import java.util.Random;
 import java.io.File;
 import java.util.concurrent.TimeUnit;
 
+import org.seng302.datagenerator.LocationGenerator.Location;
+
 import static org.seng302.datagenerator.Main.connectToDatabase;
 
 public class UserGenerator {
@@ -175,15 +177,11 @@ public class UserGenerator {
 
         try {
             PersonNameGenerator personNameGenerator = PersonNameGenerator.getInstance();
-<<<<<<< HEAD
-=======
-
->>>>>>> t233-business-name-generator
             for (int i=0; i < users; i++) {
                 PersonNameGenerator.FullName fullName = personNameGenerator.generateName();
                 String email = generateEmail(i, fullName);
                 String password = generatePassword();
-                String[] address = locationGenerator.generateAddress(random);
+                Location address = locationGenerator.generateAddress(random);
                 long addressId = locationGenerator.createInsertAddressSQL(address, conn);
 
                 clear();
