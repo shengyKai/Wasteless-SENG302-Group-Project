@@ -16,6 +16,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * Implementation of EventService
+ */
 @Service
 public class EventServiceImpl implements EventService {
     private static final Logger LOGGER = LogManager.getLogger(EventServiceImpl.class);

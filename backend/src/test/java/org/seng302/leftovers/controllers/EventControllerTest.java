@@ -125,7 +125,7 @@ public class EventControllerTest {
         json.put("message", "this that");
         mockMvc.perform(post("/events/globalmessage").contentType(MediaType.APPLICATION_JSON)
                 .content(json.toString()))
-                .andExpect(status().isOk())
+                .andExpect(status().isCreated())
                 .andReturn();
 
         verify(userRepository).findAll();

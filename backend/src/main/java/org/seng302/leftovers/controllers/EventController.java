@@ -16,8 +16,13 @@ import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.*;
 
+/**
+ * Controller for the /events/* endpoints.
+ * Provides access point for listening to events (GET /events/emitter) and posting new events
+ */
 @RestController
 public class EventController {
     private static final Logger LOGGER = LogManager.getLogger(EventController.class);
@@ -59,7 +64,7 @@ public class EventController {
      * @param messageInfo Object containing message to send
      */
     @PostMapping("/events/globalmessage")
-    public void postDemoEvent(@RequestBody JSONObject messageInfo, HttpServletRequest request) {
+    public void postDemoEvent(@RequestBody JSONObject messageInfo, HttpServletRequest request, HttpServletResponse response) {
         LOGGER.info("Posting a message to all users");
 
         try {
@@ -74,6 +79,7 @@ public class EventController {
             userRepository.findAll().forEach(allUsers::add);
 
             eventService.addUsersToEvent(allUsers, event);
+            response.setStatus(201);
         } catch (Exception e) {
             LOGGER.error(e.getMessage());
             throw e;

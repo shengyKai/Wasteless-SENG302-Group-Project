@@ -15,7 +15,7 @@
         rounded="lg"
         class="newsfeed-item"
       >
-        <template v-if="event.type == 'message'">
+        <template v-if="event.type == 'MessageEvent'">
           <GlobalMessage :event="event"/>
         </template>
         <template v-else>

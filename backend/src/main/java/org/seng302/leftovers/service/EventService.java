@@ -6,6 +6,10 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.util.Set;
 
+/**
+ * Service for linking event creation/updating and sending the events to users
+ * Keeps track of all the currently logged in user's event streams
+ */
 public interface EventService {
     /**
      * Creates an event emitter for the given user

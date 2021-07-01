@@ -7,6 +7,9 @@ import org.springframework.web.server.ResponseStatusException;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 
+/**
+ * Event for a message sent by an administrator to a user
+ */
 @Entity
 public class MessageEvent extends Event {
     @Column(nullable = false)
@@ -48,7 +51,6 @@ public class MessageEvent extends Event {
     @Override
     public JSONObject constructJSONObject() {
         JSONObject json = super.constructJSONObject();
-        json.put("type", "message");
         json.put("message", message);
         return json;
     }

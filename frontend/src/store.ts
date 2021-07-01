@@ -1,5 +1,5 @@
 import { User, Business, getUser, login, InventoryItem } from './api/internal';
-import { Event, initialiseEventSourceForUser, addEventMessageHandler } from './api/events';
+import { AnyEvent, initialiseEventSourceForUser, addEventMessageHandler } from './api/events';
 import Vuex, { Store, StoreOptions } from 'vuex';
 import { COOKIE, deleteCookie, getCookie, isTesting, setCookie } from './utils';
 import Vue from 'vue';
@@ -50,7 +50,7 @@ export type StoreData = {
    * Map from event ids to events.
    * This is a sparse array
    */
-  eventMap: Record<number, Event>,
+  eventMap: Record<number, AnyEvent>,
 };
 
 function createOptions(): StoreOptions<StoreData> {
@@ -85,7 +85,7 @@ function createOptions(): StoreOptions<StoreData> {
        * @param state Current state
        * @param payload New event
        */
-      addEvent(state, payload: Event) {
+      addEvent(state, payload: AnyEvent) {
         Vue.set(state.eventMap, payload.id, payload);
       },
       /**

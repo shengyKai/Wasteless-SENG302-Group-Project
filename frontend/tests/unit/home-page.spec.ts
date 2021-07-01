@@ -6,7 +6,7 @@ import {createLocalVue, mount, Wrapper} from '@vue/test-utils';
 import HomePage from '@/components/home/HomePage.vue';
 import { getStore, resetStoreForTesting, StoreData } from '@/store';
 
-import { Event } from '@/api/events';
+import { AnyEvent } from '@/api/events';
 
 Vue.use(Vuetify);
 const localVue = createLocalVue();
@@ -42,8 +42,8 @@ describe('HomePage.vue', () => {
   });
 
   it('If an event is posted to the store then it should be displayed in the newsfeed', async () => {
-    const event: Event = {
-      type: 'message',
+    const event: AnyEvent = {
+      type: 'MessageEvent',
       id: 7,
       created: new Date().toString(),
       message: 'Hello world',
@@ -57,8 +57,8 @@ describe('HomePage.vue', () => {
   });
 
   it('If an event is posted to the store then the message "No items in your feed" should not be shown', async () => {
-    const event: Event = {
-      type: 'message',
+    const event: AnyEvent = {
+      type: 'MessageEvent',
       id: 7,
       created: new Date().toString(),
       message: 'Hello world',

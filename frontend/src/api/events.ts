@@ -3,7 +3,7 @@ const EMITTER_URL = process.env.VUE_APP_SERVER_ADD + '/events/emitter';
 let eventSource: EventSource;
 let lastErrorTime = Number.MIN_VALUE;
 
-export type Event = MessageEvent
+export type AnyEvent = MessageEvent
 
 type BaseEvent = {
   id: number,
@@ -12,10 +12,15 @@ type BaseEvent = {
 }
 
 type MessageEvent = BaseEvent & {
-  type: 'message',
+  type: 'MessageEvent',
   message: string
 }
 
+/**
+ * Starts the global event listener.
+ * This method is expected to be called immediately after the user is logged in, so that they can receive their newsfeed items
+ * @param userId user to try listening events from
+ */
 export function initialiseEventSourceForUser(userId: number): void {
   eventSource?.close();
 
@@ -35,6 +40,10 @@ export function initialiseEventSourceForUser(userId: number): void {
   });
 }
 
-export function addEventMessageHandler(handler: (event: Event) => void): void {
+/**
+ * Add a handler for whenever a newsfeed event arrives
+ * @param handler Event handler
+ */
+export function addEventMessageHandler(handler: (event: AnyEvent) => void): void {
   eventSource.addEventListener('newsfeed' as any, (event) => handler(JSON.parse(event.data)));
 }

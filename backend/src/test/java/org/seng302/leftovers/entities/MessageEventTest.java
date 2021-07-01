@@ -14,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class MessageEventTest {
+class MessageEventTest {
 
     @Autowired
     private EventRepository eventRepository;
@@ -45,7 +45,7 @@ public class MessageEventTest {
         JSONObject json = event.constructJSONObject();
         assertEquals(event.getId(), json.get("id"));
         assertEquals(event.getCreated().toString(), json.get("created"));
-        assertEquals("message", json.get("type"));
+        assertEquals("MessageEvent", json.get("type"));
         assertEquals("Foo", json.get("message"));
         assertEquals(4, json.size());
     }

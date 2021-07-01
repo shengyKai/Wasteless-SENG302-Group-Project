@@ -6,11 +6,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import java.time.Instant;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class EventTest {
+class EventTest {
 
     @Test
     void createEvent_any_creationTimeCorrect() {
@@ -22,6 +22,17 @@ public class EventTest {
         assertFalse(event.getCreated().isAfter(after));
     }
 
-    // Event is static so we need to subclass
+    @Test
+    void constructJSONObject_any_validFields() {
+        Event event = new EventSubclass();
+
+        var json = event.constructJSONObject();
+        assertNull(json.get("id"));
+        assertEquals(event.getCreated().toString(), json.get("created"));
+        assertEquals(event.getClass().getSimpleName(), json.get("type"));
+        assertEquals(3, json.size());
+    }
+
+    // Event is abstract so we need to subclass
     static class EventSubclass extends Event {}
 }
