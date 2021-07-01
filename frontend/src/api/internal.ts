@@ -915,3 +915,21 @@ export async function getMarketplaceCardsBySection(section: SectionType, page: n
   }
   return response.data;
 }
+
+/**
+ * Deletes a card from the community marketplace
+ * @param marketplaceCardId The id of the community marketplace card
+ */
+ export async function deleteMarketplaceCard(marketplaceCardId: number) : Promise<MaybeError<undefined>> {
+  try {
+    await instance.delete(`/cards/${marketplaceCardId}`);
+  } catch (error) {
+    let status: number | undefined = error.response?.status;
+    if (status === undefined) return 'Failed to reach backend';
+    if (status === 401) return 'Missing/Invalid access token';
+    if (status === 403) return 'Invalid authorization for card deletion';
+    if (status === 406) return 'Marketplace card not found';
+    return 'Request failed: ' + error.response?.data.message;
+  }
+  return undefined;
+}
