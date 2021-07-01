@@ -31,8 +31,9 @@ public class BusinessGenerator {
      * Creates and inserts the buiness into the database
      * @param addressId the id associated with the location entity representing the business's address
      * @param ownerId the id associated with the user entity representing the user who owns the business
+     * @return the if of the business that was generated
      */
-    private void createInsertBusinessSQL(long addressId, long ownerId) throws SQLException {
+    private long createInsertBusinessSQL(long addressId, long ownerId) throws SQLException {
         PreparedStatement stmt = conn.prepareStatement(
             "INSERT INTO business (business_type, created, description, name, address_id, owner_id)"
                 + "VALUES (?, ?, ?, ?, ?, ?)"
@@ -43,6 +44,24 @@ public class BusinessGenerator {
         stmt.setObject(4, NAMES[random.nextInt(NAMES.length)]);
         stmt.setObject(5, addressId);
         stmt.setObject(6, ownerId);
+        stmt.executeUpdate();
+        ResultSet keys = stmt.getGeneratedKeys();
+        keys.next();
+        return keys.getLong(1);
+    }
+
+    /**
+     * Inserts the admin of the business into the database
+     * @param businessId the id associated with the business
+     * @param adminId the id associated with the user who is an administrator of the business
+     */
+    private void addAdminToBusiness(long businessId, long adminId) throws SQLException {
+        PreparedStatement stmt = conn.prepareStatement(
+                "INSERT INTO business_admins (business_id, user_id)"
+                + "VALUES (?, ?)"
+        );
+        stmt.setObject(1, businessId);
+        stmt.setObject(2, adminId);
         stmt.executeUpdate();
     }
 
@@ -98,13 +117,22 @@ public class BusinessGenerator {
         try {
             for (int i=0; i < businesses; i++) {
                 clear();
-                userGenerator.generateUsers(1);
-                long ownerId = userGenerator.getUserIds().get(0);
+                int usersGenerated = random.nextInt(1) + 1; // between 1 and 2 users will be generated
+                //if two users are generated, the second is a business admin
+                userGenerator.generateUsers(usersGenerated);
+                ArrayList<Long> userIds = userGenerator.getUserIds();
+                long ownerId = userIds.get(0);
                 long addressId = userGenerator.getAddressId();
                 System.out.println(String.format("Creating Business %d / %d", i+1, businesses));
                 int progress = (int) (((float)(i+1) / (float)businesses) * 100);
                 System.out.println(String.format("Progress: %d%%", progress));
-                createInsertBusinessSQL(addressId, ownerId);
+                long businessId = createInsertBusinessSQL(addressId, ownerId);
+
+                //check if an admin needs to be added to the business
+                if (userIds.size() == 2) {
+                    long adminId = userIds.get(1);
+                    addAdminToBusiness(businessId, adminId);
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
