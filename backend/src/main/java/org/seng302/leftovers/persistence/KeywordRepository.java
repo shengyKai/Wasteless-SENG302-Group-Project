@@ -1,7 +1,7 @@
-package org.seng302.persistence;
+package org.seng302.leftovers.persistence;
 
-import org.seng302.entities.Keyword;
-import org.seng302.entities.MarketplaceCard;
+import org.seng302.leftovers.entities.Keyword;
+import org.seng302.leftovers.entities.MarketplaceCard;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 

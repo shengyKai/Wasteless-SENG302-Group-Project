@@ -3,8 +3,8 @@ package cucumber.stepDefinitions;
 import cucumber.context.BusinessContext;
 import cucumber.context.UserContext;
 import io.cucumber.java.en.Given;
-import org.seng302.entities.Business;
-import org.seng302.entities.Location;
+import org.seng302.leftovers.entities.Business;
+import org.seng302.leftovers.entities.Location;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.text.ParseException;

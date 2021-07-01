@@ -11,11 +11,9 @@ import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
 import net.minidev.json.parser.ParseException;
 import org.junit.jupiter.api.Assertions;
-import org.seng302.entities.MarketplaceCard;
-import org.seng302.persistence.MarketplaceCardRepository;
+import org.seng302.leftovers.entities.MarketplaceCard;
+import org.seng302.leftovers.persistence.MarketplaceCardRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 
 import java.io.UnsupportedEncodingException;
 
