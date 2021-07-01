@@ -1,13 +1,13 @@
 <template>
-  <v-card>
+  <v-card class="mt-1">
     <v-container fluid>
       <v-row>
-        <v-col align="center" justify="center" cols="auto" md="3" sm="12" v-if="product.images.length === 0">
+        <v-col align="center" justify="center" cols="12" md="3" v-if="product.images.length === 0">
           <v-icon size="250">
             mdi-image
           </v-icon>
         </v-col>
-        <v-col cols="auto" md="3" sm="12" v-else>
+        <v-col cols="12" md="3" v-else>
           <!-- feed the productImages into the carousel child component -->
           <ProductImageCarousel
             :productImages="product.images"
@@ -18,22 +18,29 @@
         </v-col>
         <v-col>
           <v-row>
-            <v-col class="auto pa-0" md="10" sm="10">
+            <v-col class="pa-0">
               <v-card-title
                 :class="{ 'pt-0': $vuetify.breakpoint.smAndDown }"
-                class="pb-0"
+                class="pb-0 d-block"
               >
                 <!-- shows product name -->
                 {{ product.name }}
               </v-card-title>
             </v-col>
-            <v-col cols="auto" md="2" sm="2">
+            <v-col cols="auto">
               <v-card-actions
                 :class="{ 'pt-0': $vuetify.breakpoint.smAndDown }"
-                class="pb-0"
+                class="pb-0 aflex-column aalign-end d-block"
               >
                 <!-- shows the edit button for editing product details, which supposedly links to a form -->
-                <a @click="showImageUploaderForm=true">Upload Image</a>
+                <v-chip
+                  @click="showImageUploaderForm=true"
+                  small
+                  class="mr-1 font-weight-medium"
+                  color="primary"
+                >
+                  Upload Image
+                </v-chip>
                 <!-- cant mutate parent props directly, so no point to send a prop to the child -->
                 <ProductImageUploader
                   :businessId="businessId"
@@ -42,12 +49,19 @@
                   @image-added="imageAdded"
                 />
 
-                <a @click="showModifyProduct=true">Modify (Temp)</a>
+                <v-chip
+                  @click="showModifyProduct=true"
+                  small
+                  class="font-weight-medium"
+                  color="primary"
+                >
+                  Edit
+                </v-chip>
                 <ProductForm
                   v-if="showModifyProduct"
                   :businessId="businessId"
                   :previousProduct="product"
-                  @closeDialog="showModifyProduct=false"
+                  @closeDialog="productFormClosed"
                 />
               </v-card-actions>
             </v-col>
@@ -66,10 +80,7 @@
                     <strong>Description: </strong>
                     <br >
                     {{
-                      description.replace(
-                        /^([\s\S]{50}\S*)[\s\S]*/,
-                        "$1"
-                      )
+                      trimToLength(description, 50)
                     }}...
                     <!-- feed the productDescription into the dialog box child component -->
                     <FullProductDescription
@@ -144,7 +155,7 @@ import { currencyFromCountry } from "@/api/currency";
 import ProductImageUploader from "../utils/ProductImageUploader";
 import ProductForm from "../BusinessProfile/ProductForm.vue";
 import { makeImagePrimary, deleteImage } from "@/api/internal";
-import { formatDate } from '@/utils';
+import { formatDate, trimToLength } from '@/utils';
 
 export default {
   name: "ProductCatalogueItem",
@@ -230,7 +241,15 @@ export default {
     async imageAdded() {
       this.$emit('content-changed');
     },
+    /**
+     * Handler for ProductForm close event
+     */
+    productFormClosed() {
+      this.showModifyProduct = false;
+      this.$emit('content-changed');
+    },
     formatDate,
+    trimToLength,
   },
 };
 

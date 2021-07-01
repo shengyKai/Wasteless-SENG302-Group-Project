@@ -103,7 +103,7 @@
 </template>
 
 <script>
-import {createProduct, getBusiness} from '@/api/internal';
+import {createProduct, getBusiness, modifyProduct} from '@/api/internal';
 import {currencyFromCountry} from "@/api/currency";
 export default {
   name: 'ProductForm',
@@ -176,7 +176,9 @@ export default {
   },
   methods: {
     /**
-     * Creates the product by calling the API
+     * Create or modifies the product by calling the relevant API endpoint.
+     * If the operation is successful then this dialog will be closed.
+     * Otherwise the error message will be shown.
      **/
     async createProduct() {
       // Ensures that we have a reference to the original product code.
@@ -190,18 +192,19 @@ export default {
       this.errorMessage = undefined;
       this.isLoading = true;
 
+      const properties = {
+        id: productCode,
+        name: this.product,
+        description: this.description,
+        manufacturer: this.manufacturer,
+        recommendedRetailPrice: recommendedRetailPrice,
+      };
+
       let response;
       if (!this.isCreate) {
-        // TODO Implement
-        throw 'Not implemented';
+        response = await modifyProduct(this.businessId, this.previousProduct.id, properties);
       } else {
-        response = await createProduct(this.businessId, {
-          id: productCode,
-          name: this.product,
-          description: this.description,
-          manufacturer: this.manufacturer,
-          recommendedRetailPrice: recommendedRetailPrice,
-        });
+        response = await createProduct(this.businessId, properties);
       }
 
       this.isLoading = false;
