@@ -57,10 +57,7 @@
                       <strong>Description</strong>
                       <br>
                       {{
-                        product.description.replace(
-                          /^([\s\S]{50}\S*)[\s\S]*/,
-                          "$1"
-                        )
+                        trimToLength(product.description, 50)
                       }}...
                       <!-- feed the productDescription into the dialog box child component -->
                       <FullProductDescription
@@ -287,7 +284,7 @@
 import FullProductDescription from "../utils/FullProductDescription.vue";
 import ProductImageCarousel from "../utils/ProductImageCarousel.vue";
 import { currencyFromCountry } from "@/api/currency";
-import { formatDate } from '@/utils';
+import { formatDate, trimToLength } from '@/utils';
 
 export default {
   name: "InventoryItem",
@@ -342,6 +339,7 @@ export default {
       this.$store.commit('showCreateSaleItem', {businessId: this.businessId, inventoryItem: this.inventoryItem});
     },
     formatDate,
+    trimToLength,
   },
 };
 </script>

@@ -270,7 +270,21 @@ const apiCalls: Partial<ApiCalls> = {
       401: 'Missing/Invalid access token',
       406: 'The given business does not exist',
     },
-  }
+  },
+  modifyProduct: {
+    parameters: [888, 'FOO-BAR', testCreateProduct],
+    httpMethod: 'put',
+    url: '/businesses/888/products/FOO-BAR',
+    body: testCreateProduct,
+    result: undefined,
+    extraStatusMessages: {
+      401: 'Missing/Invalid access token',
+      403: 'Operation not permitted',
+      406: 'Product/Business not found',
+      400: 'Invalid parameters',
+      409: 'Product code unavailable',
+    },
+  },
 };
 
 describe('api', () => {

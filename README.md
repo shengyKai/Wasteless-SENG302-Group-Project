@@ -63,3 +63,13 @@ Running on: http://localhost:9499/ by default
     - Josh Egan
     - Nathan Smithies
     - Sheng-He Phua
+  
+## Sources for example data
+ 
+first-names-female.txt, first-names-male.txt, last-names.txt \
+Derived from data published by the US Census Bureau https://www.census.gov/topics/population/genealogy/data/1990_census/1990_census_namefiles.html \
+Used under the Freedom of Information Act of the United States of America
+
+nicknames.csv \
+Derived from this dataset https://github.com/carltonnorthern/nickname-and-diminutive-names-lookup \
+Used under the Apache-2.0 License https://github.com/carltonnorthern/nickname-and-diminutive-names-lookup/blob/master/License.txt
