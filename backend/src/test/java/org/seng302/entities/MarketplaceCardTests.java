@@ -71,8 +71,8 @@ class MarketplaceCardTests {
     }
 
     @Test
-    void marketplaceCardDelayCloses_called_delaysClosesBy1Day() {
-        var closes = Instant.now().plus(10, ChronoUnit.DAYS);
+    void marketplaceCardDelayCloses_closesIsInsideOf1Day_delaysClosesByTwoWeeks() {
+        var closes = Instant.now().plus(23, ChronoUnit.HOURS);
         var card = new MarketplaceCard.Builder()
                 .withCreator(testUser)
                 .withSection(MarketplaceCard.Section.EXCHANGE)
@@ -81,10 +81,26 @@ class MarketplaceCardTests {
                 .withCloses(closes)
                 .build();
 
-        card.delayCloses();
+        assertDoesNotThrow(() -> card.delayCloses());
 
         var expectedExtendedCloses = closes.plus(14, ChronoUnit.DAYS);
         assertEquals(expectedExtendedCloses, card.getCloses());
+    }
+
+    @Test
+    void marketplaceCardDelayCloses_closesIsOutsideOf1Day_throws400Exception() {
+        var closes = Instant.now().plus(25, ChronoUnit.HOURS);
+        var card = new MarketplaceCard.Builder()
+                .withCreator(testUser)
+                .withSection(MarketplaceCard.Section.EXCHANGE)
+                .withTitle("test_title")
+                .withDescription("test_description")
+                .withCloses(closes)
+                .build();
+
+        var exception = assertThrows(ResponseStatusException.class, () -> card.delayCloses());
+        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
+        assertEquals("Too early to extend closing date", exception.getReason());
     }
 
     @Test

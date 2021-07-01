@@ -524,10 +524,19 @@ class CardControllerTest {
     }
 
     @Test
-    void extendCardDisplayPeriod_cardExistsAndIsAuthorised_200ResponseAndDeleted() throws Exception {
+    void extendCardDisplayPeriod_cardExistsAndIsAuthorised_200ResponseAndExtended() throws Exception {
         mockMvc.perform(put("/cards/1/extenddisplayperiod")).andExpect(status().isOk());
         verify(mockCard, times(1)).delayCloses();
         verify(marketplaceCardRepository, times(1)).save(mockCard);
+    }
+
+    @Test
+    void extendCardDisplayPeriod_cardExistsAndFailsToClose_400() throws Exception {
+        doThrow(new ResponseStatusException(HttpStatus.BAD_REQUEST)).when(mockCard).delayCloses();
+
+        mockMvc.perform(put("/cards/1/extenddisplayperiod")).andExpect(status().isBadRequest());
+        verify(mockCard, times(1)).delayCloses();
+        verify(marketplaceCardRepository, times(0)).save(mockCard);
     }
 
     @Test

@@ -165,6 +165,9 @@ public class MarketplaceCard {
      * Delays the closing date for this card by the display period (2 weeks)
      */
     public void delayCloses() {
+        if (Instant.now().isBefore(closes.minus(1, ChronoUnit.DAYS))) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Too early to extend closing date");
+        }
         closes = closes.plus(DISPLAY_PERIOD);
     }
 
