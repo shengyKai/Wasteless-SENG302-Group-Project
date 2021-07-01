@@ -63,7 +63,7 @@ public class BusinessGenerator {
             } catch (NoSuchElementException e) {
                 System.out.println("You are using the gradle generate function");
                 System.out.println("This console does not support scanner inputs");
-                System.out.println("To input your own number of users");
+                System.out.println("To input your own number of businesses");
                 System.out.println("Compile and run this java file in a local terminal");
                 System.out.println("10 businesses will be creating in...");
                 for (int i=5; i>0; i--) {
