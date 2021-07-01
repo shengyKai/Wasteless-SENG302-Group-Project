@@ -1,10 +1,11 @@
-package org.seng302.controllers;
+package org.seng302.leftovers.controllers;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.seng302.entities.*;
-import org.seng302.persistence.*;
-import org.seng302.tools.AuthenticationTokenManager;
+import org.seng302.leftovers.entities.*;
+import org.seng302.leftovers.persistence.*;
+import org.seng302.leftovers.persistence.SaleItemRepository;
+import org.seng302.leftovers.tools.AuthenticationTokenManager;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -135,7 +136,7 @@ public class DemoController {
                     .build();
             saleItemRepository.save(saleItem);
         } catch (Exception e) {
-            logger.error(e);
+            logger.error(e.getMessage());
             throw e;
         }
     }

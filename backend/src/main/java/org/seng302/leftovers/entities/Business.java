@@ -1,9 +1,9 @@
-package org.seng302.entities;
+package org.seng302.leftovers.entities;
 
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
-import org.seng302.tools.AuthenticationTokenManager;
-import org.seng302.tools.JsonTools;
+import org.seng302.leftovers.tools.AuthenticationTokenManager;
+import org.seng302.leftovers.tools.JsonTools;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 

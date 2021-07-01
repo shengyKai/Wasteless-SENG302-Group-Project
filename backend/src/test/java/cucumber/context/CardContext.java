@@ -1,8 +1,8 @@
 package cucumber.context;
 
 import io.cucumber.java.Before;
-import org.seng302.entities.MarketplaceCard;
-import org.seng302.persistence.MarketplaceCardRepository;
+import org.seng302.leftovers.entities.MarketplaceCard;
+import org.seng302.leftovers.persistence.MarketplaceCardRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class CardContext {

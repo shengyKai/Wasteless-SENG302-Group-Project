@@ -1,4 +1,4 @@
-package org.seng302.exceptions;
+package org.seng302.leftovers.exceptions;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;

@@ -1,4 +1,4 @@
-package org.seng302.service;
+package org.seng302.leftovers.service;
 
 import org.springframework.core.io.Resource;
 import org.springframework.web.multipart.MultipartFile;

@@ -1,4 +1,4 @@
-package org.seng302.service;
+package org.seng302.leftovers.service;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

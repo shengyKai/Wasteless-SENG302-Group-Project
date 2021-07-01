@@ -1,14 +1,14 @@
-package org.seng302.controllers;
+package org.seng302.leftovers.controllers;
 
 import net.minidev.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.seng302.entities.Business;
-import org.seng302.entities.Location;
-import org.seng302.entities.User;
-import org.seng302.persistence.BusinessRepository;
-import org.seng302.persistence.UserRepository;
-import org.seng302.tools.AuthenticationTokenManager;
+import org.seng302.leftovers.entities.Business;
+import org.seng302.leftovers.entities.Location;
+import org.seng302.leftovers.entities.User;
+import org.seng302.leftovers.persistence.BusinessRepository;
+import org.seng302.leftovers.persistence.UserRepository;
+import org.seng302.leftovers.tools.AuthenticationTokenManager;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
