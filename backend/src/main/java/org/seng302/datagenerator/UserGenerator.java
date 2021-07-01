@@ -22,7 +22,7 @@ public class UserGenerator {
 
     //predefined lists
     String[] BIOS = {"I enjoy running on the weekends", "Beaches are fun", "Got to focus on my career", "If only I went to a better university", "Read documentation yeah right", "My cats keep me going", "All I need is food"};
-    
+
     public UserGenerator(Connection conn) {
         this.conn = conn;
     }
@@ -175,6 +175,10 @@ public class UserGenerator {
 
         try {
             PersonNameGenerator personNameGenerator = PersonNameGenerator.getInstance();
+<<<<<<< HEAD
+=======
+
+>>>>>>> t233-business-name-generator
             for (int i=0; i < users; i++) {
                 PersonNameGenerator.FullName fullName = personNameGenerator.generateName();
                 String email = generateEmail(i, fullName);

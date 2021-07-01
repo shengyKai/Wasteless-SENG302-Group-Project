@@ -1,0 +1,20 @@
+General Store
+Department Store
+Supermarket
+Grocers
+Butchers
+Haberdashery
+Pharmacy
+Barbers
+Theatre
+Restaurant
+Baker
+Fishmongers
+Takeaways
+Salon
+Pet Shop
+Jewelers
+Watchmakers
+Gallery
+Dairy
+Museum
