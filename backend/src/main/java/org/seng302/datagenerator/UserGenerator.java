@@ -75,22 +75,6 @@ public class UserGenerator {
     }
 
     /**
-     * Randomly generates the address of the user
-     * @return the elements of a location object (user's address) in an array
-     */
-    private String[] generateAddress() {
-        String streetNum = String.valueOf(random.nextInt(998) + 1);
-        String streetName = STREETNAMES[random.nextInt(STREETNAMES.length)];
-        String city = CITIES[random.nextInt(CITIES.length)];
-        String region = REGIONS[random.nextInt(REGIONS.length)];
-        String country = COUNTRIES[random.nextInt(COUNTRIES.length)];
-        String postcode = String.valueOf(random.nextInt(98999) + 1000);
-        String district = DISTRICTS[random.nextInt(DISTRICTS.length)];
-        String[] address = {streetNum, streetName, city, region, country, postcode, district};
-        return address;
-    }
-
-    /**
      * Creates the SQL commands required to insert the user's address into the database
      * @return the id of the location entity (addressid)
      */
@@ -218,7 +202,7 @@ public class UserGenerator {
                 String email = generateEmail(i, fullName);
                 String password = generatePassword();
                 Location address = locationGenerator.generateAddress(random);
-                long this.addressId = locationGenerator.createInsertAddressSQL(address, conn);
+                this.addressId = locationGenerator.createInsertAddressSQL(address, conn);
 
                 clear();
                 System.out.println(String.format("Creating User %d / %d", i+1, users));
