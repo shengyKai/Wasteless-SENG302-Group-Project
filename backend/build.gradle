@@ -62,7 +62,6 @@ dependencies {
     implementation 'org.mariadb.jdbc:mariadb-java-client:2.7.2'
     // ability to use in-memory database (for testing only)
     runtimeOnly 'com.h2database:h2'
-    runtimeOnly 'mysql:mysql-connector-java:5.1.16'
 
     // use spring boot mocking test framework
     testImplementation 'org.springframework.boot:spring-boot-starter-test'

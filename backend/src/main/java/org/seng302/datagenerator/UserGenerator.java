@@ -118,7 +118,7 @@ public class UserGenerator {
 
             Instant endTime = Instant.now();
 
-            System.out.println("Added " + userCount + " users in " + Duration.between(startTime, endTime).getNano() / 1_000_000 + "ms");
+            System.out.println("Added " + userCount + " users in " + ChronoUnit.MILLIS.between(startTime, endTime) + "ms");
 
             return generatedUserIds;
         } catch (Exception e) {

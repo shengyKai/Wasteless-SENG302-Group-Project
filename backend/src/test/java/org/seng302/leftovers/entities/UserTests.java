@@ -2,9 +2,11 @@ package org.seng302.leftovers.entities;
 
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
+import org.hibernate.SessionFactory;
 import org.junit.Ignore;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.MockitoAnnotations;
 import org.mockito.internal.matchers.apachecommons.ReflectionEquals;
 import org.seng302.leftovers.exceptions.EmailInUseException;
@@ -12,7 +14,12 @@ import org.seng302.leftovers.persistence.BusinessRepository;
 import org.seng302.leftovers.persistence.UserRepository;
 import org.seng302.leftovers.tools.PasswordAuthenticator;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.security.NoSuchAlgorithmException;
@@ -28,6 +35,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@Transactional
 @SpringBootTest
 class UserTests {
     private User testUser;
@@ -36,6 +44,8 @@ class UserTests {
     private UserRepository userRepository;
     @Autowired
     private BusinessRepository businessRepository;
+    @Autowired
+    SessionFactory sessionFactory;
 
     @BeforeEach
     void setup() throws ParseException {
@@ -828,6 +838,8 @@ class UserTests {
     @Test
     void constructPublicJsonBusinessesAdministeredTrueTest() {
         addBusinessesAdministeredToTestUser();
+        sessionFactory.getCurrentSession().flush();
+
         List<Business> testBusinesses = new ArrayList<>();
         testBusinesses.addAll(testUser.getBusinessesAdministeredAndOwned());
         Collections.sort(testBusinesses, (Business b1, Business b2) ->
