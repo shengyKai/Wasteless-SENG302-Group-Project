@@ -98,9 +98,11 @@ public class BusinessGenerator {
                 LocationGenerator.Location businessLocation = locationGenerator.generateAddress(random);
                 long addressId = locationGenerator.createInsertAddressSQL(businessLocation, conn);
 
-                System.out.println(String.format("Creating Business %d / %d", i+1, businessCount));
-                int progress = (int) (((float)(i+1) / (float)businessCount) * 100);
-                System.out.println(String.format("Progress: %d%%", progress));
+                if (i % 10 == 0) {
+                    System.out.println(String.format("Creating Business %d / %d", i + 1, businessCount));
+                    int progress = (int) (((float) (i + 1) / (float) businessCount) * 100);
+                    System.out.println(String.format("Progress: %d%%", progress));
+                }
                 long businessId = createInsertBusinessSQL(addressId, ownerId);
 
                 //check if an admin needs to be added to the business
