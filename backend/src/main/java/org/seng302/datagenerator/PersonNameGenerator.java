@@ -11,7 +11,6 @@ public class PersonNameGenerator {
 
     private static PersonNameGenerator instance;
 
-    private static final String EXAMPLE_DATA_FILE_PATH = "example-data/";
     private static final String NICKNAME_FILE = "nicknames.csv";
     private static final String FEMALE_FIRST_NAMES_FILE = "first-names-female.txt";
     private static final String MALE_FIRST_NAMES_FILE = "first-names-male.txt";
@@ -30,9 +29,9 @@ public class PersonNameGenerator {
      */
     private PersonNameGenerator() {
         readNicknameFile();
-        femaleFirstNames = readNameFile(FEMALE_FIRST_NAMES_FILE);
-        maleFirstNames = readNameFile(MALE_FIRST_NAMES_FILE);
-        lastNames = readNameFile(LAST_NAMES_FILE);
+        femaleFirstNames = ExampleDataFileReader.readExampleDataFile(FEMALE_FIRST_NAMES_FILE);
+        maleFirstNames = ExampleDataFileReader.readExampleDataFile(MALE_FIRST_NAMES_FILE);
+        lastNames = ExampleDataFileReader.readExampleDataFile(LAST_NAMES_FILE);
         random = new Random();
     }
 
@@ -43,7 +42,7 @@ public class PersonNameGenerator {
      */
     private void readNicknameFile() {
         nicknameLookup = new HashMap<>();
-        try (BufferedReader bufferedReader = new BufferedReader(new FileReader(EXAMPLE_DATA_FILE_PATH + NICKNAME_FILE))) {
+        try (BufferedReader bufferedReader = new BufferedReader(new FileReader(ExampleDataFileReader.getExampleDataFilePath() + NICKNAME_FILE))) {
             String line;
             while ((line = bufferedReader.readLine()) != null) {
                 String[] splitLine = line.strip().split(",");
@@ -58,22 +57,11 @@ public class PersonNameGenerator {
     }
 
     /**
-     * Reads a text file with a list of names and returns a list where each entry in the list is a name from the file.
-     * @param filename The name of the file to be read.
-     * @return A list of all names in the file.
+     * Randomly selects and returns a name from the list of last names.
+     * @return A randomly selected last name.
      */
-    private List<String> readNameFile(String filename) {
-        List<String> names = new ArrayList<>();
-        try (BufferedReader bufferedReader = new BufferedReader(new FileReader(EXAMPLE_DATA_FILE_PATH + filename))) {
-            String line;
-            while ((line = bufferedReader.readLine()) != null) {
-                String name = line.strip();
-                names.add(name);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return names;
+    public String randomLastName() {
+        return randomNameFromList(lastNames);
     }
 
     /**

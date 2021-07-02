@@ -1,4 +1,4 @@
-package org.seng302.persistence;
+package org.seng302.leftovers.persistence;
 
 /**
  * Defines a criteria for building predicates

@@ -1,11 +1,11 @@
 /* Parent class for all kinds of accounts */
-package org.seng302.entities;
+package org.seng302.leftovers.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.seng302.exceptions.EmailInUseException;
-import org.seng302.persistence.UserRepository;
-import org.seng302.tools.PasswordAuthenticator;
+import org.seng302.leftovers.exceptions.EmailInUseException;
+import org.seng302.leftovers.persistence.UserRepository;
+import org.seng302.leftovers.tools.PasswordAuthenticator;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 

@@ -1,6 +1,6 @@
-package org.seng302.persistence;
+package org.seng302.leftovers.persistence;
 
-import org.seng302.entities.User;
+import org.seng302.leftovers.entities.User;
 import org.springframework.data.jpa.domain.Specification;
 
 import javax.persistence.Transient;

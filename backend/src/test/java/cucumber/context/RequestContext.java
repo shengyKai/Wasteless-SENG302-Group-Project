@@ -2,7 +2,7 @@ package cucumber.context;
 
 import io.cucumber.java.Before;
 import org.junit.jupiter.api.Assertions;
-import org.seng302.entities.User;
+import org.seng302.leftovers.entities.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;

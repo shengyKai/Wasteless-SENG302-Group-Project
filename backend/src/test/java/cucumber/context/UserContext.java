@@ -1,10 +1,8 @@
 package cucumber.context;
 
 import io.cucumber.java.Before;
-import org.seng302.entities.Business;
-import org.seng302.entities.User;
-import org.seng302.persistence.BusinessRepository;
-import org.seng302.persistence.UserRepository;
+import org.seng302.leftovers.entities.User;
+import org.seng302.leftovers.persistence.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.HashMap;

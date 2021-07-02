@@ -1,12 +1,12 @@
-package org.seng302.controllers;
+package org.seng302.leftovers.controllers;
 
 import net.minidev.json.JSONObject;
-import org.seng302.entities.Account;
-import org.seng302.entities.User;
-import org.seng302.persistence.AccountRepository;
-import org.seng302.persistence.UserRepository;
-import org.seng302.tools.AuthenticationTokenManager;
-import org.seng302.tools.PasswordAuthenticator;
+import org.seng302.leftovers.entities.Account;
+import org.seng302.leftovers.entities.User;
+import org.seng302.leftovers.persistence.AccountRepository;
+import org.seng302.leftovers.persistence.UserRepository;
+import org.seng302.leftovers.tools.AuthenticationTokenManager;
+import org.seng302.leftovers.tools.PasswordAuthenticator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PostMapping;

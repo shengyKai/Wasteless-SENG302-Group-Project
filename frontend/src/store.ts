@@ -1,6 +1,8 @@
 import { User, Business, getUser, login, InventoryItem } from './api/internal';
+import { AnyEvent, initialiseEventSourceForUser, addEventMessageHandler } from './api/events';
 import Vuex, { Store, StoreOptions } from 'vuex';
 import { COOKIE, deleteCookie, getCookie, isTesting, setCookie } from './utils';
+import Vue from 'vue';
 
 type UserRole = { type: "user" | "business", id: number };
 type SaleItemInfo = { businessId: number, inventoryItem: InventoryItem };
@@ -44,6 +46,11 @@ export type StoreData = {
    * Whether or not the dialog for creating a marketplace card is being shown.
    */
   createMarketplaceCardDialog: User | undefined,
+  /**
+   * Map from event ids to events.
+   * This is a sparse array
+   */
+  eventMap: Record<number, AnyEvent>,
 };
 
 function createOptions(): StoreOptions<StoreData> {
@@ -56,6 +63,7 @@ function createOptions(): StoreOptions<StoreData> {
       createInventoryDialog: undefined,
       createSaleItemDialog: undefined,
       createMarketplaceCardDialog: undefined,
+      eventMap: [],
     },
     mutations: {
       setUser(state, payload: User) {
@@ -70,6 +78,15 @@ function createOptions(): StoreOptions<StoreData> {
           deleteCookie(COOKIE.USER.toLowerCase());
           setCookie(COOKIE.USER, payload.id);
         }
+      },
+      /**
+       * Adds or replaces a event in the event list
+       * This method is only expected to be called from the event message handler
+       * @param state Current state
+       * @param payload New event
+       */
+      addEvent(state, payload: AnyEvent) {
+        Vue.set(state.eventMap, payload.id, payload);
       },
       /**
        * Displays an error message at the top of the screen.
@@ -186,8 +203,28 @@ function createOptions(): StoreOptions<StoreData> {
       role(state) {
         return state.user?.role;
       },
+      /**
+       * Gets a list of all events sorted by creation date
+       * @param state Current state
+       * @returns List of events
+       */
+      events(state) {
+        let events = Object.values(state.eventMap);
+        events.sort((a, b) => +new Date(b.created) - +new Date(a.created));
+        return events;
+      },
     },
     actions: {
+      /**
+       * Starts listening to notification events which are placed in state.eventMap
+       * This is expected to be called just after logging in
+       * @param context The store context
+       */
+      startUserFeed(context) {
+        context.state.eventMap = []; // Clear events
+        initialiseEventSourceForUser(context.state.user!.id); // Make event handler
+        addEventMessageHandler(event => context.commit('addEvent', event));
+      },
       /**
        * Attempts to automatically log in the provided user id with the current authentication cookies.
        * Will also set the current role to the previously selected role.
@@ -202,6 +239,7 @@ function createOptions(): StoreOptions<StoreData> {
           return;
         }
         context.commit('setUser', response);
+        context.dispatch('startUserFeed');
 
         let rawRole = getCookie('role');
         if (rawRole !== null) {
@@ -251,6 +289,7 @@ function createOptions(): StoreOptions<StoreData> {
           return user;
         }
         context.commit('setUser', user);
+        context.dispatch('startUserFeed');
 
         return undefined;
       }

@@ -1,11 +1,11 @@
-package org.seng302.controllers;
+package org.seng302.leftovers.controllers;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.seng302.entities.Image;
-import org.seng302.persistence.ImageRepository;
-import org.seng302.service.StorageService;
-import org.seng302.tools.AuthenticationTokenManager;
+import org.seng302.leftovers.entities.Image;
+import org.seng302.leftovers.persistence.ImageRepository;
+import org.seng302.leftovers.service.StorageService;
+import org.seng302.leftovers.tools.AuthenticationTokenManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;

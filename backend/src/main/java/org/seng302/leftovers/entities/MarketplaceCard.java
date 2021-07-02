@@ -1,14 +1,16 @@
-package org.seng302.entities;
+package org.seng302.leftovers.entities;
 
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
-import org.seng302.tools.JsonTools;
+import org.seng302.leftovers.tools.JsonTools;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.persistence.*;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalUnit;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -16,6 +18,8 @@ import java.util.Objects;
 
 @Entity
 public class MarketplaceCard {
+    private static final Duration DISPLAY_PERIOD = Duration.ofDays(14);
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -155,6 +159,16 @@ public class MarketplaceCard {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Closing time cannot be before creation");
         }
         this.closes = closes;
+    }
+
+    /**
+     * Delays the closing date for this card by the display period (2 weeks)
+     */
+    public void delayCloses() {
+        if (Instant.now().isBefore(closes.minus(1, ChronoUnit.DAYS))) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Too early to extend closing date");
+        }
+        closes = closes.plus(DISPLAY_PERIOD);
     }
 
     /**
@@ -362,7 +376,7 @@ public class MarketplaceCard {
             card.setDescription(description);
             card.created = Instant.now();
             if (closes == null) {
-                card.setCloses(card.created.plus(14, ChronoUnit.DAYS));
+                card.setCloses(card.created.plus(DISPLAY_PERIOD));
             } else {
                 card.setCloses(closes);
             }

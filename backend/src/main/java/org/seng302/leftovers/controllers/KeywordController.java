@@ -1,11 +1,11 @@
-package org.seng302.controllers;
+package org.seng302.leftovers.controllers;
 
 import net.minidev.json.JSONArray;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.seng302.entities.Keyword;
-import org.seng302.persistence.KeywordRepository;
-import org.seng302.tools.AuthenticationTokenManager;
+import org.seng302.leftovers.entities.Keyword;
+import org.seng302.leftovers.persistence.KeywordRepository;
+import org.seng302.leftovers.tools.AuthenticationTokenManager;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 

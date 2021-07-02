@@ -1,6 +1,6 @@
-package org.seng302.persistence;
+package org.seng302.leftovers.persistence;
 
-import org.seng302.entities.Account;
+import org.seng302.leftovers.entities.Account;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;

@@ -1,19 +1,19 @@
-package org.seng302.controllers;
+package org.seng302.leftovers.controllers;
 
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.seng302.entities.Business;
-import org.seng302.entities.Image;
-import org.seng302.entities.Product;
-import org.seng302.exceptions.BusinessNotFoundException;
-import org.seng302.persistence.BusinessRepository;
-import org.seng302.persistence.ImageRepository;
-import org.seng302.persistence.ProductRepository;
-import org.seng302.service.StorageService;
-import org.seng302.tools.AuthenticationTokenManager;
-import org.seng302.tools.SearchHelper;
+import org.seng302.leftovers.entities.Business;
+import org.seng302.leftovers.entities.Image;
+import org.seng302.leftovers.entities.Product;
+import org.seng302.leftovers.exceptions.BusinessNotFoundException;
+import org.seng302.leftovers.persistence.BusinessRepository;
+import org.seng302.leftovers.persistence.ImageRepository;
+import org.seng302.leftovers.persistence.ProductRepository;
+import org.seng302.leftovers.service.StorageService;
+import org.seng302.leftovers.tools.AuthenticationTokenManager;
+import org.seng302.leftovers.tools.SearchHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -204,7 +204,7 @@ public class ProductController {
 
             response.setStatus(201);
         } catch (Exception error) {
-            logger.error(error);
+            logger.error(error.getMessage());
             throw error;
         }
     }
