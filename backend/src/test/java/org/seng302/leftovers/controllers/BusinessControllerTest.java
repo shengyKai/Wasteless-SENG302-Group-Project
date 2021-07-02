@@ -3,6 +3,9 @@ package org.seng302.leftovers.controllers;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
+import org.hibernate.Hibernate;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
@@ -20,7 +23,9 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
+import javax.annotation.Resource;
 import javax.servlet.http.Cookie;
+import javax.transaction.Transactional;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.HashMap;
@@ -42,6 +47,9 @@ class BusinessControllerTest {
     private BusinessRepository businessRepository;
     @Autowired
     private UserRepository userRepository;
+
+    @Resource
+    private SessionFactory sessionFactory;
 
     private final HashMap<String, Object> sessionAuthToken = new HashMap<>();
     private Cookie authCookie;
@@ -560,7 +568,17 @@ class BusinessControllerTest {
 
         testAdmin = userRepository.findById(testAdmin.getUserID()).get();
         System.out.println("Businesses administered:");
-        assertTrue(testAdmin.getBusinessesAdministered().contains(testBusiness));
+
+        Session session = sessionFactory.openSession();
+        session.beginTransaction();
+
+        User persistentTestAdmin = session.find(User.class, testAdmin.getUserID());
+        Hibernate.initialize(persistentTestAdmin.getBusinessesAdministered());
+
+        session.getTransaction().commit();
+        session.close();
+
+        assertTrue(persistentTestAdmin.getBusinessesAdministered().contains(testBusiness));
     }
 
     /**
