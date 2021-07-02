@@ -12,6 +12,7 @@ import org.seng302.leftovers.exceptions.UserNotFoundException;
 import org.seng302.leftovers.persistence.UserRepository;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
 import org.seng302.leftovers.tools.SearchHelper;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
@@ -115,24 +116,6 @@ public class UserController {
     }
 
     /**
-     * REST GET method to get the number of users from the search query
-     * @param searchQuery The search term
-     * @return The total number of users
-     */
-    @GetMapping("/users/search/count")
-    public JSONObject getSearchCount(HttpServletRequest session, @RequestParam("searchQuery") String searchQuery) {
-        AuthenticationTokenManager.checkAuthenticationToken(session);
-        logger.info(() -> String.format("Getting search count for \"%s\"", searchQuery));
-
-        Specification<User> spec = SearchHelper.constructUserSpecificationFromSearchQuery(searchQuery);
-        spec = spec.and(SearchHelper.isNotDGAASpec());
-        JSONObject count = new JSONObject();
-        count.put("count", userRepository.count(spec));
-        return count;
-    }
-
-
-    /**
      * REST GET method to search for users matching a search query
      * @param searchQuery The search term
      * @param page The page number in the results to be returned (defaults to one)
@@ -142,7 +125,7 @@ public class UserController {
      * @return List of matching Users
      */
     @GetMapping("/users/search")
-    public JSONArray searchUsersByName(HttpServletRequest session,
+    public JSONObject searchUsersByName(HttpServletRequest session,
                                 @RequestParam("searchQuery") String searchQuery,
                                 @RequestParam(required = false) Integer page,
                                 @RequestParam(required = false) Integer resultsPerPage,
@@ -153,25 +136,32 @@ public class UserController {
 
         logger.info(() -> String.format("Performing search for \"%s\"", searchQuery));
         List<User> queryResults;
+        long count;
         if (orderBy == null || orderBy.equals("relevance")) {
             queryResults = SearchHelper.getSearchResultsOrderedByRelevance(searchQuery, userRepository, reverse);
+            count = queryResults.size();
+            queryResults = SearchHelper.getPageInResults(queryResults, page, resultsPerPage);
         } else {
             Specification<User> spec = SearchHelper.constructUserSpecificationFromSearchQuery(searchQuery);
-            spec = spec.and(SearchHelper.isNotDGAASpec());
             Sort userSort = SearchHelper.getSort(orderBy, reverse);
-            queryResults = userRepository.findAll(spec, SearchHelper.getPageRequest(page, resultsPerPage, userSort)).toList();
+            Page<User> results = userRepository.findAll(spec, SearchHelper.getPageRequest(page, resultsPerPage, userSort));
+            count = results.getTotalElements();
+            queryResults = results.toList();
         }
 
-        List<User> pageInResults = SearchHelper.getPageInResults(queryResults, page, resultsPerPage);
-        JSONArray publicResults = new JSONArray();
-        for (User user : pageInResults) {
+
+        JSONArray resultArray = new JSONArray();
+        for (User user : queryResults) {
             if (AuthenticationTokenManager.sessionCanSeePrivate(session, user.getUserID())) {
-                publicResults.appendElement(user.constructPrivateJson(true));
+                resultArray.appendElement(user.constructPrivateJson(true));
             } else {
-                publicResults.appendElement(user.constructPublicJson(true));
+                resultArray.appendElement(user.constructPublicJson(true));
             }
         }
-        return publicResults;
+        JSONObject json = new JSONObject();
+        json.put("count", count);
+        json.put("results", resultArray);
+        return json;
     }
 
 

@@ -150,8 +150,10 @@ public class SearchHelper {
      * predicates types. The specifications will match uses which contain a certain term, and the predicate types indicate
      * whether these specifications are joined by logical AND or logical OR.
      *
-     * Lastly, buildCompoundSpecification is called which combines the individual specifications using the predicates to
+     * Then buildCompoundSpecification is called which combines the individual specifications using the predicates to
      * create one specification which can be used to query the User repository for users which match the search query.
+     *
+     * Finally DGAA accounts are filtered out
      * @param searchQuery A query entered by the user for searching for users within the database.
      * @return A specification which matches the user's search query.
      */
@@ -162,7 +164,8 @@ public class SearchHelper {
         List<PredicateType> predicateTypesByIndex = new ArrayList<>();
         parseUserSearchTokens(searchTokens, searchSpecs, predicateTypesByIndex);
 
-        return buildCompoundSpecification(searchSpecs, predicateTypesByIndex);
+        return buildCompoundSpecification(searchSpecs, predicateTypesByIndex)
+                .and(isNotDGAASpec());
     }
 
     /**
