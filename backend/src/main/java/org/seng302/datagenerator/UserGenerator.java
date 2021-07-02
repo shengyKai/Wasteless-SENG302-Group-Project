@@ -35,6 +35,8 @@ public class UserGenerator {
         String month = String.valueOf(random.nextInt(11) + 1); // +1 as the month cannot be zero
         //year must be more than a year in the past
         String year = String.valueOf(random.nextInt(2006) + 1); // +1 as the year cannot be zero
+        while (year.length() < 4) year = "0" + year;
+
         return year +"-"+ month +"-"+ day;
     }
 
