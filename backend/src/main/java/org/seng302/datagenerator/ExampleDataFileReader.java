@@ -2,8 +2,12 @@ package org.seng302.datagenerator;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * This class reads data from parameter files for generating example data
@@ -12,6 +16,39 @@ public class ExampleDataFileReader {
 
     private static final String EXAMPLE_DATA_FILE_PATH = "example-data/";
 
+
+    public static Map<String, String> readPropertiesFile(String resourcePath) {
+        Map<String, String> properties = new HashMap<>();
+
+        InputStream stream = ExampleDataFileReader.class.getResourceAsStream(resourcePath);
+        if (stream == null) {
+            return null;
+        }
+        try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(stream))) {
+            String line;
+            while ((line = bufferedReader.readLine()) != null) {
+                line = line.strip();
+                if (line.startsWith("#")) continue;
+
+                int index = line.indexOf('=');
+                if (index == -1) continue;
+
+                String key = line.substring(0, index);
+                String value = line.substring(index+1);
+
+                if (properties.containsKey(key)) {
+                    throw new RuntimeException("Unexpected duplicate key \"" + key + "\"");
+                }
+
+                properties.put(key, value);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+
+        return properties;
+    }
 
     /**
      * Reads a text file with one value per line and returns a list where each entry in the list is a value from the file.
