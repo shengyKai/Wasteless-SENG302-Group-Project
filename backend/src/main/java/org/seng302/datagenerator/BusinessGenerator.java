@@ -1,11 +1,10 @@
 package org.seng302.datagenerator;
 
+import org.seng302.leftovers.entities.Location;
+
 import java.sql.*;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.NoSuchElementException;
-import java.util.Random;
-import java.util.Scanner;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 import static org.seng302.datagenerator.Main.*;
@@ -13,15 +12,13 @@ import static org.seng302.datagenerator.Main.*;
 public class BusinessGenerator {
     private Random random = new Random();
     private Connection conn;
-    static Scanner scanner = new Scanner(System.in);
+    private LocationGenerator locationGenerator = LocationGenerator.getInstance();
 
     //predefined lists
     String[] BUSINESSTYPES = {"Accommodation and Food Services", "Retail Trade", "Charitable organisation", "Non-profit organisation"};
     String[] DESCRIPTIONS = {"This is a Japanese restaurant, the best Ramen and Sake.", "We are non-profit organisation focused on bringing New Zealand's extreme housing unaffordability down to a managable unaffordable housing market.",
     "We are a non-profit focused on making sure all SENG302 students get enough sleep"};
     String[] NAMES = {"Japan Food", "Sleep Saviour", "Ed Sheeran Church", "Unaffordable Housing"};
-
-    public long businessId;
 
     public BusinessGenerator(Connection conn) { this.conn = conn; }
 
@@ -51,14 +48,15 @@ public class BusinessGenerator {
 
     /**
      * Inserts the admin of the business into the database
+     * @param businessId the id associated with the business
      * @param adminId the id associated with the user who is an administrator of the business
      */
-    private void addAdminToBusiness(long adminId) throws SQLException {
+    private void addAdminToBusiness(long businessId, long adminId) throws SQLException {
         PreparedStatement stmt = conn.prepareStatement(
                 "INSERT INTO business_admins (business_id, user_id)"
                 + "VALUES (?, ?)"
         );
-        stmt.setObject(1, this.businessId);
+        stmt.setObject(1, businessId);
         stmt.setObject(2, adminId);
         stmt.executeUpdate();
     }
@@ -70,41 +68,47 @@ public class BusinessGenerator {
     public static void main(String[] args) throws SQLException, InterruptedException {
         Connection conn = connectToDatabase();
         var generator = new BusinessGenerator(conn);
-        generator.generateBusinesses();
+
+        int businessCount = getNumObjectsFromInput("businesses");
+        generator.generateBusinesses(businessCount);
     }
 
     /**
      * Generates the businesses
+     * @param businessCount Number of businesses to generate
+     * @return List of generated business ids
      */
-    private void generateBusinesses() throws InterruptedException {
-        int businesses = getNumObjectsFromInput("businesses");
+    private List<Long> generateBusinesses(int businessCount) throws InterruptedException {
         var userGenerator = new UserGenerator(conn);
-
+        List<Long> generatedBusinessIds = new ArrayList<>();
         try {
-            for (int i=0; i < businesses; i++) {
+            for (int i=0; i < businessCount; i++) {
                 clear();
-                int usersGenerated = random.nextInt(1) + 1; // between 1 and 2 users will be generated
+                int usersGenerated = random.nextInt(2) + 1; // between 1 and 2 users will be generated
                 //if two users are generated, the second is a business admin
-                userGenerator.generateUsers(usersGenerated);
-                ArrayList<Long> userIds = userGenerator.getUserIds();
+                List<Long> userIds = userGenerator.generateUsers(usersGenerated);
                 long ownerId = userIds.get(0);
-                long addressId = userGenerator.getAddressId();
-                System.out.println(String.format("Creating Business %d / %d", i+1, businesses));
-                int progress = (int) (((float)(i+1) / (float)businesses) * 100);
+
+                LocationGenerator.Location businessLocation = locationGenerator.generateAddress(random);
+                long addressId = locationGenerator.createInsertAddressSQL(businessLocation, conn);
+
+                System.out.println(String.format("Creating Business %d / %d", i+1, businessCount));
+                int progress = (int) (((float)(i+1) / (float)businessCount) * 100);
                 System.out.println(String.format("Progress: %d%%", progress));
-                this.businessId = createInsertBusinessSQL(addressId, ownerId);
+                long businessId = createInsertBusinessSQL(addressId, ownerId);
 
                 //check if an admin needs to be added to the business
                 if (userIds.size() == 2) {
                     long adminId = userIds.get(1);
-                    addAdminToBusiness(adminId);
+                    addAdminToBusiness(businessId, adminId);
                 }
+
+                generatedBusinessIds.add(businessId);
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
-        scanner.close();
-    }
 
-    public long getBusinessId() { return this.businessId; }
+        return generatedBusinessIds;
+    }
 }

@@ -34,7 +34,6 @@ public class Main {
      * @return the number of objects to be generated
      */
     public static int getNumObjectsFromInput(String objectName) throws InterruptedException {
-        int defaultCreated = 10;
         int numObjects = 0;
         while (numObjects <= 0) {
             clear();
@@ -44,17 +43,6 @@ public class Main {
                 System.out.println("generated and put into the database?");
                 System.out.println("-------------------------------------------------------");
                 numObjects = Integer.parseInt(scanner.nextLine());
-            } catch (NoSuchElementException e) {
-                System.out.println("You are using the gradle generate function");
-                System.out.println("This terminal does not support scanner inputs (stdin)");
-                System.out.println(String.format("To input your own number of %s", objectName));
-                System.out.println("Compile and run this java file in a local terminal");
-                System.out.println(String.format("%d %s will be created in...", defaultCreated, objectName));
-                for (int i=5; i>0; i--) {
-                    TimeUnit.SECONDS.sleep(1);
-                    System.out.println(i);
-                }
-                numObjects = defaultCreated;
             } catch (NumberFormatException e) {
                 System.out.println("Please enter a number! (above 0)");
             }
