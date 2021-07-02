@@ -6,9 +6,14 @@ import org.seng302.leftovers.entities.User;
 import org.seng302.leftovers.exceptions.SearchFormatException;
 import org.seng302.leftovers.persistence.UserRepository;
 import org.seng302.leftovers.persistence.UserSpecificationsBuilder;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -46,6 +51,17 @@ public class SearchHelper {
         int fromIndex = (pageToReturn - 1) * resultsPerPage;
         int toIndex = Math.min(fromIndex + resultsPerPage, numResults);
         return queryResults.subList(fromIndex, toIndex);
+    }
+
+    /**
+     * Creates a request for a specific page when sorting by the provided sort
+     * @param requestedPage Page index to start from (1 based indexing)
+     * @param resultsPerPage Maximum number of results per page
+     * @param sort Sorting function to use
+     * @return PageRequest for the given parameters
+     */
+    public static PageRequest getPageRequest(Integer requestedPage, Integer resultsPerPage, Sort sort) {
+        return PageRequest.of(getRequestedPageInt(requestedPage) - 1, getResultsPerPageInt(resultsPerPage), sort);
     }
 
     /**
@@ -113,6 +129,14 @@ public class SearchHelper {
         } else {
             return Sort.by(Sort.Direction.ASC, orderBy);
         }
+    }
+
+    /**
+     * Specification for a user that is not the DGAA
+     * @return Specification matching any user except DGAA
+     */
+    public static Specification<User> isNotDGAASpec() {
+        return (root, query, criteriaBuilder) -> criteriaBuilder.notEqual(root.get("role"), "defaultGlobalApplicationAdmin");
     }
 
     /**

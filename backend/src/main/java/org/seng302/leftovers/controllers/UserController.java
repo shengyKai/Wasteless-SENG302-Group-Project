@@ -122,14 +122,12 @@ public class UserController {
     @GetMapping("/users/search/count")
     public JSONObject getSearchCount(HttpServletRequest session, @RequestParam("searchQuery") String searchQuery) {
         AuthenticationTokenManager.checkAuthenticationToken(session);
-        logger.info(() -> String.format("Performing search for \"%s\" and getting search count", searchQuery));
-        List<User> queryResults;
-        queryResults = SearchHelper.getSearchResultsOrderedByRelevance(searchQuery, userRepository, false);
+        logger.info(() -> String.format("Getting search count for \"%s\"", searchQuery));
 
-        queryResults = SearchHelper.removeDGAAAccountFromResults(queryResults);
-
+        Specification<User> spec = SearchHelper.constructUserSpecificationFromSearchQuery(searchQuery);
+        spec = spec.and(SearchHelper.isNotDGAASpec());
         JSONObject count = new JSONObject();
-        count.put("count", queryResults.size());
+        count.put("count", userRepository.count(spec));
         return count;
     }
 
@@ -159,11 +157,10 @@ public class UserController {
             queryResults = SearchHelper.getSearchResultsOrderedByRelevance(searchQuery, userRepository, reverse);
         } else {
             Specification<User> spec = SearchHelper.constructUserSpecificationFromSearchQuery(searchQuery);
+            spec = spec.and(SearchHelper.isNotDGAASpec());
             Sort userSort = SearchHelper.getSort(orderBy, reverse);
-            queryResults = userRepository.findAll(spec, userSort);
+            queryResults = userRepository.findAll(spec, SearchHelper.getPageRequest(page, resultsPerPage, userSort)).toList();
         }
-
-        queryResults = SearchHelper.removeDGAAAccountFromResults(queryResults);
 
         List<User> pageInResults = SearchHelper.getPageInResults(queryResults, page, resultsPerPage);
         JSONArray publicResults = new JSONArray();
