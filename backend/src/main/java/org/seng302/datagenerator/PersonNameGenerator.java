@@ -11,6 +11,7 @@ public class PersonNameGenerator {
 
     private static PersonNameGenerator instance;
 
+    private static final String EXAMPLE_DATA_FILE_PATH = "example-data/";
     private static final String NICKNAME_FILE = "nicknames.csv";
     private static final String FEMALE_FIRST_NAMES_FILE = "first-names-female.txt";
     private static final String MALE_FIRST_NAMES_FILE = "first-names-male.txt";

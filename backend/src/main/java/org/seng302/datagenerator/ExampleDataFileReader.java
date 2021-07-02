@@ -10,7 +10,7 @@ import java.util.List;
  */
 public class ExampleDataFileReader {
 
-    private static final String EXAMPLE_DATA_FILE_PATH = "backend/example-data/";
+    private static final String EXAMPLE_DATA_FILE_PATH = "example-data/";
 
 
     /**
