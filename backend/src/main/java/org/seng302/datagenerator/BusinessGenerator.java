@@ -8,8 +8,7 @@ import java.util.Random;
 import java.util.Scanner;
 import java.util.concurrent.TimeUnit;
 
-import static org.seng302.datagenerator.Main.clear;
-import static org.seng302.datagenerator.Main.connectToDatabase;
+import static org.seng302.datagenerator.Main.*;
 
 public class BusinessGenerator {
     private Random random = new Random();
@@ -65,38 +64,6 @@ public class BusinessGenerator {
     }
 
     /**
-     * Asks the user how many businesses they want generated
-     * @return the number of businesses to be generated
-     */
-    private int getBusinessesFromInput() throws InterruptedException {
-        int businesses = 0; //Change businesses
-        while (businesses <= 0) {
-            clear();
-            try {
-                System.out.println("-----------------------------------------");
-                System.out.println("How many businesses do you want generated");
-                System.out.println("and put into the database?");
-                System.out.println("----------------------------------------");
-                businesses = Integer.parseInt(scanner.nextLine());
-            } catch (NoSuchElementException e) {
-                System.out.println("You are using the gradle generate function");
-                System.out.println("This console does not support scanner inputs");
-                System.out.println("To input your own number of users");
-                System.out.println("Compile and run this java file in a local terminal");
-                System.out.println("10 businesses will be creating in...");
-                for (int i=5; i>0; i--) {
-                    TimeUnit.SECONDS.sleep(1);
-                    System.out.println(i);
-                }
-                businesses = 10;
-            } catch (Exception e) {
-                System.out.println("Please enter a number! (above 0)");
-            }
-        }
-        return businesses;
-    }
-
-    /**
      * Main program
      * @param args no arguments should be provided
      */
@@ -110,7 +77,7 @@ public class BusinessGenerator {
      * Generates the businesses
      */
     private void generateBusinesses() throws InterruptedException {
-        int businesses = getBusinessesFromInput();
+        int businesses = getNumObjectsFromInput("businesses");
         var userGenerator = new UserGenerator(conn);
 
         try {

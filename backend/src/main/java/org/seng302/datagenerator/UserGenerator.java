@@ -16,6 +16,7 @@ import java.util.concurrent.TimeUnit;
 import org.seng302.datagenerator.LocationGenerator.Location;
 
 import static org.seng302.datagenerator.Main.connectToDatabase;
+import static org.seng302.datagenerator.Main.getNumObjectsFromInput;
 
 public class UserGenerator {
     private Random random = new Random();
@@ -145,38 +146,6 @@ public class UserGenerator {
     }
 
     /**
-     * Asks the user how many users they want generated
-     * @return the number of users to be generated
-     */
-    private int getUsersFromInput() throws InterruptedException {
-        int users = 0; //Change users
-        while (users <= 0) {
-            clear();
-            try {
-                System.out.println("------------------------------------");
-                System.out.println("How many users do you want generated");
-                System.out.println("and put into the database?");
-                System.out.println("------------------------------------");
-                users = Integer.parseInt(scanner.nextLine());
-            } catch (NoSuchElementException e) {
-                System.out.println("You are using the gradle generate function");
-                System.out.println("This console does not support scanner inputs");
-                System.out.println("To input your own number of users");
-                System.out.println("Compile and run this java file in a local terminal");
-                System.out.println("10 users will be creating in...");
-                for (int i=5; i>0; i--) {
-                    TimeUnit.SECONDS.sleep(1);
-                    System.out.println(i);
-                }
-                users = 10;
-            } catch (NumberFormatException e) {
-                System.out.println("Please enter a number! (above 0)");
-            }
-        }
-        return users;
-    }
-
-    /**
      * Main program
      * @param args no arguments should be provided
      */
@@ -191,7 +160,7 @@ public class UserGenerator {
      */
     public void generateUsers(Integer users) throws InterruptedException {
         if (users == null) {
-            users = getUsersFromInput();
+            users = getNumObjectsFromInput("users");
         }
         clear();
 
