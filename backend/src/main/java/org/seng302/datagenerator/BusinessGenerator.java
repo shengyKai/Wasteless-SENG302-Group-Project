@@ -1,9 +1,6 @@
 package org.seng302.datagenerator;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.NoSuchElementException;
@@ -25,6 +22,8 @@ public class BusinessGenerator {
     "We are a non-profit focused on making sure all SENG302 students get enough sleep"};
     String[] NAMES = {"Japan Food", "Sleep Saviour", "Ed Sheeran Church", "Unaffordable Housing"};
 
+    public long businessId;
+
     public BusinessGenerator(Connection conn) { this.conn = conn; }
 
     /**
@@ -36,7 +35,8 @@ public class BusinessGenerator {
     private long createInsertBusinessSQL(long addressId, long ownerId) throws SQLException {
         PreparedStatement stmt = conn.prepareStatement(
             "INSERT INTO business (business_type, created, description, name, address_id, owner_id)"
-                + "VALUES (?, ?, ?, ?, ?, ?)"
+                + "VALUES (?, ?, ?, ?, ?, ?)",
+                Statement.RETURN_GENERATED_KEYS
         );
         stmt.setObject(1, BUSINESSTYPES[random.nextInt(BUSINESSTYPES.length)]); //business type
         stmt.setObject(2, Instant.now()); //date created
@@ -52,15 +52,14 @@ public class BusinessGenerator {
 
     /**
      * Inserts the admin of the business into the database
-     * @param businessId the id associated with the business
      * @param adminId the id associated with the user who is an administrator of the business
      */
-    private void addAdminToBusiness(long businessId, long adminId) throws SQLException {
+    private void addAdminToBusiness(long adminId) throws SQLException {
         PreparedStatement stmt = conn.prepareStatement(
                 "INSERT INTO business_admins (business_id, user_id)"
                 + "VALUES (?, ?)"
         );
-        stmt.setObject(1, businessId);
+        stmt.setObject(1, this.businessId);
         stmt.setObject(2, adminId);
         stmt.executeUpdate();
     }
@@ -126,12 +125,12 @@ public class BusinessGenerator {
                 System.out.println(String.format("Creating Business %d / %d", i+1, businesses));
                 int progress = (int) (((float)(i+1) / (float)businesses) * 100);
                 System.out.println(String.format("Progress: %d%%", progress));
-                long businessId = createInsertBusinessSQL(addressId, ownerId);
+                this.businessId = createInsertBusinessSQL(addressId, ownerId);
 
                 //check if an admin needs to be added to the business
                 if (userIds.size() == 2) {
                     long adminId = userIds.get(1);
-                    addAdminToBusiness(businessId, adminId);
+                    addAdminToBusiness(adminId);
                 }
             }
         } catch (Exception e) {
@@ -139,4 +138,6 @@ public class BusinessGenerator {
         }
         scanner.close();
     }
+
+    public long getBusinessId() { return this.businessId; }
 }
