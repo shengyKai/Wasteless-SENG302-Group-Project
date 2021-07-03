@@ -1,6 +1,7 @@
 
 import Vue from 'vue';
 import Vuetify from 'vuetify';
+import Vuex from 'vuex';
 import { createLocalVue, mount, Wrapper } from '@vue/test-utils';
 import MarketplaceCard from '@/components/cards/MarketplaceCard.vue';
 
@@ -13,6 +14,7 @@ jest.mock('@/api/internal', () => ({
 Vue.use(Vuetify);
 
 const localVue = createLocalVue();
+localVue.use(Vuex);
 
 const testUser: User = {
   id: 2,
@@ -36,6 +38,9 @@ describe('MarketplaceCard.vue', () => {
   let appWrapper: Wrapper<any>;
   let wrapper: Wrapper<any>;
   let vuetify: Vuetify;
+  let getters: any;
+  let state: Object;
+  let store: any;
 
   /**
    * Finds the required button in the MarketplaceCard card by specifying the
@@ -61,9 +66,11 @@ describe('MarketplaceCard.vue', () => {
     return dialogs.at(0)
   }
 
-  beforeEach(() => {
-    vuetify = new Vuetify();
-
+  /**
+   * Creates the environment used for testing. The marketplace card being viewed
+   * can be altered by changing the contents of the card
+   */
+  function generateWrapper() {
     // Creating wrapper around MarketplaceCard with data-app to appease vuetify
     const App = localVue.component('App', {
       components: { MarketplaceCard },
@@ -80,14 +87,41 @@ describe('MarketplaceCard.vue', () => {
       localVue,
       vuetify,
       attachTo: elem,
+      store,
       data() {
         return {
           testMarketplaceCard: testMarketplaceCard
         };
       }
     });
-
     wrapper = appWrapper.getComponent(MarketplaceCard);
+  };
+
+  /**
+   * Set up the store for testing so that the marketplace card can show the appropriate details.
+   * @param userId ID of the current user that is currently logged in
+   * @param userRole Role of the current user that is currently logged in
+   */
+  function setUpStore(userId: number, userRole: string) {
+    // mocking the Vuex store user id such that it does not match the testMarketplaceCard object.
+    state = {
+      user: {
+        id: userId
+      }
+    }
+    getters = {
+      role: () => userRole
+    }
+    store = new Vuex.Store({
+      getters,
+      state
+    })
+  }
+
+  beforeEach(() => {
+    vuetify = new Vuetify();
+    setUpStore(2, "user");
+    generateWrapper();
   });
 
   it('Must match snapshot', () => {
@@ -174,5 +208,24 @@ describe('MarketplaceCard.vue', () => {
     expect(wrapper.vm.deleteCardDialog).toBeFalsy();
   });
 
-  
+  it("Must not be able to find the delete icon if the user is not the owner of the card", async () => {
+    setUpStore(3, "user");
+    generateWrapper();
+    const buttons = wrapper.findAllComponents({ ref: 'deleteButton' });
+    expect(buttons.length).toBe(0);
+  });
+
+  it("Must be able to find the delete icon if the user is not the owner of the card but is a DGAA", async () => {
+    setUpStore(3, "defaultGlobalApplicationAdmin");
+    generateWrapper();
+    const buttons = wrapper.findAllComponents({ ref: 'deleteButton' });
+    expect(buttons.length).toBe(1);
+  });
+
+  it("Must be able to find the delete icon if the user is not the owner of the card but is a GAA", async () => {
+    setUpStore(3, "globalApplicationAdmin");
+    generateWrapper();
+    const buttons = wrapper.findAllComponents({ ref: 'deleteButton' });
+    expect(buttons.length).toBe(1);
+  });
 });
