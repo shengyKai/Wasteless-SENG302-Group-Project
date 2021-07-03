@@ -198,7 +198,8 @@ export default {
      * Updates the marketplace based the actions done in the Marketplace Card.
      */
     updateMarketplace(response) {
-      if (typeof response === String) {
+      console.log(typeof response);
+      if (typeof response === "string") {
         this.error = response;
       } else {
         this.updateResults();
