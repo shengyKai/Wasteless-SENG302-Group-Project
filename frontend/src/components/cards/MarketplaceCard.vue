@@ -1,8 +1,22 @@
 <template>
   <v-card min-height="250px" class="d-flex flex-column">
-    <v-card-title class="my-n1 title">
-      {{ content.title }}
-    </v-card-title>
+    <div class="d-flex justify-space-between">
+      <v-card-title class="my-n1 title">
+        {{ content.title }}
+      </v-card-title>
+      <v-card-actions>
+        <v-btn
+          dense
+          fab
+          x-small
+          color="primary"
+        >
+          <v-icon>
+            mdi-trash-can
+          </v-icon>
+        </v-btn>
+      </v-card-actions>
+    </div>
     <v-card-text class="my-n2 flex-grow-1 d-flex flex-column justify-space-between">
       <div>
         <strong v-if="location">
