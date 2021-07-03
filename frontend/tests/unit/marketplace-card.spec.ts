@@ -5,9 +5,14 @@ import { createLocalVue, mount, Wrapper } from '@vue/test-utils';
 import MarketplaceCard from '@/components/cards/MarketplaceCard.vue';
 
 import { deleteMarketplaceCard, User } from '@/api/internal';
-import { flushQueue } from './utils';
+
+jest.mock('@/api/internal', () => ({
+  deleteMarketplaceCard: jest.fn(),
+}));
 
 Vue.use(Vuetify);
+
+const localVue = createLocalVue();
 
 const testUser: User = {
   id: 2,
@@ -28,20 +33,61 @@ const testMarketplaceCard = {
 };
 
 describe('MarketplaceCard.vue', () => {
+  let appWrapper: Wrapper<any>;
   let wrapper: Wrapper<any>;
   let vuetify: Vuetify;
 
+  /**
+   * Finds the required button in the MarketplaceCard card by specifying the
+   * button text in the button.
+   * @returns A Wrapper around the required button
+   */
+  function findButton(buttonText: string, specifiedWrapper: Wrapper<any>) {
+    const buttons = specifiedWrapper.findAllComponents({ name: 'v-btn' });
+    const filtered = buttons.filter(button => button.text().includes(buttonText));
+    expect(filtered.length).toBe(1);
+    return filtered.at(0);
+  }
+
+  /**
+   * Finds the delete confirmation dialog box upon clicking the delete button
+   * @returns the delete confirmation dialog box
+   */
+  async function findDeleteConfirmationDialog() {
+    const deleteButton = wrapper.findComponent({ ref: 'deleteButton' });
+    await deleteButton.trigger('click');
+
+    const dialogs = wrapper.findAllComponents({ name: "v-dialog" });
+    return dialogs.at(0)
+  }
+
   beforeEach(() => {
-    const localVue = createLocalVue();
     vuetify = new Vuetify();
 
-    wrapper = mount(MarketplaceCard as any, {
+    // Creating wrapper around MarketplaceCard with data-app to appease vuetify
+    const App = localVue.component('App', {
+      components: { MarketplaceCard },
+      template: `
+      <div data-app>
+        <MarketplaceCard :content="testMarketplaceCard"/>
+      </div>`
+    });
+
+    const elem = document.createElement('div');
+    document.body.appendChild(elem);
+
+    appWrapper = mount(App, {
       localVue,
       vuetify,
-      propsData: {
-        content: testMarketplaceCard,
+      attachTo: elem,
+      data() {
+        return {
+          testMarketplaceCard: testMarketplaceCard
+        };
       }
     });
+
+    wrapper = appWrapper.getComponent(MarketplaceCard);
   });
 
   it('Must match snapshot', () => {
@@ -106,12 +152,25 @@ describe('MarketplaceCard.vue', () => {
   });
 
   it("Must trigger delete confirmation dialog box upon clicking delete icon", async () => {
-    const deleteButton = wrapper.findAllComponents({ ref: 'deleteButton' });
-    expect(deleteButton).not.toBeUndefined();
-    deleteButton.trigger('click');
-    await flushQueue();
-    // const deleteConfirmationDialog = wrapper.findAllComponents({ name: 'v-dialog' });
-    // expect(deleteConfirmationDialog).not.toBeUndefined();
-    // expect(deleteMarketplaceCard).toBeCalled();
+    expect(wrapper.vm.deleteCardDialog).toBeFalsy();
+    //This button is an icon, so a reference is used to identify it instead of its button text
+    const deleteButton = wrapper.findComponent({ ref: 'deleteButton' });
+    await deleteButton.trigger('click');
+    expect(wrapper.vm.deleteCardDialog).toBeTruthy();
+  })
+
+  it("The deleteMarketplaceCard method must be called and the dialog box should not be visible, upon clicking the delete button in the confirmation dialog box", async () => {
+    const deleteConfirmationDialog = await findDeleteConfirmationDialog();
+    const dialogDeleteButton = findButton('Delete', deleteConfirmationDialog);
+    await dialogDeleteButton.trigger("click");
+    expect(deleteMarketplaceCard).toBeCalledWith(testMarketplaceCard.id);
+    expect(wrapper.vm.deleteCardDialog).toBeFalsy();
+  })
+
+  it("The dialog box should not be visible if the cancel button is clicked in the confirmation dialog box", async () => {
+    const deleteConfirmationDialog = await findDeleteConfirmationDialog();
+    const dialogCancelButton = findButton('Cancel', deleteConfirmationDialog);
+    await dialogCancelButton.trigger("click");
+    expect(wrapper.vm.deleteCardDialog).toBeFalsy();
   })
 });
