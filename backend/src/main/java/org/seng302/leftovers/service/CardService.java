@@ -30,19 +30,19 @@ public class CardService {
     }
 
     /**
-     * Perform a scheduled check every 24 hours to identify marketplace cards which are expiring within the next day.
+     * Perform a scheduled check every hour to identify marketplace cards which are expiring within the next day.
      * Construct and dispatch an expiry event for these cards.
      */
     @Scheduled(fixedRate = 1000)
     private void sendCardExpiryEvents() {
-        logger.info("Checking for cards which are expiring within the next 24 hours");
-        Instant cutOff = Instant.now().minus(Duration.ofDays(1));
-        Iterable<MarketplaceCard> allCards = marketplaceCardRepository.getAllExpiringAfter(cutOff);
+        Instant cutOff = Instant.now().plus(Duration.ofDays(1));
+        logger.info("Checking for cards which will expire before date {}", cutOff);
+        Iterable<MarketplaceCard> allCards = marketplaceCardRepository.getAllExpiringBefore(cutOff);
         for (MarketplaceCard card : allCards) {
-            logger.info("Card {} is expiring within the next 24 hours", card.getID());
+            logger.info("Card {} is expiring before date {}", card.getID(), cutOff);
             ExpiryEvent event = new ExpiryEvent(card);
             eventService.addUserToEvent(card.getCreator(), event);
-            logger.info("Expiry event sent for card {}", card.getID());
+            logger.info("Expiry notification event sent for card {}", card.getID());
         }
     }
 

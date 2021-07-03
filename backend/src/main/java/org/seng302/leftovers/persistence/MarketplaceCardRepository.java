@@ -45,11 +45,11 @@ public interface MarketplaceCardRepository extends CrudRepository<MarketplaceCar
     }
 
     /**
-     * Return all cards which have an closing data after the given cutoff data and which do not already have an associated
+     * Return all cards which have an closing data before the given cutoff data and which do not already have an associated
      * expiry event.
-     * @param cutOff Cards with a closing date later than this date will be returned.
+     * @param cutOff Cards with a closing date earlier than this date will be returned.
      * @return a list of all marketplace cards which need to have an expiry event sent.
      */
-    @Query("SELECT c FROM MarketplaceCard c left join ExpiryEvent e ON e.expiringCard.id = c.id WHERE c.closes > :cutOff AND e is null")
-    List<MarketplaceCard> getAllExpiringAfter(Instant cutOff);
+    @Query("SELECT c FROM MarketplaceCard c left join ExpiryEvent e ON e.expiringCard.id = c.id WHERE c.closes < :cutOff AND e is null")
+    List<MarketplaceCard> getAllExpiringBefore(Instant cutOff);
 }
