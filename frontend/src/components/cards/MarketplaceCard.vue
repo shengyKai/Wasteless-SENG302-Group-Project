@@ -29,7 +29,7 @@
               <v-btn
                 color="primary"
                 text
-                @click="deleteCardDialog = false"
+                @click="deleteCard(content.id); deleteCardDialog = false;"
               >
                 Delete
               </v-btn>
@@ -79,6 +79,7 @@
 
 <script>
 import { formatDate } from '@/utils';
+import { deleteMarketplaceCard } from '../../api/internal.ts';
 
 export default {
   name: "MarketplaceCard",
@@ -118,6 +119,13 @@ export default {
 
   methods: {
     formatDate,
+    /**
+     * Deletes the selected marketplace card and emits the response to the parent, Marketplace
+     */
+    async deleteCard(cardId) {
+      let response = await deleteMarketplaceCard(cardId);
+      this.$emit("delete-card", response);
+    }
   }
 };
 </script>
