@@ -2,8 +2,15 @@
 
 exports[`MarketplaceCard.vue Must match snapshot 1`] = `
 <div class="d-flex flex-column v-card v-sheet theme--light" style="min-height: 250px;">
-  <div class="v-card__title my-n1 title">
-    test_card_title
+  <div class="d-flex justify-space-between">
+    <div class="v-card__title my-n1 title">
+      test_card_title
+    </div>
+    <div class="v-card__actions"><button type="button" class="v-btn v-btn--is-elevated v-btn--fab v-btn--has-bg v-btn--round theme--light v-size--x-small primary" dense=""><span class="v-btn__content"><i aria-hidden="true" class="v-icon notranslate mdi mdi-trash-can theme--light"></i></span></button>
+      <div role="dialog" class="v-dialog__container">
+        <!---->
+      </div>
+    </div>
   </div>
   <div class="v-card__text my-n2 flex-grow-1 d-flex flex-column justify-space-between">
     <div><strong>

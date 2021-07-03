@@ -4,7 +4,8 @@ import Vuetify from 'vuetify';
 import { createLocalVue, mount, Wrapper } from '@vue/test-utils';
 import MarketplaceCard from '@/components/cards/MarketplaceCard.vue';
 
-import { User } from '@/api/internal';
+import { deleteMarketplaceCard, User } from '@/api/internal';
+import { flushQueue } from './utils';
 
 Vue.use(Vuetify);
 
@@ -103,4 +104,14 @@ describe('MarketplaceCard.vue', () => {
   it("Must contain posted date", () => {
     expect(wrapper.text()).toContain('Posted 10 Mar 2021');
   });
+
+  it("Must trigger delete confirmation dialog box upon clicking delete icon", async () => {
+    const deleteButton = wrapper.findAllComponents({ ref: 'deleteButton' });
+    expect(deleteButton).not.toBeUndefined();
+    deleteButton.trigger('click');
+    await flushQueue();
+    // const deleteConfirmationDialog = wrapper.findAllComponents({ name: 'v-dialog' });
+    // expect(deleteConfirmationDialog).not.toBeUndefined();
+    // expect(deleteMarketplaceCard).toBeCalled();
+  })
 });

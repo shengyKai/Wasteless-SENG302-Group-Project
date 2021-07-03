@@ -6,6 +6,7 @@
       </v-card-title>
       <v-card-actions>
         <v-btn
+          ref="deleteButton"
           dense
           fab
           x-small
