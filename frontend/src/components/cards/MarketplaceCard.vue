@@ -4,7 +4,7 @@
       <v-card-title class="my-n1 title">
         {{ content.title }}
       </v-card-title>
-      <v-card-actions>
+      <v-card-actions v-if="isCardOwnerOrDGAA">
         <v-btn
           ref="deleteButton"
           dense
@@ -115,6 +115,12 @@ export default {
       } else {
         return `From ${this.location.country}`;
       }
+    },
+    // To ensure only the card owner, DGAA or GAA is able to execute an action relating to the marketplace card
+    isCardOwnerOrDGAA() {
+      return (this.$store.state.user.id === this.content.creator.id)
+            || (this.$store.getters.role === "defaultGlobalApplicationAdmin")
+            || (this.$store.getters.role === "globalApplicationAdmin");
     },
   },
 

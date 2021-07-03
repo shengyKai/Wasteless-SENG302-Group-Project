@@ -157,7 +157,7 @@ describe('MarketplaceCard.vue', () => {
     const deleteButton = wrapper.findComponent({ ref: 'deleteButton' });
     await deleteButton.trigger('click');
     expect(wrapper.vm.deleteCardDialog).toBeTruthy();
-  })
+  });
 
   it("The deleteMarketplaceCard method must be called and the dialog box should not be visible, upon clicking the delete button in the confirmation dialog box", async () => {
     const deleteConfirmationDialog = await findDeleteConfirmationDialog();
@@ -165,12 +165,14 @@ describe('MarketplaceCard.vue', () => {
     await dialogDeleteButton.trigger("click");
     expect(deleteMarketplaceCard).toBeCalledWith(testMarketplaceCard.id);
     expect(wrapper.vm.deleteCardDialog).toBeFalsy();
-  })
+  });
 
   it("The dialog box should not be visible if the cancel button is clicked in the confirmation dialog box", async () => {
     const deleteConfirmationDialog = await findDeleteConfirmationDialog();
     const dialogCancelButton = findButton('Cancel', deleteConfirmationDialog);
     await dialogCancelButton.trigger("click");
     expect(wrapper.vm.deleteCardDialog).toBeFalsy();
-  })
+  });
+
+  
 });
