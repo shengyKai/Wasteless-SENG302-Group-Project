@@ -10,11 +10,40 @@
           fab
           x-small
           color="primary"
+          @click.stop="deleteCardDialog = true"
         >
           <v-icon>
             mdi-trash-can
           </v-icon>
         </v-btn>
+        <v-dialog
+          v-model="deleteCardDialog"
+          max-width="250px"
+        >
+          <v-card>
+            <v-card-title>
+              Delete item?
+            </v-card-title>
+            <v-card-actions>
+              <v-spacer/>
+              <v-btn
+                color="primary"
+                text
+                @click="deleteCardDialog = false"
+              >
+                Delete
+              </v-btn>
+
+              <v-btn
+                color="primary"
+                text
+                @click="deleteCardDialog = false"
+              >
+                Cancel
+              </v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-dialog>
       </v-card-actions>
     </div>
     <v-card-text class="my-n2 flex-grow-1 d-flex flex-column justify-space-between">
@@ -53,6 +82,11 @@ import { formatDate } from '@/utils';
 
 export default {
   name: "MarketplaceCard",
+  data () {
+    return {
+      deleteCardDialog: false
+    };
+  },
   props: {
     content: {
       id: Number,
