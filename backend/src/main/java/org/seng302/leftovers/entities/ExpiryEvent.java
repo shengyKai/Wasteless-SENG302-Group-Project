@@ -10,7 +10,7 @@ import javax.persistence.OneToOne;
  * This class is used for notifying users when their marketplace card is about to expire.
  */
 @Entity
-public class ExpiryEvent extends Event{
+public class ExpiryEvent extends Event {
 
     @OneToOne
     @JoinColumn(name = "expiring_card", unique = true, nullable = false)

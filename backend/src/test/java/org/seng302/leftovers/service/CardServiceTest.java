@@ -57,7 +57,7 @@ class CardServiceTest {
     /**
      * Mock the static method Instant.now() so that when called it will return a set time.
      */
-    void mockCurrentTime() {
+    private void mockCurrentTime() {
         String mockedCurrentTimeValue = "2021-01-01T12:00:00Z";
         mockedCurrentTime = Instant.parse(mockedCurrentTimeValue);
         mockedInstant = mockStatic(Instant.class);
@@ -67,7 +67,7 @@ class CardServiceTest {
     /**
      * Set up the ID numbers and users which will be returned by accessors in the mocked marketplace cards.
      */
-    void setUpCards() {
+    private void setUpCards() {
         when(mockCard1.getID()).thenReturn(32L);
         when(mockCard2.getID()).thenReturn(8456L);
         when(mockCard3.getID()).thenReturn(2L);
@@ -79,7 +79,7 @@ class CardServiceTest {
     /**
      * Use reflection to invoke the private sendCardExpiryEvents method in the CardService class.
      */
-    void invokeSendCardExpiryEvents() {
+    private void invokeSendCardExpiryEvents() {
         try {
             Method sendCardExpiryEvents = CardService.class.getDeclaredMethod("sendCardExpiryEvents");
             sendCardExpiryEvents.setAccessible(true);
