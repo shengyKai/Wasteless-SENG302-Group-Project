@@ -9,7 +9,6 @@ import static org.seng302.datagenerator.Main.*;
 public class ProductGenerator {
     private Random random = new Random();
     private Connection conn;
-    static Scanner scanner = new Scanner(System.in);
 
     //predefined lists
     String[] COUNTRIES = {"New Zealand", "Australia", "Japan", "Korea", "Singapore", "Vatican City"};
@@ -80,7 +79,7 @@ public class ProductGenerator {
                 List<Long> businessIds = businessGenerator.generateBusinesses(1);
                 long businessId = businessIds.get(0);
 
-                System.out.println(String.format("Creating Business %d / %d", i+1, productCount));
+                System.out.println(String.format("Creating Product %d / %d", i+1, productCount));
                 int progress = (int) (((float)(i+1) / (float)productCount) * 100);
                 System.out.println(String.format("Progress: %d%%", progress));
                 long productId = createInsertProductSQL(businessId);
