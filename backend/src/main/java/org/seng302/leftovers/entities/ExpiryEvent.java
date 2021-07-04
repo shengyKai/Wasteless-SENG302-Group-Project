@@ -3,6 +3,7 @@ package org.seng302.leftovers.entities;
 import net.minidev.json.JSONObject;
 
 import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 
 /**
@@ -12,6 +13,7 @@ import javax.persistence.OneToOne;
 public class ExpiryEvent extends Event{
 
     @OneToOne
+    @JoinColumn(name = "expiring_card", unique = true)
     private MarketplaceCard expiringCard;
 
     protected ExpiryEvent() {

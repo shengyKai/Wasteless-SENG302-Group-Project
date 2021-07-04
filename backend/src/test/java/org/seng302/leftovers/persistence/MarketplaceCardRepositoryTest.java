@@ -1,18 +1,25 @@
 package org.seng302.leftovers.persistence;
 
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.runner.RunWith;
+import org.seng302.leftovers.entities.ExpiryEvent;
 import org.seng302.leftovers.entities.Location;
 import org.seng302.leftovers.entities.MarketplaceCard;
 import org.seng302.leftovers.entities.User;
+import org.seng302.leftovers.service.EventService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.text.ParseException;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -26,11 +33,15 @@ class MarketplaceCardRepositoryTest {
     private UserRepository userRepository;
     @Autowired
     private BusinessRepository businessRepository;
+    @Autowired
+    private ExpiryEventRepository expiryEventRepository;
+    @Autowired
+    private EventService eventService;
     private MarketplaceCard card;
     private User user;
 
-    @BeforeAll
-    private void setUp() throws ParseException {
+    @BeforeEach
+    private void setUp() {
         businessRepository.deleteAll();
         marketplaceCardRepository.deleteAll();
         userRepository.deleteAll();
@@ -60,8 +71,9 @@ class MarketplaceCardRepositoryTest {
         marketplaceCardRepository.save(card);
     }
 
-    @AfterAll
+    @AfterEach
     private void tearDown() {
+        expiryEventRepository.deleteAll();
         marketplaceCardRepository.deleteAll();
         userRepository.deleteAll();
     }
@@ -116,5 +128,41 @@ class MarketplaceCardRepositoryTest {
         Assertions.assertFalse(cards.contains(card));
 
     }
+
+    private Stream<Arguments> closesAndCutoff() {
+        return Stream.of(
+                Arguments.of(Instant.now().plus(Duration.ofDays(2)), Instant.now().plus(Duration.ofDays(1))),
+                Arguments.of(Instant.now().plus(Duration.ofDays(1)), Instant.now().plus(Duration.ofDays(2))));
+    }
+
+    @ParameterizedTest
+    @MethodSource("closesAndCutoff")
+    void getAllExpiringAfter_noExpiryEvent_cardReturnedIfClosesAfterCutoff(Instant closes, Instant cutoff) {
+        boolean shouldReturnCard = closes.isAfter(cutoff);
+
+        card.setCloses(closes);
+        card = marketplaceCardRepository.save(card);
+
+        Assertions.assertTrue(expiryEventRepository.getByExpiringCard(card).isEmpty());
+
+        List<MarketplaceCard> results = marketplaceCardRepository.getAllExpiringAfter(cutoff);
+        Assertions.assertEquals(shouldReturnCard, results.contains(card));
+    }
+
+    @ParameterizedTest
+    @MethodSource("closesAndCutoff")
+    void getAllExpiringAfter_expiryEventExists_cardNotReturned(Instant closes, Instant cutoff) {
+        card.setCloses(closes);
+        card = marketplaceCardRepository.save(card);
+
+        ExpiryEvent event = new ExpiryEvent(card);
+        eventService.addUserToEvent(card.getCreator(), event);
+        Assertions.assertTrue(expiryEventRepository.getByExpiringCard(card).isPresent());
+
+        List<MarketplaceCard> results = marketplaceCardRepository.getAllExpiringAfter(cutoff);
+        Assertions.assertFalse(results.contains(card));
+    }
+
+
 
 }
