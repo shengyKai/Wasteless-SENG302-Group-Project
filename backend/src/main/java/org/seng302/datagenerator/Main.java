@@ -17,7 +17,7 @@ public class Main {
      */
     public static Connection connectToDatabase() throws SQLException {
         String url = "jdbc:mariadb://localhost/seng302-2021-team500-prod";
-        Connection conn = DriverManager.getConnection(url, "seng302-team500", "changeMe");
+        Connection conn = DriverManager.getConnection(url, "seng302-team500", "ListenDirectly6053");
         return conn;
     }
 
@@ -38,7 +38,8 @@ public class Main {
      */
     public static int getNumObjectsFromInput(String objectName) throws InterruptedException {
         int numObjects = 0;
-        while (numObjects <= 0) {
+        int maxObjects = 2000000; //maximum objects 2 million
+        while (numObjects < 0 || numObjects >= maxObjects) {
             clear();
             try {
                 System.out.println("-------------------------------------------------------");
@@ -46,8 +47,17 @@ public class Main {
                 System.out.println("generated and put into the database?");
                 System.out.println("-------------------------------------------------------");
                 numObjects = Integer.parseInt(scanner.nextLine());
+
+                if (numObjects > maxObjects) {
+                    System.out.println(String.format("You cannot create %d %s", numObjects, objectName));
+                    System.out.println(String.format("Please enter a number below %d", maxObjects));
+                } else if (numObjects < 0) {
+                    System.out.println(String.format("You cannot create %d %s that does not make sense",
+                            numObjects, objectName));
+                    System.out.println("Please enter a number above 0");
+                }
             } catch (NumberFormatException e) {
-                System.out.println("Please enter a number! (above 0)");
+                System.out.println("You entered an invalid character. Please input a number.");
             }
         }
         return numObjects;
