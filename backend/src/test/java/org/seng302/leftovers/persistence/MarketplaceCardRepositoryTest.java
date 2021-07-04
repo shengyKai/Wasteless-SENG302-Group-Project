@@ -137,21 +137,21 @@ class MarketplaceCardRepositoryTest {
 
     @ParameterizedTest
     @MethodSource("closesAndCutoff")
-    void getAllExpiringAfter_noExpiryEvent_cardReturnedIfClosesAfterCutoff(Instant closes, Instant cutoff) {
-        boolean shouldReturnCard = closes.isAfter(cutoff);
+    void getAllExpiringBefore_noExpiryEvent_cardReturnedIfClosesBeforeCutoff(Instant closes, Instant cutoff) {
+        boolean shouldReturnCard = closes.isBefore(cutoff);
 
         card.setCloses(closes);
         card = marketplaceCardRepository.save(card);
 
         Assertions.assertTrue(expiryEventRepository.getByExpiringCard(card).isEmpty());
 
-        List<MarketplaceCard> results = marketplaceCardRepository.getAllExpiringAfter(cutoff);
+        List<MarketplaceCard> results = marketplaceCardRepository.getAllExpiringBefore(cutoff);
         Assertions.assertEquals(shouldReturnCard, results.contains(card));
     }
 
     @ParameterizedTest
     @MethodSource("closesAndCutoff")
-    void getAllExpiringAfter_expiryEventExists_cardNotReturned(Instant closes, Instant cutoff) {
+    void getAllExpiringBefore_expiryEventExists_cardNotReturned(Instant closes, Instant cutoff) {
         card.setCloses(closes);
         card = marketplaceCardRepository.save(card);
 
@@ -159,7 +159,7 @@ class MarketplaceCardRepositoryTest {
         eventService.addUserToEvent(card.getCreator(), event);
         Assertions.assertTrue(expiryEventRepository.getByExpiringCard(card).isPresent());
 
-        List<MarketplaceCard> results = marketplaceCardRepository.getAllExpiringAfter(cutoff);
+        List<MarketplaceCard> results = marketplaceCardRepository.getAllExpiringBefore(cutoff);
         Assertions.assertFalse(results.contains(card));
     }
 

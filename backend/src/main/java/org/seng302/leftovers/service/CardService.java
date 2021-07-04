@@ -36,8 +36,8 @@ public class CardService {
     @Scheduled(fixedRate = 1000)
     private void sendCardExpiryEvents() {
         logger.info("Checking for cards which are expiring within the next 24 hours");
-        Instant cutOff = Instant.now().minus(Duration.ofDays(1));
-        Iterable<MarketplaceCard> allCards = marketplaceCardRepository.getAllExpiringAfter(cutOff);
+        Instant cutOff = Instant.now().plus(Duration.ofDays(1));
+        Iterable<MarketplaceCard> allCards = marketplaceCardRepository.getAllExpiringBefore(cutOff);
         for (MarketplaceCard card : allCards) {
             logger.info("Card {} is expiring within the next 24 hours", card.getID());
             ExpiryEvent event = new ExpiryEvent(card);

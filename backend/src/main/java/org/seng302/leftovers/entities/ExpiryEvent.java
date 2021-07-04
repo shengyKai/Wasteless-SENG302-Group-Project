@@ -13,7 +13,7 @@ import javax.persistence.OneToOne;
 public class ExpiryEvent extends Event{
 
     @OneToOne
-    @JoinColumn(name = "expiring_card", unique = true)
+    @JoinColumn(name = "expiring_card", unique = true, nullable = false)
     private MarketplaceCard expiringCard;
 
     protected ExpiryEvent() {
@@ -22,6 +22,14 @@ public class ExpiryEvent extends Event{
 
     public ExpiryEvent(MarketplaceCard expiringCard) {
         this.expiringCard = expiringCard;
+    }
+
+    /**
+     * Returns the marketplace card nearing expiry which is associated with this event.
+     * @return The marketplace card associated with this event.
+     */
+    public MarketplaceCard getExpiringCard() {
+        return expiringCard;
     }
 
     /**
