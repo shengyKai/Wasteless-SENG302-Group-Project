@@ -1,12 +1,15 @@
 package org.seng302.datagenerator;
 
 import java.sql.*;
-import java.util.NoSuchElementException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.Random;
 import java.util.Scanner;
-import java.util.concurrent.TimeUnit;
 
 public class Main {
     static Scanner scanner = new Scanner(System.in);
+    static Random random = new Random();
 
     /**
      * Connects to Marinadb production environment
@@ -48,5 +51,17 @@ public class Main {
             }
         }
         return numObjects;
+    }
+
+    /**
+     * Generates a random date between a lower and upper date bound
+     * @param start the earliest date that can be randomly generated
+     * @param end the latest date that can be randomly generated
+     * @return the randomly generated date
+     */
+    public static LocalDate randomDate(LocalDate start, LocalDate end) {
+        int days = (int) ChronoUnit.DAYS.between(start, end);
+        long randomDays = random.nextInt(days);
+        return start.plusDays(randomDays);
     }
 }

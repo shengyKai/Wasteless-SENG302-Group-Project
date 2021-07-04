@@ -1,6 +1,7 @@
 package org.seng302.datagenerator;
 
 import java.sql.*;
+import java.time.LocalDate;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -17,8 +18,18 @@ public class InventoryItemGenerator {
      * @return a list containing the five dates
      */
     private String[] generateDates () {
-        //TODO
-        return null;
+        //creation < manufactured < today < sell by < best before < expires
+        LocalDate today = LocalDate.now();
+        LocalDate minimumDate = today.minusYears(2);
+        LocalDate maximumDate = today.plusYears(2);
+
+        LocalDate creation = randomDate(minimumDate, today);
+        LocalDate manufactured = randomDate(creation, today);
+        LocalDate sellBy = randomDate(today, maximumDate);
+        LocalDate bestBefore = randomDate(sellBy, maximumDate);
+        LocalDate expires = randomDate(bestBefore, maximumDate);
+
+        return new String[] {creation.toString(), manufactured.toString(), sellBy.toString(), bestBefore.toString(), expires.toString()};
     }
 
     /**
