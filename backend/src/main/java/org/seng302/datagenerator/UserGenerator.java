@@ -6,26 +6,18 @@ package org.seng302.datagenerator;
 
 import java.sql.*;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.NoSuchElementException;
-import java.util.Scanner;
-import java.util.Random;
+import java.util.*;
 import java.io.File;
 import java.util.concurrent.TimeUnit;
 
 import org.seng302.datagenerator.LocationGenerator.Location;
 
-import static org.seng302.datagenerator.Main.connectToDatabase;
-import static org.seng302.datagenerator.Main.getNumObjectsFromInput;
+import static org.seng302.datagenerator.Main.*;
 
 public class UserGenerator {
     private Random random = new Random();
     private Connection conn;
     private LocationGenerator locationGenerator = LocationGenerator.getInstance();
-    static Scanner scanner = new Scanner(System.in);
-
-    public ArrayList<Long> userIds = new ArrayList<Long>();
-    public long addressId;
 
     //predefined lists
     String[] BIOS = {"I enjoy running on the weekends", "Beaches are fun", "Got to focus on my career", "If only I went to a better university", "Read documentation yeah right", "My cats keep me going", "All I need is food"};
@@ -43,6 +35,8 @@ public class UserGenerator {
         String month = String.valueOf(random.nextInt(11) + 1); // +1 as the month cannot be zero
         //year must be more than a year in the past
         String year = String.valueOf(random.nextInt(2006) + 1); // +1 as the year cannot be zero
+        while (year.length() < 4) year = "0" + year;
+
         return year +"-"+ month +"-"+ day;
     }
 
@@ -76,35 +70,6 @@ public class UserGenerator {
     }
 
     /**
-     * Creates the SQL commands required to insert the user's address into the database
-     * @return the id of the location entity (addressid)
-     */
-    private long createInsertAddressSQL(String[] address) throws SQLException {
-        PreparedStatement stmt = conn.prepareStatement(
-                "INSERT INTO location (street_number, street_name, city, region, country, post_code, district) "
-                        + "VALUES (?, ?, ?, ?, ?, ?, ?);",
-                Statement.RETURN_GENERATED_KEYS
-        );
-        for (int i=0; i<7; i++) {
-            stmt.setObject(i+1, address[i]);
-        }
-        stmt.executeUpdate();
-        ResultSet keys = stmt.getGeneratedKeys();
-        keys.next();
-        return keys.getLong(1);
-    }
-
-    /**
-     * Clears the console on windows and linux
-     */
-    private void clear() {
-        final String ANSI_CLS = "\u001b[2J";
-        final String ANSI_HOME = "\u001b[H";
-        System.out.print(ANSI_CLS + ANSI_HOME);
-        System.out.flush();
-    }
-
-    /**
      * Creates the SQL commands required to insert the user's account into the database
      * @return the id of the account entity (userid)
      */
@@ -127,7 +92,7 @@ public class UserGenerator {
     /**
      * Creates the SQL commands required to insert the user's account into the database
      */
-    private void createInsertUsersSQL(long userId, PersonNameGenerator.FullName fullName) throws SQLException {
+    private void createInsertUsersSQL(long userId, long addressId, PersonNameGenerator.FullName fullName) throws SQLException {
         PreparedStatement stmt = conn.prepareStatement(
                 "INSERT INTO user (first_name, middle_name, last_name, nickname, ph_num, dob, bio, created, userid, address_id) "
                         + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
@@ -141,7 +106,7 @@ public class UserGenerator {
         stmt.setObject(7, BIOS[random.nextInt(BIOS.length)]); //bio
         stmt.setObject(8, Instant.now()); //date created
         stmt.setObject(9, userId);
-        stmt.setObject(10, this.addressId);
+        stmt.setObject(10, addressId);
         stmt.executeUpdate();
     }
 
@@ -152,47 +117,41 @@ public class UserGenerator {
     public static void main(String[] args) throws SQLException, InterruptedException {
         Connection conn = connectToDatabase();
         var generator = new UserGenerator(conn);
-        generator.generateUsers(null);
+        int userCount = getNumObjectsFromInput("users");
+        generator.generateUsers(userCount);
     }
 
     /**
      * Generates the users
+     * @param userCount Number of users to generate
+     * @return List of generated user ids
      */
-    public void generateUsers(Integer users) throws InterruptedException {
-        if (users == null) {
-            users = getNumObjectsFromInput("users");
-        }
+    public List<Long> generateUsers(int userCount) {
         clear();
 
+        List<Long> generatedUserIds = new ArrayList<>();
         try {
             PersonNameGenerator personNameGenerator = PersonNameGenerator.getInstance();
-            for (int i=0; i < users; i++) {
+            for (int i=0; i < userCount; i++) {
                 PersonNameGenerator.FullName fullName = personNameGenerator.generateName();
                 String email = generateEmail(i, fullName);
                 String password = generatePassword();
                 Location address = locationGenerator.generateAddress(random);
-                this.addressId = locationGenerator.createInsertAddressSQL(address, conn);
+                long addressId = locationGenerator.createInsertAddressSQL(address, conn);
 
                 clear();
-                System.out.println(String.format("Creating User %d / %d", i+1, users));
-                int progress = (int) (((float)(i+1) / (float)users) * 100);
+                System.out.println(String.format("Creating User %d / %d", i+1, userCount));
+                int progress = (int) (((float)(i+1) / (float)userCount) * 100);
                 System.out.println(String.format("Progress: %d%%", progress));
                 long userId = createInsertAccountSQL(email, password);
-                createInsertUsersSQL(userId, fullName);
-                this.userIds.add(userId);
+                createInsertUsersSQL(userId, addressId, fullName);
+                generatedUserIds.add(userId);
             }
 
         } catch (Exception e) {
             e.printStackTrace();
         }
-        scanner.close();
-    }
 
-    public long getAddressId() {
-        return this.addressId;
-    }
-
-    public ArrayList<Long> getUserIds() {
-        return this.userIds;
+        return generatedUserIds;
     }
 }

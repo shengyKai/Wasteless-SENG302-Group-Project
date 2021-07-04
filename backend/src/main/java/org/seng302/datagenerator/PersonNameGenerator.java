@@ -11,7 +11,6 @@ public class PersonNameGenerator {
 
     private static PersonNameGenerator instance;
 
-    private static final String EXAMPLE_DATA_FILE_PATH = "example-data/";
     private static final String NICKNAME_FILE = "nicknames.csv";
     private static final String FEMALE_FIRST_NAMES_FILE = "first-names-female.txt";
     private static final String MALE_FIRST_NAMES_FILE = "first-names-male.txt";
@@ -158,7 +157,7 @@ public class PersonNameGenerator {
     /**
      * A class to make it easier to access the fields of the full name returned by the generateName method.
      */
-    public class FullName {
+    public static class FullName {
 
         private FullName(String firstName, String middleName, String lastName, String nickname) {
             this.firstName = firstName;
@@ -167,10 +166,10 @@ public class PersonNameGenerator {
             this.nickname = nickname;
         }
 
-        private String firstName;
-        private String middleName;
-        private String lastName;
-        private String nickname;
+        private final String firstName;
+        private final String middleName;
+        private final String lastName;
+        private final String nickname;
 
         /**
          * @return The first name attribute (a single name).
