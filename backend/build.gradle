@@ -97,6 +97,7 @@ task(generateUser, dependsOn: 'classes', type: JavaExec) {
 
 task(generateBusiness, dependsOn: 'classes', type: JavaExec) {
     main = 'org.seng302.datagenerator.BusinessGenerator'
+    standardInput = System.in
     classpath = sourceSets.main.runtimeClasspath
 }
 

@@ -1,8 +1,8 @@
-package org.seng302.entities;
+package org.seng302.leftovers.entities;
 
 import lombok.NoArgsConstructor;
 import net.minidev.json.JSONObject;
-import org.seng302.tools.JsonTools;
+import org.seng302.leftovers.tools.JsonTools;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import org.springframework.http.HttpStatus;

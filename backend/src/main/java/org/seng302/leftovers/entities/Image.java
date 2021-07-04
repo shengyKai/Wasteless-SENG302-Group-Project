@@ -1,4 +1,4 @@
-package org.seng302.entities;
+package org.seng302.leftovers.entities;
 
 import net.minidev.json.JSONObject;
 import org.springframework.http.HttpStatus;

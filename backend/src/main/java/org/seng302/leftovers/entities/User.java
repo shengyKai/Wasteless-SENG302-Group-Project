@@ -1,16 +1,15 @@
 /* Subtype of Account for individual users */
-package org.seng302.entities;
+package org.seng302.leftovers.entities;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
-import org.seng302.tools.JsonTools;
+import org.seng302.leftovers.tools.JsonTools;
 import org.springframework.data.annotation.ReadOnlyProperty;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.persistence.*;
-import java.text.ParseException;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -31,6 +30,7 @@ public class User extends Account {
     private Instant created;
     private Set<Business> businessesAdministered = new HashSet<>();
     private Set<Business> businessesOwned = new HashSet<>();
+    private Set<Event> events = new HashSet<>();
 
     /* Matches:
     123-456-7890
@@ -288,6 +288,11 @@ public class User extends Account {
     private void setBusinessesAdministered(Set<Business> businesses) {
         this.businessesAdministered = businesses;
     }
+
+    @ManyToMany(mappedBy = "notifiedUsers", fetch = FetchType.LAZY)
+    public Set<Event> getEvents() { return this.events;}
+
+    private void setEvents(Set<Event> events) { this.events = events; }
 
     /**
      * Gets the set of businesses that the user is an admin of OR is the owner of
