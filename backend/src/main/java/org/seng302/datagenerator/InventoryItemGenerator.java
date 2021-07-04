@@ -1,22 +1,14 @@
 package org.seng302.datagenerator;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.util.NoSuchElementException;
-import java.util.Random;
-import java.util.Scanner;
+import java.sql.*;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
-import static org.seng302.datagenerator.Main.clear;
-import static org.seng302.datagenerator.Main.connectToDatabase;
+import static org.seng302.datagenerator.Main.*;
 
 public class InventoryItemGenerator {
     private Random random = new Random();
     private Connection conn;
-    static Scanner scanner = new Scanner(System.in);
-
-    //predefined lists
 
     public InventoryItemGenerator(Connection conn) { this.conn = conn; }
 
@@ -54,12 +46,12 @@ public class InventoryItemGenerator {
      */
     private int generateVersion() { return random.nextInt(10); }
 
-
     /**
      * Creates and inserts the product into the database
      * @param productId the id associated with the product entity representing what product the inventory item is
+     * @return the id of inventory item
      */
-    private void createInsertInventoryItemSQL(long productId) throws SQLException {
+    private long createInsertInventoryItemSQL(long productId) throws SQLException {
         String[] dates = generateDates();
         String bestBefore = dates[0];
         String creationDate = dates[1];
@@ -76,7 +68,8 @@ public class InventoryItemGenerator {
         PreparedStatement stmt = conn.prepareStatement(
             "INSERT INTO inventory_item(best_before, creation_date, expires, manufactured, price_per_item, quantity, " +
                     "remaining_quantity, sell_by, total_price, version, product_id)"
-                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                Statement.RETURN_GENERATED_KEYS
         );
         stmt.setObject(1, bestBefore); //best before date
         stmt.setObject(2, creationDate); //creation date
@@ -90,48 +83,44 @@ public class InventoryItemGenerator {
         stmt.setObject(10, generateVersion()); //version of product
         stmt.setObject(11, productId); //product id
         stmt.executeUpdate();
-    }
-
-    /**
-     * Asks the user how many inventory items they want generated
-     * @return the number of inventory items generated
-     */
-    private int getInventoryItemsFromInput() throws InterruptedException {
-        int inventoryItems = 0; //Change inventory items
-        while (inventoryItems <= 0) {
-            clear();
-            try {
-                System.out.println("------------------------------------");
-                System.out.println("How many inventory items do you want");
-                System.out.println("generated and put into the database?");
-                System.out.println("------------------------------------");
-                inventoryItems = Integer.parseInt(scanner.nextLine());
-            } catch (NoSuchElementException e) {
-                System.out.println("You are using the gradle generate function");
-                System.out.println("This console does not support scanner inputs");
-                System.out.println("To input your own number of inventory items");
-                System.out.println("Compile and run this java file in a local terminal");
-                System.out.println("10 inventory items will be creating in...");
-                for (int i=5; i>0; i--) {
-                    TimeUnit.SECONDS.sleep(1);
-                    System.out.println(i);
-                }
-                inventoryItems = 10;
-            } catch (NumberFormatException e) {
-                System.out.println("Please enter a number! (above 0)");
-            }
-        }
-        return inventoryItems;
+        ResultSet keys = stmt.getGeneratedKeys();
+        keys.next();
+        return keys.getLong(1);
     }
 
     public static void main(String[] args) throws SQLException, InterruptedException {
         Connection conn = connectToDatabase();
         var generator = new InventoryItemGenerator(conn);
-        generator.generateInventoryItems();
+
+        int invItemCount = getNumObjectsFromInput("inventory items");
+        generator.generateInventoryItems(invItemCount);
     }
 
-    private void generateInventoryItems() throws InterruptedException {
-        int inventoryItems = getInventoryItemsFromInput();
+    /**
+     * Generates the inventory items
+     * @param invItemCount
+     * @return
+     */
+    private List<Long> generateInventoryItems(int invItemCount) throws SQLException {
+        var productGenerator = new ProductGenerator(conn);
+        List<Long> generatedInvItemIds = new ArrayList<>();
+        try {
+            for (int i=0; i < invItemCount; i++) {
+                clear();
+                List<Long> productIds = productGenerator.generateProducts(1);
+                long productId = productIds.get(0);
 
+                System.out.println(String.format("Creating Inventory Item %d / %d", i+1, invItemCount));
+                int progress = (int) (((float)(i+1) / (float)invItemCount) * 100);
+                System.out.println(String.format("Progress: %d%%", progress));
+                long invItemId = createInsertInventoryItemSQL(productId);
+
+                generatedInvItemIds.add(invItemId);
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        return generatedInvItemIds;
     }
 }
