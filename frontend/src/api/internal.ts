@@ -938,7 +938,7 @@ export async function deleteMarketplaceCard(marketplaceCardId: number) : Promise
  * Extends a marketplace card expiry date such that the card can be displayed for another two weeks
  * @param marketplaceCardId The id of the community marketplace card
  */
- export async function extendMarketplaceCardExpiry(marketplaceCardId: number) : Promise<MaybeError<undefined>> {
+export async function extendMarketplaceCardExpiry(marketplaceCardId: number) : Promise<MaybeError<undefined>> {
   try {
     await instance.put(`/cards/${marketplaceCardId}/extenddisplayperiod`);
   } catch (error) {
