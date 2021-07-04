@@ -1,16 +1,10 @@
 package org.seng302.datagenerator;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
+import java.sql.*;
 import java.time.Instant;
-import java.util.NoSuchElementException;
-import java.util.Random;
-import java.util.Scanner;
-import java.util.concurrent.TimeUnit;
+import java.util.*;
 
-import static org.seng302.datagenerator.Main.clear;
-import static org.seng302.datagenerator.Main.connectToDatabase;
+import static org.seng302.datagenerator.Main.*;
 
 public class ProductGenerator {
     private Random random = new Random();
@@ -19,10 +13,12 @@ public class ProductGenerator {
 
     //predefined lists
     String[] COUNTRIES = {"New Zealand", "Australia", "Japan", "Korea", "Singapore", "Vatican City"};
-    String[] DESCRIPTIONS = {"Good for your gut", "May contain traces of peanuts", "Helps improve grades"}
+    String[] DESCRIPTIONS = {"Good for your gut", "May contain traces of peanuts", "Helps improve grades"};
     String[] MANUFACTURERS = {"Nathan", "Connor", "Ella", "Josh", "Henry", "Edward", "Ben", "Kai"};
     String[] NAMES = {"Nathan Apple", "Yellow Banana", "Orange Coloured Orange", "A Box", "The Box", "Cube Shaped Box"};
     String[] PRODUCTCODES = {"APPLE123", "BANANA456", "ORANGE789"}; //Change to randomly generated?
+
+    public ProductGenerator(Connection conn) { this.conn = conn; }
 
     /**
      * Randomly generates the recommended retail price
@@ -33,18 +29,17 @@ public class ProductGenerator {
         return ((float) RRPx100) / 100;
     }
 
-
-    public ProductGenerator(Connection conn) { this.conn = conn; }
-
     /**
      * Creates and inserts the product into the database
      * @param businessId the id associated with the business entity representing the business who owns this product
+     * @return the id of the generated product
      */
-    private void createInsertProductSQL(long businessId) throws SQLException {
+    private long createInsertProductSQL(long businessId) throws SQLException {
         PreparedStatement stmt = conn.prepareStatement(
                 "INSERT INTO product (country_of_sale, created, description, manufacturer, name, product_code, " +
                         "recommended_retail_price, business_id)"
-                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
+                        + "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                Statement.RETURN_GENERATED_KEYS
         );
         stmt.setObject(1, COUNTRIES[random.nextInt(COUNTRIES.length)]);
         stmt.setObject(2, Instant.now());
@@ -55,33 +50,9 @@ public class ProductGenerator {
         stmt.setObject(7, generateRRP());
         stmt.setObject(8, businessId);
         stmt.executeUpdate();
-    }
-
-    private int getProductsFromInput() throws InterruptedException {
-        int products = 0 //Change products
-        while (products <= 0) {
-            clear();
-            try {
-                System.out.println("-----------------------------------------");
-                System.out.println("How many products do you want generated");
-                System.out.println("and put into the database?");
-                System.out.println("----------------------------------------");
-            } catch (NoSuchElementException) {
-                System.out.println("You are using the gradle generate function");
-                System.out.println("This console does not support scanner inputs");
-                System.out.println("To input your own number of products");
-                System.out.println("Compile and run this java file in a local terminal");
-                System.out.println("10 products will be creating in...");
-                for (int i=5; i>0; i--) {
-                    TimeUnit.SECONDS.sleep(1);
-                    System.out.println(i);
-                }
-                products = 10;
-            } catch (NumberFormatException e) {
-                System.out.println("Please enter a number! (above 0)");
-            }
-        }
-        return products;
+        ResultSet keys = stmt.getGeneratedKeys();
+        keys.next();
+        return keys.getLong(1);
     }
 
     /**
@@ -90,18 +61,36 @@ public class ProductGenerator {
     public static void main(String[] args) throws InterruptedException, SQLException {
         Connection conn = connectToDatabase();
         var generator = new ProductGenerator(conn);
-        generator.generateProducts();
+
+        int productCount = getNumObjectsFromInput("products");
+        generator.generateProducts(productCount);
     }
 
-
-    private void generateProducts() throws InterruptedException {
-        int products = getProductsFromInput();
-
+    /**
+     * Generates the products
+     * @param productCount Number of products to generate
+     * @return List of generated product ids
+     */
+    public List<Long> generateProducts(int productCount) throws InterruptedException {
+        var businessGenerator = new BusinessGenerator(conn);
+        List<Long> generatedProductIds = new ArrayList<>();
         try {
+            for (int i=0; i < productCount; i++) {
+                clear();
+                List<Long> businessIds = businessGenerator.generateBusinesses(1);
+                long businessId = businessIds.get(0);
 
+                System.out.println(String.format("Creating Business %d / %d", i+1, productCount));
+                int progress = (int) (((float)(i+1) / (float)productCount) * 100);
+                System.out.println(String.format("Progress: %d%%", progress));
+                long productId = createInsertProductSQL(businessId);
+
+                generatedProductIds.add(productId);
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
-        scanner.close();
+
+        return generatedProductIds;
     }
 }

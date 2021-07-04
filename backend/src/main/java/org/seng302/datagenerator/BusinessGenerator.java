@@ -10,6 +10,7 @@ import java.util.concurrent.TimeUnit;
 import static org.seng302.datagenerator.Main.*;
 
 public class BusinessGenerator {
+
     private Random random = new Random();
     private Connection conn;
     private LocationGenerator locationGenerator = LocationGenerator.getInstance();
@@ -78,7 +79,7 @@ public class BusinessGenerator {
      * @param businessCount Number of businesses to generate
      * @return List of generated business ids
      */
-    private List<Long> generateBusinesses(int businessCount) throws InterruptedException {
+    public List<Long> generateBusinesses(int businessCount) throws InterruptedException {
         var userGenerator = new UserGenerator(conn);
         List<Long> generatedBusinessIds = new ArrayList<>();
         try {
