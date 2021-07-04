@@ -37,7 +37,7 @@ public class Main {
      * @return the number of objects to be generated
      */
     public static int getNumObjectsFromInput(String objectName) throws InterruptedException {
-        int numObjects = 0;
+        int numObjects = -1;
         int maxObjects = 2000000; //maximum objects 2 million
         while (numObjects < 0 || numObjects >= maxObjects) {
             clear();
