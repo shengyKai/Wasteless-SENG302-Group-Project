@@ -109,6 +109,7 @@ task(generateProduct, dependsOn: 'classes', type: JavaExec) {
 
 task(generateInventoryItem, dependsOn: 'classes', type: JavaExec) {
     main = 'org.seng302.datagenerator.BusinessGenerator'
+    standardInput = System.in
     classpath = sourceSets.main.runtimeClasspath
 }
 
