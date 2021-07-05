@@ -1,13 +1,13 @@
 <template>
   <div>
     <v-card-title>
-      Your marketplace card is about to expire
+      {{ title }}
     </v-card-title>
     <v-card-subtitle>
       {{ date }}
     </v-card-subtitle>
     <v-card-text>
-      Your card '{{ card.title }}' will expire in {{ remaining }}. Do you want to delay the expiry by two weeks?
+      {{ text }}
     </v-card-text>
     <v-expand-transition>
       <v-container v-show="viewCard">
@@ -19,14 +19,18 @@
       </v-container>
     </v-expand-transition>
     <v-card-actions class="justify-center">
-      <v-btn color="primary">Delay expiry</v-btn>
+      <v-btn v-if="!delayed" color="primary" @click="delayExpiry">Delay expiry</v-btn>
       <v-btn color="secondary" @click="viewCard=!viewCard">{{ expandMessage }}</v-btn>
     </v-card-actions>
+    <v-card-text class="justify-center">
+      <div class="error--text" v-if="errorMessage !== undefined">{{ errorMessage }}</div>
+    </v-card-text>
   </div>
 </template>
 
 <script>
 import { formatDate } from '@/utils';
+import { extendMarketplaceCardExpiry } from '@/api/internal';
 import MarketplaceCard from '@/components/cards/MarketplaceCard';
 
 export default {
@@ -42,6 +46,9 @@ export default {
     return {
       now: new Date(),
       viewCard: false,
+      errorMessage: undefined,
+      delayPeriodSeconds: 60 * 60 * 24,
+      successfulDelayRequest: false,
     };
   },
   created() {
@@ -91,6 +98,43 @@ export default {
         return 'Hide card';
       }
       return 'View card';
+    },
+    /**
+     * True if the card's expiry date has been delayed, false otherwise.
+     */
+    delayed() {
+      return this.successfulDelayRequest || this.remainingSeconds > this.delayPeriodSeconds;
+    },
+    /**
+     * Title of the newsfeed item. Depends on whether the card's expiry has been delayed.
+     */
+    title() {
+      if (this.delayed) {
+        return 'You have delayed your card\'s expiry date';
+      } else {
+        return 'Your marketplace card is about to expire';
+      }
+    },
+    /**
+     * Main text of the newsfeed item. Depends on whether the card's expiry has been delayed.
+     */
+    text() {
+      if (this.delayed) {
+        return `The expriy date of your card '${this.card.title}' was delayed by two weeks.`;
+      } else {
+        return `Your card '${this.card.title}' will expire in ${this.remaining}. Do you want to delay the expiry by two weeks?`;
+      }
+    }
+  },
+  /**
+   * Call the api function to delay the card's expiry and show feedback based on the response.
+   */
+  methods: {
+    async delayExpiry() {
+      this.errorMessage = await extendMarketplaceCardExpiry(this.card.id);
+      if (this.errorMessage === undefined) {
+        this.successfulDelayRequest = true;
+      }
     }
   }
 };
