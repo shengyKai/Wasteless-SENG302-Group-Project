@@ -63,7 +63,7 @@ describe('MarketplaceCard.vue', () => {
     await deleteButton.trigger('click');
 
     const dialogs = wrapper.findAllComponents({ name: "v-dialog" });
-    return dialogs.at(0)
+    return dialogs.at(0);
   }
 
   /**
@@ -95,7 +95,7 @@ describe('MarketplaceCard.vue', () => {
       }
     });
     wrapper = appWrapper.getComponent(MarketplaceCard);
-  };
+  }
 
   /**
    * Set up the store for testing so that the marketplace card can show the appropriate details.
@@ -108,14 +108,14 @@ describe('MarketplaceCard.vue', () => {
       user: {
         id: userId
       }
-    }
+    };
     getters = {
       role: () => userRole
-    }
+    };
     store = new Vuex.Store({
       getters,
       state
-    })
+    });
   }
 
   beforeEach(() => {

@@ -6,11 +6,6 @@ exports[`MarketplaceCard.vue Must match snapshot 1`] = `
     <div class="v-card__title my-n1 title">
       test_card_title
     </div>
-    <div class="v-card__actions"><button type="button" class="v-btn v-btn--is-elevated v-btn--fab v-btn--has-bg v-btn--round theme--light v-size--x-small primary" dense=""><span class="v-btn__content"><i aria-hidden="true" class="v-icon notranslate mdi mdi-trash-can theme--light"></i></span></button>
-      <div role="dialog" class="v-dialog__container">
-        <!---->
-      </div>
-    </div>
   </div>
   <div class="v-card__text my-n2 flex-grow-1 d-flex flex-column justify-space-between">
     <div><strong>
@@ -26,6 +21,12 @@ exports[`MarketplaceCard.vue Must match snapshot 1`] = `
       </span></span><span class="mx-1 my-1 v-chip theme--light v-size--small primary"><span class="v-chip__content">
         test_keyword_2
       </span></span></div>
+  </div>
+  <hr role="separator" aria-orientation="horizontal" class="v-divider theme--light">
+  <div class="v-card__actions"><button type="button" class="v-icon notranslate v-icon--link mdi mdi-trash-can theme--light primary--text"></button>
+    <div role="dialog" class="v-dialog__container">
+      <!---->
+    </div>
   </div>
 </div>
 `;

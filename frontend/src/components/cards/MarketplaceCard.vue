@@ -4,48 +4,6 @@
       <v-card-title class="my-n1 title">
         {{ content.title }}
       </v-card-title>
-      <v-card-actions v-if="isCardOwnerOrDGAA">
-        <v-btn
-          ref="deleteButton"
-          dense
-          fab
-          x-small
-          color="primary"
-          @click.stop="deleteCardDialog = true"
-        >
-          <v-icon>
-            mdi-trash-can
-          </v-icon>
-        </v-btn>
-        <v-dialog
-          v-model="deleteCardDialog"
-          max-width="250px"
-        >
-          <v-card>
-            <v-card-title>
-              Delete item?
-            </v-card-title>
-            <v-card-actions>
-              <v-spacer/>
-              <v-btn
-                color="primary"
-                text
-                @click="deleteCard(content.id); deleteCardDialog = false;"
-              >
-                Delete
-              </v-btn>
-
-              <v-btn
-                color="primary"
-                text
-                @click="deleteCardDialog = false"
-              >
-                Cancel
-              </v-btn>
-            </v-card-actions>
-          </v-card>
-        </v-dialog>
-      </v-card-actions>
     </div>
     <v-card-text class="my-n2 flex-grow-1 d-flex flex-column justify-space-between">
       <div>
@@ -75,6 +33,45 @@
         </v-chip>
       </div>
     </v-card-text>
+    <v-divider/>
+    <v-card-actions v-if="isCardOwnerOrDGAA">
+      <v-icon ref="deleteButton"
+              color="primary"
+              @click.stop="deleteCardDialog = true"
+      >
+        mdi-trash-can
+      </v-icon>
+      <v-dialog
+        v-model="deleteCardDialog"
+        max-width="300px"
+      >
+        <v-card>
+          <v-card-title>
+            Are you sure?
+          </v-card-title>
+          <v-card-text>
+            Deleting "{{ content.title }}" will remove the card listing from the marketplace
+          </v-card-text>
+          <v-card-actions>
+            <v-spacer/>
+            <v-btn
+              color="primary"
+              text
+              @click="deleteCard(content.id); deleteCardDialog = false;"
+            >
+              Delete
+            </v-btn>
+            <v-btn
+              color="primary"
+              text
+              @click="deleteCardDialog = false"
+            >
+              Cancel
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+    </v-card-actions>
   </v-card>
 </template>
 
