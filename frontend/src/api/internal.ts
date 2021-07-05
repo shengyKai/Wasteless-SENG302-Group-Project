@@ -35,7 +35,7 @@ const SERVER_URL = process.env.VUE_APP_SERVER_ADD;
 
 const instance = axios.create({
   baseURL: SERVER_URL,
-  timeout: 2000,
+  timeout: 5 * 1000,
   withCredentials: true,
 });
 
@@ -191,6 +191,8 @@ export type CreateProduct = Omit<Product, 'created' | 'images'>;
 
 type UserOrderBy = 'userId' | 'relevance' | 'firstName' | 'middleName' | 'lastName' | 'nickname' | 'email';
 
+type SearchResults<T> = { results: T[], count: number }
+
 /**
  * Sends a search query to the backend.
  *
@@ -201,7 +203,7 @@ type UserOrderBy = 'userId' | 'relevance' | 'firstName' | 'middleName' | 'lastNa
  * @param reverse Specifies whether to reverse the search results (default order is descending for relevance and ascending for all other orders)
  * @returns List of user infos for the current page or an error message
  */
-export async function search(query: string, pageIndex: number, resultsPerPage: number, orderBy: UserOrderBy, reverse: boolean): Promise<MaybeError<User[]>> {
+export async function search(query: string, pageIndex: number, resultsPerPage: number, orderBy: UserOrderBy, reverse: boolean): Promise<MaybeError<SearchResults<User>>> {
   let response;
   try {
     response = await instance.get('/users/search', {
@@ -220,39 +222,11 @@ export async function search(query: string, pageIndex: number, resultsPerPage: n
     return `Request failed: ${status}`;
   }
 
-  if (!is<User[]>(response.data)) {
+  if (!is<SearchResults<User>>(response.data)) {
     return 'Response is not user array';
   }
 
   return response.data;
-}
-
-/**
- * Sends a query for the number of search results for a given query to the backend.
- *
- * @param query Query string to search for
- * @returns Number of search results or an error message
- */
-export async function getSearchCount(query: string): Promise<MaybeError<number>> {
-  let response;
-  try {
-    response = await instance.get('/users/search/count', {
-      params: {
-        searchQuery: query,
-      }
-    });
-  } catch (error) {
-    let status: number | undefined = error.response?.status;
-
-    if (status === undefined) return 'Failed to reach backend';
-    return `Request failed: ${status}`;
-  }
-
-  if (!is<number>(response.data.count)) {
-    return 'Response is not number';
-  }
-
-  return response.data.count;
 }
 
 /**

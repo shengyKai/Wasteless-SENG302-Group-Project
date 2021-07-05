@@ -19,7 +19,6 @@ jest.mock('@/utils', () => ({
 }));
 
 const search = castMock(api.search);
-const getSearchCount = castMock(api.getSearchCount);
 
 Vue.use(Vuetify);
 
@@ -80,8 +79,10 @@ describe('SearchResults.vue', () => {
    * @param testCount The mock number of total users for this search
    */
   function setResults(users: User[], totalCount?: number) {
-    search.mockResolvedValue(users);
-    getSearchCount.mockResolvedValue(totalCount !== undefined ? totalCount : users.length);
+    search.mockResolvedValue({
+      results: users,
+      count: totalCount !== undefined ? totalCount : users.length
+    });
   }
 
   /**
