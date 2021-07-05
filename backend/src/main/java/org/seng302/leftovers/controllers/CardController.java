@@ -4,9 +4,11 @@ import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.seng302.leftovers.entities.ExpiryEvent;
 import org.seng302.leftovers.entities.Keyword;
 import org.seng302.leftovers.entities.MarketplaceCard;
 import org.seng302.leftovers.entities.User;
+import org.seng302.leftovers.persistence.ExpiryEventRepository;
 import org.seng302.leftovers.persistence.KeywordRepository;
 import org.seng302.leftovers.persistence.MarketplaceCardRepository;
 import org.seng302.leftovers.persistence.UserRepository;
@@ -32,13 +34,15 @@ public class CardController {
     private final MarketplaceCardRepository marketplaceCardRepository;
     private final KeywordRepository keywordRepository;
     private final UserRepository userRepository;
+    private final ExpiryEventRepository expiryEventRepository;
     private final Logger logger = LogManager.getLogger(CardController.class.getName());
 
     @Autowired
-    public CardController(MarketplaceCardRepository marketplaceCardRepository, KeywordRepository keywordRepository, UserRepository userRepository) {
+    public CardController(MarketplaceCardRepository marketplaceCardRepository, KeywordRepository keywordRepository, UserRepository userRepository, ExpiryEventRepository expiryEventRepository) {
         this.marketplaceCardRepository = marketplaceCardRepository;
         this.keywordRepository = keywordRepository;
         this.userRepository = userRepository;
+        this.expiryEventRepository = expiryEventRepository;
     }
 
     /**
@@ -101,6 +105,10 @@ public class CardController {
                 throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Current user does not have permission to delete this card");
             }
 
+            Optional<ExpiryEvent> expiryEvent = expiryEventRepository.getByExpiringCard(card);
+            if (expiryEvent.isPresent()) {
+                expiryEventRepository.delete(expiryEvent.get());
+            }
             marketplaceCardRepository.delete(card);
 
         } catch (Exception e) {
