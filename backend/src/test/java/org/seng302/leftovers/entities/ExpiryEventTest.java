@@ -6,6 +6,7 @@ import org.junit.After;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.seng302.leftovers.persistence.BusinessRepository;
 import org.seng302.leftovers.persistence.ExpiryEventRepository;
 import org.seng302.leftovers.persistence.MarketplaceCardRepository;
 import org.seng302.leftovers.persistence.UserRepository;
@@ -23,6 +24,8 @@ class ExpiryEventTest {
     MarketplaceCardRepository marketplaceCardRepository;
     @Autowired
     ExpiryEventRepository expiryEventRepository;
+    @Autowired
+    BusinessRepository businessRepository;
     private MarketplaceCard testCard;
 
     @BeforeEach
@@ -38,6 +41,8 @@ class ExpiryEventTest {
     }
 
     private void setUpTestCard() {
+        businessRepository.deleteAll();
+        userRepository.deleteAll();
         User testUser = new User.Builder()
                 .withFirstName("John")
                 .withLastName("Smith")

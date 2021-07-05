@@ -14,6 +14,7 @@ import org.seng302.leftovers.entities.Location;
 import org.seng302.leftovers.entities.MarketplaceCard;
 import org.seng302.leftovers.entities.User;
 import org.seng302.leftovers.exceptions.AccessTokenException;
+import org.seng302.leftovers.persistence.ExpiryEventRepository;
 import org.seng302.leftovers.persistence.KeywordRepository;
 import org.seng302.leftovers.persistence.MarketplaceCardRepository;
 import org.seng302.leftovers.persistence.UserRepository;
@@ -60,6 +61,8 @@ class CardControllerTest {
     private MarketplaceCardRepository marketplaceCardRepository;
     @Mock
     private UserRepository userRepository;
+    @Mock
+    private ExpiryEventRepository expiryEventRepository;
     @Mock
     private MarketplaceCard mockCard;
     @Mock
@@ -129,7 +132,7 @@ class CardControllerTest {
         when(mockUser.getUserID()).thenReturn(userId);
 
         // Tell MockMvc to use controller with mocked repositories for tests
-        cardController = new CardController(marketplaceCardRepository, keywordRepository, userRepository);
+        cardController = new CardController(marketplaceCardRepository, keywordRepository, userRepository, expiryEventRepository);
         mockMvc = MockMvcBuilders.standaloneSetup(cardController).build();
 
         constructValidCreateCardJson();
