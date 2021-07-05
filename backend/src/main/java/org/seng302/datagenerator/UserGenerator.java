@@ -6,21 +6,18 @@ package org.seng302.datagenerator;
 
 import java.sql.*;
 import java.time.Instant;
-import java.util.NoSuchElementException;
-import java.util.Scanner;
-import java.util.Random;
+import java.util.*;
 import java.io.File;
 import java.util.concurrent.TimeUnit;
 
 import org.seng302.datagenerator.LocationGenerator.Location;
 
-import static org.seng302.datagenerator.Main.connectToDatabase;
+import static org.seng302.datagenerator.Main.*;
 
 public class UserGenerator {
     private Random random = new Random();
     private Connection conn;
     private LocationGenerator locationGenerator = LocationGenerator.getInstance();
-    static Scanner scanner = new Scanner(System.in);
 
     //predefined lists
     String[] BIOS = {"I enjoy running on the weekends", "Beaches are fun", "Got to focus on my career", "If only I went to a better university", "Read documentation yeah right", "My cats keep me going", "All I need is food"};
@@ -36,7 +33,10 @@ public class UserGenerator {
     private String generateDOB() {
         String day = String.valueOf(random.nextInt(27) + 1); // +1 as the day cannot be zero
         String month = String.valueOf(random.nextInt(11) + 1); // +1 as the month cannot be zero
-        String year = String.valueOf(random.nextInt(9998) + 1); // +1 as the year cannot be zero
+        //year must be more than a year in the past
+        String year = String.valueOf(random.nextInt(2006) + 1); // +1 as the year cannot be zero
+        while (year.length() < 4) year = "0" + year;
+
         return year +"-"+ month +"-"+ day;
     }
 
@@ -67,16 +67,6 @@ public class UserGenerator {
         String counterStr = String.valueOf(counter);
         String suffix = suffixes[random.nextInt(suffixes.length)];
         return emailStart + counterStr + suffix;
-    }
-
-    /**
-     * Clears the console on windows and linux
-     */
-    private void clear() {
-        final String ANSI_CLS = "\u001b[2J";
-        final String ANSI_HOME = "\u001b[H";
-        System.out.print(ANSI_CLS + ANSI_HOME);
-        System.out.flush();
     }
 
     /**
@@ -114,50 +104,10 @@ public class UserGenerator {
         stmt.setObject(5, generatePhNum()); //phone number
         stmt.setObject(6, generateDOB()); //date of birth
         stmt.setObject(7, BIOS[random.nextInt(BIOS.length)]); //bio
-        stmt.setObject(8, Instant.now());
+        stmt.setObject(8, Instant.now()); //date created
         stmt.setObject(9, userId);
         stmt.setObject(10, addressId);
         stmt.executeUpdate();
-    }
-
-    /**
-     * Asks the user how many users that want generated
-     * @return the number of users to be generated
-     */
-    private int GetUsersFromInput() throws InterruptedException {
-
-        int users = 0; //Change users
-        while (users <= 0) {
-            clear();
-            try {
-                System.out.println("------------------------------------");
-                System.out.println("How many users do you want generated");
-                System.out.println("and put into the database?");
-                System.out.println("------------------------------------");
-                users = Integer.parseInt(scanner.nextLine());
-            } catch (NumberFormatException e) {
-                System.out.println("Please enter a number! (above 0)");
-            }
-        }
-        return users;
-    }
-
-    /**
-     * Creates the file. If the file already exists, prompts the user to delete
-     * the existing file
-     * @param filename the name of the file that will be created
-     */
-    private void CreateFile(String filename) {
-        File file = new File(filename);
-        try {
-            while (!file.createNewFile()) {
-                System.out.println(String.format("The file '%s' already exists. Please delete that file to continue", filename));
-                System.out.println("Press any key to continue...");
-                scanner.nextLine();
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
     /**
@@ -166,18 +116,23 @@ public class UserGenerator {
      */
     public static void main(String[] args) throws SQLException, InterruptedException {
         Connection conn = connectToDatabase();
-
         var generator = new UserGenerator(conn);
-        generator.generate();
+        int userCount = getNumObjectsFromInput("users");
+        generator.generateUsers(userCount);
     }
 
-    private void generate() throws InterruptedException {
-        int users = GetUsersFromInput();
+    /**
+     * Generates the users
+     * @param userCount Number of users to generate
+     * @return List of generated user ids
+     */
+    public List<Long> generateUsers(int userCount) {
         clear();
 
+        List<Long> generatedUserIds = new ArrayList<>();
         try {
             PersonNameGenerator personNameGenerator = PersonNameGenerator.getInstance();
-            for (int i=0; i < users; i++) {
+            for (int i=0; i < userCount; i++) {
                 PersonNameGenerator.FullName fullName = personNameGenerator.generateName();
                 String email = generateEmail(i, fullName);
                 String password = generatePassword();
@@ -185,16 +140,18 @@ public class UserGenerator {
                 long addressId = locationGenerator.createInsertAddressSQL(address, conn);
 
                 clear();
-                System.out.println(String.format("Creating User %d / %d", i+1, users));
-                int progress = (int) (((float)(i+1) / (float)users) * 100);
+                System.out.println(String.format("Creating User %d / %d", i+1, userCount));
+                int progress = (int) (((float)(i+1) / (float)userCount) * 100);
                 System.out.println(String.format("Progress: %d%%", progress));
                 long userId = createInsertAccountSQL(email, password);
                 createInsertUsersSQL(userId, addressId, fullName);
+                generatedUserIds.add(userId);
             }
 
         } catch (Exception e) {
             e.printStackTrace();
         }
-        scanner.close();
+
+        return generatedUserIds;
     }
 }

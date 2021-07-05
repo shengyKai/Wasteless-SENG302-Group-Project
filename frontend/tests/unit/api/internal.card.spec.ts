@@ -8,7 +8,9 @@ jest.mock('axios', () => ({
   }
   ),
   instance: {
-    post: jest.fn()
+    post: jest.fn(),
+    delete: jest.fn(),
+    put: jest.fn()
   },
 }));
 
@@ -16,7 +18,7 @@ jest.mock('axios', () => ({
 type Mocked<T extends { [k: string]: (...args: any[]) => any }> = { [k in keyof T]: jest.Mock<ReturnType<T[k]>, Parameters<T[k]>> }
 
 // @ts-ignore - We've added an instance attribute in the mock declaration that mimics a AxiosInstance
-const instance: Mocked<Pick<AxiosInstance, 'post'>> = axios.instance;
+const instance: Mocked<Pick<AxiosInstance, 'post' | 'delete' | 'put' >> = axios.instance;
 
 describe("Test POST /cards endpoint", () => {
 
@@ -117,5 +119,115 @@ describe("Test POST /cards endpoint", () => {
     instance.post.mockRejectedValueOnce(undefined);
     const message = await api.getBusinessSales(7, 1, 1, 'created', false);
     expect(message).toEqual('Failed to reach backend');
+  });
+});
+
+describe("Test DELETE /cards/{id} endpoint", () => {
+  it('When provided with a card id which exists and a card is successfully deleted on the backend, there will be no return message', async ()=>{
+    instance.delete.mockResolvedValueOnce({
+      response: {
+        status: 200
+      }
+    });
+    const response = await api.deleteMarketplaceCard(1);
+    expect(response).toEqual(undefined);
+  });
+
+  it('When API deletion request is successfully resolved but there is an invalid access token, a message is returned about the missing/invalid token', async ()=>{
+    instance.delete.mockRejectedValueOnce({
+      response: {
+        status: 401
+      }
+    });
+    const response = await api.deleteMarketplaceCard(1);
+    expect(response).toEqual('Missing/Invalid access token');
+  });
+
+  it('When API deletion request is successfully resolved but there is an invalid authorisation, a message is returned about the invalid authorisation', async ()=>{
+    instance.delete.mockRejectedValueOnce({
+      response: {
+        status: 403
+      }
+    });
+    const response = await api.deleteMarketplaceCard(1);
+    expect(response).toEqual('Invalid authorization for card deletion');
+  });
+
+  it('When API deletion request is successfully resolved but the card id does not exist, a message is returned about the unfindable card', async ()=>{
+    instance.delete.mockRejectedValueOnce({
+      response: {
+        status: 406
+      }
+    });
+    const response = await api.deleteMarketplaceCard(1);
+    expect(response).toEqual('Marketplace card not found');
+  });
+
+  it('When API deletion request is successfully resolved but an unspecified error in the backend occurs, a message is returned about the error', async ()=>{
+    instance.delete.mockRejectedValueOnce({
+      response: {
+        status: 500,
+        data: {
+          message: "Some error message"
+        }
+      }
+    });
+    const response = await api.deleteMarketplaceCard(1);
+    expect(response).toEqual('Request failed: Some error message');
+  });
+});
+
+describe("Test PUT /cards/{id}/extenddisplayperiod endpoint", () => {
+  it('When provided with a card id which exists and the card expiry is successfully extended on the backend, there will be no return message', async ()=>{
+    instance.put.mockResolvedValueOnce({
+      response: {
+        status: 200
+      }
+    });
+    const response = await api.extendMarketplaceCardExpiry(1);
+    expect(response).toEqual(undefined);
+  });
+
+  it('When API extension request is successfully resolved but there is an invalid access token, a message is returned about the missing/invalid token', async ()=>{
+    instance.put.mockRejectedValueOnce({
+      response: {
+        status: 401
+      }
+    });
+    const response = await api.extendMarketplaceCardExpiry(1);
+    expect(response).toEqual('Missing/Invalid access token');
+  });
+
+  it('When API extension request is successfully resolved but there is an invalid authorisation, a message is returned about the invalid authorisation', async ()=>{
+    instance.put.mockRejectedValueOnce({
+      response: {
+        status: 403
+      }
+    });
+    const response = await api.extendMarketplaceCardExpiry(1);
+    expect(response).toEqual('Invalid authorization for card expiry extension');
+  });
+
+  it('When API extension request is successfully resolved but the card id does not exist, a message is returned about the unfindable card', async ()=>{
+    instance.put.mockRejectedValueOnce({
+      response: {
+        status: 406
+      }
+    });
+    const response = await api.extendMarketplaceCardExpiry(1);
+    expect(response).toEqual('Marketplace card not found');
+  });
+
+  it('When API extension request is successfully resolved but an unspecified error in the backend occurs, a message is returned about the error', async ()=>{
+    instance.put.mockRejectedValueOnce({
+      response: {
+        status: 500,
+        data: {
+          message: "Some error message"
+        }
+      }
+    });
+    const response = await api.extendMarketplaceCardExpiry(1);
+    expect(response).toEqual('Request failed: Some error message');
   });
 });
