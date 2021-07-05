@@ -933,3 +933,21 @@ export async function deleteMarketplaceCard(marketplaceCardId: number) : Promise
   }
   return undefined;
 }
+
+/**
+ * Extends a marketplace card expiry date such that the card can be displayed for another two weeks
+ * @param marketplaceCardId The id of the community marketplace card
+ */
+export async function extendMarketplaceCardExpiry(marketplaceCardId: number) : Promise<MaybeError<undefined>> {
+  try {
+    await instance.put(`/cards/${marketplaceCardId}/extenddisplayperiod`);
+  } catch (error) {
+    let status: number | undefined = error.response?.status;
+    if (status === undefined) return 'Failed to reach backend';
+    if (status === 401) return 'Missing/Invalid access token';
+    if (status === 403) return 'Invalid authorization for card expiry extension';
+    if (status === 406) return 'Marketplace card not found';
+    return 'Request failed: ' + error.response?.data.message;
+  }
+  return undefined;
+}
