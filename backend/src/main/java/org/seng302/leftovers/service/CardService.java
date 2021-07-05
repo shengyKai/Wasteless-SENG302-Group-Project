@@ -33,7 +33,7 @@ public class CardService {
      * Perform a scheduled check every hour to identify marketplace cards which are expiring within the next day.
      * Construct and dispatch an expiry event for these cards.
      */
-    @Scheduled(fixedRate = 1000)
+    @Scheduled(fixedRate = 60 * 60 * 1000)
     private void sendCardExpiryEvents() {
         logger.info("Checking for cards which are expiring within the next 24 hours");
         Instant cutOff = Instant.now().plus(Duration.ofDays(1));

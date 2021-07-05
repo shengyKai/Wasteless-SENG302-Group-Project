@@ -375,7 +375,7 @@ public class MarketplaceCard {
             card.setDescription(description);
             card.created = Instant.now();
             if (closes == null) {
-                card.setCloses(card.created.plus(Duration.ofHours(1)));
+                card.setCloses(card.created.plus(DISPLAY_PERIOD));
             } else {
                 card.setCloses(closes);
             }
