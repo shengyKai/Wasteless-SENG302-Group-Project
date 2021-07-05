@@ -1,10 +1,8 @@
 <template>
   <v-card min-height="250px" class="d-flex flex-column">
-    <div class="d-flex justify-space-between">
-      <v-card-title class="my-n1 title">
-        {{ content.title }}
-      </v-card-title>
-    </div>
+    <v-card-title class="my-n1 title">
+      {{ content.title }}
+    </v-card-title>
     <v-card-text class="my-n2 flex-grow-1 d-flex flex-column justify-space-between">
       <div>
         <strong v-if="location">
