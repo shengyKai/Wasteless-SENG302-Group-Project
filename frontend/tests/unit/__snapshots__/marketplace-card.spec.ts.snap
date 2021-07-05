@@ -20,5 +20,11 @@ exports[`MarketplaceCard.vue Must match snapshot 1`] = `
         test_keyword_2
       </span></span></div>
   </div>
+  <hr role="separator" aria-orientation="horizontal" class="v-divider theme--light">
+  <div class="v-card__actions"><button type="button" class="v-icon notranslate v-icon--link mdi mdi-trash-can theme--light primary--text"></button>
+    <div role="dialog" class="v-dialog__container">
+      <!---->
+    </div>
+  </div>
 </div>
 `;

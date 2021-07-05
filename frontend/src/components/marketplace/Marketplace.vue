@@ -88,7 +88,7 @@
         <v-container class="grey lighten-2">
           <v-row>
             <v-col v-for="card in cards[section]" :key="card.id" cols="12" sm="6" md="4" lg="3">
-              <MarketplaceCard :content="card"/>
+              <MarketplaceCard :content="card" @delete-card="updateMarketplace"/>
             </v-col>
           </v-row>
         </v-container>
@@ -194,6 +194,16 @@ export default {
       const pageEndIndex = pageStartIndex + this.cards[section].length;
       return`Displaying ${pageStartIndex + 1} - ${pageEndIndex} of ${this.totalResults[section]} results`;
     },
+    /**
+     * Updates the marketplace based the actions done in the Marketplace Card.
+     */
+    updateMarketplace(response) {
+      if (typeof response === "string") {
+        this.error = response;
+      } else {
+        this.updateResults();
+      }
+    }
   },
   components: {
     MarketplaceCard
