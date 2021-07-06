@@ -112,7 +112,7 @@ describe('ExpiryEvent.vue', () => {
 
   it.each(remainingTimes)("Remaining time is correctly formatted", async (testTime) => {
     await wrapper.setData({
-      successfulDelayRequest: false,
+      delayed: false,
       now: testTime.now,
     });
 
@@ -122,7 +122,7 @@ describe('ExpiryEvent.vue', () => {
   describe('Expiry has not been delayed', () => {
     beforeEach(async () => {
       await wrapper.setData({
-        successfulDelayRequest: false,
+        delayed: false,
       });
     });
 
@@ -168,7 +168,7 @@ describe('ExpiryEvent.vue', () => {
   describe('Expiry has been delayed', () => {
     beforeEach(async () => {
       await wrapper.setData({
-        successfulDelayRequest: true,
+        delayed: true,
       });
     });
 
