@@ -12,9 +12,7 @@
     <v-expand-transition>
       <v-container v-show="viewCard">
         <v-row justify="center">
-          <v-col>
-            <MarketplaceCard :content="card" style="max-width: 300px"/>
-          </v-col>
+          <MarketplaceCard :content="card" style="width: 300px"/>
         </v-row>
       </v-container>
     </v-expand-transition>
@@ -48,7 +46,7 @@ export default {
       viewCard: false,
       errorMessage: undefined,
       delayPeriodSeconds: 60 * 60 * 24,
-      successfulDelayRequest: false,
+      delayed: false,
     };
   },
   created() {
@@ -100,12 +98,6 @@ export default {
       return 'View card';
     },
     /**
-     * True if the card's expiry date has been delayed, false otherwise.
-     */
-    delayed() {
-      return this.successfulDelayRequest || this.remainingSeconds > this.delayPeriodSeconds;
-    },
-    /**
      * Title of the newsfeed item. Depends on whether the card's expiry has been delayed.
      */
     title() {
@@ -133,7 +125,7 @@ export default {
     async delayExpiry() {
       this.errorMessage = await extendMarketplaceCardExpiry(this.card.id);
       if (this.errorMessage === undefined) {
-        this.successfulDelayRequest = true;
+        this.delayed = true;
       }
     }
   }

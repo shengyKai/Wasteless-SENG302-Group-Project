@@ -173,6 +173,10 @@ public class CardController {
                 throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Current user does not have permission to delete this card");
             }
 
+            Optional<ExpiryEvent> expiryEvent = expiryEventRepository.getByExpiringCard(card);
+            if (expiryEvent.isPresent()) {
+                expiryEventRepository.delete(expiryEvent.get());
+            }
             card.delayCloses();
             marketplaceCardRepository.save(card);
         } catch (Exception e) {
