@@ -40,6 +40,7 @@ public class ProductGenerator {
                         + "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
                 Statement.RETURN_GENERATED_KEYS
         );
+
         stmt.setObject(1, COUNTRIES[random.nextInt(COUNTRIES.length)]);
         stmt.setObject(2, Instant.now());
         stmt.setObject(3, DESCRIPTIONS[random.nextInt(DESCRIPTIONS.length)]);
