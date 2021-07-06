@@ -15,12 +15,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -28,6 +31,7 @@ import java.util.List;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -147,6 +151,8 @@ public class InventoryControllerModifyInvEntriesTest {
         InventoryController invController = new InventoryController(businessRepository, invItemRepository,
                 productRepository);
         mockMvc = MockMvcBuilders.standaloneSetup(invController).build();
+
+        //TODO create inventory item
     }
 
     /**
@@ -170,193 +176,880 @@ public class InventoryControllerModifyInvEntriesTest {
     }
 
     @Test
-    void modifyInvEntries_modifyId_modifiedInvEntry200() {
-        //TODO
+    void modifyInvEntries_modifyId_modifiedInvEntry200() throws Exception {
+        Business businessSpy = spy(testBusiness);
+        Product productSpy = spy(testProduct);
+        when(businessRepository.getBusinessById(any())).thenReturn(businessSpy);
+        when(productRepository.getProduct(any(), any())).thenReturn(productSpy);
+        doNothing().when(businessSpy).checkSessionPermissions(any());
+
+        JSONObject invBody = new JSONObject();
+        invBody.put("productId", "NathanAppple95");
+
+        mockMvc.perform(MockMvcRequestBuilders
+                .post("/businesses/1/inventory/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(invBody.toString()))
+                .andExpect(status().isOk());
     }
 
     @Test
-    void modifyInvEntries_modifyIdInvalid_cannotModify400() {
-        //TODO
+    void modifyInvEntries_modifyIdInvalid_cannotModify400() throws Exception {
+        Business businessSpy = spy(testBusiness);
+        Product productSpy = spy(testProduct);
+        when(businessRepository.getBusinessById(any())).thenReturn(businessSpy);
+        when(productRepository.getProduct(any(), any())).thenReturn(productSpy);
+        doNothing().when(businessSpy).checkSessionPermissions(any());
+
+        int[] productIds = {-1, -2, 0, 1, 1000};
+
+        for (int i=0; i <= productIds.length; i++) {
+            JSONObject invBody = new JSONObject();
+            invBody.put("quantity", productIds[i]);
+
+            mockMvc.perform(MockMvcRequestBuilders
+                    .post("/businesses/1/inventory/1")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(invBody.toString()))
+                    .andExpect(status().isBadRequest());
+        }
     }
 
     @Test
-    void modifyInvEntries_modifyIdNull_cannotModify400() {
-        //TODO
+    void modifyInvEntries_modifyIdNull_cannotModify400() throws Exception {
+        Business businessSpy = spy(testBusiness);
+        Product productSpy = spy(testProduct);
+        when(businessRepository.getBusinessById(any())).thenReturn(businessSpy);
+        when(productRepository.getProduct(any(), any())).thenReturn(productSpy);
+        doNothing().when(businessSpy).checkSessionPermissions(any());
+
+        JSONObject invBody = new JSONObject();
+        invBody.put("productId", null);
+
+        mockMvc.perform(MockMvcRequestBuilders
+                .post("/businesses/1/inventory/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(invBody.toString()))
+                .andExpect(status().isBadRequest());
     }
 
     @Test
-    void modifyInvEntries_modifyQuantity_modifiedInvEntry200() {
-        //TODO
+    void modifyInvEntries_modifyQuantity_modifiedInvEntry200() throws Exception {
+        Business businessSpy = spy(testBusiness);
+        Product productSpy = spy(testProduct);
+        when(businessRepository.getBusinessById(any())).thenReturn(businessSpy);
+        when(productRepository.getProduct(any(), any())).thenReturn(productSpy);
+        doNothing().when(businessSpy).checkSessionPermissions(any());
+
+        //tests a wide range of integers
+        for (int quantity=1; quantity <= 100; quantity++) {
+            JSONObject invBody = new JSONObject();
+            invBody.put("quantity", quantity);
+
+            mockMvc.perform(MockMvcRequestBuilders
+                    .post("/businesses/1/inventory/1")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(invBody.toString()))
+                    .andExpect(status().isOk());
+        }
     }
 
     @Test
-    void modifyInvEntries_modifyQuantityInvalid_cannotModify400() {
-        //TODO
+    void modifyInvEntries_modifyQuantityInvalid_cannotModify400() throws Exception {
+        Business businessSpy = spy(testBusiness);
+        Product productSpy = spy(testProduct);
+        when(businessRepository.getBusinessById(any())).thenReturn(businessSpy);
+        when(productRepository.getProduct(any(), any())).thenReturn(productSpy);
+        doNothing().when(businessSpy).checkSessionPermissions(any());
+
+        String[] quantities = {"-1", "-2", "-10", "#", "$", "a", "b", "Z" };
+
+        for (int i=0; i <= quantities.length; i++) {
+            JSONObject invBody = new JSONObject();
+            invBody.put("quantity", quantities[i]);
+
+            mockMvc.perform(MockMvcRequestBuilders
+                    .post("/businesses/1/inventory/1")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(invBody.toString()))
+                    .andExpect(status().isBadRequest());
+        }
     }
 
     @Test
-    void modifyInvEntries_modifyQuantityNull_cannotModify400() {
-        //TODO
+    void modifyInvEntries_modifyQuantityNull_cannotModify400() throws Exception {
+        Business businessSpy = spy(testBusiness);
+        Product productSpy = spy(testProduct);
+        when(businessRepository.getBusinessById(any())).thenReturn(businessSpy);
+        when(productRepository.getProduct(any(), any())).thenReturn(productSpy);
+        doNothing().when(businessSpy).checkSessionPermissions(any());
+
+        JSONObject invBody = new JSONObject();
+        invBody.put("quantity", null);
+
+        mockMvc.perform(MockMvcRequestBuilders
+                .post("/businesses/1/inventory/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(invBody.toString()))
+                .andExpect(status().isBadRequest());
     }
 
     @Test
-    void modifyInvEntries_modifyPricePerItem_modifiedInvEntry200() {
-        //TODO
+    void modifyInvEntries_modifyPricePerItem_modifiedInvEntry200() throws Exception {
+        Business businessSpy = spy(testBusiness);
+        Product productSpy = spy(testProduct);
+        when(businessRepository.getBusinessById(any())).thenReturn(businessSpy);
+        when(productRepository.getProduct(any(), any())).thenReturn(productSpy);
+        doNothing().when(businessSpy).checkSessionPermissions(any());
+
+        //tests a wide range of floats
+        for (int price=1; price <= 99; price++) {
+            float pricePerItem = price + (((float)price) / 100);
+            JSONObject invBody = new JSONObject();
+            invBody.put("pricePerItem", pricePerItem);
+
+            mockMvc.perform(MockMvcRequestBuilders
+                    .post("/businesses/1/inventory/1")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(invBody.toString()))
+                    .andExpect(status().isOk());
+        }
     }
 
     @Test
-    void modifyInvEntries_modifyPricePerItemInvalid_cannotModify400() {
-        //TODO
+    void modifyInvEntries_modifyPricePerItemInvalid_cannotModify400() throws Exception {
+        Business businessSpy = spy(testBusiness);
+        Product productSpy = spy(testProduct);
+        when(businessRepository.getBusinessById(any())).thenReturn(businessSpy);
+        when(productRepository.getProduct(any(), any())).thenReturn(productSpy);
+        doNothing().when(businessSpy).checkSessionPermissions(any());
+
+        String[] prices = {"-1.01", "-0.01", "-2000", "-1000.99", "#", "$", "a", "b", "Z" };
+
+        for (int i=0; i <= prices.length; i++) {
+            JSONObject invBody = new JSONObject();
+            invBody.put("pricePerItem", prices[i]);
+
+            mockMvc.perform(MockMvcRequestBuilders
+                    .post("/businesses/1/inventory/1")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(invBody.toString()))
+                    .andExpect(status().isBadRequest());
+        }
     }
 
     @Test
-    void modifyInvEntries_modifyTotalPrice_modifiedInvEntry200() {
-        //TODO
+    void modifyInvEntries_modifyPricePerItemNull_modifiedEntry200() throws Exception {
+        Business businessSpy = spy(testBusiness);
+        Product productSpy = spy(testProduct);
+        when(businessRepository.getBusinessById(any())).thenReturn(businessSpy);
+        when(productRepository.getProduct(any(), any())).thenReturn(productSpy);
+        doNothing().when(businessSpy).checkSessionPermissions(any());
+
+        JSONObject invBody = new JSONObject();
+        invBody.put("pricePerItem", null);
+
+        mockMvc.perform(MockMvcRequestBuilders
+                .post("/businesses/1/inventory/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(invBody.toString()))
+                .andExpect(status().isOk());
     }
 
     @Test
-    void modifyInvEntries_modifyTotalPriceInvalid_cannotModify400() {
-        //TODO
+    void modifyInvEntries_modifyTotalPrice_modifiedInvEntry200() throws Exception {
+        Business businessSpy = spy(testBusiness);
+        Product productSpy = spy(testProduct);
+        when(businessRepository.getBusinessById(any())).thenReturn(businessSpy);
+        when(productRepository.getProduct(any(), any())).thenReturn(productSpy);
+        doNothing().when(businessSpy).checkSessionPermissions(any());
+
+        //tests a wide range of floats
+        for (int price=1; price <= 99; price++) {
+            float totalPrice = price + (((float)price) / 100);
+            JSONObject invBody = new JSONObject();
+            invBody.put("totalPrice", totalPrice);
+
+            mockMvc.perform(MockMvcRequestBuilders
+                    .post("/businesses/1/inventory/1")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(invBody.toString()))
+                    .andExpect(status().isOk());
+        }
     }
 
     @Test
-    void modifyInvEntries_modifyTotalPriceNull_cannotModify400() {
-        //TODO
+    void modifyInvEntries_modifyTotalPriceInvalid_cannotModify400() throws Exception {
+        Business businessSpy = spy(testBusiness);
+        Product productSpy = spy(testProduct);
+        when(businessRepository.getBusinessById(any())).thenReturn(businessSpy);
+        when(productRepository.getProduct(any(), any())).thenReturn(productSpy);
+        doNothing().when(businessSpy).checkSessionPermissions(any());
+
+        String[] prices = {"-21.01", "-0.01", "-9000", "-3000.99", "#", "$", "a", "b", "Z" };
+
+        for (int i=0; i <= prices.length; i++) {
+            JSONObject invBody = new JSONObject();
+            invBody.put("totalPrice", prices[i]);
+
+            mockMvc.perform(MockMvcRequestBuilders
+                    .post("/businesses/1/inventory/1")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(invBody.toString()))
+                    .andExpect(status().isBadRequest());
+        }
     }
 
     @Test
-    void modifyInvEntries_modifyCreationDate_modifiedEntry200() {
-        //TODO
+    void modifyInvEntries_modifyTotalPriceNull_cannotModify400() throws Exception {
+        Business businessSpy = spy(testBusiness);
+        Product productSpy = spy(testProduct);
+        when(businessRepository.getBusinessById(any())).thenReturn(businessSpy);
+        when(productRepository.getProduct(any(), any())).thenReturn(productSpy);
+        doNothing().when(businessSpy).checkSessionPermissions(any());
+
+        JSONObject invBody = new JSONObject();
+        invBody.put("totalPrice", null);
+
+        mockMvc.perform(MockMvcRequestBuilders
+                .post("/businesses/1/inventory/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(invBody.toString()))
+                .andExpect(status().isOk());
     }
 
     @Test
-    void modifyInvEntries_modifyCreationDateInvalid_cannotModify400() {
-        //TODO
+    void modifyInvEntries_modifyCreationDate_modifiedEntry200() throws Exception {
+        Business businessSpy = spy(testBusiness);
+        Product productSpy = spy(testProduct);
+        when(businessRepository.getBusinessById(any())).thenReturn(businessSpy);
+        when(productRepository.getProduct(any(), any())).thenReturn(productSpy);
+        doNothing().when(businessSpy).checkSessionPermissions(any());
+
+        JSONObject invBody = new JSONObject();
+        invBody.put("creationDate", LocalDate.now());
+
+        mockMvc.perform(MockMvcRequestBuilders
+                .post("/businesses/1/inventory/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(invBody.toString()))
+                .andExpect(status().isOk());
     }
 
     @Test
-    void modifyInvEntries_modifyCreationDateBeforeToday_cannotModify400() {
-        //TODO
+    void modifyInvEntries_modifyCreationDateInvalid_cannotModify400() throws Exception {
+        Business businessSpy = spy(testBusiness);
+        Product productSpy = spy(testProduct);
+        when(businessRepository.getBusinessById(any())).thenReturn(businessSpy);
+        when(productRepository.getProduct(any(), any())).thenReturn(productSpy);
+        doNothing().when(businessSpy).checkSessionPermissions(any());
+
+        String[] creationDates = {"10-10", "10/10/1999", "999999", "#", "$", "a", "b", "Z" };
+
+        for (int i=0; i <= creationDates.length; i++) {
+            JSONObject invBody = new JSONObject();
+            invBody.put("creationDate", creationDates[i]);
+
+            mockMvc.perform(MockMvcRequestBuilders
+                    .post("/businesses/1/inventory/1")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(invBody.toString()))
+                    .andExpect(status().isBadRequest());
+        }
     }
 
     @Test
-    void modifyInvEntries_modifyCreationDateNull_cannotModify400() {
-        //TODO
+    void modifyInvEntries_modifyCreationDateAfterToday_cannotModify400() throws Exception {
+        Business businessSpy = spy(testBusiness);
+        Product productSpy = spy(testProduct);
+        when(businessRepository.getBusinessById(any())).thenReturn(businessSpy);
+        when(productRepository.getProduct(any(), any())).thenReturn(productSpy);
+        doNothing().when(businessSpy).checkSessionPermissions(any());
+
+        JSONObject invBody = new JSONObject();
+        invBody.put("creationDate", LocalDate.now().plusYears(1));
+
+        mockMvc.perform(MockMvcRequestBuilders
+                .post("/businesses/1/inventory/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(invBody.toString()))
+                .andExpect(status().isOk());
     }
 
     @Test
-    void modifyInvEntries_modifyManufacturedDate_modifiedEntry200() {
-        //TODO
+    void modifyInvEntries_modifyCreationDateNull_cannotModify400() throws Exception {
+        Business businessSpy = spy(testBusiness);
+        Product productSpy = spy(testProduct);
+        when(businessRepository.getBusinessById(any())).thenReturn(businessSpy);
+        when(productRepository.getProduct(any(), any())).thenReturn(productSpy);
+        doNothing().when(businessSpy).checkSessionPermissions(any());
+
+        JSONObject invBody = new JSONObject();
+        invBody.put("creationDate", null);
+
+        mockMvc.perform(MockMvcRequestBuilders
+                .post("/businesses/1/inventory/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(invBody.toString()))
+                .andExpect(status().isBadRequest());
     }
 
     @Test
-    void modifyInvEntries_modifyManufacturedDateInvalid_cannotModify400() {
-        //TODO
+    void modifyInvEntries_modifyManufacturedDate_modifiedEntry200() throws Exception {
+        Business businessSpy = spy(testBusiness);
+        Product productSpy = spy(testProduct);
+        when(businessRepository.getBusinessById(any())).thenReturn(businessSpy);
+        when(productRepository.getProduct(any(), any())).thenReturn(productSpy);
+        doNothing().when(businessSpy).checkSessionPermissions(any());
+
+        JSONObject invBody = new JSONObject();
+        invBody.put("manufactured", LocalDate.now().minusYears(1));
+
+        mockMvc.perform(MockMvcRequestBuilders
+                .post("/businesses/1/inventory/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(invBody.toString()))
+                .andExpect(status().isOk());
     }
 
     @Test
-    void modifyInvEntries_modifyManufacturedDateNull_modifiedEntry200() {
-        //TODO
+    void modifyInvEntries_modifyManufacturedDateInvalid_cannotModify400() throws Exception {
+        Business businessSpy = spy(testBusiness);
+        Product productSpy = spy(testProduct);
+        when(businessRepository.getBusinessById(any())).thenReturn(businessSpy);
+        when(productRepository.getProduct(any(), any())).thenReturn(productSpy);
+        doNothing().when(businessSpy).checkSessionPermissions(any());
+
+        String[] manufacturedDates = {"10-10", "10/10/1999", "999999", "#", "$", "a", "b", "Z" };
+
+        for (int i=0; i <= manufacturedDates.length; i++) {
+            JSONObject invBody = new JSONObject();
+            invBody.put("manufactured", manufacturedDates[i]);
+
+            mockMvc.perform(MockMvcRequestBuilders
+                    .post("/businesses/1/inventory/1")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(invBody.toString()))
+                    .andExpect(status().isBadRequest());
+        }
     }
 
     @Test
-    void modifyInvEntries_modifyManufacturedDateAfterToday_cannotModify400() {
-        //TODO
+    void modifyInvEntries_modifyManufacturedDateNull_modifiedEntry200() throws Exception {
+        Business businessSpy = spy(testBusiness);
+        Product productSpy = spy(testProduct);
+        when(businessRepository.getBusinessById(any())).thenReturn(businessSpy);
+        when(productRepository.getProduct(any(), any())).thenReturn(productSpy);
+        doNothing().when(businessSpy).checkSessionPermissions(any());
+
+        JSONObject invBody = new JSONObject();
+        invBody.put("manufactured", null);
+
+        mockMvc.perform(MockMvcRequestBuilders
+                .post("/businesses/1/inventory/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(invBody.toString()))
+                .andExpect(status().isOk());
     }
 
     @Test
-    void modifyInvEntries_modifySelByDate_modifiedEntry200() {
-        //TODO
+    void modifyInvEntries_modifyManufacturedDateAfterToday_cannotModify400() throws Exception {
+        Business businessSpy = spy(testBusiness);
+        Product productSpy = spy(testProduct);
+        when(businessRepository.getBusinessById(any())).thenReturn(businessSpy);
+        when(productRepository.getProduct(any(), any())).thenReturn(productSpy);
+        doNothing().when(businessSpy).checkSessionPermissions(any());
+
+        JSONObject invBody = new JSONObject();
+        invBody.put("manufactured", LocalDate.now().plusYears(1));
+
+        mockMvc.perform(MockMvcRequestBuilders
+                .post("/businesses/1/inventory/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(invBody.toString()))
+                .andExpect(status().isBadRequest());
     }
 
     @Test
-    void modifyInvEntries_modifySellByDateInvalid_cannotModify() {
-        //TODO
+    void modifyInvEntries_modifySelByDate_modifiedEntry200() throws Exception {
+        Business businessSpy = spy(testBusiness);
+        Product productSpy = spy(testProduct);
+        when(businessRepository.getBusinessById(any())).thenReturn(businessSpy);
+        when(productRepository.getProduct(any(), any())).thenReturn(productSpy);
+        doNothing().when(businessSpy).checkSessionPermissions(any());
+
+        JSONObject invBody = new JSONObject();
+        invBody.put("sellBy", LocalDate.now().plusYears(1));
+
+        mockMvc.perform(MockMvcRequestBuilders
+                .post("/businesses/1/inventory/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(invBody.toString()))
+                .andExpect(status().isOk());
     }
 
     @Test
-    void modifyInvEntries_modifySellByDateNull_modifiedEntry200() {
-        //TODO
+    void modifyInvEntries_modifySellByDateInvalid_cannotModify400() throws Exception {
+        Business businessSpy = spy(testBusiness);
+        Product productSpy = spy(testProduct);
+        when(businessRepository.getBusinessById(any())).thenReturn(businessSpy);
+        when(productRepository.getProduct(any(), any())).thenReturn(productSpy);
+        doNothing().when(businessSpy).checkSessionPermissions(any());
+
+        String[] sellByDates = {"10-10", "10/10/1999", "999999", "#", "$", "a", "b", "Z" };
+
+        for (int i=0; i <= sellByDates.length; i++) {
+            JSONObject invBody = new JSONObject();
+            invBody.put("sellBy", sellByDates[i]);
+
+            mockMvc.perform(MockMvcRequestBuilders
+                    .post("/businesses/1/inventory/1")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(invBody.toString()))
+                    .andExpect(status().isBadRequest());
+        }
     }
 
     @Test
-    void modifyInvEntries_modifySellByDateBeforeToday_cannotModify() {
-        //TODO
+    void modifyInvEntries_modifySellByDateNull_modifiedEntry200() throws Exception {
+        Business businessSpy = spy(testBusiness);
+        Product productSpy = spy(testProduct);
+        when(businessRepository.getBusinessById(any())).thenReturn(businessSpy);
+        when(productRepository.getProduct(any(), any())).thenReturn(productSpy);
+        doNothing().when(businessSpy).checkSessionPermissions(any());
+
+        JSONObject invBody = new JSONObject();
+        invBody.put("sellBy", null);
+
+        mockMvc.perform(MockMvcRequestBuilders
+                .post("/businesses/1/inventory/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(invBody.toString()))
+                .andExpect(status().isOk());
     }
 
     @Test
-    void modifyInvEntries_modifyBestBeforeDate_modifiedEntry200() {
-        //TODO
+    void modifyInvEntries_modifySellByDateBeforeToday_cannotModify400() throws Exception {
+        Business businessSpy = spy(testBusiness);
+        Product productSpy = spy(testProduct);
+        when(businessRepository.getBusinessById(any())).thenReturn(businessSpy);
+        when(productRepository.getProduct(any(), any())).thenReturn(productSpy);
+        doNothing().when(businessSpy).checkSessionPermissions(any());
+
+        JSONObject invBody = new JSONObject();
+        invBody.put("sellBy", LocalDate.now().minusYears(1));
+
+        mockMvc.perform(MockMvcRequestBuilders
+                .post("/businesses/1/inventory/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(invBody.toString()))
+                .andExpect(status().isBadRequest());
     }
 
     @Test
-    void modifyInvEntries_modifyBestBeforeDateInvalid_cannotModify400() {
-        //TODO
+    void modifyInvEntries_modifyBestBeforeDate_modifiedEntry200() throws Exception {
+        Business businessSpy = spy(testBusiness);
+        Product productSpy = spy(testProduct);
+        when(businessRepository.getBusinessById(any())).thenReturn(businessSpy);
+        when(productRepository.getProduct(any(), any())).thenReturn(productSpy);
+        doNothing().when(businessSpy).checkSessionPermissions(any());
+
+        JSONObject invBody = new JSONObject();
+        invBody.put("bestBefore", LocalDate.now().plusYears(1));
+
+        mockMvc.perform(MockMvcRequestBuilders
+                .post("/businesses/1/inventory/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(invBody.toString()))
+                .andExpect(status().isOk());
     }
 
     @Test
-    void modifyInvEntries_modifyBestBeforeDateNull_modifiedEntry200() {
-        //TODO
+    void modifyInvEntries_modifyBestBeforeDateInvalid_cannotModify400() throws Exception {
+        Business businessSpy = spy(testBusiness);
+        Product productSpy = spy(testProduct);
+        when(businessRepository.getBusinessById(any())).thenReturn(businessSpy);
+        when(productRepository.getProduct(any(), any())).thenReturn(productSpy);
+        doNothing().when(businessSpy).checkSessionPermissions(any());
+
+        String[] bestBeforeDates = {"10-10", "10/10/1999", "999999", "#", "$", "a", "b", "Z" };
+
+        for (int i=0; i <= bestBeforeDates.length; i++) {
+            JSONObject invBody = new JSONObject();
+            invBody.put("bestBefore", bestBeforeDates[i]);
+
+            mockMvc.perform(MockMvcRequestBuilders
+                    .post("/businesses/1/inventory/1")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(invBody.toString()))
+                    .andExpect(status().isBadRequest());
+        }
     }
 
     @Test
-    void modifyInvEntries_modifyBestBeforeDateBeforeToday_cannotModify400() {
-        //TODO
+    void modifyInvEntries_modifyBestBeforeDateNull_modifiedEntry200() throws Exception {
+        Business businessSpy = spy(testBusiness);
+        Product productSpy = spy(testProduct);
+        when(businessRepository.getBusinessById(any())).thenReturn(businessSpy);
+        when(productRepository.getProduct(any(), any())).thenReturn(productSpy);
+        doNothing().when(businessSpy).checkSessionPermissions(any());
+
+        JSONObject invBody = new JSONObject();
+        invBody.put("bestBefore", null);
+
+        mockMvc.perform(MockMvcRequestBuilders
+                .post("/businesses/1/inventory/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(invBody.toString()))
+                .andExpect(status().isOk());
     }
 
     @Test
-    void modifyInvEntries_modifyExpiresDate_modifiedEntry200() {
-        //TODO
+    void modifyInvEntries_modifyBestBeforeDateBeforeToday_cannotModify400() throws Exception {
+        Business businessSpy = spy(testBusiness);
+        Product productSpy = spy(testProduct);
+        when(businessRepository.getBusinessById(any())).thenReturn(businessSpy);
+        when(productRepository.getProduct(any(), any())).thenReturn(productSpy);
+        doNothing().when(businessSpy).checkSessionPermissions(any());
+
+        JSONObject invBody = new JSONObject();
+        invBody.put("bestBefore", LocalDate.now().minusYears(1));
+
+        mockMvc.perform(MockMvcRequestBuilders
+                .post("/businesses/1/inventory/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(invBody.toString()))
+                .andExpect(status().isBadRequest());
     }
 
     @Test
-    void modifyInvEntries_modifyExpiresDateInvalid_cannotModify400() {
-        //TODO
+    void modifyInvEntries_modifyExpiresDate_modifiedEntry200() throws Exception {
+        Business businessSpy = spy(testBusiness);
+        Product productSpy = spy(testProduct);
+        when(businessRepository.getBusinessById(any())).thenReturn(businessSpy);
+        when(productRepository.getProduct(any(), any())).thenReturn(productSpy);
+        doNothing().when(businessSpy).checkSessionPermissions(any());
+
+        JSONObject invBody = new JSONObject();
+        invBody.put("expires", LocalDate.now().plusYears(1));
+
+        mockMvc.perform(MockMvcRequestBuilders
+                .post("/businesses/1/inventory/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(invBody.toString()))
+                .andExpect(status().isOk());
     }
 
     @Test
-    void modifyInvEntries_modifyExpiresDateNull_cannotModify400() {
-        //TODO
+    void modifyInvEntries_modifyExpiresDateInvalid_cannotModify400() throws Exception {
+        Business businessSpy = spy(testBusiness);
+        Product productSpy = spy(testProduct);
+        when(businessRepository.getBusinessById(any())).thenReturn(businessSpy);
+        when(productRepository.getProduct(any(), any())).thenReturn(productSpy);
+        doNothing().when(businessSpy).checkSessionPermissions(any());
+
+        String[] expiresDates = {"10-10", "10/10/1999", "999999", "#", "$", "a", "b", "Z" };
+
+        for (int i=0; i <= expiresDates.length; i++) {
+            JSONObject invBody = new JSONObject();
+            invBody.put("expires", expiresDates[i]);
+
+            mockMvc.perform(MockMvcRequestBuilders
+                    .post("/businesses/1/inventory/1")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(invBody.toString()))
+                    .andExpect(status().isBadRequest());
+        }
     }
 
     @Test
-    void modifyInvEntries_modifyExpiresDateBeforeToday_cannotModify400() {
-        //TODO
+    void modifyInvEntries_modifyExpiresDateNull_cannotModify400() throws Exception {
+        Business businessSpy = spy(testBusiness);
+        Product productSpy = spy(testProduct);
+        when(businessRepository.getBusinessById(any())).thenReturn(businessSpy);
+        when(productRepository.getProduct(any(), any())).thenReturn(productSpy);
+        doNothing().when(businessSpy).checkSessionPermissions(any());
+
+        JSONObject invBody = new JSONObject();
+        invBody.put("pricePerItem", null);
+
+        mockMvc.perform(MockMvcRequestBuilders
+                .post("/businesses/1/inventory/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(invBody.toString()))
+                .andExpect(status().isBadRequest());
     }
 
     @Test
-    void modifyInvEntries_modifyManufacturedAfterSellBy_cannotModify400() {
-        //TODO
+    void modifyInvEntries_modifyExpiresDateBeforeToday_cannotModify400() throws Exception {
+        Business businessSpy = spy(testBusiness);
+        Product productSpy = spy(testProduct);
+        when(businessRepository.getBusinessById(any())).thenReturn(businessSpy);
+        when(productRepository.getProduct(any(), any())).thenReturn(productSpy);
+        doNothing().when(businessSpy).checkSessionPermissions(any());
+
+        JSONObject invBody = new JSONObject();
+        invBody.put("expires", LocalDate.now().minusYears(1));
+
+        mockMvc.perform(MockMvcRequestBuilders
+                .post("/businesses/1/inventory/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(invBody.toString()))
+                .andExpect(status().isBadRequest());
     }
 
     @Test
-    void modifyInvEntries_modifyManufacturedAfterBestBefore_cannotModify() {
-        //TODO
+    void modifyInvEntries_modifyManufacturedBeforeSellBy_ModifiedEntry200() throws Exception {
+        Business businessSpy = spy(testBusiness);
+        Product productSpy = spy(testProduct);
+        when(businessRepository.getBusinessById(any())).thenReturn(businessSpy);
+        when(productRepository.getProduct(any(), any())).thenReturn(productSpy);
+        doNothing().when(businessSpy).checkSessionPermissions(any());
+
+        JSONObject invBody = new JSONObject();
+        invBody.put("manufactured", LocalDate.now().minusYears(1));
+        invBody.put("sellBy", LocalDate.now().plusYears(1));
+
+        mockMvc.perform(MockMvcRequestBuilders
+                .post("/businesses/1/inventory/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(invBody.toString()))
+                .andExpect(status().isOk());
     }
 
     @Test
-    void modifyInvEntries_modifyManufacturedAfterExpires_cannotModify() {
-        //TODO
+    void modifyInvEntries_modifyManufacturedAfterSellBy_cannotModify400() throws Exception {
+        Business businessSpy = spy(testBusiness);
+        Product productSpy = spy(testProduct);
+        when(businessRepository.getBusinessById(any())).thenReturn(businessSpy);
+        when(productRepository.getProduct(any(), any())).thenReturn(productSpy);
+        doNothing().when(businessSpy).checkSessionPermissions(any());
+
+        JSONObject invBody = new JSONObject();
+        invBody.put("manufactured", LocalDate.now().plusYears(1));
+        invBody.put("sellBy", LocalDate.now().minusYears(1));
+
+        mockMvc.perform(MockMvcRequestBuilders
+                .post("/businesses/1/inventory/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(invBody.toString()))
+                .andExpect(status().isOk());
     }
 
     @Test
-    void modifyInvEntries_modifySellByAfterBestBefore_cannotModify() {
-        //TODO
+    void modifyInvEntries_modifyManufacturedBeforeBestBefore_modifiedEntry200() throws Exception {
+        Business businessSpy = spy(testBusiness);
+        Product productSpy = spy(testProduct);
+        when(businessRepository.getBusinessById(any())).thenReturn(businessSpy);
+        when(productRepository.getProduct(any(), any())).thenReturn(productSpy);
+        doNothing().when(businessSpy).checkSessionPermissions(any());
+
+        JSONObject invBody = new JSONObject();
+        invBody.put("manufactured", LocalDate.now().minusYears(1));
+        invBody.put("bestBefore", LocalDate.now().plusYears(1));
+
+        mockMvc.perform(MockMvcRequestBuilders
+                .post("/businesses/1/inventory/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(invBody.toString()))
+                .andExpect(status().isOk());
     }
 
     @Test
-    void modifyInvEntries_modifySellByAfterExpires_cannotModify400() {
-        //TODO
+    void modifyInvEntries_modifyManufacturedAfterBestBefore_cannotModify400() throws Exception {
+        Business businessSpy = spy(testBusiness);
+        Product productSpy = spy(testProduct);
+        when(businessRepository.getBusinessById(any())).thenReturn(businessSpy);
+        when(productRepository.getProduct(any(), any())).thenReturn(productSpy);
+        doNothing().when(businessSpy).checkSessionPermissions(any());
+
+        JSONObject invBody = new JSONObject();
+        invBody.put("manufactured", LocalDate.now().plusYears(1));
+        invBody.put("bestBefore", LocalDate.now().minusYears(1));
+
+        mockMvc.perform(MockMvcRequestBuilders
+                .post("/businesses/1/inventory/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(invBody.toString()))
+                .andExpect(status().isBadRequest());
     }
 
     @Test
-    void modifyInvEntries_modifyBestBeforeAfterExpires_cannotModify400() {
-        //TODO
+    void modifyInvEntries_modifyManufacturedBeforeExpires_modifiedEntry200() throws Exception {
+        Business businessSpy = spy(testBusiness);
+        Product productSpy = spy(testProduct);
+        when(businessRepository.getBusinessById(any())).thenReturn(businessSpy);
+        when(productRepository.getProduct(any(), any())).thenReturn(productSpy);
+        doNothing().when(businessSpy).checkSessionPermissions(any());
+
+        JSONObject invBody = new JSONObject();
+        invBody.put("manufactured", LocalDate.now().minusYears(1));
+        invBody.put("expires", LocalDate.now().plusYears(1));
+
+        mockMvc.perform(MockMvcRequestBuilders
+                .post("/businesses/1/inventory/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(invBody.toString()))
+                .andExpect(status().isOk());
     }
 
     @Test
-    void modifyInvEntries_modifyAllFields_modifiedEntry200() {
-        //TODO
+    void modifyInvEntries_modifyManufacturedAfterExpires_cannotModify400() throws Exception {
+        Business businessSpy = spy(testBusiness);
+        Product productSpy = spy(testProduct);
+        when(businessRepository.getBusinessById(any())).thenReturn(businessSpy);
+        when(productRepository.getProduct(any(), any())).thenReturn(productSpy);
+        doNothing().when(businessSpy).checkSessionPermissions(any());
+
+        JSONObject invBody = new JSONObject();
+        invBody.put("manufactured", LocalDate.now().plusYears(1));
+        invBody.put("expires", LocalDate.now().minusYears(1));
+
+        mockMvc.perform(MockMvcRequestBuilders
+                .post("/businesses/1/inventory/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(invBody.toString()))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void modifyInvEntries_modifySellByBeforeBestBefore_modifiedEntry200() throws Exception {
+        Business businessSpy = spy(testBusiness);
+        Product productSpy = spy(testProduct);
+        when(businessRepository.getBusinessById(any())).thenReturn(businessSpy);
+        when(productRepository.getProduct(any(), any())).thenReturn(productSpy);
+        doNothing().when(businessSpy).checkSessionPermissions(any());
+
+        JSONObject invBody = new JSONObject();
+        invBody.put("sellBy", LocalDate.now().plusYears(1));
+        invBody.put("bestBefore", LocalDate.now().plusYears(2));
+
+        mockMvc.perform(MockMvcRequestBuilders
+                .post("/businesses/1/inventory/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(invBody.toString()))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void modifyInvEntries_modifySellByAfterBestBefore_cannotModify400() throws Exception {
+        Business businessSpy = spy(testBusiness);
+        Product productSpy = spy(testProduct);
+        when(businessRepository.getBusinessById(any())).thenReturn(businessSpy);
+        when(productRepository.getProduct(any(), any())).thenReturn(productSpy);
+        doNothing().when(businessSpy).checkSessionPermissions(any());
+
+        JSONObject invBody = new JSONObject();
+        invBody.put("sellBy", LocalDate.now().plusYears(2));
+        invBody.put("bestBefore", LocalDate.now().plusYears(1));
+
+        mockMvc.perform(MockMvcRequestBuilders
+                .post("/businesses/1/inventory/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(invBody.toString()))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void modifyInvEntries_modifySellByBeforeExpires_modifiedEntry200() throws Exception {
+        Business businessSpy = spy(testBusiness);
+        Product productSpy = spy(testProduct);
+        when(businessRepository.getBusinessById(any())).thenReturn(businessSpy);
+        when(productRepository.getProduct(any(), any())).thenReturn(productSpy);
+        doNothing().when(businessSpy).checkSessionPermissions(any());
+
+        JSONObject invBody = new JSONObject();
+        invBody.put("sellBy", LocalDate.now().plusYears(1));
+        invBody.put("expires", LocalDate.now().plusYears(2));
+
+        mockMvc.perform(MockMvcRequestBuilders
+                .post("/businesses/1/inventory/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(invBody.toString()))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void modifyInvEntries_modifySellByAfterExpires_cannotModify400() throws Exception {
+        Business businessSpy = spy(testBusiness);
+        Product productSpy = spy(testProduct);
+        when(businessRepository.getBusinessById(any())).thenReturn(businessSpy);
+        when(productRepository.getProduct(any(), any())).thenReturn(productSpy);
+        doNothing().when(businessSpy).checkSessionPermissions(any());
+
+        JSONObject invBody = new JSONObject();
+        invBody.put("sellBy", LocalDate.now().plusYears(2));
+        invBody.put("expires", LocalDate.now().plusYears(1));
+
+        mockMvc.perform(MockMvcRequestBuilders
+                .post("/businesses/1/inventory/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(invBody.toString()))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void modifyInvEntries_modifyBestBeforeBeforeExpires_modifiedEntry200() throws Exception {
+        Business businessSpy = spy(testBusiness);
+        Product productSpy = spy(testProduct);
+        when(businessRepository.getBusinessById(any())).thenReturn(businessSpy);
+        when(productRepository.getProduct(any(), any())).thenReturn(productSpy);
+        doNothing().when(businessSpy).checkSessionPermissions(any());
+
+        JSONObject invBody = new JSONObject();
+        invBody.put("bestBefore", LocalDate.now().plusYears(1));
+        invBody.put("expires", LocalDate.now().plusYears(2));
+
+        mockMvc.perform(MockMvcRequestBuilders
+                .post("/businesses/1/inventory/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(invBody.toString()))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void modifyInvEntries_modifyBestBeforeAfterExpires_cannotModify400() throws Exception {
+        Business businessSpy = spy(testBusiness);
+        Product productSpy = spy(testProduct);
+        when(businessRepository.getBusinessById(any())).thenReturn(businessSpy);
+        when(productRepository.getProduct(any(), any())).thenReturn(productSpy);
+        doNothing().when(businessSpy).checkSessionPermissions(any());
+
+        JSONObject invBody = new JSONObject();
+        invBody.put("bestBefore", LocalDate.now().plusYears(2));
+        invBody.put("expires", LocalDate.now().plusYears(1));
+
+        mockMvc.perform(MockMvcRequestBuilders
+                .post("/businesses/1/inventory/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(invBody.toString()))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void modifyInvEntries_modifyAllFields_modifiedEntry200() throws Exception {
+        Business businessSpy = spy(testBusiness);
+        Product productSpy = spy(testProduct);
+        when(businessRepository.getBusinessById(any())).thenReturn(businessSpy);
+        when(productRepository.getProduct(any(), any())).thenReturn(productSpy);
+        doNothing().when(businessSpy).checkSessionPermissions(any());
+
+        JSONObject invBody = new JSONObject();
+        invBody.put("productId", "NathanApple52");
+        invBody.put("quantity", 10);
+        invBody.put("pricePerItem", 5.42);
+        invBody.put("totalPrice", 54.20);
+        invBody.put("creationDate", LocalDate.now());
+        invBody.put("manufactured", LocalDate.now().minusYears(1));
+        invBody.put("sellBy", LocalDate.now().plusYears(1));
+        invBody.put("bestBefore", LocalDate.now().plusYears(2));
+        invBody.put("expires", LocalDate.now().plusYears(3));
+
+        mockMvc.perform(MockMvcRequestBuilders
+                .post("/businesses/1/inventory/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(invBody.toString()))
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -396,11 +1089,6 @@ public class InventoryControllerModifyInvEntriesTest {
 
     @Test
     void modifyInvEntries_nonexistentInvItemId_invalidId40() {
-        //TODO
-    }
-
-    @Test
-    void modifyInvEntries_() {
         //TODO
     }
 }
