@@ -7,6 +7,7 @@ import org.mockito.*;
 import org.seng302.leftovers.entities.ExpiryEvent;
 import org.seng302.leftovers.entities.MarketplaceCard;
 import org.seng302.leftovers.entities.User;
+import org.seng302.leftovers.persistence.ExpiryEventRepository;
 import org.seng302.leftovers.persistence.MarketplaceCardRepository;
 
 import java.lang.reflect.InvocationTargetException;
@@ -31,6 +32,8 @@ class CardServiceTest {
     @Mock
     EventService eventService;
     @Mock
+    ExpiryEventRepository expiryEventRepository;
+    @Mock
     User mockUser;
     @Mock
     MarketplaceCard mockCard1;
@@ -49,7 +52,7 @@ class CardServiceTest {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        cardService = new CardService(marketplaceCardRepository, eventService);
+        cardService = new CardService(marketplaceCardRepository, eventService, expiryEventRepository);
         setUpCards();
         mockCurrentTime();
     }
