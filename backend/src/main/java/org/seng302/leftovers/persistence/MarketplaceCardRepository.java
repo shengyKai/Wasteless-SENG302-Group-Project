@@ -52,4 +52,12 @@ public interface MarketplaceCardRepository extends CrudRepository<MarketplaceCar
      */
     @Query("SELECT c FROM MarketplaceCard c left join ExpiryEvent e ON e.expiringCard.id = c.id WHERE c.closes < :cutOff AND e is null")
     List<MarketplaceCard> getAllExpiringBefore(Instant cutOff);
+
+    /**
+     * Return all cards which have a closing date after or equal to the given date.
+     * @param currentInstant The current date(instant) of the system.
+     * @return a list of all marketplace cards which have expired.
+     */
+    @Query("SELECT c FROM MarketplaceCard c WHERE c.closes >= :currentInstant")
+    List<MarketplaceCard> getAllExpiringAfterOrEqual(Instant currentInstant);
 }

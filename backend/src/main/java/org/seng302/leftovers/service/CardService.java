@@ -30,10 +30,10 @@ public class CardService {
     }
 
     /**
-     * Perform a scheduled check every hour to identify marketplace cards which are expiring within the next day.
+     * Perform a scheduled check every 5 minutes to identify marketplace cards which are expiring within the next day.
      * Construct and dispatch an expiry event for these cards.
      */
-    @Scheduled(fixedRate = 60 * 60 * 1000)
+    @Scheduled(fixedRate = 5 * 60 * 1000)
     private void sendCardExpiryEvents() {
         logger.info("Checking for cards which are expiring within the next 24 hours");
         Instant cutOff = Instant.now().plus(Duration.ofDays(1));
@@ -46,4 +46,18 @@ public class CardService {
         }
     }
 
+    /**
+     * Perform a scheduled check every 5 minutes to identify marketplace cards which are expired.
+     * Expired cards will be deleted and removed from the repository.
+     */
+    @Scheduled(fixedRate = 5 * 60 * 1000)
+    private void deleteExpiredCards() {
+        logger.info("Checking for cards which are expired");
+        Iterable<MarketplaceCard> allCards = marketplaceCardRepository.getAllExpiringAfterOrEqual(Instant.now());
+        for (MarketplaceCard card : allCards) {
+            logger.info("Card {} has just expired, deleting card from marketplace repository", card.getID());
+            marketplaceCardRepository.delete(card);
+            logger.info("Card {} deleted from marketplace repository", card.getID());
+        }
+    }
 }
