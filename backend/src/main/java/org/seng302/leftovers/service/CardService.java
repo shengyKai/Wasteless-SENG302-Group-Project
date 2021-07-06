@@ -53,7 +53,7 @@ public class CardService {
     @Scheduled(fixedRate = 5 * 60 * 1000)
     private void deleteExpiredCards() {
         logger.info("Checking for cards which are expired");
-        Iterable<MarketplaceCard> allCards = marketplaceCardRepository.getAllExpiringAfterOrEqual(Instant.now());
+        Iterable<MarketplaceCard> allCards = marketplaceCardRepository.getAllExpired(Instant.now());
         for (MarketplaceCard card : allCards) {
             logger.info("Card {} has just expired, deleting card from marketplace repository", card.getID());
             marketplaceCardRepository.delete(card);
