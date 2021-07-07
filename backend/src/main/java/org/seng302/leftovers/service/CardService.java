@@ -24,14 +24,13 @@ public class CardService {
     private MarketplaceCardRepository marketplaceCardRepository;
     private EventService eventService;
     private Logger logger = LogManager.getLogger(CardService.class);
-
-    @Autowired
     private SessionFactory sessionFactory;
 
     @Autowired
-    public CardService(MarketplaceCardRepository marketplaceCardRepository, EventService eventService) {
+    public CardService(MarketplaceCardRepository marketplaceCardRepository, EventService eventService, SessionFactory sessionFactory) {
         this.marketplaceCardRepository = marketplaceCardRepository;
         this.eventService = eventService;
+        this.sessionFactory = sessionFactory;
     }
 
     /**
