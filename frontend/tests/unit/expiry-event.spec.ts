@@ -8,7 +8,7 @@ import * as api from '@/api/internal';
 
 import Vuex, { Store } from 'vuex';
 import { getStore, resetStoreForTesting, StoreData } from '@/store';
-import { castMock, flushQueue } from './utils';
+import { castMock } from './utils';
 
 Vue.use(Vuetify);
 
@@ -145,7 +145,7 @@ describe('ExpiryEvent.vue', () => {
     });
 
     describe('A request to delay expiry is made', () => {
-      
+
       it("When a successful response is received, the event shows that the expiry has been delayed", async () => {
         extendMarketplaceCardExpiry.mockResolvedValueOnce(undefined);
         await findDelayButton().trigger('click');
@@ -160,7 +160,7 @@ describe('ExpiryEvent.vue', () => {
         await Vue.nextTick();
         expect(wrapper.vm.delayed).toBeFalsy();
         expect(wrapper.vm.errorMessage).toBe("Error message");
-      })
+      });
     });
 
   });
@@ -205,7 +205,7 @@ describe('ExpiryEvent.vue', () => {
       const button = findExpandButton();
       await button.trigger('click');
       expect(findMarketplaceCard().isVisible()).toBeFalsy();
-    })
+    });
 
   });
 
@@ -228,7 +228,7 @@ describe('ExpiryEvent.vue', () => {
       const button = findExpandButton();
       await button.trigger('click');
       expect(findMarketplaceCard().isVisible()).toBeTruthy();
-    })
+    });
 
   });
 });
