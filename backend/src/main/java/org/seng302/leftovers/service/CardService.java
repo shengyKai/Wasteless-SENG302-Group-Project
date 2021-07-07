@@ -8,6 +8,9 @@ import org.seng302.leftovers.persistence.MarketplaceCardRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.hibernate.Hibernate;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -22,6 +25,8 @@ public class CardService {
     private EventService eventService;
     private Logger logger = LogManager.getLogger(CardService.class);
 
+    @Autowired
+    private SessionFactory sessionFactory;
 
     @Autowired
     public CardService(MarketplaceCardRepository marketplaceCardRepository, EventService eventService) {
@@ -33,15 +38,18 @@ public class CardService {
      * Perform a scheduled check every hour to identify marketplace cards which are expiring within the next day.
      * Construct and dispatch an expiry event for these cards.
      */
-    @Scheduled(fixedRate = 60 * 60 * 1000)
+    @Scheduled(fixedRate = 5 * 1000)
     private void sendCardExpiryEvents() {
         logger.info("Checking for cards which are expiring within the next 24 hours");
         Instant cutOff = Instant.now().plus(Duration.ofDays(1));
         Iterable<MarketplaceCard> allCards = marketplaceCardRepository.getAllExpiringBefore(cutOff);
         for (MarketplaceCard card : allCards) {
             logger.info("Card {} is expiring before date {}", card.getID(), cutOff);
-            ExpiryEvent event = new ExpiryEvent(card);
-            eventService.addUserToEvent(card.getCreator(), event);
+            try (Session session = sessionFactory.openSession()) {
+                card = session.find(MarketplaceCard.class, card.getID());
+                ExpiryEvent event = new ExpiryEvent(card);
+                eventService.addUserToEvent(card.getCreator(), event);
+            }
             logger.info("Expiry notification event sent for card {}", card.getID());
         }
     }
