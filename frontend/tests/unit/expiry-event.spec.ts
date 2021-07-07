@@ -8,7 +8,7 @@ import * as api from '@/api/internal';
 
 import Vuex, { Store } from 'vuex';
 import { getStore, resetStoreForTesting, StoreData } from '@/store';
-import { castMock, flushQueue } from './utils';
+import { castMock } from './utils';
 
 Vue.use(Vuetify);
 
@@ -21,6 +21,36 @@ jest.mock('@/components/utils/Methods/synchronizedTime', () => ({
 }));
 
 const extendMarketplaceCardExpiry = castMock(api.extendMarketplaceCardExpiry);
+
+/**
+ * Creates a test user with the given user id
+ *
+ * @param userId The user id to use
+ * @returns The generated user
+ */
+ function makeTestUser(userId: number) {
+  return {
+    id:  userId,
+    firstName: 'test_firstname' + userId,
+    lastName: 'test_lastname' + userId,
+    nickname: 'test_nickname' + userId,
+    email: 'test_email' + userId,
+    bio: 'test_biography' + userId,
+    phoneNumber: 'test_phone_number' + userId,
+    dateOfBirth: '1/1/1900',
+    created: '1/5/2005',
+    homeAddress: {
+      streetNumber: 'test_street_number',
+      streetName: 'test_street1',
+      city: 'test_city',
+      region: 'test_region',
+      postcode: 'test_postcode',
+      district: 'test_district',
+      country: 'test_country' + userId
+    },
+    businessesAdministered: [],
+  };
+}
 
 describe('ExpiryEvent.vue', () => {
   let wrapper: Wrapper<any>;
@@ -35,6 +65,7 @@ describe('ExpiryEvent.vue', () => {
     localVue.use(Vuex);
     resetStoreForTesting();
     store = getStore();
+    store.state.user = makeTestUser(1);
 
     const app = document.createElement ("div");
     app.setAttribute ("data-app", "true");
@@ -55,6 +86,9 @@ describe('ExpiryEvent.vue', () => {
             title: "Card title",
             displayPeriodEnd: "2021-01-02T12:00:00Z",
             description: "Card description",
+            creator: {
+              id: 77
+            }
           }
         },
       }
