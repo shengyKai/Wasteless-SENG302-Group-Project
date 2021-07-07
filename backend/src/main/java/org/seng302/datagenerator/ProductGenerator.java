@@ -9,6 +9,9 @@ import static org.seng302.datagenerator.Main.*;
 public class ProductGenerator {
     private Random random = new Random();
     private Connection conn;
+    private BusinessNameGenerator nameGenerator  = BusinessNameGenerator.getInstance();
+    private ProductImageGenerator imageGenerator;
+
 
     //predefined lists
     String[] COUNTRIES = {"New Zealand", "Australia", "Japan", "Korea", "Singapore", "Vatican City"};
@@ -17,7 +20,7 @@ public class ProductGenerator {
     String[] NAMES = {"Nathan Apple", "Yellow Banana", "Orange Coloured Orange", "A Box", "The Box", "Cube Shaped Box"};
     String[] PRODUCTCODES = {"APPLE123", "BANANA456", "ORANGE789"}; //Change to randomly generated?
 
-    public ProductGenerator(Connection conn) { this.conn = conn; }
+    public ProductGenerator(Connection conn, ProductImageGenerator imageGenerator) { this.conn = conn; this.imageGenerator = imageGenerator;}
 
     /**
      * Randomly generates the recommended retail price
@@ -40,19 +43,21 @@ public class ProductGenerator {
                         + "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
                 Statement.RETURN_GENERATED_KEYS
         );
-
+        String productName = nameGenerator.randomProductName();
         stmt.setObject(1, COUNTRIES[random.nextInt(COUNTRIES.length)]);
         stmt.setObject(2, Instant.now());
         stmt.setObject(3, DESCRIPTIONS[random.nextInt(DESCRIPTIONS.length)]);
         stmt.setObject(4, MANUFACTURERS[random.nextInt(MANUFACTURERS.length)]);
-        stmt.setObject(5, NAMES[random.nextInt(NAMES.length)]);
+        stmt.setObject(5, productName);
         stmt.setObject(6, PRODUCTCODES[random.nextInt(PRODUCTCODES.length)]);
         stmt.setObject(7, generateRRP());
         stmt.setObject(8, businessId);
         stmt.executeUpdate();
         ResultSet keys = stmt.getGeneratedKeys();
         keys.next();
-        return keys.getLong(1);
+        long productId = keys.getLong(1);
+        imageGenerator.addImageToProduct(productId, productName);
+        return productId;
     }
 
     /**
@@ -60,7 +65,8 @@ public class ProductGenerator {
      */
     public static void main(String[] args) throws InterruptedException, SQLException {
         Connection conn = connectToDatabase();
-        var generator = new ProductGenerator(conn);
+        var imageGenerator = new ProductImageGenerator(conn);
+        var generator = new ProductGenerator(conn, imageGenerator);
 
         int productCount = getNumObjectsFromInput("products");
         generator.generateProducts(productCount);

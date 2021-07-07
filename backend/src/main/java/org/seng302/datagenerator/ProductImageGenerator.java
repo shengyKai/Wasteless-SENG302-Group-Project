@@ -16,12 +16,12 @@ import java.util.Optional;
 import java.util.UUID;
 
 public class ProductImageGenerator {
-    private final Path root = Paths.get("exampleImages");
+    private final Path root = Paths.get("example-data/images");
     @Autowired
     private StorageService storageService;
     private Connection conn;
 
-    public void ProductGenerator(Connection conn) {
+    public ProductImageGenerator(Connection conn) {
         try {
             Files.createDirectory(root);
         } catch (FileAlreadyExistsException existsException) {
@@ -42,8 +42,10 @@ public class ProductImageGenerator {
      * @throws SQLException
      */
     public void addImageToProduct(Long productId, String productName) throws SQLException {
+        String noun = productName.split(" ")[1];
+        Optional<File> image = findImage(noun);
         String filename = UUID.randomUUID().toString();
-        if (saveImageToSystem(productName + ".png", filename)) {
+        if (saveImageToSystem(image, filename)) {
             createInsertImageSQL(productId, filename);
         } else {
             System.out.println("File '" + productName + "' Could not be found");
@@ -56,21 +58,25 @@ public class ProductImageGenerator {
      * @return Optional of type File.
      * @throws IOException
      */
-    private Optional<File> findImage(String noun) throws IOException {
-        Optional<Path> foundFile = Files.walk(this.root, 1).filter(path -> path.relativize(this.root).toString().contains(noun)).findFirst();
-        return foundFile.map(Path::toFile);
+    private Optional<File> findImage(String noun) {
+        try {
+            Optional<Path> foundFile = Files.walk(this.root, 1).filter(path -> path.relativize(this.root).toString().contains(noun)).findFirst();
+            return foundFile.map(Path::toFile);
+        } catch (IOException e) {
+            System.out.println("An error occurred reading an image file:" + e.getMessage());
+        }
+        return Optional.empty();
     }
 
     /**
      * Given an example image, copies the image into the images directory.
-     * @param demoImageName The name of the demo image
+     * @param demoImage The demo image to copy
      * @param fileName The name of the file to save
      * @return true if file successfully saved.
      */
-    private boolean saveImageToSystem(String demoImageName, String fileName) {
-        File originalImage = root.resolve(demoImageName).toFile();
-        if (originalImage.exists()) {
-            storageService.store((MultipartFile) originalImage, fileName);
+    private boolean saveImageToSystem(Optional<File> demoImage, String fileName) {
+        if (demoImage.isPresent()) {
+            storageService.store((MultipartFile) demoImage.get(), fileName);
             return true;
         }
         return false;
