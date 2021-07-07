@@ -25,7 +25,8 @@ public class DescriptionGenerator {
      */
     public String randomDescription() {
         int start = random.nextInt(descriptions.length());
-        int end = start + random.nextInt(200);  // 200 characters is max length of descriptions
-        return descriptions.substring(start, end);
+        int end = start + random.nextInt(200) + 1;  // 200 characters is max length of descriptions
+        if (end > descriptions.length()) end = descriptions.length();
+        return descriptions.substring(start, end-1);
     }
 }
