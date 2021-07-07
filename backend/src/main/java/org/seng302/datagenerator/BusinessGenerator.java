@@ -24,7 +24,7 @@ public class BusinessGenerator {
     public BusinessGenerator(Connection conn) { this.conn = conn; }
 
     /**
-     * Creates and inserts the buiness into the database
+     * Creates and inserts the business into the database
      * @param addressId the id associated with the location entity representing the business's address
      * @param ownerId the id associated with the user entity representing the user who owns the business
      * @return the if of the business that was generated
