@@ -16,6 +16,10 @@ jest.mock('@/api/internal', () => ({
   extendMarketplaceCardExpiry: jest.fn(),
 }));
 
+jest.mock('@/components/utils/Methods/synchronizedTime', () => ({
+  now : new Date("2021-01-02T11:00:00Z")
+}));
+
 const extendMarketplaceCardExpiry = castMock(api.extendMarketplaceCardExpiry);
 
 describe('ExpiryEvent.vue', () => {
@@ -55,9 +59,6 @@ describe('ExpiryEvent.vue', () => {
         },
       }
     });
-    await wrapper.setData({
-      now: new Date("2021-01-02T11:00:00Z")
-    });
   });
 
   /**
@@ -95,30 +96,6 @@ describe('ExpiryEvent.vue', () => {
     return marketplaceCard.at(0);
   }
 
-  const remainingTimes = [
-    {
-      now: new Date("2021-01-02T11:00:00Z"),
-      remainingTimeString: "1h 0m 0s"
-    },
-    {
-      now: new Date("2021-01-02T11:05:00Z"),
-      remainingTimeString: "0h 55m 0s"
-    },
-    {
-      now: new Date("2021-01-02T11:21:33Z"),
-      remainingTimeString: "0h 38m 27s"
-    },
-  ];
-
-  it.each(remainingTimes)("Remaining time is correctly formatted", async (testTime) => {
-    await wrapper.setData({
-      delayed: false,
-      now: testTime.now,
-    });
-
-    expect(wrapper.vm.remaining).toBe(testTime.remainingTimeString);
-  });
-
   describe('Expiry has not been delayed', () => {
     beforeEach(async () => {
       await wrapper.setData({
@@ -145,7 +122,7 @@ describe('ExpiryEvent.vue', () => {
     });
 
     describe('A request to delay expiry is made', () => {
-      
+
       it("When a successful response is received, the event shows that the expiry has been delayed", async () => {
         extendMarketplaceCardExpiry.mockResolvedValueOnce(undefined);
         await findDelayButton().trigger('click');
@@ -160,7 +137,7 @@ describe('ExpiryEvent.vue', () => {
         await Vue.nextTick();
         expect(wrapper.vm.delayed).toBeFalsy();
         expect(wrapper.vm.errorMessage).toBe("Error message");
-      })
+      });
     });
 
   });
@@ -205,7 +182,7 @@ describe('ExpiryEvent.vue', () => {
       const button = findExpandButton();
       await button.trigger('click');
       expect(findMarketplaceCard().isVisible()).toBeFalsy();
-    })
+    });
 
   });
 
@@ -228,7 +205,7 @@ describe('ExpiryEvent.vue', () => {
       const button = findExpandButton();
       await button.trigger('click');
       expect(findMarketplaceCard().isVisible()).toBeTruthy();
-    })
+    });
 
   });
 });

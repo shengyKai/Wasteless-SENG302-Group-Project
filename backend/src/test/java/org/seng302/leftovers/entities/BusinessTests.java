@@ -2,6 +2,8 @@ package org.seng302.leftovers.entities;
 
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -48,6 +50,8 @@ class BusinessTests {
     HttpServletRequest request;
     @Mock
     HttpSession session;
+    @Autowired
+    SessionFactory sessionFactory;
 
     User testUser1;
     User testUser2;
@@ -525,7 +529,10 @@ class BusinessTests {
         businessRepository.deleteById(businessId);
         assertFalse(businessRepository.existsById(businessId));
         assertTrue(userRepository.existsById(ownerId));
-        assertTrue(userRepository.findById(ownerId).get().getBusinessesOwned().isEmpty());
+
+        try (Session session = sessionFactory.openSession()) {
+            assertTrue(session.find(User.class, ownerId).getBusinessesOwned().isEmpty());
+        }
     }
 
     /**

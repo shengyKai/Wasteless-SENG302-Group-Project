@@ -1,5 +1,6 @@
 package org.seng302.datagenerator;
 
+import org.apache.catalina.User;
 import org.seng302.leftovers.entities.Location;
 
 import java.sql.*;
@@ -67,39 +68,49 @@ public class BusinessGenerator {
      */
     public static void main(String[] args) throws SQLException, InterruptedException {
         Connection conn = connectToDatabase();
-        var generator = new BusinessGenerator(conn);
+        var userGenerator = new UserGenerator(conn);
+        var businessGenerator = new BusinessGenerator(conn);
+
+
+        int userCount = getNumObjectsFromInput("users");
+        List<Long> userIds = userGenerator.generateUsers(userCount);
 
         int businessCount = getNumObjectsFromInput("businesses");
-        generator.generateBusinesses(businessCount);
+        businessGenerator.generateBusinesses(userIds, businessCount);
     }
 
     /**
      * Generates the businesses
+     * @param userIds Users to select owners and admins from
      * @param businessCount Number of businesses to generate
      * @return List of generated business ids
      */
-    private List<Long> generateBusinesses(int businessCount) throws InterruptedException {
-        var userGenerator = new UserGenerator(conn);
+    private List<Long> generateBusinesses(List<Long> userIds, int businessCount) {
         List<Long> generatedBusinessIds = new ArrayList<>();
         try {
             for (int i=0; i < businessCount; i++) {
                 clear();
                 int usersGenerated = random.nextInt(2) + 1; // between 1 and 2 users will be generated
                 //if two users are generated, the second is a business admin
-                List<Long> userIds = userGenerator.generateUsers(usersGenerated);
-                long ownerId = userIds.get(0);
+
+                long ownerId = userIds.get(random.nextInt(userIds.size()));
 
                 LocationGenerator.Location businessLocation = locationGenerator.generateAddress(random);
                 long addressId = locationGenerator.createInsertAddressSQL(businessLocation, conn);
 
-                System.out.println(String.format("Creating Business %d / %d", i+1, businessCount));
-                int progress = (int) (((float)(i+1) / (float)businessCount) * 100);
-                System.out.println(String.format("Progress: %d%%", progress));
+                if (i % 10 == 0) {
+                    System.out.println(String.format("Creating Business %d / %d", i + 1, businessCount));
+                    int progress = (int) (((float) (i + 1) / (float) businessCount) * 100);
+                    System.out.println(String.format("Progress: %d%%", progress));
+                }
                 long businessId = createInsertBusinessSQL(addressId, ownerId);
 
                 //check if an admin needs to be added to the business
-                if (userIds.size() == 2) {
-                    long adminId = userIds.get(1);
+                if (random.nextBoolean() && userIds.size() > 1) {
+                    long adminId = ownerId;
+                    while (adminId == ownerId) {
+                        adminId = userIds.get(random.nextInt(userIds.size()));
+                    }
                     addAdminToBusiness(businessId, adminId);
                 }
 

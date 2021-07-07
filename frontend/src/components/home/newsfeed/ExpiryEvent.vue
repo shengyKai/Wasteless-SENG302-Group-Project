@@ -30,6 +30,7 @@
 import { formatDate } from '@/utils';
 import { extendMarketplaceCardExpiry } from '@/api/internal';
 import MarketplaceCard from '@/components/cards/MarketplaceCard';
+import synchronizedTime from '@/components/utils/Methods/synchronizedTime';
 
 export default {
   name: 'ExpiryEvent',
@@ -42,15 +43,10 @@ export default {
   },
   data() {
     return {
-      now: new Date(),
       viewCard: false,
       errorMessage: undefined,
-      delayPeriodSeconds: 60 * 60 * 24,
       delayed: false,
     };
-  },
-  created() {
-    setInterval(() => this.now = new Date(), 1000);
   },
   computed: {
     /**
@@ -75,7 +71,7 @@ export default {
      * Number of seconds remaining until the marketplace card expires.
      */
     remainingSeconds() {
-      return Math.floor((this.expiryDate - this.now) / 1000);
+      return Math.floor((this.expiryDate - synchronizedTime.now) / 1000);
     },
     /**
      * The amount of time remainging before the marketplace card expires in the format <hours>h <minutes>m <seconds>s.
@@ -128,6 +124,6 @@ export default {
         this.delayed = true;
       }
     }
-  }
+  },
 };
 </script>
