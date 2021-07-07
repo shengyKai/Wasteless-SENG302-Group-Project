@@ -1,5 +1,3 @@
-import vue from 'vue';
-
 /**
  * Sets a cookie. Will expire in one year.
  * @param name Name of the cookie being set.
@@ -104,16 +102,3 @@ export function trimToLength(str: string, length: number) {
 export function isTesting() {
   return process.env.JEST_WORKER_ID !== undefined;
 }
-
-/**
- * Object which allows current time to be updated at the same rate for all components.
- */
-let synchronizedTime = vue.observable({now: new Date()});
-setInterval(() => synchronizedTime.now = new Date(), 1000);
-
-/**
- * Other components should not be able to modify the synchronized time object.
- */
-Object.freeze(synchronizedTime);
-
-export default synchronizedTime;

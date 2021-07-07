@@ -8,7 +8,7 @@ import * as api from '@/api/internal';
 
 import Vuex, { Store } from 'vuex';
 import { getStore, resetStoreForTesting, StoreData } from '@/store';
-import { castMock } from './utils';
+import { castMock, flushQueue } from './utils';
 
 Vue.use(Vuetify);
 
@@ -16,13 +16,9 @@ jest.mock('@/api/internal', () => ({
   extendMarketplaceCardExpiry: jest.fn(),
 }));
 
-jest.mock('@/utils', () => ({
-  synchronizedTime: {
-    now: new Date("2021-01-02T11:00:00Z"),
-  },
-  isTesting: jest.requireActual('@/utils').isTesting,
+jest.mock('@/components/utils/Methods/synchronizedTime', () => ({
+  now : new Date("2021-01-02T11:00:00Z")
 }));
-
 
 const extendMarketplaceCardExpiry = castMock(api.extendMarketplaceCardExpiry);
 
@@ -99,30 +95,6 @@ describe('ExpiryEvent.vue', () => {
     expect(marketplaceCard.length).toBe(1);
     return marketplaceCard.at(0);
   }
-
-  const remainingTimes = [
-    {
-      now: new Date("2021-01-02T11:00:00Z"),
-      remainingTimeString: "1h 0m 0s"
-    },
-    {
-      now: new Date("2021-01-02T11:05:00Z"),
-      remainingTimeString: "0h 55m 0s"
-    },
-    {
-      now: new Date("2021-01-02T11:21:33Z"),
-      remainingTimeString: "0h 38m 27s"
-    },
-  ];
-
-  it.each(remainingTimes)("Remaining time is correctly formatted", async (testTime) => {
-    await wrapper.setData({
-      delayed: false,
-      now: testTime.now,
-    });
-
-    expect(wrapper.vm.remaining).toBe(testTime.remainingTimeString);
-  });
 
   describe('Expiry has not been delayed', () => {
     beforeEach(async () => {

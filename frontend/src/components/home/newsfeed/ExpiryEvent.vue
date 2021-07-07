@@ -27,9 +27,10 @@
 </template>
 
 <script>
-import synchronizedTime, { formatDate } from '@/utils';
+import { formatDate } from '@/utils';
 import { extendMarketplaceCardExpiry } from '@/api/internal';
 import MarketplaceCard from '@/components/cards/MarketplaceCard';
+import synchronizedTime from '@/components/utils/Methods/synchronizedTime';
 
 export default {
   name: 'ExpiryEvent',
