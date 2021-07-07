@@ -13,6 +13,9 @@ import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
 import net.minidev.json.parser.ParseException;
+import org.hibernate.Hibernate;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.junit.jupiter.api.Assertions;
 import org.seng302.leftovers.entities.MarketplaceCard;
 import org.seng302.leftovers.persistence.MarketplaceCardRepository;
@@ -50,6 +53,8 @@ public class CardStepDefinition {
 
     @Autowired
     private CardService cardService;
+    @Autowired
+    private SessionFactory sessionFactory;
 
     @Given("a card exists")
     public void a_card_exists() {
@@ -164,7 +169,7 @@ public class CardStepDefinition {
     @Then("I have received a message telling me the card is about to expire")
     public void i_have_received_a_message_telling_me_the_card_is_about_to_expire()
             throws JsonProcessingException, UnsupportedEncodingException {
-        MarketplaceCard card = marketplaceCardRepository.getCard(cardContext.getLast().getID());
+
         String response = requestContext.getLastResult().getResponse().getContentAsString();
 
         // Parse the data from the response
@@ -179,8 +184,13 @@ public class CardStepDefinition {
         ObjectMapper mapper = new ObjectMapper();
         JsonNode responseJson = mapper.readTree(responseData);
         Assertions.assertEquals("ExpiryEvent", responseJson.get("type").asText());
-        JsonNode expectedResponseCard = mapper.readTree(card.constructJSONObject().toJSONString());
         JsonNode actualResponseCard = responseJson.get("card");
-        Assertions.assertEquals(expectedResponseCard, actualResponseCard);
+
+        try (Session session = sessionFactory.openSession()) {
+            MarketplaceCard card = session.find(MarketplaceCard.class, cardContext.getLast().getID());
+            JsonNode expectedResponseCard = mapper.readTree(card.constructJSONObject().toJSONString());
+            Assertions.assertEquals(expectedResponseCard, actualResponseCard);
+        }
+
     }
 }
