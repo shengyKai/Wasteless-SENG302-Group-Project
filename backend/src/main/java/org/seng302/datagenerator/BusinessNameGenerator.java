@@ -81,36 +81,4 @@ public class BusinessNameGenerator {
         return instance;
     }
 
-
-    //Todo delete before merging to dev
-    public static void main(String[] args) {
-        BusinessNameGenerator businessNameGenerator = BusinessNameGenerator.getInstance();
-        businessNameGenerator.printTest();
-    }
-
-    //Todo delete before merging to dev
-    public void printTest() {
-
-        Instant startTime = Instant.now();
-        for (int i = 0; i < 10000; i++) {
-            randomBusinessName();
-            randomManufacturerName();
-            randomProductName();
-        }
-        Instant endTime = Instant.now();
-        System.out.println("Exectution time for generating 10000 business, manufacturer and product names: " + Duration.between(startTime, endTime).getNano());
-
-        for (int i = 0; i < 5; i++) {
-            System.out.println("Random business name: " + randomBusinessName());
-        }
-        System.out.println();
-        for (int i = 0; i < 5; i++) {
-            System.out.println("Random manufacturer name: " + randomManufacturerName());
-        }
-        System.out.println();
-        for (int i = 0; i < 5; i++) {
-            System.out.println("Random product name: " + randomProductName());
-        }
-    }
-
 }
