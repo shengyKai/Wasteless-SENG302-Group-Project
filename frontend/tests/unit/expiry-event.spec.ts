@@ -16,6 +16,14 @@ jest.mock('@/api/internal', () => ({
   extendMarketplaceCardExpiry: jest.fn(),
 }));
 
+jest.mock('@/utils', () => ({
+  synchronizedTime: {
+    now: new Date("2021-01-02T11:00:00Z"),
+  },
+  isTesting: jest.requireActual('@/utils').isTesting,
+}));
+
+
 const extendMarketplaceCardExpiry = castMock(api.extendMarketplaceCardExpiry);
 
 describe('ExpiryEvent.vue', () => {
@@ -54,9 +62,6 @@ describe('ExpiryEvent.vue', () => {
           }
         },
       }
-    });
-    await wrapper.setData({
-      now: new Date("2021-01-02T11:00:00Z")
     });
   });
 
