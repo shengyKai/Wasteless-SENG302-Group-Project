@@ -12,6 +12,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.*;
+import java.util.Optional;
 import java.util.UUID;
 
 public class ProductImageGenerator {
@@ -33,20 +34,31 @@ public class ProductImageGenerator {
     }
 
     /**
-     * Given a product ID and a given example image,
+     * Given a product ID and a products name,
      * attempts to create a copy of the image to the images directory
      * and saves the record to the database
      * @param productId The ID of the product
-     * @param productNoun The name of the demo image
+     * @param productName The name of the demo image
      * @throws SQLException
      */
-    public void addImageToProduct(Long productId, String productNoun) throws SQLException {
+    public void addImageToProduct(Long productId, String productName) throws SQLException {
         String filename = UUID.randomUUID().toString();
-        if (saveImageToSystem(productNoun + ".png", filename)) {
+        if (saveImageToSystem(productName + ".png", filename)) {
             createInsertImageSQL(productId, filename);
         } else {
-            System.out.println("File '" + productNoun + "' Could not be found");
+            System.out.println("File '" + productName + "' Could not be found");
         }
+    }
+
+    /**
+     * Given a noun, attempts to find the image associated with that noun.
+     * @param noun The product to find
+     * @return Optional of type File.
+     * @throws IOException
+     */
+    private Optional<File> findImage(String noun) throws IOException {
+        Optional<Path> foundFile = Files.walk(this.root, 1).filter(path -> path.relativize(this.root).toString().contains(noun)).findFirst();
+        return foundFile.map(Path::toFile);
     }
 
     /**
