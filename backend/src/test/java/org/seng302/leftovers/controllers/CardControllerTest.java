@@ -9,11 +9,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mockito.*;
-import org.seng302.leftovers.entities.Keyword;
-import org.seng302.leftovers.entities.Location;
-import org.seng302.leftovers.entities.MarketplaceCard;
-import org.seng302.leftovers.entities.User;
+import org.seng302.leftovers.entities.*;
 import org.seng302.leftovers.exceptions.AccessTokenException;
+import org.seng302.leftovers.persistence.ExpiryEventRepository;
 import org.seng302.leftovers.persistence.KeywordRepository;
 import org.seng302.leftovers.persistence.MarketplaceCardRepository;
 import org.seng302.leftovers.persistence.UserRepository;
@@ -61,7 +59,11 @@ class CardControllerTest {
     @Mock
     private UserRepository userRepository;
     @Mock
+    private ExpiryEventRepository expiryEventRepository;
+    @Mock
     private MarketplaceCard mockCard;
+    @Mock
+    private ExpiryEvent mockEvent;
     @Mock
     private User mockUser;
     @Mock
@@ -129,7 +131,7 @@ class CardControllerTest {
         when(mockUser.getUserID()).thenReturn(userId);
 
         // Tell MockMvc to use controller with mocked repositories for tests
-        cardController = new CardController(marketplaceCardRepository, keywordRepository, userRepository);
+        cardController = new CardController(marketplaceCardRepository, keywordRepository, userRepository, expiryEventRepository);
         mockMvc = MockMvcBuilders.standaloneSetup(cardController).build();
 
         constructValidCreateCardJson();
@@ -561,6 +563,15 @@ class CardControllerTest {
     @Test
     void deleteCard_cardExistsAndIsAuthorised_200ResponseAndDeleted() throws Exception {
         mockMvc.perform(delete("/cards/1")).andExpect(status().isOk());
+        verify(marketplaceCardRepository, times(1)).delete(mockCard);
+    }
+
+    @Test
+    void deleteCard_cardHasAssociatedExpiryEvent_200ResponseAndBothDeleted() throws Exception {
+        Optional<ExpiryEvent> optionalExpiryEvent = Optional.of(mockEvent);
+        when(expiryEventRepository.getByExpiringCard(mockCard)).thenReturn(optionalExpiryEvent);
+        mockMvc.perform(delete("/cards/1")).andExpect(status().isOk());
+        verify(expiryEventRepository, times(1)).delete(mockEvent);
         verify(marketplaceCardRepository, times(1)).delete(mockCard);
     }
 }

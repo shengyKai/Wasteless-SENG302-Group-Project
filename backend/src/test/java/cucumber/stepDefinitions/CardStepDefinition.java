@@ -1,5 +1,8 @@
 package cucumber.stepDefinitions;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import cucumber.context.CardContext;
 import cucumber.context.RequestContext;
 import cucumber.context.UserContext;
@@ -13,13 +16,21 @@ import net.minidev.json.parser.ParseException;
 import org.junit.jupiter.api.Assertions;
 import org.seng302.leftovers.entities.MarketplaceCard;
 import org.seng302.leftovers.persistence.MarketplaceCardRepository;
+import org.seng302.leftovers.service.CardService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.web.servlet.MvcResult;
 
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.net.http.HttpResponse;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 
 
@@ -36,6 +47,9 @@ public class CardStepDefinition {
 
     @Autowired
     private RequestContext requestContext;
+
+    @Autowired
+    private CardService cardService;
 
     @Given("a card exists")
     public void a_card_exists() {
@@ -131,5 +145,42 @@ public class CardStepDefinition {
         MarketplaceCard card = cardContext.save(marketplaceCardRepository.getCard(previouslyLoaded.getID()));
 
         Assertions.assertEquals(0, ChronoUnit.SECONDS.between(previouslyLoaded.getCloses(), card.getCloses()));
+    }
+
+    @Given("The system has performed its scheduled check for cards that are close to expiry")
+    public void the_system_has_performed_its_scheduled_check_for_cards_that_are_close_to_expiry()
+            throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
+        Method sendCardExpiryEvents = CardService.class.getDeclaredMethod("sendCardExpiryEvents");
+        sendCardExpiryEvents.setAccessible(true);
+        sendCardExpiryEvents.invoke(cardService);
+    }
+
+    @When("I check my notification feed")
+    public void i_check_my_notification_feed() {
+        requestContext.performRequest(get("/events/emitter")
+                .param("userId", userContext.getLast().getUserID().toString()));
+    }
+
+    @Then("I have received a message telling me the card is about to expire")
+    public void i_have_received_a_message_telling_me_the_card_is_about_to_expire()
+            throws JsonProcessingException, UnsupportedEncodingException {
+        MarketplaceCard card = marketplaceCardRepository.getCard(cardContext.getLast().getID());
+        String response = requestContext.getLastResult().getResponse().getContentAsString();
+
+        // Parse the data from the response
+        Pattern pattern = Pattern.compile("data:.*\n");
+        Matcher matcher = pattern.matcher(response);
+        if (!matcher.find()) {
+            fail("Response did not contain expected field 'data'");
+        }
+        String responseData = matcher.group().substring(matcher.group().indexOf(':') + 1, matcher.group().indexOf('\n'));
+
+        // Check that the received notification is for card expiry and relates to the expected card
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode responseJson = mapper.readTree(responseData);
+        Assertions.assertEquals("ExpiryEvent", responseJson.get("type").asText());
+        JsonNode expectedResponseCard = mapper.readTree(card.constructJSONObject().toJSONString());
+        JsonNode actualResponseCard = responseJson.get("card");
+        Assertions.assertEquals(expectedResponseCard, actualResponseCard);
     }
 }
