@@ -29,9 +29,6 @@ public class RandomTestUtils {
         when(mockRandom.nextInt(any(Integer.class))).thenAnswer((Answer<Integer>) invocation -> {
             nextIntCount++;
             int upperLimit = invocation.getArgument(0);
-            System.out.println("nextInt() count: " + nextIntCount);
-            System.out.println(invocation);
-            System.out.println();
             return values[nextIntCount-1] % upperLimit;
         });
     }
@@ -48,9 +45,6 @@ public class RandomTestUtils {
         nextBooleanCount = 0;
         when(mockRandom.nextBoolean()).thenAnswer((Answer<Boolean>) invocation -> {
             nextBooleanCount++;
-            System.out.println("nextBoolean() count: " + nextBooleanCount);
-            System.out.println(invocation);
-            System.out.println();
             return values[nextBooleanCount-1];
         });
     }
