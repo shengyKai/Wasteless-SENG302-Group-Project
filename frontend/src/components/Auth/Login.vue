@@ -15,6 +15,7 @@
         v-model="password"
         type="password"
         label="Password"
+        :rules="mandatoryRules.concat(passwordRules)"
         outlined
       />
     </v-form>
@@ -59,14 +60,14 @@ export default {
         (field) => !!field || '',
       ],
       passwordRules: [
-        field => (field && field.length >= 7 && field.length <= 16) || '',                    //Password must have 7-16 characters
-        field => /^(?=.*[0-9])(?=.*[a-zA-Z])([a-zA-Z0-9]+)$/.test(field) || ''                //Must have at least one number and one alphabet'
+        field => (field && field.length >= 7 && field.length <= 16) || 'Password must have 7-16 characters',
+        field => /^(?=.*[0-9])(?=.*[a-zA-ZÀ-ž])([a-zA-ZÀ-ž0-9]+)$/.test(field) || 'Must have at least one number and one alphabet',
       ],
       maxCharShortRules: [
-        (field) => field.length <= 16 || "",                                                  //Reached max character limit: 16
+        (field) => field.length <= 16 || "Reached max character limit: 16",
       ],
       maxCharLongRules: [
-        (field) => field.length <= 255 || "",                                                 //Reached max character limit: 255
+        (field) => field.length <= 255 || "Reached max character limit: 255",
       ],
     };
   },
@@ -84,7 +85,7 @@ export default {
       this.errorMessage = undefined;
       this.errorMessage = await this.$store.dispatch("login", { email : this.email, password : this.password });
       if(this.errorMessage !== "Invalid credentials") {
-        this.$router.push("/home");
+        await this.$router.push("/home");
       }
     },
   },
