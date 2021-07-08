@@ -9,6 +9,9 @@ import org.seng302.leftovers.persistence.ExpiryEventRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.hibernate.Hibernate;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -24,13 +27,14 @@ public class CardService {
     private ExpiryEventRepository expiryEventRepository;
     private EventService eventService;
     private Logger logger = LogManager.getLogger(CardService.class);
-
+    private SessionFactory sessionFactory;
 
     @Autowired
-    public CardService(MarketplaceCardRepository marketplaceCardRepository, EventService eventService, ExpiryEventRepository expiryEventRepository) {
+    public CardService(MarketplaceCardRepository marketplaceCardRepository, EventService eventService, ExpiryEventRepository expiryEventRepository, SessionFactory sessionFactory) {
         this.marketplaceCardRepository = marketplaceCardRepository;
         this.eventService = eventService;
         this.expiryEventRepository = expiryEventRepository;
+        this.sessionFactory = sessionFactory;
     }
 
     /**
@@ -45,8 +49,11 @@ public class CardService {
         Iterable<MarketplaceCard> allCards = marketplaceCardRepository.getAllExpiringBefore(cutOff);
         for (MarketplaceCard card : allCards) {
             logger.info("Card {} is expiring before date {}", card.getID(), cutOff);
-            ExpiryEvent event = new ExpiryEvent(card);
-            eventService.addUserToEvent(card.getCreator(), event);
+            try (Session session = sessionFactory.openSession()) {
+                card = session.find(MarketplaceCard.class, card.getID());
+                ExpiryEvent event = new ExpiryEvent(card);
+                eventService.addUserToEvent(card.getCreator(), event);
+            }
             logger.info("Expiry notification event sent for card {}", card.getID());
         }
     }

@@ -1,5 +1,7 @@
 package org.seng302.leftovers.service;
 
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -33,6 +35,9 @@ class CardServiceTest {
     EventService eventService;
     @Mock
     ExpiryEventRepository expiryEventRepository;
+    SessionFactory sessionFactory;
+    @Mock
+    Session mockSession;
     @Mock
     User mockUser;
     @Mock
@@ -52,9 +57,11 @@ class CardServiceTest {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        cardService = new CardService(marketplaceCardRepository, eventService, expiryEventRepository);
+        cardService = new CardService(marketplaceCardRepository, eventService, expiryEventRepository, sessionFactory);
         setUpCards();
         mockCurrentTime();
+        when(sessionFactory.openSession()).thenReturn(mockSession);
+
     }
 
     /**
@@ -77,6 +84,9 @@ class CardServiceTest {
         when(mockCard1.getCreator()).thenReturn(mockUser);
         when(mockCard2.getCreator()).thenReturn(mockUser);
         when(mockCard3.getCreator()).thenReturn(mockUser);
+        when(mockSession.find(MarketplaceCard.class, 32L)).thenReturn(mockCard1);
+        when(mockSession.find(MarketplaceCard.class, 8456L)).thenReturn(mockCard2);
+        when(mockSession.find(MarketplaceCard.class, 2L)).thenReturn(mockCard3);
     }
 
     /**
