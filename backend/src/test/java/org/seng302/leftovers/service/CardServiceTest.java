@@ -35,6 +35,7 @@ class CardServiceTest {
     EventService eventService;
     @Mock
     ExpiryEventRepository expiryEventRepository;
+    @Mock
     SessionFactory sessionFactory;
     @Mock
     Session mockSession;
