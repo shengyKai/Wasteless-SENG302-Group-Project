@@ -1,5 +1,6 @@
 package org.seng302.leftovers.service;
 
+import org.apache.catalina.filters.ExpiresFilter;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.junit.jupiter.api.AfterEach;
@@ -18,6 +19,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -47,6 +49,12 @@ class CardServiceTest {
     MarketplaceCard mockCard2;
     @Mock
     MarketplaceCard mockCard3;
+    @Mock
+    ExpiryEvent expiryEvent1;
+    @Mock
+    ExpiryEvent expiryEvent2;
+    @Mock
+    ExpiryEvent expiryEvent3;
 
     @Captor
     ArgumentCaptor<Instant> instantArgumentCaptor;
@@ -54,6 +62,8 @@ class CardServiceTest {
     ArgumentCaptor<User> userArgumentCaptor;
     @Captor
     ArgumentCaptor<ExpiryEvent> expiryEventArgumentCaptor;
+    @Captor
+    ArgumentCaptor<MarketplaceCard> marketplaceCardArgumentCaptor;
 
     @BeforeEach
     void setUp() {
@@ -152,6 +162,88 @@ class CardServiceTest {
         Mockito.verify(eventService, times(3)).addUserToEvent(any(), any());
     }
 
+    @Test
+    void cardExpiredWithExpiryEvent_queryReturnsOneCardAndExpiryEvent_deletesOneCardAndExpiryEvent() {
+        List<MarketplaceCard> queryResult = new ArrayList<>(List.of(mockCard1));
+        when(marketplaceCardRepository.getAllExpired(any())).thenReturn(queryResult);
+        when(expiryEventRepository.getByExpiringCard(any())).thenReturn(Optional.of(expiryEvent1));
+        
+        invokeSendCardExpiryEvents();
+
+        Mockito.verify(expiryEventRepository, times(1)).delete(expiryEventArgumentCaptor.capture());
+
+        Mockito.verify(marketplaceCardRepository, times(1)).delete(marketplaceCardArgumentCaptor.capture());
+    }
+
+    @Test
+    void cardExpiredWithNoExpiryEvent_queryReturnsOneCard_deletesOneCardOnly() {
+        List<MarketplaceCard> queryResult = new ArrayList<>(List.of(mockCard1));
+        when(marketplaceCardRepository.getAllExpired(any())).thenReturn(queryResult);
+        when(expiryEventRepository.getByExpiringCard(any())).thenReturn(Optional.empty());
+        
+        invokeSendCardExpiryEvents();
+
+        Mockito.verify(expiryEventRepository, times(0)).delete(expiryEventArgumentCaptor.capture());
+
+        Mockito.verify(marketplaceCardRepository, times(1)).delete(marketplaceCardArgumentCaptor.capture());
+    }
+
+    @Test
+    void multipleCardsExpiredWithMutlipleExpiryEvents_queryReturnsMutlipleCardsAndExpiryEvents_deletesAllExpiredCardsAndExpiryEvents() {
+        List<MarketplaceCard> queryResult = new ArrayList<>(List.of(mockCard1, mockCard2, mockCard3));
+        when(marketplaceCardRepository.getAllExpired(any())).thenReturn(queryResult);
+        when(expiryEventRepository.getByExpiringCard(mockCard1)).thenReturn(Optional.of(expiryEvent1));
+        when(expiryEventRepository.getByExpiringCard(mockCard2)).thenReturn(Optional.of(expiryEvent2));
+        when(expiryEventRepository.getByExpiringCard(mockCard3)).thenReturn(Optional.of(expiryEvent3));
+
+        invokeSendCardExpiryEvents();
+
+        Mockito.verify(expiryEventRepository, times(3)).delete(expiryEventArgumentCaptor.capture());
+
+        Mockito.verify(marketplaceCardRepository, times(3)).delete(marketplaceCardArgumentCaptor.capture());
+    }
+
+    @Test
+    void multipleCardsExpiredWithNoExpiryEvent_queryReturnsMultipleCards_deletesAllExpiredCardsOnly() {
+        List<MarketplaceCard> queryResult = new ArrayList<>(List.of(mockCard1, mockCard2, mockCard3));
+        when(marketplaceCardRepository.getAllExpired(any())).thenReturn(queryResult);
+        when(expiryEventRepository.getByExpiringCard(any())).thenReturn(Optional.empty());
+        
+        invokeSendCardExpiryEvents();
+
+        Mockito.verify(expiryEventRepository, times(0)).delete(expiryEventArgumentCaptor.capture());
+
+        Mockito.verify(marketplaceCardRepository, times(3)).delete(marketplaceCardArgumentCaptor.capture());
+    }
+
+    
+    @Test
+    void multipleCardsExpiredWithSomeExpiryEvents_queryReturnsMultipleCardsAndSomeExpiryEvents_deletesAllExpiredCardsOnly() {
+        List<MarketplaceCard> queryResult = new ArrayList<>(List.of(mockCard1, mockCard2, mockCard3));
+        when(marketplaceCardRepository.getAllExpired(any())).thenReturn(queryResult);
+        when(expiryEventRepository.getByExpiringCard(mockCard1)).thenReturn(Optional.of(expiryEvent1));
+        when(expiryEventRepository.getByExpiringCard(mockCard2)).thenReturn(Optional.empty());
+        when(expiryEventRepository.getByExpiringCard(mockCard3)).thenReturn(Optional.of(expiryEvent3));
+        
+        invokeSendCardExpiryEvents();
+
+        Mockito.verify(expiryEventRepository, times(2)).delete(expiryEventArgumentCaptor.capture());
+
+        Mockito.verify(marketplaceCardRepository, times(3)).delete(marketplaceCardArgumentCaptor.capture());
+    }
+
+    @Test
+    void noCardsExpiredNoExpiryEvent_queryReturnsNoCardsOrExpiryEvents_nothingDeleted() {
+        List<MarketplaceCard> queryResult = new ArrayList<>(List.of());
+        when(marketplaceCardRepository.getAllExpired(any())).thenReturn(queryResult);
+        when(expiryEventRepository.getByExpiringCard(any())).thenReturn(Optional.empty());
+        
+        invokeSendCardExpiryEvents();
+
+        Mockito.verify(expiryEventRepository, times(0)).delete(expiryEventArgumentCaptor.capture());
+
+        Mockito.verify(marketplaceCardRepository, times(0)).delete(marketplaceCardArgumentCaptor.capture());
+    }
 
     @AfterEach
     void tearDown() {

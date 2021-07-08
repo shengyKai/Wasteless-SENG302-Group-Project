@@ -83,7 +83,7 @@ public class EventServiceImpl implements EventService {
         LOGGER.info("Adding {} users to event (id={})", users.size(), event.getId());
 
         for (User user : users) {
-            for (SseEmitter emitter : connections.getOrDefault(List.of(user.getUserID()), List.of())) {
+            for (SseEmitter emitter : new ArrayList<>(connections.getOrDefault(user.getUserID(), List.of()))) {
                 emitEvent(emitter, event);
             }
         }
