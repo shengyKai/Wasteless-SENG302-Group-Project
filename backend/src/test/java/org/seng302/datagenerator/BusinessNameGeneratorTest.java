@@ -24,27 +24,45 @@ class BusinessNameGeneratorTest {
 
     private BusinessNameGenerator businessNameGenerator;
     @Mock
-    Random mockRandom;
+    private PersonNameGenerator mockPersonNameGenerator;
     @Mock
-    User mockUser;
+    private LocationGenerator mockLocationGenerator;
     @Mock
-    Location mockLocation;
+    private Random mockRandom;
     @Mock
-    Business mockBusiness;
+    private User mockUser;
+    @Mock
+    private Location mockLocation;
+    @Mock
+    private Business mockBusiness;
 
     @BeforeEach
     void setUp() throws NoSuchFieldException, IllegalAccessException {
         MockitoAnnotations.openMocks(this);
         businessNameGenerator = BusinessNameGenerator.getInstance();
 
+
         // Set the random object in businessNameGenerator to the mock
         Field randomField = businessNameGenerator.getClass().getDeclaredField("random");
         randomField.setAccessible(true);
         randomField.set(businessNameGenerator, mockRandom);
 
+        // Set the personNameGenerator object in businessNameGenerator to the mock
+        Field personNameGeneratorField = businessNameGenerator.getClass().getDeclaredField("personNameGenerator");
+        personNameGeneratorField.setAccessible(true);
+        personNameGeneratorField.set(businessNameGenerator, mockPersonNameGenerator);
+
+        // Set the locationGenerator object in businessNameGenerator to the mock
+        Field locationGeneratorField = businessNameGenerator.getClass().getDeclaredField("locationGenerator");
+        locationGeneratorField.setAccessible(true);
+        locationGeneratorField.set(businessNameGenerator, mockLocationGenerator);
+
+        // Set return values for mocks
         when(mockUser.getDob()).thenReturn(LocalDate.of(2000, 1, 1));
         when(mockBusiness.getAddress()).thenReturn(mockLocation);
         when(mockLocation.getCountry()).thenReturn("Country");
+        when(mockPersonNameGenerator.randomLastName()).thenReturn("Lastname");
+        when(mockLocationGenerator.randomStreetName()).thenReturn("Street Name");
     }
 
     /**
