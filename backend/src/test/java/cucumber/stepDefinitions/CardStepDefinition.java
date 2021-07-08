@@ -22,16 +22,21 @@ import org.seng302.leftovers.persistence.MarketplaceCardRepository;
 import org.seng302.leftovers.service.CardService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.web.servlet.MvcResult;
+import static org.mockito.Mockito.*;
 
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.http.HttpResponse;
+import java.time.Clock;
+import java.time.Duration;
 import java.time.Instant;
+import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static java.time.Instant.ofEpochMilli;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -53,6 +58,7 @@ public class CardStepDefinition {
 
     @Autowired
     private CardService cardService;
+
     @Autowired
     private SessionFactory sessionFactory;
 
@@ -192,5 +198,22 @@ public class CardStepDefinition {
             Assertions.assertEquals(expectedResponseCard, actualResponseCard);
         }
 
+    }
+
+    @When("The notification period is over without any action taken")
+    public void the_notification_period_is_over_without_any_action_taken() {
+        System.out.println("BEFOREEEEEEEEEE");
+        System.out.println(Instant.now());
+        Clock constantClock = Clock.fixed(ofEpochMilli(0), ZoneId.systemDefault());
+        Clock clock = Clock.offset(constantClock, Duration.ofHours(24));
+        when(Instant.now()).thenReturn(Instant.now(clock));
+        System.out.println("AFTERRRRRRRRRRRR");
+        System.out.println(Instant.now());
+    }
+
+    @Then("The card will be removed from the marketplace")
+    public void the_card_will_be_removed_from_the_marketplace() {
+        Long cardId = cardContext.getLast().getID();
+        Assertions.assertFalse(marketplaceCardRepository.existsById(cardId));
     }
 }
