@@ -28,7 +28,7 @@ const extendMarketplaceCardExpiry = castMock(api.extendMarketplaceCardExpiry);
  * @param userId The user id to use
  * @returns The generated user
  */
- function makeTestUser(userId: number) {
+function makeTestUser(userId: number) {
   return {
     id:  userId,
     firstName: 'test_firstname' + userId,

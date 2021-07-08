@@ -8,13 +8,14 @@
       <v-form v-model="valid">
         <v-card>
           <v-card-title>
-            <h4 class="primary--text">Create Inventory Item</h4>
+            <h4 v-if="isCreate" class="primary--text">Create Inventory Item</h4>
+            <h4 v-else class="primary--text">Edit Inventory Item</h4>
           </v-card-title>
           <v-card-text>
             <v-container>
               <v-row>
                 <!-- INPUT: Product code Currently used v-selector to reduce typo probability from user -->
-                <v-col cols="6">
+                <v-col cols="6" v-if="isCreate">
                   <v-select
                     no-data-text="No products found"
                     class="required"
@@ -47,11 +48,16 @@
                     </template>
                   </v-select>
                 </v-col>
+                <v-col cols="6" v-else>
+                  <v-card-subtitle class="pb-0">
+                    Product code
+                  </v-card-subtitle>
+                  <v-card-text class="body-1 font-weight-bold"> {{ previousItem.product.id }} </v-card-text>
+                </v-col>
                 <!-- INPUT: Quantity. Only allows number.-->
                 <v-col cols="6">
                   <v-text-field
                     class="required"
-                    solo
                     v-model="quantity"
                     label="Quantity"
                     :rules="mandatoryRules.concat(quantityRules)"
@@ -66,7 +72,7 @@
                     :prefix="currency.symbol"
                     :suffix="currency.code"
                     :hint="currency.errorMessage"
-                    :rules="maxCharRules.concat(smallPriceRules)"
+                    :rules="smallPriceRules"
                     outlined
                   />
                 </v-col>
@@ -78,7 +84,7 @@
                     :prefix="currency.symbol"
                     :suffix="currency.code"
                     :hint="currency.errorMessage"
-                    :rules="maxCharRules.concat(hugePriceRules)"
+                    :rules="hugePriceRules"
                     outlined/>
                 </v-col>
                 <!-- INPUT: Manufactured. Only take in value in dd/mm/yyyy format.-->
@@ -136,8 +142,13 @@
               label="submit"
               color="primary"
               :disabled="!valid || !datesValid"
-              @click.prevent="CreateInventory">
-              Create
+              @click.prevent="submit">
+              <template v-if="isCreate">
+                Create
+              </template>
+              <template v-else>
+                Save
+              </template>
             </v-btn>
           </v-card-actions>
         </v-card>
@@ -147,13 +158,14 @@
 </template>
 
 <script>
-import { createInventoryItem, getBusiness } from '@/api/internal';
-import { getProducts } from "@/api/internal";
+import { createInventoryItem, getProducts } from '@/api/internal';
 import { currencyFromCountry } from "@/api/currency";
 
 export default {
-  name: 'CreateInventory',
-  components: {
+  name: 'InventoryItemForm',
+  props: {
+    previousItem: Object,
+    businessId: Number
   },
   data() {
     return {
@@ -161,27 +173,24 @@ export default {
       dialog: true,
       valid: false,
       today: new Date(),
-      productCode : "",
+      productCode : this.previousItem?.product.id ?? "",
       productList: [],
-      quantity : "",
-      pricePerItem: "",
-      totalPrice: "",
-      manufactured: "",
+      quantity : this.previousItem?.quantity ?? "",
+      pricePerItem: this.previousItem?.pricePerItem ?? "",
+      totalPrice: this.previousItem?.totalPrice ??"",
+      manufactured: this.previousItem?.manufactured ?? "",
       manufacturedValid: true,
-      sellBy: "",
+      sellBy: this.previousItem?.sellBy ?? "",
       sellByValid: true,
-      bestBefore: "",
+      bestBefore: this.previousItem?.bestBefore ?? "",
       bestBeforeValid: true,
-      expires: new Date().toISOString().slice(0,10),
+      expires: this.previousItem?.expires ?? "",
       expiresValid: true,
       datesValid: true,
       productFilter: '',
       minDate: new Date("1500-01-01"),
       maxDate: new Date("5000-01-01"),
       currency: {},
-      maxCharRules: [
-        field => (field.length <= 100) || 'Reached max character limit: 100'
-      ],
       mandatoryRules: [
         //All fields with the class "required" will go through this ruleset to ensure the field is not empty.
         //if it does not follow the format, display error message
@@ -195,11 +204,11 @@ export default {
       ],
       smallPriceRules: [
         //A price must be numbers and may contain a decimal followed by exactly two numbers (4digit)
-        field => /(^\d{1,4}(\.\d{2})?$)|^$/.test(field) || 'Must be a valid price'
+        field => /(^\d{1,4}(\.\d{2})?$)|^$/.test(field) || 'Must be a valid price. Must be less than 10,000'
       ],
       hugePriceRules: [
         //A price must be numbers and may contain a decimal followed by exactly two numbers (6digit)
-        field => /(^\d{1,6}(\.\d{2})?$)|^$/.test(field) || 'Must be a valid price'
+        field => /(^\d{1,6}(\.\d{2})?$)|^$/.test(field) || 'Must be a valid price. Must be less than 1,000,000'
       ],
     };
   },
@@ -241,12 +250,11 @@ export default {
           product.description?.toLowerCase().includes(filterText.toLowerCase());
     },
     /**
-     * Called when the form is submitted
-     * Requests backend to create an inventory item
-     * Empty attributes are set to undefined
+     * Called when the form is submitted.
+     * Get the attributes from each field and call the function to either create or modify the inventory item,
+     * depending on what pupose the form is being used for.
      */
-    async CreateInventory() { //to see the attribute in console for debugging or testing, remove after this page is done
-      const businessId = this.$store.state.createInventoryDialog;
+    async submit() {
       this.errorMessage = undefined;
       let quantity;
       try {
@@ -265,12 +273,26 @@ export default {
         bestBefore: this.bestBefore ? this.bestBefore : undefined,
         expires: this.expires
       };
-      const result = await createInventoryItem(businessId, inventoryItem);
+      if (this.isCreate) {
+        this.createInventory(inventoryItem);
+      } else {
+        this.modifyInventory();
+      }
+    },
+    /**
+     * Requests backend to create an inventory item
+     * Empty attributes are set to undefined
+     */
+    async createInventory(inventoryItem) {
+      const result = await createInventoryItem(this.businessId, inventoryItem);
       if (typeof result === 'string') {
         this.errorMessage = result;
       } else {
         this.closeDialog();
       }
+    },
+    modifyInventory() {
+      this.errorMessage = "Not yet implemented";
     },
 
     async checkAllDatesValid() {
@@ -355,10 +377,16 @@ export default {
       }
       await this.checkAllDatesValid();
     },
-
+    /**
+     * Call the currency API to get the currency symbol and code from the country of sale of the product.
+     */
     async fetchCurrency() {
-      const business = await getBusiness(this.businessId);
-      this.currency = await currencyFromCountry(business.address.country);
+      if (this.productCode) {
+        const product = this.productList.filter(p => p.id === this.productCode)[0];
+        this.currency = await currencyFromCountry(product.countryOfSale);
+      } else {
+        this.currency = {errorMessage: "Currency not available"};
+      }
     }
   },
   computed: {
@@ -369,18 +397,25 @@ export default {
     filteredProductList() {
       return this.productList.filter(x => this.filterPredicate(x));
     },
-
     /**
-     * Gets the business ID from the store
+     * Returns true if this form is for creating an inventory item, false if it is for modifying an inventory item.
      */
-    businessId() {
-      return this.$store.state.createInventoryDialog;
-    }
+    isCreate() {
+      return this.previousItem === undefined;
+    },
   },
-  created() {
+  async created() {
+    await this.fetchProducts();
     this.fetchCurrency();
-    this.fetchProducts();
   },
+  /**
+   * When the product code changes, update the currency as it depends on the product.
+   */
+  watch: {
+    productCode: function () {
+      this.fetchCurrency();
+    }
+  }
 };
 </script>
 
