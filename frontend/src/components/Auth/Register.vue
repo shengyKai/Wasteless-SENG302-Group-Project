@@ -275,13 +275,13 @@ export default {
       ],
       passwordRules: [
         field => (field && field.length >= 7) || 'Password must have 7+ characters',
-        field => /^(?=.*[0-9])(?=.*[a-zA-ZÀ-ž])([a-zA-ZÀ-ž0-9]+)$/.test(field) || 'Must have at least one number and one alphabet'
+        field => (/^(?=.*[0-9])(?=.*[\p{L} ])([\p{L}0-9 ]+)$/u).test(field) || 'Must have at least one number and one alphabet'
       ],
       numberRules: [
         field => /(^[a-zA-Z0-9]*$)/.test(field) || 'Must contain numbers and alphabet only'
       ],
       nameRules: [
-        field =>  (field.length === 0 || (/^[a-zÀ-ž-//.// ]+$/i).test(field)) || 'Naming must be valid'
+        field =>  (field.length === 0 || (/^[\p{L} -]+$/u).test(field)) || 'Naming must be valid'
       ],
       maxShortCharRules: [
         field => (field.length <= 16) || 'Reached max character limit: 16'
@@ -294,7 +294,7 @@ export default {
       ],
       charBioRules: [
         field => (field.length <= 200) || 'Reached max character limit: 200',
-        field => /(^[ a-zA-ZÀ-ž0-9@//$%&!'//#,//.//(//)//:;_-]*$)/.test(field) || 'Bio must only contain letters, numbers, and valid special characters'
+        field => (/(^[\p{L} 0-9@//$%&!'//#,//.//(//)//:;_-]*$)/u).test(field) || 'Bio must only contain letters, numbers, and valid special characters'
       ],
       phoneNumberRules: [
         field => /(^\(?\d{1,3}\)?[\s.-]?\d{3,4}[\s.-]?\d{4,5}$)|(^$)/.test(field) || 'Must be a valid phone number'
@@ -303,11 +303,11 @@ export default {
         field => /(^(\d{1,2}-)?\d{2,3}$)|(^$)/.test(field) || 'Must be a valid country code.'
       ],
       alphabetRules: [
-        field => ( field.length === 0 || /^[a-zÀ-ž-//.// ]+$/i.test(field)) || 'Naming must be valid'
+        field => (field.length === 0 || (/^[\p{L}\- ]+$/u).test(field)) || 'Naming must be valid'
       ],
       streetNumRules: [
         field => (field && field.length <= 109) || 'Reached max character limit 109 ',
-        field => /^(([0-9]+|[0-9]+\/[0-9]+)[a-zA-Z]?)(?=.*[\s])(?=.*[a-zA-Z ])([a-zA-Z0-9 ]+)$/.test(field) || 'Must have at least one number and one alphabet'
+        field => /^(([0-9]+|[0-9]+\/[0-9]+)[a-zA-Z]?)(?=.*[\s])(?=.*[\p{L} ])([\p{L}0-9 ]+)$/u.test(field) || 'Must have at least one number and one alphabet'
       ],
     };
   },

@@ -15,7 +15,6 @@
         v-model="password"
         type="password"
         label="Password"
-        :rules="mandatoryRules.concat(passwordRules)"
         outlined
       />
     </v-form>
