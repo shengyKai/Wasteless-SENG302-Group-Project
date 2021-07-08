@@ -66,5 +66,6 @@ Feature: UCM2 - Card creation
   Scenario: AC4 - If no action is taken within 24 hours of the notification, the card will be deleted automatically
     Given The card expiry is changed to less than a day from now
     When The notification period is over without any action taken
+    And The system has performed its scheduled check for cards that are expired
     Then The card will be removed from the marketplace
 

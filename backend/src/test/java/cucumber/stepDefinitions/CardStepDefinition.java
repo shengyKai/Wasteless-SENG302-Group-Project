@@ -17,11 +17,14 @@ import org.hibernate.Hibernate;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.junit.jupiter.api.Assertions;
+import org.mockito.MockedStatic;
 import org.seng302.leftovers.entities.MarketplaceCard;
 import org.seng302.leftovers.persistence.MarketplaceCardRepository;
 import org.seng302.leftovers.service.CardService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.web.servlet.MvcResult;
+
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import java.io.UnsupportedEncodingException;
@@ -37,8 +40,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static java.time.Instant.ofEpochMilli;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 
 
@@ -61,6 +62,8 @@ public class CardStepDefinition {
 
     @Autowired
     private SessionFactory sessionFactory;
+
+    private Instant futureInstant;
 
     @Given("a card exists")
     public void a_card_exists() {
@@ -202,13 +205,27 @@ public class CardStepDefinition {
 
     @When("The notification period is over without any action taken")
     public void the_notification_period_is_over_without_any_action_taken() {
-        System.out.println("BEFOREEEEEEEEEE");
-        System.out.println(Instant.now());
-        Clock constantClock = Clock.fixed(ofEpochMilli(0), ZoneId.systemDefault());
-        Clock clock = Clock.offset(constantClock, Duration.ofHours(24));
-        when(Instant.now()).thenReturn(Instant.now(clock));
-        System.out.println("AFTERRRRRRRRRRRR");
-        System.out.println(Instant.now());
+        futureInstant = Instant.now().plus(Duration.ofDays(1));
+    }
+
+    @When("The system has performed its scheduled check for cards that are expired")
+    public void the_system_has_performed_its_scheduled_check_for_cards_that_are_expired()
+            throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
+        try (MockedStatic<Instant> instant = mockStatic(Instant.class)) {
+            instant.when(Instant::now).thenReturn(futureInstant);
+            assertEquals(Instant.now(), futureInstant);
+
+            Method sendCardExpiryEvents = CardService.class.getDeclaredMethod("sendCardExpiryEvents");
+            sendCardExpiryEvents.setAccessible(true);
+            sendCardExpiryEvents.invoke(cardService);
+//            try {
+//                Method sendCardExpiryEvents = CardService.class.getDeclaredMethod("sendCardExpiryEvents");
+//                sendCardExpiryEvents.setAccessible(true);
+//                sendCardExpiryEvents.invoke(cardService);
+//            } catch (Exception e) {
+//                System.out.println(e.getCause());
+//            }
+        }
     }
 
     @Then("The card will be removed from the marketplace")
