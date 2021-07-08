@@ -15,7 +15,7 @@
             <v-container>
               <v-row>
                 <!-- INPUT: Product code Currently used v-selector to reduce typo probability from user -->
-                <v-col cols="6" v-if="isCreate">
+                <v-col cols="6">
                   <v-select
                     no-data-text="No products found"
                     class="required"
@@ -47,12 +47,6 @@
                       </v-list-item>
                     </template>
                   </v-select>
-                </v-col>
-                <v-col cols="6" v-else>
-                  <v-card-subtitle class="pb-0">
-                    Product code
-                  </v-card-subtitle>
-                  <v-card-text class="body-1 font-weight-bold"> {{ previousItem.product.id }} </v-card-text>
                 </v-col>
                 <!-- INPUT: Quantity. Only allows number.-->
                 <v-col cols="6">
@@ -184,7 +178,7 @@ export default {
       sellByValid: true,
       bestBefore: this.previousItem?.bestBefore ?? "",
       bestBeforeValid: true,
-      expires: this.previousItem?.expires ?? "",
+      expires: this.previousItem?.expires ?? new Date().toISOString().slice(0,10),
       expiresValid: true,
       datesValid: true,
       productFilter: '',
