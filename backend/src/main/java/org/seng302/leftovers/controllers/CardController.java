@@ -15,11 +15,17 @@ import org.seng302.leftovers.persistence.UserRepository;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
 import org.seng302.leftovers.tools.JsonTools;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import org.seng302.leftovers.tools.SearchHelper;
 
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.Optional;
@@ -200,23 +206,24 @@ public class CardController {
                               @RequestParam(required = false) Integer resultsPerPage,
                               @RequestParam(required = false) Boolean reverse) {
         
-        logger.info("Request to get marketplace cards for " + sectionName);
+        logger.info("Request to get marketplace cards for {}", sectionName);
         AuthenticationTokenManager.checkAuthenticationToken(request);
 
         // parse the section
         MarketplaceCard.Section section = MarketplaceCard.sectionFromString(sectionName);
 
-        Comparator<MarketplaceCard> sort = getMarketPlaceCardComparator(orderBy, reverse);
+        Specification<MarketplaceCard> specification = (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("section"), section.ordinal());
 
-        // database call for section
-        var cards = marketplaceCardRepository.getAllBySection(section);
+        Sort.Direction direction = SearchHelper.getSortDirection(reverse);
+        if (orderBy == null) {
+            orderBy = "created";
+        }
 
-        cards.sort(sort);
+        var results = marketplaceCardRepository.findAll(specification, SearchHelper.getPageRequest(page, resultsPerPage, Sort.by(direction, orderBy)));
 
-        cards = SearchHelper.getPageInResults(cards, page, resultsPerPage);
         //return JSON Object
         JSONArray responseBody = new JSONArray();
-        for (MarketplaceCard card : cards) {
+        for (MarketplaceCard card : results) {
             responseBody.appendElement(card.constructJSONObject());
         }
         return responseBody;
@@ -234,13 +241,15 @@ public class CardController {
 
         AuthenticationTokenManager.checkAuthenticationToken(request);
 
+
         //if the section is invalid, an error would already be thrown.
         MarketplaceCard.Section section = MarketplaceCard.sectionFromString(sectionName);
 
-        var cards = marketplaceCardRepository.getAllBySection(section);
+        Specification<MarketplaceCard> specification = (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("section"), section.ordinal());
 
+        var count = marketplaceCardRepository.count(specification);
         JSONObject responseBody = new JSONObject();
-        responseBody.put("count", cards.size());
+        responseBody.put("count", count);
 
         return responseBody;
     }
