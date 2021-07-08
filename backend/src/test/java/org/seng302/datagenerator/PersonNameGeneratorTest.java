@@ -126,7 +126,6 @@ class PersonNameGeneratorTest {
         when(mockRandom.nextInt(any(Integer.class))).thenReturn(returnValue);
 
         String lastName = personNameGenerator.randomLastName();
-        System.out.println(lastName);
         builder.withLastName(lastName);
         assertDoesNotThrow(() -> {
             User user = builder.build();

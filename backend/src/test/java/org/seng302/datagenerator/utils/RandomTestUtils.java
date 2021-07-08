@@ -28,6 +28,9 @@ public class RandomTestUtils {
             public Integer answer(InvocationOnMock invocation) {
                 count++;
                 int upperLimit = invocation.getArgument(0);
+                System.out.println("nextInt() count: " + count);
+                System.out.println(invocation);
+                System.out.println();
                 return values[count-1] % upperLimit;
             }
         });
@@ -46,6 +49,9 @@ public class RandomTestUtils {
             private int count = 0;
             public Boolean answer(InvocationOnMock invocation) {
                 count++;
+                System.out.println("nextBoolean() count: " + count);
+                System.out.println(invocation);
+                System.out.println();
                 return values[count-1];
             }
         });

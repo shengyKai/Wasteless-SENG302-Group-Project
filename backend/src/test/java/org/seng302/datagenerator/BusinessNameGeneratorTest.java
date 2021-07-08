@@ -109,8 +109,6 @@ class BusinessNameGeneratorTest {
 
         assertDoesNotThrow(() -> {
             Product product = builder.build();
-            System.out.println(product);
-            System.out.println(manufacturerName);
             assertEquals(manufacturerName, product.getManufacturer());
         });
     }
