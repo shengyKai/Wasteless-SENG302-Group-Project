@@ -70,7 +70,7 @@ public class ProductGenerator {
      * @param productCount Number of products to generate
      * @return List of generated product ids
      */
-    public List<Long> generateProducts(int productCount) throws InterruptedException {
+    public List<Long> generateProducts(int productCount) {
         var businessGenerator = new BusinessGenerator(conn);
         List<Long> generatedProductIds = new ArrayList<>();
         try {
