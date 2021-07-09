@@ -44,6 +44,7 @@ public class CardService {
     @Scheduled(fixedRate = 5 * 60 * 1000)
     private void sendCardExpiryEvents() {
         deleteExpiredCards();
+
         logger.info("Checking for cards which are expiring within the next 24 hours");
         Instant cutOff = Instant.now().plus(Duration.ofDays(1));
         Iterable<MarketplaceCard> allCards = marketplaceCardRepository.getAllExpiringBefore(cutOff);
@@ -76,7 +77,6 @@ public class CardService {
             } else {
                 logger.info("No expiry event relating to card {}", card.getID());
             }
-            
             marketplaceCardRepository.delete(card);
             logger.info("Card {} deleted from marketplace repository", card.getID());
         }

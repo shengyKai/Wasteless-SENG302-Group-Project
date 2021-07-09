@@ -18,6 +18,7 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.junit.jupiter.api.Assertions;
 import org.mockito.MockedStatic;
+import org.mockito.invocation.InvocationOnMock;
 import org.seng302.leftovers.entities.MarketplaceCard;
 import org.seng302.leftovers.persistence.MarketplaceCardRepository;
 import org.seng302.leftovers.service.CardService;
@@ -205,26 +206,19 @@ public class CardStepDefinition {
 
     @When("The notification period is over without any action taken")
     public void the_notification_period_is_over_without_any_action_taken() {
-        futureInstant = Instant.now().plus(Duration.ofDays(1));
+        futureInstant = Instant.now().plus(Duration.ofHours(24));
     }
 
     @When("The system has performed its scheduled check for cards that are expired")
     public void the_system_has_performed_its_scheduled_check_for_cards_that_are_expired()
             throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
-        try (MockedStatic<Instant> instant = mockStatic(Instant.class)) {
+        try (MockedStatic<Instant> instant = mockStatic(Instant.class, InvocationOnMock::callRealMethod)) {
             instant.when(Instant::now).thenReturn(futureInstant);
             assertEquals(Instant.now(), futureInstant);
 
             Method sendCardExpiryEvents = CardService.class.getDeclaredMethod("sendCardExpiryEvents");
             sendCardExpiryEvents.setAccessible(true);
             sendCardExpiryEvents.invoke(cardService);
-//            try {
-//                Method sendCardExpiryEvents = CardService.class.getDeclaredMethod("sendCardExpiryEvents");
-//                sendCardExpiryEvents.setAccessible(true);
-//                sendCardExpiryEvents.invoke(cardService);
-//            } catch (Exception e) {
-//                System.out.println(e.getCause());
-//            }
         }
     }
 
