@@ -22,7 +22,7 @@ public class UserGeneratorTest {
             //Connects to production database
             String url = "jdbc:mariadb://localhost/seng302-2021-team500-prod";
             //change password
-            this.conn = DriverManager.getConnection(url, "seng302-team500", "ListenDirectly6053");
+            this.conn = DriverManager.getConnection(url, "seng302-team500", "changeMe");
 
             //Creates generator
             this.generator = new UserGenerator(conn);
@@ -67,111 +67,96 @@ public class UserGeneratorTest {
         return results.getLong(1);
     }
 
+    /**
+     * Deletes the generated users from the database as part of the clean up process
+     * @param userIds the ids of the generated users
+     */
+    public void deleteUsersFromDB(List<Long> userIds) throws SQLException {
+        for (Long userId: userIds) {
+            PreparedStatement stmt = conn.prepareStatement("DELETE FROM user WHERE userid = ?");
+            stmt.setObject(1, userId);
+            stmt.executeUpdate();
+        }
+    }
+
     @Test
-    void generateUsers_generateOneUserAndConsistentData_oneUserGenerated() {
+    void generateUsers_generateOneUserAndConsistentData_oneUserGenerated() throws SQLException {
         List<Long> userIds = generator.generateUsers(1);
         if (userIds.size() != 1) {
             fail();
         }
         long userId = userIds.get(0);
-        try {
-            checkRequiredFieldsNotNull(userId);
-        } catch (SQLException e) {
-            e.printStackTrace();
-            fail();
-        }
+        checkRequiredFieldsNotNull(userId);
+
+
     }
 
     @Test
-    void generateUsers_generateTwoUsersConsistentData_twoUsersGenerated() {
+    void generateUsers_generateTwoUsersConsistentData_twoUsersGenerated() throws SQLException {
         List<Long> userIds = generator.generateUsers(2);
         if (userIds.size() != 2) {
             fail();
         }
-        try {
-            for (int i=0; i < userIds.size(); i++) {
-                checkRequiredFieldsNotNull(userIds.get(i));
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-            fail();
+        for (int i=0; i < userIds.size(); i++) {
+            checkRequiredFieldsNotNull(userIds.get(i));
         }
         //How to check if data is consistent?
+
+        deleteUsersFromDB(userIds);
     }
 
     @Test
-    void generateUsers_generateTenUsersConsistentData_tenUsersGenerated() {
+    void generateUsers_generateTenUsersConsistentData_tenUsersGenerated() throws SQLException {
         List<Long> userIds = generator.generateUsers(10);
         if (userIds.size() != 10) {
             fail();
         }
-        try {
-            for (int i=0; i < userIds.size(); i++) {
-                checkRequiredFieldsNotNull(userIds.get(i));
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-            fail();
+        for (int i=0; i < userIds.size(); i++) {
+            checkRequiredFieldsNotNull(userIds.get(i));
         }
+
+        deleteUsersFromDB(userIds);
     }
 
     @Test
-    void generateUsers_generateHundredUsersConsistentData_hundredUsersGenerated() {
+    void generateUsers_generateHundredUsersConsistentData_hundredUsersGenerated() throws SQLException {
         List<Long> userIds = generator.generateUsers(100);
         if (userIds.size() != 100) {
             fail();
         }
-        try {
-            for (int i=0; i < userIds.size(); i++) {
-                checkRequiredFieldsNotNull(userIds.get(i));
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
+        for (int i=0; i < userIds.size(); i++) {
+            checkRequiredFieldsNotNull(userIds.get(i));
+        }
+
+        deleteUsersFromDB(userIds);
+    }
+
+    @Test
+    void generateUsers_generateZeroUsers_noUsersGeneratedRepeatPrompt() throws SQLException {
+        long usersInDB = getNumUsersInDB();
+        generator.generateUsers(0);
+        long usersInDBAfter = getNumUsersInDB();
+        if (usersInDB != usersInDBAfter) {
             fail();
         }
     }
 
     @Test
-    void generateUsers_generateZeroUsers_noUsersGeneratedRepeatPrompt() {
-        try {
-            long usersInDB = getNumUsersInDB();
-            generator.generateUsers(0);
-            long usersInDBAfter = getNumUsersInDB();
-            if (usersInDB != usersInDBAfter) {
-                fail();
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
+    void generateUsers_generateNegativeOneUsers_noUsersGeneratedRepeatPrompt() throws SQLException {
+        long usersInDB = getNumUsersInDB();
+        generator.generateUsers(-1);
+        long usersInDBAfter = getNumUsersInDB();
+        if (usersInDB != usersInDBAfter) {
             fail();
         }
     }
 
     @Test
-    void generateUsers_generateNegativeOneUsers_noUsersGeneratedRepeatPrompt() {
-        try {
-            long usersInDB = getNumUsersInDB();
-            generator.generateUsers(-1);
-            long usersInDBAfter = getNumUsersInDB();
-            if (usersInDB != usersInDBAfter) {
-                fail();
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-            fail();
-        }
-    }
-
-    @Test
-    void generateUsers_generateNegativeTenUsers_noUsersGeneratedRepeatPrompt() {
-        try {
-            long usersInDB = getNumUsersInDB();
-            generator.generateUsers(-10);
-            long usersInDBAfter = getNumUsersInDB();
-            if (usersInDB != usersInDBAfter) {
-                fail();
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
+    void generateUsers_generateNegativeTenUsers_noUsersGeneratedRepeatPrompt() throws SQLException {
+        long usersInDB = getNumUsersInDB();
+        generator.generateUsers(-10);
+        long usersInDBAfter = getNumUsersInDB();
+        if (usersInDB != usersInDBAfter) {
             fail();
         }
     }
