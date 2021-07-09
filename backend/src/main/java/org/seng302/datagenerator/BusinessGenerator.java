@@ -85,7 +85,7 @@ public class BusinessGenerator {
      * @param businessCount Number of businesses to generate
      * @return List of generated business ids
      */
-    private List<Long> generateBusinesses(List<Long> userIds, int businessCount) {
+    public List<Long> generateBusinesses(List<Long> userIds, int businessCount) {
         List<Long> generatedBusinessIds = new ArrayList<>();
         try {
             for (int i=0; i < businessCount; i++) {
