@@ -4,13 +4,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.runner.RunWith;
-import org.seng302.leftovers.entities.Product;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.sql.*;
 import java.util.List;
-import java.util.PropertyPermission;
 
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -18,8 +16,6 @@ import static org.junit.jupiter.api.Assertions.fail;
 @SpringBootTest(classes={Main.class})
 public class ProductGeneratorTest {
     private Connection conn;
-    private UserGenerator userGenerator;
-    private BusinessGenerator businessGenerator;
     private ProductGenerator productGenerator;
 
     @BeforeEach
@@ -30,8 +26,6 @@ public class ProductGeneratorTest {
         this.conn = DriverManager.getConnection(url, "seng302-team500", "changeMe");
 
         //Creates generators
-        this.userGenerator = new UserGenerator(conn);
-        this.businessGenerator = new BusinessGenerator(conn);
         this.productGenerator = new ProductGenerator(conn);
     }
 
