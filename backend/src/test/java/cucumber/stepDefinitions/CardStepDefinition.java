@@ -29,6 +29,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.http.HttpResponse;
@@ -63,8 +64,6 @@ public class CardStepDefinition {
 
     @Autowired
     private SessionFactory sessionFactory;
-
-    private Instant futureInstant;
 
     @Given("a card exists")
     public void a_card_exists() {
@@ -204,22 +203,15 @@ public class CardStepDefinition {
 
     }
 
-    @When("The notification period is over without any action taken")
-    public void the_notification_period_is_over_without_any_action_taken() {
-        futureInstant = Instant.now().plus(Duration.ofHours(24));
-    }
-
-    @When("The system has performed its scheduled check for cards that are expired")
-    public void the_system_has_performed_its_scheduled_check_for_cards_that_are_expired()
-            throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
-        try (MockedStatic<Instant> instant = mockStatic(Instant.class, InvocationOnMock::callRealMethod)) {
-            instant.when(Instant::now).thenReturn(futureInstant);
-            assertEquals(Instant.now(), futureInstant);
-
-            Method sendCardExpiryEvents = CardService.class.getDeclaredMethod("sendCardExpiryEvents");
-            sendCardExpiryEvents.setAccessible(true);
-            sendCardExpiryEvents.invoke(cardService);
-        }
+    @Given("The card has expired")
+    public void the_card_has_expired()
+            throws  IllegalAccessException, NoSuchFieldException {
+        Instant pastInstant = Instant.now().minus(Duration.ofHours(1));
+        var card = cardContext.getLast();
+        Field closes = MarketplaceCard.class.getDeclaredField("closes");
+        closes.setAccessible(true);
+        closes.set(card, pastInstant);
+        cardContext.save(card);
     }
 
     @Then("The card will be removed from the marketplace")
