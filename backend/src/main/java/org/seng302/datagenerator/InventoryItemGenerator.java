@@ -112,7 +112,7 @@ public class InventoryItemGenerator {
      * @param invItemCount
      * @return
      */
-    private List<Long> generateInventoryItems(int invItemCount) throws SQLException {
+    public List<Long> generateInventoryItems(int invItemCount) throws SQLException {
         var productGenerator = new ProductGenerator(conn);
         List<Long> generatedInvItemIds = new ArrayList<>();
         try {
