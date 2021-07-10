@@ -10,6 +10,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import java.lang.reflect.Field;
 import java.sql.*;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -37,13 +38,11 @@ public class LocationGeneratorTest {
 
   @BeforeEach
   public void setup() throws SQLException {
-      //Connects to production database
-      String url = "jdbc:mariadb://localhost/seng302-2021-team500-prod";
-      //change password
-      this.conn = DriverManager.getConnection(url, "seng302-team500", "changeMe");
+    Map<String, String> properties = ExampleDataFileReader.readPropertiesFile("/generator_db.properties");
+    this.conn =  DriverManager.getConnection(properties.get("url"), properties.get("username"), properties.get("password"));
 
-      //Creates generators
-      this.userGenerator = new UserGenerator(conn);
+    //Creates generators
+    this.userGenerator = new UserGenerator(conn);
   }
 
   @AfterEach
