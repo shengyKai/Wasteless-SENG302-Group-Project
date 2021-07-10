@@ -40,7 +40,7 @@ public class LocationGeneratorTest {
       //Connects to production database
       String url = "jdbc:mariadb://localhost/seng302-2021-team500-prod";
       //change password
-      this.conn = DriverManager.getConnection(url, "seng302-team500", "ListenDirectly6053");
+      this.conn = DriverManager.getConnection(url, "seng302-team500", "changeMe");
 
       //Creates generators
       this.userGenerator = new UserGenerator(conn);
