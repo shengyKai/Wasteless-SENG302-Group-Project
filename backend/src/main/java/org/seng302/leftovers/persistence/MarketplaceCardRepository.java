@@ -1,12 +1,14 @@
 package org.seng302.leftovers.persistence;
 
 import org.seng302.leftovers.entities.*;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Repository;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.Instant;
 import java.util.List;
 
 @Repository
@@ -41,4 +43,13 @@ public interface MarketplaceCardRepository extends CrudRepository<MarketplaceCar
     default MarketplaceCard getCard(Long id) {
         return findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No card exists with the given id"));
     }
+
+    /**
+     * Return all cards which have an closing data before the given cutoff data and which do not already have an associated
+     * expiry event.
+     * @param cutOff Cards with a closing date earlier than this date will be returned.
+     * @return a list of all marketplace cards which need to have an expiry event sent.
+     */
+    @Query("SELECT c FROM MarketplaceCard c left join ExpiryEvent e ON e.expiringCard.id = c.id WHERE c.closes < :cutOff AND e is null")
+    List<MarketplaceCard> getAllExpiringBefore(@Param("cutOff") Instant cutOff);
 }

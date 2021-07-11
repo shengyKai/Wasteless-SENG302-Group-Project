@@ -29,6 +29,13 @@ Feature: UCM2 - Card creation
     Then The request succeeds
     And I expect the card to be deleted
 
+  Scenario: AC 3 - I receive a notification when my card is within 24 hours of expiring
+    Given The card expiry is changed to less than a day from now
+    And I am logged into my account
+    And The system has performed its scheduled check for cards that are close to expiry
+    When I check my notification feed
+    Then I have received a message telling me the card is about to expire
+
   Scenario: AC3 - I can extend the display period of one of my cards if the expiry is within 1 day
     Given The card expiry is changed to less than a day from now
     And I am logged into my account
