@@ -22,9 +22,9 @@ public class BusinessGeneratorTest {
     @BeforeEach
     public void setup() throws SQLException {
         //Connects to production database
-        String url = "jdbc:mariadb://localhost/seng302-2021-team500-prod";
-        //change password
-        this.conn = DriverManager.getConnection(url, "seng302-team500", "changeMe");
+        String url = "jdbc:mariadb://" + System.getenv("S302T500-DB-ADDRESS");
+        this.conn = DriverManager.getConnection(url, System.getenv("S302T500-DB-USERNAME"), System.getenv("S302T500-DB-PASSWORD"));
+
 
         //Creates generators
         this.userGenerator = new UserGenerator(conn);
