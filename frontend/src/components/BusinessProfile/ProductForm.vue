@@ -12,7 +12,7 @@
           <v-card-title>
             <span class="headline create-product">
               <template v-if="isCreate">
-                Create new Product
+                Create New Product
               </template>
               <template v-else>
                 Update {{ previousProduct.id }}

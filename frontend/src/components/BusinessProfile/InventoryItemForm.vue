@@ -8,8 +8,14 @@
       <v-form v-model="valid">
         <v-card>
           <v-card-title>
-            <h4 v-if="isCreate" class="primary--text">Create Inventory Item</h4>
-            <h4 v-else class="primary--text">Edit Inventory Item</h4>
+            <span class="headline create-inventory">
+              <template v-if="isCreate">
+                Create New Inventory Item
+              </template>
+              <template v-else>
+                Update Inventory Item
+              </template>
+            </span>
           </v-card-title>
           <v-card-text>
             <v-container>
@@ -418,5 +424,10 @@ export default {
 .required label::after {
   content: "*";
   color: red;
+}
+
+.create-inventory {
+  color: var(--v-primary-base);
+  font-weight: bolder;
 }
 </style>
