@@ -109,7 +109,7 @@
 
 <script>
 import MarketplaceCard from "../cards/MarketplaceCard";
-import {getMarketplaceCardsBySection, getMarketplaceCardCount} from "../../api/internal.ts";
+import {getMarketplaceCardsBySection } from "../../api/internal.ts";
 
 export default {
   data() {
@@ -156,20 +156,21 @@ export default {
      */
     async updateResults() {
       this.error = undefined;
-      for (const index in this.sections) {
-        const value = await getMarketplaceCardsBySection (
-          this.sections[index],
-          this.currentPage[this.sections[index]],
+      for (const key of this.sections) {
+        const value = await getMarketplaceCardsBySection(
+          key,
+          this.currentPage[key],
           this.resultsPerPage,
           this.orderBy,
           this.reverse
         );
-        this.totalResults[this.sections[index]] = await getMarketplaceCardCount(this.sections[index]);
         if (typeof value === 'string') {
-          this.cards[this.sections[index]] = [];
+          this.cards[key] = [];
+          this.totalResults[key] = 0;
           this.error = value;
         } else {
-          this.cards[this.sections[index]] = value;
+          this.cards[key] = value.results;
+          this.totalResults[key] = value.count;
         }
       }
 

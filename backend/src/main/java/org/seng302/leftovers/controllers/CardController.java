@@ -15,27 +15,24 @@ import org.seng302.leftovers.persistence.UserRepository;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
 import org.seng302.leftovers.tools.JsonTools;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import org.seng302.leftovers.tools.SearchHelper;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.Optional;
-import java.util.Comparator;
+import java.util.Set;
 
 /**
  * This controller handles requests involving marketplace cards
  */
 @RestController
 public class CardController {
+    private static final Set<String> VALID_CARD_ORDERINGS = Set.of("created", "title", "closes", "creatorFirstName", "creatorLastName");
 
     private final MarketplaceCardRepository marketplaceCardRepository;
     private final KeywordRepository keywordRepository;
@@ -199,7 +196,7 @@ public class CardController {
      * @return A JSON Array of Marketplace cards
      */
     @GetMapping("/cards")
-    public JSONArray getCards(HttpServletRequest request,
+    public JSONObject getCards(HttpServletRequest request,
                               @RequestParam(name = "section") String sectionName,
                               @RequestParam(required = false) String orderBy,
                               @RequestParam(required = false) Integer page,
@@ -211,82 +208,26 @@ public class CardController {
 
         // parse the section
         MarketplaceCard.Section section = MarketplaceCard.sectionFromString(sectionName);
-
-        Specification<MarketplaceCard> specification = (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("section"), section.ordinal());
-
         Sort.Direction direction = SearchHelper.getSortDirection(reverse);
         if (orderBy == null) {
             orderBy = "created";
         }
 
-        var results = marketplaceCardRepository.findAll(specification, SearchHelper.getPageRequest(page, resultsPerPage, Sort.by(direction, orderBy)));
+        if (!VALID_CARD_ORDERINGS.contains(orderBy)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid card ordering");
+        }
+
+        PageRequest pageRequest = SearchHelper.getPageRequest(page, resultsPerPage, Sort.by(direction, orderBy));
+        var results = marketplaceCardRepository.getAllBySection(section, pageRequest);
 
         //return JSON Object
-        JSONArray responseBody = new JSONArray();
+        JSONArray resultArray = new JSONArray();
         for (MarketplaceCard card : results) {
-            responseBody.appendElement(card.constructJSONObject());
+            resultArray.appendElement(card.constructJSONObject());
         }
-        return responseBody;
-    }
-
-    /**
-     * REST GET method to retrieve the number of cards in the marketplace.
-     * @param request the HTTP request
-     * @param sectionName the requested section name
-     * @return the card count by the requested section
-     */
-    @GetMapping("/cards/count")
-    public JSONObject retrieveCardCount(HttpServletRequest request,
-                                        @RequestParam(name = "section") String sectionName) {
-
-        AuthenticationTokenManager.checkAuthenticationToken(request);
-
-
-        //if the section is invalid, an error would already be thrown.
-        MarketplaceCard.Section section = MarketplaceCard.sectionFromString(sectionName);
-
-        Specification<MarketplaceCard> specification = (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("section"), section.ordinal());
-
-        var count = marketplaceCardRepository.count(specification);
-        JSONObject responseBody = new JSONObject();
-        responseBody.put("count", count);
-
-        return responseBody;
-    }
-
-    /**
-     * Sort marketplace cards by a key. Can reverse results.
-     * 
-     * @param orderBy Key to order marketplace cards by.
-     * @param reverse Reverse results.
-     * @return MarketplaceCard Comparator
-     */
-    public Comparator<MarketplaceCard> getMarketPlaceCardComparator(String orderBy, Boolean reverse) {
-        if (orderBy == null) orderBy = "created";
-
-        Comparator<MarketplaceCard> sort;
-        switch (orderBy) {
-            case "title":
-                sort = Comparator.comparing(MarketplaceCard::getTitle, String.CASE_INSENSITIVE_ORDER);
-                break;
-            case "closes":
-                sort = Comparator.comparing(MarketplaceCard::getCloses);
-                break;
-            case "creatorFirstName":
-                sort = Comparator.comparing(marketPlaceCard -> marketPlaceCard.getCreator().getFirstName(), String.CASE_INSENSITIVE_ORDER);
-                break;
-            case "creatorLastName":
-                sort = Comparator.comparing(marketPlaceCard -> marketPlaceCard.getCreator().getLastName(), String.CASE_INSENSITIVE_ORDER);
-                break;
-            case "created":
-            default:
-                sort = Comparator.comparing(MarketplaceCard::getCreated);
-                break;
-        }
-        if (Boolean.TRUE.equals(reverse)) {
-            sort = sort.reversed();
-        }
-
-        return sort;
+        JSONObject json = new JSONObject();
+        json.put("count", results.getTotalElements());
+        json.put("results", resultArray);
+        return json;
     }
 }
