@@ -13,8 +13,8 @@ public class Main {
      * @return the connection to the database
      */
     public static Connection connectToDatabase() throws SQLException {
-        String url = "jdbc:mariadb://localhost/seng302-2021-team500-prod";
-        Connection conn = DriverManager.getConnection(url, "seng302-team500", "changeMe");
+        String url = "jdbc:mariadb://" + System.getenv("S302T500-DB-ADDRESS");
+        Connection conn = DriverManager.getConnection(url, System.getenv("S302T500-DB-USERNAME"), System.getenv("S302T500-DB-PASSWORD"));
         return conn;
     }
 

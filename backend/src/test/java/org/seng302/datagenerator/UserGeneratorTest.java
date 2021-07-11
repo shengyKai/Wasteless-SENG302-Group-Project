@@ -20,9 +20,9 @@ public class UserGeneratorTest {
     public void setup() {
         try {
             //Connects to production database
-            String url = "jdbc:mariadb://localhost/seng302-2021-team500-prod";
-            //change password
-            this.conn = DriverManager.getConnection(url, "seng302-team500", "changeMe");
+            String url = "jdbc:mariadb://" + System.getenv("S302T500-DB-ADDRESS");
+            Connection conn = DriverManager.getConnection(url, System.getenv("S302T500-DB-USERNAME"), System.getenv("S302T500-DB-PASSWORD"));
+
 
             //Creates generator
             this.generator = new UserGenerator(conn);
