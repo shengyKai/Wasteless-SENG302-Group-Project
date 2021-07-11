@@ -6,6 +6,7 @@ import InventoryItemForm from "@/components/BusinessProfile/InventoryItemForm.vu
 import { castMock, flushQueue, todayPlusYears } from "./utils";
 import { getStore, resetStoreForTesting } from "@/store";
 import * as api from '@/api/internal';
+import { assertEquals } from "typescript-is";
 
 Vue.use(Vuetify);
 
@@ -113,7 +114,7 @@ describe("InventoryItemForm.vue", () => {
     // Creating wrapper around InventoryItemForm with data-app to appease vuetify
     const App = localVue.component("App", {
       components: { InventoryItemForm },
-      template: "<div data-app><InventoryItemForm/></div>",
+      template: "<div data-app><InventoryItemForm :businessId=\"90\"/></div>",
     });
 
     // Put the InventoryItemForm component inside a div in the global document,
@@ -332,6 +333,97 @@ describe("InventoryItemForm.vue", () => {
       expect(wrapper.vm.valid).toBeFalsy();
     }
   );
+
+  it('Currency contains an error message if product code is not set', () => {
+    expect(wrapper.vm.productCode).toBeFalsy();
+    expect(wrapper.vm.currency).toStrictEqual({errorMessage: "Currency not available"});
+  });
+
+  it('Currency contains the result of a call to currencyFromCountry() if product code is set', async () => {
+    await wrapper.setData({
+      productCode: "WATT-420-BEANS"
+    });
+    await Vue.nextTick();
+    expect(wrapper.vm.currency).toStrictEqual({
+      code: 'NZD',
+      name: 'New Zealand dollar',
+      symbol: '$',
+    });
+  });
+
+  describe('Form is being used to create an inventory item', () => {
+
+    beforeEach(() => {
+      expect(wrapper.props().previousItem).toBe(undefined);
+      expect(wrapper.vm.isCreate).toBe(true);
+    });
+
+    it('createInventoryItem called when create button pressed', async () => {
+      const formData = {
+        productCode: "WATT-420-BEANS",
+        quantity: 4,
+        pricePerItem: "3.00",
+        totalPrice: "12.50",
+        manufactured: "2020-07-11",
+        sellBy: "2030-07-11",
+        bestBefore: "2030-07-11",
+        expires: "2030-07-11"
+      };
+      await wrapper.setData(formData);
+      await Vue.nextTick();
+      await findCreateButton().trigger('click');
+      expect(createInventoryItem.mock.calls.length).toBe(1);
+    });
+
+    it('createInventoryItem called with data entered into form as arguments when create button pressed', async () => {
+      const formData = {
+        productCode: "WATT-420-BEANS",
+        quantity: 4,
+        pricePerItem: "3.00",
+        totalPrice: "12.50",
+        manufactured: "2020-07-11",
+        sellBy: "2030-07-11",
+        bestBefore: "2030-07-11",
+        expires: "2030-07-11"
+      };
+      const expectedData = {
+        productId: formData.productCode,
+        quantity: formData.quantity,
+        pricePerItem: formData.pricePerItem,
+        totalPrice: formData.totalPrice,
+        manufactured: formData.manufactured,
+        sellBy: formData.sellBy,
+        bestBefore: formData.bestBefore,
+        expires: formData.expires,
+      };
+      await wrapper.setData(formData);
+      await Vue.nextTick();
+      await findCreateButton().trigger('click');
+      expect(createInventoryItem.mock.calls[0][0]).toBe(90);
+      expect(createInventoryItem.mock.calls[0][1]).toStrictEqual(expectedData);
+    });
+
+    it('Error message is shown if API request is unsuccessful', async () => {
+      createInventoryItem.mockResolvedValueOnce('ERROR!');
+      await populateAllFields();
+      await Vue.nextTick();
+      await findCreateButton().trigger('click');
+      await Vue.nextTick();
+      expect(wrapper.vm.errorMessage).toBe('ERROR!');
+      expect(wrapper.emitted().closeDialog).toBeFalsy();
+    });
+
+    it('Dialog is closed if API request is successful', async() => {
+      createInventoryItem.mockResolvedValueOnce(undefined);
+      await populateAllFields();
+      await Vue.nextTick();
+      await findCreateButton().trigger('click');
+      await Vue.nextTick();
+      expect(wrapper.vm.errorMessage).toBe(undefined);
+      expect(wrapper.emitted().closeDialog).toBeTruthy();
+    });
+
+  });
 
   describe("Date Validation", () => {
     it("Valid when all date fields are today", async () => {
