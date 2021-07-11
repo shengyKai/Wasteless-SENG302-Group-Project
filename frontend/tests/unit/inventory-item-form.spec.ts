@@ -2,7 +2,7 @@ import Vue from "vue";
 import Vuex from "vuex";
 import Vuetify from "vuetify";
 import { createLocalVue, Wrapper, mount } from "@vue/test-utils";
-import CreateInventory from "@/components/BusinessProfile/CreateInventory.vue";
+import InventoryItemForm from "@/components/BusinessProfile/InventoryItemForm.vue";
 import { castMock, flushQueue, todayPlusYears } from "./utils";
 import { getStore, resetStoreForTesting } from "@/store";
 import * as api from '@/api/internal';
@@ -26,7 +26,6 @@ jest.mock('@/api/internal', () => ({
 const createInventoryItem = castMock(api.createInventoryItem);
 const getProducts = castMock(api.getProducts);
 
-getProducts.mockResolvedValue([]);
 // Characters that are in the set of letters, numbers, spaces and punctuation.
 const validQuantityCharacters = [
   "11",
@@ -90,17 +89,19 @@ const testProducts = [
 // Characters that are whitespace not including the space character.
 const whitespaceCharacters = ["\n", "\t"];
 
+getProducts.mockResolvedValue(testProducts);
+
 const localVue = createLocalVue();
 
-describe("CreateInventory.vue", () => {
-  // Container for the wrapper around CreateInventory
+describe("InventoryItemForm.vue", () => {
+  // Container for the wrapper around InventoryItemForm
   let appWrapper: Wrapper<any>;
 
-  // Container for the CreateInventory under test
+  // Container for the InventoryItemForm under test
   let wrapper: Wrapper<any>;
 
   /**
-     * Sets up the test CreateInventory instance
+     * Sets up the test InventoryItemForm instance
      *
      * Because the element we're testing has a v-dialog we need to take some extra sets to make it
      * work.
@@ -109,35 +110,30 @@ describe("CreateInventory.vue", () => {
     localVue.use(Vuex);
     const vuetify = new Vuetify();
 
-    // Creating wrapper around CreateInventory with data-app to appease vuetify
+    // Creating wrapper around InventoryItemForm with data-app to appease vuetify
     const App = localVue.component("App", {
-      components: { CreateInventory },
-      template: "<div data-app><CreateInventory/></div>",
+      components: { InventoryItemForm },
+      template: "<div data-app><InventoryItemForm/></div>",
     });
 
-    // Put the CreateInventory component inside a div in the global document,
+    // Put the InventoryItemForm component inside a div in the global document,
     // this seems to make vuetify work correctly, but necessitates calling appWrapper.destroy
     const elem = document.createElement("div");
     document.body.appendChild(elem);
 
-    resetStoreForTesting();
-    let store = getStore();
-    store.state.createInventoryDialog = 90;
-
     appWrapper = mount(App, {
       localVue,
       vuetify,
-      store: store,
       attachTo: elem,
     });
 
-    wrapper = appWrapper.getComponent(CreateInventory);
+    wrapper = appWrapper.getComponent(InventoryItemForm);
   });
 
   /**
      * Executes after every test case.
      *
-     * This function makes sure that the CreateInventory component is removed from the global document
+     * This function makes sure that the ItemFormInventory component is removed from the global document
      */
   afterEach(() => {
     appWrapper.destroy();
@@ -153,14 +149,14 @@ describe("CreateInventory.vue", () => {
      */
   async function populateRequiredFields() {
     await wrapper.setData({
-      productCode: "ABC-XYZ-012-789",
+      productCode: "WATT-420-BEANS",
       quantity: 2,
       expires: "2030-05-17",
     });
   }
 
   /**
-     * Populates all fields of the CreateInventory form
+     * Populates all fields of the InventoryItem form
      *
      * Which include the inventory's:
      * - Inventory shortcode
