@@ -2,10 +2,11 @@ import Vue from "vue";
 import Vuex from "vuex";
 import Vuetify from "vuetify";
 import { createLocalVue, Wrapper, mount } from "@vue/test-utils";
-import CreateInventory from "@/components/BusinessProfile/CreateInventory.vue";
+import InventoryItemForm from "@/components/BusinessProfile/InventoryItemForm.vue";
 import { castMock, flushQueue, todayPlusYears } from "./utils";
 import { getStore, resetStoreForTesting } from "@/store";
 import * as api from '@/api/internal';
+import { assertEquals } from "typescript-is";
 
 Vue.use(Vuetify);
 
@@ -26,7 +27,6 @@ jest.mock('@/api/internal', () => ({
 const createInventoryItem = castMock(api.createInventoryItem);
 const getProducts = castMock(api.getProducts);
 
-getProducts.mockResolvedValue([]);
 // Characters that are in the set of letters, numbers, spaces and punctuation.
 const validQuantityCharacters = [
   "11",
@@ -90,17 +90,19 @@ const testProducts = [
 // Characters that are whitespace not including the space character.
 const whitespaceCharacters = ["\n", "\t"];
 
+getProducts.mockResolvedValue(testProducts);
+
 const localVue = createLocalVue();
 
-describe("CreateInventory.vue", () => {
-  // Container for the wrapper around CreateInventory
+describe("InventoryItemForm.vue", () => {
+  // Container for the wrapper around InventoryItemForm
   let appWrapper: Wrapper<any>;
 
-  // Container for the CreateInventory under test
+  // Container for the InventoryItemForm under test
   let wrapper: Wrapper<any>;
 
   /**
-     * Sets up the test CreateInventory instance
+     * Sets up the test InventoryItemForm instance
      *
      * Because the element we're testing has a v-dialog we need to take some extra sets to make it
      * work.
@@ -109,35 +111,30 @@ describe("CreateInventory.vue", () => {
     localVue.use(Vuex);
     const vuetify = new Vuetify();
 
-    // Creating wrapper around CreateInventory with data-app to appease vuetify
+    // Creating wrapper around InventoryItemForm with data-app to appease vuetify
     const App = localVue.component("App", {
-      components: { CreateInventory },
-      template: "<div data-app><CreateInventory/></div>",
+      components: { InventoryItemForm },
+      template: "<div data-app><InventoryItemForm :businessId=\"90\"/></div>",
     });
 
-    // Put the CreateInventory component inside a div in the global document,
+    // Put the InventoryItemForm component inside a div in the global document,
     // this seems to make vuetify work correctly, but necessitates calling appWrapper.destroy
     const elem = document.createElement("div");
     document.body.appendChild(elem);
 
-    resetStoreForTesting();
-    let store = getStore();
-    store.state.createInventoryDialog = 90;
-
     appWrapper = mount(App, {
       localVue,
       vuetify,
-      store: store,
       attachTo: elem,
     });
 
-    wrapper = appWrapper.getComponent(CreateInventory);
+    wrapper = appWrapper.getComponent(InventoryItemForm);
   });
 
   /**
      * Executes after every test case.
      *
-     * This function makes sure that the CreateInventory component is removed from the global document
+     * This function makes sure that the ItemFormInventory component is removed from the global document
      */
   afterEach(() => {
     appWrapper.destroy();
@@ -153,14 +150,14 @@ describe("CreateInventory.vue", () => {
      */
   async function populateRequiredFields() {
     await wrapper.setData({
-      productCode: "ABC-XYZ-012-789",
+      productCode: "WATT-420-BEANS",
       quantity: 2,
       expires: "2030-05-17",
     });
   }
 
   /**
-     * Populates all fields of the CreateInventory form
+     * Populates all fields of the InventoryItem form
      *
      * Which include the inventory's:
      * - Inventory shortcode
@@ -336,6 +333,97 @@ describe("CreateInventory.vue", () => {
       expect(wrapper.vm.valid).toBeFalsy();
     }
   );
+
+  it('Currency contains an error message if product code is not set', () => {
+    expect(wrapper.vm.productCode).toBeFalsy();
+    expect(wrapper.vm.currency).toStrictEqual({errorMessage: "Currency not available"});
+  });
+
+  it('Currency contains the result of a call to currencyFromCountry() if product code is set', async () => {
+    await wrapper.setData({
+      productCode: "WATT-420-BEANS"
+    });
+    await Vue.nextTick();
+    expect(wrapper.vm.currency).toStrictEqual({
+      code: 'NZD',
+      name: 'New Zealand dollar',
+      symbol: '$',
+    });
+  });
+
+  describe('Form is being used to create an inventory item', () => {
+
+    beforeEach(() => {
+      expect(wrapper.props().previousItem).toBe(undefined);
+      expect(wrapper.vm.isCreate).toBe(true);
+    });
+
+    it('createInventoryItem called when create button pressed', async () => {
+      const formData = {
+        productCode: "WATT-420-BEANS",
+        quantity: 4,
+        pricePerItem: "3.00",
+        totalPrice: "12.50",
+        manufactured: "2020-07-11",
+        sellBy: "2030-07-11",
+        bestBefore: "2030-07-11",
+        expires: "2030-07-11"
+      };
+      await wrapper.setData(formData);
+      await Vue.nextTick();
+      await findCreateButton().trigger('click');
+      expect(createInventoryItem.mock.calls.length).toBe(1);
+    });
+
+    it('createInventoryItem called with data entered into form as arguments when create button pressed', async () => {
+      const formData = {
+        productCode: "WATT-420-BEANS",
+        quantity: 4,
+        pricePerItem: "3.00",
+        totalPrice: "12.50",
+        manufactured: "2020-07-11",
+        sellBy: "2030-07-11",
+        bestBefore: "2030-07-11",
+        expires: "2030-07-11"
+      };
+      const expectedData = {
+        productId: formData.productCode,
+        quantity: formData.quantity,
+        pricePerItem: formData.pricePerItem,
+        totalPrice: formData.totalPrice,
+        manufactured: formData.manufactured,
+        sellBy: formData.sellBy,
+        bestBefore: formData.bestBefore,
+        expires: formData.expires,
+      };
+      await wrapper.setData(formData);
+      await Vue.nextTick();
+      await findCreateButton().trigger('click');
+      expect(createInventoryItem.mock.calls[0][0]).toBe(90);
+      expect(createInventoryItem.mock.calls[0][1]).toStrictEqual(expectedData);
+    });
+
+    it('Error message is shown if API request is unsuccessful', async () => {
+      createInventoryItem.mockResolvedValueOnce('ERROR!');
+      await populateAllFields();
+      await Vue.nextTick();
+      await findCreateButton().trigger('click');
+      await Vue.nextTick();
+      expect(wrapper.vm.errorMessage).toBe('ERROR!');
+      expect(wrapper.emitted().closeDialog).toBeFalsy();
+    });
+
+    it('Dialog is closed if API request is successful', async() => {
+      createInventoryItem.mockResolvedValueOnce(undefined);
+      await populateAllFields();
+      await Vue.nextTick();
+      await findCreateButton().trigger('click');
+      await Vue.nextTick();
+      expect(wrapper.vm.errorMessage).toBe(undefined);
+      expect(wrapper.emitted().closeDialog).toBeTruthy();
+    });
+
+  });
 
   describe("Date Validation", () => {
     it("Valid when all date fields are today", async () => {

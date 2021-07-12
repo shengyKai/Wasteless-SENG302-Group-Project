@@ -9,9 +9,6 @@
           <div v-if="$store.state.createBusinessDialogShown">
             <CreateBusiness @closeDialog="$store.commit('hideCreateBusiness')" />
           </div>
-          <div v-if="$store.state.createInventoryDialog !== undefined">
-            <CreateInventory @closeDialog="$store.commit('hideCreateInventory')"/>
-          </div>
           <div v-if="$store.state.createSaleItemDialog !== undefined">
             <CreateSaleItem @closeDialog="$store.commit('hideCreateSaleItem')"/>
           </div>
@@ -73,7 +70,6 @@ import Auth from "./components/Auth";
 import AppBar from "./components/AppBar";
 import AppFooter from "./components/AppFooter";
 import CreateBusiness from "./components/BusinessProfile/CreateBusiness";
-import CreateInventory from "./components/BusinessProfile/CreateInventory";
 import CreateSaleItem from "./components/BusinessProfile/CreateSaleItem";
 import CreateCard from "./components/marketplace/CreateCard";
 
@@ -96,7 +92,6 @@ export default {
     AppBar,
     AppFooter,
     CreateBusiness,
-    CreateInventory,
     CreateSaleItem,
     CreateCard,
   },
