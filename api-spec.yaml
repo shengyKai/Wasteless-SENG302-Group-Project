@@ -863,9 +863,16 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items: 
-                  $ref: '#/components/schemas/Card'
+                allOf:
+                  - $ref: '#/components/schemas/Page'
+                  - type: object
+                    required:
+                      - results
+                    properties:
+                      results:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Card'
         '400': 
           $ref: '#/components/responses/BadRequestError'
         '401':
@@ -1560,3 +1567,14 @@ components:
           description: '(Implemented in U6): A list of businesses for which the user is an administrator'
           items:
             $ref: '#/components/schemas/Business'
+    Page:
+      type: object
+      description: Page of results
+      required:
+        - count
+      properties:
+        count:
+          type: integer
+          example: 70
+          readOnly: true
+          description: Total number of results
