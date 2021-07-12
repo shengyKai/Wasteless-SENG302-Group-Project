@@ -19,7 +19,7 @@ describe('currency.ts', () => {
     );
     const response = await currencyFromCountry("Some wrong country");
     expect('errorMessage' in response).toBeTruthy();
-    expect(response).toStrictEqual({"errorMessage": "No currency for country with name Some wrong country was found"});
+    expect(response).toStrictEqual({"errorMessage": "No currency for country with name Some wrong country was found", "symbol": "$", "code": ""});
   });
 
   it('Returns with a format error message to the frontend when API responds with a country', async () => {
@@ -30,7 +30,7 @@ describe('currency.ts', () => {
     );
     const response = await currencyFromCountry("Australia");
     expect('errorMessage' in response).toBeTruthy();
-    expect(response).toStrictEqual({"errorMessage": "API response was not in readable format"});
+    expect(response).toStrictEqual({"errorMessage": "API response was not in readable format", "symbol": "$", "code": ""});
   });
 
   it('Returns with no error message to the frontend when API responds with a country with correct format', async () => {

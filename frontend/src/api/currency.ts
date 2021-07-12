@@ -36,14 +36,14 @@ export async function currencyFromCountry(country: string): Promise<CurrencyOrEr
 
   if (typeof response === 'string') {
     console.warn(response);
-    return { errorMessage: response };
+    return { errorMessage: response, symbol:"$", code: ""};
   }
 
   const currency = await getCurrencyFromAPIResponse(response);
 
   if (typeof currency === 'string') {
     console.warn(currency);
-    return { errorMessage: currency };
+    return { errorMessage: currency, symbol:"$", code: ""};
   }
 
   return currency;
