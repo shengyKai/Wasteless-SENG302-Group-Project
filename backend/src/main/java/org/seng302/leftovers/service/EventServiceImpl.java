@@ -107,9 +107,4 @@ public class EventServiceImpl implements EventService {
         }
 
     }
-
-    public void deleteEvent(Event event) {
-        LOGGER.info("Deleting event {} from the database", event.getId());
-        eventRepository.delete(event);
-    }
 }

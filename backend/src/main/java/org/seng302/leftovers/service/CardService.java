@@ -42,7 +42,7 @@ public class CardService {
      * or have expired from this instant.
      */
     @Scheduled(fixedRate = 5 * 60 * 1000)
-    private void invokeCardSchedulingEvent() {
+    private void initiateCardCheckEvents() {
         deleteExpiredCards();
         sendCardExpiryEvents();
     }
@@ -54,7 +54,7 @@ public class CardService {
     private void sendCardExpiryEvents() {
         logger.info("Checking for cards which are expiring within the next 24 hours");
         Instant cutOff = Instant.now().plus(Duration.ofDays(1));
-        Iterable<MarketplaceCard> allCards = marketplaceCardRepository.getAllExpiringBefore(cutOff);
+        Iterable<MarketplaceCard> allCards = marketplaceCardRepository.getAllExpiringBeforeWithoutEvent(cutOff);
         for (MarketplaceCard card : allCards) {
             logger.info("Card {} is expiring before date {}", card.getID(), cutOff);
             try (Session session = sessionFactory.openSession()) {
