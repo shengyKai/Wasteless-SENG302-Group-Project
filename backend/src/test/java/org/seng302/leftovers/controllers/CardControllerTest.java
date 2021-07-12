@@ -452,7 +452,7 @@ class CardControllerTest {
                 .param("reverse", "false"))
                 .andExpect(status().isOk())
                 .andReturn();
-        var expectedPageRequest = SearchHelper.getPageRequest(6, 8, Sort.by(Sort.Direction.ASC, "created"));
+        var expectedPageRequest = SearchHelper.getPageRequest(6, 8, Sort.by(new Sort.Order(Sort.Direction.ASC, "created").ignoreCase()));
         verify(marketplaceCardRepository).getAllBySection(section, expectedPageRequest);
 
         JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
@@ -478,7 +478,7 @@ class CardControllerTest {
                 .param("reverse", "false"))
                 .andExpect(status().isOk())
                 .andReturn();
-        var expectedPageRequest = SearchHelper.getPageRequest(6, 8, Sort.by(Sort.Direction.ASC, ordering));
+        var expectedPageRequest = SearchHelper.getPageRequest(6, 8, Sort.by(new Sort.Order(Sort.Direction.ASC, ordering).ignoreCase()));
         verify(marketplaceCardRepository).getAllBySection(MarketplaceCard.Section.WANTED, expectedPageRequest);
 
         JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
