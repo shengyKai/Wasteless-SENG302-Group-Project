@@ -2,22 +2,15 @@ package org.seng302.datagenerator;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.seng302.datagenerator.utils.RandomTestUtils;
 import org.seng302.leftovers.entities.Location;
 import org.seng302.leftovers.entities.User;
 
 import java.lang.reflect.Field;
 import java.util.Random;
-import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
 
 
 class PersonNameGeneratorTest {
@@ -25,18 +18,11 @@ class PersonNameGeneratorTest {
     private PersonNameGenerator personNameGenerator;
     private PersonNameGenerator.FullName fullName;
     private User.Builder builder;
-    @Mock
-    private Random mockRandom;
 
     @BeforeEach
-    void setUp() throws NoSuchFieldException, IllegalAccessException {
+    void setUp() {
         MockitoAnnotations.openMocks(this);
         personNameGenerator = PersonNameGenerator.getInstance();
-
-        // Set the random object in personNameGenerator to the mock
-        Field randomField = personNameGenerator.getClass().getDeclaredField("random");
-        randomField.setAccessible(true);
-        randomField.set(personNameGenerator, mockRandom);
 
         // Set up a user builder with valid values for each mandatory field
         builder = new User.Builder()
@@ -49,31 +35,22 @@ class PersonNameGeneratorTest {
                         "Country,1234"));
     }
 
-    /**
-     * Return arrays of integer and boolean values to be used for setting the return values for mockRandom
-     * to make the tests deterministic. The first argument is an array of two booleans, because nextBoolean()
-     * will be called at most twice in the generateName() method. The second argument is an array of six
-     * integers, because nextInt() will be called at most six times in the generateName() method.
-     * @return Stream of arguments, where each set of arguments consists of an array of two boolean and an
-     * array of 6 numbers between 0 and 1000.
-     */
-    private static Stream<Arguments> mockRandomReturnValues() {
-        return Stream.of(
-                Arguments.of(new boolean[] {true, true}, new int[] {571, 459, 234, 376, 152, 850}),
-                Arguments.of(new boolean[] {true, true}, new int[] {632, 479, 369, 883, 910, 485}),
-                Arguments.of(new boolean[] {false, true}, new int[] {832, 351, 88, 344, 13, 78}),
-                Arguments.of(new boolean[] {false, true}, new int[] {763, 302, 641, 733, 121, 314}),
-                Arguments.of(new boolean[] {true, false}, new int[] {192, 640, 171, 86, 716, 890}),
-                Arguments.of(new boolean[] {true, false}, new int[] {622, 395, 883, 655, 772, 178}),
-                Arguments.of(new boolean[] {false, false}, new int[] {161, 639, 776, 844, 145, 655}),
-                Arguments.of(new boolean[] {false, false}, new int[] {457, 716, 270, 715, 730, 905}));
+    void setRandomWithSeed(long seed) {
+        try {
+            Random random = new Random(seed);
+            Field randomField = personNameGenerator.getClass().getDeclaredField("random");
+            randomField.setAccessible(true);
+            randomField.set(personNameGenerator, random);
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
     }
 
     @ParameterizedTest
-    @MethodSource("mockRandomReturnValues")
-    void generateName_firstNameIsValid(boolean[] booleanReturnValues, int[] intReturnValues) {
-        RandomTestUtils.setNextBooleanReturnValues(mockRandom, booleanReturnValues);
-        RandomTestUtils.setNextIntReturnValues(mockRandom, intReturnValues);
+    @ValueSource(ints = {571, 459, 234, 376, 152, 850})
+    void generateName_firstNameIsValid(int randomSeed) {
+        setRandomWithSeed(randomSeed);
 
         fullName = personNameGenerator.generateName();
         builder.withFirstName(fullName.getFirstName());
@@ -84,10 +61,10 @@ class PersonNameGeneratorTest {
     }
 
     @ParameterizedTest
-    @MethodSource("mockRandomReturnValues")
-    void generateName_middleNameIsValid(boolean[] booleanReturnValues, int[] intReturnValues) {
-        RandomTestUtils.setNextBooleanReturnValues(mockRandom, booleanReturnValues);
-        RandomTestUtils.setNextIntReturnValues(mockRandom, intReturnValues);
+    @ValueSource(ints = {571, 459, 234, 376, 152, 850})
+    void generateName_middleNameIsValid(int randomSeed) {
+        setRandomWithSeed(randomSeed);
+
         fullName = personNameGenerator.generateName();
         builder.withMiddleName(fullName.getMiddleName());
         assertDoesNotThrow(() -> {
@@ -97,10 +74,9 @@ class PersonNameGeneratorTest {
     }
 
     @ParameterizedTest
-    @MethodSource("mockRandomReturnValues")
-    void generateName_lastNameIsValid(boolean[] booleanReturnValues, int[] intReturnValues) {
-        RandomTestUtils.setNextBooleanReturnValues(mockRandom, booleanReturnValues);
-        RandomTestUtils.setNextIntReturnValues(mockRandom, intReturnValues);
+    @ValueSource(ints = {571, 459, 234, 376, 152, 850})
+    void generateName_lastNameIsValid(int randomSeed) {
+        setRandomWithSeed(randomSeed);
 
         fullName = personNameGenerator.generateName();
         builder.withLastName(fullName.getLastName());
@@ -111,10 +87,9 @@ class PersonNameGeneratorTest {
     }
 
     @ParameterizedTest
-    @MethodSource("mockRandomReturnValues")
-    void generateName_nicknameIsValid(boolean[] booleanReturnValues, int[] intReturnValues) {
-        RandomTestUtils.setNextBooleanReturnValues(mockRandom, booleanReturnValues);
-        RandomTestUtils.setNextIntReturnValues(mockRandom, intReturnValues);
+    @ValueSource(ints = {571, 459, 234, 376, 152, 850})
+    void generateName_nicknameIsValid(int randomSeed) {
+        setRandomWithSeed(randomSeed);
 
         fullName = personNameGenerator.generateName();
         builder.withNickName(fullName.getNickname());
@@ -126,8 +101,8 @@ class PersonNameGeneratorTest {
 
     @ParameterizedTest
     @ValueSource(ints = {571, 459, 234, 376, 152, 850})
-    void randomLastName_lastNameIsValid(int returnValue) {
-        when(mockRandom.nextInt(any(Integer.class))).thenReturn(returnValue);
+    void randomLastName_lastNameIsValid(int randomSeed) {
+        setRandomWithSeed(randomSeed);
 
         String lastName = personNameGenerator.randomLastName();
         builder.withLastName(lastName);
