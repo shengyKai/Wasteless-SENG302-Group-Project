@@ -4,16 +4,21 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.lang.reflect.Field;
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes={Main.class})
@@ -29,6 +34,9 @@ public class LocationGeneratorTest {
   // LocationGenerator is called by UserGenerator or BusinessGenerator, so it has to be called with either of them
   private UserGenerator userGenerator;
 
+  @Mock
+  private LocationGenerator locationGenerator;
+
   //loads all the example files which are the same as the generators
   private List<String> streetNames = ExampleDataFileReader.readExampleDataFile(STREET_NAMES_FILE);
   private List<String> cities = ExampleDataFileReader.readExampleDataFile(CITIES_FILE);
@@ -38,8 +46,8 @@ public class LocationGeneratorTest {
 
   @BeforeEach
   public void setup() throws SQLException {
-    Map<String, String> properties = ExampleDataFileReader.readPropertiesFile("/generator_db.properties");
-    this.conn =  DriverManager.getConnection(properties.get("url"), properties.get("username"), properties.get("password"));
+    Map<String, String> properties = ExampleDataFileReader.readPropertiesFile("/application.properties");
+    this.conn =  DriverManager.getConnection(properties.get("spring.datasource.url"), properties.get("spring.datasource.username"), properties.get("spring.datasource.password"));
 
     //Creates generators
     this.userGenerator = new UserGenerator(conn);
@@ -129,14 +137,14 @@ public class LocationGeneratorTest {
 
   @Test
   void generateOneLocation_generateOneUser_oneLocationEntryGenerated() throws SQLException {
-      List<Long> userIds = userGenerator.generateUsers(1);
-      if (userIds.size() != 1) {
-          fail();
-      }
-      long userId = userIds.get(0);
+    List<Long> userIds = userGenerator.generateUsers(1);
+    if (userIds.size() != 1) {
+        fail();
+    }
+    long userId = userIds.get(0);
 
-      checkRequiredFieldsNotNull(userId);
-      deleteLocationAndUserFromDB(userIds);
+    checkRequiredFieldsNotNull(userId);
+    deleteLocationAndUserFromDB(userIds);
   }
 
   
