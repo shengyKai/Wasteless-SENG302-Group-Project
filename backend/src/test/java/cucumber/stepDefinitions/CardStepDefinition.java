@@ -164,9 +164,9 @@ public class CardStepDefinition {
     @Given("The system has performed its scheduled check for cards that are close to expiry")
     public void the_system_has_performed_its_scheduled_check_for_cards_that_are_close_to_expiry()
             throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
-        Method sendCardExpiryEvents = CardService.class.getDeclaredMethod("sendCardExpiryEvents");
-        sendCardExpiryEvents.setAccessible(true);
-        sendCardExpiryEvents.invoke(cardService);
+        Method initiateCardCheckEvents = CardService.class.getDeclaredMethod("initiateCardCheckEvents");
+        initiateCardCheckEvents.setAccessible(true);
+        initiateCardCheckEvents.invoke(cardService);
     }
 
     @When("I check my notification feed")
