@@ -38,8 +38,6 @@ public class CucumberSetup {
     protected KeywordRepository keywordRepository;
     @Autowired
     protected EventRepository eventRepository;
-    @Autowired
-    private ExpiryEventRepository expiryEventRepository;
 
     /**
      * Set up the mockMvc object for mocking API requests, and remove everything from the repositories.
@@ -54,7 +52,6 @@ public class CucumberSetup {
         productRepository.deleteAll();
         businessRepository.deleteAll();
         eventRepository.deleteAll();
-        expiryEventRepository.deleteAll();
         marketplaceCardRepository.deleteAll();
         keywordRepository.deleteAll();
         userRepository.deleteAll();

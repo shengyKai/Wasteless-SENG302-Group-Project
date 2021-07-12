@@ -116,6 +116,20 @@ test {
     useJUnitPlatform()
 }
 
+task leftoversTest(type: Test) {
+    includes = ['**/org/seng302/leftovers/**']
+    description = "Runs JUnit 5 tests (unit tests) for leftovers module"
+    testLogging.showStandardStreams = true
+    useJUnitPlatform()
+}
+
+task datageneratorTest(type: Test) {
+    includes = ['**/org/seng302/datagenerator/**']
+    description = "Runs JUnit 5 tests (unit tests) for datagenerator module"
+    testLogging.showStandardStreams = true
+    useJUnitPlatform()
+}
+
 // Jacoco test coverage configuration
 jacoco {
     toolVersion = "0.8.6"
