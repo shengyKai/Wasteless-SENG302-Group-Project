@@ -113,6 +113,16 @@ public class SearchHelper {
     }
 
     /**
+     * Gets the sort direction based on whether reverse is selected.
+     * If reverse is null then a default sort order is returned (Ascending)
+     * @param reverse Whether sort needs to be reversed from default
+     * @return Sort order based in reverse
+     */
+    public static Sort.Direction getSortDirection(Boolean reverse) {
+        return Boolean.TRUE.equals(reverse) ? Sort.Direction.DESC : Sort.Direction.ASC;
+    }
+
+    /**
      * This method constructs a Sort object to be passed into a query for searching the UserRepository. The attribute
      * which Users should be sorted by and whether that order should be reversed are specified.
      * @param orderBy The attribute which query results will be ordered by.
@@ -124,11 +134,7 @@ public class SearchHelper {
             orderBy = "userID";
         }
 
-        if (Boolean.TRUE.equals(reverse)) {
-            return Sort.by(Sort.Direction.DESC, orderBy);
-        } else {
-            return Sort.by(Sort.Direction.ASC, orderBy);
-        }
+        return Sort.by(getSortDirection(reverse), orderBy);
     }
 
     /**

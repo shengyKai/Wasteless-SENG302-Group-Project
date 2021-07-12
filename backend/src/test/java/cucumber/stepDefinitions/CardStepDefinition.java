@@ -102,9 +102,12 @@ public class CardStepDefinition {
         var expectedCard = cardContext.getLast();
         Assertions.assertEquals(200, requestContext.getLastResult().getResponse().getStatus());
         JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
-        JSONArray response = (JSONArray) parser.parse(requestContext.getLastResult().getResponse().getContentAsString());
+        JSONObject response = (JSONObject) parser.parse(requestContext.getLastResult().getResponse().getContentAsString());
 
-        var item = (JSONObject) response.get(0);
+        Assertions.assertEquals(1, response.get("count"));
+
+        JSONArray resultArray = (JSONArray) response.get("results");
+        var item = (JSONObject) resultArray.get(0);
         Assertions.assertEquals(((Number)item.get("id")).longValue(), expectedCard.getID());
         Assertions.assertEquals(item.getAsString("title"), expectedCard.getTitle());
         Assertions.assertEquals(item.getAsString("section"), expectedCard.getSection().getName());
