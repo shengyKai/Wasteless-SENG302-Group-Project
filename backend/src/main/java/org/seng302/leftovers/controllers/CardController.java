@@ -217,7 +217,7 @@ public class CardController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid card ordering");
         }
 
-        PageRequest pageRequest = SearchHelper.getPageRequest(page, resultsPerPage, Sort.by(direction, orderBy));
+        PageRequest pageRequest = SearchHelper.getPageRequest(page, resultsPerPage, Sort.by(new Sort.Order(direction, orderBy).ignoreCase()));
         var results = marketplaceCardRepository.getAllBySection(section, pageRequest);
 
         //return JSON Object
