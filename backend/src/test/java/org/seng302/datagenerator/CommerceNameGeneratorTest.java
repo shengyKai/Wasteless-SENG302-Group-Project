@@ -20,9 +20,9 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
-class BusinessNameGeneratorTest {
+class CommerceNameGeneratorTest {
 
-    private BusinessNameGenerator businessNameGenerator;
+    private CommerceNameGenerator commerceNameGenerator;
     @Mock
     private PersonNameGenerator mockPersonNameGenerator;
     @Mock
@@ -39,23 +39,23 @@ class BusinessNameGeneratorTest {
     @BeforeEach
     void setUp() throws NoSuchFieldException, IllegalAccessException {
         MockitoAnnotations.openMocks(this);
-        businessNameGenerator = BusinessNameGenerator.getInstance();
+        commerceNameGenerator = CommerceNameGenerator.getInstance();
 
 
         // Set the random object in businessNameGenerator to the mock
-        Field randomField = businessNameGenerator.getClass().getDeclaredField("random");
+        Field randomField = commerceNameGenerator.getClass().getDeclaredField("random");
         randomField.setAccessible(true);
-        randomField.set(businessNameGenerator, mockRandom);
+        randomField.set(commerceNameGenerator, mockRandom);
 
         // Set the personNameGenerator object in businessNameGenerator to the mock
-        Field personNameGeneratorField = businessNameGenerator.getClass().getDeclaredField("personNameGenerator");
+        Field personNameGeneratorField = commerceNameGenerator.getClass().getDeclaredField("personNameGenerator");
         personNameGeneratorField.setAccessible(true);
-        personNameGeneratorField.set(businessNameGenerator, mockPersonNameGenerator);
+        personNameGeneratorField.set(commerceNameGenerator, mockPersonNameGenerator);
 
         // Set the locationGenerator object in businessNameGenerator to the mock
-        Field locationGeneratorField = businessNameGenerator.getClass().getDeclaredField("locationGenerator");
+        Field locationGeneratorField = commerceNameGenerator.getClass().getDeclaredField("locationGenerator");
         locationGeneratorField.setAccessible(true);
-        locationGeneratorField.set(businessNameGenerator, mockLocationGenerator);
+        locationGeneratorField.set(commerceNameGenerator, mockLocationGenerator);
 
         // Set return values for mocks
         when(mockUser.getDob()).thenReturn(LocalDate.of(2000, 1, 1));
@@ -75,7 +75,9 @@ class BusinessNameGeneratorTest {
                 Arguments.of((Object) new int[] {571,459}),
                 Arguments.of((Object) new int[] {234,376}),
                 Arguments.of((Object) new int[] {152,850}),
-                Arguments.of((Object) new int[] {832,351}));
+                Arguments.of((Object) new int[] {832,351}),
+                Arguments.of((Object) new int[] {661,951}),
+                Arguments.of((Object) new int[] {783, 755}));
     }
 
     @ParameterizedTest
@@ -87,7 +89,7 @@ class BusinessNameGeneratorTest {
                 .withAddress(mockLocation);
 
         RandomTestUtils.setNextIntReturnValues(mockRandom, values);
-        String businessName = businessNameGenerator.randomBusinessName();
+        String businessName = commerceNameGenerator.randomBusinessName();
         builder.withName(businessName);
 
         assertDoesNotThrow(() -> {
@@ -104,7 +106,7 @@ class BusinessNameGeneratorTest {
                 .withProductCode("PROD");
 
         RandomTestUtils.setNextIntReturnValues(mockRandom, values);
-        String productName = businessNameGenerator.randomProductName();
+        String productName = commerceNameGenerator.randomProductName();
         builder.withName(productName);
 
         assertDoesNotThrow(() -> {
@@ -122,7 +124,7 @@ class BusinessNameGeneratorTest {
                 .withProductCode("PROD");
 
         RandomTestUtils.setNextIntReturnValues(mockRandom, values);
-        String manufacturerName = businessNameGenerator.randomManufacturerName();
+        String manufacturerName = commerceNameGenerator.randomManufacturerName();
         builder.withManufacturer(manufacturerName);
 
         assertDoesNotThrow(() -> {

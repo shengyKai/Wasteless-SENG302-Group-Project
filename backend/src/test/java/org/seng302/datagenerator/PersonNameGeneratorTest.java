@@ -60,9 +60,13 @@ class PersonNameGeneratorTest {
     private static Stream<Arguments> mockRandomReturnValues() {
         return Stream.of(
                 Arguments.of(new boolean[] {true, true}, new int[] {571, 459, 234, 376, 152, 850}),
+                Arguments.of(new boolean[] {true, true}, new int[] {632, 479, 369, 883, 910, 485}),
                 Arguments.of(new boolean[] {false, true}, new int[] {832, 351, 88, 344, 13, 78}),
+                Arguments.of(new boolean[] {false, true}, new int[] {763, 302, 641, 733, 121, 314}),
                 Arguments.of(new boolean[] {true, false}, new int[] {192, 640, 171, 86, 716, 890}),
-                Arguments.of(new boolean[] {false, false}, new int[] {161, 639, 776, 844, 145, 655}));
+                Arguments.of(new boolean[] {true, false}, new int[] {622, 395, 883, 655, 772, 178}),
+                Arguments.of(new boolean[] {false, false}, new int[] {161, 639, 776, 844, 145, 655}),
+                Arguments.of(new boolean[] {false, false}, new int[] {457, 716, 270, 715, 730, 905}));
     }
 
     @ParameterizedTest

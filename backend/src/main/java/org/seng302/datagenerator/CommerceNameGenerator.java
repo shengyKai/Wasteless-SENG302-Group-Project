@@ -1,16 +1,14 @@
 package org.seng302.datagenerator;
 
-import java.time.Duration;
-import java.time.Instant;
 import java.util.List;
 import java.util.Random;
 
 /**
  * This class randomly generates names relating to a business, consisting of business, manufacturer and product names.
  */
-public class BusinessNameGenerator {
+public class CommerceNameGenerator {
 
-    private static BusinessNameGenerator instance;
+    private static CommerceNameGenerator instance;
 
     private static final String BUSINESS_SUFFIX_FILE = "business-suffixes.txt";
     private static final String MANUFACTURER_SUFFIX_FILE = "manufacturer-suffixes.txt";
@@ -30,7 +28,7 @@ public class BusinessNameGenerator {
      * Private constructor. Reads data for generating business, manufacturer and product names into lists. Initializes
      * personNameGenerator for generating last names, and random for generating random numbers.
      */
-    private BusinessNameGenerator() {
+    private CommerceNameGenerator() {
         businessSuffixes = ExampleDataFileReader.readExampleDataFile(BUSINESS_SUFFIX_FILE);
         manufacturerSuffixes = ExampleDataFileReader.readExampleDataFile(MANUFACTURER_SUFFIX_FILE);
         productAdjectives = ExampleDataFileReader.readExampleDataFile(PRODUCT_ADJECTIVE_FILE);
@@ -74,9 +72,9 @@ public class BusinessNameGenerator {
      * Creates (if necessary) and returns the singleton instance of the BusinessNameGenerator class.
      * @return the singleton instance of the BusinessNameGenerator.
      */
-    public static BusinessNameGenerator getInstance() {
+    public static CommerceNameGenerator getInstance() {
         if (instance == null) {
-            instance = new BusinessNameGenerator();
+            instance = new CommerceNameGenerator();
         }
         return instance;
     }
