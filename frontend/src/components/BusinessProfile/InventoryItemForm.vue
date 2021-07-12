@@ -365,7 +365,9 @@ export default {
       let expiresDate = new Date(this.expires);
       let bestBeforeDate = new Date(this.bestBefore);
       this.expiresValid = false;
-      if (expiresDate < this.minDate || expiresDate > this.maxDate) {
+      if (!this.expires) {
+        this.errorMessage = "An expiry date must be entered";
+      } else if (expiresDate < this.minDate || expiresDate > this.maxDate) {
         this.errorMessage = "The expires date cannot be before 1500 AD or after 5000 AD";
       } else if (expiresDate < this.today) {
         this.errorMessage = "The expires date is before today!";
