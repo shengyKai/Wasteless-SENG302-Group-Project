@@ -59,5 +59,5 @@ public interface MarketplaceCardRepository extends CrudRepository<MarketplaceCar
      * @return a list of all marketplace cards which have expired.
      */
     @Query("SELECT c FROM MarketplaceCard c WHERE c.closes <= :currentInstant")
-    List<MarketplaceCard> getAllExpired(Instant currentInstant);
+    List<MarketplaceCard> getAllExpiredBefore(Instant currentInstant);
 }
