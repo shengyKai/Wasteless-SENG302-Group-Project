@@ -3,6 +3,7 @@ package org.seng302.leftovers.controllers;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -179,6 +180,14 @@ class ProductControllerTest {
 
         // Ensures that we have a copy of administratorUser with all the administered businesses
         administratorUser = userRepository.findById(administratorUser.getUserID()).get();
+    }
+
+    @AfterEach
+    void tearDown() {
+        businessRepository.deleteAll();
+        userRepository.deleteAll();
+        productRepository.deleteAll();
+        imageRepository.deleteAll();
     }
 
     /**

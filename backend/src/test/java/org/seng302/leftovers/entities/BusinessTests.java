@@ -4,6 +4,7 @@ import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -125,6 +126,15 @@ class BusinessTests {
         MockitoAnnotations.openMocks(this);
 
     }
+
+    @AfterEach
+    void tearDown() {
+        businessRepository.deleteAll();
+        userRepository.deleteAll();
+        productRepository.deleteAll();
+        imageRepository.deleteAll();
+    }
+
     /**
      * Test that when a User is an admin of a business, the set of business admins contains that user
      * @throws Exception
