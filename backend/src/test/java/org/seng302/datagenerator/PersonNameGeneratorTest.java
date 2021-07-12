@@ -35,6 +35,11 @@ class PersonNameGeneratorTest {
                         "Country,1234"));
     }
 
+    /**
+     * Use reflection to set the random object in the personNameGenerator class to a random object with the given seed,
+     * so that the tests will be deterministic.
+     * @param seed The seed for the random object of personNameGenerator.
+     */
     void setRandomWithSeed(long seed) {
         try {
             Random random = new Random(seed);

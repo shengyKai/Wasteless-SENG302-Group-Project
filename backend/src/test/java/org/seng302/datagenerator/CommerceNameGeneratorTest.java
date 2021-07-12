@@ -38,12 +38,12 @@ class CommerceNameGeneratorTest {
         MockitoAnnotations.openMocks(this);
         commerceNameGenerator = CommerceNameGenerator.getInstance();
 
-        // Set the personNameGenerator object in businessNameGenerator to the mock
+        // Set the personNameGenerator object in commerceNameGenerator to the mock
         Field personNameGeneratorField = commerceNameGenerator.getClass().getDeclaredField("personNameGenerator");
         personNameGeneratorField.setAccessible(true);
         personNameGeneratorField.set(commerceNameGenerator, mockPersonNameGenerator);
 
-        // Set the locationGenerator object in businessNameGenerator to the mock
+        // Set the locationGenerator object in commerceNameGenerator to the mock
         Field locationGeneratorField = commerceNameGenerator.getClass().getDeclaredField("locationGenerator");
         locationGeneratorField.setAccessible(true);
         locationGeneratorField.set(commerceNameGenerator, mockLocationGenerator);
@@ -56,6 +56,11 @@ class CommerceNameGeneratorTest {
         when(mockLocationGenerator.randomStreetName()).thenReturn("Street Name");
     }
 
+    /**
+     * Use reflection to set the random object in the commerceNameGenerator class to a random object with the given seed,
+     * so that the tests will be deterministic.
+     * @param seed The seed for the random object of commerceNameGenerator.
+     */
     void setRandomWithSeed(long seed) {
         try {
             Random random = new Random(seed);
