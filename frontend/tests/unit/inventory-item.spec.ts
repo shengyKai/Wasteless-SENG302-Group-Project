@@ -181,6 +181,10 @@ describe('InventoryItem.vue', () => {
     expect(wrapper.text()).toContain("15 May 2021");
   });
 
+  it('Must match snapshot', () => {
+    expect(wrapper).toMatchSnapshot();
+  });
+
   it('Must have a button to create a sale', () => {
     const button = wrapper.findComponent({ref:'createSaleItemButton'});
     expect(button.exists()).toBeTruthy();

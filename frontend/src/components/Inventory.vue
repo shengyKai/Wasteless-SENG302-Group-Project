@@ -185,8 +185,13 @@ export default {
     resultsPerPage() {
       this.updateResults();
     },
-    '$store.state.createInventoryDialog': function () {
-      if (this.$store.state.createInventoryDialog === undefined) {
+    showInventoryItemForm: function () {
+      if (!this.showInventoryItemForm) {
+        this.updateResults();
+      }
+    },
+    '$store.state.createSaleItemDialog': function () {
+      if (!this.showInventoryItemForm) {
         this.updateResults();
       }
     },
