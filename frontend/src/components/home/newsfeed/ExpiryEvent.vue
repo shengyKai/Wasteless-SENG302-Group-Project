@@ -12,7 +12,7 @@
     <v-expand-transition>
       <v-container v-show="viewCard">
         <v-row justify="center">
-          <MarketplaceCard :content="card" style="width: 300px"/>
+          <MarketplaceCard :isExpiryEvent="true" :content="card" style="width: 300px"/>
         </v-row>
       </v-container>
     </v-expand-transition>
@@ -111,6 +111,14 @@ export default {
         return `The expriy date of your card '${this.card.title}' was delayed by two weeks.`;
       } else {
         return `Your card '${this.card.title}' will expire in ${this.remaining}. Do you want to delay the expiry by two weeks?`;
+      }
+    }
+  },
+  watch: {
+    remainingSeconds: function () {
+      console.log(this.remainingSeconds);
+      if (this.remainingSeconds === 0) {
+        this.$emit('cardExpired');
       }
     }
   },
