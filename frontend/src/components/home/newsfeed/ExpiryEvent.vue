@@ -119,10 +119,13 @@ export default {
      * Watches over the remaniningSeconds computed property such that once it hits 0, the store
      * will remove this event from the store events, thus deleting this component
      */
-    remainingSeconds: function () {
-      if (this.remainingSeconds === 0) {
-        this.$store.commit("removeEvent", this.event.id);
-      }
+    remainingSeconds: {
+      handler () {
+        if (this.remainingSeconds < 0) {
+          this.$store.commit("removeEvent", this.event.id);
+        }
+      },
+      immediate: true
     }
   },
   /**
