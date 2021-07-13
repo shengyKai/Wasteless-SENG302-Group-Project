@@ -1,12 +1,16 @@
 package org.seng302.datagenerator;
 
 import org.seng302.leftovers.service.StorageService;
-import org.seng302.leftovers.service.StorageServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -17,12 +21,11 @@ import java.util.Optional;
 import java.util.UUID;
 
 public class ProductImageGenerator {
-    private final Path root = Paths.get("example-data/images");
-    @Autowired
-    private StorageService storageService;
+    private final Path root = Paths.get(ProductImageGenerator.class.getResource("example-images/").toURI());
+    private final Path userUploadsRoot = Paths.get("uploads");
     private Connection conn;
 
-    public ProductImageGenerator(Connection conn) {
+    public ProductImageGenerator(Connection conn) throws URISyntaxException {
         try {
             Files.createDirectory(root);
         } catch (FileAlreadyExistsException existsException) {
@@ -30,7 +33,6 @@ public class ProductImageGenerator {
         } catch (IOException ioException) {
             throw new RuntimeException("Could not initialize example images folder.");
         }
-
         this.conn = conn;
     }
 
@@ -67,8 +69,8 @@ public class ProductImageGenerator {
             return foundFile.map(Path::toFile);
         } catch (IOException e) {
             System.out.println("An error occurred reading an image file:" + e.getMessage());
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "An error occurred reading an image file:" + e.getMessage());
         }
-        return Optional.empty();
     }
 
     /**
@@ -79,10 +81,19 @@ public class ProductImageGenerator {
      */
     private boolean saveImageToSystem(Optional<File> demoImage, String fileName) {
         if (demoImage.isPresent()) {
-            storageService.store((MultipartFile) demoImage.get(), fileName);
+            store(demoImage.get(), fileName);
             return true;
         }
         return false;
+    }
+
+    public void store(File file, String filename) {
+        try {
+            Files.copy( new FileInputStream(file), this.userUploadsRoot.resolve(filename));
+
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to store file");
+        }
     }
 
     /**

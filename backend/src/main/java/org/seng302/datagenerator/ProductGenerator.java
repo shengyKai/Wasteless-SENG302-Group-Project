@@ -1,5 +1,6 @@
 package org.seng302.datagenerator;
 
+import java.net.URISyntaxException;
 import java.sql.*;
 import java.time.Instant;
 import java.util.*;
@@ -20,7 +21,15 @@ public class ProductGenerator {
     String[] NAMES = {"Nathan Apple", "Yellow Banana", "Orange Coloured Orange", "A Box", "The Box", "Cube Shaped Box"};
     String[] PRODUCTCODES = {"APPLE123", "BANANA456", "ORANGE789"}; //Change to randomly generated?
 
-    public ProductGenerator(Connection conn, ProductImageGenerator imageGenerator) { this.conn = conn; this.imageGenerator = imageGenerator;}
+    public ProductGenerator(Connection conn) {
+        this.conn = conn;
+        try {
+            this.imageGenerator = new ProductImageGenerator(conn);
+        } catch (URISyntaxException e) {
+            throw new RuntimeException("Cannot read path");
+        }
+
+    }
 
     /**
      * Randomly generates the recommended retail price
@@ -65,8 +74,7 @@ public class ProductGenerator {
      */
     public static void main(String[] args) throws InterruptedException, SQLException {
         Connection conn = connectToDatabase();
-        var imageGenerator = new ProductImageGenerator(conn);
-        var generator = new ProductGenerator(conn, imageGenerator);
+        var generator = new ProductGenerator(conn);
 
         int productCount = getNumObjectsFromInput("products");
         generator.generateProducts(productCount);
