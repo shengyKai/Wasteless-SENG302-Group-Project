@@ -26,6 +26,7 @@ import org.seng302.leftovers.tools.SearchHelper;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -220,18 +221,17 @@ public class CardController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid card ordering");
         }
 
-        PageRequest pageRequest = null;
-        Page<MarketplaceCard> results = null;
+        List<Sort.Order> sortOrder;
+        //If the orderBy is by address, creates a Sort.Order list for Location, else it creates a List for a normal orderBy attribute
+        //For location sort, the primary sort would be by country, followed by the city, since these both attributes are shown to the user in the marketplace card.
         if (orderBy.equals("address")) {
-            orderBy = "creator.address.country";
-            pageRequest = SearchHelper.getPageRequest(page, resultsPerPage, Sort.by(List.of(new Sort.Order(direction, orderBy).ignoreCase(), new Sort.Order(direction, "creator.address.city").ignoreCase())));
-            results = marketplaceCardRepository.getAllBySection(section, pageRequest);
+            sortOrder = List.of(new Sort.Order(direction, "creator.address.country").ignoreCase(), new Sort.Order(direction, "creator.address.city").ignoreCase());
         } else {
-            pageRequest = SearchHelper.getPageRequest(page, resultsPerPage, Sort.by(new Sort.Order(direction, orderBy).ignoreCase()));
-            results = marketplaceCardRepository.getAllBySection(section, pageRequest);
+            sortOrder = List.of(new Sort.Order(direction, orderBy).ignoreCase());
         }
 
-
+        PageRequest pageRequest = SearchHelper.getPageRequest(page, resultsPerPage, Sort.by(sortOrder));
+        Page<MarketplaceCard> results = marketplaceCardRepository.getAllBySection(section, pageRequest);
 
         //return JSON Object
         JSONArray resultArray = new JSONArray();
