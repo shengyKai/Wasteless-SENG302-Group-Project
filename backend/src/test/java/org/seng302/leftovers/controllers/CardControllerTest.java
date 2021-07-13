@@ -219,6 +219,15 @@ class CardControllerTest {
         createCardJson.appendField("keywordIds", new int[0]);
     }
 
+    /**
+     * Sets up the marketplace cards for address ordering testing. Actual cards are needed as the address parts itself needs to be tested.
+     */
+    private void setUpAddressOrderingForGetCards() {
+        when(marketplaceCardRepository.getAllBySection(any(MarketplaceCard.Section.class), any(PageRequest.class))).thenReturn(mockPage);
+        when(mockPage.getTotalElements()).thenReturn(3L);
+        when(mockPage.iterator()).thenReturn(List.of(testCard1, testCard2, testCard3).iterator());
+    }
+
     @Test
     void createCard_invalidAuthToken_cannotCreateCard() throws Exception {
        authenticationTokenManager.when(() -> AuthenticationTokenManager.checkAuthenticationToken(any())).thenThrow(new AccessTokenException());
@@ -637,11 +646,8 @@ class CardControllerTest {
     }
 
     @Test
-    void getCards_orderByAddress_cardsReturnedWithAddressOrdering() throws Exception {
-        when(marketplaceCardRepository.getAllBySection(any(MarketplaceCard.Section.class), any(PageRequest.class))).thenReturn(mockPage);
-        when(mockPage.getTotalElements()).thenReturn(3L);
-        when(mockPage.iterator()).thenReturn(List.of(testCard1, testCard2, testCard3).iterator());
-
+    void getCards_orderByAddress_cardsReturnedWithValidAddressOrdering() throws Exception {
+        setUpAddressOrderingForGetCards();
         var result = mockMvc.perform(get("/cards")
                 .param("resultsPerPage", "8")
                 .param("page", "6")
@@ -650,6 +656,7 @@ class CardControllerTest {
                 .andExpect(status().isOk())
                 .andReturn();
         
+        //verify the arguments for the method call are the same
         var expectedPageRequest = SearchHelper.getPageRequest(6, 8, Sort.by(List.of(new Sort.Order(Sort.Direction.ASC, "creator.address.country").ignoreCase(), new Sort.Order(Sort.Direction.ASC, "creator.address.city").ignoreCase())));
         verify(marketplaceCardRepository).getAllBySection(MarketplaceCard.Section.WANTED, expectedPageRequest);
 
@@ -664,5 +671,21 @@ class CardControllerTest {
         expectedResults.add(testCard3.constructJSONObject());
 
         assertEquals(expectedResults, responseBody.get("results"));
+    }
+
+    @Test
+    void getCards_orderByAddressReverse_argumentsMatchForSortByCall() throws Exception {
+        var result = mockMvc.perform(get("/cards")
+                .param("resultsPerPage", "8")
+                .param("page", "6")
+                .param("section", "Wanted")
+                .param("orderBy", "address")
+                .param("reverse", "true"))
+                .andExpect(status().isOk())
+                .andReturn();
+        
+        //verify the arguments for the method call are the same
+        var expectedPageRequest = SearchHelper.getPageRequest(6, 8, Sort.by(List.of(new Sort.Order(Sort.Direction.DESC, "creator.address.country").ignoreCase(), new Sort.Order(Sort.Direction.ASC, "creator.address.city").ignoreCase())));
+        verify(marketplaceCardRepository).getAllBySection(MarketplaceCard.Section.WANTED, expectedPageRequest); 
     }
 }

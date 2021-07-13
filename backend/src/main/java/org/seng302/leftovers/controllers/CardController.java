@@ -225,7 +225,7 @@ public class CardController {
         //If the orderBy is by address, creates a Sort.Order list for Location, else it creates a List for a normal orderBy attribute
         //For location sort, the primary sort would be by country, followed by the city, since these both attributes are shown to the user in the marketplace card.
         if (orderBy.equals("address")) {
-            sortOrder = List.of(new Sort.Order(direction, "creator.address.country").ignoreCase(), new Sort.Order(direction, "creator.address.city").ignoreCase());
+            sortOrder = List.of(new Sort.Order(direction, "creator.address.country").ignoreCase(), new Sort.Order(Sort.Direction.ASC, "creator.address.city").ignoreCase());
         } else {
             sortOrder = List.of(new Sort.Order(direction, orderBy).ignoreCase());
         }
