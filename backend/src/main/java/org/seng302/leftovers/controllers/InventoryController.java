@@ -10,12 +10,16 @@ import org.seng302.leftovers.entities.Product;
 import org.seng302.leftovers.persistence.BusinessRepository;
 import org.seng302.leftovers.persistence.InventoryItemRepository;
 import org.seng302.leftovers.persistence.ProductRepository;
+import org.seng302.leftovers.tools.AuthenticationTokenManager;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import org.seng302.leftovers.tools.SearchHelper;
 
 import javax.servlet.http.HttpServletRequest;
+import java.lang.annotation.Repeatable;
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Comparator;
 
@@ -71,6 +75,45 @@ public class InventoryController {
                     .build();
 
             inventoryItemRepository.save(item);
+        } catch (ResponseStatusException exception) {
+            logger.warn(exception);
+            throw exception;
+        }
+    }
+
+    @PostMapping("/businesses/{businessId}/inventory/{invItemId}")
+    public void modifyInvEntry(@PathVariable(name = "businessId") Long businessId,
+                               @PathVariable(name = "invItemId") Long invItemId, HttpServletRequest request,
+                               @RequestBody JSONObject invItemInfo) throws Exception {
+        String message = String.format("Attempting to modify the inventory %d for the business %d", businessId,
+                invItemId);
+        logger.info(message);
+        try {
+            AuthenticationTokenManager.checkAuthenticationToken(request);
+
+            Business business = businessRepository.getBusinessById(businessId);
+            business.checkSessionPermissions(request);
+
+            InventoryItem invItem = inventoryItemRepository.getInventoryItemByBusinessAndId(business, invItemId);
+
+            if (invItemInfo == null) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No JSON request body was provided");
+            }
+
+            String newProductCode = invItemInfo.getAsString("productId");
+            if (productRepository.findByBusinessAndProductCode(business, newProductCode).isEmpty()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                        "The product with the given id does not exist within the business's catalogue");
+            }
+            invItem.setProduct(productRepository.getProduct(business, newProductCode));
+
+            invItem.setQuantity((int) invItemInfo.getAsNumber("quantity"));
+            invItem.setPricePerItem((BigDecimal) invItemInfo.getAsNumber("pricePerItem"));
+            invItem.setTotalPrice((BigDecimal) invItemInfo.getAsNumber("totalPrice"));
+            invItem.setManufactured(LocalDate.parse(invItemInfo.getAsString("manufactured")));
+            invItem.setSellBy(LocalDate.parse(invItemInfo.getAsString("sellBy")));
+            invItem.setBestBefore(LocalDate.parse(invItemInfo.getAsString("bestBefore")));
+            invItem.setExpires(LocalDate.parse(invItemInfo.getAsString("expires")));
         } catch (ResponseStatusException exception) {
             logger.warn(exception);
             throw exception;
