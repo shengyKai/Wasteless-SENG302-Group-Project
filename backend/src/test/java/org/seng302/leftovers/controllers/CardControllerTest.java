@@ -85,6 +85,13 @@ class CardControllerTest {
 
     private User testUser;
     private User testUser1;
+    private User testUser2;
+    private User testUser3;
+    private MarketplaceCard testCard1;
+    private MarketplaceCard testCard2;
+    private MarketplaceCard testCard3;
+
+
     private CardController cardController;
     private List<MarketplaceCard> cards = new ArrayList<>();
 
@@ -116,6 +123,48 @@ class CardControllerTest {
                 .withPassword("password123")
                 .withDob("1987-04-12")
                 .withAddress(Location.covertAddressStringToLocation("108,Albert Road,Ashburton,Christchurch,New Zealand,Canterbury,8041"))
+                .build();
+        testUser2 = new User.Builder()
+                .withFirstName("Stuart")
+                .withMiddleName("Derp")
+                .withLastName("Alex")
+                .withNickName("Derpy")
+                .withEmail("stuart@gmail.com")
+                .withPassword("password123")
+                .withDob("1987-04-12")
+                .withAddress(Location.covertAddressStringToLocation("108,Albert Road,Waimairi,Auckland,New Zealand,Auckland,8041"))
+                .build();
+        testUser3 = new User.Builder()
+                .withFirstName("Rick")
+                .withMiddleName("Morty")
+                .withLastName("Pickle")
+                .withNickName("Danger")
+                .withEmail("ricknmorty@gmail.com")
+                .withPassword("password123")
+                .withDob("1987-04-12")
+                .withAddress(Location.covertAddressStringToLocation("108,Albert Road,Singapore,Singapore,Singapore,Singapore,8041"))
+                .build();
+        var closes = Instant.now().plus(23, ChronoUnit.HOURS);
+        testCard1 = new MarketplaceCard.Builder()
+                .withCreator(testUser1)
+                .withSection(MarketplaceCard.Section.WANTED)
+                .withTitle("test_title")
+                .withDescription("test_description")
+                .withCloses(closes)
+                .build();
+        testCard2 = new MarketplaceCard.Builder()
+                .withCreator(testUser2)
+                .withSection(MarketplaceCard.Section.WANTED)
+                .withTitle("test_title")
+                .withDescription("test_description")
+                .withCloses(closes)
+                .build();
+        testCard3 = new MarketplaceCard.Builder()
+                .withCreator(testUser3)
+                .withSection(MarketplaceCard.Section.WANTED)
+                .withTitle("test_title")
+                .withDescription("test_description")
+                .withCloses(closes)
                 .build();
                 
         MockitoAnnotations.openMocks(this);
@@ -585,5 +634,35 @@ class CardControllerTest {
         mockMvc.perform(delete("/cards/1")).andExpect(status().isOk());
         verify(expiryEventRepository, times(1)).delete(mockEvent);
         verify(marketplaceCardRepository, times(1)).delete(mockCard);
+    }
+
+    @Test
+    void getCards_orderByAddress_cardsReturnedWithAddressOrdering() throws Exception {
+        when(marketplaceCardRepository.getAllBySection(any(MarketplaceCard.Section.class), any(PageRequest.class))).thenReturn(mockPage);
+        when(mockPage.getTotalElements()).thenReturn(3L);
+        when(mockPage.iterator()).thenReturn(List.of(testCard1, testCard2, testCard3).iterator());
+
+        var result = mockMvc.perform(get("/cards")
+                .param("resultsPerPage", "8")
+                .param("page", "6")
+                .param("section", "Wanted")
+                .param("orderBy", "address"))
+                .andExpect(status().isOk())
+                .andReturn();
+        
+        var expectedPageRequest = SearchHelper.getPageRequest(6, 8, Sort.by(List.of(new Sort.Order(Sort.Direction.ASC, "creator.address.country").ignoreCase(), new Sort.Order(Sort.Direction.ASC, "creator.address.city").ignoreCase())));
+        verify(marketplaceCardRepository).getAllBySection(MarketplaceCard.Section.WANTED, expectedPageRequest);
+
+        JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
+        JSONObject responseBody = (JSONObject) parser.parse(result.getResponse().getContentAsString());
+
+        assertEquals(3, responseBody.get("count"));
+
+        var expectedResults = new JSONArray();
+        expectedResults.add(testCard1.constructJSONObject());
+        expectedResults.add(testCard2.constructJSONObject());
+        expectedResults.add(testCard3.constructJSONObject());
+
+        assertEquals(expectedResults, responseBody.get("results"));
     }
 }
