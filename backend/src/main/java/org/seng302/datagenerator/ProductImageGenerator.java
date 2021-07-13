@@ -12,6 +12,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.*;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -60,7 +61,9 @@ public class ProductImageGenerator {
      */
     private Optional<File> findImage(String noun) {
         try {
-            Optional<Path> foundFile = Files.walk(this.root, 1).filter(path -> path.relativize(this.root).toString().contains(noun)).findFirst();
+            Optional<Path> foundFile = Files.walk(this.root, 1)
+                    .filter(path -> path.getFileName().toString().replaceFirst("[.][^.]+$", "")
+                            .equals(noun.toLowerCase(Locale.ROOT))).findFirst();
             return foundFile.map(Path::toFile);
         } catch (IOException e) {
             System.out.println("An error occurred reading an image file:" + e.getMessage());
