@@ -115,10 +115,13 @@ export default {
     }
   },
   watch: {
+    /**
+     * Watches over the remaniningSeconds computed property such that once it hits 0, an event
+     * will be emitted to HomePage.vue to delete this instance
+     */
     remainingSeconds: function () {
-      console.log(this.remainingSeconds);
       if (this.remainingSeconds === 0) {
-        this.$emit('cardExpired');
+        this.$emit('cardExpired', this.event.id);
       }
     }
   },

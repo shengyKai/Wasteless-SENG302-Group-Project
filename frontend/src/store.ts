@@ -194,6 +194,14 @@ function createOptions(): StoreOptions<StoreData> {
       setRole(state, role: UserRole) {
         setCookie('role', JSON.stringify(role));
         state.activeRole = role;
+      },
+      /**
+       * Removes an event based on a provided event id
+       * @param state Current store state
+       * @param id id of the event
+       */
+      removeEvent(state, id: number) {
+        Vue.delete(state.eventMap, id);
       }
     },
     getters: {

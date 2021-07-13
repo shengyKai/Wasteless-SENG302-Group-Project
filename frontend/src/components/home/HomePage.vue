@@ -65,8 +65,11 @@ export default {
     },
   },
   methods: {
-    deleteExpiryEventComponent() {
-      //not sure
+    /**
+     * Updates the store to remove the event that has expired
+     */
+    deleteExpiryEventComponent(eventId) {
+      this.$store.commit("removeEvent", eventId);
     }
   }
 };
