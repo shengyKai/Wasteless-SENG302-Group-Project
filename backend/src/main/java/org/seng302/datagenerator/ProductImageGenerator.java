@@ -1,14 +1,10 @@
 package org.seng302.datagenerator;
 
-import org.seng302.leftovers.service.StorageService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.FileAlreadyExistsException;
@@ -49,9 +45,9 @@ public class ProductImageGenerator {
         Optional<File> image = findImage(noun);
 
         String filename = UUID.randomUUID().toString();
-        Optional<String> fileType = getExtension(image.toString());
+        Optional<String> fileType = getExtension(image.get().toString());
         if (fileType.isPresent()) {
-            filename += "." + fileType;
+            filename += "." + fileType.get();
         } else {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Could not locate file type for:" + image.get().toString());
         }
@@ -135,7 +131,7 @@ public class ProductImageGenerator {
         );
         stmt.setObject(1, filename);
         stmt.setObject(2, productId);
-        stmt.setObject(3, 1);
+        stmt.setObject(3, 0);
 
         stmt.executeUpdate();
 
