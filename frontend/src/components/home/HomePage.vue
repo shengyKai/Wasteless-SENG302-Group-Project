@@ -16,7 +16,7 @@
         class="newsfeed-item"
       >
         <GlobalMessage v-if="event.type === 'MessageEvent'" :event="event"/>
-        <ExpiryEvent @cardExpired="deleteExpiryEventComponent" v-else-if="event.type === 'ExpiryEvent'" :event="event"/>
+        <ExpiryEvent v-else-if="event.type === 'ExpiryEvent'" :event="event"/>
         <template v-else>
           <v-card-title>
             {{ event.type }}
@@ -63,14 +63,6 @@ export default {
       if (!this.isBusiness) return undefined;
       return [...Array(10).keys()].map(i => `Item ${i}`);
     },
-  },
-  methods: {
-    /**
-     * Updates the store to remove the event that has expired
-     */
-    deleteExpiryEventComponent(eventId) {
-      this.$store.commit("removeEvent", eventId);
-    }
   }
 };
 </script>
