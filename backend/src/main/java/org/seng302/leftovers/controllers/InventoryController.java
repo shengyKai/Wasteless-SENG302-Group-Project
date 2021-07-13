@@ -20,6 +20,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.lang.annotation.Repeatable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Comparator;
 
@@ -81,7 +82,7 @@ public class InventoryController {
         }
     }
 
-    @PostMapping("/businesses/{businessId}/inventory/{invItemId}")
+    @PutMapping("/businesses/{businessId}/inventory/{invItemId}")
     public void modifyInvEntry(@PathVariable(name = "businessId") Long businessId,
                                @PathVariable(name = "invItemId") Long invItemId, HttpServletRequest request,
                                @RequestBody JSONObject invItemInfo) throws Exception {
@@ -89,7 +90,7 @@ public class InventoryController {
                 invItemId);
         logger.info(message);
         try {
-            AuthenticationTokenManager.checkAuthenticationToken(request);
+            //AuthenticationTokenManager.checkAuthenticationToken(request);
 
             Business business = businessRepository.getBusinessById(businessId);
             business.checkSessionPermissions(request);
@@ -101,19 +102,45 @@ public class InventoryController {
             }
 
             String newProductCode = invItemInfo.getAsString("productId");
-            if (productRepository.findByBusinessAndProductCode(business, newProductCode).isEmpty()) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                        "The product with the given id does not exist within the business's catalogue");
+            if (newProductCode != null) {
+                if (productRepository.findByBusinessAndProductCode(business, newProductCode).isEmpty()) {
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                            "The product with the given id does not exist within the business's catalogue");
+                }
+                invItem.setProduct(productRepository.getProduct(business, newProductCode));
             }
-            invItem.setProduct(productRepository.getProduct(business, newProductCode));
 
-            invItem.setQuantity((int) invItemInfo.getAsNumber("quantity"));
-            invItem.setPricePerItem((BigDecimal) invItemInfo.getAsNumber("pricePerItem"));
-            invItem.setTotalPrice((BigDecimal) invItemInfo.getAsNumber("totalPrice"));
-            invItem.setManufactured(LocalDate.parse(invItemInfo.getAsString("manufactured")));
-            invItem.setSellBy(LocalDate.parse(invItemInfo.getAsString("sellBy")));
-            invItem.setBestBefore(LocalDate.parse(invItemInfo.getAsString("bestBefore")));
-            invItem.setExpires(LocalDate.parse(invItemInfo.getAsString("expires")));
+            Integer quantity = (Integer) invItemInfo.getAsNumber("quantity");
+            if (quantity != null) {
+                invItem.setQuantity(quantity);
+            }
+            BigDecimal pricePerItem = (BigDecimal) invItemInfo.getAsNumber("pricePerItem");
+            if (pricePerItem != null) {
+                invItem.setPricePerItem(pricePerItem);
+            }
+            BigDecimal totalPrice = (BigDecimal) invItemInfo.getAsNumber("totalPrice");
+            if (totalPrice != null) {
+                invItem.setTotalPrice(totalPrice);
+            }
+
+            DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE;
+            String manufactured = invItemInfo.getAsString("manufactured");
+            if (manufactured != null) {
+                invItem.setManufactured(LocalDate.parse(manufactured, dateTimeFormatter));
+            }
+            String sellBy = invItemInfo.getAsString("sellBy");
+            if (sellBy != null) {
+                invItem.setManufactured(LocalDate.parse(sellBy, dateTimeFormatter));
+            }
+            String bestBefore = invItemInfo.getAsString("bestBefore");
+            if (bestBefore != null) {
+                invItem.setManufactured(LocalDate.parse(bestBefore, dateTimeFormatter));
+            }
+            String expires = invItemInfo.getAsString("expires");
+            if (expires != null) {
+                invItem.setManufactured(LocalDate.parse(expires, dateTimeFormatter));
+            }
+            inventoryItemRepository.save(invItem);
         } catch (ResponseStatusException exception) {
             logger.warn(exception);
             throw exception;

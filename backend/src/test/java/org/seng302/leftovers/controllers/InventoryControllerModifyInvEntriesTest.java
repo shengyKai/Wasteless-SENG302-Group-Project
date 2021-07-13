@@ -187,7 +187,7 @@ public class InventoryControllerModifyInvEntriesTest {
         invBody.put("productId", "NathanAppple95");
 
         mockMvc.perform(MockMvcRequestBuilders
-                .post("/businesses/1/inventory/1")
+                .put("/businesses/1/inventory/1")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(invBody.toString()))
                 .andExpect(status().isOk());
@@ -208,7 +208,7 @@ public class InventoryControllerModifyInvEntriesTest {
             invBody.put("quantity", productIds[i]);
 
             mockMvc.perform(MockMvcRequestBuilders
-                    .post("/businesses/1/inventory/1")
+                    .put("/businesses/1/inventory/1")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(invBody.toString()))
                     .andExpect(status().isBadRequest());
@@ -227,7 +227,7 @@ public class InventoryControllerModifyInvEntriesTest {
         invBody.put("productId", null);
 
         mockMvc.perform(MockMvcRequestBuilders
-                .post("/businesses/1/inventory/1")
+                .put("/businesses/1/inventory/1")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(invBody.toString()))
                 .andExpect(status().isBadRequest());
@@ -247,7 +247,7 @@ public class InventoryControllerModifyInvEntriesTest {
             invBody.put("quantity", quantity);
 
             mockMvc.perform(MockMvcRequestBuilders
-                    .post("/businesses/1/inventory/1")
+                    .put("/businesses/1/inventory/1")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(invBody.toString()))
                     .andExpect(status().isOk());
@@ -269,7 +269,7 @@ public class InventoryControllerModifyInvEntriesTest {
             invBody.put("quantity", quantities[i]);
 
             mockMvc.perform(MockMvcRequestBuilders
-                    .post("/businesses/1/inventory/1")
+                    .put("/businesses/1/inventory/1")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(invBody.toString()))
                     .andExpect(status().isBadRequest());
@@ -288,7 +288,7 @@ public class InventoryControllerModifyInvEntriesTest {
         invBody.put("quantity", null);
 
         mockMvc.perform(MockMvcRequestBuilders
-                .post("/businesses/1/inventory/1")
+                .put("/businesses/1/inventory/1")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(invBody.toString()))
                 .andExpect(status().isBadRequest());
@@ -309,7 +309,7 @@ public class InventoryControllerModifyInvEntriesTest {
             invBody.put("pricePerItem", pricePerItem);
 
             mockMvc.perform(MockMvcRequestBuilders
-                    .post("/businesses/1/inventory/1")
+                    .put("/businesses/1/inventory/1")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(invBody.toString()))
                     .andExpect(status().isOk());
@@ -331,7 +331,7 @@ public class InventoryControllerModifyInvEntriesTest {
             invBody.put("pricePerItem", prices[i]);
 
             mockMvc.perform(MockMvcRequestBuilders
-                    .post("/businesses/1/inventory/1")
+                    .put("/businesses/1/inventory/1")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(invBody.toString()))
                     .andExpect(status().isBadRequest());
@@ -350,7 +350,7 @@ public class InventoryControllerModifyInvEntriesTest {
         invBody.put("pricePerItem", null);
 
         mockMvc.perform(MockMvcRequestBuilders
-                .post("/businesses/1/inventory/1")
+                .put("/businesses/1/inventory/1")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(invBody.toString()))
                 .andExpect(status().isOk());
@@ -371,7 +371,7 @@ public class InventoryControllerModifyInvEntriesTest {
             invBody.put("totalPrice", totalPrice);
 
             mockMvc.perform(MockMvcRequestBuilders
-                    .post("/businesses/1/inventory/1")
+                    .put("/businesses/1/inventory/1")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(invBody.toString()))
                     .andExpect(status().isOk());
@@ -393,7 +393,7 @@ public class InventoryControllerModifyInvEntriesTest {
             invBody.put("totalPrice", prices[i]);
 
             mockMvc.perform(MockMvcRequestBuilders
-                    .post("/businesses/1/inventory/1")
+                    .put("/businesses/1/inventory/1")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(invBody.toString()))
                     .andExpect(status().isBadRequest());
@@ -412,7 +412,7 @@ public class InventoryControllerModifyInvEntriesTest {
         invBody.put("totalPrice", null);
 
         mockMvc.perform(MockMvcRequestBuilders
-                .post("/businesses/1/inventory/1")
+                .put("/businesses/1/inventory/1")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(invBody.toString()))
                 .andExpect(status().isOk());
@@ -427,10 +427,10 @@ public class InventoryControllerModifyInvEntriesTest {
         doNothing().when(businessSpy).checkSessionPermissions(any());
 
         JSONObject invBody = new JSONObject();
-        invBody.put("manufactured", LocalDate.now().minusYears(1));
+        invBody.put("manufactured", LocalDate.now().minusYears(1).toString());
 
         mockMvc.perform(MockMvcRequestBuilders
-                .post("/businesses/1/inventory/1")
+                .put("/businesses/1/inventory/1")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(invBody.toString()))
                 .andExpect(status().isOk());
@@ -451,7 +451,7 @@ public class InventoryControllerModifyInvEntriesTest {
             invBody.put("manufactured", manufacturedDates[i]);
 
             mockMvc.perform(MockMvcRequestBuilders
-                    .post("/businesses/1/inventory/1")
+                    .put("/businesses/1/inventory/1")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(invBody.toString()))
                     .andExpect(status().isBadRequest());
@@ -470,7 +470,7 @@ public class InventoryControllerModifyInvEntriesTest {
         invBody.put("manufactured", null);
 
         mockMvc.perform(MockMvcRequestBuilders
-                .post("/businesses/1/inventory/1")
+                .put("/businesses/1/inventory/1")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(invBody.toString()))
                 .andExpect(status().isOk());
@@ -485,10 +485,10 @@ public class InventoryControllerModifyInvEntriesTest {
         doNothing().when(businessSpy).checkSessionPermissions(any());
 
         JSONObject invBody = new JSONObject();
-        invBody.put("manufactured", LocalDate.now().plusYears(1));
+        invBody.put("manufactured", LocalDate.now().plusYears(1).toString());
 
         mockMvc.perform(MockMvcRequestBuilders
-                .post("/businesses/1/inventory/1")
+                .put("/businesses/1/inventory/1")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(invBody.toString()))
                 .andExpect(status().isBadRequest());
@@ -503,10 +503,10 @@ public class InventoryControllerModifyInvEntriesTest {
         doNothing().when(businessSpy).checkSessionPermissions(any());
 
         JSONObject invBody = new JSONObject();
-        invBody.put("sellBy", LocalDate.now().plusYears(1));
+        invBody.put("sellBy", LocalDate.now().plusYears(1).toString());
 
         mockMvc.perform(MockMvcRequestBuilders
-                .post("/businesses/1/inventory/1")
+                .put("/businesses/1/inventory/1")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(invBody.toString()))
                 .andExpect(status().isOk());
@@ -527,7 +527,7 @@ public class InventoryControllerModifyInvEntriesTest {
             invBody.put("sellBy", sellByDates[i]);
 
             mockMvc.perform(MockMvcRequestBuilders
-                    .post("/businesses/1/inventory/1")
+                    .put("/businesses/1/inventory/1")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(invBody.toString()))
                     .andExpect(status().isBadRequest());
@@ -546,7 +546,7 @@ public class InventoryControllerModifyInvEntriesTest {
         invBody.put("sellBy", null);
 
         mockMvc.perform(MockMvcRequestBuilders
-                .post("/businesses/1/inventory/1")
+                .put("/businesses/1/inventory/1")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(invBody.toString()))
                 .andExpect(status().isOk());
@@ -561,10 +561,10 @@ public class InventoryControllerModifyInvEntriesTest {
         doNothing().when(businessSpy).checkSessionPermissions(any());
 
         JSONObject invBody = new JSONObject();
-        invBody.put("sellBy", LocalDate.now().minusYears(1));
+        invBody.put("sellBy", LocalDate.now().minusYears(1).toString());
 
         mockMvc.perform(MockMvcRequestBuilders
-                .post("/businesses/1/inventory/1")
+                .put("/businesses/1/inventory/1")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(invBody.toString()))
                 .andExpect(status().isBadRequest());
@@ -579,10 +579,10 @@ public class InventoryControllerModifyInvEntriesTest {
         doNothing().when(businessSpy).checkSessionPermissions(any());
 
         JSONObject invBody = new JSONObject();
-        invBody.put("bestBefore", LocalDate.now().plusYears(1));
+        invBody.put("bestBefore", LocalDate.now().plusYears(1).toString());
 
         mockMvc.perform(MockMvcRequestBuilders
-                .post("/businesses/1/inventory/1")
+                .put("/businesses/1/inventory/1")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(invBody.toString()))
                 .andExpect(status().isOk());
@@ -603,7 +603,7 @@ public class InventoryControllerModifyInvEntriesTest {
             invBody.put("bestBefore", bestBeforeDates[i]);
 
             mockMvc.perform(MockMvcRequestBuilders
-                    .post("/businesses/1/inventory/1")
+                    .put("/businesses/1/inventory/1")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(invBody.toString()))
                     .andExpect(status().isBadRequest());
@@ -622,7 +622,7 @@ public class InventoryControllerModifyInvEntriesTest {
         invBody.put("bestBefore", null);
 
         mockMvc.perform(MockMvcRequestBuilders
-                .post("/businesses/1/inventory/1")
+                .put("/businesses/1/inventory/1")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(invBody.toString()))
                 .andExpect(status().isOk());
@@ -637,10 +637,10 @@ public class InventoryControllerModifyInvEntriesTest {
         doNothing().when(businessSpy).checkSessionPermissions(any());
 
         JSONObject invBody = new JSONObject();
-        invBody.put("bestBefore", LocalDate.now().minusYears(1));
+        invBody.put("bestBefore", LocalDate.now().minusYears(1).toString());
 
         mockMvc.perform(MockMvcRequestBuilders
-                .post("/businesses/1/inventory/1")
+                .put("/businesses/1/inventory/1")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(invBody.toString()))
                 .andExpect(status().isBadRequest());
@@ -655,10 +655,10 @@ public class InventoryControllerModifyInvEntriesTest {
         doNothing().when(businessSpy).checkSessionPermissions(any());
 
         JSONObject invBody = new JSONObject();
-        invBody.put("expires", LocalDate.now().plusYears(1));
+        invBody.put("expires", LocalDate.now().plusYears(1).toString());
 
         mockMvc.perform(MockMvcRequestBuilders
-                .post("/businesses/1/inventory/1")
+                .put("/businesses/1/inventory/1")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(invBody.toString()))
                 .andExpect(status().isOk());
@@ -679,7 +679,7 @@ public class InventoryControllerModifyInvEntriesTest {
             invBody.put("expires", expiresDates[i]);
 
             mockMvc.perform(MockMvcRequestBuilders
-                    .post("/businesses/1/inventory/1")
+                    .put("/businesses/1/inventory/1")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(invBody.toString()))
                     .andExpect(status().isBadRequest());
@@ -698,7 +698,7 @@ public class InventoryControllerModifyInvEntriesTest {
         invBody.put("pricePerItem", null);
 
         mockMvc.perform(MockMvcRequestBuilders
-                .post("/businesses/1/inventory/1")
+                .put("/businesses/1/inventory/1")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(invBody.toString()))
                 .andExpect(status().isBadRequest());
@@ -713,10 +713,10 @@ public class InventoryControllerModifyInvEntriesTest {
         doNothing().when(businessSpy).checkSessionPermissions(any());
 
         JSONObject invBody = new JSONObject();
-        invBody.put("expires", LocalDate.now().minusYears(1));
+        invBody.put("expires", LocalDate.now().minusYears(1).toString());
 
         mockMvc.perform(MockMvcRequestBuilders
-                .post("/businesses/1/inventory/1")
+                .put("/businesses/1/inventory/1")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(invBody.toString()))
                 .andExpect(status().isBadRequest());
@@ -731,11 +731,11 @@ public class InventoryControllerModifyInvEntriesTest {
         doNothing().when(businessSpy).checkSessionPermissions(any());
 
         JSONObject invBody = new JSONObject();
-        invBody.put("manufactured", LocalDate.now().minusYears(1));
-        invBody.put("sellBy", LocalDate.now().plusYears(1));
+        invBody.put("manufactured", LocalDate.now().minusYears(1).toString());
+        invBody.put("sellBy", LocalDate.now().plusYears(1).toString());
 
         mockMvc.perform(MockMvcRequestBuilders
-                .post("/businesses/1/inventory/1")
+                .put("/businesses/1/inventory/1")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(invBody.toString()))
                 .andExpect(status().isOk());
@@ -750,11 +750,11 @@ public class InventoryControllerModifyInvEntriesTest {
         doNothing().when(businessSpy).checkSessionPermissions(any());
 
         JSONObject invBody = new JSONObject();
-        invBody.put("manufactured", LocalDate.now().plusYears(1));
-        invBody.put("sellBy", LocalDate.now().minusYears(1));
+        invBody.put("manufactured", LocalDate.now().plusYears(1).toString());
+        invBody.put("sellBy", LocalDate.now().minusYears(1).toString());
 
         mockMvc.perform(MockMvcRequestBuilders
-                .post("/businesses/1/inventory/1")
+                .put("/businesses/1/inventory/1")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(invBody.toString()))
                 .andExpect(status().isOk());
@@ -769,11 +769,11 @@ public class InventoryControllerModifyInvEntriesTest {
         doNothing().when(businessSpy).checkSessionPermissions(any());
 
         JSONObject invBody = new JSONObject();
-        invBody.put("manufactured", LocalDate.now().minusYears(1));
-        invBody.put("bestBefore", LocalDate.now().plusYears(1));
+        invBody.put("manufactured", LocalDate.now().minusYears(1).toString());
+        invBody.put("bestBefore", LocalDate.now().plusYears(1).toString());
 
         mockMvc.perform(MockMvcRequestBuilders
-                .post("/businesses/1/inventory/1")
+                .put("/businesses/1/inventory/1")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(invBody.toString()))
                 .andExpect(status().isOk());
@@ -788,11 +788,11 @@ public class InventoryControllerModifyInvEntriesTest {
         doNothing().when(businessSpy).checkSessionPermissions(any());
 
         JSONObject invBody = new JSONObject();
-        invBody.put("manufactured", LocalDate.now().plusYears(1));
-        invBody.put("bestBefore", LocalDate.now().minusYears(1));
+        invBody.put("manufactured", LocalDate.now().plusYears(1).toString());
+        invBody.put("bestBefore", LocalDate.now().minusYears(1).toString());
 
         mockMvc.perform(MockMvcRequestBuilders
-                .post("/businesses/1/inventory/1")
+                .put("/businesses/1/inventory/1")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(invBody.toString()))
                 .andExpect(status().isBadRequest());
@@ -807,11 +807,11 @@ public class InventoryControllerModifyInvEntriesTest {
         doNothing().when(businessSpy).checkSessionPermissions(any());
 
         JSONObject invBody = new JSONObject();
-        invBody.put("manufactured", LocalDate.now().minusYears(1));
-        invBody.put("expires", LocalDate.now().plusYears(1));
+        invBody.put("manufactured", LocalDate.now().minusYears(1).toString());
+        invBody.put("expires", LocalDate.now().plusYears(1).toString());
 
         mockMvc.perform(MockMvcRequestBuilders
-                .post("/businesses/1/inventory/1")
+                .put("/businesses/1/inventory/1")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(invBody.toString()))
                 .andExpect(status().isOk());
@@ -826,11 +826,11 @@ public class InventoryControllerModifyInvEntriesTest {
         doNothing().when(businessSpy).checkSessionPermissions(any());
 
         JSONObject invBody = new JSONObject();
-        invBody.put("manufactured", LocalDate.now().plusYears(1));
-        invBody.put("expires", LocalDate.now().minusYears(1));
+        invBody.put("manufactured", LocalDate.now().plusYears(1).toString());
+        invBody.put("expires", LocalDate.now().minusYears(1).toString());
 
         mockMvc.perform(MockMvcRequestBuilders
-                .post("/businesses/1/inventory/1")
+                .put("/businesses/1/inventory/1")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(invBody.toString()))
                 .andExpect(status().isBadRequest());
@@ -845,11 +845,11 @@ public class InventoryControllerModifyInvEntriesTest {
         doNothing().when(businessSpy).checkSessionPermissions(any());
 
         JSONObject invBody = new JSONObject();
-        invBody.put("sellBy", LocalDate.now().plusYears(1));
-        invBody.put("bestBefore", LocalDate.now().plusYears(2));
+        invBody.put("sellBy", LocalDate.now().plusYears(1).toString());
+        invBody.put("bestBefore", LocalDate.now().plusYears(2).toString());
 
         mockMvc.perform(MockMvcRequestBuilders
-                .post("/businesses/1/inventory/1")
+                .put("/businesses/1/inventory/1")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(invBody.toString()))
                 .andExpect(status().isOk());
@@ -864,11 +864,11 @@ public class InventoryControllerModifyInvEntriesTest {
         doNothing().when(businessSpy).checkSessionPermissions(any());
 
         JSONObject invBody = new JSONObject();
-        invBody.put("sellBy", LocalDate.now().plusYears(2));
-        invBody.put("bestBefore", LocalDate.now().plusYears(1));
+        invBody.put("sellBy", LocalDate.now().plusYears(2).toString());
+        invBody.put("bestBefore", LocalDate.now().plusYears(1).toString());
 
         mockMvc.perform(MockMvcRequestBuilders
-                .post("/businesses/1/inventory/1")
+                .put("/businesses/1/inventory/1")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(invBody.toString()))
                 .andExpect(status().isBadRequest());
@@ -883,11 +883,11 @@ public class InventoryControllerModifyInvEntriesTest {
         doNothing().when(businessSpy).checkSessionPermissions(any());
 
         JSONObject invBody = new JSONObject();
-        invBody.put("sellBy", LocalDate.now().plusYears(1));
-        invBody.put("expires", LocalDate.now().plusYears(2));
+        invBody.put("sellBy", LocalDate.now().plusYears(1).toString());
+        invBody.put("expires", LocalDate.now().plusYears(2).toString());
 
         mockMvc.perform(MockMvcRequestBuilders
-                .post("/businesses/1/inventory/1")
+                .put("/businesses/1/inventory/1")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(invBody.toString()))
                 .andExpect(status().isOk());
@@ -902,11 +902,11 @@ public class InventoryControllerModifyInvEntriesTest {
         doNothing().when(businessSpy).checkSessionPermissions(any());
 
         JSONObject invBody = new JSONObject();
-        invBody.put("sellBy", LocalDate.now().plusYears(2));
-        invBody.put("expires", LocalDate.now().plusYears(1));
+        invBody.put("sellBy", LocalDate.now().plusYears(2).toString());
+        invBody.put("expires", LocalDate.now().plusYears(1).toString());
 
         mockMvc.perform(MockMvcRequestBuilders
-                .post("/businesses/1/inventory/1")
+                .put("/businesses/1/inventory/1")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(invBody.toString()))
                 .andExpect(status().isBadRequest());
@@ -921,11 +921,11 @@ public class InventoryControllerModifyInvEntriesTest {
         doNothing().when(businessSpy).checkSessionPermissions(any());
 
         JSONObject invBody = new JSONObject();
-        invBody.put("bestBefore", LocalDate.now().plusYears(1));
-        invBody.put("expires", LocalDate.now().plusYears(2));
+        invBody.put("bestBefore", LocalDate.now().plusYears(1).toString());
+        invBody.put("expires", LocalDate.now().plusYears(2).toString());
 
         mockMvc.perform(MockMvcRequestBuilders
-                .post("/businesses/1/inventory/1")
+                .put("/businesses/1/inventory/1")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(invBody.toString()))
                 .andExpect(status().isOk());
@@ -940,11 +940,11 @@ public class InventoryControllerModifyInvEntriesTest {
         doNothing().when(businessSpy).checkSessionPermissions(any());
 
         JSONObject invBody = new JSONObject();
-        invBody.put("bestBefore", LocalDate.now().plusYears(2));
-        invBody.put("expires", LocalDate.now().plusYears(1));
+        invBody.put("bestBefore", LocalDate.now().plusYears(2).toString());
+        invBody.put("expires", LocalDate.now().plusYears(1).toString());
 
         mockMvc.perform(MockMvcRequestBuilders
-                .post("/businesses/1/inventory/1")
+                .put("/businesses/1/inventory/1")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(invBody.toString()))
                 .andExpect(status().isBadRequest());
@@ -963,14 +963,13 @@ public class InventoryControllerModifyInvEntriesTest {
         invBody.put("quantity", 10);
         invBody.put("pricePerItem", 5.42);
         invBody.put("totalPrice", 54.20);
-        invBody.put("creationDate", LocalDate.now());
-        invBody.put("manufactured", LocalDate.now().minusYears(1));
-        invBody.put("sellBy", LocalDate.now().plusYears(1));
-        invBody.put("bestBefore", LocalDate.now().plusYears(2));
-        invBody.put("expires", LocalDate.now().plusYears(3));
+        invBody.put("manufactured", LocalDate.now().minusYears(1).toString());
+        invBody.put("sellBy", LocalDate.now().plusYears(1).toString());
+        invBody.put("bestBefore", LocalDate.now().plusYears(2).toString());
+        invBody.put("expires", LocalDate.now().plusYears(3).toString());
 
         mockMvc.perform(MockMvcRequestBuilders
-                .post("/businesses/1/inventory/1")
+                .put("/businesses/1/inventory/1")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(invBody.toString()))
                 .andExpect(status().isOk());
