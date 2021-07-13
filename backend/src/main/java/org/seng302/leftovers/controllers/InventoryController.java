@@ -130,15 +130,15 @@ public class InventoryController {
             }
             String sellBy = invItemInfo.getAsString("sellBy");
             if (sellBy != null) {
-                invItem.setManufactured(LocalDate.parse(sellBy, dateTimeFormatter));
+                invItem.setSellBy(LocalDate.parse(sellBy, dateTimeFormatter));
             }
             String bestBefore = invItemInfo.getAsString("bestBefore");
             if (bestBefore != null) {
-                invItem.setManufactured(LocalDate.parse(bestBefore, dateTimeFormatter));
+                invItem.setBestBefore(LocalDate.parse(bestBefore, dateTimeFormatter));
             }
             String expires = invItemInfo.getAsString("expires");
             if (expires != null) {
-                invItem.setManufactured(LocalDate.parse(expires, dateTimeFormatter));
+                invItem.setExpires(LocalDate.parse(expires, dateTimeFormatter));
             }
             inventoryItemRepository.save(invItem);
         } catch (ResponseStatusException exception) {
