@@ -17,23 +17,31 @@ import org.hibernate.Hibernate;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.junit.jupiter.api.Assertions;
+import org.mockito.MockedStatic;
+import org.mockito.invocation.InvocationOnMock;
 import org.seng302.leftovers.entities.MarketplaceCard;
 import org.seng302.leftovers.persistence.MarketplaceCardRepository;
 import org.seng302.leftovers.service.CardService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.web.servlet.MvcResult;
 
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.http.HttpResponse;
+import java.time.Clock;
+import java.time.Duration;
 import java.time.Instant;
+import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static java.time.Instant.ofEpochMilli;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 
 
@@ -53,6 +61,7 @@ public class CardStepDefinition {
 
     @Autowired
     private CardService cardService;
+
     @Autowired
     private SessionFactory sessionFactory;
 
@@ -158,9 +167,9 @@ public class CardStepDefinition {
     @Given("The system has performed its scheduled check for cards that are close to expiry")
     public void the_system_has_performed_its_scheduled_check_for_cards_that_are_close_to_expiry()
             throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
-        Method sendCardExpiryEvents = CardService.class.getDeclaredMethod("sendCardExpiryEvents");
-        sendCardExpiryEvents.setAccessible(true);
-        sendCardExpiryEvents.invoke(cardService);
+        Method initiateCardCheckEvents = CardService.class.getDeclaredMethod("initiateCardCheckEvents");
+        initiateCardCheckEvents.setAccessible(true);
+        initiateCardCheckEvents.invoke(cardService);
     }
 
     @When("I check my notification feed")
@@ -195,5 +204,22 @@ public class CardStepDefinition {
             Assertions.assertEquals(expectedResponseCard, actualResponseCard);
         }
 
+    }
+
+    @Given("The card has expired")
+    public void the_card_has_expired()
+            throws  IllegalAccessException, NoSuchFieldException {
+        Instant pastInstant = Instant.now().minus(Duration.ofHours(1));
+        var card = cardContext.getLast();
+        Field closes = MarketplaceCard.class.getDeclaredField("closes");
+        closes.setAccessible(true);
+        closes.set(card, pastInstant);
+        cardContext.save(card);
+    }
+
+    @Then("The card will be removed from the marketplace")
+    public void the_card_will_be_removed_from_the_marketplace() {
+        Long cardId = cardContext.getLast().getID();
+        Assertions.assertFalse(marketplaceCardRepository.existsById(cardId));
     }
 }

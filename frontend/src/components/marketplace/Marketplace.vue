@@ -88,7 +88,7 @@
         <v-container class="grey lighten-2">
           <v-row>
             <v-col v-for="card in cards[section]" :key="card.id" cols="12" sm="6" md="4" lg="3">
-              <MarketplaceCard :content="card" @delete-card="updateMarketplace"/>
+              <MarketplaceCard :isExpiryEvent="false" :content="card" @delete-card="updateMarketplace"/>
             </v-col>
           </v-row>
         </v-container>

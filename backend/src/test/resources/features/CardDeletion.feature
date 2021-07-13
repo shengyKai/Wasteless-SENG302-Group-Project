@@ -62,3 +62,9 @@ Feature: UCM2 - Card creation
     When I try to extend the display period of my card
     Then The request fails due to forbidden
     And I expect the display period of my card to not be extended
+
+  Scenario: AC4 - If no action is taken within 24 hours of the notification, the card will be deleted automatically
+    Given The card has expired
+    When The system has performed its scheduled check for cards that are close to expiry
+    Then The card will be removed from the marketplace
+

@@ -32,7 +32,7 @@
       </div>
     </v-card-text>
     <v-divider/>
-    <v-card-actions v-if="isCardOwnerOrDGAA">
+    <v-card-actions v-if="isCardOwnerOrDGAA && !isExpiryEvent">
       <v-icon ref="deleteButton"
               color="primary"
               @click.stop="deleteCardDialog = true"
@@ -93,6 +93,7 @@ export default {
       created: String,
       keywords: Array,
     },
+    isExpiryEvent: Boolean
   },
 
   computed: {

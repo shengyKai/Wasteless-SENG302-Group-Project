@@ -145,7 +145,7 @@ class MarketplaceCardRepositoryTest {
 
         Assertions.assertTrue(expiryEventRepository.getByExpiringCard(card).isEmpty());
 
-        List<MarketplaceCard> results = marketplaceCardRepository.getAllExpiringBefore(cutoff);
+        List<MarketplaceCard> results = marketplaceCardRepository.getAllExpiringBeforeWithoutEvent(cutoff);
         Assertions.assertEquals(shouldReturnCard, results.contains(card));
     }
 
@@ -159,7 +159,7 @@ class MarketplaceCardRepositoryTest {
         eventService.addUserToEvent(card.getCreator(), event);
         Assertions.assertTrue(expiryEventRepository.getByExpiringCard(card).isPresent());
 
-        List<MarketplaceCard> results = marketplaceCardRepository.getAllExpiringBefore(cutoff);
+        List<MarketplaceCard> results = marketplaceCardRepository.getAllExpiringBeforeWithoutEvent(cutoff);
         Assertions.assertFalse(results.contains(card));
     }
 
