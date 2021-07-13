@@ -1,6 +1,7 @@
 package org.seng302.datagenerator;
 
 import java.sql.*;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
 import java.util.concurrent.TimeUnit;
@@ -13,9 +14,8 @@ public class Main {
      * @return the connection to the database
      */
     public static Connection connectToDatabase() throws SQLException {
-        String url = "jdbc:mariadb://localhost/seng302-2021-team500-prod";
-        Connection conn = DriverManager.getConnection(url, "seng302-team500", "ListenDirectly6053");
-        return conn;
+        Map<String, String> properties = ExampleDataFileReader.readPropertiesFile("/generator_db.properties");
+        return DriverManager.getConnection(properties.get("url"), properties.get("username"), properties.get("password"));
     }
 
     /**

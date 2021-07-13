@@ -1,5 +1,8 @@
 package cucumber.stepDefinitions;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import cucumber.context.CardContext;
 import cucumber.context.RequestContext;
 import cucumber.context.UserContext;
@@ -10,16 +13,35 @@ import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
 import net.minidev.json.parser.ParseException;
+import org.hibernate.Hibernate;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.junit.jupiter.api.Assertions;
+import org.mockito.MockedStatic;
+import org.mockito.invocation.InvocationOnMock;
 import org.seng302.leftovers.entities.MarketplaceCard;
 import org.seng302.leftovers.persistence.MarketplaceCardRepository;
+import org.seng302.leftovers.service.CardService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.web.servlet.MvcResult;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.net.http.HttpResponse;
+import java.time.Clock;
+import java.time.Duration;
 import java.time.Instant;
+import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static java.time.Instant.ofEpochMilli;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 
 
@@ -36,6 +58,12 @@ public class CardStepDefinition {
 
     @Autowired
     private RequestContext requestContext;
+
+    @Autowired
+    private CardService cardService;
+
+    @Autowired
+    private SessionFactory sessionFactory;
 
     @Given("a card exists")
     public void a_card_exists() {
@@ -83,9 +111,12 @@ public class CardStepDefinition {
         var expectedCard = cardContext.getLast();
         Assertions.assertEquals(200, requestContext.getLastResult().getResponse().getStatus());
         JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
-        JSONArray response = (JSONArray) parser.parse(requestContext.getLastResult().getResponse().getContentAsString());
+        JSONObject response = (JSONObject) parser.parse(requestContext.getLastResult().getResponse().getContentAsString());
 
-        var item = (JSONObject) response.get(0);
+        Assertions.assertEquals(1, response.get("count"));
+
+        JSONArray resultArray = (JSONArray) response.get("results");
+        var item = (JSONObject) resultArray.get(0);
         Assertions.assertEquals(((Number)item.get("id")).longValue(), expectedCard.getID());
         Assertions.assertEquals(item.getAsString("title"), expectedCard.getTitle());
         Assertions.assertEquals(item.getAsString("section"), expectedCard.getSection().getName());
@@ -131,5 +162,64 @@ public class CardStepDefinition {
         MarketplaceCard card = cardContext.save(marketplaceCardRepository.getCard(previouslyLoaded.getID()));
 
         Assertions.assertEquals(0, ChronoUnit.SECONDS.between(previouslyLoaded.getCloses(), card.getCloses()));
+    }
+
+    @Given("The system has performed its scheduled check for cards that are close to expiry")
+    public void the_system_has_performed_its_scheduled_check_for_cards_that_are_close_to_expiry()
+            throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
+        Method initiateCardCheckEvents = CardService.class.getDeclaredMethod("initiateCardCheckEvents");
+        initiateCardCheckEvents.setAccessible(true);
+        initiateCardCheckEvents.invoke(cardService);
+    }
+
+    @When("I check my notification feed")
+    public void i_check_my_notification_feed() {
+        requestContext.performRequest(get("/events/emitter")
+                .param("userId", userContext.getLast().getUserID().toString()));
+    }
+
+    @Then("I have received a message telling me the card is about to expire")
+    public void i_have_received_a_message_telling_me_the_card_is_about_to_expire()
+            throws JsonProcessingException, UnsupportedEncodingException {
+
+        String response = requestContext.getLastResult().getResponse().getContentAsString();
+
+        // Parse the data from the response
+        Pattern pattern = Pattern.compile("data:.*\n");
+        Matcher matcher = pattern.matcher(response);
+        if (!matcher.find()) {
+            fail("Response did not contain expected field 'data'");
+        }
+        String responseData = matcher.group().substring(matcher.group().indexOf(':') + 1, matcher.group().indexOf('\n'));
+
+        // Check that the received notification is for card expiry and relates to the expected card
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode responseJson = mapper.readTree(responseData);
+        Assertions.assertEquals("ExpiryEvent", responseJson.get("type").asText());
+        JsonNode actualResponseCard = responseJson.get("card");
+
+        try (Session session = sessionFactory.openSession()) {
+            MarketplaceCard card = session.find(MarketplaceCard.class, cardContext.getLast().getID());
+            JsonNode expectedResponseCard = mapper.readTree(card.constructJSONObject().toJSONString());
+            Assertions.assertEquals(expectedResponseCard, actualResponseCard);
+        }
+
+    }
+
+    @Given("The card has expired")
+    public void the_card_has_expired()
+            throws  IllegalAccessException, NoSuchFieldException {
+        Instant pastInstant = Instant.now().minus(Duration.ofHours(1));
+        var card = cardContext.getLast();
+        Field closes = MarketplaceCard.class.getDeclaredField("closes");
+        closes.setAccessible(true);
+        closes.set(card, pastInstant);
+        cardContext.save(card);
+    }
+
+    @Then("The card will be removed from the marketplace")
+    public void the_card_will_be_removed_from_the_marketplace() {
+        Long cardId = cardContext.getLast().getID();
+        Assertions.assertFalse(marketplaceCardRepository.existsById(cardId));
     }
 }

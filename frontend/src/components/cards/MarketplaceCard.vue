@@ -31,14 +31,59 @@
         </v-chip>
       </div>
     </v-card-text>
+    <v-divider/>
+    <v-card-actions v-if="isCardOwnerOrDGAA && !isExpiryEvent">
+      <v-icon ref="deleteButton"
+              color="primary"
+              @click.stop="deleteCardDialog = true"
+      >
+        mdi-trash-can
+      </v-icon>
+      <v-dialog
+        v-model="deleteCardDialog"
+        max-width="300px"
+      >
+        <v-card>
+          <v-card-title>
+            Are you sure?
+          </v-card-title>
+          <v-card-text>
+            Deleting "{{ content.title }}" will remove the card listing from the marketplace
+          </v-card-text>
+          <v-card-actions>
+            <v-spacer/>
+            <v-btn
+              color="primary"
+              text
+              @click="deleteCard(content.id); deleteCardDialog = false;"
+            >
+              Delete
+            </v-btn>
+            <v-btn
+              color="primary"
+              text
+              @click="deleteCardDialog = false"
+            >
+              Cancel
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+    </v-card-actions>
   </v-card>
 </template>
 
 <script>
 import { formatDate } from '@/utils';
+import { deleteMarketplaceCard } from '../../api/internal.ts';
 
 export default {
   name: "MarketplaceCard",
+  data () {
+    return {
+      deleteCardDialog: false
+    };
+  },
   props: {
     content: {
       id: Number,
@@ -48,6 +93,7 @@ export default {
       created: String,
       keywords: Array,
     },
+    isExpiryEvent: Boolean
   },
 
   computed: {
@@ -66,10 +112,23 @@ export default {
         return `From ${this.location.country}`;
       }
     },
+    // To ensure only the card owner, DGAA or GAA is able to execute an action relating to the marketplace card
+    isCardOwnerOrDGAA() {
+      return (this.$store.state.user.id === this.content.creator.id)
+            || (this.$store.getters.role === "defaultGlobalApplicationAdmin")
+            || (this.$store.getters.role === "globalApplicationAdmin");
+    },
   },
 
   methods: {
     formatDate,
+    /**
+     * Deletes the selected marketplace card and emits the response to the parent, Marketplace
+     */
+    async deleteCard(cardId) {
+      let response = await deleteMarketplaceCard(cardId);
+      this.$emit("delete-card", response);
+    }
   }
 };
 </script>
