@@ -135,7 +135,10 @@ exports[`InventoryItem.vue Must match snapshot 1`] = `
     </div>
     <div class="row justify-end"><button type="button" class="sale-item-but v-btn v-btn--outlined v-btn--rounded theme--light v-size--default primary--text"><span class="v-btn__content">
             Create Sale Item
-          </span></button><span class="v-tooltip v-tooltip--top"><!----></span></div>
+          </span></button><span class="v-tooltip v-tooltip--top"><!----></span> <button type="button" class="v-btn v-btn--is-elevated v-btn--has-bg theme--light v-size--default"><span class="v-btn__content">
+        Temporary edit button
+      </span></button></div>
   </div>
+  <!---->
 </div>
 `;
