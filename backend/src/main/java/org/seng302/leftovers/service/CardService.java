@@ -2,6 +2,7 @@ package org.seng302.leftovers.service;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.seng302.leftovers.entities.DeleteEvent;
 import org.seng302.leftovers.entities.ExpiryEvent;
 import org.seng302.leftovers.entities.MarketplaceCard;
 import org.seng302.leftovers.persistence.MarketplaceCardRepository;
@@ -84,6 +85,10 @@ public class CardService {
             } else {
                 logger.info("No expiry event relating to card {}", card.getID());
             }
+
+            DeleteEvent deleteEvent = new DeleteEvent(card);
+            eventService.addUserToEvent(card.getCreator(), deleteEvent);
+
             marketplaceCardRepository.delete(card);
             logger.info("Card {} deleted from marketplace repository", card.getID());
         }
