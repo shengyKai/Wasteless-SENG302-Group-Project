@@ -15,6 +15,7 @@ import org.seng302.leftovers.persistence.UserRepository;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
 import org.seng302.leftovers.tools.JsonTools;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
@@ -24,6 +25,8 @@ import org.seng302.leftovers.tools.SearchHelper;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -32,7 +35,7 @@ import java.util.Set;
  */
 @RestController
 public class CardController {
-    private static final Set<String> VALID_CARD_ORDERINGS = Set.of("created", "title", "closes", "creatorFirstName", "creatorLastName");
+    private static final Set<String> VALID_CARD_ORDERINGS = Set.of("created", "title", "closes", "creatorFirstName", "creatorLastName", "address");
 
     private final MarketplaceCardRepository marketplaceCardRepository;
     private final KeywordRepository keywordRepository;
@@ -217,8 +220,18 @@ public class CardController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid card ordering");
         }
 
-        PageRequest pageRequest = SearchHelper.getPageRequest(page, resultsPerPage, Sort.by(new Sort.Order(direction, orderBy).ignoreCase()));
-        var results = marketplaceCardRepository.getAllBySection(section, pageRequest);
+        PageRequest pageRequest = null;
+        Page<MarketplaceCard> results = null;
+        if (orderBy.equals("address")) {
+            orderBy = "creator.address.country";
+            pageRequest = SearchHelper.getPageRequest(page, resultsPerPage, Sort.by(List.of(new Sort.Order(direction, orderBy).ignoreCase(), new Sort.Order(direction, "creator.address.city").ignoreCase())));
+            results = marketplaceCardRepository.getAllBySection(section, pageRequest);
+        } else {
+            pageRequest = SearchHelper.getPageRequest(page, resultsPerPage, Sort.by(new Sort.Order(direction, orderBy).ignoreCase()));
+            results = marketplaceCardRepository.getAllBySection(section, pageRequest);
+        }
+
+
 
         //return JSON Object
         JSONArray resultArray = new JSONArray();
