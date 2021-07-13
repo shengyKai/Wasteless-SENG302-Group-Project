@@ -94,6 +94,7 @@
         </v-container>
         <v-pagination
           v-model="currentPage[section]"
+          :total-visible="11"
           :length="totalPages(section)"
           circle
         />
@@ -109,7 +110,7 @@
 
 <script>
 import MarketplaceCard from "../cards/MarketplaceCard";
-import {getMarketplaceCardsBySection, getMarketplaceCardCount} from "../../api/internal.ts";
+import {getMarketplaceCardsBySection } from "../../api/internal.ts";
 
 export default {
   data() {
@@ -130,7 +131,7 @@ export default {
       /**
        * Number of results per a result page
        */
-      resultsPerPage: 8,
+      resultsPerPage: 12,
       /**
        * Total number of results for all pages
        * For now, it is hard coded to suit the above aesthetic. once the api method to retrieve the count is created, it can
@@ -152,27 +153,29 @@ export default {
   },
   methods: {
     /**
-     * Iterates through the 3 sections and gets all the cards and card count
+     * Updates the provided sections
+     * @param sections Section keys to update
      */
-    async updateResults() {
+    async updateSections(sections) {
       this.error = undefined;
-      for (const index in this.sections) {
-        const value = await getMarketplaceCardsBySection (
-          this.sections[index],
-          this.currentPage[this.sections[index]],
-          this.resultsPerPage,
-          this.orderBy,
-          this.reverse
-        );
-        this.totalResults[this.sections[index]] = await getMarketplaceCardCount(this.sections[index]);
+
+      const results = await Promise.all(
+        sections.map(key => getMarketplaceCardsBySection(key, this.currentPage[key], this.resultsPerPage, this.orderBy, this.reverse))
+      );
+
+      for (let i = 0; i<sections.length; i++) {
+        const key = sections[i];
+        const value = results[i];
+
         if (typeof value === 'string') {
-          this.cards[this.sections[index]] = [];
+          this.cards[key] = [];
+          this.totalResults[key] = 0;
           this.error = value;
         } else {
-          this.cards[this.sections[index]] = value;
+          this.cards[key] = value.results;
+          this.totalResults[key] = value.count;
         }
       }
-
     },
     showCreateCard() {
       this.$store.commit('showCreateMarketplaceCard', this.$store.state.user);
@@ -201,7 +204,7 @@ export default {
       if (typeof response === "string") {
         this.error = response;
       } else {
-        this.updateResults();
+        this.updateSections(this.sections);
       }
     }
   },
@@ -210,24 +213,26 @@ export default {
   },
   watch: {
     orderBy() {
-      this.updateResults();
+      this.updateSections(this.sections);
     },
     reverse() {
-      this.updateResults();
+      this.updateSections(this.sections);
     },
-    currentPage: {
-      handler() {
-        this.updateResults();
-      },
-      //this will enable the watcher to watch nested data
-      deep: true
+    'currentPage.Wanted': function() {
+      this.updateSections(['Wanted']);
+    },
+    'currentPage.ForSale': function() {
+      this.updateSections(['ForSale']);
+    },
+    'currentPage.Exchange': function() {
+      this.updateSections(['Exchange']);
     },
     resultsPerPage() {
-      this.updateResults();
+      this.updateSections(this.sections);
     },
   },
   async created() {
-    await this.updateResults();
+    await this.updateSections(this.sections);
   },
 };
 </script>
