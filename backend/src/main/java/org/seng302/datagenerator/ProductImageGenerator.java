@@ -47,12 +47,31 @@ public class ProductImageGenerator {
     public void addImageToProduct(Long productId, String productName) throws SQLException {
         String noun = productName.split(" ")[1];
         Optional<File> image = findImage(noun);
+
         String filename = UUID.randomUUID().toString();
+        Optional<String> fileType = getExtension(image.toString());
+        if (fileType.isPresent()) {
+            filename += "." + fileType;
+        } else {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Could not locate file type for:" + image.get().toString());
+        }
+
         if (saveImageToSystem(image, filename)) {
             createInsertImageSQL(productId, filename);
         } else {
             System.out.println("File '" + productName + "' Could not be found");
         }
+    }
+
+    /**
+     * Gets the file type from a given file
+     * @param filename name of the file
+     * @return File type
+     */
+    public Optional<String> getExtension(String filename) {
+        return Optional.ofNullable(filename)
+                .filter(f -> f.contains("."))
+                .map(f -> f.substring(filename.lastIndexOf(".") + 1));
     }
 
     /**
@@ -87,6 +106,12 @@ public class ProductImageGenerator {
         return false;
     }
 
+    /**
+     * This is copied and modified from storageServiceImpl
+     * Saves a given file to the system
+     * @param file The file to save
+     * @param filename The name of the new file.
+     */
     public void store(File file, String filename) {
         try {
             Files.copy( new FileInputStream(file), this.userUploadsRoot.resolve(filename));
