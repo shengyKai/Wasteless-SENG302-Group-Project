@@ -132,24 +132,6 @@ function createOptions(): StoreOptions<StoreData> {
       hideCreateBusiness(state) {
         state.createBusinessDialogShown = false;
       },
-
-      /**
-       * Creates a modal create inventory dialog for adding a inventory item to the provided business
-       *
-       * @param state Current store state
-       * @param businessId Business to create the product for
-       */
-      showCreateInventory(state, businessId: number) {
-        state.createInventoryDialog = businessId;
-      },
-      /**
-       * Hides the create inventory dialog
-       *
-       * @param state Current store state
-       */
-      hideCreateInventory(state) {
-        state.createInventoryDialog = undefined;
-      },
       /**
        * Creates a modal create inventory dialog for adding a sale item to the provided business
        *

@@ -1,6 +1,8 @@
 package org.seng302.leftovers.persistence;
 
 import org.seng302.leftovers.entities.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
@@ -33,6 +35,14 @@ public interface MarketplaceCardRepository extends CrudRepository<MarketplaceCar
      * @return List of cards within that section
      */
     List<MarketplaceCard> getAllBySection(@Param("section") MarketplaceCard.Section section);
+
+    /**
+     * Finds all the marketplace cards that are in the given section with pagination
+     * @param section Section to filter by
+     * @param pageable Pagination query parameters
+     * @return Page of cards within that section
+     */
+    Page<MarketplaceCard> getAllBySection(@Param("section") MarketplaceCard.Section section, Pageable pageable);
 
     /**
      * Fetches a marketplace card from the database for the given card id. This method will also check that

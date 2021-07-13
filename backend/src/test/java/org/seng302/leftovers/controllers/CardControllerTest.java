@@ -7,6 +7,9 @@ import net.minidev.json.parser.JSONParser;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.junit.runner.RunWith;
 import org.mockito.*;
 import org.seng302.leftovers.entities.*;
@@ -16,9 +19,14 @@ import org.seng302.leftovers.persistence.KeywordRepository;
 import org.seng302.leftovers.persistence.MarketplaceCardRepository;
 import org.seng302.leftovers.persistence.UserRepository;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
+import org.seng302.leftovers.tools.SearchHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -66,6 +74,8 @@ class CardControllerTest {
     private ExpiryEvent mockEvent;
     @Mock
     private User mockUser;
+    @Mock
+    private Page<MarketplaceCard> mockPage;
     @Mock
     private Keyword mockKeyword1;
     @Mock
@@ -119,11 +129,15 @@ class CardControllerTest {
         when(userRepository.findById(userId)).thenReturn(Optional.of(mockUser));
         when(keywordRepository.findById(keywordId1)).thenReturn(Optional.of(mockKeyword1));
         when(keywordRepository.findById(keywordId2)).thenReturn(Optional.of(mockKeyword2));
+
         when(marketplaceCardRepository.save(any())).thenReturn(mockCard);
-        when(marketplaceCardRepository.getAllBySection(any())).thenReturn(Collections.singletonList(mockCard));
         when(marketplaceCardRepository.findById(1L)).thenReturn(Optional.of(mockCard));
         when(marketplaceCardRepository.findById(not(eq(1L)))).thenReturn(Optional.empty());
         when(marketplaceCardRepository.getCard(any())).thenCallRealMethod();
+
+        when(marketplaceCardRepository.getAllBySection(any(MarketplaceCard.Section.class), any(PageRequest.class))).thenReturn(mockPage);
+        when(mockPage.getTotalElements()).thenReturn(30L);
+        when(mockPage.iterator()).thenReturn(List.of(mockCard).iterator());
 
         // Set up entities to return set id when getter called
         when(mockCard.getID()).thenReturn(cardId);
@@ -412,73 +426,71 @@ class CardControllerTest {
     }
 
     @Test
+    void getCards_invalidOrdering_cannotViewCards() throws Exception {
+        mockMvc.perform(get("/cards")
+                    .param("section", "Wanted")
+                    .param("orderBy", "invalidOrdering"))
+                    .andExpect(status().isBadRequest())
+                    .andReturn();
+    }
+
+    @Test
     void getCards_noSectionGiven_CannotViewCards() throws Exception {
         mockMvc.perform(get("/cards"))
                 .andExpect(status().isBadRequest());
         verify(marketplaceCardRepository, times(0)).getAllBySection(any(MarketplaceCard.Section.class));
     }
 
-    @Test
-    void getCards_validAuthToken_CanViewCards() throws Exception {
-        mockMvc.perform(get("/cards")
-                .param("section", "Wanted"))
-                .andExpect(status().isOk());
-        verify(marketplaceCardRepository, times(1)).getAllBySection(any(MarketplaceCard.Section.class));
-    }
+    @ParameterizedTest
+    @EnumSource(MarketplaceCard.Section.class)
+    void getCards_validSection_canViewCardsForSection(MarketplaceCard.Section section) throws Exception {
+        var result = mockMvc.perform(get("/cards")
+                .param("section", section.getName())
+                .param("resultsPerPage", "8")
+                .param("page", "6")
+                .param("orderBy", "created")
+                .param("reverse", "false"))
+                .andExpect(status().isOk())
+                .andReturn();
+        var expectedPageRequest = SearchHelper.getPageRequest(6, 8, Sort.by(new Sort.Order(Sort.Direction.ASC, "created").ignoreCase()));
+        verify(marketplaceCardRepository).getAllBySection(section, expectedPageRequest);
 
-
-    @Test
-    void retrievePaginatedCards_firstPage_firstPageOfMarketplaceCards() throws Exception {
-        MvcResult result = mockMvc.perform(
-            MockMvcRequestBuilders.get("/cards").param("section", "ForSale").param("page", "1").param("resultsPerPage", "2"))
-            .andExpect(status().isOk()).andReturn();
-        
         JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
-        JSONArray responseBody = (JSONArray) parser.parse(result.getResponse().getContentAsString());
-        // Check length should be 2 cards
+        JSONObject responseBody = (JSONObject) parser.parse(result.getResponse().getContentAsString());
+
+        assertEquals(30, responseBody.get("count"));
+
+        var expectedResults = new JSONArray();
+        expectedResults.add(mockCard.constructJSONObject());
+        assertEquals(expectedResults, responseBody.get("results"));
+
         assertEquals(2, responseBody.size());
-
-        // Check the two products are the expected ones
-        JSONObject firstCard = (JSONObject) responseBody.get(0);
-        JSONObject secondCard = (JSONObject) responseBody.get(1);
-
-        assertEquals("abcd", firstCard.getAsString("title"));
-        assertEquals("efgh", secondCard.getAsString("title"));
     }
 
-    @Test
-    void retrievePaginatedCards_secondPage_secondPageOfMarketplaceCards() throws Exception {
-        MvcResult result = mockMvc.perform(
-            MockMvcRequestBuilders.get("/cards").param("section", "ForSale").param("page", "2").param("resultsPerPage", "2"))
-            .andExpect(status().isOk()).andReturn();
-        
+    @ParameterizedTest
+    @ValueSource(strings = {"created", "title", "closes", "creatorFirstName", "creatorLastName"})
+    void getCards_validOrdering_canViewCardsWithOrdering(String ordering) throws Exception {
+        var result = mockMvc.perform(get("/cards")
+                .param("section", "Wanted")
+                .param("resultsPerPage", "8")
+                .param("page", "6")
+                .param("orderBy", ordering)
+                .param("reverse", "false"))
+                .andExpect(status().isOk())
+                .andReturn();
+        var expectedPageRequest = SearchHelper.getPageRequest(6, 8, Sort.by(new Sort.Order(Sort.Direction.ASC, ordering).ignoreCase()));
+        verify(marketplaceCardRepository).getAllBySection(MarketplaceCard.Section.WANTED, expectedPageRequest);
+
         JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
-        JSONArray responseBody = (JSONArray) parser.parse(result.getResponse().getContentAsString());
-        // Check length should be 2 cards
+        JSONObject responseBody = (JSONObject) parser.parse(result.getResponse().getContentAsString());
+
+        assertEquals(30, responseBody.get("count"));
+
+        var expectedResults = new JSONArray();
+        expectedResults.add(mockCard.constructJSONObject());
+        assertEquals(expectedResults, responseBody.get("results"));
+
         assertEquals(2, responseBody.size());
-
-        // Check the two products are the expected ones
-        JSONObject firstCard = (JSONObject) responseBody.get(0);
-        JSONObject secondCard = (JSONObject) responseBody.get(1);
-
-        assertEquals("ijkl", firstCard.getAsString("title"));
-        assertEquals("mnop", secondCard.getAsString("title"));
-    }
-    
-    @Test
-    void getMarketplaceCardCount_emptyCardList_zeroReturned() {
-        when(marketplaceCardRepository.getAllBySection(MarketplaceCard.Section.FOR_SALE)).thenReturn(new ArrayList<MarketplaceCard>());
-        JSONObject result = cardController.retrieveCardCount(request, "ForSale");
-        assertTrue(result.containsKey("count"));
-        assertEquals(0, result.getAsNumber("count"));
-    }
-
-    @Test
-    void getMarketplaceCardCount_multipleCards_correctCountReturned() throws Exception {
-        when(marketplaceCardRepository.getAllBySection(MarketplaceCard.Section.FOR_SALE)).thenReturn(cards);
-        JSONObject result = cardController.retrieveCardCount(request, "ForSale");
-        assertTrue(result.containsKey("count"));
-        assertEquals(4, result.getAsNumber("count"));
     }
 
     /**
