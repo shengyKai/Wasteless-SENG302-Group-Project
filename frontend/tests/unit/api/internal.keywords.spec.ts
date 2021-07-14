@@ -49,6 +49,6 @@ describe("Test GET /keywords/search endpoint", () => {
       }
     });
     const keywords = await api.getKeywords();
-    expect(keywords).toEqual('Missing/Invalid access token');
+    expect(keywords).toEqual('You have been logged out. Please login again and retry');
   });
 });
