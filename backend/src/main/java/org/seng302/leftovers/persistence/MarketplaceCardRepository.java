@@ -45,6 +45,14 @@ public interface MarketplaceCardRepository extends CrudRepository<MarketplaceCar
     Page<MarketplaceCard> getAllBySection(@Param("section") MarketplaceCard.Section section, Pageable pageable);
 
     /**
+     * Finds all the marketplace cards from the given creator
+     * @param creator User to filter cards by
+     * @param pageable Pagination query parameters
+     * @return Page of cards for the given user
+     */
+    Page<MarketplaceCard> getAllByCreator(@Param("creator") User creator, Pageable pageable);
+
+    /**
      * Fetches a marketplace card from the database for the given card id. This method will also check that
      * the card exists and will throw a 404 response exception if no card exists with the given id.
      * @param id Card id to filter by
