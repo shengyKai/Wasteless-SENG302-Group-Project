@@ -228,7 +228,7 @@ describe('CreateBusiness.vue', () => {
     expect(wrapper.vm.valid).toBeFalsy();
   });
 
-  it.each(diacritics)('Valid when street contains diacritics', async (char) => {
+  it.each(diacritics)('Valid when street contains the character "%s"', async (char) => {
     await populateRequiredFields();
     await wrapper.setData({
       street1: '5 ' + char,
