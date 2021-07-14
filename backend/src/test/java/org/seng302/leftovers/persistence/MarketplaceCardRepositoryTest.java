@@ -17,7 +17,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.text.ParseException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
@@ -32,8 +31,6 @@ class MarketplaceCardRepositoryTest {
     @Autowired
     private UserRepository userRepository;
     @Autowired
-    private BusinessRepository businessRepository;
-    @Autowired
     private ExpiryEventRepository expiryEventRepository;
     @Autowired
     private EventService eventService;
@@ -42,7 +39,6 @@ class MarketplaceCardRepositoryTest {
 
     @BeforeEach
     private void setUp() {
-        businessRepository.deleteAll();
         marketplaceCardRepository.deleteAll();
         userRepository.deleteAll();
         Location address = new Location.Builder()

@@ -1,5 +1,6 @@
 package org.seng302.leftovers.tools;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.seng302.leftovers.controllers.DGAAController;
@@ -74,6 +75,12 @@ class SearchHelperTest {
         for (User user : savedUserList) {
             userRepository.save(user);
         }
+    }
+
+    @AfterEach
+    void tearDown() {
+        businessRepository.deleteAll();
+        userRepository.deleteAll();
     }
 
     private List<User> readUserFile(String filepath) throws IOException {
