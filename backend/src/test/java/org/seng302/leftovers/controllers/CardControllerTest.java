@@ -652,7 +652,7 @@ class CardControllerTest {
                 .param("resultsPerPage", "8")
                 .param("page", "6")
                 .param("section", "Wanted")
-                .param("orderBy", "country"))
+                .param("orderBy", "location"))
                 .andExpect(status().isOk())
                 .andReturn();
         
@@ -679,7 +679,7 @@ class CardControllerTest {
                 .param("resultsPerPage", "8")
                 .param("page", "6")
                 .param("section", "Wanted")
-                .param("orderBy", "country")
+                .param("orderBy", "location")
                 .param("reverse", "true"))
                 .andExpect(status().isOk())
                 .andReturn();
