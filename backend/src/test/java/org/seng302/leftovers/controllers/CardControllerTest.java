@@ -652,7 +652,7 @@ class CardControllerTest {
                 .param("resultsPerPage", "8")
                 .param("page", "6")
                 .param("section", "Wanted")
-                .param("orderBy", "address"))
+                .param("orderBy", "country"))
                 .andExpect(status().isOk())
                 .andReturn();
         
@@ -679,13 +679,13 @@ class CardControllerTest {
                 .param("resultsPerPage", "8")
                 .param("page", "6")
                 .param("section", "Wanted")
-                .param("orderBy", "address")
+                .param("orderBy", "country")
                 .param("reverse", "true"))
                 .andExpect(status().isOk())
                 .andReturn();
         
         //verify the arguments for the method call are the same
-        var expectedPageRequest = SearchHelper.getPageRequest(6, 8, Sort.by(List.of(new Sort.Order(Sort.Direction.DESC, "creator.address.country").ignoreCase(), new Sort.Order(Sort.Direction.ASC, "creator.address.city").ignoreCase())));
+        var expectedPageRequest = SearchHelper.getPageRequest(6, 8, Sort.by(List.of(new Sort.Order(Sort.Direction.DESC, "creator.address.country").ignoreCase(), new Sort.Order(Sort.Direction.DESC, "creator.address.city").ignoreCase())));
         verify(marketplaceCardRepository).getAllBySection(MarketplaceCard.Section.WANTED, expectedPageRequest); 
     }
 }

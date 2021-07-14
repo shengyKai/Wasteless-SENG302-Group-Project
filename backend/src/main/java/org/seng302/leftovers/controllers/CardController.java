@@ -36,7 +36,7 @@ import java.util.Set;
  */
 @RestController
 public class CardController {
-    private static final Set<String> VALID_CARD_ORDERINGS = Set.of("created", "title", "closes", "creatorFirstName", "creatorLastName", "address");
+    private static final Set<String> VALID_CARD_ORDERINGS = Set.of("created", "title", "closes", "creatorFirstName", "creatorLastName", "country");
 
     private final MarketplaceCardRepository marketplaceCardRepository;
     private final KeywordRepository keywordRepository;
@@ -224,8 +224,8 @@ public class CardController {
         List<Sort.Order> sortOrder;
         //If the orderBy is by address, creates a Sort.Order list for Location, else it creates a List for a normal orderBy attribute
         //For location sort, the primary sort would be by country, followed by the city, since these both attributes are shown to the user in the marketplace card.
-        if (orderBy.equals("address")) {
-            sortOrder = List.of(new Sort.Order(direction, "creator.address.country").ignoreCase(), new Sort.Order(Sort.Direction.ASC, "creator.address.city").ignoreCase());
+        if (orderBy.equals("country")) {
+            sortOrder = List.of(new Sort.Order(direction, "creator.address.country").ignoreCase(), new Sort.Order(direction, "creator.address.city").ignoreCase());
         } else {
             sortOrder = List.of(new Sort.Order(direction, orderBy).ignoreCase());
         }
