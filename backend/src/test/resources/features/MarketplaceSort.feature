@@ -1,8 +1,8 @@
 Feature: UCM3 - Marketplace section display
 
   Background:
-    Given A user exists
-    And multiple cards exists in the section "Wanted"
+    Given Multiple cards of different owners exists in the section "Wanted"
+    And I am logged into my account
 
   Scenario: AC1 - Upon navigation to a Marketplace section, cards are ordered appropriately
     When I request cards in the "Wanted" section
