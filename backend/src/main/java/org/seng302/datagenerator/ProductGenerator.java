@@ -10,7 +10,7 @@ import static org.seng302.datagenerator.Main.*;
 public class ProductGenerator {
     private Random random = new Random();
     private Connection conn;
-    private BusinessNameGenerator nameGenerator  = BusinessNameGenerator.getInstance();
+    private CommerceNameGenerator nameGenerator  = CommerceNameGenerator.getInstance();
     private ProductImageGenerator imageGenerator;
 
 

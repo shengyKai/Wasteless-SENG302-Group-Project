@@ -18,6 +18,11 @@ public class GeneratorController {
         this.entityManager = entityManager;
     }
 
+    /**
+     * Generates a set of demo products
+     * @param options Contains the quantity field which determines the number of products to generates
+     * @return
+     */
     @PostMapping("/demo/generateProducts")
     public JSONObject generateProducts(HttpServletRequest request, HttpServletResponse response, @RequestBody JSONObject options) {
         JSONObject json = new JSONObject();
@@ -35,10 +40,5 @@ public class GeneratorController {
         });
         return json;
     }
-
-//    @PostMapping("/demo/businessLogin/{businessId}")
-//    public String getDatabase(HttpServletRequest request, HttpServletResponse response, @PathVariable String businessId) {
-//
-//    }
 
 }
