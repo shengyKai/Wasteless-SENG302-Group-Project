@@ -5,7 +5,7 @@ const EMITTER_URL = process.env.VUE_APP_SERVER_ADD + '/events/emitter';
 let eventSource: EventSource;
 let lastErrorTime = Number.MIN_VALUE;
 
-export type AnyEvent = MessageEvent | ExpiryEvent
+export type AnyEvent = MessageEvent | ExpiryEvent | DeleteEvent
 
 type BaseEvent = {
   id: number,
@@ -20,6 +20,11 @@ type MessageEvent = BaseEvent & {
 
 type ExpiryEvent = BaseEvent & {
   type: 'ExpiryEvent',
+  card: MarketplaceCard,
+}
+
+type DeleteEvent = BaseEvent & {
+  type: 'DeleteEvent',
   card: MarketplaceCard,
 }
 
