@@ -1,6 +1,7 @@
 package org.seng302.leftovers.controllers;
 
 import org.junit.Ignore;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.seng302.leftovers.entities.Location;
@@ -33,6 +34,13 @@ class DGAAControllerTest {
     @BeforeEach
     public void clean() {
         //because business repo has a foreign key in user repo, it needs to be cleared too
+        inventoryItemRepository.deleteAll();
+        businessRepository.deleteAll();
+        userRepository.deleteAll();
+    }
+
+    @AfterEach
+    public void tearDown() {
         inventoryItemRepository.deleteAll();
         businessRepository.deleteAll();
         userRepository.deleteAll();
