@@ -68,6 +68,11 @@ public class InventoryControllerModifyInvEntriesTest {
     private Product testProduct3;
     private Product testProductNull;
 
+    private InventoryItem testInvItem;
+    private InventoryItem testInvItem2;
+    private InventoryItem testInvItem3;
+    private InventoryItem testInvItemNull;
+
     @BeforeEach
     public void setup() throws Exception {
         MockitoAnnotations.openMocks(this);
@@ -119,34 +124,70 @@ public class InventoryControllerModifyInvEntriesTest {
                 .withName("zzz")
                 .build();
 
-        List<InventoryItem> inventory = new ArrayList<>();
-        inventory.add(new InventoryItem.Builder().withProduct(testProduct).withQuantity(1).withExpires("2028-01-01")
-                .withPricePerItem("1").withTotalPrice("1").withManufactured("2020-01-01").withSellBy("2026-02-01")
-                .withBestBefore("2027-03-01").build());
-        inventory.add(new InventoryItem.Builder().withProduct(testProduct).withQuantity(2).withExpires("2028-01-01")
-                .withPricePerItem("2").withTotalPrice("2").withManufactured("2020-01-01").withSellBy("2026-02-01")
-                .withBestBefore("2027-03-01").build());
-        inventory.add(new InventoryItem.Builder().withProduct(testProduct2).withQuantity(3).withExpires("2029-01-01")
-                .withPricePerItem("3").withTotalPrice("3").withManufactured("2020-03-01").withSellBy("2027-02-01")
-                .withBestBefore("2028-03-01").build());
-        inventory.add(new InventoryItem.Builder().withProduct(testProduct2).withQuantity(4).withExpires("2029-01-01")
-                .withPricePerItem("4").withTotalPrice("4").withManufactured("2020-03-01").withSellBy("2027-02-01")
-                .withBestBefore("2028-03-01").build());
-        inventory.add(new InventoryItem.Builder().withProduct(testProduct3).withQuantity(5).withExpires("2030-06-06")
-                .withPricePerItem("5").withTotalPrice("5").withManufactured("2020-06-06").withSellBy("2028-02-01")
-                .withBestBefore("2029-02-01").build());
-        inventory.add(new InventoryItem.Builder().withProduct(testProduct3).withQuantity(6).withExpires("2030-06-06")
-                .withPricePerItem("6").withTotalPrice("6").withManufactured("2020-06-06").withSellBy("2028-02-01")
-                .withBestBefore("2029-02-01").build());
-        inventory.add(new InventoryItem.Builder().withProduct(testProductNull).withQuantity(7).withExpires("2031-06-06")
-                .build());
+        testInvItem = new InventoryItem.Builder()
+                .withProduct(testProduct)
+                .withQuantity(1)
+                .withExpires("2028-01-01")
+                .withPricePerItem("1")
+                .withTotalPrice("1")
+                .withManufactured("2020-01-01")
+                .withSellBy("2026-02-01")
+                .withBestBefore("2027-03-01")
+                .build();
+        testInvItem2 = new InventoryItem.Builder()
+                .withProduct(testProduct)
+                .withQuantity(2)
+                .withExpires("2028-01-01")
+                .withPricePerItem("2")
+                .withTotalPrice("2")
+                .withManufactured("2020-01-01")
+                .withSellBy("2026-02-01")
+                .withBestBefore("2027-03-01")
+                .build();
+        testInvItem3 = new InventoryItem.Builder()
+                .withProduct(testProduct2)
+                .withQuantity(3)
+                .withExpires("2029-01-01")
+                .withPricePerItem("3")
+                .withTotalPrice("3")
+                .withManufactured("2020-03-01")
+                .withSellBy("2027-02-01")
+                .withBestBefore("2028-03-01")
+                .build();
+        testInvItemNull = new InventoryItem.Builder()
+                .withProduct(testProductNull)
+                .withQuantity(7)
+                .withExpires("2031-06-06")
+                .build();
+
+        //List<InventoryItem> inventory = new ArrayList<>();
+        //inventory.add(new InventoryItem.Builder().withProduct(testProduct).withQuantity(1).withExpires("2028-01-01")
+        //        .withPricePerItem("1").withTotalPrice("1").withManufactured("2020-01-01").withSellBy("2026-02-01")
+        //        .withBestBefore("2027-03-01").build());
+        //inventory.add(new InventoryItem.Builder().withProduct(testProduct).withQuantity(2).withExpires("2028-01-01")
+        //        .withPricePerItem("2").withTotalPrice("2").withManufactured("2020-01-01").withSellBy("2026-02-01")
+        //        .withBestBefore("2027-03-01").build());
+        //inventory.add(new InventoryItem.Builder().withProduct(testProduct2).withQuantity(3).withExpires("2029-01-01")
+        //        .withPricePerItem("3").withTotalPrice("3").withManufactured("2020-03-01").withSellBy("2027-02-01")
+        //        .withBestBefore("2028-03-01").build());
+        //inventory.add(new InventoryItem.Builder().withProduct(testProduct2).withQuantity(4).withExpires("2029-01-01")
+        //        .withPricePerItem("4").withTotalPrice("4").withManufactured("2020-03-01").withSellBy("2027-02-01")
+        //        .withBestBefore("2028-03-01").build());
+        //inventory.add(new InventoryItem.Builder().withProduct(testProduct3).withQuantity(5).withExpires("2030-06-06")
+        //        .withPricePerItem("5").withTotalPrice("5").withManufactured("2020-06-06").withSellBy("2028-02-01")
+        //        .withBestBefore("2029-02-01").build());
+        //inventory.add(new InventoryItem.Builder().withProduct(testProduct3).withQuantity(6).withExpires("2030-06-06")
+        //        .withPricePerItem("6").withTotalPrice("6").withManufactured("2020-06-06").withSellBy("2028-02-01")
+        //        .withBestBefore("2029-02-01").build());
+        //inventory.add(new InventoryItem.Builder().withProduct(testProductNull).withQuantity(7).withExpires("2031-06-06")
+         //       .build());
 
         Business businessSpy = spy(testBusiness);
         when(businessSpy.getId()).thenReturn(1L);
         when(businessRepository.getBusinessById(any())).thenReturn(businessSpy); // use our business
         doNothing().when(businessSpy).checkSessionPermissions(any()); // mock successful authentication
         when(productRepository.findAllByBusiness(any())).thenReturn(mockProductList);
-        when(invItemRepository.getInventoryByCatalogue(any())).thenReturn(inventory);
+        //when(invItemRepository.getInventoryByCatalogue(any())).thenReturn(inventory);
 
         InventoryController invController = new InventoryController(businessRepository, invItemRepository,
                 productRepository);
@@ -179,6 +220,7 @@ public class InventoryControllerModifyInvEntriesTest {
     void modifyInvEntries_modifyId_modifiedInvEntry200() throws Exception {
         Business businessSpy = spy(testBusiness);
         Product productSpy = spy(testProduct);
+        InventoryItem invItemSpy = spy(testInvItem);
         when(businessRepository.getBusinessById(any())).thenReturn(businessSpy);
         when(productRepository.getProduct(any(), any())).thenReturn(productSpy);
         doNothing().when(businessSpy).checkSessionPermissions(any());
@@ -237,8 +279,11 @@ public class InventoryControllerModifyInvEntriesTest {
     void modifyInvEntries_modifyQuantity_modifiedInvEntry200() throws Exception {
         Business businessSpy = spy(testBusiness);
         Product productSpy = spy(testProduct);
+        InventoryItem invItemSpy = spy(testInvItem);
         when(businessRepository.getBusinessById(any())).thenReturn(businessSpy);
         when(productRepository.getProduct(any(), any())).thenReturn(productSpy);
+        when(invItemRepository.getInventoryItemByBusinessAndId(any(), any())).thenReturn(invItemSpy);
+        //when(invItemRepository.getInventoryItemByBusinessAndId(businessSpy, invItemSpy.getId())).thenReturn(invItemSpy);
         doNothing().when(businessSpy).checkSessionPermissions(any());
 
         //tests a wide range of integers

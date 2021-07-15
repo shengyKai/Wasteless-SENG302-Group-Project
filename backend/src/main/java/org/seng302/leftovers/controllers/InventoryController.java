@@ -96,6 +96,7 @@ public class InventoryController {
             business.checkSessionPermissions(request);
 
             InventoryItem invItem = inventoryItemRepository.getInventoryItemByBusinessAndId(business, invItemId);
+            System.out.println(invItem.getId());
 
             if (invItemInfo == null) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No JSON request body was provided");
