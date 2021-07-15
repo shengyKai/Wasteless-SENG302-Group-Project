@@ -243,8 +243,6 @@ public class CardStepDefinition {
 
     @Then("I have received a message telling me the card has expired")
     public void i_have_received_a_message_telling_me_the_card_has_expired() throws UnsupportedEncodingException, ParseException {
-        System.out.println(requestContext.getLastResult().getResponse().getContentAsString());
-
         List<JSONObject> events = parseEvents(requestContext.getLastResult().getResponse(), "newsfeed");
 
         Assertions.assertEquals(1, events.size());
