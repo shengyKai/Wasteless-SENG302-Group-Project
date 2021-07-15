@@ -11,17 +11,21 @@ import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
 import net.minidev.json.parser.ParseException;
 import org.hibernate.SessionFactory;
+import org.junit.Assert;
 import org.seng302.leftovers.entities.Location;
 import org.seng302.leftovers.entities.MarketplaceCard;
 import org.seng302.leftovers.entities.User;
 import org.seng302.leftovers.persistence.MarketplaceCardRepository;
 import org.seng302.leftovers.service.CardService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.web.servlet.MvcResult;
 
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.time.Duration;
 
@@ -45,6 +49,10 @@ public class CardSortDefinition {
 
     @Autowired
     private SessionFactory sessionFactory;
+
+    private List<String> expectedOrder = new ArrayList<String>();
+
+    private MvcResult cards;
 
     @Given("Multiple cards of different owners exists in the section {string}")
     public void multiple_cards_of_different_owners_exists_in_the_section(String string) throws NoSuchFieldException, IllegalAccessException {
@@ -90,56 +98,77 @@ public class CardSortDefinition {
         userContext.save(user1);
         userContext.save(user2);
         userContext.save(user3);
+        //withCloses has to be added because we are overwriting the created field below, which means the closing date
+        //would not align with the default 2 weeks with additional seconds
         var card1 = new MarketplaceCard.Builder()
                 .withCreator(userContext.getByName("Alpha"))
                 .withSection("Wanted")
                 .withTitle("Awesome")
                 .withDescription("A cool vintage car")
+                .withCloses(Instant.now().plus(Duration.ofDays(14)))
                 .build();
         var card2 = new MarketplaceCard.Builder()
                 .withCreator(userContext.getByName("Beta"))
                 .withSection("Wanted")
                 .withTitle("Boring")
                 .withDescription("A cool vintage car")
+                .withCloses(Instant.now().plus(Duration.ofDays(14).plus(Duration.ofSeconds(1))))
                 .build();
         var card3 = new MarketplaceCard.Builder()
                 .withCreator(userContext.getByName("Charlie"))
                 .withSection("Wanted")
                 .withTitle("Colourful")
                 .withDescription("A cool vintage car")
+                .withCloses(Instant.now().plus(Duration.ofDays(14).plus(Duration.ofSeconds(2))))
                 .build();
+        //overwrite the created time field here so that we can produce expected result orderings
         Field createdField = MarketplaceCard.class.getDeclaredField("created");
         createdField.setAccessible(true);
         createdField.set(card1, Instant.now());
         createdField.set(card2, Instant.now().plus(Duration.ofSeconds(1)));
         createdField.set(card3, Instant.now().plus(Duration.ofSeconds(2)));
         cardContext.save(card1);
+        expectedOrder.add(card1.getCreator().getFirstName());
         cardContext.save(card2);
+        expectedOrder.add(card2.getCreator().getFirstName());
         cardContext.save(card3);
+        expectedOrder.add(card3.getCreator().getFirstName());
     }
 
     @Then("the cards should be ordered by {string} by default")
     public void the_cards_should_be_ordered_by_by_default(String string) throws UnsupportedEncodingException, ParseException {
-        var cards = requestContext.performRequest(get("/cards")
+        cards = requestContext.performRequest(get("/cards")
                 .queryParam("section", "Wanted"));
         JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
         JSONObject jsonObject = (JSONObject) parser.parse(cards.getResponse().getContentAsString());
 
-//        List<String> expectedOrder = List.of("")
+        JSONObject creator;
+        int iterator = 0;
         for (Object object: (JSONArray) jsonObject.get("results")) {
-            System.out.println(object);
+            creator = (JSONObject) ((JSONObject) object).get("creator");
+            Assert.assertEquals(expectedOrder.get(iterator), creator.get("firstName"));
+            iterator += 1;
         }
     }
 
     @When("have them ordered by {string}")
-    public void have_them_ordered_by(String string) {
-        // Write code here that turns the phrase above into concrete actions
-        throw new io.cucumber.java.PendingException();
+    public void have_them_ordered_by(String order) {
+        cards = requestContext.performRequest(get("/cards")
+                .queryParam("section", "Wanted")
+                .queryParam("orderBy", order));
     }
 
     @Then("the cards should be ordered by their {string}")
-    public void the_cards_should_be_ordered_by_their(String string) {
-        // Write code here that turns the phrase above into concrete actions
-        throw new io.cucumber.java.PendingException();
+    public void the_cards_should_be_ordered_by_their(String order) throws UnsupportedEncodingException, ParseException {
+        JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
+        JSONObject jsonObject = (JSONObject) parser.parse(cards.getResponse().getContentAsString());
+
+        JSONObject creator;
+        int iterator = 0;
+        for (Object object: (JSONArray) jsonObject.get("results")) {
+            creator = (JSONObject) ((JSONObject) object).get("creator");
+            Assert.assertEquals(expectedOrder.get(iterator), creator.get("firstName"));
+            iterator += 1;
+        }
     }
 }
