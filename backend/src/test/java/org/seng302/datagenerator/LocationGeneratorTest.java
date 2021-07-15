@@ -30,9 +30,6 @@ public class LocationGeneratorTest {
   // LocationGenerator is called by UserGenerator or BusinessGenerator, so it has to be called with either of them
   private UserGenerator userGenerator;
 
-  @Mock
-  private LocationGenerator locationGenerator;
-
   //loads all the example files which are the same as the generators
   private List<String> streetNames = ExampleDataFileReader.readExampleDataFile(STREET_NAMES_FILE);
   private List<String> cities = ExampleDataFileReader.readExampleDataFile(CITIES_FILE);
@@ -43,6 +40,9 @@ public class LocationGeneratorTest {
   @BeforeEach
   public void setup() throws SQLException {
     Map<String, String> properties = ExampleDataFileReader.readPropertiesFile("/application.properties");
+    if (properties.get("spring.datasource.url") == null || properties.get("spring.datasource.username") == null || properties.get("spring.datasource.password") == null) {
+      fail("The url/username/password is not found");
+    }
     this.conn =  DriverManager.getConnection(properties.get("spring.datasource.url"), properties.get("spring.datasource.username"), properties.get("spring.datasource.password"));
 
     //Creates generators
