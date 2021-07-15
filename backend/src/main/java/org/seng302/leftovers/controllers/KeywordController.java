@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.security.Key;
 
 @RestController
@@ -58,7 +59,7 @@ public class KeywordController {
      * @return JSONObject with the created keyword id
      */
     @PostMapping("/keywords")
-    public JSONObject addKeyword(HttpServletRequest request, @RequestBody JSONObject keywordInfo) {
+    public JSONObject addKeyword(HttpServletRequest request, HttpServletResponse response, @RequestBody JSONObject keywordInfo) {
         try {
             String name = keywordInfo.getAsString("name");
             logger.info("Adding new keyword with name \"{}\"", name);
@@ -72,6 +73,8 @@ public class KeywordController {
             keyword = keywordRepository.save(keyword);
             JSONObject json = new JSONObject();
             json.put("keywordId", keyword.getID());
+
+            response.setStatus(201);
             return json;
         } catch (Exception e) {
             logger.error(e.getMessage());
