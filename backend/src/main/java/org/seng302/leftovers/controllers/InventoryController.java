@@ -90,9 +90,6 @@ public class InventoryController {
                 invItemId);
         logger.info(message);
         try {
-
-            //AuthenticationTokenManager.checkAuthenticationToken(request);
-
             Business business = businessRepository.getBusinessById(businessId);
             business.checkSessionPermissions(request);
 
@@ -102,46 +99,49 @@ public class InventoryController {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No JSON request body was provided");
             }
 
-            String newProductCode = invItemInfo.getAsString("productId");
-            if (newProductCode != null) {
-                if (productRepository.findByBusinessAndProductCode(business, newProductCode).isEmpty()) {
-                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                            "The product with the given id does not exist within the business's catalogue");
+            //assuming all exceptions are related to bad requests since only data is being save below
+            try {
+                if (invItemInfo.containsKey("productId")) {
+                    String newProductCode = invItemInfo.getAsString("productId");
+                    if (productRepository.findByBusinessAndProductCode(business, newProductCode).isEmpty()) {
+                        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                                "The product with the given id does not exist within the business's catalogue");
+                    }
+                    invItem.setProduct(productRepository.getProduct(business, newProductCode));
                 }
-                invItem.setProduct(productRepository.getProduct(business, newProductCode));
-            }
 
-            Integer quantity = (Integer) invItemInfo.getAsNumber("quantity");
-            if (quantity != null) {
-                invItem.setQuantity(quantity);
-            }
-            BigDecimal pricePerItem = (BigDecimal) invItemInfo.getAsNumber("pricePerItem");
-            if (pricePerItem != null) {
-                invItem.setPricePerItem(pricePerItem);
-            }
-            BigDecimal totalPrice = (BigDecimal) invItemInfo.getAsNumber("totalPrice");
-            if (totalPrice != null) {
-                invItem.setTotalPrice(totalPrice);
-            }
+                if (invItemInfo.containsKey("quantity")) {
+                    invItem.setQuantity((int) invItemInfo.getAsNumber("quantity"));
+                }
+                if (invItemInfo.containsKey("pricePerItem")) {
+                    invItem.setPricePerItem((BigDecimal) invItemInfo.getAsNumber("pricePerItem"));
+                }
+                if (invItemInfo.containsKey("totalPrice")) {
+                    invItem.setTotalPrice((BigDecimal) invItemInfo.getAsNumber("totalPrice"));
+                }
 
-            DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE;
-            String manufactured = invItemInfo.getAsString("manufactured");
-            if (manufactured != null) {
-                invItem.setManufactured(LocalDate.parse(manufactured, dateTimeFormatter));
+                DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE;
+                if (invItemInfo.containsKey("manufactured")) {
+                    String manufactured = invItemInfo.getAsString("manufactured");
+                    invItem.setManufactured(LocalDate.parse(manufactured, dateTimeFormatter));
+                }
+                if (invItemInfo.containsKey("sellBy")) {
+                    String sellBy = invItemInfo.getAsString("sellBy");
+                    invItem.setSellBy(LocalDate.parse(sellBy, dateTimeFormatter));
+                }
+                if (invItemInfo.containsKey("bestBefore")) {
+                    String bestBefore = invItemInfo.getAsString("bestBefore");
+                    invItem.setBestBefore(LocalDate.parse(bestBefore, dateTimeFormatter));
+                }
+                if (invItemInfo.containsKey("expires")) {
+                    String expires = invItemInfo.getAsString("expires");
+                    invItem.setExpires(LocalDate.parse(expires, dateTimeFormatter));
+                }
+                inventoryItemRepository.save(invItem);
+            } catch (Exception exception) {
+                logger.warn(exception);
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The data provided was invalid");
             }
-            String sellBy = invItemInfo.getAsString("sellBy");
-            if (sellBy != null) {
-                invItem.setSellBy(LocalDate.parse(sellBy, dateTimeFormatter));
-            }
-            String bestBefore = invItemInfo.getAsString("bestBefore");
-            if (bestBefore != null) {
-                invItem.setBestBefore(LocalDate.parse(bestBefore, dateTimeFormatter));
-            }
-            String expires = invItemInfo.getAsString("expires");
-            if (expires != null) {
-                invItem.setExpires(LocalDate.parse(expires, dateTimeFormatter));
-            }
-            inventoryItemRepository.save(invItem);
         } catch (ResponseStatusException exception) {
             logger.warn(exception);
             throw exception;
