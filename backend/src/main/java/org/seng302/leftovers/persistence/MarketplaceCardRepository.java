@@ -23,6 +23,14 @@ public interface MarketplaceCardRepository extends CrudRepository<MarketplaceCar
     List<MarketplaceCard> getAllByCreator(@Param("Creator") User user);
 
     /**
+     * Finds all the marketplace cards from the given creator
+     * @param creator User to filter cards by
+     * @param pageable Pagination query parameters
+     * @return Page of cards for the given user
+     */
+    Page<MarketplaceCard> getAllByCreator(@Param("creator") User creator, Pageable pageable);
+
+    /**
      * Finds all the marketplace cards with the given keyword
      * @param keyword Keyword to search for
      * @return List of cards with the keyword
@@ -43,14 +51,6 @@ public interface MarketplaceCardRepository extends CrudRepository<MarketplaceCar
      * @return Page of cards within that section
      */
     Page<MarketplaceCard> getAllBySection(@Param("section") MarketplaceCard.Section section, Pageable pageable);
-
-    /**
-     * Finds all the marketplace cards from the given creator
-     * @param creator User to filter cards by
-     * @param pageable Pagination query parameters
-     * @return Page of cards for the given user
-     */
-    Page<MarketplaceCard> getAllByCreator(@Param("creator") User creator, Pageable pageable);
 
     /**
      * Fetches a marketplace card from the database for the given card id. This method will also check that
