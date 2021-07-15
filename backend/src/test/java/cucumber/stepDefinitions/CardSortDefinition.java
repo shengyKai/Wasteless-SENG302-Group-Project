@@ -10,13 +10,10 @@ import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
 import net.minidev.json.parser.ParseException;
-import org.hibernate.SessionFactory;
 import org.junit.Assert;
 import org.seng302.leftovers.entities.Location;
 import org.seng302.leftovers.entities.MarketplaceCard;
 import org.seng302.leftovers.entities.User;
-import org.seng302.leftovers.persistence.MarketplaceCardRepository;
-import org.seng302.leftovers.service.CardService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.web.servlet.MvcResult;
 
@@ -32,9 +29,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 
 public class CardSortDefinition {
     @Autowired
-    private MarketplaceCardRepository marketplaceCardRepository;
-
-    @Autowired
     private CardContext cardContext;
 
     @Autowired
@@ -42,12 +36,6 @@ public class CardSortDefinition {
 
     @Autowired
     private RequestContext requestContext;
-
-    @Autowired
-    private CardService cardService;
-
-    @Autowired
-    private SessionFactory sessionFactory;
 
     private List<String> expectedOrder = new ArrayList<String>();
 
