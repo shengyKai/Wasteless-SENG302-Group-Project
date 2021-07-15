@@ -223,6 +223,7 @@ public class InventoryControllerModifyInvEntriesTest {
         InventoryItem invItemSpy = spy(testInvItem);
         when(businessRepository.getBusinessById(any())).thenReturn(businessSpy);
         when(productRepository.getProduct(any(), any())).thenReturn(productSpy);
+        when(invItemRepository.getInventoryItemByBusinessAndId(any(), any())).thenReturn(invItemSpy);
         doNothing().when(businessSpy).checkSessionPermissions(any());
 
         JSONObject invBody = new JSONObject();
@@ -239,8 +240,10 @@ public class InventoryControllerModifyInvEntriesTest {
     void modifyInvEntries_modifyIdInvalid_cannotModify400() throws Exception {
         Business businessSpy = spy(testBusiness);
         Product productSpy = spy(testProduct);
+        InventoryItem invItemSpy = spy(testInvItem);
         when(businessRepository.getBusinessById(any())).thenReturn(businessSpy);
         when(productRepository.getProduct(any(), any())).thenReturn(productSpy);
+        when(invItemRepository.getInventoryItemByBusinessAndId(any(), any())).thenReturn(invItemSpy);
         doNothing().when(businessSpy).checkSessionPermissions(any());
 
         int[] productIds = {-1, -2, 0, 1, 1000};
@@ -261,8 +264,10 @@ public class InventoryControllerModifyInvEntriesTest {
     void modifyInvEntries_modifyIdNull_cannotModify400() throws Exception {
         Business businessSpy = spy(testBusiness);
         Product productSpy = spy(testProduct);
+        InventoryItem invItemSpy = spy(testInvItem);
         when(businessRepository.getBusinessById(any())).thenReturn(businessSpy);
         when(productRepository.getProduct(any(), any())).thenReturn(productSpy);
+        when(invItemRepository.getInventoryItemByBusinessAndId(any(), any())).thenReturn(invItemSpy);
         doNothing().when(businessSpy).checkSessionPermissions(any());
 
         JSONObject invBody = new JSONObject();
@@ -283,7 +288,6 @@ public class InventoryControllerModifyInvEntriesTest {
         when(businessRepository.getBusinessById(any())).thenReturn(businessSpy);
         when(productRepository.getProduct(any(), any())).thenReturn(productSpy);
         when(invItemRepository.getInventoryItemByBusinessAndId(any(), any())).thenReturn(invItemSpy);
-        //when(invItemRepository.getInventoryItemByBusinessAndId(businessSpy, invItemSpy.getId())).thenReturn(invItemSpy);
         doNothing().when(businessSpy).checkSessionPermissions(any());
 
         //tests a wide range of integers
@@ -303,8 +307,10 @@ public class InventoryControllerModifyInvEntriesTest {
     void modifyInvEntries_modifyQuantityInvalid_cannotModify400() throws Exception {
         Business businessSpy = spy(testBusiness);
         Product productSpy = spy(testProduct);
+        InventoryItem invItemSpy = spy(testInvItem);
         when(businessRepository.getBusinessById(any())).thenReturn(businessSpy);
         when(productRepository.getProduct(any(), any())).thenReturn(productSpy);
+        when(invItemRepository.getInventoryItemByBusinessAndId(any(), any())).thenReturn(invItemSpy);
         doNothing().when(businessSpy).checkSessionPermissions(any());
 
         String[] quantities = {"-1", "-2", "-10", "#", "$", "a", "b", "Z" };
@@ -325,8 +331,10 @@ public class InventoryControllerModifyInvEntriesTest {
     void modifyInvEntries_modifyQuantityNull_cannotModify400() throws Exception {
         Business businessSpy = spy(testBusiness);
         Product productSpy = spy(testProduct);
+        InventoryItem invItemSpy = spy(testInvItem);
         when(businessRepository.getBusinessById(any())).thenReturn(businessSpy);
         when(productRepository.getProduct(any(), any())).thenReturn(productSpy);
+        when(invItemRepository.getInventoryItemByBusinessAndId(any(), any())).thenReturn(invItemSpy);
         doNothing().when(businessSpy).checkSessionPermissions(any());
 
         JSONObject invBody = new JSONObject();
@@ -343,8 +351,10 @@ public class InventoryControllerModifyInvEntriesTest {
     void modifyInvEntries_modifyPricePerItem_modifiedInvEntry200() throws Exception {
         Business businessSpy = spy(testBusiness);
         Product productSpy = spy(testProduct);
+        InventoryItem invItemSpy = spy(testInvItem);
         when(businessRepository.getBusinessById(any())).thenReturn(businessSpy);
         when(productRepository.getProduct(any(), any())).thenReturn(productSpy);
+        when(invItemRepository.getInventoryItemByBusinessAndId(any(), any())).thenReturn(invItemSpy);
         doNothing().when(businessSpy).checkSessionPermissions(any());
 
         //tests a wide range of floats
@@ -365,8 +375,10 @@ public class InventoryControllerModifyInvEntriesTest {
     void modifyInvEntries_modifyPricePerItemInvalid_cannotModify400() throws Exception {
         Business businessSpy = spy(testBusiness);
         Product productSpy = spy(testProduct);
+        InventoryItem invItemSpy = spy(testInvItem);
         when(businessRepository.getBusinessById(any())).thenReturn(businessSpy);
         when(productRepository.getProduct(any(), any())).thenReturn(productSpy);
+        when(invItemRepository.getInventoryItemByBusinessAndId(any(), any())).thenReturn(invItemSpy);
         doNothing().when(businessSpy).checkSessionPermissions(any());
 
         String[] prices = {"-1.01", "-0.01", "-2000", "-1000.99", "#", "$", "a", "b", "Z" };
@@ -387,8 +399,10 @@ public class InventoryControllerModifyInvEntriesTest {
     void modifyInvEntries_modifyPricePerItemNull_modifiedEntry200() throws Exception {
         Business businessSpy = spy(testBusiness);
         Product productSpy = spy(testProduct);
+        InventoryItem invItemSpy = spy(testInvItem);
         when(businessRepository.getBusinessById(any())).thenReturn(businessSpy);
         when(productRepository.getProduct(any(), any())).thenReturn(productSpy);
+        when(invItemRepository.getInventoryItemByBusinessAndId(any(), any())).thenReturn(invItemSpy);
         doNothing().when(businessSpy).checkSessionPermissions(any());
 
         JSONObject invBody = new JSONObject();
@@ -405,8 +419,10 @@ public class InventoryControllerModifyInvEntriesTest {
     void modifyInvEntries_modifyTotalPrice_modifiedInvEntry200() throws Exception {
         Business businessSpy = spy(testBusiness);
         Product productSpy = spy(testProduct);
+        InventoryItem invItemSpy = spy(testInvItem);
         when(businessRepository.getBusinessById(any())).thenReturn(businessSpy);
         when(productRepository.getProduct(any(), any())).thenReturn(productSpy);
+        when(invItemRepository.getInventoryItemByBusinessAndId(any(), any())).thenReturn(invItemSpy);
         doNothing().when(businessSpy).checkSessionPermissions(any());
 
         //tests a wide range of floats
@@ -427,8 +443,10 @@ public class InventoryControllerModifyInvEntriesTest {
     void modifyInvEntries_modifyTotalPriceInvalid_cannotModify400() throws Exception {
         Business businessSpy = spy(testBusiness);
         Product productSpy = spy(testProduct);
+        InventoryItem invItemSpy = spy(testInvItem);
         when(businessRepository.getBusinessById(any())).thenReturn(businessSpy);
         when(productRepository.getProduct(any(), any())).thenReturn(productSpy);
+        when(invItemRepository.getInventoryItemByBusinessAndId(any(), any())).thenReturn(invItemSpy);
         doNothing().when(businessSpy).checkSessionPermissions(any());
 
         String[] prices = {"-21.01", "-0.01", "-9000", "-3000.99", "#", "$", "a", "b", "Z" };
@@ -449,8 +467,10 @@ public class InventoryControllerModifyInvEntriesTest {
     void modifyInvEntries_modifyTotalPriceNull_cannotModify400() throws Exception {
         Business businessSpy = spy(testBusiness);
         Product productSpy = spy(testProduct);
+        InventoryItem invItemSpy = spy(testInvItem);
         when(businessRepository.getBusinessById(any())).thenReturn(businessSpy);
         when(productRepository.getProduct(any(), any())).thenReturn(productSpy);
+        when(invItemRepository.getInventoryItemByBusinessAndId(any(), any())).thenReturn(invItemSpy);
         doNothing().when(businessSpy).checkSessionPermissions(any());
 
         JSONObject invBody = new JSONObject();
@@ -467,8 +487,10 @@ public class InventoryControllerModifyInvEntriesTest {
     void modifyInvEntries_modifyManufacturedDate_modifiedEntry200() throws Exception {
         Business businessSpy = spy(testBusiness);
         Product productSpy = spy(testProduct);
+        InventoryItem invItemSpy = spy(testInvItem);
         when(businessRepository.getBusinessById(any())).thenReturn(businessSpy);
         when(productRepository.getProduct(any(), any())).thenReturn(productSpy);
+        when(invItemRepository.getInventoryItemByBusinessAndId(any(), any())).thenReturn(invItemSpy);
         doNothing().when(businessSpy).checkSessionPermissions(any());
 
         JSONObject invBody = new JSONObject();
@@ -485,8 +507,10 @@ public class InventoryControllerModifyInvEntriesTest {
     void modifyInvEntries_modifyManufacturedDateInvalid_cannotModify400() throws Exception {
         Business businessSpy = spy(testBusiness);
         Product productSpy = spy(testProduct);
+        InventoryItem invItemSpy = spy(testInvItem);
         when(businessRepository.getBusinessById(any())).thenReturn(businessSpy);
         when(productRepository.getProduct(any(), any())).thenReturn(productSpy);
+        when(invItemRepository.getInventoryItemByBusinessAndId(any(), any())).thenReturn(invItemSpy);
         doNothing().when(businessSpy).checkSessionPermissions(any());
 
         String[] manufacturedDates = {"10-10", "10/10/1999", "999999", "#", "$", "a", "b", "Z" };
@@ -507,8 +531,10 @@ public class InventoryControllerModifyInvEntriesTest {
     void modifyInvEntries_modifyManufacturedDateNull_modifiedEntry200() throws Exception {
         Business businessSpy = spy(testBusiness);
         Product productSpy = spy(testProduct);
+        InventoryItem invItemSpy = spy(testInvItem);
         when(businessRepository.getBusinessById(any())).thenReturn(businessSpy);
         when(productRepository.getProduct(any(), any())).thenReturn(productSpy);
+        when(invItemRepository.getInventoryItemByBusinessAndId(any(), any())).thenReturn(invItemSpy);
         doNothing().when(businessSpy).checkSessionPermissions(any());
 
         JSONObject invBody = new JSONObject();
@@ -525,8 +551,10 @@ public class InventoryControllerModifyInvEntriesTest {
     void modifyInvEntries_modifyManufacturedDateAfterToday_cannotModify400() throws Exception {
         Business businessSpy = spy(testBusiness);
         Product productSpy = spy(testProduct);
+        InventoryItem invItemSpy = spy(testInvItem);
         when(businessRepository.getBusinessById(any())).thenReturn(businessSpy);
         when(productRepository.getProduct(any(), any())).thenReturn(productSpy);
+        when(invItemRepository.getInventoryItemByBusinessAndId(any(), any())).thenReturn(invItemSpy);
         doNothing().when(businessSpy).checkSessionPermissions(any());
 
         JSONObject invBody = new JSONObject();
@@ -543,8 +571,10 @@ public class InventoryControllerModifyInvEntriesTest {
     void modifyInvEntries_modifySelByDate_modifiedEntry200() throws Exception {
         Business businessSpy = spy(testBusiness);
         Product productSpy = spy(testProduct);
+        InventoryItem invItemSpy = spy(testInvItem);
         when(businessRepository.getBusinessById(any())).thenReturn(businessSpy);
         when(productRepository.getProduct(any(), any())).thenReturn(productSpy);
+        when(invItemRepository.getInventoryItemByBusinessAndId(any(), any())).thenReturn(invItemSpy);
         doNothing().when(businessSpy).checkSessionPermissions(any());
 
         JSONObject invBody = new JSONObject();
@@ -561,8 +591,10 @@ public class InventoryControllerModifyInvEntriesTest {
     void modifyInvEntries_modifySellByDateInvalid_cannotModify400() throws Exception {
         Business businessSpy = spy(testBusiness);
         Product productSpy = spy(testProduct);
+        InventoryItem invItemSpy = spy(testInvItem);
         when(businessRepository.getBusinessById(any())).thenReturn(businessSpy);
         when(productRepository.getProduct(any(), any())).thenReturn(productSpy);
+        when(invItemRepository.getInventoryItemByBusinessAndId(any(), any())).thenReturn(invItemSpy);
         doNothing().when(businessSpy).checkSessionPermissions(any());
 
         String[] sellByDates = {"10-10", "10/10/1999", "999999", "#", "$", "a", "b", "Z" };
@@ -583,8 +615,10 @@ public class InventoryControllerModifyInvEntriesTest {
     void modifyInvEntries_modifySellByDateNull_modifiedEntry200() throws Exception {
         Business businessSpy = spy(testBusiness);
         Product productSpy = spy(testProduct);
+        InventoryItem invItemSpy = spy(testInvItem);
         when(businessRepository.getBusinessById(any())).thenReturn(businessSpy);
         when(productRepository.getProduct(any(), any())).thenReturn(productSpy);
+        when(invItemRepository.getInventoryItemByBusinessAndId(any(), any())).thenReturn(invItemSpy);
         doNothing().when(businessSpy).checkSessionPermissions(any());
 
         JSONObject invBody = new JSONObject();
@@ -601,8 +635,10 @@ public class InventoryControllerModifyInvEntriesTest {
     void modifyInvEntries_modifySellByDateBeforeToday_cannotModify400() throws Exception {
         Business businessSpy = spy(testBusiness);
         Product productSpy = spy(testProduct);
+        InventoryItem invItemSpy = spy(testInvItem);
         when(businessRepository.getBusinessById(any())).thenReturn(businessSpy);
         when(productRepository.getProduct(any(), any())).thenReturn(productSpy);
+        when(invItemRepository.getInventoryItemByBusinessAndId(any(), any())).thenReturn(invItemSpy);
         doNothing().when(businessSpy).checkSessionPermissions(any());
 
         JSONObject invBody = new JSONObject();
@@ -619,8 +655,10 @@ public class InventoryControllerModifyInvEntriesTest {
     void modifyInvEntries_modifyBestBeforeDate_modifiedEntry200() throws Exception {
         Business businessSpy = spy(testBusiness);
         Product productSpy = spy(testProduct);
+        InventoryItem invItemSpy = spy(testInvItem);
         when(businessRepository.getBusinessById(any())).thenReturn(businessSpy);
         when(productRepository.getProduct(any(), any())).thenReturn(productSpy);
+        when(invItemRepository.getInventoryItemByBusinessAndId(any(), any())).thenReturn(invItemSpy);
         doNothing().when(businessSpy).checkSessionPermissions(any());
 
         JSONObject invBody = new JSONObject();
@@ -637,8 +675,10 @@ public class InventoryControllerModifyInvEntriesTest {
     void modifyInvEntries_modifyBestBeforeDateInvalid_cannotModify400() throws Exception {
         Business businessSpy = spy(testBusiness);
         Product productSpy = spy(testProduct);
+        InventoryItem invItemSpy = spy(testInvItem);
         when(businessRepository.getBusinessById(any())).thenReturn(businessSpy);
         when(productRepository.getProduct(any(), any())).thenReturn(productSpy);
+        when(invItemRepository.getInventoryItemByBusinessAndId(any(), any())).thenReturn(invItemSpy);
         doNothing().when(businessSpy).checkSessionPermissions(any());
 
         String[] bestBeforeDates = {"10-10", "10/10/1999", "999999", "#", "$", "a", "b", "Z" };
@@ -659,8 +699,10 @@ public class InventoryControllerModifyInvEntriesTest {
     void modifyInvEntries_modifyBestBeforeDateNull_modifiedEntry200() throws Exception {
         Business businessSpy = spy(testBusiness);
         Product productSpy = spy(testProduct);
+        InventoryItem invItemSpy = spy(testInvItem);
         when(businessRepository.getBusinessById(any())).thenReturn(businessSpy);
         when(productRepository.getProduct(any(), any())).thenReturn(productSpy);
+        when(invItemRepository.getInventoryItemByBusinessAndId(any(), any())).thenReturn(invItemSpy);
         doNothing().when(businessSpy).checkSessionPermissions(any());
 
         JSONObject invBody = new JSONObject();
@@ -677,8 +719,10 @@ public class InventoryControllerModifyInvEntriesTest {
     void modifyInvEntries_modifyBestBeforeDateBeforeToday_cannotModify400() throws Exception {
         Business businessSpy = spy(testBusiness);
         Product productSpy = spy(testProduct);
+        InventoryItem invItemSpy = spy(testInvItem);
         when(businessRepository.getBusinessById(any())).thenReturn(businessSpy);
         when(productRepository.getProduct(any(), any())).thenReturn(productSpy);
+        when(invItemRepository.getInventoryItemByBusinessAndId(any(), any())).thenReturn(invItemSpy);
         doNothing().when(businessSpy).checkSessionPermissions(any());
 
         JSONObject invBody = new JSONObject();
@@ -695,8 +739,10 @@ public class InventoryControllerModifyInvEntriesTest {
     void modifyInvEntries_modifyExpiresDate_modifiedEntry200() throws Exception {
         Business businessSpy = spy(testBusiness);
         Product productSpy = spy(testProduct);
+        InventoryItem invItemSpy = spy(testInvItem);
         when(businessRepository.getBusinessById(any())).thenReturn(businessSpy);
         when(productRepository.getProduct(any(), any())).thenReturn(productSpy);
+        when(invItemRepository.getInventoryItemByBusinessAndId(any(), any())).thenReturn(invItemSpy);
         doNothing().when(businessSpy).checkSessionPermissions(any());
 
         JSONObject invBody = new JSONObject();
@@ -713,8 +759,10 @@ public class InventoryControllerModifyInvEntriesTest {
     void modifyInvEntries_modifyExpiresDateInvalid_cannotModify400() throws Exception {
         Business businessSpy = spy(testBusiness);
         Product productSpy = spy(testProduct);
+        InventoryItem invItemSpy = spy(testInvItem);
         when(businessRepository.getBusinessById(any())).thenReturn(businessSpy);
         when(productRepository.getProduct(any(), any())).thenReturn(productSpy);
+        when(invItemRepository.getInventoryItemByBusinessAndId(any(), any())).thenReturn(invItemSpy);
         doNothing().when(businessSpy).checkSessionPermissions(any());
 
         String[] expiresDates = {"10-10", "10/10/1999", "999999", "#", "$", "a", "b", "Z" };
@@ -735,8 +783,10 @@ public class InventoryControllerModifyInvEntriesTest {
     void modifyInvEntries_modifyExpiresDateNull_cannotModify400() throws Exception {
         Business businessSpy = spy(testBusiness);
         Product productSpy = spy(testProduct);
+        InventoryItem invItemSpy = spy(testInvItem);
         when(businessRepository.getBusinessById(any())).thenReturn(businessSpy);
         when(productRepository.getProduct(any(), any())).thenReturn(productSpy);
+        when(invItemRepository.getInventoryItemByBusinessAndId(any(), any())).thenReturn(invItemSpy);
         doNothing().when(businessSpy).checkSessionPermissions(any());
 
         JSONObject invBody = new JSONObject();
@@ -753,8 +803,10 @@ public class InventoryControllerModifyInvEntriesTest {
     void modifyInvEntries_modifyExpiresDateBeforeToday_cannotModify400() throws Exception {
         Business businessSpy = spy(testBusiness);
         Product productSpy = spy(testProduct);
+        InventoryItem invItemSpy = spy(testInvItem);
         when(businessRepository.getBusinessById(any())).thenReturn(businessSpy);
         when(productRepository.getProduct(any(), any())).thenReturn(productSpy);
+        when(invItemRepository.getInventoryItemByBusinessAndId(any(), any())).thenReturn(invItemSpy);
         doNothing().when(businessSpy).checkSessionPermissions(any());
 
         JSONObject invBody = new JSONObject();
@@ -771,8 +823,10 @@ public class InventoryControllerModifyInvEntriesTest {
     void modifyInvEntries_modifyManufacturedBeforeSellBy_ModifiedEntry200() throws Exception {
         Business businessSpy = spy(testBusiness);
         Product productSpy = spy(testProduct);
+        InventoryItem invItemSpy = spy(testInvItem);
         when(businessRepository.getBusinessById(any())).thenReturn(businessSpy);
         when(productRepository.getProduct(any(), any())).thenReturn(productSpy);
+        when(invItemRepository.getInventoryItemByBusinessAndId(any(), any())).thenReturn(invItemSpy);
         doNothing().when(businessSpy).checkSessionPermissions(any());
 
         JSONObject invBody = new JSONObject();
@@ -790,8 +844,10 @@ public class InventoryControllerModifyInvEntriesTest {
     void modifyInvEntries_modifyManufacturedAfterSellBy_cannotModify400() throws Exception {
         Business businessSpy = spy(testBusiness);
         Product productSpy = spy(testProduct);
+        InventoryItem invItemSpy = spy(testInvItem);
         when(businessRepository.getBusinessById(any())).thenReturn(businessSpy);
         when(productRepository.getProduct(any(), any())).thenReturn(productSpy);
+        when(invItemRepository.getInventoryItemByBusinessAndId(any(), any())).thenReturn(invItemSpy);
         doNothing().when(businessSpy).checkSessionPermissions(any());
 
         JSONObject invBody = new JSONObject();
@@ -809,8 +865,10 @@ public class InventoryControllerModifyInvEntriesTest {
     void modifyInvEntries_modifyManufacturedBeforeBestBefore_modifiedEntry200() throws Exception {
         Business businessSpy = spy(testBusiness);
         Product productSpy = spy(testProduct);
+        InventoryItem invItemSpy = spy(testInvItem);
         when(businessRepository.getBusinessById(any())).thenReturn(businessSpy);
         when(productRepository.getProduct(any(), any())).thenReturn(productSpy);
+        when(invItemRepository.getInventoryItemByBusinessAndId(any(), any())).thenReturn(invItemSpy);
         doNothing().when(businessSpy).checkSessionPermissions(any());
 
         JSONObject invBody = new JSONObject();
@@ -828,8 +886,10 @@ public class InventoryControllerModifyInvEntriesTest {
     void modifyInvEntries_modifyManufacturedAfterBestBefore_cannotModify400() throws Exception {
         Business businessSpy = spy(testBusiness);
         Product productSpy = spy(testProduct);
+        InventoryItem invItemSpy = spy(testInvItem);
         when(businessRepository.getBusinessById(any())).thenReturn(businessSpy);
         when(productRepository.getProduct(any(), any())).thenReturn(productSpy);
+        when(invItemRepository.getInventoryItemByBusinessAndId(any(), any())).thenReturn(invItemSpy);
         doNothing().when(businessSpy).checkSessionPermissions(any());
 
         JSONObject invBody = new JSONObject();
@@ -847,8 +907,10 @@ public class InventoryControllerModifyInvEntriesTest {
     void modifyInvEntries_modifyManufacturedBeforeExpires_modifiedEntry200() throws Exception {
         Business businessSpy = spy(testBusiness);
         Product productSpy = spy(testProduct);
+        InventoryItem invItemSpy = spy(testInvItem);
         when(businessRepository.getBusinessById(any())).thenReturn(businessSpy);
         when(productRepository.getProduct(any(), any())).thenReturn(productSpy);
+        when(invItemRepository.getInventoryItemByBusinessAndId(any(), any())).thenReturn(invItemSpy);
         doNothing().when(businessSpy).checkSessionPermissions(any());
 
         JSONObject invBody = new JSONObject();
@@ -866,8 +928,10 @@ public class InventoryControllerModifyInvEntriesTest {
     void modifyInvEntries_modifyManufacturedAfterExpires_cannotModify400() throws Exception {
         Business businessSpy = spy(testBusiness);
         Product productSpy = spy(testProduct);
+        InventoryItem invItemSpy = spy(testInvItem);
         when(businessRepository.getBusinessById(any())).thenReturn(businessSpy);
         when(productRepository.getProduct(any(), any())).thenReturn(productSpy);
+        when(invItemRepository.getInventoryItemByBusinessAndId(any(), any())).thenReturn(invItemSpy);
         doNothing().when(businessSpy).checkSessionPermissions(any());
 
         JSONObject invBody = new JSONObject();
@@ -885,8 +949,10 @@ public class InventoryControllerModifyInvEntriesTest {
     void modifyInvEntries_modifySellByBeforeBestBefore_modifiedEntry200() throws Exception {
         Business businessSpy = spy(testBusiness);
         Product productSpy = spy(testProduct);
+        InventoryItem invItemSpy = spy(testInvItem);
         when(businessRepository.getBusinessById(any())).thenReturn(businessSpy);
         when(productRepository.getProduct(any(), any())).thenReturn(productSpy);
+        when(invItemRepository.getInventoryItemByBusinessAndId(any(), any())).thenReturn(invItemSpy);
         doNothing().when(businessSpy).checkSessionPermissions(any());
 
         JSONObject invBody = new JSONObject();
@@ -904,8 +970,10 @@ public class InventoryControllerModifyInvEntriesTest {
     void modifyInvEntries_modifySellByAfterBestBefore_cannotModify400() throws Exception {
         Business businessSpy = spy(testBusiness);
         Product productSpy = spy(testProduct);
+        InventoryItem invItemSpy = spy(testInvItem);
         when(businessRepository.getBusinessById(any())).thenReturn(businessSpy);
         when(productRepository.getProduct(any(), any())).thenReturn(productSpy);
+        when(invItemRepository.getInventoryItemByBusinessAndId(any(), any())).thenReturn(invItemSpy);
         doNothing().when(businessSpy).checkSessionPermissions(any());
 
         JSONObject invBody = new JSONObject();
@@ -923,8 +991,10 @@ public class InventoryControllerModifyInvEntriesTest {
     void modifyInvEntries_modifySellByBeforeExpires_modifiedEntry200() throws Exception {
         Business businessSpy = spy(testBusiness);
         Product productSpy = spy(testProduct);
+        InventoryItem invItemSpy = spy(testInvItem);
         when(businessRepository.getBusinessById(any())).thenReturn(businessSpy);
         when(productRepository.getProduct(any(), any())).thenReturn(productSpy);
+        when(invItemRepository.getInventoryItemByBusinessAndId(any(), any())).thenReturn(invItemSpy);
         doNothing().when(businessSpy).checkSessionPermissions(any());
 
         JSONObject invBody = new JSONObject();
@@ -942,8 +1012,10 @@ public class InventoryControllerModifyInvEntriesTest {
     void modifyInvEntries_modifySellByAfterExpires_cannotModify400() throws Exception {
         Business businessSpy = spy(testBusiness);
         Product productSpy = spy(testProduct);
+        InventoryItem invItemSpy = spy(testInvItem);
         when(businessRepository.getBusinessById(any())).thenReturn(businessSpy);
         when(productRepository.getProduct(any(), any())).thenReturn(productSpy);
+        when(invItemRepository.getInventoryItemByBusinessAndId(any(), any())).thenReturn(invItemSpy);
         doNothing().when(businessSpy).checkSessionPermissions(any());
 
         JSONObject invBody = new JSONObject();
@@ -961,8 +1033,10 @@ public class InventoryControllerModifyInvEntriesTest {
     void modifyInvEntries_modifyBestBeforeBeforeExpires_modifiedEntry200() throws Exception {
         Business businessSpy = spy(testBusiness);
         Product productSpy = spy(testProduct);
+        InventoryItem invItemSpy = spy(testInvItem);
         when(businessRepository.getBusinessById(any())).thenReturn(businessSpy);
         when(productRepository.getProduct(any(), any())).thenReturn(productSpy);
+        when(invItemRepository.getInventoryItemByBusinessAndId(any(), any())).thenReturn(invItemSpy);
         doNothing().when(businessSpy).checkSessionPermissions(any());
 
         JSONObject invBody = new JSONObject();
@@ -980,8 +1054,10 @@ public class InventoryControllerModifyInvEntriesTest {
     void modifyInvEntries_modifyBestBeforeAfterExpires_cannotModify400() throws Exception {
         Business businessSpy = spy(testBusiness);
         Product productSpy = spy(testProduct);
+        InventoryItem invItemSpy = spy(testInvItem);
         when(businessRepository.getBusinessById(any())).thenReturn(businessSpy);
         when(productRepository.getProduct(any(), any())).thenReturn(productSpy);
+        when(invItemRepository.getInventoryItemByBusinessAndId(any(), any())).thenReturn(invItemSpy);
         doNothing().when(businessSpy).checkSessionPermissions(any());
 
         JSONObject invBody = new JSONObject();
@@ -999,8 +1075,10 @@ public class InventoryControllerModifyInvEntriesTest {
     void modifyInvEntries_modifyAllFields_modifiedEntry200() throws Exception {
         Business businessSpy = spy(testBusiness);
         Product productSpy = spy(testProduct);
+        InventoryItem invItemSpy = spy(testInvItem);
         when(businessRepository.getBusinessById(any())).thenReturn(businessSpy);
         when(productRepository.getProduct(any(), any())).thenReturn(productSpy);
+        when(invItemRepository.getInventoryItemByBusinessAndId(any(), any())).thenReturn(invItemSpy);
         doNothing().when(businessSpy).checkSessionPermissions(any());
 
         JSONObject invBody = new JSONObject();

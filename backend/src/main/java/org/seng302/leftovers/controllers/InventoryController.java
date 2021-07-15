@@ -90,13 +90,13 @@ public class InventoryController {
                 invItemId);
         logger.info(message);
         try {
+
             //AuthenticationTokenManager.checkAuthenticationToken(request);
 
             Business business = businessRepository.getBusinessById(businessId);
             business.checkSessionPermissions(request);
 
             InventoryItem invItem = inventoryItemRepository.getInventoryItemByBusinessAndId(business, invItemId);
-            System.out.println(invItem.getId());
 
             if (invItemInfo == null) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No JSON request body was provided");
