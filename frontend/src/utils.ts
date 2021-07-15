@@ -102,3 +102,57 @@ export function trimToLength(str: string, length: number) {
 export function isTesting() {
   return process.env.JEST_WORKER_ID !== undefined;
 }
+
+/**
+ * ========= REGEX =========
+ */
+
+/**
+ * Returns a Regex pattern that matches letters, spaces and dashes
+ */
+export function regxAlphabet() {
+  return /^[\p{L}\- ]*$/u;
+}
+
+/**
+ * Returns a Regex pattern that matches letters, spaces, numbers and common characters
+ */
+export function regxAlphabetExtended() {
+  return /(^[\p{L}0-9\p{P} ]*$)/u;
+}
+
+/**
+ * Returns a Regex that matches a password with at least one number and one letter.
+ */
+export function regxPassword() {
+  return /^(?=.*[0-9])(?=.*[\p{L} ])([\p{L}0-9 ]+)$/u;
+}
+
+/**
+ * Returns a Regex that matches a valid email address
+ */
+export function regxEmail() {
+  return /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+}
+
+/**
+ * Returns a Regex that matches a valid post code
+ */
+export function regxPostCode() {
+  return /(^[\p{L}0-9]*$)/u;
+}
+
+/**
+ Returns a Regex that matches a valid phone number
+ */
+export function regxPhoneNumber() {
+  return /(^\(?\d{1,3}\)?[\s.-]?\d{3,4}[\s.-]?\d{4,5}$)|(^$)/;
+}
+
+export function regxCountryCode() {
+  return /(^(\d{1,2}-)?\d{2,3}$)|(^$)/;
+}
+
+export function regxStreet() {
+  return /^(([0-9]+|[0-9]+\/[0-9]+)[a-zA-Z]?)(?=\s[\p{L}])([\p{L}0-9 ]+)$/u;
+}

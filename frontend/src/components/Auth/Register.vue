@@ -167,7 +167,7 @@
       <LocationAutocomplete
         type="district"
         v-model="district"
-        :rules="maxLongCharRules.concat(alphabetRules).concat(maxLongCharRules)"
+        :rules="maxLongCharRules.concat(alphabetRules)"
       />
 
       <!-- INPUT: City -->
@@ -199,7 +199,7 @@
         class="required"
         v-model="postcode"
         label="Postcode"
-        :rules="mandatoryRules.concat(numberRules).concat(maxShortCharRules)"
+        :rules="mandatoryRules.concat(postCodeRules).concat(maxShortCharRules)"
         outlined
       />
 
@@ -227,6 +227,15 @@
 <script>
 import LocationAutocomplete from '@/components/utils/LocationAutocomplete';
 import {createUser} from '../../api/internal';
+import {
+  regxAlphabet,
+  regxAlphabetExtended,
+  regxCountryCode,
+  regxEmail,
+  regxPassword,
+  regxPhoneNumber,
+  regxPostCode, regxStreet
+} from "@/utils";
 
 export default {
   name: 'Register',
@@ -265,8 +274,7 @@ export default {
         //"blah@hotmail.co
         //if it does not follow the format, display error message
         email =>
-          /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(email)
-          || 'E-mail must be valid'
+          regxEmail().test(email) || 'E-mail must be valid'
       ],
       mandatoryRules: [
         //All fields with the class "required" will go through this ruleset to ensure the field is not empty.
@@ -275,13 +283,13 @@ export default {
       ],
       passwordRules: [
         field => (field && field.length >= 7) || 'Password must have 7+ characters',
-        field => (/^(?=.*[0-9])(?=.*[\p{L} ])([\p{L}0-9 ]+)$/u).test(field) || 'Must have at least one number and one alphabet'
+        field => regxPassword().test(field) || 'Must have at least one number and one alphabet'
       ],
-      numberRules: [
-        field => /(^[a-zA-Z0-9]*$)/.test(field) || 'Must contain numbers and alphabet only'
+      postCodeRules: [
+        field => regxPostCode().test(field) || 'Must contain numbers and alphabet only'
       ],
       nameRules: [
-        field =>  (field.length === 0 || (/^[\p{L} -]+$/u).test(field)) || 'Naming must be valid'
+        field =>  (field.length === 0 || regxAlphabet().test(field)) || 'Naming must be valid'
       ],
       maxShortCharRules: [
         field => (field.length <= 16) || 'Reached max character limit: 16'
@@ -294,20 +302,20 @@ export default {
       ],
       charBioRules: [
         field => (field.length <= 200) || 'Reached max character limit: 200',
-        field => (/(^[\p{L} 0-9@//$%&!'//#,//.//(//)//:;_-]*$)/u).test(field) || 'Bio must only contain letters, numbers, and valid special characters'
+        field => regxAlphabetExtended().test(field) || 'Bio must only contain letters, numbers, and valid special characters'
       ],
       phoneNumberRules: [
-        field => /(^\(?\d{1,3}\)?[\s.-]?\d{3,4}[\s.-]?\d{4,5}$)|(^$)/.test(field) || 'Must be a valid phone number'
+        field => regxPhoneNumber().test(field) || 'Must be a valid phone number'
       ],
       countryCodeRules: [
-        field => /(^(\d{1,2}-)?\d{2,3}$)|(^$)/.test(field) || 'Must be a valid country code.'
+        field => regxCountryCode().test(field) || 'Must be a valid country code.'
       ],
       alphabetRules: [
-        field => (field.length === 0 || (/^[\p{L}\- ]+$/u).test(field)) || 'Naming must be valid'
+        field => (field.length === 0 || regxAlphabet().test(field)) || 'Naming must be valid'
       ],
       streetNumRules: [
         field => (field && field.length <= 109) || 'Reached max character limit 109 ',
-        field => /^(([0-9]+|[0-9]+\/[0-9]+)[a-zA-Z]?)(?=.*[\s])(?=.*[\p{L} ])([\p{L}0-9 ]+)$/u.test(field) || 'Must have at least one number and one alphabet'
+        field => regxStreet().test(field) || 'Must have at least one number and one alphabet'
       ],
     };
   },

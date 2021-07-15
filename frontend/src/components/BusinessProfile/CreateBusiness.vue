@@ -18,7 +18,7 @@
                     class="required"
                     v-model="business"
                     label="Name of business"
-                    :rules="mandatoryRules.concat(maxCharRules)"
+                    :rules="mandatoryRules.concat(maxCharRules).concat(alphabetExtendedRules)"
                     outlined
                   />
                 </v-col>
@@ -26,7 +26,7 @@
                   <v-textarea
                     v-model="description"
                     label="Description"
-                    :rules="maxCharDescriptionRules"
+                    :rules="maxCharDescriptionRules.concat(alphabetExtendedRules)"
                     rows="3"
                     outlined
                   />
@@ -37,7 +37,7 @@
                     v-model="businessType"
                     :items="businessTypes"
                     label="Business Type"
-                    :rules="mandatoryRules.concat(maxCharRules)"
+                    :rules="mandatoryRules"
                     outlined
                   />
                 </v-col>
@@ -53,7 +53,7 @@
                   <LocationAutocomplete
                     type="district"
                     v-model="district"
-                    :rules="maxCharRules"
+                    :rules="maxCharRules.concat(alphabetRules)"
                   />
                 </v-col>
                 <v-col cols="12">
@@ -61,7 +61,7 @@
                     type="city"
                     class="required"
                     v-model="city"
-                    :rules="mandatoryRules.concat(maxCharRules)"
+                    :rules="mandatoryRules.concat(maxCharRules).concat(alphabetRules)"
                   />
                 </v-col>
                 <v-col cols="12">
@@ -69,7 +69,7 @@
                     type="region"
                     class="required"
                     v-model="region"
-                    :rules="mandatoryRules.concat(maxCharRules)"
+                    :rules="mandatoryRules.concat(maxCharRules).concat(alphabetRules)"
                   />
                 </v-col>
                 <v-col cols="12">
@@ -77,7 +77,7 @@
                     type="country"
                     class="required"
                     v-model="country"
-                    :rules="mandatoryRules.concat(maxCharRules)"
+                    :rules="mandatoryRules.concat(maxCharRules).concat(alphabetRules)"
                   />
                 </v-col>
                 <v-col cols="12">
@@ -85,7 +85,7 @@
                     class="required"
                     v-model="postcode"
                     label="Postcode"
-                    :rules="mandatoryRules.concat(maxCharRules)"
+                    :rules="mandatoryRules.concat(maxCharRules).concat(postcodeRules)"
                     outlined
                   />
                 </v-col>
@@ -118,6 +118,7 @@
 <script>
 import LocationAutocomplete from '@/components/utils/LocationAutocomplete';
 import {createBusiness} from '@/api/internal';
+import {regxAlphabet, regxAlphabetExtended, regxPostCode, regxStreet} from "@/utils";
 
 export default {
   name: 'CreateBusiness',
@@ -155,8 +156,17 @@ export default {
         //if it does not follow the format, display error message
         field => !!field || 'Field is required'
       ],
+      alphabetExtendedRules: [
+        field => regxAlphabetExtended().test(field) || 'Must contain only letters, numbers, spaces and punctuation'
+      ],
+      alphabetRules: [
+        field => regxAlphabet().test(field) || 'Must contain only letters, spaces and dashes'
+      ],
       streetRules: [
-        field => /^(([0-9]+|[0-9]+\/[0-9]+)[\p{L}]?)(?=.*[\s])(?=.*[\p{L} ])([\p{L}0-9 ]+)$/u.test(field) || 'Must have at least one number and one alphabet'
+        field => regxStreet().test(field) || 'Must have at least one number and one alphabet'
+      ],
+      postcodeRules: [
+        field => regxPostCode().test(field) || 'Must contain numbers and letters only'
       ]
     };
   },
