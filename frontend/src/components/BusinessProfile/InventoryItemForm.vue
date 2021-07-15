@@ -160,6 +160,7 @@
 <script>
 import { createInventoryItem, getProducts } from '@/api/internal';
 import { currencyFromCountry } from "@/api/currency";
+import {regxNumerical} from "@/utils";
 
 export default {
   name: 'InventoryItemForm',
@@ -197,18 +198,21 @@ export default {
         field => !!field || 'Field is required'
       ],
       numberRules: [
-        field => /(^[0-9]*$)/.test(field) || 'Must contain numbers only'
+        field => regxNumerical().test(field) || 'Must contain numbers only'
       ],
       quantityRules: [
-        field => /(^[1-9][0-9]*$)/.test(field) || 'Must contain numbers only above zero'
+        field => regxNumerical().test(field) || 'Must contain numbers only above zero',
+        field => parseInt(field) > 0
       ],
       smallPriceRules: [
         //A price must be numbers and may contain a decimal followed by exactly two numbers (4digit)
-        field => /(^\d{1,4}(\.\d{2})?$)|^$/.test(field) || 'Must be a valid price. Must be less than 10,000'
+        field => regxNumerical().test(field) || 'Must be a valid price',
+        field => parseInt(field) < 10000 || 'Must be less than 10,000'
       ],
       hugePriceRules: [
         //A price must be numbers and may contain a decimal followed by exactly two numbers (6digit)
-        field => /(^\d{1,6}(\.\d{2})?$)|^$/.test(field) || 'Must be a valid price. Must be less than 1,000,000'
+        field => regxNumerical().test(field) || 'Must be a valid price',
+        field => parseInt(field) < 1000000 || 'Must be less than 1,000,000'
       ],
     };
   },

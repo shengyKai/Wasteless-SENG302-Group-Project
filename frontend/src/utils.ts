@@ -118,7 +118,25 @@ export function regxAlphabet() {
  * Returns a Regex pattern that matches letters, spaces, numbers and common characters
  */
 export function regxAlphabetExtended() {
-  return /(^[\p{L}0-9\p{P} ]*$)/u;
+  return /(^[\p{L}\d\p{P} ]*$)/u;
+}
+
+export function regxAlphabetExtendedMultiline() {
+  return /(^[\p{L}\d\p{P}\s]*$)/u;
+}
+
+/**
+ * Returns a Regex pattern that matches numbers
+ */
+export function regxNumerical() {
+  return /(^[\d]*$)/;
+}
+
+/**
+ * Returns a Regex pattern that matches a price
+ */
+export function regxPrice() {
+  return /(^\d{1,4}(\.\d{2})?$)|^$/;
 }
 
 /**
@@ -155,4 +173,8 @@ export function regxCountryCode() {
 
 export function regxStreet() {
   return /^(([0-9]+|[0-9]+\/[0-9]+)[a-zA-Z]?)(?=\s[\p{L}])([\p{L}0-9 ]+)$/u;
+}
+
+export function regxProductCode() {
+  return /^[-A-Z0-9]+$/;
 }

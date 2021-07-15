@@ -403,7 +403,7 @@ class BusinessTests {
     @Test
     void setDescriptionInvalidCharacterTest() {
         String originalDescription = testBusiness1.getDescription();
-        String[] invalidCharacterDescriptions = {"ƒ", "»»»»»", "business¢", "½This is not allowed", "¡or this¡"};
+        String[] invalidCharacterDescriptions = {"»»»»»", "business¢", "½This is not allowed", "¡or this¡"};
         for (String description : invalidCharacterDescriptions) {
             ResponseStatusException e = assertThrows(ResponseStatusException.class, () -> {
                 testBusiness1.setDescription(description);

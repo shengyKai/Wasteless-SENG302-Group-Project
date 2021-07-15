@@ -92,6 +92,7 @@
 <script>
 import { createSaleItem } from "@/api/internal";
 import { currencyFromCountry } from "@/api/currency";
+import {regxAlphabetExtended, regxNumerical, regxPrice} from "@/utils";
 
 export default {
   name: "CreateSaleItem",
@@ -120,7 +121,7 @@ export default {
       ],
 
       quantityRules: [
-        (field) => /(^[0-9]*$)/.test(field) || "Must be a valid number",
+        (field) => regxNumerical().test(field) || "Must be a valid number",
         (field) => parseInt(field) !== 0 || "Must not be zero",
         (field) =>
           parseInt(field) <= this.inventoryItem.remainingQuantity ||
@@ -129,18 +130,14 @@ export default {
 
       priceRules: [
         (field) =>
-          /(^\d{1,4}(\.\d{2})?$)|^$/.test(field) ||
-                    "Must be a valid price",
+          regxPrice().test(field) || "Must be a valid price",
       ],
 
       infoRules: [
         (field) =>
           field.length <= 200 || "Reached max character limit: 200",
         (field) =>
-          /(^[ a-zA-Z0-9@//$%&!'//#,//.//(//)//:;_-]*$)/.test(
-            field
-          ) ||
-                    "Bio must only contain letters, numbers, and valid special characters",
+          regxAlphabetExtended().test(field) || "Bio must only contain letters, numbers, and valid special characters",
       ],
     };
   },

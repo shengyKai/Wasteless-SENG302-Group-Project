@@ -15,6 +15,7 @@
         v-model="password"
         type="password"
         label="Password"
+        :rules="mandatoryRules"
         outlined
       />
     </v-form>
@@ -37,6 +38,8 @@
 
 <script>
 // import {login} from '../../api';
+import {regxEmail} from "@/utils";
+
 export default {
   loggedIn: true,
   name: "Login",
@@ -48,8 +51,8 @@ export default {
       password: "",
       emailRules: [
         email =>
-          /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(email)
-          || ''
+          regxEmail().test(email)
+          || 'Not a valid email'
       ],
       mandatoryRules: [
         /**
@@ -57,10 +60,6 @@ export default {
          * If it does not follow the format, turn text field into red
         */
         (field) => !!field || '',
-      ],
-      passwordRules: [
-        field => (field && field.length >= 7 && field.length <= 16) || 'Password must have 7-16 characters',
-        field => /^(?=.*[0-9])(?=.*[a-zA-ZÀ-ž])([a-zA-ZÀ-ž0-9]+)$/.test(field) || 'Must have at least one number and one alphabet',
       ],
       maxCharShortRules: [
         (field) => field.length <= 16 || "Reached max character limit: 16",

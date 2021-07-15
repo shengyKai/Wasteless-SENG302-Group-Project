@@ -105,6 +105,7 @@
 <script>
 import {createProduct, getBusiness, modifyProduct} from '@/api/internal';
 import {currencyFromCountry} from "@/api/currency";
+import {regxAlphabetExtended, regxAlphabetExtendedMultiline, regxPrice, regxProductCode} from "@/utils";
 export default {
   name: 'ProductForm',
   props: {
@@ -145,10 +146,10 @@ export default {
         field => (field.length <= 200) || 'Reached max character limit: 200',
       ],
       validCharactersSingleLineRules: [
-        field => /^[ \d\p{L}\p{P}]*$/u.test(field) || 'Must only contain letters, numbers, punctuation and spaces',
+        field => regxAlphabetExtended().test(field) || 'Must only contain letters, numbers, punctuation and spaces',
       ],
       validCharactersMultiLineRules: [
-        field => /^[\s\d\p{L}\p{P}]*$/u.test(field) || 'Must only contain letters, numbers, punctuation and whitespace',
+        field => regxAlphabetExtendedMultiline().test(field) || 'Must only contain letters, numbers, punctuation and whitespace',
       ],
       mandatoryRules: [
         //All fields with the class "required" will go through this ruleset to ensure the field is not empty.
@@ -157,12 +158,12 @@ export default {
       ],
       priceRules: [
         //A price must be numbers and may contain a decimal followed by exactly two numbers
-        field => /(^\d{1,5}(\.\d{2})?$)|^$/.test(field) || 'Must be a valid price'
+        field => regxPrice().test(field) || 'Must be a valid price'
       ],
       productCodeRules: [
         field => field.length <= 15 || 'Reached max character limit: 15',
         field => !/ /.test(field) || 'Must not contain a space',
-        field => /^[-A-Z0-9]+$/.test(field) || 'Must be all uppercase letters, numbers and dashes.',
+        field => regxProductCode().test(field) || 'Must be all uppercase letters, numbers and dashes.',
         field => !this.unavailableProductCodes.includes(field) || 'Product code is unavailable',
       ]
     };
