@@ -163,15 +163,50 @@ paths:
             type: string
           required: true
           description: 'Criteria to search users for, e.g: user’s full name or one or more of their names/nickname'
+        - name: page
+          in: query
+          description: The page number to retrieve (1 indexed)
+          schema:
+            type: integer
+        - name: resultsPerPage
+          in: query
+          description: The number of results to show per page
+          schema:
+            type: integer
+        - name: orderBy
+          in: query
+          description: Card property to order results by
+          schema:
+            type: string
+            enum:
+              - userId
+              - relevance
+              - firstName
+              - middleName
+              - lastName
+              - nickname
+              - email
+        - name: reverse
+          in: query
+          description: Whether to flip default sort order (default is ascending)
+          schema:
+            type: boolean
       responses:
         '200':
           description: Request successful, a (possibly empty) list of users is returned
           content:
             application/json:
               schema:
-                type: array
-                items: 
-                  $ref: '#/components/schemas/User'
+                allOf:
+                  - $ref: '#/components/schemas/Page'
+                  - type: object
+                    required:
+                      - results
+                    properties:
+                      results:
+                        type: array
+                        items: 
+                          $ref: '#/components/schemas/User'
         '401':
           $ref: '#/components/responses/UnauthorizedError'
       
@@ -390,6 +425,33 @@ paths:
           required: true
           schema:
             type: integer
+        - name: page
+          in: query
+          description: The page number to retrieve (1 indexed)
+          schema:
+            type: integer
+        - name: resultsPerPage
+          in: query
+          description: The number of results to show per page
+          schema:
+            type: integer
+        - name: orderBy
+          in: query
+          description: Card property to order results by
+          schema:
+            type: string
+            enum:
+              - name
+              - description
+              - manufacturer
+              - recommendedRetailPrice
+              - created
+              - productCode
+        - name: reverse
+          in: query
+          description: Whether to flip default sort order (default is ascending)
+          schema:
+            type: boolean
       responses:
         '200':
           description: 'Catalogue retrieved successfully. This could be an empty array.'
@@ -637,6 +699,40 @@ paths:
           required: true
           schema:
             type: integer
+        - name: page
+          in: query
+          description: The page number to retrieve (1 indexed)
+          schema:
+            type: integer
+        - name: resultsPerPage
+          in: query
+          description: The number of results to show per page
+          schema:
+            type: integer
+        - name: orderBy
+          in: query
+          description: Card property to order results by
+          schema:
+            type: string
+            enum:
+              - name
+              - description
+              - manufacturer
+              - recommendedRetailPrice
+              - created
+              - quantity
+              - pricePerItem
+              - totalPrice
+              - manufactured
+              - sellBy
+              - bestBefore
+              - expires
+              - productCode
+        - name: reverse
+          in: query
+          description: Whether to flip default sort order (default is ascending)
+          schema:
+            type: boolean
       responses:
         '200':
           description: 'Inventory retrieved successfully. This could be an empty array.'
@@ -749,6 +845,33 @@ paths:
           required: true
           schema:
             type: integer
+        - name: page
+          in: query
+          description: The page number to retrieve (1 indexed)
+          schema:
+            type: integer
+        - name: resultsPerPage
+          in: query
+          description: The number of results to show per page
+          schema:
+            type: integer
+        - name: orderBy
+          in: query
+          description: Card property to order results by
+          schema:
+            type: string
+            enum:
+              - created
+              - closing
+              - productCode
+              - productName
+              - quantity
+              - price
+        - name: reverse
+          in: query
+          description: Whether to flip default sort order (default is ascending)
+          schema:
+            type: boolean
       responses:
         '200':
           description: 'Listings retrieved successfully. This could be an empty array.'
@@ -852,6 +975,32 @@ paths:
               - ForSale
               - Wanted
               - Exchange
+        - name: page
+          in: query
+          description: The page number to retrieve (1 indexed)
+          schema:
+            type: integer
+        - name: resultsPerPage
+          in: query
+          description: The number of results to show per page
+          schema:
+            type: integer
+        - name: orderBy
+          in: query
+          description: Card property to order results by
+          schema:
+            type: string
+            enum:
+              - created
+              - title
+              - closes
+              - creatorFirstName
+              - creatorLastName
+        - name: reverse
+          in: query
+          description: Whether to flip default sort order (default is ascending)
+          schema:
+            type: boolean
       security: 
           - CookieAuth:
             - user
@@ -981,6 +1130,16 @@ paths:
           schema:
             type: integer
             example: 100
+        - name: page
+          in: query
+          description: The page number to retrieve (1 indexed)
+          schema:
+            type: integer
+        - name: resultsPerPage
+          in: query
+          description: The number of results to show per page
+          schema:
+            type: integer
       security: 
           - CookieAuth:
             - user
@@ -1319,6 +1478,7 @@ components:
       required:
         - productId
         - quantity
+        - remainingQuantity
         - expires
       properties:
         id:
@@ -1339,6 +1499,10 @@ components:
           type: integer
           example: 4
           description: How many items of stock are present
+        remainingQuantity:
+          type: integer
+          example: 3
+          description: How many items of stock are not in a listing
         pricePerItem:
           type: number
           format: double

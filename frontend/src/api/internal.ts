@@ -701,6 +701,8 @@ export async function getBusinessSalesCount(businessId: number): Promise<MaybeEr
   return response.data.count;
 }
 
+type InventoryOrderBy = 'name' | 'description' | 'manufacturer' | 'recommendedRetailPrice' | 'created' | 'quantity' | 'pricePerItem' | 'totalPrice' | 'manufactured' | 'sellBy' | 'bestBefore' | 'expires' | 'productCode'
+
 /**
  * Get all inventory items for that business
  *
@@ -711,7 +713,7 @@ export async function getBusinessSalesCount(businessId: number): Promise<MaybeEr
  * @param reverse
  * @return a list of inventory items
  */
-export async function getInventory(businessId: number, page: number, resultsPerPage: number, orderBy: string, reverse: boolean): Promise<MaybeError<InventoryItem[]>> {
+export async function getInventory(businessId: number, page: number, resultsPerPage: number, orderBy: InventoryOrderBy, reverse: boolean): Promise<MaybeError<InventoryItem[]>> {
   let response;
   try {
     response = await instance.get(`/businesses/${businessId}/inventory`, {
