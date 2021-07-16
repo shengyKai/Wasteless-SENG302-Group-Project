@@ -32,7 +32,7 @@
                     label="Product Code"
                     item-text="name"
                     item-value="id"
-                    :rules="mandatoryRules"
+                    :rules="mandatoryRules()"
                     :hint="productCode"
                     @click="productCode=undefined"
                     persistent-hint
@@ -60,7 +60,7 @@
                     class="required"
                     v-model="quantity"
                     label="Quantity"
-                    :rules="mandatoryRules.concat(quantityRules)"
+                    :rules="mandatoryRules().concat(quantityRules())"
                     outlined
                   />
                 </v-col>
@@ -72,7 +72,7 @@
                     :prefix="currency.symbol"
                     :suffix="currency.code"
                     :hint="currency.errorMessage"
-                    :rules="smallPriceRules"
+                    :rules="smallPriceRules()"
                     outlined
                   />
                 </v-col>
@@ -84,7 +84,7 @@
                     :prefix="currency.symbol"
                     :suffix="currency.code"
                     :hint="currency.errorMessage"
-                    :rules="hugePriceRules"
+                    :rules="hugePriceRules()"
                     outlined/>
                 </v-col>
                 <!-- INPUT: Manufactured. Only take in value in dd/mm/yyyy format.-->
@@ -160,6 +160,7 @@
 <script>
 import { createInventoryItem, getProducts } from '@/api/internal';
 import { currencyFromCountry } from "@/api/currency";
+import {hugePriceRules, mandatoryRules, quantityRules, smallPriceRules} from "@/utils";
 
 export default {
   name: 'InventoryItemForm',
@@ -191,25 +192,10 @@ export default {
       minDate: new Date("1500-01-01"),
       maxDate: new Date("5000-01-01"),
       currency: {},
-      mandatoryRules: [
-        //All fields with the class "required" will go through this ruleset to ensure the field is not empty.
-        //if it does not follow the format, display error message
-        field => !!field || 'Field is required'
-      ],
-      numberRules: [
-        field => /(^[0-9]*$)/.test(field) || 'Must contain numbers only'
-      ],
-      quantityRules: [
-        field => /(^[1-9][0-9]*$)/.test(field) || 'Must contain numbers only above zero'
-      ],
-      smallPriceRules: [
-        //A price must be numbers and may contain a decimal followed by exactly two numbers (4digit)
-        field => /(^\d{1,4}(\.\d{2})?$)|^$/.test(field) || 'Must be a valid price. Must be less than 10,000'
-      ],
-      hugePriceRules: [
-        //A price must be numbers and may contain a decimal followed by exactly two numbers (6digit)
-        field => /(^\d{1,6}(\.\d{2})?$)|^$/.test(field) || 'Must be a valid price. Must be less than 1,000,000'
-      ],
+      mandatoryRules: () => mandatoryRules,
+      quantityRules: () => quantityRules,
+      smallPriceRules: () => smallPriceRules,
+      hugePriceRules: () => hugePriceRules,
     };
   },
   methods: {
