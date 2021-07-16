@@ -25,6 +25,7 @@ import java.util.Collections;
 import java.util.List;
 import java.time.Duration;
 
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
 public class CardSortDefinition {
@@ -108,6 +109,13 @@ public class CardSortDefinition {
                 .withDescription("A cool vintage car")
                 .withCloses(Instant.now().plus(Duration.ofDays(14).plus(Duration.ofSeconds(2))))
                 .build();
+        var card4 = new MarketplaceCard.Builder()
+                .withCreator(userContext.getByName("Charlie"))
+                .withSection("Wanted")
+                .withTitle("Colourful")
+                .withDescription("A cool vintage car")
+                .withCloses(Instant.now().plus(Duration.ofDays(14).plus(Duration.ofSeconds(2))))
+                .build();
         //overwrite the created time field here so that we can produce expected result orderings
         Field createdField = MarketplaceCard.class.getDeclaredField("created");
         createdField.setAccessible(true);
@@ -122,64 +130,75 @@ public class CardSortDefinition {
         expectedOrder.add(card3.getCreator().getFirstName());
     }
 
-    @Then("the cards should be ordered by {string} by default")
-    public void the_cards_should_be_ordered_by_by_default(String string) throws UnsupportedEncodingException, ParseException {
-        cards = requestContext.performRequest(get("/cards")
-                .queryParam("section", "Wanted"));
-        JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
-        JSONObject jsonObject = (JSONObject) parser.parse(cards.getResponse().getContentAsString());
-
-        JSONObject creator;
-        int iterator = 0;
-        for (Object object: (JSONArray) jsonObject.get("results")) {
-            creator = (JSONObject) ((JSONObject) object).get("creator");
-            Assert.assertEquals(expectedOrder.get(iterator), creator.get("firstName"));
-            iterator += 1;
-        }
-    }
-
-    @When("have them ordered by {string}")
-    public void have_them_ordered_by(String order) {
+    @When("the cards are ordered by {string}")
+    public void the_cards_are_ordered_by(String order) {
         cards = requestContext.performRequest(get("/cards")
                 .queryParam("section", "Wanted")
                 .queryParam("orderBy", order));
     }
 
-    @When("have them ordered by {string} in reverse")
-    public void have_them_ordered_by_in_reverse(String order) {
+    @When("the cards are ordered by {string} in reverse")
+    public void the_cards_are_ordered_by_in_reverse(String order) {
         cards = requestContext.performRequest(get("/cards")
                 .queryParam("section", "Wanted")
                 .queryParam("orderBy", order)
                 .queryParam("reverse", "true"));
     }
 
-    @Then("the cards should be ordered by their {string}")
-    public void the_cards_should_be_ordered_by_their(String order) throws UnsupportedEncodingException, ParseException {
+    @Then("the cards in the response should be ordered by {string} by default")
+    public void the_cards_in_the_response_should_be_ordered_by_by_default(String string) throws UnsupportedEncodingException, ParseException {
+        cards = requestContext.performRequest(get("/cards")
+                .queryParam("section", "Wanted"));
         JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
         JSONObject jsonObject = (JSONObject) parser.parse(cards.getResponse().getContentAsString());
 
-        JSONObject creator;
         int iterator = 0;
-        for (Object object: (JSONArray) jsonObject.get("results")) {
-            creator = (JSONObject) ((JSONObject) object).get("creator");
-            Assert.assertEquals(expectedOrder.get(iterator), creator.get("firstName"));
-            iterator += 1;
+        try {
+            for (JSONObject object : (List<JSONObject>) jsonObject.get("results")) {
+                JSONObject creator = (JSONObject) object.get("creator");
+                Assert.assertEquals(expectedOrder.get(iterator), creator.get("firstName"));
+                iterator += 1;
+            }
+        } catch (ClassCastException e) {
+            fail("Invalid error type for response");
         }
     }
 
-    @Then("the cards should be ordered by their {string} in reverse")
-    public void the_cards_should_be_ordered_by_their_in_reverse(String string) throws UnsupportedEncodingException, ParseException {
+    @Then("the cards in the response should be ordered by their {string}")
+    public void the_cards_in_the_response_should_be_ordered_by_their(String order) throws UnsupportedEncodingException, ParseException {
+        JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
+        JSONObject jsonObject = (JSONObject) parser.parse(cards.getResponse().getContentAsString());
+
+        int iterator = 0;
+        try {
+            for (JSONObject object : (List<JSONObject>) jsonObject.get("results")) {
+                JSONObject creator = (JSONObject) object.get("creator");
+                Assert.assertEquals(expectedOrder.get(iterator), creator.get("firstName"));
+                iterator += 1;
+            }
+        } catch (ClassCastException e) {
+            fail("Invalid error type for response");
+        }
+    }
+
+    @Then("the cards in the response should be ordered by their {string} in reverse")
+    public void the_cards_in_the_response_should_be_ordered_by_their_in_reverse(String string) throws UnsupportedEncodingException, ParseException {
         JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
         JSONObject jsonObject = (JSONObject) parser.parse(cards.getResponse().getContentAsString());
 
         Collections.reverse(expectedOrder);
 
-        JSONObject creator;
         int iterator = 0;
-        for (Object object: (JSONArray) jsonObject.get("results")) {
-            creator = (JSONObject) ((JSONObject) object).get("creator");
-            Assert.assertEquals(expectedOrder.get(iterator), creator.get("firstName"));
-            iterator += 1;
+        try {
+            for (JSONObject object : (List<JSONObject>) jsonObject.get("results")) {
+                JSONObject creator = (JSONObject) object.get("creator");
+                Assert.assertEquals(expectedOrder.get(iterator), creator.get("firstName"));
+                iterator += 1;
+            }
+        } catch (ClassCastException e) {
+            fail("Invalid error type for response");
         }
     }
+
+
 }
