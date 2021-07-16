@@ -38,23 +38,26 @@ public class CardSortDefinition {
     @Autowired
     private RequestContext requestContext;
 
-    private List<String> expectedOrder = new ArrayList<String>();
+    private List<String> expectedOrder;
 
     private MvcResult cards;
+    private String cardCreatorName1;
+    private String cardCreatorName2;
+    private String cardCreatorName3;
 
     @Given("Multiple cards of different owners exists in the section {string}")
     public void multiple_cards_of_different_owners_exists_in_the_section(String string) throws NoSuchFieldException, IllegalAccessException {
         var user1 = new User.Builder()
-                .withFirstName("Alpha")
+                .withFirstName("Carl")
                 .withMiddleName("Hector")
-                .withLastName("Delta")
+                .withLastName("Foxtrot")
                 .withNickName("nick")
                 .withEmail("here1@testing")
                 .withPassword("12345678abc")
                 .withBio("g")
                 .withDob("2001-03-11")
                 .withPhoneNumber("123-456-7890")
-                .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Auckland,New Zealand," +
+                .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
                         "Canterbury,8041"))
                 .build();
         var user2 = new User.Builder()
@@ -67,20 +70,20 @@ public class CardSortDefinition {
                 .withBio("g")
                 .withDob("2001-03-11")
                 .withPhoneNumber("123-456-7890")
-                .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
+                .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Singapore,Singapore," +
                         "Canterbury,8041"))
                 .build();
         var user3 = new User.Builder()
                 .withFirstName("Charlie")
                 .withMiddleName("Hector")
-                .withLastName("Foxtrot")
+                .withLastName("Delta")
                 .withNickName("nick")
                 .withEmail("here3@testing")
                 .withPassword("12345678abc")
                 .withBio("g")
                 .withDob("2001-03-11")
                 .withPhoneNumber("123-456-7890")
-                .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Singapore,Singapore," +
+                .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Auckland,New Zealand," +
                         "Canterbury,8041"))
                 .build();
         userContext.save(user1);
@@ -89,7 +92,7 @@ public class CardSortDefinition {
         //withCloses has to be added because we are overwriting the created field below, which means the closing date
         //would not align with the default 2 weeks with additional seconds
         var card1 = new MarketplaceCard.Builder()
-                .withCreator(userContext.getByName("Alpha"))
+                .withCreator(userContext.getByName("Carl"))
                 .withSection("Wanted")
                 .withTitle("Awesome")
                 .withDescription("A cool vintage car")
@@ -109,13 +112,6 @@ public class CardSortDefinition {
                 .withDescription("A cool vintage car")
                 .withCloses(Instant.now().plus(Duration.ofDays(14).plus(Duration.ofSeconds(2))))
                 .build();
-        var card4 = new MarketplaceCard.Builder()
-                .withCreator(userContext.getByName("Charlie"))
-                .withSection("Wanted")
-                .withTitle("Colourful")
-                .withDescription("A cool vintage car")
-                .withCloses(Instant.now().plus(Duration.ofDays(14).plus(Duration.ofSeconds(2))))
-                .build();
         //overwrite the created time field here so that we can produce expected result orderings
         Field createdField = MarketplaceCard.class.getDeclaredField("created");
         createdField.setAccessible(true);
@@ -123,11 +119,11 @@ public class CardSortDefinition {
         createdField.set(card2, Instant.now().plus(Duration.ofSeconds(1)));
         createdField.set(card3, Instant.now().plus(Duration.ofSeconds(2)));
         cardContext.save(card1);
-        expectedOrder.add(card1.getCreator().getFirstName());
+        cardCreatorName1 = card1.getCreator().getFirstName();
         cardContext.save(card2);
-        expectedOrder.add(card2.getCreator().getFirstName());
+        cardCreatorName2 = card2.getCreator().getFirstName();
         cardContext.save(card3);
-        expectedOrder.add(card3.getCreator().getFirstName());
+        cardCreatorName3 = card3.getCreator().getFirstName();
     }
 
     @When("the cards are ordered by {string}")
@@ -147,6 +143,9 @@ public class CardSortDefinition {
 
     @Then("the cards in the response should be ordered by {string} by default")
     public void the_cards_in_the_response_should_be_ordered_by_by_default(String string) throws UnsupportedEncodingException, ParseException {
+        //"created" for these cards are as such: 0second, +1second, +2 second
+        expectedOrder = List.of(cardCreatorName1, cardCreatorName2, cardCreatorName3);
+
         cards = requestContext.performRequest(get("/cards")
                 .queryParam("section", "Wanted"));
         JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
@@ -164,8 +163,11 @@ public class CardSortDefinition {
         }
     }
 
-    @Then("the cards in the response should be ordered by their {string}")
-    public void the_cards_in_the_response_should_be_ordered_by_their(String order) throws UnsupportedEncodingException, ParseException {
+    @Then("the cards in the response should be ordered by their title")
+    public void the_cards_in_the_response_should_be_ordered_by_their_title() throws UnsupportedEncodingException, ParseException {
+        //"title" for these cards are as such: Awesome, Boring, Colourful
+        expectedOrder = List.of(cardCreatorName1, cardCreatorName2, cardCreatorName3);
+
         JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
         JSONObject jsonObject = (JSONObject) parser.parse(cards.getResponse().getContentAsString());
 
@@ -181,12 +183,13 @@ public class CardSortDefinition {
         }
     }
 
-    @Then("the cards in the response should be ordered by their {string} in reverse")
-    public void the_cards_in_the_response_should_be_ordered_by_their_in_reverse(String string) throws UnsupportedEncodingException, ParseException {
+    @Then("the cards in the response should be ordered by their title in reverse")
+    public void the_cards_in_the_response_should_be_ordered_by_their_title_in_reverse() throws UnsupportedEncodingException, ParseException {
+        //"title" for these cards in reverse are as such: Colourful, Boring, Awesome
+        expectedOrder = List.of(cardCreatorName3, cardCreatorName2, cardCreatorName1);
+
         JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
         JSONObject jsonObject = (JSONObject) parser.parse(cards.getResponse().getContentAsString());
-
-        Collections.reverse(expectedOrder);
 
         int iterator = 0;
         try {
@@ -200,5 +203,185 @@ public class CardSortDefinition {
         }
     }
 
+    @Then("the cards in the response should be ordered by their location")
+    public void the_cards_in_the_response_should_be_ordered_by_their_location() throws UnsupportedEncodingException, ParseException {
+        //"location" for these cards are as such: Auckland-NewZealand, Christchurch-NewZealand, Singapore-Singapore
+        expectedOrder = List.of(cardCreatorName3, cardCreatorName1, cardCreatorName2);
 
+        JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
+        JSONObject jsonObject = (JSONObject) parser.parse(cards.getResponse().getContentAsString());
+
+        int iterator = 0;
+        try {
+            for (JSONObject object : (List<JSONObject>) jsonObject.get("results")) {
+                JSONObject creator = (JSONObject) object.get("creator");
+                Assert.assertEquals(expectedOrder.get(iterator), creator.get("firstName"));
+                iterator += 1;
+            }
+        } catch (ClassCastException e) {
+            fail("Invalid error type for response");
+        }
+    }
+
+    @Then("the cards in the response should be ordered by their location in reverse")
+    public void the_cards_in_the_response_should_be_ordered_by_their_location_in_reverse() throws UnsupportedEncodingException, ParseException {
+        //"location" for these cards are as such: Singapore-Singapore, Christchurch-NewZealand, Auckland-NewZealand
+        expectedOrder = List.of(cardCreatorName2, cardCreatorName1, cardCreatorName3);
+
+        JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
+        JSONObject jsonObject = (JSONObject) parser.parse(cards.getResponse().getContentAsString());
+
+        int iterator = 0;
+        try {
+            for (JSONObject object : (List<JSONObject>) jsonObject.get("results")) {
+                JSONObject creator = (JSONObject) object.get("creator");
+                Assert.assertEquals(expectedOrder.get(iterator), creator.get("firstName"));
+                iterator += 1;
+            }
+        } catch (ClassCastException e) {
+            fail("Invalid error type for response");
+        }
+    }
+
+    @Then("the cards in the response should be ordered by their closes")
+    public void the_cards_in_the_response_should_be_ordered_by_their_closes() throws UnsupportedEncodingException, ParseException {
+        //"closes" for these cards are similar to the "created" which is as such:
+        // 0second, +1second, +2 second
+        expectedOrder = List.of(cardCreatorName1, cardCreatorName2, cardCreatorName3);
+
+        JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
+        JSONObject jsonObject = (JSONObject) parser.parse(cards.getResponse().getContentAsString());
+
+        int iterator = 0;
+        try {
+            for (JSONObject object : (List<JSONObject>) jsonObject.get("results")) {
+                JSONObject creator = (JSONObject) object.get("creator");
+                Assert.assertEquals(expectedOrder.get(iterator), creator.get("firstName"));
+                iterator += 1;
+            }
+        } catch (ClassCastException e) {
+            fail("Invalid error type for response");
+        }
+    }
+
+    @Then("the cards in the response should be ordered by their closes in reverse")
+    public void the_cards_in_the_response_should_be_ordered_by_their_closes_in_reverse() throws UnsupportedEncodingException, ParseException {
+        //"closes" for these cards in reverse are similar to the "created" which is as such:
+        //+2second, +1second, 0second
+        expectedOrder = List.of(cardCreatorName3, cardCreatorName2, cardCreatorName1);
+
+        JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
+        JSONObject jsonObject = (JSONObject) parser.parse(cards.getResponse().getContentAsString());
+
+        int iterator = 0;
+        try {
+            for (JSONObject object : (List<JSONObject>) jsonObject.get("results")) {
+                JSONObject creator = (JSONObject) object.get("creator");
+                Assert.assertEquals(expectedOrder.get(iterator), creator.get("firstName"));
+                iterator += 1;
+            }
+        } catch (ClassCastException e) {
+            fail("Invalid error type for response");
+        }
+    }
+
+    @Then("the cards in the response should be ordered by their creatorFirstName")
+    public void the_cards_in_the_response_should_be_ordered_by_their_creator_first_name() throws UnsupportedEncodingException, ParseException {
+        //"creatorFirstName" for these cards are as such: Beta, Carl, Charlie
+        expectedOrder = List.of(cardCreatorName2, cardCreatorName1, cardCreatorName3);
+
+        JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
+        JSONObject jsonObject = (JSONObject) parser.parse(cards.getResponse().getContentAsString());
+
+        int iterator = 0;
+        try {
+            for (JSONObject object : (List<JSONObject>) jsonObject.get("results")) {
+                JSONObject creator = (JSONObject) object.get("creator");
+                Assert.assertEquals(expectedOrder.get(iterator), creator.get("firstName"));
+                iterator += 1;
+            }
+        } catch (ClassCastException e) {
+            fail("Invalid error type for response");
+        }
+    }
+
+    @Then("the cards in the response should be ordered by their creatorFirstName in reverse")
+    public void the_cards_in_the_response_should_be_ordered_by_their_creator_first_name_in_reverse() throws UnsupportedEncodingException, ParseException {
+        //"creatorFirstName" for these cards in reverse are as such: Charlie, Carl, Beta
+        expectedOrder = List.of(cardCreatorName3, cardCreatorName1, cardCreatorName2);
+
+        JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
+        JSONObject jsonObject = (JSONObject) parser.parse(cards.getResponse().getContentAsString());
+
+        int iterator = 0;
+        try {
+            for (JSONObject object : (List<JSONObject>) jsonObject.get("results")) {
+                JSONObject creator = (JSONObject) object.get("creator");
+                Assert.assertEquals(expectedOrder.get(iterator), creator.get("firstName"));
+                iterator += 1;
+            }
+        } catch (ClassCastException e) {
+            fail("Invalid error type for response");
+        }
+    }
+
+    @Then("the cards in the response should be ordered by their creatorLastName")
+    public void the_cards_in_the_response_should_be_ordered_by_their_creator_last_name() throws UnsupportedEncodingException, ParseException {
+        //"creatorLastName" for these cards are as such: Delta, Echo, Foxtrot
+        expectedOrder = List.of(cardCreatorName3, cardCreatorName2, cardCreatorName1);
+
+        JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
+        JSONObject jsonObject = (JSONObject) parser.parse(cards.getResponse().getContentAsString());
+
+        int iterator = 0;
+        try {
+            for (JSONObject object : (List<JSONObject>) jsonObject.get("results")) {
+                JSONObject creator = (JSONObject) object.get("creator");
+                Assert.assertEquals(expectedOrder.get(iterator), creator.get("firstName"));
+                iterator += 1;
+            }
+        } catch (ClassCastException e) {
+            fail("Invalid error type for response");
+        }
+    }
+
+    @Then("the cards in the response should be ordered by their creatorLastName in reverse")
+    public void the_cards_in_the_response_should_be_ordered_by_their_creator_last_name_in_reverse() throws UnsupportedEncodingException, ParseException {
+        //"creatorLastName" for these cards in reverse are as such: Foxtrot, Echo, Delta
+        expectedOrder = List.of(cardCreatorName1, cardCreatorName2, cardCreatorName3);
+
+        JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
+        JSONObject jsonObject = (JSONObject) parser.parse(cards.getResponse().getContentAsString());
+
+        int iterator = 0;
+        try {
+            for (JSONObject object : (List<JSONObject>) jsonObject.get("results")) {
+                JSONObject creator = (JSONObject) object.get("creator");
+                Assert.assertEquals(expectedOrder.get(iterator), creator.get("firstName"));
+                iterator += 1;
+            }
+        } catch (ClassCastException e) {
+            fail("Invalid error type for response");
+        }
+    }
+
+    @Then("the cards in the response should be ordered by their created in reverse")
+    public void the_cards_in_the_response_should_be_ordered_by_their_created_in_reverse() throws UnsupportedEncodingException, ParseException {
+        //"created" for these cards are as such: +2second, +1second, 0second
+        expectedOrder = List.of(cardCreatorName3, cardCreatorName2, cardCreatorName1);
+
+        JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
+        JSONObject jsonObject = (JSONObject) parser.parse(cards.getResponse().getContentAsString());
+
+        int iterator = 0;
+        try {
+            for (JSONObject object : (List<JSONObject>) jsonObject.get("results")) {
+                JSONObject creator = (JSONObject) object.get("creator");
+                Assert.assertEquals(expectedOrder.get(iterator), creator.get("firstName"));
+                iterator += 1;
+            }
+        } catch (ClassCastException e) {
+            fail("Invalid error type for response");
+        }
+    }
 }
