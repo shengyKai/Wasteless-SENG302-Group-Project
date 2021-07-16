@@ -223,6 +223,7 @@ public class InventoryControllerModifyInvEntriesTest {
         InventoryItem invItemSpy = spy(testInvItem);
         when(businessRepository.getBusinessById(any())).thenReturn(businessSpy);
         when(productRepository.getProduct(any(), any())).thenReturn(productSpy);
+        when(productRepository.findByBusinessAndProductCode(any(), any())).thenReturn(java.util.Optional.ofNullable(productSpy));
         when(invItemRepository.getInventoryItemByBusinessAndId(any(), any())).thenReturn(invItemSpy);
         doNothing().when(businessSpy).checkSessionPermissions(any());
 
@@ -246,9 +247,9 @@ public class InventoryControllerModifyInvEntriesTest {
         when(invItemRepository.getInventoryItemByBusinessAndId(any(), any())).thenReturn(invItemSpy);
         doNothing().when(businessSpy).checkSessionPermissions(any());
 
-        int[] productIds = {-1, -2, 0, 1, 1000};
+        int[] productIds = {-1, -2, 0};
 
-        for (int i=0; i <= productIds.length; i++) {
+        for (int i=0; i < productIds.length; i++) {
             JSONObject invBody = new JSONObject();
             invBody.put("quantity", productIds[i]);
 
@@ -291,7 +292,7 @@ public class InventoryControllerModifyInvEntriesTest {
         doNothing().when(businessSpy).checkSessionPermissions(any());
 
         //tests a wide range of integers
-        for (int quantity=1; quantity <= 100; quantity++) {
+        for (int quantity=1; quantity < 100; quantity++) {
             JSONObject invBody = new JSONObject();
             invBody.put("quantity", quantity);
 
@@ -315,7 +316,7 @@ public class InventoryControllerModifyInvEntriesTest {
 
         String[] quantities = {"-1", "-2", "-10", "#", "$", "a", "b", "Z" };
 
-        for (int i=0; i <= quantities.length; i++) {
+        for (int i=0; i < quantities.length; i++) {
             JSONObject invBody = new JSONObject();
             invBody.put("quantity", quantities[i]);
 
@@ -358,7 +359,7 @@ public class InventoryControllerModifyInvEntriesTest {
         doNothing().when(businessSpy).checkSessionPermissions(any());
 
         //tests a wide range of floats
-        for (int price=1; price <= 99; price++) {
+        for (int price=1; price < 99; price++) {
             float pricePerItem = price + (((float)price) / 100);
             JSONObject invBody = new JSONObject();
             invBody.put("pricePerItem", pricePerItem);
@@ -383,7 +384,7 @@ public class InventoryControllerModifyInvEntriesTest {
 
         String[] prices = {"-1.01", "-0.01", "-2000", "-1000.99", "#", "$", "a", "b", "Z" };
 
-        for (int i=0; i <= prices.length; i++) {
+        for (int i=0; i < prices.length; i++) {
             JSONObject invBody = new JSONObject();
             invBody.put("pricePerItem", prices[i]);
 
@@ -426,7 +427,7 @@ public class InventoryControllerModifyInvEntriesTest {
         doNothing().when(businessSpy).checkSessionPermissions(any());
 
         //tests a wide range of floats
-        for (int price=1; price <= 99; price++) {
+        for (int price=1; price < 99; price++) {
             float totalPrice = price + (((float)price) / 100);
             JSONObject invBody = new JSONObject();
             invBody.put("totalPrice", totalPrice);
@@ -451,7 +452,7 @@ public class InventoryControllerModifyInvEntriesTest {
 
         String[] prices = {"-21.01", "-0.01", "-9000", "-3000.99", "#", "$", "a", "b", "Z" };
 
-        for (int i=0; i <= prices.length; i++) {
+        for (int i=0; i < prices.length; i++) {
             JSONObject invBody = new JSONObject();
             invBody.put("totalPrice", prices[i]);
 
@@ -515,7 +516,7 @@ public class InventoryControllerModifyInvEntriesTest {
 
         String[] manufacturedDates = {"10-10", "10/10/1999", "999999", "#", "$", "a", "b", "Z" };
 
-        for (int i=0; i <= manufacturedDates.length; i++) {
+        for (int i=0; i < manufacturedDates.length; i++) {
             JSONObject invBody = new JSONObject();
             invBody.put("manufactured", manufacturedDates[i]);
 
@@ -599,7 +600,7 @@ public class InventoryControllerModifyInvEntriesTest {
 
         String[] sellByDates = {"10-10", "10/10/1999", "999999", "#", "$", "a", "b", "Z" };
 
-        for (int i=0; i <= sellByDates.length; i++) {
+        for (int i=0; i < sellByDates.length; i++) {
             JSONObject invBody = new JSONObject();
             invBody.put("sellBy", sellByDates[i]);
 
@@ -683,7 +684,7 @@ public class InventoryControllerModifyInvEntriesTest {
 
         String[] bestBeforeDates = {"10-10", "10/10/1999", "999999", "#", "$", "a", "b", "Z" };
 
-        for (int i=0; i <= bestBeforeDates.length; i++) {
+        for (int i=0; i < bestBeforeDates.length; i++) {
             JSONObject invBody = new JSONObject();
             invBody.put("bestBefore", bestBeforeDates[i]);
 
@@ -767,7 +768,7 @@ public class InventoryControllerModifyInvEntriesTest {
 
         String[] expiresDates = {"10-10", "10/10/1999", "999999", "#", "$", "a", "b", "Z" };
 
-        for (int i=0; i <= expiresDates.length; i++) {
+        for (int i=0; i < expiresDates.length; i++) {
             JSONObject invBody = new JSONObject();
             invBody.put("expires", expiresDates[i]);
 
@@ -790,7 +791,7 @@ public class InventoryControllerModifyInvEntriesTest {
         doNothing().when(businessSpy).checkSessionPermissions(any());
 
         JSONObject invBody = new JSONObject();
-        invBody.put("pricePerItem", null);
+        invBody.put("expires", null);
 
         mockMvc.perform(MockMvcRequestBuilders
                 .put("/businesses/1/inventory/1")
@@ -858,7 +859,7 @@ public class InventoryControllerModifyInvEntriesTest {
                 .put("/businesses/1/inventory/1")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(invBody.toString()))
-                .andExpect(status().isOk());
+                .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -1078,6 +1079,7 @@ public class InventoryControllerModifyInvEntriesTest {
         InventoryItem invItemSpy = spy(testInvItem);
         when(businessRepository.getBusinessById(any())).thenReturn(businessSpy);
         when(productRepository.getProduct(any(), any())).thenReturn(productSpy);
+        when(productRepository.findByBusinessAndProductCode(any(), any())).thenReturn(java.util.Optional.ofNullable(productSpy));
         when(invItemRepository.getInventoryItemByBusinessAndId(any(), any())).thenReturn(invItemSpy);
         doNothing().when(businessSpy).checkSessionPermissions(any());
 
