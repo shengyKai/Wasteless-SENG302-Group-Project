@@ -82,6 +82,13 @@ public class InventoryController {
         }
     }
 
+    /**
+     * PUT endpoint for modifying an inventory item entry's attributes.
+     *
+     * @param businessId the id of the business that has the product associated with the inventory item in their
+     *                   catalogue
+     * @param invItemId the id of the inventory being modified
+     */
     @PutMapping("/businesses/{businessId}/inventory/{invItemId}")
     public void modifyInvEntry(@PathVariable(name = "businessId") Long businessId,
                                @PathVariable(name = "invItemId") Long invItemId, HttpServletRequest request,
@@ -91,9 +98,17 @@ public class InventoryController {
         logger.info(message);
 
         Business business = businessRepository.getBusinessById(businessId);
+        if (business == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    String.format("The business with the id %d does not exist", businessId));
+        }
         business.checkSessionPermissions(request);
 
         InventoryItem invItem = inventoryItemRepository.getInventoryItemByBusinessAndId(business, invItemId);
+        if (invItem == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    String.format("The inventory item with the id %d does not exist", invItemId));
+        }
 
         if (invItemInfo == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No JSON request body was provided");
