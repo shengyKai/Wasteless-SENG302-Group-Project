@@ -18,7 +18,7 @@
                     class="required"
                     v-model="business"
                     label="Name of business"
-                    :rules="mandatoryRules.concat(maxCharRules).concat(alphabetExtendedRules)"
+                    :rules="mandatoryRules().concat(maxCharRules()).concat(alphabetExtendedSingleLineRules())"
                     outlined
                   />
                 </v-col>
@@ -26,7 +26,7 @@
                   <v-textarea
                     v-model="description"
                     label="Description"
-                    :rules="maxCharDescriptionRules.concat(alphabetExtendedRules)"
+                    :rules="maxCharDescriptionRules().concat(alphabetExtendedMultilineRules())"
                     rows="3"
                     outlined
                   />
@@ -37,7 +37,7 @@
                     v-model="businessType"
                     :items="businessTypes"
                     label="Business Type"
-                    :rules="mandatoryRules"
+                    :rules="mandatoryRules()"
                     outlined
                   />
                 </v-col>
@@ -46,14 +46,14 @@
                     class="required"
                     v-model="street1"
                     label="Company Street Address"
-                    :rules="mandatoryRules.concat(streetRules)"
+                    :rules="mandatoryRules().concat(streetRules())"
                     outlined/>
                 </v-col>
                 <v-col cols="12">
                   <LocationAutocomplete
                     type="district"
                     v-model="district"
-                    :rules="maxCharRules.concat(alphabetRules)"
+                    :rules="maxCharRules().concat(alphabetRules())"
                   />
                 </v-col>
                 <v-col cols="12">
@@ -61,7 +61,7 @@
                     type="city"
                     class="required"
                     v-model="city"
-                    :rules="mandatoryRules.concat(maxCharRules).concat(alphabetRules)"
+                    :rules="mandatoryRules().concat(maxCharRules()).concat(alphabetRules())"
                   />
                 </v-col>
                 <v-col cols="12">
@@ -69,7 +69,7 @@
                     type="region"
                     class="required"
                     v-model="region"
-                    :rules="mandatoryRules.concat(maxCharRules).concat(alphabetRules)"
+                    :rules="mandatoryRules().concat(maxCharRules()).concat(alphabetRules())"
                   />
                 </v-col>
                 <v-col cols="12">
@@ -77,7 +77,7 @@
                     type="country"
                     class="required"
                     v-model="country"
-                    :rules="mandatoryRules.concat(maxCharRules).concat(alphabetRules)"
+                    :rules="mandatoryRules().concat(maxCharRules()).concat(alphabetRules())"
                   />
                 </v-col>
                 <v-col cols="12">
@@ -85,7 +85,7 @@
                     class="required"
                     v-model="postcode"
                     label="Postcode"
-                    :rules="mandatoryRules.concat(maxCharRules).concat(postcodeRules)"
+                    :rules="mandatoryRules().concat(maxCharRules()).concat(postcodeRules())"
                     outlined
                   />
                 </v-col>
@@ -118,7 +118,12 @@
 <script>
 import LocationAutocomplete from '@/components/utils/LocationAutocomplete';
 import {createBusiness} from '@/api/internal';
-import {regxAlphabet, regxAlphabetExtended, regxPostCode, regxStreet} from "@/utils";
+import {
+  alphabetExtendedMultilineRules,
+  alphabetExtendedSingleLineRules, alphabetRules,
+  mandatoryRules,
+  maxCharRules, postCodeRules, streetNumRules
+} from "@/utils";
 
 export default {
   name: 'CreateBusiness',
@@ -145,29 +150,14 @@ export default {
         'Retail Trade',
       ],
       valid: false,
-      maxCharRules: [
-        field => (field.length <= 100) || 'Reached max character limit: 100'
-      ],
-      maxCharDescriptionRules: [
-        field => (field.length <= 200) || 'Reached max character limit: 200'
-      ],
-      mandatoryRules: [
-        //All fields with the class "required" will go through this ruleset to ensure the field is not empty.
-        //if it does not follow the format, display error message
-        field => !!field || 'Field is required'
-      ],
-      alphabetExtendedRules: [
-        field => regxAlphabetExtended().test(field) || 'Must contain only letters, numbers, spaces and punctuation'
-      ],
-      alphabetRules: [
-        field => regxAlphabet().test(field) || 'Must contain only letters, spaces and dashes'
-      ],
-      streetRules: [
-        field => regxStreet().test(field) || 'Must have at least one number and one alphabet'
-      ],
-      postcodeRules: [
-        field => regxPostCode().test(field) || 'Must contain numbers and letters only'
-      ]
+      maxCharRules: () => maxCharRules(100),
+      maxCharDescriptionRules: ()=> maxCharRules(200),
+      mandatoryRules: ()=> mandatoryRules,
+      alphabetExtendedSingleLineRules: ()=> alphabetExtendedSingleLineRules,
+      alphabetExtendedMultilineRules: ()=> alphabetExtendedMultilineRules,
+      alphabetRules: ()=> alphabetRules,
+      streetRules: ()=> streetNumRules,
+      postcodeRules: ()=> postCodeRules
     };
   },
   methods: {

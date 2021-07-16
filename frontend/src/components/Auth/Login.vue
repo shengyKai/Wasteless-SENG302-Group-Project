@@ -9,13 +9,13 @@
         type="email"
         label="Email"
         outlined
-        :rules="mandatoryRules.concat(emailRules).concat(maxCharLongRules)"
+        :rules="mandatoryRules().concat(emailRules()).concat(maxCharLongRules())"
       />
       <v-text-field
         v-model="password"
         type="password"
         label="Password"
-        :rules="mandatoryRules"
+        :rules="mandatoryRules()"
         outlined
       />
     </v-form>
@@ -38,7 +38,7 @@
 
 <script>
 // import {login} from '../../api';
-import {regxEmail} from "@/utils";
+import {emailRules, mandatoryRules, maxCharRules} from "@/utils";
 
 export default {
   loggedIn: true,
@@ -49,24 +49,10 @@ export default {
       errorMessage: undefined,
       email: "",
       password: "",
-      emailRules: [
-        email =>
-          regxEmail().test(email)
-          || 'Not a valid email'
-      ],
-      mandatoryRules: [
-        /**
-         * All fields with the class "required" will go through this ruleset to ensure the field is not empty.
-         * If it does not follow the format, turn text field into red
-        */
-        (field) => !!field || '',
-      ],
-      maxCharShortRules: [
-        (field) => field.length <= 16 || "Reached max character limit: 16",
-      ],
-      maxCharLongRules: [
-        (field) => field.length <= 255 || "Reached max character limit: 255",
-      ],
+      emailRules: () => emailRules,
+      mandatoryRules: () => mandatoryRules,
+      maxCharShortRules: () => maxCharRules(16),
+      maxCharLongRules: () => maxCharRules(255),
     };
   },
 
