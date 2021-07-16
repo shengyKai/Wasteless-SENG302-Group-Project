@@ -28,8 +28,8 @@ describe('UserCards.vue', () => {
 
     let cardComponents = wrapper.findAllComponents({ name: 'MarketplaceCard' });
     for (let i = 0; i<5; i++) {
-      let foo = cardComponents.at(i);
-      expect(foo.props()).toStrictEqual({
+      let card = cardComponents.at(i);
+      expect(card.props()).toStrictEqual({
         content: {id: i},
         showActions: false,
         showSection: true,
