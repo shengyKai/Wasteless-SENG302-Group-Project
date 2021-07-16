@@ -26,6 +26,7 @@ import org.seng302.leftovers.entities.User;
 import org.seng302.leftovers.persistence.MarketplaceCardRepository;
 import org.seng302.leftovers.service.CardService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MvcResult;
 import org.yaml.snakeyaml.error.Mark;
 
@@ -42,6 +43,10 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -188,32 +193,74 @@ public class CardStepDefinition {
                 .param("userId", userContext.getLast().getUserID().toString()));
     }
 
+    private List<JSONObject> parseEvents(MockHttpServletResponse response, String channel) throws UnsupportedEncodingException, ParseException {
+        String content = response.getContentAsString();
+        JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
+
+        List<JSONObject> events = new ArrayList<>();
+
+        // Iterable of lines that are not comments
+        Iterator<String> lineIterator = content.lines().filter(line -> !line.startsWith(":")).iterator();
+
+        while (lineIterator.hasNext()) {
+            // Every iteration parses a single event
+            // Expects the format:
+            //  field:$(channel_name)
+            //  data:$(data)
+            //  --empty-line--
+
+            String fieldLine = lineIterator.next();
+            Assertions.assertTrue(fieldLine.startsWith("event:"));
+            String foundChannel = fieldLine.substring("event:".length());
+
+            Assertions.assertTrue(lineIterator.hasNext());
+            String dataLine = lineIterator.next();
+            Assertions.assertTrue(dataLine.startsWith("data:"));
+            String data = dataLine.substring("data:".length());
+
+            Assertions.assertTrue(lineIterator.hasNext());
+            Assertions.assertEquals("", lineIterator.next());
+
+            if (foundChannel.equals(channel)) {
+                events.add(parser.parse(data, JSONObject.class));
+            }
+        }
+
+        return events;
+    }
+
     @Then("I have received a message telling me the card is about to expire")
     public void i_have_received_a_message_telling_me_the_card_is_about_to_expire()
-            throws JsonProcessingException, UnsupportedEncodingException {
+            throws JsonProcessingException, UnsupportedEncodingException, ParseException {
 
-        String response = requestContext.getLastResult().getResponse().getContentAsString();
+        List<JSONObject> events = parseEvents(requestContext.getLastResult().getResponse(), "newsfeed");
 
-        // Parse the data from the response
-        Pattern pattern = Pattern.compile("data:.*\n");
-        Matcher matcher = pattern.matcher(response);
-        if (!matcher.find()) {
-            fail("Response did not contain expected field 'data'");
-        }
-        String responseData = matcher.group().substring(matcher.group().indexOf(':') + 1, matcher.group().indexOf('\n'));
+        Assertions.assertEquals(1, events.size());
+        JSONObject event = events.get(0);
 
         // Check that the received notification is for card expiry and relates to the expected card
-        ObjectMapper mapper = new ObjectMapper();
-        JsonNode responseJson = mapper.readTree(responseData);
-        Assertions.assertEquals("ExpiryEvent", responseJson.get("type").asText());
-        JsonNode actualResponseCard = responseJson.get("card");
+        Assertions.assertEquals("ExpiryEvent", event.get("type"));
+
+        JSONObject cardJson = (JSONObject) event.get("card");
 
         try (Session session = sessionFactory.openSession()) {
             MarketplaceCard card = session.find(MarketplaceCard.class, cardContext.getLast().getID());
-            JsonNode expectedResponseCard = mapper.readTree(card.constructJSONObject().toJSONString());
-            Assertions.assertEquals(expectedResponseCard, actualResponseCard);
+            ObjectMapper mapper = new ObjectMapper();
+            assertEquals(mapper.readTree(card.constructJSONObject().toJSONString()), mapper.readTree(cardJson.toJSONString()));
         }
+    }
 
+    @Then("I have received a message telling me the card has expired")
+    public void i_have_received_a_message_telling_me_the_card_has_expired() throws UnsupportedEncodingException, ParseException {
+        List<JSONObject> events = parseEvents(requestContext.getLastResult().getResponse(), "newsfeed");
+
+        Assertions.assertEquals(1, events.size());
+        JSONObject event = events.get(0);
+
+        // Check that the received notification is for card deleting and relates to the expected card
+        Assertions.assertEquals("DeleteEvent", event.get("type"));
+        Assertions.assertEquals(cardContext.getLast().getTitle(), event.get("title"));
+        Assertions.assertEquals(cardContext.getLast().getSection().getName(), event.get("section"));
     }
 
     @Given("The card has expired")
