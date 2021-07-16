@@ -6,6 +6,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import cucumber.context.CardContext;
 import cucumber.context.RequestContext;
 import cucumber.context.UserContext;
+import io.cucumber.datatable.DataTable;
+import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
@@ -20,11 +22,13 @@ import org.junit.jupiter.api.Assertions;
 import org.mockito.MockedStatic;
 import org.mockito.invocation.InvocationOnMock;
 import org.seng302.leftovers.entities.MarketplaceCard;
+import org.seng302.leftovers.entities.User;
 import org.seng302.leftovers.persistence.MarketplaceCardRepository;
 import org.seng302.leftovers.service.CardService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MvcResult;
+import org.yaml.snakeyaml.error.Mark;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -43,9 +47,14 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import static java.time.Instant.ofEpochMilli;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -269,5 +278,54 @@ public class CardStepDefinition {
     public void the_card_will_be_removed_from_the_marketplace() {
         Long cardId = cardContext.getLast().getID();
         Assertions.assertFalse(marketplaceCardRepository.existsById(cardId));
+    }
+
+    @And("{string} has the cards")
+    public void has_the_cards(String name, DataTable table) {
+        User user = userContext.getByName(name);
+
+        List<Map<String, String>> rows = table.asMaps(String.class, String.class);
+        for (Map<String, String> row : rows) {
+            MarketplaceCard card = new MarketplaceCard.Builder()
+                    .withCreator(user)
+                    .withTitle(row.get("title"))
+                    .withDescription(row.get("description"))
+                    .withSection(row.get("section"))
+                    .build();
+            cardContext.save(card);
+        }
+    }
+
+    @When("I request cards by {string}")
+    public void i_request_cards_by(String name) {
+        User user = userContext.getByName(name);
+        requestContext.performRequest(get("/users/" + user.getUserID() + "/cards"));
+    }
+
+    @And("I expect the cards for {string} to be returned")
+    public void i_expect_the_cards_for_to_be_returned(String name) throws ParseException, UnsupportedEncodingException {
+        User user = userContext.getByName(name);
+
+        // Gets all the cards for the specified user by filter all cards in the database
+        Map<Long, MarketplaceCard> expectedCards = StreamSupport.stream(marketplaceCardRepository.findAll().spliterator(), false)
+                .filter(card -> card.getCreator().getUserID().equals(user.getUserID()))
+                .collect(Collectors.toMap(MarketplaceCard::getID, Function.identity()));
+
+
+        String response = requestContext.getLastResult().getResponse().getContentAsString();
+        JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
+        JSONObject page = parser.parse(response, JSONObject.class);
+
+        // Validates the results
+        List<JSONObject> results = (List<JSONObject>) page.get("results");
+        for (JSONObject object : results) {
+            MarketplaceCard userCard = expectedCards.get(((Number)object.get("id")).longValue());
+            assertNotNull(userCard);
+            assertEquals(userCard.getTitle(), object.get("title"));
+            assertEquals(userCard.getDescription(), object.get("description"));
+            assertEquals(userCard.getSection().getName(), object.get("section"));
+        }
+        assertEquals(expectedCards.size(), results.size());
+        assertEquals(expectedCards.size(), page.get("count"));
     }
 }

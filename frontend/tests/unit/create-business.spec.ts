@@ -77,6 +77,8 @@ describe('CreateBusiness.vue', () => {
     };
   });
 
+  const diacritics = ['À','È','Ì','Ò','Ù','à','è','ì','ò','ù','Á','É','Í','Ó','Ú','Ý','á','é','í','ó','ú','ý','Â','Ê','Î','Ô','Û','â','ê','î','ô','û','Ã','Ñ','Õ','ã','ñ','õ','Ä','Ë','Ï','Ö','Ü','Ÿ','ä','ë','ï','ö','ü','ÿ'];
+
   /**
    * Sets up the test CreateBusiness instance
    *
@@ -224,6 +226,15 @@ describe('CreateBusiness.vue', () => {
     });
     await Vue.nextTick();
     expect(wrapper.vm.valid).toBeFalsy();
+  });
+
+  it.each(diacritics)('Valid when street contains the character "%s"', async (char) => {
+    await populateRequiredFields();
+    await wrapper.setData({
+      street1: '5 ' + char,
+    });
+    await Vue.nextTick();
+    expect(wrapper.vm.valid).toBeTruthy();
   });
 
   it('Invalid if district too long', async () => {
