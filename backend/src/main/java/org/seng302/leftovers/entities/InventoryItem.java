@@ -236,19 +236,6 @@ public class InventoryItem {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The Sell By date cannot be in the past");
         }
 
-        //checks that the sell by date is before best before and expires date if they exist
-        if (this.bestBefore != null) {
-            if (sellBy.compareTo(this.bestBefore) > 0) { //checks if sell by is after best before
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                        "The sell by date cannot be after the best before date.");
-            }
-        }
-        if (this.expires != null) { //expires cannot be null, but will be null when creating a new object
-            if (sellBy.compareTo(this.expires) > 0) { //checks if sell by is after expires
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                        "The sell by date cannot be after the expires date.");
-            }
-        }
         this.sellBy = sellBy;
     }
     /**
@@ -266,17 +253,11 @@ public class InventoryItem {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The Best Before date cannot be in the past");
         }
 
-        //checks that the best before date is after the sell by date and before the expires date if they exist
+        //checks that the best before date is after the sell by date if it exists
         if (this.sellBy != null) {
             if (bestBefore.compareTo(this.sellBy) < 0) { //checks if best before is before sell by
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                         "The best before date cannot be before the sell by date.");
-            }
-        }
-        if (this.expires != null) { //expires cannot be null, but will be null when creating a new object
-            if (bestBefore.compareTo(this.expires) > 0) { //checks if best before is after expires
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                        "The best before date cannot be after the expires date.");
             }
         }
         this.bestBefore = bestBefore;
