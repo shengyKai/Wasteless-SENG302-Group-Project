@@ -15,7 +15,8 @@
         rounded="lg"
         class="newsfeed-item"
       >
-        <GlobalMessage v-if="event.type == 'MessageEvent'" :event="event"/>
+        <GlobalMessage v-if="event.type === 'MessageEvent'" :event="event"/>
+        <ExpiryEvent v-else-if="event.type === 'ExpiryEvent'" :event="event"/>
         <template v-else>
           <v-card-title>
             {{ event.type }}
@@ -33,12 +34,14 @@
 import BusinessActionPanel from "./BusinessActionPanel";
 import UserActionPanel from "./UserActionPanel";
 import GlobalMessage from "./newsfeed/GlobalMessage.vue";
+import ExpiryEvent from './newsfeed/ExpiryEvent.vue';
 
 export default {
   components: {
     BusinessActionPanel,
     UserActionPanel,
     GlobalMessage,
+    ExpiryEvent,
   },
   computed: {
     /**
@@ -60,7 +63,7 @@ export default {
       if (!this.isBusiness) return undefined;
       return [...Array(10).keys()].map(i => `Item ${i}`);
     },
-  },
+  }
 };
 </script>
 

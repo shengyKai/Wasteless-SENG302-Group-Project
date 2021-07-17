@@ -258,11 +258,13 @@ class UserControllerTest {
                 .andReturn();
 
         JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
-        JSONArray jsonArray = (JSONArray) parser.parse(result.getResponse().getContentAsString());
-        JSONObject firstJsonObject = (JSONObject) jsonArray.get(0);
+        JSONObject response = (JSONObject) parser.parse(result.getResponse().getContentAsString());
+        JSONArray results = (JSONArray) response.get("results");
+
+        JSONObject firstJsonObject = (JSONObject) results.get(0);
         String previousFirstName = firstJsonObject.getAsString("firstName");
-        for (int i = 1; i < jsonArray.size(); i++) {
-            JSONObject currentJsonObject = (JSONObject) jsonArray.get(i);
+        for (int i = 1; i < results.size(); i++) {
+            JSONObject currentJsonObject = (JSONObject) results.get(i);
             String currentFirstName = currentJsonObject.getAsString("firstName");
             assertTrue(currentFirstName.compareTo(previousFirstName) <= 0);
             previousFirstName = currentFirstName;
@@ -292,11 +294,13 @@ class UserControllerTest {
                 .andReturn();
 
         JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
-        JSONArray jsonArray = (JSONArray) parser.parse(result.getResponse().getContentAsString());
-        JSONObject firstJsonObject = (JSONObject) jsonArray.get(0);
+        JSONObject response = (JSONObject) parser.parse(result.getResponse().getContentAsString());
+        JSONArray results = (JSONArray) response.get("results");
+
+        JSONObject firstJsonObject = (JSONObject) results.get(0);
         String previousEmail = firstJsonObject.getAsString("email");
-        for (int i = 1; i < jsonArray.size(); i++) {
-            JSONObject currentJsonObject = (JSONObject) jsonArray.get(i);
+        for (int i = 1; i < results.size(); i++) {
+            JSONObject currentJsonObject = (JSONObject) results.get(i);
             String currentEmail = currentJsonObject.getAsString("email");
             assertTrue(currentEmail.compareTo(previousEmail) >= 0);
             previousEmail = currentEmail;
@@ -323,13 +327,14 @@ class UserControllerTest {
                 .andReturn();
 
         JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
-        JSONArray jsonArray = (JSONArray) parser.parse(result.getResponse().getContentAsString());
-        JSONObject firstJsonObject = (JSONObject) jsonArray.get(0);
+        JSONObject response = (JSONObject) parser.parse(result.getResponse().getContentAsString());
+        JSONArray results = (JSONArray) response.get("results");
+        JSONObject firstJsonObject = (JSONObject) results.get(0);
         assertUserEquivalentToJSONObject(userList.get(2), firstJsonObject);
-        JSONObject secondJsonObject = (JSONObject) jsonArray.get(1);
+        JSONObject secondJsonObject = (JSONObject) results.get(1);
         int previousId = Integer.parseInt(secondJsonObject.getAsString("id"));
-        for (int i = 2; i < jsonArray.size(); i++) {
-            JSONObject currentJsonObject = (JSONObject) jsonArray.get(i);
+        for (int i = 2; i < results.size(); i++) {
+            JSONObject currentJsonObject = (JSONObject) results.get(i);
             int currentId = Integer.parseInt(currentJsonObject.getAsString("id"));
             assertTrue(currentId > previousId);
             previousId = currentId;
@@ -358,11 +363,12 @@ class UserControllerTest {
                 .andReturn();
 
         JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
-        JSONArray jsonArray = (JSONArray) parser.parse(result.getResponse().getContentAsString());
-        assertEquals(2, jsonArray.size());
-        JSONObject firstJsonObject = (JSONObject) jsonArray.get(0);
+        JSONObject response = (JSONObject) parser.parse(result.getResponse().getContentAsString());
+        JSONArray results = (JSONArray) response.get("results");
+        assertEquals(2, results.size());
+        JSONObject firstJsonObject = (JSONObject) results.get(0);
         assertUserEquivalentToJSONObject(userList.get(6), firstJsonObject);
-        JSONObject secondJsonObject = (JSONObject) jsonArray.get(1);
+        JSONObject secondJsonObject = (JSONObject) results.get(1);
         assertUserEquivalentToJSONObject(userList.get(7), secondJsonObject);
     }
 
@@ -388,21 +394,18 @@ class UserControllerTest {
                 .andReturn();
 
         JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
-        JSONArray jsonArray = (JSONArray) parser.parse(result.getResponse().getContentAsString());
-        assertEquals(5, jsonArray.size());
+        JSONObject response = (JSONObject) parser.parse(result.getResponse().getContentAsString());
+        JSONArray results = (JSONArray) response.get("results");
+        assertEquals(5, results.size());
     }
 
-    /**
-     * Verify that a GET request is made to "/users/search/count" it returns a json object with a single field "count".
-     * Where this count field is equal to the number of users matching the query.
-     */
     @Test
     void getUserSearchCountTest() throws Exception {
         List<User> userList = readUsersFromTestFile("src//test//testFiles//UsersControllerTestData.csv");
         userRepository.deleteAll();
         userRepository.saveAll(userList);
 
-        MvcResult result = mockMvc.perform(get("/users/search/count")
+        MvcResult result = mockMvc.perform(get("/users/search")
                 .param("searchQuery", "andy")
                 .sessionAttrs(sessionAuthToken)
                 .cookie(authCookie))
@@ -412,7 +415,8 @@ class UserControllerTest {
         JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
         JSONObject jsonObject = (JSONObject) parser.parse(result.getResponse().getContentAsString());
         assertEquals(7, jsonObject.getAsNumber("count"));
-        assertEquals(1, jsonObject.size());
+        assertTrue(jsonObject.containsKey("results"));
+        assertEquals(2, jsonObject.size());
     }
 
     /**
