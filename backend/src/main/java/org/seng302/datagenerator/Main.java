@@ -1,6 +1,7 @@
 package org.seng302.datagenerator;
 
 import java.sql.*;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
 import java.util.concurrent.TimeUnit;

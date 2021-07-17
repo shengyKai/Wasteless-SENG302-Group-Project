@@ -7,6 +7,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import java.sql.*;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -14,21 +15,18 @@ import static org.junit.jupiter.api.Assertions.fail;
 @SpringBootTest(classes={Main.class})
 public class UserGeneratorTest {
     private Connection conn;
-    private UserGenerator generator;
+    private UserGenerator userGenerator;
 
     @BeforeEach
-    public void setup() {
-        try {
-            //Connects to production database
-            String url = "jdbc:mariadb://" + System.getenv("S302T500-DB-ADDRESS");
-            Connection conn = DriverManager.getConnection(url, System.getenv("S302T500-DB-USERNAME"), System.getenv("S302T500-DB-PASSWORD"));
-
-
-            //Creates generator
-            this.generator = new UserGenerator(conn);
-        } catch (SQLException e) {
-            e.printStackTrace();
+    public void setup() throws SQLException {
+        Map<String, String> properties = ExampleDataFileReader.readPropertiesFile("/application.properties");
+        if (properties.get("spring.datasource.url") == null || properties.get("spring.datasource.username") == null || properties.get("spring.datasource.password") == null) {
+            fail("The url/username/password is not found");
         }
+        this.conn =  DriverManager.getConnection(properties.get("spring.datasource.url"), properties.get("spring.datasource.username"), properties.get("spring.datasource.password"));
+
+        //Creates userGenerators
+        this.userGenerator = new UserGenerator(conn);
     }
 
     @AfterEach
@@ -81,7 +79,7 @@ public class UserGeneratorTest {
 
     @Test
     void generateUsers_generateOneUserAndConsistentData_oneUserGenerated() throws SQLException {
-        List<Long> userIds = generator.generateUsers(1);
+        List<Long> userIds = userGenerator.generateUsers(1);
         if (userIds.size() != 1) {
             fail();
         }
@@ -93,7 +91,7 @@ public class UserGeneratorTest {
 
     @Test
     void generateUsers_generateTwoUsersConsistentData_twoUsersGenerated() throws SQLException {
-        List<Long> userIds = generator.generateUsers(2);
+        List<Long> userIds = userGenerator.generateUsers(2);
         if (userIds.size() != 2) {
             fail();
         }
@@ -107,7 +105,7 @@ public class UserGeneratorTest {
 
     @Test
     void generateUsers_generateTenUsersConsistentData_tenUsersGenerated() throws SQLException {
-        List<Long> userIds = generator.generateUsers(10);
+        List<Long> userIds = userGenerator.generateUsers(10);
         if (userIds.size() != 10) {
             fail();
         }
@@ -120,7 +118,7 @@ public class UserGeneratorTest {
 
     @Test
     void generateUsers_generateHundredUsersConsistentData_hundredUsersGenerated() throws SQLException {
-        List<Long> userIds = generator.generateUsers(100);
+        List<Long> userIds = userGenerator.generateUsers(100);
         if (userIds.size() != 100) {
             fail();
         }
@@ -134,7 +132,7 @@ public class UserGeneratorTest {
     @Test
     void generateUsers_generateZeroUsers_noUsersGeneratedRepeatPrompt() throws SQLException {
         long usersInDB = getNumUsersInDB();
-        generator.generateUsers(0);
+        userGenerator.generateUsers(0);
         long usersInDBAfter = getNumUsersInDB();
         if (usersInDB != usersInDBAfter) {
             fail();
@@ -144,7 +142,7 @@ public class UserGeneratorTest {
     @Test
     void generateUsers_generateNegativeOneUsers_noUsersGeneratedRepeatPrompt() throws SQLException {
         long usersInDB = getNumUsersInDB();
-        generator.generateUsers(-1);
+        userGenerator.generateUsers(-1);
         long usersInDBAfter = getNumUsersInDB();
         if (usersInDB != usersInDBAfter) {
             fail();
@@ -154,7 +152,7 @@ public class UserGeneratorTest {
     @Test
     void generateUsers_generateNegativeTenUsers_noUsersGeneratedRepeatPrompt() throws SQLException {
         long usersInDB = getNumUsersInDB();
-        generator.generateUsers(-10);
+        userGenerator.generateUsers(-10);
         long usersInDBAfter = getNumUsersInDB();
         if (usersInDB != usersInDBAfter) {
             fail();
