@@ -258,6 +258,15 @@
         </v-col>
       </v-row>
       <v-row justify="end">
+        <v-btn
+          rounded
+          outlined
+          color="primary"
+          class="sale-item-but"
+          @click="showInventoryItemForm=true"
+        >
+          Edit
+        </v-btn>
         <v-tooltip top>
           <template #activator="{on: tooltip}">
             <v-btn
@@ -274,11 +283,6 @@
           </template>
           <span>Create a Sale from this inventory item</span>
         </v-tooltip>
-        <v-btn
-          @click="showInventoryItemForm=true"
-        >
-          Temporary edit button
-        </v-btn>
       </v-row>
     </v-container>
     <template v-if="showInventoryItemForm">

@@ -158,7 +158,7 @@
 </template>
 
 <script>
-import { createInventoryItem, getProducts } from '@/api/internal';
+import { createInventoryItem, getProducts, modifyInventory } from '@/api/internal';
 import { currencyFromCountry } from "@/api/currency";
 import {hugePriceRules, mandatoryRules, quantityRules, smallPriceRules} from "@/utils";
 
@@ -262,7 +262,7 @@ export default {
       if (this.isCreate) {
         this.createInventory(inventoryItem);
       } else {
-        this.modifyInventory();
+        this.modifyInventory(inventoryItem);
       }
     },
     /**
@@ -277,8 +277,8 @@ export default {
         this.closeDialog();
       }
     },
-    modifyInventory() {
-      this.errorMessage = "Not yet implemented";
+    modifyInventory(inventoryItem) {
+      modifyInventory(this.businessId, this.previousItem.id, inventoryItem);
     },
 
     async checkAllDatesValid() {
