@@ -1,4 +1,5 @@
 package org.seng302.datagenerator;
+import org.seng302.leftovers.Main;
 
 import org.junit.jupiter.api.*;
 import org.junit.runner.RunWith;
