@@ -47,6 +47,12 @@ public class KeywordController {
         }
     }
 
+    /**
+     * REST DELETE method to delete the given keyword entity
+     * This endpoint is only accessible to system admins
+     * @param request The HTTP request
+     * @param id Keyword ID to delete
+     */
     @DeleteMapping("/keywords/{id}")
     public void deleteKeyword(HttpServletRequest request, @PathVariable Long id) {
         try {
