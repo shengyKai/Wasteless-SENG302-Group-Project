@@ -12,7 +12,7 @@
     <v-expand-transition>
       <v-container v-show="viewCard">
         <v-row justify="center">
-          <MarketplaceCard :content="card" style="width: 300px"/>
+          <MarketplaceCard :isExpiryEvent="true" :content="card" style="width: 300px"/>
         </v-row>
       </v-container>
     </v-expand-transition>
@@ -112,6 +112,20 @@ export default {
       } else {
         return `Your card '${this.card.title}' will expire in ${this.remaining}. Do you want to delay the expiry by two weeks?`;
       }
+    }
+  },
+  watch: {
+    /**
+     * Watches over the remaniningSeconds computed property such that once it hits 0, the store
+     * will remove this event from the store events, thus deleting this component
+     */
+    remainingSeconds: {
+      handler () {
+        if (this.remainingSeconds < 0) {
+          this.$store.commit("removeEvent", this.event.id);
+        }
+      },
+      immediate: true
     }
   },
   /**

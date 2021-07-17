@@ -11,9 +11,9 @@ export type Currency = {
 };
 
 /**
- * Returned value should either be of type Currency or a string which contains an error message
+ * Returned value should either be of type Currency or an object which contains an error message, default symbol and code
  */
-type CurrencyOrError = Currency | { errorMessage: string }
+type CurrencyOrError = Currency | { errorMessage: string, symbol: string, code: string }
 
 /**
  * An object which only has the attribute 'currencies', which is a list of Currency objects. The API response is expected
@@ -36,14 +36,14 @@ export async function currencyFromCountry(country: string): Promise<CurrencyOrEr
 
   if (typeof response === 'string') {
     console.warn(response);
-    return { errorMessage: response };
+    return { errorMessage: response, symbol:"$", code: ""};
   }
 
   const currency = await getCurrencyFromAPIResponse(response);
 
   if (typeof currency === 'string') {
     console.warn(currency);
-    return { errorMessage: currency };
+    return { errorMessage: currency, symbol:"$", code: ""};
   }
 
   return currency;

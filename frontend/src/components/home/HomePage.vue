@@ -63,7 +63,7 @@ export default {
       if (!this.isBusiness) return undefined;
       return [...Array(10).keys()].map(i => `Item ${i}`);
     },
-  },
+  }
 };
 </script>
 

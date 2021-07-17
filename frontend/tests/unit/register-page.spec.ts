@@ -104,6 +104,8 @@ describe('Register.vue', () => {
     };
   });
 
+  const diacritics = ['À','È','Ì','Ò','Ù','à','è','ì','ò','ù','Á','É','Í','Ó','Ú','Ý','á','é','í','ó','ú','ý','Â','Ê','Î','Ô','Û','â','ê','î','ô','û','Ã','Ñ','Õ','ã','ñ','õ','Ä','Ë','Ï','Ö','Ü','Ÿ','ä','ë','ï','ö','ü','ÿ'];
+
   it("Testing out all inputs, such that the user can only press the register button " +
     "after inputting valid formats for all fields", () => {
     //find the register button by the component
@@ -203,6 +205,15 @@ describe('Register.vue', () => {
     expect(registerButton.props().disabled).toBeTruthy();
   });
 
+  it("Testing password supports diacritics and accents", async () => {
+    const registerButton = wrapper.find(".v-btn");
+    await wrapper.setData({
+      password: "ÈÍúËêÂè1Ýý"
+    });
+    await Vue.nextTick();
+    expect(registerButton.props().disabled).toBeFalsy();
+  });
+
   it("Testing for invalid password format, over character limit", async () => {
     const registerButton = wrapper.find(".v-btn");
     await wrapper.setData({
@@ -239,6 +250,15 @@ describe('Register.vue', () => {
     expect(registerButton.props().disabled).toBeTruthy();
   });
 
+  it.each(diacritics)("Testing first name supports diacritics and accents", async (char) => {
+    const registerButton = wrapper.find(".v-btn");
+    await wrapper.setData({
+      firstName: char
+    });
+    await Vue.nextTick();
+    expect(registerButton.props().disabled).toBeFalsy();
+  });
+
   it("Testing for invalid first name format, first name with numbers", async () => {
     const registerButton = wrapper.find(".v-btn");
     await wrapper.setData({
@@ -261,6 +281,15 @@ describe('Register.vue', () => {
     const registerButton = wrapper.find(".v-btn");
     await wrapper.setData({
       middleName: ""
+    });
+    await Vue.nextTick();
+    expect(registerButton.props().disabled).toBeFalsy();
+  });
+
+  it.each(diacritics)("Testing middle name supports diacritics and accents", async (char) => {
+    const registerButton = wrapper.find(".v-btn");
+    await wrapper.setData({
+      middleName: char
     });
     await Vue.nextTick();
     expect(registerButton.props().disabled).toBeFalsy();
@@ -293,6 +322,15 @@ describe('Register.vue', () => {
     expect(registerButton.props().disabled).toBeTruthy();
   });
 
+  it.each(diacritics)("Testing last name supports diacritics and accents", async (char) => {
+    const registerButton = wrapper.find(".v-btn");
+    await wrapper.setData({
+      lastName: char
+    });
+    await Vue.nextTick();
+    expect(registerButton.props().disabled).toBeFalsy();
+  });
+
   it("Testing for invalid last name format, last name with numbers", async () => {
     const registerButton = wrapper.find(".v-btn");
     await wrapper.setData({
@@ -318,6 +356,15 @@ describe('Register.vue', () => {
     });
     await Vue.nextTick();
     expect(registerButton.props().disabled).toBeTruthy();
+  });
+
+  it.each(diacritics)("Testing nickname supports diacritics and accents", async (char) => {
+    const registerButton = wrapper.find(".v-btn");
+    await wrapper.setData({
+      nickname: char
+    });
+    await Vue.nextTick();
+    expect(registerButton.props().disabled).toBeFalsy();
   });
 
   it("Testing for invalid nickname format, over character limit", async () => {
