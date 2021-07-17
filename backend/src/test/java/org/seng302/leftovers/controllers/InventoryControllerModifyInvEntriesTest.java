@@ -3,7 +3,6 @@ package org.seng302.leftovers.controllers;
 import net.minidev.json.JSONObject;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -507,7 +506,7 @@ public class InventoryControllerModifyInvEntriesTest {
         doNothing().when(businessSpy).checkSessionPermissions(any());
 
         JSONObject invBody = new JSONObject();
-        invBody.put("manufactured", LocalDate.now().plusYears(1).toString());
+        invBody.put("manufactured", LocalDate.now().plusYears(100).toString());
 
         mockMvc.perform(MockMvcRequestBuilders
                 .put("/businesses/1/inventory/1")
@@ -527,7 +526,7 @@ public class InventoryControllerModifyInvEntriesTest {
         doNothing().when(businessSpy).checkSessionPermissions(any());
 
         JSONObject invBody = new JSONObject();
-        invBody.put("sellBy", LocalDate.now().plusYears(1).toString());
+        invBody.put("sellBy", LocalDate.now().plusYears(100).toString());
 
         mockMvc.perform(MockMvcRequestBuilders
                 .put("/businesses/1/inventory/1")
@@ -591,7 +590,7 @@ public class InventoryControllerModifyInvEntriesTest {
         doNothing().when(businessSpy).checkSessionPermissions(any());
 
         JSONObject invBody = new JSONObject();
-        invBody.put("sellBy", LocalDate.now().minusYears(1).toString());
+        invBody.put("sellBy", LocalDate.now().minusYears(100).toString());
 
         mockMvc.perform(MockMvcRequestBuilders
                 .put("/businesses/1/inventory/1")
@@ -611,7 +610,7 @@ public class InventoryControllerModifyInvEntriesTest {
         doNothing().when(businessSpy).checkSessionPermissions(any());
 
         JSONObject invBody = new JSONObject();
-        invBody.put("bestBefore", LocalDate.now().plusYears(1).toString());
+        invBody.put("bestBefore", LocalDate.now().plusYears(100).toString());
 
         mockMvc.perform(MockMvcRequestBuilders
                 .put("/businesses/1/inventory/1")
@@ -695,7 +694,7 @@ public class InventoryControllerModifyInvEntriesTest {
         doNothing().when(businessSpy).checkSessionPermissions(any());
 
         JSONObject invBody = new JSONObject();
-        invBody.put("expires", LocalDate.now().plusYears(1).toString());
+        invBody.put("expires", LocalDate.now().plusYears(100).toString());
 
         mockMvc.perform(MockMvcRequestBuilders
                 .put("/businesses/1/inventory/1")
@@ -780,7 +779,7 @@ public class InventoryControllerModifyInvEntriesTest {
 
         JSONObject invBody = new JSONObject();
         invBody.put("manufactured", LocalDate.now().minusYears(1).toString());
-        invBody.put("sellBy", LocalDate.now().plusYears(1).toString());
+        invBody.put("sellBy", LocalDate.now().plusYears(100).toString());
 
         mockMvc.perform(MockMvcRequestBuilders
                 .put("/businesses/1/inventory/1")
@@ -800,8 +799,8 @@ public class InventoryControllerModifyInvEntriesTest {
         doNothing().when(businessSpy).checkSessionPermissions(any());
 
         JSONObject invBody = new JSONObject();
-        invBody.put("manufactured", LocalDate.now().plusYears(1).toString());
-        invBody.put("sellBy", LocalDate.now().minusYears(1).toString());
+        invBody.put("manufactured", LocalDate.now().plusYears(100).toString());
+        invBody.put("sellBy", LocalDate.now().minusYears(100).toString());
 
         mockMvc.perform(MockMvcRequestBuilders
                 .put("/businesses/1/inventory/1")
@@ -821,8 +820,8 @@ public class InventoryControllerModifyInvEntriesTest {
         doNothing().when(businessSpy).checkSessionPermissions(any());
 
         JSONObject invBody = new JSONObject();
-        invBody.put("manufactured", LocalDate.now().minusYears(1).toString());
-        invBody.put("bestBefore", LocalDate.now().plusYears(1).toString());
+        invBody.put("manufactured", LocalDate.now().minusYears(100).toString());
+        invBody.put("bestBefore", LocalDate.now().plusYears(100).toString());
 
         mockMvc.perform(MockMvcRequestBuilders
                 .put("/businesses/1/inventory/1")
@@ -842,8 +841,8 @@ public class InventoryControllerModifyInvEntriesTest {
         doNothing().when(businessSpy).checkSessionPermissions(any());
 
         JSONObject invBody = new JSONObject();
-        invBody.put("manufactured", LocalDate.now().plusYears(1).toString());
-        invBody.put("bestBefore", LocalDate.now().minusYears(1).toString());
+        invBody.put("manufactured", LocalDate.now().plusYears(100).toString());
+        invBody.put("bestBefore", LocalDate.now().minusYears(100).toString());
 
         mockMvc.perform(MockMvcRequestBuilders
                 .put("/businesses/1/inventory/1")
@@ -863,8 +862,8 @@ public class InventoryControllerModifyInvEntriesTest {
         doNothing().when(businessSpy).checkSessionPermissions(any());
 
         JSONObject invBody = new JSONObject();
-        invBody.put("manufactured", LocalDate.now().minusYears(1).toString());
-        invBody.put("expires", LocalDate.now().plusYears(1).toString());
+        invBody.put("manufactured", LocalDate.now().minusYears(100).toString());
+        invBody.put("expires", LocalDate.now().plusYears(100).toString());
 
         mockMvc.perform(MockMvcRequestBuilders
                 .put("/businesses/1/inventory/1")
@@ -884,8 +883,8 @@ public class InventoryControllerModifyInvEntriesTest {
         doNothing().when(businessSpy).checkSessionPermissions(any());
 
         JSONObject invBody = new JSONObject();
-        invBody.put("manufactured", LocalDate.now().plusYears(1).toString());
-        invBody.put("expires", LocalDate.now().minusYears(1).toString());
+        invBody.put("manufactured", LocalDate.now().plusYears(100).toString());
+        invBody.put("expires", LocalDate.now().minusYears(300).toString());
 
         mockMvc.perform(MockMvcRequestBuilders
                 .put("/businesses/1/inventory/1")
@@ -905,8 +904,8 @@ public class InventoryControllerModifyInvEntriesTest {
         doNothing().when(businessSpy).checkSessionPermissions(any());
 
         JSONObject invBody = new JSONObject();
-        invBody.put("sellBy", LocalDate.now().plusYears(1).toString());
-        invBody.put("bestBefore", LocalDate.now().plusYears(2).toString());
+        invBody.put("sellBy", LocalDate.now().plusYears(100).toString());
+        invBody.put("bestBefore", LocalDate.now().plusYears(200).toString());
 
         mockMvc.perform(MockMvcRequestBuilders
                 .put("/businesses/1/inventory/1")
@@ -915,7 +914,6 @@ public class InventoryControllerModifyInvEntriesTest {
                 .andExpect(status().isOk());
     }
 
-    @Disabled
     @Test
     void modifyInvEntries_modifySellByAfterBestBefore_cannotModify400() throws Exception {
         Business businessSpy = spy(testBusiness);
@@ -927,8 +925,8 @@ public class InventoryControllerModifyInvEntriesTest {
         doNothing().when(businessSpy).checkSessionPermissions(any());
 
         JSONObject invBody = new JSONObject();
-        invBody.put("sellBy", LocalDate.now().plusYears(2).toString());
-        invBody.put("bestBefore", LocalDate.now().plusYears(1).toString());
+        invBody.put("sellBy", LocalDate.now().plusYears(200).toString());
+        invBody.put("bestBefore", LocalDate.now().plusYears(100).toString());
 
         mockMvc.perform(MockMvcRequestBuilders
                 .put("/businesses/1/inventory/1")
@@ -948,8 +946,8 @@ public class InventoryControllerModifyInvEntriesTest {
         doNothing().when(businessSpy).checkSessionPermissions(any());
 
         JSONObject invBody = new JSONObject();
-        invBody.put("sellBy", LocalDate.now().plusYears(1).toString());
-        invBody.put("expires", LocalDate.now().plusYears(2).toString());
+        invBody.put("sellBy", LocalDate.now().plusYears(200).toString());
+        invBody.put("expires", LocalDate.now().plusYears(300).toString());
 
         mockMvc.perform(MockMvcRequestBuilders
                 .put("/businesses/1/inventory/1")
@@ -958,7 +956,6 @@ public class InventoryControllerModifyInvEntriesTest {
                 .andExpect(status().isOk());
     }
 
-    @Disabled
     @Test
     void modifyInvEntries_modifySellByAfterExpires_cannotModify400() throws Exception {
         Business businessSpy = spy(testBusiness);
@@ -970,8 +967,8 @@ public class InventoryControllerModifyInvEntriesTest {
         doNothing().when(businessSpy).checkSessionPermissions(any());
 
         JSONObject invBody = new JSONObject();
-        invBody.put("sellBy", LocalDate.now().plusYears(2).toString());
-        invBody.put("expires", LocalDate.now().plusYears(1).toString());
+        invBody.put("sellBy", LocalDate.now().plusYears(200).toString());
+        invBody.put("expires", LocalDate.now().plusYears(100).toString());
 
         mockMvc.perform(MockMvcRequestBuilders
                 .put("/businesses/1/inventory/1")
@@ -991,8 +988,8 @@ public class InventoryControllerModifyInvEntriesTest {
         doNothing().when(businessSpy).checkSessionPermissions(any());
 
         JSONObject invBody = new JSONObject();
-        invBody.put("bestBefore", LocalDate.now().plusYears(1).toString());
-        invBody.put("expires", LocalDate.now().plusYears(2).toString());
+        invBody.put("bestBefore", LocalDate.now().plusYears(100).toString());
+        invBody.put("expires", LocalDate.now().plusYears(200).toString());
 
         mockMvc.perform(MockMvcRequestBuilders
                 .put("/businesses/1/inventory/1")
@@ -1001,7 +998,6 @@ public class InventoryControllerModifyInvEntriesTest {
                 .andExpect(status().isOk());
     }
 
-    @Disabled
     @Test
     void modifyInvEntries_modifyBestBeforeAfterExpires_cannotModify400() throws Exception {
         Business businessSpy = spy(testBusiness);
@@ -1013,8 +1009,8 @@ public class InventoryControllerModifyInvEntriesTest {
         doNothing().when(businessSpy).checkSessionPermissions(any());
 
         JSONObject invBody = new JSONObject();
-        invBody.put("bestBefore", LocalDate.now().plusYears(2).toString());
-        invBody.put("expires", LocalDate.now().plusYears(1).toString());
+        invBody.put("bestBefore", LocalDate.now().plusYears(200).toString());
+        invBody.put("expires", LocalDate.now().plusYears(100).toString());
 
         mockMvc.perform(MockMvcRequestBuilders
                 .put("/businesses/1/inventory/1")
@@ -1039,10 +1035,10 @@ public class InventoryControllerModifyInvEntriesTest {
         invBody.put("quantity", 10);
         invBody.put("pricePerItem", 5.42);
         invBody.put("totalPrice", 54.20);
-        invBody.put("manufactured", LocalDate.now().minusYears(1).toString());
-        invBody.put("sellBy", LocalDate.now().plusYears(1).toString());
-        invBody.put("bestBefore", LocalDate.now().plusYears(2).toString());
-        invBody.put("expires", LocalDate.now().plusYears(3).toString());
+        invBody.put("manufactured", LocalDate.now().minusYears(100).toString());
+        invBody.put("sellBy", LocalDate.now().plusYears(100).toString());
+        invBody.put("bestBefore", LocalDate.now().plusYears(200).toString());
+        invBody.put("expires", LocalDate.now().plusYears(300).toString());
 
         mockMvc.perform(MockMvcRequestBuilders
                 .put("/businesses/1/inventory/1")
@@ -1100,10 +1096,10 @@ public class InventoryControllerModifyInvEntriesTest {
         invBody.put("quantity", 10);
         invBody.put("pricePerItem", 5.42);
         invBody.put("totalPrice", 54.20);
-        invBody.put("manufactured", LocalDate.now().minusYears(1).toString());
-        invBody.put("sellBy", LocalDate.now().plusYears(1).toString());
-        invBody.put("bestBefore", LocalDate.now().plusYears(2).toString());
-        invBody.put("expires", LocalDate.now().plusYears(3).toString());
+        invBody.put("manufactured", LocalDate.now().minusYears(100).toString());
+        invBody.put("sellBy", LocalDate.now().plusYears(100).toString());
+        invBody.put("bestBefore", LocalDate.now().plusYears(200).toString());
+        invBody.put("expires", LocalDate.now().plusYears(300).toString());
 
         mockMvc.perform(MockMvcRequestBuilders
                 .put("/businesses/2/inventory/1")
@@ -1128,10 +1124,10 @@ public class InventoryControllerModifyInvEntriesTest {
         invBody.put("quantity", 10);
         invBody.put("pricePerItem", 5.42);
         invBody.put("totalPrice", 54.20);
-        invBody.put("manufactured", LocalDate.now().minusYears(1).toString());
-        invBody.put("sellBy", LocalDate.now().plusYears(1).toString());
-        invBody.put("bestBefore", LocalDate.now().plusYears(2).toString());
-        invBody.put("expires", LocalDate.now().plusYears(3).toString());
+        invBody.put("manufactured", LocalDate.now().minusYears(100).toString());
+        invBody.put("sellBy", LocalDate.now().plusYears(100).toString());
+        invBody.put("bestBefore", LocalDate.now().plusYears(200).toString());
+        invBody.put("expires", LocalDate.now().plusYears(300).toString());
 
         mockMvc.perform(MockMvcRequestBuilders
                 .put("/businesses/10000/inventory/1")
@@ -1156,10 +1152,10 @@ public class InventoryControllerModifyInvEntriesTest {
         invBody.put("quantity", 10);
         invBody.put("pricePerItem", 5.42);
         invBody.put("totalPrice", 54.20);
-        invBody.put("manufactured", LocalDate.now().minusYears(1).toString());
-        invBody.put("sellBy", LocalDate.now().plusYears(1).toString());
-        invBody.put("bestBefore", LocalDate.now().plusYears(2).toString());
-        invBody.put("expires", LocalDate.now().plusYears(3).toString());
+        invBody.put("manufactured", LocalDate.now().minusYears(100).toString());
+        invBody.put("sellBy", LocalDate.now().plusYears(100).toString());
+        invBody.put("bestBefore", LocalDate.now().plusYears(200).toString());
+        invBody.put("expires", LocalDate.now().plusYears(300).toString());
 
         mockMvc.perform(MockMvcRequestBuilders
                 .put("/businesses/1/inventory/10000")
