@@ -13,9 +13,8 @@ public class Main {
      * @return the connection to the database
      */
     public static Connection connectToDatabase() throws SQLException {
-        String url = "jdbc:mariadb://" + System.getenv("S302T500-DB-ADDRESS");
-        Connection conn = DriverManager.getConnection(url, System.getenv("S302T500-DB-USERNAME"), System.getenv("S302T500-DB-PASSWORD"));
-        return conn;
+        Map<String, String> properties = ExampleDataFileReader.readPropertiesFile("/generator_db.properties");
+        return DriverManager.getConnection(properties.get("url"), properties.get("username"), properties.get("password"));
     }
 
     /**

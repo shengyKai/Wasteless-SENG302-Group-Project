@@ -10,6 +10,7 @@ import org.seng302.leftovers.controllers.CardController;
 import org.seng302.leftovers.entities.Keyword;
 import org.seng302.leftovers.entities.MarketplaceCard;
 import org.seng302.leftovers.entities.User;
+import org.seng302.leftovers.persistence.ExpiryEventRepository;
 import org.seng302.leftovers.persistence.KeywordRepository;
 import org.seng302.leftovers.persistence.MarketplaceCardRepository;
 import org.seng302.leftovers.persistence.UserRepository;
@@ -38,6 +39,8 @@ public class CardCreationStepDefinition {
     private UserRepository userRepository;
     @Autowired
     private KeywordRepository keywordRepository;
+    @Autowired
+    private ExpiryEventRepository expiryEventRepository;
     private MarketplaceCard createdCard;
 
     /**
@@ -99,7 +102,7 @@ public class CardCreationStepDefinition {
             keywordRepository.save(keyword);
 
         }
-        CardController controller = new CardController(marketplaceCardRepository, keywordRepository, userRepository);
+        CardController controller = new CardController(marketplaceCardRepository, keywordRepository, userRepository, expiryEventRepository);
         mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
     }
 

@@ -18,45 +18,10 @@ type Mocked<T extends { [k: string]: (...args: any[]) => any }> = { [k in keyof 
 // @ts-ignore - We've added an instance attribute in the mock declaration that mimics a AxiosInstance
 const instance: Mocked<Pick<AxiosInstance, 'get'>> = axios.instance;
 
-describe("Test GET /cards/count endpoint", () => {
-  it('When response is a number containing the total number of results, the response will be a number', async () => {
-    instance.get.mockResolvedValueOnce({
-      data: { count: 1 }
-    });
-    const cardCount = await api.getMarketplaceCardCount("ForSale");
-    expect(cardCount).toEqual(1);
-  });
-
-  it('When backend sends a non number card count, the response will be an error message stating it is not a number', async () => {
-    instance.get.mockResolvedValueOnce({
-      data: { count: "something" }
-    });
-    const error = await api.getMarketplaceCardCount("ForSale");
-    expect(error).toEqual('Response is not number');
-  });
-
-  it('When api call reaches the backend but responds with an error message, the reponse will be an error message with a status number', async () => {
-    instance.get.mockRejectedValueOnce({
-      response: { status: 400 }
-    });
-    const error = await api.getMarketplaceCardCount("ForSale");
-    expect(error).toEqual('Request failed: 400');
-  });
-
-  it('When api call cannot reach the backend, the response will be an error message stating the failed attempt', async () => {
-    instance.get.mockRejectedValueOnce({
-      response: {}
-    });
-    const error = await api.getMarketplaceCardCount("ForSale");
-    expect(error).toEqual('Failed to reach backend');
-  });
-});
-
-
 describe("Test GET /cards endpoint", () => {
   it('When the api call is made with all valid parameters, a list of cards is returned ', async () => {
-    const responseData = [
-      {
+    const responseData: api.SearchResults<api.MarketplaceCard> = {
+      results: [{
         id: 1,
         creator: {
           id: 1,
@@ -77,8 +42,9 @@ describe("Test GET /cards endpoint", () => {
             created: "somedate"
           }
         ]
-      }
-    ];
+      }],
+      count: 50,
+    };
     instance.get.mockResolvedValueOnce({
       data: responseData
     });
@@ -119,11 +85,11 @@ describe("Test GET /cards endpoint", () => {
   });
 
   it('When api call returns any other error status, the response will be an error message with that status', async () => {
-    const responseData = [
+    const responseData =
       {
-        id: 1
-      }
-    ];
+        results: [{id: 1}],
+        count: 100,
+      };
     instance.get.mockResolvedValueOnce({
       data: responseData
     });

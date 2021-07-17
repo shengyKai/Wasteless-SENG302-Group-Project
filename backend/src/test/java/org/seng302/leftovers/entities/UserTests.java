@@ -1,10 +1,13 @@
 package org.seng302.leftovers.entities;
 
+import io.cucumber.java.eo.Se;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.junit.Ignore;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.MockitoAnnotations;
 import org.mockito.internal.matchers.apachecommons.ReflectionEquals;
 import org.seng302.leftovers.exceptions.EmailInUseException;
@@ -12,7 +15,12 @@ import org.seng302.leftovers.persistence.BusinessRepository;
 import org.seng302.leftovers.persistence.UserRepository;
 import org.seng302.leftovers.tools.PasswordAuthenticator;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.security.NoSuchAlgorithmException;
@@ -28,6 +36,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest
 class UserTests {
     private User testUser;
@@ -36,6 +45,14 @@ class UserTests {
     private UserRepository userRepository;
     @Autowired
     private BusinessRepository businessRepository;
+    @Autowired
+    SessionFactory sessionFactory;
+
+    @BeforeAll
+    void init() {
+        businessRepository.deleteAll();
+        userRepository.deleteAll();
+    }
 
     @BeforeEach
     void setup() throws ParseException {
@@ -68,28 +85,50 @@ class UserTests {
         MockitoAnnotations.openMocks(this);
     }
 
+    @AfterEach
+    void tearDown() {
+        businessRepository.deleteAll();
+        userRepository.deleteAll();
+    }
+
     /**
      * Helper function for tests involving the businesses administered attribute. Saves the user to the
      * user repository and creates two businesses, making the user a primary admin of one and a secondary
      * admin of the other.
      */
     void addBusinessesAdministeredToTestUser() {
-        businessRepository.deleteAll();
-        userRepository.deleteAll();
-        userRepository.save(testUser);
-        User testUser2 = testBuilder.build();
-        userRepository.save(testUser2);
-        Business testBusiness1 = new Business.Builder().withName("Corellis").withBusinessType("Accommodation and Food Services")
-        .withAddress(Location.covertAddressStringToLocation("46,Victoria Road,Ashburton,Auckland,Auckland,New Zealand,0624"))
-        .withPrimaryOwner(testUser).withDescription("Great coffee").build();
-        businessRepository.save(testBusiness1);
-        Business testBusiness2 = new Business.Builder().withName("Cakes n Ladders").withBusinessType("Accommodation and Food Services")
-        .withAddress(Location.covertAddressStringToLocation("173,Symonds Street,Ashburton,Auckland,Auckland,New Zealand,1010"))
-        .withPrimaryOwner(testUser2).withDescription("Chill spot").build();
-        businessRepository.save(testBusiness2);
-        testBusiness2.addAdmin(testUser);
-        businessRepository.save(testBusiness2);
-        testUser = userRepository.findByEmail(testUser.getEmail());
+        try (Session session = sessionFactory.openSession()) {
+            testUser = session.load(User.class, session.save(testUser));
+
+            User testUser2 = testBuilder.build();
+            testUser2 = session.load(User.class, session.save(testUser2));
+
+
+            Business testBusiness1 = new Business.Builder()
+                .withName("Corellis")
+                .withBusinessType("Accommodation and Food Services")
+                .withAddress(Location.covertAddressStringToLocation("46,Victoria Road,Ashburton,Auckland,Auckland,New Zealand,0624"))
+                .withPrimaryOwner(testUser)
+                .withDescription("Great coffee")
+                .build();
+            session.save(testBusiness1);
+
+
+            Business testBusiness2 = new Business.Builder()
+                .withName("Cakes n Ladders")
+                .withBusinessType("Accommodation and Food Services")
+                .withAddress(Location.covertAddressStringToLocation("173,Symonds Street,Ashburton,Auckland,Auckland,New Zealand,1010"))
+                .withPrimaryOwner(testUser2)
+                .withDescription("Chill spot")
+                .build();
+
+            session.beginTransaction();
+            testBusiness2.addAdmin(testUser);
+            session.save(testBusiness2);
+            session.getTransaction().commit();
+
+            testUser = session.load(User.class, testUser.getUserID());
+        }
     }
 
     @Test
@@ -572,7 +611,7 @@ class UserTests {
     /**
      * Checks several passwords will be set as the user's password
      */
-    @Test @Ignore
+    @Test
     void checkValidPassword() throws NoSuchAlgorithmException {
         String[] validPasswords = { "SAASDJ3KAasdasdsa$*#", "asdjaskdj383", "77asjdksajk&&&",
                 "ASJDKLASJLKDJASKLDJK234567890123", "SKLDJASKD*(*(@*(#@*(8238283999" };
@@ -827,19 +866,37 @@ class UserTests {
      */
     @Test
     void constructPublicJsonBusinessesAdministeredTrueTest() {
-        addBusinessesAdministeredToTestUser();
-        List<Business> testBusinesses = new ArrayList<>();
-        testBusinesses.addAll(testUser.getBusinessesAdministeredAndOwned());
-        Collections.sort(testBusinesses, (Business b1, Business b2) ->
-                b1.getId().compareTo(b2.getId()));
-        assertEquals(2, testBusinesses.size());
-        JSONObject json = testUser.constructPublicJson(true);
-        JSONArray expectedBusinessArray = new JSONArray();
-        for (Business business : testBusinesses) {
-            expectedBusinessArray.add(business.constructJson(false));
+        try (Session session = sessionFactory.openSession()) {
+        System.out.println("Before");
+        //try (Session session = sessionFactory.openSession()){
+            //var transaction = session.beginTransaction();
+            addBusinessesAdministeredToTestUser();
+            //transaction.commit();
+        //}
+        System.out.println("After");
+
+
+
+            System.out.println("Wow" + testUser.getUserID());
+
+            testUser = session.find(User.class, testUser.getUserID());
+
+            System.out.println(businessRepository.findAll());
+            System.out.println(testUser.getBusinessesAdministeredAndOwned());
+
+            List<Business> testBusinesses = new ArrayList<>();
+            testBusinesses.addAll(testUser.getBusinessesAdministeredAndOwned());
+            Collections.sort(testBusinesses, (Business b1, Business b2) ->
+                    b1.getId().compareTo(b2.getId()));
+            assertEquals(2, testBusinesses.size());
+            JSONObject json = testUser.constructPublicJson(true);
+            JSONArray expectedBusinessArray = new JSONArray();
+            for (Business business : testBusinesses) {
+                expectedBusinessArray.add(business.constructJson(false));
+            }
+            String expectedBusinessString = expectedBusinessArray.toJSONString();
+            assertEquals(expectedBusinessString, json.getAsString("businessesAdministered"));
         }
-        String expectedBusinessString = expectedBusinessArray.toJSONString();
-        assertEquals(expectedBusinessString, json.getAsString("businessesAdministered"));
     }
 
     /**
@@ -875,16 +932,21 @@ class UserTests {
     void constructPrivateJsonBusinessesAdministeredTrueTest() {
         addBusinessesAdministeredToTestUser();
         List<Business> testBusinesses = new ArrayList<>();
-        testBusinesses.addAll(testUser.getBusinessesAdministeredAndOwned());
-        Collections.sort(testBusinesses, (Business b1, Business b2) -> b1.getId().compareTo(b2.getId()));
-        assertEquals(2, testBusinesses.size());
-        JSONObject json = testUser.constructPrivateJson(true);
-        JSONArray expectedBusinessArray = new JSONArray();
-        for (Business business : testBusinesses) {
-            expectedBusinessArray.add(business.constructJson(false));
+
+        try (Session session = sessionFactory.openSession()) {
+            testUser = session.load(User.class, testUser.getUserID());
+            testBusinesses.addAll(testUser.getBusinessesAdministeredAndOwned());
+
+            Collections.sort(testBusinesses, (Business b1, Business b2) -> b1.getId().compareTo(b2.getId()));
+            assertEquals(2, testBusinesses.size());
+            JSONObject json = testUser.constructPrivateJson(true);
+            JSONArray expectedBusinessArray = new JSONArray();
+            for (Business business : testBusinesses) {
+                expectedBusinessArray.add(business.constructJson(false));
+            }
+            String expectedBusinessString = expectedBusinessArray.toJSONString();
+            assertEquals(expectedBusinessString, json.getAsString("businessesAdministered"));
         }
-        String expectedBusinessString = expectedBusinessArray.toJSONString();
-        assertEquals(expectedBusinessString, json.getAsString("businessesAdministered"));
     }
 
     /**
@@ -934,9 +996,7 @@ class UserTests {
         businessRepository.deleteAll();
         userRepository.deleteAll();
         userRepository.save(testUser);
-        assertThrows(EmailInUseException.class, () -> {
-            User.checkEmailUniqueness(testEmail, userRepository);
-        });
+        assertThrows(EmailInUseException.class, () -> User.checkEmailUniqueness(testEmail, userRepository));
     }
 
     /**

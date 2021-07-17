@@ -4,15 +4,19 @@ import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.seng302.leftovers.entities.ExpiryEvent;
 import org.seng302.leftovers.entities.Keyword;
 import org.seng302.leftovers.entities.MarketplaceCard;
 import org.seng302.leftovers.entities.User;
+import org.seng302.leftovers.persistence.ExpiryEventRepository;
 import org.seng302.leftovers.persistence.KeywordRepository;
 import org.seng302.leftovers.persistence.MarketplaceCardRepository;
 import org.seng302.leftovers.persistence.UserRepository;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
 import org.seng302.leftovers.tools.JsonTools;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
@@ -21,24 +25,27 @@ import org.seng302.leftovers.tools.SearchHelper;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.Optional;
-import java.util.Comparator;
+import java.util.Set;
 
 /**
  * This controller handles requests involving marketplace cards
  */
 @RestController
 public class CardController {
+    private static final Set<String> VALID_CARD_ORDERINGS = Set.of("created", "title", "closes", "creatorFirstName", "creatorLastName");
 
     private final MarketplaceCardRepository marketplaceCardRepository;
     private final KeywordRepository keywordRepository;
     private final UserRepository userRepository;
+    private final ExpiryEventRepository expiryEventRepository;
     private final Logger logger = LogManager.getLogger(CardController.class.getName());
 
     @Autowired
-    public CardController(MarketplaceCardRepository marketplaceCardRepository, KeywordRepository keywordRepository, UserRepository userRepository) {
+    public CardController(MarketplaceCardRepository marketplaceCardRepository, KeywordRepository keywordRepository, UserRepository userRepository, ExpiryEventRepository expiryEventRepository) {
         this.marketplaceCardRepository = marketplaceCardRepository;
         this.keywordRepository = keywordRepository;
         this.userRepository = userRepository;
+        this.expiryEventRepository = expiryEventRepository;
     }
 
     /**
@@ -101,6 +108,10 @@ public class CardController {
                 throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Current user does not have permission to delete this card");
             }
 
+            Optional<ExpiryEvent> expiryEvent = expiryEventRepository.getByExpiringCard(card);
+            if (expiryEvent.isPresent()) {
+                expiryEventRepository.delete(expiryEvent.get());
+            }
             marketplaceCardRepository.delete(card);
 
         } catch (Exception e) {
@@ -165,6 +176,10 @@ public class CardController {
                 throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Current user does not have permission to delete this card");
             }
 
+            Optional<ExpiryEvent> expiryEvent = expiryEventRepository.getByExpiringCard(card);
+            if (expiryEvent.isPresent()) {
+                expiryEventRepository.delete(expiryEvent.get());
+            }
             card.delayCloses();
             marketplaceCardRepository.save(card);
         } catch (Exception e) {
@@ -181,91 +196,62 @@ public class CardController {
      * @return A JSON Array of Marketplace cards
      */
     @GetMapping("/cards")
-    public JSONArray getCards(HttpServletRequest request,
+    public JSONObject getCards(HttpServletRequest request,
                               @RequestParam(name = "section") String sectionName,
                               @RequestParam(required = false) String orderBy,
                               @RequestParam(required = false) Integer page,
                               @RequestParam(required = false) Integer resultsPerPage,
                               @RequestParam(required = false) Boolean reverse) {
         
-        logger.info("Request to get marketplace cards for " + sectionName);
+        logger.info("Request to get marketplace cards for {}", sectionName);
         AuthenticationTokenManager.checkAuthenticationToken(request);
 
         // parse the section
         MarketplaceCard.Section section = MarketplaceCard.sectionFromString(sectionName);
-
-        Comparator<MarketplaceCard> sort = getMarketPlaceCardComparator(orderBy, reverse);
-
-        // database call for section
-        var cards = marketplaceCardRepository.getAllBySection(section);
-
-        cards.sort(sort);
-
-        cards = SearchHelper.getPageInResults(cards, page, resultsPerPage);
-        //return JSON Object
-        JSONArray responseBody = new JSONArray();
-        for (MarketplaceCard card : cards) {
-            responseBody.appendElement(card.constructJSONObject());
+        Sort.Direction direction = SearchHelper.getSortDirection(reverse);
+        if (orderBy == null) {
+            orderBy = "created";
         }
-        return responseBody;
+
+        if (!VALID_CARD_ORDERINGS.contains(orderBy)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid card ordering");
+        }
+
+        PageRequest pageRequest = SearchHelper.getPageRequest(page, resultsPerPage, Sort.by(new Sort.Order(direction, orderBy).ignoreCase()));
+        var results = marketplaceCardRepository.getAllBySection(section, pageRequest);
+
+        //return JSON Object
+        JSONArray resultArray = new JSONArray();
+        for (MarketplaceCard card : results) {
+            resultArray.appendElement(card.constructJSONObject());
+        }
+        JSONObject json = new JSONObject();
+        json.put("count", results.getTotalElements());
+        json.put("results", resultArray);
+        return json;
     }
 
-    /**
-     * REST GET method to retrieve the number of cards in the marketplace.
-     * @param request the HTTP request
-     * @param sectionName the requested section name
-     * @return the card count by the requested section
-     */
-    @GetMapping("/cards/count")
-    public JSONObject retrieveCardCount(HttpServletRequest request,
-                                        @RequestParam(name = "section") String sectionName) {
-
+    @GetMapping("/users/{id}/cards")
+    public JSONObject getCardsForUser(HttpServletRequest request,
+                                      @PathVariable Long id,
+                                      @RequestParam(required = false) Integer page,
+                                      @RequestParam(required = false) Integer resultsPerPage) {
+        logger.info("Request to get marketplace cards for user {}", id);
         AuthenticationTokenManager.checkAuthenticationToken(request);
 
-        //if the section is invalid, an error would already be thrown.
-        MarketplaceCard.Section section = MarketplaceCard.sectionFromString(sectionName);
+        User user = userRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "User not found"));
 
-        var cards = marketplaceCardRepository.getAllBySection(section);
+        PageRequest pageRequest = SearchHelper.getPageRequest(page, resultsPerPage, Sort.by(Sort.Direction.DESC, "created"));
+        var results = marketplaceCardRepository.getAllByCreator(user, pageRequest);
 
-        JSONObject responseBody = new JSONObject();
-        responseBody.put("count", cards.size());
-
-        return responseBody;
-    }
-
-    /**
-     * Sort marketplace cards by a key. Can reverse results.
-     * 
-     * @param orderBy Key to order marketplace cards by.
-     * @param reverse Reverse results.
-     * @return MarketplaceCard Comparator
-     */
-    public Comparator<MarketplaceCard> getMarketPlaceCardComparator(String orderBy, Boolean reverse) {
-        if (orderBy == null) orderBy = "created";
-
-        Comparator<MarketplaceCard> sort;
-        switch (orderBy) {
-            case "title":
-                sort = Comparator.comparing(MarketplaceCard::getTitle, String.CASE_INSENSITIVE_ORDER);
-                break;
-            case "closes":
-                sort = Comparator.comparing(MarketplaceCard::getCloses);
-                break;
-            case "creatorFirstName":
-                sort = Comparator.comparing(marketPlaceCard -> marketPlaceCard.getCreator().getFirstName(), String.CASE_INSENSITIVE_ORDER);
-                break;
-            case "creatorLastName":
-                sort = Comparator.comparing(marketPlaceCard -> marketPlaceCard.getCreator().getLastName(), String.CASE_INSENSITIVE_ORDER);
-                break;
-            case "created":
-            default:
-                sort = Comparator.comparing(MarketplaceCard::getCreated);
-                break;
+        //return JSON Object
+        JSONArray resultArray = new JSONArray();
+        for (MarketplaceCard card : results) {
+            resultArray.appendElement(card.constructJSONObject());
         }
-        if (Boolean.TRUE.equals(reverse)) {
-            sort = sort.reversed();
-        }
-
-        return sort;
+        JSONObject json = new JSONObject();
+        json.put("count", results.getTotalElements());
+        json.put("results", resultArray);
+        return json;
     }
 }

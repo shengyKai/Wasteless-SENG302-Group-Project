@@ -17,9 +17,17 @@ import java.util.regex.Pattern;
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
 public abstract class Account {
-    private String email;
-    private String authenticationCode;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long userID;
+
+    @Column(unique = true, nullable = false)
+    private String email;
+
+    @Column(nullable = false)
+    private String authenticationCode;
+
+    @Column(nullable = false)
     protected String role;
     // Allows letters, numbers and selected symbols then 1 @ then some amount of other characters
     private static final String EMAIL_REGEX = "^[A-Za-z0-9+_.-]+@(.+)$";
@@ -28,7 +36,7 @@ public abstract class Account {
      * Returns email associated with the account, also works as username
      * @return email
      */
-    @Column(unique = true, nullable = false)
+
     public String getEmail() {
         return email;
     }
@@ -63,8 +71,6 @@ public abstract class Account {
      * Returns password of the account
      * @return password (Hashed)
      */
-    @Column(nullable = false)
-    @JsonIgnore
     public String getAuthenticationCode() {
         return authenticationCode;
     }
@@ -75,7 +81,7 @@ public abstract class Account {
      * @param password to be hashed and stored
      */
     public void setAuthenticationCodeFromPassword(String password) {
-        if (password != null && !password.trim().isEmpty() && password.length() >= 7 && password.length() <= 32 && password.matches(".*[a-zA-Z].*") && password.matches(".*[0-9].*")) {
+        if (password != null && !password.trim().isEmpty() && password.length() >= 7 && password.length() <= 32 && password.matches(".*[a-zA-ZÀ-ž].*") && password.matches(".*[0-9].*")) {
             try {
                 this.authenticationCode = PasswordAuthenticator.generateAuthenticationCode(password);
 
@@ -105,9 +111,6 @@ public abstract class Account {
      * Returns primary key of where it is in the tables
      * @return userID
      */
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @JsonProperty("id")
     public Long getUserID() {
         return userID;
     }
@@ -124,7 +127,6 @@ public abstract class Account {
      * Authority within the system, eg: admin status and what businesses they are associated with
      * @return role
      */
-    @Column(nullable = false)
     public String getRole(){
         return this.role;
     }

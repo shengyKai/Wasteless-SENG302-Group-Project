@@ -10,6 +10,7 @@ import org.seng302.leftovers.persistence.ProductRepository;
 import org.seng302.leftovers.persistence.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
@@ -347,7 +348,7 @@ class ProductTests {
                     .build()
         );
 
-        Product foundProduct = productRepository.findByBusinessAndProductCode(testBusiness1, "NATHAN-APPLE-70").get();
+        Product foundProduct = productRepository.findByBusinessAndProductCode(testBusiness1, "NATHAN-APPLE-70").orElseThrow();
         assertNotNull(foundProduct);
 
         assertEquals(product.getID(), foundProduct.getID());
@@ -385,7 +386,6 @@ class ProductTests {
      */
     @Test
     void testFindByBusinessAndProductCodeIsNullIfProductHasBeenDeleted() {
-        // Product with same code saved to a different business
         Product product = productRepository.save(
                 new Product.Builder()
                         .withProductCode("NATHAN-APPLE-70")
@@ -401,6 +401,88 @@ class ProductTests {
 
         Optional<Product> foundProduct = productRepository.findByBusinessAndProductCode(testBusiness1, "NATHAN-APPLE-70");
         assertTrue(foundProduct.isEmpty());
+    }
+
+    @Test
+    void getProduct_productExists_productReturned() {
+        Product product = productRepository.save(
+                new Product.Builder()
+                        .withProductCode("NATHAN-APPLE-70")
+                        .withName("The Nathan Apple")
+                        .withDescription("Ever wonder why Nathan has an apple")
+                        .withManufacturer("Apple")
+                        .withRecommendedRetailPrice("9000.03")
+                        .withBusiness(testBusiness1)
+                        .build()
+        );
+
+        Product foundProduct = assertDoesNotThrow(() -> productRepository.getProduct(testBusiness1, "NATHAN-APPLE-70"));
+        assertNotNull(foundProduct);
+
+        assertEquals(product.getID(), foundProduct.getID());
+        assertEquals(product.getProductCode(), foundProduct.getProductCode());
+        assertEquals(product.getName(), foundProduct.getName());
+        assertEquals(product.getDescription(), foundProduct.getDescription());
+        assertEquals(product.getManufacturer(), foundProduct.getManufacturer());
+        assertEquals(product.getRecommendedRetailPrice(), foundProduct.getRecommendedRetailPrice());
+        assertEquals(product.getBusiness().getId(), foundProduct.getBusiness().getId());
+    }
+
+    @Test
+    void getProduct_productExistsInDifferentBusiness_throws406Exception() {
+        // Product with same code saved to a different business
+        productRepository.save(
+                new Product.Builder()
+                        .withProductCode("NATHAN-APPLE-70")
+                        .withName("The Nathan Apple")
+                        .withDescription("Ever wonder why Nathan has an apple")
+                        .withManufacturer("Apple")
+                        .withRecommendedRetailPrice("9000.03")
+                        .withBusiness(testBusiness2)
+                        .build()
+        );
+
+        var exception = assertThrows(ResponseStatusException.class, () -> productRepository.getProduct(testBusiness1, "NATHAN-APPLE-70"));
+        assertEquals(HttpStatus.NOT_ACCEPTABLE, exception.getStatus());
+        assertEquals("the product does not exist", exception.getReason());
+    }
+
+    @Test
+    void getProduct_productCodeDoesNotExist_throws406Exception() {
+        productRepository.save(
+                new Product.Builder()
+                        .withProductCode("NATHAN-APPLE-71")
+                        .withName("The Nathan Apple")
+                        .withDescription("Ever wonder why Nathan has an apple")
+                        .withManufacturer("Apple")
+                        .withRecommendedRetailPrice("9000.03")
+                        .withBusiness(testBusiness1)
+                        .build()
+        );
+
+        var exception = assertThrows(ResponseStatusException.class, () -> productRepository.getProduct(testBusiness1, "NATHAN-APPLE-70"));
+        assertEquals(HttpStatus.NOT_ACCEPTABLE, exception.getStatus());
+        assertEquals("the product does not exist", exception.getReason());
+    }
+
+    @Test
+    void getProduct_productHasBeenDeleted_throws406Exception() {
+        Product product = productRepository.save(
+                new Product.Builder()
+                        .withProductCode("NATHAN-APPLE-70")
+                        .withName("The Nathan Apple")
+                        .withDescription("Ever wonder why Nathan has an apple")
+                        .withManufacturer("Apple")
+                        .withRecommendedRetailPrice("9000.03")
+                        .withBusiness(testBusiness1)
+                        .build()
+        );
+
+        productRepository.delete(product);
+
+        var exception = assertThrows(ResponseStatusException.class, () -> productRepository.getProduct(testBusiness1, "NATHAN-APPLE-70"));
+        assertEquals(HttpStatus.NOT_ACCEPTABLE, exception.getStatus());
+        assertEquals("the product does not exist", exception.getReason());
     }
 
     /**
