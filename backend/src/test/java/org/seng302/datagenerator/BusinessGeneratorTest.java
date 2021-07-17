@@ -1,4 +1,5 @@
 package org.seng302.datagenerator;
+import org.seng302.leftovers.Main;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -9,6 +10,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import java.sql.*;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -21,12 +23,13 @@ public class BusinessGeneratorTest {
 
     @BeforeEach
     public void setup() throws SQLException {
-        //Connects to production database
-        String url = "jdbc:mariadb://" + System.getenv("S302T500-DB-ADDRESS");
-        this.conn = DriverManager.getConnection(url, System.getenv("S302T500-DB-USERNAME"), System.getenv("S302T500-DB-PASSWORD"));
+        Map<String, String> properties = ExampleDataFileReader.readPropertiesFile("/application.properties");
+        if (properties.get("spring.datasource.url") == null || properties.get("spring.datasource.username") == null || properties.get("spring.datasource.password") == null) {
+            fail("The url/username/password is not found");
+        }
+        this.conn =  DriverManager.getConnection(properties.get("spring.datasource.url"), properties.get("spring.datasource.username"), properties.get("spring.datasource.password"));
 
-
-        //Creates generators
+        //Creates userGenerators
         this.userGenerator = new UserGenerator(conn);
         this.businessGenerator = new BusinessGenerator(conn);
     }
