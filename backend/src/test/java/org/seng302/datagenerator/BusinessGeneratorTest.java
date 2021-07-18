@@ -5,8 +5,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
-import org.seng302.leftovers.entities.Account;
-import org.seng302.leftovers.persistence.AccountRepository;
 import org.seng302.leftovers.persistence.BusinessRepository;
 import org.seng302.leftovers.persistence.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,7 +37,7 @@ public class BusinessGeneratorTest {
         }
         this.conn =  DriverManager.getConnection(properties.get("spring.datasource.url"), properties.get("spring.datasource.username"), properties.get("spring.datasource.password"));
 
-        //Creates userGenerators
+        //Creates Generators
         this.userGenerator = new UserGenerator(conn);
         this.businessGenerator = new BusinessGenerator(conn);
     }

@@ -1,10 +1,12 @@
 package org.seng302.datagenerator;
+import org.seng302.leftovers.Main;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.runner.RunWith;
 import org.seng302.leftovers.persistence.BusinessRepository;
+import org.seng302.leftovers.persistence.ProductRepository;
 import org.seng302.leftovers.persistence.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -28,8 +30,10 @@ public class ProductGeneratorTest {
 
     @Autowired
     private UserRepository userRepository;
-
-
+    @Autowired
+    private BusinessRepository businessRepository;
+    @Autowired
+    private ProductRepository productRepository;
 
     @BeforeEach
     public void setup() throws SQLException {
@@ -39,12 +43,16 @@ public class ProductGeneratorTest {
         }
         this.conn =  DriverManager.getConnection(properties.get("spring.datasource.url"), properties.get("spring.datasource.username"), properties.get("spring.datasource.password"));
 
-        //Creates userGenerators
+        //Creates Generators
         this.userGenerator = new UserGenerator(conn);
+        this.businessGenerator = new BusinessGenerator(conn);
+        this.productGenerator = new ProductGenerator(conn);
     }
 
     @AfterEach
     public void teardown() throws SQLException {
+        productRepository.deleteAll();
+        businessRepository.deleteAll();
         userRepository.deleteAll();
         conn.close();
     }
@@ -82,68 +90,68 @@ public class ProductGeneratorTest {
     }
 
     /**
-     * Deletes the generated products form the database as part of the clean up process
-     * @param productIds the ids of the generated products
+     * Generates a specified number of users and businesses using the generators and returns the ids of the
+     * generated businesses.
+     * @return the ids of the generated businesses
      */
-    public void deleteProductsFromDB(List<Long> productIds) throws SQLException {
-        for (Long productId: productIds) {
-            PreparedStatement stmt = conn.prepareStatement("DELETE FROM product WHERE id = ?");
-            stmt.setObject(1, productId);
-            stmt.executeQuery();
-        }
+    public List<Long> generateUserAndBusiness(int userCount, int businessCount) {
+        List<Long> userIds = userGenerator.generateUsers(userCount);
+        List<Long> businessIds = businessGenerator.generateBusinesses(userIds, businessCount);
+        return businessIds;
     }
 
     @Test
     void generateProducts_generateOneProduct_oneProductGenerated() throws SQLException {
-        List<Long> productIds = productGenerator.generateProducts(1);
+        List<Long> businessIds = generateUserAndBusiness(1, 1);
+        List<Long> productIds = productGenerator.generateProducts(businessIds, 1);
         if (productIds.size() != 1) {
             fail();
         }
         long productId = productIds.get(0);
         checkRequiredFieldsNotNull(productId);
-        deleteProductsFromDB(productIds);
     }
 
     @Test
     void generateProducts_generateTwoProducts_twoProductsGenerated() throws SQLException {
-        List<Long> productIds = productGenerator.generateProducts(2);
+        List<Long> businessIds = generateUserAndBusiness(1, 1);
+        List<Long> productIds = productGenerator.generateProducts(businessIds, 2);
         if (productIds.size() != 2) {
             fail();
         }
         for (int i=0; i < productIds.size(); i++) {
             checkRequiredFieldsNotNull(productIds.get(i));
         }
-        deleteProductsFromDB(productIds);
     }
 
     @Test
     void generateProducts_generateTenProducts_tenProductsGenerated() throws SQLException {
-        List<Long> productIds = productGenerator.generateProducts(10);
+        List<Long> businessIds = generateUserAndBusiness(1, 1);
+        List<Long> productIds = productGenerator.generateProducts(businessIds, 10);
         if (productIds.size() != 10) {
             fail();
         }
         for (int i=0; i < productIds.size(); i++) {
             checkRequiredFieldsNotNull(productIds.get(i));
         }
-        deleteProductsFromDB(productIds);
     }
 
     @Test
     void generateProducts_generateHundredProducts_hundredProductsGenerated() throws SQLException {
-        List<Long> productIds = productGenerator.generateProducts(100);
+        List<Long> businessIds = generateUserAndBusiness(1, 1);
+        List<Long> productIds = productGenerator.generateProducts(businessIds, 100);
         if (productIds.size() != 100) {
             fail();
         }
         for (int i=0; i < productIds.size(); i++) {
             checkRequiredFieldsNotNull(productIds.get(i));
         }
-        deleteProductsFromDB(productIds);
     }
 
     @Test
     void generateProducts_generateZeroProducts_noProductGenerated() throws SQLException {
         long productsInDB = getNumProductsInDB();
-        List<Long> productIds = productGenerator.generateProducts(0);
+        List<Long> businessIds = generateUserAndBusiness(1, 1);
+        List<Long> productIds = productGenerator.generateProducts(businessIds, 0);
         long productsInDBAfter = getNumProductsInDB();
         if (productsInDB != productsInDBAfter) {
             fail();
@@ -153,7 +161,8 @@ public class ProductGeneratorTest {
     @Test
     void generateProducts_generateNegativeOneProducts_noProductGenerated() throws SQLException {
         long productsInDB = getNumProductsInDB();
-        List<Long> productIds = productGenerator.generateProducts(-1);
+        List<Long> businessIds = generateUserAndBusiness(1, 1);
+        List<Long> productIds = productGenerator.generateProducts(businessIds, -1);
         long productsInDBAfter = getNumProductsInDB();
         if (productsInDB != productsInDBAfter) {
             fail();
@@ -163,7 +172,8 @@ public class ProductGeneratorTest {
     @Test
     void generateProducts_generateNegativeTenProducts_noProductGenerated() throws SQLException {
         long productsInDB = getNumProductsInDB();
-        List<Long> productIds = productGenerator.generateProducts(-10);
+        List<Long> businessIds = generateUserAndBusiness(1, 1);
+        List<Long> productIds = productGenerator.generateProducts(businessIds, -10);
         long productsInDBAfter = getNumProductsInDB();
         if (productsInDB != productsInDBAfter) {
             fail();
