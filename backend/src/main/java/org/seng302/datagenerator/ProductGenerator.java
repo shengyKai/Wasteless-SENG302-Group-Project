@@ -59,10 +59,18 @@ public class ProductGenerator {
      */
     public static void main(String[] args) throws InterruptedException, SQLException {
         Connection conn = connectToDatabase();
-        var generator = new ProductGenerator(conn);
+        var userGenerator = new UserGenerator(conn);
+        var businessGenerator = new BusinessGenerator(conn);
+        var productGenerator = new ProductGenerator(conn);
+
+        int userCount = getNumObjectsFromInput("users");
+        List<Long> userIds = userGenerator.generateUsers(userCount);
+
+        int businessCount = getNumObjectsFromInput("businesses");
+        List<Long> businessIds = businessGenerator.generateBusinesses(userIds, businessCount);
 
         int productCount = getNumObjectsFromInput("products");
-        generator.generateProducts(productCount);
+        List<Long> productIds = productGenerator.generateProducts(businessIds, productCount);
     }
 
     /**
@@ -70,13 +78,11 @@ public class ProductGenerator {
      * @param productCount Number of products to generate
      * @return List of generated product ids
      */
-    public List<Long> generateProducts(int productCount) {
-        var businessGenerator = new BusinessGenerator(conn);
+    public List<Long> generateProducts(List<Long> businessIds, int productCount) {
         List<Long> generatedProductIds = new ArrayList<>();
         try {
             for (int i=0; i < productCount; i++) {
                 clear();
-                List<Long> businessIds = businessGenerator.generateBusinesses(1);
                 long businessId = businessIds.get(0);
 
                 System.out.println(String.format("Creating Product %d / %d", i+1, productCount));
