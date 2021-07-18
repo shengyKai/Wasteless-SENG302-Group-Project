@@ -185,6 +185,39 @@ describe('Login.vue', () => {
     });
   });
 
+  it("Testing password length must be at least 7", async () => {
+    const loginButton = wrapper.find(".v-btn");
+    await wrapper.setData({
+      password: 'short1'
+    });
+    validateForm();
+    await Vue.nextTick(() => {
+      expect(loginButton.props().disabled).toBeTruthy();
+    });
+  });
+
+  it("Testing password length must be less than or equal to 16", async () => {
+    const loginButton = wrapper.find(".v-btn");
+    await wrapper.setData({
+      password: 'thisIsAReallyLongPassword22'
+    });
+    validateForm();
+    await Vue.nextTick(() => {
+      expect(loginButton.props().disabled).toBeTruthy();
+    });
+  });
+
+  it("Testing password supports diacritics and accents", async () => {
+    const loginButton = wrapper.find(".v-btn");
+    await wrapper.setData({
+      password: 'ÈÍúËêÂè1Ýý'
+    });
+    validateForm();
+    await Vue.nextTick(() => {
+      expect(loginButton.props().disables).toBeFalsy();
+    });
+  });
+
   it('Tests that errorMessage is displayed if not undefined', async () => {
     await wrapper.setData({
       errorMessage: 'test_error_message',

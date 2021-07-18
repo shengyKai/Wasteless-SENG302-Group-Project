@@ -2,6 +2,7 @@ package cucumber;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.cucumber.java.After;
 import io.cucumber.java.Before;
 import org.seng302.leftovers.persistence.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,27 +13,33 @@ import org.springframework.web.context.WebApplicationContext;
 public class CucumberSetup {
 
     @Autowired
-    protected ObjectMapper objectMapper;
+    private ObjectMapper objectMapper;
     @Autowired
-    protected WebApplicationContext webApplicationContext;
+    private WebApplicationContext webApplicationContext;
     @Autowired
-    protected MockMvc mockMvc;
+    private MockMvc mockMvc;
     @Autowired
-    protected AccountRepository accountRepository;
+    private AccountRepository accountRepository;
     @Autowired
-    protected BusinessRepository businessRepository;
+    private BusinessRepository businessRepository;
     @Autowired
-    protected InventoryItemRepository inventoryItemRepository;
+    private InventoryItemRepository inventoryItemRepository;
     @Autowired
-    protected ProductRepository productRepository;
+    private ProductRepository productRepository;
     @Autowired
-    protected UserRepository userRepository;
+    private UserRepository userRepository;
     @Autowired
-    protected SaleItemRepository saleItemRepository;
+    private SaleItemRepository saleItemRepository;
     @Autowired
-    protected MarketplaceCardRepository marketplaceCardRepository;
+    private MarketplaceCardRepository marketplaceCardRepository;
     @Autowired
-    protected KeywordRepository keywordRepository;
+    private KeywordRepository keywordRepository;
+    @Autowired
+    private EventRepository eventRepository;
+    @Autowired
+    private ExpiryEventRepository expiryEventRepository;
+    @Autowired
+    private ImageRepository imageRepository;
 
     /**
      * Set up the mockMvc object for mocking API requests, and remove everything from the repositories.
@@ -41,15 +48,29 @@ public class CucumberSetup {
     public void Setup() {
         objectMapper.enable(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT);
         mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
+        clearDatabase();
+    }
+    
+    @After
+    public void tearDown() {
+        clearDatabase();
+    }
 
+    /**
+     * Delete all entities from all repositories in the database.
+     */
+    private void clearDatabase() {
         saleItemRepository.deleteAll();
         inventoryItemRepository.deleteAll();
         productRepository.deleteAll();
         businessRepository.deleteAll();
+        eventRepository.deleteAll();
+        expiryEventRepository.deleteAll();
         marketplaceCardRepository.deleteAll();
         keywordRepository.deleteAll();
         userRepository.deleteAll();
         accountRepository.deleteAll();
+        imageRepository.deleteAll();
     }
 
 }

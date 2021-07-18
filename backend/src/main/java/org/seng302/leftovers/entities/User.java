@@ -19,17 +19,36 @@ import java.util.regex.Pattern;
 @Entity
 public class User extends Account {
 
+    @Column(nullable = false)
     private String firstName;
+
     private String middleName;
+
+    @Column(nullable = false)
     private String lastName;
+
     private String nickname;
+
     private String bio;
+
+    @Column(nullable = false)
     private LocalDate dob;
+
     private String phNum;
+
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Location address;
+
+    @ReadOnlyProperty
     private Instant created;
+
+    @ManyToMany(mappedBy = "administrators", fetch = FetchType.LAZY)
     private Set<Business> businessesAdministered = new HashSet<>();
+
+    @OneToMany(mappedBy = "primaryOwner", fetch = FetchType.LAZY)
     private Set<Business> businessesOwned = new HashSet<>();
+
+    @ManyToMany(mappedBy = "notifiedUsers", fetch = FetchType.LAZY)
     private Set<Event> events = new HashSet<>();
 
     /* Matches:
@@ -48,7 +67,7 @@ public class User extends Account {
      * Returns users first name
      * @return firstName
      */
-    @Column(nullable = false)
+
     public String getFirstName() {
         return firstName;
     }
@@ -59,7 +78,7 @@ public class User extends Account {
      * @param firstName users first name
      */
     public void setFirstName(String firstName) {
-        if (firstName != null && firstName.length() > 0 && firstName.length() <= 32 && firstName.matches("[ a-zA-Z\\-]+")) {
+        if (firstName != null && firstName.length() > 0 && firstName.length() <= 32 && firstName.matches("[ a-zA-ZÀ-ž\\-]+")) {
             this.firstName = firstName;
         } else {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The first name must not be empty, be less then 16 characters, and only contain letters.");
@@ -78,7 +97,7 @@ public class User extends Account {
      * @param middleName
      */
     public void setMiddleName(String middleName) {
-        if (middleName == null || (middleName.length() > 0 && middleName.length() <= 32 && middleName.matches("[ a-zA-Z\\-]+"))) {
+        if (middleName == null || (middleName.length() > 0 && middleName.length() <= 32 && middleName.matches("[ a-zA-ZÀ-ž\\-]+"))) {
             this.middleName = middleName;
         } else if (middleName.equals("")) {
             this.middleName = null;
@@ -91,7 +110,7 @@ public class User extends Account {
      * Returns users last name
      * @return lastName
      */
-    @Column(nullable = false)
+
     public String getLastName() {
         return lastName;
     }
@@ -102,7 +121,7 @@ public class User extends Account {
      * @param lastName users surname
      */
     public void setLastName(String lastName) {
-        if (lastName != null && lastName.length() > 0 && lastName.length() <= 32 && lastName.matches("[ a-zA-Z\\-]+")) {
+        if (lastName != null && lastName.length() > 0 && lastName.length() <= 32 && lastName.matches("[ a-zA-ZÀ-ž\\-]+")) {
             this.lastName = lastName;
         } else {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The last name must not be empty, be less then 16 characters, and only contain letters.");
@@ -122,7 +141,7 @@ public class User extends Account {
      * @param nickname users preferred name
      */
     public void setNickname(String nickname) {
-        if (nickname == null || (nickname.length() > 0 && nickname.length() <= 32 && nickname.matches("[ a-zA-Z]*"))) {
+        if (nickname == null || (nickname.length() > 0 && nickname.length() <= 32 && nickname.matches("[ a-zA-ZÀ-ž]*"))) {
             this.nickname = nickname;
         } else if (nickname.equals("")) {
             this.nickname = null;
@@ -144,7 +163,7 @@ public class User extends Account {
      * @param bio brief description of user
      */
     public void setBio(String bio) {
-        if (bio == null || (bio.length() > 0 && bio.length() <= 200 && bio.matches("[ a-zA-Z0-9\\p{Punct}]*"))) {
+        if (bio == null || (bio.length() > 0 && bio.length() <= 200 && bio.matches("[ a-zA-ZÀ-ž0-9\\p{Punct}]*"))) {
             this.bio = bio;
         } else if (bio.equals("")) {
             this.bio = null;
@@ -158,8 +177,6 @@ public class User extends Account {
      * Returns the users date of birth
      * @return dob
      */
-    @Column(nullable = false)
-    @JsonProperty("dateOfBirth")
     public LocalDate getDob() {
         return dob;
     }
@@ -191,7 +208,6 @@ public class User extends Account {
      * Returns the users phone number
      * @return phNum
      */
-    @JsonProperty("phoneNumber")
     public String getPhNum() {
         return phNum;
     }
@@ -218,8 +234,6 @@ public class User extends Account {
      * Gets the users country, city, street, house number etc as string
      * @return address
      */
-    @OneToOne(cascade = CascadeType.ALL)
-    //@Column(nullable = false)
     public Location getAddress() {
     return this.address;
     }
@@ -241,7 +255,6 @@ public class User extends Account {
      * Date the account was created
      * @return Date the account was created
      */
-    @ReadOnlyProperty
     public Instant getCreated(){
         return this.created;
     }
@@ -258,38 +271,21 @@ public class User extends Account {
      * Gets the set of businesses this user is the primary owner of
      * @return Set of businesses owned
      */
-    @OneToMany(mappedBy = "primaryOwner", fetch = FetchType.EAGER)
     public Set<Business> getBusinessesOwned() {
         return this.businessesOwned;
     }
 
-    /**
-     * Sets the set of businesses this user is the primary owner of
-     * @param owned Businesses owned
-     */
-    private void setBusinessesOwned(Set<Business> owned) {
-        this.businessesOwned = owned;
-    }
 
     /**
      * Gets the set of businesses that the user is an admin of
      * @return Businesses administered
      */
-    @ManyToMany(mappedBy = "administrators", fetch = FetchType.EAGER)
+
     public Set<Business> getBusinessesAdministered() {
         return this.businessesAdministered;
     }
 
-    /**
-     * For JPA only
-     * Sets the businesses administered
-     * @param businesses Set of businesses
-     */
-    private void setBusinessesAdministered(Set<Business> businesses) {
-        this.businessesAdministered = businesses;
-    }
 
-    @ManyToMany(mappedBy = "notifiedUsers", fetch = FetchType.LAZY)
     public Set<Event> getEvents() { return this.events;}
 
     private void setEvents(Set<Event> events) { this.events = events; }

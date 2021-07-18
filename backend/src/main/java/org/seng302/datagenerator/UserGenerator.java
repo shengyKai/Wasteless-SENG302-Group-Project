@@ -5,11 +5,14 @@ package org.seng302.datagenerator;
  */
 
 import java.sql.*;
+import java.time.Duration;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.io.File;
 import java.util.concurrent.TimeUnit;
 
+import lombok.Data;
 import org.seng302.datagenerator.LocationGenerator.Location;
 
 import static org.seng302.datagenerator.Main.*;
@@ -18,9 +21,10 @@ public class UserGenerator {
     private Random random = new Random();
     private Connection conn;
     private LocationGenerator locationGenerator = LocationGenerator.getInstance();
+    private PersonNameGenerator personNameGenerator = PersonNameGenerator.getInstance();
 
     //predefined lists
-    String[] BIOS = {"I enjoy running on the weekends", "Beaches are fun", "Got to focus on my career", "If only I went to a better university", "Read documentation yeah right", "My cats keep me going", "All I need is food"};
+    private static final String[] BIOS = {"I enjoy running on the weekends", "Beaches are fun", "Got to focus on my career", "If only I went to a better university", "Read documentation yeah right", "My cats keep me going", "All I need is food"};
 
     public UserGenerator(Connection conn) {
         this.conn = conn;
@@ -70,47 +74,6 @@ public class UserGenerator {
     }
 
     /**
-     * Creates the SQL commands required to insert the user's account into the database
-     * @return the id of the account entity (userid)
-     */
-    private long createInsertAccountSQL(String email, String password) throws SQLException {
-        String role = "user";
-        PreparedStatement stmt = conn.prepareStatement(
-                "INSERT INTO account (email, role, authentication_code) "
-                        + "VALUES (?, ?, ?);",
-                Statement.RETURN_GENERATED_KEYS
-        );
-        stmt.setObject(1, email);
-        stmt.setObject(2, role);
-        stmt.setObject(3, password);
-        stmt.executeUpdate();
-        ResultSet keys = stmt.getGeneratedKeys();
-        keys.next();
-        return keys.getLong(1);
-    }
-
-    /**
-     * Creates the SQL commands required to insert the user's account into the database
-     */
-    private void createInsertUsersSQL(long userId, long addressId, PersonNameGenerator.FullName fullName) throws SQLException {
-        PreparedStatement stmt = conn.prepareStatement(
-                "INSERT INTO user (first_name, middle_name, last_name, nickname, ph_num, dob, bio, created, userid, address_id) "
-                        + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
-        );
-        stmt.setObject(1, fullName.getFirstName()); //first name
-        stmt.setObject(2, fullName.getMiddleName()); //middle name
-        stmt.setObject(3, fullName.getLastName()); //last name
-        stmt.setObject(4, fullName.getNickname()); //nickname
-        stmt.setObject(5, generatePhNum()); //phone number
-        stmt.setObject(6, generateDOB()); //date of birth
-        stmt.setObject(7, BIOS[random.nextInt(BIOS.length)]); //bio
-        stmt.setObject(8, Instant.now()); //date created
-        stmt.setObject(9, userId);
-        stmt.setObject(10, addressId);
-        stmt.executeUpdate();
-    }
-
-    /**
      * Main program
      * @param args no arguments should be provided
      */
@@ -127,31 +90,97 @@ public class UserGenerator {
      * @return List of generated user ids
      */
     public List<Long> generateUsers(int userCount) {
-        clear();
+        Instant startTime = Instant.now();
+        List<PersonNameGenerator.FullName> names = new ArrayList<>();
+        for (int i = 0; i < userCount; i++) names.add(personNameGenerator.generateName());
 
-        List<Long> generatedUserIds = new ArrayList<>();
         try {
-            PersonNameGenerator personNameGenerator = PersonNameGenerator.getInstance();
-            for (int i=0; i < userCount; i++) {
-                PersonNameGenerator.FullName fullName = personNameGenerator.generateName();
-                String email = generateEmail(i, fullName);
+            System.out.println("Adding addresses");
+            List<Location> addresses = new ArrayList<>();
+            for (int i = 0; i < userCount; i++) addresses.add(locationGenerator.generateAddress(random));
+            List<Long> addressIds = locationGenerator.createInsertAddressSQL(addresses, conn);
+
+            System.out.println("Adding accounts");
+            AccountBatch accountBatch = new AccountBatch(conn);
+            for (int i = 0; i<userCount; i++) {
+                String email = generateEmail(i, names.get(i));
                 String password = generatePassword();
-                Location address = locationGenerator.generateAddress(random);
-                long addressId = locationGenerator.createInsertAddressSQL(address, conn);
 
-                clear();
-                System.out.println(String.format("Creating User %d / %d", i+1, userCount));
-                int progress = (int) (((float)(i+1) / (float)userCount) * 100);
-                System.out.println(String.format("Progress: %d%%", progress));
-                long userId = createInsertAccountSQL(email, password);
-                createInsertUsersSQL(userId, addressId, fullName);
-                generatedUserIds.add(userId);
+                accountBatch.addAccount(email, password);
             }
+            List<Long> generatedUserIds = accountBatch.execute();
 
+            System.out.println("Adding users");
+            UserBatch userBatch = new UserBatch(conn);
+            for (int i = 0; i<userCount; i++) userBatch.addUser(generatedUserIds.get(i), addressIds.get(i), names.get(i));
+            userBatch.execute();
+
+            Instant endTime = Instant.now();
+
+            System.out.println("Added " + userCount + " users in " + ChronoUnit.MILLIS.between(startTime, endTime) + "ms");
+
+            return generatedUserIds;
         } catch (Exception e) {
             e.printStackTrace();
+            return List.of();
+        }
+    }
+
+    public class AccountBatch {
+        private final PreparedStatement statement;
+
+        public AccountBatch(Connection connection) throws SQLException {
+            statement = connection.prepareStatement(
+                    "INSERT INTO account (email, role, authentication_code) "
+                            + "VALUES (?, ?, ?);",
+                    Statement.RETURN_GENERATED_KEYS
+            );
         }
 
-        return generatedUserIds;
+        public void addAccount(String email, String password) throws SQLException {
+            String role = "user";
+            statement.setObject(1, email);
+            statement.setObject(2, role);
+            statement.setObject(3, password);
+            statement.addBatch();
+        }
+
+        public List<Long> execute() throws SQLException {
+            statement.executeBatch();
+
+            List<Long> keys = new ArrayList<>();
+            ResultSet keyResults = statement.getGeneratedKeys();
+            while (keyResults.next()) keys.add(keyResults.getLong(1));
+            return keys;
+        }
+    }
+
+    public class UserBatch {
+        private final PreparedStatement statement;
+
+        public UserBatch(Connection connection) throws SQLException {
+            statement = connection.prepareStatement(
+                    "INSERT INTO user (first_name, middle_name, last_name, nickname, ph_num, dob, bio, created, userid, address_id) "
+                            + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+            );
+        }
+
+        public void addUser(long userId, long addressId, PersonNameGenerator.FullName fullName) throws SQLException {
+            statement.setObject(1, fullName.getFirstName()); //first name
+            statement.setObject(2, fullName.getMiddleName()); //middle name
+            statement.setObject(3, fullName.getLastName()); //last name
+            statement.setObject(4, fullName.getNickname()); //nickname
+            statement.setObject(5, generatePhNum()); //phone number
+            statement.setObject(6, generateDOB()); //date of birth
+            statement.setObject(7, BIOS[random.nextInt(BIOS.length)]); //bio
+            statement.setObject(8, Instant.now()); //date created
+            statement.setObject(9, userId);
+            statement.setObject(10, addressId);
+            statement.addBatch();
+        }
+
+        public void execute() throws SQLException {
+            statement.executeBatch();
+        }
     }
 }

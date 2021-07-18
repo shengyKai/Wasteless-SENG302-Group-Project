@@ -7,20 +7,26 @@ import net.minidev.json.parser.JSONParser;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.junit.runner.RunWith;
 import org.mockito.*;
-import org.seng302.leftovers.entities.Keyword;
-import org.seng302.leftovers.entities.Location;
-import org.seng302.leftovers.entities.MarketplaceCard;
-import org.seng302.leftovers.entities.User;
+import org.seng302.leftovers.entities.*;
 import org.seng302.leftovers.exceptions.AccessTokenException;
+import org.seng302.leftovers.persistence.ExpiryEventRepository;
 import org.seng302.leftovers.persistence.KeywordRepository;
 import org.seng302.leftovers.persistence.MarketplaceCardRepository;
 import org.seng302.leftovers.persistence.UserRepository;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
+import org.seng302.leftovers.tools.SearchHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -61,9 +67,15 @@ class CardControllerTest {
     @Mock
     private UserRepository userRepository;
     @Mock
+    private ExpiryEventRepository expiryEventRepository;
+    @Mock
     private MarketplaceCard mockCard;
     @Mock
+    private ExpiryEvent mockEvent;
+    @Mock
     private User mockUser;
+    @Mock
+    private Page<MarketplaceCard> mockPage;
     @Mock
     private Keyword mockKeyword1;
     @Mock
@@ -73,6 +85,13 @@ class CardControllerTest {
 
     private User testUser;
     private User testUser1;
+    private User testUser2;
+    private User testUser3;
+    private MarketplaceCard testCard1;
+    private MarketplaceCard testCard2;
+    private MarketplaceCard testCard3;
+
+
     private CardController cardController;
     private List<MarketplaceCard> cards = new ArrayList<>();
 
@@ -105,6 +124,48 @@ class CardControllerTest {
                 .withDob("1987-04-12")
                 .withAddress(Location.covertAddressStringToLocation("108,Albert Road,Ashburton,Christchurch,New Zealand,Canterbury,8041"))
                 .build();
+        testUser2 = new User.Builder()
+                .withFirstName("Stuart")
+                .withMiddleName("Derp")
+                .withLastName("Alex")
+                .withNickName("Derpy")
+                .withEmail("stuart@gmail.com")
+                .withPassword("password123")
+                .withDob("1987-04-12")
+                .withAddress(Location.covertAddressStringToLocation("108,Albert Road,Waimairi,Auckland,New Zealand,Auckland,8041"))
+                .build();
+        testUser3 = new User.Builder()
+                .withFirstName("Rick")
+                .withMiddleName("Morty")
+                .withLastName("Pickle")
+                .withNickName("Danger")
+                .withEmail("ricknmorty@gmail.com")
+                .withPassword("password123")
+                .withDob("1987-04-12")
+                .withAddress(Location.covertAddressStringToLocation("108,Albert Road,Singapore,Singapore,Singapore,Singapore,8041"))
+                .build();
+        var closes = Instant.now().plus(23, ChronoUnit.HOURS);
+        testCard1 = new MarketplaceCard.Builder()
+                .withCreator(testUser1)
+                .withSection(MarketplaceCard.Section.WANTED)
+                .withTitle("test_title")
+                .withDescription("test_description")
+                .withCloses(closes)
+                .build();
+        testCard2 = new MarketplaceCard.Builder()
+                .withCreator(testUser2)
+                .withSection(MarketplaceCard.Section.WANTED)
+                .withTitle("test_title")
+                .withDescription("test_description")
+                .withCloses(closes)
+                .build();
+        testCard3 = new MarketplaceCard.Builder()
+                .withCreator(testUser3)
+                .withSection(MarketplaceCard.Section.WANTED)
+                .withTitle("test_title")
+                .withDescription("test_description")
+                .withCloses(closes)
+                .build();
                 
         MockitoAnnotations.openMocks(this);
 
@@ -117,11 +178,16 @@ class CardControllerTest {
         when(userRepository.findById(userId)).thenReturn(Optional.of(mockUser));
         when(keywordRepository.findById(keywordId1)).thenReturn(Optional.of(mockKeyword1));
         when(keywordRepository.findById(keywordId2)).thenReturn(Optional.of(mockKeyword2));
+
         when(marketplaceCardRepository.save(any())).thenReturn(mockCard);
-        when(marketplaceCardRepository.getAllBySection(any())).thenReturn(Collections.singletonList(mockCard));
         when(marketplaceCardRepository.findById(1L)).thenReturn(Optional.of(mockCard));
         when(marketplaceCardRepository.findById(not(eq(1L)))).thenReturn(Optional.empty());
         when(marketplaceCardRepository.getCard(any())).thenCallRealMethod();
+
+        when(mockPage.getTotalElements()).thenReturn(30L);
+        when(mockPage.iterator()).thenReturn(List.of(mockCard).iterator());
+        when(marketplaceCardRepository.getAllBySection(any(), any())).thenReturn(mockPage);
+        when(marketplaceCardRepository.getAllByCreator(any(), any())).thenReturn(mockPage);
 
         // Set up entities to return set id when getter called
         when(mockCard.getID()).thenReturn(cardId);
@@ -129,13 +195,12 @@ class CardControllerTest {
         when(mockUser.getUserID()).thenReturn(userId);
 
         // Tell MockMvc to use controller with mocked repositories for tests
-        cardController = new CardController(marketplaceCardRepository, keywordRepository, userRepository);
+        cardController = new CardController(marketplaceCardRepository, keywordRepository, userRepository, expiryEventRepository);
         mockMvc = MockMvcBuilders.standaloneSetup(cardController).build();
 
         constructValidCreateCardJson();
 
         addSeveralMarketplaceCards(cards);
-        when(marketplaceCardRepository.getAllBySection(any())).thenReturn(cards);
     }
 
     @AfterEach
@@ -152,6 +217,15 @@ class CardControllerTest {
         createCardJson.appendField("creatorId", (int) userId);
         createCardJson.appendField("section", "ForSale");
         createCardJson.appendField("keywordIds", new int[0]);
+    }
+
+    /**
+     * Sets up the marketplace cards for address ordering testing. Actual cards are needed as the address parts itself needs to be tested.
+     */
+    private void setUpAddressOrderingForGetCards() {
+        when(marketplaceCardRepository.getAllBySection(any(MarketplaceCard.Section.class), any(PageRequest.class))).thenReturn(mockPage);
+        when(mockPage.getTotalElements()).thenReturn(3L);
+        when(mockPage.iterator()).thenReturn(List.of(testCard1, testCard2, testCard3).iterator());
     }
 
     @Test
@@ -398,7 +472,7 @@ class CardControllerTest {
         mockMvc.perform(get("/cards")
                 .param("section", "Wanted"))
                 .andExpect(status().isUnauthorized());
-        verify(marketplaceCardRepository, times(0)).getAllBySection(any(MarketplaceCard.Section.class));
+        verify(marketplaceCardRepository, times(0)).getAllBySection(any(), any());
     }
 
     @Test
@@ -406,77 +480,75 @@ class CardControllerTest {
         mockMvc.perform(get("/cards")
                 .param("section", "invalidSectionName"))
                 .andExpect(status().isBadRequest());
-        verify(marketplaceCardRepository, times(0)).getAllBySection(any(MarketplaceCard.Section.class));
+        verify(marketplaceCardRepository, times(0)).getAllBySection(any(), any());
+    }
+
+    @Test
+    void getCards_invalidOrdering_cannotViewCards() throws Exception {
+        mockMvc.perform(get("/cards")
+                    .param("section", "Wanted")
+                    .param("orderBy", "invalidOrdering"))
+                    .andExpect(status().isBadRequest())
+                    .andReturn();
     }
 
     @Test
     void getCards_noSectionGiven_CannotViewCards() throws Exception {
         mockMvc.perform(get("/cards"))
                 .andExpect(status().isBadRequest());
-        verify(marketplaceCardRepository, times(0)).getAllBySection(any(MarketplaceCard.Section.class));
+        verify(marketplaceCardRepository, times(0)).getAllBySection(any(), any());
     }
 
-    @Test
-    void getCards_validAuthToken_CanViewCards() throws Exception {
-        mockMvc.perform(get("/cards")
-                .param("section", "Wanted"))
-                .andExpect(status().isOk());
-        verify(marketplaceCardRepository, times(1)).getAllBySection(any(MarketplaceCard.Section.class));
-    }
+    @ParameterizedTest
+    @EnumSource(MarketplaceCard.Section.class)
+    void getCards_validSection_canViewCardsForSection(MarketplaceCard.Section section) throws Exception {
+        var result = mockMvc.perform(get("/cards")
+                .param("section", section.getName())
+                .param("resultsPerPage", "8")
+                .param("page", "6")
+                .param("orderBy", "created")
+                .param("reverse", "false"))
+                .andExpect(status().isOk())
+                .andReturn();
+        var expectedPageRequest = SearchHelper.getPageRequest(6, 8, Sort.by(new Sort.Order(Sort.Direction.ASC, "created").ignoreCase()));
+        verify(marketplaceCardRepository).getAllBySection(section, expectedPageRequest);
 
-
-    @Test
-    void retrievePaginatedCards_firstPage_firstPageOfMarketplaceCards() throws Exception {
-        MvcResult result = mockMvc.perform(
-            MockMvcRequestBuilders.get("/cards").param("section", "ForSale").param("page", "1").param("resultsPerPage", "2"))
-            .andExpect(status().isOk()).andReturn();
-        
         JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
-        JSONArray responseBody = (JSONArray) parser.parse(result.getResponse().getContentAsString());
-        // Check length should be 2 cards
+        JSONObject responseBody = (JSONObject) parser.parse(result.getResponse().getContentAsString());
+
+        assertEquals(30, responseBody.get("count"));
+
+        var expectedResults = new JSONArray();
+        expectedResults.add(mockCard.constructJSONObject());
+        assertEquals(expectedResults, responseBody.get("results"));
+
         assertEquals(2, responseBody.size());
-
-        // Check the two products are the expected ones
-        JSONObject firstCard = (JSONObject) responseBody.get(0);
-        JSONObject secondCard = (JSONObject) responseBody.get(1);
-
-        assertEquals("abcd", firstCard.getAsString("title"));
-        assertEquals("efgh", secondCard.getAsString("title"));
     }
 
-    @Test
-    void retrievePaginatedCards_secondPage_secondPageOfMarketplaceCards() throws Exception {
-        MvcResult result = mockMvc.perform(
-            MockMvcRequestBuilders.get("/cards").param("section", "ForSale").param("page", "2").param("resultsPerPage", "2"))
-            .andExpect(status().isOk()).andReturn();
-        
+    @ParameterizedTest
+    @ValueSource(strings = {"created", "title", "closes", "creatorFirstName", "creatorLastName"})
+    void getCards_validOrdering_canViewCardsWithOrdering(String ordering) throws Exception {
+        var result = mockMvc.perform(get("/cards")
+                .param("section", "Wanted")
+                .param("resultsPerPage", "8")
+                .param("page", "6")
+                .param("orderBy", ordering)
+                .param("reverse", "false"))
+                .andExpect(status().isOk())
+                .andReturn();
+        var expectedPageRequest = SearchHelper.getPageRequest(6, 8, Sort.by(new Sort.Order(Sort.Direction.ASC, ordering).ignoreCase()));
+        verify(marketplaceCardRepository).getAllBySection(MarketplaceCard.Section.WANTED, expectedPageRequest);
+
         JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
-        JSONArray responseBody = (JSONArray) parser.parse(result.getResponse().getContentAsString());
-        // Check length should be 2 cards
+        JSONObject responseBody = (JSONObject) parser.parse(result.getResponse().getContentAsString());
+
+        assertEquals(30, responseBody.get("count"));
+
+        var expectedResults = new JSONArray();
+        expectedResults.add(mockCard.constructJSONObject());
+        assertEquals(expectedResults, responseBody.get("results"));
+
         assertEquals(2, responseBody.size());
-
-        // Check the two products are the expected ones
-        JSONObject firstCard = (JSONObject) responseBody.get(0);
-        JSONObject secondCard = (JSONObject) responseBody.get(1);
-
-        assertEquals("ijkl", firstCard.getAsString("title"));
-        assertEquals("mnop", secondCard.getAsString("title"));
-    }
-    
-    @Test
-    void getMarketplaceCardCount_emptyCardList_zeroReturned() {
-        when(marketplaceCardRepository.getAllBySection(MarketplaceCard.Section.FOR_SALE)).thenReturn(new ArrayList<MarketplaceCard>());
-        JSONObject result = cardController.retrieveCardCount(request, "ForSale");
-        assertTrue(result.containsKey("count"));
-        assertEquals(0, result.getAsNumber("count"));
-    }
-
-    @Test
-    void getMarketplaceCardCount_multipleCards_correctCountReturned() throws Exception {
-        when(marketplaceCardRepository.getAllBySection(MarketplaceCard.Section.FOR_SALE)).thenReturn(cards);
-        JSONObject result = cardController.retrieveCardCount(request, "ForSale");
-        assertTrue(result.containsKey("count"));
-        assertEquals(4, result.getAsNumber("count"));
     }
 
     /**
@@ -562,5 +634,96 @@ class CardControllerTest {
     void deleteCard_cardExistsAndIsAuthorised_200ResponseAndDeleted() throws Exception {
         mockMvc.perform(delete("/cards/1")).andExpect(status().isOk());
         verify(marketplaceCardRepository, times(1)).delete(mockCard);
+    }
+
+    @Test
+    void deleteCard_cardHasAssociatedExpiryEvent_200ResponseAndBothDeleted() throws Exception {
+        Optional<ExpiryEvent> optionalExpiryEvent = Optional.of(mockEvent);
+        when(expiryEventRepository.getByExpiringCard(mockCard)).thenReturn(optionalExpiryEvent);
+        mockMvc.perform(delete("/cards/1")).andExpect(status().isOk());
+        verify(expiryEventRepository, times(1)).delete(mockEvent);
+        verify(marketplaceCardRepository, times(1)).delete(mockCard);
+    }
+
+    @Test
+    void getCardsForUser_noAuthToken_401Response() throws Exception {
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.checkAuthenticationToken(any())).thenThrow(new AccessTokenException());
+        mockMvc.perform(get("/users/1/cards")).andExpect(status().isUnauthorized());
+        // Check that the authentication token manager was called
+        authenticationTokenManager.verify(() -> AuthenticationTokenManager.checkAuthenticationToken(any()));
+        verify(marketplaceCardRepository, times(0)).getAllByCreator(any());
+    }
+
+    @Test
+    void getCardsForUser_userDoesNotExist_406Response() throws Exception {
+        mockMvc.perform(get("/users/9999/cards")).andExpect(status().isNotAcceptable());
+        verify(marketplaceCardRepository, times(0)).getAllByCreator(any());
+    }
+
+    @Test
+    void getCardsForUser_validUser_usersCardsReturned() throws Exception {
+        var result = mockMvc.perform(get("/users/" + userId + "/cards")
+                .param("resultsPerPage", "8")
+                .param("page", "6"))
+                .andExpect(status().isOk())
+                .andReturn();
+        var expectedPageRequest = SearchHelper.getPageRequest(6, 8, Sort.by(new Sort.Order(Sort.Direction.DESC, "created")));
+        verify(marketplaceCardRepository).getAllByCreator(mockUser, expectedPageRequest);
+
+        JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
+        JSONObject responseBody = (JSONObject) parser.parse(result.getResponse().getContentAsString());
+
+        assertEquals(30, responseBody.get("count"));
+
+        var expectedResults = new JSONArray();
+        expectedResults.add(mockCard.constructJSONObject());
+        assertEquals(expectedResults, responseBody.get("results"));
+
+        assertEquals(2, responseBody.size());
+    }
+
+    
+    @Test
+    void getCards_orderByAddress_cardsReturnedWithValidAddressOrdering() throws Exception {
+        setUpAddressOrderingForGetCards();
+        var result = mockMvc.perform(get("/cards")
+                .param("resultsPerPage", "8")
+                .param("page", "6")
+                .param("section", "Wanted")
+                .param("orderBy", "location"))
+                .andExpect(status().isOk())
+                .andReturn();
+        
+        //verify the arguments for the method call are the same
+        var expectedPageRequest = SearchHelper.getPageRequest(6, 8, Sort.by(List.of(new Sort.Order(Sort.Direction.ASC, "creator.address.country").ignoreCase(), new Sort.Order(Sort.Direction.ASC, "creator.address.city").ignoreCase())));
+        verify(marketplaceCardRepository).getAllBySection(MarketplaceCard.Section.WANTED, expectedPageRequest);
+
+        JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
+        JSONObject responseBody = (JSONObject) parser.parse(result.getResponse().getContentAsString());
+
+        assertEquals(3, responseBody.get("count"));
+
+        var expectedResults = new JSONArray();
+        expectedResults.add(testCard1.constructJSONObject());
+        expectedResults.add(testCard2.constructJSONObject());
+        expectedResults.add(testCard3.constructJSONObject());
+
+        assertEquals(expectedResults, responseBody.get("results"));
+    }
+
+    @Test
+    void getCards_orderByAddressReverse_argumentsMatchForSortByCall() throws Exception {
+        var result = mockMvc.perform(get("/cards")
+                .param("resultsPerPage", "8")
+                .param("page", "6")
+                .param("section", "Wanted")
+                .param("orderBy", "location")
+                .param("reverse", "true"))
+                .andExpect(status().isOk())
+                .andReturn();
+        
+        //verify the arguments for the method call are the same
+        var expectedPageRequest = SearchHelper.getPageRequest(6, 8, Sort.by(List.of(new Sort.Order(Sort.Direction.DESC, "creator.address.country").ignoreCase(), new Sort.Order(Sort.Direction.DESC, "creator.address.city").ignoreCase())));
+        verify(marketplaceCardRepository).getAllBySection(MarketplaceCard.Section.WANTED, expectedPageRequest); 
     }
 }

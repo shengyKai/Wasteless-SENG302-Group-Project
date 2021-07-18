@@ -3,6 +3,9 @@ package org.seng302.leftovers.controllers;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
@@ -20,14 +23,14 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
+import javax.annotation.Resource;
 import javax.servlet.http.Cookie;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.Assert.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -43,12 +46,17 @@ class BusinessControllerTest {
     @Autowired
     private UserRepository userRepository;
 
+    @Resource
+    private SessionFactory sessionFactory;
+
     private final HashMap<String, Object> sessionAuthToken = new HashMap<>();
     private Cookie authCookie;
     private Business testBusiness;
     private User owner;
     private User admin;
     private User otherUser;
+    private Session session;
+
     /**
      * Add a user object to the userRepository and construct an authorization token
      * to be used for this session.
@@ -62,6 +70,15 @@ class BusinessControllerTest {
         setUpAuthCode();
         setUpTestUser();
         setUpTestBusiness();
+
+        session = sessionFactory.openSession();
+    }
+
+    @AfterEach
+    void tearDown() {
+        businessRepository.deleteAll();
+        userRepository.deleteAll();
+        session.close();
     }
 
     /**
@@ -427,7 +444,7 @@ class BusinessControllerTest {
      */
     @Test
     void getBusinessLoggedInAsOwnerTest() throws Exception {
-        testBusiness = businessRepository.findById(testBusiness.getId()).get();
+        testBusiness = session.find(Business.class, testBusiness.getId());
         setCurrentUser(owner.getUserID());
         MvcResult result = mockMvc.perform(get(String.format("/businesses/%d", testBusiness.getId()))
                 .sessionAttrs(sessionAuthToken).cookie(authCookie)).andExpect(status().isOk()).andReturn();
@@ -449,7 +466,7 @@ class BusinessControllerTest {
      */
     @Test
     void getBusinessLoggedInAsAdminTest() throws Exception {
-        testBusiness = businessRepository.findById(testBusiness.getId()).get();
+        testBusiness = session.find(Business.class, testBusiness.getId());
         setCurrentUser(admin.getUserID());
         MvcResult result = mockMvc.perform(get(String.format("/businesses/%d", testBusiness.getId()))
                 .sessionAttrs(sessionAuthToken).cookie(authCookie)).andExpect(status().isOk()).andReturn();
@@ -471,7 +488,7 @@ class BusinessControllerTest {
      */
     @Test
     void getBusinessLoggedInAsOtherTest() throws Exception {
-        testBusiness = businessRepository.findById(testBusiness.getId()).get();
+        testBusiness = session.find(Business.class, testBusiness.getId());
         setCurrentUser(otherUser.getUserID());
         MvcResult result = mockMvc.perform(get(String.format("/businesses/%d", testBusiness.getId()))
                 .sessionAttrs(sessionAuthToken).cookie(authCookie)).andExpect(status().isOk()).andReturn();
@@ -521,7 +538,7 @@ class BusinessControllerTest {
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
 
-        testAdmin = userRepository.findById(testAdmin.getUserID()).get();
+        testAdmin = session.find(User.class, testAdmin.getUserID());
         assertTrue(testAdmin.getBusinessesAdministered().contains(testBusiness));
     }
 
@@ -558,8 +575,7 @@ class BusinessControllerTest {
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
 
-        testAdmin = userRepository.findById(testAdmin.getUserID()).get();
-        System.out.println("Businesses administered:");
+        testAdmin = session.find(User.class, testAdmin.getUserID());
         assertTrue(testAdmin.getBusinessesAdministered().contains(testBusiness));
     }
 
@@ -596,7 +612,7 @@ class BusinessControllerTest {
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
 
-        testAdmin = userRepository.findById(testAdmin.getUserID()).get();
+        testAdmin = session.find(User.class, testAdmin.getUserID());
         assertTrue(testAdmin.getBusinessesAdministered().contains(testBusiness));
     }
 
@@ -798,7 +814,7 @@ class BusinessControllerTest {
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
 
-        testAdmin = userRepository.findById(testAdmin.getUserID()).get();
+        testAdmin = session.find(User.class, testAdmin.getUserID());
         assertFalse(testAdmin.getBusinessesAdministered().contains(testBusiness));
     }
 
@@ -894,7 +910,7 @@ class BusinessControllerTest {
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
 
-        testAdmin = userRepository.findById(testAdmin.getUserID()).get();
+        testAdmin = session.find(User.class, testAdmin.getUserID());
         assertFalse(testAdmin.getBusinessesAdministered().contains(testBusiness));
     }
 
@@ -934,7 +950,7 @@ class BusinessControllerTest {
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
 
-        testAdmin = userRepository.findById(testAdmin.getUserID()).get();
+        testAdmin = session.find(User.class, testAdmin.getUserID());
         assertFalse(testAdmin.getBusinessesAdministered().contains(testBusiness));
     }
 }
