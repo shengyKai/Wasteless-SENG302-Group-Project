@@ -59,6 +59,7 @@
     <!--paginate results-->
     <v-pagination
       v-model="currentPage"
+      :total-visible="11"
       :length="totalPages"
       circle
     />
@@ -71,7 +72,7 @@
 
 <script>
 import SearchResultItem from './cards/SearchResultItem';
-import { getSearchCount, search } from '../api/internal';
+import { search } from '../api/internal';
 import { debounce } from '../utils';
 
 export default {
@@ -89,7 +90,7 @@ export default {
       /**
        * The search response data for this page.
        */
-      users: [],
+      results: undefined,
       /**
        * Current error message string.
        * If undefined then there is no error.
@@ -112,18 +113,28 @@ export default {
        */
       resultsPerPage: 10,
       /**
-       * Total number of returned results
-       */
-      totalResults: 0,
-      /**
        * Function that is called whenever the "searchQuery" variable is updated.
        * This function is rate limited to avoid too many queries to the backend.
        */
-      debouncedUpdateQuery: debounce(this.updateQuery, 500),
+      debouncedUpdateQuery: debounce(this.updateSearchQuery, 500),
     };
   },
 
   computed: {
+    /**
+     * Total number of results
+     */
+    totalResults() {
+      if (this.results === undefined) return 0;
+      return this.results.count;
+    },
+    /**
+     * List of users on the current page
+     */
+    users() {
+      if (this.results === undefined) return [];
+      return this.results.results;
+    },
     /**
      * The total number of pages required to show all the users
      * May be 0 if there are no results
@@ -144,35 +155,21 @@ export default {
   },
   methods: {
     /**
-     * This function gets called when the search query is changed.
+     * This function is called when the search query changes.
      */
-    async updateQuery() {
+    async updateSearchQuery() {
+      this.currentPage = 1; // Makes sure we start on the first page
+      this.results = undefined; // Remove results
+      this.updateResults();
+    },
+    /**
+     * This function gets called when the search results need to be updated
+     */
+    async updateResults() {
       if (!this.searchQuery) return; // If the current search query is empty, do not search
 
       this.searchedQuery = this.searchQuery;
-      this.currentPage = 1; // Makes sure we start on the first page
-      await this.updateNotQuery();
 
-      // Sets an initial estimate for the total number of results
-      this.totalResults = this.users.length;
-
-      if (this.users.length >= this.resultsPerPage) {
-        // If we have at least a page worth of results, check if we have any more results.
-        let count = await getSearchCount(this.searchQuery);
-        if (typeof count === 'string') {
-          this.error = count;
-        } else {
-          this.totalResults = count;
-        }
-      }
-    },
-
-    /**
-     * This function gets called when the search results need to change, but the search query has not changed.
-     * The page index, results per page, order by and reverse variables notify this function.
-     */
-    async updateNotQuery() {
-      if (!this.searchedQuery) return; // If the current search query is empty, do not search
       const value = await search (
         this.searchedQuery,
         this.currentPage,
@@ -181,10 +178,10 @@ export default {
         this.reverse
       );
       if (typeof value === 'string') {
-        this.users = [];
+        this.results = undefined;
         this.error = value;
       } else {
-        this.users = value;
+        this.results = value;
         this.error = undefined;
       }
     },
@@ -198,21 +195,21 @@ export default {
       immediate: true,
     } ,
     orderBy() {
-      this.updateNotQuery();
+      this.updateResults();
     },
     reverse() {
-      this.updateNotQuery();
+      this.updateResults();
     },
     currentPage() {
-      this.updateNotQuery();
+      this.updateResults();
     },
     resultsPerPage() {
-      this.updateNotQuery();
+      this.updateResults();
     },
     totalPages() {
       // Ensures that the current page is at least 1 and less than or equal to the total number of pages.
       this.currentPage = Math.max(Math.min(this.currentPage, this.totalPages), 1);
-    }
+    },
   },
 
   components: {

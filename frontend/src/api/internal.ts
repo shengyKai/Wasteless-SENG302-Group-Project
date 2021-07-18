@@ -35,7 +35,7 @@ const SERVER_URL = process.env.VUE_APP_SERVER_ADD;
 
 const instance = axios.create({
   baseURL: SERVER_URL,
-  timeout: 2000,
+  timeout: 5 * 1000,
   withCredentials: true,
 });
 
@@ -191,6 +191,8 @@ export type CreateProduct = Omit<Product, 'created' | 'images'>;
 
 type UserOrderBy = 'userId' | 'relevance' | 'firstName' | 'middleName' | 'lastName' | 'nickname' | 'email';
 
+export type SearchResults<T> = { results: T[], count: number }
+
 /**
  * Sends a search query to the backend.
  *
@@ -201,7 +203,7 @@ type UserOrderBy = 'userId' | 'relevance' | 'firstName' | 'middleName' | 'lastNa
  * @param reverse Specifies whether to reverse the search results (default order is descending for relevance and ascending for all other orders)
  * @returns List of user infos for the current page or an error message
  */
-export async function search(query: string, pageIndex: number, resultsPerPage: number, orderBy: UserOrderBy, reverse: boolean): Promise<MaybeError<User[]>> {
+export async function search(query: string, pageIndex: number, resultsPerPage: number, orderBy: UserOrderBy, reverse: boolean): Promise<MaybeError<SearchResults<User>>> {
   let response;
   try {
     response = await instance.get('/users/search', {
@@ -220,39 +222,11 @@ export async function search(query: string, pageIndex: number, resultsPerPage: n
     return `Request failed: ${status}`;
   }
 
-  if (!is<User[]>(response.data)) {
+  if (!is<SearchResults<User>>(response.data)) {
     return 'Response is not user array';
   }
 
   return response.data;
-}
-
-/**
- * Sends a query for the number of search results for a given query to the backend.
- *
- * @param query Query string to search for
- * @returns Number of search results or an error message
- */
-export async function getSearchCount(query: string): Promise<MaybeError<number>> {
-  let response;
-  try {
-    response = await instance.get('/users/search/count', {
-      params: {
-        searchQuery: query,
-      }
-    });
-  } catch (error) {
-    let status: number | undefined = error.response?.status;
-
-    if (status === undefined) return 'Failed to reach backend';
-    return `Request failed: ${status}`;
-  }
-
-  if (!is<number>(response.data.count)) {
-    return 'Response is not number';
-  }
-
-  return response.data.count;
 }
 
 /**
@@ -727,6 +701,8 @@ export async function getBusinessSalesCount(businessId: number): Promise<MaybeEr
   return response.data.count;
 }
 
+type InventoryOrderBy = 'name' | 'description' | 'manufacturer' | 'recommendedRetailPrice' | 'created' | 'quantity' | 'pricePerItem' | 'totalPrice' | 'manufactured' | 'sellBy' | 'bestBefore' | 'expires' | 'productCode'
+
 /**
  * Get all inventory items for that business
  *
@@ -737,7 +713,7 @@ export async function getBusinessSalesCount(businessId: number): Promise<MaybeEr
  * @param reverse
  * @return a list of inventory items
  */
-export async function getInventory(businessId: number, page: number, resultsPerPage: number, orderBy: string, reverse: boolean): Promise<MaybeError<InventoryItem[]>> {
+export async function getInventory(businessId: number, page: number, resultsPerPage: number, orderBy: InventoryOrderBy, reverse: boolean): Promise<MaybeError<InventoryItem[]>> {
   let response;
   try {
     response = await instance.get(`/businesses/${businessId}/inventory`, {
@@ -852,34 +828,6 @@ export async function createMarketplaceCard(marketplaceCard: CreateMarketplaceCa
 
 type SectionType = 'ForSale' | 'Wanted' | 'Exchange'
 
-/**
-   * Sends a query for the total number of cards by section in the marketplace
-   *
-   * @param section section name to identify which section of the marketplace to acquire the card count from
-   * @returns Number of cards or an error message
-   */
-export async function getMarketplaceCardCount(section: SectionType): Promise<MaybeError<number>> {
-  let response;
-  try {
-    response = await instance.get(`/cards/count`, {
-      params: {
-        section
-      }
-    });
-  } catch (error) {
-    let status: number | undefined = error.response?.status;
-
-    if (status === undefined) return 'Failed to reach backend';
-    return `Request failed: ${status}`;
-  }
-
-  if (typeof response.data?.count !== 'number') {
-    return 'Response is not number';
-  }
-
-  return response.data.count;
-}
-
 type CardOrderBy = 'created' | 'title' | 'closes' | 'creatorFirstName' | 'creatorLastName'
 
 /**
@@ -891,7 +839,7 @@ type CardOrderBy = 'created' | 'title' | 'closes' | 'creatorFirstName' | 'creato
  * @param reverse Whether to reverse the results (default ascending)
  * @returns List of sales or a string error message
  */
-export async function getMarketplaceCardsBySection(section: SectionType, page: number, resultsPerPage: number, orderBy: CardOrderBy, reverse: boolean): Promise<MaybeError<MarketplaceCard[]>> {
+export async function getMarketplaceCardsBySection(section: SectionType, page: number, resultsPerPage: number, orderBy: CardOrderBy, reverse: boolean): Promise<MaybeError<SearchResults<MarketplaceCard>>> {
   let response;
   try {
     response = await instance.get(`/cards`, {
@@ -910,7 +858,7 @@ export async function getMarketplaceCardsBySection(section: SectionType, page: n
     if (status === 401) return 'Missing/Invalid access token';
     return 'Request failed: ' + status;
   }
-  if (!is<MarketplaceCard[]>(response.data)) {
+  if (!is<SearchResults<MarketplaceCard>>(response.data)) {
     return "Response is not card array";
   }
   return response.data;
@@ -928,6 +876,24 @@ export async function deleteMarketplaceCard(marketplaceCardId: number) : Promise
     if (status === undefined) return 'Failed to reach backend';
     if (status === 401) return 'Missing/Invalid access token';
     if (status === 403) return 'Invalid authorization for card deletion';
+    if (status === 406) return 'Marketplace card not found';
+    return 'Request failed: ' + error.response?.data.message;
+  }
+  return undefined;
+}
+
+/**
+ * Extends a marketplace card expiry date such that the card can be displayed for another two weeks
+ * @param marketplaceCardId The id of the community marketplace card
+ */
+export async function extendMarketplaceCardExpiry(marketplaceCardId: number) : Promise<MaybeError<undefined>> {
+  try {
+    await instance.put(`/cards/${marketplaceCardId}/extenddisplayperiod`);
+  } catch (error) {
+    let status: number | undefined = error.response?.status;
+    if (status === undefined) return 'Failed to reach backend';
+    if (status === 401) return 'Missing/Invalid access token';
+    if (status === 403) return 'Invalid authorization for card expiry extension';
     if (status === 406) return 'Marketplace card not found';
     return 'Request failed: ' + error.response?.data.message;
   }

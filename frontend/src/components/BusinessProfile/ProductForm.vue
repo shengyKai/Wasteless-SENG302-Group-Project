@@ -12,7 +12,7 @@
           <v-card-title>
             <span class="headline create-product">
               <template v-if="isCreate">
-                Create new Product
+                Create New Product
               </template>
               <template v-else>
                 Update {{ previousProduct.id }}
@@ -28,7 +28,7 @@
                     v-model="productCode"
                     label="Short-hand Product Code"
                     outlined
-                    :rules="mandatoryRules.concat(productCodeRules)"
+                    :rules="mandatoryRules().concat(productCodeRules()).concat(availableProductCodeRule)"
                     ref="productCodeField"
                   />
                 </v-col>
@@ -37,7 +37,7 @@
                     class="required"
                     v-model="product"
                     label="Name of product"
-                    :rules="mandatoryRules.concat(maxCharRules).concat(validCharactersSingleLineRules)"
+                    :rules="mandatoryRules().concat(maxCharRules()).concat(validCharactersSingleLineRules())"
                     outlined
                   />
                 </v-col>
@@ -45,7 +45,7 @@
                   <v-textarea
                     v-model="description"
                     label="Description"
-                    :rules="maxCharDescriptionRules.concat(validCharactersMultiLineRules)"
+                    :rules="maxCharDescriptionRules().concat(validCharactersMultiLineRules())"
                     rows="3"
                     outlined
                   />
@@ -54,7 +54,7 @@
                   <v-text-field
                     v-model="manufacturer"
                     label="Manufacturer"
-                    :rules="maxCharManufacturerRules.concat(validCharactersSingleLineRules)"
+                    :rules="maxCharManufacturerRules().concat(validCharactersSingleLineRules())"
                     outlined
                   />
                 </v-col>
@@ -64,7 +64,7 @@
                     label="Recommended Retail Price"
                     :prefix="currency.symbol"
                     :suffix="currency.code"
-                    :rules="priceRules"
+                    :rules="priceRules()"
                     :hint="currency.errorMessage"
                     outlined
                   />
@@ -105,6 +105,11 @@
 <script>
 import {createProduct, getBusiness, modifyProduct} from '@/api/internal';
 import {currencyFromCountry} from "@/api/currency";
+import {
+  alphabetExtendedMultilineRules,
+  alphabetExtendedSingleLineRules, mandatoryRules,
+  maxCharRules, productCodeRules, smallPriceRules
+} from "@/utils";
 export default {
   name: 'ProductForm',
   props: {
@@ -135,34 +140,15 @@ export default {
       currency: {},
       valid: false,
       currencyErrorMessage: "",
-      maxCharRules: [
-        field => (field.length <= 50) || 'Reached max character limit: 50',
-      ],
-      maxCharManufacturerRules: [
-        field => (field.length <= 100) || 'Reached max character limit: 100',
-      ],
-      maxCharDescriptionRules: [
-        field => (field.length <= 200) || 'Reached max character limit: 200',
-      ],
-      validCharactersSingleLineRules: [
-        field => /^[ \d\p{L}\p{P}]*$/u.test(field) || 'Must only contain letters, numbers, punctuation and spaces',
-      ],
-      validCharactersMultiLineRules: [
-        field => /^[\s\d\p{L}\p{P}]*$/u.test(field) || 'Must only contain letters, numbers, punctuation and whitespace',
-      ],
-      mandatoryRules: [
-        //All fields with the class "required" will go through this ruleset to ensure the field is not empty.
-        //if it does not follow the format, display error message
-        field => !!field || 'Field is required'
-      ],
-      priceRules: [
-        //A price must be numbers and may contain a decimal followed by exactly two numbers
-        field => /(^\d{1,5}(\.\d{2})?$)|^$/.test(field) || 'Must be a valid price'
-      ],
-      productCodeRules: [
-        field => field.length <= 15 || 'Reached max character limit: 15',
-        field => !/ /.test(field) || 'Must not contain a space',
-        field => /^[-A-Z0-9]+$/.test(field) || 'Must be all uppercase letters, numbers and dashes.',
+      maxCharRules: ()=> maxCharRules(50),
+      maxCharManufacturerRules: ()=> maxCharRules(100),
+      maxCharDescriptionRules: ()=> maxCharRules(200),
+      validCharactersSingleLineRules: () => alphabetExtendedSingleLineRules,
+      validCharactersMultiLineRules: () => alphabetExtendedMultilineRules,
+      mandatoryRules: () => mandatoryRules,
+      priceRules: () => smallPriceRules,
+      productCodeRules: () => productCodeRules,
+      availableProductCodeRule: [
         field => !this.unavailableProductCodes.includes(field) || 'Product code is unavailable',
       ]
     };

@@ -274,15 +274,25 @@
           </template>
           <span>Create a Sale from this inventory item</span>
         </v-tooltip>
+        <v-btn
+          @click="showInventoryItemForm=true"
+        >
+          Temporary edit button
+        </v-btn>
       </v-row>
     </v-container>
+    <template v-if="showInventoryItemForm">
+      <InventoryItemForm :previousItem="inventoryItem" :businessId="businessId"  @closeDialog="showInventoryItemForm=false"/>
+    </template>
   </v-card>
+
 </template>
 
 <script>
 //This component requires two other custom components, one to display the product image, one to view more of the product's description
 import FullProductDescription from "../utils/FullProductDescription.vue";
 import ProductImageCarousel from "../utils/ProductImageCarousel.vue";
+import InventoryItemForm from "../BusinessProfile/InventoryItemForm.vue";
 import { currencyFromCountry } from "@/api/currency";
 import { formatDate, trimToLength } from '@/utils';
 
@@ -296,6 +306,7 @@ export default {
   components: {
     FullProductDescription,
     ProductImageCarousel,
+    InventoryItemForm,
   },
   data() {
     return {
@@ -303,7 +314,8 @@ export default {
       showImageUploaderForm: false,
       //If readMoreActivated is false, the product description is less than 50 words, so it wont have to use the FullProductDescription
       //component. Else it will use it and the "Read more..." link will also be shown to lead to the FullProductDescription component
-      readMoreActivated: false
+      readMoreActivated: false,
+      showInventoryItemForm: false,
     };
   },
   async created() {

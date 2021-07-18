@@ -63,27 +63,38 @@ public class LocationGenerator {
       return Location.of(streetNum, streetName, city, region, country, postcode, district);
     }
 
+    public long createInsertAddressSQL(Location address, Connection conn) throws SQLException {
+        return createInsertAddressSQL(List.of(address), conn).get(0);
+    }
+
     /**
      * Creates the SQL commands required to insert the user/business's address into the database
      * @return the id of the location entity (addressid)
      */
-    public long createInsertAddressSQL(Location address, Connection conn) throws SQLException {
+    public List<Long> createInsertAddressSQL(List<Location> addresses, Connection conn) throws SQLException {
       PreparedStatement stmt = conn.prepareStatement(
               "INSERT INTO location (street_number, street_name, city, region, country, post_code, district) "
                       + "VALUES (?, ?, ?, ?, ?, ?, ?);",
               Statement.RETURN_GENERATED_KEYS
       );
-      stmt.setObject(1, address.streetNum);
-      stmt.setObject(2, address.streetName);
-      stmt.setObject(3, address.city);
-      stmt.setObject(4, address.region);
-      stmt.setObject(5, address.country);
-      stmt.setObject(6, address.postcode);
-      stmt.setObject(7, address.district);
-      stmt.executeUpdate();
+      for (Location address : addresses) {
+          stmt.setObject(1, address.streetNum);
+          stmt.setObject(2, address.streetName);
+          stmt.setObject(3, address.city);
+          stmt.setObject(4, address.region);
+          stmt.setObject(5, address.country);
+          stmt.setObject(6, address.postcode);
+          stmt.setObject(7, address.district);
+          stmt.addBatch();
+      }
+      stmt.executeBatch();
       ResultSet keys = stmt.getGeneratedKeys();
-      keys.next();
-      return keys.getLong(1);
+
+      List<Long> locationIds = new ArrayList<>();
+      while (keys.next()) {
+          locationIds.add(keys.getLong(1));
+      }
+      return locationIds;
     }
 
     /**

@@ -22,7 +22,7 @@
         label="Sort by"
       />
       <v-col >
-        <v-btn outlined  @click="viewCreateInventory" :value="false">
+        <v-btn outlined  @click="showInventoryItemForm=true" :value="false">
           Add Inventory
         </v-btn>
       </v-col>
@@ -62,18 +62,23 @@
     <v-row justify="center" no-gutters>
       {{ resultsMessage }}
     </v-row>
+    <template v-if="showInventoryItemForm">
+      <InventoryItemForm :businessId="businessId" @closeDialog="showInventoryItemForm=false"/>
+    </template>
   </div>
 </template>
 
 <script>
 import InventoryItem from "./cards/InventoryItem.vue";
+import InventoryItemForm from "./BusinessProfile/InventoryItemForm.vue";
 import {getInventory, getInventoryCount} from "@/api/internal";
 
 export default {
   name: "Inventory",
 
   components: {
-    InventoryItem
+    InventoryItem,
+    InventoryItemForm
   },
 
   data() {
@@ -110,7 +115,8 @@ export default {
        * Total number of results for all pages
        */
       totalResults: 0,
-      businessId: null
+      businessId: null,
+      showInventoryItemForm: false,
     };
   },
   computed: {
@@ -164,12 +170,6 @@ export default {
         this.error = undefined;
       }
     },
-    /**
-     * Shows the create Inventory dialog
-     */
-    viewCreateInventory() {
-      this.$store.commit('showCreateInventory', this.businessId);
-    },
   },
 
   watch: {
@@ -185,13 +185,13 @@ export default {
     resultsPerPage() {
       this.updateResults();
     },
-    '$store.state.createInventoryDialog': function () {
-      if (this.$store.state.createInventoryDialog === undefined) {
+    showInventoryItemForm: function () {
+      if (!this.showInventoryItemForm) {
         this.updateResults();
       }
     },
     '$store.state.createSaleItemDialog': function () {
-      if (this.$store.state.createInventoryDialog === undefined) {
+      if (!this.showInventoryItemForm) {
         this.updateResults();
       }
     },

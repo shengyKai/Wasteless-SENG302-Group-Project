@@ -10,7 +10,6 @@ import javax.persistence.*;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.time.temporal.TemporalUnit;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -43,7 +42,7 @@ public class MarketplaceCard {
     @Column(nullable = false)
     private Instant closes;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "card_keywords")
     private List<Keyword> keywords = new ArrayList<>();
 
@@ -192,8 +191,8 @@ public class MarketplaceCard {
         json.appendField("id", this.getID());
         json.appendField("creator", this.creator.constructPublicJson());
         json.appendField("section", this.section.getName());
-        json.appendField("created", this.created);
-        json.appendField("displayPeriodEnd", this.closes);
+        json.appendField("created", this.created.toString());
+        json.appendField("displayPeriodEnd", this.closes.toString());
         json.appendField("title", this.title);
         json.appendField("description", this.description);
 

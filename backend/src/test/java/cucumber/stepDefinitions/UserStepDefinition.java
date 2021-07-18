@@ -10,6 +10,8 @@ import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.junit.Assert;
 import org.seng302.leftovers.entities.Location;
 import org.seng302.leftovers.entities.User;
@@ -42,18 +44,12 @@ public class UserStepDefinition {
     private UserContext userContext;
     @Autowired
     private RequestContext requestContext;
-
-    @Autowired
-    private ObjectMapper objectMapper;
-
-    @Autowired
-    private WebApplicationContext webApplicationContext;
     @Autowired
     private MockMvc mockMvc;
     @Autowired
     private UserRepository userRepository;
     @Autowired
-    private AccountRepository accountRepository;
+    private SessionFactory sessionFactory;
 
     private User theUser;
     private String userFirstName = "Bob";
@@ -241,9 +237,12 @@ public class UserStepDefinition {
     @Then("the user has the address {string}")
     public void theUserHasTheAddress(String address) {
         User user = userRepository.findByEmail(userEmail);
-        Location location = Location.covertAddressStringToLocation(address);
-        location.setId(user.getAddress().getId());
-        Assert.assertEquals(user.getAddress(), location);
+        try (Session session = sessionFactory.openSession()) {
+            user = session.find(User.class, user.getUserID());
+            Location location = Location.covertAddressStringToLocation(address);
+            location.setId(user.getAddress().getId());
+            Assert.assertEquals(user.getAddress(), location);
+        }
     }
 
     @Given("the user possesses the email {string}")
