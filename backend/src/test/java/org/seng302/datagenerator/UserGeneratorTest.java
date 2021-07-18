@@ -3,6 +3,7 @@ import org.seng302.leftovers.Main;
 
 import org.junit.jupiter.api.*;
 import org.junit.runner.RunWith;
+import org.seng302.leftovers.persistence.AccountRepository;
 import org.seng302.leftovers.persistence.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

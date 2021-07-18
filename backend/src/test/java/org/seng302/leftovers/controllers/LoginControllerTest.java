@@ -66,8 +66,8 @@ class LoginControllerTest {
     @AfterEach
     void tearDown() {
         businessRepository.deleteAll();
-        accountRepository.deleteAll();
         userRepository.deleteAll();
+        accountRepository.deleteAll();
     }
 
     /**

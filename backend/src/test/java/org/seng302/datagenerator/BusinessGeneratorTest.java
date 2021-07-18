@@ -5,6 +5,11 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
+import org.seng302.leftovers.entities.Account;
+import org.seng302.leftovers.persistence.AccountRepository;
+import org.seng302.leftovers.persistence.BusinessRepository;
+import org.seng302.leftovers.persistence.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -21,6 +26,11 @@ public class BusinessGeneratorTest {
     private UserGenerator userGenerator;
     private BusinessGenerator businessGenerator;
 
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private BusinessRepository businessRepository;
+
     @BeforeEach
     public void setup() throws SQLException {
         Map<String, String> properties = ExampleDataFileReader.readPropertiesFile("/application.properties");
@@ -36,6 +46,8 @@ public class BusinessGeneratorTest {
 
     @AfterEach
     public void teardown() throws SQLException {
+        businessRepository.deleteAll();
+        userRepository.deleteAll();
         conn.close();
     }
 
