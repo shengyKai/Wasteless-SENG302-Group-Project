@@ -1,14 +1,21 @@
 package org.seng302.datagenerator;
+import org.seng302.leftovers.Main;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
+import org.seng302.leftovers.persistence.BusinessRepository;
+import org.seng302.leftovers.persistence.InventoryItemRepository;
+import org.seng302.leftovers.persistence.ProductRepository;
+import org.seng302.leftovers.persistence.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.sql.*;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -16,20 +23,41 @@ import static org.junit.jupiter.api.Assertions.fail;
 @SpringBootTest(classes={Main.class})
 public class InventoryItemGeneratorTest {
     private Connection conn;
+    private UserGenerator userGenerator;
+    private BusinessGenerator businessGenerator;
+    private ProductGenerator productGenerator;
     private InventoryItemGenerator invItemGenerator;
+
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private BusinessRepository businessRepository;
+    @Autowired
+    private ProductRepository productRepository;
+    @Autowired
+    private InventoryItemRepository inventoryItemRepository;
 
     @BeforeEach
     public void setup() throws SQLException {
-        //Connects to production database
-        String url = "jdbc:mariadb://" + System.getenv("S302T500-DB-ADDRESS");
-        Connection conn = DriverManager.getConnection(url, System.getenv("S302T500-DB-USERNAME"), System.getenv("S302T500-DB-PASSWORD"));
+        Map<String, String> properties = ExampleDataFileReader.readPropertiesFile("/application.properties");
+        if (properties.get("spring.datasource.url") == null || properties.get("spring.datasource.username") == null || properties.get("spring.datasource.password") == null) {
+            fail("The url/username/password is not found");
+        }
+        this.conn =  DriverManager.getConnection(properties.get("spring.datasource.url"), properties.get("spring.datasource.username"), properties.get("spring.datasource.password"));
 
-        //Creates generators
+        //Creates Generators
+        this.userGenerator = new UserGenerator(conn);
+        this.businessGenerator = new BusinessGenerator(conn);
+        this.productGenerator = new ProductGenerator(conn);
         this.invItemGenerator = new InventoryItemGenerator(conn);
     }
 
     @AfterEach
     public void teardown() throws SQLException {
+        inventoryItemRepository.deleteAll();
+        productRepository.deleteAll();
+        businessRepository.deleteAll();
+        userRepository.deleteAll();
         conn.close();
     }
 
@@ -68,71 +96,73 @@ public class InventoryItemGeneratorTest {
         return results.getLong(1);
     }
 
-
-    //Does not delete created users, businesses, and products
     /**
-     * Deletes the inventory item associated with the given id within the database. This is part of the clean up.
-     * @param invItemIds the ids of the generated inventory items
+     * Generates a specified number of users, businesses and products using the generators and returns the ids of the
+     * generated products.
+     * @param userCount the number of users to be generated
+     * @param businessCount the number of businesses to be generated
+     * @param productCount the number of products to be generated
+     * @return the ids of the generated products
      */
-    public void deleteInvItemsFromDB(List<Long> invItemIds) throws SQLException {
-        for (Long invItemId: invItemIds) {
-            PreparedStatement stmt = conn.prepareStatement("DELETE FROM inventory_item WHERE id = ?");
-            stmt.setObject(1, invItemId);
-            stmt.executeUpdate();
-        }
+    public List<Long> generateUserBusinessAndProduct(int userCount, int businessCount, int productCount) {
+        List<Long> userIds = userGenerator.generateUsers(userCount);
+        List<Long> businessIds = businessGenerator.generateBusinesses(userIds, businessCount);
+        List<Long> productIds = productGenerator.generateProducts(businessIds, productCount);
+        return productIds;
     }
 
     @Test
     void generateInvItems_generateOneInvItemAndConsistentData_oneInvItemGenerated() throws SQLException {
-        List<Long> invItemIds = invItemGenerator.generateInventoryItems(1);
+        List<Long> productIds = generateUserBusinessAndProduct(1, 1, 1);
+        List<Long> invItemIds = invItemGenerator.generateInventoryItems(productIds, 1);
         if (invItemIds.size() != 1) {
             fail();
         }
         long invItemId = invItemIds.get(0);
         checkRequiredFieldsNotNull(invItemId);
-        deleteInvItemsFromDB(invItemIds);
     }
 
     @Test
     void generateInvItems_generateTwoInvItemsAndConsistentData_twoInvItemsGenerated() throws SQLException {
-        List<Long> invItemIds = invItemGenerator.generateInventoryItems(2);
+        List<Long> productIds = generateUserBusinessAndProduct(1, 1, 1);
+        List<Long> invItemIds = invItemGenerator.generateInventoryItems(productIds, 2);
         if (invItemIds.size() != 2) {
             fail();
         }
         for (long invItemId: invItemIds) {
             checkRequiredFieldsNotNull(invItemId);
         }
-        deleteInvItemsFromDB(invItemIds);
     }
 
     @Test
     void generateInvItems_generateTenInvItemsAndConsistentData_tenInvItemsGenerated() throws SQLException {
-        List<Long> invItemIds = invItemGenerator.generateInventoryItems(10);
+        List<Long> productIds = generateUserBusinessAndProduct(1, 1, 1);
+        List<Long> invItemIds = invItemGenerator.generateInventoryItems(productIds, 10);
         if (invItemIds.size() != 10) {
             fail();
         }
         for (long invItemId: invItemIds) {
             checkRequiredFieldsNotNull(invItemId);
         }
-        deleteInvItemsFromDB(invItemIds);
     }
 
     @Test
     void generateInvItems_generateHundredInvItemsAndConsistentData_hundredInvItemsGenerated() throws SQLException {
-        List<Long> invItemIds = invItemGenerator.generateInventoryItems(100);
+        List<Long> productIds = generateUserBusinessAndProduct(1, 1, 1);
+        List<Long> invItemIds = invItemGenerator.generateInventoryItems(productIds, 100);
         if (invItemIds.size() != 100) {
             fail();
         }
         for (long invItemId: invItemIds) {
             checkRequiredFieldsNotNull(invItemId);
         }
-        deleteInvItemsFromDB(invItemIds);
     }
 
     @Test
     void generateInvItems_generateZeroInvItemsAndConsistentData_NoInvItemGenerated() throws SQLException {
         long invItemsInDB = getNumInvItemsInDB();
-        List<Long> invItemIds = invItemGenerator.generateInventoryItems(0);
+        List<Long> productIds = generateUserBusinessAndProduct(1, 1, 1);
+        List<Long> invItemIds = invItemGenerator.generateInventoryItems(productIds, 0);
         long invItemsInDBAfter = getNumInvItemsInDB();
         if (invItemsInDB != invItemsInDBAfter) {
             fail();
@@ -142,7 +172,8 @@ public class InventoryItemGeneratorTest {
     @Test
     void generateInvItems_generateNegativeOneInvItemsAndConsistentData_NoInvItemGenerated() throws SQLException {
         long invItemsInDB = getNumInvItemsInDB();
-        List<Long> invItemIds = invItemGenerator.generateInventoryItems(-1);
+        List<Long> productIds = generateUserBusinessAndProduct(1, 1, 1);
+        List<Long> invItemIds = invItemGenerator.generateInventoryItems(productIds, -1);
         long invItemsInDBAfter = getNumInvItemsInDB();
         if (invItemsInDB != invItemsInDBAfter) {
             fail();
@@ -152,7 +183,8 @@ public class InventoryItemGeneratorTest {
     @Test
     void generateInvItems_generateNegativeTenInvItemsAndConsistentData_NoInvItemGenerated() throws SQLException {
         long invItemsInDB = getNumInvItemsInDB();
-        List<Long> invItemIds = invItemGenerator.generateInventoryItems(-10);
+        List<Long> productIds = generateUserBusinessAndProduct(1, 1, 1);
+        List<Long> invItemIds = invItemGenerator.generateInventoryItems(productIds, -10);
         long invItemsInDBAfter = getNumInvItemsInDB();
         if (invItemsInDB != invItemsInDBAfter) {
             fail();

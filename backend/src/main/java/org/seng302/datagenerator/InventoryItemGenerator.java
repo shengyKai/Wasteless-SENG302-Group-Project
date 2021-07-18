@@ -101,10 +101,22 @@ public class InventoryItemGenerator {
 
     public static void main(String[] args) throws SQLException, InterruptedException {
         Connection conn = connectToDatabase();
-        var generator = new InventoryItemGenerator(conn);
+        var userGenerator = new UserGenerator(conn);
+        var businessGenerator = new BusinessGenerator(conn);
+        var productGenerator = new ProductGenerator(conn);
+        var invItemGenerator = new InventoryItemGenerator(conn);
+
+        int userCount = getNumObjectsFromInput("users");
+        List<Long> userIds = userGenerator.generateUsers(userCount);
+
+        int businessCount = getNumObjectsFromInput("businesses");
+        List<Long> businessIds = businessGenerator.generateBusinesses(userIds, businessCount);
+
+        int productCount = getNumObjectsFromInput("products");
+        List<Long> productIds = productGenerator.generateProducts(businessIds, productCount);
 
         int invItemCount = getNumObjectsFromInput("inventory items");
-        generator.generateInventoryItems(invItemCount);
+        List<Long> invItemIds = invItemGenerator.generateInventoryItems(productIds, invItemCount);
     }
 
     /**
@@ -112,24 +124,18 @@ public class InventoryItemGenerator {
      * @param invItemCount
      * @return
      */
-    public List<Long> generateInventoryItems(int invItemCount) throws SQLException {
-        var productGenerator = new ProductGenerator(conn);
+    public List<Long> generateInventoryItems(List<Long> productIds, int invItemCount) throws SQLException {
         List<Long> generatedInvItemIds = new ArrayList<>();
-        try {
-            for (int i=0; i < invItemCount; i++) {
-                clear();
-                List<Long> productIds = productGenerator.generateProducts(1);
-                long productId = productIds.get(0);
+        for (int i=0; i < invItemCount; i++) {
+            clear();
+            long productId = productIds.get(0);
 
-                System.out.println(String.format("Creating Inventory Item %d / %d", i+1, invItemCount));
-                int progress = (int) (((float)(i+1) / (float)invItemCount) * 100);
-                System.out.println(String.format("Progress: %d%%", progress));
-                long invItemId = createInsertInventoryItemSQL(productId);
+            System.out.println(String.format("Creating Inventory Item %d / %d", i+1, invItemCount));
+            int progress = (int) (((float)(i+1) / (float)invItemCount) * 100);
+            System.out.println(String.format("Progress: %d%%", progress));
+            long invItemId = createInsertInventoryItemSQL(productId);
 
-                generatedInvItemIds.add(invItemId);
-            }
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+            generatedInvItemIds.add(invItemId);
         }
 
         return generatedInvItemIds;
