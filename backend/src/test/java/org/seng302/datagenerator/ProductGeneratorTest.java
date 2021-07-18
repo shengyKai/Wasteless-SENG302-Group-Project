@@ -4,11 +4,17 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.runner.RunWith;
+import org.seng302.leftovers.persistence.BusinessRepository;
+import org.seng302.leftovers.persistence.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.sql.*;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -16,21 +22,30 @@ import static org.junit.jupiter.api.Assertions.fail;
 @SpringBootTest(classes={Main.class})
 public class ProductGeneratorTest {
     private Connection conn;
+    private UserGenerator userGenerator;
+    private BusinessGenerator businessGenerator;
     private ProductGenerator productGenerator;
+
+    @Autowired
+    private UserRepository userRepository;
+
+
 
     @BeforeEach
     public void setup() throws SQLException {
-        //Connects to production database
-        String url = "jdbc:mariadb://localhost/seng302-2021-team500-prod";
-        //change password
-        this.conn = DriverManager.getConnection(url, "seng302-team500", "changeMe");
+        Map<String, String> properties = ExampleDataFileReader.readPropertiesFile("/application.properties");
+        if (properties.get("spring.datasource.url") == null || properties.get("spring.datasource.username") == null || properties.get("spring.datasource.password") == null) {
+            fail("The url/username/password is not found");
+        }
+        this.conn =  DriverManager.getConnection(properties.get("spring.datasource.url"), properties.get("spring.datasource.username"), properties.get("spring.datasource.password"));
 
-        //Creates generators
-        this.productGenerator = new ProductGenerator(conn);
+        //Creates userGenerators
+        this.userGenerator = new UserGenerator(conn);
     }
 
     @AfterEach
     public void teardown() throws SQLException {
+        userRepository.deleteAll();
         conn.close();
     }
 
