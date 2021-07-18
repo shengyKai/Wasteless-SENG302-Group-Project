@@ -21,7 +21,7 @@ public class Business {
     //Minimum age to create a business
     private static final int MINIMUM_AGE = 16;
     private static final List<String> BUSINESS_TYPES = Arrays.asList("Accommodation and Food Services", "Retail Trade", "Charitable organisation", "Non-profit organisation");
-    private static final String TEXT_REGEX = "[ a-zA-Z0-9\\p{Punct}]*";
+    private static final String TEXT_REGEX = "[ \\p{L}0-9\\p{Punct}]*";
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -16,7 +16,7 @@
                     v-model="quantity"
                     label="Quantity"
                     :rules="
-                      mandatoryRules.concat(quantityRules)
+                      mandatoryRules().concat(quantityRules()).concat(remainingQuantityRule)
                     "
                     :suffix="
                       '/' +
@@ -36,10 +36,7 @@
                     :suffix="currency.code"
                     :hint="currency.errorMessage"
                     :rules="
-                      mandatoryRules
-                        .concat(mandatoryRules)
-                        .concat(priceRules)
-                    "
+                      mandatoryRules().concat(priceRules())"
                     outlined
                   />
                 </v-col>
@@ -49,7 +46,7 @@
                     v-model="info"
                     label="Info"
                     rows="3"
-                    :rules="infoRules"
+                    :rules="infoRules()"
                     outlined
                   />
                 </v-col>
@@ -92,6 +89,13 @@
 <script>
 import { createSaleItem } from "@/api/internal";
 import { currencyFromCountry } from "@/api/currency";
+import {
+  alphabetExtendedMultilineRules,
+  mandatoryRules,
+  maxCharRules,
+  quantityRules,
+  smallPriceRules
+} from "@/utils";
 
 export default {
   name: "CreateSaleItem",
@@ -109,39 +113,15 @@ export default {
       closesValid: true,
       maxDate: new Date("5000-01-01"),
       currency: {},
-      maxCharRules: [
-        (field) =>
-          field.length <= 100 || "Reached max character limit: 100",
+      maxCharRules: ()=> maxCharRules(100),
+      mandatoryRules: () => mandatoryRules,
+      quantityRules: ()=> quantityRules,
+      remainingQuantityRule: [
+        (field) => parseInt(field) <= this.inventoryItem.remainingQuantity ||
+            "Must not be greater than remaining quantity",
       ],
-      mandatoryRules: [
-        //All fields with the class "required" will go through this ruleset to ensure the field is not empty.
-        //if it does not follow the format, display error message
-        (field) => !!field || "Field is required",
-      ],
-
-      quantityRules: [
-        (field) => /(^[0-9]*$)/.test(field) || "Must be a valid number",
-        (field) => parseInt(field) !== 0 || "Must not be zero",
-        (field) =>
-          parseInt(field) <= this.inventoryItem.remainingQuantity ||
-                    "Must not be greater than remaining quantity",
-      ],
-
-      priceRules: [
-        (field) =>
-          /(^\d{1,4}(\.\d{2})?$)|^$/.test(field) ||
-                    "Must be a valid price",
-      ],
-
-      infoRules: [
-        (field) =>
-          field.length <= 200 || "Reached max character limit: 200",
-        (field) =>
-          /(^[ a-zA-Z0-9@//$%&!'//#,//.//(//)//:;_-]*$)/.test(
-            field
-          ) ||
-                    "Bio must only contain letters, numbers, and valid special characters",
-      ],
+      priceRules: () => smallPriceRules,
+      infoRules: () => maxCharRules(200).concat(alphabetExtendedMultilineRules),
     };
   },
   created() {

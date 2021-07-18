@@ -59,6 +59,7 @@
     <!--paginate results-->
     <v-pagination
       v-model="currentPage"
+      :total-visible="11"
       :length="totalPages"
       circle
     />

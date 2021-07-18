@@ -1,6 +1,8 @@
 package org.seng302.leftovers.persistence;
 
 import org.seng302.leftovers.entities.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
@@ -21,6 +23,14 @@ public interface MarketplaceCardRepository extends CrudRepository<MarketplaceCar
     List<MarketplaceCard> getAllByCreator(@Param("Creator") User user);
 
     /**
+     * Finds all the marketplace cards from the given creator
+     * @param creator User to filter cards by
+     * @param pageable Pagination query parameters
+     * @return Page of cards for the given user
+     */
+    Page<MarketplaceCard> getAllByCreator(@Param("creator") User creator, Pageable pageable);
+
+    /**
      * Finds all the marketplace cards with the given keyword
      * @param keyword Keyword to search for
      * @return List of cards with the keyword
@@ -33,6 +43,14 @@ public interface MarketplaceCardRepository extends CrudRepository<MarketplaceCar
      * @return List of cards within that section
      */
     List<MarketplaceCard> getAllBySection(@Param("section") MarketplaceCard.Section section);
+
+    /**
+     * Finds all the marketplace cards that are in the given section with pagination
+     * @param section Section to filter by
+     * @param pageable Pagination query parameters
+     * @return Page of cards within that section
+     */
+    Page<MarketplaceCard> getAllBySection(@Param("section") MarketplaceCard.Section section, Pageable pageable);
 
     /**
      * Fetches a marketplace card from the database for the given card id. This method will also check that
@@ -51,5 +69,13 @@ public interface MarketplaceCardRepository extends CrudRepository<MarketplaceCar
      * @return a list of all marketplace cards which need to have an expiry event sent.
      */
     @Query("SELECT c FROM MarketplaceCard c left join ExpiryEvent e ON e.expiringCard.id = c.id WHERE c.closes < :cutOff AND e is null")
-    List<MarketplaceCard> getAllExpiringBefore(@Param("cutOff") Instant cutOff);
+    List<MarketplaceCard> getAllExpiringBeforeWithoutEvent(Instant cutOff);
+
+    /**
+     * Return all cards which have a closing date before or equal to the given date.
+     * @param currentInstant The current date(instant) of the system.
+     * @return a list of all marketplace cards which have expired.
+     */
+    @Query("SELECT c FROM MarketplaceCard c WHERE c.closes <= :currentInstant")
+    List<MarketplaceCard> getAllExpiredBefore(Instant currentInstant);
 }
