@@ -1,5 +1,7 @@
 package org.seng302.datagenerator;
 
+import org.seng302.leftovers.entities.MarketplaceCard;
+
 import java.sql.*;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -15,8 +17,6 @@ public class MarketplaceCardGenerator {
 
     private static final String CARD_TITLES_FILE = "card-titles.txt";
     private List<String> cardTitles;
-
-    String[] sections = new String[] {"ForSale", "Wanted", "Exchange"};
 
     /**
      * Constructor for Marketplace Card Generator, establishes connection to db
@@ -39,7 +39,7 @@ public class MarketplaceCardGenerator {
                 Statement.RETURN_GENERATED_KEYS
         );
         stmt.setObject(1, userIds.get(random.nextInt(userIds.size())));
-        stmt.setObject(2, sections[random.nextInt(3)]);
+        stmt.setObject(2, random.nextInt(3));
         stmt.setObject(3, cardTitles.get(random.nextInt(cardTitles.size())));
         stmt.setObject(4, "Placeholder"); //TODO Description generator
         stmt.setObject(5, Instant.now());
@@ -58,7 +58,7 @@ public class MarketplaceCardGenerator {
      */
     private void cardKeywordSQL(Long cardId, List<Long> keywords) throws SQLException {
         for (Long keyword : keywords) {
-            PreparedStatement stmt = conn.prepareStatement("INSERT INTO card_keywords (card_id, keyword_id) " +
+            PreparedStatement stmt = conn.prepareStatement("INSERT INTO card_keywords (cards_id, keywords_id) " +
                     "VALUES (?,?)");
             stmt.setObject(1, cardId);
             stmt.setObject(2, keyword);
@@ -71,25 +71,33 @@ public class MarketplaceCardGenerator {
      * @param userIds users that post cards on the marketplace
      * @param cardCount amount of example cards to create
      */
-    private void generateCards(List<Long> userIds, int cardCount) {
+    public List<Long> generateCards(List<Long> userIds, int cardCount) {
         List<Long> generatedCardIds = new ArrayList<>();
         try {
+            System.out.printf("Generating %d marketplace cards\n", cardCount);
             for (int i = 0; i < cardCount; i++) {
                 clear();
+
+                if (i % 10 == 0) {
+                    int progress = (int) (((float) (i + 1) / (float) cardCount) * 100);
+                    System.out.printf("Progress: %d%%\n", progress);
+                }
 
                 long cardId = createInsertCardSQL(userIds);
                 generatedCardIds.add(cardId);
 
                 List<Long> keywords = new ArrayList<>();
-                int numKeys = random.nextInt(6);
+                int numKeys = random.nextInt(6)+1;
                 for (int j=0; j<numKeys; j++) {
                     long keyword = random.nextInt(30);
                     if (!keywords.contains(keyword)) keywords.add(keyword);
                 }
                 cardKeywordSQL(cardId, keywords);
             }
+            return generatedCardIds;
         } catch (Exception e) {
             e.printStackTrace();
+            return List.of();
         }
     }
 
