@@ -3,6 +3,10 @@ import org.seng302.leftovers.Main;
 
 import org.junit.jupiter.api.*;
 import org.junit.runner.RunWith;
+import org.seng302.leftovers.persistence.AccountRepository;
+import org.seng302.leftovers.persistence.LocationRepository;
+import org.seng302.leftovers.persistence.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -18,6 +22,15 @@ public class UserGeneratorTest {
     private Connection conn;
     private UserGenerator userGenerator;
 
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private AccountRepository accountRepository;
+
+    @Autowired
+    private LocationRepository locationRepository;
+
     @BeforeEach
     public void setup() throws SQLException {
         Map<String, String> properties = ExampleDataFileReader.readPropertiesFile("/application.properties");
@@ -32,6 +45,9 @@ public class UserGeneratorTest {
 
     @AfterEach
     public void teardown() throws SQLException {
+        userRepository.deleteAll();
+        accountRepository.deleteAll();
+        locationRepository.deleteAll();
         conn.close();
     }
 
@@ -66,18 +82,6 @@ public class UserGeneratorTest {
         return results.getLong(1);
     }
 
-    /**
-     * Deletes the generated users from the database as part of the clean up process
-     * @param userIds the ids of the generated users
-     */
-    public void deleteUsersFromDB(List<Long> userIds) throws SQLException {
-        for (Long userId: userIds) {
-            PreparedStatement stmt = conn.prepareStatement("DELETE FROM user WHERE userid = ?");
-            stmt.setObject(1, userId);
-            stmt.executeUpdate();
-        }
-    }
-
     @Test
     void generateUsers_generateOneUserAndConsistentData_oneUserGenerated() throws SQLException {
         List<Long> userIds = userGenerator.generateUsers(1);
@@ -86,8 +90,6 @@ public class UserGeneratorTest {
         }
         long userId = userIds.get(0);
         checkRequiredFieldsNotNull(userId);
-
-
     }
 
     @Test
@@ -100,8 +102,6 @@ public class UserGeneratorTest {
             checkRequiredFieldsNotNull(userIds.get(i));
         }
         //How to check if data is consistent?
-
-        deleteUsersFromDB(userIds);
     }
 
     @Test
@@ -113,8 +113,6 @@ public class UserGeneratorTest {
         for (int i=0; i < userIds.size(); i++) {
             checkRequiredFieldsNotNull(userIds.get(i));
         }
-
-        deleteUsersFromDB(userIds);
     }
 
     @Test
@@ -126,8 +124,6 @@ public class UserGeneratorTest {
         for (int i=0; i < userIds.size(); i++) {
             checkRequiredFieldsNotNull(userIds.get(i));
         }
-
-        deleteUsersFromDB(userIds);
     }
 
     @Test
