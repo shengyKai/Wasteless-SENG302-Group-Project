@@ -4,13 +4,10 @@
  import org.junit.jupiter.api.BeforeEach;
  import org.junit.jupiter.api.Test;
  import org.junit.runner.RunWith;
- import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
  import org.springframework.test.context.junit4.SpringRunner;
  import org.seng302.leftovers.Main;
-import org.seng302.leftovers.persistence.AccountRepository;
-import org.seng302.leftovers.persistence.LocationRepository;
 import org.seng302.leftovers.persistence.UserRepository;
 
 import java.sql.*;
@@ -37,12 +34,6 @@ import java.sql.*;
    @Autowired
    private UserRepository userRepository;
 
-   @Autowired
-   private AccountRepository accountRepository;
-
-   @Autowired
-   private LocationRepository locationRepository;
-
    //loads all the example files which are the same as the generators
    private List<String> streetNames = ExampleDataFileReader.readExampleDataFile(STREET_NAMES_FILE);
    private List<String> cities = ExampleDataFileReader.readExampleDataFile(CITIES_FILE);
@@ -65,8 +56,6 @@ import java.sql.*;
    @AfterEach
    public void teardown() throws SQLException {
        userRepository.deleteAll();
-       accountRepository.deleteAll();
-       locationRepository.deleteAll();
        conn.close();
    }
 

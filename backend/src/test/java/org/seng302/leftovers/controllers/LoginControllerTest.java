@@ -9,7 +9,6 @@ import org.seng302.leftovers.entities.Location;
 import org.seng302.leftovers.entities.User;
 import org.seng302.leftovers.persistence.AccountRepository;
 import org.seng302.leftovers.persistence.BusinessRepository;
-import org.seng302.leftovers.persistence.LocationRepository;
 import org.seng302.leftovers.persistence.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -41,9 +40,6 @@ class LoginControllerTest {
     @Autowired
     private UserRepository userRepository;
 
-    @Autowired
-    private LocationRepository locationRepository;
-
     @BeforeEach
     void setUp() throws ParseException {
         businessRepository.deleteAll(); // Do this to prevent table constraint issues
@@ -72,7 +68,6 @@ class LoginControllerTest {
         businessRepository.deleteAll();
         userRepository.deleteAll();
         accountRepository.deleteAll();
-        locationRepository.deleteAll();
     }
 
     /**

@@ -3,8 +3,6 @@ import org.seng302.leftovers.Main;
 
 import org.junit.jupiter.api.*;
 import org.junit.runner.RunWith;
-import org.seng302.leftovers.persistence.AccountRepository;
-import org.seng302.leftovers.persistence.LocationRepository;
 import org.seng302.leftovers.persistence.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -25,12 +23,6 @@ public class UserGeneratorTest {
     @Autowired
     private UserRepository userRepository;
 
-    @Autowired
-    private AccountRepository accountRepository;
-
-    @Autowired
-    private LocationRepository locationRepository;
-
     @BeforeEach
     public void setup() throws SQLException {
         Map<String, String> properties = ExampleDataFileReader.readPropertiesFile("/application.properties");
@@ -46,8 +38,6 @@ public class UserGeneratorTest {
     @AfterEach
     public void teardown() throws SQLException {
         userRepository.deleteAll();
-        accountRepository.deleteAll();
-        locationRepository.deleteAll();
         conn.close();
     }
 
