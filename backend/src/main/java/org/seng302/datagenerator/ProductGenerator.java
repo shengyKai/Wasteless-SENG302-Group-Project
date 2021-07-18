@@ -9,13 +9,11 @@ import static org.seng302.datagenerator.Main.*;
 public class ProductGenerator {
     private Random random = new Random();
     private Connection conn;
+    private CommerceNameGenerator commerceNameGenerator = CommerceNameGenerator.getInstance();
 
     //predefined lists
-    String[] COUNTRIES = {"New Zealand", "Australia", "Japan", "Korea", "Singapore", "Vatican City"};
     String[] DESCRIPTIONS = {"Good for your gut", "May contain traces of peanuts", "Helps improve grades"};
-    String[] MANUFACTURERS = {"Nathan", "Connor", "Ella", "Josh", "Henry", "Edward", "Ben", "Kai"};
-    String[] NAMES = {"Nathan Apple", "Yellow Banana", "Orange Coloured Orange", "A Box", "The Box", "Cube Shaped Box"};
-    String[] PRODUCTCODES = {"APPLE123", "BANANA456", "ORANGE789"}; //Change to randomly generated?
+    //TODO when description generator finished hook it up
 
     public ProductGenerator(Connection conn) { this.conn = conn; }
 
@@ -26,6 +24,36 @@ public class ProductGenerator {
     public float generateRRP() {
         int RRPx100 = random.nextInt(100000);
         return ((float) RRPx100) / 100;
+    }
+
+    /**
+     * Randomly generates a product code
+     * @return the randomly generated product code
+     */
+    public String generateProductCode() {
+        String productWord = "";
+        int numLetters = random.nextInt(20);
+        for (int i=0; i < numLetters; i++) {
+            productWord += random.nextInt(26) + 'A';
+        }
+        int productNumber = random.nextInt(99999);
+        return productWord + productNumber;
+    }
+
+    /**
+     * Retrieves the country the business is located in by querying the database
+     * @param businessId the id of the business
+     * @return the country of the business
+     */
+    private String getCountryOfBusiness(long businessId) throws SQLException {
+        PreparedStatement stmt = conn.prepareStatement(
+                "SELECT country FROM location WHERE id = " +
+                        "(SELECT address_id FROM business WHERE id = ?)"
+        );
+        stmt.setObject(1, businessId);
+        stmt.executeQuery();
+        ResultSet results = stmt.getResultSet();
+        return results.getString(1);
     }
 
     /**
@@ -40,14 +68,15 @@ public class ProductGenerator {
                         + "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
                 Statement.RETURN_GENERATED_KEYS
         );
-        stmt.setObject(1, COUNTRIES[random.nextInt(COUNTRIES.length)]);
+        stmt.setObject(1, "JAPAN"); //TODO Fix country finder
         stmt.setObject(2, Instant.now());
         stmt.setObject(3, DESCRIPTIONS[random.nextInt(DESCRIPTIONS.length)]);
-        stmt.setObject(4, MANUFACTURERS[random.nextInt(MANUFACTURERS.length)]);
-        stmt.setObject(5, NAMES[random.nextInt(NAMES.length)]);
-        stmt.setObject(6, PRODUCTCODES[random.nextInt(PRODUCTCODES.length)]);
+        stmt.setObject(4, commerceNameGenerator.randomManufacturerName());
+        stmt.setObject(5, commerceNameGenerator.randomProductName());
+        stmt.setObject(6, generateProductCode());
         stmt.setObject(7, generateRRP());
         stmt.setObject(8, businessId);
+        System.out.println(stmt);
         stmt.executeUpdate();
         ResultSet keys = stmt.getGeneratedKeys();
         keys.next();
