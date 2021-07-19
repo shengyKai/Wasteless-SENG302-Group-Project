@@ -3,7 +3,10 @@
 exports[`MarketplaceCard.vue Must match snapshot 1`] = `
 <div class="d-flex flex-column v-card v-sheet theme--light" style="min-height: 250px;">
   <div class="v-card__title my-n1 title">
-    test_card_title
+    <div class="mr-1">
+      test_card_title
+    </div>
+    <!---->
   </div>
   <div class="v-card__text my-n2 flex-grow-1 d-flex flex-column justify-space-between">
     <div><strong>

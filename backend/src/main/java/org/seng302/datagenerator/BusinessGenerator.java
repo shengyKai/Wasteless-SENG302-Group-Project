@@ -71,7 +71,6 @@ public class BusinessGenerator {
         var userGenerator = new UserGenerator(conn);
         var businessGenerator = new BusinessGenerator(conn);
 
-
         int userCount = getNumObjectsFromInput("users");
         List<Long> userIds = userGenerator.generateUsers(userCount);
 
