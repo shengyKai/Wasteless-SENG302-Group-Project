@@ -7,7 +7,7 @@
       {{ text }}
     </v-card-text>
     <v-card-actions class="justify-center">
-      <v-btn color="primary" @click="blah">Close</v-btn>
+      <v-btn color="primary" @click="removeEvent">Close</v-btn>
     </v-card-actions>
   </div>
 </template>
@@ -36,5 +36,10 @@ export default {
       return this.event.section;
     }
   },
+  methods: {
+    removeEvent() {
+      this.$store.commit("removeEvent", this.event.id);
+    }
+  }
 };
 </script>
