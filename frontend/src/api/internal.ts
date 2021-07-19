@@ -162,9 +162,11 @@ export type InventoryItem = {
   expires: string
 };
 
+export type MarketplaceCardSection = 'ForSale' | 'Wanted' | 'Exchange'
+
 export type CreateMarketplaceCard = {
   creatorId: number,
-  section: "ForSale" | "Wanted" | "Exchange",
+  section: MarketplaceCardSection,
   title: string,
   description?: string,
   keywordIds: number[],
@@ -179,7 +181,7 @@ export type Keyword = {
 export type MarketplaceCard = {
   id: number,
   creator: User,
-  section: "ForSale" | "Wanted" | "Exchange",
+  section: MarketplaceCardSection,
   created: string,
   displayPeriodEnd?: string,
   title: string,
@@ -826,8 +828,6 @@ export async function createMarketplaceCard(marketplaceCard: CreateMarketplaceCa
   return response.data.cardId;
 }
 
-type SectionType = 'ForSale' | 'Wanted' | 'Exchange'
-
 type CardOrderBy = 'created' | 'title' | 'closes' | 'creatorFirstName' | 'creatorLastName'
 
 /**
@@ -839,7 +839,7 @@ type CardOrderBy = 'created' | 'title' | 'closes' | 'creatorFirstName' | 'creato
  * @param reverse Whether to reverse the results (default ascending)
  * @returns List of sales or a string error message
  */
-export async function getMarketplaceCardsBySection(section: SectionType, page: number, resultsPerPage: number, orderBy: CardOrderBy, reverse: boolean): Promise<MaybeError<SearchResults<MarketplaceCard>>> {
+export async function getMarketplaceCardsBySection(section: MarketplaceCardSection, page: number, resultsPerPage: number, orderBy: CardOrderBy, reverse: boolean): Promise<MaybeError<SearchResults<MarketplaceCard>>> {
   let response;
   try {
     response = await instance.get(`/cards`, {
