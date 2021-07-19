@@ -64,6 +64,7 @@ class KeywordTests {
 
     @AfterEach
     void tearDown() {
+        businessRepository.deleteAll();
         marketplaceCardRepository.deleteAll();
         userRepository.deleteAll();
         keywordRepository.deleteAll();

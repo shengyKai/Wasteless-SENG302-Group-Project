@@ -102,3 +102,164 @@ export function trimToLength(str: string, length: number) {
 export function isTesting() {
   return process.env.JEST_WORKER_ID !== undefined;
 }
+
+/**
+ * ========= REGEX =========
+ */
+
+/**
+ * Returns a Regex pattern that matches letters, spaces and dashes
+ */
+export function regxAlphabet() {
+  return /^[\p{L}\- ]*$/u;
+}
+
+/**
+ * Returns a Regex pattern that matches letters, spaces, numbers and common characters
+ */
+export function regxAlphabetExtended() {
+  return /(^[\p{L}\d\p{P} ]*$)/u;
+}
+
+export function regxAlphabetExtendedMultiline() {
+  return /(^[\p{L}\d\p{P}\s]*$)/u;
+}
+
+/**
+ * Returns a Regex pattern that matches numbers
+ */
+export function regxNumerical() {
+  return /(^[\d]*$)/;
+}
+
+/**
+ * Returns a Regex pattern that matches a price
+ */
+export function regxPrice() {
+  return /(^\d{1,8}(\.\d{2})?$)|^$/;
+}
+
+/**
+ * Returns a Regex that matches a password with at least one number and one letter.
+ */
+export function regxPassword() {
+  return /^(?=.*[0-9])(?=.*[\p{L} ])([\p{L}0-9 ]+)$/u;
+}
+
+/**
+ * Returns a Regex that matches a valid email address
+ */
+export function regxEmail() {
+  return /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+}
+
+/**
+ * Returns a Regex that matches a valid post code
+ */
+export function regxPostCode() {
+  return /(^[\p{L}0-9]*$)/u;
+}
+
+/**
+ Returns a Regex that matches a valid phone number
+ */
+export function regxPhoneNumber() {
+  return /(^\(?\d{1,3}\)?[\s.-]?\d{3,4}[\s.-]?\d{4,5}$)|(^$)/;
+}
+
+/**
+ Returns a Regex that matches a country code
+ */
+export function regxCountryCode() {
+  return /(^(\d{1,2}-)?\d{2,3}$)|(^$)/;
+}
+/**
+ Returns a Regex that matches a valid street address
+ */
+export function regxStreet() {
+  return /^(([0-9]+|[0-9]+\/[0-9]+)[a-zA-Z]?)(?=\s[\p{L}])([\p{L}0-9 ]+)$/u;
+}
+/**
+ Returns a Regex that matches a valid product code
+ */
+export function regxProductCode() {
+  return /^[-A-Z0-9]+$/;
+}
+
+/**
+ * ========= RULES =========
+ */
+
+export const emailRules = [
+  (email: string) => regxEmail().test(email) || 'E-mail must be valid'
+];
+
+export const mandatoryRules = [
+  //All fields with the class "required" will go through this ruleset to ensure the field is not empty.
+  //if it does not follow the format, display error message
+  (field: string) => !!field || 'Field is required'
+];
+
+export const passwordRules = [
+  (field: string) => (field && field.length >= 7) || 'Password must have 7+ characters',
+  (field: string) => regxPassword().test(field) || 'Must have at least one number and one alphabet'
+];
+
+export const postCodeRules = [
+  (field: string) => regxPostCode().test(field) || 'Must contain numbers and alphabet only'
+];
+
+export const nameRules = [
+  (field: string) =>  (field.length === 0 || regxAlphabet().test(field)) || 'Naming must be valid'
+];
+
+export function maxCharRules(size: number) {
+  return [
+    (field: string) => (field.length <= size) || `Reached max character limit: ${size}`
+  ];
+}
+
+export const phoneNumberRules = [
+  (field: string) => regxPhoneNumber().test(field) || 'Must be a valid phone number'
+];
+export const countryCodeRules = [
+  (field: string) => regxCountryCode().test(field) || 'Must be a valid country code.'
+];
+export const alphabetRules = [
+  (field: string) => (field.length === 0 || regxAlphabet().test(field)) || 'Naming must be valid'
+];
+export const streetNumRules = [
+  (field: string) => (field && field.length <= 109) || 'Reached max character limit 109 ',
+  (field: string) => regxStreet().test(field) || 'Must have at least one number and one alphabet'
+];
+
+export const quantityRules = [
+  (field: string) => regxNumerical().test(field) || 'Must contain an integer',
+  (field: string) => field ? parseInt(field) > 0 || 'Must be greater than zero' : true
+];
+
+export const smallPriceRules = [
+  //A price must be numbers and may contain a decimal followed by exactly two numbers (4digit)
+  (field: string) => regxPrice().test(field) || 'Must be a valid price',
+  (field: string) => field ? parseInt(field) < 10000 || 'Must be less than 10,000' : true,
+];
+
+export const hugePriceRules = [
+  //A price must be numbers and may contain a decimal followed by exactly two numbers (6digit)
+  (field: string) => regxPrice().test(field) || 'Must be a valid price',
+  (field: string) => field ? parseInt(field) < 1000000 || 'Must be less than 1,000,000' : true
+];
+
+export const alphabetExtendedSingleLineRules = [
+  (field: string) => regxAlphabetExtended().test(field) || 'Must only contain letters, numbers, punctuation and spaces',
+];
+
+export const alphabetExtendedMultilineRules = [
+  (field: string) => regxAlphabetExtendedMultiline().test(field) || 'Must only contain letters, numbers, punctuation and whitespace',
+];
+
+export const productCodeRules = [
+  (field: string) => field.length <= 15 || 'Reached max character limit: 15',
+  (field: string) => !/ /.test(field) || 'Must not contain a space',
+  (field: string) => regxProductCode().test(field) || 'Must be all uppercase letters, numbers and dashes.',
+];

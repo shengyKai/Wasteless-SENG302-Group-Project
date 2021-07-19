@@ -1,5 +1,6 @@
 package org.seng302.leftovers.controllers;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
@@ -21,7 +22,6 @@ import javax.servlet.http.HttpSession;
 import java.text.ParseException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -61,6 +61,13 @@ class LoginControllerTest {
             accountRepository.delete(sameEmailAccount);
         }
         accountRepository.save(john);
+    }
+
+    @AfterEach
+    void tearDown() {
+        businessRepository.deleteAll();
+        accountRepository.deleteAll();
+        userRepository.deleteAll();
     }
 
     /**

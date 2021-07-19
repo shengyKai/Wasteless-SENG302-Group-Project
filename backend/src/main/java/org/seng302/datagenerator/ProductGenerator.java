@@ -10,16 +10,13 @@ import static org.seng302.datagenerator.Main.*;
 public class ProductGenerator {
     private Random random = new Random();
     private Connection conn;
-    private CommerceNameGenerator nameGenerator  = CommerceNameGenerator.getInstance();
+    private CommerceNameGenerator commerceNameGenerator = CommerceNameGenerator.getInstance();
     private ProductImageGenerator imageGenerator;
 
 
     //predefined lists
-    String[] COUNTRIES = {"New Zealand", "Australia", "Japan", "Korea", "Singapore", "Vatican City"};
     String[] DESCRIPTIONS = {"Good for your gut", "May contain traces of peanuts", "Helps improve grades"};
-    String[] MANUFACTURERS = {"Nathan", "Connor", "Ella", "Josh", "Henry", "Edward", "Ben", "Kai"};
-    String[] NAMES = {"Nathan Apple", "Yellow Banana", "Orange Coloured Orange", "A Box", "The Box", "Cube Shaped Box"};
-    String[] PRODUCTCODES = {"APPLE123", "BANANA456", "ORANGE789"}; //Change to randomly generated?
+    //TODO when description generator finished hook it up
 
     public ProductGenerator(Connection conn) {
         this.conn = conn;
@@ -41,6 +38,37 @@ public class ProductGenerator {
     }
 
     /**
+     * Randomly generates a product code
+     * @return the randomly generated product code
+     */
+    public String generateProductCode() {
+        String productWord = "";
+        int numLetters = random.nextInt(20);
+        for (int i=0; i < numLetters; i++) {
+            productWord += random.nextInt(26) + 'A';
+        }
+        int productNumber = random.nextInt(99999);
+        return productWord + productNumber;
+    }
+
+    /**
+     * Retrieves the country the business is located in by querying the database
+     * @param businessId the id of the business
+     * @return the country of the business
+     */
+    private String getCountryOfBusiness(long businessId) throws SQLException {
+        PreparedStatement stmt = conn.prepareStatement(
+                "SELECT country FROM location WHERE id = " +
+                        "(SELECT address_id FROM business WHERE id = ?)"
+        );
+        stmt.setObject(1, businessId);
+        stmt.executeQuery();
+        ResultSet results = stmt.getResultSet();
+        results.next();
+        return results.getString(1);
+    }
+
+    /**
      * Creates and inserts the product into the database
      * @param businessId the id associated with the business entity representing the business who owns this product
      * @return the id of the generated product
@@ -52,15 +80,15 @@ public class ProductGenerator {
                         + "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
                 Statement.RETURN_GENERATED_KEYS
         );
-        String productName = nameGenerator.randomProductName();
-        stmt.setObject(1, COUNTRIES[random.nextInt(COUNTRIES.length)]);
+        stmt.setObject(1, getCountryOfBusiness(businessId));
         stmt.setObject(2, Instant.now());
         stmt.setObject(3, DESCRIPTIONS[random.nextInt(DESCRIPTIONS.length)]);
-        stmt.setObject(4, MANUFACTURERS[random.nextInt(MANUFACTURERS.length)]);
-        stmt.setObject(5, productName);
-        stmt.setObject(6, PRODUCTCODES[random.nextInt(PRODUCTCODES.length)]);
+        stmt.setObject(4, commerceNameGenerator.randomManufacturerName());
+        stmt.setObject(5, commerceNameGenerator.randomProductName());
+        stmt.setObject(6, generateProductCode());
         stmt.setObject(7, generateRRP());
         stmt.setObject(8, businessId);
+        System.out.println(stmt);
         stmt.executeUpdate();
         ResultSet keys = stmt.getGeneratedKeys();
         keys.next();
@@ -74,10 +102,18 @@ public class ProductGenerator {
      */
     public static void main(String[] args) throws InterruptedException, SQLException {
         Connection conn = connectToDatabase();
-        var generator = new ProductGenerator(conn);
+        var userGenerator = new UserGenerator(conn);
+        var businessGenerator = new BusinessGenerator(conn);
+        var productGenerator = new ProductGenerator(conn);
+
+        int userCount = getNumObjectsFromInput("users");
+        List<Long> userIds = userGenerator.generateUsers(userCount);
+
+        int businessCount = getNumObjectsFromInput("businesses");
+        List<Long> businessIds = businessGenerator.generateBusinesses(userIds, businessCount);
 
         int productCount = getNumObjectsFromInput("products");
-        generator.generateProducts(productCount);
+        List<Long> productIds = productGenerator.generateProducts(businessIds, productCount);
     }
 
     /**
@@ -85,13 +121,11 @@ public class ProductGenerator {
      * @param productCount Number of products to generate
      * @return List of generated product ids
      */
-    public List<Long> generateProducts(int productCount) throws InterruptedException {
-        var businessGenerator = new BusinessGenerator(conn);
+    public List<Long> generateProducts(List<Long> businessIds, int productCount) {
         List<Long> generatedProductIds = new ArrayList<>();
         try {
             for (int i=0; i < productCount; i++) {
                 clear();
-                List<Long> businessIds = businessGenerator.generateBusinesses(1);
                 long businessId = businessIds.get(0);
 
                 System.out.println(String.format("Creating Product %d / %d", i+1, productCount));

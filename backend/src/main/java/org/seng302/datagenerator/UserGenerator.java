@@ -94,7 +94,6 @@ public class UserGenerator {
         List<PersonNameGenerator.FullName> names = new ArrayList<>();
         for (int i = 0; i < userCount; i++) names.add(personNameGenerator.generateName());
 
-
         try {
             System.out.println("Adding addresses");
             List<Location> addresses = new ArrayList<>();
