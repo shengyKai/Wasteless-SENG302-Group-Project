@@ -1,5 +1,6 @@
 package org.seng302.datagenerator;
 
+import org.seng302.leftovers.entities.Keyword;
 import org.seng302.leftovers.entities.MarketplaceCard;
 
 import java.sql.*;
@@ -31,6 +32,7 @@ public class MarketplaceCardGenerator {
      * SQL statement to insert created card into database
      * @param userIds list of user ids to be card creators
      * @return id of created card
+     * @throws SQLException
      */
     private long createInsertCardSQL(List<Long> userIds) throws SQLException {
         PreparedStatement stmt = conn.prepareStatement(
@@ -67,12 +69,29 @@ public class MarketplaceCardGenerator {
     }
 
     /**
+     * Get all current keywords in the db
+     * @return list of keyword ids
+     * @throws SQLException
+     */
+    private List<Long> loadKeywords() throws SQLException {
+        List<Long> keywords = new ArrayList<>();
+        PreparedStatement stmt = conn.prepareStatement("SELECT id FROM keyword");
+        ResultSet result = stmt.executeQuery();
+        while (result.next()) {
+            keywords.add(result.getLong(1));
+        }
+        return keywords;
+    }
+
+    /**
      * Generate a certain amount of marketplace cards and insert them into the database
      * @param userIds users that post cards on the marketplace
      * @param cardCount amount of example cards to create
+     * @throws SQLException
      */
-    public List<Long> generateCards(List<Long> userIds, int cardCount) {
+    public List<Long> generateCards(List<Long> userIds, int cardCount) throws SQLException {
         List<Long> generatedCardIds = new ArrayList<>();
+        List<Long> keywordIds = loadKeywords();
         try {
             System.out.printf("Generating %d marketplace cards\n", cardCount);
             for (int i = 0; i < cardCount; i++) {
@@ -89,10 +108,11 @@ public class MarketplaceCardGenerator {
                 List<Long> keywords = new ArrayList<>();
                 int numKeys = random.nextInt(6)+1;
                 for (int j=0; j<numKeys; j++) {
-                    long keyword = random.nextInt(30);
+                    long keyword = keywordIds.get(random.nextInt(keywordIds.size()));
                     if (!keywords.contains(keyword)) keywords.add(keyword);
                 }
                 cardKeywordSQL(cardId, keywords);
+                keywords.clear();
             }
             return generatedCardIds;
         } catch (Exception e) {

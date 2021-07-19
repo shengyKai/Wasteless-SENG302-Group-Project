@@ -3,10 +3,16 @@ package org.seng302.datagenerator;
 import org.junit.jupiter.api.*;
 import org.junit.runner.RunWith;
 import org.seng302.leftovers.Main;
+import org.seng302.leftovers.persistence.KeywordRepository;
+import org.seng302.leftovers.persistence.MarketplaceCardRepository;
+import org.seng302.leftovers.persistence.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import javax.xml.bind.annotation.XmlType;
 import java.sql.*;
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 
@@ -19,6 +25,17 @@ public class MarketplaceCardGeneratorTest {
     private MarketplaceCardGenerator marketplaceCardGenerator;
     private List<Long> userIds;
 
+    private static final List<String> DEFAULT_KEYWORD_NAMES = List.of("Free", "Home Baking", "With Love", "Inspired", "Bulk", "Gluten Free", "Vegan", "Vegetarian", "Fun", "Keto", "Plant Based", "Fat Free", "Italian", "French", "Local Produce", "Fresh", "Eco", "Sustainable", "Asian", "Curry", "Dairy", "Perishable", "Non Perishable", "Free Range", "Natural", "Organic", "Connor", "Kosher", "Paleo", "Home Grown");
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private MarketplaceCardRepository marketplaceCardRepository;
+
+    @Autowired
+    private KeywordRepository keywordRepository;
+
     @BeforeEach
     public void setup() throws SQLException {
         Map<String, String> properties = ExampleDataFileReader.readPropertiesFile("/application.properties");
@@ -30,10 +47,22 @@ public class MarketplaceCardGeneratorTest {
         marketplaceCardGenerator = new MarketplaceCardGenerator(conn);
         UserGenerator userGenerator = new UserGenerator(conn);
         userIds = userGenerator.generateUsers(10);
+
+        for (String key : DEFAULT_KEYWORD_NAMES) {
+            PreparedStatement stmt2 = conn.prepareStatement("INSERT INTO keyword (created, name) VALUES (?,?)");
+            stmt2.setObject(1, Instant.now());
+            stmt2.setObject(2, key);
+            stmt2.execute();
+        }
     }
 
     @AfterEach
     public void teardown() throws SQLException {
+        keywordRepository.deleteAll();
+        marketplaceCardRepository.deleteAll();
+        userRepository.deleteAll();
+        PreparedStatement stmt = conn.prepareStatement("DELETE FROM keyword");
+        stmt.execute();
         conn.close();
     }
 
@@ -73,8 +102,8 @@ public class MarketplaceCardGeneratorTest {
     void generateCards_SingleCard_OneCardGenerated() throws SQLException {
         List<Long> cardIds = marketplaceCardGenerator.generateCards(userIds,1);
         if (cardIds.size() != 1) fail();
-        checkFields(cardIds.get(0));
-        checkKeywords(cardIds.get(0));
+        assert(checkFields(cardIds.get(0)));
+        assert(checkKeywords(cardIds.get(0)));
     }
 
     @Test
@@ -82,19 +111,19 @@ public class MarketplaceCardGeneratorTest {
         List<Long> cardIds = marketplaceCardGenerator.generateCards(userIds,100);
         if (cardIds.size() != 100) fail();
         for (Long cardId : cardIds) {
-            checkFields(cardId);
-            checkKeywords(cardId);
+            assert(checkFields(cardId));
+            assert(checkKeywords(cardId));
         }
     }
 
     @Test
-    void generateCards_ZeroCard_NoCardsGenerated() {
+    void generateCards_ZeroCard_NoCardsGenerated() throws SQLException {
         List<Long> cardIds = marketplaceCardGenerator.generateCards(userIds,0);
         if (cardIds.size() != 0) fail();
     }
 
     @Test
-    void generateCards_NegativeCard_NoCardsGenerated() {
+    void generateCards_NegativeCard_NoCardsGenerated() throws SQLException {
         List<Long> cardIds = marketplaceCardGenerator.generateCards(userIds,-10);
         if (cardIds.size() != 0) fail();
     }
