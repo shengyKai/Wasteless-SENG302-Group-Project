@@ -37,6 +37,7 @@ export default {
     }
   },
   methods: {
+    //Removes the event from the store, which in turn deletes this component from the page
     removeEvent() {
       this.$store.commit("removeEvent", this.event.id);
     }
