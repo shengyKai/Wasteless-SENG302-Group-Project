@@ -80,42 +80,6 @@ public class BusinessGeneratorTest {
         return results.getLong(1);
     }
 
-    /**
-     * Deletes the generated users from the database as part of the clean up process
-     * @param businessIds the ids of the generated businesses
-     * @param userIds the ids of the generated users
-     */
-    public void deleteUsersAndBusinessesFromDb(List<Long> businessIds, List<Long> userIds) throws SQLException {
-        if (businessIds != null) {
-            long lowestUserId = userIds.get(0);
-            long highestUserId = userIds.get(userIds.size()-1);
-            long lowestBusinessId = businessIds.get(0);
-            long highestBusinessId = businessIds.get(businessIds.size()-1);
-
-            PreparedStatement stmt = conn.prepareStatement(
-                    "DELETE FROM business_admins WHERE user_id >= ? AND user_id <= ? AND " +
-                            "business_id >= ? AND business_id <= ?"
-            );
-            stmt.setObject(1, lowestUserId);
-            stmt.setObject(2, highestUserId);
-            stmt.setObject(3, lowestBusinessId);
-            stmt.setObject(4, highestBusinessId);
-            stmt.executeUpdate();
-
-            for (Long businessId: businessIds) {
-                PreparedStatement stmt2 = conn.prepareStatement("DELETE FROM business WHERE id = ?");
-                stmt2.setObject(1, businessId);
-                stmt2.executeUpdate();
-            }
-        }
-
-        for (Long userId: userIds) {
-            PreparedStatement stmt3 = conn.prepareStatement("DELETE FROM user WHERE userid = ?");
-            stmt3.setObject(1, userId);
-            stmt3.executeUpdate();
-        }
-    }
-
     @Test
     void generateBusinesses_generateOneBusinessAndConsistentData_oneBusinessGenerated() throws SQLException {
         List<Long> userIds = userGenerator.generateUsers(1);
@@ -125,8 +89,6 @@ public class BusinessGeneratorTest {
         }
         long businessId = businessIds.get(0);
         checkRequiredFieldsNotNull(businessId);
-        //clean up
-        deleteUsersAndBusinessesFromDb(businessIds, userIds);
     }
 
     @Test
@@ -139,8 +101,6 @@ public class BusinessGeneratorTest {
         for (int i=0; i < businessIds.size(); i++) {
             checkRequiredFieldsNotNull(businessIds.get(i));
         }
-
-        deleteUsersAndBusinessesFromDb(businessIds, userIds);
     }
 
     @Test
@@ -153,8 +113,6 @@ public class BusinessGeneratorTest {
         for (int i=0; i < businessIds.size(); i++) {
             checkRequiredFieldsNotNull(businessIds.get(i));
         }
-
-        deleteUsersAndBusinessesFromDb(businessIds, userIds);
     }
 
     @Test
@@ -167,8 +125,6 @@ public class BusinessGeneratorTest {
         for (int i=0; i < businessIds.size(); i++) {
             checkRequiredFieldsNotNull(businessIds.get(i));
         }
-
-        deleteUsersAndBusinessesFromDb(businessIds, userIds);
     }
 
     @Test
@@ -180,8 +136,6 @@ public class BusinessGeneratorTest {
         if (businessesInDB != businessesInDBAfter) {
             fail();
         }
-
-        deleteUsersAndBusinessesFromDb(null, userIds);
     }
 
     @Test
@@ -193,8 +147,6 @@ public class BusinessGeneratorTest {
         if (businessesInDB != businessesInDBAfter) {
             fail();
         }
-
-        deleteUsersAndBusinessesFromDb(null, userIds);
     }
 
     @Test
@@ -206,7 +158,5 @@ public class BusinessGeneratorTest {
         if (businessesInDB != businessesInDBAfter) {
             fail();
         }
-
-        deleteUsersAndBusinessesFromDb(null, userIds);
     }
 }
