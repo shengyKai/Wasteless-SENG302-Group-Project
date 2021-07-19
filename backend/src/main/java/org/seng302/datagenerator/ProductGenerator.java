@@ -53,6 +53,7 @@ public class ProductGenerator {
         stmt.setObject(1, businessId);
         stmt.executeQuery();
         ResultSet results = stmt.getResultSet();
+        results.next();
         return results.getString(1);
     }
 
@@ -68,7 +69,7 @@ public class ProductGenerator {
                         + "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
                 Statement.RETURN_GENERATED_KEYS
         );
-        stmt.setObject(1, "JAPAN"); //TODO Fix country finder
+        stmt.setObject(1, getCountryOfBusiness(businessId));
         stmt.setObject(2, Instant.now());
         stmt.setObject(3, DESCRIPTIONS[random.nextInt(DESCRIPTIONS.length)]);
         stmt.setObject(4, commerceNameGenerator.randomManufacturerName());
