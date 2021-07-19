@@ -1,7 +1,13 @@
 <template>
   <v-card min-height="250px" class="d-flex flex-column">
+
     <v-card-title class="my-n1 title">
-      {{ content.title }}
+      <div class="mr-1">
+        {{ content.title }}
+      </div>
+      <v-chip v-if="showSection" color="primary" small outlined>
+        {{ section }}
+      </v-chip>
     </v-card-title>
     <v-card-text class="my-n2 flex-grow-1 d-flex flex-column justify-space-between">
       <div>
@@ -32,7 +38,7 @@
       </div>
     </v-card-text>
     <v-divider/>
-    <v-card-actions v-if="isCardOwnerOrDGAA && !isExpiryEvent">
+    <v-card-actions v-if="isCardOwnerOrDGAA && showActions">
       <v-icon ref="deleteButton"
               color="primary"
               @click.stop="deleteCardDialog = true"
@@ -74,7 +80,7 @@
 </template>
 
 <script>
-import { formatDate } from '@/utils';
+import { formatDate, SECTION_NAMES } from '@/utils';
 import { deleteMarketplaceCard } from '../../api/internal.ts';
 
 export default {
@@ -93,9 +99,15 @@ export default {
       created: String,
       keywords: Array,
     },
-    isExpiryEvent: Boolean
+    showActions: {
+      type: Boolean,
+      default: false,
+    },
+    showSection: {
+      type: Boolean,
+      default: false,
+    },
   },
-
   computed: {
     creator() {
       return this.content.creator;
@@ -117,6 +129,9 @@ export default {
       return (this.$store.state.user.id === this.content.creator.id)
             || (this.$store.getters.role === "defaultGlobalApplicationAdmin")
             || (this.$store.getters.role === "globalApplicationAdmin");
+    },
+    section() {
+      return SECTION_NAMES[this.content.section];
     },
   },
 

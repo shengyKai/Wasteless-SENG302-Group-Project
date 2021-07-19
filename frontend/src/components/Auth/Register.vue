@@ -8,7 +8,7 @@
         class="required"
         v-model="email"
         label="Email"
-        :rules="mandatoryRules.concat(emailRules).concat(maxLongCharRules)"
+        :rules="mandatoryRules().concat(emailRules()).concat(maxLongCharRules())"
         outlined
       />
 
@@ -22,7 +22,7 @@
         :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
         :type="showPassword ? 'text' : 'password'"
         @click:append="showPassword = !showPassword"
-        :rules="mandatoryRules.concat(passwordRules).concat(maxMediumCharRules)"
+        :rules="mandatoryRules().concat(passwordRules()).concat(maxMediumCharRules())"
         outlined
       />
 
@@ -35,7 +35,7 @@
         :append-icon="showConfirmPassword ? 'mdi-eye' : 'mdi-eye-off'"
         :type="showConfirmPassword ? 'text' : 'password'"
         @click:append="showConfirmPassword = !showConfirmPassword"
-        :rules="mandatoryRules.concat(passwordConfirmationRule).concat(maxMediumCharRules)"
+        :rules="mandatoryRules().concat(passwordConfirmationRule).concat(maxMediumCharRules())"
         outlined
       />
 
@@ -44,7 +44,7 @@
         class="required"
         v-model="firstName"
         label="First name"
-        :rules="mandatoryRules.concat(nameRules).concat(maxMediumCharRules)"
+        :rules="mandatoryRules().concat(nameRules()).concat(maxMediumCharRules())"
         outlined
       />
 
@@ -52,7 +52,7 @@
       <v-text-field
         v-model="middleName"
         label="Middle name(s)"
-        :rules="alphabetRules.concat(maxMediumCharRules)"
+        :rules="nameRules().concat(maxMediumCharRules())"
         outlined
       />
 
@@ -61,7 +61,7 @@
         class="required"
         v-model="lastName"
         label="Last name"
-        :rules="mandatoryRules.concat(nameRules).concat(maxMediumCharRules)"
+        :rules="mandatoryRules().concat(nameRules()).concat(maxMediumCharRules())"
         outlined
       />
 
@@ -69,7 +69,7 @@
       <v-text-field
         v-model="nickname"
         label="Nickname"
-        :rules="alphabetRules.concat(maxMediumCharRules)"
+        :rules="alphabetRules().concat(maxMediumCharRules())"
         outlined
       />
 
@@ -78,7 +78,7 @@
         v-model="bio"
         label="Bio"
         rows="3"
-        :rules="charBioRules"
+        :rules="charBioRules().concat(alphabetExtendedMultilineRules())"
         outlined
       />
 
@@ -95,7 +95,7 @@
             class="required"
             v-model="dob"
             label="Date of Birth"
-            :rules="mandatoryRules"
+            :rules="mandatoryRules()"
             prepend-inner-icon="mdi-calendar"
             readonly
             v-bind="attrs"
@@ -135,7 +135,7 @@
             ref="countryCode"
             v-model="countryCode"
             label="Country Code"
-            :rules="countryCodeRules.concat(phoneRequiresCountryCodeRule)"
+            :rules="countryCodeRules().concat(phoneRequiresCountryCodeRule)"
             outlined
           />
         </v-col>
@@ -147,7 +147,7 @@
             v-model="phone"
             label="Phone"
             @keyup="phoneNumberChange"
-            :rules="phoneNumberRules"
+            :rules="phoneNumberRules()"
             outlined
           />
         </v-col>
@@ -159,7 +159,7 @@
         class="required"
         v-model="streetAddress"
         label="Street Address"
-        :rules="mandatoryRules.concat(streetNumRules)"
+        :rules="mandatoryRules().concat(streetNumRules())"
         outlined
       />
 
@@ -167,7 +167,7 @@
       <LocationAutocomplete
         type="district"
         v-model="district"
-        :rules="maxLongCharRules.concat(alphabetRules).concat(maxLongCharRules)"
+        :rules="maxLongCharRules().concat(alphabetRules())"
       />
 
       <!-- INPUT: City -->
@@ -175,7 +175,7 @@
         type="city"
         class="required"
         v-model="city"
-        :rules="mandatoryRules.concat(alphabetRules).concat(maxLongCharRules)"
+        :rules="mandatoryRules().concat(alphabetRules()).concat(maxLongCharRules())"
       />
 
       <!-- INPUT: Region -->
@@ -183,7 +183,7 @@
         type="region"
         class="required"
         v-model="region"
-        :rules="mandatoryRules.concat(alphabetRules).concat(maxLongCharRules)"
+        :rules="mandatoryRules().concat(alphabetRules()).concat(maxLongCharRules())"
       />
 
       <!-- INPUT: Country -->
@@ -191,7 +191,7 @@
         type="country"
         class="required"
         v-model="country"
-        :rules="mandatoryRules.concat(alphabetRules).concat(maxLongCharRules)"
+        :rules="mandatoryRules().concat(alphabetRules()).concat(maxLongCharRules())"
       />
 
       <!-- INPUT: Postcode -->
@@ -199,7 +199,7 @@
         class="required"
         v-model="postcode"
         label="Postcode"
-        :rules="mandatoryRules.concat(numberRules).concat(maxShortCharRules)"
+        :rules="mandatoryRules().concat(postCodeRules()).concat(maxShortCharRules())"
         outlined
       />
 
@@ -227,6 +227,17 @@
 <script>
 import LocationAutocomplete from '@/components/utils/LocationAutocomplete';
 import {createUser} from '../../api/internal';
+import {
+  alphabetExtendedMultilineRules,
+  alphabetRules,
+  countryCodeRules,
+  emailRules,
+  mandatoryRules, maxCharRules,
+  nameRules,
+  passwordRules, phoneNumberRules,
+  postCodeRules,
+  streetNumRules,
+} from "@/utils";
 
 export default {
   name: 'Register',
@@ -260,55 +271,20 @@ export default {
       items: [],
       isLoading: false,
       maxDate: '',
-      emailRules: [
-        //regex rules for emails, example format is as such:
-        //"blah@hotmail.co
-        //if it does not follow the format, display error message
-        email =>
-          /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(email)
-          || 'E-mail must be valid'
-      ],
-      mandatoryRules: [
-        //All fields with the class "required" will go through this ruleset to ensure the field is not empty.
-        //if it does not follow the format, display error message
-        field => !!field || 'Field is required'
-      ],
-      passwordRules: [
-        field => (field && field.length >= 7) || 'Password must have 7+ characters',
-        field => (/^(?=.*[0-9])(?=.*[\p{L} ])([\p{L}0-9 ]+)$/u).test(field) || 'Must have at least one number and one alphabet'
-      ],
-      numberRules: [
-        field => /(^[a-zA-Z0-9]*$)/.test(field) || 'Must contain numbers and alphabet only'
-      ],
-      nameRules: [
-        field =>  (field.length === 0 || (/^[\p{L} -]+$/u).test(field)) || 'Naming must be valid'
-      ],
-      maxShortCharRules: [
-        field => (field.length <= 16) || 'Reached max character limit: 16'
-      ],
-      maxMediumCharRules: [
-        field => (field.length <= 32) || 'Reached max character limit: 32'
-      ],
-      maxLongCharRules: [
-        field => (field.length <= 100) || 'Reached max character limit: 100'
-      ],
-      charBioRules: [
-        field => (field.length <= 200) || 'Reached max character limit: 200',
-        field => (/(^[\p{L} 0-9@//$%&!'//#,//.//(//)//:;_-]*$)/u).test(field) || 'Bio must only contain letters, numbers, and valid special characters'
-      ],
-      phoneNumberRules: [
-        field => /(^\(?\d{1,3}\)?[\s.-]?\d{3,4}[\s.-]?\d{4,5}$)|(^$)/.test(field) || 'Must be a valid phone number'
-      ],
-      countryCodeRules: [
-        field => /(^(\d{1,2}-)?\d{2,3}$)|(^$)/.test(field) || 'Must be a valid country code.'
-      ],
-      alphabetRules: [
-        field => (field.length === 0 || (/^[\p{L}\- ]+$/u).test(field)) || 'Naming must be valid'
-      ],
-      streetNumRules: [
-        field => (field && field.length <= 109) || 'Reached max character limit 109 ',
-        field => /^(([0-9]+|[0-9]+\/[0-9]+)[a-zA-Z]?)(?=.*[\s])(?=.*[\p{L} ])([\p{L}0-9 ]+)$/u.test(field) || 'Must have at least one number and one alphabet'
-      ],
+      emailRules: () => emailRules,
+      mandatoryRules: () => mandatoryRules,
+      passwordRules: () => passwordRules,
+      postCodeRules: () => postCodeRules,
+      nameRules: () => nameRules,
+      maxShortCharRules: () => maxCharRules(16),
+      maxMediumCharRules: () => maxCharRules(32),
+      maxLongCharRules: () => maxCharRules(100),
+      charBioRules: () => maxCharRules(200),
+      phoneNumberRules: () => phoneNumberRules,
+      countryCodeRules: () => countryCodeRules,
+      alphabetRules: () => alphabetRules,
+      alphabetExtendedMultilineRules: () => alphabetExtendedMultilineRules,
+      streetNumRules: () => streetNumRules,
     };
   },
 

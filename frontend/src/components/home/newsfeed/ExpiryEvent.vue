@@ -12,7 +12,7 @@
     <v-expand-transition>
       <v-container v-show="viewCard">
         <v-row justify="center">
-          <MarketplaceCard :isExpiryEvent="true" :content="card" style="width: 300px"/>
+          <MarketplaceCard :content="card" style="width: 300px"/>
         </v-row>
       </v-container>
     </v-expand-transition>

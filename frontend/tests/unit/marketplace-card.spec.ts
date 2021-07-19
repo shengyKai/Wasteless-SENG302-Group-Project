@@ -5,7 +5,9 @@ import Vuex from 'vuex';
 import { createLocalVue, mount, Wrapper } from '@vue/test-utils';
 import MarketplaceCard from '@/components/cards/MarketplaceCard.vue';
 
-import { deleteMarketplaceCard, User } from '@/api/internal';
+import { deleteMarketplaceCard, MarketplaceCardSection, User } from '@/api/internal';
+import { flushQueue } from './utils';
+import { SECTION_NAMES } from '@/utils';
 
 jest.mock('@/api/internal', () => ({
   deleteMarketplaceCard: jest.fn(),
@@ -70,13 +72,13 @@ describe('MarketplaceCard.vue', () => {
    * Creates the environment used for testing. The marketplace card being viewed
    * can be altered by changing the contents of the card
    */
-  function generateWrapper() {
+  function generateWrapper(properties?: Partial<{showActions: boolean, showSection: boolean}>) {
     // Creating wrapper around MarketplaceCard with data-app to appease vuetify
     const App = localVue.component('App', {
       components: { MarketplaceCard },
       template: `
       <div data-app>
-        <MarketplaceCard :content="testMarketplaceCard"/>
+        <MarketplaceCard :content="testMarketplaceCard" :showActions="showActions" :showSection="showSection"/>
       </div>`
     });
 
@@ -90,7 +92,10 @@ describe('MarketplaceCard.vue', () => {
       store,
       data() {
         return {
-          testMarketplaceCard: testMarketplaceCard
+          testMarketplaceCard: testMarketplaceCard,
+          showActions: true,
+          showSection: false,
+          ...properties
         };
       }
     });
@@ -122,6 +127,13 @@ describe('MarketplaceCard.vue', () => {
     vuetify = new Vuetify();
     setUpStore(2, "user");
     generateWrapper();
+  });
+
+  /**
+	 * Ensures the CreateSaleItem component is removed from the global document
+	 */
+  afterEach(() => {
+    appWrapper.destroy();
   });
 
   it('Must match snapshot', () => {
@@ -215,6 +227,13 @@ describe('MarketplaceCard.vue', () => {
     expect(buttons.length).toBe(0);
   });
 
+  it('Must not be able to find the delete icon if the property "showActions" is false', async () => {
+    generateWrapper({showActions: false});
+
+    const buttons = wrapper.findAllComponents({ ref: 'deleteButton' });
+    expect(buttons.length).toBe(0);
+  });
+
   it("Must be able to find the delete icon if the user is not the owner of the card but is a DGAA", async () => {
     setUpStore(3, "defaultGlobalApplicationAdmin");
     generateWrapper();
@@ -228,4 +247,30 @@ describe('MarketplaceCard.vue', () => {
     const buttons = wrapper.findAllComponents({ ref: 'deleteButton' });
     expect(buttons.length).toBe(1);
   });
+
+  it.each(Object.keys(SECTION_NAMES) as MarketplaceCardSection[])(
+    'Must contain the section name of "%s" if "showSection" is true',
+    async (section: MarketplaceCardSection) => {
+      generateWrapper({showSection: true});
+      await wrapper.setData({
+        content: {
+          section
+        }
+      });
+      await Vue.nextTick();
+      expect(wrapper.text()).toContain(SECTION_NAMES[section]);
+    });
+
+  it.each(Object.keys(SECTION_NAMES) as MarketplaceCardSection[])(
+    'Must not contain the section name of "%s" if "showSection" is false',
+    async (section: MarketplaceCardSection) => {
+      generateWrapper({showSection: false});
+      await wrapper.setData({
+        content: {
+          section
+        }
+      });
+      await Vue.nextTick();
+      expect(wrapper.text()).not.toContain(SECTION_NAMES[section]);
+    });
 });

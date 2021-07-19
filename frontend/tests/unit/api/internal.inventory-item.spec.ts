@@ -107,7 +107,7 @@ describe("Test GET /businesses/:businessId/inventory endpoint", () => {
       }
     });
     const inventories = await api.getInventory(7, 1, 10, "name", false);
-    expect(inventories).toEqual("Missing/Invalid access token");
+    expect(inventories).toEqual("You have been logged out. Please login again and retry");
   });
 
   it('When response is 403 status, the result will be an error message stating the user is not an admin of the business', async () => {

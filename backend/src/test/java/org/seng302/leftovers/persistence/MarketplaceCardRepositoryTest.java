@@ -1,9 +1,6 @@
 package org.seng302.leftovers.persistence;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -13,14 +10,22 @@ import org.seng302.leftovers.entities.Location;
 import org.seng302.leftovers.entities.MarketplaceCard;
 import org.seng302.leftovers.entities.User;
 import org.seng302.leftovers.service.EventService;
+import org.seng302.leftovers.tools.SearchHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Sort;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.yaml.snakeyaml.error.Mark;
 
+import java.lang.reflect.Field;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.stream.Stream;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -64,7 +69,7 @@ class MarketplaceCardRepositoryTest {
                 .withCreator(user)
                 .withSection("Wanted")
                 .build();
-        marketplaceCardRepository.save(card);
+        card = marketplaceCardRepository.save(card);
     }
 
     @AfterEach
@@ -142,7 +147,7 @@ class MarketplaceCardRepositoryTest {
         Assertions.assertTrue(expiryEventRepository.getByExpiringCard(card).isEmpty());
 
         List<MarketplaceCard> results = marketplaceCardRepository.getAllExpiringBeforeWithoutEvent(cutoff);
-        Assertions.assertEquals(shouldReturnCard, results.contains(card));
+        assertEquals(shouldReturnCard, results.contains(card));
     }
 
     @ParameterizedTest
@@ -159,6 +164,50 @@ class MarketplaceCardRepositoryTest {
         Assertions.assertFalse(results.contains(card));
     }
 
+    @Test
+    void getAllByCreator_sortByCreated_returnsValidOrdering() throws Exception {
+        // Remove existing card that will interfere with results
+        marketplaceCardRepository.delete(card);
 
+        Field created = MarketplaceCard.class.getDeclaredField("created");
+        created.setAccessible(true);
 
+        Instant now = Instant.now();
+
+        MarketplaceCard card1 = new MarketplaceCard.Builder()
+                .withCreator(user)
+                .withSection(MarketplaceCard.Section.WANTED)
+                .withTitle("This")
+                .withDescription("That")
+                .build();
+        created.set(card1, now.minus(1, ChronoUnit.HOURS));
+        card1 = marketplaceCardRepository.save(card1);
+
+        MarketplaceCard card2 = new MarketplaceCard.Builder()
+                .withCreator(user)
+                .withSection(MarketplaceCard.Section.WANTED)
+                .withTitle("This")
+                .withDescription("That")
+                .build();
+        created.set(card2, now.minus(3, ChronoUnit.HOURS));
+        card2 = marketplaceCardRepository.save(card2);
+
+        MarketplaceCard card3 = new MarketplaceCard.Builder()
+                .withCreator(user)
+                .withSection(MarketplaceCard.Section.WANTED)
+                .withTitle("This")
+                .withDescription("That")
+                .build();
+        created.set(card3, now.minus(2, ChronoUnit.HOURS));
+        card3 = marketplaceCardRepository.save(card3);
+
+        // Same page request as in GET /users/:id/cards
+        var pageRequest = SearchHelper.getPageRequest(null, null, Sort.by(new Sort.Order(Sort.Direction.DESC, "created")));
+        Page<MarketplaceCard> result = marketplaceCardRepository.getAllByCreator(user, pageRequest);
+
+        List<MarketplaceCard> expectedOrder = List.of(card1, card3, card2);
+        assertEquals(expectedOrder, result.getContent());
+
+        assertEquals(3, result.getTotalElements());
+    }
 }

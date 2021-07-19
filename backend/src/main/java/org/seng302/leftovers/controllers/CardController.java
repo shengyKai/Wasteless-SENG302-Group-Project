@@ -243,4 +243,28 @@ public class CardController {
         json.put("results", resultArray);
         return json;
     }
+
+    @GetMapping("/users/{id}/cards")
+    public JSONObject getCardsForUser(HttpServletRequest request,
+                                      @PathVariable Long id,
+                                      @RequestParam(required = false) Integer page,
+                                      @RequestParam(required = false) Integer resultsPerPage) {
+        logger.info("Request to get marketplace cards for user {}", id);
+        AuthenticationTokenManager.checkAuthenticationToken(request);
+
+        User user = userRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "User not found"));
+
+        PageRequest pageRequest = SearchHelper.getPageRequest(page, resultsPerPage, Sort.by(Sort.Direction.DESC, "created"));
+        var results = marketplaceCardRepository.getAllByCreator(user, pageRequest);
+
+        //return JSON Object
+        JSONArray resultArray = new JSONArray();
+        for (MarketplaceCard card : results) {
+            resultArray.appendElement(card.constructJSONObject());
+        }
+        JSONObject json = new JSONObject();
+        json.put("count", results.getTotalElements());
+        json.put("results", resultArray);
+        return json;
+    }
 }
