@@ -3,19 +3,17 @@ package org.seng302.datagenerator;
 import org.junit.jupiter.api.*;
 import org.junit.runner.RunWith;
 import org.seng302.leftovers.Main;
-import org.seng302.leftovers.persistence.KeywordRepository;
 import org.seng302.leftovers.persistence.MarketplaceCardRepository;
 import org.seng302.leftovers.persistence.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import javax.xml.bind.annotation.XmlType;
 import java.sql.*;
-import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 @RunWith(SpringRunner.class)
@@ -33,9 +31,6 @@ public class MarketplaceCardGeneratorTest {
     @Autowired
     private MarketplaceCardRepository marketplaceCardRepository;
 
-    @Autowired
-    private KeywordRepository keywordRepository;
-
     @BeforeEach
     public void setup() throws SQLException {
         Map<String, String> properties = ExampleDataFileReader.readPropertiesFile("/application.properties");
@@ -47,22 +42,12 @@ public class MarketplaceCardGeneratorTest {
         marketplaceCardGenerator = new MarketplaceCardGenerator(conn);
         UserGenerator userGenerator = new UserGenerator(conn);
         userIds = userGenerator.generateUsers(10);
-
-        for (String key : DEFAULT_KEYWORD_NAMES) {
-            PreparedStatement stmt2 = conn.prepareStatement("INSERT INTO keyword (created, name) VALUES (?,?)");
-            stmt2.setObject(1, Instant.now());
-            stmt2.setObject(2, key);
-            stmt2.execute();
-        }
     }
 
     @AfterEach
     public void teardown() throws SQLException {
-        keywordRepository.deleteAll();
         marketplaceCardRepository.deleteAll();
         userRepository.deleteAll();
-        PreparedStatement stmt = conn.prepareStatement("DELETE FROM keyword");
-        stmt.execute();
         conn.close();
     }
 
@@ -72,7 +57,7 @@ public class MarketplaceCardGeneratorTest {
      * @return whether the card is successful or not
      */
     private boolean checkFields(Long cardId) throws SQLException {
-        PreparedStatement stmt = conn.prepareStatement("SELECT COUNT(*) FROM marketplace_card WHERE creator_id = ? " +
+        PreparedStatement stmt = conn.prepareStatement("SELECT COUNT(*) FROM marketplace_card WHERE id = ? AND creator_id IS NOT NULL " +
                 "AND created IS NOT NULL AND section IS NOT NULL AND title IS NOT NULL and description IS NOT NULL " +
                 "AND closes IS NOT NULL");
         stmt.setObject(1, cardId);
@@ -102,8 +87,8 @@ public class MarketplaceCardGeneratorTest {
     void generateCards_SingleCard_OneCardGenerated() throws SQLException {
         List<Long> cardIds = marketplaceCardGenerator.generateCards(userIds,1);
         if (cardIds.size() != 1) fail();
-        assert(checkFields(cardIds.get(0)));
-        assert(checkKeywords(cardIds.get(0)));
+        assertTrue(checkFields(cardIds.get(0)));
+        assertTrue(checkKeywords(cardIds.get(0)));
     }
 
     @Test
@@ -111,8 +96,8 @@ public class MarketplaceCardGeneratorTest {
         List<Long> cardIds = marketplaceCardGenerator.generateCards(userIds,100);
         if (cardIds.size() != 100) fail();
         for (Long cardId : cardIds) {
-            assert(checkFields(cardId));
-            assert(checkKeywords(cardId));
+            assertTrue(checkFields(cardId));
+            assertTrue(checkKeywords(cardId));
         }
     }
 

@@ -13,11 +13,11 @@ import java.util.Random;
 import static org.seng302.datagenerator.Main.*;
 
 public class MarketplaceCardGenerator {
-    private Random random = new Random();
-    private Connection conn;
+    private final Random random = new Random();
+    private final Connection conn;
 
     private static final String CARD_TITLES_FILE = "card-titles.txt";
-    private List<String> cardTitles;
+    private final List<String> cardTitles;
 
     /**
      * Constructor for Marketplace Card Generator, establishes connection to db
