@@ -315,7 +315,7 @@ export async function makeAdmin(userId: number): Promise<MaybeError<undefined>> 
     let status: number | undefined = error.response?.status;
 
     if (status === undefined) return 'Failed to reach backend';
-    if (status === 401) return 'Missing/Invalid access token';
+    if (status === 401) return 'You have been logged out. Please login again and retry';
     if (status === 403) return 'Operation not permitted';
     if (status === 406) return 'User does not exist';
 
@@ -335,7 +335,7 @@ export async function revokeAdmin(userId: number): Promise<MaybeError<undefined>
     await instance.put(`/users/${userId}/revokeAdmin`);
   } catch (error) {
     let status: number | undefined = error.response?.status;
-    if (status === 401) return 'Missing/Invalid access token';
+    if (status === 401) return 'You have been logged out. Please login again and retry';
     if (status === 403) return 'Operation not permitted';
     if (status === 406) return 'User does not exist';
 
@@ -356,7 +356,7 @@ export async function createBusiness(business: CreateBusiness): Promise<MaybeErr
   } catch (error) {
     let status: number | undefined = error.response?.status;
     if (status === undefined) return 'Failed to reach backend';
-    if (status === 401) return 'Missing/Invalid access token';
+    if (status === 401) return 'You have been logged out. Please login again and retry';
 
     return error.response.data.message;
   }
@@ -377,7 +377,7 @@ export async function createProduct(businessId: number, product: CreateProduct):
   } catch (error) {
     let status: number | undefined = error.response?.status;
     if (status === undefined) return 'Failed to reach backend';
-    if (status === 401) return 'Missing/Invalid access token';
+    if (status === 401) return 'You have been logged out. Please login again and retry';
     if (status === 403) return 'Operation not permitted';
     if (status === 400) return 'Invalid parameters';
     if (status === 409) return 'Product code unavailable';
@@ -401,7 +401,7 @@ export async function modifyProduct(businessId: number, productCode: string, pro
   } catch (error) {
     let status: number | undefined = error.response?.status;
     if (status === undefined) return 'Failed to reach backend';
-    if (status === 401) return 'Missing/Invalid access token';
+    if (status === 401) return 'You have been logged out. Please login again and retry';
     if (status === 403) return 'Operation not permitted';
     if (status === 406) return 'Product/Business not found';
     if (status === 400) return 'Invalid parameters';
@@ -453,7 +453,7 @@ export async function uploadProductImage(businessId: number, productCode: string
     let status: number | undefined = error.response?.status;
     if (status === undefined) return 'Failed to reach backend';
     if (status === 400) return 'Invalid image';
-    if (status === 401) return 'Missing/Invalid access token';
+    if (status === 401) return 'You have been logged out. Please login again and retry';
     if (status === 403) return 'Operation not permitted';
     if (status === 406) return 'Product/Business not found';
     if (status === 413) return 'Image too large';
@@ -475,7 +475,7 @@ export async function makeImagePrimary(businessId: number, productId: string, im
   } catch (error) {
     let status: number | undefined = error.response?.status;
     if (status === undefined) return 'Failed to reach backend';
-    if (status === 401) return 'Missing/Invalid access token';
+    if (status === 401) return 'You have been logged out. Please login again and retry';
     if (status === 403) return 'Operation not permitted';
     if (status === 406) return 'Product/Business not found';
 
@@ -496,7 +496,7 @@ export async function deleteImage(businessId: number, productId: string, imageId
   } catch (error) {
     let status: number | undefined = error.response?.status;
     if (status === undefined) return 'Failed to reach backend';
-    if (status === 401) return 'Missing/Invalid access token';
+    if (status === 401) return 'You have been logged out. Please login again and retry';
     if (status === 403) return 'Operation not permitted';
     if (status === 406) return 'Product/Business not found';
 
@@ -530,7 +530,7 @@ export async function getProducts(businessId: number, page: number, resultsPerPa
   } catch (error) {
     let status: number | undefined = error.response?.status;
     if (status === undefined) return 'Failed to reach backend';
-    if (status === 401) return 'Missing/Invalid access token';
+    if (status === 401) return 'You have been logged out. Please login again and retry';
     if (status === 403) return 'Not an admin of the business';
     if (status === 406) return 'Business not found';
     return 'Request failed: ' + status;
@@ -579,7 +579,7 @@ export async function getBusiness(businessId: number): Promise<MaybeError<Busine
   } catch (error) {
     let status: number | undefined = error.response?.status;
     if (status === undefined) return 'Failed to reach backend';
-    if (status === 401) return 'Missing/Invalid access token';
+    if (status === 401) return 'You have been logged out. Please login again and retry';
     if (status === 406) return 'Business not found';
 
     return 'Request failed: ' + status;
@@ -608,7 +608,7 @@ export async function makeBusinessAdmin(businessId: number, userId: number): Pro
     let status: number | undefined = error.response?.status;
     if (status === undefined) return 'Failed to reach backend';
     if (status === 400) return 'User doesn\'t exist or is already an admin';
-    if (status === 401) return 'Missing/Invalid access token';
+    if (status === 401) return 'You have been logged out. Please login again and retry';
     if (status === 403) return 'Current user cannot perform this action';
     if (status === 406) return 'Business not found';
 
@@ -634,7 +634,7 @@ export async function removeBusinessAdmin(businessId: number, userId: number): P
     let status: number | undefined = error.response?.status;
     if (status === undefined) return 'Failed to reach backend';
     if (status === 400) return 'User doesn\'t exist or is not an admin';
-    if (status === 401) return 'Missing/Invalid access token';
+    if (status === 401) return 'You have been logged out. Please login again and retry';
     if (status === 403) return 'Current user cannot perform this action';
     if (status === 406) return 'Business not found';
 
@@ -669,7 +669,7 @@ export async function getBusinessSales(businessId: number, page: number, results
   } catch (error) {
     let status: number | undefined = error.response?.status;
     if (status === undefined) return 'Failed to reach backend';
-    if (status === 401) return 'Missing/Invalid access token';
+    if (status === 401) return 'You have been logged out. Please login again and retry';
     if (status === 406) return 'The given business does not exist';
     return 'Request failed: ' + status;
   }
@@ -691,7 +691,7 @@ export async function getBusinessSalesCount(businessId: number): Promise<MaybeEr
   } catch (error) {
     let status: number | undefined = error.response?.status;
     if (status === undefined) return 'Failed to reach backend';
-    if (status === 401) return 'Missing/Invalid access token';
+    if (status === 401) return 'You have been logged out. Please login again and retry';
     if (status === 406) return 'The given business does not exist';
     return 'Request failed: ' + status;
   }
@@ -727,7 +727,7 @@ export async function getInventory(businessId: number, page: number, resultsPerP
   } catch (error) {
     let status: number | undefined = error.response?.status;
     if (status === undefined) return 'Failed to reach backend';
-    if (status === 401) return 'Missing/Invalid access token';
+    if (status === 401) return 'You have been logged out. Please login again and retry';
     if (status === 403) return 'Not an admin of the business';
     if (status === 406) return 'Business not found';
     return 'Request failed: ' + status;
@@ -773,7 +773,7 @@ export async function getKeywords(): Promise<MaybeError<Keyword[]>> {
   } catch (error) {
     let status: number | undefined = error.response?.status;
     if (status === undefined) return 'Failed to reach backend';
-    if (status === 401) return 'Missing/Invalid access token';
+    if (status === 401) return 'You have been logged out. Please login again and retry';
     return `Request failed: ${status}`;
   }
   if (!is<Keyword[]>(response.data)) {
@@ -815,7 +815,7 @@ export async function createMarketplaceCard(marketplaceCard: CreateMarketplaceCa
     let status: number | undefined = error.response?.status;
     if (status === undefined) return 'Failed to reach backend';
     if (status === 400) return 'Incorrect marketplace card format: ' + error.response?.data.message;
-    if (status === 401) return 'Missing/Invalid access token';
+    if (status === 401) return 'You have been logged out. Please login again and retry';
     if (status === 403) return 'A user cannot create a marketplace card for another user';
 
     return 'Request failed: ' + error.response?.data.message;
@@ -855,7 +855,7 @@ export async function getMarketplaceCardsBySection(section: SectionType, page: n
     let status: number | undefined = error.response?.status;
     if (status === undefined) return 'Failed to reach backend';
     if (status === 400) return 'The given section does not exist';
-    if (status === 401) return 'Missing/Invalid access token';
+    if (status === 401) return 'You have been logged out. Please login again and retry';
     return 'Request failed: ' + status;
   }
   if (!is<SearchResults<MarketplaceCard>>(response.data)) {
@@ -874,7 +874,7 @@ export async function deleteMarketplaceCard(marketplaceCardId: number) : Promise
   } catch (error) {
     let status: number | undefined = error.response?.status;
     if (status === undefined) return 'Failed to reach backend';
-    if (status === 401) return 'Missing/Invalid access token';
+    if (status === 401) return 'You have been logged out. Please login again and retry';
     if (status === 403) return 'Invalid authorization for card deletion';
     if (status === 406) return 'Marketplace card not found';
     return 'Request failed: ' + error.response?.data.message;
@@ -892,7 +892,7 @@ export async function extendMarketplaceCardExpiry(marketplaceCardId: number) : P
   } catch (error) {
     let status: number | undefined = error.response?.status;
     if (status === undefined) return 'Failed to reach backend';
-    if (status === 401) return 'Missing/Invalid access token';
+    if (status === 401) return 'You have been logged out. Please login again and retry';
     if (status === 403) return 'Invalid authorization for card expiry extension';
     if (status === 406) return 'Marketplace card not found';
     return 'Request failed: ' + error.response?.data.message;

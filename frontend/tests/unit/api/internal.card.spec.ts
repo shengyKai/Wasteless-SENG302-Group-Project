@@ -79,7 +79,7 @@ describe("Test POST /cards endpoint", () => {
       }
     });
     const response = await api.createMarketplaceCard(marketplaceCard);
-    expect(response).toEqual("Missing/Invalid access token");
+    expect(response).toEqual("You have been logged out. Please login again and retry");
   });
 
   it('When API response has a 403 status code, an error message saying a card cannot be created for another user will be returned', async () => {
@@ -140,7 +140,7 @@ describe("Test DELETE /cards/{id} endpoint", () => {
       }
     });
     const response = await api.deleteMarketplaceCard(1);
-    expect(response).toEqual('Missing/Invalid access token');
+    expect(response).toEqual('You have been logged out. Please login again and retry');
   });
 
   it('When API deletion request is successfully resolved but there is an invalid authorisation, a message is returned about the invalid authorisation', async ()=>{
@@ -195,7 +195,7 @@ describe("Test PUT /cards/{id}/extenddisplayperiod endpoint", () => {
       }
     });
     const response = await api.extendMarketplaceCardExpiry(1);
-    expect(response).toEqual('Missing/Invalid access token');
+    expect(response).toEqual('You have been logged out. Please login again and retry');
   });
 
   it('When API extension request is successfully resolved but there is an invalid authorisation, a message is returned about the invalid authorisation', async ()=>{
