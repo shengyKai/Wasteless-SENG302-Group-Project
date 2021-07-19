@@ -21,7 +21,6 @@ Cocoa
 Coffee
 Cookie
 Cream
-Croissant
 Crumble
 Curd
 Dessert

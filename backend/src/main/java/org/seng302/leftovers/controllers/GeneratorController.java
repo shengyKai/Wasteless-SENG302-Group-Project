@@ -45,7 +45,7 @@ public class GeneratorController {
 
             List<Long> userIds = userGenerator.generateUsers(userCount);
             List<Long> businessIds = businessGenerator.generateBusinesses(userIds, businessCount);
-            List<Long> productIds = productGenerator.generateProducts(businessIds, productCount);
+            List<Long> productIds = productGenerator.generateProducts(businessIds, productCount, true);
 
             json.appendField("generatedUsers", userIds);
             json.appendField("generatedBusinesses", businessIds);
