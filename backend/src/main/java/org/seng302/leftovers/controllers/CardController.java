@@ -15,6 +15,7 @@ import org.seng302.leftovers.persistence.UserRepository;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
 import org.seng302.leftovers.tools.JsonTools;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
@@ -24,6 +25,9 @@ import org.seng302.leftovers.tools.SearchHelper;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -32,7 +36,7 @@ import java.util.Set;
  */
 @RestController
 public class CardController {
-    private static final Set<String> VALID_CARD_ORDERINGS = Set.of("created", "title", "closes", "creatorFirstName", "creatorLastName");
+    private static final Set<String> VALID_CARD_ORDERINGS = Set.of("created", "title", "closes", "creatorFirstName", "creatorLastName", "location");
 
     private final MarketplaceCardRepository marketplaceCardRepository;
     private final KeywordRepository keywordRepository;
@@ -217,8 +221,17 @@ public class CardController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid card ordering");
         }
 
-        PageRequest pageRequest = SearchHelper.getPageRequest(page, resultsPerPage, Sort.by(new Sort.Order(direction, orderBy).ignoreCase()));
-        var results = marketplaceCardRepository.getAllBySection(section, pageRequest);
+        List<Sort.Order> sortOrder;
+        //If the orderBy is by address, creates a Sort.Order list for Location, else it creates a List for a normal orderBy attribute
+        //For location sort, the primary sort would be by country, followed by the city, since these both attributes are shown to the user in the marketplace card.
+        if (orderBy.equals("location")) {
+            sortOrder = List.of(new Sort.Order(direction, "creator.address.country").ignoreCase(), new Sort.Order(direction, "creator.address.city").ignoreCase());
+        } else {
+            sortOrder = List.of(new Sort.Order(direction, orderBy).ignoreCase());
+        }
+
+        PageRequest pageRequest = SearchHelper.getPageRequest(page, resultsPerPage, Sort.by(sortOrder));
+        Page<MarketplaceCard> results = marketplaceCardRepository.getAllBySection(section, pageRequest);
 
         //return JSON Object
         JSONArray resultArray = new JSONArray();

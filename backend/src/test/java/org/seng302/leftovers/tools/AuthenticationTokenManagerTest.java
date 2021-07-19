@@ -82,7 +82,7 @@ class AuthenticationTokenManagerTest {
         AuthenticationTokenManager.setAuthenticationToken(request, response);
         Mockito.verify(response).addCookie(cookieArgumentCaptor.capture());
         Cookie responseCookie = cookieArgumentCaptor.getValue();
-        assertEquals(30 * 60, responseCookie.getMaxAge());
+        assertEquals(60 * 60, responseCookie.getMaxAge());
     }
 
     /**

@@ -169,7 +169,7 @@ const apiCalls: Partial<ApiCalls> = {
     body: testCreateProduct,
     result: undefined,
     extraStatusMessages: {
-      401: 'Missing/Invalid access token',
+      401: 'You have been logged out. Please login again and retry',
       403: 'Operation not permitted',
       400: 'Invalid parameters',
       409: 'Product code unavailable',
@@ -211,7 +211,7 @@ const apiCalls: Partial<ApiCalls> = {
     result: undefined,
     extraStatusMessages: {
       400: 'Invalid image',
-      401: 'Missing/Invalid access token',
+      401: 'You have been logged out. Please login again and retry',
       403: 'Operation not permitted',
       406: 'Product/Business not found',
       413: 'Image too large',
@@ -232,7 +232,7 @@ const apiCalls: Partial<ApiCalls> = {
     result: [testProduct],
     failedTypeCheckResponse: 'Response is not product array',
     extraStatusMessages: {
-      401: 'Missing/Invalid access token',
+      401: 'You have been logged out. Please login again and retry',
       403: 'Not an admin of the business',
       406: 'Business not found',
     },
@@ -252,7 +252,7 @@ const apiCalls: Partial<ApiCalls> = {
     result: [testSaleItem],
     failedTypeCheckResponse: 'Response is not Sale array',
     extraStatusMessages: {
-      401: 'Missing/Invalid access token',
+      401: 'You have been logged out. Please login again and retry',
       406: 'The given business does not exist',
     },
   },
@@ -267,7 +267,7 @@ const apiCalls: Partial<ApiCalls> = {
     result: 100,
     failedTypeCheckResponse: 'Response is not a number',
     extraStatusMessages: {
-      401: 'Missing/Invalid access token',
+      401: 'You have been logged out. Please login again and retry',
       406: 'The given business does not exist',
     },
   },
@@ -278,7 +278,7 @@ const apiCalls: Partial<ApiCalls> = {
     body: testCreateProduct,
     result: undefined,
     extraStatusMessages: {
-      401: 'Missing/Invalid access token',
+      401: 'You have been logged out. Please login again and retry',
       403: 'Operation not permitted',
       406: 'Product/Business not found',
       400: 'Invalid parameters',
