@@ -15,19 +15,22 @@ import java.sql.*;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collector;
+import java.util.stream.Stream;
 
 public class ProductImageGenerator {
-    private final Path root = Paths.get(ProductImageGenerator.class.getResource("example-images/").toURI());
+    private Path root;
     private final Path userUploadsRoot = Paths.get("uploads");
-    private Connection conn;
+    private final Connection conn;
 
-    public ProductImageGenerator(Connection conn) throws URISyntaxException {
+    public ProductImageGenerator(Connection conn) {
         try {
+            root = Paths.get(ProductImageGenerator.class.getResource("example-images/").toURI());
             Files.createDirectory(root);
         } catch (FileAlreadyExistsException existsException) {
             // don't do anything if directory exists
-        } catch (IOException ioException) {
-            throw new RuntimeException("Could not initialize example images folder.");
+        } catch (IOException | URISyntaxException ioException) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,"Could not initialize example images folder.");
         }
         this.conn = conn;
     }
@@ -43,6 +46,9 @@ public class ProductImageGenerator {
     public void addImageToProduct(Long productId, String productName) throws SQLException {
         String noun = productName.split(" ")[1];
         Optional<File> image = findImage(noun);
+        if (image.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Could not locate file type for product name:" + productName);
+        }
 
         String filename = UUID.randomUUID().toString();
         Optional<String> fileType = getExtension(image.get().toString());
@@ -52,10 +58,10 @@ public class ProductImageGenerator {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Could not locate file type for:" + image.get().toString());
         }
 
-        if (saveImageToSystem(image, filename)) {
+        if (saveImageToSystem(image.get(), filename)) {
             createInsertImageSQL(productId, filename);
         } else {
-            System.out.println("File '" + productName + "' Could not be found");
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Could save image to disk for: " + image.get().toString());
         }
     }
 
@@ -77,9 +83,8 @@ public class ProductImageGenerator {
      * @throws IOException
      */
     private Optional<File> findImage(String noun) {
-        try {
-            Optional<Path> foundFile = Files.walk(this.root, 1)
-                    .filter(path -> path.getFileName().toString().replaceFirst("[.][^.]+$", "")
+        try (Stream<Path> directory = Files.walk(this.root, 1)) {
+            Optional<Path> foundFile = directory.filter(path -> path.getFileName().toString().replaceFirst("[.][^.]+$", "")
                             .equals(noun.toLowerCase(Locale.ROOT))).findFirst();
             return foundFile.map(Path::toFile);
         } catch (IOException e) {
@@ -94,12 +99,13 @@ public class ProductImageGenerator {
      * @param fileName The name of the file to save
      * @return true if file successfully saved.
      */
-    private boolean saveImageToSystem(Optional<File> demoImage, String fileName) {
-        if (demoImage.isPresent()) {
-            store(demoImage.get(), fileName);
+    private boolean saveImageToSystem(File demoImage, String fileName) {
+        try {
+            store(demoImage, fileName);
             return true;
+        } catch (Exception e) {
+            return false;
         }
-        return false;
     }
 
     /**
@@ -112,7 +118,7 @@ public class ProductImageGenerator {
         try {
             Files.copy( new FileInputStream(file), this.userUploadsRoot.resolve(filename));
 
-        } catch (Exception e) {
+        } catch (IOException e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to store file");
         }
     }

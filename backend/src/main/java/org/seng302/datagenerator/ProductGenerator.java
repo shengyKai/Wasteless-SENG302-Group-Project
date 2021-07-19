@@ -8,10 +8,10 @@ import java.util.*;
 import static org.seng302.datagenerator.Main.*;
 
 public class ProductGenerator {
-    private Random random = new Random();
-    private Connection conn;
-    private CommerceNameGenerator commerceNameGenerator = CommerceNameGenerator.getInstance();
-    private ProductImageGenerator imageGenerator;
+    private final Random random = new Random();
+    private final Connection conn;
+    private final CommerceNameGenerator commerceNameGenerator = CommerceNameGenerator.getInstance();
+    private final ProductImageGenerator imageGenerator;
 
 
     //predefined lists
@@ -20,12 +20,7 @@ public class ProductGenerator {
 
     public ProductGenerator(Connection conn) {
         this.conn = conn;
-        try {
-            this.imageGenerator = new ProductImageGenerator(conn);
-        } catch (URISyntaxException e) {
-            throw new RuntimeException("Cannot read path");
-        }
-
+        this.imageGenerator = new ProductImageGenerator(conn);
     }
 
     /**
@@ -80,11 +75,13 @@ public class ProductGenerator {
                         + "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
                 Statement.RETURN_GENERATED_KEYS
         );
+        String productName = commerceNameGenerator.randomProductName();
+
         stmt.setObject(1, getCountryOfBusiness(businessId));
         stmt.setObject(2, Instant.now());
         stmt.setObject(3, DESCRIPTIONS[random.nextInt(DESCRIPTIONS.length)]);
         stmt.setObject(4, commerceNameGenerator.randomManufacturerName());
-        stmt.setObject(5, commerceNameGenerator.randomProductName());
+        stmt.setObject(5, productName);
         stmt.setObject(6, generateProductCode());
         stmt.setObject(7, generateRRP());
         stmt.setObject(8, businessId);
