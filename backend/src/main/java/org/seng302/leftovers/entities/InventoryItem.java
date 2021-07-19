@@ -234,7 +234,8 @@ public class InventoryItem {
         LocalDate acceptDate = date.plusDays(1);                //at least 1 day later
         if (sellBy.compareTo(acceptDate) < 0) {           //is in the past
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The Sell By date cannot be in the past");
-    }
+        }
+
         this.sellBy = sellBy;
     }
     /**
@@ -251,6 +252,14 @@ public class InventoryItem {
         if (bestBefore.compareTo(acceptDate) < 0) {          //is in the past
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The Best Before date cannot be in the past");
         }
+
+        //checks that the best before date is after the sell by date if it exists
+        if (this.sellBy != null) {
+            if (bestBefore.compareTo(this.sellBy) < 0) { //checks if best before is before sell by
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                        "The best before date cannot be before the sell by date.");
+            }
+        }
         this.bestBefore = bestBefore;
     }
 
@@ -265,7 +274,21 @@ public class InventoryItem {
         LocalDate date = LocalDate.now();
         LocalDate acceptDate = date.plusDays(1);                    //at least 1 day later
         if (expires.compareTo(acceptDate) < 0) {              //is in the past
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The Expires date cannot be in the past");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The expires date cannot be in the past");
+        }
+
+        //checks that the best before date and sell by date are before the expire date if they exist
+        if (this.sellBy != null) {
+            if (expires.compareTo(this.sellBy) < 0) { //checks if expires is before sell by
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                        "The expires date cannot be before the sell by date.");
+            }
+        }
+        if (this.bestBefore != null) {
+            if (expires.compareTo(this.bestBefore) < 0) { //checks if expires is before best before
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                        "The expires date cannot be before the best before date.");
+            }
         }
         this.expires = expires;
     }

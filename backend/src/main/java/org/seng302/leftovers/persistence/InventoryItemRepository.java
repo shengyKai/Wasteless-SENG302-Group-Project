@@ -48,7 +48,7 @@ public interface InventoryItemRepository extends CrudRepository<InventoryItem, L
      * @param inventoryItemId Inventory item id to search for
      * @return Inventory id for business and inventoryItemId
      */
-    default InventoryItem getInventoryItemByBusinessAndId(Business business, long inventoryItemId) {
+    default InventoryItem getInventoryItemByBusinessAndId(Business business, Long inventoryItemId) {
         Optional<InventoryItem> inventoryItem = findById(inventoryItemId);
         if (
                 inventoryItem.isEmpty() ||
