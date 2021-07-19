@@ -38,7 +38,8 @@ Feature: UCM6 - Keyword Management
 
   Scenario: AC6 - Deleted keywords are removed from all cards that have them
     Given The keyword "Dance" exists
-    And A card exists with the keyword "Dance"
+    And a card exists
+    And The keyword "Dance" is added to the card
     And A admin exists with name "Dave"
     And I am logged into "Dave" account
     When I try to delete the keyword "Dance"

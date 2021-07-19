@@ -143,7 +143,7 @@ class KeywordControllerTest {
 
         when(keywordRepository.findById(99L)).thenReturn(Optional.empty());
 
-        // Verify that a 403 response is received in response to the DELETE request
+        // Verify that a 406 response is received in response to the DELETE request
         mockMvc.perform(delete("/keywords/99"))
                 .andExpect(status().isNotAcceptable())
                 .andReturn();
@@ -161,7 +161,7 @@ class KeywordControllerTest {
         Keyword mockKeyword = mock(Keyword.class);
         when(keywordRepository.findById(99L)).thenReturn(Optional.of(mockKeyword));
 
-        // Verify that a 403 response is received in response to the DELETE request
+        // Verify that a 200 response is received in response to the DELETE request
         mockMvc.perform(delete("/keywords/99"))
                 .andExpect(status().isOk())
                 .andReturn();
@@ -169,7 +169,7 @@ class KeywordControllerTest {
         // Check that the authentication token manager was called
         authenticationTokenManager.verify(() -> AuthenticationTokenManager.sessionIsAdmin(any()));
         verify(keywordRepository, times(1)).findById(99L);
-        verify(keywordRepository, times(1)).delete(mockKeyword); // Nothing is deleted
+        verify(keywordRepository, times(1)).delete(mockKeyword); // Keyword is deleted
     }
 
     @Test

@@ -334,15 +334,10 @@ public class CardStepDefinition {
         assertEquals(expectedCards.size(), page.get("count"));
     }
 
-    @Given("A card exists with the keyword {string}")
-    public void a_card_exists_with_the_keyword(String name) {
+    @Given("The keyword {string} is added to the card")
+    public void the_keyword_is_added_to_the_card(String name) {
         Keyword keyword = keywordRepository.findByName(name).orElseThrow();
-        var card = new MarketplaceCard.Builder()
-                .withCreator(userContext.getLast())
-                .withSection("Wanted")
-                .withTitle("Vintage car")
-                .withDescription("A cool vintage car")
-                .build();
+        var card = cardContext.getLast();
         card.addKeyword(keyword);
         cardContext.save(card);
     }
