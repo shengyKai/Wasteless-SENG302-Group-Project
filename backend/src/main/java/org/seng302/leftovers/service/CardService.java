@@ -42,7 +42,7 @@ public class CardService {
      * Perform a scheduled check every 5 minutes to identify marketplace cards which are expiring within the next day
      * or have expired from this instant.
      */
-    @Scheduled(fixedRate = 10 * 1000)
+    @Scheduled(fixedRate = 5 * 60 * 1000)
     private void initiateCardCheckEvents() {
         deleteExpiredCards();
         sendCardExpiryEvents();
