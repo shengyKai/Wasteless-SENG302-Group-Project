@@ -1,5 +1,6 @@
 package org.seng302.leftovers.controllers;
 
+// import net.bytebuddy.asm.Advice.OffsetMapping.Sort;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
@@ -15,15 +16,17 @@ import org.seng302.leftovers.service.StorageService;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
 import org.seng302.leftovers.tools.SearchHelper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.data.web.SpringDataWebProperties.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.swing.SortOrder;
+
 import java.util.*;
 
 /**
@@ -116,13 +119,22 @@ public class ProductController {
                             
         logger.info(() -> String.format("Retrieving catalogue from business with id %d.", id));
         Optional<Business> business = businessRepository.findById(id);
+
+        List<Sort.Order> sortOrder;
+        Sort.Direction direction = SearchHelper.getSortDirection(reverse);
+        if (orderBy.equals("location")) {
+            sortOrder = List.of(new Sort.Order(direction, "creator.address.country").ignoreCase(), new Sort.Order(direction, "creator.address.city").ignoreCase());
+        } else {
+            sortOrder = List.of(new Sort.Order(direction, orderBy).ignoreCase());
+            
+        }
         if (business.isEmpty()) {
             BusinessNotFoundException notFound = new BusinessNotFoundException();
             logger.error(notFound.getMessage());
             throw notFound;
         } else {
             business.get().checkSessionPermissions(request);
-            PageRequest pageablePage = PageRequest.of(this.paginationIndex, 1);
+            PageRequest pageablePage = SearchHelper.getPageRequest(this.paginationIndex, 1, Sort.by(sortOrder));
             List<Product> catalogue = productRepository.getAllByBusiness(business.get(), pageablePage);
 
             Comparator<Product> sort = sortProducts(orderBy, reverse);
