@@ -1,5 +1,9 @@
 package org.seng302.leftovers.entities;
 
+import io.cucumber.java.eo.Se;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.junit.Assert;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -33,6 +37,9 @@ class KeywordTests {
 
     @Autowired
     UserRepository userRepository;
+
+    @Autowired
+    SessionFactory sessionFactory;
 
     User testUser;
 
@@ -269,5 +276,36 @@ class KeywordTests {
         List<String> sortedNames = keywordNames.stream().sorted().collect(Collectors.toList());
         List<String> resultNames = keywordRepository.findByOrderByNameAsc().stream().map(Keyword::getName).collect(Collectors.toList());
         assertEquals(sortedNames, resultNames);
+    }
+
+    @Test
+    void deleteKeyword_withCard_keywordRemovedFromCard() {
+        Keyword bystander = keywordRepository.save(new Keyword("Bystander"));
+        Keyword deleted = keywordRepository.save(new Keyword("Deleted"));
+
+        MarketplaceCard card = new MarketplaceCard.Builder()
+                .withSection(MarketplaceCard.Section.WANTED)
+                .withCreator(testUser)
+                .withTitle("Title")
+                .withDescription("Description")
+                .build();
+        card.addKeyword(bystander);
+        card.addKeyword(deleted);
+        card = marketplaceCardRepository.save(card);
+
+        try (Session session = sessionFactory.openSession()) {
+            session.beginTransaction();
+
+            deleted = session.find(Keyword.class, deleted.getID());
+            session.delete(deleted);
+
+            session.getTransaction().commit();
+        }
+
+        card = marketplaceCardRepository.findById(card.getID()).orElseThrow();
+
+        // Deleted keyword should have been removed from the card, but bystander keyword should stay
+        assertEquals(1, card.getKeywords().size());
+        assertEquals(bystander.getName(), card.getKeywords().get(0).getName());
     }
 }
