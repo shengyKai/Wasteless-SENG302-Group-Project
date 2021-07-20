@@ -86,8 +86,6 @@ Banana
 Berry
 Cantaloupe
 Cherry
-
-
 Coconut
 Date
 Fig

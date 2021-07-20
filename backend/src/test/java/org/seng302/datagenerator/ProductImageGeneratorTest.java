@@ -1,7 +1,6 @@
 package org.seng302.datagenerator;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.*;
 import org.junit.runner.RunWith;
 import org.seng302.leftovers.Main;
 import org.seng302.leftovers.persistence.BusinessRepository;
@@ -12,9 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.List;
 import java.util.Map;
 
@@ -57,14 +54,117 @@ public class ProductImageGeneratorTest {
 
         //Creates generators
         this.userGenerator = new UserGenerator(conn);
-
+        this.businessGenerator = new BusinessGenerator(conn);
+        this.productGenerator = new ProductGenerator(conn);
     }
 
     @AfterEach
     public void teardown() throws SQLException {
+        imageRepository.deleteAll();
+        productRepository.deleteAll();
+        businessRepository.deleteAll();
         userRepository.deleteAll();
+
         conn.close();
     }
 
+    /**
+     * Sets up a test user and a test business
+     * Useful for creating test products
+     * @return List of generated business IDs
+     */
+    private List<Long> createTestBusiness() {
+        var userIds = userGenerator.generateUsers(1);
+        return businessGenerator.generateBusinesses(userIds, 1);
+    }
+
+    /**
+     * Checks that the required fields within the image table are not null using an SQL query.
+     * @param productId The ID of the generated product
+     * @param expectedCount The expected number of images for the product
+     * @throws SQLException SQL fails
+     */
+    private void checkRequiredFieldsNotNull(Long productId, int expectedCount) throws SQLException {
+        PreparedStatement stmt = conn.prepareStatement(
+                "SELECT COUNT(*) FROM image WHERE image_id = ? AND filename IS NOT NULL AND image_order IS NOT NULL"
+        );
+        stmt.setObject(1, productId);
+        stmt.executeQuery();
+        ResultSet results = stmt.getResultSet();
+        results.next();
+        if (results.getLong(1) != expectedCount) {
+            fail();
+        }
+    }
+
+    /**
+     * Queries that database to find out how many image entries are in the database
+     * @return the number of image entries in the database
+     */
+    private Long getNumImagesInDB() throws SQLException {
+        PreparedStatement stmt = conn.prepareStatement("SELECT COUNT(*) FROM image");
+        stmt.executeQuery();
+        ResultSet results = stmt.getResultSet();
+        results.next();
+        return results.getLong(1);
+    }
+
+    @Test
+    void generateOneProduct_generateImage_oneImageEntryGenerated() throws SQLException {
+        var businessIds = createTestBusiness();
+        var productIds = productGenerator.generateProducts(businessIds, 1, true);
+
+        if (productIds.size() != 1) {
+            fail();
+        }
+        long productId = productIds.get(0);
+
+        checkRequiredFieldsNotNull(productId, 1);
+        Assertions.assertEquals(1, getNumImagesInDB());
+    }
+
+    @Test
+    void generateMultipleProduct_generateImage_multipleImageEntryGenerated() throws SQLException {
+        var businessIds = createTestBusiness();
+        var productIds = productGenerator.generateProducts(businessIds, 10, true);
+
+        if (productIds.size() != 10) {
+            fail();
+        }
+        for (var productId : productIds) {
+            checkRequiredFieldsNotNull(productId, 1);
+        }
+        Assertions.assertEquals(10, getNumImagesInDB());
+    }
+
+    @Test
+    void generateOneProduct_notGenerateImage_noImageEntryGenerated() throws SQLException {
+        var businessIds = createTestBusiness();
+        var productIds = productGenerator.generateProducts(businessIds, 1, false);
+
+        if (productIds.size() != 1) {
+            fail();
+        }
+        for (var productId : productIds) {
+            checkRequiredFieldsNotNull(productId, 0);
+        }
+        Assertions.assertEquals(0, getNumImagesInDB());
+    }
+
+    @Test
+    void generateMultipleProduct_notGenerateImage_noImageEntryGenerated() throws SQLException {
+        var businessIds = createTestBusiness();
+        var productIds = productGenerator.generateProducts(businessIds, 10, false);
+
+        if (productIds.size() != 10) {
+            fail();
+        }
+        for (var productId : productIds) {
+            checkRequiredFieldsNotNull(productId, 0);
+        }
+        Assertions.assertEquals(0, getNumImagesInDB());
+    }
+
+    // Refer to manual testing for further tests
 
 }
