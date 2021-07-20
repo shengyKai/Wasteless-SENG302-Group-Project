@@ -259,28 +259,18 @@ export default {
         bestBefore: this.bestBefore ? this.bestBefore : undefined,
         expires: this.expires
       };
+      let result;
       if (this.isCreate) {
-        this.createInventory(inventoryItem);
+        result = await createInventoryItem(this.businessId, inventoryItem);
       } else {
-        this.modifyInventory(inventoryItem);
+        result = await modifyInventory(this.businessId, this.previousItem.id, inventoryItem);
       }
-    },
-    /**
-     * Requests backend to create an inventory item
-     * Empty attributes are set to undefined
-     */
-    async createInventory(inventoryItem) {
-      const result = await createInventoryItem(this.businessId, inventoryItem);
       if (typeof result === 'string') {
         this.errorMessage = result;
       } else {
         this.closeDialog();
       }
     },
-    modifyInventory(inventoryItem) {
-      modifyInventory(this.businessId, this.previousItem.id, inventoryItem);
-    },
-
     async checkAllDatesValid() {
       //checks the booleans for all the dates are valid
       if (this.manufacturedValid && this.sellByValid && this.bestBeforeValid && this.expiresValid) {
