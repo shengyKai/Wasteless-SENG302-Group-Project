@@ -4,6 +4,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.seng302.leftovers.controllers.DGAAController;
+import org.seng302.leftovers.entities.Business;
 import org.seng302.leftovers.entities.Location;
 import org.seng302.leftovers.entities.User;
 import org.seng302.leftovers.exceptions.SearchFormatException;
@@ -949,5 +950,72 @@ class SearchHelperTest {
 
         List<User> filteredUserList = SearchHelper.removeDGAAAccountFromResults(listCopy);
         assertEquals(savedUserList, filteredUserList);
+    }
+
+    private void createBusinesses() {
+        User owner = userRepository.findByEmail("123andyelliot@gmail.com");
+        Business testBusiness1 = new Business.Builder()
+                .withBusinessType("Accommodation and Food Services")
+                .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
+                        "Canterbury,8041"))
+                .withDescription("Some description")
+                .withName("Joe's Garage")
+                .withPrimaryOwner(owner)
+                .build();
+        businessRepository.save(testBusiness1);
+        Business testBusiness2 = new Business.Builder()
+                .withBusinessType("Accommodation and Food Services")
+                .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
+                        "Canterbury,8041"))
+                .withDescription("Some description")
+                .withName("Old Joe's Farm")
+                .withPrimaryOwner(owner)
+                .build();
+        businessRepository.save(testBusiness2);
+        Business testBusiness3 = new Business.Builder()
+                .withBusinessType("Accommodation and Food Services")
+                .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
+                        "Canterbury,8041"))
+                .withDescription("Some description")
+                .withName("Steve's Workshop")
+                .withPrimaryOwner(owner)
+                .build();
+        businessRepository.save(testBusiness3);
+    }
+
+    @Test
+    void constructBusinessSpecificationFromSearchQuery_validSearchTerm_matchesBusinessName() {
+        createBusinesses();
+        var specification1 = SearchHelper.constructBusinessSpecificationFromSearchQuery("joe");
+        var specification2 = SearchHelper.constructBusinessSpecificationFromSearchQuery("garage");
+        var specification3 = SearchHelper.constructBusinessSpecificationFromSearchQuery("steve");
+        var businesses1 = businessRepository.findAll(specification1);
+        var businesses2 = businessRepository.findAll(specification2);
+        var businesses3 = businessRepository.findAll(specification3);
+
+
+        assertEquals(2, businesses1.size());
+        assertEquals(1, businesses2.size());
+        assertEquals(1, businesses3.size());
+
+    }
+
+    @Test
+    void constructBusinessSpecificationFromSearchQuery_randomSearchTerm_matchesNoBusinesses() {
+        createBusinesses();
+        var specification = SearchHelper.constructBusinessSpecificationFromSearchQuery("thereAreNoBusinessesWithThisInTheirName");
+        var businesses = businessRepository.findAll(specification);
+        assertEquals(0, businesses.size());
+    }
+
+    @Test
+    void constructBusinessSpecificationFromSearchQuery_caseIsIgnored() {
+        createBusinesses();
+        var specificationUpper = SearchHelper.constructBusinessSpecificationFromSearchQuery("JOE");
+        var specificationLower = SearchHelper.constructBusinessSpecificationFromSearchQuery("joe");
+        var businessesUpper = businessRepository.findAll(specificationUpper);
+        var businessesLower = businessRepository.findAll(specificationLower);
+        assertEquals(2, businessesUpper.size());
+        assertEquals(2, businessesLower.size());
     }
 }

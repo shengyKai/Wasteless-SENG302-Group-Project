@@ -495,7 +495,7 @@ public class SearchHelper {
      * @param searchTerm A term to find exact matches for.
      * @return A specification which will match Businesses that partially match the given string in the business name.
      */
-    private static Specification<Business> constructBusinessSpecificationFromSearchQuery(String searchTerm) {
+    public static Specification<Business> constructBusinessSpecificationFromSearchQuery(String searchTerm) {
         SpecificationsBuilder<Business> builder = new SpecificationsBuilder<>();
         builder.with("name", ":", searchTerm, true);
         return builder.build();
