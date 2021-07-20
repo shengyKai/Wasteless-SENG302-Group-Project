@@ -3,16 +3,18 @@
     <v-card-title>
       {{ title }}
     </v-card-title>
+    <v-card-subtitle>
+      {{ date }}
+    </v-card-subtitle>
     <v-card-text>
       {{ text }}
     </v-card-text>
-    <v-card-actions class="justify-center">
-      <v-btn color="primary" @click="removeEvent">Close</v-btn>
-    </v-card-actions>
   </div>
 </template>
 
 <script>
+import { formatDate } from '@/utils';
+
 export default {
   name: 'DeleteEvent',
   props: {
@@ -34,12 +36,9 @@ export default {
         return "For Sale";
       }
       return this.event.section;
-    }
-  },
-  methods: {
-    //Removes the event from the store, which in turn deletes this component from the page
-    removeEvent() {
-      this.$store.commit("removeEvent", this.event.id);
+    },
+    date() {
+      return formatDate(this.event.created);
     }
   }
 };

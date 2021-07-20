@@ -44,7 +44,6 @@ describe('DeleteEvent.vue', () => {
   let vuetify: Vuetify;
   // The global store to be used
   let store: Store<StoreData>;
-  let removeEventSpy: jest.SpyInstance;
 
   beforeEach(async () => {
     const localVue = createLocalVue();
@@ -59,7 +58,6 @@ describe('DeleteEvent.vue', () => {
     app.setAttribute ("data-app", "true");
     document.body.append (app);
 
-    removeEventSpy = jest.spyOn((DeleteEvent as any).methods, 'removeEvent').mockImplementation(() => undefined);
     wrapper = mount(DeleteEvent, {
       localVue,
       vuetify,
@@ -75,19 +73,6 @@ describe('DeleteEvent.vue', () => {
       }
     });
   });
-
-  /**
-   * Finds the close button in the DeleteEvent.
-   *
-   * @returns A Wrapper around the close button.
-   */
-    function findCloseButton() {
-    const buttons = wrapper.findAllComponents({ name: 'v-btn' });
-    const filtered = buttons.filter(button => button.text().includes('Close'));
-    expect(filtered.length).toBe(1);
-    return filtered.at(0);
-  }
-
 
   describe('Card has been deleted from the databse', () => {
     it("Title contains delete message", () => {
@@ -111,10 +96,8 @@ describe('DeleteEvent.vue', () => {
       expect(wrapper.vm.text).toBe('Your marketplace card "Card title" in the Wanted section has been removed from the marketplace');
     });
 
-    it("Clicking the close button deletes the delete event from the store", async () => {
-      await findCloseButton().trigger('click');
-      await Vue.nextTick();
-      expect(removeEventSpy).toHaveBeenCalled();
+    it('Must match snapshot', () => {
+      expect(wrapper).toMatchSnapshot();
     });
   });
 })

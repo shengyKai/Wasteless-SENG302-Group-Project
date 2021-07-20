@@ -1,4 +1,4 @@
-import { MarketplaceCard } from "./internal";
+import { MarketplaceCard, MarketplaceCardSection } from "./internal";
 
 const EMITTER_URL = process.env.VUE_APP_SERVER_ADD + '/events/emitter';
 
@@ -20,12 +20,13 @@ type MessageEvent = BaseEvent & {
 
 type ExpiryEvent = BaseEvent & {
   type: 'ExpiryEvent',
-  card: MarketplaceCard,
+  card: MarketplaceCard
 }
 
 type DeleteEvent = BaseEvent & {
   type: 'DeleteEvent',
-  card: MarketplaceCard,
+  title: string,
+  section: MarketplaceCardSection
 }
 
 /**
