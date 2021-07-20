@@ -20,6 +20,7 @@
         hide-details
         :items="[
           { text: ' Maybe no need Relevance',   value: 'relevance'  },
+          { text: ' Name',   value: 'name'  },
           { text: 'Created',     value: 'created'     },
           { text: 'Address',  value: 'address'  },
           { text: 'Description', value: 'description' },

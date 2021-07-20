@@ -5,9 +5,11 @@ import { createLocalVue, Wrapper, mount } from '@vue/test-utils';
 import SearchBusinessResults from '@/components/SearchBusinessResults.vue';
 import SearchResultItem from '@/components/cards/SearchResultItem.vue';
 import { User } from '@/api/internal';
+import { Business } from '@/api/internal';
 import * as api from '@/api/internal';
 import { castMock, flushQueue } from './utils';
 
+//TODO might need to change these after the new business search api is implemented
 jest.mock('@/api/internal', () => ({
   search: jest.fn(),
   getSearchCount: jest.fn(),
@@ -28,22 +30,23 @@ localVue.use(Vuex);
 const RESULTS_PER_PAGE = 10;
 
 /**
- * Creates a list of unique test users
+ * Creates a list of unique test business
  *
- * @param count Number of users to create
- * @returns List of test users
+ * @param count Number of business to create
+ * @returns List of test business
  */
-function createTestUsers(count: number) {
-  let result: User[] = [];
+function createTestBusiness(count: number) {
+  let result: api.Business[] = [];
 
   for (let i = 0; i<count; i++) {
     result.push({
       id: i,
-      firstName: 'test_firstname' + i,
-      lastName: 'test_lastname' + i,
-      email: 'test_email' + i,
-      dateOfBirth: '1/1/1900',
-      homeAddress: { country: 'test_country' + i },
+      primaryAdministratorId: i,
+      name: 'test_buisnessName' + i,
+      description: 'test_buisnessDescription' + i,
+      businessType: 'Charitable organisation',
+      created: "1/1/2020",
+      address: { country: 'test_country' + i },
     });
   }
   return result;
@@ -75,13 +78,13 @@ describe('SearchBusinessResults.vue', () => {
   /**
    * Sets the mock api results.
    *
-   * @param users Users on the current page to use for the mock results
-   * @param testCount The mock number of total users for this search
+   * @param business Business on the current page to use for the mock results
+   * @param testCount The mock number of total business for this search
    */
-  function setResults(users: User[], totalCount?: number) {
+  function setResults(business: Business[], totalCount?: number) {
     search.mockResolvedValue({
-      results: users,
-      count: totalCount !== undefined ? totalCount : users.length
+      results: business,
+      count: totalCount !== undefined ? totalCount : business.length
     });
   }
 
@@ -95,13 +98,13 @@ describe('SearchBusinessResults.vue', () => {
   }
 
   it('The search query passed in from the url is searched', () => {
-    setResults(createTestUsers(5));
+    setResults(createTestBusiness(5));
     createWrapper();
     expect(search).toBeCalledWith('test_query', 1, RESULTS_PER_PAGE, 'relevance', false);
   });
 
   it('The search results should be displayed somewhere', async () => {
-    let users = createTestUsers(5);
+    let users = createTestBusiness(5);
     setResults(users);
     createWrapper();
     // Flush queue is used instead of Vue.nextTick() since this will wait for everything to finish
@@ -139,14 +142,14 @@ describe('SearchBusinessResults.vue', () => {
   });
 
   it('If there are results then there should be a message informing the user how many', async () => {
-    setResults(createTestUsers(RESULTS_PER_PAGE), 100);
+    setResults(createTestBusiness(RESULTS_PER_PAGE), 100);
     createWrapper();
     await flushQueue();
     expect(wrapper.text()).toContain(`Displaying 1 - ${RESULTS_PER_PAGE} of 100 results`);
   });
 
   it('The search query should update as the search box is modified', async () => {
-    setResults(createTestUsers(5));
+    setResults(createTestBusiness(5));
     createWrapper();
     await flushQueue();
     // Update the search box
@@ -156,7 +159,7 @@ describe('SearchBusinessResults.vue', () => {
   });
 
   it('If there are many pages then there should be a pagination component with many pages', async () => {
-    setResults(createTestUsers(RESULTS_PER_PAGE), 100);
+    setResults(createTestBusiness(RESULTS_PER_PAGE), 100);
     createWrapper();
     await flushQueue();
     let pagination = wrapper.findComponent({ name: 'v-pagination' });
