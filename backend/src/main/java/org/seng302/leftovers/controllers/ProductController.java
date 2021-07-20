@@ -21,6 +21,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import javax.servlet.http.HttpServletRequest;
@@ -40,8 +41,6 @@ public class ProductController {
     private final StorageService storageService;
     private final ImageRepository imageRepository;
     private static final Logger logger = LogManager.getLogger(ProductController.class.getName());
-    private Integer paginationIndex = 0;
-    private Integer paginationCount = 0;
     @Autowired
     public ProductController(ProductRepository productRepository, BusinessRepository businessRepository, StorageService storageService, ImageRepository imageRepository) {
         this.productRepository = productRepository;
@@ -51,63 +50,13 @@ public class ProductController {
     }
 
     /**
-     * Sort products by a key. Can reverse results.
-     * @param key Key to order products by.
-     * @param reverse Reverse results.
-     * @return Product Comparator
-     */
-    Comparator<Product> sortProducts(String key, Boolean reverse) {
-        key = key == null ? "productCode" : key;
-        if (reverse == null) {
-            reverse = false;
-        }
-
-        Comparator<Product> sort;
-        switch (key) {
-            case "name":
-                sort = Comparator.comparing(Product::getName,
-                        String.CASE_INSENSITIVE_ORDER);
-                break;
-
-            case "description":
-                sort = Comparator.comparing(Product::getDescription,
-                        Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER));
-                break;
-
-            case "manufacturer":
-                sort = Comparator.comparing(Product::getManufacturer,
-                        Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER));
-                break;
-
-            case "recommendedRetailPrice":
-                sort = Comparator.comparing(Product::getRecommendedRetailPrice,
-                        Comparator.nullsLast(Comparator.naturalOrder()));
-                break;
-
-            case "created":
-                sort = Comparator.comparing(Product::getCreated);
-                break;
-
-            default:
-                sort = Comparator.comparing(Product::getProductCode);
-                break;
-        }
-
-        if (reverse) {
-            sort = sort.reversed();
-        }
-
-        return sort;
-    }
-
-    /**
      * REST GET method to retrieve all the products with a business's catalogue.
      * @param id the id of the business
      * @param request the HTTP request
      * @return List of products in the business's catalogue
      */
     @GetMapping("/businesses/{id}/products")
-    public JSONArray retrieveCatalogue(@PathVariable Long id,
+    public JSONObject retrieveCatalogue(@PathVariable Long id,
                                        HttpServletRequest request,
                                        @RequestParam(required = false) String orderBy,
                                        @RequestParam(required = false) Integer page,
@@ -122,61 +71,27 @@ public class ProductController {
 
         List<Sort.Order> sortOrder;
         Sort.Direction direction = SearchHelper.getSortDirection(reverse);
-        if (orderBy.equals("location")) {
-            sortOrder = List.of(new Sort.Order(direction, "creator.address.country").ignoreCase(), new Sort.Order(direction, "creator.address.city").ignoreCase());
-        } else {
-            sortOrder = List.of(new Sort.Order(direction, orderBy).ignoreCase());
-            
-        }
+
+        sortOrder = List.of(new Sort.Order(direction, orderBy).ignoreCase());
+
+    
         if (business.isEmpty()) {
             BusinessNotFoundException notFound = new BusinessNotFoundException();
             logger.error(notFound.getMessage());
             throw notFound;
         } else {
             business.get().checkSessionPermissions(request);
-            PageRequest pageablePage = SearchHelper.getPageRequest(this.paginationIndex, 1, Sort.by(sortOrder));
-            List<Product> catalogue = productRepository.getAllByBusiness(business.get(), pageablePage);
-
-            Comparator<Product> sort = sortProducts(orderBy, reverse);
-            catalogue.sort(sort);
-
-            catalogue = SearchHelper.getPageInResults(catalogue, page, resultsPerPage);
+            PageRequest pageablePage = SearchHelper.getPageRequest(page, resultsPerPage, Sort.by(sortOrder));
+            Page<Product> catalogue = productRepository.getAllByBusiness(business.get(), pageablePage);
 
             JSONArray responseBody = new JSONArray();
             for (Product product: catalogue) {
                 responseBody.appendElement(product.constructJSONObject());
             }
-            return responseBody;
-        }
-    }
-
-    /**
-     * REST GET method to retrieve the number of products in a business's catalogue.
-     * @param id the id of the business
-     * @param request the HTTP request
-     * @return List of products in the business's catalogue
-     */
-    @GetMapping("/businesses/{id}/products/count")
-    public JSONObject retrieveCatalogueCount(@PathVariable Long id,
-                                             HttpServletRequest request) {
-
-        AuthenticationTokenManager.checkAuthenticationToken(request);
-
-        Optional<Business> business = businessRepository.findById(id);
-
-        if(business.isEmpty()) {
-            BusinessNotFoundException notFound = new BusinessNotFoundException();
-            logger.error(notFound.getMessage());
-            throw new BusinessNotFoundException();
-        } else {
-            business.get().checkSessionPermissions(request);
-            PageRequest pageablePage = PageRequest.of(this.paginationIndex, 1);
-            List<Product> catalogue = productRepository.getAllByBusiness(business.get(), pageablePage);
-
-            JSONObject responseBody = new JSONObject();
-            responseBody.put("count", catalogue.size());
-
-            return responseBody;
+            JSONObject json = new JSONObject();
+            json.put("count", catalogue.getTotalElements());
+            json.put("results", responseBody);
+            return json;
         }
     }
 

@@ -2,6 +2,7 @@ package org.seng302.leftovers.persistence;
 
 import org.seng302.leftovers.entities.Business;
 import org.seng302.leftovers.entities.Product;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
@@ -26,7 +27,7 @@ public interface ProductRepository extends PagingAndSortingRepository<Product, L
         Optional<Product> findByBusinessAndProductCode(@Param("business") Business business,
                                                        @Param("productCode") String productCode);
 
-        List<Product> getAllByBusiness(@Param("Business") Business business, Pageable pageable);
+        // List<Product> getAllByBusiness(@Param("Business") Business business, Pageable pageable);
 
         /**
         * Find all then products in the repository which belong to the given business.
@@ -34,6 +35,7 @@ public interface ProductRepository extends PagingAndSortingRepository<Product, L
         * @return A list of products belonging to the business.
         */
         public List<Product> findAllByBusiness(@Param("business") Business business);
+        Page<Product> getAllByBusiness(@Param("Business") Business business, Pageable pageable);
 
         /**
          * Gets a product from the database that matches a given image Id. This method preforms a sanity check to ensure the
