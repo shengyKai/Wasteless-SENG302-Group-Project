@@ -59,7 +59,7 @@
               no-data-text="No keywords found"
               value = "keywords"
               v-model="selectedKeywords"
-              :items="allKeywords"
+              :items="filteredKeywordList"
               label="Select keywords"
               item-text="name"
               item-value="id"
