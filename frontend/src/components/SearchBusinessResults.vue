@@ -19,13 +19,12 @@
         solo-inverted
         hide-details
         :items="[
-          { text: 'RRRelevance',   value: 'relevance'  },
-          { text: 'User ID',     value: 'userId'     },
-          { text: 'First Name',  value: 'firstName'  },
-          { text: 'Middle Name', value: 'middleName' },
-          { text: 'Last Name',   value: 'lastName'   },
-          { text: 'Nickname',    value: 'nickname'   },
-          { text: 'Email',       value: 'email'      },
+          { text: ' Maybe no need Relevance',   value: 'relevance'  },
+          { text: 'Created',     value: 'created'     },
+          { text: 'Address',  value: 'address'  },
+          { text: 'Description', value: 'description' },
+          { text: 'Administrators',   value: 'administrators'   },
+          { text: 'Category',    value: 'category'   },
         ]"
         prepend-inner-icon="mdi-sort-variant"
         label="Sort by"
@@ -49,11 +48,11 @@
       {{ error }}
     </v-alert>
     <v-list three-line>
-      <!--users would produce the results for each page, and then it will show each result with
-      SearchResultItem-->
-      <template v-for="(user, index) in users">
-        <v-divider v-if="user === undefined" :key="'divider-'+index"/>
-        <SearchResultItem v-else :key="user.id" :user="user"/>
+      <!--The users would produce the results for each page, and then it will show each result with
+      SearchBusinessResultItem-->
+      <template v-for="(business, index) in businesss">
+        <v-divider v-if="business === undefined" :key="'divider-'+index"/>
+        <SearchResultItem v-else :key="business.id" :business="business"/>
       </template>
     </v-list>
     <!--paginate results-->
@@ -130,14 +129,14 @@ export default {
       return this.results.count;
     },
     /**
-     * List of users on the current page
+     * List of businesss on the current page
      */
-    users() {
+    businesss() {
       if (this.results === undefined) return [];
       return this.results.results;
     },
     /**
-     * The total number of pages required to show all the users
+     * The total number of pages required to show all the businesss
      * May be 0 if there are no results
      */
     totalPages () {
@@ -147,10 +146,10 @@ export default {
      * The message displayed at the bottom of the page to show how many results there are
      */
     resultsMessage() {
-      if (this.users.length === 0) return 'There are no results to show';
+      if (this.businesss.length === 0) return 'There are no results to show';
 
       const pageStartIndex = (this.currentPage - 1) * this.resultsPerPage;
-      const pageEndIndex = pageStartIndex + this.users.length;
+      const pageEndIndex = pageStartIndex + this.businesss.length;
       return`Displaying ${pageStartIndex + 1} - ${pageEndIndex} of ${this.totalResults} results`;
     },
   },
