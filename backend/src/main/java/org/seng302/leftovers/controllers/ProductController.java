@@ -15,12 +15,13 @@ import org.seng302.leftovers.service.StorageService;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
 import org.seng302.leftovers.tools.SearchHelper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.data.web.SpringDataWebProperties.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
-
+import org.springframework.data.domain.PageRequest;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.*;
@@ -36,7 +37,8 @@ public class ProductController {
     private final StorageService storageService;
     private final ImageRepository imageRepository;
     private static final Logger logger = LogManager.getLogger(ProductController.class.getName());
-
+    private Integer paginationIndex = 0;
+    private Integer paginationCount = 0;
     @Autowired
     public ProductController(ProductRepository productRepository, BusinessRepository businessRepository, StorageService storageService, ImageRepository imageRepository) {
         this.productRepository = productRepository;
@@ -108,10 +110,10 @@ public class ProductController {
                                        @RequestParam(required = false) Integer page,
                                        @RequestParam(required = false) Integer resultsPerPage,
                                        @RequestParam(required = false) Boolean reverse) {
-
+                                        
         logger.info("Get catalogue by business id.");
         AuthenticationTokenManager.checkAuthenticationToken(request);
-
+                            
         logger.info(() -> String.format("Retrieving catalogue from business with id %d.", id));
         Optional<Business> business = businessRepository.findById(id);
         if (business.isEmpty()) {
@@ -120,7 +122,8 @@ public class ProductController {
             throw notFound;
         } else {
             business.get().checkSessionPermissions(request);
-            List<Product> catalogue = productRepository.getAllByBusiness(business.get());
+            PageRequest pageablePage = PageRequest.of(this.paginationIndex, 1);
+            List<Product> catalogue = productRepository.getAllByBusiness(business.get(), pageablePage);
 
             Comparator<Product> sort = sortProducts(orderBy, reverse);
             catalogue.sort(sort);
@@ -155,8 +158,8 @@ public class ProductController {
             throw new BusinessNotFoundException();
         } else {
             business.get().checkSessionPermissions(request);
-
-            List<Product> catalogue = productRepository.getAllByBusiness(business.get());
+            PageRequest pageablePage = PageRequest.of(this.paginationIndex, 1);
+            List<Product> catalogue = productRepository.getAllByBusiness(business.get(), pageablePage);
 
             JSONObject responseBody = new JSONObject();
             responseBody.put("count", catalogue.size());
