@@ -1,7 +1,7 @@
 <template>
   <div>
-    <v-toolbar dark color="darkGrey" class="mb-1">
-      <!-- Temporary stand in for search bar component -->
+    <v-toolbar dark color="secondary" class="mb-1">
+      <!-- Search field for user to input search term -->
       <v-text-field
         clearable
         flat
@@ -13,29 +13,28 @@
         autofocus
       />
       <v-spacer/>
+      <!-- Dropdown select box to allow user search by business type -->
       <v-select
         v-model="orderBy"
         flat
         solo-inverted
         hide-details
         :items="[
-          { text: ' Maybe no need Relevance',   value: 'relevance'  },
-          { text: ' Name',   value: 'name'  },
-          { text: 'Created',     value: 'created'     },
-          { text: 'Address',  value: 'address'  },
-          { text: 'Description', value: 'description' },
-          { text: 'Administrators',   value: 'administrators'   },
-          { text: 'Category',    value: 'category'   },
+          { text: ' Accomodation and Food Services',   value: 'type_1'  },
+          { text: 'Charitable organisation',     value: 'type_2'     },
+          { text: 'non-profit organisation',  value: 'type_3'  },
+          { text: 'Retail trade',    value: 'type_4'   },
         ]"
         prepend-inner-icon="mdi-sort-variant"
-        label="Sort by"
+        label="Search by Business type"
       />
+      <!-- Toggle button for user to choose partially or fully matched results -->
       <v-btn-toggle class="toggle" v-model="reverse" mandatory>
         <v-btn depressed color="primary" :value="false">
-          <v-icon>mdi-arrow-up</v-icon>
+          <v-icon>mdi-circle-half-full</v-icon>
         </v-btn>
         <v-btn depressed color="primary" :value="true">
-          <v-icon>mdi-arrow-down</v-icon>
+          <v-icon>mdi-circle</v-icon>
         </v-btn>
       </v-btn-toggle>
     </v-toolbar>
