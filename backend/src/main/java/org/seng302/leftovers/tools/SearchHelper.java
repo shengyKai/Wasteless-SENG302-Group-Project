@@ -2,18 +2,16 @@ package org.seng302.leftovers.tools;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.seng302.leftovers.entities.Business;
 import org.seng302.leftovers.entities.User;
 import org.seng302.leftovers.exceptions.SearchFormatException;
+import org.seng302.leftovers.persistence.SearchCriteria;
 import org.seng302.leftovers.persistence.UserRepository;
-import org.seng302.leftovers.persistence.UserSpecificationsBuilder;
+import org.seng302.leftovers.persistence.SpecificationsBuilder;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -244,7 +242,7 @@ public class SearchHelper {
      * @return A specification which will match users that exactly match the given string in one of their name attributes.
      */
     private static Specification<User> buildExactMatchUserSpec(String searchTerm) {
-        UserSpecificationsBuilder builder = new UserSpecificationsBuilder();
+        SpecificationsBuilder<User> builder = new SpecificationsBuilder<>();
         builder.with("firstName", "=", searchTerm, true);
         builder.with("middleName", "=", searchTerm, true);
         builder.with("lastName", "=", searchTerm, true);
@@ -254,13 +252,13 @@ public class SearchHelper {
 
     /**
      * This method returns a specification for the User entity which will match User objects with a firstName, middleName,
-     * lastName or nickname which is an exact match for the given searchTerm. For example, if the search term was 'Jo', the
+     * lastName or nickname which is a partial match for the given searchTerm. For example, if the search term was 'Jo', the
      * specification would match Users with the name 'Jo', 'jo' or 'Joe',
      * @param searchTerm A term to find exact matches for.
      * @return A specification which will match users that exactly match the given string in one of their name attributes.
      */
     private static Specification<User> buildPartialMatchUserSpec(String searchTerm) {
-        UserSpecificationsBuilder builder = new UserSpecificationsBuilder();
+        SpecificationsBuilder<User> builder = new SpecificationsBuilder<>();
         builder.with("firstName", ":", searchTerm, true);
         builder.with("middleName", ":", searchTerm, true);
         builder.with("lastName", ":", searchTerm, true);
@@ -489,6 +487,19 @@ public class SearchHelper {
         }
     }
 
+
+    /**
+     * This method returns a specification for the Business entity which will match Business objects with a name which is a partial match for the given searchTerm.
+     * For example, if the search term was 'Tim', the
+     * specification would match Businesses with the name 'Tim', 'Tim's BBQ' or 'Tim's garage',
+     * @param searchTerm A term to find exact matches for.
+     * @return A specification which will match Businesses that partially match the given string in the business name.
+     */
+    private static Specification<Business> constructBusinessSpecificationFromSearchQuery(String searchTerm) {
+        SpecificationsBuilder<Business> builder = new SpecificationsBuilder<>();
+        builder.with("name", ":", searchTerm, true);
+        return builder.build();
+    }
 
 
 }

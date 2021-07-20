@@ -9,7 +9,7 @@ import org.seng302.leftovers.entities.User;
 import org.seng302.leftovers.exceptions.SearchFormatException;
 import org.seng302.leftovers.persistence.BusinessRepository;
 import org.seng302.leftovers.persistence.UserRepository;
-import org.seng302.leftovers.persistence.UserSpecificationsBuilder;
+import org.seng302.leftovers.persistence.SpecificationsBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Sort;
@@ -59,7 +59,7 @@ class SearchHelperTest {
      */
     @BeforeEach
     void setUp() throws ParseException, IOException {
-        UserSpecificationsBuilder builder = new UserSpecificationsBuilder()
+        SpecificationsBuilder builder = new SpecificationsBuilder()
                 .with("firstName", ":", "andy", true)
                 .with("middleName", ":", "andy", true)
                 .with("lastName", ":", "andy", true)
