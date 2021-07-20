@@ -15,6 +15,7 @@ import static org.seng302.datagenerator.Main.*;
 public class MarketplaceCardGenerator {
     private final Random random = new Random();
     private final Connection conn;
+    private final DescriptionGenerator descGen;
 
     private static final String CARD_TITLES_FILE = "card-titles.txt";
     private final List<String> cardTitles;
@@ -26,6 +27,7 @@ public class MarketplaceCardGenerator {
     public MarketplaceCardGenerator(Connection conn) {
         this.conn = conn;
         cardTitles = ExampleDataFileReader.readExampleDataFile(CARD_TITLES_FILE);
+        descGen = DescriptionGenerator.getInstance();
     }
 
     /**
@@ -43,7 +45,7 @@ public class MarketplaceCardGenerator {
         stmt.setObject(1, userIds.get(random.nextInt(userIds.size())));
         stmt.setObject(2, random.nextInt(3));
         stmt.setObject(3, cardTitles.get(random.nextInt(cardTitles.size())));
-        stmt.setObject(4, "Placeholder"); //TODO Description generator
+        stmt.setObject(4, descGen.randomDescription());
         stmt.setObject(5, Instant.now());
         stmt.setObject(6, Instant.now().plus(4, ChronoUnit.DAYS));
         stmt.executeUpdate();
