@@ -1,5 +1,6 @@
 package org.seng302.leftovers.controllers;
 
+import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -9,6 +10,11 @@ import org.seng302.leftovers.entities.User;
 import org.seng302.leftovers.persistence.BusinessRepository;
 import org.seng302.leftovers.persistence.UserRepository;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
+import org.seng302.leftovers.tools.SearchHelper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,14 +22,19 @@ import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 @RestController
 public class BusinessController {
     private final BusinessRepository businessRepository;
     private final UserRepository userRepository;
     private static final Logger logger = LogManager.getLogger(BusinessController.class.getName());
+
+    private static final Set<String> VALID_BUSINESS_ORDERINGS = Set.of("created", "name", "location", "businessType");
+
 
     public BusinessController(BusinessRepository businessRepository, UserRepository userRepository) {
         this.businessRepository = businessRepository;
@@ -234,5 +245,49 @@ public class BusinessController {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN,
                     "You do not have permission to perform this action");
         }
+    }
+
+
+    @GetMapping("/businesses/search")
+    public JSONObject search(HttpServletRequest request, @RequestParam("searchQuery") String searchQuery,
+                             @RequestParam(required = false) Integer page,
+                             @RequestParam(required = false) Integer resultsPerPage,
+                             @RequestParam(required = false) String orderBy,
+                             @RequestParam(required = false) Boolean reverse) {
+
+        AuthenticationTokenManager.checkAuthenticationToken(request);
+
+        logger.info(() -> String.format("Performing search for \"%s\"", searchQuery));
+
+        Sort.Direction direction = SearchHelper.getSortDirection(reverse);
+        if (orderBy == null) {
+            orderBy = "created";
+        }
+        if (!VALID_BUSINESS_ORDERINGS.contains(orderBy)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid business ordering");
+        }
+
+        List<Sort.Order> sortOrder;
+        if (orderBy.equals("location")) {
+            sortOrder = List.of(new Sort.Order(direction, "address.address.country").ignoreCase(), new Sort.Order(direction, "address.address.city").ignoreCase());
+        } else {
+            sortOrder = List.of(new Sort.Order(direction, orderBy).ignoreCase());
+        }
+
+        PageRequest pageRequest = SearchHelper.getPageRequest(page, resultsPerPage, Sort.by(sortOrder));
+        //Specification<Business> specificatiion ...
+        Page<Business> results = businessRepository.findAll(specification, pageRequest);
+        Long count = results.getTotalElements();
+
+        JSONArray resultArray = new JSONArray();
+        for (Business business : results) {
+            resultArray.appendElement(business.constructJson(AuthenticationTokenManager.sessionIsAdmin(request)));
+        }
+        JSONObject json = new JSONObject();
+        json.put("count", count);
+        json.put("results", resultArray);
+        return json;
+
+        return null;
     }
 }
