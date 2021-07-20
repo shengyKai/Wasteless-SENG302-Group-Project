@@ -210,19 +210,19 @@ describe("InventoryItemForm.vue", () => {
     return filtered.at(0);
   }
 
-    /**
+  /**
      * Finds the save button in the inventory item form
      *
      * @returns A Wrapper around the save button
      */
-     function findSaveButton() {
-      const buttons = wrapper.findAllComponents({ name: "v-btn" });
-      const filtered = buttons.filter((button) =>
-        button.text().includes("Save")
-      );
-      expect(filtered.length).toBe(1);
-      return filtered.at(0);
-    }
+  function findSaveButton() {
+    const buttons = wrapper.findAllComponents({ name: "v-btn" });
+    const filtered = buttons.filter((button) =>
+      button.text().includes("Save")
+    );
+    expect(filtered.length).toBe(1);
+    return filtered.at(0);
+  }
 
   /**
    * Finds the product select dropdown
