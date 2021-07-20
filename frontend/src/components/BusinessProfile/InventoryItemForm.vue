@@ -158,7 +158,7 @@
 </template>
 
 <script>
-import { createInventoryItem, getProducts, modifyInventory } from '@/api/internal';
+import { createInventoryItem, getProducts, modifyInventoryItem } from '@/api/internal';
 import { currencyFromCountry } from "@/api/currency";
 import {hugePriceRules, mandatoryRules, quantityRules, smallPriceRules} from "@/utils";
 
@@ -263,7 +263,7 @@ export default {
       if (this.isCreate) {
         result = await createInventoryItem(this.businessId, inventoryItem);
       } else {
-        result = await modifyInventory(this.businessId, this.previousItem.id, inventoryItem);
+        result = await modifyInventoryItem(this.businessId, this.previousItem.id, inventoryItem);
       }
       if (typeof result === 'string') {
         this.errorMessage = result;
@@ -359,7 +359,8 @@ export default {
      * Call the currency API to get the currency symbol and code from the country of sale of the product.
      */
     async fetchCurrency() {
-      if (this.productCode) {
+      console.log("HEREeeeeeeeee");
+      if (this.productCode && this.productList.length > 0) {
         const product = this.productList.filter(p => p.id === this.productCode)[0];
         this.currency = await currencyFromCountry(product.countryOfSale);
       } else {

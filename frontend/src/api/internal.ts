@@ -771,7 +771,7 @@ export async function getInventoryCount(businessId: number): Promise<MaybeError<
  * @param inventoryItem The inventory item's new properties
  * @return undefined if operation is successful, otherwise a string error
  */
-export async function modifyInventory(businessId: number, inventoryItemId: number, inventoryItem: CreateInventoryItem): Promise<MaybeError<undefined>> {
+export async function modifyInventoryItem(businessId: number, inventoryItemId: number, inventoryItem: CreateInventoryItem): Promise<MaybeError<undefined>> {
   try {
     await instance.put(`/businesses/${businessId}/inventory/${inventoryItemId}`, inventoryItem);
   } catch (error) {

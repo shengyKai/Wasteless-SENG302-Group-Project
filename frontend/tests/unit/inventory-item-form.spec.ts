@@ -21,10 +21,12 @@ jest.mock('@/api/currency', () => ({
 
 jest.mock('@/api/internal', () => ({
   createInventoryItem: jest.fn(),
+  modifyInventoryItem: jest.fn(),
   getProducts: jest.fn(),
   getBusiness: jest.fn().mockReturnValue({address: {}}), // Makes sure that fetching the currency doesn't crash
 }));
 const createInventoryItem = castMock(api.createInventoryItem);
+const modifyInventoryItem = castMock(api.modifyInventoryItem);
 const getProducts = castMock(api.getProducts);
 
 // Characters that are in the set of letters, numbers, spaces and punctuation.
@@ -195,7 +197,7 @@ describe("InventoryItemForm.vue", () => {
   }
 
   /**
-     * Finds the create button in the CreateProduct form
+     * Finds the create button in the inventory item form
      *
      * @returns A Wrapper around the create button
      */
@@ -207,6 +209,20 @@ describe("InventoryItemForm.vue", () => {
     expect(filtered.length).toBe(1);
     return filtered.at(0);
   }
+
+    /**
+     * Finds the save button in the inventory item form
+     *
+     * @returns A Wrapper around the save button
+     */
+     function findSaveButton() {
+      const buttons = wrapper.findAllComponents({ name: "v-btn" });
+      const filtered = buttons.filter((button) =>
+        button.text().includes("Save")
+      );
+      expect(filtered.length).toBe(1);
+      return filtered.at(0);
+    }
 
   /**
    * Finds the product select dropdown
@@ -418,6 +434,118 @@ describe("InventoryItemForm.vue", () => {
       await populateAllFields();
       await Vue.nextTick();
       await findCreateButton().trigger('click');
+      await Vue.nextTick();
+      expect(wrapper.vm.errorMessage).toBe(undefined);
+      expect(wrapper.emitted().closeDialog).toBeTruthy();
+    });
+
+  });
+
+  describe('Form is being used to modify an inventory item', () => {
+
+    beforeEach(async () => {
+      const vuetify = new Vuetify();
+        // Creating wrapper around InventoryItemForm with data-app to appease vuetify
+      const App = localVue.component("App", {
+        components: { InventoryItemForm },
+        template: "<div data-app><InventoryItemForm :businessId=\"businessId\" :previousItem=\"previousItem\"/></div>",
+      });
+
+      // Put the InventoryItemForm component inside a div in the global document,
+      // this seems to make vuetify work correctly, but necessitates calling appWrapper.destroy
+      const elem = document.createElement("div");
+      document.body.appendChild(elem);
+
+      appWrapper = mount(App, {
+        localVue,
+        vuetify,
+        attachTo: elem,
+        data() { 
+          return { 
+            businessId: 90,
+            previousItem: {
+              id: 33,
+              productCode: "WATT-420-BEANS",
+              quantity: 47,
+              pricePerItem: "3.00",
+              totalPrice: "12.50",
+              manufactured: "2020-07-11",
+              sellBy: "2030-07-11",
+              bestBefore: "2030-07-11",
+              expires: "2030-07-11",
+            }
+          }
+        }
+      });
+
+      wrapper = appWrapper.getComponent(InventoryItemForm);
+
+      await Vue.nextTick();
+      console.log(wrapper.vm.businessId);
+      console.log(wrapper.vm.previousItem);
+      expect(wrapper.vm.isCreate).toBe(false);
+    });
+
+    it('modifyInventoryItem called when save button pressed', async () => {
+      const formData = {
+        productCode: "WATT-420-BEANS",
+        quantity: 47,
+        pricePerItem: "3.00",
+        totalPrice: "12.50",
+        manufactured: "2020-07-11",
+        sellBy: "2030-07-11",
+        bestBefore: "2030-07-11",
+        expires: "2030-07-11"
+      };
+      await wrapper.setData(formData);
+      await Vue.nextTick();
+      await findSaveButton().trigger('click');
+      expect(modifyInventoryItem.mock.calls.length).toBe(1);
+    });
+
+    it('modifyInventoryItem called with data entered into form as arguments when save button pressed', async () => {
+      const formData = {
+        productCode: "WATT-420-BEANS",
+        quantity: 4,
+        pricePerItem: "3.00",
+        totalPrice: "12.50",
+        manufactured: "2020-07-11",
+        sellBy: "2030-07-11",
+        bestBefore: "2030-07-11",
+        expires: "2030-07-11"
+      };
+      const expectedData = {
+        productId: formData.productCode,
+        quantity: formData.quantity,
+        pricePerItem: formData.pricePerItem,
+        totalPrice: formData.totalPrice,
+        manufactured: formData.manufactured,
+        sellBy: formData.sellBy,
+        bestBefore: formData.bestBefore,
+        expires: formData.expires,
+      };
+      await wrapper.setData(formData);
+      await Vue.nextTick();
+      await findSaveButton().trigger('click');
+      expect(modifyInventoryItem.mock.calls[0][0]).toBe(90);
+      expect(modifyInventoryItem.mock.calls[0][1]).toStrictEqual(expectedData);
+    });
+
+    it('Error message is shown if API request is unsuccessful', async () => {
+      modifyInventoryItem.mockResolvedValueOnce('ERROR!');
+      await populateAllFields();
+      await Vue.nextTick();
+      await findSaveButton().trigger('click');
+      await Vue.nextTick();
+      expect(wrapper.vm.errorMessage).toBe('ERROR!');
+      expect(wrapper.emitted().closeDialog).toBeFalsy();
+    });
+
+    it('Dialog is closed if API request is successful', async() => {
+      modifyInventoryItem.mockResolvedValueOnce(undefined);
+      await populateAllFields();
+      await Vue.nextTick();
+      await findSaveButton().trigger('click');
       await Vue.nextTick();
       expect(wrapper.vm.errorMessage).toBe(undefined);
       expect(wrapper.emitted().closeDialog).toBeTruthy();
