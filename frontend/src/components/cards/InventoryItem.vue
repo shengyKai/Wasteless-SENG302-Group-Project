@@ -257,9 +257,11 @@
             :class="{ 'pt-0': $vuetify.breakpoint.smAndDown }"
             class="pb-0 aflex-column aalign-end d-block"
           >
+             <!-- Button to create a sale item from this inventory item. -->
             <v-tooltip top>
               <template #activator="{on: tooltip}">
                 <v-chip
+                  ref='createSaleItemButton'
                   medium
                   v-on="tooltip"
                   color="primary"
@@ -271,6 +273,7 @@
               </template>
               <span>Create a Sale from this inventory item</span>
             </v-tooltip>
+             <!-- Button to edit this inventory item.-->
             <v-chip
               @click="showInventoryItemForm=true"
               medium
@@ -283,6 +286,7 @@
         </v-col>
       </v-row>
     </v-container>
+        <!-- Display form for modifying the inventory item -->
     <template v-if="showInventoryItemForm">
       <InventoryItemForm
         :previousItem="inventoryItem"
