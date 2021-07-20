@@ -1,0 +1,15 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`DeleteEvent.vue Card has been deleted from the databse Must match snapshot 1`] = `
+<div>
+  <div class="v-card__title">
+    Your marketplace card has been deleted
+  </div>
+  <div class="v-card__subtitle">
+    02 Jan 2021
+  </div>
+  <div class="v-card__text">
+    Your marketplace card "Card title" in the For Sale section has been removed from the marketplace
+  </div>
+</div>
+`;
