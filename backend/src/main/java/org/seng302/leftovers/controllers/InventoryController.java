@@ -139,9 +139,9 @@ public class InventoryController {
             if (invItemInfo.containsKey("totalPrice")) {
                 Double totalPrice = Double.parseDouble(invItemInfo.getAsString("totalPrice"));
                 if (totalPrice != null) {
-                    invItem.setPricePerItem(BigDecimal.valueOf(totalPrice));
+                    invItem.setTotalPrice(BigDecimal.valueOf(totalPrice));
                 } else {
-                    invItem.setPricePerItem(null);
+                    invItem.setTotalPrice(null);
                 }
             }
 

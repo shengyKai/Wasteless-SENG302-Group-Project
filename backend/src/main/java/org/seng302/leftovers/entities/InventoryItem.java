@@ -150,10 +150,13 @@ public class InventoryItem {
      * @param quantity of item
      */
     public void setQuantity(Integer quantity) throws ResponseStatusException {
-        if (quantity > 0) {
-            this.quantity = quantity;
-        } else {
+        if (quantity <= 0) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A quantity less than 1 was provided");
+        } else if (quantity < this.remainingQuantity) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "The quantity cannot be higher than the remaining quantity");
+        } else {
+            this.quantity = quantity;
         }
     }
 
@@ -459,8 +462,8 @@ public class InventoryItem {
         public InventoryItem build() throws Exception {
             InventoryItem inventoryItem = new InventoryItem();
             inventoryItem.setProduct(this.product);
-            inventoryItem.setQuantity(this.quantity);
             inventoryItem.setRemainingQuantity(this.quantity);
+            inventoryItem.setQuantity(this.quantity);
             if (pricePerItem != null) {
                 inventoryItem.setPricePerItem(this.pricePerItem);
             }
