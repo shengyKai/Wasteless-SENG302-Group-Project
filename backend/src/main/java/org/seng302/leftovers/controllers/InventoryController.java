@@ -98,21 +98,9 @@ public class InventoryController {
         logger.info(message);
 
         Business business = businessRepository.getBusinessById(businessId);
-        if (business == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    String.format("The business with the id %d does not exist", businessId));
-        }
         business.checkSessionPermissions(request);
 
         InventoryItem invItem = inventoryItemRepository.getInventoryItemByBusinessAndId(business, invItemId);
-        if (invItem == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    String.format("The inventory item with the id %d does not exist", invItemId));
-        }
-
-        if (invItemInfo == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No JSON request body was provided");
-        }
 
         //assuming all exceptions are related to bad requests since only data is being save below
         try {
