@@ -9,12 +9,13 @@
         type="email"
         label="Email"
         outlined
-        :rules="mandatoryRules.concat(emailRules).concat(maxCharLongRules)"
+        :rules="mandatoryRules().concat(emailRules()).concat(maxCharLongRules())"
       />
       <v-text-field
         v-model="password"
         type="password"
         label="Password"
+        :rules="mandatoryRules()"
         outlined
       />
     </v-form>
@@ -37,6 +38,8 @@
 
 <script>
 // import {login} from '../../api';
+import {emailRules, mandatoryRules, maxCharRules} from "@/utils";
+
 export default {
   loggedIn: true,
   name: "Login",
@@ -46,28 +49,10 @@ export default {
       errorMessage: undefined,
       email: "",
       password: "",
-      emailRules: [
-        email =>
-          /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(email)
-          || ''
-      ],
-      mandatoryRules: [
-        /**
-         * All fields with the class "required" will go through this ruleset to ensure the field is not empty.
-         * If it does not follow the format, turn text field into red
-        */
-        (field) => !!field || '',
-      ],
-      passwordRules: [
-        field => (field && field.length >= 7 && field.length <= 16) || '',                    //Password must have 7-16 characters
-        field => /^(?=.*[0-9])(?=.*[a-zA-Z])([a-zA-Z0-9]+)$/.test(field) || ''                //Must have at least one number and one alphabet'
-      ],
-      maxCharShortRules: [
-        (field) => field.length <= 16 || "",                                                  //Reached max character limit: 16
-      ],
-      maxCharLongRules: [
-        (field) => field.length <= 255 || "",                                                 //Reached max character limit: 255
-      ],
+      emailRules: () => emailRules,
+      mandatoryRules: () => mandatoryRules,
+      maxCharShortRules: () => maxCharRules(16),
+      maxCharLongRules: () => maxCharRules(255),
     };
   },
 
@@ -84,7 +69,7 @@ export default {
       this.errorMessage = undefined;
       this.errorMessage = await this.$store.dispatch("login", { email : this.email, password : this.password });
       if(this.errorMessage !== "Invalid credentials") {
-        this.$router.push("/home");
+        await this.$router.push("/home");
       }
     },
   },

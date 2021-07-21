@@ -701,6 +701,8 @@ export async function getBusinessSalesCount(businessId: number): Promise<MaybeEr
   return response.data.count;
 }
 
+type InventoryOrderBy = 'name' | 'description' | 'manufacturer' | 'recommendedRetailPrice' | 'created' | 'quantity' | 'pricePerItem' | 'totalPrice' | 'manufactured' | 'sellBy' | 'bestBefore' | 'expires' | 'productCode'
+
 /**
  * Get all inventory items for that business
  *
@@ -711,7 +713,7 @@ export async function getBusinessSalesCount(businessId: number): Promise<MaybeEr
  * @param reverse
  * @return a list of inventory items
  */
-export async function getInventory(businessId: number, page: number, resultsPerPage: number, orderBy: string, reverse: boolean): Promise<MaybeError<InventoryItem[]>> {
+export async function getInventory(businessId: number, page: number, resultsPerPage: number, orderBy: InventoryOrderBy, reverse: boolean): Promise<MaybeError<InventoryItem[]>> {
   let response;
   try {
     response = await instance.get(`/businesses/${businessId}/inventory`, {
@@ -759,6 +761,30 @@ export async function getInventoryCount(businessId: number): Promise<MaybeError<
   }
 
   return response.data.count;
+}
+
+/**
+ * Updates an existing inventory item's properties
+ *
+ * @param businessId The business for which the inventory item belongs
+ * @param inventoryItemId The id number of the inventory item
+ * @param inventoryItem The inventory item's new properties
+ * @return undefined if operation is successful, otherwise a string error
+ */
+export async function modifyInventoryItem(businessId: number, inventoryItemId: number, inventoryItem: CreateInventoryItem): Promise<MaybeError<undefined>> {
+  try {
+    await instance.put(`/businesses/${businessId}/inventory/${inventoryItemId}`, inventoryItem);
+  } catch (error) {
+    let status: number | undefined = error.response?.status;
+    if (status === undefined) return 'Failed to reach backend';
+    if (status === 401) return 'Missing/Invalid access token';
+    if (status === 403) return 'Operation not permitted';
+    if (status === 406) return 'Inventory item/Business not found';
+    if (status === 400) return 'Invalid parameters';
+
+    return 'Request failed: ' + error.response?.data.message;
+  }
+  return undefined;
 }
 
 /**

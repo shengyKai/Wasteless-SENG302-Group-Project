@@ -3,11 +3,9 @@ package org.seng302.leftovers.controllers;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
-import org.hibernate.Hibernate;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
@@ -27,7 +25,6 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import javax.annotation.Resource;
 import javax.servlet.http.Cookie;
-import javax.transaction.Transactional;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.HashMap;
@@ -79,6 +76,8 @@ class BusinessControllerTest {
 
     @AfterEach
     void tearDown() {
+        businessRepository.deleteAll();
+        userRepository.deleteAll();
         session.close();
     }
 

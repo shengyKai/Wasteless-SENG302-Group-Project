@@ -29,10 +29,10 @@ public class InventoryItem {
     private Product product;
 
     @Column(name = "quantity", nullable = false)
-    private int quantity;
+    private Integer quantity;
 
     @Column(name = "remaining_quantity")
-    private int remainingQuantity;
+    private Integer remainingQuantity;
 
     @Column(name = "price_per_item")
     private BigDecimal pricePerItem;
@@ -150,10 +150,20 @@ public class InventoryItem {
      * @param quantity of item
      */
     public void setQuantity(Integer quantity) throws ResponseStatusException {
-        if (quantity > 0) {
-            this.quantity = quantity;
+        if (this.quantity == null) {
+            if (quantity > 0) {
+                this.quantity = quantity;
+            } else {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A quantity less than 1 was provided");
+            }
         } else {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A quantity less than 1 was provided");
+            if (quantity >= (this.quantity - this.remainingQuantity)) {
+                this.remainingQuantity = this.remainingQuantity - (this.quantity - quantity);
+                this.quantity = quantity;
+            } else {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                        "The quantity cannot be lower than the amount used in the sale listings for this inventory item");
+            }
         }
     }
 

@@ -5,6 +5,7 @@ import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
 import org.junit.Ignore;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
@@ -63,6 +64,12 @@ class UserControllerTest {
     void setUp() throws ParseException, IOException {
         setUpAuthCode();
         setUpTestUser();
+    }
+
+    @AfterEach
+    void tearDown() {
+        businessRepository.deleteAll();
+        userRepository.deleteAll();
     }
 
     /**

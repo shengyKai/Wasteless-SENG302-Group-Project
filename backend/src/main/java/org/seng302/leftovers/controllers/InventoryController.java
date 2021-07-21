@@ -93,26 +93,12 @@ public class InventoryController {
     public void modifyInvEntry(@PathVariable(name = "businessId") Long businessId,
                                @PathVariable(name = "invItemId") Long invItemId, HttpServletRequest request,
                                @RequestBody JSONObject invItemInfo) throws Exception {
-        String message = String.format("Attempting to modify the inventory %d for the business %d", businessId,
-                invItemId);
-        logger.info(message);
+        logger.info("Attempting to modify the inventory {} for the business {}", invItemId, businessId);
 
         Business business = businessRepository.getBusinessById(businessId);
-        if (business == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    String.format("The business with the id %d does not exist", businessId));
-        }
         business.checkSessionPermissions(request);
 
         InventoryItem invItem = inventoryItemRepository.getInventoryItemByBusinessAndId(business, invItemId);
-        if (invItem == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    String.format("The inventory item with the id %d does not exist", invItemId));
-        }
-
-        if (invItemInfo == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No JSON request body was provided");
-        }
 
         //assuming all exceptions are related to bad requests since only data is being save below
         try {
@@ -129,19 +115,19 @@ public class InventoryController {
                 invItem.setQuantity((int) invItemInfo.getAsNumber("quantity"));
             }
             if (invItemInfo.containsKey("pricePerItem")) {
-                Double pricePerItem = (Double) invItemInfo.getAsNumber("pricePerItem");
+                String pricePerItem = invItemInfo.getAsString("pricePerItem");
                 if (pricePerItem != null) {
-                    invItem.setPricePerItem(BigDecimal.valueOf(pricePerItem));
+                    invItem.setPricePerItem(BigDecimal.valueOf(Double.parseDouble(pricePerItem)));
                 } else {
                     invItem.setPricePerItem(null);
                 }
             }
             if (invItemInfo.containsKey("totalPrice")) {
-                Double totalPrice = (Double) invItemInfo.getAsNumber("totalPrice");
+                String totalPrice = invItemInfo.getAsString("totalPrice");
                 if (totalPrice != null) {
-                    invItem.setPricePerItem(BigDecimal.valueOf(totalPrice));
+                    invItem.setTotalPrice(BigDecimal.valueOf(Double.parseDouble(totalPrice)));
                 } else {
-                    invItem.setPricePerItem(null);
+                    invItem.setTotalPrice(null);
                 }
             }
 
