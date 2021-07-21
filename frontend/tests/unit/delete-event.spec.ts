@@ -74,9 +74,10 @@ describe('DeleteEvent.vue', () => {
     });
   });
 
-  describe('Card has been deleted from the databse', () => {
+  describe('Card has been deleted from the database', () => {
     it("Title contains delete message", () => {
-      expect(wrapper.vm.title).toBe('Your marketplace card has been deleted');
+      let eventWrapper = wrapper.findComponent({ name: 'Event'});
+      expect(eventWrapper.props().title).toBe('Your marketplace card has been deleted');
     });
 
     it("Text contains delete message if the card is in the ForSale section ", () => {
@@ -100,4 +101,4 @@ describe('DeleteEvent.vue', () => {
       expect(wrapper).toMatchSnapshot();
     });
   });
-})
+});
