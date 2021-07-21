@@ -129,7 +129,7 @@ public class InventoryController {
                 invItem.setQuantity((int) invItemInfo.getAsNumber("quantity"));
             }
             if (invItemInfo.containsKey("pricePerItem")) {
-                Double pricePerItem = (Double) invItemInfo.getAsNumber("pricePerItem");
+                Double pricePerItem = Double.parseDouble(invItemInfo.getAsString("pricePerItem"));
                 if (pricePerItem != null) {
                     invItem.setPricePerItem(BigDecimal.valueOf(pricePerItem));
                 } else {
@@ -137,7 +137,7 @@ public class InventoryController {
                 }
             }
             if (invItemInfo.containsKey("totalPrice")) {
-                Double totalPrice = (Double) invItemInfo.getAsNumber("totalPrice");
+                Double totalPrice = Double.parseDouble(invItemInfo.getAsString("totalPrice"));
                 if (totalPrice != null) {
                     invItem.setPricePerItem(BigDecimal.valueOf(totalPrice));
                 } else {
