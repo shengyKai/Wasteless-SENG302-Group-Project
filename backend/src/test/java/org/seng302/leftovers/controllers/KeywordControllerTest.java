@@ -11,11 +11,15 @@ import org.seng302.leftovers.exceptions.AccessTokenException;
 import org.seng302.leftovers.persistence.KeywordRepository;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.server.ResponseStatusException;
 
+import java.security.Key;
 import java.text.ParseException;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -44,6 +48,8 @@ class KeywordControllerTest {
 
         // By default this will mock checkAuthenticationToken method to do nothing, which simulates a valid authentication token
         authenticationTokenManager = Mockito.mockStatic(AuthenticationTokenManager.class);
+
+        when(keywordRepository.findByName(any())).thenReturn(Optional.empty());
 
         var keywordController = new KeywordController(keywordRepository);
         mockMvc = MockMvcBuilders.standaloneSetup(keywordController).build();
@@ -99,5 +105,140 @@ class KeywordControllerTest {
         expected.addAll(keywords.stream().map(Keyword::constructJSONObject).collect(Collectors.toList()));
 
         assertEquals(expected, response);
+    }
+
+    @Test
+    void deleteKeyword_noAuthentication_401Response() throws Exception {
+        // Mock the AuthenticationTokenManager to respond as it would when the authentication token is missing or invalid
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.checkAuthenticationToken(any()))
+                .thenThrow(new AccessTokenException());
+
+        // Verify that a 401 response is received in response to the DELETE request
+        mockMvc.perform(delete("/keywords/1"))
+                .andExpect(status().isUnauthorized())
+                .andReturn();
+
+        // Check that the authentication token manager was called
+        authenticationTokenManager.verify(() -> AuthenticationTokenManager.checkAuthenticationToken(any()));
+        verify(keywordRepository, times(0)).delete(any()); // Nothing is deleted
+    }
+
+    @Test
+    void deleteKeyword_notAdmin_403Response() throws Exception {
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionIsAdmin(any())).thenReturn(false);
+
+        // Verify that a 403 response is received in response to the DELETE request
+        mockMvc.perform(delete("/keywords/1"))
+                .andExpect(status().isForbidden())
+                .andReturn();
+
+        // Check that the authentication token manager was called
+        authenticationTokenManager.verify(() -> AuthenticationTokenManager.sessionIsAdmin(any()));
+        verify(keywordRepository, times(0)).delete(any()); // Nothing is deleted
+    }
+
+    @Test
+    void deleteKeyword_keywordNotFound_406Response() throws Exception {
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionIsAdmin(any())).thenReturn(true);
+
+        when(keywordRepository.findById(99L)).thenReturn(Optional.empty());
+
+        // Verify that a 406 response is received in response to the DELETE request
+        mockMvc.perform(delete("/keywords/99"))
+                .andExpect(status().isNotAcceptable())
+                .andReturn();
+
+        // Check that the authentication token manager was called
+        authenticationTokenManager.verify(() -> AuthenticationTokenManager.sessionIsAdmin(any()));
+        verify(keywordRepository, times(1)).findById(99L);
+        verify(keywordRepository, times(0)).delete(any()); // Nothing is deleted
+    }
+
+    @Test
+    void deleteKeyword_validRequest_200ResponseAndDeleted() throws Exception {
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionIsAdmin(any())).thenReturn(true);
+
+        Keyword mockKeyword = mock(Keyword.class);
+        when(keywordRepository.findById(99L)).thenReturn(Optional.of(mockKeyword));
+
+        // Verify that a 200 response is received in response to the DELETE request
+        mockMvc.perform(delete("/keywords/99"))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        // Check that the authentication token manager was called
+        authenticationTokenManager.verify(() -> AuthenticationTokenManager.sessionIsAdmin(any()));
+        verify(keywordRepository, times(1)).findById(99L);
+        verify(keywordRepository, times(1)).delete(mockKeyword); // Keyword is deleted
+    }
+
+    @Test
+    void addKeyword_noAuthentication_401Response() throws Exception {
+        // Mock the AuthenticationTokenManager to respond as it would when the authentication token is missing or invalid
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.checkAuthenticationToken(any()))
+                .thenThrow(new AccessTokenException());
+
+        JSONObject json = new JSONObject();
+        json.put("name", "Dance");
+
+        // Verify that a 401 response is received in response to the POST request
+        mockMvc.perform(post("/keywords")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json.toJSONString()))
+                .andExpect(status().isUnauthorized())
+                .andReturn();
+
+        // Check that the authentication token manager was called
+        authenticationTokenManager.verify(() -> AuthenticationTokenManager.checkAuthenticationToken(any()));
+    }
+
+    @Test
+    void addKeyword_keywordAlreadyExists_400Response() throws Exception {
+        when(keywordRepository.findByName("Dance")).thenReturn(Optional.of(mock(Keyword.class)));
+
+        JSONObject json = new JSONObject();
+        json.put("name", "Dance");
+
+        mockMvc.perform(post("/keywords")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json.toJSONString()))
+                .andExpect(status().isBadRequest())
+                .andReturn();
+
+        verify(keywordRepository, times(1)).findByName("Dance");
+        verify(keywordRepository, times(0)).save(any());
+    }
+
+    @Test
+    void addKeyword_invalidKeyword_400Response() throws Exception {
+        try (MockedConstruction<Keyword> mocked = Mockito.mockConstruction(Keyword.class, (mock, context) -> {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+        })) {
+            JSONObject json = new JSONObject();
+            json.put("name", "Dance");
+
+            mockMvc.perform(post("/keywords")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(json.toJSONString()))
+                    .andExpect(status().isBadRequest())
+                    .andReturn();
+        }
+        verify(keywordRepository, times(0)).save(any());
+    }
+
+    @Test
+    void addKeyword_validRequest_201Response() throws Exception {
+        when(keywordRepository.save(any())).thenAnswer(keyword -> keyword.getArgument(0));
+
+        JSONObject json = new JSONObject();
+        json.put("name", "Dance");
+
+        mockMvc.perform(post("/keywords")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json.toJSONString()))
+                .andExpect(status().isCreated())
+                .andReturn();
+
+        verify(keywordRepository, times(1)).save(any());
     }
 }
