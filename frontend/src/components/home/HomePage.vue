@@ -4,12 +4,12 @@
     <UserActionPanel v-else />
     <div class="newsfeed">
       <!-- Newsfeed -->
-      <div v-if="$store.getters.events.length === -1" class="text-center">
+      <div v-if="$store.getters.events.length === 0" class="text-center">
         No items in your feed
       </div>
       <v-card
         v-else
-        v-for="event in events"
+        v-for="event in $store.getters.events"
         :key="event.id"
         outlined
         rounded="lg"
@@ -48,35 +48,6 @@ export default {
     ExpiryEvent,
     DeleteEvent,
     KeywordCreated,
-  },
-  data() {
-    return {
-      events: [
-        {
-          type: 'KeywordCreatedEvent',
-          created: "2021-07-21T02:37:15.131118Z",
-          keyword: {
-            name: 'Dance',
-          },
-        },
-        {
-          type: 'MessageEvent',
-          created: "2021-07-20T02:37:15.131118Z",
-          message: 'This is a message',
-        },
-        {
-          type: 'ExpiryEvent',
-          created: "2021-07-20T02:37:15.131118Z",
-          card: {id: 4, section: 'Wanted', displayPeriodEnd: "2021-07-22T02:37:15.131118Z",   creator: {firstName: 'Mark'  , lastName: 'Zuckerburg', location: { country: 'New Zealand', city: 'Christchurch', district: 'Upper Riccarton'}}, created: '2021-05-23', title: 'Facecook',                        description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus hendrerit nisl ac pharetra cursus. Vestibulum gravida varius purus, in maximus ante fermentum sed. Curabitur ultrices accumsan metus ia', keywords: [{name: 'Spicy'}]},
-        },
-        {
-          type: 'DeleteEvent',
-          created: "2021-07-20T02:37:15.131118Z",
-          title: 'Hello world',
-          section: 'ForSale',
-        },
-      ]
-    };
   },
   computed: {
     /**
