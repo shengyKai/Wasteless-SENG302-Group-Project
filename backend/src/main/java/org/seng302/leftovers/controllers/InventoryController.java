@@ -93,9 +93,7 @@ public class InventoryController {
     public void modifyInvEntry(@PathVariable(name = "businessId") Long businessId,
                                @PathVariable(name = "invItemId") Long invItemId, HttpServletRequest request,
                                @RequestBody JSONObject invItemInfo) throws Exception {
-        String message = String.format("Attempting to modify the inventory %d for the business %d", businessId,
-                invItemId);
-        logger.info(message);
+        logger.info("Attempting to modify the inventory {} for the business {}", invItemId, businessId);
 
         Business business = businessRepository.getBusinessById(businessId);
         business.checkSessionPermissions(request);
