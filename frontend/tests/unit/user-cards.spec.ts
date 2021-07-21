@@ -13,9 +13,16 @@ describe('UserCards.vue', () => {
   beforeEach(() => {
     let vuetify = new Vuetify();
     wrapper = mount(UserCards, {
-      stubs: ['MarketplaceCard'],
+      stubs: ['MarketplaceCard', 'router-link', 'router-view'],
       localVue,
       vuetify,
+      mocks: {
+        $route: {
+          params: {
+            id: 1,
+          }
+        }
+      },
     });
   });
 

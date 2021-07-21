@@ -83,7 +83,7 @@ export default {
      * Fetches all the marketplace cards and the count of the cards relating to the currently logged in user
      */
     async updatePage() {
-      let response = await getMarketplaceCardsByUser(this.$store.state.user?.id, this.resultsPerPage, this.currentPage);
+      let response = await getMarketplaceCardsByUser(this.$route.params.id, this.resultsPerPage, this.currentPage);
       this.totalResults = response.count;
       this.cards = response.results;
     }
