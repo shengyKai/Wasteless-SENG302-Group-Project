@@ -977,12 +977,15 @@ class SearchHelperTest {
                 .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
                         "Canterbury,8041"))
                 .withDescription("Some description")
-                .withName("Steve's Workshop")
+                .withName("Steves Workshop")
                 .withPrimaryOwner(owner)
                 .build();
         businessRepository.save(testBusiness3);
     }
 
+    /**
+     * BUSINESS SEARCH
+     */
     @Test
     void constructBusinessSpecificationFromSearchQuery_validSearchTerm_matchesBusinessName() {
         createBusinesses();
@@ -1018,4 +1021,234 @@ class SearchHelperTest {
         assertEquals(2, businessesUpper.size());
         assertEquals(2, businessesLower.size());
     }
+
+    @Test
+    void constructBusinessSpecificationFromSearchQueryEmptyStringTest() {
+        assertThrows(SearchFormatException.class, () -> {
+            SearchHelper.constructBusinessSpecificationFromSearchQuery("");
+        });
+    }
+
+    @Test
+    void constructBusinessSpecificationFromSearchQueryDoubleQuotesExactMatchTest() {
+        createBusinesses();
+        Specification<Business> specification = SearchHelper.constructBusinessSpecificationFromSearchQuery("\"Joe's Garage\"");
+        List<Business> matches = businessRepository.findAll(specification);
+        assertEquals(1, matches.size());
+        assertEquals("Joe's Garage", matches.get(0).getName());
+    }
+
+    @Test
+    void constructBusinessSpecificationFromSearchQuerySingleQuotesExactMatchTest() {
+        createBusinesses();
+        Specification<Business> specification = SearchHelper.constructBusinessSpecificationFromSearchQuery("'Steves Workshop'");
+        List<Business> matches = businessRepository.findAll(specification);
+        assertEquals(1, matches.size());
+        assertEquals("Steves Workshop", matches.get(0).getName());
+    }
+
+
+    @Test
+    void constructBusinessSpecificationFromSearchQueryDoubleQuotesPartialMatchTest() {
+        createBusinesses();
+        Specification<Business> specification = SearchHelper.constructBusinessSpecificationFromSearchQuery("\"Joe\"");
+        List<Business> matches = businessRepository.findAll(specification);
+        assertEquals(0, matches.size());
+    }
+
+
+    @Test
+    void constructBusinessSpecificationFromSearchQuerySingleQuotesPartialMatchTest() {
+        createBusinesses();
+        Specification<Business> specification = SearchHelper.constructBusinessSpecificationFromSearchQuery("'Joe'");
+        List<Business> matches = businessRepository.findAll(specification);
+        assertEquals(0, matches.size());
+    }
+
+
+    @Test
+    void constructBusinessSpecificationFromSearchQueryDoubleQuotesNoMatchTest() {
+        createBusinesses();
+        Specification<Business> specification = SearchHelper.constructBusinessSpecificationFromSearchQuery("\"zzz\"");
+        List<Business> matches = businessRepository.findAll(specification);
+        assertEquals(0, matches.size());
+    }
+
+
+    @Test
+    void constructBusinessSpecificationFromSearchQuerySingleQuotesNoMatchTest() {
+        createBusinesses();
+        Specification<Business> specification = SearchHelper.constructBusinessSpecificationFromSearchQuery("'X'");
+        List<Business> matches = businessRepository.findAll(specification);
+        assertEquals(0, matches.size());
+    }
+
+
+    @Test
+    void constructBusinessSpecificationFromSearchQueryDoubleQuotesDifferentCaseMatchTest() {
+        createBusinesses();
+        Specification<Business> specification = SearchHelper.constructBusinessSpecificationFromSearchQuery("\"joe's garage\"");
+        List<Business> matches = businessRepository.findAll(specification);
+        assertEquals(0, matches.size());
+    }
+
+
+    @Test
+    void constructBusinessSpecificationFromSearchQuerySingleQuotesDifferentCaseMatchTest() {
+        createBusinesses();
+        Specification<Business> specification = SearchHelper.constructBusinessSpecificationFromSearchQuery("'steves workshop'");
+        List<Business> matches = businessRepository.findAll(specification);
+        assertEquals(0, matches.size());
+    }
+
+    @Test
+    void constructBusinessSpecificationFromSearchQueryNoQuotesExactMatchTest() {
+        createBusinesses();
+        Specification<Business> specification = SearchHelper.constructBusinessSpecificationFromSearchQuery("Joe's Garage");
+        List<Business> matches = businessRepository.findAll(specification);
+        assertEquals(1, matches.size());
+        for (Business business : matches) {
+            assertEquals("Joe's Garage", business.getName());
+        }
+    }
+
+    @Test
+    void constructBusinessSpecificationFromSearchQueryNoQuotesPartialMatchTest() {
+        createBusinesses();
+        Specification<Business> specification = SearchHelper.constructBusinessSpecificationFromSearchQuery("Joe");
+        List<Business> matches = businessRepository.findAll(specification);
+        assertEquals(2, matches.size());
+        for (Business business : matches) {
+            assertTrue(business.getName().contains("Joe"));
+        }
+    }
+
+
+    @Test
+    void constructBusinessSpecificationFromSearchQueryNoQuotesNoMatchTest() {
+        createBusinesses();
+        Specification<Business> specification = SearchHelper.constructBusinessSpecificationFromSearchQuery("kfsdjkdf");
+        List<Business> matches = businessRepository.findAll(specification);
+        assertEquals(0, matches.size());
+    }
+
+    @Test
+    void constructBusinessSpecificationFromSearchQueryNoQuotesDifferentCaseMatchTest() {
+        createBusinesses();
+        Specification<Business> specification = SearchHelper.constructBusinessSpecificationFromSearchQuery("JOE");
+        List<Business> matches = businessRepository.findAll(specification);
+        assertEquals(2, matches.size());
+        for (Business business : matches) {
+            assertTrue(business.getName().toLowerCase().contains("joe"));
+        }
+    }
+
+    /**
+     * Verify that when constructUserSpecificationFromSearchQuery is called with just the word 'and' as its argument,
+     * a SearchFormatException is thrown.
+     */
+    @Test
+    void constructBusinessSpecificationFromSearchQueryJustAndTest() {
+        assertThrows(SearchFormatException.class, () -> {
+            SearchHelper.constructBusinessSpecificationFromSearchQuery("and");
+        });
+    }
+
+
+    @Test
+    void constructBusinessSpecificationFromSearchQueryLowerAndBothMatchTest() {
+        createBusinesses();
+        Specification<Business> specification = SearchHelper.constructBusinessSpecificationFromSearchQuery("Joe's and Garage");
+        List<Business> matches = businessRepository.findAll(specification);
+        assertEquals(1, matches.size());
+    }
+
+
+    @Test
+    void constructBusinessSpecificationFromSearchQueryUpperAndBothMatchTest() {
+        createBusinesses();
+        Specification<Business> specification = SearchHelper.constructBusinessSpecificationFromSearchQuery("joe's AND Garage");
+        List<Business> matches = businessRepository.findAll(specification);
+        assertEquals(1, matches.size());
+    }
+
+    @Test
+    void constructBusinessSpecificationFromSearchQueryAndOneMatchTest() {
+        createBusinesses();
+        Specification<Business> specification = SearchHelper.constructBusinessSpecificationFromSearchQuery("joe and \"Potato\"");
+        List<Business> matches = businessRepository.findAll(specification);
+        assertEquals(0, matches.size());
+    }
+
+    @Test
+    void constructBusinessSpecificationFromSearchQueryAndNoMatchTest() {
+        createBusinesses();
+        Specification<Business> specification = SearchHelper.constructBusinessSpecificationFromSearchQuery("tomato and \"Potato\"");
+        List<Business> matches = businessRepository.findAll(specification);
+        assertEquals(0, matches.size());
+    }
+
+    @Test
+    void constructBusinessSpecificationFromSearchQueryJustOrTest() {
+        assertThrows(SearchFormatException.class, () -> {
+            SearchHelper.constructBusinessSpecificationFromSearchQuery("OR");
+        });
+    }
+
+    @Test
+    void constructBusinessSpecificationFromSearchQueryBothMatchTest() {
+        createBusinesses();
+        Specification<Business> specification = SearchHelper.constructBusinessSpecificationFromSearchQuery("farm or Workshop");
+        List<Business> matches = businessRepository.findAll(specification);
+        assertEquals(2, matches.size());
+    }
+
+
+    @Test
+    void constructBusinessSpecificationFromSearchQueryLowerOrOneMatchTest() {
+        createBusinesses();
+        Specification<Business> specification = SearchHelper.constructBusinessSpecificationFromSearchQuery("workshop or \"Potato\"");
+        List<Business> matches = businessRepository.findAll(specification);
+        assertEquals(1, matches.size());
+    }
+
+    @Test
+    void constructBusinessSpecificationFromSearchQueryOrNoMatchTest() {
+        createBusinesses();
+        Specification<Business> specification = SearchHelper.constructBusinessSpecificationFromSearchQuery("tomato or \"Potato\"");
+        List<Business> matches = businessRepository.findAll(specification);
+        assertEquals(0, matches.size());
+    }
+
+
+    @Test
+    void constructBusinessSpecificationFromSearchQueryNoPredicateOneMatchTest() {
+        createBusinesses();
+        Specification<Business> specification = SearchHelper.constructBusinessSpecificationFromSearchQuery("Joe's \"Potato\"");
+        List<Business> matches = businessRepository.findAll(specification);
+        assertEquals(0, matches.size());
+    }
+
+    @Test
+    void constructBusinessSpecificationFromSearchQueryOrExtraWhitespaceTest() {
+        createBusinesses();
+        Specification<Business> specification = SearchHelper.constructBusinessSpecificationFromSearchQuery("workshop         or      \"Potato\"");
+        List<Business> matches = businessRepository.findAll(specification);
+        assertEquals(1, matches.size());
+    }
+
+    @Test
+    void constructBusinessSpecificationFromSearchQueryAndExtraWhitespaceTest() {
+        Specification<Business> specification = SearchHelper.constructBusinessSpecificationFromSearchQuery("joe   and        \"Potato\"");
+        List<Business> matches = businessRepository.findAll(specification);
+        assertEquals(0, matches.size());
+    }
+
+    @Test
+    void constructBusinessSpecificationFromSearchQueryOpeningQuoteTest() {
+        assertThrows(SearchFormatException.class, () -> {
+            SearchHelper.constructBusinessSpecificationFromSearchQuery("\"hello");
+        });
+    }
+
 }
