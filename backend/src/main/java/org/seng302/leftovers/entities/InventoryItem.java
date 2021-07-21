@@ -469,8 +469,8 @@ public class InventoryItem {
         public InventoryItem build() throws Exception {
             InventoryItem inventoryItem = new InventoryItem();
             inventoryItem.setProduct(this.product);
-            inventoryItem.setRemainingQuantity(this.quantity);
             inventoryItem.setQuantity(this.quantity);
+            inventoryItem.setRemainingQuantity(this.quantity);
             if (pricePerItem != null) {
                 inventoryItem.setPricePerItem(this.pricePerItem);
             }
