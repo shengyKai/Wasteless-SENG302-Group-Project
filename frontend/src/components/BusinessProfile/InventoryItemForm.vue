@@ -360,7 +360,7 @@ export default {
      * Checks that the quantity is greater than or equal to the amount that has already been used in sale listings if the
      * form is being used to modify an inventory item.
      */
-    async checkQuantityValid() {
+    checkQuantityValid() {
       if (this.isCreate) {
         return true;
       }
