@@ -118,11 +118,11 @@ public class InventoryController {
         try {
             if (invItemInfo.containsKey("productId")) {
                 String newProductCode = invItemInfo.getAsString("productId");
-                if (productRepository.findByBusinessAndProductCode(business, newProductCode).isEmpty()) {
-                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                            "The product with the given id does not exist within the business's catalogue");
-                }
-                invItem.setProduct(productRepository.getProduct(business, newProductCode));
+                Product product = productRepository.findByBusinessAndProductCode(business, newProductCode)
+                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "The product with the " +
+                                "given id does not exist within the business's catalogue"));
+                invItem.setProduct(product);
+
             }
 
             if (invItemInfo.containsKey("quantity")) {
