@@ -363,6 +363,11 @@ export default {
     formatDate,
     trimToLength,
   },
+  watch: {
+    showInventoryItemForm: function() {
+      this.$emit('content-changed');
+    }
+  }
 };
 </script>
 
