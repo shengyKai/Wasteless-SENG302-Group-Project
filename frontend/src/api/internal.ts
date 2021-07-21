@@ -183,6 +183,7 @@ export type MarketplaceCard = {
   creator: User,
   section: MarketplaceCardSection,
   created: string,
+  lastRenewed: string,
   displayPeriodEnd?: string,
   title: string,
   description?: string,

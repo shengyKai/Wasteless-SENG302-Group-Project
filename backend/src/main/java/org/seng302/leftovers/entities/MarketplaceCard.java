@@ -10,10 +10,7 @@ import javax.persistence.*;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 @Entity
 public class MarketplaceCard {
@@ -384,6 +381,7 @@ public class MarketplaceCard {
          * @return Newly created marketplace card
          */
         public MarketplaceCard build() {
+            Random random = new Random();
             var card = new MarketplaceCard();
 
             if (creator == null) {
@@ -394,7 +392,7 @@ public class MarketplaceCard {
             card.setTitle(title);
             card.setDescription(description);
             card.created = Instant.now();
-            card.lastRenewed = Instant.now();
+            card.lastRenewed = card.created;
             if (closes == null) {
                 card.setCloses(card.created.plus(DISPLAY_PERIOD));
             } else {

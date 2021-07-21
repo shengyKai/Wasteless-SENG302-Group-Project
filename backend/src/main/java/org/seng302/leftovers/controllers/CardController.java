@@ -36,7 +36,7 @@ import java.util.Set;
  */
 @RestController
 public class CardController {
-    private static final Set<String> VALID_CARD_ORDERINGS = Set.of("created", "title", "closes", "creatorFirstName", "creatorLastName", "location");
+    private static final Set<String> VALID_CARD_ORDERINGS = Set.of("lastRenewed", "created", "title", "closes", "creatorFirstName", "creatorLastName", "location");
 
     private final MarketplaceCardRepository marketplaceCardRepository;
     private final KeywordRepository keywordRepository;
@@ -195,8 +195,11 @@ public class CardController {
     /**
      * Retrieve all of the Marketplace Cards for a given section.
      * @param sectionName The name of the section to retrieve
+     * @param orderBy the field to use for sorting the results. Will default to last renewed if none is provided.
      * @param page The page number of the current requested section
      * @param resultsPerPage Maximum number of results to retrieve
+     * @param reverse Indicates which way the results will be ordered. They will be in descending order if it is true,
+     *                or ascending if it is false or null.
      * @return A JSON Array of Marketplace cards
      */
     @GetMapping("/cards")
@@ -208,40 +211,45 @@ public class CardController {
                               @RequestParam(required = false) Boolean reverse) {
         
         logger.info("Request to get marketplace cards for {}", sectionName);
-        AuthenticationTokenManager.checkAuthenticationToken(request);
+        try {
+            AuthenticationTokenManager.checkAuthenticationToken(request);
 
-        // parse the section
-        MarketplaceCard.Section section = MarketplaceCard.sectionFromString(sectionName);
-        Sort.Direction direction = SearchHelper.getSortDirection(reverse);
-        if (orderBy == null) {
-            orderBy = "created";
+            // parse the section
+            MarketplaceCard.Section section = MarketplaceCard.sectionFromString(sectionName);
+            Sort.Direction direction = SearchHelper.getSortDirection(reverse);
+            if (orderBy == null) {
+                orderBy = "lastRenewed";
+            }
+
+            if (!VALID_CARD_ORDERINGS.contains(orderBy)) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid card ordering");
+            }
+
+            List<Sort.Order> sortOrder;
+            //If the orderBy is by address, creates a Sort.Order list for Location, else it creates a List for a normal orderBy attribute
+            //For location sort, the primary sort would be by country, followed by the city, since these both attributes are shown to the user in the marketplace card.
+            if (orderBy.equals("location")) {
+                sortOrder = List.of(new Sort.Order(direction, "creator.address.country").ignoreCase(), new Sort.Order(direction, "creator.address.city").ignoreCase());
+            } else {
+                sortOrder = List.of(new Sort.Order(direction, orderBy).ignoreCase());
+            }
+
+            PageRequest pageRequest = SearchHelper.getPageRequest(page, resultsPerPage, Sort.by(sortOrder));
+            Page<MarketplaceCard> results = marketplaceCardRepository.getAllBySection(section, pageRequest);
+
+            //return JSON Object
+            JSONArray resultArray = new JSONArray();
+            for (MarketplaceCard card : results) {
+                resultArray.appendElement(card.constructJSONObject());
+            }
+            JSONObject json = new JSONObject();
+            json.put("count", results.getTotalElements());
+            json.put("results", resultArray);
+            return json;
+        } catch (Exception exception) {
+            logger.error(exception.getMessage());
+            throw exception;
         }
-
-        if (!VALID_CARD_ORDERINGS.contains(orderBy)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid card ordering");
-        }
-
-        List<Sort.Order> sortOrder;
-        //If the orderBy is by address, creates a Sort.Order list for Location, else it creates a List for a normal orderBy attribute
-        //For location sort, the primary sort would be by country, followed by the city, since these both attributes are shown to the user in the marketplace card.
-        if (orderBy.equals("location")) {
-            sortOrder = List.of(new Sort.Order(direction, "creator.address.country").ignoreCase(), new Sort.Order(direction, "creator.address.city").ignoreCase());
-        } else {
-            sortOrder = List.of(new Sort.Order(direction, orderBy).ignoreCase());
-        }
-
-        PageRequest pageRequest = SearchHelper.getPageRequest(page, resultsPerPage, Sort.by(sortOrder));
-        Page<MarketplaceCard> results = marketplaceCardRepository.getAllBySection(section, pageRequest);
-
-        //return JSON Object
-        JSONArray resultArray = new JSONArray();
-        for (MarketplaceCard card : results) {
-            resultArray.appendElement(card.constructJSONObject());
-        }
-        JSONObject json = new JSONObject();
-        json.put("count", results.getTotalElements());
-        json.put("results", resultArray);
-        return json;
     }
 
     @GetMapping("/users/{id}/cards")
@@ -254,7 +262,7 @@ public class CardController {
 
         User user = userRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "User not found"));
 
-        PageRequest pageRequest = SearchHelper.getPageRequest(page, resultsPerPage, Sort.by(Sort.Direction.DESC, "created"));
+        PageRequest pageRequest = SearchHelper.getPageRequest(page, resultsPerPage, Sort.by(Sort.Direction.DESC, "lastRenewed"));
         var results = marketplaceCardRepository.getAllByCreator(user, pageRequest);
 
         //return JSON Object
