@@ -46,7 +46,7 @@ public class InventoryItemGenerator {
      * @return the quantity
      */
     private int[] generateQuantities() {
-        int quantity = random.nextInt(250);
+        int quantity = random.nextInt(249) + 1;
         int remainingQuantity = random.nextInt(quantity);
         return new int[]{quantity, remainingQuantity};
     }
