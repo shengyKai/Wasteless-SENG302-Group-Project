@@ -520,6 +520,7 @@ type ProductOrderBy = 'name' | 'description' | 'manufacturer' | 'recommendedReta
  */
 export async function getProducts(businessId: number, page: number, resultsPerPage: number, orderBy: ProductOrderBy, reverse: boolean): Promise<MaybeError<Product[]>> {
   let response;
+  console.log("1");
   try {
     response = await instance.get(`/businesses/${businessId}/products`, {
       params: {
@@ -537,7 +538,8 @@ export async function getProducts(businessId: number, page: number, resultsPerPa
     if (status === 406) return 'Business not found';
     return 'Request failed: ' + status;
   }
-
+  console.log("2");
+  console.log(response.data);
   if (!is<Product[]>(response.data)) {
     return 'Response is not product array';
   }

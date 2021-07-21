@@ -62,7 +62,7 @@
 </template>
 
 <script>
-import getProducts from '../api/internal';
+import { getProducts} from '../api/internal';
 import ProductCatalogueItem from './cards/ProductCatalogueItem.vue';
 
 export default {
@@ -144,7 +144,6 @@ export default {
         this.orderBy,
         this.reverse
       );
-      console.log("B");
       console.log(value);
       // this.totalResults = await getProductCount(this.businessId);
       if (typeof value === 'string') {
