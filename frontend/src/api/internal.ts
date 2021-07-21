@@ -541,6 +541,7 @@ export async function getProducts(businessId: number, page: number, resultsPerPa
   if (!is<Product[]>(response.data)) {
     return 'Response is not product array';
   }
+  console.log(response.data);
   return response.data;
 }
 
@@ -552,6 +553,7 @@ export async function getProducts(businessId: number, page: number, resultsPerPa
  */
 export async function getProductCount(buisnessId: number): Promise<MaybeError<number>> {
   let response;
+  console.log("A");
   try {
     response = await instance.get(`/businesses/${buisnessId}/products/count`);
   } catch (error) {
@@ -564,7 +566,6 @@ export async function getProductCount(buisnessId: number): Promise<MaybeError<nu
   if (typeof response.data?.count !== 'number') {
     return 'Response is not number';
   }
-
   return response.data.count;
 }
 

@@ -62,7 +62,7 @@
 </template>
 
 <script>
-import { getProducts, getProductCount } from '../api/internal';
+import getProducts from '../api/internal';
 import ProductCatalogueItem from './cards/ProductCatalogueItem.vue';
 
 export default {
@@ -136,7 +136,7 @@ export default {
         this.error = `Invalid business id "${this.$route.params.id}"`;
         return;
       }
-
+      console.log("A");
       const value = await getProducts (
         this.businessId,
         this.currentPage,
@@ -144,7 +144,9 @@ export default {
         this.orderBy,
         this.reverse
       );
-      this.totalResults = await getProductCount(this.businessId);
+      console.log("B");
+      console.log(value);
+      // this.totalResults = await getProductCount(this.businessId);
       if (typeof value === 'string') {
         this.products = [];
         this.error = value;
