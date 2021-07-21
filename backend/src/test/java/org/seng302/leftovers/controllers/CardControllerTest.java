@@ -667,7 +667,7 @@ class CardControllerTest {
                 .param("page", "6"))
                 .andExpect(status().isOk())
                 .andReturn();
-        var expectedPageRequest = SearchHelper.getPageRequest(6, 8, Sort.by(new Sort.Order(Sort.Direction.DESC, "created")));
+        var expectedPageRequest = SearchHelper.getPageRequest(6, 8, Sort.by(new Sort.Order(Sort.Direction.DESC, "lastRenewed")));
         verify(marketplaceCardRepository).getAllByCreator(mockUser, expectedPageRequest);
 
         JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
