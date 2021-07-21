@@ -177,7 +177,7 @@ public class CardController {
             MarketplaceCard card = marketplaceCardRepository.getCard(id);
 
             if (!AuthenticationTokenManager.sessionCanSeePrivate(request, card.getCreator().getUserID())) {
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Current user does not have permission to delete this card");
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Current user does not have permission to extend display period for this card");
             }
 
             Optional<ExpiryEvent> expiryEvent = expiryEventRepository.getByExpiringCard(card);

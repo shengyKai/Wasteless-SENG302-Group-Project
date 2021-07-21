@@ -42,6 +42,9 @@ public class MarketplaceCard {
     @Column(nullable = false)
     private Instant closes;
 
+    @Column(name = "last_renewed", nullable = false)
+    private Instant lastRenewed;
+
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "card_keywords")
     private List<Keyword> keywords = new ArrayList<>();
@@ -90,6 +93,12 @@ public class MarketplaceCard {
      * @return closing date and time
      */
     public Instant getCloses() { return closes; }
+
+    /**
+     * Get the last date on which this card was renewed. If the card has never been renewed, returns the creation date.
+     * @return date of last renewal or creation if there have been no renewals.
+     */
+    public Instant getLastRenewed() {return lastRenewed;}
 
     /**
      * @return Card description
@@ -161,13 +170,15 @@ public class MarketplaceCard {
     }
 
     /**
-     * Delays the closing date for this card by the display period (2 weeks)
+     * Delays the closing date for this card by the display period (2 weeks). Additionally, sets the card's last renewal
+     * date to the current datetime.
      */
     public void delayCloses() {
         if (Instant.now().isBefore(closes.minus(1, ChronoUnit.DAYS))) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Too early to extend closing date");
         }
         closes = closes.plus(DISPLAY_PERIOD);
+        lastRenewed = Instant.now();
     }
 
     /**
@@ -200,6 +211,7 @@ public class MarketplaceCard {
         json.appendField("creator", this.creator.constructPublicJson());
         json.appendField("section", this.section.getName());
         json.appendField("created", this.created.toString());
+        json.appendField("lastRenewed", this.lastRenewed.toString());
         json.appendField("displayPeriodEnd", this.closes.toString());
         json.appendField("title", this.title);
         json.appendField("description", this.description);
@@ -382,6 +394,7 @@ public class MarketplaceCard {
             card.setTitle(title);
             card.setDescription(description);
             card.created = Instant.now();
+            card.lastRenewed = Instant.now();
             if (closes == null) {
                 card.setCloses(card.created.plus(DISPLAY_PERIOD));
             } else {
