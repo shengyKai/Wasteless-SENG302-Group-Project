@@ -32,7 +32,7 @@
                     label="Product Code"
                     item-text="name"
                     item-value="id"
-                    :rules="mandatoryRules"
+                    :rules="mandatoryRules()"
                     :hint="productCode"
                     @click="productCode=undefined"
                     persistent-hint
@@ -60,7 +60,7 @@
                     class="required"
                     v-model="quantity"
                     label="Quantity"
-                    :rules="mandatoryRules.concat(quantityRules)"
+                    :rules="mandatoryRules().concat(quantityRules())"
                     outlined
                   />
                 </v-col>
@@ -72,7 +72,7 @@
                     :prefix="currency.symbol"
                     :suffix="currency.code"
                     :hint="currency.errorMessage"
-                    :rules="smallPriceRules"
+                    :rules="smallPriceRules()"
                     outlined
                   />
                 </v-col>
@@ -84,7 +84,7 @@
                     :prefix="currency.symbol"
                     :suffix="currency.code"
                     :hint="currency.errorMessage"
-                    :rules="hugePriceRules"
+                    :rules="hugePriceRules()"
                     outlined/>
                 </v-col>
                 <!-- INPUT: Manufactured. Only take in value in dd/mm/yyyy format.-->
@@ -158,8 +158,9 @@
 </template>
 
 <script>
-import { createInventoryItem, getProducts } from '@/api/internal';
+import { createInventoryItem, getProducts, modifyInventoryItem } from '@/api/internal';
 import { currencyFromCountry } from "@/api/currency";
+import {hugePriceRules, mandatoryRules, quantityRules, smallPriceRules} from "@/utils";
 
 export default {
   name: 'InventoryItemForm',
@@ -191,25 +192,10 @@ export default {
       minDate: new Date("1500-01-01"),
       maxDate: new Date("5000-01-01"),
       currency: {},
-      mandatoryRules: [
-        //All fields with the class "required" will go through this ruleset to ensure the field is not empty.
-        //if it does not follow the format, display error message
-        field => !!field || 'Field is required'
-      ],
-      numberRules: [
-        field => /(^[0-9]*$)/.test(field) || 'Must contain numbers only'
-      ],
-      quantityRules: [
-        field => /(^[1-9][0-9]*$)/.test(field) || 'Must contain numbers only above zero'
-      ],
-      smallPriceRules: [
-        //A price must be numbers and may contain a decimal followed by exactly two numbers (4digit)
-        field => /(^\d{1,4}(\.\d{2})?$)|^$/.test(field) || 'Must be a valid price. Must be less than 10,000'
-      ],
-      hugePriceRules: [
-        //A price must be numbers and may contain a decimal followed by exactly two numbers (6digit)
-        field => /(^\d{1,6}(\.\d{2})?$)|^$/.test(field) || 'Must be a valid price. Must be less than 1,000,000'
-      ],
+      mandatoryRules: () => mandatoryRules,
+      quantityRules: () => quantityRules,
+      smallPriceRules: () => smallPriceRules,
+      hugePriceRules: () => hugePriceRules,
     };
   },
   methods: {
@@ -251,8 +237,9 @@ export default {
     },
     /**
      * Called when the form is submitted.
-     * Get the attributes from each field and call the function to either create or modify the inventory item,
+     * Get the attributes from each field and call the api function to either create or modify the inventory item,
      * depending on what pupose the form is being used for.
+     * Displays an error message if the api response is an error.
      */
     async submit() {
       this.errorMessage = undefined;
@@ -273,28 +260,18 @@ export default {
         bestBefore: this.bestBefore ? this.bestBefore : undefined,
         expires: this.expires
       };
+      let result;
       if (this.isCreate) {
-        this.createInventory(inventoryItem);
+        result = await createInventoryItem(this.businessId, inventoryItem);
       } else {
-        this.modifyInventory();
+        result = await modifyInventoryItem(this.businessId, this.previousItem.id, inventoryItem);
       }
-    },
-    /**
-     * Requests backend to create an inventory item
-     * Empty attributes are set to undefined
-     */
-    async createInventory(inventoryItem) {
-      const result = await createInventoryItem(this.businessId, inventoryItem);
       if (typeof result === 'string') {
         this.errorMessage = result;
       } else {
         this.closeDialog();
       }
     },
-    modifyInventory() {
-      this.errorMessage = "Not yet implemented";
-    },
-
     async checkAllDatesValid() {
       //checks the booleans for all the dates are valid
       if (this.manufacturedValid && this.sellByValid && this.bestBeforeValid && this.expiresValid) {
@@ -383,7 +360,7 @@ export default {
      * Call the currency API to get the currency symbol and code from the country of sale of the product.
      */
     async fetchCurrency() {
-      if (this.productCode) {
+      if (this.productCode && this.productList.length > 0) {
         const product = this.productList.filter(p => p.id === this.productCode)[0];
         this.currency = await currencyFromCountry(product.countryOfSale);
       } else {

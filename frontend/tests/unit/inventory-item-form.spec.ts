@@ -21,10 +21,12 @@ jest.mock('@/api/currency', () => ({
 
 jest.mock('@/api/internal', () => ({
   createInventoryItem: jest.fn(),
+  modifyInventoryItem: jest.fn(),
   getProducts: jest.fn(),
   getBusiness: jest.fn().mockReturnValue({address: {}}), // Makes sure that fetching the currency doesn't crash
 }));
 const createInventoryItem = castMock(api.createInventoryItem);
+const modifyInventoryItem = castMock(api.modifyInventoryItem);
 const getProducts = castMock(api.getProducts);
 
 // Characters that are in the set of letters, numbers, spaces and punctuation.
@@ -195,7 +197,7 @@ describe("InventoryItemForm.vue", () => {
   }
 
   /**
-     * Finds the create button in the CreateProduct form
+     * Finds the create button in the inventory item form
      *
      * @returns A Wrapper around the create button
      */
@@ -203,6 +205,20 @@ describe("InventoryItemForm.vue", () => {
     const buttons = wrapper.findAllComponents({ name: "v-btn" });
     const filtered = buttons.filter((button) =>
       button.text().includes("Create")
+    );
+    expect(filtered.length).toBe(1);
+    return filtered.at(0);
+  }
+
+  /**
+     * Finds the save button in the inventory item form
+     *
+     * @returns A Wrapper around the save button
+     */
+  function findSaveButton() {
+    const buttons = wrapper.findAllComponents({ name: "v-btn" });
+    const filtered = buttons.filter((button) =>
+      button.text().includes("Save")
     );
     expect(filtered.length).toBe(1);
     return filtered.at(0);

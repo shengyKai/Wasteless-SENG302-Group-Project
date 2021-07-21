@@ -25,12 +25,6 @@
                 {{ product.name }}
               </v-card-title>
             </v-col>
-            <v-col cols="auto" md="2" sm="2">
-              <v-card-actions
-                :class="{ 'pt-0': $vuetify.breakpoint.smAndDown }"
-                class="pb-0"
-              />
-            </v-col>
           </v-row>
           <v-row>
             <v-col cols="auto" md="9" sm="12">
@@ -258,31 +252,47 @@
         </v-col>
       </v-row>
       <v-row justify="end">
-        <v-tooltip top>
-          <template #activator="{on: tooltip}">
-            <v-btn
-              ref="createSaleItemButton"
-              rounded
-              outlined
-              v-on="tooltip"
+        <v-col cols="auto">
+          <v-card-actions
+            :class="{ 'pt-0': $vuetify.breakpoint.smAndDown }"
+            class="pb-0 aflex-column aalign-end d-block"
+          >
+            <!-- Button to create a sale item from this inventory item. -->
+            <v-tooltip top>
+              <template #activator="{on: tooltip}">
+                <v-chip
+                  ref='createSaleItemButton'
+                  medium
+                  v-on="tooltip"
+                  color="primary"
+                  class="font-weight-medium action-button"
+                  @click="viewCreateSaleItem"
+                >
+                  Create Sale Item
+                </v-chip>
+              </template>
+              <span>Create a Sale from this inventory item</span>
+            </v-tooltip>
+            <!-- Button to edit this inventory item.-->
+            <v-chip
+              @click="showInventoryItemForm=true"
+              medium
+              class="font-weight-medium action-button"
               color="primary"
-              class="sale-item-but"
-              @click="viewCreateSaleItem"
             >
-              Create Sale Item
-            </v-btn>
-          </template>
-          <span>Create a Sale from this inventory item</span>
-        </v-tooltip>
-        <v-btn
-          @click="showInventoryItemForm=true"
-        >
-          Temporary edit button
-        </v-btn>
+              Edit
+            </v-chip>
+          </v-card-actions>
+        </v-col>
       </v-row>
     </v-container>
+    <!-- Display form for modifying the inventory item -->
     <template v-if="showInventoryItemForm">
-      <InventoryItemForm :previousItem="inventoryItem" :businessId="businessId"  @closeDialog="showInventoryItemForm=false"/>
+      <InventoryItemForm
+        :previousItem="inventoryItem"
+        :businessId="businessId"
+        @closeDialog="showInventoryItemForm=false"
+      />
     </template>
   </v-card>
 
@@ -374,9 +384,8 @@ export default {
   font-weight: bold;
 }
 
-.sale-item-but {
+.action-button {
   margin: 10px;
-  font-weight: bold;
 }
 
 </style>
