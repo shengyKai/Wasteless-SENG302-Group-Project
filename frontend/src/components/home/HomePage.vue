@@ -4,12 +4,12 @@
     <UserActionPanel v-else />
     <div class="newsfeed">
       <!-- Newsfeed -->
-      <div v-if="$store.getters.events.length === 0" class="text-center">
+      <div v-if="$store.getters.events.length === -1" class="text-center">
         No items in your feed
       </div>
       <v-card
         v-else
-        v-for="event in $store.getters.events"
+        v-for="event in events"
         :key="event.id"
         outlined
         rounded="lg"
@@ -48,6 +48,20 @@ export default {
     ExpiryEvent,
     DeleteEvent,
     KeywordCreated,
+  },
+  data() {
+    return {
+      events: [
+        {
+          type: 'KeywordCreatedEvent',
+          created: "2021-07-21T02:37:15.131118Z",
+          keyword: {
+            name: 'Rotten',
+          },
+          creator: {firstName: 'Mark'  , lastName: 'Zuckerburg', location: { country: 'New Zealand', city: 'Christchurch', district: 'Upper Riccarton'}}
+        }
+      ]
+    };
   },
   computed: {
     /**

@@ -1,7 +1,10 @@
 <template>
   <Event :event="event" :title="title">
-    <v-card-actions>
-      <v-btn color="error" @click="deleteKeyword">Delete</v-btn>
+    <v-card-text>
+      {{ creator.firstName}} {{ creator.lastName }} has added "{{ keyword.name }}"
+    </v-card-text>
+    <v-card-actions class="justify-center">
+      <v-btn color="error" @click="deleteKeyword">Remove</v-btn>
     </v-card-actions>
   </Event>
 </template>
@@ -20,11 +23,14 @@ export default {
     Event,
   },
   computed: {
+    creator() {
+      return this.event.creator;
+    },
     keyword() {
       return this.event.keyword;
     },
     title() {
-      return `A keyword "${this.keyword.name}" has been created`;
+      return `Keyword "${this.keyword.name}" has been created`;
     },
   },
   methods: {
