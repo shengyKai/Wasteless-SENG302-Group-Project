@@ -1,25 +1,16 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`DeleteEvent.vue Must match snapshot 1`] = `
-<div>
-  <div class="v-card__title">
-    A keyword "TestKeywordName" has been created
-  </div>
-  <div class="v-card__subtitle">
-    02 Jan 2021, 01:00
-  </div>
-  <div class="v-card__actions"><button type="button" class="v-btn v-btn--is-elevated v-btn--has-bg theme--light v-size--default error"><span class="v-btn__content">Delete</span></button></div>
-</div>
-`;
-
 exports[`KeywordCreated.vue Must match snapshot 1`] = `
 <div>
   <div class="v-card__title">
-    A keyword "TestKeywordName" has been created
+    Keyword "TestKeywordName" has been created
   </div>
   <div class="v-card__subtitle">
     02 Jan 2021, 01:00
   </div>
-  <div class="v-card__actions"><button type="button" class="v-btn v-btn--is-elevated v-btn--has-bg theme--light v-size--default error"><span class="v-btn__content">Delete</span></button></div>
+  <div class="v-card__text">
+    John Smith has added "TestKeywordName"
+  </div>
+  <div class="v-card__actions justify-center"><button type="button" class="v-btn v-btn--is-elevated v-btn--has-bg theme--light v-size--default error"><span class="v-btn__content">Remove</span></button></div>
 </div>
 `;

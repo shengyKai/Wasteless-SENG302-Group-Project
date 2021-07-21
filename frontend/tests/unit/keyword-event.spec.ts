@@ -28,6 +28,7 @@ describe('KeywordCreated.vue', () => {
           keyword: {
             name: 'TestKeywordName',
           },
+          creator: {firstName: 'John'  , lastName: 'Smith'},
         },
       }
     });
@@ -35,7 +36,11 @@ describe('KeywordCreated.vue', () => {
 
   it("Title is correct", () => {
     let eventWrapper = wrapper.findComponent({ name: 'Event'});
-    expect(eventWrapper.props().title).toBe('A keyword "TestKeywordName" has been created');
+    expect(eventWrapper.props().title).toBe('Keyword "TestKeywordName" has been created');
+  });
+
+  it('Contains creator\'s name', () => {
+    expect(wrapper.text()).toContain('John Smith');
   });
 
   it('Must match snapshot', () => {
