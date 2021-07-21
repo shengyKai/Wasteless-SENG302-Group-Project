@@ -518,7 +518,8 @@ type ProductOrderBy = 'name' | 'description' | 'manufacturer' | 'recommendedReta
  * @param reverse
  * @return a list of products
  */
-export async function getProducts(businessId: number, page: number, resultsPerPage: number, orderBy: ProductOrderBy, reverse: boolean): Promise<MaybeError<Product[]>> {
+export async function getProducts(businessId: number, page: number, resultsPerPage: number, orderBy: ProductOrderBy, reverse: boolean):
+  Promise<MaybeError<Product[]>>{
   let response;
   console.log("1");
   try {
@@ -540,11 +541,38 @@ export async function getProducts(businessId: number, page: number, resultsPerPa
   }
   console.log("2");
   console.log(response.data);
-  if (!is<Product[]>(response.data)) {
+
+  /***
+   * Old code here
+   */
+  // if (!is<Product[]>(response.data)) {
+  //   return 'Response is not product array';
+  // }
+
+  // console.log(response.data);
+  // return response.data;
+
+  /**
+   * @description The responses structure will be
+   *                e.g.  {
+   *                        "count" : 1 ,
+   *                        "results" : [{}]   < Product[] >
+   *                      }
+   *               The code below will unpack the responses.
+   */
+  let product_count = response.data.count;
+  let product_list  = response.data.results;
+
+  console.log(product_list);
+
+  if (!is<Product[]>(product_list)) {
     return 'Response is not product array';
   }
-  console.log(response.data);
-  return response.data;
+  console.log(product_list);
+
+
+
+  return product_list;
 }
 
 /**
