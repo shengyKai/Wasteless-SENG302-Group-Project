@@ -60,7 +60,7 @@
                     class="required"
                     v-model="quantity"
                     label="Quantity"
-                    :rules="mandatoryRules().concat(quantityRules())"
+                    :rules="mandatoryRules().concat(quantityRules()).concat(checkQuantityValid())"
                     outlined
                   />
                 </v-col>
@@ -355,6 +355,16 @@ export default {
         this.expiresValid = true;
       }
       await this.checkAllDatesValid();
+    },
+    /**
+     * Checks that the quantity is greater than or equal to the amount that has already been used in sale listings if the
+     * form is being used to modify an inventory item.
+     */
+    async checkQuantityValid() {
+      if (this.isCreate) {
+        return true;
+      }
+      return this.quantity >= (this.previousItem.quantity - this.previousItem.remainingQuantity);
     },
     /**
      * Call the currency API to get the currency symbol and code from the country of sale of the product.
