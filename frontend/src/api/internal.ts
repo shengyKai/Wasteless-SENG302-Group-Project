@@ -923,7 +923,7 @@ export async function getMarketplaceCardsByUser(userId: number, resultsPerPage: 
     if (status === 400) return 'The page does not exist';
     if (status === 401) return 'You have been logged out. Please login again and retry';
     if (status === 406) return 'The user does not exist';
-    return 'Request failed: ' + status;
+    return 'Request failed: ' + error.response?.data.message;
   }
   if (!is<SearchResults<MarketplaceCard>>(response.data)) {
     return "Response is not card array";
