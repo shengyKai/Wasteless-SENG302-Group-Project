@@ -45,45 +45,44 @@
             </v-col>
           </v-row>
           <v-row>
-            <!--            <v-select-->
-            <!--              v-model="selectedKeywords"-->
-            <!--              :items="allKeywords"-->
-            <!--              item-text="name"-->
-            <!--              item-value="id"-->
-            <!--              label="Select keywords"-->
-            <!--              multiple-->
-            <!--              small-chips-->
-            <!--              color="primary"-->
-            <!--            />-->
-            <v-select
-              no-data-text="No keywords found"
-              value = "keywords"
-              v-model="selectedKeywords"
-              :items="filteredKeywordList"
-              label="Select keywords"
-              item-text="name"
-              item-value="id"
-              multiple
-              :hint="selectedKeywords"
-              @click="selectedKeywords=undefined"
-              persistent-hint
-              outlined
-            >
-              <template v-slot:prepend-item>
-                <v-list-item>
-                  <v-list-item-content>
-                    <v-text-field
-                      label="Search for a keyword" v-model="keywordFilter"
-                      clearable
-                      :autofocus="true"
-                      @click:clear="resetSearch"
-                      hint="Keyword name"
-                    />
-                  </v-list-item-content>
-                </v-list-item>
-              </template>
-            </v-select>
+            <div class="keyword">
+              <v-select
+                class="keyword-child"
+                no-data-text="Can't find what you're looking for? Hit '+' to create a new keyword"
+                value = "keywords"
+                v-model="selectedKeywords"
+                :items="filteredKeywordList"
+                label="Select keywords"
+                item-text="name"
+                item-value="id"
+                multiple
+                :hint="selectedKeywords"
+                @click="selectedKeywords=undefined"
+                persistent-hint
+                outlined
+              >
+                <template v-slot:prepend-item>
+                  <v-list-item>
+                    <v-list-item-content>
+                      <v-text-field
+                        label="Search for a keyword" v-model="keywordFilter"
+                        clearable
+                        :autofocus="true"
+                        @click:clear="resetSearch"
+                        hint="Keyword name"
+                      />
+                    </v-list-item-content>
+                  </v-list-item>
+                </template>
+              </v-select>
+              <v-btn class="keyword-child" color="primary" @click="showCreateKeyword=true" title="Create new keyword">
+                <v-icon>mdi-plus-box</v-icon>
+              </v-btn>
+            </div>
             <p class="error-text text-center" v-if ="errorMessage !== undefined"> {{errorMessage}} </p>
+            <template v-if="showCreateKeyword">
+              <CreateKeyword @closeDialog="showCreateKeyword=false"/>
+            </template>
             <v-card-actions>
               <v-spacer/>
               <div class="error--text" v-if="feedback !== undefined">{{ feedback }}</div>
@@ -102,13 +101,15 @@
 </template>
 
 <script>
-import { createMarketplaceCard } from '../../api/internal';
-import { getKeywords } from '../../api/internal.ts';
+import { createMarketplaceCard, getKeywords } from '@/api/internal';
+import CreateKeyword from "@/components/marketplace/CreateKeyword";
 
 export default {
   name: "MarketplaceCard",
+  components: {CreateKeyword},
   data() {
     return {
+      showCreateKeyword: false,
       title: "",
       description: "",
       allKeywords: [],
@@ -251,6 +252,12 @@ export default {
 
 
 <style scoped>
+.keyword {
+  display: flex;
+}
+.keyword-child {
+  margin: 0.5em;
+}
 .title {
   line-height: 1.25;
   word-break: break-word;
