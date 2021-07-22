@@ -3,7 +3,6 @@ package org.seng302.datagenerator;
 import java.sql.*;
 import java.time.LocalDate;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 
 import static org.seng302.datagenerator.Main.*;
 
@@ -13,6 +12,13 @@ public class SaleItemGenerator {
 
     public SaleItemGenerator(Connection conn) { this.conn = conn; }
 
+    /**
+     * Extracts the essential information from inventory item table so that the newly generated sale items can be
+     * constructed within the constraints of the associated inventory item attributes
+     * @param invItemId id of the inventory item to get information from
+     * @return a string list of the information of the inventory item
+     * @throws SQLException
+     */
     private String[] extractInvItemInfo(long invItemId) throws SQLException {
         PreparedStatement stmt = conn.prepareStatement(
             "SELECT expires, creation_date, quantity FROM inventory_item WHERE id = ?"
@@ -30,17 +36,19 @@ public class SaleItemGenerator {
      */
     private String[] generateDates(String expires, String creationDate) {
         LocalDate parsedExpires = LocalDate.parse(expires);
-        LocalDate parsedCreationDate = LocalDate.parse(creationDate);
+        LocalDate parsedCreationDate = LocalDate.parse(creationDate.substring(0, 10));
         LocalDate today = LocalDate.now();
 
         LocalDate created = randomDate(parsedCreationDate, today);
         LocalDate closes = randomDate(created, parsedExpires);
+        //randomly generate a time and append it to the created time string
+        Time time = new Time((long)random.nextInt(24*60*60*1000));
 
-        return new String[] {closes.toString(), created.toString()};
+        return new String[] {closes.toString(), created.toString() + " " + time.toString()};
     }
 
     /**
-     * Randomly generates the quantity for sale item and remaining quantity of inventory item
+     * Randomly generates the quantity for sale item and remaining quantity of associated inventory item
      * @return the quantity values in a list
      */
     private int[] generateQuantities(int upperLimit) {
@@ -48,7 +56,6 @@ public class SaleItemGenerator {
         int remainingQuantity = upperLimit - quantity;
         return new int[]{quantity, remainingQuantity};
     }
-
 
     /**
      * Randomly generates the price per item
@@ -60,9 +67,26 @@ public class SaleItemGenerator {
     }
 
     /**
-     * Creates and inserts the product into the database
-     * @param productId the id associated with the product entity representing what product the inventory item is
-     * @return the id of inventory item
+     * Updates the associated inventory item quantity with the new quantity deducted from the sale item generation.
+     * @param remainingQuantity the remaining quantity from generating the sale item
+     * @param invItemId the associated inventory item id of the generated sale item
+     * @throws SQLException
+     */
+    private void updateInventoryItemQuantity(int remainingQuantity, long invItemId) throws SQLException {
+        System.out.println(String.format("Updating inventory item quantity of id %d", invItemId));
+        PreparedStatement stmt = conn.prepareStatement(
+                "UPDATE inventory_item SET quantity = ? WHERE id = ?",
+                Statement.RETURN_GENERATED_KEYS
+        );
+        stmt.setObject(1, remainingQuantity);
+        stmt.setObject(2, invItemId);
+        stmt.executeUpdate();
+    }
+
+    /**
+     * Creates and inserts the sale item into the database
+     * @param invItemId the id associated with the inventory item entity
+     * @return the id of sale item
      */
     private long createInsertSaleItemSQL(long invItemId) throws SQLException {
         String[] invItemInfo = extractInvItemInfo(invItemId);
@@ -93,6 +117,7 @@ public class SaleItemGenerator {
         stmt.executeUpdate();
         ResultSet keys = stmt.getGeneratedKeys();
         keys.next();
+        updateInventoryItemQuantity(remainingQuantity, invItemId);
         return keys.getLong(1);
     }
 
@@ -123,13 +148,16 @@ public class SaleItemGenerator {
     /**
      * Generates the sale items
      * @param saleItemCount count of the number of sale items to be generated
+     * @param invItemIds List of all the ids of the inventory items
      * @return
      */
     public List<Long> generateSaleItems(List<Long> invItemIds, int saleItemCount) throws SQLException {
         List<Long> generatedSaleItemIds = new ArrayList<>();
         for (int i=0; i < saleItemCount; i++) {
             clear();
-            long invItemId = invItemIds.get(i);
+            //Inventory items can have multiple sales, as such, if we randomize the which inventory item is chosen
+            //we can allow some sale items to exist for the same inventory item.
+            long invItemId = invItemIds.get(random.nextInt(invItemIds.size()-1));
 
             System.out.println(String.format("Creating Sale Item %d / %d", i+1, saleItemCount));
             int progress = (int) (((float)(i+1) / (float)saleItemCount) * 100);
