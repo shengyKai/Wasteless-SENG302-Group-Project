@@ -13,17 +13,28 @@ public class SaleItemGenerator {
 
     public SaleItemGenerator(Connection conn) { this.conn = conn; }
 
+    private String[] extractInvItemInfo(long invItemId) throws SQLException {
+        PreparedStatement stmt = conn.prepareStatement(
+            "SELECT expires, creation_date, quantity FROM inventory_item WHERE id = ?"
+        );
+        stmt.setObject(1, invItemId);
+        stmt.executeQuery();
+        ResultSet results = stmt.getResultSet();
+        results.next();
+        return new String[] {results.getString("expires"), results.getString("creation_date"), results.getString("quantity")};
+    }
+
     /**
      * Randomly generates the closes, created date
      * @return a list containing the two dates
      */
-    private String[] generateDates() {
+    private String[] generateDates(String expires, String creationDate) {
+        LocalDate parsedExpires = LocalDate.parse(expires);
+        LocalDate parsedCreationDate = LocalDate.parse(creationDate);
         LocalDate today = LocalDate.now();
-        LocalDate minimumDate = today.minusYears(2);
-        LocalDate maximumDate = today.plusYears(2);
 
-        LocalDate created = randomDate(minimumDate, today);
-        LocalDate closes = randomDate(created, maximumDate);
+        LocalDate created = randomDate(parsedCreationDate, today);
+        LocalDate closes = randomDate(created, parsedExpires);
 
         return new String[] {created.toString(), closes.toString()};
     }
@@ -34,7 +45,9 @@ public class SaleItemGenerator {
      * @return the id of inventory item
      */
     private long createInsertSaleItemSQL(long invItemId) throws SQLException {
-        String[] dates = generateDates();
+        String[] invItemInfo = extractInvItemInfo(invItemId);
+        String[] dates = generateDates(invItemInfo[0], invItemInfo[1]);
+        
         String bestBefore = dates[0];
         String creationDate = dates[1];
         String expires = dates[2];
@@ -48,9 +61,8 @@ public class SaleItemGenerator {
         float pricePerItem = generatePricePerItem();
 
         PreparedStatement stmt = conn.prepareStatement(
-            "INSERT INTO inventory_item(best_before, creation_date, expires, manufactured, price_per_item, quantity, " +
-                    "remaining_quantity, sell_by, total_price, version, product_id)"
-                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            "INSERT INTO sale_item(closes, created, more_info, price, quantity, inventory_item_id)"
+                + "VALUES (?, ?, ?, ?, ?, ?)",
                 Statement.RETURN_GENERATED_KEYS
         );
         stmt.setObject(1, bestBefore); //best before date
