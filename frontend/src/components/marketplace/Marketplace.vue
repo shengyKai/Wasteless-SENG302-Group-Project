@@ -49,7 +49,7 @@
             autofocus
           />
         </v-col>
-        <!-- <v-select
+        <v-select
           v-model="selectedKeywords"
           :items="allKeywords"
           item-text="name"
@@ -58,8 +58,8 @@
           multiple
           small-chips
           color="primary"
-        /> -->
-        <v-select
+        />
+        <!-- <v-select
           no-data-text="No keywords found"
           value = "keywords"
           v-model="selectedKeywords"
@@ -86,7 +86,7 @@
               </v-list-item-content>
             </v-list-item>
           </template>
-        </v-select>
+        </v-select> -->
         <v-col>
           <!-- Toggle button for user to choose partially or fully matched results -->
           <v-btn-toggle class="toggle" v-model="reverse" mandatory>
