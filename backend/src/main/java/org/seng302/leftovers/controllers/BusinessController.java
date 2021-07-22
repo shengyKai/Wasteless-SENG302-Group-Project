@@ -248,6 +248,18 @@ public class BusinessController {
     }
 
 
+    /**
+     * Searches for businesses matching a search query. Results are paginated
+     * The query string can contain AND and OR operators to refine the search.
+     * Searching performs partial matches by default. Using quotation marks performs exact matches
+     * @param request The HTTP Request
+     * @param searchQuery The search term
+     * @param page Page number to display
+     * @param resultsPerPage Number of results per page
+     * @param orderBy Order by term. Can be one of "created", "name", "location", "businessType"
+     * @param reverse Boolean. Reverse ordering of results
+     * @return A JSON object containing the total count and paginated results.
+     */
     @GetMapping("/businesses/search")
     public JSONObject search(HttpServletRequest request, @RequestParam("searchQuery") String searchQuery,
                              @RequestParam(required = false) Integer page,
@@ -257,7 +269,7 @@ public class BusinessController {
 
         AuthenticationTokenManager.checkAuthenticationToken(request);
 
-        logger.info(() -> String.format("Performing search for \"%s\"", searchQuery));
+        logger.info(() -> String.format("Performing Business search for \"%s\"", searchQuery));
 
         Sort.Direction direction = SearchHelper.getSortDirection(reverse);
         if (orderBy == null) {
@@ -275,7 +287,8 @@ public class BusinessController {
         }
 
         PageRequest pageRequest = SearchHelper.getPageRequest(page, resultsPerPage, Sort.by(sortOrder));
-        //Specification<Business> specificatiion ...
+        Specification<Business> specification = SearchHelper.constructBusinessSpecificationFromSearchQuery(searchQuery);
+
         Page<Business> results = businessRepository.findAll(specification, pageRequest);
         Long count = results.getTotalElements();
 
@@ -287,7 +300,5 @@ public class BusinessController {
         json.put("count", count);
         json.put("results", resultArray);
         return json;
-
-        return null;
     }
 }
