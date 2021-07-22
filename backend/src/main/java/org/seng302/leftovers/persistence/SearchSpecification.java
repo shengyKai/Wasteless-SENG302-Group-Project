@@ -14,7 +14,7 @@ import javax.persistence.criteria.Root;
  * Used to create search predicates
  * Can be chained together to form a specification
  */
-public class UserSpecification implements Specification<User> {
+public class SearchSpecification<T> implements Specification<T> {
 
     @Transient
     private SearchCriteria criteria;
@@ -23,7 +23,7 @@ public class UserSpecification implements Specification<User> {
      * Specification
      * @param criteria The search criteria for this predicate
      */
-    public UserSpecification(SearchCriteria criteria){
+    public SearchSpecification(SearchCriteria criteria){
         this.criteria = criteria;
     }
 
@@ -36,7 +36,7 @@ public class UserSpecification implements Specification<User> {
      */
     @Override
     public Predicate toPredicate
-            (Root<User> root, CriteriaQuery<?> query, CriteriaBuilder builder) {
+            (Root<T> root, CriteriaQuery<?> query, CriteriaBuilder builder) {
 
         if (criteria.getOperation().equalsIgnoreCase(">")) {
             return builder.greaterThanOrEqualTo(

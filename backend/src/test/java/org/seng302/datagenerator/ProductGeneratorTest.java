@@ -92,6 +92,8 @@ public class ProductGeneratorTest {
     /**
      * Generates a specified number of users and businesses using the generators and returns the ids of the
      * generated businesses.
+     * @param userCount the number of users to be generated
+     * @param businessCount the number of businesses to be generated
      * @return the ids of the generated businesses
      */
     public List<Long> generateUserAndBusiness(int userCount, int businessCount) {
