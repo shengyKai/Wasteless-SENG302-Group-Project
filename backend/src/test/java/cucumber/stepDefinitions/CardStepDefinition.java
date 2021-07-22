@@ -21,8 +21,10 @@ import org.hibernate.SessionFactory;
 import org.junit.jupiter.api.Assertions;
 import org.mockito.MockedStatic;
 import org.mockito.invocation.InvocationOnMock;
+import org.seng302.leftovers.entities.Keyword;
 import org.seng302.leftovers.entities.MarketplaceCard;
 import org.seng302.leftovers.entities.User;
+import org.seng302.leftovers.persistence.KeywordRepository;
 import org.seng302.leftovers.persistence.MarketplaceCardRepository;
 import org.seng302.leftovers.service.CardService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,6 +66,9 @@ public class CardStepDefinition {
 
     @Autowired
     private MarketplaceCardRepository marketplaceCardRepository;
+
+    @Autowired
+    private KeywordRepository keywordRepository;
 
     @Autowired
     private CardContext cardContext;
@@ -327,5 +332,19 @@ public class CardStepDefinition {
         }
         assertEquals(expectedCards.size(), results.size());
         assertEquals(expectedCards.size(), page.get("count"));
+    }
+
+    @Given("The keyword {string} is added to the card")
+    public void the_keyword_is_added_to_the_card(String name) {
+        Keyword keyword = keywordRepository.findByName(name).orElseThrow();
+        var card = cardContext.getLast();
+        card.addKeyword(keyword);
+        cardContext.save(card);
+    }
+
+    @Then("The card does not have the keyword {string}")
+    public void the_card_does_not_have_the_keyword(String name) {
+        MarketplaceCard card = marketplaceCardRepository.getCard(cardContext.getLast().getID());
+        assertFalse(card.getKeywords().stream().map(Keyword::getName).anyMatch(str -> str.equals(name)));
     }
 }

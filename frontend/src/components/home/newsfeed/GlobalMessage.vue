@@ -1,32 +1,24 @@
 <template>
-  <div>
-    <v-card-title>
-      Global Message
-    </v-card-title>
-    <v-card-subtitle>
-      {{ date }}
-    </v-card-subtitle>
+  <Event :event="event" title="Global Message">
     <v-card-text>
       {{ event.message }}
     </v-card-text>
-  </div>
+  </Event>
 </template>
 
 <script>
-import { formatDate } from '@/utils';
+import Event from './Event';
 
 export default {
   name: 'GlobalMessage',
+  components: {
+    Event,
+  },
   props: {
     event: {
       type: Object,
       required: true,
     },
   },
-  computed: {
-    date() {
-      return formatDate(this.event.created);
-    }
-  }
 };
 </script>
