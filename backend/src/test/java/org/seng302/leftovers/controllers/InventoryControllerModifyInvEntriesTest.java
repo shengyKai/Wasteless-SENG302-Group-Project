@@ -198,7 +198,7 @@ public class InventoryControllerModifyInvEntriesTest {
 
         for (int i=0; i < productIds.length; i++) {
             JSONObject invBody = new JSONObject();
-            invBody.put("productId", productIds[i]);
+            invBody.put("quantity", productIds[i]);
 
             mockMvc.perform(MockMvcRequestBuilders
                     .put("/businesses/1/inventory/1")

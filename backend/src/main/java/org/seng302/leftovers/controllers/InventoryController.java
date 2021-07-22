@@ -117,17 +117,17 @@ public class InventoryController {
                 invItem.setQuantity((int) invItemInfo.getAsNumber("quantity"));
             }
             if (invItemInfo.containsKey("pricePerItem")) {
-                String pricePerItem = invItemInfo.getAsString("pricePerItem");
+                Double pricePerItem = Double.parseDouble(invItemInfo.getAsString("pricePerItem"));
                 if (pricePerItem != null) {
-                    invItem.setPricePerItem(BigDecimal.valueOf(Double.parseDouble(pricePerItem)));
+                    invItem.setPricePerItem(BigDecimal.valueOf(pricePerItem));
                 } else {
                     invItem.setPricePerItem(null);
                 }
             }
             if (invItemInfo.containsKey("totalPrice")) {
-                String totalPrice = invItemInfo.getAsString("totalPrice");
+                Double totalPrice = Double.parseDouble(invItemInfo.getAsString("totalPrice"));
                 if (totalPrice != null) {
-                    invItem.setTotalPrice(BigDecimal.valueOf(Double.parseDouble(totalPrice)));
+                    invItem.setTotalPrice(BigDecimal.valueOf(totalPrice));
                 } else {
                     invItem.setTotalPrice(null);
                 }
