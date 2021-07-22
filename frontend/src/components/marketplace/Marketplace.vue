@@ -49,6 +49,55 @@
             autofocus
           />
         </v-col>
+        <!-- <v-select
+          v-model="selectedKeywords"
+          :items="allKeywords"
+          item-text="name"
+          item-value="id"
+          label="Select keywords"
+          multiple
+          small-chips
+          color="primary"
+        /> -->
+        <v-select
+          no-data-text="No keywords found"
+          value = "keywords"
+          v-model="selectedKeywords"
+          :items="filteredKeywordList"
+          label="Select keywords"
+          item-text="name"
+          item-value="id"
+          multiple
+          :hint="selectedKeywords"
+          @click="selectedKeywords=undefined"
+          persistent-hint
+          outlined
+        >
+          <template v-slot:prepend-item>
+            <v-list-item>
+              <v-list-item-content>
+                <v-text-field
+                  label="Search for a keyword" v-model="keywordFilter"
+                  clearable
+                  :autofocus="true"
+                  @click:clear="resetSearch"
+                  hint="Keyword name"
+                />
+              </v-list-item-content>
+            </v-list-item>
+          </template>
+        </v-select>
+        <v-col>
+          <!-- Toggle button for user to choose partially or fully matched results -->
+          <v-btn-toggle class="toggle" v-model="reverse" mandatory>
+            <v-btn depressed color="primary" :value="false">
+              <v-icon>mdi-circle-half-full</v-icon>
+            </v-btn>
+            <v-btn depressed color="primary" :value="true">
+              <v-icon>mdi-circle</v-icon>
+            </v-btn>
+          </v-btn-toggle>
+        </v-col>
         <v-spacer/>
         <v-col cols="auto" class="text-right" >
           <!---Link to modal for creating new card--->
