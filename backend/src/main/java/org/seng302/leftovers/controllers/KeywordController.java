@@ -6,6 +6,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.seng302.leftovers.entities.Keyword;
 import org.seng302.leftovers.persistence.KeywordRepository;
+import org.seng302.leftovers.service.KeywordService;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -18,16 +19,17 @@ import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.security.Key;
 
 @RestController
 public class KeywordController {
     private static final Logger logger = LogManager.getLogger(KeywordController.class);
 
     private final KeywordRepository keywordRepository;
+    private final KeywordService keywordService;
 
-    public KeywordController(KeywordRepository keywordRepository) {
+    public KeywordController(KeywordRepository keywordRepository, KeywordService keywordService) {
         this.keywordRepository = keywordRepository;
+        this.keywordService = keywordService;
     }
 
 
@@ -100,6 +102,8 @@ public class KeywordController {
             }
 
             keyword = keywordRepository.save(keyword);
+            keywordService.sendNewKeywordEvent(keyword);
+
             JSONObject json = new JSONObject();
             json.put("keywordId", keyword.getID());
 
