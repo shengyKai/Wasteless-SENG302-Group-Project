@@ -59,7 +59,7 @@
           small-chips
           color="primary"
         />
-        <!-- <v-select
+        <v-select
           no-data-text="No keywords found"
           value = "keywords"
           v-model="selectedKeywords"
@@ -86,7 +86,7 @@
               </v-list-item-content>
             </v-list-item>
           </template>
-        </v-select> -->
+        </v-select>
         <v-col>
           <!-- Toggle button for user to choose partially or fully matched results -->
           <v-btn-toggle class="toggle" v-model="reverse" mandatory>
@@ -161,10 +161,22 @@
 import MarketplaceCard from "../cards/MarketplaceCard";
 import {getMarketplaceCardsBySection } from "../../api/internal.ts";
 import { SECTION_NAMES } from '@/utils';
+import { getKeywords } from '../../api/internal.ts';
 
 export default {
   data() {
     return {
+      title: "",
+      description: "",
+      allKeywords: [],
+      selectedKeywords: [],
+      keywordFilter: "",
+      dialog: true,
+      errorMessage: undefined,
+      // sections: [{text: "For Sale", value: "ForSale"}, {text: "Wanted", value: "Wanted"}, {text: "Exchange", value: "Exchange"}],
+      selectedSection: undefined,
+      allowedCharsRegex: /^[\s\d\p{L}\p{P}]*$/u,
+
       tab: null,
       sectionNames: SECTION_NAMES,
       sections: ["ForSale", "Wanted", "Exchange"],
@@ -201,6 +213,31 @@ export default {
       reverse: true
     };
   },
+  mounted() {
+    function OnInput() {
+      this.style.height = "auto";
+      this.style.height = (this.scrollHeight) + "px";
+    }
+
+    this.descriptionField.setAttribute("style", "height:" + (this.descriptionField.scrollHeight) + "px;overflow-y:hidden;");
+    this.descriptionField.addEventListener("input", OnInput);
+
+    this.titleField.setAttribute("style", "height:" + (this.titleField.scrollHeight) + "px;overflow-y:hidden;");
+    this.titleField.addEventListener("input", OnInput);
+    getKeywords()
+      .then((response) => {
+        if (typeof response === 'string') {
+          this.allKeywords = [];
+        } else {
+          this.allKeywords = response;
+        }})
+      .catch(() => (this.allKeywords = []));
+  },
+  computed: {
+    filteredKeywordList() {
+      return this.allKeywords.filter(x => this.filterKeywords(x));
+    },
+  },
   methods: {
     /**
      * Updates the provided sections
@@ -226,6 +263,13 @@ export default {
           this.totalResults[key] = value.count;
         }
       }
+    },
+    resetSearch() {
+      this.keywordFilter = "";
+    },
+    filterKeywords(keyword) {
+      const filterText = this.keywordFilter ?? '';
+      return keyword.name.toLowerCase().includes(filterText.toLowerCase());
     },
     showCreateCard() {
       this.$store.commit('showCreateMarketplaceCard', this.$store.state.user);
