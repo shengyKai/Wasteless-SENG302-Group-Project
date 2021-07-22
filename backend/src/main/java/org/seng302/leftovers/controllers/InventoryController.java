@@ -93,9 +93,7 @@ public class InventoryController {
     public void modifyInvEntry(@PathVariable(name = "businessId") Long businessId,
                                @PathVariable(name = "invItemId") Long invItemId, HttpServletRequest request,
                                @RequestBody JSONObject invItemInfo) throws Exception {
-        String message = String.format("Attempting to modify the inventory %d for the business %d", businessId,
-                invItemId);
-        logger.info(message);
+        logger.info("Attempting to modify the inventory {} for the business {}", invItemId, businessId);
 
         Business business = businessRepository.getBusinessById(businessId);
         if (business == null) {
@@ -118,11 +116,10 @@ public class InventoryController {
         try {
             if (invItemInfo.containsKey("productId")) {
                 String newProductCode = invItemInfo.getAsString("productId");
-                if (productRepository.findByBusinessAndProductCode(business, newProductCode).isEmpty()) {
-                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                            "The product with the given id does not exist within the business's catalogue");
-                }
-                invItem.setProduct(productRepository.getProduct(business, newProductCode));
+                Product product = productRepository.findByBusinessAndProductCode(business, newProductCode)
+                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                                "The product with the given id does not exist within the business's catalogue"));
+                invItem.setProduct(product);
             }
 
             if (invItemInfo.containsKey("quantity")) {
