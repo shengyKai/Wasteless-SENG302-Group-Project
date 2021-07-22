@@ -36,7 +36,27 @@ public class SaleItemGenerator {
         LocalDate created = randomDate(parsedCreationDate, today);
         LocalDate closes = randomDate(created, parsedExpires);
 
-        return new String[] {created.toString(), closes.toString()};
+        return new String[] {closes.toString(), created.toString()};
+    }
+
+    /**
+     * Randomly generates the quantity for sale item and remaining quantity of inventory item
+     * @return the quantity values in a list
+     */
+    private int[] generateQuantities(int upperLimit) {
+        int quantity = random.nextInt(upperLimit);
+        int remainingQuantity = upperLimit - quantity;
+        return new int[]{quantity, remainingQuantity};
+    }
+
+
+    /**
+     * Randomly generates the price per item
+     * @return the price per item
+     */
+    private float generatePricePerItem() {
+        int pricex100 = random.nextInt(100000);
+        return ((float) pricex100) / 100;
     }
 
     /**
@@ -47,35 +67,29 @@ public class SaleItemGenerator {
     private long createInsertSaleItemSQL(long invItemId) throws SQLException {
         String[] invItemInfo = extractInvItemInfo(invItemId);
         String[] dates = generateDates(invItemInfo[0], invItemInfo[1]);
-        
-        String bestBefore = dates[0];
-        String creationDate = dates[1];
-        String expires = dates[2];
-        String manufactured = dates[3];
-        String sellBy = dates[4];
 
-        int[] quantities = generateQuantities();
+        String closes = dates[0];
+        String created = dates[1];
+
+        String moreInfo = DescriptionGenerator.getInstance().randomDescription();
+
+        float price = generatePricePerItem();
+
+        int[] quantities = generateQuantities(Integer.parseInt(invItemInfo[2]));
         int quantity = quantities[0];
         int remainingQuantity = quantities[1];
-
-        float pricePerItem = generatePricePerItem();
 
         PreparedStatement stmt = conn.prepareStatement(
             "INSERT INTO sale_item(closes, created, more_info, price, quantity, inventory_item_id)"
                 + "VALUES (?, ?, ?, ?, ?, ?)",
                 Statement.RETURN_GENERATED_KEYS
         );
-        stmt.setObject(1, bestBefore); //best before date
-        stmt.setObject(2, creationDate); //creation date
-        stmt.setObject(3, expires); //expiration date
-        stmt.setObject(4, manufactured); //manufactured date
-        stmt.setObject(5, pricePerItem); //price per item
-        stmt.setObject(6, quantity); //quantity
-        stmt.setObject(7, remainingQuantity); //remaining quantity
-        stmt.setObject(8, sellBy); //sell by date
-        stmt.setObject(9, remainingQuantity * pricePerItem); //total price
-        stmt.setObject(10, generateVersion()); //version of product
-        stmt.setObject(11, productId); //product id
+        stmt.setObject(1, closes); 
+        stmt.setObject(2, created);
+        stmt.setObject(3, moreInfo);
+        stmt.setObject(4, price);
+        stmt.setObject(5, quantity);
+        stmt.setObject(6, invItemId);
         stmt.executeUpdate();
         ResultSet keys = stmt.getGeneratedKeys();
         keys.next();
@@ -115,9 +129,9 @@ public class SaleItemGenerator {
         List<Long> generatedSaleItemIds = new ArrayList<>();
         for (int i=0; i < saleItemCount; i++) {
             clear();
-            long invItemId = invItemIds.get(0);
+            long invItemId = invItemIds.get(i);
 
-            System.out.println(String.format("Creating Inventory Item %d / %d", i+1, saleItemCount));
+            System.out.println(String.format("Creating Sale Item %d / %d", i+1, saleItemCount));
             int progress = (int) (((float)(i+1) / (float)saleItemCount) * 100);
             System.out.println(String.format("Progress: %d%%", progress));
             long saleItemId = createInsertSaleItemSQL(invItemId);
