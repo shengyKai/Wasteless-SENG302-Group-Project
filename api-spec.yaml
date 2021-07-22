@@ -924,6 +924,72 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Listing'
+  '/businesses/search':
+    get:
+      tags:
+        - 'U23: Search for business'
+        - 'Business Accounts'
+      summary: 'Search for businesses by some criteria, for now: their name'
+      security: 
+        - CookieAuth:
+          - user
+          - globalApplicationAdmin
+          - defaultGlobalApplicationAdmin
+      parameters: 
+        - in: query
+          name: searchQuery
+          schema:
+            type: string
+          required: true
+          example: "supermarket"
+          description: "Criteria to search businesses for, e.g: Businesses full name, or part of their name. <br> Use keywords ***AND*** and ***OR*** to refine search. Quotations can be used to find exact matches"
+        - name: page
+          in: query
+          description: The page number to retrieve (1 indexed)
+          schema:
+            type: integer
+            example: 1
+        - name: resultsPerPage
+          in: query
+          description: The number of results to show per page
+          schema:
+            type: integer
+            example: 10
+        - name: orderBy
+          in: query
+          description: Card property to order results by
+          schema:
+            type: string
+            example: created
+            enum:
+              - created
+              - name
+              - location
+              - businessType
+        - name: reverse
+          in: query
+          description: Whether to flip default sort order (default is ascending)
+          schema:
+            type: boolean
+            example: false
+      responses:
+        '200':
+          description: Request successful, a (possibly empty) list of businesses is returned along with total count
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Page'
+                  - type: object
+                    required:
+                      - results
+                    properties:
+                      results:
+                        type: array
+                        items: 
+                          $ref: '#/components/schemas/Business'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
               
   '/cards':
     post:
