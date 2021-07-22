@@ -281,7 +281,7 @@ public class BusinessController {
 
         List<Sort.Order> sortOrder;
         if (orderBy.equals("location")) {
-            sortOrder = List.of(new Sort.Order(direction, "address.address.country").ignoreCase(), new Sort.Order(direction, "address.address.city").ignoreCase());
+            sortOrder = List.of(new Sort.Order(direction, "address.country").ignoreCase(), new Sort.Order(direction, "address.city").ignoreCase());
         } else {
             sortOrder = List.of(new Sort.Order(direction, orderBy).ignoreCase());
         }
