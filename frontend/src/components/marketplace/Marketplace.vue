@@ -214,16 +214,6 @@ export default {
     };
   },
   mounted() {
-    function OnInput() {
-      this.style.height = "auto";
-      this.style.height = (this.scrollHeight) + "px";
-    }
-
-    this.descriptionField.setAttribute("style", "height:" + (this.descriptionField.scrollHeight) + "px;overflow-y:hidden;");
-    this.descriptionField.addEventListener("input", OnInput);
-
-    this.titleField.setAttribute("style", "height:" + (this.titleField.scrollHeight) + "px;overflow-y:hidden;");
-    this.titleField.addEventListener("input", OnInput);
     getKeywords()
       .then((response) => {
         if (typeof response === 'string') {
