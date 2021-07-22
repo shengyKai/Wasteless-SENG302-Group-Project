@@ -33,7 +33,7 @@ Feature: U20 - Modify Inventory Entries
     Given I am an administrator of the business
     And I am logged into my account
     When I try to modify the total price to 15.05 for the inventory entry with the id 2
-    Then the price per item of the inventory item with the id 2 will be 1.20
+    Then the total price of the inventory item with the id 2 will be 1.20
 
   Scenario: AC1 - I can modify the manufactured date of an inventory entry when logged in as the business administrator.
     Given I am an administrator of the business
@@ -57,7 +57,7 @@ Feature: U20 - Modify Inventory Entries
     Given I am an administrator of the business
     And I am logged into my account
     When I try to modify the expires date to "2021-06-20" for the inventory entry with the id 6
-    Then the expires of the inventory item with the id 6 will be "2021-06-20"
+    Then the expires date of the inventory item with the id 6 will be "2021-06-20"
 
   Scenario: AC1 - I can modify the product of an inventory entry when logged in as the business administrator.
     Given I am an administrator of the business
@@ -66,13 +66,13 @@ Feature: U20 - Modify Inventory Entries
     Then the product of the inventory item with the id 6 will have the product code "APPLE11"
 
   Scenario: AC1 - I cannot modify the quantity of an inventory entry when logged in as user that is not the business administrator.
-    Given I am not an administrator of the business
+    Given I am an not an administrator of the business
     And I am logged into my account
     When I try to modify the quantity to 4 for the inventory entry with the id 1
     Then the quantity of the inventory item with the id 1 will be 5
 
   Scenario: AC1 - I cannot modify the price_per_item of an inventory entry when logged in as user that is not the business administrator.
-    Given I am not an administrator of the business
+    Given I am an not an administrator of the business
     And I am logged into my account
     When I try to modify the price per item to 1.20 for the inventory entry with the id 1
     Then the price per item of the inventory item with the id 1 will be 1.10
@@ -93,13 +93,13 @@ Feature: U20 - Modify Inventory Entries
     Given I am an administrator of the business
     And I am logged into my account
     When I try to modify the expires date to null for the inventory entry with the id 6
-    Then the expires of the inventory item with the id 6 will be "2028-01-21"
+    Then the expires date of the inventory item with the id 6 will be "2028-01-21"
 
   Scenario: AC2 - I cannot modify the expires date to be before the best_before date
     Given I am an administrator of the business
     And I am logged into my account
     When I try to modify the expires date to "2025-10-10" for the inventory entry with the id 6
-    Then the expires of the inventory item with the id 6 will be "2028-01-21"
+    Then the expires date of the inventory item with the id 6 will be "2028-01-21"
 
   Scenario: AC2 - I can modify the manufactured date to be empty (null)
     Given I am an administrator of the business

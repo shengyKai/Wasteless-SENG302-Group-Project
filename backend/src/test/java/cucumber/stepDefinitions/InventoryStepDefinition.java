@@ -265,4 +265,138 @@ public class InventoryStepDefinition  {
         List<InventoryItem> inventory = inventoryItemRepository.findAllByProduct(product);
         assertTrue(inventory.stream().anyMatch(x-> x.getQuantity() == quantity));
     }
+
+    // For Modify Inventory Entry Feature
+
+    @When("I try to modify the quantity to {int} for the inventory entry with the id {int}")
+    public void i_try_to_modify_the_quantity_to_for_the_inventory_entry_with_the_id(
+            int quantity, int invItemId) {
+        //TODO
+    }
+
+    @When("I try to modify the price per item to {float} for the inventory entry with the id {int}")
+    public void i_try_to_modify_the_price_per_item_to_for_the_inventory_entry_with_the_id(
+            float pricePerItem, int invItemId) {
+        //TODO
+    }
+
+    @When("I try to modify the total price to {float} for the inventory entry with the id {int}")
+    public void i_try_to_modify_the_total_price_to_for_the_inventory_entry_with_the_id(
+            float totalPrice, int invItemId) {
+        //TODO
+    }
+
+    @When("I try to modify the manufactured date to {string} for the inventory entry with the id {int}")
+    public void i_try_to_modify_the_manufacutured_date_to_for_the_inventory_entry_with_the_id(
+            String manufactured, int invItemId) {
+        //TODO
+    }
+
+    @When("I try to modify the sell by date to {string} for the inventory entry with the id {int}")
+    public void i_try_to_modify_the_sell_by_date_to_for_the_inventory_entry_with_the_id(
+            String sellBy, int invItemId) {
+        //TODO
+    }
+
+    @When("I try to modify the best before date to {string} for the inventory entry with the id {int}")
+    public void i_try_to_modify_the_best_before_date_to_for_the_inventory_entry_with_the_id(
+            String bestBefore, int invItemId) {
+        //TODO
+    }
+
+    @When("I try to modify the expires date to {string} for the inventory entry with the id {int}")
+    public void i_try_to_modify_the_expires_date_to_for_the_inventory_entry_with_the_id(
+            String expires, int invItemId) {
+        //TODO
+    }
+
+    @When("I try to modify the product to the one with the product code {string} for the inventory entry with the id {int}")
+    public void i_try_to_modify_the_product_to_the_one_with_the_product_code_for_the_inventory_entry_with_the_id(
+            String productCode, int invItemId) {
+        //TODO
+    }
+
+    @When("I try to modify the quantity to null for the inventory entry with the id {int}")
+    public void i_try_to_modify_the_quantity_to_null_for_the_inventory_entry_with_the_id(
+            int invItemId) {
+        //TODO
+    }
+
+    @When("I try to modify the expires date to null for the inventory entry with the id {int}")
+    public void i_try_to_modify_the_expires_date_to_null_for_the_inventory_entry_with_the_id(
+            int invItemId) {
+        //TODO
+    }
+
+    @When("I try to modify the manufactured date to null for the inventory entry with the id {int}")
+    public void i_try_to_modify_the_manufactured_date_to_null_for_the_inventory_entry_with_the_id(
+            int invItemId) {
+        //TODO
+    }
+
+    @Then("the quantity of the inventory item with the id {int} will be {int}")
+    public void the_quantity_of_the_inventory_item_with_the_id_will_be(
+            int invItemId, int quantity) {
+        //TODO
+    }
+
+    @Then("the price per item of the inventory item with the id {int} will be {float}")
+    public void the_price_per_item_of_the_inventory_item_with_the_id_will_be(
+            int invItemId, float pricePerItem) {
+        //TODO
+    }
+
+    @Then("the total price of the inventory item with the id {int} will be {float}")
+    public void the_total_price_of_the_inventory_item_with_the_id_will_be(
+            int invItemId, float totalPrice) {
+        //TODO
+    }
+
+    @Then("the manufactured date of the inventory item with the id {int} will be {string}")
+    public void the_manufactured_date_of_the_inventory_item_with_the_id_will_be(
+            int invItemId, String manufactured) {
+        //TODO
+    }
+
+    @Then("the sell by date of the inventory item with the id {int} will be {string}")
+    public void the_sell_by_date_of_the_inventory_item_with_the_id_will_be(
+            int invItemId, String sellBy) {
+        //TODO
+    }
+
+    @Then("the best before date of the inventory item with the id {int} will be {string}")
+    public void the_best_before_date_of_the_inventory_item_with_the_id_will_be(
+            int invItemId, String bestBefore) {
+        //TODO
+    }
+
+    @Then("the expires date of the inventory item with the id {int} will be {string}")
+    public void the_expires_date_of_the_inventory_item_with_the_id_will_be(
+            int invItemId, String expires) {
+        //TODO
+    }
+
+    @Then("the product of the inventory item with the id {int} will have the product code {string}")
+    public void the_product_of_the_inventory_item_with_the_id_will_have_the_product_code(
+            int invItemId, String productCode) {
+        //TODO
+    }
+
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
