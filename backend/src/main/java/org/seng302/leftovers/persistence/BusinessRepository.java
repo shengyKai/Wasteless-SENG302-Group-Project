@@ -1,6 +1,7 @@
 package org.seng302.leftovers.persistence;
 
 import org.seng302.leftovers.entities.Business;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
@@ -10,7 +11,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.Optional;
 
 @Repository
-public interface BusinessRepository extends CrudRepository<Business, Long> {
+public interface BusinessRepository extends CrudRepository<Business, Long>, JpaSpecificationExecutor<Business> {
     Business findByName(@Param("name") String name);
 
     /**

@@ -7,24 +7,21 @@ let lastErrorTime = Number.MIN_VALUE;
 
 export type AnyEvent = MessageEvent | ExpiryEvent | DeleteEvent
 
-type BaseEvent = {
+type BaseEvent<T extends string> = {
   id: number,
   created: string,
-  type: string,
+  type: T,
 }
 
-type MessageEvent = BaseEvent & {
-  type: 'MessageEvent',
+type MessageEvent = BaseEvent<'MessageEvent'> & {
   message: string
 }
 
-type ExpiryEvent = BaseEvent & {
-  type: 'ExpiryEvent',
+type ExpiryEvent = BaseEvent<'ExpiryEvent'> & {
   card: MarketplaceCard
 }
 
-type DeleteEvent = BaseEvent & {
-  type: 'DeleteEvent',
+type DeleteEvent = BaseEvent<'DeleteEvent'> & {
   title: string,
   section: MarketplaceCardSection
 }

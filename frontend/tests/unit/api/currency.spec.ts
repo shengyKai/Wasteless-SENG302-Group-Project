@@ -1,4 +1,4 @@
-import { currencyFromCountry, queryCurrencyAPI, getCurrencyFromAPIResponse } from "@/api/currency";
+import { currencyFromCountry } from "@/api/currency";
 
 describe('currency.ts', () => {
 
@@ -60,6 +60,7 @@ describe('currency.ts', () => {
     expect(consoleOutput).toEqual([
       "Failed to reach https://restcountries.eu/rest/v2/name/Australia?fullText=true&fields=currencies"
     ]);
+    expect(currency).toStrictEqual({"errorMessage": "Failed to reach https://restcountries.eu/rest/v2/name/Australia?fullText=true&fields=currencies", "symbol": "$", "code": ""});
   });
 
   it('Returns no currency to the frontend and outputs to the console when 404 response received', async () => {
@@ -71,6 +72,7 @@ describe('currency.ts', () => {
     expect(consoleOutput).toEqual([
       "No currency for country with name Australia was found"
     ]);
+    expect(currency).toStrictEqual({"errorMessage": "No currency for country with name Australia was found", "symbol": "$", "code": ""});
   });
 
   it('Returns no currency to the frontend and outputs to the console when 400 response received', async () => {
@@ -82,6 +84,7 @@ describe('currency.ts', () => {
     expect(consoleOutput).toEqual([
       "Request failed: 400"
     ]);
+    expect(currency).toStrictEqual({"errorMessage": "Request failed: 400", "symbol": "$", "code": ""});
   });
 
   it('Returns no currency to the frontend and outputs to the console when 200 response received but response is not in expected format', async () => {
@@ -94,6 +97,7 @@ describe('currency.ts', () => {
     expect(consoleOutput).toEqual([
       "API response was not in readable format"
     ]);
+    expect(currency).toStrictEqual({"errorMessage": "API response was not in readable format", "symbol": "$", "code": ""});
   });
 
   it('Return currency received from API when response list contains one currency', async () => {

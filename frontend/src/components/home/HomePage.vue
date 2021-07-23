@@ -18,6 +18,7 @@
         <GlobalMessage v-if="event.type === 'MessageEvent'" :event="event"/>
         <ExpiryEvent v-else-if="event.type === 'ExpiryEvent'" :event="event"/>
         <DeleteEvent v-else-if="event.type === 'DeleteEvent'" :event="event"/>
+        <KeywordCreated v-else-if="event.type === 'KeywordCreatedEvent'" :event="event"/>
         <template v-else>
           <v-card-title>
             {{ event.type }}
@@ -37,6 +38,7 @@ import UserActionPanel from "./UserActionPanel";
 import GlobalMessage from "./newsfeed/GlobalMessage.vue";
 import ExpiryEvent from './newsfeed/ExpiryEvent.vue';
 import DeleteEvent from './newsfeed/DeleteEvent.vue';
+import KeywordCreated from './newsfeed/KeywordCreated.vue';
 
 export default {
   components: {
@@ -44,7 +46,8 @@ export default {
     UserActionPanel,
     GlobalMessage,
     ExpiryEvent,
-    DeleteEvent
+    DeleteEvent,
+    KeywordCreated,
   },
   computed: {
     /**
