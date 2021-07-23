@@ -39,7 +39,7 @@ public class AuthenticationTokenManager {
         Cookie authToken = new Cookie(AUTH_TOKEN_NAME, authString);
         authToken.setPath("/");
         authToken.setHttpOnly(true);
-        authToken.setMaxAge(30 * 60);   // Set cookie expiry for 30 minutes from now
+        authToken.setMaxAge(60*60);   // Set cookie expiry for 60 minutes from now
         response.addCookie(authToken);
 
         HttpSession session = request.getSession(true);

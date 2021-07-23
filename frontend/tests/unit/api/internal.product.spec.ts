@@ -81,7 +81,7 @@ describe('Test GET /businesses/:id/products endpoint', () => {
         status: 401,
       }});
     const message = await getProducts(1, 1, 1, "created", false);
-    expect(message).toEqual('Missing/Invalid access token');
+    expect(message).toEqual('You have been logged out. Please login again and retry');
   });
 
   it('When response has a 403 status, getProducts returns an error message indicating that the user is not an admin of the business', async () => {

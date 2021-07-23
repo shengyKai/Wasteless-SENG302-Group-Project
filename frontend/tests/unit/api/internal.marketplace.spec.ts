@@ -73,7 +73,7 @@ describe("Test GET /cards endpoint", () => {
       response: {status: 401}
     });
     const errorMessage = await api.getMarketplaceCardsBySection("ForSale", 0, 0, "created", true);
-    expect(errorMessage).toEqual('Missing/Invalid access token');
+    expect(errorMessage).toEqual('You have been logged out. Please login again and retry');
   });
 
   it('When api call returns any other error status, the response will be an error message with that status', async () => {

@@ -182,6 +182,14 @@ public class MarketplaceCard {
     }
 
     /**
+     * Removes the provided keyword from this marketplace card
+     * @param keyword Keyword to remove to card
+     */
+    public void removeKeyword(Keyword keyword) {
+        keywords.remove(keyword);
+    }
+
+    /**
      * Constructs the JSON representation of this card
      * @return A JSONObject containing this cards data
      */
