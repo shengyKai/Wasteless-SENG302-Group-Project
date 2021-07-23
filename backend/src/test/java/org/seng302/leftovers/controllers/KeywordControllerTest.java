@@ -108,6 +108,71 @@ class KeywordControllerTest {
     }
 
     @Test
+    void deleteKeyword_noAuthentication_401Response() throws Exception {
+        // Mock the AuthenticationTokenManager to respond as it would when the authentication token is missing or invalid
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.checkAuthenticationToken(any()))
+                .thenThrow(new AccessTokenException());
+
+        // Verify that a 401 response is received in response to the DELETE request
+        mockMvc.perform(delete("/keywords/1"))
+                .andExpect(status().isUnauthorized())
+                .andReturn();
+
+        // Check that the authentication token manager was called
+        authenticationTokenManager.verify(() -> AuthenticationTokenManager.checkAuthenticationToken(any()));
+        verify(keywordRepository, times(0)).delete(any()); // Nothing is deleted
+    }
+
+    @Test
+    void deleteKeyword_notAdmin_403Response() throws Exception {
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionIsAdmin(any())).thenReturn(false);
+
+        // Verify that a 403 response is received in response to the DELETE request
+        mockMvc.perform(delete("/keywords/1"))
+                .andExpect(status().isForbidden())
+                .andReturn();
+
+        // Check that the authentication token manager was called
+        authenticationTokenManager.verify(() -> AuthenticationTokenManager.sessionIsAdmin(any()));
+        verify(keywordRepository, times(0)).delete(any()); // Nothing is deleted
+    }
+
+    @Test
+    void deleteKeyword_keywordNotFound_406Response() throws Exception {
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionIsAdmin(any())).thenReturn(true);
+
+        when(keywordRepository.findById(99L)).thenReturn(Optional.empty());
+
+        // Verify that a 406 response is received in response to the DELETE request
+        mockMvc.perform(delete("/keywords/99"))
+                .andExpect(status().isNotAcceptable())
+                .andReturn();
+
+        // Check that the authentication token manager was called
+        authenticationTokenManager.verify(() -> AuthenticationTokenManager.sessionIsAdmin(any()));
+        verify(keywordRepository, times(1)).findById(99L);
+        verify(keywordRepository, times(0)).delete(any()); // Nothing is deleted
+    }
+
+    @Test
+    void deleteKeyword_validRequest_200ResponseAndDeleted() throws Exception {
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionIsAdmin(any())).thenReturn(true);
+
+        Keyword mockKeyword = mock(Keyword.class);
+        when(keywordRepository.findById(99L)).thenReturn(Optional.of(mockKeyword));
+
+        // Verify that a 200 response is received in response to the DELETE request
+        mockMvc.perform(delete("/keywords/99"))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        // Check that the authentication token manager was called
+        authenticationTokenManager.verify(() -> AuthenticationTokenManager.sessionIsAdmin(any()));
+        verify(keywordRepository, times(1)).findById(99L);
+        verify(keywordRepository, times(1)).delete(mockKeyword); // Keyword is deleted
+    }
+
+    @Test
     void addKeyword_noAuthentication_401Response() throws Exception {
         // Mock the AuthenticationTokenManager to respond as it would when the authentication token is missing or invalid
         authenticationTokenManager.when(() -> AuthenticationTokenManager.checkAuthenticationToken(any()))

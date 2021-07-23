@@ -107,6 +107,12 @@ task(generateProduct, dependsOn: 'classes', type: JavaExec) {
     classpath = sourceSets.main.runtimeClasspath
 }
 
+task(generateInventoryItem, dependsOn: 'classes', type: JavaExec) {
+    main = 'org.seng302.datagenerator.InventoryItemGenerator'
+    standardInput = System.in
+    classpath = sourceSets.main.runtimeClasspath
+}
+
 // create a specific task to run cucumber tests
 task cucumber(type: Test) {
     excludes = ['**/org/seng302/**']

@@ -45,16 +45,44 @@
             </v-col>
           </v-row>
           <v-row>
+            <!--            <v-select-->
+            <!--              v-model="selectedKeywords"-->
+            <!--              :items="allKeywords"-->
+            <!--              item-text="name"-->
+            <!--              item-value="id"-->
+            <!--              label="Select keywords"-->
+            <!--              multiple-->
+            <!--              small-chips-->
+            <!--              color="primary"-->
+            <!--            />-->
             <v-select
+              no-data-text="No keywords found"
+              value = "keywords"
               v-model="selectedKeywords"
-              :items="allKeywords"
+              :items="filteredKeywordList"
+              label="Select keywords"
               item-text="name"
               item-value="id"
-              label="Select keywords"
               multiple
-              small-chips
-              color="primary"
-            />
+              :hint="selectedKeywords"
+              @click="selectedKeywords=undefined"
+              persistent-hint
+              outlined
+            >
+              <template v-slot:prepend-item>
+                <v-list-item>
+                  <v-list-item-content>
+                    <v-text-field
+                      label="Search for a keyword" v-model="keywordFilter"
+                      clearable
+                      :autofocus="true"
+                      @click:clear="resetSearch"
+                      hint="Keyword name"
+                    />
+                  </v-list-item-content>
+                </v-list-item>
+              </template>
+            </v-select>
             <p class="error-text text-center" v-if ="errorMessage !== undefined"> {{errorMessage}} </p>
             <v-card-actions>
               <v-spacer/>
@@ -85,6 +113,7 @@ export default {
       description: "",
       allKeywords: [],
       selectedKeywords: [],
+      keywordFilter: "",
       dialog: true,
       errorMessage: undefined,
       sections: [{text: "For Sale", value: "ForSale"}, {text: "Wanted", value: "Wanted"}, {text: "Exchange", value: "Exchange"}],
@@ -113,6 +142,9 @@ export default {
       .catch(() => (this.allKeywords = []));
   },
   computed: {
+    filteredKeywordList() {
+      return this.allKeywords.filter(x => this.filterKeywords(x));
+    },
     descriptionField() {
       return this.$refs.descriptionField;
     },
@@ -186,6 +218,13 @@ export default {
     }
   },
   methods: {
+    resetSearch() {
+      this.keywordFilter = "";
+    },
+    filterKeywords(keyword) {
+      const filterText = this.keywordFilter ?? '';
+      return keyword.name.toLowerCase().includes(filterText.toLowerCase());
+    },
     closeDialog() {
       this.$emit('closeDialog');
     },
