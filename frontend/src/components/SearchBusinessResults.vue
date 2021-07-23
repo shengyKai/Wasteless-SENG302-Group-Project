@@ -64,8 +64,7 @@
     />
     <!--Text to display range of results out of total number of results-->
     <v-row justify="center" no-gutters>
-      <!-- {{ resultsMessage }} -->
-      HAHA waiting for CONORRRRRR
+      {{ resultsMessage }}
     </v-row>
   </div>
 </template>
