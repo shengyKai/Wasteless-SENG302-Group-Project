@@ -2,18 +2,15 @@ package org.seng302.leftovers.tools;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.seng302.leftovers.entities.Business;
 import org.seng302.leftovers.entities.User;
 import org.seng302.leftovers.exceptions.SearchFormatException;
 import org.seng302.leftovers.persistence.UserRepository;
-import org.seng302.leftovers.persistence.UserSpecificationsBuilder;
+import org.seng302.leftovers.persistence.SpecificationsBuilder;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -166,12 +163,32 @@ public class SearchHelper {
     public static Specification<User> constructUserSpecificationFromSearchQuery(String searchQuery) {
         List<String> searchTokens = splitSearchStringIntoTerms(searchQuery);
 
+        var fieldNames = Arrays.asList("firstName", "lastName", "nickname", "middleName");
+
         List<Specification<User>> searchSpecs = new ArrayList<>();
         List<PredicateType> predicateTypesByIndex = new ArrayList<>();
-        parseUserSearchTokens(searchTokens, searchSpecs, predicateTypesByIndex);
+        parseSearchTokens(searchTokens, searchSpecs, predicateTypesByIndex, fieldNames);
 
         return buildCompoundSpecification(searchSpecs, predicateTypesByIndex)
                 .and(isNotDGAASpec());
+    }
+
+    /**
+     * This method returns a specification for the Business entity which will match Business objects with a name which is a partial match for the given searchTerm.
+     * For example, if the search term was 'Tim', the
+     * specification would match Businesses with the name 'Tim', 'Tim's BBQ' or 'Tim's garage',
+     * Also supports operations AND and OR in the search term. Exact matches are given using quotation marks
+     * @param searchQuery A term to find exact matches for.
+     * @return A specification which will match Businesses that partially match the given string in the business name.
+     */
+    public static Specification<Business> constructBusinessSpecificationFromSearchQuery(String searchQuery) {
+        List<String> searchTokens = splitSearchStringIntoTerms(searchQuery);
+        List<String> fieldNames = Collections.singletonList("name");
+
+        List<Specification<Business>> searchSpecs = new ArrayList<>();
+        List<PredicateType> predicateTypesByIndex = new ArrayList<>();
+        parseSearchTokens(searchTokens, searchSpecs, predicateTypesByIndex, fieldNames);
+        return buildCompoundSpecification(searchSpecs, predicateTypesByIndex);
     }
 
     /**
@@ -183,9 +200,9 @@ public class SearchHelper {
      * @param predicateTypes A list of N-1 predicate types to use when combining the specifications.
      * @return A compound specification made up of individual specifications linked by predicates.
      */
-    private static Specification<User> buildCompoundSpecification(List<Specification<User>> searchSpecs,
-                                                                  List<PredicateType> predicateTypes) {
-        Specification<User> result = searchSpecs.get(0);
+    private static <T> Specification<T> buildCompoundSpecification(List<Specification<T>> searchSpecs,
+                                                                   List<PredicateType> predicateTypes) {
+        Specification<T> result = searchSpecs.get(0);
         for (int i = 1; i < searchSpecs.size(); i++) {
             if (predicateTypes.get(i-1).equals(PredicateType.OR)) {
                 result = result.or(searchSpecs.get(i));
@@ -206,20 +223,21 @@ public class SearchHelper {
      * @param searchTokens A list of single words or phrases in quotes from the user's search string.
      * @param searchSpecs An empty list which the specifications will be added to.
      * @param predicateTypesByIndex An empty list which the predicates will be added to.
+     * @param fieldNames A list of field names to compare against
      */
-    private static void parseUserSearchTokens(List<String> searchTokens, List<Specification<User>> searchSpecs,
-                                              List<PredicateType> predicateTypesByIndex) {
+    private static <T> void parseSearchTokens(List<String> searchTokens, List<Specification<T>> searchSpecs,
+                                              List<PredicateType> predicateTypesByIndex, List<String> fieldNames) {
         int i = 0;
         while (i < searchTokens.size()) {
             if (searchTokens.get(i).startsWith("\"") || searchTokens.get(i).startsWith("'")) {
                 String termWithoutQuotes = searchTokens.get(i).substring(1, searchTokens.get(i).length() - 1);
-                searchSpecs.add(buildExactMatchUserSpec(termWithoutQuotes));
+                searchSpecs.add(buildExactMatchSpec(termWithoutQuotes, fieldNames));
                 if (i + 1 < searchTokens.size()) {
                     PredicateType predicateType = getPredicateType(searchTokens.get(i + 1));
                     predicateTypesByIndex.add(predicateType);
                 }
             } else if (!(searchTokens.get(i).equalsIgnoreCase("and") || searchTokens.get(i).equalsIgnoreCase("or"))) {
-                searchSpecs.add(buildPartialMatchUserSpec(searchTokens.get(i)));
+                searchSpecs.add(buildPartialMatchSpec(searchTokens.get(i), fieldNames));
                 if (i + 1 < searchTokens.size()) {
                     PredicateType predicateType = getPredicateType(searchTokens.get(i + 1));
                     predicateTypesByIndex.add(predicateType);
@@ -237,34 +255,34 @@ public class SearchHelper {
     }
 
     /**
-     * This method returns a specification for the User entity which will match User objects with a firstName, middleName,
-     * lastName or nickname which is an exact match for the given searchTerm. For example, if the search term was 'Jo', the
+     * This method returns a specification for filtering entities which will match objects with fields
+     * which is an exact match for the given searchTerm. For example, if the search term was 'Jo', the
      * specification would match Users with the name 'Jo' but not 'jo' or 'Joe',
      * @param searchTerm A term to find exact matches for.
-     * @return A specification which will match users that exactly match the given string in one of their name attributes.
+     * @param fieldNames A list of fields to compare
+     * @return A specification which will match entities that exactly match the given string in one of the given fields.
      */
-    private static Specification<User> buildExactMatchUserSpec(String searchTerm) {
-        UserSpecificationsBuilder builder = new UserSpecificationsBuilder();
-        builder.with("firstName", "=", searchTerm, true);
-        builder.with("middleName", "=", searchTerm, true);
-        builder.with("lastName", "=", searchTerm, true);
-        builder.with("nickname", "=", searchTerm, true);
+    private static <T> Specification<T> buildExactMatchSpec(String searchTerm, List<String> fieldNames) {
+        SpecificationsBuilder<T> builder = new SpecificationsBuilder<>();
+        for (var field : fieldNames) {
+            builder.with(field, "=", searchTerm, true);
+        }
         return builder.build();
     }
 
     /**
-     * This method returns a specification for the User entity which will match User objects with a firstName, middleName,
-     * lastName or nickname which is an exact match for the given searchTerm. For example, if the search term was 'Jo', the
+     * This method returns a specification for filtering entities which will match objects with fields
+     * which is a partial match for the given searchTerm. For example, if the search term was 'Jo', the
      * specification would match Users with the name 'Jo', 'jo' or 'Joe',
      * @param searchTerm A term to find exact matches for.
-     * @return A specification which will match users that exactly match the given string in one of their name attributes.
+     * @param fieldNames A list of fields to compare
+     * @return A specification which will match entities that exactly match the given string in one of their given fields.
      */
-    private static Specification<User> buildPartialMatchUserSpec(String searchTerm) {
-        UserSpecificationsBuilder builder = new UserSpecificationsBuilder();
-        builder.with("firstName", ":", searchTerm, true);
-        builder.with("middleName", ":", searchTerm, true);
-        builder.with("lastName", ":", searchTerm, true);
-        builder.with("nickname", ":", searchTerm, true);
+    private static <T> Specification<T> buildPartialMatchSpec(String searchTerm, List<String> fieldNames) {
+        SpecificationsBuilder<T> builder = new SpecificationsBuilder<>();
+        for (var field : fieldNames) {
+            builder.with(field, ":", searchTerm, true);
+        }
         return builder.build();
     }
 
@@ -488,6 +506,8 @@ public class SearchHelper {
             }
         }
     }
+
+
 
 
 
