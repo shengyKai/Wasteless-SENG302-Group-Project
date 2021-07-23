@@ -12,7 +12,7 @@
     <v-container class="grey lighten-2 mt-2">
       <v-row>
         <v-col v-for="card in cards" :key="card.id" cols="12" sm="6" md="4" lg="3">
-          <MarketplaceCard :showSection="true" :content="card"/>
+          <MarketplaceCard :showSection="true" :showActions="true" :content="card" @delete-card="updateMarketplace"/>
         </v-col>
       </v-row>
     </v-container>
@@ -51,8 +51,6 @@ export default {
       resultsPerPage: 12,
       /**
        * Total number of results for all pages
-       * For now, it is hard coded to suit the above aesthetic. once the api method to retrieve the count is created, it can
-       * be replaced with dynamic values.
        */
       totalResults: 0,
       error: undefined,
@@ -86,6 +84,16 @@ export default {
       let response = await getMarketplaceCardsByUser(this.$route.params.id, this.resultsPerPage, this.currentPage);
       this.totalResults = response.count;
       this.cards = response.results;
+    },
+    /**
+     * Updates the marketplace based the actions done in the Marketplace Card.
+     */
+    updateMarketplace(response) {
+      if (typeof response === "string") {
+        this.error = response;
+      } else {
+        this.updatePage();
+      }
     }
   },
   created() {
