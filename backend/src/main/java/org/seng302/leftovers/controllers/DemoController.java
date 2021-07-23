@@ -1,17 +1,27 @@
 package org.seng302.leftovers.controllers;
 
+import net.minidev.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.hibernate.Session;
+import org.seng302.datagenerator.BusinessGenerator;
+import org.seng302.datagenerator.ProductGenerator;
+import org.seng302.datagenerator.UserGenerator;
 import org.seng302.leftovers.entities.*;
 import org.seng302.leftovers.persistence.*;
 import org.seng302.leftovers.persistence.SaleItemRepository;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
+import org.seng302.leftovers.tools.JsonTools;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
+import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.time.LocalDate;
@@ -31,15 +41,17 @@ public class DemoController {
     private final InventoryItemRepository inventoryItemRepository;
     private final SaleItemRepository saleItemRepository;
     private final ImageRepository imageRepository;
+    private final EntityManager entityManager;
     private static final Logger logger = LogManager.getLogger(DemoController.class.getName());
 
-    public DemoController(UserRepository userRepository, BusinessRepository businessRepository, ProductRepository productRepository, InventoryItemRepository inventoryItemRepository, SaleItemRepository saleItemRepository, ImageRepository imageRepository) {
+    public DemoController(UserRepository userRepository, BusinessRepository businessRepository, ProductRepository productRepository, InventoryItemRepository inventoryItemRepository, SaleItemRepository saleItemRepository, ImageRepository imageRepository, EntityManager entityManager) {
         this.userRepository = userRepository;
         this.businessRepository = businessRepository;
         this.productRepository = productRepository;
         this.inventoryItemRepository = inventoryItemRepository;
         this.saleItemRepository = saleItemRepository;
         this.imageRepository = imageRepository;
+        this.entityManager = entityManager;
     }
 
     /**
@@ -160,4 +172,39 @@ public class DemoController {
         }
         return userList;
     }
+
+
+    /**
+     * Generates a set of demo data (Using the more advanced generators)
+     * @param options Contains the quantity field which determines the number of products to generates
+     * @return JSON including generated Users, Businesses and Products IDs
+     */
+    @PostMapping("/demo/generate")
+    public JSONObject generate(HttpServletRequest request, @RequestBody JSONObject options) {
+        AuthenticationTokenManager.checkAuthenticationTokenDGAA(request);
+
+        JSONObject json = new JSONObject();
+
+        int productCount = (int) JsonTools.parseLongFromJsonField(options, "productCount");
+        int userCount = (int)JsonTools.parseLongFromJsonField(options, "userCount");
+        int businessCount = (int)JsonTools.parseLongFromJsonField(options, "businessCount");
+
+        Session session = entityManager.unwrap(Session.class);
+        session.doWork(connection -> {
+            var userGenerator = new UserGenerator(connection);
+            var businessGenerator = new BusinessGenerator(connection);
+            var productGenerator = new ProductGenerator(connection);
+
+            List<Long> userIds = userGenerator.generateUsers(userCount);
+            List<Long> businessIds = businessGenerator.generateBusinesses(userIds, businessCount);
+            List<Long> productIds = productGenerator.generateProducts(businessIds, productCount, true);
+
+            json.appendField("generatedUsers", userIds);
+            json.appendField("generatedBusinesses", businessIds);
+            json.appendField("generatedProducts", productIds);
+        });
+        return json;
+    }
+
+
 }
