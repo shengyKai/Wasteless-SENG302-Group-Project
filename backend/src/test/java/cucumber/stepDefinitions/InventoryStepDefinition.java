@@ -20,6 +20,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.context.WebApplicationContext;
 
 import java.io.UnsupportedEncodingException;
+import java.math.BigDecimal;
 import java.text.ParseException;
 import java.time.LocalDate;
 import java.util.Comparator;
@@ -29,8 +30,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.junit.Assert.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 
 public class InventoryStepDefinition  {
     @Autowired
@@ -287,120 +287,250 @@ public class InventoryStepDefinition  {
         return invBody;
     }
 
-    @When("I try to modify the quantity to {int} for the inventory entry with the id {int}")
+    @When("I try to modify the quantity to {int} for the inventory entry with the id {long}")
     public void i_try_to_modify_the_quantity_to_for_the_inventory_entry_with_the_id(
-            int quantity, int invItemId) {
+            int quantity, long invItemId) throws Exception {
+        JSONObject invBody = generateInvJSONBody();
+        invBody.remove("quantity");
+        invBody.put("quantity", quantity);
 
+        mvcResult = mockMvc.perform(
+                requestContext.addAuthorisationToken(
+                        put(String.format("/businesses/%d/inventory/%d", businessContext.getLast().getId(), invItemId))
+                ).content(invBody.toString())
+                .contentType(MediaType.APPLICATION_JSON)
+        ).andReturn();
     }
 
-    @When("I try to modify the price per item to {float} for the inventory entry with the id {int}")
+    @When("I try to modify the price per item to {float} for the inventory entry with the id {long}")
     public void i_try_to_modify_the_price_per_item_to_for_the_inventory_entry_with_the_id(
-            float pricePerItem, int invItemId) {
-        //TODO
+            float pricePerItem, long invItemId) throws Exception {
+        JSONObject invBody = generateInvJSONBody();
+        invBody.remove("pricePerItem");
+        invBody.put("pricePerItem", pricePerItem);
+
+        mvcResult = mockMvc.perform(
+                requestContext.addAuthorisationToken(
+                        put(String.format("/businesses/%d/inventory/%d", businessContext.getLast().getId(), invItemId))
+                ).content(invBody.toString())
+                        .contentType(MediaType.APPLICATION_JSON)
+        ).andReturn();
     }
 
-    @When("I try to modify the total price to {float} for the inventory entry with the id {int}")
+    @When("I try to modify the total price to {float} for the inventory entry with the id {long}")
     public void i_try_to_modify_the_total_price_to_for_the_inventory_entry_with_the_id(
-            float totalPrice, int invItemId) {
-        //TODO
+            float totalPrice, long invItemId) throws Exception {
+        JSONObject invBody = generateInvJSONBody();
+        invBody.remove("totalPrice");
+        invBody.put("totalPrice", totalPrice);
+
+        mvcResult = mockMvc.perform(
+                requestContext.addAuthorisationToken(
+                        put(String.format("/businesses/%d/inventory/%d", businessContext.getLast().getId(), invItemId))
+                ).content(invBody.toString())
+                        .contentType(MediaType.APPLICATION_JSON)
+        ).andReturn();
     }
 
-    @When("I try to modify the manufactured date to {string} for the inventory entry with the id {int}")
+    @When("I try to modify the manufactured date to {string} for the inventory entry with the id {long}")
     public void i_try_to_modify_the_manufacutured_date_to_for_the_inventory_entry_with_the_id(
-            String manufactured, int invItemId) {
-        //TODO
+            String manufactured, long invItemId) throws Exception {
+        JSONObject invBody = generateInvJSONBody();
+        invBody.remove("manufactured");
+        invBody.put("manufactured", manufactured);
+
+        mvcResult = mockMvc.perform(
+                requestContext.addAuthorisationToken(
+                        put(String.format("/businesses/%d/inventory/%d", businessContext.getLast().getId(), invItemId))
+                ).content(invBody.toString())
+                        .contentType(MediaType.APPLICATION_JSON)
+        ).andReturn();
     }
 
-    @When("I try to modify the sell by date to {string} for the inventory entry with the id {int}")
+    @When("I try to modify the sell by date to {string} for the inventory entry with the id {long}")
     public void i_try_to_modify_the_sell_by_date_to_for_the_inventory_entry_with_the_id(
-            String sellBy, int invItemId) {
-        //TODO
+            String sellBy, long invItemId) throws Exception {
+        JSONObject invBody = generateInvJSONBody();
+        invBody.remove("sellBy");
+        invBody.put("sellBy", sellBy);
+
+        mvcResult = mockMvc.perform(
+                requestContext.addAuthorisationToken(
+                        put(String.format("/businesses/%d/inventory/%d", businessContext.getLast().getId(), invItemId))
+                ).content(invBody.toString())
+                        .contentType(MediaType.APPLICATION_JSON)
+        ).andReturn();
     }
 
-    @When("I try to modify the best before date to {string} for the inventory entry with the id {int}")
+    @When("I try to modify the best before date to {string} for the inventory entry with the id {long}")
     public void i_try_to_modify_the_best_before_date_to_for_the_inventory_entry_with_the_id(
-            String bestBefore, int invItemId) {
-        //TODO
+            String bestBefore, long invItemId) throws Exception {
+        JSONObject invBody = generateInvJSONBody();
+        invBody.remove("bestBefore");
+        invBody.put("bestBefore", bestBefore);
+
+        mvcResult = mockMvc.perform(
+                requestContext.addAuthorisationToken(
+                        put(String.format("/businesses/%d/inventory/%d", businessContext.getLast().getId(), invItemId))
+                ).content(invBody.toString())
+                        .contentType(MediaType.APPLICATION_JSON)
+        ).andReturn();
     }
 
-    @When("I try to modify the expires date to {string} for the inventory entry with the id {int}")
+    @When("I try to modify the expires date to {string} for the inventory entry with the id {long}")
     public void i_try_to_modify_the_expires_date_to_for_the_inventory_entry_with_the_id(
-            String expires, int invItemId) {
-        //TODO
+            String expires, long invItemId) throws Exception {
+        JSONObject invBody = generateInvJSONBody();
+        invBody.remove("expires");
+        invBody.put("expires", expires);
+
+        mvcResult = mockMvc.perform(
+                requestContext.addAuthorisationToken(
+                        put(String.format("/businesses/%d/inventory/%d", businessContext.getLast().getId(), invItemId))
+                ).content(invBody.toString())
+                        .contentType(MediaType.APPLICATION_JSON)
+        ).andReturn();
     }
 
-    @When("I try to modify the product to the one with the product code {string} for the inventory entry with the id {int}")
+    @When("I try to modify the product to the one with the product code {string} for the inventory entry with the id {long}")
     public void i_try_to_modify_the_product_to_the_one_with_the_product_code_for_the_inventory_entry_with_the_id(
-            String productCode, int invItemId) {
-        //TODO
+            String productCode, long invItemId) throws Exception {
+        JSONObject invBody = generateInvJSONBody();
+        invBody.remove("productCode");
+        invBody.put("productCode", productCode);
+
+        mvcResult = mockMvc.perform(
+                requestContext.addAuthorisationToken(
+                        put(String.format("/businesses/%d/inventory/%d", businessContext.getLast().getId(), invItemId))
+                ).content(invBody.toString())
+                        .contentType(MediaType.APPLICATION_JSON)
+        ).andReturn();
     }
 
-    @When("I try to modify the quantity to null for the inventory entry with the id {int}")
+    @When("I try to modify the quantity to null for the inventory entry with the id {long}")
     public void i_try_to_modify_the_quantity_to_null_for_the_inventory_entry_with_the_id(
-            int invItemId) {
-        //TODO
+            long invItemId) throws Exception {
+        JSONObject invBody = generateInvJSONBody();
+        invBody.remove("quantity");
+        invBody.put("quantity", null);
+
+        mvcResult = mockMvc.perform(
+                requestContext.addAuthorisationToken(
+                        put(String.format("/businesses/%d/inventory/%d", businessContext.getLast().getId(), invItemId))
+                ).content(invBody.toString())
+                        .contentType(MediaType.APPLICATION_JSON)
+        ).andReturn();
     }
 
-    @When("I try to modify the expires date to null for the inventory entry with the id {int}")
+    @When("I try to modify the expires date to null for the inventory entry with the id {long}")
     public void i_try_to_modify_the_expires_date_to_null_for_the_inventory_entry_with_the_id(
-            int invItemId) {
-        //TODO
+            long invItemId) throws Exception {
+        JSONObject invBody = generateInvJSONBody();
+        invBody.remove("expires");
+        invBody.put("expires", null);
+
+        mvcResult = mockMvc.perform(
+                requestContext.addAuthorisationToken(
+                        put(String.format("/businesses/%d/inventory/%d", businessContext.getLast().getId(), invItemId))
+                ).content(invBody.toString())
+                        .contentType(MediaType.APPLICATION_JSON)
+        ).andReturn();
     }
 
-    @When("I try to modify the manufactured date to null for the inventory entry with the id {int}")
+    @When("I try to modify the manufactured date to null for the inventory entry with the id {long}")
     public void i_try_to_modify_the_manufactured_date_to_null_for_the_inventory_entry_with_the_id(
-            int invItemId) {
-        //TODO
+            long invItemId) throws Exception {
+        JSONObject invBody = generateInvJSONBody();
+        invBody.remove("expires");
+        invBody.put("expires", null);
+
+        mvcResult = mockMvc.perform(
+                requestContext.addAuthorisationToken(
+                        put(String.format("/businesses/%d/inventory/%d", businessContext.getLast().getId(), invItemId))
+                ).content(invBody.toString())
+                        .contentType(MediaType.APPLICATION_JSON)
+        ).andReturn();
     }
 
-    @Then("the quantity of the inventory item with the id {int} will be {int}")
+    @Then("the quantity of the inventory item with the id {long} will be {int}")
     public void the_quantity_of_the_inventory_item_with_the_id_will_be(
-            int invItemId, int quantity) {
-        //TODO
+            long invItemId, int quantity) {
+        assertEquals(200, mvcResult.getResponse().getStatus());
+        InventoryItem invItem = inventoryItemRepository.getInventoryItemByBusinessAndId(
+                businessContext.getLast(), invItemId);
+        assertNotNull(invItem);
+        assertEquals(invItem.getQuantity(), quantity);
     }
 
-    @Then("the price per item of the inventory item with the id {int} will be {float}")
+    @Then("the price per item of the inventory item with the id {long} will be {float}")
     public void the_price_per_item_of_the_inventory_item_with_the_id_will_be(
-            int invItemId, float pricePerItem) {
-        //TODO
+            long invItemId, float pricePerItem) {
+        assertEquals(200, mvcResult.getResponse().getStatus());
+        InventoryItem invItem = inventoryItemRepository.getInventoryItemByBusinessAndId(
+                businessContext.getLast(), invItemId);
+        assertNotNull(invItem);
+        assertEquals(invItem.getPricePerItem(), BigDecimal.valueOf(pricePerItem));
     }
 
-    @Then("the total price of the inventory item with the id {int} will be {float}")
+    @Then("the total price of the inventory item with the id {long} will be {float}")
     public void the_total_price_of_the_inventory_item_with_the_id_will_be(
-            int invItemId, float totalPrice) {
-        //TODO
+            long invItemId, float totalPrice) {
+        assertEquals(200, mvcResult.getResponse().getStatus());
+        InventoryItem invItem = inventoryItemRepository.getInventoryItemByBusinessAndId(
+                businessContext.getLast(), invItemId);
+        assertNotNull(invItem);
+        assertEquals(invItem.getPricePerItem(), BigDecimal.valueOf(totalPrice));
     }
 
-    @Then("the manufactured date of the inventory item with the id {int} will be {string}")
+    @Then("the manufactured date of the inventory item with the id {long} will be {string}")
     public void the_manufactured_date_of_the_inventory_item_with_the_id_will_be(
-            int invItemId, String manufactured) {
-        //TODO
+            long invItemId, String manufactured) {
+        assertEquals(200, mvcResult.getResponse().getStatus());
+        InventoryItem invItem = inventoryItemRepository.getInventoryItemByBusinessAndId(
+                businessContext.getLast(), invItemId);
+        assertNotNull(invItem);
+        assertEquals(invItem.getManufactured().toString(), manufactured);
     }
 
-    @Then("the sell by date of the inventory item with the id {int} will be {string}")
+    @Then("the sell by date of the inventory item with the id {long} will be {string}")
     public void the_sell_by_date_of_the_inventory_item_with_the_id_will_be(
-            int invItemId, String sellBy) {
-        //TODO
+            long invItemId, String sellBy) {
+        assertEquals(200, mvcResult.getResponse().getStatus());
+        InventoryItem invItem = inventoryItemRepository.getInventoryItemByBusinessAndId(
+                businessContext.getLast(), invItemId);
+        assertNotNull(invItem);
+        assertEquals(invItem.getSellBy().toString(), sellBy);
     }
 
-    @Then("the best before date of the inventory item with the id {int} will be {string}")
+    @Then("the best before date of the inventory item with the id {long} will be {string}")
     public void the_best_before_date_of_the_inventory_item_with_the_id_will_be(
-            int invItemId, String bestBefore) {
-        //TODO
+            long invItemId, String bestBefore) {
+        assertEquals(200, mvcResult.getResponse().getStatus());
+        InventoryItem invItem = inventoryItemRepository.getInventoryItemByBusinessAndId(
+                businessContext.getLast(), invItemId);
+        assertNotNull(invItem);
+        assertEquals(invItem.getBestBefore().toString(), bestBefore);
     }
 
-    @Then("the expires date of the inventory item with the id {int} will be {string}")
+    @Then("the expires date of the inventory item with the id {long} will be {string}")
     public void the_expires_date_of_the_inventory_item_with_the_id_will_be(
-            int invItemId, String expires) {
-        //TODO
+            long invItemId, String expires) {
+        assertEquals(200, mvcResult.getResponse().getStatus());
+        InventoryItem invItem = inventoryItemRepository.getInventoryItemByBusinessAndId(
+                businessContext.getLast(), invItemId);
+        assertNotNull(invItem);
+        assertEquals(invItem.getExpires().toString(), expires);
     }
 
-    @Then("the product of the inventory item with the id {int} will have the product code {string}")
+    @Then("the product of the inventory item with the id {long} will have the product code {string}")
     public void the_product_of_the_inventory_item_with_the_id_will_have_the_product_code(
-            int invItemId, String productCode) {
-        //TODO
+            long invItemId, String productCode) {
+        assertEquals(200, mvcResult.getResponse().getStatus());
+        InventoryItem invItem = inventoryItemRepository.getInventoryItemByBusinessAndId(
+                businessContext.getLast(), invItemId);
+        assertNotNull(invItem);
+        assertEquals(invItem.getProduct().getProductCode(), productCode);
     }
-
 }
 
 
