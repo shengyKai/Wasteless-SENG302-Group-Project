@@ -152,7 +152,7 @@ export function regxPrice() {
  * Returns a Regex that matches a password with at least one number and one letter.
  */
 export function regxPassword() {
-  return /^(?=.*[0-9])(?=.*[\p{L} ])([\p{L}0-9 ]+)$/u;
+  return /^(?=.*[0-9])(?=.*[\p{L} ])([\p{L}0-9 !@#$%^&*()-]+)$/u;
 }
 
 /**
