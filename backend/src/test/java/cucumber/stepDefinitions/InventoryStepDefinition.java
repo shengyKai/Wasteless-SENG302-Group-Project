@@ -9,6 +9,7 @@ import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import net.minidev.json.JSONArray;
+import net.minidev.json.JSONObject;
 import org.seng302.leftovers.entities.*;
 import org.seng302.leftovers.persistence.InventoryItemRepository;
 import org.seng302.leftovers.persistence.ProductRepository;
@@ -20,6 +21,7 @@ import org.springframework.web.context.WebApplicationContext;
 
 import java.io.UnsupportedEncodingException;
 import java.text.ParseException;
+import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -268,10 +270,27 @@ public class InventoryStepDefinition  {
 
     // For Modify Inventory Entry Feature
 
+    /**
+     * Generates a mock JSON inventory item JSON body to be used in the modify inventory entries API endpoint
+     * @return inventory item JSON body
+     */
+    public JSONObject generateInvJSONBody() {
+        JSONObject invBody = new JSONObject();
+        invBody.put("productId", "APPLE11");
+        invBody.put("quantity", 10);
+        invBody.put("pricePerItem", 5.42);
+        invBody.put("totalPrice", 54.20);
+        invBody.put("manufactured", LocalDate.now().minusYears(100).toString());
+        invBody.put("sellBy", LocalDate.now().plusYears(100).toString());
+        invBody.put("bestBefore", LocalDate.now().plusYears(200).toString());
+        invBody.put("expires", LocalDate.now().plusYears(300).toString());
+        return invBody;
+    }
+
     @When("I try to modify the quantity to {int} for the inventory entry with the id {int}")
     public void i_try_to_modify_the_quantity_to_for_the_inventory_entry_with_the_id(
             int quantity, int invItemId) {
-        //TODO
+
     }
 
     @When("I try to modify the price per item to {float} for the inventory entry with the id {int}")
