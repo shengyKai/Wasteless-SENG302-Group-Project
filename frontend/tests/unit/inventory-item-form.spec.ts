@@ -446,7 +446,7 @@ describe("InventoryItemForm.vue", () => {
 
     beforeEach(async () => {
       const vuetify = new Vuetify();
-        // Creating wrapper around InventoryItemForm with data-app to appease vuetify
+      // Creating wrapper around InventoryItemForm with data-app to appease vuetify
       const App = localVue.component("App", {
         components: { InventoryItemForm },
         template: "<div data-app><InventoryItemForm :businessId=\"businessId\" :previousItem=\"previousItem\"/></div>",
@@ -486,6 +486,10 @@ describe("InventoryItemForm.vue", () => {
 
       await Vue.nextTick();
       expect(wrapper.vm.isCreate).toBe(false);
+    });
+
+    afterEach(() => {
+      appWrapper.destroy();
     });
 
     it('modifyInventoryItem called when save button pressed', async () => {
@@ -945,9 +949,15 @@ describe("InventoryItemForm.vue", () => {
   //Associated with bug on t170
   it('Product search limits results', async ()=>{
     await wrapper.setData({productList:testProducts});
+    getProducts.mockResolvedValue(testProducts);
     const selectbox = findProductSelect();
     (selectbox.vm as any).activateMenu();
     await flushQueue();
+    console.log("Product list: " + wrapper.vm.productList);
+    console.log("Product list id: " + wrapper.vm.productList[0].id);
+    console.log("Product list name: " + wrapper.vm.productList[0].name);
+    console.log("Product code: " + wrapper.vm.productCode);
+    console.log("Filter: " + wrapper.vm.productFilter);
     expect(appWrapper.text()).toContain("Watties");
     await wrapper.setData({productFilter: "Not watties"});
     await Vue.nextTick();
