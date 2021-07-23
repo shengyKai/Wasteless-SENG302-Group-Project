@@ -1,35 +1,37 @@
 package org.seng302.datagenerator;
 
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.*;
-import java.util.Locale;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collector;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class ProductImageGenerator {
-    private Path root;
+
     private final Path userUploadsRoot = Paths.get("uploads");
     private final Connection conn;
+    private Resource[] demoImages;
 
     public ProductImageGenerator(Connection conn) {
         try {
-            root = Paths.get(ProductImageGenerator.class.getResource("example-images/").toURI());
-            Files.createDirectory(root);
-        } catch (FileAlreadyExistsException existsException) {
-            // don't do anything if directory exists
-        } catch (IOException | URISyntaxException ioException) {
+            var loader = ProductImageGenerator.class.getClassLoader();
+            PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver(loader);
+            this.demoImages = resolver.getResources("classpath*:org/seng302/datagenerator/example-images/**");
+        } catch (IOException e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,"Could not initialize example images folder.");
         }
         this.conn = conn;
@@ -45,9 +47,9 @@ public class ProductImageGenerator {
      */
     public void addImageToProduct(Long productId, String productName) throws SQLException {
         String noun = productName.split(" ")[1];
-        Optional<File> image = findImage(noun);
+        Optional<InputStream> image = findImage(noun);
         if (image.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Could not locate file type for product name:" + productName);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Could not locate file for product name:" + productName);
         }
 
         String filename = UUID.randomUUID().toString();
@@ -79,18 +81,22 @@ public class ProductImageGenerator {
     /**
      * Given a noun, attempts to find the image associated with that noun.
      * @param noun The product to find
-     * @return Optional of type File.
+     * @return Optional of type InputStream.
      * @throws IOException
      */
-    private Optional<File> findImage(String noun) {
-        try (Stream<Path> directory = Files.walk(this.root, 1)) {
-            Optional<Path> foundFile = directory.filter(path -> path.getFileName().toString().replaceFirst("[.][^.]+$", "")
-                            .equals(noun.toLowerCase(Locale.ROOT))).findFirst();
-            return foundFile.map(Path::toFile);
-        } catch (IOException e) {
-            System.out.println("An error occurred reading an image file:" + e.getMessage());
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "An error occurred reading an image file:" + e.getMessage());
-        }
+    private Optional<InputStream> findImage(String noun) {
+        Optional<Resource> file = Arrays.stream(demoImages)
+                .filter(res -> Objects.requireNonNull(res.getFilename())
+                .replaceFirst("[.][^.]+$", "").equals(noun.toLowerCase(Locale.ROOT)))
+                .findFirst();
+
+        return file.map(resource -> {
+            try {
+                return resource.getInputStream();
+            } catch (IOException e) {
+                throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "An error occurred reading an image file:" + e.getMessage());
+            }
+        });
     }
 
     /**
@@ -99,7 +105,7 @@ public class ProductImageGenerator {
      * @param fileName The name of the file to save
      * @return true if file successfully saved.
      */
-    private boolean saveImageToSystem(File demoImage, String fileName) {
+    private boolean saveImageToSystem(InputStream demoImage, String fileName) {
         try {
             store(demoImage, fileName);
             return true;
@@ -114,9 +120,9 @@ public class ProductImageGenerator {
      * @param file The file to save
      * @param filename The name of the new file.
      */
-    public void store(File file, String filename) {
+    public void store(InputStream file, String filename) {
         try {
-            Files.copy( new FileInputStream(file), this.userUploadsRoot.resolve(filename));
+            Files.copy( file, this.userUploadsRoot.resolve(filename));
 
         } catch (IOException e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to store file");
