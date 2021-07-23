@@ -38,7 +38,7 @@ describe('UserCards.vue', () => {
       let card = cardComponents.at(i);
       expect(card.props()).toStrictEqual({
         content: {id: i},
-        showActions: false,
+        showActions: true,
         showSection: true,
       });
     }
