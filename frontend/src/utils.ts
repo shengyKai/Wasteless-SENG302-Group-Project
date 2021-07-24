@@ -117,10 +117,10 @@ export function isTesting() {
  */
 
 /**
- * Returns a Regex pattern that matches letters, spaces and dashes
+ * Returns a Regex pattern that matches letters, spaces, dashes, hyphen and apostrophe
  */
 export function regxAlphabet() {
-  return /^[\p{L}\- ]*$/u;
+  return /^[\p{L}\-.' ]*$/u;
 }
 
 /**
@@ -131,7 +131,7 @@ export function regxAlphabetExtended() {
 }
 
 export function regxAlphabetExtendedMultiline() {
-  return /(^[\p{L}\d\p{P}\s]*$)/u;
+  return /(^[\p{L}\d\p{P}$\s]*$)/u;
 }
 
 /**
@@ -180,13 +180,13 @@ export function regxPhoneNumber() {
  Returns a Regex that matches a country code
  */
 export function regxCountryCode() {
-  return /(^(\d{1,2}-)?\d{2,3}$)|(^$)/;
+  return /(^(\d{1,2}-)?\d{2}$)|(^$)/;
 }
 /**
  Returns a Regex that matches a valid street address
  */
 export function regxStreet() {
-  return /^(([0-9]+|[0-9]+\/[0-9]+)[a-zA-Z]?)(?=\s[\p{L}])([\p{L}0-9 ]+)$/u;
+  return /^(([0-9]+|[0-9]+\/[0-9]+)[a-zA-Z]?)(?=\s[\p{L}])([\p{L}0-9-' ]+)$/u;
 }
 /**
  Returns a Regex that matches a valid product code
@@ -211,7 +211,7 @@ export const mandatoryRules = [
 
 export const passwordRules = [
   (field: string) => (field && field.length >= 7) || 'Password must have 7+ characters',
-  (field: string) => regxPassword().test(field) || 'Must have at least one number and one alphabet'
+  (field: string) => regxPassword().test(field) || 'Must have at least one number and one letter'
 ];
 
 export const postCodeRules = [
@@ -229,17 +229,17 @@ export function maxCharRules(size: number) {
 }
 
 export const phoneNumberRules = [
-  (field: string) => regxPhoneNumber().test(field) || 'Must be a valid phone number'
+  (field: string) => regxPhoneNumber().test(field) || 'Must only contain 8-12 digits'
 ];
 export const countryCodeRules = [
-  (field: string) => regxCountryCode().test(field) || 'Must be a valid country code.'
+  (field: string) => regxCountryCode().test(field) || 'Must only contain 2 digits.'
 ];
 export const alphabetRules = [
   (field: string) => (field.length === 0 || regxAlphabet().test(field)) || 'Naming must be valid'
 ];
 export const streetNumRules = [
   (field: string) => (field && field.length <= 109) || 'Reached max character limit 109 ',
-  (field: string) => regxStreet().test(field) || 'Must have at least one number and one alphabet'
+  (field: string) => regxStreet().test(field) || 'Must contain unit number and street name'
 ];
 
 export const quantityRules = [
