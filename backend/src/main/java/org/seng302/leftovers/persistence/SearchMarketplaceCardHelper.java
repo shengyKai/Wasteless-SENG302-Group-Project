@@ -7,6 +7,9 @@ import org.springframework.data.jpa.domain.Specification;
 import javax.persistence.criteria.*;
 import java.util.List;
 
+/**
+ * Defines specifications for searching MarketplaceCard entities
+ */
 public class SearchMarketplaceCardHelper {
 
     private SearchMarketplaceCardHelper() {}
