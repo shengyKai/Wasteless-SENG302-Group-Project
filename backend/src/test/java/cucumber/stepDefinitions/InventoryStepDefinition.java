@@ -5,11 +5,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import cucumber.context.BusinessContext;
 import cucumber.context.RequestContext;
 import cucumber.context.UserContext;
+import io.cucumber.java.After;
+import io.cucumber.java.AfterStep;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import net.minidev.json.JSONArray;
+import net.minidev.json.JSONObject;
 import org.seng302.leftovers.entities.*;
+import org.seng302.leftovers.persistence.BusinessRepository;
 import org.seng302.leftovers.persistence.InventoryItemRepository;
 import org.seng302.leftovers.persistence.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +23,9 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.context.WebApplicationContext;
 
 import java.io.UnsupportedEncodingException;
+import java.math.BigDecimal;
 import java.text.ParseException;
+import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -27,8 +33,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.junit.Assert.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 
 public class InventoryStepDefinition  {
     @Autowired
@@ -52,6 +57,12 @@ public class InventoryStepDefinition  {
     private MvcResult mvcResult;
     private String productCode;
     private Integer quantity;
+
+    @After
+    public void cleanUp() {
+        productRepository.deleteAll();
+        inventoryItemRepository.deleteAll();
+    }
 
     @Given("the business has the following products in its catalogue:")
     public void the_business_has_the_following_products_in_its_catalogue(io.cucumber.datatable.DataTable dataTable) {
@@ -265,4 +276,352 @@ public class InventoryStepDefinition  {
         List<InventoryItem> inventory = inventoryItemRepository.findAllByProduct(product);
         assertTrue(inventory.stream().anyMatch(x-> x.getQuantity() == quantity));
     }
+
+    // For Modify Inventory Entry Feature
+
+    //TODO Concern there is currently no way to find a inventory item without knowing its id. Therefore,
+    //once another unique identifier has been added, change these step definitions and features to be less clunky than
+    //my temporary solution of using version as a unique identifier within this local set of cucumber tests
+    /**
+     * Generates a mock JSON inventory item JSON body to be used in the modify inventory entries API endpoint
+     * @return inventory item JSON body
+     */
+    public JSONObject generateInvJSONBody() {
+        JSONObject invBody = new JSONObject();
+        invBody.put("productId", "APPLE11");
+        invBody.put("quantity", 10);
+        invBody.put("pricePerItem", 5.42);
+        invBody.put("totalPrice", 54.20);
+        invBody.put("manufactured", LocalDate.now().minusYears(100).toString());
+        invBody.put("sellBy", LocalDate.now().plusYears(100).toString());
+        invBody.put("bestBefore", LocalDate.now().plusYears(200).toString());
+        invBody.put("expires", LocalDate.now().plusYears(300).toString());
+        return invBody;
+    }
+
+    /**
+     * Uses the version as a local unique identifier to find the inventory item's id
+     * @param version the version of the inventory item
+     * @return the id of the inventory item
+     */
+    public Long getIdThroughVersion(int version) {
+        List<InventoryItem> invItems = (List<InventoryItem>) inventoryItemRepository.findAll();
+        for (InventoryItem invItem: invItems) {
+            if (invItem.getVersion() == version) {
+                return invItem.getId();
+            }
+        }
+        return null;
+    }
+
+    @When("I try to modify the quantity to {int} for the inventory entry with the version {int}")
+    public void i_try_to_modify_the_quantity_to_for_the_inventory_entry_with_the_version(
+            int quantity, int version) throws Exception {
+        JSONObject invBody = generateInvJSONBody();
+        invBody.remove("quantity");
+        invBody.put("quantity", quantity);
+
+        long invItemId = getIdThroughVersion(version);
+
+        mvcResult = mockMvc.perform(
+                requestContext.addAuthorisationToken(
+                        put(String.format("/businesses/%d/inventory/%d", businessContext.getLast().getId(), invItemId))
+                ).content(invBody.toString())
+                .contentType(MediaType.APPLICATION_JSON)
+        ).andReturn();
+    }
+
+    @When("I try to modify the price per item to {float} for the inventory entry with the version {int}")
+    public void i_try_to_modify_the_price_per_item_to_for_the_inventory_entry_with_the_version(
+            float pricePerItem, int version) throws Exception {
+        JSONObject invBody = generateInvJSONBody();
+        invBody.remove("pricePerItem");
+        invBody.put("pricePerItem", pricePerItem);
+
+        long invItemId = getIdThroughVersion(version);
+
+        mvcResult = mockMvc.perform(
+                requestContext.addAuthorisationToken(
+                        put(String.format("/businesses/%d/inventory/%d", businessContext.getLast().getId(), invItemId))
+                ).content(invBody.toString())
+                        .contentType(MediaType.APPLICATION_JSON)
+        ).andReturn();
+    }
+
+    @When("I try to modify the total price to {float} for the inventory entry with the version {int}")
+    public void i_try_to_modify_the_total_price_to_for_the_inventory_entry_with_the_version(
+            float totalPrice, int version) throws Exception {
+        JSONObject invBody = generateInvJSONBody();
+        invBody.remove("totalPrice");
+        invBody.put("totalPrice", totalPrice);
+
+        long invItemId = getIdThroughVersion(version);
+
+        mvcResult = mockMvc.perform(
+                requestContext.addAuthorisationToken(
+                        put(String.format("/businesses/%d/inventory/%d", businessContext.getLast().getId(), invItemId))
+                ).content(invBody.toString())
+                        .contentType(MediaType.APPLICATION_JSON)
+        ).andReturn();
+    }
+
+    @When("I try to modify the manufactured date to {string} for the inventory entry with the version {int}")
+    public void i_try_to_modify_the_manufacutured_date_to_for_the_inventory_entry_with_the_version(
+            String manufactured, int version) throws Exception {
+        JSONObject invBody = generateInvJSONBody();
+        invBody.remove("manufactured");
+        invBody.put("manufactured", manufactured);
+
+        long invItemId = getIdThroughVersion(version);
+
+        mvcResult = mockMvc.perform(
+                requestContext.addAuthorisationToken(
+                        put(String.format("/businesses/%d/inventory/%d", businessContext.getLast().getId(), invItemId))
+                ).content(invBody.toString())
+                        .contentType(MediaType.APPLICATION_JSON)
+        ).andReturn();
+    }
+
+    @When("I try to modify the sell by date to {string} for the inventory entry with the version {int}")
+    public void i_try_to_modify_the_sell_by_date_to_for_the_inventory_entry_with_the_version(
+            String sellBy, int version) throws Exception {
+        JSONObject invBody = generateInvJSONBody();
+        invBody.remove("sellBy");
+        invBody.put("sellBy", sellBy);
+
+        long invItemId = getIdThroughVersion(version);
+
+        mvcResult = mockMvc.perform(
+                requestContext.addAuthorisationToken(
+                        put(String.format("/businesses/%d/inventory/%d", businessContext.getLast().getId(), invItemId))
+                ).content(invBody.toString())
+                        .contentType(MediaType.APPLICATION_JSON)
+        ).andReturn();
+    }
+
+    @When("I try to modify the best before date to {string} for the inventory entry with the version {int}")
+    public void i_try_to_modify_the_best_before_date_to_for_the_inventory_entry_with_the_version(
+            String bestBefore, int version) throws Exception {
+        JSONObject invBody = generateInvJSONBody();
+        invBody.remove("bestBefore");
+        invBody.put("bestBefore", bestBefore);
+
+        long invItemId = getIdThroughVersion(version);
+
+        mvcResult = mockMvc.perform(
+                requestContext.addAuthorisationToken(
+                        put(String.format("/businesses/%d/inventory/%d", businessContext.getLast().getId(), invItemId))
+                ).content(invBody.toString())
+                        .contentType(MediaType.APPLICATION_JSON)
+        ).andReturn();
+    }
+
+    @When("I try to modify the expires date to {string} for the inventory entry with the version {int}")
+    public void i_try_to_modify_the_expires_date_to_for_the_inventory_entry_with_the_version(
+            String expires, int version) throws Exception {
+        JSONObject invBody = generateInvJSONBody();
+        invBody.remove("expires");
+        invBody.put("expires", expires);
+
+        long invItemId = getIdThroughVersion(version);
+
+        mvcResult = mockMvc.perform(
+                requestContext.addAuthorisationToken(
+                        put(String.format("/businesses/%d/inventory/%d", businessContext.getLast().getId(), invItemId))
+                ).content(invBody.toString())
+                        .contentType(MediaType.APPLICATION_JSON)
+        ).andReturn();
+    }
+
+    @When("I try to modify the product to the one with the product code {string} for the inventory entry with the version {int}")
+    public void i_try_to_modify_the_product_to_the_one_with_the_product_code_for_the_inventory_entry_with_the_version(
+            String productCode, int version) throws Exception {
+        JSONObject invBody = generateInvJSONBody();
+        invBody.remove("productCode");
+        invBody.put("productCode", productCode);
+
+        long invItemId = getIdThroughVersion(version);
+
+        mvcResult = mockMvc.perform(
+                requestContext.addAuthorisationToken(
+                        put(String.format("/businesses/%d/inventory/%d", businessContext.getLast().getId(), invItemId))
+                ).content(invBody.toString())
+                        .contentType(MediaType.APPLICATION_JSON)
+        ).andReturn();
+    }
+
+    @When("I try to modify the quantity to null for the inventory entry with the version {int}")
+    public void i_try_to_modify_the_quantity_to_null_for_the_inventory_entry_with_the_version(
+            int version) throws Exception {
+        JSONObject invBody = generateInvJSONBody();
+        invBody.remove("quantity");
+        invBody.put("quantity", null);
+
+        long invItemId = getIdThroughVersion(version);
+
+        mvcResult = mockMvc.perform(
+                requestContext.addAuthorisationToken(
+                        put(String.format("/businesses/%d/inventory/%d", businessContext.getLast().getId(), invItemId))
+                ).content(invBody.toString())
+                        .contentType(MediaType.APPLICATION_JSON)
+        ).andReturn();
+    }
+
+    @When("I try to modify the expires date to null for the inventory entry with the version {int}")
+    public void i_try_to_modify_the_expires_date_to_null_for_the_inventory_entry_with_the_version(
+            int version) throws Exception {
+        JSONObject invBody = generateInvJSONBody();
+        invBody.remove("expires");
+        invBody.put("expires", null);
+
+        long invItemId = getIdThroughVersion(version);
+
+        mvcResult = mockMvc.perform(
+                requestContext.addAuthorisationToken(
+                        put(String.format("/businesses/%d/inventory/%d", businessContext.getLast().getId(), invItemId))
+                ).content(invBody.toString())
+                        .contentType(MediaType.APPLICATION_JSON)
+        ).andReturn();
+    }
+
+    @When("I try to modify the manufactured date to null for the inventory entry with the version {int}")
+    public void i_try_to_modify_the_manufactured_date_to_null_for_the_inventory_entry_with_the_version(
+            int version) throws Exception {
+        JSONObject invBody = generateInvJSONBody();
+        invBody.remove("expires");
+        invBody.put("expires", null);
+
+        long invItemId = getIdThroughVersion(version);
+
+        mvcResult = mockMvc.perform(
+                requestContext.addAuthorisationToken(
+                        put(String.format("/businesses/%d/inventory/%d", businessContext.getLast().getId(), invItemId))
+                ).content(invBody.toString())
+                        .contentType(MediaType.APPLICATION_JSON)
+        ).andReturn();
+    }
+
+    @Then("the quantity of the inventory item with the version {int} will be {int}")
+    public void the_quantity_of_the_inventory_item_with_the_version_will_be(
+            int version, int quantity) {
+        long invItemId = getIdThroughVersion(version);
+
+        assertEquals(200, mvcResult.getResponse().getStatus());
+        InventoryItem invItem = inventoryItemRepository.getInventoryItemByBusinessAndId(
+                businessContext.getLast(), invItemId);
+        assertNotNull(invItem);
+        assertEquals(invItem.getQuantity(), quantity);
+    }
+
+    @Then("the price per item of the inventory item with the version {int} will be {float}")
+    public void the_price_per_item_of_the_inventory_item_with_the_version_will_be(
+            int version, float pricePerItem) {
+        long invItemId = getIdThroughVersion(version);
+
+        assertEquals(200, mvcResult.getResponse().getStatus());
+        InventoryItem invItem = inventoryItemRepository.getInventoryItemByBusinessAndId(
+                businessContext.getLast(), invItemId);
+        assertNotNull(invItem);
+        assertEquals(invItem.getPricePerItem(), BigDecimal.valueOf(pricePerItem));
+    }
+
+    @Then("the total price of the inventory item with the version {int} will be {float}")
+    public void the_total_price_of_the_inventory_item_with_the_version_will_be(
+            int version, float totalPrice) {
+        long invItemId = getIdThroughVersion(version);
+
+        assertEquals(200, mvcResult.getResponse().getStatus());
+        InventoryItem invItem = inventoryItemRepository.getInventoryItemByBusinessAndId(
+                businessContext.getLast(), invItemId);
+        assertNotNull(invItem);
+        assertEquals(invItem.getPricePerItem(), BigDecimal.valueOf(totalPrice));
+    }
+
+    @Then("the manufactured date of the inventory item with the version {int} will be {string}")
+    public void the_manufactured_date_of_the_inventory_item_with_the_version_will_be(
+            int version, String manufactured) {
+        long invItemId = getIdThroughVersion(version);
+
+        assertEquals(200, mvcResult.getResponse().getStatus());
+        InventoryItem invItem = inventoryItemRepository.getInventoryItemByBusinessAndId(
+                businessContext.getLast(), invItemId);
+        assertNotNull(invItem);
+        assertEquals(invItem.getManufactured().toString(), manufactured);
+    }
+
+    @Then("the manufactured date of the inventory item with the version {int} will be null")
+    public void the_manufactured_date_of_the_inventory_item_with_the_version_will_be_null(
+            int version, String manufactured) {
+        long invItemId = getIdThroughVersion(version);
+
+        assertEquals(200, mvcResult.getResponse().getStatus());
+        InventoryItem invItem = inventoryItemRepository.getInventoryItemByBusinessAndId(
+                businessContext.getLast(), invItemId);
+        assertNull(invItem);
+    }
+
+    @Then("the sell by date of the inventory item with the version {int} will be {string}")
+    public void the_sell_by_date_of_the_inventory_item_with_the_version_will_be(
+            int version, String sellBy) {
+        long invItemId = getIdThroughVersion(version);
+
+        assertEquals(200, mvcResult.getResponse().getStatus());
+        InventoryItem invItem = inventoryItemRepository.getInventoryItemByBusinessAndId(
+                businessContext.getLast(), invItemId);
+        assertNotNull(invItem);
+        assertEquals(invItem.getSellBy().toString(), sellBy);
+    }
+
+    @Then("the best before date of the inventory item with the version {int} will be {string}")
+    public void the_best_before_date_of_the_inventory_item_with_the_version_will_be(
+            int version, String bestBefore) {
+        long invItemId = getIdThroughVersion(version);
+
+        assertEquals(200, mvcResult.getResponse().getStatus());
+        InventoryItem invItem = inventoryItemRepository.getInventoryItemByBusinessAndId(
+                businessContext.getLast(), invItemId);
+        assertNotNull(invItem);
+        assertEquals(invItem.getBestBefore().toString(), bestBefore);
+    }
+
+    @Then("the expires date of the inventory item with the version {int} will be {string}")
+    public void the_expires_date_of_the_inventory_item_with_the_version_will_be(
+            int version, String expires) {
+        long invItemId = getIdThroughVersion(version);
+
+        assertEquals(200, mvcResult.getResponse().getStatus());
+        InventoryItem invItem = inventoryItemRepository.getInventoryItemByBusinessAndId(
+                businessContext.getLast(), invItemId);
+        assertNotNull(invItem);
+        assertEquals(invItem.getExpires().toString(), expires);
+    }
+
+    @Then("the product of the inventory item with the version {int} will have the product code {string}")
+    public void the_product_of_the_inventory_item_with_the_version_will_have_the_product_code(
+            int version, String productCode) {
+        long invItemId = getIdThroughVersion(version);
+
+        assertEquals(200, mvcResult.getResponse().getStatus());
+        InventoryItem invItem = inventoryItemRepository.getInventoryItemByBusinessAndId(
+                businessContext.getLast(), invItemId);
+        assertNotNull(invItem);
+        assertEquals(invItem.getProduct().getProductCode(), productCode);
+    }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

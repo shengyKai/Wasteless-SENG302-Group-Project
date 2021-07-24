@@ -132,6 +132,8 @@ public class InventoryItem {
         return remainingQuantity;
     }
 
+    public int getVersion() { return version; }
+
 
 //Setters
     /**
