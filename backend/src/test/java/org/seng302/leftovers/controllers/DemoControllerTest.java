@@ -52,8 +52,6 @@ class DemoControllerTest {
     @Mock
     private ImageRepository imageRepository;
     @Mock
-    private MarketplaceCardRepository marketplaceCardRepository;
-    @Mock
     private EntityManager entityManager;
 
     private User testUser;
@@ -62,7 +60,7 @@ class DemoControllerTest {
     @BeforeEach
     public void setUp() throws ParseException {
         MockitoAnnotations.openMocks(this);
-        demoController = new DemoController(userRepository, businessRepository, productRepository, inventoryItemRepository, saleItemRepository, imageRepository, marketplaceCardRepository, entityManager);
+        demoController = new DemoController(userRepository, businessRepository, productRepository, inventoryItemRepository, saleItemRepository, imageRepository, entityManager);
         testUser = new User.Builder()
                 .withFirstName("Andy")
                 .withMiddleName("Percy")
@@ -192,7 +190,6 @@ class DemoControllerTest {
             when(productRepository.save(any(Product.class))).thenAnswer(x->x.getArgument(0));
             when(inventoryItemRepository.save(any(InventoryItem.class))).thenAnswer(x->x.getArgument(0));
             when(saleItemRepository.save(any(SaleItem.class))).thenAnswer(x->x.getArgument(0));
-
 
             assertDoesNotThrow(() -> demoController.loadDemoData(request));
         }
