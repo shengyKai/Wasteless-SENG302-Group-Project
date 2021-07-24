@@ -249,27 +249,30 @@ public class BusinessController {
 
 
     /**
-     * Searches for businesses matching a search query. Results are paginated
+     * Searches for businesses matching a search query and/or business type. Results are paginated
      * The query string can contain AND and OR operators to refine the search.
-     * Searching performs partial matches by default. Using quotation marks performs exact matches
+     * Searching performs partial matches by default. Using quotation marks performs exact matches.
      * @param request The HTTP Request
      * @param searchQuery The search term
      * @param page Page number to display
      * @param resultsPerPage Number of results per page
      * @param orderBy Order by term. Can be one of "created", "name", "location", "businessType"
      * @param reverse Boolean. Reverse ordering of results
+     * @param businessType Type of business. Can by one of "Accommodation and Food Services", "Retail Trade",
+     *                     "Charitable organisation", "Non-profit organisation".
      * @return A JSON object containing the total count and paginated results.
      */
     @GetMapping("/businesses/search")
-    public JSONObject search(HttpServletRequest request, @RequestParam("searchQuery") String searchQuery,
+    public JSONObject search(HttpServletRequest request, @RequestParam(required = false) String searchQuery,
                              @RequestParam(required = false) Integer page,
                              @RequestParam(required = false) Integer resultsPerPage,
                              @RequestParam(required = false) String orderBy,
-                             @RequestParam(required = false) Boolean reverse) {
+                             @RequestParam(required = false) Boolean reverse,
+                             @RequestParam(required = false) String businessType) {
 
         AuthenticationTokenManager.checkAuthenticationToken(request);
 
-        logger.info(() -> String.format("Performing Business search for \"%s\"", searchQuery));
+        logger.info(() -> String.format("Performing Business search for query \"%s\" and type \"%s\"", searchQuery, businessType));
 
         Sort.Direction direction = SearchHelper.getSortDirection(reverse);
         if (orderBy == null) {
@@ -287,7 +290,7 @@ public class BusinessController {
         }
 
         PageRequest pageRequest = SearchHelper.getPageRequest(page, resultsPerPage, Sort.by(sortOrder));
-        Specification<Business> specification = SearchHelper.constructBusinessSpecificationFromSearchQuery(searchQuery);
+        Specification<Business> specification = SearchHelper.constructSpecificationFromBusinessSearch(searchQuery, businessType);
 
         Page<Business> results = businessRepository.findAll(specification, pageRequest);
         Long count = results.getTotalElements();
