@@ -75,14 +75,12 @@
                   </v-list-item>
                 </template>
               </v-select>
-              <v-btn class="keyword-child" color="primary" @click="showCreateKeyword=true" title="Create new keyword">
+              <!-- Add new keyword -->
+              <v-btn class="keyword-child" color="primary" @click="addNewKeyword" title="Create new keyword">
                 <v-icon>mdi-plus-box</v-icon>
               </v-btn>
             </div>
             <p class="error-text text-center" v-if ="errorMessage !== undefined"> {{errorMessage}} </p>
-            <template v-if="showCreateKeyword">
-              <CreateKeyword @closeDialog="showCreateKeyword=false"/>
-            </template>
             <v-card-actions>
               <v-spacer/>
               <div class="error--text" v-if="feedback !== undefined">{{ feedback }}</div>
@@ -101,15 +99,12 @@
 </template>
 
 <script>
-import { createMarketplaceCard, getKeywords } from '@/api/internal';
-import CreateKeyword from "@/components/marketplace/CreateKeyword";
+import {createMarketplaceCard, createNewKeyword, getKeywords} from '@/api/internal';
 
 export default {
   name: "MarketplaceCard",
-  components: {CreateKeyword},
   data() {
     return {
-      showCreateKeyword: false,
       title: "",
       description: "",
       allKeywords: [],
@@ -219,6 +214,15 @@ export default {
     }
   },
   methods: {
+    async addNewKeyword() {
+      const matches = this.filterKeywords(this.keywordFilter + " ");
+      if (this.keywordFilter !== "" && matches.size() === 0) {
+        const result = await createNewKeyword(this.keyword);
+        if (typeof result === 'string') {
+          this.errorMessage = result;
+        }
+      }
+    },
     resetSearch() {
       this.keywordFilter = "";
     },

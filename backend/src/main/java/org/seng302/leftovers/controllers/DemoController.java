@@ -14,7 +14,9 @@ import org.springframework.web.server.ResponseStatusException;
 import javax.servlet.http.HttpServletRequest;
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -31,15 +33,17 @@ public class DemoController {
     private final InventoryItemRepository inventoryItemRepository;
     private final SaleItemRepository saleItemRepository;
     private final ImageRepository imageRepository;
+    private final MarketplaceCardRepository marketplaceCardRepository;
     private static final Logger logger = LogManager.getLogger(DemoController.class.getName());
 
-    public DemoController(UserRepository userRepository, BusinessRepository businessRepository, ProductRepository productRepository, InventoryItemRepository inventoryItemRepository, SaleItemRepository saleItemRepository, ImageRepository imageRepository) {
+    public DemoController(UserRepository userRepository, BusinessRepository businessRepository, ProductRepository productRepository, InventoryItemRepository inventoryItemRepository, SaleItemRepository saleItemRepository, ImageRepository imageRepository, MarketplaceCardRepository marketplaceCardRepository) {
         this.userRepository = userRepository;
         this.businessRepository = businessRepository;
         this.productRepository = productRepository;
         this.inventoryItemRepository = inventoryItemRepository;
         this.saleItemRepository = saleItemRepository;
         this.imageRepository = imageRepository;
+        this.marketplaceCardRepository = marketplaceCardRepository;
     }
 
     /**
@@ -135,6 +139,17 @@ public class DemoController {
                     .withPrice("1")
                     .build();
             saleItemRepository.save(saleItem);
+
+            // Construct a demo marketplace card
+            MarketplaceCard marketplaceCard = new MarketplaceCard.Builder()
+                    .withCloses(Instant.now().plus(4, ChronoUnit.DAYS))
+                    .withCreator(user)
+                    .withSection(MarketplaceCard.Section.EXCHANGE)
+                    .withTitle("Card")
+                    .withDescription("Example card")
+                    .addKeyword(new Keyword("Testing"))
+                    .build();
+            marketplaceCardRepository.save(marketplaceCard);
         } catch (Exception e) {
             logger.error(e.getMessage());
             throw e;

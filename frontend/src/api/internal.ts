@@ -899,3 +899,12 @@ export async function extendMarketplaceCardExpiry(marketplaceCardId: number) : P
   }
   return undefined;
 }
+
+/**
+ * Creates a new keyword to associate with marketplace cards
+ * @param keyword string to set as new marketplace card keyword object
+ */
+export async function createNewKeyword(keyword: string) : Promise<MaybeError<undefined>> {
+  // Task 219
+  return undefined;
+}
