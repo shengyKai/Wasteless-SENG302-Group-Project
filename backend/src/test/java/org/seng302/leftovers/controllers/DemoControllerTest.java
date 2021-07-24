@@ -18,6 +18,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.server.ResponseStatusException;
 
+import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServletRequest;
 import java.text.ParseException;
 
@@ -50,6 +51,8 @@ class DemoControllerTest {
     private SaleItemRepository saleItemRepository;
     @Mock
     private ImageRepository imageRepository;
+    @Mock
+    private EntityManager entityManager;
 
     private User testUser;
     private Business testBusiness;
@@ -57,7 +60,7 @@ class DemoControllerTest {
     @BeforeEach
     public void setUp() throws ParseException {
         MockitoAnnotations.openMocks(this);
-        demoController = new DemoController(userRepository, businessRepository, productRepository, inventoryItemRepository, saleItemRepository, imageRepository);
+        demoController = new DemoController(userRepository, businessRepository, productRepository, inventoryItemRepository, saleItemRepository, imageRepository, entityManager);
         testUser = new User.Builder()
                 .withFirstName("Andy")
                 .withMiddleName("Percy")
