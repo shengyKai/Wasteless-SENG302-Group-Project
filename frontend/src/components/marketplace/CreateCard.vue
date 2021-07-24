@@ -48,16 +48,15 @@
             <div class="keyword">
               <v-select
                 class="keyword-child"
-                no-data-text="Can't find what you're looking for? Hit '+' to create a new keyword"
+                no-data-text="No keywords found"
                 value = "keywords"
                 v-model="selectedKeywords"
                 :items="filteredKeywordList"
+                :hint="selectedKeywordsNames"
                 label="Select keywords"
                 item-text="name"
                 item-value="id"
                 multiple
-                :hint="selectedKeywords"
-                @click="selectedKeywords=undefined"
                 persistent-hint
                 outlined
               >
@@ -66,9 +65,7 @@
                     <v-list-item-content>
                       <v-text-field
                         label="Search for a keyword" v-model="keywordFilter"
-                        clearable
                         :autofocus="true"
-                        @click:clear="resetSearch"
                         hint="Keyword name"
                       />
                     </v-list-item-content>
@@ -76,7 +73,7 @@
                 </template>
               </v-select>
               <!-- Add new keyword -->
-              <v-btn class="keyword-child" color="primary" @click="addNewKeyword" title="Create new keyword">
+              <v-btn class="keyword-child" color="primary" @click="addNewKeyword" title="Can't find what you're looking for? Hit '+' to create a new keyword out of what you have currently typed">
                 <v-icon>mdi-plus-box</v-icon>
               </v-btn>
             </div>
@@ -138,6 +135,17 @@ export default {
       .catch(() => (this.allKeywords = []));
   },
   computed: {
+    selectedKeywordsNames() {
+      let names = "";
+      for (let i = 0; i < this.selectedKeywords.length; i++) {
+        for (let j = 0; j < this.allKeywords.length; j++) {
+          if (this.selectedKeywords[i] === this.allKeywords[j].id) {
+            names += this.allKeywords[j].name + ', ';
+          }
+        }
+      }
+      return names.replace(/, +$/, "");
+    },
     filteredKeywordList() {
       return this.allKeywords.filter(x => this.filterKeywords(x));
     },
@@ -186,10 +194,7 @@ export default {
       }
     },
     validSection() {
-      if (this.selectedSection) {
-        return true;
-      }
-      return false;
+      return !!this.selectedSection;
     },
     feedback() {
       if (!this.title || this.title.length === 0) {
@@ -222,9 +227,6 @@ export default {
           this.errorMessage = result;
         }
       }
-    },
-    resetSearch() {
-      this.keywordFilter = "";
     },
     filterKeywords(keyword) {
       const filterText = this.keywordFilter ?? '';
