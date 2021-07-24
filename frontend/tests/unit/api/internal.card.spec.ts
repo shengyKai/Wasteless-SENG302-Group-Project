@@ -299,6 +299,7 @@ describe("Test GET /users/{userId}/cards endpoint", () => {
     section: "Exchange",
     created: "some date",
     title: "some title",
+    lastRenewed: "some date",
     keywords: []
   };
 
