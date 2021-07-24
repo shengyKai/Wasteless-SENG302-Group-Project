@@ -13,13 +13,18 @@ public class SearchMarketplaceCardHelper {
 
     /**
      * Specification generator for finding marketplace cards with the given keywords
+     * If no keywords are provided then the resulting specification will match all marketplace cards
      * @param keywords List of keywords to filter by
      * @param isOr Whether to accept cards with all or at least 1 matching keyword
      * @return Generated specification
      */
     public static Specification<MarketplaceCard> cardHasKeywords(List<Keyword> keywords, boolean isOr) {
         return (root, query, criteriaBuilder) -> {
-            Subquery<Long> subquery = query.subquery(Long.class);
+            if (keywords.isEmpty()) {
+                return criteriaBuilder.conjunction();
+            }
+
+            Subquery<Long> subquery = query.subquery(Long.class); // Query for the number of matching keywords
 
             Root<MarketplaceCard> subqueryRoot = subquery.from(MarketplaceCard.class);
             Join<MarketplaceCard, Keyword> join = subqueryRoot.join("keywords");
@@ -28,9 +33,9 @@ public class SearchMarketplaceCardHelper {
             subquery.where(criteriaBuilder.equal(root, subqueryRoot), join.in(keywords));
 
             if (isOr) {
-                return criteriaBuilder.greaterThan(subquery, 0L);
+                return criteriaBuilder.greaterThanOrEqualTo(subquery, 1L); // At least one match
             } else {
-                return criteriaBuilder.equal(subquery, keywords.size());
+                return criteriaBuilder.greaterThanOrEqualTo(subquery, (long)keywords.size()); // All match
             }
         };
     }
