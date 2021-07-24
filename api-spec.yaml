@@ -40,6 +40,7 @@ tags:
   - name: 'UCM2: Card creation'
   - name: 'UCM3: Marketplace section display'
   - name: 'UCM4: Card expiry'
+  - name: 'U23: Search for business'
   - name: 'UCM5: Find my cards'
   - name: 'UCM6: Keyword management'
   - name: 'UCM7: Keyword search'
@@ -1018,6 +1019,17 @@ paths:
           schema:
             type: boolean
             example: false
+        - name: businessType
+          in: query
+          description: Business type to filter results by
+          schema:
+            type: string
+            example: Retail Trade
+            enum:
+              - Accommodation and Food Services
+              - Retail Trade
+              - Charitable organisation
+              - Non-profit organisation
       responses:
         '200':
           description: Request successful, a (possibly empty) list of businesses is returned along with total count
