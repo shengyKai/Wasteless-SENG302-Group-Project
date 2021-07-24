@@ -186,7 +186,7 @@ export function regxCountryCode() {
  Returns a Regex that matches a valid street address
  */
 export function regxStreet() {
-  return /^(([0-9]+|[0-9]+\/[0-9]+)[a-zA-Z]?)(?=\s[\p{L}])([\p{L}0-9-' ]+)$/u;
+  return /^(([0-9]+|[0-9]+\/[0-9]+)[a-zA-Z]?)(?=\s[\p{L}])([\p{L}0-9-.' ]+)$/u;
 }
 /**
  Returns a Regex that matches a valid product code
@@ -219,7 +219,7 @@ export const postCodeRules = [
 ];
 
 export const nameRules = [
-  (field: string) =>  (field.length === 0 || regxAlphabet().test(field)) || 'Naming must be valid'
+  (field: string) =>  (field.length === 0 || regxAlphabet().test(field)) || 'Naming must only contain letter and common characters'
 ];
 
 export function maxCharRules(size: number) {
