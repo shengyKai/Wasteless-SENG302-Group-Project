@@ -521,6 +521,34 @@ describe("InventoryItemForm.vue", () => {
       expect(findCreateButton().props().disabled).toBeTruthy();
     });
 
+    it("Valid when sell by date before expiry date", async () => {
+      await populateRequiredFields();
+      let expiryDate = todayPlusYears(2);
+      let sellByDate = todayPlusYears(1);
+      await wrapper.setData({
+        expires: expiryDate,
+        sellBy: sellByDate
+      });
+      wrapper.vm.checkExpiresDateVaild();
+      wrapper.vm.checkSellByDateValid();
+      await Vue.nextTick();
+      expect(findCreateButton().props().disabled).toBeFalsy();
+    });
+
+    it("Invalid when sell by date after expiry date", async () => {
+      await populateRequiredFields();
+      let expiryDate = todayPlusYears(1);
+      let sellByDate = todayPlusYears(2);
+      await wrapper.setData({
+        expires: expiryDate,
+        sellBy: sellByDate
+      });
+      wrapper.vm.checkExpiresDateVaild();
+      wrapper.vm.checkSellByDateValid();
+      await Vue.nextTick();
+      expect(findCreateButton().props().disabled).toBeTruthy();
+    });
+
     it("Invalid when sell by date before 1000 AD", async () => {
       await populateRequiredFields();
       let sellByDate = todayPlusYears(-1500);
@@ -741,11 +769,6 @@ describe("InventoryItemForm.vue", () => {
     const selectbox = findProductSelect();
     (selectbox.vm as any).activateMenu();
     await flushQueue();
-    console.log("Product list: " + wrapper.vm.productList);
-    console.log("Product list id: " + wrapper.vm.productList[0].id);
-    console.log("Product list name: " + wrapper.vm.productList[0].name);
-    console.log("Product code: " + wrapper.vm.productCode);
-    console.log("Filter: " + wrapper.vm.productFilter);
     expect(appWrapper.text()).toContain("Watties");
     await wrapper.setData({productFilter: "Not watties"});
     await Vue.nextTick();
@@ -757,6 +780,12 @@ describe("InventoryItemForm.vue", () => {
     beforeEach(() => {
       expect(wrapper.props().previousItem).toBe(undefined);
       expect(wrapper.vm.isCreate).toBe(true);
+    });
+
+    it('Quantity will be valid', async () => {
+      await populateRequiredFields();
+      expect(wrapper.vm.checkQuantityValid()).toBeTruthy();
+      expect(findCreateButton().props().disabled).toBeFalsy();
     });
 
     it('createInventoryItem called when create button pressed', async () => {
@@ -828,6 +857,17 @@ describe("InventoryItemForm.vue", () => {
 
   describe('Form is being used to modify an inventory item', () => {
 
+    const formData = {
+      productCode: "WATT-420-BEANS",
+      quantity: 77,
+      pricePerItem: "3.00",
+      totalPrice: "12.50",
+      manufactured: "2020-07-11",
+      sellBy: "2030-07-11",
+      bestBefore: "2030-07-11",
+      expires: "2030-07-11",
+    };
+
     beforeEach(async () => {
       const vuetify = new Vuetify();
       // Creating wrapper around InventoryItemForm with data-app to appease vuetify
@@ -870,40 +910,57 @@ describe("InventoryItemForm.vue", () => {
 
       await Vue.nextTick();
       expect(wrapper.vm.isCreate).toBe(false);
+
+      await wrapper.setData(formData);
+      await Vue.nextTick();
     });
 
     afterEach(() => {
       appWrapper.destroy();
     });
 
+    it('Quantity will be valid if it is greater than the amount used in sale listings for this inventory item', async () => {
+      await wrapper.setData({
+        previousItem: {
+          quantity: 47,
+          remainingQuantity: 20,
+        },
+        quantity: 60,
+      });
+      expect(wrapper.vm.checkQuantityValid()).toBeTruthy();
+      expect(findSaveButton().props().disabled).toBeFalsy();
+    });
+
+    it('Quantity will be valid if it is equal to the amount used in sale listings for this inventory item', async () => {
+      await wrapper.setData({
+        previousItem: {
+          quantity: 47,
+          remainingQuantity: 20,
+        },
+        quantity: 27,
+      });
+      expect(wrapper.vm.checkQuantityValid()).toBeTruthy();
+      expect(findSaveButton().props().disabled).toBeFalsy();
+    });
+
+    it('Quantity will be invalid if it is less than the amount used in sale listings for this inventory item', async () => {
+      await wrapper.setData({
+        previousItem: {
+          quantity: 47,
+          remainingQuantity: 20,
+        },
+        quantity: 26,
+      });
+      expect(wrapper.vm.checkQuantityValid()).toBeFalsy();
+      expect(findSaveButton().props().disabled).toBeTruthy();
+    });
+
     it('modifyInventoryItem called when save button pressed', async () => {
-      const formData = {
-        productCode: "WATT-420-BEANS",
-        quantity: 77,
-        pricePerItem: "3.00",
-        totalPrice: "12.50",
-        manufactured: "2020-07-11",
-        sellBy: "2030-07-11",
-        bestBefore: "2030-07-11",
-        expires: "2030-07-11",
-      };
-      await wrapper.setData(formData);
-      await Vue.nextTick();
       await findSaveButton().trigger('click');
       expect(modifyInventoryItem.mock.calls.length).toBe(1);
     });
 
     it('modifyInventoryItem called with data entered into form as arguments when save button pressed', async () => {
-      const formData = {
-        productCode: "WATT-420-BEANS",
-        quantity: 77,
-        pricePerItem: "3.00",
-        totalPrice: "12.50",
-        manufactured: "2020-07-11",
-        sellBy: "2030-07-11",
-        bestBefore: "2030-07-11",
-        expires: "2030-07-11"
-      };
       const expectedData = {
         productId: formData.productCode,
         quantity: formData.quantity,
@@ -914,8 +971,6 @@ describe("InventoryItemForm.vue", () => {
         bestBefore: formData.bestBefore,
         expires: formData.expires,
       };
-      await wrapper.setData(formData);
-      await Vue.nextTick();
       await findSaveButton().trigger('click');
       expect(modifyInventoryItem.mock.calls[0][0]).toBe(90);
       expect(modifyInventoryItem.mock.calls[0][1]).toBe(33);
@@ -924,18 +979,6 @@ describe("InventoryItemForm.vue", () => {
 
     it('Error message is shown if API request is unsuccessful', async () => {
       modifyInventoryItem.mockResolvedValueOnce('ERROR!');
-      const formData = {
-        productCode: "WATT-420-BEANS",
-        quantity: 77,
-        pricePerItem: "3.00",
-        totalPrice: "12.50",
-        manufactured: "2020-07-11",
-        sellBy: "2030-07-11",
-        bestBefore: "2030-07-11",
-        expires: "2030-07-11",
-      };
-      await wrapper.setData(formData);
-      await Vue.nextTick();
       await findSaveButton().trigger('click');
       await Vue.nextTick();
       expect(wrapper.vm.errorMessage).toBe('ERROR!');
@@ -944,18 +987,6 @@ describe("InventoryItemForm.vue", () => {
 
     it('Dialog is closed if API request is successful', async() => {
       modifyInventoryItem.mockResolvedValueOnce(undefined);
-      const formData = {
-        productCode: "WATT-420-BEANS",
-        quantity: 77,
-        pricePerItem: "3.00",
-        totalPrice: "12.50",
-        manufactured: "2020-07-11",
-        sellBy: "2030-07-11",
-        bestBefore: "2030-07-11",
-        expires: "2030-07-11",
-      };
-      await wrapper.setData(formData);
-      await Vue.nextTick();
       await findSaveButton().trigger('click');
       await Vue.nextTick();
       expect(wrapper.vm.errorMessage).toBe(undefined);
