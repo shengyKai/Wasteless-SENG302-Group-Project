@@ -1,18 +1,12 @@
 <template>
-  <div>
-    <v-card-title>
-      {{ title }}
-    </v-card-title>
-    <v-card-subtitle>
-      {{ date }}
-    </v-card-subtitle>
+  <Event :event="event" :title="title">
     <v-card-text>
       {{ text }}
     </v-card-text>
     <v-expand-transition>
       <v-container v-show="viewCard">
         <v-row justify="center">
-          <MarketplaceCard :isExpiryEvent="true" :content="card" style="width: 300px"/>
+          <MarketplaceCard :content="card" style="width: 300px"/>
         </v-row>
       </v-container>
     </v-expand-transition>
@@ -23,18 +17,21 @@
     <v-card-text class="justify-center">
       <div class="error--text" v-if="errorMessage !== undefined">{{ errorMessage }}</div>
     </v-card-text>
-  </div>
+  </Event>
 </template>
 
 <script>
-import { formatDate } from '@/utils';
 import { extendMarketplaceCardExpiry } from '@/api/internal';
 import MarketplaceCard from '@/components/cards/MarketplaceCard';
+import Event from './Event';
 import synchronizedTime from '@/components/utils/Methods/synchronizedTime';
 
 export default {
   name: 'ExpiryEvent',
-  components: { MarketplaceCard },
+  components: {
+    MarketplaceCard,
+    Event,
+  },
   props: {
     event: {
       type: Object,
@@ -54,12 +51,6 @@ export default {
      */
     card() {
       return this.event.card;
-    },
-    /**
-     * The date the event was created in a displayable format.
-     */
-    date() {
-      return formatDate(this.event.created);
     },
     /**
      * The date and time at which the marketplace card expires.

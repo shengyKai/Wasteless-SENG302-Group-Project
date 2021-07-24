@@ -160,7 +160,7 @@ describe("Test GET /businesses/:businessId/listings endpoint", () => {
       }
     });
     const inventories = await api.getBusinessSales(7, 1, 1, 'created', false);
-    expect(inventories).toEqual("Missing/Invalid access token");
+    expect(inventories).toEqual("You have been logged out. Please login again and retry");
   });
 
   it('When response is 406 status, the result will be an error message stating there is no such business', async () => {

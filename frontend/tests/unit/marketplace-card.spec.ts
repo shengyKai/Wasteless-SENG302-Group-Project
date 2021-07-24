@@ -5,7 +5,9 @@ import Vuex from 'vuex';
 import { createLocalVue, mount, Wrapper } from '@vue/test-utils';
 import MarketplaceCard from '@/components/cards/MarketplaceCard.vue';
 
-import { deleteMarketplaceCard, User } from '@/api/internal';
+import { deleteMarketplaceCard, MarketplaceCardSection, User } from '@/api/internal';
+import { flushQueue } from './utils';
+import { SECTION_NAMES } from '@/utils';
 
 jest.mock('@/api/internal', () => ({
   deleteMarketplaceCard: jest.fn(),
@@ -29,6 +31,7 @@ const testMarketplaceCard = {
   creator: testUser,
   section: 'ForSale',
   created: '2021-03-10',
+  lastRenewed: '2021-03-10',
   title: 'test_card_title',
   description: 'test_card_description',
   keywords: [{id: 3, name: 'test_keyword_1'}, {id: 4, name: 'test_keyword_2'}],
@@ -70,13 +73,13 @@ describe('MarketplaceCard.vue', () => {
    * Creates the environment used for testing. The marketplace card being viewed
    * can be altered by changing the contents of the card
    */
-  function generateWrapper() {
+  function generateWrapper(properties?: Partial<{showActions: boolean, showSection: boolean}>) {
     // Creating wrapper around MarketplaceCard with data-app to appease vuetify
     const App = localVue.component('App', {
       components: { MarketplaceCard },
       template: `
       <div data-app>
-        <MarketplaceCard :content="testMarketplaceCard"/>
+        <MarketplaceCard :content="testMarketplaceCard" :showActions="showActions" :showSection="showSection"/>
       </div>`
     });
 
@@ -90,7 +93,10 @@ describe('MarketplaceCard.vue', () => {
       store,
       data() {
         return {
-          testMarketplaceCard: testMarketplaceCard
+          testMarketplaceCard: testMarketplaceCard,
+          showActions: true,
+          showSection: false,
+          ...properties
         };
       }
     });
@@ -122,6 +128,13 @@ describe('MarketplaceCard.vue', () => {
     vuetify = new Vuetify();
     setUpStore(2, "user");
     generateWrapper();
+  });
+
+  /**
+	 * Ensures the CreateSaleItem component is removed from the global document
+	 */
+  afterEach(() => {
+    appWrapper.destroy();
   });
 
   it('Must match snapshot', () => {
@@ -215,6 +228,13 @@ describe('MarketplaceCard.vue', () => {
     expect(buttons.length).toBe(0);
   });
 
+  it('Must not be able to find the delete icon if the property "showActions" is false', async () => {
+    generateWrapper({showActions: false});
+
+    const buttons = wrapper.findAllComponents({ ref: 'deleteButton' });
+    expect(buttons.length).toBe(0);
+  });
+
   it("Must be able to find the delete icon if the user is not the owner of the card but is a DGAA", async () => {
     setUpStore(3, "defaultGlobalApplicationAdmin");
     generateWrapper();
@@ -228,4 +248,52 @@ describe('MarketplaceCard.vue', () => {
     const buttons = wrapper.findAllComponents({ ref: 'deleteButton' });
     expect(buttons.length).toBe(1);
   });
+
+  it.each(Object.keys(SECTION_NAMES) as MarketplaceCardSection[])(
+    'Must contain the section name of "%s" if "showSection" is true',
+    async (section: MarketplaceCardSection) => {
+      generateWrapper({showSection: true});
+      await wrapper.setData({
+        content: {
+          section
+        }
+      });
+      await Vue.nextTick();
+      expect(wrapper.text()).toContain(SECTION_NAMES[section]);
+    });
+
+  it.each(Object.keys(SECTION_NAMES) as MarketplaceCardSection[])(
+    'Must not contain the section name of "%s" if "showSection" is false',
+    async (section: MarketplaceCardSection) => {
+      generateWrapper({showSection: false});
+      await wrapper.setData({
+        content: {
+          section
+        }
+      });
+      await Vue.nextTick();
+      expect(wrapper.text()).not.toContain(SECTION_NAMES[section]);
+    });
+
+    it('Date string must contain only the created date if created and last renewed dates are the same', async() => {
+      await wrapper.setData({
+        content: {
+          created: '2021-03-01',
+          lastRenewed: '2021-03-01',
+        }
+      });
+      expect(wrapper.vm.dateString).toBe('Posted 01 Mar 2021');
+    });
+
+    it('Date string must contain both created and renewed date if they are different', async() => {
+      await wrapper.setData({
+        content: {
+          created: '2021-03-01',
+          lastRenewed: '2021-04-01',
+        }
+      });
+      expect(wrapper.vm.dateString).toBe('Posted 01 Mar 2021, Renewed 01 Apr 2021');
+    });
+
+
 });

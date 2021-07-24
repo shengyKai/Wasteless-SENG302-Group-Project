@@ -98,4 +98,11 @@ public class Keyword {
                 ", created=" + created +
                 '}';
     }
+
+    @PreRemove
+    private void preRemove() {
+        for (MarketplaceCard card : cards) {
+            card.removeKeyword(this);
+        }
+    }
 }

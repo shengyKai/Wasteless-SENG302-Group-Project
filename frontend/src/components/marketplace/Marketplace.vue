@@ -13,9 +13,9 @@
             solo-inverted
             hide-details
             :items="[
-              { text: 'Date Added', value: 'created'},
-              { text: 'Date Closing', value: 'closes'},
+              { text: 'Date Added / Renewed', value: 'lastRenewed'},
               { text: 'Title', value: 'title'},
+              { text: 'Location', value: 'location'},
               { text: 'Author First Name', value: 'creatorFirstName'},
               { text: 'Author Last Name', value: 'creatorLastName'},
             ]"
@@ -88,7 +88,7 @@
         <v-container class="grey lighten-2">
           <v-row>
             <v-col v-for="card in cards[section]" :key="card.id" cols="12" sm="6" md="4" lg="3">
-              <MarketplaceCard :isExpiryEvent="false" :content="card" @delete-card="updateMarketplace"/>
+              <MarketplaceCard :showActions="true" :content="card" @delete-card="updateMarketplace"/>
             </v-col>
           </v-row>
         </v-container>
@@ -111,12 +111,13 @@
 <script>
 import MarketplaceCard from "../cards/MarketplaceCard";
 import {getMarketplaceCardsBySection } from "../../api/internal.ts";
+import { SECTION_NAMES } from '@/utils';
 
 export default {
   data() {
     return {
       tab: null,
-      sectionNames: ["For Sale", "Wanted", "Exchange"],
+      sectionNames: SECTION_NAMES,
       sections: ["ForSale", "Wanted", "Exchange"],
       cards: {
         ForSale: [],
@@ -143,7 +144,7 @@ export default {
         Exchange: 0,
       },
       error: "",
-      orderBy: "created",
+      orderBy: "lastRenewed",
       /**
        * Note: change the default here to true because backlog states that
        * creation date should be descending by default.

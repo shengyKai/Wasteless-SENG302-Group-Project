@@ -1,3 +1,5 @@
+import { MarketplaceCardSection } from "./api/internal";
+
 /**
  * Sets a cookie. Will expire in one year.
  * @param name Name of the cookie being set.
@@ -69,7 +71,14 @@ export const USER_ROLES = {
   DGAA: 'defaultGlobalApplicationAdmin'
 };
 
-
+/**
+ * Mapping between section key and section name
+ */
+export const SECTION_NAMES: Record<MarketplaceCardSection, string> = {
+  ForSale: 'For Sale',
+  Wanted: 'Wanted',
+  Exchange: 'Exchange',
+};
 
 
 /**
