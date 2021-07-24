@@ -838,7 +838,7 @@ type CardOrderBy = 'created' | 'title' | 'closes' | 'creatorFirstName' | 'creato
  * @param resultsPerPage Maximum number of results per page
  * @param orderBy Parameter to order the results by
  * @param reverse Whether to reverse the results (default ascending)
- * @returns List of sales or a string error message
+ * @returns List of marketplace cards and the count or a string error message
  */
 export async function getMarketplaceCardsBySection(section: MarketplaceCardSection, page: number, resultsPerPage: number, orderBy: CardOrderBy, reverse: boolean): Promise<MaybeError<SearchResults<MarketplaceCard>>> {
   let response;
@@ -899,4 +899,35 @@ export async function extendMarketplaceCardExpiry(marketplaceCardId: number) : P
     return 'Request failed: ' + error.response?.data.message;
   }
   return undefined;
+}
+
+/**
+ * Retrieves all the marketplace cards that are created by a user.
+ * @param userId id of the requested user to identify the cards
+ * @param resultsPerPage Maximum number of results per page
+ * @param page Page to fetch (1 indexed)
+ * @returns List of marketplace cards and the count or a string error message
+ */
+export async function getMarketplaceCardsByUser(userId: number, resultsPerPage: number, page: number): Promise<MaybeError<SearchResults<MarketplaceCard>>> {
+  let response;
+  try {
+    response = await instance.get(`/users/${userId}/cards`, {
+      params: {
+        userId,
+        page,
+        resultsPerPage
+      }
+    });
+  } catch (error) {
+    let status: number | undefined = error.response?.status;
+    if (status === undefined) return 'Failed to reach backend';
+    if (status === 400) return 'The page does not exist';
+    if (status === 401) return 'You have been logged out. Please login again and retry';
+    if (status === 406) return 'The user does not exist';
+    return 'Request failed: ' + error.response?.data.message;
+  }
+  if (!is<SearchResults<MarketplaceCard>>(response.data)) {
+    return "Response is not card array";
+  }
+  return response.data;
 }
