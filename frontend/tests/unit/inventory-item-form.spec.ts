@@ -368,218 +368,6 @@ describe("InventoryItemForm.vue", () => {
     });
   });
 
-  describe('Form is being used to create an inventory item', () => {
-
-    beforeEach(() => {
-      expect(wrapper.props().previousItem).toBe(undefined);
-      expect(wrapper.vm.isCreate).toBe(true);
-    });
-
-    it('createInventoryItem called when create button pressed', async () => {
-      const formData = {
-        productCode: "WATT-420-BEANS",
-        quantity: 4,
-        pricePerItem: "3.00",
-        totalPrice: "12.50",
-        manufactured: "2020-07-11",
-        sellBy: "2030-07-11",
-        bestBefore: "2030-07-11",
-        expires: "2030-07-11"
-      };
-      await wrapper.setData(formData);
-      await Vue.nextTick();
-      await findCreateButton().trigger('click');
-      expect(createInventoryItem.mock.calls.length).toBe(1);
-    });
-
-    it('createInventoryItem called with data entered into form as arguments when create button pressed', async () => {
-      const formData = {
-        productCode: "WATT-420-BEANS",
-        quantity: 4,
-        pricePerItem: "3.00",
-        totalPrice: "12.50",
-        manufactured: "2020-07-11",
-        sellBy: "2030-07-11",
-        bestBefore: "2030-07-11",
-        expires: "2030-07-11"
-      };
-      const expectedData = {
-        productId: formData.productCode,
-        quantity: formData.quantity,
-        pricePerItem: formData.pricePerItem,
-        totalPrice: formData.totalPrice,
-        manufactured: formData.manufactured,
-        sellBy: formData.sellBy,
-        bestBefore: formData.bestBefore,
-        expires: formData.expires,
-      };
-      await wrapper.setData(formData);
-      await Vue.nextTick();
-      await findCreateButton().trigger('click');
-      expect(createInventoryItem.mock.calls[0][0]).toBe(90);
-      expect(createInventoryItem.mock.calls[0][1]).toStrictEqual(expectedData);
-    });
-
-    it('Error message is shown if API request is unsuccessful', async () => {
-      createInventoryItem.mockResolvedValueOnce('ERROR!');
-      await populateAllFields();
-      await Vue.nextTick();
-      await findCreateButton().trigger('click');
-      await Vue.nextTick();
-      expect(wrapper.vm.errorMessage).toBe('ERROR!');
-      expect(wrapper.emitted().closeDialog).toBeFalsy();
-    });
-
-    it('Dialog is closed if API request is successful', async() => {
-      createInventoryItem.mockResolvedValueOnce(undefined);
-      await populateAllFields();
-      await Vue.nextTick();
-      await findCreateButton().trigger('click');
-      await Vue.nextTick();
-      expect(wrapper.vm.errorMessage).toBe(undefined);
-      expect(wrapper.emitted().closeDialog).toBeTruthy();
-    });
-
-  });
-
-  describe('Form is being used to modify an inventory item', () => {
-
-    beforeEach(async () => {
-      const vuetify = new Vuetify();
-      // Creating wrapper around InventoryItemForm with data-app to appease vuetify
-      const App = localVue.component("App", {
-        components: { InventoryItemForm },
-        template: "<div data-app><InventoryItemForm :businessId=\"businessId\" :previousItem=\"previousItem\"/></div>",
-      });
-
-      // Put the InventoryItemForm component inside a div in the global document,
-      // this seems to make vuetify work correctly, but necessitates calling appWrapper.destroy
-      const elem = document.createElement("div");
-      document.body.appendChild(elem);
-
-      appWrapper = mount(App, {
-        localVue,
-        vuetify,
-        attachTo: elem,
-        data() {
-          return {
-            businessId: 90,
-            previousItem: {
-              id: 33,
-              product: {
-                id: "WATT-420-BEANS",
-              },
-              quantity: 47,
-              remainingQuantity: 20,
-              pricePerItem: "3.00",
-              totalPrice: "12.50",
-              manufactured: "2020-07-11",
-              sellBy: "2030-07-11",
-              bestBefore: "2030-07-11",
-              expires: "2030-07-11",
-            }
-          };
-        }
-      });
-
-      wrapper = appWrapper.getComponent(InventoryItemForm);
-
-      await Vue.nextTick();
-      expect(wrapper.vm.isCreate).toBe(false);
-    });
-
-    afterEach(() => {
-      appWrapper.destroy();
-    });
-
-    it('modifyInventoryItem called when save button pressed', async () => {
-      const formData = {
-        productCode: "WATT-420-BEANS",
-        quantity: 77,
-        pricePerItem: "3.00",
-        totalPrice: "12.50",
-        manufactured: "2020-07-11",
-        sellBy: "2030-07-11",
-        bestBefore: "2030-07-11",
-        expires: "2030-07-11",
-      };
-      await wrapper.setData(formData);
-      await Vue.nextTick();
-      await findSaveButton().trigger('click');
-      expect(modifyInventoryItem.mock.calls.length).toBe(1);
-    });
-
-    it('modifyInventoryItem called with data entered into form as arguments when save button pressed', async () => {
-      const formData = {
-        productCode: "WATT-420-BEANS",
-        quantity: 77,
-        pricePerItem: "3.00",
-        totalPrice: "12.50",
-        manufactured: "2020-07-11",
-        sellBy: "2030-07-11",
-        bestBefore: "2030-07-11",
-        expires: "2030-07-11"
-      };
-      const expectedData = {
-        productId: formData.productCode,
-        quantity: formData.quantity,
-        pricePerItem: formData.pricePerItem,
-        totalPrice: formData.totalPrice,
-        manufactured: formData.manufactured,
-        sellBy: formData.sellBy,
-        bestBefore: formData.bestBefore,
-        expires: formData.expires,
-      };
-      await wrapper.setData(formData);
-      await Vue.nextTick();
-      await findSaveButton().trigger('click');
-      expect(modifyInventoryItem.mock.calls[0][0]).toBe(90);
-      expect(modifyInventoryItem.mock.calls[0][1]).toBe(33);
-      expect(modifyInventoryItem.mock.calls[0][2]).toStrictEqual(expectedData);
-    });
-
-    it('Error message is shown if API request is unsuccessful', async () => {
-      modifyInventoryItem.mockResolvedValueOnce('ERROR!');
-      const formData = {
-        productCode: "WATT-420-BEANS",
-        quantity: 77,
-        pricePerItem: "3.00",
-        totalPrice: "12.50",
-        manufactured: "2020-07-11",
-        sellBy: "2030-07-11",
-        bestBefore: "2030-07-11",
-        expires: "2030-07-11",
-      };
-      await wrapper.setData(formData);
-      await Vue.nextTick();
-      await findSaveButton().trigger('click');
-      await Vue.nextTick();
-      expect(wrapper.vm.errorMessage).toBe('ERROR!');
-      expect(wrapper.emitted().closeDialog).toBeFalsy();
-    });
-
-    it('Dialog is closed if API request is successful', async() => {
-      modifyInventoryItem.mockResolvedValueOnce(undefined);
-      const formData = {
-        productCode: "WATT-420-BEANS",
-        quantity: 77,
-        pricePerItem: "3.00",
-        totalPrice: "12.50",
-        manufactured: "2020-07-11",
-        sellBy: "2030-07-11",
-        bestBefore: "2030-07-11",
-        expires: "2030-07-11",
-      };
-      await wrapper.setData(formData);
-      await Vue.nextTick();
-      await findSaveButton().trigger('click');
-      await Vue.nextTick();
-      expect(wrapper.vm.errorMessage).toBe(undefined);
-      expect(wrapper.emitted().closeDialog).toBeTruthy();
-    });
-
-  });
-
   describe("Date Validation", () => {
     it("Valid when all date fields are today", async () => {
       await populateRequiredFields();
@@ -962,5 +750,217 @@ describe("InventoryItemForm.vue", () => {
     await wrapper.setData({productFilter: "Not watties"});
     await Vue.nextTick();
     expect(appWrapper.text()).not.toContain("Watties");
+  });
+
+  describe('Form is being used to create an inventory item', () => {
+
+    beforeEach(() => {
+      expect(wrapper.props().previousItem).toBe(undefined);
+      expect(wrapper.vm.isCreate).toBe(true);
+    });
+
+    it('createInventoryItem called when create button pressed', async () => {
+      const formData = {
+        productCode: "WATT-420-BEANS",
+        quantity: 4,
+        pricePerItem: "3.00",
+        totalPrice: "12.50",
+        manufactured: "2020-07-11",
+        sellBy: "2030-07-11",
+        bestBefore: "2030-07-11",
+        expires: "2030-07-11"
+      };
+      await wrapper.setData(formData);
+      await Vue.nextTick();
+      await findCreateButton().trigger('click');
+      expect(createInventoryItem.mock.calls.length).toBe(1);
+    });
+
+    it('createInventoryItem called with data entered into form as arguments when create button pressed', async () => {
+      const formData = {
+        productCode: "WATT-420-BEANS",
+        quantity: 4,
+        pricePerItem: "3.00",
+        totalPrice: "12.50",
+        manufactured: "2020-07-11",
+        sellBy: "2030-07-11",
+        bestBefore: "2030-07-11",
+        expires: "2030-07-11"
+      };
+      const expectedData = {
+        productId: formData.productCode,
+        quantity: formData.quantity,
+        pricePerItem: formData.pricePerItem,
+        totalPrice: formData.totalPrice,
+        manufactured: formData.manufactured,
+        sellBy: formData.sellBy,
+        bestBefore: formData.bestBefore,
+        expires: formData.expires,
+      };
+      await wrapper.setData(formData);
+      await Vue.nextTick();
+      await findCreateButton().trigger('click');
+      expect(createInventoryItem.mock.calls[0][0]).toBe(90);
+      expect(createInventoryItem.mock.calls[0][1]).toStrictEqual(expectedData);
+    });
+
+    it('Error message is shown if API request is unsuccessful', async () => {
+      createInventoryItem.mockResolvedValueOnce('ERROR!');
+      await populateAllFields();
+      await Vue.nextTick();
+      await findCreateButton().trigger('click');
+      await Vue.nextTick();
+      expect(wrapper.vm.errorMessage).toBe('ERROR!');
+      expect(wrapper.emitted().closeDialog).toBeFalsy();
+    });
+
+    it('Dialog is closed if API request is successful', async() => {
+      createInventoryItem.mockResolvedValueOnce(undefined);
+      await populateAllFields();
+      await Vue.nextTick();
+      await findCreateButton().trigger('click');
+      await Vue.nextTick();
+      expect(wrapper.vm.errorMessage).toBe(undefined);
+      expect(wrapper.emitted().closeDialog).toBeTruthy();
+    });
+
+  });
+
+  describe('Form is being used to modify an inventory item', () => {
+
+    beforeEach(async () => {
+      const vuetify = new Vuetify();
+      // Creating wrapper around InventoryItemForm with data-app to appease vuetify
+      const App = localVue.component("App", {
+        components: { InventoryItemForm },
+        template: "<div data-app><InventoryItemForm :businessId=\"businessId\" :previousItem=\"previousItem\"/></div>",
+      });
+
+      // Put the InventoryItemForm component inside a div in the global document,
+      // this seems to make vuetify work correctly, but necessitates calling appWrapper.destroy
+      const elem = document.createElement("div");
+      document.body.appendChild(elem);
+
+      appWrapper = mount(App, {
+        localVue,
+        vuetify,
+        attachTo: elem,
+        data() {
+          return {
+            businessId: 90,
+            previousItem: {
+              id: 33,
+              product: {
+                id: "WATT-420-BEANS",
+              },
+              quantity: 47,
+              remainingQuantity: 20,
+              pricePerItem: "3.00",
+              totalPrice: "12.50",
+              manufactured: "2020-07-11",
+              sellBy: "2030-07-11",
+              bestBefore: "2030-07-11",
+              expires: "2030-07-11",
+            }
+          };
+        }
+      });
+
+      wrapper = appWrapper.getComponent(InventoryItemForm);
+
+      await Vue.nextTick();
+      expect(wrapper.vm.isCreate).toBe(false);
+    });
+
+    afterEach(() => {
+      appWrapper.destroy();
+    });
+
+    it('modifyInventoryItem called when save button pressed', async () => {
+      const formData = {
+        productCode: "WATT-420-BEANS",
+        quantity: 77,
+        pricePerItem: "3.00",
+        totalPrice: "12.50",
+        manufactured: "2020-07-11",
+        sellBy: "2030-07-11",
+        bestBefore: "2030-07-11",
+        expires: "2030-07-11",
+      };
+      await wrapper.setData(formData);
+      await Vue.nextTick();
+      await findSaveButton().trigger('click');
+      expect(modifyInventoryItem.mock.calls.length).toBe(1);
+    });
+
+    it('modifyInventoryItem called with data entered into form as arguments when save button pressed', async () => {
+      const formData = {
+        productCode: "WATT-420-BEANS",
+        quantity: 77,
+        pricePerItem: "3.00",
+        totalPrice: "12.50",
+        manufactured: "2020-07-11",
+        sellBy: "2030-07-11",
+        bestBefore: "2030-07-11",
+        expires: "2030-07-11"
+      };
+      const expectedData = {
+        productId: formData.productCode,
+        quantity: formData.quantity,
+        pricePerItem: formData.pricePerItem,
+        totalPrice: formData.totalPrice,
+        manufactured: formData.manufactured,
+        sellBy: formData.sellBy,
+        bestBefore: formData.bestBefore,
+        expires: formData.expires,
+      };
+      await wrapper.setData(formData);
+      await Vue.nextTick();
+      await findSaveButton().trigger('click');
+      expect(modifyInventoryItem.mock.calls[0][0]).toBe(90);
+      expect(modifyInventoryItem.mock.calls[0][1]).toBe(33);
+      expect(modifyInventoryItem.mock.calls[0][2]).toStrictEqual(expectedData);
+    });
+
+    it('Error message is shown if API request is unsuccessful', async () => {
+      modifyInventoryItem.mockResolvedValueOnce('ERROR!');
+      const formData = {
+        productCode: "WATT-420-BEANS",
+        quantity: 77,
+        pricePerItem: "3.00",
+        totalPrice: "12.50",
+        manufactured: "2020-07-11",
+        sellBy: "2030-07-11",
+        bestBefore: "2030-07-11",
+        expires: "2030-07-11",
+      };
+      await wrapper.setData(formData);
+      await Vue.nextTick();
+      await findSaveButton().trigger('click');
+      await Vue.nextTick();
+      expect(wrapper.vm.errorMessage).toBe('ERROR!');
+      expect(wrapper.emitted().closeDialog).toBeFalsy();
+    });
+
+    it('Dialog is closed if API request is successful', async() => {
+      modifyInventoryItem.mockResolvedValueOnce(undefined);
+      const formData = {
+        productCode: "WATT-420-BEANS",
+        quantity: 77,
+        pricePerItem: "3.00",
+        totalPrice: "12.50",
+        manufactured: "2020-07-11",
+        sellBy: "2030-07-11",
+        bestBefore: "2030-07-11",
+        expires: "2030-07-11",
+      };
+      await wrapper.setData(formData);
+      await Vue.nextTick();
+      await findSaveButton().trigger('click');
+      await Vue.nextTick();
+      expect(wrapper.vm.errorMessage).toBe(undefined);
+      expect(wrapper.emitted().closeDialog).toBeTruthy();
+    });
+
   });
 });

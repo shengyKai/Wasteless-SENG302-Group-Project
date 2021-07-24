@@ -52,6 +52,14 @@ export function formatDate(date: Date | string) {
   return `${parts[2]} ${parts[1]} ${parts[3]}`;
 }
 
+export function formatPrice(price : number) {
+  if (Number.isInteger(price)) {
+    return price.toString();
+  } else {
+    return (+price).toFixed(2);
+  }
+}
+
 /**
  * User roles.
  */

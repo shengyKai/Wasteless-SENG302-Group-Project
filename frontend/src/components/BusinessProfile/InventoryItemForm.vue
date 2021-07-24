@@ -58,7 +58,7 @@
                 <v-col cols="6">
                   <v-text-field
                     class="required"
-                    v-model="quantity"
+                    v-model.trim="quantity"
                     label="Quantity"
                     :rules="mandatoryRules().concat(quantityRules()).concat(checkQuantityValid())"
                     outlined
@@ -67,7 +67,7 @@
                 <!-- INPUT: Price per item. Only allows number or '.'but come with 2 digit -->
                 <v-col cols="6">
                   <v-text-field
-                    v-model="pricePerItem"
+                    v-model.trim="pricePerItem"
                     label="Price Per Item"
                     :prefix="currency.symbol"
                     :suffix="currency.code"
@@ -79,7 +79,7 @@
                 <!-- INPUT: Total Price. Only allows number or '.'but come with 2 digit -->
                 <v-col cols="6">
                   <v-text-field
-                    v-model="totalPrice"
+                    v-model.trim="totalPrice"
                     label="Total Price"
                     :prefix="currency.symbol"
                     :suffix="currency.code"

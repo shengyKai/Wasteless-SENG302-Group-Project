@@ -158,7 +158,7 @@ import { currencyFromCountry } from "@/api/currency";
 import ProductImageUploader from "../utils/ProductImageUploader";
 import ProductForm from "../BusinessProfile/ProductForm.vue";
 import { makeImagePrimary, deleteImage } from "@/api/internal";
-import { formatDate, trimToLength } from '@/utils';
+import { formatDate, formatPrice, trimToLength } from '@/utils';
 
 export default {
   name: "ProductCatalogueItem",
@@ -194,7 +194,7 @@ export default {
       if (!this.product.recommendedRetailPrice) {
         return "Not set";
       }
-      return this.currency.symbol + this.product.recommendedRetailPrice + " " + this.currency.code;
+      return this.currency.symbol + formatPrice(this.product.recommendedRetailPrice) + " " + this.currency.code;
     },
     manufacturer() {
       return this.product.manufacturer || "Not set";
