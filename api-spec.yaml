@@ -1039,7 +1039,7 @@ paths:
           $ref: '#/components/responses/UnauthorizedError'
         '400': 
           $ref: '#/components/responses/BadRequestError'
-  '/cards'
+  '/cards':
     post:
       tags:
         - 'UCM2: Card creation'
@@ -1107,11 +1107,13 @@ paths:
           schema:
             type: string
             enum:
+              - lastRenewed
               - created
               - title
               - closes
               - creatorFirstName
               - creatorLastName
+              - location
         - name: reverse
           in: query
           description: Whether to flip default sort order (default is ascending)
@@ -1414,15 +1416,50 @@ paths:
           schema:
             type: boolean
           required: true
+        - name: page
+          in: query
+          description: The page number to retrieve (1 indexed)
+          schema:
+            type: integer
+        - name: resultsPerPage
+          in: query
+          description: The number of results to show per page
+          schema:
+            type: integer
+        - name: orderBy
+          in: query
+          description: Card property to order results by
+          schema:
+            type: string
+            enum:
+              - lastRenewed
+              - created
+              - title
+              - closes
+              - creatorFirstName
+              - creatorLastName
+              - location
+        - name: reverse
+          in: query
+          description: Whether to flip default sort order (default is ascending)
+          schema:
+            type: boolean
       responses:
         '200':
           description: 'Request successful, a (possibly empty) list of cards is returned'
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Card'
+                allOf:
+                  - $ref: '#/components/schemas/Page'
+                  - type: object
+                    required:
+                      - results
+                    properties:
+                      results:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Card'
         '400':
           $ref: '#/components/responses/BadRequestError'
         '401':
