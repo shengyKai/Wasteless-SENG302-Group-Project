@@ -970,3 +970,12 @@ export async function getMarketplaceCardsByUser(userId: number, resultsPerPage: 
   }
   return response.data;
 }
+
+/**
+ * Creates a new keyword to associate with marketplace cards
+ * @param keyword string to set as new marketplace card keyword object
+ */
+export async function createNewKeyword(keyword: string) : Promise<MaybeError<undefined>> {
+  // Task 219
+  return undefined;
+}
