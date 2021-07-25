@@ -2,7 +2,7 @@ import Vue from 'vue';
 import Vuetify from 'vuetify';
 import Vuex, { Store } from 'vuex';
 import { createLocalVue, Wrapper, mount } from '@vue/test-utils';
-import Marketplace from '@/components/marketplace/Marketplace.vue'
+import Marketplace from '@/components/marketplace/Marketplace.vue';
 import * as api from '@/api/internal';
 import { User, MarketplaceCard } from '@/api/internal';
 import { castMock, flushQueue } from './utils';
@@ -69,7 +69,7 @@ describe('Marketplace.vue', () => {
     await flushQueue();
     const prevCalls = getMarketplaceCardsBySection.mock.calls.length;
     expect(wrapper.vm.orderBy).toBe('lastRenewed');
-    
+
     wrapper.setData({
       orderBy: "title",
     });
