@@ -40,3 +40,15 @@ Feature: U23 Search for Business
     When I search with query "New OR Pakn"
     Then I expect business "New World" to be returned
     And I expect business "PaknSave" to be returned
+
+  Scenario: AC2 - I can search by business type instead of name
+    Given the business "New World" with the type "Retail Trade" exists
+    When I search for business type "Retail Trade"
+    Then I expect business "New World" to be returned
+
+  Scenario: AC2 - I can search by business type as well as name
+    Given the business "New World" with the type "Retail Trade" exists
+    And the business "PaknSave" with the type "Retail Trade" exists
+    When I search with query "New" and business type "Retail Trade"
+    Then I expect business "New World" to be returned
+    And I don't expect business "PaknSave" to be returned

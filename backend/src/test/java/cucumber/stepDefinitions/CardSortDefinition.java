@@ -112,12 +112,12 @@ public class CardSortDefinition {
                 .withDescription("A cool vintage car")
                 .withCloses(Instant.now().plus(Duration.ofDays(14).plus(Duration.ofSeconds(2))))
                 .build();
-        //overwrite the created time field here so that we can produce expected result orderings
-        Field createdField = MarketplaceCard.class.getDeclaredField("created");
-        createdField.setAccessible(true);
-        createdField.set(card1, Instant.now());
-        createdField.set(card2, Instant.now().plus(Duration.ofSeconds(1)));
-        createdField.set(card3, Instant.now().plus(Duration.ofSeconds(2)));
+        //overwrite the last renewed time field here so that we can produce expected result orderings
+        Field lastRenewedField = MarketplaceCard.class.getDeclaredField("lastRenewed");
+        lastRenewedField.setAccessible(true);
+        lastRenewedField.set(card1, Instant.now());
+        lastRenewedField.set(card2, Instant.now().plus(Duration.ofSeconds(1)));
+        lastRenewedField.set(card3, Instant.now().plus(Duration.ofSeconds(2)));
         cardContext.save(card1);
         cardCreatorName1 = card1.getCreator().getFirstName();
         cardContext.save(card2);
@@ -141,9 +141,9 @@ public class CardSortDefinition {
                 .queryParam("reverse", "true"));
     }
 
-    @Then("the cards in the response should be ordered by {string} by default")
-    public void the_cards_in_the_response_should_be_ordered_by_by_default(String string) throws UnsupportedEncodingException, ParseException {
-        //"created" for these cards are as such: 0second, +1second, +2 second
+    @Then("the cards in the response should be ordered by last renewed date by default")
+    public void the_cards_in_the_response_should_be_ordered_by_last_renewed_date_by_default() throws UnsupportedEncodingException, ParseException {
+        //"lastRenewed" for these cards are as such: 0second, +1second, +2 second
         expectedOrder = List.of(cardCreatorName1, cardCreatorName2, cardCreatorName3);
 
         cards = requestContext.performRequest(get("/cards")
@@ -365,9 +365,9 @@ public class CardSortDefinition {
         }
     }
 
-    @Then("the cards in the response should be ordered by their created in reverse")
-    public void the_cards_in_the_response_should_be_ordered_by_their_created_in_reverse() throws UnsupportedEncodingException, ParseException {
-        //"created" for these cards are as such: +2second, +1second, 0second
+    @Then("the cards in the response should be ordered by their last renewed date in reverse")
+    public void the_cards_in_the_response_should_be_ordered_by_their_last_renewed_date_in_reverse() throws UnsupportedEncodingException, ParseException {
+        //"lastRenewed" for these cards are as such: +2second, +1second, 0second
         expectedOrder = List.of(cardCreatorName3, cardCreatorName2, cardCreatorName1);
 
         JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
