@@ -178,6 +178,10 @@ export type Keyword = {
   created: string
 };
 
+export type CreateKeyword = {
+  name: string
+}
+
 export type MarketplaceCard = {
   id: number,
   creator: User,
@@ -975,7 +979,16 @@ export async function getMarketplaceCardsByUser(userId: number, resultsPerPage: 
  * Creates a new keyword to associate with marketplace cards
  * @param keyword string to set as new marketplace card keyword object
  */
-export async function createNewKeyword(keyword: string) : Promise<MaybeError<undefined>> {
-  // Task 219
-  return undefined;
+export async function createNewKeyword(keyword: CreateKeyword) : Promise<MaybeError<undefined>> {
+  let response;
+  try {
+    response = await instance.post(`/keywords`, keyword);
+  } catch (error) {
+    let status: number | undefined = error.response?.status;
+    if (status === undefined) return 'Failed to reach backend';
+    if (status === 400) return 'This keyword already exists';
+    if (status === 401) return 'You have been logged out. Please login again and retry';
+    return 'Request failed: ' + error.response?.data.message;
+  }
+  return response.data;
 }

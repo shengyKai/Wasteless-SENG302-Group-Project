@@ -76,6 +76,7 @@
               <v-btn class="keyword-child" color="primary" @click="addNewKeyword" title="Can't find what you're looking for? Hit '+' to create a new keyword out of what you have currently typed">
                 <v-icon>mdi-plus-box</v-icon>
               </v-btn>
+              {{testMessage}}
             </div>
             <p class="error-text text-center" v-if ="errorMessage !== undefined"> {{errorMessage}} </p>
             <v-card-actions>
@@ -112,6 +113,7 @@ export default {
       sections: [{text: "For Sale", value: "ForSale"}, {text: "Wanted", value: "Wanted"}, {text: "Exchange", value: "Exchange"}],
       selectedSection: undefined,
       allowedCharsRegex: /^[\s\d\p{L}\p{P}]*$/u,
+      testMessage: "Testing "
     };
   },
   mounted() {
@@ -220,11 +222,23 @@ export default {
   },
   methods: {
     async addNewKeyword() {
-      const matches = this.filterKeywords(this.keywordFilter + " ");
-      if (this.keywordFilter !== "" && matches.size() === 0) {
-        const result = await createNewKeyword(this.keyword);
+      if (this.keywordFilter.length > 1) {
+        let formattedName = this.keywordFilter.charAt(0).toUpperCase() + this.keywordFilter.slice(1).toLowerCase();
+        let keyword = {
+          name: formattedName
+        };
+        const result = await createNewKeyword(keyword);
         if (typeof result === 'string') {
           this.errorMessage = result;
+        } else { // Reload the keywords to show the newly added one
+          getKeywords()
+            .then((response) => {
+              if (typeof response === 'string') {
+                this.allKeywords = [];
+              } else {
+                this.allKeywords = response;
+              }})
+            .catch(() => (this.allKeywords = []));
         }
       }
     },
