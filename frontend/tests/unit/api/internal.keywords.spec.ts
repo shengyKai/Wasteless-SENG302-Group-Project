@@ -18,42 +18,7 @@ type Mocked<T extends { [k: string]: (...args: any[]) => any }> = { [k in keyof 
 // @ts-ignore - We've added an instance attribute in the mock declaration that mimics a AxiosInstance
 const instance: Mocked<Pick<AxiosInstance, 'get'>> = axios.instance;
 
-describe("Test GET /keywords/search endpoint (all keywords)", () => {
-  it("Get keywords", async () => {
-    const defaultWords = [{
-      id: 1,
-      name: "Gluten Free",
-      created: "2002-02-02"
-    }];
-    instance.get.mockResolvedValueOnce({
-      data: defaultWords
-    });
-    const keywords = await api.getKeywords();
-    expect(keywords).toEqual(defaultWords);
-  });
-
-  it("Backend couldn't be reached", async () => {
-    instance.get.mockRejectedValueOnce({
-      response: {
-        status: undefined,
-      }
-    });
-    const keywords = await api.getKeywords();
-    expect(keywords).toEqual("Failed to reach backend");
-  });
-
-  it("Unauthorised call to keywords", async () => {
-    instance.get.mockRejectedValueOnce({
-      response: {
-        status: 401,
-      }
-    });
-    const keywords = await api.getKeywords();
-    expect(keywords).toEqual('You have been logged out. Please login again and retry');
-  });
-});
-
-describe("Test GET /keywords/search endpoint with search param", () => {
+describe("Test GET /keywords/search endpoint", () => {
   const invalidKeyword = {
     thing: "woop",
   };
