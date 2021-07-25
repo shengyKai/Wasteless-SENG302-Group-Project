@@ -18,9 +18,13 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 import java.sql.*;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -212,10 +216,56 @@ public class SaleItemGeneratorTest {
     }
 
     @Test
-    void generateQuantities_generateQuantityWithAUpperBound1_quantityGeneratedBetweenZeroAndUpperBound() throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
-      Method generateQuantities = SaleItemGenerator.class.getDeclaredMethod("generateQuantities", int.class);
-      generateQuantities.setAccessible(true);
-      int[] quantities = (int[]) generateQuantities.invoke(saleItemGenerator, 1);
-      assertTrue(quantities[0] == 1);
+    void generateQuantities_generateQuantityWithAUpperBoundOne_quantityGeneratedEqualsOne() throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
+        Method generateQuantities = SaleItemGenerator.class.getDeclaredMethod("generateQuantities", int.class);
+        generateQuantities.setAccessible(true);
+        int[] quantities = (int[]) generateQuantities.invoke(saleItemGenerator, 1);
+        assertTrue(quantities[0] == 1);
+    }
+
+    @Test
+    void generateQuantities_generateQuantityWithAUpperBoundFive_quantityGeneratedBetweenOneAndFive() throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
+        Method generateQuantities = SaleItemGenerator.class.getDeclaredMethod("generateQuantities", int.class);
+        generateQuantities.setAccessible(true);
+        int[] quantities = (int[]) generateQuantities.invoke(saleItemGenerator, 5);
+        assertTrue(quantities[0] >= 1);
+        assertTrue(quantities[0] <= 5);
+    }
+
+    @Test
+    void generateQuantities_generateQuantityWithAUpperBoundNegativeAmount_illegalArgumentExceptionThrown() throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
+        Method generateQuantities = SaleItemGenerator.class.getDeclaredMethod("generateQuantities", int.class);
+        generateQuantities.setAccessible(true);
+
+        try {
+          generateQuantities.invoke(saleItemGenerator, -1);
+        } catch (InvocationTargetException exception) {
+          assertEquals(IllegalArgumentException.class, exception.getCause().getClass());
+        }
+    }
+
+    @Test
+    void generateDates_generatedDatesIsWithinExpiresAndCreationDateContraint_closesAndCreatedDateGenerated() throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+        Method generateDates = SaleItemGenerator.class.getDeclaredMethod("generateDates", String.class, String.class);
+        generateDates.setAccessible(true);
+        // the first parameter of generateDates() refers to the expires field of the inventory item, and the date would have to be after today. 
+        // Same logic for the second parameter, creationDate, except it has to be before today. 20 is just an arbitrary number. 
+        String[] generatedDates = (String[]) generateDates.invoke(saleItemGenerator, LocalDate.now().plusDays(20).toString(), LocalDate.now().minusDays(20).toString());
+
+        LocalDate closes = LocalDate.parse(generatedDates[0]);
+        LocalDate created = LocalDate.parse(generatedDates[1].substring(0, 10));
+
+        assertTrue(closes.isAfter(created));
+    }
+
+    @Test
+    void extractInvItemInfo_informationForInventoryItemRetrievedWithInventoryItemId_inventoryItemInfoRetrievedFromDb() throws NoSuchMethodException, SecurityException, SQLException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+        Method extractInvItemInfo = SaleItemGenerator.class.getDeclaredMethod("extractInvItemInfo", long.class);
+        extractInvItemInfo.setAccessible(true);
+        List<Long> invItemIds = generateUserBusinessProductAndInvItems(1, 1, 1, 1);
+        String[] invItemInfo = (String[]) extractInvItemInfo.invoke(saleItemGenerator, invItemIds.get(0));
+        if (invItemInfo.length != 3) {
+          fail();
+        }
     }
 }

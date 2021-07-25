@@ -54,7 +54,8 @@ public class SaleItemGenerator {
      * @return the quantity values in a list
      */
     private int[] generateQuantities(int upperLimit) {
-        // "+ 1" because the upperLimit itself is not part of the random pick
+        // "random.nextInt(upperLimit) + 1" will give a random number between upperLimit inclusive
+        // and 1 inclusive
         int quantity = random.nextInt(upperLimit) + 1;
         int remainingQuantity = upperLimit - quantity;
         return new int[]{quantity, remainingQuantity};
