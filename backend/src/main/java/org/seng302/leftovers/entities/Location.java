@@ -14,6 +14,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 @Data // generate setters and getters for all fields (lombok pre-processor)
 @NoArgsConstructor // generate a no-args constructor needed by JPA (lombok pre-processor)
 @ToString // generate a toString method
@@ -44,6 +47,7 @@ public class Location {
     @Column(name="district")
     private String district;
 
+    private static final Logger logger = LogManager.getLogger(Location.class.getName());
     /**
      * Converts the address string into a location object
      * @param address
@@ -51,6 +55,8 @@ public class Location {
      */
     public static Location covertAddressStringToLocation(String address) {
         List<String> addressComponents = Arrays.asList(address.split(","));
+        logger.info(addressComponents.get(2));
+        logger.info("A");
         try {
             String streetNumber = addressComponents.get(0);
             String streetName = addressComponents.get(1);
@@ -66,6 +72,7 @@ public class Location {
         } catch (Exception e) {
             throw e;
         }
+        
     }
 
     /**
@@ -74,6 +81,8 @@ public class Location {
      * @return A Location object representing the given address
      */
     public static Location parseLocationFromJson(JSONObject json) {
+        logger.info("B");
+        logger.info(json.getAsString("district"));
         Location address = new Builder()
                 .inCountry(json.getAsString("country"))
                 .inCity(json.getAsString("city"))
@@ -109,6 +118,8 @@ public class Location {
             return false;
         }
         if (!checkValidDistrict(location.getDistrict())) {
+            logger.info("C");
+            logger.info(location.district);
             return false;
         }
         return checkValidPostCode(location.getPostCode());
@@ -221,6 +232,12 @@ public class Location {
      * @return true if the district is valid, false otherwise
      */
     public boolean checkValidDistrict(String district) {
+        logger.info("D");
+        logger.info(district);
+        if(district == null) {
+            district = "";
+            return true;
+        }
         if (district == null || (district.length() <= 100 && district.matches("[\\p{L}0-9.'-]+"))) {
             return true;
         } else {
