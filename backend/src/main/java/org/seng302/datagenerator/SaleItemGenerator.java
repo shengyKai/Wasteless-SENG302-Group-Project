@@ -23,13 +23,13 @@ public class SaleItemGenerator {
      */
     private String[] extractInvItemInfo(long invItemId) throws SQLException {
         PreparedStatement stmt = conn.prepareStatement(
-            "SELECT expires, creation_date, quantity FROM inventory_item WHERE id = ?"
+            "SELECT expires, creation_date, remaining_quantity FROM inventory_item WHERE id = ?"
         );
         stmt.setObject(1, invItemId);
         stmt.executeQuery();
         ResultSet results = stmt.getResultSet();
         results.next();
-        return new String[] {results.getString("expires"), results.getString("creation_date"), results.getString("quantity")};
+        return new String[] {results.getString("expires"), results.getString("creation_date"), results.getString("remaining_quantity")};
     }
 
     /**
@@ -55,7 +55,7 @@ public class SaleItemGenerator {
      */
     private int[] generateQuantities(int upperLimit) {
         // "+ 1" because the upperLimit itself is not part of the random pick
-        int quantity = random.nextInt(upperLimit + 1);
+        int quantity = random.nextInt(upperLimit) + 1;
         int remainingQuantity = upperLimit - quantity;
         return new int[]{quantity, remainingQuantity};
     }

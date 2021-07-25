@@ -21,6 +21,7 @@ import java.sql.*;
 import java.util.List;
 import java.util.Map;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 @RunWith(SpringRunner.class)
@@ -208,5 +209,13 @@ public class SaleItemGeneratorTest {
         }
         long saleItemId = saleItemIds.get(0);
         checkRequiredFieldsNotNull(saleItemId);
+    }
+
+    @Test
+    void generateQuantities_generateQuantityWithAUpperBound1_quantityGeneratedBetweenZeroAndUpperBound() throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
+      Method generateQuantities = SaleItemGenerator.class.getDeclaredMethod("generateQuantities", int.class);
+      generateQuantities.setAccessible(true);
+      int[] quantities = (int[]) generateQuantities.invoke(saleItemGenerator, 1);
+      assertTrue(quantities[0] == 1);
     }
 }
