@@ -108,11 +108,88 @@ public class SaleItemGeneratorTest {
      * @return the ids of the generated inventory items
      * @throws SQLException
      */
-    public List<Long> generateUserBusinessAndProduct(int userCount, int businessCount, int productCount, int invItemCount) throws SQLException {
+    public List<Long> generateUserBusinessProductAndInvItems(int userCount, int businessCount, int productCount, int invItemCount) throws SQLException {
       List<Long> userIds = userGenerator.generateUsers(userCount);
       List<Long> businessIds = businessGenerator.generateBusinesses(userIds, businessCount);
       List<Long> productIds = productGenerator.generateProducts(businessIds, productCount);
       List<Long> invItemIds = invItemGenerator.generateInventoryItems(productIds, invItemCount);
       return invItemIds;
   }
+
+    @Test
+    void generateSaleItems_generateOneSaleItemAndConsistentData_oneSaleItemGenerated() throws SQLException {
+        List<Long> invItemIds = generateUserBusinessProductAndInvItems(1, 1, 1, 1);
+        List<Long> saleItemIds = saleItemGenerator.generateSaleItems(invItemIds, 1);
+        if (saleItemIds.size() != 1) {
+            fail();
+        }
+        long saleItemId = saleItemIds.get(0);
+        checkRequiredFieldsNotNull(saleItemId);
+    }
+
+    @Test
+    void generateSaleItems_generateTwoSaleItemsAndConsistentData_twoSaleItemsGenerated() throws SQLException {
+        List<Long> invItemIds = generateUserBusinessProductAndInvItems(1, 1, 1, 1);
+        List<Long> saleItemIds = saleItemGenerator.generateSaleItems(invItemIds, 2);
+        if (saleItemIds.size() != 2) {
+            fail();
+        }
+        for (long saleItemId: saleItemIds) {
+            checkRequiredFieldsNotNull(saleItemId);
+        }
+    }
+
+    @Test
+    void generateSaleItems_generateTenSaleItemsAndConsistentData_tenSaleItemsGenerated() throws SQLException {
+        List<Long> invItemIds = generateUserBusinessProductAndInvItems(1, 1, 1, 1);
+        List<Long> saleItemIds = saleItemGenerator.generateSaleItems(invItemIds, 10);
+        if (saleItemIds.size() != 10) {
+            fail();
+        }
+        for (long saleItemId: saleItemIds) {
+            checkRequiredFieldsNotNull(saleItemId);
+        }
+    }
+
+    @Test
+    void generateSaleItems_generateHundredSaleItemsAndConsistentData_hundredSaleItemsGenerated() throws SQLException {
+        List<Long> invItemIds = generateUserBusinessProductAndInvItems(1, 1, 1, 1);
+        List<Long> saleItemIds = saleItemGenerator.generateSaleItems(invItemIds, 100);
+        if (saleItemIds.size() != 100) {
+            fail();
+        }
+        for (long saleItemId: saleItemIds) {
+            checkRequiredFieldsNotNull(saleItemId);
+        }
+    }
+
+    @Test
+    void generateSaleItems_generateZeroSaleItemsAndConsistentData_NoSaleItemGenerated() throws SQLException {
+        List<Long> invItemIds = generateUserBusinessProductAndInvItems(1, 1, 1, 1);
+        List<Long> saleItemIds = saleItemGenerator.generateSaleItems(invItemIds, 0);
+        long saleItemsInDB = getNumSaleItemsInDB();
+        if (saleItemsInDB != 0) {
+            fail();
+        }
+    }
+
+    @Test
+    void generateSaleItems_generateNegativeOneSaleItemsAndConsistentData_NoSaleItemGenerated() throws SQLException {
+        List<Long> invItemIds = generateUserBusinessProductAndInvItems(1, 1, 1, 1);
+        List<Long> saleItemIds = saleItemGenerator.generateSaleItems(invItemIds, -1);
+        long saleItemsInDB = getNumSaleItemsInDB();
+        if (saleItemsInDB != 0) {
+            fail();
+        }
+    }
+
+    @Test
+    void generateSaleItems_generateNegativeTenSaleItemsAndConsistentData_NoSaleItemGenerated() throws SQLException {
+        List<Long> invItemIds = generateUserBusinessProductAndInvItems(1, 1, 1, 1);
+        List<Long> saleItemIds = saleItemGenerator.generateSaleItems(invItemIds, -10);
+        long saleItemsInDB = getNumSaleItemsInDB();
+        if (saleItemsInDB != 0) {
+            fail();
+        }
+    }
 }

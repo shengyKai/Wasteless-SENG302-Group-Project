@@ -54,7 +54,8 @@ public class SaleItemGenerator {
      * @return the quantity values in a list
      */
     private int[] generateQuantities(int upperLimit) {
-        int quantity = random.nextInt(upperLimit - 1) + 1;
+        // "+ 1" because the upperLimit itself is not part of the random pick
+        int quantity = random.nextInt(upperLimit + 1);
         int remainingQuantity = upperLimit - quantity;
         return new int[]{quantity, remainingQuantity};
     }
@@ -163,7 +164,7 @@ public class SaleItemGenerator {
 
             //Inventory items can have multiple sales, as such, if we randomize the which inventory item is chosen
             //we can allow some sale items to exist for the same inventory item.
-            long invItemId = invItemIds.get(random.nextInt(invItemIds.size()-1));
+            long invItemId = invItemIds.get(random.nextInt(invItemIds.size()));
             String[] invItemInfo = extractInvItemInfo(invItemId);
             //checks if the quantity equals to zero, if zero, it will increment the inventory item's quantity by a random number
             if (Integer.parseInt(invItemInfo[2]) == 0) {
