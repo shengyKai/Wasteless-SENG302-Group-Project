@@ -54,7 +54,7 @@ public class SaleItemGenerator {
      * @return the quantity values in a list
      */
     private int[] generateQuantities(int upperLimit) {
-        int quantity = random.nextInt(upperLimit);
+        int quantity = random.nextInt(upperLimit - 1) + 1;
         int remainingQuantity = upperLimit - quantity;
         return new int[]{quantity, remainingQuantity};
     }
@@ -161,17 +161,15 @@ public class SaleItemGenerator {
             int progress = (int) (((float)(i+1) / (float)saleItemCount) * 100);
             System.out.println(String.format("Progress: %d%%", progress));
 
-            boolean quantityEqualZeroCheck = true;
-            long invItemId = 0;
-            String[] invItemInfo = null;
-            //checks if the quantity equals to zero, if zero, it will ask for another inventory item id
-            while (quantityEqualZeroCheck) {
-                //Inventory items can have multiple sales, as such, if we randomize the which inventory item is chosen
-                //we can allow some sale items to exist for the same inventory item.
-                invItemId = invItemIds.get(random.nextInt(invItemIds.size()-1));
-                invItemInfo = extractInvItemInfo(invItemId);
-                quantityEqualZeroCheck = (Integer.parseInt(invItemInfo[2]) == 0);
+            //Inventory items can have multiple sales, as such, if we randomize the which inventory item is chosen
+            //we can allow some sale items to exist for the same inventory item.
+            long invItemId = invItemIds.get(random.nextInt(invItemIds.size()-1));
+            String[] invItemInfo = extractInvItemInfo(invItemId);
+            //checks if the quantity equals to zero, if zero, it will increment the inventory item's quantity by a random number
+            if (Integer.parseInt(invItemInfo[2]) == 0) {
+                updateInventoryItemQuantity(random.nextInt(249) + 1, invItemId);
             }
+
             long saleItemId = createInsertSaleItemSQL(invItemId, invItemInfo);
 
             generatedSaleItemIds.add(saleItemId);
