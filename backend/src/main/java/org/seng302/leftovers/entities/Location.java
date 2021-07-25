@@ -221,7 +221,7 @@ public class Location {
      * @return true if the district is valid, false otherwise
      */
     public boolean checkValidDistrict(String district) {
-        if (district == null || (district.length() <= 100 && district.matches("[\\p{L}0-9 ]+"))) {
+        if (district == null || (district.length() <= 100 && district.matches("[\\p{L}0-9.'- ]+"))) {
             return true;
         } else {
             return false;
