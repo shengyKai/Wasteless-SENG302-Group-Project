@@ -275,25 +275,25 @@ describe('MarketplaceCard.vue', () => {
       expect(wrapper.text()).not.toContain(SECTION_NAMES[section]);
     });
 
-    it('Date string must contain only the created date if created and last renewed dates are the same', async() => {
-      await wrapper.setData({
-        content: {
-          created: '2021-03-01',
-          lastRenewed: '2021-03-01',
-        }
-      });
-      expect(wrapper.vm.dateString).toBe('Posted 01 Mar 2021');
+  it('Date string must contain only the created date if created and last renewed dates are the same', async() => {
+    await wrapper.setData({
+      content: {
+        created: '2021-03-01',
+        lastRenewed: '2021-03-01',
+      }
     });
+    expect(wrapper.vm.dateString).toBe('Posted 01 Mar 2021');
+  });
 
-    it('Date string must contain both created and renewed date if they are different', async() => {
-      await wrapper.setData({
-        content: {
-          created: '2021-03-01',
-          lastRenewed: '2021-04-01',
-        }
-      });
-      expect(wrapper.vm.dateString).toBe('Posted 01 Mar 2021, Renewed 01 Apr 2021');
+  it('Date string must contain both created and renewed date if they are different', async() => {
+    await wrapper.setData({
+      content: {
+        created: '2021-03-01',
+        lastRenewed: '2021-04-01',
+      }
     });
+    expect(wrapper.vm.dateString).toBe('Posted 01 Mar 2021, Renewed 01 Apr 2021');
+  });
 
 
 });
