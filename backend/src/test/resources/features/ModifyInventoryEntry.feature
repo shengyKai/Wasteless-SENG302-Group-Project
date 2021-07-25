@@ -33,7 +33,7 @@ Feature: U20 - Modify Inventory Entries
     Given I am an administrator of the business
     And I am logged into my account
     When I try to modify the total price to 15.05 for the inventory entry with the id 2
-    Then the total price of the inventory item with the id 2 will be 1.20
+    Then the total price of the inventory item with the id 2 will be 15.05
 
   Scenario: AC1 - I can modify the manufactured date of an inventory entry when logged in as the business administrator.
     Given I am an administrator of the business

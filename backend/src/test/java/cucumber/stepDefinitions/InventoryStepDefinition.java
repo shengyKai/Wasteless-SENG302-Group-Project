@@ -25,6 +25,8 @@ import org.springframework.web.context.WebApplicationContext;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
+import java.math.MathContext;
+import java.math.RoundingMode;
 import java.text.ParseException;
 import java.time.LocalDate;
 import java.util.Comparator;
@@ -495,24 +497,28 @@ public class InventoryStepDefinition  {
         assertEquals(invItem.getQuantity(), quantity);
     }
 
-    @Then("the price per item of the inventory item with the id {long} will be {float}")
+    @Then("the price per item of the inventory item with the id {long} will be {double}")
     public void the_price_per_item_of_the_inventory_item_with_the_version_will_be(
-            long invItemId, float pricePerItem) {
+            long invItemId, double pricePerItem) {
         assertEquals(200, mvcResult.getResponse().getStatus());
         InventoryItem invItem = inventoryItemRepository.getInventoryItemByBusinessAndId(
                 businessContext.getLast(), invItemId);
         assertNotNull(invItem);
-        assertEquals(invItem.getPricePerItem(), BigDecimal.valueOf(pricePerItem));
+        BigDecimal pricePerItemBD = BigDecimal.valueOf(pricePerItem);
+        pricePerItemBD = pricePerItemBD.setScale(2, RoundingMode.HALF_UP);
+        assertEquals(invItem.getPricePerItem(), pricePerItemBD);
     }
 
-    @Then("the total price of the inventory item with the id {long} will be {float}")
+    @Then("the total price of the inventory item with the id {long} will be {double}")
     public void the_total_price_of_the_inventory_item_with_the_version_will_be(
-            long invItemId, float totalPrice) {
+            long invItemId, double totalPrice) {
         assertEquals(200, mvcResult.getResponse().getStatus());
         InventoryItem invItem = inventoryItemRepository.getInventoryItemByBusinessAndId(
                 businessContext.getLast(), invItemId);
         assertNotNull(invItem);
-        assertEquals(invItem.getPricePerItem(), BigDecimal.valueOf(totalPrice));
+        BigDecimal totalPriceBD = BigDecimal.valueOf(totalPrice);
+        totalPriceBD = totalPriceBD.setScale(2, RoundingMode.HALF_UP);
+        assertEquals(invItem.getTotalPrice(), totalPriceBD);
     }
 
     @Then("the manufactured date of the inventory item with the id {long} will be {string}")
