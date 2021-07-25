@@ -14,16 +14,14 @@ import org.junit.runner.RunWith;
 import org.mockito.*;
 import org.seng302.leftovers.entities.*;
 import org.seng302.leftovers.exceptions.AccessTokenException;
-import org.seng302.leftovers.persistence.ExpiryEventRepository;
-import org.seng302.leftovers.persistence.KeywordRepository;
-import org.seng302.leftovers.persistence.MarketplaceCardRepository;
-import org.seng302.leftovers.persistence.UserRepository;
+import org.seng302.leftovers.persistence.*;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
 import org.seng302.leftovers.tools.SearchHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.*;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -42,6 +40,7 @@ import java.util.Optional;
 import javax.servlet.http.HttpServletRequest;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.AdditionalMatchers.and;
 import static org.mockito.AdditionalMatchers.not;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -75,7 +74,11 @@ class CardControllerTest {
     @Mock
     private Keyword mockKeyword2;
     @Mock
-    private HttpServletRequest request;
+    private Specification<MarketplaceCard> keywordSpec;
+    @Mock
+    private Specification<MarketplaceCard> sectionSpec;
+    @Mock
+    private Specification<MarketplaceCard> combinedSpec;
 
     private Page<MarketplaceCard> expectedPage;
 
@@ -92,6 +95,8 @@ class CardControllerTest {
     private List<MarketplaceCard> cards = new ArrayList<>();
 
     private MockedStatic<AuthenticationTokenManager> authenticationTokenManager;
+    private MockedStatic<SearchMarketplaceCardHelper> searchMarketplaceCardHelper;
+
     private JSONObject createCardJson;
     private final long userId = 17L;
     private final long cardId = 32L;
@@ -165,6 +170,8 @@ class CardControllerTest {
                 
         MockitoAnnotations.openMocks(this);
 
+        searchMarketplaceCardHelper = Mockito.mockStatic(SearchMarketplaceCardHelper.class);
+
         // Set up authentication manager respond as if user has correct permissions to create card
         authenticationTokenManager = Mockito.mockStatic(AuthenticationTokenManager.class);
         authenticationTokenManager.when(() -> AuthenticationTokenManager.checkAuthenticationToken(any())).then(invocation -> null);
@@ -174,6 +181,20 @@ class CardControllerTest {
         when(userRepository.findById(userId)).thenReturn(Optional.of(mockUser));
         when(keywordRepository.findById(keywordId1)).thenReturn(Optional.of(mockKeyword1));
         when(keywordRepository.findById(keywordId2)).thenReturn(Optional.of(mockKeyword2));
+        when(keywordRepository.findAllById(any())).thenAnswer(invocation -> {
+            Iterable<Long> ids = invocation.getArgument(0);
+            List<Keyword> answer = new ArrayList<>();
+            for (Long id : ids) {
+                if (id == keywordId1) {
+                    answer.add(mockKeyword1);
+                } else if (id == keywordId2) {
+                    answer.add(mockKeyword2);
+                } else {
+                    throw new IllegalArgumentException();
+                }
+            }
+            return answer;
+        });
 
         when(marketplaceCardRepository.save(any())).thenReturn(mockCard);
         when(marketplaceCardRepository.findById(1L)).thenReturn(Optional.of(mockCard));
@@ -184,11 +205,16 @@ class CardControllerTest {
 
         when(marketplaceCardRepository.getAllBySection(any(), any())).thenReturn(expectedPage);
         when(marketplaceCardRepository.getAllByCreator(any(), any())).thenReturn(expectedPage);
+        when(marketplaceCardRepository.findAll(any(), any(Pageable.class))).thenReturn(expectedPage);
 
         // Set up entities to return set id when getter called
         when(mockCard.getID()).thenReturn(cardId);
         when(mockCard.getCreator()).thenReturn(mockUser);
         when(mockUser.getUserID()).thenReturn(userId);
+
+        // Set up keywordSpec and sectionSpec so that when they are combined with "and" they return combined spec
+        when(keywordSpec.and(sectionSpec)).thenReturn(combinedSpec);
+        when(sectionSpec.and(keywordSpec)).thenReturn(combinedSpec);
 
         // Tell MockMvc to use controller with mocked repositories for tests
         cardController = new CardController(marketplaceCardRepository, keywordRepository, userRepository, expiryEventRepository);
@@ -202,6 +228,7 @@ class CardControllerTest {
     @AfterEach
     public void tearDown() {
         authenticationTokenManager.close();
+        searchMarketplaceCardHelper.close();
     }
 
     /**
@@ -521,7 +548,7 @@ class CardControllerTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"created", "title", "closes", "creatorFirstName", "creatorLastName"})
+    @ValueSource(strings = {"lastRenewed", "created", "title", "closes", "creatorFirstName", "creatorLastName"})
     void getCards_validOrdering_canViewCardsWithOrdering(String ordering) throws Exception {
         var result = mockMvc.perform(get("/cards")
                 .param("section", "Wanted")
@@ -533,6 +560,145 @@ class CardControllerTest {
                 .andReturn();
         var expectedPageRequest = SearchHelper.getPageRequest(6, 8, Sort.by(new Sort.Order(Sort.Direction.ASC, ordering).ignoreCase()));
         verify(marketplaceCardRepository).getAllBySection(MarketplaceCard.Section.WANTED, expectedPageRequest);
+
+        JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
+        JSONObject responseBody = (JSONObject) parser.parse(result.getResponse().getContentAsString());
+
+        assertEquals(30, responseBody.get("count"));
+
+        var expectedResults = new JSONArray();
+        expectedResults.add(mockCard.constructJSONObject());
+        assertEquals(expectedResults, responseBody.get("results"));
+
+        assertEquals(2, responseBody.size());
+    }
+
+    // SEARCH CARDS TESTS
+
+    @Test
+    void searchCards_invalidAuthToken_cannotViewCards() throws Exception {
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.checkAuthenticationToken(any())).thenThrow(new AccessTokenException());
+        var res = mockMvc.perform(get("/cards/search")
+                .param("section", "Wanted")
+                .param("keywordIds", "1")
+                .param("union", "true"))
+                .andExpect(status().isUnauthorized());
+        verify(marketplaceCardRepository, times(0)).findAll(any(), any(Pageable.class));
+    }
+
+    @Test
+    void searchCards_invalidSection_cannotViewCards() throws Exception {
+        mockMvc.perform(get("/cards/search")
+                .param("section", "invalidSectionName")
+                .param("keywordIds", "1")
+                .param("union", "true"))
+                .andExpect(status().isBadRequest());
+        verify(marketplaceCardRepository, times(0)).findAll(any(), any(Pageable.class));
+    }
+
+    @Test
+    void searchCards_invalidOrdering_cannotViewCards() throws Exception {
+        mockMvc.perform(get("/cards/search")
+                .param("section", "Wanted")
+                .param("orderBy", "invalidOrdering")
+                .param("keywordIds", "1")
+                .param("union", "true"))
+                .andExpect(status().isBadRequest())
+                .andReturn();
+    }
+
+    @Test
+    void searchCards_noSectionGiven_cannotViewCards() throws Exception {
+        mockMvc.perform(get("/cards/search")
+                .param("keywordIds", "1")
+                .param("union", "true"))
+                .andExpect(status().isBadRequest());
+        verify(marketplaceCardRepository, times(0)).findAll(any(), any(Pageable.class));
+    }
+
+    @Test
+    void searchCards_noKeywordsGiven_cannotViewCards() throws Exception {
+        mockMvc.perform(get("/cards/search")
+                .param("section", "Wanted")
+                .param("union", "true"))
+                .andExpect(status().isBadRequest());
+        verify(marketplaceCardRepository, times(0)).findAll(any(), any(Pageable.class));
+    }
+
+    @Test
+    void searchCards_noUnionGiven_cannotViewCards() throws Exception {
+        mockMvc.perform(get("/cards/search")
+                .param("section", "Wanted")
+                .param("keywordIds", "1"))
+                .andExpect(status().isBadRequest());
+        verify(marketplaceCardRepository, times(0)).findAll(any(), any(Pageable.class));
+    }
+
+    @Test
+    void searchCards_invalidKeywordId_cannotViewCards() throws Exception {
+        mockMvc.perform(get("/cards/search")
+                .param("section", "Wanted")
+                .param("keywordIds", "9999")
+                .param("union", "true"))
+                .andExpect(status().isBadRequest());
+        verify(marketplaceCardRepository, times(0)).findAll(any(), any(Pageable.class));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"lastRenewed", "created", "title", "closes", "creatorFirstName", "creatorLastName"})
+    void searchCards_validOrdering_canViewCardsWithOrdering(String ordering) throws Exception {
+        // Set up the specification generators for the expected arguments
+        searchMarketplaceCardHelper.when(() -> SearchMarketplaceCardHelper.cardHasKeywords(List.of(mockKeyword1, mockKeyword2), true)).thenReturn(keywordSpec);
+        searchMarketplaceCardHelper.when(() -> SearchMarketplaceCardHelper.cardIsInSection(MarketplaceCard.Section.WANTED)).thenReturn(sectionSpec);
+
+        var result = mockMvc.perform(get("/cards/search")
+                .param("section", "Wanted")
+                .param("keywordIds",  String.valueOf(keywordId1), String.valueOf(keywordId2))
+                .param("union", "true")
+                .param("resultsPerPage", "8")
+                .param("page", "6")
+                .param("orderBy", ordering)
+                .param("reverse", "false"))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        var expectedPageRequest = SearchHelper.getPageRequest(6, 8, Sort.by(new Sort.Order(Sort.Direction.ASC, ordering).ignoreCase()));
+
+        verify(marketplaceCardRepository).findAll(combinedSpec, expectedPageRequest);
+
+        JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
+        JSONObject responseBody = (JSONObject) parser.parse(result.getResponse().getContentAsString());
+
+        assertEquals(30, responseBody.get("count"));
+
+        var expectedResults = new JSONArray();
+        expectedResults.add(mockCard.constructJSONObject());
+        assertEquals(expectedResults, responseBody.get("results"));
+
+        assertEquals(2, responseBody.size());
+    }
+
+    @ParameterizedTest
+    @EnumSource(MarketplaceCard.Section.class)
+    void searchCards_validSection_canViewCardsForSection(MarketplaceCard.Section section) throws Exception {
+        // Set up the specification generators for the expected arguments
+        searchMarketplaceCardHelper.when(() -> SearchMarketplaceCardHelper.cardHasKeywords(List.of(mockKeyword1), false)).thenReturn(keywordSpec);
+        searchMarketplaceCardHelper.when(() -> SearchMarketplaceCardHelper.cardIsInSection(section)).thenReturn(sectionSpec);
+
+        var result = mockMvc.perform(get("/cards/search")
+                .param("section", section.getName())
+                .param("keywordIds",  String.valueOf(keywordId1))
+                .param("union", "false")
+                .param("resultsPerPage", "8")
+                .param("page", "6")
+                .param("orderBy", "created")
+                .param("reverse", "false"))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        var expectedPageRequest = SearchHelper.getPageRequest(6, 8, Sort.by(new Sort.Order(Sort.Direction.ASC, "created").ignoreCase()));
+
+        verify(marketplaceCardRepository).findAll(combinedSpec, expectedPageRequest);
 
         JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
         JSONObject responseBody = (JSONObject) parser.parse(result.getResponse().getContentAsString());
