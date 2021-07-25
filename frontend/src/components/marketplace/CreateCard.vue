@@ -59,7 +59,7 @@
               no-data-text="No keywords found"
               value = "keywords"
               v-model="selectedKeywords"
-              :items="filteredKeywordList"
+              :items="allKeywords"
               label="Select keywords"
               item-text="name"
               item-value="id"
@@ -76,6 +76,7 @@
                       label="Search for a keyword" v-model="keywordFilter"
                       clearable
                       :autofocus="true"
+                      @input="searchKeywords"
                       @click:clear="resetSearch"
                       hint="Keyword name"
                     />
@@ -102,9 +103,7 @@
 </template>
 
 <script>
-import { createMarketplaceCard } from '../../api/internal';
-import { getKeywords } from '../../api/internal.ts';
-
+import {createMarketplaceCard, searchKeywords} from '../../api/internal';
 export default {
   name: "MarketplaceCard",
   data() {
@@ -132,19 +131,8 @@ export default {
 
     this.titleField.setAttribute("style", "height:" + (this.titleField.scrollHeight) + "px;overflow-y:hidden;");
     this.titleField.addEventListener("input", OnInput);
-    getKeywords()
-      .then((response) => {
-        if (typeof response === 'string') {
-          this.allKeywords = [];
-        } else {
-          this.allKeywords = response;
-        }})
-      .catch(() => (this.allKeywords = []));
   },
   computed: {
-    filteredKeywordList() {
-      return this.allKeywords.filter(x => this.filterKeywords(x));
-    },
     descriptionField() {
       return this.$refs.descriptionField;
     },
@@ -220,10 +208,7 @@ export default {
   methods: {
     resetSearch() {
       this.keywordFilter = "";
-    },
-    filterKeywords(keyword) {
-      const filterText = this.keywordFilter ?? '';
-      return keyword.name.toLowerCase().includes(filterText.toLowerCase());
+      this.searchKeywords();
     },
     closeDialog() {
       this.$emit('closeDialog');
@@ -245,6 +230,16 @@ export default {
         this.$router.go();
       }
     },
+    async searchKeywords() {
+      const filterText = this.keywordFilter ?? '';
+      this.errorMessage = undefined;
+      const response = await searchKeywords(filterText);
+      if (typeof response === 'string') {
+        this.errorMessage = response;
+      } else {
+        this.allKeywords = response;
+      }
+    }
   }
 };
 </script>
