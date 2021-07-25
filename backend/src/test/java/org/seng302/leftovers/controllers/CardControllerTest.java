@@ -6,7 +6,6 @@ import net.minidev.json.parser.JSONParser;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
@@ -24,24 +23,19 @@ import org.seng302.leftovers.tools.SearchHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.domain.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -75,14 +69,15 @@ class CardControllerTest {
     private ExpiryEvent mockEvent;
     @Mock
     private User mockUser;
-    @Mock
-    private Page<MarketplaceCard> mockPage;
+
     @Mock
     private Keyword mockKeyword1;
     @Mock
     private Keyword mockKeyword2;
     @Mock
     private HttpServletRequest request;
+
+    private Page<MarketplaceCard> expectedPage;
 
     private User testUser;
     private User testUser1;
@@ -185,10 +180,10 @@ class CardControllerTest {
         when(marketplaceCardRepository.findById(not(eq(1L)))).thenReturn(Optional.empty());
         when(marketplaceCardRepository.getCard(any())).thenCallRealMethod();
 
-        when(mockPage.getTotalElements()).thenReturn(30L);
-        when(mockPage.iterator()).thenReturn(List.of(mockCard).iterator());
-        when(marketplaceCardRepository.getAllBySection(any(), any())).thenReturn(mockPage);
-        when(marketplaceCardRepository.getAllByCreator(any(), any())).thenReturn(mockPage);
+        expectedPage = new PageImpl<>(List.of(mockCard), Pageable.unpaged(), 30L);
+
+        when(marketplaceCardRepository.getAllBySection(any(), any())).thenReturn(expectedPage);
+        when(marketplaceCardRepository.getAllByCreator(any(), any())).thenReturn(expectedPage);
 
         // Set up entities to return set id when getter called
         when(mockCard.getID()).thenReturn(cardId);
@@ -224,9 +219,8 @@ class CardControllerTest {
      * Sets up the marketplace cards for address ordering testing. Actual cards are needed as the address parts itself needs to be tested.
      */
     private void setUpAddressOrderingForGetCards() {
-        when(marketplaceCardRepository.getAllBySection(any(MarketplaceCard.Section.class), any(PageRequest.class))).thenReturn(mockPage);
-        when(mockPage.getTotalElements()).thenReturn(3L);
-        when(mockPage.iterator()).thenReturn(List.of(testCard1, testCard2, testCard3).iterator());
+        expectedPage = new PageImpl<>(List.of(testCard1, testCard2, testCard3), Pageable.unpaged(), 3L);
+        when(marketplaceCardRepository.getAllBySection(any(MarketplaceCard.Section.class), any(PageRequest.class))).thenReturn(expectedPage);
     }
 
     @Test
