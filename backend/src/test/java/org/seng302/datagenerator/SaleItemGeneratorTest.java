@@ -14,6 +14,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+
 import java.sql.*;
 import java.util.List;
 import java.util.Map;
@@ -191,5 +194,19 @@ public class SaleItemGeneratorTest {
         if (saleItemsInDB != 0) {
             fail();
         }
+    }
+
+    @Test
+    void generateSaleItems_generateSaleItemFromInvItemWithZeroQuantity_oneSaleItemGenerated() throws SQLException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
+        List<Long> invItemIds = generateUserBusinessProductAndInvItems(1, 1, 1, 1);
+        Method updateInventoryItemQuantity = SaleItemGenerator.class.getDeclaredMethod("updateInventoryItemQuantity", int.class, long.class);
+        updateInventoryItemQuantity.setAccessible(true);
+        updateInventoryItemQuantity.invoke(saleItemGenerator, 0, invItemIds.get(0));
+        List<Long> saleItemIds = saleItemGenerator.generateSaleItems(invItemIds, 1);
+        if (saleItemIds.size() != 1) {
+          fail();
+        }
+        long saleItemId = saleItemIds.get(0);
+        checkRequiredFieldsNotNull(saleItemId);
     }
 }
