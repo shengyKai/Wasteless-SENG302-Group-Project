@@ -16,20 +16,18 @@ Feature: UCM7 - Keyword search
 
   Scenario: AC1 - When searching in section "Wanted" only cards from "Wanted" are returned
     And I am logged into my account
-    When I search for cards in the section "Wanted" with all of the keywords:
+    When I try to search for cards in the section "Wanted" with all of the keywords:
       | Home Baking |
     Then The request succeeds
     And I expect the cards to be returned:
-      | title |
       | Pear  |
 
   Scenario: AC1 - When searching in section "ForSale" only cards from "ForSale" are returned
     And I am logged into my account
-    When I search for cards in the section "ForSale" with all of the keywords:
+    When I try to search for cards in the section "ForSale" with all of the keywords:
       | Home Baking |
     Then The request succeeds
     And I expect the cards to be returned:
-      | title  |
       | Orange |
 
   Scenario: AC1 - When searching in section "Exchange" only cards from "Exchange" are returned
@@ -38,7 +36,6 @@ Feature: UCM7 - Keyword search
       | Home Baking |
     Then The request succeeds
     And I expect the cards to be returned:
-      | title     |
       | Pineapple |
 
   Scenario: AC2 - I can filter by cards that have any of the selected keywords:
@@ -48,7 +45,6 @@ Feature: UCM7 - Keyword search
       | Vehicle |
     Then The request succeeds
     And I expect the cards to be returned:
-      | title    |
       | Apricot  |
       | Cucumber |
       | Apple    |
@@ -60,7 +56,6 @@ Feature: UCM7 - Keyword search
       | Vehicle |
     Then The request succeeds
     And I expect the cards to be returned:
-      | title    |
       | Cucumber |
 
   Scenario: An unauthorised user cannot search cards
