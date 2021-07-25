@@ -2,6 +2,7 @@ package org.seng302.datagenerator;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.io.InputStreamReader;
 import java.util.*;
 
 /**
@@ -42,7 +43,7 @@ public class PersonNameGenerator {
      */
     private void readNicknameFile() {
         nicknameLookup = new HashMap<>();
-        try (BufferedReader bufferedReader = new BufferedReader(new FileReader(ExampleDataFileReader.getExampleDataFilePath() + NICKNAME_FILE))) {
+        try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(ExampleDataFileReader.class.getResourceAsStream(ExampleDataFileReader.getExampleDataFilePath() + NICKNAME_FILE)))) {
             String line;
             while ((line = bufferedReader.readLine()) != null) {
                 String[] splitLine = line.strip().split(",");

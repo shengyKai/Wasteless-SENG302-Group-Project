@@ -37,17 +37,19 @@ public class MarketplaceCardGenerator {
      * @throws SQLException
      */
     private long createInsertCardSQL(List<Long> userIds) throws SQLException {
+        Instant created = Instant.now();
         PreparedStatement stmt = conn.prepareStatement(
-                "INSERT INTO marketplace_card (creator_id, section, title, description, created, closes) " +
-                        "VALUES (?,?,?,?,?,?)",
+                "INSERT INTO marketplace_card (creator_id, section, title, description, created, closes, last_renewed) " +
+                        "VALUES (?,?,?,?,?,?,?)",
                 Statement.RETURN_GENERATED_KEYS
         );
         stmt.setObject(1, userIds.get(random.nextInt(userIds.size())));
         stmt.setObject(2, random.nextInt(3));
         stmt.setObject(3, cardTitles.get(random.nextInt(cardTitles.size())));
         stmt.setObject(4, descGen.randomDescription());
-        stmt.setObject(5, Instant.now());
-        stmt.setObject(6, Instant.now().plus(4, ChronoUnit.DAYS));
+        stmt.setObject(5, created);
+        stmt.setObject(6, created.plus(4, ChronoUnit.DAYS));
+        stmt.setObject(7, created);
         stmt.executeUpdate();
         ResultSet keys = stmt.getGeneratedKeys();
         keys.next();
