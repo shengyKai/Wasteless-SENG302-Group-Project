@@ -43,7 +43,7 @@ public class EventController {
      * @param userId User to get event stream of
      */
     @GetMapping("/events/emitter")
-    public synchronized SseEmitter eventEmitter(@RequestParam long userId, HttpServletRequest request) {
+    public synchronized SseEmitter eventEmitter(@RequestParam long userId, HttpServletRequest request, HttpServletResponse response) {
         try {
             AuthenticationTokenManager.checkAuthenticationToken(request);
             if (!AuthenticationTokenManager.sessionCanSeePrivate(request, userId)) {
@@ -51,6 +51,7 @@ public class EventController {
             }
 
             User user = userRepository.findById(userId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "User not found"));
+            response.setHeader("X-Accel-Buffering", "no"); // Fix for Nginx sse issues
             return eventService.createEmitterForUser(user);
         } catch (Exception e) {
             LOGGER.error(e.getMessage());
