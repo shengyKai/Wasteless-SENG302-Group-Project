@@ -279,6 +279,7 @@ public class BusinessController {
             orderBy = "created";
         }
         if (!VALID_BUSINESS_ORDERINGS.contains(orderBy)) {
+            logger.error("Invalid 'orderBy' parameter {} used", orderBy);
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid business ordering");
         }
 
@@ -297,8 +298,9 @@ public class BusinessController {
 
         JSONArray resultArray = new JSONArray();
         for (Business business : results) {
-            resultArray.appendElement(business.constructJson(AuthenticationTokenManager.sessionIsAdmin(request)));
+            resultArray.appendElement(business.constructJson());
         }
+
         JSONObject json = new JSONObject();
         json.put("count", count);
         json.put("results", resultArray);
