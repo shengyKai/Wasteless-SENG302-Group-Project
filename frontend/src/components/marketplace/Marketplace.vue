@@ -1,6 +1,6 @@
 <template>
   <div>
-    <v-container fluid>
+    <v-toolbar dark color="primary" class="mb-1">
       <v-row align="center">
         <v-col
           class="d-flex"
@@ -34,32 +34,10 @@
             </v-btn>
           </v-btn-toggle>
         </v-col>
-        <v-col
-          class="d-flex"
-          cols="auto"
-        >
-          <!---Search for cards by their keywords--->
-          <v-text-field
-            clearable
-            flat
-            solo-inverted
-            hide-details
-            prepend-inner-icon="mdi-magnify"
-            label="Keywords"
-            autofocus
-          />
-        </v-col>
         <v-select
-          v-model="selectedKeywords"
-          :items="allKeywords"
-          item-text="name"
-          item-value="id"
-          label="Select keywords"
-          multiple
-          small-chips
-          color="primary"
-        />
-        <v-select
+          color="secondary" class="mb-1"
+          flat
+          solo-inverted
           no-data-text="No keywords found"
           value = "keywords"
           v-model="selectedKeywords"
@@ -101,12 +79,12 @@
         <v-spacer/>
         <v-col cols="auto" class="text-right" >
           <!---Link to modal for creating new card--->
-          <v-btn type="button" color="primary" @click="showCreateCard" rounded>
+          <v-btn type="button" color="secondary" @click="showCreateCard" rounded>
             Create card
           </v-btn>
         </v-col>
       </v-row>
-    </v-container>
+    </v-toolbar>
     <v-alert
       v-if="error !== undefined"
       type="error"
