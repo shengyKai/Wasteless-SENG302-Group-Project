@@ -976,18 +976,17 @@ paths:
       tags:
         - 'U23: Search for business'
         - 'Business Accounts'
-      summary: 'Search for businesses by some criteria, for now: their name'
-      security: 
+      summary: 'Search for businesses by their name or business type'
+      security:
         - CookieAuth:
-          - user
-          - globalApplicationAdmin
-          - defaultGlobalApplicationAdmin
-      parameters: 
+            - user
+            - globalApplicationAdmin
+            - defaultGlobalApplicationAdmin
+      parameters:
         - in: query
           name: searchQuery
           schema:
             type: string
-          required: true
           example: "supermarket"
           description: "Criteria to search businesses for, e.g: Businesses full name, or part of their name. <br> Use keywords ***AND*** and ***OR*** to refine search. Quotations can be used to find exact matches"
         - name: page
@@ -1044,13 +1043,13 @@ paths:
                     properties:
                       results:
                         type: array
-                        items: 
+                        items:
                           $ref: '#/components/schemas/Business'
         '401':
           $ref: '#/components/responses/UnauthorizedError'
         '400':
           $ref: '#/components/responses/BadRequestError'
-  '/cards'
+  '/cards':
     post:
       tags:
         - 'UCM2: Card creation'
