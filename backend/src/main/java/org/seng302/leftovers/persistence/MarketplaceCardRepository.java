@@ -3,6 +3,7 @@ package org.seng302.leftovers.persistence;
 import org.seng302.leftovers.entities.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
@@ -14,7 +15,7 @@ import java.time.Instant;
 import java.util.List;
 
 @Repository
-public interface MarketplaceCardRepository extends CrudRepository<MarketplaceCard, Long> {
+public interface MarketplaceCardRepository extends CrudRepository<MarketplaceCard, Long>, JpaSpecificationExecutor<MarketplaceCard> {
     /**
      * Finds all the marketplace cards created by a given user
      * @param user User that the cards belong to

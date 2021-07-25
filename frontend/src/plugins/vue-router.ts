@@ -87,7 +87,7 @@ const routes = [
     meta: { title: 'Marketplace' }
   },
   {
-    path: '/usercards',
+    path: '/usercards/:id',
     component: UserCards,
     meta: { title: 'User Cards' },
   },

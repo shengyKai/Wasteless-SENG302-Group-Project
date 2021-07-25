@@ -183,6 +183,7 @@ export type MarketplaceCard = {
   creator: User,
   section: MarketplaceCardSection,
   created: string,
+  lastRenewed: string,
   displayPeriodEnd?: string,
   title: string,
   description?: string,
@@ -192,6 +193,7 @@ export type MarketplaceCard = {
 export type CreateProduct = Omit<Product, 'created' | 'images'>;
 
 type UserOrderBy = 'userId' | 'relevance' | 'firstName' | 'middleName' | 'lastName' | 'nickname' | 'email';
+type BusinessOrderBy = 'created' | 'name' | 'location' | 'businessType';
 
 export type SearchResults<T> = { results: T[], count: number }
 
@@ -595,6 +597,44 @@ export async function getBusiness(businessId: number): Promise<MaybeError<Busine
 }
 
 /**
+ * Sends a business search query to the backend.
+ *
+ * @param query Query string to search for
+ * @param pageIndex Index of page to start the results from (1 = first page)
+ * @param resultsPerPage Number of results to return per page
+ * @param orderBy Specifies the method used to sort the results
+ * @param reverse Specifies whether to reverse the search results (default order is descending for relevance and ascending for all other orders)
+ * @returns List of business infos for the current page or an error message
+ */
+export async function searchBusinesses(query: string, pageIndex: number, resultsPerPage: number, orderBy: BusinessOrderBy, reverse: boolean): Promise<MaybeError<SearchResults<Business>>> {
+  let response;
+  try {
+    response = await instance.get('/businesses/search', {
+      params: {
+        searchQuery: query,
+        page: pageIndex,
+        resultsPerPage,
+        orderBy,
+        reverse: reverse.toString(),
+      }
+    });
+  } catch (error) {
+    let status: number | undefined = error.response?.status;
+
+    if (status === undefined) return 'Failed to reach backend';
+    if (status === 400) return 'Invalid search query: ' + error.response?.data.message;
+    if (status === 401) return 'You have been logged out. Please login again and retry';
+    return `Request failed: ${status}`;
+  }
+
+  if (!is<SearchResults<Business>>(response.data)) {
+    return 'Response is not business array';
+  }
+
+  return response.data;
+}
+
+/**
  * Makes the provided user an administrator of the provided business.
  *
  * @param businessId Business id to add an administrator to
@@ -837,7 +877,7 @@ type CardOrderBy = 'created' | 'title' | 'closes' | 'creatorFirstName' | 'creato
  * @param resultsPerPage Maximum number of results per page
  * @param orderBy Parameter to order the results by
  * @param reverse Whether to reverse the results (default ascending)
- * @returns List of sales or a string error message
+ * @returns List of marketplace cards and the count or a string error message
  */
 export async function getMarketplaceCardsBySection(section: MarketplaceCardSection, page: number, resultsPerPage: number, orderBy: CardOrderBy, reverse: boolean): Promise<MaybeError<SearchResults<MarketplaceCard>>> {
   let response;
@@ -897,5 +937,45 @@ export async function extendMarketplaceCardExpiry(marketplaceCardId: number) : P
     if (status === 406) return 'Marketplace card not found';
     return 'Request failed: ' + error.response?.data.message;
   }
+  return undefined;
+}
+
+/**
+ * Retrieves all the marketplace cards that are created by a user.
+ * @param userId id of the requested user to identify the cards
+ * @param resultsPerPage Maximum number of results per page
+ * @param page Page to fetch (1 indexed)
+ * @returns List of marketplace cards and the count or a string error message
+ */
+export async function getMarketplaceCardsByUser(userId: number, resultsPerPage: number, page: number): Promise<MaybeError<SearchResults<MarketplaceCard>>> {
+  let response;
+  try {
+    response = await instance.get(`/users/${userId}/cards`, {
+      params: {
+        userId,
+        page,
+        resultsPerPage
+      }
+    });
+  } catch (error) {
+    let status: number | undefined = error.response?.status;
+    if (status === undefined) return 'Failed to reach backend';
+    if (status === 400) return 'The page does not exist';
+    if (status === 401) return 'You have been logged out. Please login again and retry';
+    if (status === 406) return 'The user does not exist';
+    return 'Request failed: ' + error.response?.data.message;
+  }
+  if (!is<SearchResults<MarketplaceCard>>(response.data)) {
+    return "Response is not card array";
+  }
+  return response.data;
+}
+
+/**
+ * Creates a new keyword to associate with marketplace cards
+ * @param keyword string to set as new marketplace card keyword object
+ */
+export async function createNewKeyword(keyword: string) : Promise<MaybeError<undefined>> {
+  // Task 219
   return undefined;
 }
