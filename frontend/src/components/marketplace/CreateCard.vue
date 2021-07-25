@@ -131,6 +131,8 @@ export default {
 
     this.titleField.setAttribute("style", "height:" + (this.titleField.scrollHeight) + "px;overflow-y:hidden;");
     this.titleField.addEventListener("input", OnInput);
+
+    this.searchKeywords();
   },
   computed: {
     descriptionField() {
