@@ -14,9 +14,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 @Data // generate setters and getters for all fields (lombok pre-processor)
 @NoArgsConstructor // generate a no-args constructor needed by JPA (lombok pre-processor)
 @ToString // generate a toString method
@@ -47,7 +44,6 @@ public class Location {
     @Column(name="district")
     private String district;
 
-    private static final Logger logger = LogManager.getLogger(Location.class.getName());
     /**
      * Converts the address string into a location object
      * @param address
@@ -55,8 +51,6 @@ public class Location {
      */
     public static Location covertAddressStringToLocation(String address) {
         List<String> addressComponents = Arrays.asList(address.split(","));
-        logger.info(addressComponents.get(2));
-        logger.info("A");
         try {
             String streetNumber = addressComponents.get(0);
             String streetName = addressComponents.get(1);
@@ -81,8 +75,6 @@ public class Location {
      * @return A Location object representing the given address
      */
     public static Location parseLocationFromJson(JSONObject json) {
-        logger.info("B");
-        logger.info(json.getAsString("district"));
         Location address = new Builder()
                 .inCountry(json.getAsString("country"))
                 .inCity(json.getAsString("city"))
@@ -91,7 +83,6 @@ public class Location {
                 .atStreetNumber(json.getAsString("streetNumber"))
                 .withPostCode(json.getAsString("postcode"))
                 .atDistrict(json.getAsString("district"))
-                .inSuburb("suburb")
                 .build();
         return address;
     }
@@ -118,8 +109,6 @@ public class Location {
             return false;
         }
         if (!checkValidDistrict(location.getDistrict())) {
-            logger.info("C");
-            logger.info(location.district);
             return false;
         }
         return checkValidPostCode(location.getPostCode());
@@ -232,13 +221,7 @@ public class Location {
      * @return true if the district is valid, false otherwise
      */
     public boolean checkValidDistrict(String district) {
-        logger.info("D");
-        logger.info(district);
-        if(district == null) {
-            district = "";
-            return true;
-        }
-        if (district == null || (district.length() <= 100 && district.matches("[\\p{L}0-9.'-]+"))) {
+        if (district == "" || district == null || (district.length() <= 100 && district.matches("[\\p{L}0-9.'-]+"))) {
             return true;
         } else {
             return false;
@@ -379,7 +362,6 @@ public class Location {
 
         private String country;
         private String city;
-        private String suburb;
         private String region;
         private String streetName;
         private String streetNumber;
@@ -403,16 +385,6 @@ public class Location {
          */
         public Builder inCity(String city) {
             this.city = city;
-            return this;
-        }
-
-        /**
-         * Set the builder's suburb.
-         * @param suburb A string representing a suburb.
-         * @return Builder with suburb parameter set.
-         */
-        public Builder inSuburb(String suburb) {
-            this.suburb = suburb;
             return this;
         }
 
@@ -463,7 +435,7 @@ public class Location {
          */
         public Builder atDistrict(String district)  {
             if (district == null || district.equals("")) {
-                district = null;
+                district = "";
             }
             this.district = district;
             return this;
