@@ -7,13 +7,9 @@ import org.apache.logging.log4j.Logger;
 import org.seng302.leftovers.entities.Keyword;
 import org.seng302.leftovers.persistence.KeywordRepository;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
+import org.seng302.leftovers.tools.SearchHelper;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.HttpServletRequest;
@@ -33,16 +29,35 @@ public class KeywordController {
 
 
     /**
-     * REST GET method to retrieve all the global keyword entities
+     * REST GET method to retrieve keywords partially matching a search term by name
+     * When the search term is omitted, or left blank, all keywords are returned.
      * @param request the HTTP request
+     * @param searchQuery The term to search for
      * @return List of all the keyword entities
      */
     @GetMapping("/keywords/search")
-    public JSONArray searchKeywords(HttpServletRequest request) {
-        try {
-            logger.info("Getting all the keywords");
-            AuthenticationTokenManager.checkAuthenticationToken(request);
+    public JSONArray searchKeywords(HttpServletRequest request, @RequestParam(required = false) String searchQuery) {
+        AuthenticationTokenManager.checkAuthenticationToken(request);
+        logger.info("Searching for keywords with query: {}", searchQuery);
+        if (searchQuery==null || searchQuery.isBlank()) {
+            return getAllKeywords();
+        }
 
+        var specification = SearchHelper.constructKeywordSpecificationFromSearchQuery(searchQuery);
+        var keywords = keywordRepository.findAll(specification);
+        JSONArray result = new JSONArray();
+        for (var keyword : keywords) {
+            result.add(keyword.constructJSONObject());
+        }
+        return result;
+    }
+
+    /**
+     * Returns a JSON Array containing all of the keywords in the system
+     * @return JSON Array of all keywords currently in the system
+     */
+    private JSONArray getAllKeywords() {
+        try {
             JSONArray result = new JSONArray();
             for (Keyword keyword : keywordRepository.findByOrderByNameAsc()) {
                 result.add(keyword.constructJSONObject());

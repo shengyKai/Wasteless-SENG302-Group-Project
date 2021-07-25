@@ -11,6 +11,7 @@ import org.seng302.leftovers.exceptions.AccessTokenException;
 import org.seng302.leftovers.persistence.KeywordRepository;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -77,7 +78,7 @@ class KeywordControllerTest {
     }
 
     @Test
-    void searchKeywords_withAuthentication_returnsKeywordList() throws Exception {
+    void searchKeywords_noQueryPresent_returnsAllKeywordList() throws Exception {
         List<Keyword> keywords = new ArrayList<>();
         for (String keywordName : List.of("Keyword One", "Keyword Two", "Keyword Three")) {
             Keyword mockKeyword = mock(Keyword.class);
@@ -105,6 +106,48 @@ class KeywordControllerTest {
         expected.addAll(keywords.stream().map(Keyword::constructJSONObject).collect(Collectors.toList()));
 
         assertEquals(expected, response);
+    }
+
+    @Test
+    void searchKeywords_QueryEmpty_returnsAllKeywordList() throws Exception {
+        List<Keyword> keywords = new ArrayList<>();
+        for (String keywordName : List.of("Keyword One", "Keyword Two", "Keyword Three")) {
+            Keyword mockKeyword = mock(Keyword.class);
+
+            JSONObject mockResponse = new JSONObject();
+            mockResponse.put("name", keywordName);
+            when(mockKeyword.constructJSONObject()).thenReturn(mockResponse);
+
+            keywords.add(mockKeyword);
+        }
+
+        when(keywordRepository.findByOrderByNameAsc()).thenReturn(keywords);
+
+        MvcResult result = mockMvc.perform(get("/keywords/search")
+                .param("searchQuery", ""))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        verify(keywordRepository).findByOrderByNameAsc();
+
+        JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
+        Object response = parser.parse(result.getResponse().getContentAsString());
+
+        JSONArray expected = new JSONArray();
+
+        expected.addAll(keywords.stream().map(Keyword::constructJSONObject).collect(Collectors.toList()));
+
+        assertEquals(expected, response);
+    }
+
+    @Test
+    void searchKeywords_withSearchTerm_doesPredicateSearch() throws Exception {
+        MvcResult result = mockMvc.perform(get("/keywords/search")
+                .param("searchQuery", "One"))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        verify(keywordRepository).findAll(any(Specification.class)); // couldn't find a way to mock the abstract method
     }
 
     @Test
