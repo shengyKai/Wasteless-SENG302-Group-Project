@@ -5,7 +5,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.hibernate.Session;
 import org.seng302.datagenerator.BusinessGenerator;
+import org.seng302.datagenerator.InventoryItemGenerator;
 import org.seng302.datagenerator.ProductGenerator;
+import org.seng302.datagenerator.SaleItemGenerator;
 import org.seng302.datagenerator.UserGenerator;
 import org.seng302.leftovers.entities.*;
 import org.seng302.leftovers.persistence.*;
@@ -188,20 +190,28 @@ public class DemoController {
         int productCount = (int) JsonTools.parseLongFromJsonField(options, "productCount");
         int userCount = (int)JsonTools.parseLongFromJsonField(options, "userCount");
         int businessCount = (int)JsonTools.parseLongFromJsonField(options, "businessCount");
+        int inventoryItemCount = (int)JsonTools.parseLongFromJsonField(options, "inventoryItemCount");
+        int saleItemCount = (int)JsonTools.parseLongFromJsonField(options, "saleItemCount");
 
         Session session = entityManager.unwrap(Session.class);
         session.doWork(connection -> {
             var userGenerator = new UserGenerator(connection);
             var businessGenerator = new BusinessGenerator(connection);
             var productGenerator = new ProductGenerator(connection);
+            var inventoryItemGenerator = new InventoryItemGenerator(connection);
+            var saleItemGenerator = new SaleItemGenerator(connection);
 
             List<Long> userIds = userGenerator.generateUsers(userCount);
             List<Long> businessIds = businessGenerator.generateBusinesses(userIds, businessCount);
             List<Long> productIds = productGenerator.generateProducts(businessIds, productCount, true);
+            List<Long> inventoryItemIds = inventoryItemGenerator.generateInventoryItems(productIds, inventoryItemCount);
+            List<Long> saleItemIds = saleItemGenerator.generateSaleItems(inventoryItemIds, saleItemCount);
 
             json.appendField("generatedUsers", userIds);
             json.appendField("generatedBusinesses", businessIds);
             json.appendField("generatedProducts", productIds);
+            json.appendField("generatedInventoryItems", inventoryItemIds);
+            json.appendField("generatedSaleItems", saleItemIds);
         });
         return json;
     }

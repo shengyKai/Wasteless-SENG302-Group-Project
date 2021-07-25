@@ -4,6 +4,8 @@ import java.sql.*;
 import java.time.LocalDate;
 import java.util.*;
 
+import net.minidev.json.JSONObject;
+
 import static org.seng302.datagenerator.Main.*;
 
 public class SaleItemGenerator {
@@ -86,10 +88,10 @@ public class SaleItemGenerator {
     /**
      * Creates and inserts the sale item into the database
      * @param invItemId the id associated with the inventory item entity
+     * @param invItemInfo information of the inventory item to create sales item with
      * @return the id of sale item
      */
-    private long createInsertSaleItemSQL(long invItemId) throws SQLException {
-        String[] invItemInfo = extractInvItemInfo(invItemId);
+    private long createInsertSaleItemSQL(long invItemId, String[] invItemInfo) throws SQLException {
         String[] dates = generateDates(invItemInfo[0], invItemInfo[1]);
 
         String closes = dates[0];
@@ -155,16 +157,24 @@ public class SaleItemGenerator {
         List<Long> generatedSaleItemIds = new ArrayList<>();
         for (int i=0; i < saleItemCount; i++) {
             clear();
-            //Inventory items can have multiple sales, as such, if we randomize the which inventory item is chosen
-            //we can allow some sale items to exist for the same inventory item.
-            long invItemId = invItemIds.get(random.nextInt(invItemIds.size()-1));
-
             System.out.println(String.format("Creating Sale Item %d / %d", i+1, saleItemCount));
             int progress = (int) (((float)(i+1) / (float)saleItemCount) * 100);
             System.out.println(String.format("Progress: %d%%", progress));
-            long saleItemId = createInsertSaleItemSQL(invItemId);
 
-            generatedSaleItemIds.add(invItemId);
+            boolean quantityEqualZeroCheck = true;
+            long invItemId = 0;
+            String[] invItemInfo = null;
+            //checks if the quantity equals to zero, if zero, it will ask for another inventory item id
+            while (quantityEqualZeroCheck) {
+                //Inventory items can have multiple sales, as such, if we randomize the which inventory item is chosen
+                //we can allow some sale items to exist for the same inventory item.
+                invItemId = invItemIds.get(random.nextInt(invItemIds.size()-1));
+                invItemInfo = extractInvItemInfo(invItemId);
+                quantityEqualZeroCheck = (Integer.parseInt(invItemInfo[2]) == 0);
+            }
+            long saleItemId = createInsertSaleItemSQL(invItemId, invItemInfo);
+
+            generatedSaleItemIds.add(saleItemId);
         }
         return generatedSaleItemIds;
     }
