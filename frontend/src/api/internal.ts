@@ -988,7 +988,7 @@ export async function searchKeywords(query: string) : Promise<MaybeError<Keyword
     let status: number | undefined = error.response?.status;
     if (status === undefined) return 'Failed to reach backend';
     if (status === 401) return 'You have been logged out. Please login again and retry';
-    return 'Request failed: ' + error.response?.data.message;
+    return 'Request failed: ' + status;
   }
   if (!is<Keyword[]>(response.data)) {
     return "Response is not Keyword array";
