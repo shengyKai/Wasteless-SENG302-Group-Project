@@ -34,6 +34,7 @@ describe("Test GET /cards endpoint", () => {
         },
         section: "ForSale",
         created: "somedate",
+        lastRenewed: "someotherdate",
         title: "sometitle",
         keywords: [
           {
