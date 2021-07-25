@@ -931,3 +931,28 @@ export async function getMarketplaceCardsByUser(userId: number, resultsPerPage: 
   }
   return response.data;
 }
+
+/**
+ * Retrieves all keywords which match the given query by name.
+ * @param query The search term
+ * @return A (possibly empty) list of keywords
+ */
+export async function searchKeywords(query: string) : Promise<MaybeError<Keyword[]>> {
+  let response;
+  try {
+    response = await instance.get('/keywords/search', {
+      params: {
+        searchQuery: query,
+      }
+    });
+  } catch (error) {
+    let status: number | undefined = error.response?.status;
+    if (status === undefined) return 'Failed to reach backend';
+    if (status === 401) return 'You have been logged out. Please login again and retry';
+    return 'Request failed: ' + error.response?.data.message;
+  }
+  if (!is<Keyword[]>(response.data)) {
+    return "Response is not Keyword array";
+  }
+  return response.data;
+}
