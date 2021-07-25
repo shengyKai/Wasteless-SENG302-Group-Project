@@ -1124,4 +1124,30 @@ class BusinessControllerTest {
         assertEquals(2, count);
     }
 
+    @Test
+    void searchInvalidOrdering_returns400Error() throws Exception {
+        mockMvc.perform(get("/businesses/search")
+                .param("searchQuery", "o")
+                .param("orderBy", "thisIsWrong")
+                .sessionAttrs(sessionAuthToken)
+                .cookie(authCookie))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void searchNoAuthenticationCookie_returns401Error() throws Exception {
+        mockMvc.perform(get("/businesses/search")
+                .param("searchQuery", "o")
+                .sessionAttrs(sessionAuthToken))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void searchNoSession_returns401Error() throws Exception {
+        mockMvc.perform(get("/businesses/search")
+                .param("searchQuery", "o")
+                .cookie(authCookie))
+                .andExpect(status().isUnauthorized());
+    }
+
 }

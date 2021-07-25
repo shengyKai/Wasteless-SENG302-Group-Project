@@ -32,6 +32,7 @@ tags:
   - name: 'U19: Create inventory'
   - name: 'U20: Modify inventory entries'
   - name: 'U22: List sale'
+  - name: 'U23: Search for business'
   - name: 'UCM1: Community marketplace'
     description: 'No endpoints required here yet, these will come from the subsequent stories'
   - name: 'UCM2: Card creation'
@@ -990,6 +991,8 @@ paths:
                           $ref: '#/components/schemas/Business'
         '401':
           $ref: '#/components/responses/UnauthorizedError'
+        '400': 
+          $ref: '#/components/responses/BadRequestError'
               
   '/cards':
     post:
