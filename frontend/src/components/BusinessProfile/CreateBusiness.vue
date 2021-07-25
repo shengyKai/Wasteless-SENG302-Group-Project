@@ -169,11 +169,6 @@ export default {
       const streetParts = this.streetAddress.split(" ");
       const streetNum = streetParts[0];
       const streetName = streetParts.slice(1, streetParts.length).join(" ");
-      console.log(typeof this.district);
-      console.log(this.district.length);
-      if (this.district === "") {
-        console.log("A");
-      }
       let business = {
         primaryAdministratorId: this.$store.state.user.id,
         name: this.business,
@@ -190,15 +185,12 @@ export default {
         businessType: this.businessType,
       };
       let response = await createBusiness(business);
-      console.log("B");
-      console.log(response);
-      console.log(business);
-      // if (response === undefined) {
-      //   this.closeDialog();
-      //   this.$router.go();
-      // } else {
-      //   this.errorMessage = response;
-      // }
+      if (response === undefined) {
+        this.closeDialog();
+        this.$router.go();
+      } else {
+        this.errorMessage = response;
+      }
     },
     closeDialog() {
       this.$emit('closeDialog');
