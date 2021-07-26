@@ -3,11 +3,15 @@ package org.seng302.leftovers.controllers;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mockito.*;
-import org.seng302.leftovers.entities.*;
+import org.seng302.leftovers.entities.CreateKeywordEvent;
+import org.seng302.leftovers.entities.Keyword;
 import org.seng302.leftovers.exceptions.AccessTokenException;
+import org.seng302.leftovers.persistence.CreateKeywordEventRepository;
 import org.seng302.leftovers.persistence.KeywordRepository;
 import org.seng302.leftovers.service.KeywordService;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
@@ -20,13 +24,13 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.security.Key;
 import java.text.ParseException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.AdditionalMatchers.not;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -44,6 +48,12 @@ class KeywordControllerTest {
     @Mock
     private KeywordService keywordService;
 
+    @Mock
+    private CreateKeywordEventRepository createKeywordEventRepository;
+
+    @Mock
+    private CreateKeywordEvent mockEvent;
+
     private MockedStatic<AuthenticationTokenManager> authenticationTokenManager;
 
     @BeforeEach
@@ -54,8 +64,9 @@ class KeywordControllerTest {
         authenticationTokenManager = Mockito.mockStatic(AuthenticationTokenManager.class);
 
         when(keywordRepository.findByName(any())).thenReturn(Optional.empty());
+        when(createKeywordEventRepository.getByNewKeyword(any())).thenReturn(Optional.of(mockEvent));
 
-        var keywordController = new KeywordController(keywordRepository, keywordService);
+        var keywordController = new KeywordController(keywordRepository, keywordService, createKeywordEventRepository);
         mockMvc = MockMvcBuilders.standaloneSetup(keywordController).build();
     }
 
@@ -174,6 +185,8 @@ class KeywordControllerTest {
         authenticationTokenManager.verify(() -> AuthenticationTokenManager.sessionIsAdmin(any()));
         verify(keywordRepository, times(1)).findById(99L);
         verify(keywordRepository, times(1)).delete(mockKeyword); // Keyword is deleted
+        verify(createKeywordEventRepository, times(1)).getByNewKeyword(mockKeyword);
+        verify(createKeywordEventRepository, times(1)).delete(mockEvent);   // Event is deleted
     }
 
     @Test

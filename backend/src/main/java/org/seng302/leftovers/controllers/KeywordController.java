@@ -4,7 +4,9 @@ import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.seng302.leftovers.entities.CreateKeywordEvent;
 import org.seng302.leftovers.entities.Keyword;
+import org.seng302.leftovers.persistence.CreateKeywordEventRepository;
 import org.seng302.leftovers.persistence.KeywordRepository;
 import org.seng302.leftovers.service.KeywordService;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
@@ -19,16 +21,19 @@ import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.Optional;
 
 @RestController
 public class KeywordController {
     private static final Logger logger = LogManager.getLogger(KeywordController.class);
 
     private final KeywordRepository keywordRepository;
+    private final CreateKeywordEventRepository createKeywordEventRepository;
     private final KeywordService keywordService;
 
-    public KeywordController(KeywordRepository keywordRepository, KeywordService keywordService) {
+    public KeywordController(KeywordRepository keywordRepository, KeywordService keywordService, CreateKeywordEventRepository createKeywordEventRepository) {
         this.keywordRepository = keywordRepository;
+        this.createKeywordEventRepository = createKeywordEventRepository;
         this.keywordService = keywordService;
     }
 
@@ -75,6 +80,8 @@ public class KeywordController {
 
             Keyword keyword = keywordRepository.findById(id)
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "Keyword not found"));
+            Optional<CreateKeywordEvent> keywordEvent = createKeywordEventRepository.getByNewKeyword(keyword);
+            keywordEvent.ifPresent(createKeywordEventRepository::delete);
             keywordRepository.delete(keyword);
 
         } catch (Exception e) {
