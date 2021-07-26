@@ -11,7 +11,11 @@ import org.seng302.leftovers.persistence.BusinessRepository;
 import org.seng302.leftovers.persistence.InventoryItemRepository;
 import org.seng302.leftovers.persistence.SaleItemRepository;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
+import org.seng302.leftovers.tools.JsonTools;
 import org.seng302.leftovers.tools.SearchHelper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
@@ -21,6 +25,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 
 @RestController
 public class SaleController {
@@ -36,26 +41,36 @@ public class SaleController {
         this.inventoryItemRepository = inventoryItemRepository;
     }
 
-    public Comparator<SaleItem> getSaleItemComparator(String orderBy) {
+    private static final Set<String> VALID_ORDERINGS = Set.of("created", "closing", "productCode", "productName", "quantity", "price");
+
+    /**
+     * Returns the ordering term for the Sort object for sorting Sale Items
+     *
+     * @param orderBy   Order by term
+     * @param direction Ascending or descending
+     * @return Order term of Sort
+     */
+    private Sort.Order getSaleItemOrder(String orderBy, Sort.Direction direction) {
         if (orderBy == null) orderBy = "created";
-        switch (orderBy) {
-            case "created":
-                return Comparator.comparing(SaleItem::getCreated);
-            case "closing":
-                return Comparator.comparing(SaleItem::getCloses);
-            case "productCode":
-                return Comparator.comparing(saleItem -> saleItem.getProduct().getProductCode());
-            case "productName":
-                return Comparator.comparing(saleItem -> saleItem.getProduct().getName(), String.CASE_INSENSITIVE_ORDER);
-            case "quantity":
-                return Comparator.comparing(SaleItem::getQuantity);
-            case "price":
-                return Comparator.comparing(SaleItem::getPrice);
-            default:
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid sort order");
+        else if (!VALID_ORDERINGS.contains(orderBy)) {
+            logger.error("Invalid sale item ordering given: {}", orderBy);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The provided ordering is invalid");
         }
+        if (orderBy.equals("productCode")) {
+            orderBy = "inventoryItem.product.productCode";
+        } else if (orderBy.equals("productName")) {
+            orderBy = "inventoryItem.product.name";
+        }
+        return new Sort.Order(direction, orderBy).ignoreCase();
     }
 
+    /**
+     * Adds a sale item to a given business
+     *
+     * @param id           The id of the business to add to
+     * @param saleItemInfo The content of the sale item
+     * @return The ID of the new listing
+     */
     @PostMapping("/businesses/{id}/listings")
     public JSONObject addSaleItemToBusiness(@PathVariable Long id, @RequestBody JSONObject saleItemInfo, HttpServletRequest request, HttpServletResponse response) {
         try {
@@ -75,7 +90,7 @@ public class SaleController {
             try {
                 inventoryItem = inventoryItemRepository.getInventoryItemByBusinessAndId(
                         business,
-                        ((Number)inventoryItemIdObj).longValue()
+                        ((Number) inventoryItemIdObj).longValue()
                 );
             } catch (ResponseStatusException exception) {
                 // Make sure to return a 400 instead of a 406
@@ -88,7 +103,7 @@ public class SaleController {
 
             SaleItem saleItem = new SaleItem.Builder()
                     .withInventoryItem(inventoryItem)
-                    .withQuantity((Integer)saleItemInfo.get("quantity"))
+                    .withQuantity((Integer) saleItemInfo.get("quantity"))
                     .withPrice(saleItemInfo.getAsString("price"))
                     .withMoreInfo(saleItemInfo.getAsString("moreInfo"))
                     .withCloses(saleItemInfo.getAsString("closes"))
@@ -107,65 +122,38 @@ public class SaleController {
 
     /**
      * REST GET method to retrieve all the sale items for a given business
-     * @param id the id of the business
+     *
+     * @param id      the id of the business
      * @param request the HTTP request
      * @return List of sale items the business is listing
      */
     @GetMapping("/businesses/{id}/listings")
-    public JSONArray getSaleItemsForBusiness(@PathVariable Long id,
-                                             HttpServletRequest request,
-                                             @RequestParam(required = false) String orderBy,
-                                             @RequestParam(required = false) Integer page,
-                                             @RequestParam(required = false) Integer resultsPerPage,
-                                             @RequestParam(required = false) Boolean reverse) {
+    public JSONObject getSaleItemsForBusiness(@PathVariable Long id,
+                                              HttpServletRequest request,
+                                              @RequestParam(required = false) String orderBy,
+                                              @RequestParam(required = false) Integer page,
+                                              @RequestParam(required = false) Integer resultsPerPage,
+                                              @RequestParam(required = false) Boolean reverse) {
+        AuthenticationTokenManager.checkAuthenticationToken(request);
+        logger.info(() -> String.format("Getting sales item for business (businessId=%d).", id));
+
         try {
-            AuthenticationTokenManager.checkAuthenticationToken(request);
-            logger.info(() -> String.format("Getting sales item for business (businessId=%d).", id));
             Business business = businessRepository.getBusinessById(id);
 
-            List<SaleItem> listings = new ArrayList<>(saleItemRepository.findAllForBusiness(business));
+            Sort.Direction direction = SearchHelper.getSortDirection(reverse);
+            Sort.Order sortOrder = getSaleItemOrder(orderBy, direction);
 
-            Comparator<SaleItem> comparator = getSaleItemComparator(orderBy);
-            if (Boolean.TRUE.equals(reverse)) {
-                comparator = comparator.reversed();
-            }
-            listings.sort(comparator);
+            PageRequest pageRequest = SearchHelper.getPageRequest(page, resultsPerPage, Sort.by(sortOrder));
 
-            listings = SearchHelper.getPageInResults(listings, page, resultsPerPage);
+            Page<SaleItem> result = saleItemRepository.findAllForBusiness(business, pageRequest);
 
-            var response = new JSONArray();
-            for (SaleItem saleItem : listings) {
-                response.add(saleItem.constructJSONObject());
-            }
-            return response;
+            return JsonTools.constructPageJSON(result.map(SaleItem::constructJSONObject));
+
         } catch (Exception error) {
             logger.error(error.getMessage());
             throw error;
         }
     }
 
-    /**
-     * REST GET method to retrieve the sale item count for the business
-     * @param id the id of the business
-     * @param request the HTTP request
-     * @return JSON object containing a single "count" field with the sales item count
-     */
-    @GetMapping("/businesses/{id}/listings/count")
-    public JSONObject getSalesItemForBusinessCount(@PathVariable Long id, HttpServletRequest request) {
-        try {
-            AuthenticationTokenManager.checkAuthenticationToken(request);
-            logger.info(() -> String.format("Getting sales item count for business (businessId=%d", id));
-            Business business = businessRepository.getBusinessById(id);
-
-            List<SaleItem> listings = saleItemRepository.findAllForBusiness(business);
-
-            var response = new JSONObject();
-            response.put("count", listings.size());
-
-            return response;
-        } catch (Exception e) {
-            logger.error(e.getMessage());
-            throw e;
-        }
-    }
+    //* remember to sort the count stuff out on the frontend eh?
 }
