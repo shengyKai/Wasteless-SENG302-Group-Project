@@ -23,7 +23,7 @@
             label="Sort by"
           />
         </v-col>
-        <v-col cols="auto">
+        <v-col class="text-right">
           <!---Reverse the order in which the cards should be displayed--->
           <v-btn-toggle class="toggle" v-model="reverse" mandatory>
             <v-btn depressed color="primary" :value="false">
@@ -34,40 +34,42 @@
             </v-btn>
           </v-btn-toggle>
         </v-col>
-        <v-select
-          color="secondary" class="mb-1"
-          flat
-          solo-inverted
-          no-data-text="No keywords found"
-          value = "keywords"
-          v-model="selectedKeywords"
-          :items="filteredKeywordList"
-          label="Select keywords"
-          item-text="name"
-          item-value="id"
-          multiple
-          :hint="selectedKeywords"
-          @click="selectedKeywords=undefined"
-          persistent-hint
-          outlined
-        >
-          <template v-slot:prepend-item>
-            <v-list-item>
-              <v-list-item-content>
-                <v-text-field
-                  label="Search for a keyword" v-model="keywordFilter"
-                  clearable
-                  :autofocus="true"
-                  @click:clear="resetSearch"
-                  hint="Keyword name"
-                />
-              </v-list-item-content>
-            </v-list-item>
-          </template>
-        </v-select>
         <v-col>
+          <v-select
+            color="secondary" class="mb-1"
+            flat
+            solo-inverted
+            no-data-text="No keywords found"
+            value = "keywords"
+            v-model="selectedKeywords"
+            :items="filteredKeywordList"
+            label="Select keywords"
+            item-text="name"
+            item-value="id"
+            multiple
+            :hint="selectedKeywords"
+            @click="selectedKeywords=undefined"
+            persistent-hint
+            outlined
+          >
+            <template v-slot:prepend-item>
+              <v-list-item>
+                <v-list-item-content>
+                  <v-text-field
+                    label="Search for a keyword" v-model="keywordFilter"
+                    clearable
+                    :autofocus="true"
+                    @click:clear="resetSearch"
+                    hint="Keyword name"
+                  />
+                </v-list-item-content>
+              </v-list-item>
+            </template>
+          </v-select>
+        </v-col>
+        <v-col >
           <!-- Toggle button for user to choose partially or fully matched results -->
-          <v-btn-toggle class="toggle" v-model="reverse" mandatory>
+          <v-btn-toggle class="toggle text-right" v-model="reverse" mandatory>
             <v-btn depressed color="primary" :value="false">
               <v-icon>mdi-circle-half-full</v-icon>
             </v-btn>
@@ -77,7 +79,7 @@
           </v-btn-toggle>
         </v-col>
         <v-spacer/>
-        <v-col cols="auto" class="text-right" >
+        <v-col class="text-right" >
           <!---Link to modal for creating new card--->
           <v-btn type="button" color="secondary" @click="showCreateCard" rounded>
             Create card
