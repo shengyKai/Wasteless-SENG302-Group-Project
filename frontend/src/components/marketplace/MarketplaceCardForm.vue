@@ -7,7 +7,7 @@
     >
       <v-card>
         <v-card-title>
-          Create Marketplace Card
+          {{ modalTitle }}
         </v-card-title>
         <v-container class="pa-6">
           <v-row>
@@ -100,6 +100,9 @@ import {createMarketplaceCard, createNewKeyword, getKeywords} from '@/api/intern
 
 export default {
   name: "MarketplaceCard",
+  props: {
+    previousCard: Object,
+  },
   data() {
     return {
       title: "",
@@ -216,6 +219,15 @@ export default {
         return 'Section must be selected';
       }
       return undefined;
+    },
+    isCreate() {
+      return this.previousCard === undefined;
+    },
+    modalTitle() {
+      if (this.isCreate) {
+        return "Create Marketplace Card";
+      }
+      return "Modify Marketplace Card";
     }
   },
   methods: {

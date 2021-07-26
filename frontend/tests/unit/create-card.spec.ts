@@ -3,7 +3,7 @@ import Vuex from 'vuex';
 import Vuetify from 'vuetify';
 import { createLocalVue, Wrapper, mount } from '@vue/test-utils';
 
-import CreateCard from '@/components/marketplace/CreateCard.vue';
+import MarketplaceCardForm from '@/components/marketplace/MarketplaceCardForm.vue';
 import {castMock} from "./utils";
 import * as api from '@/api/internal';
 import { getStore, resetStoreForTesting } from '@/store';
@@ -70,17 +70,19 @@ const invalidCharacters = [
 ];
 
 /**
-   * Sets up the test CreateCard instance
+   * Sets up the test MarketplaceCardForm instance
    *
    * Because the element we're testing has a v-dialog we need to take some extra sets to make it
    * work.
    */
-describe('CreateCard.vue', () => {
-  // Container for the wrapper around CreateCard
+describe('MarketplaceCardFrom.vue', () => {
+
+  // Container for the wrapper around MarketplaceCardForm
   let appWrapper: Wrapper<any>;
 
-  // Container for the CreateCard under test
+  // Container for the MarketplaceCardForm under test
   let wrapper: Wrapper<any>;
+
 
   beforeEach(() => {
     const vuetify = new Vuetify();
@@ -89,13 +91,13 @@ describe('CreateCard.vue', () => {
     let store = getStore();
     store.state.user = makeTestUser(1); // log in as user 1
     store.state.createMarketplaceCardDialog = store.state.user;
-    // Creating wrapper around CreateCard with data-app to appease vuetify
+    // Creating wrapper around MarketplaceCardForm with data-app to appease vuetify
     const App = localVue.component('App', {
-      components: { CreateCard },
-      template: '<div data-app><CreateCard/></div>',
+      components: { MarketplaceCardForm },
+      template: '<div data-app><MarketplaceCardForm/></div>',
     });
 
-    // Put the CreateCard component inside a div in the global document,
+    // Put the MarketplaceCardForm component inside a div in the global document,
     // this seems to make vuetify work correctly, but necessitates calling appWrapper.destroy
     const elem = document.createElement('div');
     document.body.appendChild(elem);
@@ -116,20 +118,20 @@ describe('CreateCard.vue', () => {
       store: store,
     });
 
-    wrapper = appWrapper.getComponent(CreateCard);
+    wrapper = appWrapper.getComponent(MarketplaceCardForm);
   });
 
   /**
    * Executes after every test case.
    *
-   * This function makes sure that the CreateCard component is removed from the global document
+   * This function makes sure that the MarketplaceCardForm component is removed from the global document
    */
   afterEach(() => {
     appWrapper.destroy();
   });
 
   /**
-   * Finds the cancel button in the CreateCard form
+   * Finds the cancel button in the MarketplaceCardForm form
    *
    * @returns A Wrapper around the cancel button
    */
@@ -141,7 +143,7 @@ describe('CreateCard.vue', () => {
   }
 
   /**
-   * Finds the create button in the CreateCard form
+   * Finds the create button in the MarketplaceCardForm form
    *
    * @returns A Wrapper around the create button
    */

@@ -75,6 +75,13 @@
           </v-card-actions>
         </v-card>
       </v-dialog>
+      <v-btn
+        @click="editCardDialog=true">
+        Temporary edit button
+      </v-btn>
+      <template v-if="editCardDialog">
+        <MarketplaceCardForm @closeDialog="editCardDialog=false"/>
+      </template>
     </v-card-actions>
   </v-card>
 </template>
@@ -82,13 +89,18 @@
 <script>
 import { formatDate, SECTION_NAMES } from '@/utils';
 import { deleteMarketplaceCard } from '../../api/internal.ts';
+import MarketplaceCardForm from '../marketplace/MarketplaceCardForm.vue';
 
 export default {
   name: "MarketplaceCard",
   data () {
     return {
-      deleteCardDialog: false
+      deleteCardDialog: false,
+      editCardDialog: false
     };
+  },
+  components: {
+    MarketplaceCardForm,
   },
   props: {
     content: {

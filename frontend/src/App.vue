@@ -13,7 +13,7 @@
             <CreateSaleItem @closeDialog="$store.commit('hideCreateSaleItem')"/>
           </div>
           <div v-if="$store.state.createMarketplaceCardDialog">
-            <CreateCard @closeDialog="$store.commit('hideCreateMarketplaceCard')" />
+            <MarketplaceCardForm @closeDialog="$store.commit('hideCreateMarketplaceCard')" />
           </div>
 
           <AppBar />
@@ -71,7 +71,7 @@ import AppBar from "./components/AppBar";
 import AppFooter from "./components/AppFooter";
 import CreateBusiness from "./components/BusinessProfile/CreateBusiness";
 import CreateSaleItem from "./components/BusinessProfile/CreateSaleItem";
-import CreateCard from "./components/marketplace/CreateCard";
+import MarketplaceCardForm from "./components/marketplace/MarketplaceCardForm";
 
 import { getStore } from "./store";
 import router from "./plugins/vue-router";
@@ -93,7 +93,7 @@ export default {
     AppFooter,
     CreateBusiness,
     CreateSaleItem,
-    CreateCard,
+    MarketplaceCardForm,
   },
   async created() {
     const cookie = getCookie(COOKIE.USER);
