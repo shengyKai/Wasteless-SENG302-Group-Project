@@ -39,7 +39,7 @@
     </v-card-text>
     <v-divider/>
     <v-card-actions v-if="isCardOwnerOrDGAA && showActions">
-      <v-icon ref="deleteButton"
+      <v-icon ref="editButton"
               color="primary"
               @click.stop="editCardDialog = true"
       >
