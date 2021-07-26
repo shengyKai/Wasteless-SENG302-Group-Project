@@ -15,6 +15,12 @@ Feature: UCM6 - Keyword Management
     Then The request fails due to not authorised
     And The keyword "Dance" is not present
 
+  Scenario: AC5 - System administrators are notified a new keyword is added
+    Given I am logged in as an administrator
+    When  User "Dave" creates a new keyword "Dance"
+    Then  I receive a notification
+    And   The notification contains the keyword "Dance"
+
   Scenario: AC6 - System administrators can delete keywords
     Given The keyword "Dance" exists
     And A admin exists with name "Dave"
