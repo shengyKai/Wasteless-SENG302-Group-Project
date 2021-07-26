@@ -60,7 +60,7 @@
                     class="required"
                     v-model="quantity"
                     label="Quantity"
-                    :rules="mandatoryRules().concat(quantityRules())"
+                    :rules="mandatoryRules().concat(quantityRules()).concat(checkQuantityValid())"
                     outlined
                   />
                 </v-col>
@@ -158,7 +158,7 @@
 </template>
 
 <script>
-import { createInventoryItem, getProducts } from '@/api/internal';
+import { createInventoryItem, getProducts, modifyInventoryItem } from '@/api/internal';
 import { currencyFromCountry } from "@/api/currency";
 import {hugePriceRules, mandatoryRules, quantityRules, smallPriceRules} from "@/utils";
 
@@ -237,8 +237,9 @@ export default {
     },
     /**
      * Called when the form is submitted.
-     * Get the attributes from each field and call the function to either create or modify the inventory item,
+     * Get the attributes from each field and call the api function to either create or modify the inventory item,
      * depending on what pupose the form is being used for.
+     * Displays an error message if the api response is an error.
      */
     async submit() {
       this.errorMessage = undefined;
@@ -259,28 +260,18 @@ export default {
         bestBefore: this.bestBefore ? this.bestBefore : undefined,
         expires: this.expires
       };
+      let result;
       if (this.isCreate) {
-        this.createInventory(inventoryItem);
+        result = await createInventoryItem(this.businessId, inventoryItem);
       } else {
-        this.modifyInventory();
+        result = await modifyInventoryItem(this.businessId, this.previousItem.id, inventoryItem);
       }
-    },
-    /**
-     * Requests backend to create an inventory item
-     * Empty attributes are set to undefined
-     */
-    async createInventory(inventoryItem) {
-      const result = await createInventoryItem(this.businessId, inventoryItem);
       if (typeof result === 'string') {
         this.errorMessage = result;
       } else {
         this.closeDialog();
       }
     },
-    modifyInventory() {
-      this.errorMessage = "Not yet implemented";
-    },
-
     async checkAllDatesValid() {
       //checks the booleans for all the dates are valid
       if (this.manufacturedValid && this.sellByValid && this.bestBeforeValid && this.expiresValid) {
@@ -366,10 +357,20 @@ export default {
       await this.checkAllDatesValid();
     },
     /**
+     * Checks that the quantity is greater than or equal to the amount that has already been used in sale listings if the
+     * form is being used to modify an inventory item.
+     */
+    checkQuantityValid() {
+      if (this.isCreate) {
+        return true;
+      }
+      return this.quantity >= (this.previousItem.quantity - this.previousItem.remainingQuantity);
+    },
+    /**
      * Call the currency API to get the currency symbol and code from the country of sale of the product.
      */
     async fetchCurrency() {
-      if (this.productCode) {
+      if (this.productCode && this.productList.length > 0) {
         const product = this.productList.filter(p => p.id === this.productCode)[0];
         this.currency = await currencyFromCountry(product.countryOfSale);
       } else {
