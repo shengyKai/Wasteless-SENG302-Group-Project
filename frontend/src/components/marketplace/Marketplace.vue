@@ -76,7 +76,7 @@
           </v-btn-toggle>
         </v-col>
         <v-spacer/>
-        <v-col cols="auto" class="text-right" >
+        <v-col cols="auto " class="text-right" >
           <!---Link to modal for creating new card--->
           <v-btn type="button" color="secondary" @click="showCreateCard" rounded>
             Create card
