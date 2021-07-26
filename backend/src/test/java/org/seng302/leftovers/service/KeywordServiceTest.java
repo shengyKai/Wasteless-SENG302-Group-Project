@@ -1,6 +1,5 @@
-`package org.seng302.leftovers.service;
+package org.seng302.leftovers.service;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
@@ -12,22 +11,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
-import java.time.Duration;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest
 class KeywordServiceTest {
 
     @Mock
-    User    userOne;
+    User mockDgaa;
     @Mock
-    User    userTwo;
+    User mockGaa;
     @MockBean
     EventService eventService;
     @MockBean
@@ -41,53 +36,54 @@ class KeywordServiceTest {
     ArgumentCaptor<Set<User>> adminArgumentCaptor;
     @Captor
     ArgumentCaptor<CreateKeywordEvent> eventArgumentCaptor;
+
+    Keyword keyword;
+
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
+
+        List<User> dgaaList = new ArrayList<>();
+        dgaaList.add(mockDgaa);
+        when(userRepository.findAllByRole("defaultGlobalApplicationAdmin")).thenReturn(dgaaList);
+
+        List<User> gaaList = new ArrayList<>();
+        gaaList.add(mockGaa);
+        when(userRepository.findAllByRole("globalApplicationAdmin")).thenReturn(gaaList);
+
+        keyword = new Keyword("Blah");
     }
 
     @Test
     void sendNewKeywordsEvents_queriesUserRepositoryForAllAdmin() {
-        Keyword keyword = new Keyword("Blah");
         keywordService.sendNewKeywordEvent(keyword);
-        Mockito.verify(userRepository, Mockito.times(2)).findAllByRole(stringArgumentCaptor.capture());
+        Mockito.verify(userRepository, Mockito.times(2))
+                .findAllByRole(stringArgumentCaptor.capture());
 
         List<String> capturedRole = stringArgumentCaptor.getAllValues();
         assertEquals("defaultGlobalApplicationAdmin", capturedRole.get(0));
         assertEquals("globalApplicationAdmin", capturedRole.get(1));
-
     }
 
     @Test
     void sendNewKeywordsEvents_callEventServiceWithAdminReturnFromUserRepository() {
-        List<User> adminList = new ArrayList<User>();
-        adminList.add(userOne);
-        adminList.add(userTwo);
-        when(userRepository.findAllByRole(any())).thenReturn(adminList);
-
-        Keyword keyword = new Keyword("Blah");
         keywordService.sendNewKeywordEvent(keyword);
-        Mockito.verify(eventService, Mockito.times(1)).addUsersToEvent(adminArgumentCaptor.capture(), eventArgumentCaptor.capture());
+        Mockito.verify(eventService, Mockito.times(1))
+                .addUsersToEvent(adminArgumentCaptor.capture(), eventArgumentCaptor.capture());
 
         Set<User> adminSet= adminArgumentCaptor.getValue();
-        assertTrue(adminSet.contains(userOne));
-        assertTrue(adminSet.contains(userTwo));
+        assertTrue(adminSet.contains(mockDgaa));
+        assertTrue(adminSet.contains(mockGaa));
     }
 
     @Test
     void sendNewKeywordsEvents_callEventServiceWithKeywordPassedIntoMethod() {
-        List<User> adminList = new ArrayList<User>();
-        adminList.add(userOne);
-        adminList.add(userTwo);
-        when(userRepository.findAllByRole(any())).thenReturn(adminList);
-
-        Keyword keyword = new Keyword("Blah");
         keywordService.sendNewKeywordEvent(keyword);
-        Mockito.verify(eventService, Mockito.times(1)).addUsersToEvent(adminArgumentCaptor.capture(), eventArgumentCaptor.capture());
+        Mockito.verify(eventService, Mockito.times(1))
+                .addUsersToEvent(adminArgumentCaptor.capture(), eventArgumentCaptor.capture());
 
         CreateKeywordEvent createKeywordEvent = eventArgumentCaptor.getValue();
         assertEquals(keyword,createKeywordEvent.getKeyword());
-
     }
 }
 

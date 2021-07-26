@@ -15,10 +15,12 @@ Feature: UCM6 - Keyword Management
     Then The request fails due to not authorised
     And The keyword "Dance" is not present
 
-  Scenario: AC5 - System administrators are notified a new keyword is added
-    Given A admin exists with name "Bob"
+  Scenario: AC5 - System administrators are notified when a new keyword is added
+    Given A user exists with name "Dave"
+    And   A admin exists with name "Bob"
+    And   A keyword "Dance" has been created by user "Dave"
     And   I am logged into "Bob" account
-    When  A keyword "Dance" is created
+    When  I check my notification feed
     Then  I receive a notification
     And   The notification contains the keyword "Dance"
 
