@@ -3,7 +3,7 @@
     <v-toolbar dark color="primary" class="mb-1">
       <v-row align="center">
         <v-col
-          class="d-flex"
+          class="d-flex mr-12"
           cols="auto"
         >
           <!---Select component for the order in which the cards should be displayed--->
@@ -22,7 +22,6 @@
             prepend-inner-icon="mdi-sort-variant"
             label="Sort by"
           />
-
           <!---Reverse the order in which the cards should be displayed--->
           <v-btn-toggle class="toggle" v-model="reverse" mandatory>
             <v-btn depressed color="primary" :value="false">
@@ -33,9 +32,8 @@
             </v-btn>
           </v-btn-toggle>
         </v-col>
-        <v-col>
+        <v-col class="mt-7 ml-9 mr-n16" >
           <v-select
-            color="secondary" class="mb-1"
             flat
             solo-inverted
             no-data-text="No keywords found"
@@ -66,19 +64,19 @@
             </template>
           </v-select>
         </v-col>
-        <v-col >
+        <v-col class="text-right mr-n16" >
           <!-- Toggle button for user to choose partially or fully matched results -->
-          <v-btn-toggle class="toggle text-right" v-model="reverse" mandatory>
+          <v-btn-toggle class="toggle" v-model="reverse" mandatory>
             <v-btn depressed color="primary" :value="false">
-              <v-icon>mdi-circle-half-full</v-icon>
+              AND
             </v-btn>
             <v-btn depressed color="primary" :value="true">
-              <v-icon>mdi-circle</v-icon>
+              OR
             </v-btn>
           </v-btn-toggle>
         </v-col>
         <v-spacer/>
-        <v-col class="text-right" >
+        <v-col cols="auto" class="text-right" >
           <!---Link to modal for creating new card--->
           <v-btn type="button" color="secondary" @click="showCreateCard" rounded>
             Create card
