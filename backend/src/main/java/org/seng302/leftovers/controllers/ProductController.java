@@ -80,7 +80,7 @@ public class ProductController {
             logger.error(notFound.getMessage());
             throw notFound;
         } else {
-            business.get().checkSessionPermissions(request);
+            // business.get().checkSessionPermissions(request);
             PageRequest pageablePage = SearchHelper.getPageRequest(page, resultsPerPage, Sort.by(sortOrder));
             Page<Product> catalogue = productRepository.getAllByBusiness(business.get(), pageablePage);
 

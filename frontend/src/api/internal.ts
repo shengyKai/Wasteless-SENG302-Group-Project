@@ -521,9 +521,8 @@ type ProductOrderBy = 'name' | 'description' | 'manufacturer' | 'recommendedReta
  * @return a list of products
  */
 export async function getProducts(businessId: number, page: number, resultsPerPage: number, orderBy: ProductOrderBy, reverse: boolean):
-  Promise<MaybeError<Product[]>>{
+  Promise<MaybeError<SearchResults<Product>>>{
   let response;
-  console.log("1");
   try {
     response = await instance.get(`/businesses/${businessId}/products`, {
       params: {
@@ -541,64 +540,11 @@ export async function getProducts(businessId: number, page: number, resultsPerPa
     if (status === 406) return 'Business not found';
     return 'Request failed: ' + status;
   }
-  console.log("2");
-  console.log(response.data);
 
-  /***
-   * Old code here
-   */
-  // if (!is<Product[]>(response.data)) {
-  //   return 'Response is not product array';
-  // }
-
-  // console.log(response.data);
-  // return response.data;
-
-  /**
-   * @description The responses structure will be
-   *                e.g.  {
-   *                        "count" : 1 ,
-   *                        "results" : [{}]   < Product[] >
-   *                      }
-   *               The code below will unpack the responses.
-   */
-  let product_count = response.data.count;
-  let product_list  = response.data.results;
-
-  console.log(product_list);
-
-  if (!is<Product[]>(product_list)) {
+  if (!is<SearchResults<Product>>(response.data)) {
     return 'Response is not product array';
   }
-  console.log(product_list);
-
-
-
-  return product_list;
-}
-
-/**
- * Sends a query for the total number of products in the business
- *
- * @param buisnessId Business id to identify with the database to retrieve the product count
- * @returns Number of products or an error message
- */
-export async function getProductCount(buisnessId: number): Promise<MaybeError<number>> {
-  let response;
-  console.log("A");
-  try {
-    response = await instance.get(`/businesses/${buisnessId}/products/count`);
-  } catch (error) {
-    let status: number | undefined = error.response?.status;
-
-    if (status === undefined) return 'Failed to reach backend';
-    return `Request failed: ${status}`;
-  }
-
-  if (typeof response.data?.count !== 'number') {
-    return 'Response is not number';
-  }
-  return response.data.count;
+  return response.data;
 }
 
 /**
