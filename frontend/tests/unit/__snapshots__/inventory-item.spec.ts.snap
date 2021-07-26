@@ -12,9 +12,6 @@ exports[`InventoryItem.vue Must match snapshot 1`] = `
               test_product_name
             </div>
           </div>
-          <div class="col-sm-2 col-md-2 col-auto">
-            <div class="v-card__actions pb-0"></div>
-          </div>
         </div>
         <div class="row">
           <div class="col-sm-12 col-md-9 col-auto">
@@ -133,11 +130,15 @@ exports[`InventoryItem.vue Must match snapshot 1`] = `
         </div>
       </div>
     </div>
-    <div class="row justify-end"><button type="button" class="sale-item-but v-btn v-btn--outlined v-btn--rounded theme--light v-size--default primary--text"><span class="v-btn__content">
-            Create Sale Item
-          </span></button><span class="v-tooltip v-tooltip--top"><!----></span> <button type="button" class="v-btn v-btn--is-elevated v-btn--has-bg theme--light v-size--default"><span class="v-btn__content">
-        Temporary edit button
-      </span></button></div>
+    <div class="row justify-end">
+      <div class="col col-auto">
+        <div class="v-card__actions pb-0 aflex-column aalign-end d-block"><span class="font-weight-medium action-button v-chip v-chip--clickable theme--light v-size--default primary" medium=""><span class="v-chip__content">
+                Create Sale Item
+              </span></span><span class="v-tooltip v-tooltip--top"><!----></span> <span class="font-weight-medium action-button v-chip v-chip--clickable theme--light v-size--default primary" medium=""><span class="v-chip__content">
+            Edit
+          </span></span></div>
+      </div>
+    </div>
   </div>
   <!---->
 </div>

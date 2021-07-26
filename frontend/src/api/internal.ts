@@ -806,6 +806,30 @@ export async function getInventoryCount(businessId: number): Promise<MaybeError<
 }
 
 /**
+ * Updates an existing inventory item's properties
+ *
+ * @param businessId The business for which the inventory item belongs
+ * @param inventoryItemId The id number of the inventory item
+ * @param inventoryItem The inventory item's new properties
+ * @return undefined if operation is successful, otherwise a string error
+ */
+export async function modifyInventoryItem(businessId: number, inventoryItemId: number, inventoryItem: CreateInventoryItem): Promise<MaybeError<undefined>> {
+  try {
+    await instance.put(`/businesses/${businessId}/inventory/${inventoryItemId}`, inventoryItem);
+  } catch (error) {
+    let status: number | undefined = error.response?.status;
+    if (status === undefined) return 'Failed to reach backend';
+    if (status === 401) return 'Missing/Invalid access token';
+    if (status === 403) return 'Operation not permitted';
+    if (status === 406) return 'Inventory item/Business not found';
+    if (status === 400) return 'Invalid parameters: ' + error.response?.data.message;
+
+    return 'Request failed: ' + error.response?.status;
+  }
+  return undefined;
+}
+
+/**
  * Calls backend for list of keywords to be used in Marketplace Card creation
  */
 export async function getKeywords(): Promise<MaybeError<Keyword[]>> {

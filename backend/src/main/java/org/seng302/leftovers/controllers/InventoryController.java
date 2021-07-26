@@ -10,12 +10,17 @@ import org.seng302.leftovers.entities.Product;
 import org.seng302.leftovers.persistence.BusinessRepository;
 import org.seng302.leftovers.persistence.InventoryItemRepository;
 import org.seng302.leftovers.persistence.ProductRepository;
+import org.seng302.leftovers.tools.AuthenticationTokenManager;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import org.seng302.leftovers.tools.SearchHelper;
 
 import javax.servlet.http.HttpServletRequest;
+import java.lang.annotation.Repeatable;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Comparator;
 
@@ -74,6 +79,88 @@ public class InventoryController {
         } catch (ResponseStatusException exception) {
             logger.warn(exception);
             throw exception;
+        }
+    }
+
+    /**
+     * PUT endpoint for modifying an inventory item entry's attributes.
+     *
+     * @param businessId the id of the business that has the product associated with the inventory item in their
+     *                   catalogue
+     * @param invItemId the id of the inventory being modified
+     */
+    @PutMapping("/businesses/{businessId}/inventory/{invItemId}")
+    public void modifyInvEntry(@PathVariable(name = "businessId") Long businessId,
+                               @PathVariable(name = "invItemId") Long invItemId, HttpServletRequest request,
+                               @RequestBody JSONObject invItemInfo) throws Exception {
+        logger.info("Attempting to modify the inventory {} for the business {}", invItemId, businessId);
+
+        Business business = businessRepository.getBusinessById(businessId);
+        if (business == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    String.format("The business with the id %d does not exist", businessId));
+        }
+        business.checkSessionPermissions(request);
+
+        InventoryItem invItem = inventoryItemRepository.getInventoryItemByBusinessAndId(business, invItemId);
+        if (invItem == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    String.format("The inventory item with the id %d does not exist", invItemId));
+        }
+
+        if (invItemInfo == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No JSON request body was provided");
+        }
+
+        //assuming all exceptions are related to bad requests since only data is being save below
+        try {
+            String newProductCode = invItemInfo.getAsString("productId");
+            Product product = productRepository.findByBusinessAndProductCode(business, newProductCode)
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                            "The product with the given id does not exist within the business's catalogue"));
+            invItem.setProduct(product);
+
+            invItem.setQuantity((int) invItemInfo.getAsNumber("quantity"));
+
+            String pricePerItem = invItemInfo.getAsString("pricePerItem");
+            if (pricePerItem != null) {
+                invItem.setPricePerItem(BigDecimal.valueOf(Double.parseDouble(pricePerItem)));
+            } else {
+                invItem.setPricePerItem(null);
+            }
+            String totalPrice = invItemInfo.getAsString("totalPrice");
+            if (totalPrice != null) {
+                invItem.setTotalPrice(BigDecimal.valueOf(Double.parseDouble(totalPrice)));
+            } else {
+                invItem.setTotalPrice(null);
+            }
+
+            DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE;
+            String manufactured = invItemInfo.getAsString("manufactured");
+            if (manufactured == null) {
+                invItem.setManufactured(null);
+            } else {
+                invItem.setManufactured(LocalDate.parse(manufactured, dateTimeFormatter));
+            }
+            String sellBy = invItemInfo.getAsString("sellBy");
+            if (sellBy == null) {
+                invItem.setSellBy(null);
+            } else {
+                invItem.setSellBy(LocalDate.parse(sellBy, dateTimeFormatter));
+            }
+            String bestBefore = invItemInfo.getAsString("bestBefore");
+            if (bestBefore == null) {
+                invItem.setBestBefore(null);
+            } else {
+                invItem.setBestBefore(LocalDate.parse(bestBefore, dateTimeFormatter));
+            }
+            String expires = invItemInfo.getAsString("expires");
+            invItem.setExpires(LocalDate.parse(expires, dateTimeFormatter));
+
+            inventoryItemRepository.save(invItem);
+        } catch (Exception exception) {
+            logger.warn(exception);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The data provided was invalid");
         }
     }
 
