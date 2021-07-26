@@ -607,7 +607,7 @@ export async function getBusiness(businessId: number): Promise<MaybeError<Busine
  * @param reverse Specifies whether to reverse the search results (default order is descending for relevance and ascending for all other orders)
  * @returns List of business infos for the current page or an error message
  */
-export async function searchBusinesses(query: string, businessType: BusinessType, pageIndex: number, resultsPerPage: number, orderBy: BusinessOrderBy, reverse: boolean): Promise<MaybeError<SearchResults<Business>>> {
+export async function searchBusinesses(query: string | undefined, businessType: BusinessType | undefined, pageIndex: number, resultsPerPage: number, orderBy: BusinessOrderBy, reverse: boolean): Promise<MaybeError<SearchResults<Business>>> {
   let response;
   try {
     response = await instance.get('/businesses/search', {
