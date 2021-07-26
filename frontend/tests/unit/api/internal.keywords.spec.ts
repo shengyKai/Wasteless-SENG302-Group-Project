@@ -8,7 +8,8 @@ jest.mock('axios', () => ({
   }
   ),
   instance: {
-    get: jest.fn()
+    get: jest.fn(),
+    post: jest.fn()
   },
 }));
 
@@ -16,7 +17,7 @@ jest.mock('axios', () => ({
 type Mocked<T extends { [k: string]: (...args: any[]) => any }> = { [k in keyof T]: jest.Mock<ReturnType<T[k]>, Parameters<T[k]>> }
 
 // @ts-ignore - We've added an instance attribute in the mock declaration that mimics a AxiosInstance
-const instance: Mocked<Pick<AxiosInstance, 'get'>> = axios.instance;
+const instance: Mocked<Pick<AxiosInstance, 'get' | 'post'>> = axios.instance;
 
 describe("Test GET /keywords/search endpoint", () => {
   it("Get keywords", async () => {
@@ -50,5 +51,62 @@ describe("Test GET /keywords/search endpoint", () => {
     });
     const keywords = await api.getKeywords();
     expect(keywords).toEqual('You have been logged out. Please login again and retry');
+  });
+});
+
+describe("Test POST /keywords endpoint", () => {
+  it("Create keyword", async () => {
+    instance.post.mockResolvedValueOnce({
+      data: {
+        keywordId: 1
+      }
+    });
+    let keyword = {
+      name: "New keyword"
+    };
+    const createdKeyword = await api.createNewKeyword(keyword);
+    let expectedResponse = {
+      keywordId: 1
+    };
+    expect(createdKeyword).toEqual(expectedResponse);
+  });
+
+  it("Keyword already exists", async () => {
+    instance.post.mockRejectedValue({
+      response: {
+        status: 400
+      }
+    });
+    let keyword = {
+      name: "New keyword"
+    };
+    const createdKeyword = await api.createNewKeyword(keyword);
+    expect(createdKeyword).toEqual("This keyword already exists");
+  });
+
+  it("Unauthorised call to create keyword", async () => {
+    instance.post.mockRejectedValue({
+      response: {
+        status: 401
+      }
+    });
+    let keyword = {
+      name: "New keyword"
+    };
+    const createdKeyword = await api.createNewKeyword(keyword);
+    expect(createdKeyword).toEqual("You have been logged out. Please login again and retry");
+  });
+
+  it("Backend couldn't be reached", async () => {
+    instance.post.mockRejectedValueOnce({
+      response: {
+        status: undefined,
+      }
+    });
+    let keyword = {
+      name: "New keyword"
+    };
+    const createdKeyword = await api.createNewKeyword(keyword);
+    expect(createdKeyword).toEqual("Failed to reach backend");
   });
 });
