@@ -33,6 +33,7 @@ tags:
   - name: 'U19: Create inventory'
   - name: 'U20: Modify inventory entries'
   - name: 'U22: List sale'
+  - name: 'U23: Search for business'
   - name: 'UCM1: Community marketplace'
     description: >-
       No endpoints required here yet, these will come from the subsequent
@@ -970,7 +971,75 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Listing'
-  /cards:
+  '/businesses/search':
+    get:
+      tags:
+        - 'U23: Search for business'
+        - 'Business Accounts'
+      summary: 'Search for businesses by some criteria, for now: their name'
+      security: 
+        - CookieAuth:
+          - user
+          - globalApplicationAdmin
+          - defaultGlobalApplicationAdmin
+      parameters: 
+        - in: query
+          name: searchQuery
+          schema:
+            type: string
+          required: true
+          example: "supermarket"
+          description: "Criteria to search businesses for, e.g: Businesses full name, or part of their name. <br> Use keywords ***AND*** and ***OR*** to refine search. Quotations can be used to find exact matches"
+        - name: page
+          in: query
+          description: The page number to retrieve (1 indexed)
+          schema:
+            type: integer
+            example: 1
+        - name: resultsPerPage
+          in: query
+          description: The number of results to show per page
+          schema:
+            type: integer
+            example: 10
+        - name: orderBy
+          in: query
+          description: Card property to order results by
+          schema:
+            type: string
+            example: created
+            enum:
+              - created
+              - name
+              - location
+              - businessType
+        - name: reverse
+          in: query
+          description: Whether to flip default sort order (default is ascending)
+          schema:
+            type: boolean
+            example: false
+      responses:
+        '200':
+          description: Request successful, a (possibly empty) list of businesses is returned along with total count
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Page'
+                  - type: object
+                    required:
+                      - results
+                    properties:
+                      results:
+                        type: array
+                        items: 
+                          $ref: '#/components/schemas/Business'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '400': 
+          $ref: '#/components/responses/BadRequestError'
+  '/cards':
     post:
       tags:
         - 'UCM2: Card creation'
@@ -1038,11 +1107,13 @@ paths:
           schema:
             type: string
             enum:
+              - lastRenewed
               - created
               - title
               - closes
               - creatorFirstName
               - creatorLastName
+              - location
         - name: reverse
           in: query
           description: Whether to flip default sort order (default is ascending)
@@ -1345,15 +1416,50 @@ paths:
           schema:
             type: boolean
           required: true
+        - name: page
+          in: query
+          description: The page number to retrieve (1 indexed)
+          schema:
+            type: integer
+        - name: resultsPerPage
+          in: query
+          description: The number of results to show per page
+          schema:
+            type: integer
+        - name: orderBy
+          in: query
+          description: Card property to order results by
+          schema:
+            type: string
+            enum:
+              - lastRenewed
+              - created
+              - title
+              - closes
+              - creatorFirstName
+              - creatorLastName
+              - location
+        - name: reverse
+          in: query
+          description: Whether to flip default sort order (default is ascending)
+          schema:
+            type: boolean
       responses:
         '200':
           description: 'Request successful, a (possibly empty) list of cards is returned'
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Card'
+                allOf:
+                  - $ref: '#/components/schemas/Page'
+                  - type: object
+                    required:
+                      - results
+                    properties:
+                      results:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Card'
         '400':
           $ref: '#/components/responses/BadRequestError'
         '401':

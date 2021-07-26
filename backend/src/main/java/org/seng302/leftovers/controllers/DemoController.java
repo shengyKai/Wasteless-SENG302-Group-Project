@@ -4,11 +4,7 @@ import net.minidev.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.hibernate.Session;
-import org.seng302.datagenerator.BusinessGenerator;
-import org.seng302.datagenerator.InventoryItemGenerator;
-import org.seng302.datagenerator.ProductGenerator;
-import org.seng302.datagenerator.SaleItemGenerator;
-import org.seng302.datagenerator.UserGenerator;
+import org.seng302.datagenerator.*;
 import org.seng302.leftovers.entities.*;
 import org.seng302.leftovers.persistence.*;
 import org.seng302.leftovers.persistence.SaleItemRepository;
@@ -23,13 +19,10 @@ import org.springframework.web.server.ResponseStatusException;
 
 import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Class for API endpoints used for developing/demoing application. Remove from release.
@@ -185,14 +178,32 @@ public class DemoController {
     public JSONObject generate(HttpServletRequest request, @RequestBody JSONObject options) {
         AuthenticationTokenManager.checkAuthenticationTokenDGAA(request);
 
+        int userCount     = Optional.ofNullable(options.getAsNumber("userCount")).map(Number::intValue).orElse(0);
+        int businessCount = Optional.ofNullable(options.getAsNumber("businessCount")).map(Number::intValue).orElse(0);
+        int productCount  = Optional.ofNullable(options.getAsNumber("productCount")).map(Number::intValue).orElse(0);
+        int invItemCount  = Optional.ofNullable(options.getAsNumber("inventoryItemCount")).map(Number::intValue).orElse(0);
+        int cardCount     = Optional.ofNullable(options.getAsNumber("cardCount")).map(Number::intValue).orElse(0);
+        int saleItemCount = Optional.ofNullable(options.getAsNumber("saleItemCount")).map(Number::intValue).orElse(0);
+
+        List<Long> allUsers = new ArrayList<>();
+        if (options.containsKey("userInitial"))
+            Arrays.stream(JsonTools.parseLongArrayFromJsonField(options, "userInitial")).boxed().forEach(allUsers::add);
+
+        List<Long> allBusinesses = new ArrayList<>();
+        if (options.containsKey("businessInitial"))
+            Arrays.stream(JsonTools.parseLongArrayFromJsonField(options, "businessInitial")).boxed().forEach(allBusinesses::add);
+
+        List<Long> allProducts = new ArrayList<>();
+        if (options.containsKey("productInitial"))
+            Arrays.stream(JsonTools.parseLongArrayFromJsonField(options, "productInitial")).boxed().forEach(allProducts::add);
+
+        List<Long> allInventoryItems = new ArrayList<>();
+        if (options.containsKey("inventoryItemInitial"))
+            Arrays.stream(JsonTools.parseLongArrayFromJsonField(options, "saleItemInitial")).boxed().forEach(allInventoryItems::add);
+
+        boolean generateImages = Optional.ofNullable((Boolean)options.get("generateImages")).orElse(true);
+
         JSONObject json = new JSONObject();
-
-        int productCount = (int) JsonTools.parseLongFromJsonField(options, "productCount");
-        int userCount = (int)JsonTools.parseLongFromJsonField(options, "userCount");
-        int businessCount = (int)JsonTools.parseLongFromJsonField(options, "businessCount");
-        int inventoryItemCount = (int)JsonTools.parseLongFromJsonField(options, "inventoryItemCount");
-        int saleItemCount = (int)JsonTools.parseLongFromJsonField(options, "saleItemCount");
-
         Session session = entityManager.unwrap(Session.class);
         session.doWork(connection -> {
             var userGenerator = new UserGenerator(connection);
@@ -200,18 +211,30 @@ public class DemoController {
             var productGenerator = new ProductGenerator(connection);
             var inventoryItemGenerator = new InventoryItemGenerator(connection);
             var saleItemGenerator = new SaleItemGenerator(connection);
+            var cardGenerator = new MarketplaceCardGenerator(connection);
 
             List<Long> userIds = userGenerator.generateUsers(userCount);
-            List<Long> businessIds = businessGenerator.generateBusinesses(userIds, businessCount);
-            List<Long> productIds = productGenerator.generateProducts(businessIds, productCount, true);
-            List<Long> inventoryItemIds = inventoryItemGenerator.generateInventoryItems(productIds, inventoryItemCount);
-            List<Long> saleItemIds = saleItemGenerator.generateSaleItems(inventoryItemIds, saleItemCount);
+            allUsers.addAll(userIds);
+
+            List<Long> businessIds = businessGenerator.generateBusinesses(allUsers, businessCount);
+            allBusinesses.addAll(businessIds);
+
+            List<Long> productIds = productGenerator.generateProducts(allBusinesses, productCount, generateImages);
+            allProducts.addAll(productIds);
+
+            List<Long> inventoryIds = inventoryItemGenerator.generateInventoryItems(allProducts, invItemCount);
+            allInventoryItems.addAll(inventoryIds);
+
+            List<Long> saleItemIds = saleItemGenerator.generateSaleItems(allInventoryItems, saleItemCount);
+            List<Long> cardIds = cardGenerator.generateCards(allUsers, cardCount);
 
             json.appendField("generatedUsers", userIds);
             json.appendField("generatedBusinesses", businessIds);
             json.appendField("generatedProducts", productIds);
-            json.appendField("generatedInventoryItems", inventoryItemIds);
+            json.appendField("generatedInventoryItems", inventoryIds);
             json.appendField("generatedSaleItems", saleItemIds);
+            json.appendField("generatedCards", cardIds);
+
         });
         return json;
     }
