@@ -19,6 +19,7 @@ import org.springframework.web.server.ResponseStatusException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.security.Key;
+import java.util.Locale;
 
 @RestController
 public class KeywordController {
@@ -94,9 +95,17 @@ public class KeywordController {
             logger.info("Adding new keyword with name \"{}\"", name);
             AuthenticationTokenManager.checkAuthenticationToken(request);
 
-            Keyword keyword = new Keyword(name); // Also validates name
-            if (keywordRepository.findByName(name).isPresent()) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Keyword with the given name already exists");
+            // Formats keyword to have capitals at the start of each word
+            String[] words = name.split(" ");
+            StringBuilder formattedName = new StringBuilder();
+            for (String word : words) {
+                formattedName.append(Character.toUpperCase(word.charAt(0))).append(word.substring(1).toLowerCase()).append(" ");
+            }
+            Keyword keyword = new Keyword(formattedName.toString().strip()); // Also validates name
+            for (Keyword keywords : keywordRepository.findByOrderByNameAsc()) {
+                if (keywords.getName().equalsIgnoreCase(name)) {
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Keyword with the given name already exists");
+                }
             }
 
             keyword = keywordRepository.save(keyword);
