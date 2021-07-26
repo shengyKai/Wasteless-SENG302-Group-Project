@@ -13,7 +13,7 @@
                 <v-col cols="6">
                   <v-text-field
                     class="required"
-                    v-model="quantity"
+                    v-model.trim="quantity"
                     label="Quantity"
                     :rules="
                       mandatoryRules().concat(quantityRules()).concat(remainingQuantityRule)
@@ -29,7 +29,7 @@
                 <!-- INPUT: Price. Auto generated.-->
                 <v-col cols="6">
                   <v-text-field
-                    v-model="price"
+                    v-model.trim="price"
                     class="required"
                     label="Price"
                     :prefix="currency.symbol"

@@ -5,13 +5,16 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.JsonNodeType;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 public class JsonTools {
 
@@ -88,5 +91,28 @@ public class JsonTools {
         } catch (JsonProcessingException e) {
             throw invalidFormatException;
         }
+    }
+
+    /**
+     * Converts a page to the standard page representation.
+     * E.g.
+     * {
+     *     "count": 100,
+     *     "results": [{...}, {...}]
+     * }
+     * Users of this function are expected to use Page.map to convert their initial entities into a Page<JSONObject>
+     * @param page Page to convert
+     * @return Page as a JSONObject
+     */
+    public static JSONObject constructPageJSON(Page<JSONObject> page) {
+        JSONArray resultArray = new JSONArray();
+        for (JSONObject item : page) {
+            resultArray.appendElement(item);
+        }
+
+        JSONObject json = new JSONObject();
+        json.put("count", page.getTotalElements());
+        json.put("results", resultArray);
+        return json;
     }
 }

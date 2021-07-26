@@ -3,6 +3,7 @@ package org.seng302.leftovers.tools;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.seng302.leftovers.entities.Business;
+import org.seng302.leftovers.entities.Keyword;
 import org.seng302.leftovers.entities.User;
 import org.seng302.leftovers.exceptions.SearchFormatException;
 import org.seng302.leftovers.persistence.UserRepository;
@@ -189,6 +190,15 @@ public class SearchHelper {
         List<PredicateType> predicateTypesByIndex = new ArrayList<>();
         parseSearchTokens(searchTokens, searchSpecs, predicateTypesByIndex, fieldNames);
         return buildCompoundSpecification(searchSpecs, predicateTypesByIndex);
+    }
+
+    /**
+     * Returns a specification for Keywords which is used to filter keywords using a search term.
+     * @param searchQuery The term to search for
+     * @return Specification of type Keyword
+     */
+    public static Specification<Keyword> constructKeywordSpecificationFromSearchQuery(String searchQuery) {
+        return buildPartialMatchSpec(searchQuery ,Collections.singletonList("name"));
     }
 
     /**

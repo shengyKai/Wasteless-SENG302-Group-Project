@@ -45,44 +45,38 @@
             </v-col>
           </v-row>
           <v-row>
-            <!--            <v-select-->
-            <!--              v-model="selectedKeywords"-->
-            <!--              :items="allKeywords"-->
-            <!--              item-text="name"-->
-            <!--              item-value="id"-->
-            <!--              label="Select keywords"-->
-            <!--              multiple-->
-            <!--              small-chips-->
-            <!--              color="primary"-->
-            <!--            />-->
-            <v-select
-              no-data-text="No keywords found"
-              value = "keywords"
-              v-model="selectedKeywords"
-              :items="filteredKeywordList"
-              label="Select keywords"
-              item-text="name"
-              item-value="id"
-              multiple
-              :hint="selectedKeywords"
-              @click="selectedKeywords=undefined"
-              persistent-hint
-              outlined
-            >
-              <template v-slot:prepend-item>
-                <v-list-item>
-                  <v-list-item-content>
-                    <v-text-field
-                      label="Search for a keyword" v-model="keywordFilter"
-                      clearable
-                      :autofocus="true"
-                      @click:clear="resetSearch"
-                      hint="Keyword name"
-                    />
-                  </v-list-item-content>
-                </v-list-item>
-              </template>
-            </v-select>
+            <div class="keyword">
+              <v-select
+                class="keyword-child"
+                no-data-text="No keywords found"
+                value = "keywords"
+                v-model="selectedKeywords"
+                :items="filteredKeywordList"
+                :hint="selectedKeywordsNames"
+                label="Select keywords"
+                item-text="name"
+                item-value="id"
+                multiple
+                persistent-hint
+                outlined
+              >
+                <template v-slot:prepend-item>
+                  <v-list-item>
+                    <v-list-item-content>
+                      <v-text-field
+                        label="Search for a keyword" v-model="keywordFilter"
+                        :autofocus="true"
+                        hint="Keyword name"
+                      />
+                    </v-list-item-content>
+                  </v-list-item>
+                </template>
+              </v-select>
+              <!-- Add new keyword -->
+              <v-btn class="keyword-child" color="primary" @click="addNewKeyword" title="Can't find what you're looking for? Hit '+' to create a new keyword out of what you have currently typed">
+                <v-icon>mdi-plus-box</v-icon>
+              </v-btn>
+            </div>
             <p class="error-text text-center" v-if ="errorMessage !== undefined"> {{errorMessage}} </p>
             <v-card-actions>
               <v-spacer/>
@@ -102,8 +96,7 @@
 </template>
 
 <script>
-import { createMarketplaceCard } from '../../api/internal';
-import { getKeywords } from '../../api/internal.ts';
+import {createMarketplaceCard, createNewKeyword, getKeywords} from '@/api/internal';
 
 export default {
   name: "MarketplaceCard",
@@ -142,6 +135,17 @@ export default {
       .catch(() => (this.allKeywords = []));
   },
   computed: {
+    selectedKeywordsNames() {
+      let names = "";
+      for (let i = 0; i < this.selectedKeywords.length; i++) {
+        for (let j = 0; j < this.allKeywords.length; j++) {
+          if (this.selectedKeywords[i] === this.allKeywords[j].id) {
+            names += this.allKeywords[j].name + ', ';
+          }
+        }
+      }
+      return names.replace(/, +$/, "");
+    },
     filteredKeywordList() {
       return this.allKeywords.filter(x => this.filterKeywords(x));
     },
@@ -190,10 +194,7 @@ export default {
       }
     },
     validSection() {
-      if (this.selectedSection) {
-        return true;
-      }
-      return false;
+      return !!this.selectedSection;
     },
     feedback() {
       if (!this.title || this.title.length === 0) {
@@ -218,8 +219,14 @@ export default {
     }
   },
   methods: {
-    resetSearch() {
-      this.keywordFilter = "";
+    async addNewKeyword() {
+      const matches = this.filterKeywords(this.keywordFilter + " ");
+      if (this.keywordFilter !== "" && matches.size() === 0) {
+        const result = await createNewKeyword(this.keyword);
+        if (typeof result === 'string') {
+          this.errorMessage = result;
+        }
+      }
     },
     filterKeywords(keyword) {
       const filterText = this.keywordFilter ?? '';
@@ -251,6 +258,12 @@ export default {
 
 
 <style scoped>
+.keyword {
+  display: flex;
+}
+.keyword-child {
+  margin: 0.5em;
+}
 .title {
   line-height: 1.25;
   word-break: break-word;
