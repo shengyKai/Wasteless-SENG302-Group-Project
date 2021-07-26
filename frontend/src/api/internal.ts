@@ -822,9 +822,9 @@ export async function modifyInventoryItem(businessId: number, inventoryItemId: n
     if (status === 401) return 'Missing/Invalid access token';
     if (status === 403) return 'Operation not permitted';
     if (status === 406) return 'Inventory item/Business not found';
-    if (status === 400) return 'Invalid parameters';
+    if (status === 400) return 'Invalid parameters: ' + error.response?.data.message;
 
-    return 'Request failed: ' + error.response?.data.message;
+    return 'Request failed: ' + error.response?.status;
   }
   return undefined;
 }

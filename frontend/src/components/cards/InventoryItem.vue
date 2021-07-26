@@ -97,7 +97,7 @@
                   <v-card-text class="pb-0 product-fields">
                     <strong>Price per Item</strong>
                     <br>
-                    {{ currency.symbol }}{{ inventoryItem.pricePerItem }} {{ currency.code }}
+                    {{ pricePerItem }}
                   </v-card-text>
                 </v-row>
                 <v-row v-if="inventoryItem.totalPrice !== undefined">
@@ -105,7 +105,7 @@
                   <v-card-text class="pb-0 product-fields">
                     <strong>Total Price</strong>
                     <br>
-                    {{ currency.symbol }}{{ inventoryItem.totalPrice }} {{ currency.code }}
+                    {{ totalPrice }}
                   </v-card-text>
                 </v-row>
               </template>
@@ -124,7 +124,7 @@
                 <v-card-text class="pb-0 product-fields">
                   <strong>Price per Item</strong>
                   <br>
-                  {{ currency.symbol }}{{ inventoryItem.pricePerItem }} {{ currency.code }}
+                  {{ pricePerItem }}
                 </v-card-text>
               </v-row>
               <v-row v-if="inventoryItem.totalPrice !== undefined">
@@ -132,7 +132,7 @@
                 <v-card-text class="pb-0 product-fields">
                   <strong>Total Price</strong>
                   <br>
-                  {{ currency.symbol }}{{ inventoryItem.totalPrice }} {{ currency.code }}
+                  {{ totalPrice }}
                 </v-card-text>
               </v-row>
             </v-col>
@@ -304,7 +304,7 @@ import FullProductDescription from "../utils/FullProductDescription.vue";
 import ProductImageCarousel from "../utils/ProductImageCarousel.vue";
 import InventoryItemForm from "../BusinessProfile/InventoryItemForm.vue";
 import { currencyFromCountry } from "@/api/currency";
-import { formatDate, trimToLength } from '@/utils';
+import { formatDate, formatPrice, trimToLength } from '@/utils';
 
 export default {
   name: "InventoryItem",
@@ -340,6 +340,12 @@ export default {
     product() {
       return this.inventoryItem.product;
     },
+    pricePerItem() {
+      return this.currency.symbol + formatPrice(this.inventoryItem.pricePerItem) + " " + this.currency.code;
+    },
+    totalPrice() {
+      return this.currency.symbol + formatPrice(this.inventoryItem.totalPrice) + " " + this.currency.code;
+    }
   },
   methods: {
     //if the "Read more..." link if clicked, readMoreActivated becomes true and the FullProductDescription dialog box will open
