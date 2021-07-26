@@ -191,7 +191,6 @@ class DemoControllerTest {
             when(inventoryItemRepository.save(any(InventoryItem.class))).thenAnswer(x->x.getArgument(0));
             when(saleItemRepository.save(any(SaleItem.class))).thenAnswer(x->x.getArgument(0));
 
-
             assertDoesNotThrow(() -> demoController.loadDemoData(request));
         }
         // Verify that expected number of entities were loaded to the database

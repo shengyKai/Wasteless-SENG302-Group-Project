@@ -20,7 +20,7 @@
             <em v-if="creator">By {{ creator.firstName }} {{ creator.lastName }}</em>
           </span>
           <span v-if="content.created !== undefined">
-            Posted {{ formatDate(content.created) }}
+            {{ dateString }}
           </span>
         </div>
         {{ content.description }}
@@ -97,6 +97,7 @@ export default {
       description: String,
       creator: Object,
       created: String,
+      lastRenewed: String,
       keywords: Array,
     },
     showActions: {
@@ -123,6 +124,13 @@ export default {
       } else {
         return `From ${this.location.country}`;
       }
+    },
+    dateString() {
+      let dateString = "Posted " + formatDate(this.content.created);
+      if (this.content.lastRenewed !== this.content.created) {
+        dateString += ", Renewed " + formatDate(this.content.lastRenewed);
+      }
+      return dateString;
     },
     // To ensure only the card owner, DGAA or GAA is able to execute an action relating to the marketplace card
     isCardOwnerOrDGAA() {
