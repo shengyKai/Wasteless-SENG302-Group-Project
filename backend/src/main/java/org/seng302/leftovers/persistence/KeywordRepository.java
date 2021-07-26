@@ -2,6 +2,7 @@ package org.seng302.leftovers.persistence;
 
 import org.seng302.leftovers.entities.Keyword;
 import org.seng302.leftovers.entities.MarketplaceCard;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -11,7 +12,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface KeywordRepository extends CrudRepository<Keyword, Long> {
+public interface KeywordRepository extends CrudRepository<Keyword, Long>, JpaSpecificationExecutor<Keyword> {
 
     List<Keyword> findByOrderByNameAsc();
 
