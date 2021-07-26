@@ -77,9 +77,9 @@ public class SaleItemGenerator {
      * @throws SQLException
      */
     private void updateInventoryItemQuantity(int remainingQuantity, long invItemId) throws SQLException {
-        System.out.println(String.format("Updating inventory item quantity of id %d", invItemId));
+        System.out.println(String.format("Updating inventory item remaining quantity of id %d", invItemId));
         PreparedStatement stmt = conn.prepareStatement(
-                "UPDATE inventory_item SET quantity = ? WHERE id = ?",
+                "UPDATE inventory_item SET remaining_quantity = ? WHERE id = ?",
                 Statement.RETURN_GENERATED_KEYS
         );
         stmt.setObject(1, remainingQuantity);
@@ -170,6 +170,7 @@ public class SaleItemGenerator {
             //checks if the quantity equals to zero, if zero, it will increment the inventory item's quantity by a random number
             if (Integer.parseInt(invItemInfo[2]) == 0) {
                 updateInventoryItemQuantity(random.nextInt(249) + 1, invItemId);
+                invItemInfo = extractInvItemInfo(invItemId);
             }
 
             long saleItemId = createInsertSaleItemSQL(invItemId, invItemInfo);
