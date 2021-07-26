@@ -194,7 +194,7 @@ class KeywordControllerTest {
 
     @Test
     void addKeyword_keywordAlreadyExists_400Response() throws Exception {
-        when(keywordRepository.findByName("Dance")).thenReturn(Optional.of(mock(Keyword.class)));
+        when(keywordRepository.findByOrderByNameAsc()).thenReturn(Arrays.asList(new Keyword("Dance")));
 
         JSONObject json = new JSONObject();
         json.put("name", "Dance");
@@ -205,7 +205,7 @@ class KeywordControllerTest {
                 .andExpect(status().isBadRequest())
                 .andReturn();
 
-        verify(keywordRepository, times(1)).findByName("Dance");
+        verify(keywordRepository, times(1)).findByOrderByNameAsc();
         verify(keywordRepository, times(0)).save(any());
     }
 
