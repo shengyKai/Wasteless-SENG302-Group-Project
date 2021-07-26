@@ -1,9 +1,8 @@
 openapi: 3.0.0
 servers:
-  # Added by API Auto Mocking Plugin
   - description: SwaggerHub API Auto Mocking
-    url: https://virtserver.swaggerhub.com/matthewminish/seng302-2021-api-spec/3.0.1
-    
+    url: >-
+      https://virtserver.swaggerhub.com/matthewminish/seng302-2021-api-spec/3.0.1
 info:
   description: API specification for the SENG302 2021 project
   version: 3.0.1
@@ -13,61 +12,69 @@ info:
   license:
     name: Apache 2.0
     url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
-    
 tags:
-  # User stories
   - name: 'U1: Registering and logging into an individual account'
   - name: 'U2: Cities, States/Regions, Countries'
-    description: 'This story is implemented inside the client alone, and as such requires no associated API endpoints to be created'
+    description: >-
+      This story is implemented inside the client alone, and as such requires no
+      associated API endpoints to be created
   - name: 'U3: Searching for Users using Name'
   - name: 'U4: Default Global Application Admin (DGAA)'
   - name: 'U5: Creating Business Accounts'
   - name: 'U6: Acting as Individual or Business'
-    description: 'All necessary API endpoints are found in prior stories'
+    description: All necessary API endpoints are found in prior stories
   - name: 'U13: Home page'
-    description: 'No endpoints required for this story specifically, but several will likely be used from prior and latter stories'
+    description: >-
+      No endpoints required for this story specifically, but several will likely
+      be used from prior and latter stories
   - name: 'U15: Product Catalogue'
   - name: 'U16: Product Images'
   - name: 'U17: Modify catalogue entries'
   - name: 'U19: Create inventory'
   - name: 'U20: Modify inventory entries'
   - name: 'U22: List sale'
+  - name: 'U23: Search for business'
   - name: 'UCM1: Community marketplace'
-    description: 'No endpoints required here yet, these will come from the subsequent stories'
+    description: >-
+      No endpoints required here yet, these will come from the subsequent
+      stories
   - name: 'UCM2: Card creation'
   - name: 'UCM3: Marketplace section display'
   - name: 'UCM4: Card expiry'
   - name: 'UCM5: Find my cards'
   - name: 'UCM6: Keyword management'
   - name: 'UCM7: Keyword search'
-  # Entities
-  - name: 'Users'
-    description: 'Grouping of endpoints related to the User entity'
-  - name: 'Business Accounts'
-    description: 'Grouping of endpoints related to Business Accounts'
-  - name: 'Catalogue / Products'
-    description: 'Grouping of endpoints related to Product entities'
-  - name: 'Inventory'
-    description: 'Grouping of endpoints related to business inventories'
-  - name: 'Listings / sales'
-    description: 'Grouping of endpoints related to listings of items and the sales of these listings'
-  - name: 'Cards / community marketplace'
-    description: 'Grouping of endpoints related to the community marketplace, and the cards the are created for it'
-  - name: 'Keywords'
-    description: 'Grouping of endpoints related to system-wide keywords that can be added by users and attached to marketplace cards'
-  
-security: 
-  - CookieAuth: 
-    - user
-    - globalApplicationAdmin
-    - defaultGlobalApplicationAdmin
-    
+  - name: Users
+    description: Grouping of endpoints related to the User entity
+  - name: Business Accounts
+    description: Grouping of endpoints related to Business Accounts
+  - name: Catalogue / Products
+    description: Grouping of endpoints related to Product entities
+  - name: Inventory
+    description: Grouping of endpoints related to business inventories
+  - name: Listings / sales
+    description: >-
+      Grouping of endpoints related to listings of items and the sales of these
+      listings
+  - name: Cards / community marketplace
+    description: >-
+      Grouping of endpoints related to the community marketplace, and the cards
+      the are created for it
+  - name: Keywords
+    description: >-
+      Grouping of endpoints related to system-wide keywords that can be added by
+      users and attached to marketplace cards
+security:
+  - CookieAuth:
+      - user
+      - globalApplicationAdmin
+      - defaultGlobalApplicationAdmin
 paths:
-  '/login':
+  /login:
     post:
       tags:
-      - 'U1: Registering and logging into an individual account'
-      - 'Users'
+        - 'U1: Registering and logging into an individual account'
+        - Users
       summary: Attempt to authenticate a user account with a username and password
       security: []
       requestBody:
@@ -87,24 +94,23 @@ paths:
                   type: string
                   format: password
                   description: Plain text user password
-                  example: '1337-H%nt3r2'
+                  example: 1337-H%nt3r2
       responses:
-        '200': 
-          $ref: '#/components/responses/AuthenticatedResponse' 
+        '200':
+          $ref: '#/components/responses/AuthenticatedResponse'
         '400':
-          description: Failed login attempt, email or password incorrect
-          
-  '/users':
+          description: 'Failed login attempt, email or password incorrect'
+  /users:
     post:
       tags:
         - 'U1: Registering and logging into an individual account'
-        - 'Users'
+        - Users
       summary: Create a new user account
       security: []
       responses:
-        '201': 
-          $ref: '#/components/responses/AuthenticatedResponse' 
-        '400': 
+        '201':
+          $ref: '#/components/responses/AuthenticatedResponse'
+        '400':
           $ref: '#/components/responses/BadRequestError'
         '409':
           description: Email address already in use
@@ -113,19 +119,20 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/User'
-        description: New user account data, id will be generated automatically by the server
-        
+        description: >-
+          New user account data, id will be generated automatically by the
+          server
   '/users/{id}':
     get:
       tags:
         - 'U1: Registering and logging into an individual account'
-        - 'Users'
+        - Users
       summary: Retrieve a specific user account
-      security: 
+      security:
         - CookieAuth:
-          - user
-          - globalApplicationAdmin
-          - defaultGlobalApplicationAdmin
+            - user
+            - globalApplicationAdmin
+            - defaultGlobalApplicationAdmin
       parameters:
         - name: id
           in: path
@@ -142,27 +149,28 @@ paths:
                 $ref: '#/components/schemas/User'
         '401':
           $ref: '#/components/responses/UnauthorizedError'
-        '406': 
+        '406':
           $ref: '#/components/responses/NotAcceptableError'
-          
-  '/users/search':
+  /users/search:
     get:
       tags:
         - 'U3: Searching for Users using Name'
-        - 'Users'
+        - Users
       summary: 'Search for users by some criteria, for now: their name'
-      security: 
+      security:
         - CookieAuth:
-          - user
-          - globalApplicationAdmin
-          - defaultGlobalApplicationAdmin
-      parameters: 
+            - user
+            - globalApplicationAdmin
+            - defaultGlobalApplicationAdmin
+      parameters:
         - in: query
           name: searchQuery
           schema:
             type: string
           required: true
-          description: 'Criteria to search users for, e.g: user’s full name or one or more of their names/nickname'
+          description: >-
+            Criteria to search users for, e.g: user’s full name or one or more
+            of their names/nickname
         - name: page
           in: query
           description: The page number to retrieve (1 indexed)
@@ -193,7 +201,7 @@ paths:
             type: boolean
       responses:
         '200':
-          description: Request successful, a (possibly empty) list of users is returned
+          description: 'Request successful, a (possibly empty) list of users is returned'
           content:
             application/json:
               schema:
@@ -205,20 +213,19 @@ paths:
                     properties:
                       results:
                         type: array
-                        items: 
+                        items:
                           $ref: '#/components/schemas/User'
         '401':
           $ref: '#/components/responses/UnauthorizedError'
-      
   '/users/{id}/makeadmin':
     put:
       tags:
         - 'U4: Default Global Application Admin (DGAA)'
-        - 'Users'
+        - Users
       summary: Promote a user account to the Global Application Admin role
-      security: 
+      security:
         - CookieAuth:
-          - defaultGlobalApplicationAdmin
+            - defaultGlobalApplicationAdmin
       parameters:
         - name: id
           in: path
@@ -233,18 +240,17 @@ paths:
           $ref: '#/components/responses/UnauthorizedError'
         '403':
           $ref: '#/components/responses/ForbiddenError'
-        '406': 
+        '406':
           $ref: '#/components/responses/NotAcceptableError'
-          
   '/users/{id}/revokeadmin':
     put:
       tags:
         - 'U4: Default Global Application Admin (DGAA)'
-        - 'Users'
+        - Users
       summary: Revokes the Global Application Admin role from a user account
-      security: 
+      security:
         - CookieAuth:
-          - defaultGlobalApplicationAdmin
+            - defaultGlobalApplicationAdmin
       parameters:
         - name: id
           in: path
@@ -259,28 +265,31 @@ paths:
           $ref: '#/components/responses/UnauthorizedError'
         '403':
           $ref: '#/components/responses/ForbiddenError'
-        '406': 
+        '406':
           $ref: '#/components/responses/NotAcceptableError'
         '409':
-          description: "Returned when the DGAA tries to revoke their own admin status, this is not an allowed action."
-          
-  '/businesses':
+          description: >-
+            Returned when the DGAA tries to revoke their own admin status, this
+            is not an allowed action.
+  /businesses:
     post:
       tags:
-      - 'U5: Creating Business Accounts'
-      - 'Business Accounts'
+        - 'U5: Creating Business Accounts'
+        - Business Accounts
       summary: Create a new business entity
-      security: 
+      security:
         - CookieAuth:
-          - user
-          - globalApplicationAdmin
-          - defaultGlobalApplicationAdmin
+            - user
+            - globalApplicationAdmin
+            - defaultGlobalApplicationAdmin
       requestBody:
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/Business'
-        description: New business account data, id will be generated automatically by the server
+        description: >-
+          New business account data, id will be generated automatically by the
+          server
       responses:
         '201':
           description: Business account created successfully
@@ -295,18 +304,17 @@ paths:
                     example: 100
         '401':
           $ref: '#/components/responses/UnauthorizedError'
-  
   '/businesses/{id}':
     get:
       tags:
         - 'U5: Creating Business Accounts'
-        - 'Business Accounts'
+        - Business Accounts
       summary: Retrieve a specific business account
-      security: 
+      security:
         - CookieAuth:
-          - user
-          - globalApplicationAdmin
-          - defaultGlobalApplicationAdmin
+            - user
+            - globalApplicationAdmin
+            - defaultGlobalApplicationAdmin
       parameters:
         - name: id
           in: path
@@ -323,20 +331,19 @@ paths:
                 $ref: '#/components/schemas/Business'
         '401':
           $ref: '#/components/responses/UnauthorizedError'
-        '406': 
+        '406':
           $ref: '#/components/responses/NotAcceptableError'
-
   '/businesses/{id}/makeAdministrator':
     put:
       tags:
         - 'U5: Creating Business Accounts'
-        - 'Business Accounts'
+        - Business Accounts
       summary: Add an individual as an administrator for a business
-      security: 
+      security:
         - CookieAuth:
-          - user
-          - globalApplicationAdmin
-          - defaultGlobalApplicationAdmin
+            - user
+            - globalApplicationAdmin
+            - defaultGlobalApplicationAdmin
       parameters:
         - name: id
           in: path
@@ -358,25 +365,29 @@ paths:
         '200':
           description: Individual added as an administrator successfully
         '400':
-          description: The individual could not be added as an administrator, perhaps because it does not exist or is already an administrator.
+          description: >-
+            The individual could not be added as an administrator, perhaps
+            because it does not exist or is already an administrator.
         '401':
           $ref: '#/components/responses/UnauthorizedError'
         '403':
-          description: "Forbidden: Returned when the user making the request is not the primary administrator of the business AND is not a global application admin."
-        '406': 
+          description: >-
+            Forbidden: Returned when the user making the request is not the
+            primary administrator of the business AND is not a global
+            application admin.
+        '406':
           $ref: '#/components/responses/NotAcceptableError'
-          
   '/businesses/{id}/removeAdministrator':
     put:
       tags:
         - 'U5: Creating Business Accounts'
-        - 'Business Accounts'
+        - Business Accounts
       summary: Remove an individual from administering a business
-      security: 
+      security:
         - CookieAuth:
-          - user
-          - globalApplicationAdmin
-          - defaultGlobalApplicationAdmin
+            - user
+            - globalApplicationAdmin
+            - defaultGlobalApplicationAdmin
       parameters:
         - name: id
           in: path
@@ -398,26 +409,31 @@ paths:
         '200':
           description: Inidividual removed from administering successfully
         '400':
-          description: The individual could not be removed from administering the business, perhaps because it does not exist, was not an administrator of the business, or is the primary administrator of the business.
+          description: >-
+            The individual could not be removed from administering the business,
+            perhaps because it does not exist, was not an administrator of the
+            business, or is the primary administrator of the business.
         '401':
           $ref: '#/components/responses/UnauthorizedError'
         '403':
-          description: "Forbidden: Returned when the user making the request is not the primary administrator of the business AND is not a global application admin."
-        '406': 
+          description: >-
+            Forbidden: Returned when the user making the request is not the
+            primary administrator of the business AND is not a global
+            application admin.
+        '406':
           $ref: '#/components/responses/NotAcceptableError'
-
   '/businesses/{id}/products':
     get:
       tags:
         - 'U15: Product Catalogue'
-        - 'Business Accounts'
-        - 'Catalogue / Products'
-      summary: "Retrieve all the products in a business's catalogue"
-      security: 
+        - Business Accounts
+        - Catalogue / Products
+      summary: Retrieve all the products in a business's catalogue
+      security:
         - CookieAuth:
-          - user
-          - globalApplicationAdmin
-          - defaultGlobalApplicationAdmin
+            - user
+            - globalApplicationAdmin
+            - defaultGlobalApplicationAdmin
       parameters:
         - name: id
           in: path
@@ -454,30 +470,32 @@ paths:
             type: boolean
       responses:
         '200':
-          description: 'Catalogue retrieved successfully. This could be an empty array.'
+          description: Catalogue retrieved successfully. This could be an empty array.
           content:
             application/json:
               schema:
                 type: array
-                items: 
+                items:
                   $ref: '#/components/schemas/Product'
         '401':
           $ref: '#/components/responses/UnauthorizedError'
         '403':
-          description: 'The account performing the request is neither an administrator of the business, nor a global application admin.'
-        '406': 
+          description: >-
+            The account performing the request is neither an administrator of
+            the business, nor a global application admin.
+        '406':
           $ref: '#/components/responses/NotAcceptableError'
     post:
       tags:
         - 'U15: Product Catalogue'
-        - 'Business Accounts'
-        - 'Catalogue / Products'
-      summary: "Add a new product to a business's catalogue"
-      security: 
+        - Business Accounts
+        - Catalogue / Products
+      summary: Add a new product to a business's catalogue
+      security:
         - CookieAuth:
-          - user
-          - globalApplicationAdmin
-          - defaultGlobalApplicationAdmin
+            - user
+            - globalApplicationAdmin
+            - defaultGlobalApplicationAdmin
       parameters:
         - name: id
           in: path
@@ -496,28 +514,32 @@ paths:
                   productId:
                     type: string
                     description: The ID of the product that has just been created
-                    example: "WATT-420-BEANS"
-        '400': 
-          description: There was some error with the data supplied by the user, appropriate error message(s) should be shown to user
+                    example: WATT-420-BEANS
+        '400':
+          description: >-
+            There was some error with the data supplied by the user, appropriate
+            error message(s) should be shown to user
         '403':
-          description: 'Forbidden: Returned when a user tries to add a product to business they do not administer AND the user is not a global application admin'
+          description: >-
+            Forbidden: Returned when a user tries to add a product to business
+            they do not administer AND the user is not a global application
+            admin
       requestBody:
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/Product'
-          
   '/businesses/{businessId}/products/{productId}/images':
     post:
       tags:
         - 'U16: Product Images'
-        - 'Catalogue / Products'
+        - Catalogue / Products
       summary: Upload a new image for some photo
-      security: 
+      security:
         - CookieAuth:
-          - user
-          - globalApplicationAdmin
-          - defaultGlobalApplicationAdmin
+            - user
+            - globalApplicationAdmin
+            - defaultGlobalApplicationAdmin
       parameters:
         - name: businessId
           in: path
@@ -559,21 +581,23 @@ paths:
         '401':
           $ref: '#/components/responses/UnauthorizedError'
         '403':
-          description: 'Forbidden: Returned when a user tries to add an image for a product that it is in a catalogue for a business they do not administer AND the user is not a global application admin'
-        '406': 
+          description: >-
+            Forbidden: Returned when a user tries to add an image for a product
+            that it is in a catalogue for a business they do not administer AND
+            the user is not a global application admin
+        '406':
           $ref: '#/components/responses/NotAcceptableError'
-          
   '/businesses/{businessId}/products/{productId}/images/{imageId}':
     delete:
       tags:
         - 'U16: Product Images'
-        - 'Catalogue / Products'
+        - Catalogue / Products
       summary: Delete an image of a product
-      security: 
+      security:
         - CookieAuth:
-          - user
-          - globalApplicationAdmin
-          - defaultGlobalApplicationAdmin
+            - user
+            - globalApplicationAdmin
+            - defaultGlobalApplicationAdmin
       parameters:
         - name: businessId
           in: path
@@ -597,23 +621,25 @@ paths:
         '200':
           description: Image deleted successfully
         '401':
-            $ref: '#/components/responses/UnauthorizedError'
+          $ref: '#/components/responses/UnauthorizedError'
         '403':
-          description: 'Forbidden: Returned when a user tries to delete an image for a product that it is in a catalogue for a business they do not administer AND the user is not a global application admin'
-        '406': 
+          description: >-
+            Forbidden: Returned when a user tries to delete an image for a
+            product that it is in a catalogue for a business they do not
+            administer AND the user is not a global application admin
+        '406':
           $ref: '#/components/responses/NotAcceptableError'
-          
   '/businesses/{businessId}/products/{productId}/images/{imageId}/makeprimary':
     put:
       tags:
         - 'U16: Product Images'
-        - 'Catalogue / Products'
+        - Catalogue / Products
       summary: Set an existing image to be the new primary image for some product
-      security: 
+      security:
         - CookieAuth:
-          - user
-          - globalApplicationAdmin
-          - defaultGlobalApplicationAdmin
+            - user
+            - globalApplicationAdmin
+            - defaultGlobalApplicationAdmin
       parameters:
         - name: businessId
           in: path
@@ -637,23 +663,25 @@ paths:
         '200':
           description: Primary image successfully updated
         '401':
-            $ref: '#/components/responses/UnauthorizedError'
+          $ref: '#/components/responses/UnauthorizedError'
         '403':
-          description: 'Forbidden: Returned when a user tries to update the primary image for a product that it is in a catalogue for a business they do not administer AND the user is not a global application admin'
-        '406': 
+          description: >-
+            Forbidden: Returned when a user tries to update the primary image
+            for a product that it is in a catalogue for a business they do not
+            administer AND the user is not a global application admin
+        '406':
           $ref: '#/components/responses/NotAcceptableError'
-          
   '/businesses/{businessId}/products/{productId}':
     put:
       tags:
         - 'U17: Modify catalogue entries'
-        - 'Catalogue / Products'
+        - Catalogue / Products
       summary: Modify an existing catalogue item
-      security: 
+      security:
         - CookieAuth:
-          - user
-          - globalApplicationAdmin
-          - defaultGlobalApplicationAdmin
+            - user
+            - globalApplicationAdmin
+            - defaultGlobalApplicationAdmin
       parameters:
         - name: businessId
           in: path
@@ -675,23 +703,27 @@ paths:
       responses:
         '200':
           description: Product updated successfully
-        '400': 
-          description: There was some error with the data supplied by the user, appropriate error message(s) should be shown to user
+        '400':
+          description: >-
+            There was some error with the data supplied by the user, appropriate
+            error message(s) should be shown to user
         '403':
-          description: 'Forbidden: Returned when a user tries to update a product for a business they do not administer AND the user is not a global application admin'
-          
+          description: >-
+            Forbidden: Returned when a user tries to update a product for a
+            business they do not administer AND the user is not a global
+            application admin
   '/businesses/{id}/inventory/':
     get:
       tags:
         - 'U19: Create inventory'
-        - 'Business Accounts'
-        - 'Inventory'
-      summary: "Retrieve a business's product inventory"
-      security: 
+        - Business Accounts
+        - Inventory
+      summary: Retrieve a business's product inventory
+      security:
         - CookieAuth:
-          - user
-          - globalApplicationAdmin
-          - defaultGlobalApplicationAdmin
+            - user
+            - globalApplicationAdmin
+            - defaultGlobalApplicationAdmin
       parameters:
         - name: id
           in: path
@@ -735,30 +767,32 @@ paths:
             type: boolean
       responses:
         '200':
-          description: 'Inventory retrieved successfully. This could be an empty array.'
+          description: Inventory retrieved successfully. This could be an empty array.
           content:
             application/json:
               schema:
                 type: array
-                items: 
+                items:
                   $ref: '#/components/schemas/InventoryItem'
         '401':
           $ref: '#/components/responses/UnauthorizedError'
         '403':
-          description: 'The account performing the request is neither an administrator of the business, nor a global application admin.'
-        '406': 
+          description: >-
+            The account performing the request is neither an administrator of
+            the business, nor a global application admin.
+        '406':
           $ref: '#/components/responses/NotAcceptableError'
     post:
       tags:
         - 'U19: Create inventory'
-        - 'Business Accounts'
-        - 'Inventory'
-      summary: "Add a new inventory item to a business's inventory"
-      security: 
+        - Business Accounts
+        - Inventory
+      summary: Add a new inventory item to a business's inventory
+      security:
         - CookieAuth:
-          - user
-          - globalApplicationAdmin
-          - defaultGlobalApplicationAdmin
+            - user
+            - globalApplicationAdmin
+            - defaultGlobalApplicationAdmin
       parameters:
         - name: id
           in: path
@@ -778,28 +812,32 @@ paths:
                     type: integer
                     description: The ID of the inventory item that has just been created
                     example: 101
-        '400': 
-          description: There was some error with the data supplied by the user, appropriate error message(s) should be shown to user
+        '400':
+          description: >-
+            There was some error with the data supplied by the user, appropriate
+            error message(s) should be shown to user
         '403':
-          description: 'Forbidden: Returned when a user tries to add an inventory item to the inventory of a business they do not administer AND the user is not a global application admin'
+          description: >-
+            Forbidden: Returned when a user tries to add an inventory item to
+            the inventory of a business they do not administer AND the user is
+            not a global application admin
       requestBody:
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/InventoryItem'
-           
   '/businesses/{businessId}/inventory/{inventoryItemId}':
     put:
       tags:
         - 'U20: Modify inventory entries'
-        - 'Business Accounts'
-        - 'Inventory'
+        - Business Accounts
+        - Inventory
       summary: Modify an existing inventory item
-      security: 
+      security:
         - CookieAuth:
-          - user
-          - globalApplicationAdmin
-          - defaultGlobalApplicationAdmin
+            - user
+            - globalApplicationAdmin
+            - defaultGlobalApplicationAdmin
       parameters:
         - name: businessId
           in: path
@@ -821,23 +859,27 @@ paths:
       responses:
         '200':
           description: Inventory item updated successfully
-        '400': 
-          description: There was some error with the data supplied by the user, appropriate error message(s) should be shown to user
+        '400':
+          description: >-
+            There was some error with the data supplied by the user, appropriate
+            error message(s) should be shown to user
         '403':
-          description: 'Forbidden: Returned when a user tries to update an inventory item for a business they do not administer AND the user is not a global application admin'
-          
+          description: >-
+            Forbidden: Returned when a user tries to update an inventory item
+            for a business they do not administer AND the user is not a global
+            application admin
   '/businesses/{id}/listings':
     get:
       tags:
         - 'U22: List sale'
-        - 'Business Accounts'
-        - 'Listings / sales'
-      summary: "Retrieve a business's listings"
-      security: 
+        - Business Accounts
+        - Listings / sales
+      summary: Retrieve a business's listings
+      security:
         - CookieAuth:
-          - user
-          - globalApplicationAdmin
-          - defaultGlobalApplicationAdmin
+            - user
+            - globalApplicationAdmin
+            - defaultGlobalApplicationAdmin
       parameters:
         - name: id
           in: path
@@ -874,28 +916,28 @@ paths:
             type: boolean
       responses:
         '200':
-          description: 'Listings retrieved successfully. This could be an empty array.'
+          description: Listings retrieved successfully. This could be an empty array.
           content:
             application/json:
               schema:
                 type: array
-                items: 
+                items:
                   $ref: '#/components/schemas/Listing'
         '401':
           $ref: '#/components/responses/UnauthorizedError'
-        '406': 
+        '406':
           $ref: '#/components/responses/NotAcceptableError'
     post:
       tags:
         - 'U22: List sale'
-        - 'Business Accounts'
-        - 'Listings / sales'
-      summary: "Add a new listing for some inventory item of a business"
-      security: 
+        - Business Accounts
+        - Listings / sales
+      summary: Add a new listing for some inventory item of a business
+      security:
         - CookieAuth:
-          - user
-          - globalApplicationAdmin
-          - defaultGlobalApplicationAdmin
+            - user
+            - globalApplicationAdmin
+            - defaultGlobalApplicationAdmin
       parameters:
         - name: id
           in: path
@@ -915,27 +957,99 @@ paths:
                     type: integer
                     description: The ID of the listing that has just been created
                     example: 57
-        '400': 
-          description: There was some error with the data supplied by the user, appropriate error message(s) should be shown to user
+        '400':
+          description: >-
+            There was some error with the data supplied by the user, appropriate
+            error message(s) should be shown to user
         '403':
-          description: 'Forbidden: Returned when a user tries to add listing for a business they do not administer AND the user is not a global application admin'
+          description: >-
+            Forbidden: Returned when a user tries to add listing for a business
+            they do not administer AND the user is not a global application
+            admin
       requestBody:
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/Listing'
-              
-  '/cards':
-    post:
+  '/businesses/search':
+    get:
       tags:
-        - 'UCM2: Card creation'
-        - 'Cards / community marketplace'
-      summary: "Create a new card to go on the community marketplace"
+        - 'U23: Search for business'
+        - 'Business Accounts'
+      summary: 'Search for businesses by some criteria, for now: their name'
       security: 
         - CookieAuth:
           - user
           - globalApplicationAdmin
           - defaultGlobalApplicationAdmin
+      parameters: 
+        - in: query
+          name: searchQuery
+          schema:
+            type: string
+          required: true
+          example: "supermarket"
+          description: "Criteria to search businesses for, e.g: Businesses full name, or part of their name. <br> Use keywords ***AND*** and ***OR*** to refine search. Quotations can be used to find exact matches"
+        - name: page
+          in: query
+          description: The page number to retrieve (1 indexed)
+          schema:
+            type: integer
+            example: 1
+        - name: resultsPerPage
+          in: query
+          description: The number of results to show per page
+          schema:
+            type: integer
+            example: 10
+        - name: orderBy
+          in: query
+          description: Card property to order results by
+          schema:
+            type: string
+            example: created
+            enum:
+              - created
+              - name
+              - location
+              - businessType
+        - name: reverse
+          in: query
+          description: Whether to flip default sort order (default is ascending)
+          schema:
+            type: boolean
+            example: false
+      responses:
+        '200':
+          description: Request successful, a (possibly empty) list of businesses is returned along with total count
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Page'
+                  - type: object
+                    required:
+                      - results
+                    properties:
+                      results:
+                        type: array
+                        items: 
+                          $ref: '#/components/schemas/Business'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '400': 
+          $ref: '#/components/responses/BadRequestError'
+  '/cards':
+    post:
+      tags:
+        - 'UCM2: Card creation'
+        - Cards / community marketplace
+      summary: Create a new card to go on the community marketplace
+      security:
+        - CookieAuth:
+            - user
+            - globalApplicationAdmin
+            - defaultGlobalApplicationAdmin
       responses:
         '201':
           description: Card created successfully
@@ -948,12 +1062,14 @@ paths:
                     type: integer
                     description: The ID of the card that has just been created
                     example: 500
-        '400': 
+        '400':
           $ref: '#/components/responses/BadRequestError'
         '401':
           $ref: '#/components/responses/UnauthorizedError'
         '403':
-          description: Returned if a user who is not a GAA tries to create a card for somebody else.
+          description: >-
+            Returned if a user who is not a GAA tries to create a card for
+            somebody else.
       requestBody:
         content:
           application/json:
@@ -962,8 +1078,8 @@ paths:
     get:
       tags:
         - 'UCM2: Card creation'
-        - 'Cards / community marketplace'
-      summary: 'Retrieve all cards for a given section'
+        - Cards / community marketplace
+      summary: Retrieve all cards for a given section
       parameters:
         - name: section
           in: query
@@ -991,24 +1107,26 @@ paths:
           schema:
             type: string
             enum:
+              - lastRenewed
               - created
               - title
               - closes
               - creatorFirstName
               - creatorLastName
+              - location
         - name: reverse
           in: query
           description: Whether to flip default sort order (default is ascending)
           schema:
             type: boolean
-      security: 
-          - CookieAuth:
+      security:
+        - CookieAuth:
             - user
             - globalApplicationAdmin
             - defaultGlobalApplicationAdmin
       responses:
         '200':
-          description: Request successful, a (possibly empty) list of cards is returned
+          description: 'Request successful, a (possibly empty) list of cards is returned'
           content:
             application/json:
               schema:
@@ -1022,17 +1140,16 @@ paths:
                         type: array
                         items:
                           $ref: '#/components/schemas/Card'
-        '400': 
+        '400':
           $ref: '#/components/responses/BadRequestError'
         '401':
           $ref: '#/components/responses/UnauthorizedError'
-          
   '/cards/{id}':
     get:
       tags:
         - 'UCM3: Marketplace section display'
-        - 'Cards / community marketplace'
-      summary: 'Retrieve a specific card'
+        - Cards / community marketplace
+      summary: Retrieve a specific card
       parameters:
         - name: id
           in: path
@@ -1041,19 +1158,19 @@ paths:
           schema:
             type: integer
             example: 500
-      security: 
-          - CookieAuth:
+      security:
+        - CookieAuth:
             - user
             - globalApplicationAdmin
             - defaultGlobalApplicationAdmin
       responses:
         '200':
-          description: Request successful, a card is returned.
+          description: 'Request successful, a card is returned.'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Card'
-        '400': 
+        '400':
           $ref: '#/components/responses/BadRequestError'
         '401':
           $ref: '#/components/responses/UnauthorizedError'
@@ -1062,13 +1179,13 @@ paths:
     delete:
       tags:
         - 'UCM4: Card expiry'
-        - 'Cards / community marketplace'
+        - Cards / community marketplace
       summary: Delete a community marketplace card
-      security: 
+      security:
         - CookieAuth:
-          - user
-          - globalApplicationAdmin
-          - defaultGlobalApplicationAdmin
+            - user
+            - globalApplicationAdmin
+            - defaultGlobalApplicationAdmin
       parameters:
         - name: id
           in: path
@@ -1083,16 +1200,17 @@ paths:
         '401':
           $ref: '#/components/responses/UnauthorizedError'
         '403':
-          description: 'Forbidden: Returned when a user tries to delete a card that they are not the creator of AND the user is not a GAA'
-        '406': 
+          description: >-
+            Forbidden: Returned when a user tries to delete a card that they are
+            not the creator of AND the user is not a GAA
+        '406':
           $ref: '#/components/responses/NotAcceptableError'
-  
   '/cards/{id}/extenddisplayperiod':
     put:
       tags:
         - 'UCM4: Card expiry'
-        - 'Cards / community marketplace'
-      summary: 'Extend the display period of a card that is nearing expiry'
+        - Cards / community marketplace
+      summary: Extend the display period of a card that is nearing expiry
       parameters:
         - name: id
           in: path
@@ -1101,27 +1219,30 @@ paths:
           schema:
             type: integer
             example: 500
-      security: 
+      security:
         - CookieAuth:
-          - user
-          - globalApplicationAdmin
-          - defaultGlobalApplicationAdmin
+            - user
+            - globalApplicationAdmin
+            - defaultGlobalApplicationAdmin
       responses:
         '200':
-          description: End of display period successfully extended. Extension amount should be a further two weeks.
+          description: >-
+            End of display period successfully extended. Extension amount should
+            be a further two weeks.
         '401':
           $ref: '#/components/responses/UnauthorizedError'
         '403':
-          description: 'Forbidden: Returned when a user who is neither the creator of the card, nor a GAA, tries to extend the display period of the card.'
-        '406': 
+          description: >-
+            Forbidden: Returned when a user who is neither the creator of the
+            card, nor a GAA, tries to extend the display period of the card.
+        '406':
           $ref: '#/components/responses/NotAcceptableError'
-          
   '/users/{id}/cards':
     get:
       tags:
         - 'UCM5: Find my cards'
-        - 'Cards / community marketplace'
-      summary: 'Retrieve all active cards that a user has created'
+        - Cards / community marketplace
+      summary: Retrieve all active cards that a user has created
       parameters:
         - name: id
           in: path
@@ -1140,45 +1261,44 @@ paths:
           description: The number of results to show per page
           schema:
             type: integer
-      security: 
-          - CookieAuth:
+      security:
+        - CookieAuth:
             - user
             - globalApplicationAdmin
             - defaultGlobalApplicationAdmin
       responses:
         '200':
-          description: Request successful, a (possibly empty) list of cards is returned
+          description: 'Request successful, a (possibly empty) list of cards is returned'
           content:
             application/json:
               schema:
                 allOf:
-                    - $ref: '#/components/schemas/Page'
-                    - type: object
-                      required:
-                        - results
-                      properties:
-                        results:
-                          type: array
-                          items: 
-                            $ref: '#/components/schemas/Card'
-        '400': 
+                  - $ref: '#/components/schemas/Page'
+                  - type: object
+                    required:
+                      - results
+                    properties:
+                      results:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Card'
+        '400':
           $ref: '#/components/responses/BadRequestError'
         '401':
           $ref: '#/components/responses/UnauthorizedError'
         '406':
           $ref: '#/components/responses/NotAcceptableError'
-          
-  '/keywords':
+  /keywords:
     post:
       tags:
         - 'UCM6: Keyword management'
-        - 'Keywords'
-      summary: "Create a new system-wide keyword"
-      security: 
+        - Keywords
+      summary: Create a new system-wide keyword
+      security:
         - CookieAuth:
-          - user
-          - globalApplicationAdmin
-          - defaultGlobalApplicationAdmin
+            - user
+            - globalApplicationAdmin
+            - defaultGlobalApplicationAdmin
       responses:
         '201':
           description: Keyword created successfully
@@ -1191,7 +1311,7 @@ paths:
                     type: integer
                     description: The ID of the keyword that has just been created
                     example: 600
-        '400': 
+        '400':
           $ref: '#/components/responses/BadRequestError'
         '401':
           $ref: '#/components/responses/UnauthorizedError'
@@ -1200,48 +1320,48 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Keyword'
-              
-  '/keywords/search':
+  /keywords/search:
     get:
       tags:
-          - 'UCM6: Keyword management'
-          - 'Keywords'
-      summary: 'Search for keywords by partial (or complete) name'
-      security: 
+        - 'UCM6: Keyword management'
+        - Keywords
+      summary: Search for keywords by partial (or complete) name
+      security:
         - CookieAuth:
-          - user
-          - globalApplicationAdmin
-          - defaultGlobalApplicationAdmin
-      parameters: 
+            - user
+            - globalApplicationAdmin
+            - defaultGlobalApplicationAdmin
+      parameters:
         - in: query
           name: searchQuery
           schema:
             type: string
           required: true
-          description: 'Criteria to search keywords for, all partial and complete matches are returned'
+          description: >-
+            Criteria to search keywords for, all partial and complete matches
+            are returned
       responses:
         '200':
-          description: Request successful, a (possibly empty) list of keywords is returned
+          description: 'Request successful, a (possibly empty) list of keywords is returned'
           content:
             application/json:
               schema:
                 type: array
-                items: 
+                items:
                   $ref: '#/components/schemas/Keyword'
         '401':
           $ref: '#/components/responses/UnauthorizedError'
-          
   '/keywords/{id}':
     delete:
       tags:
         - 'UCM6: Keyword management'
-        - 'Keywords'
-      summary: 'Delete a keyword as an admin'
-      security: 
+        - Keywords
+      summary: Delete a keyword as an admin
+      security:
         - CookieAuth:
-          - globalApplicationAdmin
-          - defaultGlobalApplicationAdmin
-      parameters: 
+            - globalApplicationAdmin
+            - defaultGlobalApplicationAdmin
+      parameters:
         - in: path
           name: id
           schema:
@@ -1256,23 +1376,22 @@ paths:
           $ref: '#/components/responses/UnauthorizedError'
         '403':
           description: 'Forbidden: Returned if a non-GAA user attempts to delete any card.'
-
-  '/cards/search':
+  /cards/search:
     get:
       tags:
         - 'UCM7: Keyword search'
-        - 'Cards / community marketplace'
-        - 'Keywords'
-      summary: 'Search for cards based on some keywords'
-      security: 
+        - Cards / community marketplace
+        - Keywords
+      summary: Search for cards based on some keywords
+      security:
         - CookieAuth:
-          - user
-          - globalApplicationAdmin
-          - defaultGlobalApplicationAdmin
+            - user
+            - globalApplicationAdmin
+            - defaultGlobalApplicationAdmin
       parameters:
         - in: query
           name: keywordIds
-          description: 'The IDs of keywords by which cards are being searched'
+          description: The IDs of keywords by which cards are being searched
           schema:
             type: array
             items:
@@ -1290,24 +1409,125 @@ paths:
               - Exchange
         - in: query
           name: union
-          description: Whether or not to get cards that match ANY of the keywords, or only cards that match ALL of the keywords. True = Match ANY, False = Match ALL
+          description: >-
+            Whether or not to get cards that match ANY of the keywords, or only
+            cards that match ALL of the keywords. True = Match ANY, False =
+            Match ALL
           schema:
             type: boolean
           required: true
+        - name: page
+          in: query
+          description: The page number to retrieve (1 indexed)
+          schema:
+            type: integer
+        - name: resultsPerPage
+          in: query
+          description: The number of results to show per page
+          schema:
+            type: integer
+        - name: orderBy
+          in: query
+          description: Card property to order results by
+          schema:
+            type: string
+            enum:
+              - lastRenewed
+              - created
+              - title
+              - closes
+              - creatorFirstName
+              - creatorLastName
+              - location
+        - name: reverse
+          in: query
+          description: Whether to flip default sort order (default is ascending)
+          schema:
+            type: boolean
       responses:
         '200':
-          description: Request successful, a (possibly empty) list of cards is returned
+          description: 'Request successful, a (possibly empty) list of cards is returned'
           content:
             application/json:
               schema:
-                type: array
-                items: 
-                  $ref: '#/components/schemas/Card'
-        '400': 
+                allOf:
+                  - $ref: '#/components/schemas/Page'
+                  - type: object
+                    required:
+                      - results
+                    properties:
+                      results:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Card'
+        '400':
           $ref: '#/components/responses/BadRequestError'
         '401':
           $ref: '#/components/responses/UnauthorizedError'
-
+  /demo/generateProducts:
+    post:
+      tags:
+        - 'U26 - Example Data'
+      summary: Generates a set of example products
+      security:
+        - CookieAuth:
+            - globalApplicationAdmin
+      description: ''
+      operationId: ''
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                userCount:
+                  type: integer
+                  example: 10
+                  description: Number of users generated
+                businessCount:
+                  type: integer
+                  description: Number of businesses generated
+                  example: 5
+                productCount:
+                  type: integer
+                  example: 600
+                  description: Number of products generated
+                inventoryItemCount:
+                  type: integer
+                  example: 20
+                  description: Number of inventory items generated
+                saleItemCount:
+                  type: integer
+                  example: 15
+                  description: Number of sale items generated
+      responses:
+        '200':
+          description: Demo products created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  generatedUsers:
+                    type: integer
+                    description: The list of IDs of the generated Users
+                    example: 10
+                  generatedBusinesses:
+                    type: integer
+                    description: The list of IDs of the generated Businesses
+                    example: 5
+                  generatedProducts:
+                    type: integer
+                    description: The list of IDs of the generated Products
+                    example: 600
+                  generatedInventoryItems:
+                    type: integer
+                    description: The list of IDs of the generated Inventory items
+                    example: 20
+                  generatedSaleItems:
+                    type: integer
+                    description: The list of IDs of the generated Sale items
+                    example: 15
 components:
   securitySchemes:
     CookieAuth:
@@ -1316,18 +1536,26 @@ components:
       name: JSESSIONID
   responses:
     BadRequestError:
-      description: There was some error with the data supplied by the user, appropriate error message(s) should be shown to user
+      description: >-
+        There was some error with the data supplied by the user, appropriate
+        error message(s) should be shown to user
     UnauthorizedError:
       description: Access token is missing or invalid
     ForbiddenError:
       description: The user does not have permission to perform the requested action
     NotAcceptableError:
-      description: 'The requested route does exist (so not a 404) but some part of the request is not acceptable, for example trying to access a resource by an ID that does not exist.'
+      description: >-
+        The requested route does exist (so not a 404) but some part of the
+        request is not acceptable, for example trying to access a resource by an
+        ID that does not exist.
     AuthenticatedResponse:
       description: >
-        Response returned to client when they have performed an action to gain authentication (registering or logging in).
-        This response includes a session token that the client can use in future API requests to authenticate itself. 
-        This session token is set as a cookie with name 'JSESSIONID', and will need to be included in subsequent requests to the server.
+        Response returned to client when they have performed an action to gain
+        authentication (registering or logging in). This response includes a
+        session token that the client can use in future API requests to
+        authenticate itself.  This session token is set as a cookie with name
+        'JSESSIONID', and will need to be included in subsequent requests to the
+        server.
       content:
         application/json:
           schema:
@@ -1337,22 +1565,21 @@ components:
                 type: integer
                 description: The ID of the user that has just been authenticated
                 example: 100
-      headers: 
+      headers:
         Set-Cookie:
-          schema: 
+          schema:
             type: string
             example: JSESSIONID=abcde12345; Path=/; HttpOnly
-
   schemas:
     Keyword:
       type: object
-      description: "Represents a single 'keyword' within the system - similar to a hashtag." 
+      description: Represents a single 'keyword' within the system - similar to a hashtag.
       properties:
         id:
           type: integer
           example: 600
           readOnly: true
-          description: Unique ID, autogenerated by the system
+          description: 'Unique ID, autogenerated by the system'
         name:
           type: string
           description: The text value of the keyword
@@ -1363,11 +1590,10 @@ components:
           example: '2021-07-15T05:10:00Z'
           readOnly: true
           description: Date and time when the keyword was created
-  
     Card:
       type: object
       description: Represents an item in the Community Marketplace
-      required: 
+      required:
         - title
         - creatorId
         - section
@@ -1377,7 +1603,7 @@ components:
           type: integer
           example: 500
           readOnly: true
-          description: Unique ID, autogenerated by the system
+          description: 'Unique ID, autogenerated by the system'
         creatorId:
           type: integer
           example: 100
@@ -1388,7 +1614,7 @@ components:
             - $ref: '#/components/schemas/User'
         section:
           type: string
-          enum: 
+          enum:
             - ForSale
             - Wanted
             - Exchange
@@ -1403,29 +1629,41 @@ components:
           format: date-time
           example: '2021-07-29T05:10:00Z'
           readOnly: true
-          description: Date and time when the display period of the card is set to expire. This defaults to 2 weeks from creation, and can be extended per UCM4.
+          description: >-
+            Date and time when the display period of the card is set to expire.
+            This defaults to 2 weeks from creation, and can be extended per
+            UCM4.
         title:
           type: string
-          description: Title of the card, should be suitable for one-line displays.
-          example: "1982 Lada Samara"
+          description: 'Title of the card, should be suitable for one-line displays.'
+          example: 1982 Lada Samara
         description:
           type: string
           description: A more detailed description of the card.
-          example: "Beige, suitable for a hen house. Fair condition. Some rust. As is, where is. Will swap for budgerigar."
+          example: >-
+            Beige, suitable for a hen house. Fair condition. Some rust. As is,
+            where is. Will swap for budgerigar.
         keywords:
           type: array
           readOnly: true
-          description: Keywords describing the card. A card can have one or more keywords associated with it.
+          description: >-
+            Keywords describing the card. A card can have one or more keywords
+            associated with it.
           items:
             $ref: '#/components/schemas/Keyword'
         keywordIds:
           type: array
           writeOnly: true
-          description: The IDs of keywords that will be associated with a card once it is created. These keywords are created through the POST /keywords endpoints (UCM6).
+          description: >-
+            The IDs of keywords that will be associated with a card once it is
+            created. These keywords are created through the POST /keywords
+            endpoints (UCM6).
           items:
             type: integer
-            example: [20, 15, 600]
-  
+            example:
+              - 20
+              - 15
+              - 600
     Listing:
       type: object
       description: A listing for the sale of some product from a business's inventory
@@ -1438,7 +1676,9 @@ components:
           type: integer
           example: 57
           readOnly: true
-          description: A unique (within the business) identifer for this listing - autogenerated by the system
+          description: >-
+            A unique (within the business) identifer for this listing -
+            autogenerated by the system
         inventoryItem:
           readOnly: true
           allOf:
@@ -1450,7 +1690,9 @@ components:
         quantity:
           type: integer
           example: 3
-          description: Must be greater than zero, and less than or equal to the quantity of the correpsonding inventory entry
+          description: >-
+            Must be greater than zero, and less than or equal to the quantity of
+            the correpsonding inventory entry
         price:
           type: number
           format: double
@@ -1458,7 +1700,7 @@ components:
           example: 17.99
         moreInfo:
           type: string
-          example: 'Seller may be willing to consider near offers'
+          example: Seller may be willing to consider near offers
           description: An optional field for further information about the listing
         created:
           type: string
@@ -1470,8 +1712,9 @@ components:
           type: string
           format: date-time
           example: '2021-07-21T23:59:00Z'
-          description: Date and time when the listing closes (defaults to expiry date of related inventory item)
-  
+          description: >-
+            Date and time when the listing closes (defaults to expiry date of
+            related inventory item)
     InventoryItem:
       type: object
       description: Entity representing an instance of a stock of some product
@@ -1485,7 +1728,9 @@ components:
           type: integer
           example: 101
           readOnly: true
-          description: A unique (within the inventory) identifer for this item - autogenerated by the system
+          description: >-
+            A unique (within the inventory) identifer for this item -
+            autogenerated by the system
         product:
           readOnly: true
           allOf:
@@ -1493,8 +1738,11 @@ components:
         productId:
           writeOnly: true
           type: string
-          example: "WATT-420-BEANS"
-          description: Product Code of corresponding product in business's catalogue. Notice that the ID is given when writing, but the full object is returned when reading
+          example: WATT-420-BEANS
+          description: >-
+            Product Code of corresponding product in business's catalogue.
+            Notice that the ID is given when writing, but the full object is
+            returned when reading
         quantity:
           type: integer
           example: 4
@@ -1507,7 +1755,7 @@ components:
           type: number
           format: double
           description: Price to purchase a single item of the product
-          example: 6.50
+          example: 6.5
         totalPrice:
           type: number
           format: double
@@ -1524,12 +1772,11 @@ components:
         bestBefore:
           type: string
           format: date
-          description: 'The "best before" date of the product'
+          description: The "best before" date of the product
         expires:
           type: string
           format: date
           description: The expiry date of the product
-  
     Image:
       type: object
       description: Entity representing an image stored on the server
@@ -1537,66 +1784,73 @@ components:
         - filename
         - thumbnailFilename
       properties:
-        id: 
+        id:
           type: integer
           example: 1234
           readOnly: true
           description: A unique identifier (system-wide) to represent this image
         filename:
           type: string
-          example: "/media/images/23987192387509-123908794328.png"
-          description: Relative URI to full size image. A fully qualified URI (e.g www.wasteless.com/media/images/...) should NOT be given.
+          example: /media/images/23987192387509-123908794328.png
+          description: >-
+            Relative URI to full size image. A fully qualified URI (e.g
+            www.wasteless.com/media/images/...) should NOT be given.
         thumbnailFilename:
           type: string
-          example: "/media/images/23987192387509-123908794328_thumbnail.png"
-          description: Relative URI to thumbnail of image. A fully qualified URI (e.g www.wasteless.com/media/images/...) should NOT be given.
-  
+          example: /media/images/23987192387509-123908794328_thumbnail.png
+          description: >-
+            Relative URI to thumbnail of image. A fully qualified URI (e.g
+            www.wasteless.com/media/images/...) should NOT be given.
     Product:
       type: object
       description: Entity for catalogue items in a product catalogue
       required:
         - name
       properties:
-        id: 
+        id:
           type: string
-          example: 'WATT-420-BEANS'
+          example: WATT-420-BEANS
           description: >
-            Developers can choose whether or not to make this a required field (i.e user 
-            specified vs. auto-generated). In the case that the team automatically 
-            generates the IDs, they should still allow this field to be present when 
-            creating (POST) or modifying (PUT) a product, and then simply ignore its 
-            value (i.e do not return a 400 code if it is present but not needed). An
-            ID only needs to be unique within its catalogue, not system-wide.
+            Developers can choose whether or not to make this a required field
+            (i.e user  specified vs. auto-generated). In the case that the team
+            automatically  generates the IDs, they should still allow this field
+            to be present when  creating (POST) or modifying (PUT) a product,
+            and then simply ignore its  value (i.e do not return a 400 code if
+            it is present but not needed). An ID only needs to be unique within
+            its catalogue, not system-wide.
         name:
           type: string
-          description: The full name of the product 
-          example: "Watties Baked Beans - 420g can"
+          description: The full name of the product
+          example: Watties Baked Beans - 420g can
         description:
           type: string
           description: A desription of the product
-          example: "Baked Beans as they should be."
+          example: Baked Beans as they should be.
         manufacturer:
           type: string
           description: The manufacturer of the product
-          example: "Heinz Wattie's Limited"
+          example: Heinz Wattie's Limited
         recommendedRetailPrice:
           type: number
           format: double
-          example: 2.20
-          description: The recommended retail price of the product, given in whatever currency is in use at the business's location.
+          example: 2.2
+          description: >-
+            The recommended retail price of the product, given in whatever
+            currency is in use at the business's location.
         created:
           type: string
           format: date-time
           readOnly: true
-          description: The date and time when this product was created. This field is generated automatically by the server.
+          description: >-
+            The date and time when this product was created. This field is
+            generated automatically by the server.
         images:
           type: array
           readOnly: true
           description: List of images of a product (implemented in U16).
           items:
             $ref: '#/components/schemas/Image'
-      
-    Business: 
+    Business:
       type: object
       description: Business account entity
       required:
@@ -1611,24 +1865,26 @@ components:
           description: Automatically generated and assigned by the server
         administrators:
           type: array
-          items: 
+          items:
             $ref: '#/components/schemas/User'
           readOnly: true
         primaryAdministratorId:
           type: integer
           example: 20
-          description: "The ID of the 'primary' administrator of the business. This is automatically given to the creator of the business."
+          description: >-
+            The ID of the 'primary' administrator of the business. This is
+            automatically given to the creator of the business.
         name:
           type: string
-          example: 'Lumbridge General Store'
+          example: Lumbridge General Store
         description:
           type: string
-          example: 'A one-stop shop for all your adventuring needs'
+          example: A one-stop shop for all your adventuring needs
         address:
           $ref: '#/components/schemas/Address'
         businessType:
           type: string
-          enum: 
+          enum:
             - Accommodation and Food Services
             - Retail Trade
             - Charitable organisation
@@ -1639,7 +1895,6 @@ components:
           example: '2020-07-14T14:52:00Z'
           readOnly: true
           description: Date and time when the account was created
-
     Address:
       type: object
       description: Entity representing some physical address
@@ -1648,26 +1903,25 @@ components:
       properties:
         streetNumber:
           type: string
-          example: '3/24'
+          example: 3/24
         streetName:
           type: string
-          example: 'Ilam Road'
+          example: Ilam Road
         suburb:
           type: string
-          example: 'Upper Riccarton'
+          example: Upper Riccarton
         city:
           type: string
-          example: 'Christchurch'
+          example: Christchurch
         region:
           type: string
-          example: 'Canterbury'
+          example: Canterbury
         country:
           type: string
-          example: 'New Zealand'
+          example: New Zealand
         postcode:
           type: string
           example: '90210'
-
     User:
       type: object
       description: Basic user entity
@@ -1709,12 +1963,12 @@ components:
           example: '1999-04-27'
         phoneNumber:
           type: string
-          example: '+64 3 555 0129'
+          example: +64 3 555 0129
         homeAddress:
           $ref: '#/components/schemas/Address'
         password:
           type: string
-          example: '1337-H%nt3r2'
+          example: 1337-H%nt3r2
           format: password
           writeOnly: true
           description: Should not be stored in plain text (i.e hash it)
@@ -1727,7 +1981,9 @@ components:
         role:
           type: string
           readOnly: true
-          description: '(Implemented in U4): This property should only be shown to Global Application Admins'
+          description: >-
+            (Implemented in U4): This property should only be shown to Global
+            Application Admins
           enum:
             - user
             - globalApplicationAdmin
@@ -1735,7 +1991,9 @@ components:
         businessesAdministered:
           type: array
           readOnly: true
-          description: '(Implemented in U6): A list of businesses for which the user is an administrator'
+          description: >-
+            (Implemented in U6): A list of businesses for which the user is an
+            administrator
           items:
             $ref: '#/components/schemas/Business'
     Page:

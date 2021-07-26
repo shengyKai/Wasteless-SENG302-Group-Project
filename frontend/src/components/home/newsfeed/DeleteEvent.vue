@@ -1,19 +1,13 @@
 <template>
-  <div>
-    <v-card-title>
-      {{ title }}
-    </v-card-title>
-    <v-card-subtitle>
-      {{ date }}
-    </v-card-subtitle>
+  <Event :event="event" title="Your marketplace card has been deleted">
     <v-card-text>
       {{ text }}
     </v-card-text>
-  </div>
+  </Event>
 </template>
 
 <script>
-import { formatDate } from '@/utils';
+import Event from './Event';
 
 export default {
   name: 'DeleteEvent',
@@ -22,10 +16,8 @@ export default {
       type: Object
     },
   },
-  data() {
-    return {
-      title: "Your marketplace card has been deleted"
-    };
+  components: {
+    Event,
   },
   computed: {
     text() {
@@ -37,9 +29,6 @@ export default {
       }
       return this.event.section;
     },
-    date() {
-      return formatDate(this.event.created);
-    }
   }
 };
 </script>

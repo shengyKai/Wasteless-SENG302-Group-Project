@@ -57,7 +57,7 @@ public class ExampleDataFileReader {
      */
     public static List<String> readExampleDataFile(String filename) {
         List<String> values = new ArrayList<>();
-        try (BufferedReader bufferedReader = new BufferedReader(new FileReader(EXAMPLE_DATA_FILE_PATH + filename))) {
+        try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(ExampleDataFileReader.class.getResourceAsStream(EXAMPLE_DATA_FILE_PATH + filename)))) {
             String line;
             while ((line = bufferedReader.readLine()) != null) {
                 String value = line.strip();

@@ -6,7 +6,7 @@
           {{ business.name }}
         </h1>
         <p><b>Created:</b> {{ createdMsg }}</p>
-        <v-btn outlined  @click="goSalePage" :value="false">
+        <v-btn outlined color="primary" @click="goSalePage" :value="false">
           Sale listings
         </v-btn>
       </div>
