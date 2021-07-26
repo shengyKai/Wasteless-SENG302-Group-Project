@@ -1,6 +1,7 @@
 package org.seng302.leftovers.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
 import org.hibernate.Session;
@@ -69,7 +70,7 @@ class BusinessControllerTest {
         userRepository.deleteAll();
         setUpAuthCode();
         setUpTestUser();
-        setUpTestBusiness();
+        setUpTestBusinesses();
 
         session = sessionFactory.openSession();
     }
@@ -119,7 +120,7 @@ class BusinessControllerTest {
      *
      * @throws ParseException
      */
-    private void setUpTestBusiness() throws ParseException {
+    private void setUpTestBusinesses() throws ParseException {
         testBusiness = new Business.Builder()
                 .withBusinessType("Accommodation and Food Services")
                 .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
@@ -131,7 +132,44 @@ class BusinessControllerTest {
         testBusiness = businessRepository.save(testBusiness);
         testBusiness.addAdmin(admin);
         testBusiness = businessRepository.save(testBusiness);
+
+        Business business1 = new Business.Builder()
+                .withBusinessType("Accommodation and Food Services")
+                .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Wellington,New Zealand," +
+                        "Canterbury,8041"))
+                .withDescription("Some description")
+                .withName("New World")
+                .withPrimaryOwner(owner)
+                .build();
+        business1 = businessRepository.save(business1);
+        business1.addAdmin(admin);
+        businessRepository.save(business1);
+
+        Business business2 = new Business.Builder()
+                .withBusinessType("Charitable organisation")
+                .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Canberra,Australia," +
+                        "Canterbury,8041"))
+                .withDescription("Some description")
+                .withName("Food Palace")
+                .withPrimaryOwner(owner)
+                .build();
+        business2 = businessRepository.save(business2);
+        business2.addAdmin(admin);
+        businessRepository.save(business2);
+
+        Business business3 = new Business.Builder()
+                .withBusinessType("Non-profit organisation")
+                .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
+                        "Canterbury,8041"))
+                .withDescription("Some description")
+                .withName("Food Emporium")
+                .withPrimaryOwner(owner)
+                .build();
+        business3 = businessRepository.save(business3);
+        business3.addAdmin(admin);
+        businessRepository.save(business3);
     }
+
     /**
      * This method creates a user and adds it to the repository.
      *
@@ -429,7 +467,7 @@ class BusinessControllerTest {
     @Test
     void getBusinessByIdDoesNotExistTest() throws Exception{
         setCurrentUser(owner.getUserID());
-        MvcResult result = mockMvc.perform(get(String.format("/businesses/%d", testBusiness.getId() + 1))
+        MvcResult result = mockMvc.perform(get(String.format("/businesses/%d", 99999))
                 .sessionAttrs(sessionAuthToken).cookie(authCookie)).andExpect(status().isNotAcceptable()).andReturn();
         assertTrue(result.getResponse().getContentAsString().isEmpty());
     }
@@ -953,4 +991,163 @@ class BusinessControllerTest {
         testAdmin = session.find(User.class, testAdmin.getUserID());
         assertFalse(testAdmin.getBusinessesAdministered().contains(testBusiness));
     }
+
+
+    @Test
+    void searchOrderedByLocation_ordersByLocation() throws Exception {
+        MvcResult result = mockMvc.perform(get("/businesses/search")
+        .param("searchQuery", "o")
+        .param("orderBy", "location")
+        .sessionAttrs(sessionAuthToken)
+        .cookie(authCookie))
+                .andExpect(status().isOk())
+                .andReturn();
+        JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
+        JSONObject response = (JSONObject) parser.parse(result.getResponse().getContentAsString());
+        JSONArray results = (JSONArray) response.get("results");
+
+        JSONObject firstJsonObject = (JSONObject) results.get(0);
+        JSONObject address = (JSONObject) firstJsonObject.get("address");
+        String previousAddress = address.getAsString("country") + address.getAsString("city");
+        for (int i = 1; i < results.size(); i++) {
+            JSONObject currentBusiness = (JSONObject) results.get(i);
+            address = (JSONObject) currentBusiness.get("address");
+            String currentAddress = address.getAsString("country") + address.getAsString("city"); // concat country and city
+            assertTrue(currentAddress.compareTo(previousAddress) >= 0);
+            previousAddress = currentAddress;
+        }
+    }
+
+    @Test
+    void searchOrderedByName_ordersByName() throws Exception {
+        MvcResult result = mockMvc.perform(get("/businesses/search")
+                .param("searchQuery", "o")
+                .param("orderBy", "name")
+                .sessionAttrs(sessionAuthToken)
+                .cookie(authCookie))
+                .andExpect(status().isOk())
+                .andReturn();
+        JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
+        JSONObject response = (JSONObject) parser.parse(result.getResponse().getContentAsString());
+        JSONArray results = (JSONArray) response.get("results");
+
+        JSONObject firstJsonObject = (JSONObject) results.get(0);
+        String previousName = firstJsonObject.getAsString("name");
+        for (int i = 1; i < results.size(); i++) {
+            JSONObject currentBusiness = (JSONObject) results.get(i);
+            String currentName = currentBusiness.getAsString("name");
+            assertTrue(currentName.compareTo(previousName) >= 0);
+            previousName = currentName;
+        }
+    }
+
+    @Test
+    void searchOrderedByBusinessType_ordersByType() throws Exception {
+        MvcResult result = mockMvc.perform(get("/businesses/search")
+                .param("searchQuery", "o")
+                .param("orderBy", "businessType")
+                .sessionAttrs(sessionAuthToken)
+                .cookie(authCookie))
+                .andExpect(status().isOk())
+                .andReturn();
+        JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
+        JSONObject response = (JSONObject) parser.parse(result.getResponse().getContentAsString());
+        JSONArray results = (JSONArray) response.get("results");
+
+        JSONObject firstJsonObject = (JSONObject) results.get(0);
+        String previousBusinessType = firstJsonObject.getAsString("businessType");
+        for (int i = 1; i < results.size(); i++) {
+            JSONObject currentBusiness = (JSONObject) results.get(i);
+            String currentBusinessType = currentBusiness.getAsString("businessType");
+            assertTrue(currentBusinessType.compareTo(previousBusinessType) >= 0);
+            previousBusinessType = currentBusinessType;
+        }
+    }
+
+    @Test
+    void searchOrderedByNameReverseTrue_ordersByNameReversed() throws Exception {
+        MvcResult result = mockMvc.perform(get("/businesses/search")
+                .param("searchQuery", "o")
+                .param("orderBy", "name")
+                .param("reverse", "true")
+                .sessionAttrs(sessionAuthToken)
+                .cookie(authCookie))
+                .andExpect(status().isOk())
+                .andReturn();
+        JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
+        JSONObject response = (JSONObject) parser.parse(result.getResponse().getContentAsString());
+        JSONArray results = (JSONArray) response.get("results");
+
+        JSONObject firstJsonObject = (JSONObject) results.get(0);
+        String previousName = firstJsonObject.getAsString("name");
+        for (int i = 1; i < results.size(); i++) {
+            JSONObject currentBusiness = (JSONObject) results.get(i);
+            String currentName = currentBusiness.getAsString("name");
+            assertTrue(currentName.compareTo(previousName) <= 0);
+            previousName = currentName;
+        }
+    }
+
+    @Test
+    void searchPageTwo_returnsSecondPage() throws Exception {
+        MvcResult result = mockMvc.perform(get("/businesses/search")
+                .param("searchQuery", "o")
+                .param("page", "2")
+                .param("resultsPerPage", "3")
+                .sessionAttrs(sessionAuthToken)
+                .cookie(authCookie))
+                .andExpect(status().isOk())
+                .andReturn();
+        JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
+        JSONObject response = (JSONObject) parser.parse(result.getResponse().getContentAsString());
+        JSONArray results = (JSONArray) response.get("results");
+        int count = (int) response.get("count");
+        int size = results.size();
+
+        assertEquals(1, size);
+        assertEquals(4, count);
+    }
+
+    @Test
+    void searchCount_returnsTotalCount() throws Exception {
+        MvcResult result = mockMvc.perform(get("/businesses/search")
+                .param("searchQuery", "food")
+                .sessionAttrs(sessionAuthToken)
+                .cookie(authCookie))
+                .andExpect(status().isOk())
+                .andReturn();
+        JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
+        JSONObject response = (JSONObject) parser.parse(result.getResponse().getContentAsString());
+        JSONArray results = (JSONArray) response.get("results");
+        int count = (int) response.get("count");
+
+        assertEquals(2, count);
+    }
+
+    @Test
+    void searchInvalidOrdering_returns400Error() throws Exception {
+        mockMvc.perform(get("/businesses/search")
+                .param("searchQuery", "o")
+                .param("orderBy", "thisIsWrong")
+                .sessionAttrs(sessionAuthToken)
+                .cookie(authCookie))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void searchNoAuthenticationCookie_returns401Error() throws Exception {
+        mockMvc.perform(get("/businesses/search")
+                .param("searchQuery", "o")
+                .sessionAttrs(sessionAuthToken))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void searchNoSession_returns401Error() throws Exception {
+        mockMvc.perform(get("/businesses/search")
+                .param("searchQuery", "o")
+                .cookie(authCookie))
+                .andExpect(status().isUnauthorized());
+    }
+
 }

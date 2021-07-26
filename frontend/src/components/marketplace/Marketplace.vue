@@ -13,9 +13,9 @@
             solo-inverted
             hide-details
             :items="[
-              { text: 'Date Added', value: 'created'},
-              { text: 'Date Closing', value: 'closes'},
+              { text: 'Date Added / Renewed', value: 'lastRenewed'},
               { text: 'Title', value: 'title'},
+              { text: 'Location', value: 'location'},
               { text: 'Author First Name', value: 'creatorFirstName'},
               { text: 'Author Last Name', value: 'creatorLastName'},
             ]"
@@ -182,7 +182,7 @@ export default {
         Exchange: 0,
       },
       error: "",
-      orderBy: "created",
+      orderBy: "lastRenewed",
       /**
        * Note: change the default here to true because backlog states that
        * creation date should be descending by default.

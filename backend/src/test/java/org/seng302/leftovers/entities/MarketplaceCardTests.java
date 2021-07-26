@@ -86,6 +86,25 @@ class MarketplaceCardTests {
     }
 
     @Test
+    void delayCloses_closesIsInsideOfOneDay_lastRenewedSetToCurrentTime() {
+        var closes = Instant.now().plus(23, ChronoUnit.HOURS);
+        var card = new MarketplaceCard.Builder()
+                .withCreator(testUser)
+                .withSection(MarketplaceCard.Section.EXCHANGE)
+                .withTitle("test_title")
+                .withDescription("test_description")
+                .withCloses(closes)
+                .build();
+
+        Instant before = Instant.now();
+        card.delayCloses();
+        Instant after = Instant.now();
+
+        assertFalse(card.getLastRenewed().isBefore(before));
+        assertFalse(card.getLastRenewed().isAfter(after));
+    }
+
+    @Test
     void marketplaceCardDelayCloses_closesIsOutsideOf1Day_throws400Exception() {
         var closes = Instant.now().plus(25, ChronoUnit.HOURS);
         var card = new MarketplaceCard.Builder()
@@ -133,6 +152,17 @@ class MarketplaceCardTests {
 
         assertFalse(card.getCreated().isBefore(before));
         assertFalse(card.getCreated().isAfter(after));
+    }
+
+    @Test
+    void marketplaceCardBuild_withParameters_lastRenewedSameAsCreated() {
+        var card = new MarketplaceCard.Builder()
+                .withCreator(testUser)
+                .withSection(MarketplaceCard.Section.EXCHANGE)
+                .withTitle("test_title")
+                .withDescription("test_description")
+                .build();
+        assertEquals(card.getCreated(), card.getLastRenewed());
     }
 
     @Test

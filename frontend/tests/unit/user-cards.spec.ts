@@ -13,9 +13,16 @@ describe('UserCards.vue', () => {
   beforeEach(() => {
     let vuetify = new Vuetify();
     wrapper = mount(UserCards, {
-      stubs: ['MarketplaceCard'],
+      stubs: ['MarketplaceCard', 'router-link', 'router-view'],
       localVue,
       vuetify,
+      mocks: {
+        $route: {
+          params: {
+            id: 1,
+          }
+        }
+      },
     });
   });
 
@@ -31,7 +38,7 @@ describe('UserCards.vue', () => {
       let card = cardComponents.at(i);
       expect(card.props()).toStrictEqual({
         content: {id: i},
-        showActions: false,
+        showActions: true,
         showSection: true,
       });
     }
