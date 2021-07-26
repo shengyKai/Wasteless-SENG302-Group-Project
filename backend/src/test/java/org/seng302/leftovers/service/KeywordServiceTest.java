@@ -83,7 +83,7 @@ class KeywordServiceTest {
                 .addUsersToEvent(adminArgumentCaptor.capture(), eventArgumentCaptor.capture());
 
         CreateKeywordEvent createKeywordEvent = eventArgumentCaptor.getValue();
-        assertEquals(keyword,createKeywordEvent.getKeyword());
+        assertEquals(keyword,createKeywordEvent.getNewKeyword());
     }
 }
 

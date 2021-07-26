@@ -6,6 +6,9 @@ import javax.persistence.OneToOne;
 
 import net.minidev.json.JSONObject;
 
+/**
+ * Event which is sent to system administrators to notify them of the creation of a new keyword.
+ */
 @Entity
 public class CreateKeywordEvent extends Event {
 
@@ -13,26 +16,31 @@ public class CreateKeywordEvent extends Event {
     @JoinColumn(name = "new_keyword", unique = true, nullable = false)
     private Keyword newKeyword;
 
-    protected CreateKeywordEvent() {
+    /**
+     * Empty constructor to appease JPA
+     */
+    protected CreateKeywordEvent() { }
 
-    }
-
+    /**
+     * Constructor for the create keyword event.
+     * @param newKeyword The keyword which has been created.
+     */
     public CreateKeywordEvent(Keyword newKeyword) {
         this.newKeyword = newKeyword;
     }
 
     /**
-     * Returns the marketplace card nearing expiry which is associated with this event.
-     * @return The marketplace card associated with this event.
+     * Returns the keyword which is associated with this event.
+     * @return The keyword associated with this event.
      */
     public Keyword getNewKeyword() {
         return newKeyword;
     }
 
     /**
-     * Construct a JSON representation of the expiry event. Contains the event's id, created date and type, and the JSON
-     * representation of the marketplace card associated with this event.
-     * @return JSON representation of the expiry event.
+     * Construct a JSON representation of the create keyword event. Contains the event's id, created date and type, and
+     * the JSON representation of the keyword associated with this event.
+     * @return JSON representation of the create keyword event.
      */
     @Override
     public JSONObject constructJSONObject() {
@@ -41,7 +49,4 @@ public class CreateKeywordEvent extends Event {
         return jsonObject;
     }
 
-    public Keyword getKeyword() {
-        return newKeyword;
-    }
 }

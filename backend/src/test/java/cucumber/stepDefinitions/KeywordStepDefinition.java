@@ -90,7 +90,6 @@ public class KeywordStepDefinition {
     @Then("The notification contains the keyword {string}")
     public void the_notification_contains_the_keyword(String keyword) {
         Assertions.assertEquals("CreateKeywordEvent", notification.get("type"));
-        System.out.println(notification);
         JSONObject keywordJson = new JSONObject((Map<String, ?>) notification.get("keyword"));
         Assertions.assertEquals(keyword, keywordJson.get("name"));
     }

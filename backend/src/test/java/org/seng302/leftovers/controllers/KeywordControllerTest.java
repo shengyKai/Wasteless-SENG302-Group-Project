@@ -244,5 +244,6 @@ class KeywordControllerTest {
                 .andReturn();
 
         verify(keywordRepository, times(1)).save(any());
+        verify(keywordService, times(1)).sendNewKeywordEvent(any());
     }
 }
