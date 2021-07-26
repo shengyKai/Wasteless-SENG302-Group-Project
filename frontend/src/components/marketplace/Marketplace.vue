@@ -22,8 +22,7 @@
             prepend-inner-icon="mdi-sort-variant"
             label="Sort by"
           />
-        </v-col>
-        <v-col class="text-right">
+
           <!---Reverse the order in which the cards should be displayed--->
           <v-btn-toggle class="toggle" v-model="reverse" mandatory>
             <v-btn depressed color="primary" :value="false">
