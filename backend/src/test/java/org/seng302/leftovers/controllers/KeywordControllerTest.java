@@ -8,7 +8,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mockito.*;
-import org.seng302.leftovers.entities.CreateKeywordEvent;
+import org.seng302.leftovers.entities.KeywordCreatedEvent;
 import org.seng302.leftovers.entities.Keyword;
 import org.seng302.leftovers.exceptions.AccessTokenException;
 import org.seng302.leftovers.persistence.CreateKeywordEventRepository;
@@ -52,7 +52,7 @@ class KeywordControllerTest {
     private CreateKeywordEventRepository createKeywordEventRepository;
 
     @Mock
-    private CreateKeywordEvent mockEvent;
+    private KeywordCreatedEvent mockEvent;
 
     private MockedStatic<AuthenticationTokenManager> authenticationTokenManager;
 

@@ -4,9 +4,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
 import org.seng302.leftovers.entities.Keyword;
+import org.seng302.leftovers.entities.KeywordCreatedEvent;
 import org.seng302.leftovers.entities.User;
 import org.seng302.leftovers.persistence.UserRepository;
-import org.seng302.leftovers.entities.CreateKeywordEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -35,7 +35,7 @@ class KeywordServiceTest {
     @Captor
     ArgumentCaptor<Set<User>> adminArgumentCaptor;
     @Captor
-    ArgumentCaptor<CreateKeywordEvent> eventArgumentCaptor;
+    ArgumentCaptor<KeywordCreatedEvent> eventArgumentCaptor;
 
     Keyword keyword;
 
@@ -82,8 +82,8 @@ class KeywordServiceTest {
         Mockito.verify(eventService, Mockito.times(1))
                 .addUsersToEvent(adminArgumentCaptor.capture(), eventArgumentCaptor.capture());
 
-        CreateKeywordEvent createKeywordEvent = eventArgumentCaptor.getValue();
-        assertEquals(keyword,createKeywordEvent.getNewKeyword());
+        KeywordCreatedEvent keywordCreatedEvent = eventArgumentCaptor.getValue();
+        assertEquals(keyword, keywordCreatedEvent.getNewKeyword());
     }
 }
 

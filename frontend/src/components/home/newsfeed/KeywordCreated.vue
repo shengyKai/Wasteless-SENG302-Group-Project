@@ -1,7 +1,7 @@
 <template>
   <Event :event="event" :title="title">
     <v-card-text>
-      {{ creator.firstName}} {{ creator.lastName }} has added "{{ keyword.name }}"
+      Keyword "{{ keyword.name }}" has been added
     </v-card-text>
     <v-card-actions class="justify-center">
       <v-btn color="error" @click="deleteKeyword">Remove</v-btn>
@@ -23,9 +23,6 @@ export default {
     Event,
   },
   computed: {
-    creator() {
-      return this.event.creator;
-    },
     keyword() {
       return this.event.keyword;
     },
