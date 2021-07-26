@@ -93,7 +93,7 @@
                     v-model="manufactured"
                     label="Manufactured"
                     type="date"
-                    @input=checkManufacturedDateValid()
+                    @input=checkAllDatesValid()
                     outlined/>
                 </v-col>
                 <!-- INPUT: Sell By. Only take in value in dd/mm/yyyy format.-->
@@ -102,7 +102,7 @@
                     v-model="sellBy"
                     label="Sell By"
                     type="date"
-                    @input=checkSellByDateValid()
+                    @input=checkAllDatesValid()
                     outlined/>
                 </v-col>
                 <!-- INPUT: Best Before. Only take in value in dd/mm/yyyy format.-->
@@ -111,7 +111,7 @@
                     v-model="bestBefore"
                     label="Best Before"
                     type="date"
-                    @input=checkBestBeforeDateValid()
+                    @input=checkAllDatesValid()
                     outlined/>
                 </v-col>
                 <!-- INPUT: Expires. Only take in value in dd/mm/yyyy format.-->
@@ -121,7 +121,7 @@
                     v-model="expires"
                     label="Expires"
                     type="date"
-                    @input=checkExpiresDateVaild()
+                    @input=checkAllDatesValid()
                     outlined/>
                 </v-col>
               </v-row>
@@ -272,15 +272,20 @@ export default {
         this.closeDialog();
       }
     },
-    async checkAllDatesValid() {
-      //checks the booleans for all the dates are valid
+    checkAllDatesValid() {
+      //checks all the dates are consistent with each other
+      this.errorMessage = undefined;
+      this.checkManufacturedDateValid();
+      this.checkSellByDateValid();
+      this.checkBestBeforeDateValid();
+      this.checkExpiresDateVaild();
       if (this.manufacturedValid && this.sellByValid && this.bestBeforeValid && this.expiresValid) {
         this.datesValid = true;
       } else {
         this.datesValid = false;
       }
     },
-    async checkManufacturedDateValid() {
+    checkManufacturedDateValid() {
       //checks manufactured cannot be after today and is before sell by
       let sellByDate = new Date(this.manufactured);
       let manufacturedDate = new Date(this.manufactured);
@@ -292,12 +297,10 @@ export default {
       } else if (manufacturedDate > sellByDate) {
         this.errorMessage = "The manufactured date cannot be after the sell by date!";
       } else {
-        this.errorMessage = undefined;
         this.manufacturedValid = true;
       }
-      await this.checkAllDatesValid();
     },
-    async checkSellByDateValid() {
+    checkSellByDateValid() {
       //checks sell by date cannot be before today and is after manufactured and before best before
       let expiresDate = new Date(this.expires);
       let bestBeforeDate = new Date(this.bestBefore);
@@ -315,12 +318,10 @@ export default {
       } else if (sellByDate > expiresDate) {
         this.errorMessage = "The sell by date cannot be after the expiry date!";
       } else {
-        this.errorMessage = undefined;
         this.sellByValid = true;
       }
-      await this.checkAllDatesValid();
     },
-    async checkBestBeforeDateValid() {
+    checkBestBeforeDateValid() {
       //checks best before date cannot be before today and is after sell by date
       let expiresDate = new Date(this.expires);
       let bestBeforeDate = new Date(this.bestBefore);
@@ -335,12 +336,10 @@ export default {
       } else if (bestBeforeDate > expiresDate) {
         this.errorMessage = "The best before date cannot be after the expires date!";
       } else {
-        this.errorMessage = undefined;
         this.bestBeforeValid = true;
       }
-      await this.checkAllDatesValid();
     },
-    async checkExpiresDateVaild() {
+    checkExpiresDateVaild() {
       //checks expires date cannot be before today and is after best before date
       let expiresDate = new Date(this.expires);
       let bestBeforeDate = new Date(this.bestBefore);
@@ -357,10 +356,8 @@ export default {
       } else if (sellByDate > expiresDate) {
         this.errorMessage = "The expires date cannot be before the sell by date!";
       } else {
-        this.errorMessage = undefined;
         this.expiresValid = true;
       }
-      await this.checkAllDatesValid();
     },
     /**
      * Checks that the quantity is greater than or equal to the amount that has already been used in sale listings if the
@@ -370,7 +367,8 @@ export default {
       if (this.isCreate) {
         return true;
       }
-      return this.quantity >= (this.previousItem.quantity - this.previousItem.remainingQuantity);
+      return this.quantity >= (this.previousItem.quantity - this.previousItem.remainingQuantity) ||
+      `Must be at least ${this.previousItem.quantity - this.previousItem.remainingQuantity}`;
     },
     /**
      * Call the currency API to get the currency symbol and code from the country of sale of the product.

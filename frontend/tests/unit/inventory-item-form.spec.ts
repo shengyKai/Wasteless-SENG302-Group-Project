@@ -391,7 +391,7 @@ describe("InventoryItemForm.vue", () => {
       await wrapper.setData({
         manufactured: manufacturedDate
       });
-      wrapper.vm.checkManufacturedDateValid();
+      wrapper.vm.checkAllDatesValid();
       await Vue.nextTick();
       expect(findCreateButton().props().disabled).toBeFalsy();
     });
@@ -402,7 +402,7 @@ describe("InventoryItemForm.vue", () => {
       await wrapper.setData({
         manufactured: manufacturedDate
       });
-      wrapper.vm.checkManufacturedDateValid();
+      wrapper.vm.checkAllDatesValid();
       await Vue.nextTick();
       expect(findCreateButton().props().disabled).toBeTruthy();
     });
@@ -415,8 +415,7 @@ describe("InventoryItemForm.vue", () => {
         manufactured: manufacturedDate,
         sellBy: sellByDate
       });
-      wrapper.vm.checkManufacturedDateValid();
-      wrapper.vm.checkSellByDateValid();
+      wrapper.vm.checkAllDatesValid();
       await Vue.nextTick();
       expect(findCreateButton().props().disabled).toBeFalsy();
     });
@@ -429,8 +428,7 @@ describe("InventoryItemForm.vue", () => {
         manufactured: manufacturedDate,
         sellBy: sellByDate
       });
-      wrapper.vm.checkManufacturedDateValid();
-      wrapper.vm.checkSellByDateValid();
+      wrapper.vm.checkAllDatesValid();
       await Vue.nextTick();
       expect(findCreateButton().props().disabled).toBeTruthy();
     });
@@ -441,7 +439,7 @@ describe("InventoryItemForm.vue", () => {
       await wrapper.setData({
         manufactured: manufacturedDate
       });
-      wrapper.vm.checkManufacturedDateValid();
+      wrapper.vm.checkAllDatesValid();
       await Vue.nextTick();
       expect(findCreateButton().props().disabled).toBeTruthy();
     });
@@ -452,7 +450,7 @@ describe("InventoryItemForm.vue", () => {
       await wrapper.setData({
         manufactured: manufacturedDate
       });
-      wrapper.vm.checkManufacturedDateValid();
+      wrapper.vm.checkAllDatesValid();
       await Vue.nextTick();
       expect(findCreateButton().props().disabled).toBeTruthy();
     });
@@ -463,7 +461,7 @@ describe("InventoryItemForm.vue", () => {
       await wrapper.setData({
         sellBy: sellByDate
       });
-      wrapper.vm.checkSellByDateValid();
+      wrapper.vm.checkAllDatesValid();
       await Vue.nextTick();
       expect(findCreateButton().props().disabled).toBeFalsy();
     });
@@ -474,7 +472,7 @@ describe("InventoryItemForm.vue", () => {
       await wrapper.setData({
         sellBy: sellByDate
       });
-      wrapper.vm.checkSellByDateValid();
+      wrapper.vm.checkAllDatesValid();
       await Vue.nextTick();
       expect(findCreateButton().props().disabled).toBeTruthy();
     });
@@ -487,8 +485,7 @@ describe("InventoryItemForm.vue", () => {
         manufactured: manufacturedDate,
         sellBy: sellByDate
       });
-      wrapper.vm.checkManufacturedDateValid();
-      wrapper.vm.checkSellByDateValid();
+      wrapper.vm.checkAllDatesValid();
       await Vue.nextTick();
       expect(findCreateButton().props().disabled).toBeFalsy();
     });
@@ -501,8 +498,7 @@ describe("InventoryItemForm.vue", () => {
         bestBefore: bestBeforeDate,
         sellBy: sellByDate
       });
-      wrapper.vm.checkBestBeforeDateValid();
-      wrapper.vm.checkSellByDateValid();
+      wrapper.vm.checkAllDatesValid();
       await Vue.nextTick();
       expect(findCreateButton().props().disabled).toBeFalsy();
     });
@@ -515,8 +511,7 @@ describe("InventoryItemForm.vue", () => {
         bestBefore: bestBeforeDate,
         sellBy: sellByDate
       });
-      wrapper.vm.checkBestBeforeDateValid();
-      wrapper.vm.checkSellByDateValid();
+      wrapper.vm.checkAllDatesValid();
       await Vue.nextTick();
       expect(findCreateButton().props().disabled).toBeTruthy();
     });
@@ -529,8 +524,7 @@ describe("InventoryItemForm.vue", () => {
         expires: expiryDate,
         sellBy: sellByDate
       });
-      wrapper.vm.checkExpiresDateVaild();
-      wrapper.vm.checkSellByDateValid();
+      wrapper.vm.checkAllDatesValid();
       await Vue.nextTick();
       expect(findCreateButton().props().disabled).toBeFalsy();
     });
@@ -543,8 +537,7 @@ describe("InventoryItemForm.vue", () => {
         expires: expiryDate,
         sellBy: sellByDate
       });
-      wrapper.vm.checkExpiresDateVaild();
-      wrapper.vm.checkSellByDateValid();
+      wrapper.vm.checkAllDatesValid();
       await Vue.nextTick();
       expect(findCreateButton().props().disabled).toBeTruthy();
     });
@@ -555,7 +548,7 @@ describe("InventoryItemForm.vue", () => {
       await wrapper.setData({
         sellBy: sellByDate
       });
-      wrapper.vm.checkSellByDateValid();
+      wrapper.vm.checkAllDatesValid();
       await Vue.nextTick();
       expect(findCreateButton().props().disabled).toBeTruthy();
     });
@@ -566,7 +559,7 @@ describe("InventoryItemForm.vue", () => {
       await wrapper.setData({
         sellBy: sellByDate
       });
-      wrapper.vm.checkSellByDateValid();
+      wrapper.vm.checkAllDatesValid();
       await Vue.nextTick();
       expect(findCreateButton().props().disabled).toBeTruthy();
     });
@@ -577,7 +570,7 @@ describe("InventoryItemForm.vue", () => {
       await wrapper.setData({
         bestBefore: bestBeforeDate
       });
-      wrapper.vm.checkBestBeforeDateValid();
+      wrapper.vm.checkAllDatesValid();
       await Vue.nextTick();
       expect(findCreateButton().props().disabled).toBeFalsy();
     });
@@ -588,7 +581,7 @@ describe("InventoryItemForm.vue", () => {
       await wrapper.setData({
         bestBefore: bestBeforeDate
       });
-      wrapper.vm.checkBestBeforeDateValid();
+      wrapper.vm.checkAllDatesValid();
       await Vue.nextTick();
       expect(findCreateButton().props().disabled).toBeTruthy();
     });
@@ -601,8 +594,7 @@ describe("InventoryItemForm.vue", () => {
         bestBefore: bestBeforeDate,
         sellBy: sellByDate
       });
-      wrapper.vm.checkBestBeforeDateValid();
-      wrapper.vm.checkSellByDateValid();
+      wrapper.vm.checkAllDatesValid();
       await Vue.nextTick();
       expect(findCreateButton().props().disabled).toBeFalsy();
     });
@@ -615,8 +607,7 @@ describe("InventoryItemForm.vue", () => {
         bestBefore: bestBeforeDate,
         sellBy: sellByDate
       });
-      wrapper.vm.checkBestBeforeDateValid();
-      wrapper.vm.checkSellByDateValid();
+      wrapper.vm.checkAllDatesValid();
       await Vue.nextTick();
       expect(findCreateButton().props().disabled).toBeTruthy();
     });
@@ -629,8 +620,7 @@ describe("InventoryItemForm.vue", () => {
         bestBefore: bestBeforeDate,
         expires: expiresDate
       });
-      wrapper.vm.checkBestBeforeDateValid();
-      wrapper.vm.checkExpiresDateVaild();
+      wrapper.vm.checkAllDatesValid();
       await Vue.nextTick();
       expect(findCreateButton().props().disabled).toBeFalsy();
     });
@@ -643,8 +633,7 @@ describe("InventoryItemForm.vue", () => {
         bestBefore: bestBeforeDate,
         expires: expiresDate
       });
-      wrapper.vm.checkBestBeforeDateValid();
-      wrapper.vm.checkExpiresDateVaild();
+      wrapper.vm.checkAllDatesValid();
       await Vue.nextTick();
       expect(findCreateButton().props().disabled).toBeTruthy();
     });
@@ -655,7 +644,7 @@ describe("InventoryItemForm.vue", () => {
       await wrapper.setData({
         bestBefore: bestBeforeDate
       });
-      wrapper.vm.checkBestBeforeDateValid();
+      wrapper.vm.checkAllDatesValid();
       await Vue.nextTick();
       expect(findCreateButton().props().disabled).toBeTruthy();
     });
@@ -666,7 +655,7 @@ describe("InventoryItemForm.vue", () => {
       await wrapper.setData({
         bestBefore: bestBeforeDate
       });
-      wrapper.vm.checkBestBeforeDateValid();
+      wrapper.vm.checkAllDatesValid();
       await Vue.nextTick();
       expect(findCreateButton().props().disabled).toBeTruthy();
     });
@@ -677,7 +666,7 @@ describe("InventoryItemForm.vue", () => {
       await wrapper.setData({
         expires: expiresDate
       });
-      wrapper.vm.checkExpiresDateVaild();
+      wrapper.vm.checkAllDatesValid();
       await Vue.nextTick();
       expect(findCreateButton().props().disabled).toBeFalsy();
     });
@@ -688,7 +677,7 @@ describe("InventoryItemForm.vue", () => {
       await wrapper.setData({
         expires: expiresDate
       });
-      wrapper.vm.checkExpiresDateVaild();
+      wrapper.vm.checkAllDatesValid();
       await Vue.nextTick();
       expect(findCreateButton().props().disabled).toBeTruthy();
     });
@@ -701,8 +690,7 @@ describe("InventoryItemForm.vue", () => {
         bestBefore: bestBeforeDate,
         expires: expiresDate
       });
-      wrapper.vm.checkBestBeforeDateValid();
-      wrapper.vm.checkExpiresDateVaild();
+      wrapper.vm.checkAllDatesValid();;
       await Vue.nextTick();
       expect(findCreateButton().props().disabled).toBeFalsy();
     });
@@ -715,8 +703,7 @@ describe("InventoryItemForm.vue", () => {
         bestBefore: bestBeforeDate,
         expires: expiresDate
       });
-      wrapper.vm.checkBestBeforeDateValid();
-      wrapper.vm.checkExpiresDateVaild();
+      wrapper.vm.checkAllDatesValid();
       await Vue.nextTick();
       expect(findCreateButton().props().disabled).toBeTruthy();
     });
@@ -727,7 +714,7 @@ describe("InventoryItemForm.vue", () => {
       await wrapper.setData({
         expires: expiresDate
       });
-      wrapper.vm.checkExpiresDateVaild();
+      wrapper.vm.checkAllDatesValid();
       await Vue.nextTick();
       expect(findCreateButton().props().disabled).toBeTruthy();
     });
@@ -738,7 +725,7 @@ describe("InventoryItemForm.vue", () => {
       await wrapper.setData({
         expires: expiresDate
       });
-      wrapper.vm.checkExpiresDateVaild();
+      wrapper.vm.checkAllDatesValid();
       await Vue.nextTick();
       expect(findCreateButton().props().disabled).toBeTruthy();
     });
@@ -951,7 +938,7 @@ describe("InventoryItemForm.vue", () => {
         },
         quantity: 26,
       });
-      expect(wrapper.vm.checkQuantityValid()).toBeFalsy();
+      expect(wrapper.vm.checkQuantityValid()).toEqual("Must be at least 27")
       expect(findSaveButton().props().disabled).toBeTruthy();
     });
 
