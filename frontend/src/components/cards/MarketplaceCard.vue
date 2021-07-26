@@ -41,10 +41,17 @@
     <v-card-actions v-if="isCardOwnerOrDGAA && showActions">
       <v-icon ref="deleteButton"
               color="primary"
+              @click.stop="editCardDialog = true"
+      >
+        mdi-pencil
+      </v-icon>
+      <v-icon ref="deleteButton"
+              color="primary"
               @click.stop="deleteCardDialog = true"
       >
         mdi-trash-can
       </v-icon>
+
       <v-dialog
         v-model="deleteCardDialog"
         max-width="300px"
@@ -87,7 +94,8 @@ export default {
   name: "MarketplaceCard",
   data () {
     return {
-      deleteCardDialog: false
+      deleteCardDialog: false,
+      editCardDialog: false,
     };
   },
   props: {
