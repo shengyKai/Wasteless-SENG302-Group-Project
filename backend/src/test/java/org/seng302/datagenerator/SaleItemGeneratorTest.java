@@ -128,9 +128,7 @@ public class SaleItemGeneratorTest {
     void generateSaleItems_generateOneSaleItemAndConsistentData_oneSaleItemGenerated() throws SQLException {
         List<Long> invItemIds = generateUserBusinessProductAndInvItems(1, 1, 1, 1);
         List<Long> saleItemIds = saleItemGenerator.generateSaleItems(invItemIds, 1);
-        if (saleItemIds.size() != 1) {
-            fail();
-        }
+        assertEquals(1, saleItemIds.size());
         long saleItemId = saleItemIds.get(0);
         checkRequiredFieldsNotNull(saleItemId);
     }
@@ -139,9 +137,7 @@ public class SaleItemGeneratorTest {
     void generateSaleItems_generateTwoSaleItemsAndConsistentData_twoSaleItemsGenerated() throws SQLException {
         List<Long> invItemIds = generateUserBusinessProductAndInvItems(1, 1, 1, 1);
         List<Long> saleItemIds = saleItemGenerator.generateSaleItems(invItemIds, 2);
-        if (saleItemIds.size() != 2) {
-            fail();
-        }
+        assertEquals(2, saleItemIds.size());
         for (long saleItemId: saleItemIds) {
             checkRequiredFieldsNotNull(saleItemId);
         }
@@ -151,9 +147,7 @@ public class SaleItemGeneratorTest {
     void generateSaleItems_generateTenSaleItemsAndConsistentData_tenSaleItemsGenerated() throws SQLException {
         List<Long> invItemIds = generateUserBusinessProductAndInvItems(1, 1, 1, 1);
         List<Long> saleItemIds = saleItemGenerator.generateSaleItems(invItemIds, 10);
-        if (saleItemIds.size() != 10) {
-            fail();
-        }
+        assertEquals(10, saleItemIds.size());
         for (long saleItemId: saleItemIds) {
             checkRequiredFieldsNotNull(saleItemId);
         }
@@ -163,9 +157,7 @@ public class SaleItemGeneratorTest {
     void generateSaleItems_generateHundredSaleItemsAndConsistentData_hundredSaleItemsGenerated() throws SQLException {
         List<Long> invItemIds = generateUserBusinessProductAndInvItems(1, 1, 1, 1);
         List<Long> saleItemIds = saleItemGenerator.generateSaleItems(invItemIds, 100);
-        if (saleItemIds.size() != 100) {
-            fail();
-        }
+        assertEquals(100, saleItemIds.size());
         for (long saleItemId: saleItemIds) {
             checkRequiredFieldsNotNull(saleItemId);
         }
@@ -176,9 +168,7 @@ public class SaleItemGeneratorTest {
         List<Long> invItemIds = generateUserBusinessProductAndInvItems(1, 1, 1, 1);
         List<Long> saleItemIds = saleItemGenerator.generateSaleItems(invItemIds, 0);
         long saleItemsInDB = getNumSaleItemsInDB();
-        if (saleItemsInDB != 0) {
-            fail();
-        }
+        assertEquals(0, saleItemsInDB);
     }
 
     @Test
@@ -186,9 +176,7 @@ public class SaleItemGeneratorTest {
         List<Long> invItemIds = generateUserBusinessProductAndInvItems(1, 1, 1, 1);
         List<Long> saleItemIds = saleItemGenerator.generateSaleItems(invItemIds, -1);
         long saleItemsInDB = getNumSaleItemsInDB();
-        if (saleItemsInDB != 0) {
-            fail();
-        }
+        assertEquals(0, saleItemsInDB);
     }
 
     @Test
@@ -196,9 +184,7 @@ public class SaleItemGeneratorTest {
         List<Long> invItemIds = generateUserBusinessProductAndInvItems(1, 1, 1, 1);
         List<Long> saleItemIds = saleItemGenerator.generateSaleItems(invItemIds, -10);
         long saleItemsInDB = getNumSaleItemsInDB();
-        if (saleItemsInDB != 0) {
-            fail();
-        }
+        assertEquals(0, saleItemsInDB);
     }
 
     @Test
@@ -208,9 +194,7 @@ public class SaleItemGeneratorTest {
         updateInventoryItemQuantity.setAccessible(true);
         updateInventoryItemQuantity.invoke(saleItemGenerator, 0, invItemIds.get(0));
         List<Long> saleItemIds = saleItemGenerator.generateSaleItems(invItemIds, 1);
-        if (saleItemIds.size() != 1) {
-          fail();
-        }
+        assertEquals(1, saleItemIds.size());
         long saleItemId = saleItemIds.get(0);
         checkRequiredFieldsNotNull(saleItemId);
     }
@@ -220,7 +204,7 @@ public class SaleItemGeneratorTest {
         Method generateQuantities = SaleItemGenerator.class.getDeclaredMethod("generateQuantities", int.class);
         generateQuantities.setAccessible(true);
         int[] quantities = (int[]) generateQuantities.invoke(saleItemGenerator, 1);
-        assertTrue(quantities[0] == 1);
+        assertEquals(1, quantities[0]);
     }
 
     @Test
@@ -237,11 +221,11 @@ public class SaleItemGeneratorTest {
         Method generateQuantities = SaleItemGenerator.class.getDeclaredMethod("generateQuantities", int.class);
         generateQuantities.setAccessible(true);
 
-        try {
-          generateQuantities.invoke(saleItemGenerator, -1);
-        } catch (InvocationTargetException exception) {
-          assertEquals(IllegalArgumentException.class, exception.getCause().getClass());
-        }
+        var exception = assertThrows(InvocationTargetException.class, () -> {
+            generateQuantities.invoke(saleItemGenerator, -1);
+        });
+
+        assertEquals(IllegalArgumentException.class, exception.getCause().getClass());
     }
 
     @Test
@@ -264,8 +248,6 @@ public class SaleItemGeneratorTest {
         extractInvItemInfo.setAccessible(true);
         List<Long> invItemIds = generateUserBusinessProductAndInvItems(1, 1, 1, 1);
         String[] invItemInfo = (String[]) extractInvItemInfo.invoke(saleItemGenerator, invItemIds.get(0));
-        if (invItemInfo.length != 3) {
-          fail();
-        }
+        assertEquals(3, invItemInfo.length);
     }
 }
