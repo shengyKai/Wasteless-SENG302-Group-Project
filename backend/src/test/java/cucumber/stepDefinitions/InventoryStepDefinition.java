@@ -568,6 +568,7 @@ public class InventoryStepDefinition  {
     @Then("the best before date of the inventory item with the id {long} will be {string}")
     public void the_best_before_date_of_the_inventory_item_with_the_version_will_be(
             long invItemId, String bestBefore) {
+        System.out.println(mvcResult.getResponse().getErrorMessage());
         assertEquals(200, mvcResult.getResponse().getStatus());
         InventoryItem invItem = inventoryItemRepository.getInventoryItemByBusinessAndId(
                 businessContext.getLast(), invItemId);
@@ -593,6 +594,16 @@ public class InventoryStepDefinition  {
                 businessContext.getLast(), invItemId);
         assertNotNull(invItem);
         assertEquals(invItem.getProduct().getProductCode(), productCode);
+    }
+
+    @Then("I will receive a forbidden response")
+    public void i_will_receive_a_forbidden_response() {
+        assertEquals(403, mvcResult.getResponse().getStatus());
+    }
+
+    @Then("I will receive a bad request response")
+    public void i_will_receive_a_bad_request_response() {
+        assertEquals(400, mvcResult.getResponse().getStatus());
     }
 }
 
