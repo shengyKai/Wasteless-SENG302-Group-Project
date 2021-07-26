@@ -12,6 +12,7 @@ import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
+import org.hibernate.Session;
 import org.seng302.leftovers.entities.*;
 import org.seng302.leftovers.persistence.BusinessRepository;
 import org.seng302.leftovers.persistence.InventoryItemRepository;
@@ -22,11 +23,13 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.context.WebApplicationContext;
 
+import javax.persistence.EntityManager;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
+import java.sql.PreparedStatement;
 import java.text.ParseException;
 import java.time.LocalDate;
 import java.util.Comparator;
@@ -43,6 +46,8 @@ public class InventoryStepDefinition  {
     private ObjectMapper objectMapper;
     @Autowired
     private WebApplicationContext webApplicationContext;
+    @Autowired
+    private EntityManager entityManager;
     @Autowired
     private MockMvc mockMvc;
     @Autowired
@@ -96,31 +101,6 @@ public class InventoryStepDefinition  {
                     .withQuantity(Integer.parseInt(row.get("quantity")))
                     .withExpires(row.get("expires"))
                     .build();
-            inventoryItemRepository.save(item);
-        }
-    }
-
-    @Given("the business has the following list of items in its inventory:")
-    public void the_business_has_the_following_list_of_items_in_its_inventory(io.cucumber.datatable.DataTable dataTable) throws Exception {
-        List<Map<String, String>> rows = dataTable.asMaps(String.class, String.class);
-        for (Map<String, String> row : rows) {
-            Optional<Product> product = productRepository.findByBusinessAndProductCode(businessContext.getLast(), row.get("product_id"));
-            if (product.isEmpty()) {
-                throw new Exception("Product should be saved to product repository");
-            }
-            InventoryItem item = new InventoryItem.Builder()
-                    .withProduct(product.get())
-                    .withQuantity(Integer.parseInt(row.get("quantity")))
-                    .withPricePerItem(row.get("price_per_item"))
-                    .withTotalPrice(row.get("total_price"))
-                    .withManufactured(row.get("manufactured"))
-                    .withSellBy(row.get("sellBy"))
-                    .withBestBefore(row.get("bestBefore"))
-                    .withExpires(row.get("expires"))
-                    .build();
-            Field id = InventoryItem.class.getDeclaredField("id");
-            id.setAccessible(true);
-            id.set(item, Long.valueOf(row.get("id")));
             inventoryItemRepository.save(item);
         }
     }
@@ -320,6 +300,41 @@ public class InventoryStepDefinition  {
         invBody.put("bestBefore", LocalDate.now().plusYears(200).toString());
         invBody.put("expires", LocalDate.now().plusYears(300).toString());
         return invBody;
+    }
+
+    @Given("the business has the following list of items in its inventory:")
+    public void the_business_has_the_following_list_of_items_in_its_inventory(io.cucumber.datatable.DataTable dataTable) throws Exception {
+        List<Map<String, String>> rows = dataTable.asMaps(String.class, String.class);
+        for (Map<String, String> row : rows) {
+            Optional<Product> product = productRepository.findByBusinessAndProductCode(businessContext.getLast(), row.get("product_id"));
+            if (product.isEmpty()) {
+                throw new Exception("Product should be saved to product repository");
+            }
+            InventoryItem item = new InventoryItem.Builder()
+                    .withProduct(product.get())
+                    .withQuantity(Integer.parseInt(row.get("quantity")))
+                    .withPricePerItem(row.get("price_per_item"))
+                    .withTotalPrice(row.get("total_price"))
+                    .withManufactured(row.get("manufactured"))
+                    .withSellBy(row.get("sellBy"))
+                    .withBestBefore(row.get("bestBefore"))
+                    .withExpires(row.get("expires"))
+                    .build();
+            inventoryItemRepository.save(item);
+
+            //Changing Inventory ID
+            long actualId = item.getId();
+            long wantedId = Long.parseLong(row.get("id"));
+            Session session = entityManager.unwrap(Session.class);
+            session.doWork(connection -> {
+                PreparedStatement stmt = connection.prepareStatement(
+                        "UPDATE inventory_item SET id = ? WHERE id = ?"
+                );
+                stmt.setLong(1, wantedId);
+                stmt.setLong(2, actualId);
+                stmt.executeUpdate();
+            });
+        }
     }
 
     @When("I try to modify the quantity to {int} for the inventory entry with the id {long}")
