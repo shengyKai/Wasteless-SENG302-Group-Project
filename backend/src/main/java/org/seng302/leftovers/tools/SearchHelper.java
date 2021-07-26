@@ -21,7 +21,6 @@ public class SearchHelper {
 
     private static final int DEFAULT_RESULTS_PER_PAGE = 15;
     private static final List<String> USER_ORDER_BY_OPTIONS = List.of("userID", "firstName", "middleName", "lastName", "nickname", "email");
-    private static final List<String> BUSINESS_TYPES = Arrays.asList("Accommodation and Food Services", "Retail Trade", "Charitable organisation", "Non-profit organisation");
     private static final Logger logger = LogManager.getLogger(SearchHelper.class);
 
     private enum PredicateType {
@@ -226,7 +225,7 @@ public class SearchHelper {
      * @return Specification for finding businesses with the given type.
      */
     private static Specification<Business> constructBusinessSpecificationFromType(String businessType) {
-        if (!BUSINESS_TYPES.contains(businessType)) {
+        if (!Business.getBusinessTypes().contains(businessType)) {
             SearchFormatException exception = new SearchFormatException(String.format("\"%s\" is an invalid business type", businessType));
             logger.error(exception.getMessage());
             throw exception;

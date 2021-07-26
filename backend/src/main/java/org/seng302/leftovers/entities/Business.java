@@ -337,6 +337,14 @@ public class Business {
         return adminJsons;
     }
 
+    /**
+     * Returns a list of all possible business types.
+     * @return All the types allowed for a business.
+     */
+    public static List<String> getBusinessTypes() {
+        return BUSINESS_TYPES;
+    }
+
     @Override
     public String toString() {
         return this.name;
