@@ -80,7 +80,7 @@
         Temporary edit button
       </v-btn>
       <template v-if="editCardDialog">
-        <MarketplaceCardForm @closeDialog="editCardDialog=false"/>
+        <MarketplaceCardForm :user="$store.state.user" :previousCard="content" @closeDialog="editCardDialog=false"/>
       </template>
     </v-card-actions>
   </v-card>

@@ -52,7 +52,7 @@
         <v-spacer/>
         <v-col cols="auto" class="text-right" >
           <!---Link to modal for creating new card--->
-          <v-btn type="button" color="primary" @click="showCreateCard" rounded>
+          <v-btn type="button" color="primary" @click="showCreateCard=true" rounded>
             Create card
           </v-btn>
         </v-col>
@@ -104,12 +104,16 @@
         </v-row>
       </v-tab-item>
     </v-tabs-items>
+    <template v-if="showCreateCard">
+      <MarketplaceCardForm :user="user" @closeDialog="showCreateCard=false"/>
+    </template>
 
   </div>
 </template>
 
 <script>
 import MarketplaceCard from "../cards/MarketplaceCard";
+import MarketplaceCardForm from "./MarketplaceCardForm.vue";
 import {getMarketplaceCardsBySection } from "../../api/internal.ts";
 import { SECTION_NAMES } from '@/utils';
 
@@ -149,8 +153,14 @@ export default {
        * Note: change the default here to true because backlog states that
        * creation date should be descending by default.
        */
-      reverse: true
+      reverse: true,
+      showCreateCard: false,
     };
+  },
+  computed: {
+    user() {
+      return this.$store.state.user;
+    }
   },
   methods: {
     /**
@@ -177,9 +187,6 @@ export default {
           this.totalResults[key] = value.count;
         }
       }
-    },
-    showCreateCard() {
-      this.$store.commit('showCreateMarketplaceCard', this.$store.state.user);
     },
     /**
      * The total number of pages required to show all the users
@@ -210,7 +217,8 @@ export default {
     }
   },
   components: {
-    MarketplaceCard
+    MarketplaceCard,
+    MarketplaceCardForm,
   },
   watch: {
     orderBy() {

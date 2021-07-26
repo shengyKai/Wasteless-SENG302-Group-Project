@@ -90,7 +90,6 @@ describe('MarketplaceCardFrom.vue', () => {
     resetStoreForTesting();
     let store = getStore();
     store.state.user = makeTestUser(1); // log in as user 1
-    store.state.createMarketplaceCardDialog = store.state.user;
     // Creating wrapper around MarketplaceCardForm with data-app to appease vuetify
     const App = localVue.component('App', {
       components: { MarketplaceCardForm },

@@ -81,8 +81,8 @@
             <v-card-actions>
               <v-spacer/>
               <div class="error--text" v-if="feedback !== undefined">{{ feedback }}</div>
-              <v-btn text color="primary" :disabled="!valid" @click="createCard">
-                Create Card
+              <v-btn text color="primary" :disabled="!valid" @click="submit">
+                {{ submitText }}
               </v-btn>
               <v-btn text color="primary" @click="closeDialog">
                 Cancel
@@ -101,19 +101,20 @@ import {createMarketplaceCard, createNewKeyword, getKeywords} from '@/api/intern
 export default {
   name: "MarketplaceCard",
   props: {
+    user: Object,
     previousCard: Object,
   },
   data() {
     return {
-      title: "",
-      description: "",
+      title: this.previousCard?.title ?? "",
+      description: this.previousCard?.description ?? "",
       allKeywords: [],
-      selectedKeywords: [],
+      selectedKeywords: this.previousCard?.keywords ?? [],
       keywordFilter: "",
       dialog: true,
       errorMessage: undefined,
       sections: [{text: "For Sale", value: "ForSale"}, {text: "Wanted", value: "Wanted"}, {text: "Exchange", value: "Exchange"}],
-      selectedSection: undefined,
+      selectedSection: this.previousCard?.section ?? undefined,
       allowedCharsRegex: /^[\s\d\p{L}\p{P}]*$/u,
     };
   },
@@ -128,6 +129,7 @@ export default {
 
     this.titleField.setAttribute("style", "height:" + (this.titleField.scrollHeight) + "px;overflow-y:hidden;");
     this.titleField.addEventListener("input", OnInput);
+
     getKeywords()
       .then((response) => {
         if (typeof response === 'string') {
@@ -157,13 +159,6 @@ export default {
     },
     titleField() {
       return this.$refs.titleField;
-    },
-    user() {
-      if (this.$store.state.createMarketplaceCardDialog !== undefined) {
-        return this.$store.state.createMarketplaceCardDialog;
-      } else {
-        return undefined;
-      }
     },
     creator() {
       return this.user.firstName + ' ' + this.user.lastName;
@@ -228,7 +223,13 @@ export default {
         return "Create Marketplace Card";
       }
       return "Modify Marketplace Card";
-    }
+    },
+    submitText() {
+      if (this.isCreate) {
+        return "Create card";
+      }
+      return "Save card";
+    },
   },
   methods: {
     async addNewKeyword() {
@@ -247,7 +248,7 @@ export default {
     closeDialog() {
       this.$emit('closeDialog');
     },
-    async createCard() {
+    async submit() {
       this.errorMessage = undefined;
       let card = {
         creatorId: this.user.id,
@@ -256,7 +257,12 @@ export default {
         description: this.description,
         keywordIds: this.selectedKeywords,
       };
-      let response = await createMarketplaceCard(card);
+      let response;
+      if (this.isCreate) {
+        response = await createMarketplaceCard(card);
+      } else {
+        response = "Edit endpoint not yet implemented";
+      }
       if (typeof response === 'string') {
         this.errorMessage = response;
       } else {
