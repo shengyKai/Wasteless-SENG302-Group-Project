@@ -6,10 +6,12 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.seng302.leftovers.entities.Business;
 import org.seng302.leftovers.entities.Location;
+import org.seng302.leftovers.entities.MarketplaceCard;
 import org.seng302.leftovers.entities.User;
 import org.seng302.leftovers.persistence.BusinessRepository;
 import org.seng302.leftovers.persistence.UserRepository;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
+import org.seng302.leftovers.tools.JsonTools;
 import org.seng302.leftovers.tools.SearchHelper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -291,16 +293,6 @@ public class BusinessController {
         Specification<Business> specification = SearchHelper.constructBusinessSpecificationFromSearchQuery(searchQuery);
 
         Page<Business> results = businessRepository.findAll(specification, pageRequest);
-        Long count = results.getTotalElements();
-
-        JSONArray resultArray = new JSONArray();
-        for (Business business : results) {
-            resultArray.appendElement(business.constructJson());
-        }
-
-        JSONObject json = new JSONObject();
-        json.put("count", count);
-        json.put("results", resultArray);
-        return json;
+        return JsonTools.constructPageJSON(results.map(Business::constructJson));
     }
 }
