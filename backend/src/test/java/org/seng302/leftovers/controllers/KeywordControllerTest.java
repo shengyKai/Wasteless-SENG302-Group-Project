@@ -9,6 +9,7 @@ import org.mockito.*;
 import org.seng302.leftovers.entities.*;
 import org.seng302.leftovers.exceptions.AccessTokenException;
 import org.seng302.leftovers.persistence.KeywordRepository;
+import org.seng302.leftovers.service.KeywordService;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
@@ -40,6 +41,9 @@ class KeywordControllerTest {
     @Mock
     private KeywordRepository keywordRepository;
 
+    @Mock
+    private KeywordService keywordService;
+
     private MockedStatic<AuthenticationTokenManager> authenticationTokenManager;
 
     @BeforeEach
@@ -51,7 +55,7 @@ class KeywordControllerTest {
 
         when(keywordRepository.findByName(any())).thenReturn(Optional.empty());
 
-        var keywordController = new KeywordController(keywordRepository);
+        var keywordController = new KeywordController(keywordRepository, keywordService);
         mockMvc = MockMvcBuilders.standaloneSetup(keywordController).build();
     }
 

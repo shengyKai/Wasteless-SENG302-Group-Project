@@ -16,8 +16,9 @@ Feature: UCM6 - Keyword Management
     And The keyword "Dance" is not present
 
   Scenario: AC5 - System administrators are notified a new keyword is added
-    Given I am logged in as an administrator
-    When  User "Dave" creates a new keyword "Dance"
+    Given A admin exists with name "Bob"
+    And   I am logged into "Bob" account
+    When  A keyword "Dance" is created
     Then  I receive a notification
     And   The notification contains the keyword "Dance"
 

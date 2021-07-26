@@ -41,5 +41,7 @@ public class CreateKeywordEvent extends Event {
         return jsonObject;
     }
 
-
+    public Keyword getKeyword() {
+        return newKeyword;
+    }
 }
