@@ -10,11 +10,9 @@ import { castMock, flushQueue } from './utils';
 
 jest.mock('@/api/internal', () => ({
   getProducts: jest.fn(),
-  getProductCount: jest.fn()
 }));
 
 const getProducts = castMock(api.getProducts);
-const getProductCount = castMock(api.getProductCount);
 
 Vue.use(Vuetify);
 
@@ -30,10 +28,13 @@ const RESULTS_PER_PAGE = 10;
  * @returns List of test products
  */
 function createTestProducts(count: number) {
-  let result: Product[] = [];
+  let result: api.SearchResults<Product> = {
+    results : [],
+    count   : count,
+  };
 
   for (let i = 0; i<count; i++) {
-    result.push({
+    result.results.push({
       id: 'product_code' + i,
       name: 'product_name' + i,
       description: 'product_description' + i,
@@ -48,12 +49,7 @@ function createTestProducts(count: number) {
 describe('ProductCatalogue.vue', () => {
   // Container for the ProductCatalogue under test
   let wrapper: Wrapper<any>;
-  let numberOfTestProducts: number;
-
-  getProductCount.mockImplementation(async businessId => {
-    return numberOfTestProducts;
-  });
-
+  
   /**
    * Creates the wrapper for the ProductCatalogue component.
    * This must be called before using the ProductCatalogue wrapper.
@@ -78,9 +74,8 @@ describe('ProductCatalogue.vue', () => {
    *
    * @param products Products on the current page to use for the mock results
    */
-  function setResults(products: Product[], totalCount?: number) {
+  function setResults(products: api.SearchResults<Product>) {
     getProducts.mockResolvedValue(products);
-    getProductCount.mockResolvedValue(totalCount !== undefined ? totalCount : products.length);
   }
 
   /**
@@ -92,20 +87,17 @@ describe('ProductCatalogue.vue', () => {
     return wrapper.findComponent({name: 'v-alert'});
   }
 
-  beforeEach(() => {
-    numberOfTestProducts = 5;
-  });
   /**
    * Tests that when initially opened that the products are queried
    */
   it('The products from the business id are queried', () => {
-    setResults(createTestProducts(numberOfTestProducts));
+    setResults(createTestProducts(5));
     createWrapper();
     expect(getProducts).toBeCalledWith(100, 1, RESULTS_PER_PAGE, 'productCode', false);
   });
 
   it('The search results should be displayed somewhere', async () => {
-    let products = createTestProducts(numberOfTestProducts);
+    let products = createTestProducts(5);
     setResults(products);
     createWrapper();
     // Flush queue is used instead of Vue.nextTick() since this will wait for everything to finish
@@ -115,7 +107,7 @@ describe('ProductCatalogue.vue', () => {
       .findAllComponents(ProductCatalogueItem)
       .wrappers
       .map(searchResult => searchResult.props().product);
-    expect(shownProducts).toStrictEqual(products);
+    expect(shownProducts).toStrictEqual(products.results);
   });
 
   it('If there is an error then the error should be displayed', async () => {
@@ -136,7 +128,10 @@ describe('ProductCatalogue.vue', () => {
   });
 
   it('If there are many pages then there should be a pagination component with many pages', async () => {
-    setResults(createTestProducts(RESULTS_PER_PAGE), 100);
+    let testResult = createTestProducts(RESULTS_PER_PAGE);
+    testResult.count = 100;
+    setResults(testResult);
+    
     createWrapper();
     await flushQueue();
     let pagination = wrapper.findComponent({ name: 'v-pagination' });
@@ -146,14 +141,17 @@ describe('ProductCatalogue.vue', () => {
   });
 
   it('If there are results then there should be a message informing the buisness admin how many', async () => {
-    setResults(createTestProducts(RESULTS_PER_PAGE), 100);
+    let testResult = createTestProducts(RESULTS_PER_PAGE);
+    testResult.count = 100;
+    setResults(testResult);
+    
     createWrapper();
     await flushQueue();
     expect(wrapper.text()).toContain(`Displaying 1 - ${RESULTS_PER_PAGE} of 100 results`);
   });
 
   it('If there are no results then there should be a message informing the buisness admin of that', async () => {
-    setResults([]);
+    setResults(createTestProducts(0));
     createWrapper();
     await flushQueue();
     expect(wrapper.text()).toContain('There are no results to show');

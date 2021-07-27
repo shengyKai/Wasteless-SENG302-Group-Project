@@ -2,6 +2,8 @@ package org.seng302.leftovers.entities;
 
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -27,146 +29,154 @@ import static org.junit.jupiter.api.Assertions.*;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class ProductTests {
 
-   @Autowired
-   ProductRepository productRepository;
-   @Autowired
-   BusinessRepository businessRepository;
-   @Autowired
-   UserRepository userRepository;
+    @Autowired
+    ProductRepository productRepository;
+    @Autowired
+    BusinessRepository businessRepository;
+    @Autowired
+    UserRepository userRepository;
+    @Autowired
+    private SessionFactory sessionFactory;
 
-   private User testUser1;
-   private Business testBusiness1;
-   private Business testBusiness2;
+    private User testUser1;
+    private Business testBusiness1;
+    private Business testBusiness2;
+    private Session session;
 
-   /**
-    * Created a business objects for testing
-    */
-   void createTestBusinesses() {
-       testBusiness1 = new Business.Builder()
-               .withBusinessType("Accommodation and Food Services")
-               .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
-                       "Canterbury,8041"))
-               .withDescription("Some description")
-               .withName("BusinessName1")
-               .withPrimaryOwner(testUser1)
-               .build();
-       testBusiness1 = businessRepository.save(testBusiness1);
 
-       testBusiness2 = new Business.Builder()
-               .withBusinessType("Accommodation and Food Services")
-               .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
-                       "Canterbury,8041"))
-               .withDescription("Some description 2")
-               .withName("BusinessName2")
-               .withPrimaryOwner(testUser1)
-               .build();
-       testBusiness2 = businessRepository.save(testBusiness2);
-   }
+    /**
+     * Created a business objects for testing
+     */
+    void createTestBusinesses() {
+        testBusiness1 = new Business.Builder()
+                .withBusinessType("Accommodation and Food Services")
+                .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
+                        "Canterbury,8041"))
+                .withDescription("Some description")
+                .withName("BusinessName1")
+                .withPrimaryOwner(testUser1)
+                .build();
+        testBusiness1 = businessRepository.save(testBusiness1);
+        testBusiness1 = session.find(Business.class, testBusiness1.getId());
 
-   @BeforeAll
-   void setUp() throws ParseException {
-       businessRepository.deleteAll();
-       userRepository.deleteAll();
+        testBusiness2 = new Business.Builder()
+                .withBusinessType("Accommodation and Food Services")
+                .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
+                        "Canterbury,8041"))
+                .withDescription("Some description 2")
+                .withName("BusinessName2")
+                .withPrimaryOwner(testUser1)
+                .build();
+        testBusiness2 = businessRepository.save(testBusiness2);
+        testBusiness2 = session.find(Business.class, testBusiness2.getId());
+    }
 
-       // Add a test user that will be the owner of both businesses
-       testUser1 = new User.Builder()
-               .withFirstName("John")
-               .withMiddleName("Hector")
-               .withLastName("Smith")
-               .withNickName("Jonny")
-               .withEmail("johnsmith98@gmail.com")
-               .withPassword("1337-H%nt3r2")
-               .withBio("Likes long walks on the beach")
-               .withDob("2000-03-11")
-               .withPhoneNumber("+64 3 555 0129")
-               .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
-                       "Canterbury,8041"))
-               .build();
-       testUser1 = userRepository.save(testUser1);
-       createTestBusinesses();
-   }
+    @BeforeEach
+    void setup() {
+        session = sessionFactory.openSession();
+        businessRepository.deleteAll();
+        userRepository.deleteAll();
 
-   @AfterAll
-   void tearDown() {
-       businessRepository.deleteAll();
-       userRepository.deleteAll();
-   }
+        // Add a test user that will be the owner of both businesses
+        testUser1 = new User.Builder()
+                .withFirstName("John")
+                .withMiddleName("Hector")
+                .withLastName("Smith")
+                .withNickName("Jonny")
+                .withEmail("johnsmith98@gmail.com")
+                .withPassword("1337-H%nt3r2")
+                .withBio("Likes long walks on the beach")
+                .withDob("2000-03-11")
+                .withPhoneNumber("+64 3 555 0129")
+                .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
+                        "Canterbury,8041"))
+                .build();
+        testUser1 = userRepository.save(testUser1);
+        createTestBusinesses();
+    }
 
-   @AfterEach
-   void cleanUp() {
-       productRepository.deleteAll();
-   }
+    @AfterAll
+    void tearDown() {
+        businessRepository.deleteAll();
+        userRepository.deleteAll();
+    }
 
-   /**
-    * Test that a product object can be created and all its attributes are what they are expected to be.
-    */
-   @Test
-   void createValidProduct() {
-       Product product = new Product.Builder()
-               .withProductCode("ORANGE-69")
-               .withName("Fresh Orange")
-               .withDescription("This is a fresh orange")
-               .withManufacturer("Apple")
-               .withRecommendedRetailPrice("2.01")
-               .withBusiness(testBusiness1)
-               .build();
-       productRepository.save(product);
+    @AfterEach
+    void cleanUp() {
+        session.close();
+        productRepository.deleteAll();
+    }
 
-       assertEquals("ORANGE-69", product.getProductCode());
-       assertEquals("Fresh Orange", product.getName());
-       assertEquals("This is a fresh orange", product.getDescription());
-       assertEquals("Apple", product.getManufacturer());
-       assertEquals(new BigDecimal("2.01"), product.getRecommendedRetailPrice());
-       assertEquals(testBusiness1.getAddress().getCountry(), product.getCountryOfSale());
-   }
+    /**
+     * Test that a product object can be created and all its attributes are what they are expected to be.
+     */
+    @Test
+    void createValidProduct() {
+        Product product = new Product.Builder()
+                .withProductCode("ORANGE-69")
+                .withName("Fresh Orange")
+                .withDescription("This is a fresh orange")
+                .withManufacturer("Apple")
+                .withRecommendedRetailPrice("2.01")
+                .withBusiness(testBusiness1)
+                .build();
+        productRepository.save(product);
 
-   /**
-    * Test that the auto generated IDs of the products are unique and a newly created product's id does not match
-    * the previously created product's id.
-    */
-   @Test
-   void checkTwoProductsDoNotHaveTheSameIDs() {
-       Product product1 = new Product.Builder()
-               .withProductCode("NATHAN-APPLE-69")
-               .withName("The Nathan Apple")
-               .withDescription("Ever wonder why Nathan has an apple")
-               .withManufacturer("Apple")
-               .withRecommendedRetailPrice("9000.01")
-               .withBusiness(testBusiness1)
-               .build();
-       Product product2 = new Product.Builder()
-               .withProductCode("ORANGE-70")
-               .withName("Fresh Orange")
-               .withDescription("This is a fresh orange")
-               .withManufacturer("Apple")
-               .withRecommendedRetailPrice("2.02")
-               .withBusiness(testBusiness1)
-               .build();
-       productRepository.save(product1);
-       productRepository.save(product2);
+        assertEquals("ORANGE-69", product.getProductCode());
+        assertEquals("Fresh Orange", product.getName());
+        assertEquals("This is a fresh orange", product.getDescription());
+        assertEquals("Apple", product.getManufacturer());
+        assertEquals(new BigDecimal("2.01"), product.getRecommendedRetailPrice());
+        assertEquals(testBusiness1.getAddress().getCountry(), product.getCountryOfSale());
+    }
 
-       assertNotEquals(product1.getID(), product2.getID());
-   }
+    /**
+     * Test that the auto generated IDs of the products are unique and a newly created product's id does not match
+     * the previously created product's id.
+     */
+    @Test
+    void checkTwoProductsDoNotHaveTheSameIDs() {
+        Product product1 = new Product.Builder()
+                .withProductCode("NATHAN-APPLE-69")
+                .withName("The Nathan Apple")
+                .withDescription("Ever wonder why Nathan has an apple")
+                .withManufacturer("Apple")
+                .withRecommendedRetailPrice("9000.01")
+                .withBusiness(testBusiness1)
+                .build();
+        Product product2 = new Product.Builder()
+                .withProductCode("ORANGE-70")
+                .withName("Fresh Orange")
+                .withDescription("This is a fresh orange")
+                .withManufacturer("Apple")
+                .withRecommendedRetailPrice("2.02")
+                .withBusiness(testBusiness1)
+                .build();
+        productRepository.save(product1);
+        productRepository.save(product2);
 
-   /**
-    * Test the date that is generated when a product is created is today (when the product is created).
-    */
-   @Test
-   void checkDate() {
-       LocalDate now = LocalDate.now();
-       Product product = new Product.Builder()
-               .withProductCode("NATHAN-APPLE-69")
-               .withName("The Nathan Apple")
-               .withDescription("Ever wonder why Nathan has an apple")
-               .withManufacturer("Apple")
-               .withRecommendedRetailPrice("9000.01")
-               .withBusiness(testBusiness1)
-               .build();
-       productRepository.save(product);
-       Instant productDate = product.getCreated();
+        assertNotEquals(product1.getID(), product2.getID());
+    }
 
-       assertTrue(ChronoUnit.SECONDS.between(Instant.now(), productDate) < 20);
-   }
+    /**
+     * Test the date that is generated when a product is created is today (when the product is created).
+     */
+    @Test
+    void checkDate() {
+        LocalDate now = LocalDate.now();
+        Product product = new Product.Builder()
+                .withProductCode("NATHAN-APPLE-69")
+                .withName("The Nathan Apple")
+                .withDescription("Ever wonder why Nathan has an apple")
+                .withManufacturer("Apple")
+                .withRecommendedRetailPrice("9000.01")
+                .withBusiness(testBusiness1)
+                .build();
+        productRepository.save(product);
+        Instant productDate = product.getCreated();
+
+        assertTrue(ChronoUnit.SECONDS.between(Instant.now(), productDate) < 20);
+    }
 
    /**
     * Check that a product with the same code as one in a catalogue cannot be added to said catalogue, because two
@@ -247,61 +257,61 @@ class ProductTests {
        assertDoesNotThrow(() -> productRepository.save(product2));
    }
 
-   /**
-    * Checks the product is connected to the business's catalogue by checking the mentioned product is the same as
-    * the one in the catalogue.
-    */
-   @Test
-   void checkTheProductIsConnectedToTheBusinessCatalogue() {
-       Product product1 = new Product.Builder()
-               .withProductCode("NATHAN-APPLE-70")
-               .withName("The Nathan Apple")
-               .withDescription("Ever wonder why Nathan has an apple")
-               .withManufacturer("Apple")
-               .withRecommendedRetailPrice("9000.03")
-               .withBusiness(testBusiness1)
-               .build();
-       productRepository.save(product1);
-       testBusiness1 = businessRepository.findByName("BusinessName1");
-       List<Product> catalogue = productRepository.getAllByBusiness(testBusiness1);
+    /**
+     * Checks the product is connected to the business's catalogue by checking the mentioned product is the same as
+     * the one in the catalogue.
+     */
+    @Test
+    void checkTheProductIsConnectedToTheBusinessCatalogue() {
+        Product product1 = new Product.Builder()
+                .withProductCode("NATHAN-APPLE-70")
+                .withName("The Nathan Apple")
+                .withDescription("Ever wonder why Nathan has an apple")
+                .withManufacturer("Apple")
+                .withRecommendedRetailPrice("9000.03")
+                .withBusiness(testBusiness1)
+                .build();
+        productRepository.save(product1);
+        testBusiness1 = businessRepository.findByName("BusinessName1");
+        List<Product> catalogue = productRepository.findAllByBusiness(testBusiness1);
 
        assertEquals(product1.getID(), catalogue.get(0).getID());
    }
 
-   /**
-    * Checks that several products are successfully added to the business's catalogue
-    */
-   @Test
-   void createAValidListOfProductsInACatalogue() {
-       Product product1 = new Product.Builder()
-               .withProductCode("NATHAN-APPLE-70")
-               .withName("The Nathan Apple")
-               .withDescription("Ever wonder why Nathan has an apple")
-               .withManufacturer("Apple")
-               .withRecommendedRetailPrice("9000.03")
-               .withBusiness(testBusiness1)
-               .build();
-       Product product2 = new Product.Builder()
-               .withProductCode("NATHAN-APPLE-71")
-               .withName("The Nathan Apple Two")
-               .withDescription("Ever wonder why Nathan has an apple too")
-               .withManufacturer("Apple")
-               .withRecommendedRetailPrice("9000.04")
-               .withBusiness(testBusiness1)
-               .build();
-       Product product3 = new Product.Builder()
-               .withProductCode("NATHAN-APPLE-72")
-               .withName("The Nathan Apple Three")
-               .withDescription("Ever wonder why Nathan has an apple too maybe")
-               .withManufacturer("Apple")
-               .withRecommendedRetailPrice("9000.05")
-               .withBusiness(testBusiness1)
-               .build();
-       productRepository.save(product1);
-       productRepository.save(product2);
-       productRepository.save(product3);
-       testBusiness1 = businessRepository.findByName("BusinessName1");
-       List<Product> catalogue = productRepository.getAllByBusiness(testBusiness1);
+    /**
+     * Checks that several products are successfully added to the business's catalogue
+     */
+    @Test
+    void createAValidListOfProductsInACatalogue() {
+        Product product1 = new Product.Builder()
+                .withProductCode("NATHAN-APPLE-70")
+                .withName("The Nathan Apple")
+                .withDescription("Ever wonder why Nathan has an apple")
+                .withManufacturer("Apple")
+                .withRecommendedRetailPrice("9000.03")
+                .withBusiness(testBusiness1)
+                .build();
+        Product product2 = new Product.Builder()
+                .withProductCode("NATHAN-APPLE-71")
+                .withName("The Nathan Apple Two")
+                .withDescription("Ever wonder why Nathan has an apple too")
+                .withManufacturer("Apple")
+                .withRecommendedRetailPrice("9000.04")
+                .withBusiness(testBusiness1)
+                .build();
+        Product product3 = new Product.Builder()
+                .withProductCode("NATHAN-APPLE-72")
+                .withName("The Nathan Apple Three")
+                .withDescription("Ever wonder why Nathan has an apple too maybe")
+                .withManufacturer("Apple")
+                .withRecommendedRetailPrice("9000.05")
+                .withBusiness(testBusiness1)
+                .build();
+        productRepository.save(product1);
+        productRepository.save(product2);
+        productRepository.save(product3);
+        testBusiness1 = businessRepository.findByName("BusinessName1");
+        List<Product> catalogue = productRepository.findAllByBusiness(testBusiness1);
 
        assertEquals(3, catalogue.size());
    }
@@ -948,36 +958,39 @@ class ProductTests {
        assertEquals(testProduct.getCountryOfSale(), testJson.getAsString("countryOfSale"));
    }
 
-   @Test
-   void constructJsonObject_optionalAttributesNull_allExpectedFieldsPresent() {
-       Product testProduct = new Product.Builder()
-               .withProductCode("NATHAN-APPLE-70")
-               .withName("The Nathan Apple")
-               .withBusiness(testBusiness1)
-               .build();
-       JSONObject testJson = testProduct.constructJSONObject();
-       assertTrue(testJson.containsKey("id"));
-       assertTrue(testJson.containsKey("name"));
-       assertTrue(testJson.containsKey("created"));
-       assertTrue(testJson.containsKey("images"));
-       assertTrue(testJson.containsKey("countryOfSale"));
-   }
+    @Test
+    void constructJsonObject_optionalAttributesNull_allExpectedFieldsPresent() {
+            Product testProduct = new Product.Builder()
+                    .withProductCode("NATHAN-APPLE-70")
+                    .withName("The Nathan Apple")
+                    .withBusiness(testBusiness1)
+                    .build();
+            JSONObject testJson = testProduct.constructJSONObject();
+            assertTrue(testJson.containsKey("id"));
+            assertTrue(testJson.containsKey("name"));
+            assertTrue(testJson.containsKey("created"));
+            assertTrue(testJson.containsKey("images"));
+            assertTrue(testJson.containsKey("countryOfSale"));
 
-   @Test
-   void constructJsonObject_optionalAttributesNull_noUnexpectedFieldsPresent() {
-       Product testProduct = new Product.Builder()
-               .withProductCode("NATHAN-APPLE-70")
-               .withName("The Nathan Apple")
-               .withBusiness(testBusiness1)
-               .build();
-       JSONObject testJson = testProduct.constructJSONObject();
-       testJson.remove("id");
-       testJson.remove("name");
-       testJson.remove("created");
-       testJson.remove("images");
-       testJson.remove("countryOfSale");
-       assertTrue(testJson.isEmpty());
-   }
+    }
+
+    @Test
+    void constructJsonObject_optionalAttributesNull_noUnexpectedFieldsPresent() {
+            Product testProduct = new Product.Builder()
+                    .withProductCode("NATHAN-APPLE-70")
+                    .withName("The Nathan Apple")
+                    .withBusiness(testBusiness1)
+                    .build();
+
+
+            JSONObject testJson = testProduct.constructJSONObject();
+            testJson.remove("id");
+            testJson.remove("name");
+            testJson.remove("created");
+            testJson.remove("images");
+            testJson.remove("countryOfSale");
+            assertTrue(testJson.isEmpty());
+    }
 
    @Test
    void constructJsonObject_optionalAttributesNull_allHaveExpectedValue() {

@@ -129,12 +129,16 @@
         </v-row>
       </v-tab-item>
     </v-tabs-items>
+    <template v-if="showCreateCard">
+      <MarketplaceCardForm :user="user" @closeDialog="showCreateCard=false"/>
+    </template>
 
   </div>
 </template>
 
 <script>
 import MarketplaceCard from "../cards/MarketplaceCard";
+import MarketplaceCardForm from "./MarketplaceCardForm.vue";
 import {getMarketplaceCardsBySection, getMarketplaceCardsBySectionAndKeywords} from "../../api/internal.ts";
 import { SECTION_NAMES } from '@/utils';
 import { getKeywords } from '../../api/internal.ts';
@@ -188,23 +192,14 @@ export default {
        * Note: change the default here to true because backlog states that
        * creation date should be descending by default.
        */
-      reverse: true
+      reverse: true,
+      showCreateCard: false,
     };
   },
-  mounted() {
-    getKeywords()
-      .then((response) => {
-        if (typeof response === 'string') {
-          this.allKeywords = [];
-        } else {
-          this.allKeywords = response;
-        }})
-      .catch(() => (this.allKeywords = []));
-  },
   computed: {
-    filteredKeywordList() {
-      return this.allKeywords.filter(x => this.filterKeywords(x));
-    },
+    user() {
+      return this.$store.state.user;
+    }
   },
   methods: {
     /**
@@ -235,16 +230,6 @@ export default {
         }
       }
     },
-    resetSearch() {
-      this.keywordFilter = "";
-    },
-    filterKeywords(keyword) {
-      const filterText = this.keywordFilter ?? '';
-      return keyword.name.toLowerCase().includes(filterText.toLowerCase());
-    },
-    showCreateCard() {
-      this.$store.commit('showCreateMarketplaceCard', this.$store.state.user);
-    },
     /**
      * The total number of pages required to show all the users
      * May be 0 if there are no results
@@ -274,7 +259,8 @@ export default {
     }
   },
   components: {
-    MarketplaceCard
+    MarketplaceCard,
+    MarketplaceCardForm,
   },
   watch: {
     orderBy() {

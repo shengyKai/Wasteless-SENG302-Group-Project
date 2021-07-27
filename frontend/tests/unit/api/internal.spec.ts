@@ -237,7 +237,7 @@ const apiCalls: Partial<ApiCalls> = {
         reverse: "false",
       }
     },
-    result: [testProduct],
+    result: { results: [testProduct], count: 77},
     failedTypeCheckResponse: 'Response is not product array',
     extraStatusMessages: {
       401: 'You have been logged out. Please login again and retry',

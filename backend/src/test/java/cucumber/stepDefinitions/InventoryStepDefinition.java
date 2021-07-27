@@ -271,7 +271,7 @@ public class InventoryStepDefinition  {
     @Then("I expect to be prevented from creating the inventory item")
     public void i_expect_to_be_prevented_from_creating_inventory_item() {
         assertEquals(400, mvcResult.getResponse().getStatus());
-        Product product = productRepository.getAllByBusiness(businessContext.getLast()).stream().filter(x -> x.getProductCode().equals(this.productCode)).collect(Collectors.toList()).get(0);
+        Product product = productRepository.findAllByBusiness(businessContext.getLast()).stream().filter(x -> x.getProductCode().equals(this.productCode)).collect(Collectors.toList()).get(0);
         List<InventoryItem> inventory = inventoryItemRepository.findAllByProduct(product);
         assertEquals(1, inventory.size());
 
@@ -280,7 +280,7 @@ public class InventoryStepDefinition  {
     @Then("I expect the inventory item to be created")
     public void i_expect_the_inventory_to_be_created() {
         assertEquals(200, mvcResult.getResponse().getStatus());
-        Product product = productRepository.getAllByBusiness(businessContext.getLast()).stream().filter(x -> x.getProductCode().equals(this.productCode)).collect(Collectors.toList()).get(0);
+        Product product = productRepository.findAllByBusiness(businessContext.getLast()).stream().filter(x -> x.getProductCode().equals(this.productCode)).collect(Collectors.toList()).get(0);
         List<InventoryItem> inventory = inventoryItemRepository.findAllByProduct(product);
         assertTrue(inventory.stream().anyMatch(x-> x.getQuantity() == quantity));
     }
