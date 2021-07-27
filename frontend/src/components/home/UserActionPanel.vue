@@ -32,6 +32,14 @@
                 <v-list-item-title>Marketplace</v-list-item-title>
               </v-list-item-content>
             </v-list-item>
+            <v-list-item @click="viewMyCards">
+              <v-list-item-icon>
+                <v-icon>mdi-card-text</v-icon>
+              </v-list-item-icon>
+              <v-list-item-content>
+                <v-list-item-title>My Cards</v-list-item-title>
+              </v-list-item-content>
+            </v-list-item>
           </v-list-item-group>
         </v-list>
       </v-card-text>
@@ -47,6 +55,9 @@
       </v-btn>
       <v-btn icon @click="viewMarketplace" class="action-button">
         <v-icon large>mdi-store</v-icon>
+      </v-btn>
+      <v-btn icon @click="viewMyCards" class="action-button">
+        <v-icon large>mdi-card-text</v-icon>
       </v-btn>
     </v-card>
   </div>
@@ -73,6 +84,12 @@ export default {
      */
     viewMarketplace() {
       this.$router.push("/marketplace");
+    },
+    /**
+     * Redirect to users marketplace card page
+     */
+    viewMyCards() {
+      this.$router.push(`/usercards/${this.$store.state.user.id}`);
     }
   }
 };

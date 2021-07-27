@@ -8,6 +8,25 @@
     >
       {{ error }}
     </v-alert>
+    <v-container fluid>
+      <v-row align="center">
+        <v-col
+          class="d-flex"
+          cols="auto"
+        >
+          <h3 class="creator-text"> Cards created by {{ this.user.firstName }} {{ this.user.lastName }} </h3>
+        </v-col>
+        <v-spacer/>
+        <v-col
+          class="d-flex"
+          cols="auto"
+        >
+          <v-btn outlined color="primary" @click="viewProfile">
+            Go to profile
+          </v-btn>
+        </v-col>
+      </v-row>
+    </v-container>
     <!---Grid of cards --->
     <v-container class="grey lighten-2 mt-2">
       <v-row>
@@ -34,7 +53,7 @@
 
 <script>
 import MarketplaceCard from "../cards/MarketplaceCard";
-import {getMarketplaceCardsByUser} from "../../api/internal.ts";
+import {getUser, getMarketplaceCardsByUser} from "../../api/internal.ts";
 
 export default {
   name: 'UserCards',
@@ -54,6 +73,7 @@ export default {
        */
       totalResults: 0,
       error: undefined,
+      user: {},
     };
   },
 
@@ -94,10 +114,23 @@ export default {
       } else {
         this.updatePage();
       }
+    },
+    async updateUser() {
+      this.user = await getUser(this.$route.params.id);
+    },
+    viewProfile() {
+      this.$router.push(`/profile/${this.user.id}`);
     }
   },
   created() {
     this.updatePage();
+    this.updateUser();
   }
 };
 </script>
+
+<style>
+.creator-text {
+  color: var(--v-primary-base);
+}
+</style>

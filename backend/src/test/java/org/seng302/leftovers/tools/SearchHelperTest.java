@@ -5,10 +5,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.seng302.leftovers.controllers.DGAAController;
 import org.seng302.leftovers.entities.Business;
+import org.seng302.leftovers.entities.Keyword;
 import org.seng302.leftovers.entities.Location;
 import org.seng302.leftovers.entities.User;
 import org.seng302.leftovers.exceptions.SearchFormatException;
 import org.seng302.leftovers.persistence.BusinessRepository;
+import org.seng302.leftovers.persistence.KeywordRepository;
 import org.seng302.leftovers.persistence.UserRepository;
 import org.seng302.leftovers.persistence.SpecificationsBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +23,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 
@@ -46,6 +49,8 @@ class SearchHelperTest {
     private UserRepository userRepository;
     @Autowired
     private DGAAController dgaaController;
+    @Autowired
+    private KeywordRepository keywordRepository;
     /**
      * Speification for repository queries.
      */
@@ -78,6 +83,7 @@ class SearchHelperTest {
     @AfterEach
     void tearDown() {
         userRepository.deleteAll();
+        keywordRepository.deleteAll();
     }
 
     private List<User> readUserFile(String filepath) throws IOException {
@@ -946,5 +952,52 @@ class SearchHelperTest {
 
         List<User> filteredUserList = SearchHelper.removeDGAAAccountFromResults(listCopy);
         assertEquals(savedUserList, filteredUserList);
+    }
+
+    private void createKeywords() {
+        Keyword keyword1 = new Keyword("Apples");
+        Keyword keyword2 = new Keyword("Bananas");
+        Keyword keyword3 = new Keyword("Citron");
+        Keyword keyword4 = new Keyword("Eggs");
+
+        keywordRepository.saveAll(Arrays.asList(keyword1, keyword2, keyword3, keyword4));
+    }
+
+    @Test
+    void constructKeywordSpecificationFromSearchQuery_partialMatch() {
+        createKeywords();
+        Specification<Keyword> specification = SearchHelper.constructKeywordSpecificationFromSearchQuery("App");
+        List<Keyword> result = keywordRepository.findAll(specification);
+
+        assertEquals(1, result.size());
+        assertEquals("Apples",result.get(0).getName());
+    }
+
+    @Test
+    void constructKeywordSpecificationFromSearchQuery_fullMatch() {
+        createKeywords();
+        Specification<Keyword> specification = SearchHelper.constructKeywordSpecificationFromSearchQuery("Apples");
+        List<Keyword> result = keywordRepository.findAll(specification);
+
+        assertEquals(1, result.size());
+        assertEquals("Apples",result.get(0).getName());
+    }
+
+    @Test
+    void constructKeywordSpecificationFromSearchQuery_noMatch() {
+        createKeywords();
+        Specification<Keyword> specification = SearchHelper.constructKeywordSpecificationFromSearchQuery("thisShouldntGiveMeAny");
+        List<Keyword> result = keywordRepository.findAll(specification);
+
+        assertEquals(0, result.size());
+    }
+    @Test
+    void constructKeywordSpecificationFromSearchQuery_ignoresCase() {
+        createKeywords();
+        Specification<Keyword> specification = SearchHelper.constructKeywordSpecificationFromSearchQuery("apples");
+        List<Keyword> result = keywordRepository.findAll(specification);
+
+        assertEquals(1, result.size());
+        assertEquals("Apples",result.get(0).getName());
     }
 }

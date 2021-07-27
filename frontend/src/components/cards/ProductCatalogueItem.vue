@@ -27,44 +27,6 @@
                 {{ product.name }}
               </v-card-title>
             </v-col>
-            <v-col cols="auto">
-              <v-card-actions
-                :class="{ 'pt-0': $vuetify.breakpoint.smAndDown }"
-                class="pb-0 aflex-column aalign-end d-block"
-              >
-                <!-- shows the edit button for editing product details, which supposedly links to a form -->
-                <v-chip
-                  @click="showImageUploaderForm=true"
-                  small
-                  class="mr-1 font-weight-medium"
-                  color="primary"
-                >
-                  Upload Image
-                </v-chip>
-                <!-- cant mutate parent props directly, so no point to send a prop to the child -->
-                <ProductImageUploader
-                  :businessId="businessId"
-                  :productCode="product.id"
-                  v-model="showImageUploaderForm"
-                  @image-added="imageAdded"
-                />
-
-                <v-chip
-                  @click="showModifyProduct=true"
-                  small
-                  class="font-weight-medium"
-                  color="primary"
-                >
-                  Edit
-                </v-chip>
-                <ProductForm
-                  v-if="showModifyProduct"
-                  :businessId="businessId"
-                  :previousProduct="product"
-                  @closeDialog="productFormClosed"
-                />
-              </v-card-actions>
-            </v-col>
           </v-row>
           <v-row />
           <v-row>
@@ -143,7 +105,48 @@
           </v-row>
         </v-col>
       </v-row>
+      <v-row justify="end">
+        <v-col cols="auto">
+          <v-card-actions
+            :class="{ 'pt-0': $vuetify.breakpoint.smAndDown }"
+            class="pb-0 aflex-column aalign-end d-block"
+          >
+            <!-- shows the edit button for editing product details, which supposedly links to a form -->
+            <v-chip
+              @click="showImageUploaderForm=true"
+              medium
+              class="mr-1 font-weight-medium action-button"
+              color="primary"
+            >
+              Upload Image
+            </v-chip>
+            <!-- cant mutate parent props directly, so no point to send a prop to the child -->
+            <ProductImageUploader
+              :businessId="businessId"
+              :productCode="product.id"
+              v-model="showImageUploaderForm"
+              @image-added="imageAdded"
+            />
+
+            <v-chip
+              @click="showModifyProduct=true"
+              medium
+              class="font-weight-medium action-button"
+              color="primary"
+            >
+              Edit
+            </v-chip>
+          </v-card-actions>
+        </v-col>
+      </v-row>
     </v-container>
+    <template v-if="showModifyProduct">
+      <ProductForm
+        :businessId="businessId"
+        :previousProduct="product"
+        @closeDialog="productFormClosed"
+      />
+    </template>
   </v-card>
 </template>
 
@@ -155,7 +158,7 @@ import { currencyFromCountry } from "@/api/currency";
 import ProductImageUploader from "../utils/ProductImageUploader";
 import ProductForm from "../BusinessProfile/ProductForm.vue";
 import { makeImagePrimary, deleteImage } from "@/api/internal";
-import { formatDate, trimToLength } from '@/utils';
+import { formatDate, formatPrice, trimToLength } from '@/utils';
 
 export default {
   name: "ProductCatalogueItem",
@@ -191,7 +194,7 @@ export default {
       if (!this.product.recommendedRetailPrice) {
         return "Not set";
       }
-      return this.currency.symbol + this.product.recommendedRetailPrice + " " + this.currency.code;
+      return this.currency.symbol + formatPrice(this.product.recommendedRetailPrice) + " " + this.currency.code;
     },
     manufacturer() {
       return this.product.manufacturer || "Not set";
@@ -258,5 +261,9 @@ export default {
 <style scoped>
 .product-fields {
     padding-top: 0;
+}
+
+.action-button {
+  margin: 10px;
 }
 </style>

@@ -1,15 +1,24 @@
 package org.seng302.leftovers.tools;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -138,6 +147,66 @@ class JsonToolsTest {
         assertEquals(message, exception.getReason());
     }
 
+    private <T> Page<T> createPage(List<T> items, long totalItems) {
+        return new PageImpl<>(items, Pageable.unpaged(), totalItems);
+    }
 
+    @Test
+    void constructPageJSON_emptyPage_emptyPageRepresentation() throws JsonProcessingException {
+        Page<JSONObject> page = createPage(List.of(), 0);
 
+        JSONObject expectedJSON = new JSONObject();
+        expectedJSON.put("count", 0);
+        expectedJSON.put("results", new JSONArray());
+
+        JSONObject actualJSON = JsonTools.constructPageJSON(page);
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        assertEquals(objectMapper.readTree(expectedJSON.toJSONString()), objectMapper.readTree(actualJSON.toJSONString()));
+    }
+
+    @Test
+    void constructPageJSON_pageWithItems_pageWithItemsRepresentation() throws JsonProcessingException {
+        JSONObject object1 = new JSONObject();
+        object1.put("id", 1);
+        object1.put("name", "Free");
+        JSONObject object2 = new JSONObject();
+        object2.put("id", 4);
+        object2.put("name", "Seven");
+        List<JSONObject> objects = List.of(object1, object2);
+
+        Page<JSONObject> page = createPage(objects, 99);
+
+        JSONObject expectedJSON = new JSONObject();
+        expectedJSON.put("count", 99);
+        expectedJSON.put("results", objects);
+
+        JSONObject actualJSON = JsonTools.constructPageJSON(page);
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        assertEquals(objectMapper.readTree(expectedJSON.toJSONString()), objectMapper.readTree(actualJSON.toJSONString()));
+    }
+
+    @Test
+    void constructPageJSON_mappedItems_pageWithMappedRepresentation() throws JsonProcessingException {
+        List<Long> items = List.of(3L, 5L);
+
+        Function<Long, JSONObject> mapping = value -> {
+            JSONObject result = new JSONObject();
+            result.put("value", value);
+            result.put("squared", value*value);
+            return result;
+        };
+
+        Page<Long> page = createPage(items, 70);
+
+        JSONObject expectedJSON = new JSONObject();
+        expectedJSON.put("count", 70);
+        expectedJSON.put("results", items.stream().map(mapping).collect(Collectors.toList()));
+
+        JSONObject actualJSON = JsonTools.constructPageJSON(page.map(mapping));
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        assertEquals(objectMapper.readTree(expectedJSON.toJSONString()), objectMapper.readTree(actualJSON.toJSONString()));
+    }
 }
