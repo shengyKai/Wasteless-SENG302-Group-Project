@@ -9,12 +9,19 @@ import org.hibernate.SessionFactory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.seng302.leftovers.entities.Business;
 import org.seng302.leftovers.entities.Location;
 import org.seng302.leftovers.entities.User;
 import org.seng302.leftovers.persistence.BusinessRepository;
 import org.seng302.leftovers.persistence.UserRepository;
+import org.seng302.leftovers.tools.SearchHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -32,6 +39,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -49,6 +57,11 @@ class BusinessControllerTest {
 
     @Resource
     private SessionFactory sessionFactory;
+
+    @Captor
+    private ArgumentCaptor<String> queryCaptor;
+    @Captor
+    private ArgumentCaptor<String> typeCaptor;
 
     private final HashMap<String, Object> sessionAuthToken = new HashMap<>();
     private Cookie authCookie;
@@ -1148,6 +1161,31 @@ class BusinessControllerTest {
                 .param("searchQuery", "o")
                 .cookie(authCookie))
                 .andExpect(status().isUnauthorized());
+    }
+
+    @ParameterizedTest
+    @CsvSource({"Food,,2", ",Accommodation and Food Services,2", "New World,Accommodation and Food Services,1"})
+    void searchWithQueryOrTypeNotNull_matchingBusinessesInResult(String searchQuery, String businessType, int numMatches) throws Exception {
+        MvcResult result = mockMvc.perform(get("/businesses/search")
+                .param("searchQuery", searchQuery)
+                .param("businessType", businessType)
+                .sessionAttrs(sessionAuthToken)
+                .cookie(authCookie))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
+        JSONObject response = (JSONObject) parser.parse(result.getResponse().getContentAsString());
+        int count = (int) response.get("count");
+        assertEquals(numMatches, count);
+    }
+
+    @Test
+    void searchWithQueryAndTypeNull_returns400Error() throws Exception {
+        mockMvc.perform(get("/businesses/search")
+                .sessionAttrs(sessionAuthToken)
+                .cookie(authCookie))
+                .andExpect(status().isBadRequest());
     }
 
 }

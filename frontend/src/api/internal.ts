@@ -597,21 +597,23 @@ export async function getBusiness(businessId: number): Promise<MaybeError<Busine
 }
 
 /**
- * Sends a business search query to the backend.
+ * Sends a business search query to the backend. Can specify query, business type or both.
  *
  * @param query Query string to search for
+ * @param businessType Business type to filter search results by
  * @param pageIndex Index of page to start the results from (1 = first page)
  * @param resultsPerPage Number of results to return per page
  * @param orderBy Specifies the method used to sort the results
  * @param reverse Specifies whether to reverse the search results (default order is descending for relevance and ascending for all other orders)
  * @returns List of business infos for the current page or an error message
  */
-export async function searchBusinesses(query: string, pageIndex: number, resultsPerPage: number, orderBy: BusinessOrderBy, reverse: boolean): Promise<MaybeError<SearchResults<Business>>> {
+export async function searchBusinesses(query: string | undefined, businessType: BusinessType | undefined, pageIndex: number, resultsPerPage: number, orderBy: BusinessOrderBy, reverse: boolean): Promise<MaybeError<SearchResults<Business>>> {
   let response;
   try {
     response = await instance.get('/businesses/search', {
       params: {
         searchQuery: query,
+        businessType: businessType,
         page: pageIndex,
         resultsPerPage,
         orderBy,

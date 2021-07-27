@@ -85,4 +85,29 @@ public class BusinessStepDefinition {
         }
         Assert.assertFalse(found);
     }
+
+    @Given("the business {string} with the type {string} exists")
+    public void the_business_with_the_type_exists(String name, String type) {
+        var business = new Business.Builder()
+                .withName(name)
+                .withDescription("Sells stuff")
+                .withBusinessType(type)
+                .withAddress(Location.covertAddressStringToLocation("1,Bob Street,Bob,Bob,Bob,Bob,1010"))
+                .withPrimaryOwner(userContext.getLast())
+                .build();
+        businessContext.save(business);
+    }
+
+    @When("I search for business type {string}")
+    public void i_search_for_business_type(String businessType) {
+        requestContext.performRequest(get("/businesses/search")
+                .param("businessType", businessType));
+    }
+
+    @When("I search with query {string} and business type {string}")
+    public void i_search_with_query_and_business_type(String query, String businessType) {
+        requestContext.performRequest(get("/businesses/search")
+                .param("searchQuery", query)
+                .param("businessType", businessType));
+    }
 }

@@ -5,7 +5,7 @@ Feature: UCM3 - Marketplace section display
     And I am logged into my account
 
   Scenario: AC1 - Upon navigation to a Marketplace section, cards are ordered appropriately
-    Then the cards in the response should be ordered by "created" by default
+    Then the cards in the response should be ordered by last renewed date by default
 
   Scenario: AC3 - Display order can be changed to be ordered by card title
     When the cards are ordered by "title"
@@ -48,6 +48,6 @@ Feature: UCM3 - Marketplace section display
     When the cards are ordered by "creatorLastName" in reverse
     Then the cards in the response should be ordered by their creatorLastName in reverse
 
-  Scenario: Display order can be changed to be ordered by creation in reverse
-    When the cards are ordered by "created" in reverse
-    Then the cards in the response should be ordered by their created in reverse
+  Scenario: Display order can be changed to be ordered by last renewed date in reverse
+    When the cards are ordered by "lastRenewed" in reverse
+    Then the cards in the response should be ordered by their last renewed date in reverse
