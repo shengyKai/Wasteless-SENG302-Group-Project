@@ -144,13 +144,13 @@ export default {
         this.orderBy,
         this.reverse
       );
-      console.log(value);
-      // this.totalResults = await getProductCount(this.businessId);
       if (typeof value === 'string') {
         this.products = [];
+        this.totalResults = 0;
         this.error = value;
       } else {
-        this.products = value;
+        this.products = value.results;
+        this.totalResults = value.count;
         this.error = undefined;
       }
     },

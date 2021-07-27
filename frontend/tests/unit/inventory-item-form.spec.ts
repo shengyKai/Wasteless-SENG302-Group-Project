@@ -92,7 +92,7 @@ const testProducts = [
 // Characters that are whitespace not including the space character.
 const whitespaceCharacters = ["\n", "\t"];
 
-getProducts.mockResolvedValue(testProducts);
+// getProducts.mockResolvedValue(testProducts);
 
 const localVue = createLocalVue();
 
@@ -752,7 +752,7 @@ describe("InventoryItemForm.vue", () => {
   //Associated with bug on t170
   it('Product search limits results', async ()=>{
     await wrapper.setData({productList:testProducts});
-    getProducts.mockResolvedValue(testProducts);
+    // getProducts.mockResolvedValue(testProducts);
     const selectbox = findProductSelect();
     (selectbox.vm as any).activateMenu();
     await flushQueue();

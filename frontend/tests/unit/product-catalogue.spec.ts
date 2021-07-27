@@ -10,11 +10,9 @@ import { castMock, flushQueue } from './utils';
 
 jest.mock('@/api/internal', () => ({
   getProducts: jest.fn(),
-  getProductCount: jest.fn()
 }));
 
 const getProducts = castMock(api.getProducts);
-const getProductCount = castMock(api.getProductCount);
 
 Vue.use(Vuetify);
 
@@ -78,7 +76,7 @@ describe('ProductCatalogue.vue', () => {
    *
    * @param products Products on the current page to use for the mock results
    */
-  function setResults(products: Product[], totalCount?: number) {
+  function setResults(products: api.SearchResults<Product>, totalCount?: number) {
     getProducts.mockResolvedValue(products);
     getProductCount.mockResolvedValue(totalCount !== undefined ? totalCount : products.length);
   }
