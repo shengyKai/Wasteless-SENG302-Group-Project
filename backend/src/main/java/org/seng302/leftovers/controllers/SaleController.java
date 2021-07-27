@@ -153,6 +153,4 @@ public class SaleController {
             throw error;
         }
     }
-
-    //* remember to sort the count stuff out on the frontend eh?
 }
