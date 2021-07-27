@@ -194,7 +194,7 @@ export function regxCountryCode() {
  Returns a Regex that matches a valid street address
  */
 export function regxStreet() {
-  return /^(([0-9]+|[0-9]+\/[0-9]+)[a-zA-Z]?)(?=\s[\p{L}])([\p{L}0-9-.' ]+)$/u;
+  return /^(([0-9]+|[0-9]+\/[0-9]+)[\p{L}]?)(?=\s[\p{L}])([\p{L}0-9-.' ]+)$/u;
 }
 /**
  Returns a Regex that matches a valid product code
