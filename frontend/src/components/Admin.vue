@@ -12,53 +12,35 @@
           </v-card-text>
         </v-card>
       </v-footer>
-
-      <!-- Admin action list -->
-      <v-card
-        height="310"
-        width="256"
-        color="white"
+      <v-alert
+        v-if="error !== undefined"
+        type="error"
+        dismissible
+        @input="error = undefined"
       >
-        <!--     class="mx-auto"      -->
-        <v-list-item flat tile color="background">
-          <v-list-item-content>
+        {{ error }}
+      </v-alert>
 
-            <v-list-item-title class="title">
-              Admin Action
-            </v-list-item-title>
-            <v-list-item-subtitle>
-              DGAA Privilege
-            </v-list-item-subtitle>
-
-          </v-list-item-content>
-        </v-list-item>
-        <v-list dense nav>
-          <v-card color="grey lighten-5">
-            <v-list-item v-for="item in items" :key="item.title" link>
-              <v-list-item-icon>
-                <v-icon>{{ item.icon }}</v-icon>
-              </v-list-item-icon>
-
-              <v-list-item-content>
-                <v-list-item-title>{{ item.title }}</v-list-item-title>
-              </v-list-item-content>
-            </v-list-item>
-          </v-card>
-        </v-list>
-      </v-card>
-
-      <v-divider/>
-
-      <!-- Action list that admin can execute -->
-
+      <v-container class="grey lighten-2">
+        <v-row>
+          <v-col v-for="keyword in keywords" :key="keyword.id" cols="" sm="6" md="4" lg="3">
+            <KeywordCard :keyword="keyword"/>
+          </v-col>
+        </v-row>
+      </v-container>
     </v-card>
   </v-container>
 </template>
 
 <script>
+import { searchKeywords } from "../api/internal.ts";
+import KeywordCard from "./cards/KeywordCard.vue";
+
 export default {
   data () {
     return {
+      keywords: [],
+      error: undefined,
       items: [
         { title: "Dashboard", icon: "mdi-view-dashboard" },
         { title: "Gallery", icon: "mdi-image" },
@@ -67,6 +49,24 @@ export default {
       right: null,
     };
   },
+  methods: {
+    async setKeywords() {
+      this.error = undefined;
+      const response = await searchKeywords("");
+      if (typeof response === 'string') {
+        this.error = response;
+      } else {
+        this.keywords = response;
+        console.log(this.keywords);
+      }
+    }
+  },
+  mounted() {
+    this.setKeywords();
+  },
+  components: {
+    KeywordCard,
+  }
 };
 </script>
 
