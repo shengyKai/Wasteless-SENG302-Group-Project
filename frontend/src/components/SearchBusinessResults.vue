@@ -12,32 +12,29 @@
         label="Search"
         autofocus
       />
-      <v-spacer/>
-      <!-- Dropdown select box to allow user search by business type -->
       <v-select
+        class="ml-2"
+        style="max-width: 300px"
+        v-model="selectedBusinessType"
+        flat
+        solo-inverted
+        hide-details
+        :items="businessTypeOptions"
+        prepend-inner-icon="mdi-sort-variant"
+        label="Filter by Business type"
+      />
+      <v-spacer/>
+      <!-- Dropdown select box to allow user to change ordering of businesses -->
+      <v-select
+        style="max-width: 300px"
         v-model="orderBy"
         flat
         solo-inverted
         hide-details
-        :items="[
-          { text: 'Search By Name',    value: 'type_0'   },
-          { text: ' Accomodation and Food Services',   value: 'type_1'  },
-          { text: 'Charitable Organisation',     value: 'type_2'     },
-          { text: 'Non-Profit Organisation',  value: 'type_3'  },
-          { text: 'Retail Trade',    value: 'type_4'   },
-        ]"
+        :items="orderByOptions"
         prepend-inner-icon="mdi-sort-variant"
-        label="Filter by Business type"
+        label="Order By"
       />
-      <!-- Toggle button for user to choose partially or fully matched results -->
-      <v-btn-toggle class="toggle" v-model="reverse" mandatory>
-        <v-btn depressed color="primary" :value="false">
-          OR
-        </v-btn>
-        <v-btn depressed color="primary" :value="true">
-          AND
-        </v-btn>
-      </v-btn-toggle>
     </v-toolbar>
 
     <v-alert
@@ -72,7 +69,7 @@
 
 <script>
 import SearchResultItem from './cards/SearchResultItem';
-import { search } from '../api/internal';
+import { searchBusinesses, BUSINESS_TYPES } from '../api/internal';
 import { debounce } from '../utils';
 
 export default {
@@ -103,7 +100,7 @@ export default {
       /**
        * The current search result order
        */
-      orderBy: 'relevance',
+      orderBy: 'name',
       /**
        * Currently selected page (1 is first page)
        */
@@ -117,6 +114,19 @@ export default {
        * This function is rate limited to avoid too many queries to the backend.
        */
       debouncedUpdateQuery: debounce(this.updateSearchQuery, 500),
+      /**
+       * Business type to filter search by
+       */
+      selectedBusinessType: undefined,
+      /**
+       * Options for ordering the business search results
+       */
+      orderByOptions: [
+        {text: "Date Registered", value: "created"},
+        {text: "Name", value: "name"},
+        {text: "Location", value: "location"},
+        {text: "Business Type", value: "businessType"}
+      ],
     };
   },
 
@@ -152,6 +162,9 @@ export default {
       const pageEndIndex = pageStartIndex + this.businesss.length;
       return`Displaying ${pageStartIndex + 1} - ${pageEndIndex} of ${this.totalResults} results`;
     },
+    businessTypeOptions() {
+      return BUSINESS_TYPES;
+    }
   },
   methods: {
     /**
@@ -170,8 +183,9 @@ export default {
 
       this.searchedQuery = this.searchQuery;
 
-      const value = await search (
+      const value = await searchBusinesses(
         this.searchedQuery,
+        this.selectedBusinessType,
         this.currentPage,
         this.resultsPerPage,
         this.orderBy,
@@ -222,4 +236,5 @@ export default {
 .toggle {
   margin-left: 10px;
 }
+
 </style>
