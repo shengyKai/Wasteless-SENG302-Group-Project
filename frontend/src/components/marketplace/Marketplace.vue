@@ -114,7 +114,7 @@
 <script>
 import MarketplaceCard from "../cards/MarketplaceCard";
 import MarketplaceCardForm from "./MarketplaceCardForm.vue";
-import {getMarketplaceCardsBySection } from "../../api/internal.ts";
+import {getMarketplaceCardsBySection, getMarketplaceCardsBySectionAndKeywords} from "../../api/internal.ts";
 import { SECTION_NAMES } from '@/utils';
 
 export default {
@@ -122,6 +122,8 @@ export default {
     return {
       tab: null,
       sectionNames: SECTION_NAMES,
+      keywordIds: [],
+      unionSearch: false,
       sections: ["ForSale", "Wanted", "Exchange"],
       cards: {
         ForSale: [],
@@ -170,9 +172,12 @@ export default {
     async updateSections(sections) {
       this.error = undefined;
 
-      const results = await Promise.all(
-        sections.map(key => getMarketplaceCardsBySection(key, this.currentPage[key], this.resultsPerPage, this.orderBy, this.reverse))
-      );
+      let results;
+      if (this.keywordIds.length === 0) {
+        results = await Promise.all(sections.map(key => getMarketplaceCardsBySection(key, this.currentPage[key], this.resultsPerPage, this.orderBy, this.reverse)));
+      } else {
+        results = await Promise.all(sections.map(key => getMarketplaceCardsBySectionAndKeywords(this.keywordIds,key, this.unionSearch, this.currentPage[key], this.resultsPerPage, this.orderBy, this.reverse)));
+      }
 
       for (let i = 0; i<sections.length; i++) {
         const key = sections[i];

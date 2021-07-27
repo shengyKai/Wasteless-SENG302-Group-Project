@@ -44,7 +44,7 @@
                 <v-col cols="12">
                   <v-text-field
                     class="required"
-                    v-model="street1"
+                    v-model="streetAddress"
                     label="Company Street Address"
                     :rules="mandatoryRules().concat(streetRules())"
                     outlined/>
@@ -137,7 +137,7 @@ export default {
       business: '',
       description: '',
       businessType: [],
-      street1: '',
+      streetAddress: '',
       district: '',
       city: '',
       region: '',
@@ -166,7 +166,7 @@ export default {
       /**
        * Get the street number and name from the street address field.
        */
-      const streetParts = this.street1.split(" ");
+      const streetParts = this.streetAddress.split(" ");
       const streetNum = streetParts[0];
       const streetName = streetParts.slice(1, streetParts.length).join(" ");
       let business = {

@@ -66,7 +66,7 @@
                       <v-text-field
                         label="Search for a keyword" v-model="keywordFilter"
                         :autofocus="true"
-                        @input="searchKeywords"
+                        @input="searchKeywords()"
                         hint="Keyword name"
                       />
                     </v-list-item-content>
