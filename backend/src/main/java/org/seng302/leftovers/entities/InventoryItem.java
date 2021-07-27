@@ -225,10 +225,10 @@ public class InventoryItem {
      * @param bestBefore the date when the product will no longer be its best
      * @param expires the date when the product will expire and should be disposed of
      */
-    public void setDates(LocalDate manufactured, LocalDate sellBy, LocalDate bestBefore, LocalDate expires) {
+    public void setDates(String manufactured, String sellBy, String bestBefore, String expires) {
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE;
         //Checking expires is not null
-        if (expires == null) {
-            setExpires(expires); //Will throw an exception
+        if (expires == null) { //Will thrown an exception
             //Case 1: no attributes are null
         } else if (sellBy != null && bestBefore != null) {
             if ((sellBy.compareTo(bestBefore) > 0) || (bestBefore.compareTo(expires) > 0)) {
@@ -249,11 +249,13 @@ public class InventoryItem {
             }
         }
         //Case 4: best before is null and sell by is null, no validation needed
-        setExpires(expires);
-        setSellBy(sellBy);
-        setBestBefore(bestBefore);
+
+        if (expires == null) { setExpires(null); } else { setExpires(LocalDate.parse(expires, dateTimeFormatter)); }
+        if (sellBy == null ) { setSellBy(null); } else { setSellBy(LocalDate.parse(sellBy, dateTimeFormatter)); }
+        if (bestBefore == null ) { setBestBefore(null); } else { setBestBefore(LocalDate.parse(bestBefore, dateTimeFormatter)); }
         //Manufactured needs no extra validation as is the only date that can and must before today
-        setManufactured(manufactured);
+        if (manufactured == null ) { setManufactured(null); } else {setManufactured(LocalDate.parse(manufactured,
+                dateTimeFormatter)); }
     }
 
     /**
