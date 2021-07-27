@@ -699,7 +699,7 @@ type SalesOrderBy = 'created' | 'closing' | 'productCode' | 'productName' | 'qua
  * @param reverse Whether to reverse the results (default ascending)
  * @returns List of sales or a string error message
  */
-export async function getBusinessSales(businessId: number, page: number, resultsPerPage: number, orderBy: SalesOrderBy, reverse: boolean): Promise<MaybeError<Sale[]>> {
+export async function getBusinessSales(businessId: number, page: number, resultsPerPage: number, orderBy: SalesOrderBy, reverse: boolean): Promise<MaybeError<SearchResults<Sale>>> {
   let response;
   try {
     response = await instance.get(`/businesses/${businessId}/listings`, {
@@ -717,32 +717,10 @@ export async function getBusinessSales(businessId: number, page: number, results
     if (status === 406) return 'The given business does not exist';
     return 'Request failed: ' + status;
   }
-  if (!is<Sale[]>(response.data)) {
+  if (!is<SearchResults<Sale>>(response.data)) {
     return "Response is not Sale array";
   }
   return response.data;
-}
-
-/**
- * Queries the total number of sale listings
- * @param businessId Business ID to query
- * @returns Total sale listing count or a string error
- */
-export async function getBusinessSalesCount(businessId: number): Promise<MaybeError<number>> {
-  let response;
-  try {
-    response = await instance.get(`/businesses/${businessId}/listings/count`);
-  } catch (error) {
-    let status: number | undefined = error.response?.status;
-    if (status === undefined) return 'Failed to reach backend';
-    if (status === 401) return 'You have been logged out. Please login again and retry';
-    if (status === 406) return 'The given business does not exist';
-    return 'Request failed: ' + status;
-  }
-  if (!is<number>(response.data?.count)) {
-    return "Response is not a number";
-  }
-  return response.data.count;
 }
 
 type InventoryOrderBy = 'name' | 'description' | 'manufacturer' | 'recommendedRetailPrice' | 'created' | 'quantity' | 'pricePerItem' | 'totalPrice' | 'manufactured' | 'sellBy' | 'bestBefore' | 'expires' | 'productCode'
@@ -832,25 +810,6 @@ export async function modifyInventoryItem(businessId: number, inventoryItemId: n
 }
 
 /**
- * Calls backend for list of keywords to be used in Marketplace Card creation
- */
-export async function getKeywords(): Promise<MaybeError<Keyword[]>> {
-  let response;
-  try {
-    response = await instance.get(`/keywords/search`);
-  } catch (error) {
-    let status: number | undefined = error.response?.status;
-    if (status === undefined) return 'Failed to reach backend';
-    if (status === 401) return 'You have been logged out. Please login again and retry';
-    return `Request failed: ${status}`;
-  }
-  if (!is<Keyword[]>(response.data)) {
-    return 'Response is not a keyword';
-  }
-  return response.data;
-}
-
-/**
  * Add an inventory item to the business inventory.
  *
  * @param businessId Business id to identify with the database to add the inventory to the correct business
@@ -931,6 +890,47 @@ export async function getMarketplaceCardsBySection(section: MarketplaceCardSecti
 }
 
 /**
+ * Fetches a page of cards by section in the marketplace
+ * @param keywordIds The list of keyword IDs to match
+ * @param section The section to search in
+ * @param union Whether or not to match ANY keyword or ALL keywords (true = ANY)
+ * @param page Page to fetch (1 indexed)
+ * @param resultsPerPage Maximum number of results per page
+ * @param orderBy Parameter to order the results by
+ * @param reverse Whether to reverse the results (default ascending)
+ * @returns List of marketplace cards and the count or a string error message
+ */
+export async function getMarketplaceCardsBySectionAndKeywords(keywordIds: number[], section: MarketplaceCardSection, union: boolean, page: number, resultsPerPage: number, orderBy: CardOrderBy, reverse: boolean): Promise<MaybeError<SearchResults<MarketplaceCard>>> {
+  let response;
+  try {
+    const params = new URLSearchParams();
+    for (let id of keywordIds) {
+      params.append("keywordIds", id.toString());
+    }
+    params.append('section', section);
+    params.append('union', union.toString());
+    params.append('page', page.toString());
+    params.append('resultsPerPage', resultsPerPage.toString());
+    params.append('orderBy', orderBy);
+    params.append('reverse', reverse.toString());
+
+    response = await instance.get(`/cards/search`, {
+      params: params
+    });
+  } catch (error) {
+    let status: number | undefined = error.response?.status;
+    if (status === undefined) return 'Failed to reach backend';
+    if (status === 400) return 'The given section does not exist';
+    if (status === 401) return 'You have been logged out. Please login again and retry';
+    return 'Request failed: ' + error.response?.data.message;
+  }
+  if (!is<SearchResults<MarketplaceCard>>(response.data)) {
+    return "Response is not card array";
+  }
+  return response.data;
+}
+
+/**
  * Deletes a card from the community marketplace
  * @param marketplaceCardId The id of the community marketplace card
  */
@@ -993,6 +993,31 @@ export async function getMarketplaceCardsByUser(userId: number, resultsPerPage: 
   }
   if (!is<SearchResults<MarketplaceCard>>(response.data)) {
     return "Response is not card array";
+  }
+  return response.data;
+}
+
+/**
+ * Retrieves all keywords which match the given query by name.
+ * @param query The search term
+ * @return A (possibly empty) list of keywords
+ */
+export async function searchKeywords(query: string) : Promise<MaybeError<Keyword[]>> {
+  let response;
+  try {
+    response = await instance.get('/keywords/search', {
+      params: {
+        searchQuery: query,
+      }
+    });
+  } catch (error) {
+    let status: number | undefined = error.response?.status;
+    if (status === undefined) return 'Failed to reach backend';
+    if (status === 401) return 'You have been logged out. Please login again and retry';
+    return 'Request failed: ' + status;
+  }
+  if (!is<Keyword[]>(response.data)) {
+    return "Response is not Keyword array";
   }
   return response.data;
 }

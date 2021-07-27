@@ -36,6 +36,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -179,6 +180,8 @@ class CardControllerTest {
 
         // Set up repositories that will be queried when creating card to return mocks
         when(userRepository.findById(userId)).thenReturn(Optional.of(mockUser));
+        when(mockKeyword1.getID()).thenReturn(keywordId1);
+        when(mockKeyword2.getID()).thenReturn(keywordId2);
         when(keywordRepository.findById(keywordId1)).thenReturn(Optional.of(mockKeyword1));
         when(keywordRepository.findById(keywordId2)).thenReturn(Optional.of(mockKeyword2));
         when(keywordRepository.findAllById(any())).thenAnswer(invocation -> {
@@ -190,7 +193,7 @@ class CardControllerTest {
                 } else if (id == keywordId2) {
                     answer.add(mockKeyword2);
                 } else {
-                    throw new IllegalArgumentException();
+                    return List.of();
                 }
             }
             return answer;
@@ -472,9 +475,8 @@ class CardControllerTest {
     @Test
     void createCard_keywordIdNotInRepository_cardNotCreated() throws Exception {
         createCardJson.remove("keywordIds");
-        int[] keywordIds = new int[] {(int) keywordId1};
+        int[] keywordIds = new int[] {9999};
         createCardJson.appendField("keywordIds", keywordIds);
-        when(keywordRepository.findById(keywordId1)).thenReturn(Optional.empty());
 
         MvcResult result = mockMvc.perform(post("/cards")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -482,9 +484,146 @@ class CardControllerTest {
                 .andExpect(status().isBadRequest())
                 .andReturn();
 
-        assertEquals(String.format("Keyword with ID %d does not exist", keywordId1), result.getResponse().getErrorMessage());
+        assertEquals("Invalid keyword ID", result.getResponse().getErrorMessage());
         verify(marketplaceCardRepository, times(0)).save(any(MarketplaceCard.class));
     }
+
+    // MODIFY CARD TESTS
+
+    @Test
+    void modifyCard_invalidAuthToken_401Response() throws Exception {
+        createCardJson.remove("creatorId"); // Will not need this field
+
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.checkAuthenticationToken(any())).thenThrow(new AccessTokenException());
+        mockMvc.perform(put("/cards/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(createCardJson.toString()))
+                .andExpect(status().isUnauthorized());
+        authenticationTokenManager.verify(() -> AuthenticationTokenManager.checkAuthenticationToken(any()));
+        verify(marketplaceCardRepository, times(0)).save(any());
+    }
+
+    @Test
+    void modifyCard_cardNotFound_406Response() throws Exception {
+        createCardJson.remove("creatorId"); // Will not need this field
+
+        mockMvc.perform(put("/cards/9999")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(createCardJson.toString()))
+                .andExpect(status().isNotAcceptable());
+        verify(marketplaceCardRepository, times(0)).save(any());
+    }
+
+
+    @Test
+    void modifyCard_userDoesNotHavePermission_403Response() throws Exception {
+        createCardJson.remove("creatorId"); // Will not need this field
+
+        long userID = mockUser.getUserID();
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), eq(userID))).thenReturn(false);
+
+        mockMvc.perform(put("/cards/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(createCardJson.toString()))
+                .andExpect(status().isForbidden());
+        verify(marketplaceCardRepository, times(0)).save(any());
+        authenticationTokenManager.verify(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), eq(userID)));
+    }
+
+    @Test
+    void modifyCard_invalidKeyword_400Response() throws Exception {
+        createCardJson.remove("creatorId"); // Will not need this field
+        createCardJson.put("keywordIds", new int[]{ 1, 9999 });
+
+        mockMvc.perform(put("/cards/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(createCardJson.toString()))
+                .andExpect(status().isBadRequest());
+        verify(marketplaceCardRepository, times(0)).save(any());
+    }
+
+    @Test
+    void modifyCard_noSectionProvided_400Response() throws Exception {
+        createCardJson.remove("creatorId"); // Will not need this field
+        createCardJson.remove("section");
+
+        mockMvc.perform(put("/cards/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(createCardJson.toString()))
+                .andExpect(status().isBadRequest());
+        verify(marketplaceCardRepository, times(0)).save(any());
+    }
+
+    @Test
+    void modifyCard_invalidSection_400Response() throws Exception {
+        createCardJson.remove("creatorId"); // Will not need this field
+        createCardJson.put("section", "something");
+
+        mockMvc.perform(put("/cards/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(createCardJson.toString()))
+                .andExpect(status().isBadRequest());
+        verify(marketplaceCardRepository, times(0)).save(any());
+    }
+
+    @Test
+    void modifyCard_invalidTitle_400Response() throws Exception {
+        createCardJson.remove("creatorId"); // Will not need this field
+
+        doThrow(new ResponseStatusException(HttpStatus.BAD_REQUEST)).when(mockCard).setTitle(any());
+
+        mockMvc.perform(put("/cards/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(createCardJson.toString()))
+                .andExpect(status().isBadRequest());
+        verify(marketplaceCardRepository, times(0)).save(any());
+    }
+
+    @Test
+    void modifyCard_invalidDescription_400Response() throws Exception {
+        createCardJson.remove("creatorId"); // Will not need this field
+
+        doThrow(new ResponseStatusException(HttpStatus.BAD_REQUEST)).when(mockCard).setDescription(any());
+
+        mockMvc.perform(put("/cards/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(createCardJson.toString()))
+                .andExpect(status().isBadRequest());
+        verify(marketplaceCardRepository, times(0)).save(any());
+    }
+
+    @Test
+    void modifyCard_invalidKeywords_400Response() throws Exception {
+        createCardJson.remove("creatorId"); // Will not need this field
+
+        doThrow(new ResponseStatusException(HttpStatus.BAD_REQUEST)).when(mockCard).setKeywords(any());
+
+        mockMvc.perform(put("/cards/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(createCardJson.toString()))
+                .andExpect(status().isBadRequest());
+        verify(marketplaceCardRepository, times(0)).save(any());
+    }
+
+    @Test
+    void modifyCard_validRequest_cardModified() throws Exception {
+        createCardJson.remove("creatorId"); // Will not need this field
+        List<Keyword> keywords = List.of(mockKeyword1, mockKeyword2);
+        createCardJson.put("keywordIds", keywords.stream().map(Keyword::getID).collect(Collectors.toList()));
+
+        mockMvc.perform(put("/cards/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(createCardJson.toString()))
+                .andExpect(status().isOk());
+
+        verify(mockCard).setSection(MarketplaceCard.sectionFromString(createCardJson.getAsString("section")));
+        verify(mockCard).setTitle(createCardJson.getAsString("title"));
+        verify(mockCard).setDescription(createCardJson.getAsString("description"));
+        verify(mockCard).setKeywords(keywords);
+
+        verify(marketplaceCardRepository, times(1)).save(mockCard);
+    }
+
 
     // GET CARDS TESTS
 
