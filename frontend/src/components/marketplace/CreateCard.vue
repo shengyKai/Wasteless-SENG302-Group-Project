@@ -51,7 +51,7 @@
                 no-data-text="No keywords found"
                 value = "keywords"
                 v-model="selectedKeywords"
-              :items="allKeywords"
+                :items="allKeywords"
                 :hint="selectedKeywordsNames"
                 label="Select keywords"
                 item-text="name"
@@ -66,7 +66,7 @@
                       <v-text-field
                         label="Search for a keyword" v-model="keywordFilter"
                         :autofocus="true"
-                      @input="searchKeywords"
+                        @input="searchKeywords"
                         hint="Keyword name"
                       />
                     </v-list-item-content>
