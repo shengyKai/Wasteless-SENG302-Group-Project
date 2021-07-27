@@ -52,7 +52,7 @@ class KeywordCreatedEventTest {
 
     @Test
     void constructJSONObject_jsonHasExpectedFormat() throws JsonProcessingException {
-        KeywordCreatedEvent event = new CreateKeywordEvent(keyword, user);
+        KeywordCreatedEvent event = new KeywordCreatedEvent(keyword, user);
         event = eventRepository.save(event);
 
         String expectedJsonString = String.format(

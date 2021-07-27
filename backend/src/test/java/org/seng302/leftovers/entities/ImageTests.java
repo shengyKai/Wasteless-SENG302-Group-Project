@@ -360,18 +360,5 @@ class ImageTests {
         } catch (Exception e) { assertEquals(DataIntegrityViolationException.class, e.getClass()); }
     }
 
-    /**
-     * Checks that there cannot be two images with the same thumbnail filename within the database.
-     */
-    @Disabled // This is disabled because we currently do not generate image thumbnails, so all thumbnail images are null.
-    @Test
-    void createImage_ViolateUniqueFilenameThumbnail_BadRequest() {
-        try {
-            testImage = new Image("original.png", "help_thumbnail.png");
-            imageRepository.save(testImage);
-            fail();
-        } catch (Exception e) { assertEquals(DataIntegrityViolationException.class, e.getClass()); }
-    }
-
 }
 

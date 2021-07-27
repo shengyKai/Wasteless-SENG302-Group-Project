@@ -36,11 +36,11 @@ public class KeywordService {
     public void sendNewKeywordEvent(Keyword keyword, User creator) {
         List<User> adminList = userRepository.findAllByRole("defaultGlobalApplicationAdmin");
         adminList.addAll(userRepository.findAllByRole("globalApplicationAdmin"));
-        Set<User> adminSet = new HashSet<User>(adminList);
+        Set<User> adminSet = new HashSet<>(adminList);
 
         logger.info("Sending keyword creation notification for keyword \"{}\" to system administrators",
                 keyword.getName());
-        KeywordCreatedEvent newKeywordEvent = new CreateKeywordEvent(keyword, creator);
+        KeywordCreatedEvent newKeywordEvent = new KeywordCreatedEvent(keyword, creator);
         eventService.addUsersToEvent(adminSet, newKeywordEvent);
     }
 }

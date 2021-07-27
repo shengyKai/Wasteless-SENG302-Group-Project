@@ -1,4 +1,4 @@
-import { Keyword, MarketplaceCard, MarketplaceCardSection } from "./internal";
+import { Keyword, MarketplaceCard, MarketplaceCardSection, User } from "./internal";
 
 const EMITTER_URL = process.env.VUE_APP_SERVER_ADD + '/events/emitter';
 
@@ -27,7 +27,8 @@ type DeleteEvent = BaseEvent<'DeleteEvent'> & {
 }
 
 type KeywordCreatedEvent = BaseEvent<'KeywordCreatedEvent'> & {
-  keyword: Keyword
+  keyword: Keyword,
+  creator: User
 }
 
 /**

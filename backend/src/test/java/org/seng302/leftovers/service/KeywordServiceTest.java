@@ -86,7 +86,7 @@ class KeywordServiceTest {
 
         KeywordCreatedEvent keywordCreatedEvent = eventArgumentCaptor.getValue();
         assertEquals(keyword, keywordCreatedEvent.getNewKeyword());
-        assertEquals(mockUser, createKeywordEvent.getCreator());
+        assertEquals(mockUser, keywordCreatedEvent.getCreator());
     }
 }
 
