@@ -37,6 +37,14 @@
         prepend-inner-icon="mdi-sort-variant"
         label="Order By"
       />
+      <v-btn-toggle class="toggle" v-model="reverse" mandatory>
+        <v-btn depressed color="secondary" :value="false">
+          <v-icon>mdi-arrow-up</v-icon>
+        </v-btn>
+        <v-btn depressed color="secondary" :value="true">
+          <v-icon>mdi-arrow-down</v-icon>
+        </v-btn>
+      </v-btn-toggle>
     </v-toolbar>
 
     <v-alert
@@ -124,7 +132,6 @@ export default {
        * Options for ordering the business search results
        */
       orderByOptions: [
-        {text: "Date Registered", value: "created"},
         {text: "Name", value: "name"},
         {text: "Location", value: "location"},
         {text: "Business Type", value: "businessType"}
