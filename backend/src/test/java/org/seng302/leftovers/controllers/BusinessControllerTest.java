@@ -193,7 +193,6 @@ class BusinessControllerTest {
                 .inCountry("New Zealand")
                 .inRegion("Canterbury")
                 .inCity("Christchurch")
-                .inSuburb("Ilam")
                 .atStreetNumber("123")
                 .onStreet("Ilam road")
                 .withPostCode("8041")
