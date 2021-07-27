@@ -39,6 +39,9 @@ public class InventoryController {
     private final ProductRepository productRepository;
     private static final Logger logger = LogManager.getLogger(InventoryController.class.getName());
 
+    private static final Set<String> VALID_ORDERINGS = Set.of("productCode", "name", "description", "manufacturer", "recommendedRetailPrice", "created", "quantity", "pricePerItem", "totalPrice", "manufactured", "sellBy", "bestBefore", "expires");
+
+
     // @Autowired
     public InventoryController(BusinessRepository businessRepository, InventoryItemRepository inventoryItemRepository,
             ProductRepository productRepository) {
@@ -199,7 +202,7 @@ public class InventoryController {
                                 @RequestParam(required = false) Boolean reverse) {
         try {
         AuthenticationTokenManager.checkAuthenticationToken(request);
-        logger.info(() -> String.format("Getting inventory item for business (businessId=%d).", businessId));
+        logger.info("Getting inventory item for business (businessId={}).", businessId);
         Business business = businessRepository.getBusinessById(businessId);
 
         Sort.Direction direction = SearchHelper.getSortDirection(reverse);
@@ -212,13 +215,11 @@ public class InventoryController {
         return JsonTools.constructPageJSON(result.map(InventoryItem::constructJSONObject));
 
     } catch (Exception error) {
-        logger.error(error.getMessage());
+        logger.error(error);
         throw error;
     }
 
     }
-
-    private static final Set<String> VALID_ORDERINGS = Set.of("productCode", "name", "description", "manufacturer", "recommendedRetailPrice", "created", "quantity", "pricePerItem", "totalPrice", "manufactured", "sellBy", "bestBefore", "expires");
 
     private Sort.Order getInventoryItemOrder(String orderBy, Sort.Direction direction) {
         if (orderBy == null) orderBy = "productCode";
@@ -227,6 +228,9 @@ public class InventoryController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The provided ordering is invalid");
         }
 
+        if (orderBy.equals("productCode") {
+            orderBy = "product.productCode";
+        }
         if (orderBy.equals("name")) {
             orderBy = "product.name";
         }
@@ -243,86 +247,5 @@ public class InventoryController {
             orderBy = "product.created";
         }
         return new Sort.Order(direction, orderBy).ignoreCase();
-    }
-
-    /**
-     * Sort inventory by a key. Can reverse results. If the inventory item attribute is null, it will be 
-     * sorted to the last. If reversed, the null related inventory item will be the first.
-     * 
-     * @param key     Key to order products by.
-     * @param reverse Reverse results.
-     * @return Inventory Comparator
-     */
-    Comparator<InventoryItem> sortInventory(String key, Boolean reverse) {
-        key = key == null ? "productCode" : key;
-
-        Comparator<InventoryItem> sort;
-        switch (key) {
-            case "name":
-                sort = Comparator.comparing(inventoryItem -> inventoryItem.getProduct().getName(), String.CASE_INSENSITIVE_ORDER);
-                break;
-
-            case "description":
-                sort = Comparator.comparing(inventoryItem -> inventoryItem.getProduct().getDescription(), 
-                Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER));
-                break;
-
-            case "manufacturer":
-                sort = Comparator.comparing(inventoryItem -> inventoryItem.getProduct().getManufacturer(),
-                        Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER));
-                break;
-
-            case "recommendedRetailPrice":
-                sort = Comparator.comparing(inventoryItem -> inventoryItem.getProduct().getRecommendedRetailPrice(), 
-                Comparator.nullsLast(Comparator.naturalOrder()));
-                break;
-
-            case "created":
-                sort = Comparator.comparing(inventoryItem -> inventoryItem.getProduct().getCreated());
-                break;
-
-            case "quantity":
-                sort = Comparator.comparing(InventoryItem::getQuantity);
-                break;
-
-            case "pricePerItem":
-                sort = Comparator.comparing(InventoryItem::getPricePerItem, 
-                Comparator.nullsLast(Comparator.naturalOrder()));
-                break;
-
-            case "totalPrice":
-                sort = Comparator.comparing(InventoryItem::getTotalPrice, 
-                Comparator.nullsLast(Comparator.naturalOrder()));
-                break;
-
-            case "manufactured":
-                sort = Comparator.comparing(InventoryItem::getManufactured, 
-                Comparator.nullsLast(Comparator.naturalOrder()));
-                break;
-
-            case "sellBy":
-                sort = Comparator.comparing(InventoryItem::getSellBy, 
-                Comparator.nullsLast(Comparator.naturalOrder()));
-                break;
-
-            case "bestBefore":
-                sort = Comparator.comparing(InventoryItem::getBestBefore, 
-                Comparator.nullsLast(Comparator.naturalOrder()));
-                break;
-
-            case "expires":
-                sort = Comparator.comparing(InventoryItem::getExpires);
-                break;
-
-            default:
-                sort = Comparator.comparing(inventoryItem -> inventoryItem.getProduct().getProductCode());
-                break;
-        }
-
-        if (Boolean.TRUE.equals(reverse)) {
-            sort = sort.reversed();
-        }
-
-        return sort;
     }
 }
