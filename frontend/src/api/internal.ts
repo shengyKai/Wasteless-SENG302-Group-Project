@@ -925,16 +925,19 @@ export async function getMarketplaceCardsBySection(section: MarketplaceCardSecti
 export async function getMarketplaceCardsBySectionAndKeywords(keywordIds: number[], section: MarketplaceCardSection, union: boolean, page: number, resultsPerPage: number, orderBy: CardOrderBy, reverse: boolean): Promise<MaybeError<SearchResults<MarketplaceCard>>> {
   let response;
   try {
+    const params = new URLSearchParams();
+    for (let id of keywordIds) {
+      params.append("keywordIds", id.toString());
+    }
+    params.append('section', section);
+    params.append('union', union.toString());
+    params.append('page', page.toString());
+    params.append('resultsPerPage', resultsPerPage.toString());
+    params.append('orderBy', orderBy);
+    params.append('reverse', reverse.toString());
+
     response = await instance.get(`/cards/search`, {
-      params: {
-        keywordIds,
-        section,
-        union,
-        page,
-        resultsPerPage,
-        orderBy,
-        reverse
-      }
+      params: params
     });
   } catch (error) {
     let status: number | undefined = error.response?.status;
