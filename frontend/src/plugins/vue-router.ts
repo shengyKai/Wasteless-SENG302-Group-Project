@@ -2,7 +2,7 @@ import Vue from "vue";
 import VueRouter from "vue-router";
 
 import Auth from "../components/Auth/index.vue";
-import admin from "../components/Admin.vue";
+import admin from "../components/admin/Admin.vue";
 import ProfilePage from "../components/UserProfile.vue";
 import BusinessProfile from "../components/BusinessProfile/index.vue";
 import SearchBusinessResults from "../components/SearchBusinessResults.vue";
