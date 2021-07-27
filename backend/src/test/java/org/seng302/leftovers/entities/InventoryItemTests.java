@@ -581,4 +581,100 @@ class InventoryItemTests {
         copy2.setQuantity(5);
         assertDoesNotThrow( () -> inventoryItemRepository.save(copy2));
     }
+
+    //--- Date validation modify ---//
+
+    // Basic date setting
+    @Test
+    void modifyInventoryItem_changeAllDatesToValidDate_allDatesChanged() throws Exception {
+
+    }
+
+    // Null testing
+    @Test
+    void modifyInventoryItem_changeManufacturedToNull_manufacturedDateSetToNull() throws Exception {
+        //TODO
+    }
+
+    @Test
+    void modifyInventoryItem_changeSellByToNull_sellByDateSetToNull() throws Exception {
+        //TODO
+    }
+
+    @Test
+    void modifyInventoryItem_changeBestBeforeToNull_bestBeforeDateSetToNull() throws Exception {
+        //TODO
+    }
+
+    @Test
+    void modifyInventoryItem_changeExpiresToNull_ExceptionThrownAndExpiresDateNotSetToNull() throws Exception {
+        //TODO
+    }
+
+    @Test
+    void modifyInventoryItem_changeManufacturedSellByAndBestBeforeDatesToNull_respectiveDatesSetToNull() throws Exception {
+        //TODO
+    }
+
+    @Test
+    void modifyInventoryItem_changeAllDatesToNull_noDatesSetToNull() throws Exception {
+        //TODO
+    }
+
+    // Checking against today's date
+    @Test
+    void modifyInventoryItem_changeManufacturedToDayAfterToday_exceptionThrownAndManufacturedDateNotChanged() throws Exception {
+        //TODO
+    }
+
+    @Test
+    void modifyInventoryItem_changeManufacturedToTenYearsAfterToday_exceptionThrownAndManufacturedDateNotChanged() throws Exception {
+        //TODO
+    }
+
+    @Test
+    void modifyInventoryItem_changeSellByToDayBeforeToday_exceptionThrownAndSellByDateNotChanged() throws Exception {
+        //TODO
+    }
+
+    @Test
+    void modifyInventoryItem_changeSellByToTenYearsBeforeToday_exceptionThrownAndSellByDateNotChanged() throws Exception {
+        //TODO
+    }
+
+    @Test
+    void modifyInventoryItem_changeBestBeforeToDayBeforeToday_exceptionThrownAndBestBeforeDateNotChanged() throws Exception {
+        //TODO
+    }
+
+    @Test
+    void modifyInventoryItem_changeBestBeforeToTenYearsBeforeToday_exceptionThrownAndBestBeforeDateNotChanged() throws Exception {
+        //TODO
+    }
+
+    @Test
+    void modifyInventoryItem_changeExpiresToDayBeforeToday_exceptionThrownAndExpiresDateNotChanged() throws Exception {
+        //TODO
+    }
+
+    @Test
+    void modifyInventoryItem_changeExpiresToTenYearsBeforeToday_exceptionThrownAndExpiresDateNotChanged() throws Exception {
+        //TODO
+    }
+
+    // Comparing dates against each other
+    @Test
+    void modifyInventoryItem_changeBestBeforeToBeAfterSellBy_exceptionThrownAndNoDatesChanged() throws  Exception {
+        //TODO
+    }
+
+    @Test
+    void modifyInventoryItem_changeBestBeforeToBeAfterExpires_exceptionThrownAndNoDatesChanged() throws  Exception {
+        //TODO
+    }
+
+    @Test
+    void modifyInventoryItem_changeSellByToBeAfterExpires_exceptionThrownAndNoDatesChanged() throws  Exception {
+        //TODO
+    }
 }
