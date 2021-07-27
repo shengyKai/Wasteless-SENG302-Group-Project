@@ -194,7 +194,7 @@ public class MarketplaceCard {
      * @param keywords New keywords for this card
      */
     public void setKeywords(List<Keyword> keywords) {
-        if (keywords.contains(null)) {
+        if (keywords.stream().anyMatch(Objects::isNull)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Keyword cannot be null");
         }
         this.keywords.clear();

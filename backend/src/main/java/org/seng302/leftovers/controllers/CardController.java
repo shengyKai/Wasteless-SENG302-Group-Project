@@ -89,6 +89,14 @@ public class CardController {
         }
     }
 
+    /**
+     * Endpoint to modify an already existing marketplace card.
+     * Will return a 401 error if request is not logged in
+     * Will return a 403 error if the user
+     * @param request The HTTP request, used for checking permissions.
+     * @param id The card ID to modify, provided in the request path
+     * @param cardProperties Updated card properties
+     */
     @PutMapping("/cards/{id}")
     public void modifyCard(HttpServletRequest request, @PathVariable Long id, @RequestBody JSONObject cardProperties) {
         logger.info("Request to modify existing card (id={})", id);
@@ -96,6 +104,10 @@ public class CardController {
         try {
             MarketplaceCard card = marketplaceCardRepository.findById(id)
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "Card not found"));
+
+            if (!AuthenticationTokenManager.sessionCanSeePrivate(request, card.getCreator().getUserID())) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Current user does not have permission to modify this card");
+            }
 
             // Updates fields
             card.setSection(MarketplaceCard.sectionFromString(cardProperties.getAsString("section")));
@@ -157,10 +169,9 @@ public class CardController {
             return List.of();
         }
 
-        List<Keyword> keywords = new ArrayList<>();
-        keywordRepository.findAllById(
-                Arrays.stream(keywordIds).boxed().collect(Collectors.toList())
-        ).forEach(keywords::add);
+        List<Keyword> keywords = Streamable.of(
+                keywordRepository.findAllById(Arrays.stream(keywordIds).boxed().collect(Collectors.toList()))
+        ).toList();
 
         if (keywords.isEmpty()) { // findAllById will return an empty iterable if any keyword id is invalid
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid keyword ID");
@@ -326,10 +337,8 @@ public class CardController {
             MarketplaceCard.Section section = MarketplaceCard.sectionFromString(sectionName);
 
             // fetch the keywords
-            List<Keyword> keywords;
-            try {
-                keywords = Streamable.of(keywordRepository.findAllById(keywordIds)).toList();
-            } catch (IllegalArgumentException e) {
+            List<Keyword> keywords = Streamable.of(keywordRepository.findAllById(keywordIds)).toList();
+            if (keywords.isEmpty()) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Failed to find a provided keyword");
             }
 
