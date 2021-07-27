@@ -35,14 +35,24 @@ export default {
     },
   },
   methods: {
-    async deleteKeyword(keywordId) {
-      console.log("A");
-      let response = await deleteKeyword(keywordId);
+    async deleteKeyword() {
+
+      let response = await deleteKeyword(this.keyword.id);
       if (typeof response === 'string') {
         this.$store.commit('setError', response);
         return;
       }
-      this.$emit('keyword-removed');
+      for (let event of this.$store.getters.events) {
+        console.log(event.type);
+        if (event.type === 'CreateKeywordEvent' && event.keyword.id === this.keyword.id) {
+          this.$store.commit("removeEvent", event.id);
+          break;
+        }
+      }
+
+
+      this.$emit('keyword-deleted');
+      this.$emit('closeDialog');
     },
   },
 };

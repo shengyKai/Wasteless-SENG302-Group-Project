@@ -39,12 +39,21 @@ export default {
       this.$emit('closeDialog');
     },
     async deleteKeyword() {
-      console.log("B");
-      let response = await deleteKeyword(35);
+
+      let response = await deleteKeyword(this.keyword.id);
       if (typeof response === 'string') {
         this.$store.commit('setError', response);
         return;
       }
+      for (let event of this.$store.getters.events) {
+        console.log(event.type);
+        if (event.type === 'CreateKeywordEvent' && event.keyword.id === this.keyword.id) {
+          this.$store.commit("removeEvent", event.id);
+          break;
+        }
+      }
+
+
       this.$emit('keyword-deleted');
       this.$emit('closeDialog');
     },
