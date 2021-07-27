@@ -190,7 +190,7 @@ export default {
       datesValid: true,
       productFilter: '',
       minDate: new Date("1500-01-01"),
-      maxDate: new Date("5001-01-01"),
+      maxDate: new Date("5000-01-01"),
       currency: {},
       mandatoryRules: () => mandatoryRules,
       quantityRules: () => quantityRules,
