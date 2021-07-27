@@ -148,9 +148,9 @@ describe('MarketplaceCard.vue', () => {
     appWrapper.destroy();
   });
 
-  // it('Must match snapshot', () => {
-  //   expect(wrapper).toMatchSnapshot();
-  // });
+  it('Must match snapshot', () => {
+    expect(wrapper).toMatchSnapshot();
+  });
 
   it("Must contain the creator name", () => {
     expect(wrapper.text()).toContain('By test_firstname test_lastname');
@@ -217,21 +217,6 @@ describe('MarketplaceCard.vue', () => {
     expect(wrapper.vm.deleteCardDialog).toBeTruthy();
   });
 
-  // it("The deleteMarketplaceCard method must be called and the dialog box should not be visible, upon clicking the delete button in the confirmation dialog box", async () => {
-  //   const deleteConfirmationDialog = await findDeleteConfirmationDialog();
-  //   const dialogDeleteButton = findButton('Delete', deleteConfirmationDialog);
-  //   await dialogDeleteButton.trigger("click");
-  //   expect(deleteMarketplaceCard).toBeCalledWith(testMarketplaceCard.id);
-  //   expect(wrapper.vm.deleteCardDialog).toBeFalsy();
-  // });
-
-  // it("The dialog box should not be visible if the cancel button is clicked in the confirmation dialog box", async () => {
-  //   const deleteConfirmationDialog = await findDeleteConfirmationDialog();
-  //   const dialogCancelButton = findButton('Cancel', deleteConfirmationDialog);
-  //   await dialogCancelButton.trigger("click");
-  //   expect(wrapper.vm.deleteCardDialog).toBeFalsy();
-  // });
-
   it("Must not be able to find the delete icon if the user is not the owner of the card", async () => {
     setUpStore(3, "user");
     generateWrapper();
@@ -259,60 +244,6 @@ describe('MarketplaceCard.vue', () => {
     const buttons = wrapper.findAllComponents({ ref: 'deleteButton' });
     expect(buttons.length).toBe(1);
   });
-
-  // Should be fully implement in another task which I cant do yet, the edit form is not implemented
-
-  // it("Must trigger edit form dialog box upon clicking edit icon", async () => {
-  //   expect(wrapper.vm.editCardDialog).toBeFalsy();
-  //   //This button is an icon, so a reference is used to identify it instead of its button text
-  //   const editButton = wrapper.findComponent({ ref: 'editButton' });
-  //   await editButton.trigger('click');
-  //   expect(wrapper.vm.editCardDialog).toBeTruthy();
-  // });
-
-  // it("The editMarketplaceCard method must be called and the dialog box should not be visible, upon clicking the edit button in the confirmation dialog box", async () => {
-  //   const editConfirmationDialog = await findEditConfirmationDialog();
-  //   const dialogEditeButton = findButton('Submit Edit', editConfirmationDialog);
-  //   await dialogEditeButton.trigger("click");
-  //   expect(editMarketplaceCard).toBeCalledWith(testMarketplaceCard.id);
-  //   expect(wrapper.vm.editConfirmationDialog).toBeFalsy();
-  // });
-
-  // it("The dialog box should not be visible if the cancel button is clicked in the confirmation dialog box", async () => {
-  //   const editConfirmationDialog = await findEditConfirmationDialog();
-  //   const dialogCancelButton = findButton('Cancel', editConfirmationDialog);
-  //   await dialogCancelButton.trigger("click");
-  //   expect(wrapper.vm.editConfirmationDialog).toBeFalsy();
-  // });
-
-  // it("Must not be able to find the edit icon if the user is not the owner of the card", async () => {
-  //   setUpStore(3, "user");
-  //   generateWrapper();
-  //   const buttons = wrapper.findAllComponents({ ref: 'editButton' });
-  //   expect(buttons.length).toBe(0);
-  // });
-
-  // it('Must not be able to find the edit icon if the property "showActions" is false', async () => {
-  //   generateWrapper({showActions: false});
-
-  //   const buttons = wrapper.findAllComponents({ ref: 'editButton' });
-  //   expect(buttons.length).toBe(0);
-  // });
-
-  // it("Must be able to find the edit icon if the user is not the owner of the card but is a DGAA", async () => {
-  //   setUpStore(3, "defaultGlobalApplicationAdmin");
-  //   generateWrapper();
-  //   const buttons = wrapper.findAllComponents({ ref: 'editButton' });
-  //   expect(buttons.length).toBe(1);
-  // });
-
-  // it("Must be able to find the edit icon if the user is not the owner of the card but is a GAA", async () => {
-  //   setUpStore(3, "globalApplicationAdmin");
-  //   generateWrapper();
-  //   const buttons = wrapper.findAllComponents({ ref: 'editButton' });
-  //   expect(buttons.length).toBe(1);
-  // });
-
 
   it.each(Object.keys(SECTION_NAMES) as MarketplaceCardSection[])(
     'Must contain the section name of "%s" if "showSection" is true',

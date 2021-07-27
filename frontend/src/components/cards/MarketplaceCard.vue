@@ -81,7 +81,7 @@
               text
               @click="editCardDialog = false"
             >
-              Cancel
+              Abort
             </v-btn>
           </v-card-actions>
         </v-card>
