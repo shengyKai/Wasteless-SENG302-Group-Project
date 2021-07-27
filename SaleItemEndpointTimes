@@ -1,0 +1,15 @@
+10000 listings, default params                  T = ~ 1500
+10000 listings, sort = price                    T = ~ 1600
+10000 listings, sort = productCode              T = ~ 1600
+10000 listings, reverse = true                  T = ~ 1600
+10000 listings, page=1,rpp=10                   T = ~ 1500
+
+
+10000 listings, default params                  T = ~110
+10000 listings, sort = price                    T = ~ 100
+10000 listings, sort = productCode              T = ~ 100
+10000 listings, sort = productName              T = ~ 100
+
+
+
+

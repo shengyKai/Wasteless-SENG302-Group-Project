@@ -53,7 +53,7 @@
 </template>
 
 <script>
-import {getBusinessSales, getBusinessSalesCount} from "@/api/internal";
+import {getBusinessSales} from "@/api/internal";
 import SaleItem from "@/components/cards/SaleItem";
 
 export default {
@@ -80,22 +80,10 @@ export default {
       if (typeof result === 'string') {
         this.$store.commit('setError', result);
       } else {
-        this.salesList = result;
+        this.salesList = result.results;
+        this.totalCount = result.count;
       }
     },
-    /**
-     * Gets the total count of Sales for the given business
-     * Used for pagination
-     * @returns {Promise<void>}
-     */
-    async getTotalCount() {
-      const result = await getBusinessSalesCount(this.businessId);
-      if (typeof result === 'string') {
-        this.$store.commit('setError', result);
-      } else {
-        this.totalCount = result;
-      }
-    }
   },
   computed: {
     /**
@@ -115,7 +103,6 @@ export default {
   },
   async created() {
     this.$store.commit('clearError');
-    await this.getTotalCount();
     await this.populateSales();
   },
   watch: {
