@@ -39,13 +39,56 @@
     </v-card-text>
     <v-divider/>
     <v-card-actions v-if="isCardOwnerOrDGAA && showActions">
+      <v-spacer/>
+      <v-icon ref="editButton "
+              class="mr-2"
+              color="primary"
+              @click.stop="editCardDialog = true"
+      >
+        mdi-pencil
+      </v-icon>
+
       <v-icon ref="deleteButton"
               color="primary"
               @click.stop="deleteCardDialog = true"
       >
         mdi-trash-can
       </v-icon>
+
       <v-dialog
+        ref="editDialog"
+        v-model="editCardDialog"
+        max-width="500px"
+      >
+        <v-card>
+          <v-card-title>
+            Edit the Card
+          </v-card-title>
+          <v-card-text>
+            Editing "{{ content.title }}". Use the form below to edit the card
+          </v-card-text>
+          <v-card-actions>
+            <v-spacer/>
+            <v-btn
+              color="primary"
+              text
+              @click="editCard(content.id); editCardDialog = false;"
+            >
+              Submit Edit
+            </v-btn>
+            <v-btn
+              color="primary"
+              text
+              @click="editCardDialog = false"
+            >
+              Abort
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+
+      <v-dialog
+        ref="deleteDialog"
         v-model="deleteCardDialog"
         max-width="300px"
       >
@@ -75,6 +118,8 @@
           </v-card-actions>
         </v-card>
       </v-dialog>
+
+
     </v-card-actions>
   </v-card>
 </template>
@@ -87,7 +132,8 @@ export default {
   name: "MarketplaceCard",
   data () {
     return {
-      deleteCardDialog: false
+      deleteCardDialog: false,
+      editCardDialog: false,
     };
   },
   props: {
@@ -151,6 +197,16 @@ export default {
     async deleteCard(cardId) {
       let response = await deleteMarketplaceCard(cardId);
       this.$emit("delete-card", response);
+    },
+    /**
+     * Edit the selected marketplace card and emits the response to the parent, Marketplace
+     * This is temporary will be used in other task
+     * import the api endpoint to do edit and use it in this method
+     */
+    async editCard(cardId) {
+      let response = "change this to hold endpoint";
+      console.log(cardId);
+      this.$emit("edit-card", response);
     }
   }
 };
