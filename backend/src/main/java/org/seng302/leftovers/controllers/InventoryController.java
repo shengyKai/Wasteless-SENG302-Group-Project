@@ -11,10 +11,16 @@ import org.seng302.leftovers.persistence.BusinessRepository;
 import org.seng302.leftovers.persistence.InventoryItemRepository;
 import org.seng302.leftovers.persistence.ProductRepository;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
+import org.seng302.leftovers.tools.JsonTools;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import org.seng302.leftovers.tools.SearchHelper;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 
 import javax.servlet.http.HttpServletRequest;
 import java.lang.annotation.Repeatable;
@@ -22,6 +28,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Set;
 import java.util.Comparator;
 
 @RestController
@@ -198,73 +205,58 @@ public class InventoryController {
      * business's inventory.
      */
     @GetMapping("/businesses/{id}/inventory")
-    public JSONArray getInventory(@PathVariable(name = "id") Long businessId,
+    public JSONObject getInventory(@PathVariable(name = "id") Long businessId,
                                 HttpServletRequest request,
                                 @RequestParam(required = false) String orderBy,
                                 @RequestParam(required = false) Integer page,
                                 @RequestParam(required = false) Integer resultsPerPage,
                                 @RequestParam(required = false) Boolean reverse) {
-        String statusMessage = String.format("Get inventory of business with ID %d", businessId);
-        logger.info(statusMessage);
-        List<InventoryItem> inventory = getInventoryFromRequest(businessId, request);
-
-        Comparator<InventoryItem> sort = sortInventory(orderBy, reverse);
-        inventory.sort(sort);
-
-        inventory = SearchHelper.getPageInResults(inventory, page, resultsPerPage);
-        JSONArray jsonArray = new JSONArray();
-        for (InventoryItem item : inventory) {
-            jsonArray.appendElement(item.constructJSONObject());
-        }
-        return jsonArray;
-
-    }
-
-    /**
-     * GET endpoint which will return the number of items in the business's
-     * inventory, provide that the request comes from an authenticated user who is
-     * an admin of the application or the business. If the request cannot be
-     * authenticated a 401 exception is returned, if the user doesn't have
-     * permission to view the inventory then a 403 exception is returned, and if the
-     * business doesn't exist then a 406 exception is returned.
-     * 
-     * @param businessId The id of the business to retrieve the inventory from.
-     * @param request    The HTTP request, used to authenticate the user's
-     *                   permissions.
-     * @return A JSONObject with the count of the number of items in the business's
-     *         inventory.
-     */
-    @GetMapping("/businesses/{id}/inventory/count")
-    public JSONObject getInventoryCount(@PathVariable(name = "id") Long businessId, HttpServletRequest request) {
-        String statusMessage = String.format("Get inventory count of business with ID %d", businessId);
-        logger.info(statusMessage);
-        List<InventoryItem> inventory = getInventoryFromRequest(businessId, request);
-        JSONObject json = new JSONObject();
-        json.put("count", inventory.size());
-        return json;
-    }
-
-    /**
-     * This method takes the business id and the http request sent to a get
-     * endpoint, and uses them to retrieve the inventory assoicated with the
-     * business. It will also add an error to the log if one is thrown due to and
-     * invalid auth token, insufficient permissions or the business not existing.
-     * 
-     * @param businessId The ID number of the business to find the inventory of.
-     * @param request    The incoming HTTP request, used to check permissions.
-     * @return A list of the items in the business's inventory.
-     */
-    private List<InventoryItem> getInventoryFromRequest(Long businessId, HttpServletRequest request) {
         try {
-            Business business = businessRepository.getBusinessById(businessId);
-            // Check user is logged in and has permission to act as the business
-            business.checkSessionPermissions(request);
-            List<Product> catalogue = productRepository.findAllByBusiness(business);
-            return inventoryItemRepository.getInventoryByCatalogue(catalogue);
-        } catch (ResponseStatusException e) {
-            logger.error(e.getMessage());
-            throw e;
+        AuthenticationTokenManager.checkAuthenticationToken(request);
+        logger.info(() -> String.format("Getting inventory item for business (businessId=%d).", businessId));
+        Business business = businessRepository.getBusinessById(businessId);
+
+        Sort.Direction direction = SearchHelper.getSortDirection(reverse);
+        Sort.Order sortOrder = getInventoryItemOrder(orderBy, direction);
+
+        PageRequest pageRequest = SearchHelper.getPageRequest(page, resultsPerPage, Sort.by(sortOrder));
+
+        Page<InventoryItem> result = inventoryItemRepository.findAllForBusiness(business, pageRequest);
+        
+        return JsonTools.constructPageJSON(result.map(InventoryItem::constructJSONObject));
+
+    } catch (Exception error) {
+        logger.error(error.getMessage());
+        throw error;
+    }
+
+    }
+
+    private static final Set<String> VALID_ORDERINGS = Set.of("productCode", "name", "description", "manufacturer", "recommendedRetailPrice", "created", "quantity", "pricePerItem", "totalPrice", "manufactured", "sellBy", "bestBefore", "expires");
+
+    private Sort.Order getInventoryItemOrder(String orderBy, Sort.Direction direction) {
+        if (orderBy == null) orderBy = "productCode";
+        else if (!VALID_ORDERINGS.contains(orderBy)) {
+            logger.error("Invalid inventory item ordering given: {}", orderBy);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The provided ordering is invalid");
         }
+
+        if (orderBy.equals("name")) {
+            orderBy = "product.name";
+        }
+        else if (orderBy.equals("description")) {
+            orderBy = "product.description";
+        }
+        else if (orderBy.equals("manufacturer")) {
+            orderBy = "product.manufacturer";
+        }
+        else if (orderBy.equals("recommendedRetailPrice")) {
+            orderBy = "product.recommendedRetailPrice";
+        }
+        else if (orderBy.equals("created")) {
+            orderBy = "product.created";
+        }
+        return new Sort.Order(direction, orderBy).ignoreCase();
     }
 
     /**
