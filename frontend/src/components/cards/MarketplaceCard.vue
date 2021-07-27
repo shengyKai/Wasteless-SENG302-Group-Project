@@ -38,14 +38,25 @@
       </div>
     </v-card-text>
     <v-divider/>
-    <v-card-actions v-if="isCardOwnerOrDGAA && showActions">
+    <v-card-actions v-if="isCardOwnerOrAdmin && showActions">
+      <v-spacer/>
+      <v-icon ref="editButton"
+              class="mr-2"
+              color="primary"
+              @click.stop="editCardDialog = true"
+      >
+        mdi-pencil
+      </v-icon>
+
       <v-icon ref="deleteButton"
               color="primary"
               @click.stop="deleteCardDialog = true"
       >
         mdi-trash-can
       </v-icon>
+
       <v-dialog
+        ref="deleteDialog"
         v-model="deleteCardDialog"
         max-width="300px"
       >
@@ -75,14 +86,10 @@
           </v-card-actions>
         </v-card>
       </v-dialog>
-      <v-btn
-        @click="editCardDialog=true">
-        Temporary edit button
-      </v-btn>
-      <template v-if="editCardDialog">
-        <MarketplaceCardForm :user="$store.state.user" :previousCard="content" @closeDialog="editCardDialog=false"/>
-      </template>
     </v-card-actions>
+    <template v-if="editCardDialog">
+      <MarketplaceCardForm :user="$store.state.user" :previousCard="content" @closeDialog="editCardDialog=false"/>
+    </template>
   </v-card>
 </template>
 
@@ -96,7 +103,7 @@ export default {
   data () {
     return {
       deleteCardDialog: false,
-      editCardDialog: false
+      editCardDialog: false,
     };
   },
   components: {
@@ -145,7 +152,7 @@ export default {
       return dateString;
     },
     // To ensure only the card owner, DGAA or GAA is able to execute an action relating to the marketplace card
-    isCardOwnerOrDGAA() {
+    isCardOwnerOrAdmin() {
       return (this.$store.state.user.id === this.content.creator.id)
             || (this.$store.getters.role === "defaultGlobalApplicationAdmin")
             || (this.$store.getters.role === "globalApplicationAdmin");
@@ -163,7 +170,7 @@ export default {
     async deleteCard(cardId) {
       let response = await deleteMarketplaceCard(cardId);
       this.$emit("delete-card", response);
-    }
+    },
   }
 };
 </script>
