@@ -94,4 +94,12 @@ public class KeywordStepDefinition {
         Assertions.assertEquals(keyword, keywordJson.get("name"));
     }
 
+    @SneakyThrows
+    @Then("I have not received a notification")
+    public void i_have_not_received_a_notification() {
+        List<JSONObject> events = EventContext.parseEvents(requestContext.getLastResult().getResponse(), "newsfeed");
+
+        Assertions.assertEquals(0, events.size());
+    }
+
 }

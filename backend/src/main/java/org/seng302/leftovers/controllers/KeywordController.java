@@ -6,8 +6,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.seng302.leftovers.entities.CreateKeywordEvent;
 import org.seng302.leftovers.entities.Keyword;
+import org.seng302.leftovers.entities.User;
 import org.seng302.leftovers.persistence.CreateKeywordEventRepository;
 import org.seng302.leftovers.persistence.KeywordRepository;
+import org.seng302.leftovers.persistence.UserRepository;
 import org.seng302.leftovers.service.KeywordService;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
 import org.springframework.http.HttpStatus;
@@ -21,6 +23,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.util.Optional;
 
 @RestController
@@ -30,11 +33,14 @@ public class KeywordController {
     private final KeywordRepository keywordRepository;
     private final CreateKeywordEventRepository createKeywordEventRepository;
     private final KeywordService keywordService;
+    private final UserRepository userRepository;
 
-    public KeywordController(KeywordRepository keywordRepository, KeywordService keywordService, CreateKeywordEventRepository createKeywordEventRepository) {
+    public KeywordController(KeywordRepository keywordRepository, KeywordService keywordService,
+                             CreateKeywordEventRepository createKeywordEventRepository, UserRepository userRepository) {
         this.keywordRepository = keywordRepository;
         this.createKeywordEventRepository = createKeywordEventRepository;
         this.keywordService = keywordService;
+        this.userRepository = userRepository;
     }
 
 
@@ -108,8 +114,9 @@ public class KeywordController {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Keyword with the given name already exists");
             }
 
+            User creator = findUserFromRequest(request);
             keyword = keywordRepository.save(keyword);
-            keywordService.sendNewKeywordEvent(keyword);
+            keywordService.sendNewKeywordEvent(keyword, creator);
 
             JSONObject json = new JSONObject();
             json.put("keywordId", keyword.getID());
@@ -120,5 +127,23 @@ public class KeywordController {
             logger.error(e.getMessage());
             throw e;
         }
+    }
+
+    /**
+     * Finds the user who send the HTTP request by using the user ID associated with this session.
+     * @param request Incoming HTTP request.
+     * @return User associated with HTTP request.
+     */
+    private User findUserFromRequest(HttpServletRequest request) {
+        HttpSession session = request.getSession();
+        Long userId = (Long) session.getAttribute("accountId");
+        if (userId == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Could not get user ID from request");
+        }
+        Optional<User> user = userRepository.findById(userId);
+        if (user.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid user ID");
+        }
+        return user.get();
     }
 }

@@ -38,6 +38,8 @@ class KeywordServiceTest {
     ArgumentCaptor<CreateKeywordEvent> eventArgumentCaptor;
 
     Keyword keyword;
+    @Mock
+    User mockUser;
 
     @BeforeEach
     void setUp() {
@@ -56,7 +58,7 @@ class KeywordServiceTest {
 
     @Test
     void sendNewKeywordsEvents_queriesUserRepositoryForAllAdmin() {
-        keywordService.sendNewKeywordEvent(keyword);
+        keywordService.sendNewKeywordEvent(keyword, mockUser);
         Mockito.verify(userRepository, Mockito.times(2))
                 .findAllByRole(stringArgumentCaptor.capture());
 
@@ -67,7 +69,7 @@ class KeywordServiceTest {
 
     @Test
     void sendNewKeywordsEvents_callEventServiceWithAdminReturnFromUserRepository() {
-        keywordService.sendNewKeywordEvent(keyword);
+        keywordService.sendNewKeywordEvent(keyword, mockUser);
         Mockito.verify(eventService, Mockito.times(1))
                 .addUsersToEvent(adminArgumentCaptor.capture(), eventArgumentCaptor.capture());
 
@@ -77,13 +79,14 @@ class KeywordServiceTest {
     }
 
     @Test
-    void sendNewKeywordsEvents_callEventServiceWithKeywordPassedIntoMethod() {
-        keywordService.sendNewKeywordEvent(keyword);
+    void sendNewKeywordsEvents_callEventServiceWithKeywordAndUserPassedIntoMethod() {
+        keywordService.sendNewKeywordEvent(keyword, mockUser);
         Mockito.verify(eventService, Mockito.times(1))
                 .addUsersToEvent(adminArgumentCaptor.capture(), eventArgumentCaptor.capture());
 
         CreateKeywordEvent createKeywordEvent = eventArgumentCaptor.getValue();
-        assertEquals(keyword,createKeywordEvent.getNewKeyword());
+        assertEquals(keyword, createKeywordEvent.getNewKeyword());
+        assertEquals(mockUser, createKeywordEvent.getCreator());
     }
 }
 

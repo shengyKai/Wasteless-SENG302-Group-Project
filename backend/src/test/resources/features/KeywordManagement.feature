@@ -24,6 +24,14 @@ Feature: UCM6 - Keyword Management
     Then  I receive a notification
     And   The notification contains the keyword "Dance"
 
+  Scenario: AC5 - Other users are not notified when a new keyword is added
+    Given A user exists with name "Dave"
+    And   A user exists with name "Jane"
+    And   A keyword "Dance" has been created by user "Dave"
+    And   I am logged into "Jane" account
+    When  I check my notification feed
+    Then  I have not received a notification
+
   Scenario: AC6 - System administrators can delete keywords
     Given The keyword "Dance" exists
     And A admin exists with name "Dave"

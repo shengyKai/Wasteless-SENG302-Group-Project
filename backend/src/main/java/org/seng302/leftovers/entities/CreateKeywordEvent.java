@@ -1,8 +1,6 @@
 package org.seng302.leftovers.entities;
 
-import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.OneToOne;
+import javax.persistence.*;
 
 import net.minidev.json.JSONObject;
 
@@ -16,6 +14,10 @@ public class CreateKeywordEvent extends Event {
     @JoinColumn(name = "new_keyword", unique = true, nullable = false)
     private Keyword newKeyword;
 
+    @ManyToOne
+    @JoinColumn(name = "creator_id", nullable = false)
+    private User creator;
+
     /**
      * Empty constructor to appease JPA
      */
@@ -25,8 +27,9 @@ public class CreateKeywordEvent extends Event {
      * Constructor for the create keyword event.
      * @param newKeyword The keyword which has been created.
      */
-    public CreateKeywordEvent(Keyword newKeyword) {
+    public CreateKeywordEvent(Keyword newKeyword, User creator) {
         this.newKeyword = newKeyword;
+        this.creator = creator;
     }
 
     /**
@@ -38,6 +41,15 @@ public class CreateKeywordEvent extends Event {
     }
 
     /**
+     * Returns the user who created the keyword associated with this event.
+     * @return Creator of the keyword.
+     */
+    public User getCreator() {
+        return creator;
+    }
+
+
+    /**
      * Construct a JSON representation of the create keyword event. Contains the event's id, created date and type, and
      * the JSON representation of the keyword associated with this event.
      * @return JSON representation of the create keyword event.
@@ -46,6 +58,7 @@ public class CreateKeywordEvent extends Event {
     public JSONObject constructJSONObject() {
         JSONObject jsonObject = super.constructJSONObject();
         jsonObject.appendField("keyword", newKeyword.constructJSONObject());
+        jsonObject.appendField("creator", creator.constructPublicJson(false));
         return jsonObject;
     }
 
