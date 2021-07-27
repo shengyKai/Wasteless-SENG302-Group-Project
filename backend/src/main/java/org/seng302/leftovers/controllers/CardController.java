@@ -8,17 +8,17 @@ import org.seng302.leftovers.entities.ExpiryEvent;
 import org.seng302.leftovers.entities.Keyword;
 import org.seng302.leftovers.entities.MarketplaceCard;
 import org.seng302.leftovers.entities.User;
-import org.seng302.leftovers.persistence.ExpiryEventRepository;
-import org.seng302.leftovers.persistence.KeywordRepository;
-import org.seng302.leftovers.persistence.MarketplaceCardRepository;
-import org.seng302.leftovers.persistence.UserRepository;
+import org.seng302.leftovers.persistence.*;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
 import org.seng302.leftovers.tools.JsonTools;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.util.Streamable;
 import org.springframework.http.HttpStatus;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import org.seng302.leftovers.tools.SearchHelper;
@@ -26,10 +26,8 @@ import org.seng302.leftovers.tools.SearchHelper;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * This controller handles requests involving marketplace cards
@@ -37,6 +35,7 @@ import java.util.Set;
 @RestController
 public class CardController {
     private static final Set<String> VALID_CARD_ORDERINGS = Set.of("lastRenewed", "created", "title", "closes", "creatorFirstName", "creatorLastName", "location");
+    private static final String DEFAULT_ORDERING = "lastRenewed";
 
     private final MarketplaceCardRepository marketplaceCardRepository;
     private final KeywordRepository keywordRepository;
@@ -91,6 +90,40 @@ public class CardController {
     }
 
     /**
+     * Endpoint to modify an already existing marketplace card.
+     * Will return a 401 error if request is not logged in
+     * Will return a 403 error if the user
+     * @param request The HTTP request, used for checking permissions.
+     * @param id The card ID to modify, provided in the request path
+     * @param cardProperties Updated card properties
+     */
+    @PutMapping("/cards/{id}")
+    public void modifyCard(HttpServletRequest request, @PathVariable Long id, @RequestBody JSONObject cardProperties) {
+        logger.info("Request to modify existing card (id={})", id);
+        AuthenticationTokenManager.checkAuthenticationToken(request);
+        try {
+            MarketplaceCard card = marketplaceCardRepository.findById(id)
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "Card not found"));
+
+            if (!AuthenticationTokenManager.sessionCanSeePrivate(request, card.getCreator().getUserID())) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Current user does not have permission to modify this card");
+            }
+
+            // Updates fields
+            card.setSection(MarketplaceCard.sectionFromString(cardProperties.getAsString("section")));
+            card.setTitle(cardProperties.getAsString("title"));
+            card.setDescription(cardProperties.getAsString("description"));
+            card.setKeywords(getCardKeywordsFromProperties(cardProperties));
+
+            // Save result
+            marketplaceCardRepository.save(card);
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            throw e;
+        }
+    }
+
+    /**
      * Endpoint to delete the marketplace card with the provided card id.
      * If the user is unauthorised then a 401 response is returned
      * If the user is not allowed to modify the card then a 403 response is returned
@@ -100,7 +133,7 @@ public class CardController {
      * @param id Card ID to delete
      */
     @DeleteMapping("/cards/{id}")
-    private void deleteCard(HttpServletRequest request, @PathVariable Long id) {
+    public void deleteCard(HttpServletRequest request, @PathVariable Long id) {
         logger.info("Request to delete marketplace card (id={})", id);
         try {
             // Check that authentication token is present and valid
@@ -122,6 +155,29 @@ public class CardController {
             logger.error(e.getMessage());
             throw e;
         }
+    }
+
+    /**
+     * Fetches the list of card keywords from the JSONObject attribute "keywordIds"
+     * @param properties User provided JSONObject with an attribute "keywordIds" that is a list of keyword ids
+     * @return List of keywords from "keywordIds"
+     */
+    private List<Keyword> getCardKeywordsFromProperties(JSONObject properties) {
+        long[] keywordIds = JsonTools.parseLongArrayFromJsonField(properties, "keywordIds");
+
+        if (keywordIds.length == 0) {
+            return List.of();
+        }
+
+        List<Keyword> keywords = Streamable.of(
+                keywordRepository.findAllById(Arrays.stream(keywordIds).boxed().collect(Collectors.toList()))
+        ).toList();
+
+        if (keywords.isEmpty()) { // findAllById will return an empty iterable if any keyword id is invalid
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid keyword ID");
+        }
+
+        return keywords;
     }
 
     /**
@@ -148,15 +204,8 @@ public class CardController {
                 .withCreator(creator)
                 .build();
 
-        // Retrieve all the keywords and add them to the card
-        long[] keywordIds = JsonTools.parseLongArrayFromJsonField(cardProperties, "keywordIds");
-        for (long keywordId : keywordIds) {
-            Optional<Keyword> optional = keywordRepository.findById(keywordId);
-            if (optional.isEmpty()) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, String.format("Keyword with ID %d does not exist", keywordId));
-            }
-            card.addKeyword(optional.get());
-        }
+        // Adds keywords
+        card.setKeywords(getCardKeywordsFromProperties(cardProperties));
 
         return card;
     }
@@ -168,7 +217,7 @@ public class CardController {
      * @param id Card ID to delete
      */
     @PutMapping("/cards/{id}/extenddisplayperiod")
-    private void extendCardDisplayPeriod(HttpServletRequest request, @PathVariable Long id) {
+    public void extendCardDisplayPeriod(HttpServletRequest request, @PathVariable Long id) {
         logger.info("Request to extend card display period (id={})", id);
         try {
             // Check that authentication token is present and valid
@@ -190,6 +239,37 @@ public class CardController {
             logger.error(e.getMessage());
             throw e;
         }
+    }
+
+    /**
+     * Helper for generating a page request for marketplace cards from sort and pagination parameters
+     *
+     * @param orderBy Name of field to order cards by, if it is null a default ordering will be used
+     * @param page Page index to start from (1 indexed)
+     * @param resultsPerPage Maximum number of results per page
+     * @param reverse Whether to reverse the search
+     * @return Page request that contains ordering and pagination information
+     */
+    private PageRequest generatePageRequest(String orderBy, Integer page, Integer resultsPerPage, Boolean reverse) {
+        Sort.Direction direction = SearchHelper.getSortDirection(reverse);
+        if (orderBy == null) {
+            orderBy = DEFAULT_ORDERING;
+        }
+
+        if (!VALID_CARD_ORDERINGS.contains(orderBy)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid card ordering");
+        }
+
+        List<Sort.Order> sortOrder;
+        //If the orderBy is by address, creates a Sort.Order list for Location, else it creates a List for a normal orderBy attribute
+        //For location sort, the primary sort would be by country, followed by the city, since these both attributes are shown to the user in the marketplace card.
+        if (orderBy.equals("location")) {
+            sortOrder = List.of(new Sort.Order(direction, "creator.address.country").ignoreCase(), new Sort.Order(direction, "creator.address.city").ignoreCase());
+        } else {
+            sortOrder = List.of(new Sort.Order(direction, orderBy).ignoreCase());
+        }
+
+        return SearchHelper.getPageRequest(page, resultsPerPage, Sort.by(sortOrder));
     }
 
     /**
@@ -216,36 +296,61 @@ public class CardController {
 
             // parse the section
             MarketplaceCard.Section section = MarketplaceCard.sectionFromString(sectionName);
-            Sort.Direction direction = SearchHelper.getSortDirection(reverse);
-            if (orderBy == null) {
-                orderBy = "lastRenewed";
-            }
 
-            if (!VALID_CARD_ORDERINGS.contains(orderBy)) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid card ordering");
-            }
-
-            List<Sort.Order> sortOrder;
-            //If the orderBy is by address, creates a Sort.Order list for Location, else it creates a List for a normal orderBy attribute
-            //For location sort, the primary sort would be by country, followed by the city, since these both attributes are shown to the user in the marketplace card.
-            if (orderBy.equals("location")) {
-                sortOrder = List.of(new Sort.Order(direction, "creator.address.country").ignoreCase(), new Sort.Order(direction, "creator.address.city").ignoreCase());
-            } else {
-                sortOrder = List.of(new Sort.Order(direction, orderBy).ignoreCase());
-            }
-
-            PageRequest pageRequest = SearchHelper.getPageRequest(page, resultsPerPage, Sort.by(sortOrder));
+            PageRequest pageRequest = generatePageRequest(orderBy, page, resultsPerPage, reverse);
             Page<MarketplaceCard> results = marketplaceCardRepository.getAllBySection(section, pageRequest);
 
             //return JSON Object
-            JSONArray resultArray = new JSONArray();
-            for (MarketplaceCard card : results) {
-                resultArray.appendElement(card.constructJSONObject());
+            return JsonTools.constructPageJSON(results.map(MarketplaceCard::constructJSONObject));
+        } catch (Exception exception) {
+            logger.error(exception.getMessage());
+            throw exception;
+        }
+    }
+
+    /**
+     * Retrieve all of the Marketplace Cards for a given section and with the matching keywords.
+     * @param sectionName The name of the section to retrieve
+     * @param keywordIds The keywords to filter the results by
+     * @param union Mode selection for keyword filtering (false = card has all, true = card has any)
+     * @param orderBy The field to use for sorting the results. Will default to last renewed if none is provided.
+     * @param page The page number of the current requested section
+     * @param resultsPerPage Maximum number of results to retrieve
+     * @param reverse Indicates which way the results will be ordered. They will be in descending order if it is true,
+     *                or ascending if it is false or null.
+     * @return A JSONObject page of Marketplace cards
+     */
+    @GetMapping("/cards/search")
+    public JSONObject searchCards(HttpServletRequest request,
+                                  @RequestParam(name = "section") String sectionName,
+                                  @RequestParam(value="keywordIds") List<Long> keywordIds,
+                                  @RequestParam Boolean union,
+                                  @RequestParam(required = false) String orderBy,
+                                  @RequestParam(required = false) Integer page,
+                                  @RequestParam(required = false) Integer resultsPerPage,
+                                  @RequestParam(required = false) Boolean reverse) {
+        logger.info("Searching cards with section=\"{}\" and keywordsIds={}", sectionName, keywordIds);
+        try {
+            AuthenticationTokenManager.checkAuthenticationToken(request);
+
+            // parse the section
+            MarketplaceCard.Section section = MarketplaceCard.sectionFromString(sectionName);
+
+            // fetch the keywords
+            List<Keyword> keywords = Streamable.of(keywordRepository.findAllById(keywordIds)).toList();
+            if (keywords.isEmpty()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Failed to find a provided keyword");
             }
-            JSONObject json = new JSONObject();
-            json.put("count", results.getTotalElements());
-            json.put("results", resultArray);
-            return json;
+
+            PageRequest pageRequest = generatePageRequest(orderBy, page, resultsPerPage, reverse);
+
+            Specification<MarketplaceCard> spec =
+                    SearchMarketplaceCardHelper.cardHasKeywords(keywords, union)
+                    .and(SearchMarketplaceCardHelper.cardIsInSection(section));
+
+            Page<MarketplaceCard> results = marketplaceCardRepository.findAll(spec, pageRequest);
+
+            return JsonTools.constructPageJSON(results.map(MarketplaceCard::constructJSONObject));
         } catch (Exception exception) {
             logger.error(exception.getMessage());
             throw exception;
@@ -262,17 +367,9 @@ public class CardController {
 
         User user = userRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "User not found"));
 
-        PageRequest pageRequest = SearchHelper.getPageRequest(page, resultsPerPage, Sort.by(Sort.Direction.DESC, "lastRenewed"));
+        PageRequest pageRequest = SearchHelper.getPageRequest(page, resultsPerPage, Sort.by(Sort.Direction.DESC, DEFAULT_ORDERING));
         var results = marketplaceCardRepository.getAllByCreator(user, pageRequest);
 
-        //return JSON Object
-        JSONArray resultArray = new JSONArray();
-        for (MarketplaceCard card : results) {
-            resultArray.appendElement(card.constructJSONObject());
-        }
-        JSONObject json = new JSONObject();
-        json.put("count", results.getTotalElements());
-        json.put("results", resultArray);
-        return json;
+        return JsonTools.constructPageJSON(results.map(MarketplaceCard::constructJSONObject));
     }
 }
