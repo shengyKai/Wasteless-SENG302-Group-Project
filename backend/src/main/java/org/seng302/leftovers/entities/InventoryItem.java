@@ -214,8 +214,6 @@ public class InventoryItem {
      * @param expires the date when the product will expire and should be disposed of
      */
     public void setDates(LocalDate manufactured, LocalDate sellBy, LocalDate bestBefore, LocalDate expires) {
-        //Manufactured needs no extra validation as is the only date that can and must before today
-        setManufactured(manufactured);
         //Checking expires is not null
         if (expires == null) {
             setExpires(expires); //Will throw an exception
@@ -239,9 +237,11 @@ public class InventoryItem {
             }
         }
         //Case 4: best before is null and sell by is null, no validation needed
-        setBestBefore(bestBefore);
-        setSellBy(sellBy);
         setExpires(expires);
+        setSellBy(sellBy);
+        setBestBefore(bestBefore);
+        //Manufactured needs no extra validation as is the only date that can and must before today
+        setManufactured(manufactured);
     }
 
     /**
