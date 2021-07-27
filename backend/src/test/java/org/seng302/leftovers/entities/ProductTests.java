@@ -2,6 +2,8 @@ package org.seng302.leftovers.entities;
 
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -33,10 +35,14 @@ class ProductTests {
     BusinessRepository businessRepository;
     @Autowired
     UserRepository userRepository;
+    @Autowired
+    private SessionFactory sessionFactory;
 
     private User testUser1;
     private Business testBusiness1;
     private Business testBusiness2;
+    private Session session;
+
 
     /**
      * Created a business objects for testing
@@ -51,6 +57,7 @@ class ProductTests {
                 .withPrimaryOwner(testUser1)
                 .build();
         testBusiness1 = businessRepository.save(testBusiness1);
+        testBusiness1 = session.find(Business.class, testBusiness1.getId());
 
         testBusiness2 = new Business.Builder()
                 .withBusinessType("Accommodation and Food Services")
@@ -61,10 +68,12 @@ class ProductTests {
                 .withPrimaryOwner(testUser1)
                 .build();
         testBusiness2 = businessRepository.save(testBusiness2);
+        testBusiness2 = session.find(Business.class, testBusiness2.getId());
     }
 
-    @BeforeAll
-    void setUp() throws ParseException {
+    @BeforeEach
+    void setup() {
+        session = sessionFactory.openSession();
         businessRepository.deleteAll();
         userRepository.deleteAll();
 
@@ -94,6 +103,7 @@ class ProductTests {
 
     @AfterEach
     void cleanUp() {
+        session.close();
         productRepository.deleteAll();
     }
 
@@ -263,7 +273,7 @@ class ProductTests {
                 .build();
         productRepository.save(product1);
         testBusiness1 = businessRepository.findByName("BusinessName1");
-        List<Product> catalogue = productRepository.getAllByBusiness(testBusiness1);
+        List<Product> catalogue = productRepository.findAllByBusiness(testBusiness1);
 
         assertEquals(product1.getID(), catalogue.get(0).getID());
     }
@@ -301,7 +311,7 @@ class ProductTests {
         productRepository.save(product2);
         productRepository.save(product3);
         testBusiness1 = businessRepository.findByName("BusinessName1");
-        List<Product> catalogue = productRepository.getAllByBusiness(testBusiness1);
+        List<Product> catalogue = productRepository.findAllByBusiness(testBusiness1);
 
         assertEquals(3, catalogue.size());
     }
@@ -950,33 +960,36 @@ class ProductTests {
 
     @Test
     void constructJsonObject_optionalAttributesNull_allExpectedFieldsPresent() {
-        Product testProduct = new Product.Builder()
-                .withProductCode("NATHAN-APPLE-70")
-                .withName("The Nathan Apple")
-                .withBusiness(testBusiness1)
-                .build();
-        JSONObject testJson = testProduct.constructJSONObject();
-        assertTrue(testJson.containsKey("id"));
-        assertTrue(testJson.containsKey("name"));
-        assertTrue(testJson.containsKey("created"));
-        assertTrue(testJson.containsKey("images"));
-        assertTrue(testJson.containsKey("countryOfSale"));
+            Product testProduct = new Product.Builder()
+                    .withProductCode("NATHAN-APPLE-70")
+                    .withName("The Nathan Apple")
+                    .withBusiness(testBusiness1)
+                    .build();
+            JSONObject testJson = testProduct.constructJSONObject();
+            assertTrue(testJson.containsKey("id"));
+            assertTrue(testJson.containsKey("name"));
+            assertTrue(testJson.containsKey("created"));
+            assertTrue(testJson.containsKey("images"));
+            assertTrue(testJson.containsKey("countryOfSale"));
+
     }
 
     @Test
     void constructJsonObject_optionalAttributesNull_noUnexpectedFieldsPresent() {
-        Product testProduct = new Product.Builder()
-                .withProductCode("NATHAN-APPLE-70")
-                .withName("The Nathan Apple")
-                .withBusiness(testBusiness1)
-                .build();
-        JSONObject testJson = testProduct.constructJSONObject();
-        testJson.remove("id");
-        testJson.remove("name");
-        testJson.remove("created");
-        testJson.remove("images");
-        testJson.remove("countryOfSale");
-        assertTrue(testJson.isEmpty());
+            Product testProduct = new Product.Builder()
+                    .withProductCode("NATHAN-APPLE-70")
+                    .withName("The Nathan Apple")
+                    .withBusiness(testBusiness1)
+                    .build();
+
+
+            JSONObject testJson = testProduct.constructJSONObject();
+            testJson.remove("id");
+            testJson.remove("name");
+            testJson.remove("created");
+            testJson.remove("images");
+            testJson.remove("countryOfSale");
+            assertTrue(testJson.isEmpty());
     }
 
     @Test

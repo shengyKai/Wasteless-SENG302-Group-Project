@@ -49,6 +49,8 @@ public class ProductController {
         this.imageRepository = imageRepository;
     }
 
+    private static final Set<String> VALID_ORDERINGS = Set.of("name", "description", "manufacturer","recommendedRetailPrice", "created", "productCode");
+
     /**
      * REST GET method to retrieve all the products with a business's catalogue.
      * @param id the id of the business
@@ -69,10 +71,14 @@ public class ProductController {
         logger.info(() -> String.format("Retrieving catalogue from business with id %d.", id));
         Optional<Business> business = businessRepository.findById(id);
 
+        orderBy = Optional.ofNullable(orderBy).orElse("productCode");
+        if (!VALID_ORDERINGS.contains(orderBy)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "OrderBy term " + orderBy + " is invalid");
+        }
+
         List<Sort.Order> sortOrder;
         Sort.Direction direction = SearchHelper.getSortDirection(reverse);
-
-        sortOrder = List.of(new Sort.Order(direction, orderBy).ignoreCase());
+        sortOrder = List.of(new Sort.Order(direction, orderBy ).ignoreCase());
 
     
         if (business.isEmpty()) {
@@ -80,7 +86,7 @@ public class ProductController {
             logger.error(notFound.getMessage());
             throw notFound;
         } else {
-            // business.get().checkSessionPermissions(request);
+            business.get().checkSessionPermissions(request);
             PageRequest pageablePage = SearchHelper.getPageRequest(page, resultsPerPage, Sort.by(sortOrder));
             Page<Product> catalogue = productRepository.getAllByBusiness(business.get(), pageablePage);
 
