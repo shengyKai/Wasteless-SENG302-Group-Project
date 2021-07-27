@@ -1035,7 +1035,7 @@ export async function createNewKeyword(keyword: string) : Promise<MaybeError<und
  * Deletes a keyword from the keyword list
  * @param keyword The id of the community marketplace keyword
  */
- export async function deleteKeyword(keywordId: number) : Promise<MaybeError<undefined>> {
+export async function deleteKeyword(keywordId: number) : Promise<MaybeError<undefined>> {
   try {
     await instance.delete(`/keywords/${keywordId}`);
   } catch (error) {

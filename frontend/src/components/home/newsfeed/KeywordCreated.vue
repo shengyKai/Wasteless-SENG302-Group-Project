@@ -10,6 +10,7 @@
 </template>
 
 <script>
+import { deleteKeyword } from '@/api/internal';
 import Event from './Event';
 
 export default {
@@ -34,8 +35,14 @@ export default {
     },
   },
   methods: {
-    deleteKeyword() {
-      alert('TODO');
+    async deleteKeyword(keywordId) {
+      console.log("A");
+      let response = await deleteKeyword(keywordId);
+      if (typeof response === 'string') {
+        this.$store.commit('setError', response);
+        return;
+      }
+      this.$emit('keyword-removed');
     },
   },
 };
