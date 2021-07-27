@@ -26,10 +26,7 @@ import org.seng302.leftovers.tools.SearchHelper;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 /**
  * This controller handles requests involving marketplace cards
@@ -275,7 +272,7 @@ public class CardController {
     @GetMapping("/cards/search")
     public JSONObject searchCards(HttpServletRequest request,
                                   @RequestParam(name = "section") String sectionName,
-                                  @RequestParam(value="keywordIds") List<Long> keywordIds,
+                                  @RequestParam(value="keywordIds", required = false) List<Long> keywordIds,
                                   @RequestParam Boolean union,
                                   @RequestParam(required = false) String orderBy,
                                   @RequestParam(required = false) Integer page,
@@ -289,6 +286,7 @@ public class CardController {
             MarketplaceCard.Section section = MarketplaceCard.sectionFromString(sectionName);
 
             // fetch the keywords
+            keywordIds = Optional.ofNullable(keywordIds).orElse(Collections.emptyList());
             List<Keyword> keywords;
             try {
                 keywords = Streamable.of(keywordRepository.findAllById(keywordIds)).toList();

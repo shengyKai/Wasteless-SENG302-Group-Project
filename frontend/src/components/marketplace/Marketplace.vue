@@ -110,7 +110,7 @@
 
 <script>
 import MarketplaceCard from "../cards/MarketplaceCard";
-import {getMarketplaceCardsBySection } from "../../api/internal.ts";
+import {getMarketplaceCardsBySectionAndKeywords} from "../../api/internal.ts";
 import { SECTION_NAMES } from '@/utils';
 
 export default {
@@ -118,6 +118,8 @@ export default {
     return {
       tab: null,
       sectionNames: SECTION_NAMES,
+      keywordIds: [],
+      unionSearch: false,
       sections: ["ForSale", "Wanted", "Exchange"],
       cards: {
         ForSale: [],
@@ -161,7 +163,7 @@ export default {
       this.error = undefined;
 
       const results = await Promise.all(
-        sections.map(key => getMarketplaceCardsBySection(key, this.currentPage[key], this.resultsPerPage, this.orderBy, this.reverse))
+        sections.map(key => getMarketplaceCardsBySectionAndKeywords(this.keywordIds,key, this.unionSearch, this.currentPage[key], this.resultsPerPage, this.orderBy, this.reverse))
       );
 
       for (let i = 0; i<sections.length; i++) {
