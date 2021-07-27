@@ -164,12 +164,15 @@ export type InventoryItem = {
 
 export type MarketplaceCardSection = 'ForSale' | 'Wanted' | 'Exchange'
 
-export type CreateMarketplaceCard = {
-  creatorId: number,
+export type ModifyMarketplaceCard = {
   section: MarketplaceCardSection,
   title: string,
   description?: string,
   keywordIds: number[],
+}
+
+export type CreateMarketplaceCard = ModifyMarketplaceCard & {
+  creatorId: number,
 };
 
 export type Keyword = {
@@ -892,6 +895,22 @@ export async function createMarketplaceCard(marketplaceCard: CreateMarketplaceCa
     return 'Invalid response format';
   }
   return response.data.cardId;
+}
+
+export async function modifyMarketplaceCard(cardId: number, marketplaceCard: ModifyMarketplaceCard) {
+  try {
+    await instance.put(`/cards/${cardId}`, marketplaceCard);
+  } catch (error) {
+    let status: number | undefined = error.response?.status;
+    if (status === undefined) return 'Failed to reach backend';
+    if (status === 401) return 'You have been logged out. Please login again and retry';
+    if (status === 403) return 'Operation not permitted';
+    if (status === 406) return 'Marketplace card not found';
+    if (status === 400) return 'Invalid parameters: ' + error.response?.data.message;
+
+    return 'Request failed: ' + status;
+  }
+  return undefined;
 }
 
 type CardOrderBy = 'created' | 'title' | 'closes' | 'creatorFirstName' | 'creatorLastName'

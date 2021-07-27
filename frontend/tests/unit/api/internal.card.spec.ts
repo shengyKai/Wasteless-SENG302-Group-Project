@@ -365,4 +365,94 @@ describe("Test GET /users/{userId}/cards endpoint", () => {
     const response = await api.getMarketplaceCardsByUser(1, 12, 1);
     expect(response).toEqual("Response is not card array");
   });
+
+  describe("Test PUT /cards/:id endpoint", () => {
+
+    const card: api.ModifyMarketplaceCard = {
+      section: "ForSale",
+      title: "1982 Lada Samara",
+      description: "Beige, suitable for a hen house. Fair condition. Some rust. As is, where is. Will swap for budgerigar.",
+      keywordIds: [20, 15, 600],
+    };
+
+    it('When response has a 200 status code, undefined is returned', async () => {
+      instance.put.mockResolvedValueOnce({
+        response: {
+          status: 200,
+        }
+      });
+      const message = await api.modifyMarketplaceCard(7, card);
+      expect(message).toBe(undefined);
+    });
+
+    it('When response is undefined status, the result will be an error message stating unable to reach backend', async () => {
+      instance.put.mockRejectedValueOnce({
+        response: {
+          status: undefined,
+        }
+      });
+      const message = await api.modifyMarketplaceCard(7, card);
+      expect(message).toEqual("Failed to reach backend");
+    });
+
+    it('When response is 401 status, the result will be an error message stating the access token is invalid/missing', async () => {
+      instance.put.mockRejectedValueOnce({
+        response: {
+          status: 401,
+        }
+      });
+      const message = await api.modifyMarketplaceCard(7, card);
+      expect(message).toEqual("You have been logged out. Please login again and retry");
+    });
+
+    it('When response is 403 status, the result will be an error message stating the operation is not permitted', async () => {
+      instance.put.mockRejectedValueOnce({
+        response: {
+          status: 403,
+        }
+      });
+      const message = await api.modifyMarketplaceCard(7, card);
+      expect(message).toEqual("Operation not permitted");
+    });
+
+    it('When response is 406 status, the result will be an error message stating there is no such marketplace card', async () => {
+      instance.put.mockRejectedValueOnce({
+        response: {
+          status: 406,
+        }
+      });
+      const message = await api.modifyMarketplaceCard(7, card);
+      expect(message).toEqual("Marketplace card not found");
+    });
+
+    it('When response is 400 status, the result contain the error message received in the response', async () => {
+      instance.put.mockRejectedValueOnce({
+        response: {
+          status: 400,
+          data: {
+            message: "Title too long"
+          }
+        },
+      });
+      const message = await api.modifyMarketplaceCard(7, card);
+      expect(message).toEqual("Invalid parameters: Title too long");
+    });
+
+    it('When response is any other error status number, the result will be an error message stating the request failed', async () => {
+      instance.put.mockRejectedValueOnce({
+        response: {
+          status: 999,
+        }
+      });
+      const message = await api.modifyMarketplaceCard(7, card);
+      expect(message).toEqual("Request failed: 999");
+    });
+
+    it('When a response without a status is received, the result returns an error message indicating that the server could not be reached', async () => {
+      instance.put.mockRejectedValueOnce("Server is down");
+      const message = await api.modifyMarketplaceCard(7, card);
+      expect(message).toEqual("Failed to reach backend");
+    });
+
+  });
 });
