@@ -7,6 +7,7 @@ import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import lombok.SneakyThrows;
+import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
 import org.junit.jupiter.api.Assertions;
@@ -17,12 +18,12 @@ import org.seng302.leftovers.persistence.KeywordRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 
+import java.io.UnsupportedEncodingException;
 import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 
 public class KeywordStepDefinition {
     @Autowired
@@ -100,6 +101,23 @@ public class KeywordStepDefinition {
         List<JSONObject> events = EventContext.parseEvents(requestContext.getLastResult().getResponse(), "newsfeed");
 
         Assertions.assertEquals(0, events.size());
+    }
+
+    @When("I search for keywords with text {string}")
+    public void i_search_for_keywords(String searchQuery) {
+        requestContext.performRequest(get("/keywords/search").param("searchQuery", searchQuery));
+    }
+
+    @Then("The following keywords should be listed:")
+    public void the_following_keywords_listed(List<String> keywordNames) throws Exception {
+        JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
+
+        JSONArray results = (JSONArray) parser.parse(requestContext.getLastResult().getResponse().getContentAsString());
+
+        for (Object keyword : results) {
+            String keywordName = ((JSONObject) keyword).getAsString("name");
+            Assertions.assertTrue(keywordNames.contains(keywordName));
+        }
     }
 
 }

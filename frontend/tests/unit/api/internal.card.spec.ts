@@ -366,3 +366,77 @@ describe("Test GET /users/{userId}/cards endpoint", () => {
     expect(response).toEqual("Response is not card array");
   });
 });
+
+describe("Test GET /cards/search endpoint", () => {
+  const user : api.User = {
+    id: 1,
+    firstName: "some firstName",
+    lastName: "some lastName",
+    email: "some email",
+    homeAddress: {
+      country: "some country"
+    }
+  };
+  const marketplaceCard : api.MarketplaceCard = {
+    id: 2,
+    creator: user,
+    section: "Exchange",
+    created: "some date",
+    title: "some title",
+    lastRenewed: "some date",
+    keywords: []
+  };
+
+  it('When the api get request is successfully resolved, it will return all the cards related to that section', async ()=>{
+    const responseData = {
+      count: 1,
+      results: [marketplaceCard]
+    };
+    instance.get.mockResolvedValueOnce({
+      data: responseData
+    });
+    const response = await api.getMarketplaceCardsBySectionAndKeywords([],'Wanted', false, 1, 10, "created", false);
+    expect(response).toEqual(responseData);
+  });
+
+  it('When the api get request fails and returns a 400 error, it will return an error message stating the page does not exist', async ()=>{
+    instance.get.mockRejectedValueOnce({
+      response: {
+        status: 400
+      }
+    });
+    const response = await api.getMarketplaceCardsBySectionAndKeywords([],'Wanted', false, 1, 10, "created", false);
+    expect(response).toEqual("The given section does not exist");
+  });
+
+  it('When the api get request fails and returns a 401 error, it will return an error message stating the user has not logged in', async ()=>{
+    instance.get.mockRejectedValueOnce({
+      response: {
+        status: 401
+      }
+    });
+    const response = await api.getMarketplaceCardsBySectionAndKeywords([],'Wanted', false, 1, 10, "created", false);
+    expect(response).toEqual("You have been logged out. Please login again and retry");
+  });
+
+  it('When the api get request fails and returns an unidentified error, it will return an error message stating the error that occured in the backend', async ()=>{
+    instance.get.mockRejectedValueOnce({
+      response: {
+        status: 500,
+        data: {
+          message: "Some error message"
+        }
+      }
+    });
+    const response = await api.getMarketplaceCardsBySectionAndKeywords([],'Wanted', false, 1, 10, "created", false);
+    expect(response).toEqual("Request failed: Some error message");
+  });
+
+  it('When the api get request resolves but the return value is not an array of marketplace cards, it will return an error message stating the error', async ()=>{
+    instance.get.mockResolvedValueOnce({
+      response: {}
+    });
+    const response = await api.getMarketplaceCardsBySectionAndKeywords([],'Wanted', false, 1, 10, "created", false);
+    expect(response).toEqual("Response is not card array");
+  });
+});

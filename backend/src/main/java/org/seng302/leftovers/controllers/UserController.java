@@ -44,7 +44,6 @@ public class UserController {
     @PostMapping("/users")
     public void register(@RequestBody JSONObject userinfo, HttpServletRequest request, HttpServletResponse response) {
         logger.info("Register");
-        logger.info(userinfo.getAsString("bio"));
         try {
             Account.checkEmailUniqueness(userinfo.getAsString("email"), userRepository);
         } catch (EmailInUseException inUseException) {
