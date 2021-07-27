@@ -958,7 +958,7 @@ export async function getMarketplaceCardsBySectionAndKeywords(keywordIds: number
     if (status === undefined) return 'Failed to reach backend';
     if (status === 400) return 'The given section does not exist';
     if (status === 401) return 'You have been logged out. Please login again and retry';
-    return 'Request failed: ' + status;
+    return 'Request failed: ' + error.response?.data.message;
   }
   if (!is<SearchResults<MarketplaceCard>>(response.data)) {
     return "Response is not card array";
