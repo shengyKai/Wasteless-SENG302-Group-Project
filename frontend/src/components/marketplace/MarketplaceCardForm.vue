@@ -226,9 +226,9 @@ export default {
     },
     submitText() {
       if (this.isCreate) {
-        return "Create card";
+        return "Create Card";
       }
-      return "Save card";
+      return "Save Card";
     },
   },
   methods: {

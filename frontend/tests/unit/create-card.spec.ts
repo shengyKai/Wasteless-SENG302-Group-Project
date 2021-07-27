@@ -87,13 +87,10 @@ describe('MarketplaceCardFrom.vue', () => {
   beforeEach(() => {
     const vuetify = new Vuetify();
     localVue.use(Vuex);
-    resetStoreForTesting();
-    let store = getStore();
-    store.state.user = makeTestUser(1); // log in as user 1
     // Creating wrapper around MarketplaceCardForm with data-app to appease vuetify
     const App = localVue.component('App', {
       components: { MarketplaceCardForm },
-      template: '<div data-app><MarketplaceCardForm/></div>',
+      template: '<div data-app><MarketplaceCardForm :user="user" :previousCard="previousCard"/></div>',
     });
 
     // Put the MarketplaceCardForm component inside a div in the global document,
@@ -114,7 +111,12 @@ describe('MarketplaceCardFrom.vue', () => {
       localVue,
       vuetify,
       attachTo: elem,
-      store: store,
+      data() {
+        return {
+          user: makeTestUser(1),
+          previousCard: undefined,
+        };
+      }
     });
 
     wrapper = appWrapper.getComponent(MarketplaceCardForm);
@@ -130,25 +132,13 @@ describe('MarketplaceCardFrom.vue', () => {
   });
 
   /**
-   * Finds the cancel button in the MarketplaceCardForm form
-   *
-   * @returns A Wrapper around the cancel button
-   */
-  function findCancelButton() {
-    const buttons = wrapper.findAllComponents({ name: 'v-btn' });
-    const filtered = buttons.filter(button => button.text().includes('Cancel'));
-    expect(filtered.length).toBe(1);
-    return filtered.at(0);
-  }
-
-  /**
    * Finds the create button in the MarketplaceCardForm form
    *
    * @returns A Wrapper around the create button
    */
-  function findCreateButton() {
+  function findButton(text: string) {
     const buttons = wrapper.findAllComponents({ name: 'v-btn' });
-    const filtered = buttons.filter(button => button.text().includes('Create Card'));
+    const filtered = buttons.filter(button => button.text().includes(text));
     expect(filtered.length).toBe(1);
     return filtered.at(0);
   }
@@ -162,7 +152,7 @@ describe('MarketplaceCardFrom.vue', () => {
     await Vue.nextTick();
 
     expect(wrapper.vm.valid).toBeTruthy();
-    expect(findCreateButton().props().disabled).toBeFalsy();
+    expect(findButton('Create Card').props().disabled).toBeFalsy();
   });
 
   it('Valid if all fields are provided', async () => {
@@ -175,7 +165,7 @@ describe('MarketplaceCardFrom.vue', () => {
     await Vue.nextTick();
 
     expect(wrapper.vm.valid).toBeTruthy();
-    expect(findCreateButton().props().disabled).toBeFalsy();
+    expect(findButton('Create Card').props().disabled).toBeFalsy();
   });
 
   it('Invalid if title not provided', async () => {
@@ -187,7 +177,7 @@ describe('MarketplaceCardFrom.vue', () => {
     await Vue.nextTick();
 
     expect(wrapper.vm.valid).toBeFalsy();
-    expect(findCreateButton().props().disabled).toBeTruthy();
+    expect(findButton('Create Card').props().disabled).toBeTruthy();
   });
 
   it.each(validCharacters)('Valid if title contains valid characters %s', async (character) => {
@@ -199,7 +189,7 @@ describe('MarketplaceCardFrom.vue', () => {
     await Vue.nextTick();
 
     expect(wrapper.vm.valid).toBeTruthy();
-    expect(findCreateButton().props().disabled).toBeFalsy();
+    expect(findButton('Create Card').props().disabled).toBeFalsy();
   });
 
   it.each(invalidCharacters)('Invalid if title contains invalid characters %s', async (character) => {
@@ -211,7 +201,7 @@ describe('MarketplaceCardFrom.vue', () => {
     await Vue.nextTick();
 
     expect(wrapper.vm.valid).toBeFalsy();
-    expect(findCreateButton().props().disabled).toBeTruthy();
+    expect(findButton('Create Card').props().disabled).toBeTruthy();
   });
 
   it('Invalid if title has over 50 characters', async () => {
@@ -223,7 +213,7 @@ describe('MarketplaceCardFrom.vue', () => {
     await Vue.nextTick();
 
     expect(wrapper.vm.valid).toBeFalsy();
-    expect(findCreateButton().props().disabled).toBeTruthy();
+    expect(findButton('Create Card').props().disabled).toBeTruthy();
   });
 
   it.each(validCharacters)('Valid if description contains valid characters %s', async (character) => {
@@ -236,7 +226,7 @@ describe('MarketplaceCardFrom.vue', () => {
     await Vue.nextTick();
 
     expect(wrapper.vm.valid).toBeTruthy();
-    expect(findCreateButton().props().disabled).toBeFalsy();
+    expect(findButton('Create Card').props().disabled).toBeFalsy();
   });
 
   it.each(invalidCharacters)('Invalid if description contains invalid characters %s', async (character) => {
@@ -249,7 +239,7 @@ describe('MarketplaceCardFrom.vue', () => {
     await Vue.nextTick();
 
     expect(wrapper.vm.valid).toBeFalsy();
-    expect(findCreateButton().props().disabled).toBeTruthy();
+    expect(findButton('Create Card').props().disabled).toBeTruthy();
   });
 
   it('Invalid if description has over 200 characters', async () => {
@@ -262,7 +252,7 @@ describe('MarketplaceCardFrom.vue', () => {
     await Vue.nextTick();
 
     expect(wrapper.vm.valid).toBeFalsy();
-    expect(findCreateButton().props().disabled).toBeTruthy();
+    expect(findButton('Create Card').props().disabled).toBeTruthy();
   });
 
   it('Invalid if section not provided', async () => {
@@ -274,6 +264,6 @@ describe('MarketplaceCardFrom.vue', () => {
     await Vue.nextTick();
 
     expect(wrapper.vm.valid).toBeFalsy();
-    expect(findCreateButton().props().disabled).toBeTruthy();
+    expect(findButton('Create Card').props().disabled).toBeTruthy();
   });
 });

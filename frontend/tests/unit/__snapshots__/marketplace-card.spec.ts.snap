@@ -27,7 +27,10 @@ exports[`MarketplaceCard.vue Must match snapshot 1`] = `
   <div class="v-card__actions"><button type="button" class="v-icon notranslate v-icon--link mdi mdi-trash-can theme--light primary--text"></button>
     <div role="dialog" class="v-dialog__container">
       <!---->
-    </div>
+    </div> <button type="button" class="v-btn v-btn--is-elevated v-btn--has-bg theme--light v-size--default"><span class="v-btn__content">
+      Temporary edit button
+    </span></button>
+    <!---->
   </div>
 </div>
 `;
