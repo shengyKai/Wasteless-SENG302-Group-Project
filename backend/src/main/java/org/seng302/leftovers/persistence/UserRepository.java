@@ -47,6 +47,8 @@ public interface UserRepository extends CrudRepository<User, Long>, JpaSpecifica
      * @return List of users that should be notified by the given event
      */
     List<User> getAllByEvents(Event event);
+    
+    List<User> findAllByRole(String role);
 }
 
 

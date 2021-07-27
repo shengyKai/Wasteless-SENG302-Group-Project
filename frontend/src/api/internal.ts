@@ -574,21 +574,23 @@ export async function getBusiness(businessId: number): Promise<MaybeError<Busine
 }
 
 /**
- * Sends a business search query to the backend.
+ * Sends a business search query to the backend. Can specify query, business type or both.
  *
  * @param query Query string to search for
+ * @param businessType Business type to filter search results by
  * @param pageIndex Index of page to start the results from (1 = first page)
  * @param resultsPerPage Number of results to return per page
  * @param orderBy Specifies the method used to sort the results
  * @param reverse Specifies whether to reverse the search results (default order is descending for relevance and ascending for all other orders)
  * @returns List of business infos for the current page or an error message
  */
-export async function searchBusinesses(query: string, pageIndex: number, resultsPerPage: number, orderBy: BusinessOrderBy, reverse: boolean): Promise<MaybeError<SearchResults<Business>>> {
+export async function searchBusinesses(query: string | undefined, businessType: BusinessType | undefined, pageIndex: number, resultsPerPage: number, orderBy: BusinessOrderBy, reverse: boolean): Promise<MaybeError<SearchResults<Business>>> {
   let response;
   try {
     response = await instance.get('/businesses/search', {
       params: {
         searchQuery: query,
+        businessType: businessType,
         page: pageIndex,
         resultsPerPage,
         orderBy,
@@ -807,25 +809,6 @@ export async function modifyInventoryItem(businessId: number, inventoryItemId: n
 }
 
 /**
- * Calls backend for list of keywords to be used in Marketplace Card creation
- */
-export async function getKeywords(): Promise<MaybeError<Keyword[]>> {
-  let response;
-  try {
-    response = await instance.get(`/keywords/search`);
-  } catch (error) {
-    let status: number | undefined = error.response?.status;
-    if (status === undefined) return 'Failed to reach backend';
-    if (status === 401) return 'You have been logged out. Please login again and retry';
-    return `Request failed: ${status}`;
-  }
-  if (!is<Keyword[]>(response.data)) {
-    return 'Response is not a keyword';
-  }
-  return response.data;
-}
-
-/**
  * Add an inventory item to the business inventory.
  *
  * @param businessId Business id to identify with the database to add the inventory to the correct business
@@ -968,6 +951,31 @@ export async function getMarketplaceCardsByUser(userId: number, resultsPerPage: 
   }
   if (!is<SearchResults<MarketplaceCard>>(response.data)) {
     return "Response is not card array";
+  }
+  return response.data;
+}
+
+/**
+ * Retrieves all keywords which match the given query by name.
+ * @param query The search term
+ * @return A (possibly empty) list of keywords
+ */
+export async function searchKeywords(query: string) : Promise<MaybeError<Keyword[]>> {
+  let response;
+  try {
+    response = await instance.get('/keywords/search', {
+      params: {
+        searchQuery: query,
+      }
+    });
+  } catch (error) {
+    let status: number | undefined = error.response?.status;
+    if (status === undefined) return 'Failed to reach backend';
+    if (status === 401) return 'You have been logged out. Please login again and retry';
+    return 'Request failed: ' + status;
+  }
+  if (!is<Keyword[]>(response.data)) {
+    return "Response is not Keyword array";
   }
   return response.data;
 }
