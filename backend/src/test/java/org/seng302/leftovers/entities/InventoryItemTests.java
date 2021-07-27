@@ -21,6 +21,8 @@ import java.text.ParseException;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
+import java.util.Arrays;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -39,8 +41,9 @@ class InventoryItemTests {
 
     private Business testBusiness;
     private Product testProduct;
+    private InventoryItem testInvItem;
 
-    void createTestObjects() throws ParseException {
+    void createTestObjects() throws Exception {
         clearDatabase();
         User testUser = new User.Builder()
                 .withFirstName("John")
@@ -75,6 +78,17 @@ class InventoryItemTests {
                 .withBusiness(testBusiness)
                 .build();
         testProduct = productRepository.save(product);
+
+        InventoryItem invItem = new InventoryItem.Builder()
+                .withProduct(testProduct)
+                .withQuantity(3)
+                .withPricePerItem("2.69")
+                .withManufactured("2021-03-11")
+                .withSellBy(LocalDate.now().plusWeeks(1).toString())
+                .withBestBefore(LocalDate.now().plusWeeks(2).toString())
+                .withExpires(LocalDate.now().plusWeeks(3).toString())
+                .build();
+        testInvItem = inventoryItemRepository.save(invItem);
     }
     void clearDatabase() {
         inventoryItemRepository.deleteAll();
@@ -83,7 +97,7 @@ class InventoryItemTests {
         userRepository.deleteAll();
     }
     @BeforeAll
-    void setUp() throws ParseException {
+    void setUp() throws Exception {
         createTestObjects();
     }
     @AfterAll
@@ -580,5 +594,278 @@ class InventoryItemTests {
         InventoryItem copy2 = inventoryItemRepository.findById(originalItem.getId()).orElseThrow();
         copy2.setQuantity(5);
         assertDoesNotThrow( () -> inventoryItemRepository.save(copy2));
+    }
+
+    //--- Date validation modify ---//
+
+    /**
+     * Creates a valid manufactured, sell by, best before and expires date.
+     * @return a list containing the four generated valid dates.
+     */
+    public List<String> generateValidDates() {
+        String manufactured = LocalDate.now().minusYears(1).toString();
+        String sellBy = LocalDate.now().plusYears(1).toString();
+        String bestBefore = LocalDate.now().plusYears(2).toString();
+        String expires = LocalDate.now().plusYears(3).toString();
+        List<String> dates = Arrays.asList(manufactured, sellBy, bestBefore, expires);
+        return dates;
+    }
+
+    // Basic date setting
+    @Test
+    void modifyInventoryItem_changeAllDatesToValidDate_allDatesChanged() throws Exception {
+        List<String> dates = generateValidDates();
+        InventoryItem invItem = inventoryItemRepository.getInventoryItemByBusinessAndId(testBusiness, testInvItem.getId());
+        invItem.setDates(dates.get(0), dates.get(1), dates.get(2), dates.get(3));
+        inventoryItemRepository.save(invItem);
+        InventoryItem invItemRepo = inventoryItemRepository.getInventoryItemByBusinessAndId(testBusiness, invItem.getId());
+        assertEquals(invItemRepo.getManufactured().toString(), dates.get(0));
+        assertEquals(invItemRepo.getSellBy().toString(), dates.get(1));
+        assertEquals(invItemRepo.getBestBefore().toString(), dates.get(2));
+        assertEquals(invItemRepo.getExpires().toString(), dates.get(3));
+    }
+
+    // Null testing
+    @Test
+    void modifyInventoryItem_changeManufacturedToNull_manufacturedDateSetToNull() throws Exception {
+        List<String> dates = generateValidDates();
+        InventoryItem invItem = inventoryItemRepository.getInventoryItemByBusinessAndId(testBusiness, testInvItem.getId());
+        invItem.setDates(null, dates.get(1), dates.get(2), dates.get(3));
+        inventoryItemRepository.save(invItem);
+        InventoryItem invItemRepo = inventoryItemRepository.getInventoryItemByBusinessAndId(testBusiness, invItem.getId());
+        assertEquals(invItemRepo.getManufactured(), null);
+        assertEquals(invItemRepo.getSellBy().toString(), dates.get(1));
+        assertEquals(invItemRepo.getBestBefore().toString(), dates.get(2));
+        assertEquals(invItemRepo.getExpires().toString(), dates.get(3));
+    }
+
+    @Test
+    void modifyInventoryItem_changeSellByToNull_sellByDateSetToNull() throws Exception {
+        List<String> dates = generateValidDates();
+        InventoryItem invItem = inventoryItemRepository.getInventoryItemByBusinessAndId(testBusiness, testInvItem.getId());
+        invItem.setDates(dates.get(0), null, dates.get(2), dates.get(3));
+        inventoryItemRepository.save(invItem);
+        InventoryItem invItemRepo = inventoryItemRepository.getInventoryItemByBusinessAndId(testBusiness, invItem.getId());
+        assertEquals(invItemRepo.getManufactured().toString(), dates.get(0));
+        assertEquals(invItemRepo.getSellBy(), null);
+        assertEquals(invItemRepo.getBestBefore().toString(), dates.get(2));
+        assertEquals(invItemRepo.getExpires().toString(), dates.get(3));
+    }
+
+    @Test
+    void modifyInventoryItem_changeBestBeforeToNull_bestBeforeDateSetToNull() throws Exception {
+        List<String> dates = generateValidDates();
+        InventoryItem invItem = inventoryItemRepository.getInventoryItemByBusinessAndId(testBusiness, testInvItem.getId());
+        invItem.setDates(dates.get(0), dates.get(1), null, dates.get(3));
+        inventoryItemRepository.save(invItem);
+        InventoryItem invItemRepo = inventoryItemRepository.getInventoryItemByBusinessAndId(testBusiness, invItem.getId());
+        assertEquals(invItemRepo.getManufactured().toString(), dates.get(0));
+        assertEquals(invItemRepo.getSellBy().toString(), dates.get(1));
+        assertEquals(invItemRepo.getBestBefore(), null);
+        assertEquals(invItemRepo.getExpires().toString(), dates.get(3));
+    }
+
+    @Test
+    void modifyInventoryItem_changeExpiresToNull_ExceptionThrownAndExpiresDateNotSetToNull() throws Exception {
+        List<String> dates = generateValidDates();
+        InventoryItem invItem = inventoryItemRepository.getInventoryItemByBusinessAndId(testBusiness, testInvItem.getId());
+        LocalDate originalManufactured = invItem.getManufactured();
+        LocalDate originalSellBy = invItem.getSellBy();
+        LocalDate originalBestBefore = invItem.getBestBefore();
+        LocalDate originalExpires = invItem.getExpires();
+        assertThrows(ResponseStatusException.class, () -> {
+            invItem.setDates(dates.get(0), dates.get(1), dates.get(2), null);
+        });
+        inventoryItemRepository.save(invItem);
+        InventoryItem invItemRepo = inventoryItemRepository.getInventoryItemByBusinessAndId(testBusiness, invItem.getId());
+        assertEquals(invItemRepo.getManufactured(), originalManufactured);
+        assertEquals(invItemRepo.getSellBy(), originalSellBy);
+        assertEquals(invItemRepo.getBestBefore(), originalBestBefore);
+        assertEquals(invItemRepo.getExpires(), originalExpires);
+    }
+
+    @Test
+    void modifyInventoryItem_changeManufacturedSellByAndBestBeforeDatesToNull_respectiveDatesSetToNull() throws Exception {
+        List<String> dates = generateValidDates();
+        InventoryItem invItem = inventoryItemRepository.getInventoryItemByBusinessAndId(testBusiness, testInvItem.getId());
+        invItem.setDates(null, null, null, dates.get(3));
+        inventoryItemRepository.save(invItem);
+        InventoryItem invItemRepo = inventoryItemRepository.getInventoryItemByBusinessAndId(testBusiness, invItem.getId());
+        assertEquals(invItemRepo.getManufactured(), null);
+        assertEquals(invItemRepo.getSellBy(), null);
+        assertEquals(invItemRepo.getBestBefore(), null);
+        assertEquals(invItemRepo.getExpires().toString(), dates.get(3));
+    }
+
+    @Test
+    void modifyInventoryItem_changeAllDatesToNull_noDatesSetToNull() throws Exception {
+        InventoryItem invItem = inventoryItemRepository.getInventoryItemByBusinessAndId(testBusiness, testInvItem.getId());
+        LocalDate originalManufactured = invItem.getManufactured();
+        LocalDate originalSellBy = invItem.getSellBy();
+        LocalDate originalBestBefore = invItem.getBestBefore();
+        LocalDate originalExpires = invItem.getExpires();
+        assertThrows(ResponseStatusException.class, () -> {
+            invItem.setDates(null, null, null, null);
+        });
+        inventoryItemRepository.save(invItem);
+        InventoryItem invItemRepo = inventoryItemRepository.getInventoryItemByBusinessAndId(testBusiness, invItem.getId());
+        assertEquals(invItemRepo.getManufactured(), originalManufactured);
+        assertEquals(invItemRepo.getSellBy(), originalSellBy);
+        assertEquals(invItemRepo.getBestBefore(), originalBestBefore);
+        assertEquals(invItemRepo.getExpires(), originalExpires);
+    }
+
+    // Checking against today's date
+    @Test
+    void modifyInventoryItem_changeManufacturedToDayAfterToday_exceptionThrownAndManufacturedDateNotChanged() throws Exception {
+        List<String> dates = generateValidDates();
+        InventoryItem invItem = inventoryItemRepository.getInventoryItemByBusinessAndId(testBusiness, testInvItem.getId());
+        LocalDate originalManufactured = invItem.getManufactured();
+        String manufacturedAfterToday = LocalDate.now().plusDays(1).toString();
+        assertThrows(ResponseStatusException.class, () -> {
+            invItem.setDates(manufacturedAfterToday, dates.get(1), dates.get(2), dates.get(3));
+        });
+        InventoryItem inventoryItemRepo = inventoryItemRepository.getInventoryItemByBusinessAndId(testBusiness, invItem.getId());
+        assertEquals(inventoryItemRepo.getManufactured(), originalManufactured);
+    }
+
+    @Test
+    void modifyInventoryItem_changeManufacturedToTenYearsAfterToday_exceptionThrownAndManufacturedDateNotChanged() throws Exception {
+        List<String> dates = generateValidDates();
+        InventoryItem invItem = inventoryItemRepository.getInventoryItemByBusinessAndId(testBusiness, testInvItem.getId());
+        LocalDate originalManufactured = invItem.getManufactured();
+        String manufacturedAfterToday = LocalDate.now().plusYears(10).toString();
+        assertThrows(ResponseStatusException.class, () -> {
+            invItem.setDates(manufacturedAfterToday, dates.get(1), dates.get(2), dates.get(3));
+        });
+        InventoryItem inventoryItemRepo = inventoryItemRepository.getInventoryItemByBusinessAndId(testBusiness, invItem.getId());
+        assertEquals(inventoryItemRepo.getManufactured(), originalManufactured);
+    }
+
+    @Test
+    void modifyInventoryItem_changeSellByToDayBeforeToday_exceptionThrownAndSellByDateNotChanged() throws Exception {
+        List<String> dates = generateValidDates();
+        InventoryItem invItem = inventoryItemRepository.getInventoryItemByBusinessAndId(testBusiness, testInvItem.getId());
+        LocalDate originalSellBy = invItem.getSellBy();
+        String sellByBeforeToday = LocalDate.now().minusDays(1).toString();
+        assertThrows(ResponseStatusException.class, () -> {
+            invItem.setDates(dates.get(0), sellByBeforeToday, dates.get(2), dates.get(3));
+        });
+        InventoryItem inventoryItemRepo = inventoryItemRepository.getInventoryItemByBusinessAndId(testBusiness, invItem.getId());
+        assertEquals(inventoryItemRepo.getSellBy(), originalSellBy);
+    }
+
+    @Test
+    void modifyInventoryItem_changeSellByToTenYearsBeforeToday_exceptionThrownAndSellByDateNotChanged() throws Exception {
+        List<String> dates = generateValidDates();
+        InventoryItem invItem = inventoryItemRepository.getInventoryItemByBusinessAndId(testBusiness, testInvItem.getId());
+        LocalDate originalSellBy = invItem.getSellBy();
+        String sellByBeforeToday = LocalDate.now().minusYears(10).toString();
+        assertThrows(ResponseStatusException.class, () -> {
+            invItem.setDates(dates.get(0), sellByBeforeToday, dates.get(2), dates.get(3));
+        });
+        InventoryItem inventoryItemRepo = inventoryItemRepository.getInventoryItemByBusinessAndId(testBusiness, invItem.getId());
+        assertEquals(inventoryItemRepo.getSellBy(), originalSellBy);
+    }
+
+    @Test
+    void modifyInventoryItem_changeBestBeforeToDayBeforeToday_exceptionThrownAndBestBeforeDateNotChanged() throws Exception {
+        List<String> dates = generateValidDates();
+        InventoryItem invItem = inventoryItemRepository.getInventoryItemByBusinessAndId(testBusiness, testInvItem.getId());
+        LocalDate originalBestBefore = invItem.getBestBefore();
+        String bestBeforeBeforeToday = LocalDate.now().minusDays(1).toString();
+        assertThrows(ResponseStatusException.class, () -> {
+            invItem.setDates(dates.get(0), dates.get(1), bestBeforeBeforeToday, dates.get(3));
+        });
+        InventoryItem inventoryItemRepo = inventoryItemRepository.getInventoryItemByBusinessAndId(testBusiness, invItem.getId());
+        assertEquals(inventoryItemRepo.getBestBefore(), originalBestBefore);
+    }
+
+    @Test
+    void modifyInventoryItem_changeBestBeforeToTenYearsBeforeToday_exceptionThrownAndBestBeforeDateNotChanged() throws Exception {
+        List<String> dates = generateValidDates();
+        InventoryItem invItem = inventoryItemRepository.getInventoryItemByBusinessAndId(testBusiness, testInvItem.getId());
+        LocalDate originalBestBefore = invItem.getBestBefore();
+        String bestBeforeBeforeToday = LocalDate.now().minusYears(10).toString();
+        assertThrows(ResponseStatusException.class, () -> {
+            invItem.setDates(dates.get(0), dates.get(1), bestBeforeBeforeToday, dates.get(3));
+        });
+        InventoryItem inventoryItemRepo = inventoryItemRepository.getInventoryItemByBusinessAndId(testBusiness, invItem.getId());
+        assertEquals(inventoryItemRepo.getBestBefore(), originalBestBefore);
+    }
+
+    @Test
+    void modifyInventoryItem_changeExpiresToDayBeforeToday_exceptionThrownAndExpiresDateNotChanged() throws Exception {
+        List<String> dates = generateValidDates();
+        InventoryItem invItem = inventoryItemRepository.getInventoryItemByBusinessAndId(testBusiness, testInvItem.getId());
+        LocalDate originalExpires = invItem.getExpires();
+        String expiresBeforeToday = LocalDate.now().minusDays(1).toString();
+        assertThrows(ResponseStatusException.class, () -> {
+            invItem.setDates(dates.get(0), dates.get(1), dates.get(2), expiresBeforeToday);
+        });
+        InventoryItem inventoryItemRepo = inventoryItemRepository.getInventoryItemByBusinessAndId(testBusiness, invItem.getId());
+        assertEquals(inventoryItemRepo.getExpires(), originalExpires);
+    }
+
+    @Test
+    void modifyInventoryItem_changeExpiresToTenYearsBeforeToday_exceptionThrownAndExpiresDateNotChanged() throws Exception {
+        List<String> dates = generateValidDates();
+        InventoryItem invItem = inventoryItemRepository.getInventoryItemByBusinessAndId(testBusiness, testInvItem.getId());
+        LocalDate originalExpires = invItem.getExpires();
+        String expiresBeforeToday = LocalDate.now().minusYears(10).toString();
+        assertThrows(ResponseStatusException.class, () -> {
+            invItem.setDates(dates.get(0), dates.get(1), dates.get(2), expiresBeforeToday);
+        });
+        InventoryItem inventoryItemRepo = inventoryItemRepository.getInventoryItemByBusinessAndId(testBusiness, invItem.getId());
+        assertEquals(inventoryItemRepo.getExpires(), originalExpires);
+    }
+
+    // Comparing dates against each other
+    @Test
+    void modifyInventoryItem_changeSellByToBeAfterBestBefore_exceptionThrownAndNoDatesChanged() throws  Exception {
+        List<String> dates = generateValidDates();
+        InventoryItem invItem = inventoryItemRepository.getInventoryItemByBusinessAndId(testBusiness, testInvItem.getId());
+        LocalDate originalSellBy = invItem.getSellBy();
+        LocalDate originalBestBefore = invItem.getBestBefore();
+        String newSellBy = LocalDate.now().plusDays(12).toString();
+        String newBestBefore = LocalDate.now().plusDays(11).toString();
+        assertThrows(ResponseStatusException.class, () -> {
+            invItem.setDates(dates.get(0), newSellBy, newBestBefore, dates.get(3));
+        });
+        InventoryItem inventoryItemRepo = inventoryItemRepository.getInventoryItemByBusinessAndId(testBusiness, invItem.getId());
+        assertEquals(inventoryItemRepo.getSellBy(), originalSellBy);
+        assertEquals(inventoryItemRepo.getBestBefore(), originalBestBefore);
+    }
+
+    @Test
+    void modifyInventoryItem_changeBestBeforeToBeAfterExpires_exceptionThrownAndNoDatesChanged() throws  Exception {
+        List<String> dates = generateValidDates();
+        InventoryItem invItem = inventoryItemRepository.getInventoryItemByBusinessAndId(testBusiness, testInvItem.getId());
+        LocalDate originalBestBefore = invItem.getBestBefore();
+        LocalDate originalExpires = invItem.getExpires();
+        String newBestBefore = LocalDate.now().plusDays(12).toString();
+        String newExpires = LocalDate.now().plusDays(11).toString();
+        assertThrows(ResponseStatusException.class, () -> {
+            invItem.setDates(dates.get(0), dates.get(1), newBestBefore, newExpires);
+        });
+        InventoryItem inventoryItemRepo = inventoryItemRepository.getInventoryItemByBusinessAndId(testBusiness, invItem.getId());
+        assertEquals(inventoryItemRepo.getBestBefore(), originalBestBefore);
+        assertEquals(inventoryItemRepo.getExpires(), originalExpires);
+    }
+
+    @Test
+    void modifyInventoryItem_changeSellByToBeAfterExpires_exceptionThrownAndNoDatesChanged() throws  Exception {
+        List<String> dates = generateValidDates();
+        InventoryItem invItem = inventoryItemRepository.getInventoryItemByBusinessAndId(testBusiness, testInvItem.getId());
+        LocalDate originalSellBy = invItem.getSellBy();
+        LocalDate originalExpires = invItem.getExpires();
+        String newSellBy = LocalDate.now().plusDays(12).toString();
+        String newExpires = LocalDate.now().plusDays(11).toString();
+        assertThrows(ResponseStatusException.class, () -> {
+            invItem.setDates(dates.get(0), newSellBy, dates.get(2), newExpires);
+        });
+        InventoryItem inventoryItemRepo = inventoryItemRepository.getInventoryItemByBusinessAndId(testBusiness, invItem.getId());
+        assertEquals(inventoryItemRepo.getSellBy(), originalSellBy);
+        assertEquals(inventoryItemRepo.getExpires(), originalExpires);
     }
 }
