@@ -27,6 +27,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * This controller handles requests involving marketplace cards
@@ -89,6 +90,40 @@ public class CardController {
     }
 
     /**
+     * Endpoint to modify an already existing marketplace card.
+     * Will return a 401 error if request is not logged in
+     * Will return a 403 error if the user
+     * @param request The HTTP request, used for checking permissions.
+     * @param id The card ID to modify, provided in the request path
+     * @param cardProperties Updated card properties
+     */
+    @PutMapping("/cards/{id}")
+    public void modifyCard(HttpServletRequest request, @PathVariable Long id, @RequestBody JSONObject cardProperties) {
+        logger.info("Request to modify existing card (id={})", id);
+        AuthenticationTokenManager.checkAuthenticationToken(request);
+        try {
+            MarketplaceCard card = marketplaceCardRepository.findById(id)
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "Card not found"));
+
+            if (!AuthenticationTokenManager.sessionCanSeePrivate(request, card.getCreator().getUserID())) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Current user does not have permission to modify this card");
+            }
+
+            // Updates fields
+            card.setSection(MarketplaceCard.sectionFromString(cardProperties.getAsString("section")));
+            card.setTitle(cardProperties.getAsString("title"));
+            card.setDescription(cardProperties.getAsString("description"));
+            card.setKeywords(getCardKeywordsFromProperties(cardProperties));
+
+            // Save result
+            marketplaceCardRepository.save(card);
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            throw e;
+        }
+    }
+
+    /**
      * Endpoint to delete the marketplace card with the provided card id.
      * If the user is unauthorised then a 401 response is returned
      * If the user is not allowed to modify the card then a 403 response is returned
@@ -123,6 +158,29 @@ public class CardController {
     }
 
     /**
+     * Fetches the list of card keywords from the JSONObject attribute "keywordIds"
+     * @param properties User provided JSONObject with an attribute "keywordIds" that is a list of keyword ids
+     * @return List of keywords from "keywordIds"
+     */
+    private List<Keyword> getCardKeywordsFromProperties(JSONObject properties) {
+        long[] keywordIds = JsonTools.parseLongArrayFromJsonField(properties, "keywordIds");
+
+        if (keywordIds.length == 0) {
+            return List.of();
+        }
+
+        List<Keyword> keywords = Streamable.of(
+                keywordRepository.findAllById(Arrays.stream(keywordIds).boxed().collect(Collectors.toList()))
+        ).toList();
+
+        if (keywords.isEmpty()) { // findAllById will return an empty iterable if any keyword id is invalid
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid keyword ID");
+        }
+
+        return keywords;
+    }
+
+    /**
      * Retrieve the User and Keywords associated with this card from the database and use them to construct the
      * marketplace card with the properties given by the json object. A response status exception with 400 status
      * will be thrown if any part of the given json has invalid format.
@@ -146,15 +204,8 @@ public class CardController {
                 .withCreator(creator)
                 .build();
 
-        // Retrieve all the keywords and add them to the card
-        long[] keywordIds = JsonTools.parseLongArrayFromJsonField(cardProperties, "keywordIds");
-        for (long keywordId : keywordIds) {
-            Optional<Keyword> optional = keywordRepository.findById(keywordId);
-            if (optional.isEmpty()) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, String.format("Keyword with ID %d does not exist", keywordId));
-            }
-            card.addKeyword(optional.get());
-        }
+        // Adds keywords
+        card.setKeywords(getCardKeywordsFromProperties(cardProperties));
 
         return card;
     }
@@ -287,10 +338,8 @@ public class CardController {
 
             // fetch the keywords
             keywordIds = Optional.ofNullable(keywordIds).orElse(Collections.emptyList());
-            List<Keyword> keywords;
-            try {
-                keywords = Streamable.of(keywordRepository.findAllById(keywordIds)).toList();
-            } catch (IllegalArgumentException e) {
+            List<Keyword> keywords = Streamable.of(keywordRepository.findAllById(keywordIds)).toList();
+            if (keywords.isEmpty()) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Failed to find a provided keyword");
             }
 

@@ -56,7 +56,18 @@ describe('MarketplaceCard.vue', () => {
     expect(filtered.length).toBe(1);
     return filtered.at(0);
   }
+  /**
+   * Finds the edit form dialog box upon clicking the edit button
+   * @returns the edit confirmation dialog box
+   */
+   async function findEditConfirmationDialog() {
+    const editButton = wrapper.findComponent({ ref: 'editButton' });
+    await editButton.trigger('click');
 
+    // This method might be alter in another task, juz setting up
+    const dialogs = wrapper.findAllComponents({ name: "v-dialog" });
+    return dialogs.at(0);
+  }
   /**
    * Finds the delete confirmation dialog box upon clicking the delete button
    * @returns the delete confirmation dialog box
@@ -204,21 +215,6 @@ describe('MarketplaceCard.vue', () => {
     const deleteButton = wrapper.findComponent({ ref: 'deleteButton' });
     await deleteButton.trigger('click');
     expect(wrapper.vm.deleteCardDialog).toBeTruthy();
-  });
-
-  it("The deleteMarketplaceCard method must be called and the dialog box should not be visible, upon clicking the delete button in the confirmation dialog box", async () => {
-    const deleteConfirmationDialog = await findDeleteConfirmationDialog();
-    const dialogDeleteButton = findButton('Delete', deleteConfirmationDialog);
-    await dialogDeleteButton.trigger("click");
-    expect(deleteMarketplaceCard).toBeCalledWith(testMarketplaceCard.id);
-    expect(wrapper.vm.deleteCardDialog).toBeFalsy();
-  });
-
-  it("The dialog box should not be visible if the cancel button is clicked in the confirmation dialog box", async () => {
-    const deleteConfirmationDialog = await findDeleteConfirmationDialog();
-    const dialogCancelButton = findButton('Cancel', deleteConfirmationDialog);
-    await dialogCancelButton.trigger("click");
-    expect(wrapper.vm.deleteCardDialog).toBeFalsy();
   });
 
   it("Must not be able to find the delete icon if the user is not the owner of the card", async () => {

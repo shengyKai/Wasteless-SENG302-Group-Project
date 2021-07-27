@@ -699,7 +699,7 @@ type SalesOrderBy = 'created' | 'closing' | 'productCode' | 'productName' | 'qua
  * @param reverse Whether to reverse the results (default ascending)
  * @returns List of sales or a string error message
  */
-export async function getBusinessSales(businessId: number, page: number, resultsPerPage: number, orderBy: SalesOrderBy, reverse: boolean): Promise<MaybeError<Sale[]>> {
+export async function getBusinessSales(businessId: number, page: number, resultsPerPage: number, orderBy: SalesOrderBy, reverse: boolean): Promise<MaybeError<SearchResults<Sale>>> {
   let response;
   try {
     response = await instance.get(`/businesses/${businessId}/listings`, {
@@ -717,32 +717,10 @@ export async function getBusinessSales(businessId: number, page: number, results
     if (status === 406) return 'The given business does not exist';
     return 'Request failed: ' + status;
   }
-  if (!is<Sale[]>(response.data)) {
+  if (!is<SearchResults<Sale>>(response.data)) {
     return "Response is not Sale array";
   }
   return response.data;
-}
-
-/**
- * Queries the total number of sale listings
- * @param businessId Business ID to query
- * @returns Total sale listing count or a string error
- */
-export async function getBusinessSalesCount(businessId: number): Promise<MaybeError<number>> {
-  let response;
-  try {
-    response = await instance.get(`/businesses/${businessId}/listings/count`);
-  } catch (error) {
-    let status: number | undefined = error.response?.status;
-    if (status === undefined) return 'Failed to reach backend';
-    if (status === 401) return 'You have been logged out. Please login again and retry';
-    if (status === 406) return 'The given business does not exist';
-    return 'Request failed: ' + status;
-  }
-  if (!is<number>(response.data?.count)) {
-    return "Response is not a number";
-  }
-  return response.data.count;
 }
 
 type InventoryOrderBy = 'name' | 'description' | 'manufacturer' | 'recommendedRetailPrice' | 'created' | 'quantity' | 'pricePerItem' | 'totalPrice' | 'manufactured' | 'sellBy' | 'bestBefore' | 'expires' | 'productCode'
