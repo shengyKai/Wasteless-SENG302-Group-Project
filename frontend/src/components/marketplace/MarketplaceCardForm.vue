@@ -132,6 +132,14 @@ export default {
     this.titleField.addEventListener("input", OnInput);
 
     this.searchKeywords();
+
+    if (this.previousCard) {
+      const prevKeywordIds = [];
+      for (let keyword of this.previousCard.keywords) {
+        prevKeywordIds.push(keyword.id);
+      }
+      this.selectedKeywords = prevKeywordIds;
+    }
   },
   computed: {
     selectedKeywordsNames() {
@@ -249,7 +257,7 @@ export default {
       };
       let response;
       if (this.isCreate) {
-        card.creatorId = this.user.id,
+        card.creatorId = this.user.id;
         response = await createMarketplaceCard(card);
       } else {
         response = await modifyMarketplaceCard(this.previousCard.id, card);
