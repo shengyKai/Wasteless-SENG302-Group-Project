@@ -1782,10 +1782,10 @@ components:
             endpoints (UCM6).
           items:
             type: integer
-            example:
-              - 20
-              - 15
-              - 600
+          example:
+            - 20
+            - 15
+            - 600
     Listing:
       type: object
       description: A listing for the sale of some product from a business's inventory
