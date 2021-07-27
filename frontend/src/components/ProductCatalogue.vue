@@ -136,7 +136,6 @@ export default {
         this.error = `Invalid business id "${this.$route.params.id}"`;
         return;
       }
-      console.log("A");
       const value = await getProducts (
         this.businessId,
         this.currentPage,
