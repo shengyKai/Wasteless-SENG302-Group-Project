@@ -1,44 +1,48 @@
 <template>
-  <v-card class="body">
-    <div class="top-section">
-      <div>
-        <h1>
-          {{ business.name }}
-        </h1>
-        <p><b>Created:</b> {{ createdMsg }}</p>
-        <v-btn outlined color="primary" @click="goSalePage" :value="false">
-          Sale listings
-        </v-btn>
+  <div>
+    <v-col class="text-right mt-4 mb-n16">
+      <v-btn >Return to search</v-btn>
+    </v-col>
+    <v-card class="body">
+      <div class="top-section">
+        <div>
+          <h1>
+            {{ business.name }}
+          </h1>
+          <p><b>Created:</b> {{ createdMsg }}</p>
+          <v-btn outlined color="primary" @click="goSalePage" :value="false">
+            Sale listings
+          </v-btn>
+        </div>
       </div>
-    </div>
 
-    <v-container fluid>
-      <v-row>
-        <v-col cols="12" sm="6">
-          <h4>Address</h4>
-          {{ readableAddress }}
-        </v-col>
-        <v-col cols="12" sm="6">
-          <h4>Category</h4>
-          {{ business.businessType }}
-        </v-col>
+      <v-container fluid>
+        <v-row>
+          <v-col cols="12" sm="6">
+            <h4>Address</h4>
+            {{ readableAddress }}
+          </v-col>
+          <v-col cols="12" sm="6">
+            <h4>Category</h4>
+            {{ business.businessType }}
+          </v-col>
 
-        <v-col cols="12">
-          <h4>Description</h4>
-          {{ business.description }}
-        </v-col>
-        <v-col cols="12">
-          <h4>Administrators</h4>
-          <span v-for="admin in administrators" :key="admin.id">
-            <router-link :to="'/profile/' + admin.id">
-              <v-chip class="link-chip link" color="primary"> {{ admin.firstName }} {{ admin.lastName }} </v-chip>
-            </router-link>
-          </span>
-        </v-col>
-      </v-row>
-    </v-container>
-
-  </v-card>
+          <v-col cols="12">
+            <h4>Description</h4>
+            {{ business.description }}
+          </v-col>
+          <v-col cols="12">
+            <h4>Administrators</h4>
+            <span v-for="admin in administrators" :key="admin.id">
+              <router-link :to="'/profile/' + admin.id">
+                <v-chip class="link-chip link" color="primary"> {{ admin.firstName }} {{ admin.lastName }} </v-chip>
+              </router-link>
+            </span>
+          </v-col>
+        </v-row>
+      </v-container>
+    </v-card>
+  </div>
 </template>
 
 <script>
@@ -56,6 +60,9 @@ export default {
       business: {},
       readableAddress: ""
     };
+  },
+  props: {
+    searchData: undefined,
   },
 
   watch: {

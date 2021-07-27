@@ -32,10 +32,10 @@
       <!-- Toggle button for user to choose partially or fully matched results -->
       <v-btn-toggle class="toggle" v-model="reverse" mandatory>
         <v-btn depressed color="primary" :value="false">
-          OR
+          <v-icon>mdi-arrow-up</v-icon>
         </v-btn>
         <v-btn depressed color="primary" :value="true">
-          AND
+          <v-icon>mdi-arrow-down</v-icon>
         </v-btn>
       </v-btn-toggle>
     </v-toolbar>
@@ -185,6 +185,9 @@ export default {
         this.error = undefined;
       }
     },
+    async viewProfile(businessId) {
+      await this.$router.push(`/business/${businessId}`);
+    }
   },
 
   watch: {

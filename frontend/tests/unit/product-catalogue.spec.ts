@@ -49,7 +49,7 @@ function createTestProducts(count: number) {
 describe('ProductCatalogue.vue', () => {
   // Container for the ProductCatalogue under test
   let wrapper: Wrapper<any>;
-  
+
   /**
    * Creates the wrapper for the ProductCatalogue component.
    * This must be called before using the ProductCatalogue wrapper.
@@ -131,7 +131,7 @@ describe('ProductCatalogue.vue', () => {
     let testResult = createTestProducts(RESULTS_PER_PAGE);
     testResult.count = 100;
     setResults(testResult);
-    
+
     createWrapper();
     await flushQueue();
     let pagination = wrapper.findComponent({ name: 'v-pagination' });
@@ -144,7 +144,7 @@ describe('ProductCatalogue.vue', () => {
     let testResult = createTestProducts(RESULTS_PER_PAGE);
     testResult.count = 100;
     setResults(testResult);
-    
+
     createWrapper();
     await flushQueue();
     expect(wrapper.text()).toContain(`Displaying 1 - ${RESULTS_PER_PAGE} of 100 results`);
