@@ -20,6 +20,8 @@
         solo-inverted
         hide-details
         :items="businessTypeOptions"
+        item-text="text"
+        item-value="value"
         prepend-inner-icon="mdi-sort-variant"
         label="Filter by Business type"
       />
@@ -50,7 +52,7 @@
       SearchBusinessResultItem-->
       <template v-for="(business, index) in businesss">
         <v-divider v-if="business === undefined" :key="'divider-'+index"/>
-        <SearchResultItem v-else :key="business.id" :business="business"/>
+        <BusinessSearchResult v-else :key="business.id" :business="business"/>
       </template>
     </v-list>
     <!--paginate results-->
@@ -68,7 +70,7 @@
 </template>
 
 <script>
-import SearchResultItem from './cards/SearchResultItem';
+import BusinessSearchResult from './cards/BusinessSearchResult';
 import { searchBusinesses, BUSINESS_TYPES } from '../api/internal';
 import { debounce } from '../utils';
 
@@ -163,7 +165,12 @@ export default {
       return`Displaying ${pageStartIndex + 1} - ${pageEndIndex} of ${this.totalResults} results`;
     },
     businessTypeOptions() {
-      return BUSINESS_TYPES;
+      const tempBusinessTypes = [];
+      tempBusinessTypes.push({text: "Any", value: undefined});
+      for (let businessType of BUSINESS_TYPES) {
+        tempBusinessTypes.push({text: businessType, value: businessType});
+      }
+      return tempBusinessTypes;
     }
   },
   methods: {
@@ -179,13 +186,17 @@ export default {
      * This function gets called when the search results need to be updated
      */
     async updateResults() {
-      if (!this.searchQuery) return; // If the current search query is empty, do not search
+      let filterBusinessType = this.selectedBusinessType;
+      if (this.selectedBusinessType === 'Any') {
+        filterBusinessType = undefined;
+      }
+      if (!this.searchQuery && filterBusinessType === undefined) return; // If the current search query is empty, do not search
 
       this.searchedQuery = this.searchQuery;
 
       const value = await searchBusinesses(
         this.searchedQuery,
-        this.selectedBusinessType,
+        filterBusinessType,
         this.currentPage,
         this.resultsPerPage,
         this.orderBy,
@@ -224,10 +235,13 @@ export default {
       // Ensures that the current page is at least 1 and less than or equal to the total number of pages.
       this.currentPage = Math.max(Math.min(this.currentPage, this.totalPages), 1);
     },
+    selectedBusinessType() {
+      this.updateResults();
+    },
   },
 
   components: {
-    SearchResultItem,
+    BusinessSearchResult,
   },
 };
 </script>
