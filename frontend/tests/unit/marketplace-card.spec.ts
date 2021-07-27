@@ -268,14 +268,6 @@ describe('MarketplaceCard.vue', () => {
     expect(buttons.length).toBe(1);
   });
 
-  it("Must trigger edit form dialog box upon clicking edit icon", async () => {
-    expect(wrapper.vm.editCardDialog).toBeFalsy();
-    //This button is an icon, so a reference is used to identify it instead of its button text
-    const editButton = wrapper.findComponent({ ref: 'editButton' });
-    await editButton.trigger('click');
-    expect(wrapper.vm.editCardDialog).toBeTruthy();
-  });
-
   it("Must not be able to find the edit icon if the user is not the owner of the card", async () => {
     setUpStore(3, "user");
     generateWrapper();
