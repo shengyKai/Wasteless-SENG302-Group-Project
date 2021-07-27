@@ -61,3 +61,31 @@ Feature: UCM6 - Keyword Management
     And I am logged into "Dave" account
     When I try to delete the keyword "Dance"
     Then The card does not have the keyword "Dance"
+
+  Scenario: AC3 - Searching provides potential matches of keywords
+    Given I am logged into my account
+    And Keywords with the following names exist:
+      | Fruit    |
+      | Fried    |
+      | Vegetable|
+      | Vegan    |
+      | Yummy    |
+      | Yucky    |
+    When I search for keywords with text "Fr"
+    Then The following keywords should be listed:
+      | Fruit |
+      | Fried |
+
+  Scenario: AC3 - Searching provides potential matches of keywords even when casing is different
+    Given I am logged into my account
+    And Keywords with the following names exist:
+      | Fruit    |
+      | Fried    |
+      | Vegetable|
+      | Vegan    |
+      | Yummy    |
+      | Yucky    |
+    When I search for keywords with text "yu"
+    Then The following keywords should be listed:
+      | Yummy |
+      | Yucky |
