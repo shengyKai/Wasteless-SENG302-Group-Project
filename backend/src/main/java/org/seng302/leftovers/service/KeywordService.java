@@ -1,14 +1,12 @@
 package org.seng302.leftovers.service;
 
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.seng302.leftovers.entities.CreateKeywordEvent;
+import org.seng302.leftovers.entities.KeywordCreatedEvent;
 import org.seng302.leftovers.entities.Keyword;
 import org.seng302.leftovers.entities.User;
 import org.seng302.leftovers.persistence.UserRepository;
@@ -38,11 +36,11 @@ public class KeywordService {
     public void sendNewKeywordEvent(Keyword keyword, User creator) {
         List<User> adminList = userRepository.findAllByRole("defaultGlobalApplicationAdmin");
         adminList.addAll(userRepository.findAllByRole("globalApplicationAdmin"));
-        Set<User> adminSet = new HashSet<User>(adminList);
+        Set<User> adminSet = new HashSet<>(adminList);
 
         logger.info("Sending keyword creation notification for keyword \"{}\" to system administrators",
                 keyword.getName());
-        CreateKeywordEvent newKeywordEvent = new CreateKeywordEvent(keyword, creator);
+        KeywordCreatedEvent newKeywordEvent = new KeywordCreatedEvent(keyword, creator);
         eventService.addUsersToEvent(adminSet, newKeywordEvent);
     }
 }

@@ -142,29 +142,15 @@ public class InventoryController {
                 invItem.setTotalPrice(null);
             }
 
-            DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE;
             String manufactured = invItemInfo.getAsString("manufactured");
-            if (manufactured == null) {
-                invItem.setManufactured(null);
-            } else {
-                invItem.setManufactured(LocalDate.parse(manufactured, dateTimeFormatter));
-            }
             String sellBy = invItemInfo.getAsString("sellBy");
-            if (sellBy == null) {
-                invItem.setSellBy(null);
-            } else {
-                invItem.setSellBy(LocalDate.parse(sellBy, dateTimeFormatter));
-            }
             String bestBefore = invItemInfo.getAsString("bestBefore");
-            if (bestBefore == null) {
-                invItem.setBestBefore(null);
-            } else {
-                invItem.setBestBefore(LocalDate.parse(bestBefore, dateTimeFormatter));
-            }
             String expires = invItemInfo.getAsString("expires");
-            invItem.setExpires(LocalDate.parse(expires, dateTimeFormatter));
+            invItem.setDates(manufactured, sellBy, bestBefore, expires);
 
             inventoryItemRepository.save(invItem);
+        } catch (ResponseStatusException exception) {
+            throw exception;
         } catch (Exception exception) {
             logger.warn(exception);
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The data provided was invalid");

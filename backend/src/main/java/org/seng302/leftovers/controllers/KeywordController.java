@@ -4,7 +4,7 @@ import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.seng302.leftovers.entities.CreateKeywordEvent;
+import org.seng302.leftovers.entities.KeywordCreatedEvent;
 import org.seng302.leftovers.entities.Keyword;
 import org.seng302.leftovers.entities.User;
 import org.seng302.leftovers.persistence.CreateKeywordEventRepository;
@@ -101,7 +101,7 @@ public class KeywordController {
 
             Keyword keyword = keywordRepository.findById(id)
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "Keyword not found"));
-            Optional<CreateKeywordEvent> keywordEvent = createKeywordEventRepository.getByNewKeyword(keyword);
+            Optional<KeywordCreatedEvent> keywordEvent = createKeywordEventRepository.getByNewKeyword(keyword);
             keywordEvent.ifPresent(createKeywordEventRepository::delete);
             keywordRepository.delete(keyword);
 

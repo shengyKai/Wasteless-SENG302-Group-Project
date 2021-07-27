@@ -253,7 +253,7 @@ public class Product {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Country of sale cannot be empty");
         } else if (countryOfSale.length() > 100) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Country of sale must be less than 100 characters long");
-        } else if (!countryOfSale.matches("[ a-zA-Z]+")) {
+        } else if (!countryOfSale.matches("[ \\p{L}]+")) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Country of sale contains illegal characters");
         } else {
             this.countryOfSale = countryOfSale;

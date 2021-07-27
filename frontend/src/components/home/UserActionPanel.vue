@@ -40,6 +40,14 @@
                 <v-list-item-title>My Cards</v-list-item-title>
               </v-list-item-content>
             </v-list-item>
+            <v-list-item v-if="isAdmin" @click="viewAdminDashboard">
+              <v-list-item-icon>
+                <v-icon>mdi-account-tie</v-icon>
+              </v-list-item-icon>
+              <v-list-item-content>
+                <v-list-item-title>Admin Dashboard</v-list-item-title>
+              </v-list-item-content>
+            </v-list-item>
           </v-list-item-group>
         </v-list>
       </v-card-text>
@@ -59,13 +67,25 @@
       <v-btn icon @click="viewMyCards" class="action-button">
         <v-icon large>mdi-card-text</v-icon>
       </v-btn>
+      <v-btn v-if="isAdmin" icon @click="viewAdminDashboard" class="action-button">
+        <v-icon large>mdi-account-tie</v-icon>
+      </v-btn>
     </v-card>
   </div>
 </template>
 
 <script>
+import { USER_ROLES } from "../../utils";
+
 export default {
   name: "UserActionPanel",
+  computed: {
+    isAdmin() {
+      return [USER_ROLES.DGAA, USER_ROLES.GAA].includes(
+        this.$store.getters.role
+      );
+    },
+  },
   methods: {
     /**
      * Shows the user profile page
@@ -90,6 +110,9 @@ export default {
      */
     viewMyCards() {
       this.$router.push(`/usercards/${this.$store.state.user.id}`);
+    },
+    viewAdminDashboard() {
+      this.$router.push("/admin");
     }
   }
 };

@@ -8,7 +8,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mockito.*;
-import org.seng302.leftovers.entities.CreateKeywordEvent;
+import org.seng302.leftovers.entities.KeywordCreatedEvent;
 import org.seng302.leftovers.entities.Keyword;
 import org.seng302.leftovers.entities.User;
 import org.seng302.leftovers.exceptions.AccessTokenException;
@@ -58,12 +58,12 @@ class KeywordControllerTest {
 
     @Mock
     private UserRepository userRepository;
+    
+    @Mock
+    private KeywordCreatedEvent mockEvent;
 
     @Mock
     private User mockUser;
-
-    @Mock
-    private CreateKeywordEvent mockEvent;
 
     @Captor
     private ArgumentCaptor<User> userArgumentCaptor;

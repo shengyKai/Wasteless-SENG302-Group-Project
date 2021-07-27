@@ -38,7 +38,7 @@ function makeTestUser(userId: number) {
     created: '1/5/2005',
     homeAddress: {
       streetNumber: 'test_street_number',
-      streetName: 'test_street1',
+      streetName: 'test_streetAddress',
       city: 'test_city',
       region: 'test_region',
       postcode: 'test_postcode',
@@ -144,7 +144,7 @@ describe('CreateBusiness.vue', () => {
     await wrapper.setData({
       business: 'Business Name',
       businessType: 'Business Type',
-      street1: '1 Street',
+      streetAddress: '1 Street',
       city: 'City',
       region: 'Region',
       country: 'Country',
@@ -222,7 +222,7 @@ describe('CreateBusiness.vue', () => {
   it('Invalid if street line 1 not provided', async () => {
     await populateRequiredFields();
     await wrapper.setData({
-      street1: '',
+      streetAddress: '',
     });
     await Vue.nextTick();
     expect(wrapper.vm.valid).toBeFalsy();
@@ -231,7 +231,7 @@ describe('CreateBusiness.vue', () => {
   it.each(diacritics)('Valid when street contains the character "%s"', async (char) => {
     await populateRequiredFields();
     await wrapper.setData({
-      street1: '5 ' + char,
+      streetAddress: '5 ' + char,
     });
     await Vue.nextTick();
     expect(wrapper.vm.valid).toBeTruthy();

@@ -38,14 +38,25 @@
       </div>
     </v-card-text>
     <v-divider/>
-    <v-card-actions v-if="isCardOwnerOrDGAA && showActions">
+    <v-card-actions v-if="isCardOwnerOrAdmin && showActions">
+      <v-spacer/>
+      <v-icon ref="editButton"
+              class="mr-2"
+              color="primary"
+              @click.stop="editCardDialog = true"
+      >
+        mdi-pencil
+      </v-icon>
+
       <v-icon ref="deleteButton"
               color="primary"
               @click.stop="deleteCardDialog = true"
       >
         mdi-trash-can
       </v-icon>
+
       <v-dialog
+        ref="deleteDialog"
         v-model="deleteCardDialog"
         max-width="300px"
       >
@@ -76,19 +87,27 @@
         </v-card>
       </v-dialog>
     </v-card-actions>
+    <template v-if="editCardDialog">
+      <MarketplaceCardForm :user="$store.state.user" :previousCard="content" @closeDialog="editCardDialog=false"/>
+    </template>
   </v-card>
 </template>
 
 <script>
 import { formatDate, SECTION_NAMES } from '@/utils';
 import { deleteMarketplaceCard } from '../../api/internal.ts';
+import MarketplaceCardForm from '../marketplace/MarketplaceCardForm.vue';
 
 export default {
   name: "MarketplaceCard",
   data () {
     return {
-      deleteCardDialog: false
+      deleteCardDialog: false,
+      editCardDialog: false,
     };
+  },
+  components: {
+    MarketplaceCardForm,
   },
   props: {
     content: {
@@ -133,7 +152,7 @@ export default {
       return dateString;
     },
     // To ensure only the card owner, DGAA or GAA is able to execute an action relating to the marketplace card
-    isCardOwnerOrDGAA() {
+    isCardOwnerOrAdmin() {
       return (this.$store.state.user.id === this.content.creator.id)
             || (this.$store.getters.role === "defaultGlobalApplicationAdmin")
             || (this.$store.getters.role === "globalApplicationAdmin");
@@ -151,7 +170,7 @@ export default {
     async deleteCard(cardId) {
       let response = await deleteMarketplaceCard(cardId);
       this.$emit("delete-card", response);
-    }
+    },
   }
 };
 </script>

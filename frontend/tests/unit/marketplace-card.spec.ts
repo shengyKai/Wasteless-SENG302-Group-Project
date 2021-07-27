@@ -56,7 +56,18 @@ describe('MarketplaceCard.vue', () => {
     expect(filtered.length).toBe(1);
     return filtered.at(0);
   }
+  /**
+   * Finds the edit form dialog box upon clicking the edit button
+   * @returns the edit confirmation dialog box
+   */
+  async function findEditConfirmationDialog() {
+    const editButton = wrapper.findComponent({ ref: 'editButton' });
+    await editButton.trigger('click');
 
+    // This method might be alter in another task, juz setting up
+    const dialogs = wrapper.findAllComponents({ name: "v-dialog" });
+    return dialogs.at(0);
+  }
   /**
    * Finds the delete confirmation dialog box upon clicking the delete button
    * @returns the delete confirmation dialog box
@@ -112,7 +123,14 @@ describe('MarketplaceCard.vue', () => {
     // mocking the Vuex store user id such that it does not match the testMarketplaceCard object.
     state = {
       user: {
-        id: userId
+        id: userId,
+        firstName: "John",
+        lastName: "Smith",
+        homeAddress: {
+          district: "District",
+          city: "City",
+          country: "Country",
+        }
       }
     };
     getters = {
@@ -221,6 +239,7 @@ describe('MarketplaceCard.vue', () => {
     expect(wrapper.vm.deleteCardDialog).toBeFalsy();
   });
 
+
   it("Must not be able to find the delete icon if the user is not the owner of the card", async () => {
     setUpStore(3, "user");
     generateWrapper();
@@ -246,6 +265,34 @@ describe('MarketplaceCard.vue', () => {
     setUpStore(3, "globalApplicationAdmin");
     generateWrapper();
     const buttons = wrapper.findAllComponents({ ref: 'deleteButton' });
+    expect(buttons.length).toBe(1);
+  });
+
+  it("Must not be able to find the edit icon if the user is not the owner of the card", async () => {
+    setUpStore(3, "user");
+    generateWrapper();
+    const buttons = wrapper.findAllComponents({ ref: 'editButton' });
+    expect(buttons.length).toBe(0);
+  });
+
+  it('Must not be able to find the edit icon if the property "showActions" is false', async () => {
+    generateWrapper({showActions: false});
+
+    const buttons = wrapper.findAllComponents({ ref: 'editButton' });
+    expect(buttons.length).toBe(0);
+  });
+
+  it("Must be able to find the edit icon if the user is not the owner of the card but is a DGAA", async () => {
+    setUpStore(3, "defaultGlobalApplicationAdmin");
+    generateWrapper();
+    const buttons = wrapper.findAllComponents({ ref: 'editButton' });
+    expect(buttons.length).toBe(1);
+  });
+
+  it("Must be able to find the edit icon if the user is not the owner of the card but is a GAA", async () => {
+    setUpStore(3, "globalApplicationAdmin");
+    generateWrapper();
+    const buttons = wrapper.findAllComponents({ ref: 'editButton' });
     expect(buttons.length).toBe(1);
   });
 

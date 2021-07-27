@@ -216,7 +216,8 @@ export default {
       if (typeof result === 'string') {
         this.errorMessage = result;
       } else {
-        this.productList = result;
+        this.productList = result.results;
+        this.errorMessage = undefined;
       }
     },
     resetSearch: function () {

@@ -1,4 +1,5 @@
-import { getProducts, Product, Image } from "@/api/internal";
+import { getProducts, Product, Image, SearchResults } from "@/api/internal";
+import { countryCodeRules } from "@/utils";
 import axios, { AxiosError, AxiosInstance } from 'axios';
 
 jest.mock('axios', () => ({
@@ -27,18 +28,21 @@ describe('Test GET /businesses/:id/products endpoint', () => {
   };
 
   it('When response is a product array where product has no null attributes, getProducts returns the product array', async () => {
-    const responseData = [
-      {
-        id: "",
-        name: "",
-        description: "",
-        manufacturer: "",
-        recommendedRetailPrice: 10,
-        created: "",
-        images: [image],
-        countryOfSale: "",
-      }
-    ];
+    const responseData:SearchResults<Product> = {
+      results : [{
+          id: "",
+          name: "",
+          description: "",
+          manufacturer: "",
+          recommendedRetailPrice: 10,
+          created: "",
+          images: [image],
+          countryOfSale: "",
+        
+      }], 
+      count : 7,
+    }
+    
     instance.get.mockResolvedValueOnce({
       data: responseData
     });
@@ -47,13 +51,15 @@ describe('Test GET /businesses/:id/products endpoint', () => {
   });
 
   it('When response is a product array where product\'s optional attributes aren\'t present, getProducts returns the product array', async () => {
-    const responseData = [
-      {
-        id: "",
-        name: "",
-        images: [],
-      }
-    ];
+    const responseData:SearchResults<Product> = {
+      results : [{
+          id: "",
+          name: "",
+          images: [image],
+
+      }], 
+      count : 7,
+    }
     instance.get.mockResolvedValueOnce({
       data: responseData
     });
@@ -62,12 +68,14 @@ describe('Test GET /businesses/:id/products endpoint', () => {
   });
 
   it('When response does not contain the field id, getProducts returns an error message indicating that the response is not a product array', async () => {
-    const responseData = [
-      {
-        name: "",
-        images: [],
-      }
-    ];
+    const responseData = {
+      results : [{
+          name: "",
+          images: [image],
+        
+      }], 
+      count : 7,
+    }
     instance.get.mockResolvedValueOnce({
       data: responseData
     });

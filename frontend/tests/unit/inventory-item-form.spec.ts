@@ -92,7 +92,7 @@ const testProducts = [
 // Characters that are whitespace not including the space character.
 const whitespaceCharacters = ["\n", "\t"];
 
-getProducts.mockResolvedValue(testProducts);
+getProducts.mockResolvedValue({results: testProducts, count: testProducts.length});
 
 const localVue = createLocalVue();
 
@@ -690,7 +690,7 @@ describe("InventoryItemForm.vue", () => {
         bestBefore: bestBeforeDate,
         expires: expiresDate
       });
-      wrapper.vm.checkAllDatesValid();;
+      wrapper.vm.checkAllDatesValid();
       await Vue.nextTick();
       expect(findCreateButton().props().disabled).toBeFalsy();
     });
@@ -752,7 +752,7 @@ describe("InventoryItemForm.vue", () => {
   //Associated with bug on t170
   it('Product search limits results', async ()=>{
     await wrapper.setData({productList:testProducts});
-    getProducts.mockResolvedValue(testProducts);
+    // getProducts.mockResolvedValue(testProducts);
     const selectbox = findProductSelect();
     (selectbox.vm as any).activateMenu();
     await flushQueue();
@@ -938,7 +938,7 @@ describe("InventoryItemForm.vue", () => {
         },
         quantity: 26,
       });
-      expect(wrapper.vm.checkQuantityValid()).toEqual("Must be at least 27")
+      expect(wrapper.vm.checkQuantityValid()).toEqual("Must be at least 27");
       expect(findSaveButton().props().disabled).toBeTruthy();
     });
 

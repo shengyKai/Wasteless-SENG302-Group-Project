@@ -1,8 +1,11 @@
 package org.seng302.leftovers.controllers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,9 +18,12 @@ import org.seng302.leftovers.persistence.BusinessRepository;
 import org.seng302.leftovers.persistence.ImageRepository;
 import org.seng302.leftovers.persistence.ProductRepository;
 import org.seng302.leftovers.persistence.UserRepository;
+import org.seng302.leftovers.tools.SearchHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -50,6 +56,8 @@ class ProductControllerTest {
     private UserRepository userRepository;
     @Autowired
     private ImageRepository imageRepository;
+    @Autowired
+    private SessionFactory sessionFactory;
 
     private final HashMap<String, Object> sessionAuthToken = new HashMap<>();
     private Cookie authCookie;
@@ -57,6 +65,7 @@ class ProductControllerTest {
     private User ownerUser;
     private User bystanderUser;
     private User administratorUser;
+    private PageRequest templateRequest;
 
 
     /**
@@ -124,6 +133,9 @@ class ProductControllerTest {
         businessRepository.deleteAll();
         userRepository.deleteAll();
         imageRepository.deleteAll();
+
+        Sort.Order expectedOrder = new Sort.Order(Sort.Direction.ASC, "created").ignoreCase();
+        templateRequest = SearchHelper.getPageRequest(null,null, Sort.by(expectedOrder));
 
         setUpAuthCode();
 
@@ -194,42 +206,51 @@ class ProductControllerTest {
      * Adds several products to a catalogue
      */
     void addSeveralProductsToACatalogue() {
-        Product product1 = new Product.Builder()
-                .withProductCode("NATHAN-APPLE-70")
-                .withName("The Nathan Apple")
-                .withDescription("Ever wonder why Nathan has an apple")
-                .withManufacturer("Apple1")
-                .withRecommendedRetailPrice("9000.03")
-                .withBusiness(testBusiness1)
-                .build();
-        Product product2 = new Product.Builder()
-                .withProductCode("ALMOND-MILK-100")
-                .withName("Almond Milk")
-                .withDescription("Like water except bad for the environment")
-                .withManufacturer("Apple2")
-                .withRecommendedRetailPrice("10.02")
-                .withBusiness(testBusiness1)
-                .build();
-        Product product3 = new Product.Builder()
-                .withProductCode("COFFEE-7")
-                .withName("Generic Brand Coffee")
-                .withDescription("This coffee tastes exactly as you expect it would")
-                .withManufacturer("Apple3")
-                .withRecommendedRetailPrice("4.02")
-                .withBusiness(testBusiness1)
-                .build();
-        Product product4 = new Product.Builder()
-                .withProductCode("DARK-CHOCOLATE")
-                .withName("Dark Chocolate")
-                .withDescription("Would like a high cocoa concentration")
-                .withManufacturer("Apple4")
-                .withRecommendedRetailPrice("6.07")
-                .withBusiness(testBusiness1)
-                .build();
-        productRepository.save(product1);
-        productRepository.save(product2);
-        productRepository.save(product3);
-        productRepository.save(product4);
+        try (Session session = sessionFactory.openSession()) {
+            session.beginTransaction();
+            var testBusiness = session.find(Business.class, testBusiness1.getId());
+            Product product1 = new Product.Builder()
+                    .withProductCode("NATHAN-APPLE-70")
+                    .withName("The Nathan Apple")
+                    .withDescription("Ever wonder why Nathan has an apple")
+                    .withManufacturer("Apple1")
+                    .withRecommendedRetailPrice("9000.03")
+                    .withBusiness(testBusiness)
+                    .build();
+            Product product2 = new Product.Builder()
+                    .withProductCode("ALMOND-MILK-100")
+                    .withName("Almond Milk")
+                    .withDescription("Like water except bad for the environment")
+                    .withManufacturer("Apple2")
+                    .withRecommendedRetailPrice("10.02")
+                    .withBusiness(testBusiness)
+                    .build();
+            Product product3 = new Product.Builder()
+                    .withProductCode("COFFEE-7")
+                    .withName("Generic Brand Coffee")
+                    .withDescription("This coffee tastes exactly as you expect it would")
+                    .withManufacturer("Apple3")
+                    .withRecommendedRetailPrice("4.02")
+                    .withBusiness(testBusiness)
+                    .build();
+            Product product4 = new Product.Builder()
+                    .withProductCode("DARK-CHOCOLATE")
+                    .withName("Dark Chocolate")
+                    .withDescription("Would like a high cocoa concentration")
+                    .withManufacturer("Apple4")
+                    .withRecommendedRetailPrice("6.07")
+                    .withBusiness(testBusiness)
+                    .build();
+            session.save(product1);
+            session.save(product2);
+            session.save(product3);
+            session.save(product4);
+//            productRepository.save(product4);
+//            productRepository.save(product1);
+//            productRepository.save(product2);
+//            productRepository.save(product3);
+            session.getTransaction().commit();
+        }
     }
 
     /**
@@ -247,9 +268,10 @@ class ProductControllerTest {
                 .andReturn();
 
         JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
-        JSONArray responseBody = (JSONArray) parser.parse(result.getResponse().getContentAsString());
+        JSONObject response = (JSONObject) parser.parse(result.getResponse().getContentAsString());
+        JSONArray results = (JSONArray) response.get("results");
 
-        for (Object productObject: responseBody) {
+        for (Object productObject: results) {
             JSONObject productJSON = (JSONObject) productObject;
 
             String productCode = productJSON.getAsString("id");
@@ -278,8 +300,9 @@ class ProductControllerTest {
                 .andReturn();
 
         JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
-        JSONArray responseBody = (JSONArray) parser.parse(result.getResponse().getContentAsString());
-        assertTrue(responseBody.isEmpty());
+        JSONObject response = (JSONObject) parser.parse(result.getResponse().getContentAsString());
+        JSONArray results = (JSONArray) response.get("results");
+        assertTrue(results.isEmpty());
     }
 
     /**
@@ -333,8 +356,9 @@ class ProductControllerTest {
                 .andReturn();
 
         JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
-        JSONArray responseBody = (JSONArray) parser.parse(result.getResponse().getContentAsString());
-        assertTrue(responseBody.isEmpty());
+        JSONObject response = (JSONObject) parser.parse(result.getResponse().getContentAsString());
+        JSONArray results = (JSONArray) response.get("results");
+        assertTrue(results.isEmpty());
     }
 
     /**
@@ -351,8 +375,9 @@ class ProductControllerTest {
                 .andReturn();
 
         JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
-        JSONArray responseBody = (JSONArray) parser.parse(result.getResponse().getContentAsString());
-        assertTrue(responseBody.isEmpty());
+        JSONObject response = (JSONObject) parser.parse(result.getResponse().getContentAsString());
+        JSONArray results = (JSONArray) response.get("results");
+        assertTrue(results.isEmpty());
     }
 
     /**
@@ -369,8 +394,9 @@ class ProductControllerTest {
                 .andReturn();
 
         JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
-        JSONArray responseBody = (JSONArray) parser.parse(result.getResponse().getContentAsString());
-        assertTrue(responseBody.isEmpty());
+        JSONObject response = (JSONObject) parser.parse(result.getResponse().getContentAsString());
+        JSONArray results = (JSONArray) response.get("results");
+        assertTrue(results.isEmpty());
     }
 
     /**
@@ -410,14 +436,19 @@ class ProductControllerTest {
     void postingAProductAddsItToTheCatalogue() {
         setCurrentUser(ownerUser.getUserID());
         // The mock result
-        Product mockedResult = new Product.Builder()
-                .withProductCode("NATHAN-APPLE-71")
-                .withName("The Nathan Apple")
-                .withDescription("Ever wonder why Nathan has an apple")
-                .withManufacturer("Apple")
-                .withRecommendedRetailPrice("9000.05")
-                .withBusiness(testBusiness1)
-                .build();
+        Product mockedResult;
+        try (Session session = sessionFactory.openSession()) {
+            session.beginTransaction();
+            mockedResult = new Product.Builder()
+                    .withProductCode("NATHAN-APPLE-71")
+                    .withName("The Nathan Apple")
+                    .withDescription("Ever wonder why Nathan has an apple")
+                    .withManufacturer("Apple")
+                    .withRecommendedRetailPrice("9000.05")
+                    .withBusiness(session.find(Business.class, testBusiness1.getId()))
+                    .build();
+            session.getTransaction().commit();
+        }
 
         try (MockedConstruction<Product.Builder> mocked = Mockito.mockConstruction(Product.Builder.class, withSettings().defaultAnswer(RETURNS_SELF), (mock, context) -> {
             when(mock.build()).thenReturn(mockedResult); // Makes sure that build returns a valid product
@@ -539,15 +570,20 @@ class ProductControllerTest {
     @Test
     void postingProductPassesTheValuesToTheProductBuilder() {
         // This just has to be some value that will not crash when productRepository.save is called on it.
-        Product mockedResult = new Product.Builder()
-                .withProductCode("NATHAN-APPLE-71")
-                .withName("The Nathan Apple")
-                .withDescription("Ever wonder why Nathan has an apple")
-                .withManufacturer("Apple")
-                .withRecommendedRetailPrice("9000.05")
-                .withBusiness(testBusiness1)
-                .build();
-
+        // The mock result
+        Product mockedResult;
+        try (Session session = sessionFactory.openSession()) {
+            session.beginTransaction();
+            mockedResult = new Product.Builder()
+                    .withProductCode("NATHAN-APPLE-71")
+                    .withName("The Nathan Apple")
+                    .withDescription("Ever wonder why Nathan has an apple")
+                    .withManufacturer("Apple")
+                    .withRecommendedRetailPrice("9000.05")
+                    .withBusiness(session.find(Business.class, testBusiness1.getId()))
+                    .build();
+            session.getTransaction().commit();
+        }
         try (MockedConstruction<Product.Builder> mocked = Mockito.mockConstruction(Product.Builder.class, withSettings().defaultAnswer(RETURNS_SELF), (mock, context) -> {
             when(mock.build()).thenReturn(mockedResult); // Makes sure that build returns a valid product
         })) {
@@ -685,12 +721,13 @@ class ProductControllerTest {
                 .andReturn();
 
         JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
-        JSONArray responseBody = (JSONArray) parser.parse(result.getResponse().getContentAsString());
+        JSONObject response = (JSONObject) parser.parse(result.getResponse().getContentAsString());
+        JSONArray results = (JSONArray) response.get("results");
 
-        System.out.println(responseBody.toString());
+        System.out.println(results.toString());
 
-        JSONObject firstProduct = (JSONObject) responseBody.get(0);
-        JSONObject lastProduct = (JSONObject) responseBody.get(3);
+        JSONObject firstProduct = (JSONObject) results.get(0);
+        JSONObject lastProduct = (JSONObject) results.get(3);
 
         assertEquals("ALMOND-MILK-100", firstProduct.getAsString("id"));
         assertEquals("NATHAN-APPLE-70", lastProduct.getAsString("id"));
@@ -713,10 +750,11 @@ class ProductControllerTest {
                 .andReturn();
 
         JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
-        JSONArray responseBody = (JSONArray) parser.parse(result.getResponse().getContentAsString());
+        JSONObject response = (JSONObject) parser.parse(result.getResponse().getContentAsString());
+        JSONArray results = (JSONArray) response.get("results");
 
-        JSONObject firstProduct = (JSONObject) responseBody.get(0);
-        JSONObject lastProduct = (JSONObject) responseBody.get(3);
+        JSONObject firstProduct = (JSONObject) results.get(0);
+        JSONObject lastProduct = (JSONObject) results.get(3);
 
         assertEquals("NATHAN-APPLE-70", firstProduct.getAsString("id"));
         assertEquals("ALMOND-MILK-100", lastProduct.getAsString("id"));
@@ -740,14 +778,15 @@ class ProductControllerTest {
                 .andReturn();
 
         JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
-        JSONArray responseBody = (JSONArray) parser.parse(result.getResponse().getContentAsString());
+        JSONObject response = (JSONObject) parser.parse(result.getResponse().getContentAsString());
+        JSONArray results = (JSONArray) response.get("results");
 
         // Check length should be 2 products
-        assertEquals(2, responseBody.size());
+        assertEquals(2, results.size());
 
         // Check the two products are the expected ones
-        JSONObject firstProduct = (JSONObject) responseBody.get(0);
-        JSONObject secondProduct = (JSONObject) responseBody.get(1);
+        JSONObject firstProduct = (JSONObject) results.get(0);
+        JSONObject secondProduct = (JSONObject) results.get(1);
 
         assertEquals("ALMOND-MILK-100", firstProduct.getAsString("id"));
         assertEquals("COFFEE-7", secondProduct.getAsString("id"));
@@ -771,14 +810,15 @@ class ProductControllerTest {
                 .andReturn();
 
         JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
-        JSONArray responseBody = (JSONArray) parser.parse(result.getResponse().getContentAsString());
+        JSONObject response = (JSONObject) parser.parse(result.getResponse().getContentAsString());
+        JSONArray results = (JSONArray) response.get("results");
 
         // Check length should be 2 products
-        assertEquals(2, responseBody.size());
+        assertEquals(2, results.size());
 
         // Check the two products are the expected ones
-        JSONObject firstProduct = (JSONObject) responseBody.get(0);
-        JSONObject secondProduct = (JSONObject) responseBody.get(1);
+        JSONObject firstProduct = (JSONObject) results.get(0);
+        JSONObject secondProduct = (JSONObject) results.get(1);
 
         assertEquals("DARK-CHOCOLATE", firstProduct.getAsString("id"));
         assertEquals("NATHAN-APPLE-70", secondProduct.getAsString("id"));
@@ -795,15 +835,16 @@ class ProductControllerTest {
         MvcResult result = mockMvc.perform(get(String.format("/businesses/%d/products", testBusiness1.getId()))
                 .sessionAttrs(sessionAuthToken)
                 .cookie(authCookie)
-                .param("orderBy", "id"))
+                .param("orderBy", "productCode"))
                 .andExpect(status().isOk())
                 .andReturn();
 
         JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
-        JSONArray responseBody = (JSONArray) parser.parse(result.getResponse().getContentAsString());
+        JSONObject response = (JSONObject) parser.parse(result.getResponse().getContentAsString());
+        JSONArray results = (JSONArray) response.get("results");
 
-        JSONObject firstProduct = (JSONObject) responseBody.get(0);
-        JSONObject lastProduct = (JSONObject) responseBody.get(3);
+        JSONObject firstProduct = (JSONObject) results.get(0);
+        JSONObject lastProduct = (JSONObject) results.get(3);
 
         assertEquals("ALMOND-MILK-100", firstProduct.getAsString("id"));
         assertEquals("NATHAN-APPLE-70", lastProduct.getAsString("id"));
@@ -825,10 +866,11 @@ class ProductControllerTest {
                 .andReturn();
 
         JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
-        JSONArray responseBody = (JSONArray) parser.parse(result.getResponse().getContentAsString());
+        JSONObject response = (JSONObject) parser.parse(result.getResponse().getContentAsString());
+        JSONArray results = (JSONArray) response.get("results");
 
-        JSONObject firstProduct = (JSONObject) responseBody.get(0);
-        JSONObject lastProduct = (JSONObject) responseBody.get(3);
+        JSONObject firstProduct = (JSONObject) results.get(0);
+        JSONObject lastProduct = (JSONObject) results.get(3);
 
         assertEquals("ALMOND-MILK-100", firstProduct.getAsString("id"));
         assertEquals("NATHAN-APPLE-70", lastProduct.getAsString("id"));
@@ -850,10 +892,11 @@ class ProductControllerTest {
                 .andReturn();
 
         JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
-        JSONArray responseBody = (JSONArray) parser.parse(result.getResponse().getContentAsString());
+        JSONObject response = (JSONObject) parser.parse(result.getResponse().getContentAsString());
+        JSONArray results = (JSONArray) response.get("results");
 
-        JSONObject firstProduct = (JSONObject) responseBody.get(0);
-        JSONObject lastProduct = (JSONObject) responseBody.get(3);
+        JSONObject firstProduct = (JSONObject) results.get(0);
+        JSONObject lastProduct = (JSONObject) results.get(3);
 
         assertEquals("NATHAN-APPLE-70", firstProduct.getAsString("id"));
         assertEquals("DARK-CHOCOLATE", lastProduct.getAsString("id"));
@@ -875,10 +918,11 @@ class ProductControllerTest {
                 .andReturn();
 
         JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
-        JSONArray responseBody = (JSONArray) parser.parse(result.getResponse().getContentAsString());
+        JSONObject response = (JSONObject) parser.parse(result.getResponse().getContentAsString());
+        JSONArray results = (JSONArray) response.get("results");
 
-        JSONObject firstProduct = (JSONObject) responseBody.get(0);
-        JSONObject lastProduct = (JSONObject) responseBody.get(3);
+        JSONObject firstProduct = (JSONObject) results.get(0);
+        JSONObject lastProduct = (JSONObject) results.get(3);
 
         assertEquals("NATHAN-APPLE-70", firstProduct.getAsString("id"));
         assertEquals("DARK-CHOCOLATE", lastProduct.getAsString("id"));
@@ -900,10 +944,11 @@ class ProductControllerTest {
                 .andReturn();
 
         JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
-        JSONArray responseBody = (JSONArray) parser.parse(result.getResponse().getContentAsString());
+        JSONObject response = (JSONObject) parser.parse(result.getResponse().getContentAsString());
+        JSONArray results = (JSONArray) response.get("results");
 
-        JSONObject firstProduct = (JSONObject) responseBody.get(0);
-        JSONObject lastProduct = (JSONObject) responseBody.get(3);
+        JSONObject firstProduct = (JSONObject) results.get(0);
+        JSONObject lastProduct = (JSONObject) results.get(3);
 
         assertEquals("COFFEE-7", firstProduct.getAsString("id"));
         assertEquals("NATHAN-APPLE-70", lastProduct.getAsString("id"));
@@ -925,10 +970,11 @@ class ProductControllerTest {
                 .andReturn();
 
         JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
-        JSONArray responseBody = (JSONArray) parser.parse(result.getResponse().getContentAsString());
+        JSONObject response = (JSONObject) parser.parse(result.getResponse().getContentAsString());
+        JSONArray results = (JSONArray) response.get("results");
 
-        JSONObject firstProduct = (JSONObject) responseBody.get(0);
-        JSONObject lastProduct = (JSONObject) responseBody.get(3);
+        JSONObject firstProduct = (JSONObject) results.get(0);
+        JSONObject lastProduct = (JSONObject) results.get(3);
 
         assertEquals("NATHAN-APPLE-70", firstProduct.getAsString("id"));
         assertEquals("DARK-CHOCOLATE", lastProduct.getAsString("id"));
@@ -942,16 +988,16 @@ class ProductControllerTest {
         setCurrentUser(ownerUser.getUserID());
         addSeveralProductsToACatalogue();
 
-        MvcResult result = mockMvc.perform(get(String.format("/businesses/%d/products/count", testBusiness1.getId()))
+        MvcResult result = mockMvc.perform(get(String.format("/businesses/%d/products", testBusiness1.getId()))
                 .sessionAttrs(sessionAuthToken)
                 .cookie(authCookie))
                 .andExpect(status().isOk())
                 .andReturn();
 
         JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
-        JSONObject responseBody = (JSONObject) parser.parse(result.getResponse().getContentAsString());
+        JSONObject response = (JSONObject) parser.parse(result.getResponse().getContentAsString());
 
-        Number count = responseBody.getAsNumber("count");
+        Number count = response.getAsNumber("count");
 
         assertEquals(4, count);
     }
@@ -962,7 +1008,7 @@ class ProductControllerTest {
     void makeImagePrimary_valid_sets_image_primary() throws Exception {
         setCurrentUser(ownerUser.getUserID());
         addSeveralProductsToACatalogue();
-        Product product = productRepository.getAllByBusiness(testBusiness1).get(0); // get product 1
+        Product product = productRepository.getAllByBusiness(testBusiness1, templateRequest).getContent().get(0); // get product 1
         product = addImagesToProduct(product);
         Image image1 = product.getProductImages().get(0);
         Image image2 = product.getProductImages().get(1);
@@ -985,7 +1031,7 @@ class ProductControllerTest {
     void makeImagePrimary_InvalidBusinessId_406Response() throws Exception{
         setCurrentUser(ownerUser.getUserID());
         addSeveralProductsToACatalogue();
-        Product product = productRepository.getAllByBusiness(testBusiness1).get(0); // get product 1
+        Product product = productRepository.getAllByBusiness(testBusiness1, templateRequest).getContent().get(0); // get product 1
         product = addImagesToProduct(product);
         Image image2 = product.getProductImages().get(1);
         mockMvc.perform(
@@ -1002,7 +1048,7 @@ class ProductControllerTest {
     void makeImagePrimary_InvalidProductId_406Response() throws Exception{
         setCurrentUser(ownerUser.getUserID());
         addSeveralProductsToACatalogue();
-        Product product = productRepository.getAllByBusiness(testBusiness1).get(0); // get product 1
+        Product product = productRepository.getAllByBusiness(testBusiness1, templateRequest).getContent().get(0); // get product 1
         product = addImagesToProduct(product);
         Image image2 = product.getProductImages().get(1);
         mockMvc.perform(
@@ -1020,7 +1066,7 @@ class ProductControllerTest {
     void makeImagePrimary_InvalidImageId_406Response() throws Exception {
         setCurrentUser(ownerUser.getUserID());
         addSeveralProductsToACatalogue();
-        Product product = productRepository.getAllByBusiness(testBusiness1).get(0); // get product 1
+        Product product = productRepository.getAllByBusiness(testBusiness1, templateRequest).getContent().get(0); // get product 1
         product = addImagesToProduct(product);
         Image image2 = product.getProductImages().get(1);
         mockMvc.perform(
@@ -1120,7 +1166,7 @@ class ProductControllerTest {
     void makeImagePrimary_NotBusinessAdmin_403Response() throws Exception{
         setCurrentUser(bystanderUser.getUserID());
         addSeveralProductsToACatalogue();
-        Product product = productRepository.getAllByBusiness(testBusiness1).get(0); // get product 1
+        Product product = productRepository.getAllByBusiness(testBusiness1, templateRequest).getContent().get(0); // get product 1
         product = addImagesToProduct(product);
         Image image2 = product.getProductImages().get(1);
         mockMvc.perform(
@@ -1137,7 +1183,7 @@ class ProductControllerTest {
     @Test
     void makeImagePrimary_NoSession_401Response() throws Exception{
         addSeveralProductsToACatalogue();
-        Product product = productRepository.getAllByBusiness(testBusiness1).get(0); // get product 1
+        Product product = productRepository.getAllByBusiness(testBusiness1, templateRequest).getContent().get(0); // get product 1
         product = addImagesToProduct(product);
         Image image2 = product.getProductImages().get(1);
         mockMvc.perform(
@@ -1154,7 +1200,14 @@ class ProductControllerTest {
     void makeImagePrimary_isBusinessAdminForWrongCatalogue_403Response() throws Exception{
         setCurrentUser(bystanderUser.getUserID());
         addSeveralProductsToACatalogue();
-        Product product = productRepository.getAllByBusiness(testBusiness1).get(0); // get product 1
+
+//        var foo = productRepository.getAllByBusiness(testBusiness1, templateRequest);
+//        System.out.println(foo);
+
+        var bar = productRepository.findAllByBusiness(testBusiness1);
+        System.out.println(bar);
+
+        Product product = productRepository.getAllByBusiness(testBusiness1, templateRequest).getContent().get(0); // get product 1
         product = addImagesToProduct(product);
         Image image2 = product.getProductImages().get(1);
         mockMvc.perform(
@@ -1173,7 +1226,7 @@ class ProductControllerTest {
     void makeImagePrimary_isBusinessAdmin_200Response() throws Exception {
         setCurrentUser(administratorUser.getUserID());
         addSeveralProductsToACatalogue();
-        Product product = productRepository.getAllByBusiness(testBusiness1).get(0); // get product 1
+        Product product = productRepository.getAllByBusiness(testBusiness1, templateRequest).getContent().get(0); // get product 1
         product = addImagesToProduct(product);
         Image image2 = product.getProductImages().get(1);
         mockMvc.perform(
