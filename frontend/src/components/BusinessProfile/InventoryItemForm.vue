@@ -58,16 +58,16 @@
                 <v-col cols="6">
                   <v-text-field
                     class="required"
-                    v-model="quantity"
+                    v-model.trim="quantity"
                     label="Quantity"
-                    :rules="mandatoryRules().concat(quantityRules())"
+                    :rules="mandatoryRules().concat(quantityRules()).concat(checkQuantityValid())"
                     outlined
                   />
                 </v-col>
                 <!-- INPUT: Price per item. Only allows number or '.'but come with 2 digit -->
                 <v-col cols="6">
                   <v-text-field
-                    v-model="pricePerItem"
+                    v-model.trim="pricePerItem"
                     label="Price Per Item"
                     :prefix="currency.symbol"
                     :suffix="currency.code"
@@ -79,7 +79,7 @@
                 <!-- INPUT: Total Price. Only allows number or '.'but come with 2 digit -->
                 <v-col cols="6">
                   <v-text-field
-                    v-model="totalPrice"
+                    v-model.trim="totalPrice"
                     label="Total Price"
                     :prefix="currency.symbol"
                     :suffix="currency.code"
@@ -93,7 +93,7 @@
                     v-model="manufactured"
                     label="Manufactured"
                     type="date"
-                    @input=checkManufacturedDateValid()
+                    @input=checkAllDatesValid()
                     outlined/>
                 </v-col>
                 <!-- INPUT: Sell By. Only take in value in dd/mm/yyyy format.-->
@@ -102,7 +102,7 @@
                     v-model="sellBy"
                     label="Sell By"
                     type="date"
-                    @input=checkSellByDateValid()
+                    @input=checkAllDatesValid()
                     outlined/>
                 </v-col>
                 <!-- INPUT: Best Before. Only take in value in dd/mm/yyyy format.-->
@@ -111,7 +111,7 @@
                     v-model="bestBefore"
                     label="Best Before"
                     type="date"
-                    @input=checkBestBeforeDateValid()
+                    @input=checkAllDatesValid()
                     outlined/>
                 </v-col>
                 <!-- INPUT: Expires. Only take in value in dd/mm/yyyy format.-->
@@ -121,7 +121,7 @@
                     v-model="expires"
                     label="Expires"
                     type="date"
-                    @input=checkExpiresDateVaild()
+                    @input=checkAllDatesValid()
                     outlined/>
                 </v-col>
               </v-row>
@@ -158,7 +158,7 @@
 </template>
 
 <script>
-import { createInventoryItem, getProducts } from '@/api/internal';
+import { createInventoryItem, getProducts, modifyInventoryItem } from '@/api/internal';
 import { currencyFromCountry } from "@/api/currency";
 import {hugePriceRules, mandatoryRules, quantityRules, smallPriceRules} from "@/utils";
 
@@ -237,8 +237,9 @@ export default {
     },
     /**
      * Called when the form is submitted.
-     * Get the attributes from each field and call the function to either create or modify the inventory item,
+     * Get the attributes from each field and call the api function to either create or modify the inventory item,
      * depending on what pupose the form is being used for.
+     * Displays an error message if the api response is an error.
      */
     async submit() {
       this.errorMessage = undefined;
@@ -259,37 +260,32 @@ export default {
         bestBefore: this.bestBefore ? this.bestBefore : undefined,
         expires: this.expires
       };
+      let result;
       if (this.isCreate) {
-        this.createInventory(inventoryItem);
+        result = await createInventoryItem(this.businessId, inventoryItem);
       } else {
-        this.modifyInventory();
+        result = await modifyInventoryItem(this.businessId, this.previousItem.id, inventoryItem);
       }
-    },
-    /**
-     * Requests backend to create an inventory item
-     * Empty attributes are set to undefined
-     */
-    async createInventory(inventoryItem) {
-      const result = await createInventoryItem(this.businessId, inventoryItem);
       if (typeof result === 'string') {
         this.errorMessage = result;
       } else {
         this.closeDialog();
       }
     },
-    modifyInventory() {
-      this.errorMessage = "Not yet implemented";
-    },
-
-    async checkAllDatesValid() {
-      //checks the booleans for all the dates are valid
+    checkAllDatesValid() {
+      //checks all the dates are consistent with each other
+      this.errorMessage = undefined;
+      this.checkManufacturedDateValid();
+      this.checkSellByDateValid();
+      this.checkBestBeforeDateValid();
+      this.checkExpiresDateVaild();
       if (this.manufacturedValid && this.sellByValid && this.bestBeforeValid && this.expiresValid) {
         this.datesValid = true;
       } else {
         this.datesValid = false;
       }
     },
-    async checkManufacturedDateValid() {
+    checkManufacturedDateValid() {
       //checks manufactured cannot be after today and is before sell by
       let sellByDate = new Date(this.manufactured);
       let manufacturedDate = new Date(this.manufactured);
@@ -301,13 +297,12 @@ export default {
       } else if (manufacturedDate > sellByDate) {
         this.errorMessage = "The manufactured date cannot be after the sell by date!";
       } else {
-        this.errorMessage = undefined;
         this.manufacturedValid = true;
       }
-      await this.checkAllDatesValid();
     },
-    async checkSellByDateValid() {
+    checkSellByDateValid() {
       //checks sell by date cannot be before today and is after manufactured and before best before
+      let expiresDate = new Date(this.expires);
       let bestBeforeDate = new Date(this.bestBefore);
       let sellByDate = new Date(this.sellBy);
       let manufacturedDate = new Date(this.manufactured);
@@ -320,13 +315,13 @@ export default {
         this.errorMessage = "The sell by date cannot be before the manufactured date!";
       } else if (sellByDate > bestBeforeDate) {
         this.errorMessage = "The sell by date cannot be after the best before date!";
+      } else if (sellByDate > expiresDate) {
+        this.errorMessage = "The sell by date cannot be after the expiry date!";
       } else {
-        this.errorMessage = undefined;
         this.sellByValid = true;
       }
-      await this.checkAllDatesValid();
     },
-    async checkBestBeforeDateValid() {
+    checkBestBeforeDateValid() {
       //checks best before date cannot be before today and is after sell by date
       let expiresDate = new Date(this.expires);
       let bestBeforeDate = new Date(this.bestBefore);
@@ -341,15 +336,14 @@ export default {
       } else if (bestBeforeDate > expiresDate) {
         this.errorMessage = "The best before date cannot be after the expires date!";
       } else {
-        this.errorMessage = undefined;
         this.bestBeforeValid = true;
       }
-      await this.checkAllDatesValid();
     },
-    async checkExpiresDateVaild() {
+    checkExpiresDateVaild() {
       //checks expires date cannot be before today and is after best before date
       let expiresDate = new Date(this.expires);
       let bestBeforeDate = new Date(this.bestBefore);
+      let sellByDate = new Date(this.sellBy);
       this.expiresValid = false;
       if (!this.expires) {
         this.errorMessage = "An expiry date must be entered";
@@ -359,17 +353,28 @@ export default {
         this.errorMessage = "The expires date is before today!";
       } else if (expiresDate < bestBeforeDate) {
         this.errorMessage = "The expires date cannot be before the best before date!";
+      } else if (sellByDate > expiresDate) {
+        this.errorMessage = "The expires date cannot be before the sell by date!";
       } else {
-        this.errorMessage = undefined;
         this.expiresValid = true;
       }
-      await this.checkAllDatesValid();
+    },
+    /**
+     * Checks that the quantity is greater than or equal to the amount that has already been used in sale listings if the
+     * form is being used to modify an inventory item.
+     */
+    checkQuantityValid() {
+      if (this.isCreate) {
+        return true;
+      }
+      return this.quantity >= (this.previousItem.quantity - this.previousItem.remainingQuantity) ||
+      `Must be at least ${this.previousItem.quantity - this.previousItem.remainingQuantity}`;
     },
     /**
      * Call the currency API to get the currency symbol and code from the country of sale of the product.
      */
     async fetchCurrency() {
-      if (this.productCode) {
+      if (this.productCode && this.productList.length > 0) {
         const product = this.productList.filter(p => p.id === this.productCode)[0];
         this.currency = await currencyFromCountry(product.countryOfSale);
       } else {

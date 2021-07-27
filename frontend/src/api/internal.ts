@@ -597,21 +597,23 @@ export async function getBusiness(businessId: number): Promise<MaybeError<Busine
 }
 
 /**
- * Sends a business search query to the backend.
+ * Sends a business search query to the backend. Can specify query, business type or both.
  *
  * @param query Query string to search for
+ * @param businessType Business type to filter search results by
  * @param pageIndex Index of page to start the results from (1 = first page)
  * @param resultsPerPage Number of results to return per page
  * @param orderBy Specifies the method used to sort the results
  * @param reverse Specifies whether to reverse the search results (default order is descending for relevance and ascending for all other orders)
  * @returns List of business infos for the current page or an error message
  */
-export async function searchBusinesses(query: string, pageIndex: number, resultsPerPage: number, orderBy: BusinessOrderBy, reverse: boolean): Promise<MaybeError<SearchResults<Business>>> {
+export async function searchBusinesses(query: string | undefined, businessType: BusinessType | undefined, pageIndex: number, resultsPerPage: number, orderBy: BusinessOrderBy, reverse: boolean): Promise<MaybeError<SearchResults<Business>>> {
   let response;
   try {
     response = await instance.get('/businesses/search', {
       params: {
         searchQuery: query,
+        businessType: businessType,
         page: pageIndex,
         resultsPerPage,
         orderBy,
@@ -806,6 +808,30 @@ export async function getInventoryCount(businessId: number): Promise<MaybeError<
 }
 
 /**
+ * Updates an existing inventory item's properties
+ *
+ * @param businessId The business for which the inventory item belongs
+ * @param inventoryItemId The id number of the inventory item
+ * @param inventoryItem The inventory item's new properties
+ * @return undefined if operation is successful, otherwise a string error
+ */
+export async function modifyInventoryItem(businessId: number, inventoryItemId: number, inventoryItem: CreateInventoryItem): Promise<MaybeError<undefined>> {
+  try {
+    await instance.put(`/businesses/${businessId}/inventory/${inventoryItemId}`, inventoryItem);
+  } catch (error) {
+    let status: number | undefined = error.response?.status;
+    if (status === undefined) return 'Failed to reach backend';
+    if (status === 401) return 'Missing/Invalid access token';
+    if (status === 403) return 'Operation not permitted';
+    if (status === 406) return 'Inventory item/Business not found';
+    if (status === 400) return 'Invalid parameters: ' + error.response?.data.message;
+
+    return 'Request failed: ' + error.response?.status;
+  }
+  return undefined;
+}
+
+/**
  * Add an inventory item to the business inventory.
  *
  * @param businessId Business id to identify with the database to add the inventory to the correct business
@@ -975,4 +1001,13 @@ export async function searchKeywords(query: string) : Promise<MaybeError<Keyword
     return "Response is not Keyword array";
   }
   return response.data;
+}
+
+/**
+ * Creates a new keyword to associate with marketplace cards
+ * @param keyword string to set as new marketplace card keyword object
+ */
+export async function createNewKeyword(keyword: string) : Promise<MaybeError<undefined>> {
+  // Task 219
+  return undefined;
 }

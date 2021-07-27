@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import cucumber.context.CardContext;
+import cucumber.context.EventContext;
 import cucumber.context.RequestContext;
 import cucumber.context.UserContext;
 import io.cucumber.datatable.DataTable;
@@ -30,6 +31,8 @@ import org.seng302.leftovers.service.CardService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.yaml.snakeyaml.error.Mark;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -45,11 +48,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.*;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -198,47 +197,11 @@ public class CardStepDefinition {
                 .param("userId", userContext.getLast().getUserID().toString()));
     }
 
-    private List<JSONObject> parseEvents(MockHttpServletResponse response, String channel) throws UnsupportedEncodingException, ParseException {
-        String content = response.getContentAsString();
-        JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
-
-        List<JSONObject> events = new ArrayList<>();
-
-        // Iterable of lines that are not comments
-        Iterator<String> lineIterator = content.lines().filter(line -> !line.startsWith(":")).iterator();
-
-        while (lineIterator.hasNext()) {
-            // Every iteration parses a single event
-            // Expects the format:
-            //  field:$(channel_name)
-            //  data:$(data)
-            //  --empty-line--
-
-            String fieldLine = lineIterator.next();
-            Assertions.assertTrue(fieldLine.startsWith("event:"));
-            String foundChannel = fieldLine.substring("event:".length());
-
-            Assertions.assertTrue(lineIterator.hasNext());
-            String dataLine = lineIterator.next();
-            Assertions.assertTrue(dataLine.startsWith("data:"));
-            String data = dataLine.substring("data:".length());
-
-            Assertions.assertTrue(lineIterator.hasNext());
-            Assertions.assertEquals("", lineIterator.next());
-
-            if (foundChannel.equals(channel)) {
-                events.add(parser.parse(data, JSONObject.class));
-            }
-        }
-
-        return events;
-    }
-
     @Then("I have received a message telling me the card is about to expire")
     public void i_have_received_a_message_telling_me_the_card_is_about_to_expire()
             throws JsonProcessingException, UnsupportedEncodingException, ParseException {
 
-        List<JSONObject> events = parseEvents(requestContext.getLastResult().getResponse(), "newsfeed");
+        List<JSONObject> events = EventContext.parseEvents(requestContext.getLastResult().getResponse(), "newsfeed");
 
         Assertions.assertEquals(1, events.size());
         JSONObject event = events.get(0);
@@ -257,7 +220,7 @@ public class CardStepDefinition {
 
     @Then("I have received a message telling me the card has expired")
     public void i_have_received_a_message_telling_me_the_card_has_expired() throws UnsupportedEncodingException, ParseException {
-        List<JSONObject> events = parseEvents(requestContext.getLastResult().getResponse(), "newsfeed");
+        List<JSONObject> events = EventContext.parseEvents(requestContext.getLastResult().getResponse(), "newsfeed");
 
         Assertions.assertEquals(1, events.size());
         JSONObject event = events.get(0);
@@ -297,6 +260,26 @@ public class CardStepDefinition {
                     .withDescription(row.get("description"))
                     .withSection(row.get("section"))
                     .build();
+            cardContext.save(card);
+        }
+    }
+
+    @Given("The user has the following cards:")
+    public void the_user_has_the_following_cards(List<Map<String, String>> rows) {
+        User user = userContext.getLast();
+        for (Map<String, String> row : rows) {
+            MarketplaceCard card = new MarketplaceCard.Builder()
+                    .withCreator(user)
+                    .withTitle(row.get("title"))
+                    .withSection(row.get("section"))
+                    .build();
+
+            // Add the provided keywords
+            Arrays.stream(row.get("keywords").split(","))
+                    .map(String::trim)
+                    .map(name -> keywordRepository.findByName(name).orElseThrow())
+                    .forEach(card::addKeyword);
+
             cardContext.save(card);
         }
     }
@@ -346,5 +329,44 @@ public class CardStepDefinition {
     public void the_card_does_not_have_the_keyword(String name) {
         MarketplaceCard card = marketplaceCardRepository.getCard(cardContext.getLast().getID());
         assertFalse(card.getKeywords().stream().map(Keyword::getName).anyMatch(str -> str.equals(name)));
+    }
+
+    private void searchCardsByKeywords(String sectionName, List<String> keywords, boolean union) {
+        MockHttpServletRequestBuilder requestBuilder = get("/cards/search")
+                .param("section", sectionName)
+                .param("union", String.valueOf(union));
+        keywords.stream()
+                .map(name -> keywordRepository.findByName(name).orElseThrow())
+                .map(Keyword::getID)
+                .map(String::valueOf)
+                .forEach(id -> requestBuilder.param("keywordIds", id));
+
+        requestContext.performRequest(requestBuilder);
+    }
+
+    @When("I try to search for cards in the section {string} with all of the keywords:")
+    public void i_try_to_search_for_cards_in_the_section_with_all_of_the_keywords(String sectionName, List<String> keywords) {
+        searchCardsByKeywords(sectionName, keywords, false);
+    }
+
+    @When("I try to search for cards in the section {string} with any of the keywords:")
+    public void i_try_to_search_for_cards_in_the_section_with_any_of_the_keywords(String sectionName, List<String> keywords) {
+        searchCardsByKeywords(sectionName, keywords, true);
+    }
+
+    @Then("I expect the cards to be returned:")
+    public void i_expect_the_cards_to_be_returned(List<String> expectedTitles) throws UnsupportedEncodingException, ParseException {
+        JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
+        JSONObject response = parser.parse(requestContext.getLastResult().getResponse().getContentAsString(), JSONObject.class);
+
+        Set<String> actualTitles = new HashSet<>();
+        @SuppressWarnings("unchecked")
+        List<JSONObject> cards = (List<JSONObject>)response.get("results");
+        for (JSONObject card : cards) {
+            actualTitles.add(card.getAsString("title"));
+        }
+
+        assertEquals(expectedTitles.size(), response.get("count"));
+        assertEquals(new HashSet<>(expectedTitles), actualTitles);
     }
 }
