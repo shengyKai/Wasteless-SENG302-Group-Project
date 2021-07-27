@@ -181,8 +181,9 @@ public class DemoController {
         int userCount     = Optional.ofNullable(options.getAsNumber("userCount")).map(Number::intValue).orElse(0);
         int businessCount = Optional.ofNullable(options.getAsNumber("businessCount")).map(Number::intValue).orElse(0);
         int productCount  = Optional.ofNullable(options.getAsNumber("productCount")).map(Number::intValue).orElse(0);
-        int invItemCount  = Optional.ofNullable(options.getAsNumber("invItemCount")).map(Number::intValue).orElse(0);
+        int invItemCount  = Optional.ofNullable(options.getAsNumber("inventoryItemCount")).map(Number::intValue).orElse(0);
         int cardCount     = Optional.ofNullable(options.getAsNumber("cardCount")).map(Number::intValue).orElse(0);
+        int saleItemCount = Optional.ofNullable(options.getAsNumber("saleItemCount")).map(Number::intValue).orElse(0);
 
         List<Long> allUsers = new ArrayList<>();
         if (options.containsKey("userInitial"))
@@ -196,6 +197,10 @@ public class DemoController {
         if (options.containsKey("productInitial"))
             Arrays.stream(JsonTools.parseLongArrayFromJsonField(options, "productInitial")).boxed().forEach(allProducts::add);
 
+        List<Long> allInventoryItems = new ArrayList<>();
+        if (options.containsKey("inventoryItemInitial"))
+            Arrays.stream(JsonTools.parseLongArrayFromJsonField(options, "saleItemInitial")).boxed().forEach(allInventoryItems::add);
+
         boolean generateImages = Optional.ofNullable((Boolean)options.get("generateImages")).orElse(true);
 
         JSONObject json = new JSONObject();
@@ -205,6 +210,7 @@ public class DemoController {
             var businessGenerator = new BusinessGenerator(connection);
             var productGenerator = new ProductGenerator(connection);
             var inventoryItemGenerator = new InventoryItemGenerator(connection);
+            var saleItemGenerator = new SaleItemGenerator(connection);
             var cardGenerator = new MarketplaceCardGenerator(connection);
 
             List<Long> userIds = userGenerator.generateUsers(userCount);
@@ -217,13 +223,18 @@ public class DemoController {
             allProducts.addAll(productIds);
 
             List<Long> inventoryIds = inventoryItemGenerator.generateInventoryItems(allProducts, invItemCount);
+            allInventoryItems.addAll(inventoryIds);
+
+            List<Long> saleItemIds = saleItemGenerator.generateSaleItems(allInventoryItems, saleItemCount);
             List<Long> cardIds = cardGenerator.generateCards(allUsers, cardCount);
 
             json.appendField("generatedUsers", userIds);
             json.appendField("generatedBusinesses", businessIds);
             json.appendField("generatedProducts", productIds);
-            json.appendField("generatedInvItems", inventoryIds);
+            json.appendField("generatedInventoryItems", inventoryIds);
+            json.appendField("generatedSaleItems", saleItemIds);
             json.appendField("generatedCards", cardIds);
+
         });
         return json;
     }

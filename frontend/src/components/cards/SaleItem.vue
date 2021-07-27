@@ -71,7 +71,7 @@
 import ProductImageCarousel from "@/components/utils/ProductImageCarousel";
 import FullProductDescription from "@/components/utils/FullProductDescription";
 import { currencyFromCountry } from "@/api/currency";
-import { formatDate } from '@/utils';
+import { formatDate, formatPrice } from '@/utils';
 
 export default {
   name: "SaleItem",
@@ -136,7 +136,7 @@ export default {
       if (!this.saleItem.price) {
         return "Not set";
       }
-      return this.currency.symbol + this.saleItem.price + " " + this.currency.code;
+      return this.currency.symbol + formatPrice(this.saleItem.price) + " " + this.currency.code;
     },
     productDescription() {
       return this.product.description || "Not set";
