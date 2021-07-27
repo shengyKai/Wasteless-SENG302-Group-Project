@@ -20,42 +20,45 @@ const instance: Mocked<Pick<AxiosInstance, 'get', 'post'>> = axios.instance;
 
 describe("Test GET /businesses/:businessId/listings endpoint", () => {
   it('When response is a sale array with all fields, the response will be an sale array', async ()=>{
-    const responseData = [
-      {
-        "id": 57,
-        "inventoryItem": {
-          "id": 101,
-          "product": {
-            "id": "WATT-420-BEANS",
-            "name": "Watties Baked Beans - 420g can",
-            "description": "Baked Beans as they should be.",
-            "manufacturer": "Heinz Wattie's Limited",
-            "recommendedRetailPrice": 2.2,
-            "created": "2021-05-19T08:22:27.875Z",
-            "images": [
-              {
-                "id": 1234,
-                "filename": "/media/images/23987192387509-123908794328.png",
-                "thumbnailFilename": "/media/images/23987192387509-123908794328_thumbnail.png"
-              }
-            ]
+    const responseData = {
+      results: [
+        {
+          "id": 57,
+          "inventoryItem": {
+            "id": 101,
+            "product": {
+              "id": "WATT-420-BEANS",
+              "name": "Watties Baked Beans - 420g can",
+              "description": "Baked Beans as they should be.",
+              "manufacturer": "Heinz Wattie's Limited",
+              "recommendedRetailPrice": 2.2,
+              "created": "2021-05-19T08:22:27.875Z",
+              "images": [
+                {
+                  "id": 1234,
+                  "filename": "/media/images/23987192387509-123908794328.png",
+                  "thumbnailFilename": "/media/images/23987192387509-123908794328_thumbnail.png"
+                }
+              ]
+            },
+            "quantity": 4,
+            "remainingQuantity": 1,
+            "pricePerItem": 6.5,
+            "totalPrice": 21.99,
+            "manufactured": "2021-05-19",
+            "sellBy": "2021-05-19",
+            "bestBefore": "2021-05-19",
+            "expires": "2021-05-19"
           },
-          "quantity": 4,
-          "remainingQuantity": 1,
-          "pricePerItem": 6.5,
-          "totalPrice": 21.99,
-          "manufactured": "2021-05-19",
-          "sellBy": "2021-05-19",
-          "bestBefore": "2021-05-19",
-          "expires": "2021-05-19"
-        },
-        "quantity": 3,
-        "price": 17.99,
-        "moreInfo": "Seller may be willing to consider near offers",
-        "created": "2021-07-14T11:44:00Z",
-        "closes": "2021-07-21T23:59:00Z"
-      }
-    ];
+          "quantity": 3,
+          "price": 17.99,
+          "moreInfo": "Seller may be willing to consider near offers",
+          "created": "2021-07-14T11:44:00Z",
+          "closes": "2021-07-21T23:59:00Z"
+        }
+      ],
+      count: 1
+    };
     instance.get.mockResolvedValueOnce({
       data: responseData
     });
@@ -64,39 +67,43 @@ describe("Test GET /businesses/:businessId/listings endpoint", () => {
   });
 
   it('When response is a sale array with required fields, the result will be a sale array', async () =>{
-    const responseData = [
-      {
-        "id": 57,
-        "inventoryItem": {
-          "id": 101,
-          "product": {
-            "id": "WATT-420-BEANS",
-            "name": "Watties Baked Beans - 420g can",
-            "description": "Baked Beans as they should be.",
-            "manufacturer": "Heinz Wattie's Limited",
-            "recommendedRetailPrice": 2.2,
-            "created": "2021-05-19T08:22:27.875Z",
-            "images": [
-              {
-                "id": 1234,
-                "filename": "/media/images/23987192387509-123908794328.png",
-                "thumbnailFilename": "/media/images/23987192387509-123908794328_thumbnail.png"
-              }
-            ]
+    const responseData = {
+      results: [
+        {
+          "id": 57,
+          "inventoryItem": {
+            "id": 101,
+            "product": {
+              "id": "WATT-420-BEANS",
+              "name": "Watties Baked Beans - 420g can",
+              "description": "Baked Beans as they should be.",
+              "manufacturer": "Heinz Wattie's Limited",
+              "recommendedRetailPrice": 2.2,
+              "created": "2021-05-19T08:22:27.875Z",
+              "images": [
+                {
+                  "id": 1234,
+                  "filename": "/media/images/23987192387509-123908794328.png",
+                  "thumbnailFilename": "/media/images/23987192387509-123908794328_thumbnail.png"
+                }
+              ]
+            },
+            "quantity": 4,
+            "remainingQuantity": 1,
+            "pricePerItem": 6.5,
+            "totalPrice": 21.99,
+            "manufactured": "2021-05-19",
+            "sellBy": "2021-05-19",
+            "bestBefore": "2021-05-19",
+            "expires": "2021-05-19"
           },
-          "quantity": 4,
-          "remainingQuantity": 1,
-          "pricePerItem": 6.5,
-          "totalPrice": 21.99,
-          "manufactured": "2021-05-19",
-          "sellBy": "2021-05-19",
-          "bestBefore": "2021-05-19",
-          "expires": "2021-05-19"
-        },
-        "quantity": 3,
-        "price": 17.99,
-        "created": "2021-07-14T11:44:00Z",
-      }];
+          "quantity": 3,
+          "price": 17.99,
+          "created": "2021-07-14T11:44:00Z",
+        }
+      ],
+      count: 1,
+    };
     instance.get.mockResolvedValueOnce({
       data: responseData
     });
@@ -105,37 +112,40 @@ describe("Test GET /businesses/:businessId/listings endpoint", () => {
   });
 
   it('When response is a inventory array with a missing required field, the result will be an error message stating invalid format', async () => {
-    const responseData = [
-      {
-        "id": 57,
-        "inventoryItem": {
-          "id": 101,
-          "product": {
-            "id": "WATT-420-BEANS",
-            "name": "Watties Baked Beans - 420g can",
-            "description": "Baked Beans as they should be.",
-            "manufacturer": "Heinz Wattie's Limited",
-            "recommendedRetailPrice": 2.2,
-            "created": "2021-05-19T08:22:27.875Z",
-            "images": [
-              {
-                "id": 1234,
-                "filename": "/media/images/23987192387509-123908794328.png",
-                "thumbnailFilename": "/media/images/23987192387509-123908794328_thumbnail.png"
-              }
-            ]
+    const responseData = {
+      results: [
+        {
+          "id": 57,
+          "inventoryItem": {
+            "id": 101,
+            "product": {
+              "id": "WATT-420-BEANS",
+              "name": "Watties Baked Beans - 420g can",
+              "description": "Baked Beans as they should be.",
+              "manufacturer": "Heinz Wattie's Limited",
+              "recommendedRetailPrice": 2.2,
+              "created": "2021-05-19T08:22:27.875Z",
+              "images": [
+                {
+                  "id": 1234,
+                  "filename": "/media/images/23987192387509-123908794328.png",
+                  "thumbnailFilename": "/media/images/23987192387509-123908794328_thumbnail.png"
+                }
+              ]
+            },
+            "quantity": 4,
+            "pricePerItem": 6.5,
+            "totalPrice": 21.99,
+            "manufactured": "2021-05-19",
+            "sellBy": "2021-05-19",
+            "bestBefore": "2021-05-19",
+            "expires": "2021-05-19"
           },
-          "quantity": 4,
-          "pricePerItem": 6.5,
-          "totalPrice": 21.99,
-          "manufactured": "2021-05-19",
-          "sellBy": "2021-05-19",
-          "bestBefore": "2021-05-19",
-          "expires": "2021-05-19"
-        },
-        "quantity": 3,
-        "created": "2021-07-14T11:44:00Z",
-      }];
+          "quantity": 3,
+          "created": "2021-07-14T11:44:00Z",
+        }],
+      count: 1,
+    };
     instance.get.mockResolvedValueOnce({
       data: responseData
     });
