@@ -50,7 +50,12 @@
       <!--users would produce the results for each page, and then it will show each result with
       SearchResultItem-->
       <template v-for="inventoryItem in inventoryItems">
-        <InventoryItem :businessId="businessId" :key="inventoryItem.id" :inventoryItem="inventoryItem" class="dirty-centre mb-2"/>
+        <InventoryItem
+          :businessId="businessId"
+          :key="inventoryItem.id"
+          :inventoryItem="inventoryItem"
+          @content-changed="updateResults"
+          class="dirty-centre mb-2"/>
       </template>
     </v-list>
     <v-pagination

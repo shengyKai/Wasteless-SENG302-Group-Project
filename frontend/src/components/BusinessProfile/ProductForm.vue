@@ -60,7 +60,7 @@
                 </v-col>
                 <v-col cols="6">
                   <v-text-field
-                    v-model="recommendedRetailPrice"
+                    v-model.trim="recommendedRetailPrice"
                     label="Recommended Retail Price"
                     :prefix="currency.symbol"
                     :suffix="currency.code"

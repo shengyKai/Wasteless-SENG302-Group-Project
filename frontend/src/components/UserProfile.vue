@@ -179,6 +179,11 @@
         </v-btn>
       </div>
     </div>
+    <div>
+      <v-btn outlined color="primary" @click="viewMarketplaceCards">
+        Marketplace cards
+      </v-btn>
+    </div>
 
     <v-container fluid>
       <v-row>
@@ -357,6 +362,12 @@ export default {
       }
       //let the loading for the revoke stop
       this.loadingRevoke = false;
+    },
+    /**
+     * Redirect to users marketplace card page
+     */
+    viewMarketplaceCards() {
+      this.$router.push(`/usercards/${this.user.id}`);
     }
   },
   watch: {

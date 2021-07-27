@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 public class SearchHelper {
 
     private static final int DEFAULT_RESULTS_PER_PAGE = 15;
-    private static final List<String> ORDER_BY_OPTIONS = List.of("userID", "firstName", "middleName", "lastName", "nickname", "email");
+    private static final List<String> USER_ORDER_BY_OPTIONS = List.of("userID", "firstName", "middleName", "lastName", "nickname", "email");
     private static final Logger logger = LogManager.getLogger(SearchHelper.class);
 
     private enum PredicateType {
@@ -128,7 +128,7 @@ public class SearchHelper {
      * @return A Sort which can then be applied to queries of the UserRepository.
      */
     public static Sort getSort(String orderBy, Boolean reverse) {
-        if (orderBy == null || !ORDER_BY_OPTIONS.contains(orderBy)) {
+        if (orderBy == null || !USER_ORDER_BY_OPTIONS.contains(orderBy)) {
             orderBy = "userID";
         }
 
@@ -175,6 +175,33 @@ public class SearchHelper {
     }
 
     /**
+     * This method returns a specification which will match businesses according to a given search query and business
+     * type. If one of these two parameters is null then it will be ignored and the provided field will be used to find
+     * matching businesses. If bother parameters are provided then a specification for only businesses that match both
+     * will be returned. If neither is provided then an exception will be thrown.
+     * @param searchQuery A search query provided by the user, used to find matching business names.
+     * @param businessType A business type provided by the user, used to find businesses with matching type.
+     * @return A specification for businesses matching the provided search query and type.
+     */
+    public static Specification<Business> constructSpecificationFromBusinessSearch(String searchQuery, String businessType) {
+        if (searchQuery == null && businessType == null) {
+            SearchFormatException exception =
+                    new SearchFormatException("Provide either a search query or business type to find matching businesses");
+            logger.error(exception.getMessage());
+            throw exception;
+        }
+        if (searchQuery == null) {
+            return constructBusinessSpecificationFromType(businessType);
+        }
+        if (businessType == null) {
+            return constructBusinessSpecificationFromSearchQuery(searchQuery);
+        }
+        return constructBusinessSpecificationFromSearchQuery(searchQuery)
+                .and(constructBusinessSpecificationFromType(businessType));
+
+    }
+
+    /**
      * This method returns a specification for the Business entity which will match Business objects with a name which is a partial match for the given searchTerm.
      * For example, if the search term was 'Tim', the
      * specification would match Businesses with the name 'Tim', 'Tim's BBQ' or 'Tim's garage',
@@ -182,7 +209,7 @@ public class SearchHelper {
      * @param searchQuery A term to find exact matches for.
      * @return A specification which will match Businesses that partially match the given string in the business name.
      */
-    public static Specification<Business> constructBusinessSpecificationFromSearchQuery(String searchQuery) {
+    private static Specification<Business> constructBusinessSpecificationFromSearchQuery(String searchQuery) {
         List<String> searchTokens = splitSearchStringIntoTerms(searchQuery);
         List<String> fieldNames = Collections.singletonList("name");
 
@@ -193,7 +220,21 @@ public class SearchHelper {
     }
 
     /**
-     * Returns a specification for Keywords which is used to filter keywords using a search term.
+     * This method returns a specification which will only match businesses with the given string for their business type.
+     * An exception will be thrown if an invalid business type is provided.
+     * @param businessType The type to match.
+     * @return Specification for finding businesses with the given type.
+     */
+    private static Specification<Business> constructBusinessSpecificationFromType(String businessType) {
+        if (!Business.getBusinessTypes().contains(businessType)) {
+            SearchFormatException exception = new SearchFormatException(String.format("\"%s\" is an invalid business type", businessType));
+            logger.error(exception.getMessage());
+            throw exception;
+        }
+        return buildExactMatchSpec(businessType, Collections.singletonList("businessType"));
+    }
+     
+    /* Returns a specification for Keywords which is used to filter keywords using a search term.
      * @param searchQuery The term to search for
      * @return Specification of type Keyword
      */
