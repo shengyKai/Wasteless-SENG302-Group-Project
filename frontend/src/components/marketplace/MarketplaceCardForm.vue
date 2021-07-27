@@ -231,7 +231,7 @@ export default {
         if (typeof result === 'string') {
           this.errorMessage = result;
         } else {
-          this.searchKeywords();
+          await this.searchKeywords();
           this.selectedKeywords.push(result);
         }
       }
