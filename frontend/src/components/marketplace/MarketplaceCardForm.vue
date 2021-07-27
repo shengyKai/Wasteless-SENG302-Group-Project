@@ -51,7 +51,7 @@
                 no-data-text="No keywords found"
                 value = "keywords"
                 v-model="selectedKeywords"
-                :items="filteredKeywordList"
+                :items="allKeywords"
                 :hint="selectedKeywordsNames"
                 label="Select keywords"
                 item-text="name"
@@ -66,6 +66,7 @@
                       <v-text-field
                         label="Search for a keyword" v-model="keywordFilter"
                         :autofocus="true"
+                        @input="searchKeywords"
                         hint="Keyword name"
                       />
                     </v-list-item-content>
@@ -96,8 +97,7 @@
 </template>
 
 <script>
-import {createMarketplaceCard, createNewKeyword, getKeywords} from '@/api/internal';
-
+import {createMarketplaceCard, searchKeywords, createNewKeyword} from '../../api/internal';
 export default {
   name: "MarketplaceCard",
   props: {
@@ -130,14 +130,7 @@ export default {
     this.titleField.setAttribute("style", "height:" + (this.titleField.scrollHeight) + "px;overflow-y:hidden;");
     this.titleField.addEventListener("input", OnInput);
 
-    getKeywords()
-      .then((response) => {
-        if (typeof response === 'string') {
-          this.allKeywords = [];
-        } else {
-          this.allKeywords = response;
-        }})
-      .catch(() => (this.allKeywords = []));
+    this.searchKeywords();
   },
   computed: {
     selectedKeywordsNames() {
@@ -150,9 +143,6 @@ export default {
         }
       }
       return names.replace(/, +$/, "");
-    },
-    filteredKeywordList() {
-      return this.allKeywords.filter(x => this.filterKeywords(x));
     },
     descriptionField() {
       return this.$refs.descriptionField;
@@ -241,9 +231,9 @@ export default {
         }
       }
     },
-    filterKeywords(keyword) {
-      const filterText = this.keywordFilter ?? '';
-      return keyword.name.toLowerCase().includes(filterText.toLowerCase());
+    resetSearch() {
+      this.keywordFilter = "";
+      this.searchKeywords();
     },
     closeDialog() {
       this.$emit('closeDialog');
@@ -270,6 +260,16 @@ export default {
         this.$router.go();
       }
     },
+    async searchKeywords() {
+      const filterText = this.keywordFilter ?? '';
+      this.errorMessage = undefined;
+      const response = await searchKeywords(filterText);
+      if (typeof response === 'string') {
+        this.errorMessage = response;
+      } else {
+        this.allKeywords = response;
+      }
+    }
   }
 };
 </script>
