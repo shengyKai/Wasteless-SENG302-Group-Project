@@ -43,10 +43,6 @@ export type StoreData = {
    */
   createSaleItemDialog: SaleItemInfo | undefined,
   /**
-   * Whether or not the dialog for creating a marketplace card is being shown.
-   */
-  createMarketplaceCardDialog: User | undefined,
-  /**
    * Map from event ids to events.
    * This is a sparse array
    */
@@ -62,7 +58,6 @@ function createOptions(): StoreOptions<StoreData> {
       createBusinessDialogShown: false,
       createInventoryDialog: undefined,
       createSaleItemDialog: undefined,
-      createMarketplaceCardDialog: undefined,
       eventMap: [],
     },
     mutations: {
@@ -148,23 +143,6 @@ function createOptions(): StoreOptions<StoreData> {
        */
       hideCreateSaleItem(state) {
         state.createSaleItemDialog = undefined;
-      },
-
-      /**
-       * Creates a modal create card dialog for addin a card to the marketplace
-       *
-       * @param state Current store state
-       */
-      showCreateMarketplaceCard(state, user : User) {
-        state.createMarketplaceCardDialog = user;
-      },
-      /**
-       * Hides the create marketplace card dialog
-       *
-       * @param state Current store state
-       */
-      hideCreateMarketplaceCard(state) {
-        state.createMarketplaceCardDialog = undefined;
       },
 
       /**
