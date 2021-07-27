@@ -1,10 +1,11 @@
 <template>
   <div>
     <v-toolbar dark color="primary" class="mb-1">
-      <v-row align="center">
+      <v-row align="center" justify="space-between">
         <v-col
-          class="d-flex mr-12"
-          cols="auto"
+          class="d-flex"
+          cols="4"
+
         >
           <!---Select component for the order in which the cards should be displayed--->
           <v-select
@@ -22,7 +23,7 @@
             prepend-inner-icon="mdi-sort-variant"
             label="Sort by"
           />
-          <!---Reverse the order in which the cards should be displayed--->
+          <!---Reverse the order in which the cpl-16ards should be displayed--->
           <v-btn-toggle class="toggle" v-model="reverse" mandatory>
             <v-btn depressed color="primary" :value="false">
               <v-icon>mdi-arrow-up</v-icon>
@@ -32,9 +33,12 @@
             </v-btn>
           </v-btn-toggle>
         </v-col>
-        <v-col class="mt-7 ml-9 mr-n16" >
+        <v-col
+          class="d-flex pl-16 mr-n16"
+          cols="4">
           <v-select
             flat
+            hide-details
             solo-inverted
             no-data-text="No keywords found"
             value = "keywords"
@@ -44,10 +48,7 @@
             item-text="name"
             item-value="id"
             multiple
-            :hint="selectedKeywords"
             @click="selectedKeywords=undefined"
-            persistent-hint
-            outlined
           >
             <template v-slot:prepend-item>
               <v-list-item>
@@ -63,8 +64,6 @@
               </v-list-item>
             </template>
           </v-select>
-        </v-col>
-        <v-col class="text-right mr-n16" >
           <!-- Toggle button for user to choose partially or fully matched results -->
           <v-btn-toggle class="toggle" v-model="reverse" mandatory>
             <v-btn depressed color="primary" :value="false">
@@ -75,8 +74,8 @@
             </v-btn>
           </v-btn-toggle>
         </v-col>
-        <v-spacer/>
-        <v-col cols="auto " class="text-right" >
+
+        <v-col cols="4" class="text-right" >
           <!---Link to modal for creating new card--->
           <v-btn type="button" color="secondary" @click="showCreateCard" rounded>
             Create card

@@ -690,7 +690,7 @@ describe("InventoryItemForm.vue", () => {
         bestBefore: bestBeforeDate,
         expires: expiresDate
       });
-      wrapper.vm.checkAllDatesValid();;
+      wrapper.vm.checkAllDatesValid();
       await Vue.nextTick();
       expect(findCreateButton().props().disabled).toBeFalsy();
     });
@@ -938,7 +938,7 @@ describe("InventoryItemForm.vue", () => {
         },
         quantity: 26,
       });
-      expect(wrapper.vm.checkQuantityValid()).toEqual("Must be at least 27")
+      expect(wrapper.vm.checkQuantityValid()).toEqual("Must be at least 27");
       expect(findSaveButton().props().disabled).toBeTruthy();
     });
 
