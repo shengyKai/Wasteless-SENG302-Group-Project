@@ -263,6 +263,8 @@ public class Business {
         return ownerAdminSet;
     }
 
+
+
     /**
      * Add the given product to the business's catalogue.
      * This function is only expected to be called from "Product.setBusiness"
@@ -335,6 +337,14 @@ public class Business {
             adminJsons.add(admin.constructPublicJson());
         }
         return adminJsons;
+    }
+
+    /**
+     * Returns a list of all possible business types.
+     * @return All the types allowed for a business.
+     */
+    public static List<String> getBusinessTypes() {
+        return BUSINESS_TYPES;
     }
 
     @Override

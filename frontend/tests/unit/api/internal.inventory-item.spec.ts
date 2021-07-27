@@ -8,7 +8,8 @@ jest.mock('axios', () => ({
   }
   ),
   instance: {
-    get: jest.fn()
+    get: jest.fn(),
+    put: jest.fn(),
   },
 }));
 
@@ -16,7 +17,7 @@ jest.mock('axios', () => ({
 type Mocked<T extends { [k: string]: (...args: any[]) => any }> = { [k in keyof T]: jest.Mock<ReturnType<T[k]>, Parameters<T[k]>> }
 
 // @ts-ignore - We've added an instance attribute in the mock declaration that mimics a AxiosInstance
-const instance: Mocked<Pick<AxiosInstance, 'get'>> = axios.instance;
+const instance: Mocked<Pick<AxiosInstance, 'get', 'put'>> = axios.instance;
 
 describe("Test GET /businesses/:businessId/inventory endpoint", () => {
   it('When response is a inventory array with all fields, the result will be an inventory array', async () => {
@@ -200,4 +201,93 @@ describe("Test GET /businesses/:businessId/inventory/count endpoint", () => {
     const inventories = await api.getInventoryCount(7);
     expect(inventories).toEqual("Request failed: 999");
   });
+});
+
+describe("Test PUT /businesses/:businessId/inventory/:inventoryItemId endpoint", () => {
+
+  const invItem: api.CreateInventoryItem = {
+    productId: "ABC",
+    quantity: 4,
+    expires: "2023-02-11",
+  };
+
+  it('When response has a 200 status code, undefined is returned', async () => {
+    instance.put.mockResolvedValueOnce({
+      response: {
+        status: 200,
+      }
+    });
+    const message = await api.modifyInventoryItem(7, 1, invItem);
+    expect(message).toBe(undefined);
+  });
+
+  it('When response is undefined status, the result will be an error message stating unable to reach backend', async () => {
+    instance.put.mockRejectedValueOnce({
+      response: {
+        status: undefined,
+      }
+    });
+    const message = await api.modifyInventoryItem(7, 1, invItem);
+    expect(message).toEqual("Failed to reach backend");
+  });
+
+  it('When response is 401 status, the result will be an error message stating the access token is invalid/missing', async () => {
+    instance.put.mockRejectedValueOnce({
+      response: {
+        status: 401,
+      }
+    });
+    const message = await api.modifyInventoryItem(7, 1, invItem);
+    expect(message).toEqual("Missing/Invalid access token");
+  });
+
+  it('When response is 403 status, the result will be an error message stating the operation is not permitted', async () => {
+    instance.put.mockRejectedValueOnce({
+      response: {
+        status: 403,
+      }
+    });
+    const message = await api.modifyInventoryItem(7, 1, invItem);
+    expect(message).toEqual("Operation not permitted");
+  });
+
+  it('When response is 406 status, the result will be an error message stating there is no such item or business', async () => {
+    instance.put.mockRejectedValueOnce({
+      response: {
+        status: 406,
+      }
+    });
+    const message = await api.modifyInventoryItem(7, 1, invItem);
+    expect(message).toEqual("Inventory item/Business not found");
+  });
+
+  it('When response is 400 status, the result contain the error message received in the response', async () => {
+    instance.put.mockRejectedValueOnce({
+      response: {
+        status: 400,
+        data: {
+          message: "Quantity too high"
+        }
+      },
+    });
+    const message = await api.modifyInventoryItem(7, 1, invItem);
+    expect(message).toEqual("Invalid parameters: Quantity too high");
+  });
+
+  it('When response is any other error status number, the result will be an error message stating the request failed', async () => {
+    instance.put.mockRejectedValueOnce({
+      response: {
+        status: 999,
+      }
+    });
+    const message = await api.modifyInventoryItem(7, 1, invItem);
+    expect(message).toEqual("Request failed: 999");
+  });
+
+  it('When a response without a status is received, the result returns an error message indicating that the server could not be reached', async () => {
+    instance.put.mockRejectedValueOnce("Server is down");
+    const message = await api.modifyInventoryItem(7, 1, invItem);
+    expect(message).toEqual("Failed to reach backend");
+  });
+
 });

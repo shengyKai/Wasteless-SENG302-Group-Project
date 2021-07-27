@@ -29,10 +29,10 @@ public class InventoryItem {
     private Product product;
 
     @Column(name = "quantity", nullable = false)
-    private int quantity;
+    private Integer quantity;
 
     @Column(name = "remaining_quantity")
-    private int remainingQuantity;
+    private Integer remainingQuantity;
 
     @Column(name = "price_per_item")
     private BigDecimal pricePerItem;
@@ -132,6 +132,8 @@ public class InventoryItem {
         return remainingQuantity;
     }
 
+    public int getVersion() { return version; }
+
 
 //Setters
     /**
@@ -150,10 +152,20 @@ public class InventoryItem {
      * @param quantity of item
      */
     public void setQuantity(Integer quantity) throws ResponseStatusException {
-        if (quantity > 0) {
-            this.quantity = quantity;
+        if (this.quantity == null) {
+            if (quantity > 0) {
+                this.quantity = quantity;
+            } else {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A quantity less than 1 was provided");
+            }
         } else {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A quantity less than 1 was provided");
+            if (quantity >= (this.quantity - this.remainingQuantity)) {
+                this.remainingQuantity = this.remainingQuantity - (this.quantity - quantity);
+                this.quantity = quantity;
+            } else {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                        "The quantity cannot be lower than the amount used in the sale listings for this inventory item");
+            }
         }
     }
 
@@ -273,7 +285,8 @@ public class InventoryItem {
         LocalDate acceptDate = date.plusDays(1);                //at least 1 day later
         if (sellBy.compareTo(acceptDate) < 0) {           //is in the past
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The Sell By date cannot be in the past");
-    }
+        }
+
         this.sellBy = sellBy;
     }
     /**
@@ -290,6 +303,14 @@ public class InventoryItem {
         if (bestBefore.compareTo(acceptDate) < 0) {          //is in the past
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The Best Before date cannot be in the past");
         }
+
+        //checks that the best before date is after the sell by date if it exists
+        if (this.sellBy != null) {
+            if (bestBefore.compareTo(this.sellBy) < 0) { //checks if best before is before sell by
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                        "The best before date cannot be before the sell by date.");
+            }
+        }
         this.bestBefore = bestBefore;
     }
 
@@ -304,7 +325,21 @@ public class InventoryItem {
         LocalDate date = LocalDate.now();
         LocalDate acceptDate = date.plusDays(1);                    //at least 1 day later
         if (expires.compareTo(acceptDate) < 0) {              //is in the past
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The Expires date cannot be in the past");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The expires date cannot be in the past");
+        }
+
+        //checks that the best before date and sell by date are before the expire date if they exist
+        if (this.sellBy != null) {
+            if (expires.compareTo(this.sellBy) < 0) { //checks if expires is before sell by
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                        "The expires date cannot be before the sell by date.");
+            }
+        }
+        if (this.bestBefore != null) {
+            if (expires.compareTo(this.bestBefore) < 0) { //checks if expires is before best before
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                        "The expires date cannot be before the best before date.");
+            }
         }
         this.expires = expires;
     }
@@ -475,8 +510,8 @@ public class InventoryItem {
         public InventoryItem build() throws Exception {
             InventoryItem inventoryItem = new InventoryItem();
             inventoryItem.setProduct(this.product);
-            inventoryItem.setQuantity(this.quantity);
             inventoryItem.setRemainingQuantity(this.quantity);
+            inventoryItem.setQuantity(this.quantity);
             if (pricePerItem != null) {
                 inventoryItem.setPricePerItem(this.pricePerItem);
             }
