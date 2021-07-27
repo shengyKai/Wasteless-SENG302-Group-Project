@@ -222,6 +222,7 @@ export default {
     resetSearch() {
       this.keywordFilter = "";
       this.searchKeywords();
+    },
     closeDialog() {
       this.$emit('closeDialog');
     },
