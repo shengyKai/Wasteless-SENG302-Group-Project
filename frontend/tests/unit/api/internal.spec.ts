@@ -130,7 +130,7 @@ const testSaleItem: Sale = {
   created: '1-1-1900',
 };
 
-function searchResult(list: any[]) : SearchResults<any> {
+function searchResult<T>(list: T[]) : SearchResults<T> {
   return {
     count: list.length,
     results: list
