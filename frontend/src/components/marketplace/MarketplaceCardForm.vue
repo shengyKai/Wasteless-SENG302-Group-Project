@@ -96,7 +96,7 @@
 </template>
 
 <script>
-import {createMarketplaceCard, createNewKeyword, getKeywords} from '@/api/internal';
+import {createMarketplaceCard, createNewKeyword, getKeywords, modifyMarketplaceCard} from '@/api/internal';
 
 export default {
   name: "MarketplaceCard",
@@ -251,7 +251,6 @@ export default {
     async submit() {
       this.errorMessage = undefined;
       let card = {
-        creatorId: this.user.id,
         section: this.selectedSection,
         title: this.title,
         description: this.description,
@@ -259,9 +258,10 @@ export default {
       };
       let response;
       if (this.isCreate) {
+        card.creatorId = this.user.id,
         response = await createMarketplaceCard(card);
       } else {
-        response = "Edit endpoint not yet implemented";
+        response = await modifyMarketplaceCard(this.previousCard.id, card);
       }
       if (typeof response === 'string') {
         this.errorMessage = response;
