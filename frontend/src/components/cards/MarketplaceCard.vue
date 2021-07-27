@@ -39,12 +39,15 @@
     </v-card-text>
     <v-divider/>
     <v-card-actions v-if="isCardOwnerOrDGAA && showActions">
-      <v-icon ref="editButton"
+      <v-spacer/>
+      <v-icon ref="editButton "
+              class="mr-2"
               color="primary"
               @click.stop="editCardDialog = true"
       >
         mdi-pencil
       </v-icon>
+
       <v-icon ref="deleteButton"
               color="primary"
               @click.stop="deleteCardDialog = true"
