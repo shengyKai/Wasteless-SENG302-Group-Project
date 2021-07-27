@@ -678,10 +678,10 @@ class InventoryItemTests {
         });
         inventoryItemRepository.save(invItem);
         InventoryItem invItemRepo = inventoryItemRepository.getInventoryItemByBusinessAndId(testBusiness, invItem.getId());
-        assertEquals(invItemRepo.getManufactured().toString(), originalManufactured);
-        assertEquals(invItemRepo.getSellBy().toString(), originalSellBy);
-        assertEquals(invItemRepo.getBestBefore().toString(), originalBestBefore);
-        assertEquals(invItemRepo.getExpires().toString(), originalExpires);
+        assertEquals(invItemRepo.getManufactured(), originalManufactured);
+        assertEquals(invItemRepo.getSellBy(), originalSellBy);
+        assertEquals(invItemRepo.getBestBefore(), originalBestBefore);
+        assertEquals(invItemRepo.getExpires(), originalExpires);
     }
 
     @Test
@@ -709,10 +709,10 @@ class InventoryItemTests {
         });
         inventoryItemRepository.save(invItem);
         InventoryItem invItemRepo = inventoryItemRepository.getInventoryItemByBusinessAndId(testBusiness, invItem.getId());
-        assertEquals(invItemRepo.getManufactured().toString(), originalManufactured);
-        assertEquals(invItemRepo.getSellBy().toString(), originalSellBy);
-        assertEquals(invItemRepo.getBestBefore().toString(), originalBestBefore);
-        assertEquals(invItemRepo.getExpires().toString(), originalExpires);
+        assertEquals(invItemRepo.getManufactured(), originalManufactured);
+        assertEquals(invItemRepo.getSellBy(), originalSellBy);
+        assertEquals(invItemRepo.getBestBefore(), originalBestBefore);
+        assertEquals(invItemRepo.getExpires(), originalExpires);
     }
 
     // Checking against today's date
