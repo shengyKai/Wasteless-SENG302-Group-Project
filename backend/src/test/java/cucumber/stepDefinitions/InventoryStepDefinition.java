@@ -162,8 +162,7 @@ public class InventoryStepDefinition  {
     public void the_inventory_of_the_business_is_returned_to_me() throws UnsupportedEncodingException, JsonProcessingException {
         assertEquals(200, mvcResult.getResponse().getStatus());
 
-        List<Product> catalogue = productRepository.findAllByBusiness(businessContext.getLast());
-        List<InventoryItem> inventory = inventoryItemRepository.getInventoryByCatalogue(catalogue);
+        List<InventoryItem> inventory = inventoryItemRepository.findAllForBusiness(businessContext.getLast());
 
         //because now the inventory sorts by product code on default, so it has to be sorted before comparing
         Comparator<InventoryItem> sort = Comparator.comparing(inventoryItem -> inventoryItem.getProduct().getProductCode());

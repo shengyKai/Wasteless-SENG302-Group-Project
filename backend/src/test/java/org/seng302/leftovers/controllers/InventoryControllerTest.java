@@ -20,6 +20,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -140,8 +143,7 @@ class InventoryControllerTest {
         when(businessSpy.getId()).thenReturn(1L);
         when(businessRepository.getBusinessById(any())).thenReturn(businessSpy); // use our business
         doNothing().when(businessSpy).checkSessionPermissions(any()); // mock successful authentication
-        when(productRepository.findAllByBusiness(any())).thenReturn(mockProductList);
-        when(inventoryItemRepository.getInventoryByCatalogue(any())).thenReturn(inventory);
+        when(inventoryItemRepository.findAllForBusiness(businessSpy)).thenReturn(inventory);
 
         var controller = new InventoryController(businessRepository, inventoryItemRepository, productRepository);
         mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
@@ -298,16 +300,6 @@ class InventoryControllerTest {
     }
 
     @Test
-    void getInventoryCount_unverifiedAccessToken_401Thrown() {
-        inventoryController = new InventoryController(businessRepository, inventoryItemRepository, productRepository);
-        when(businessRepository.getBusinessById(1L)).thenReturn(mockBusiness);
-        doThrow(new AccessTokenException()).when(mockBusiness).checkSessionPermissions(any());
-        ResponseStatusException exception = assertThrows(ResponseStatusException.class,
-                () -> inventoryController.getInventoryCount(1L, request));
-        Assertions.assertEquals(HttpStatus.UNAUTHORIZED, exception.getStatus());
-    }
-
-    @Test
     void getInventory_insufficientPermissions_403Thrown() {
         inventoryController = new InventoryController(businessRepository, inventoryItemRepository, productRepository);
         when(businessRepository.getBusinessById(1L)).thenReturn(mockBusiness);
@@ -317,15 +309,6 @@ class InventoryControllerTest {
         Assertions.assertEquals(HttpStatus.FORBIDDEN, exception.getStatus());
     }
 
-    @Test
-    void getInventoryCount_insufficientPermissions_403Thrown() {
-        inventoryController = new InventoryController(businessRepository, inventoryItemRepository, productRepository);
-        when(businessRepository.getBusinessById(1L)).thenReturn(mockBusiness);
-        doThrow(new ResponseStatusException(HttpStatus.FORBIDDEN)).when(mockBusiness).checkSessionPermissions(any());
-        ResponseStatusException exception = assertThrows(ResponseStatusException.class,
-                () -> inventoryController.getInventoryCount(1L, request));
-        Assertions.assertEquals(HttpStatus.FORBIDDEN, exception.getStatus());
-    }
 
     @Test
     void getInventory_businessNotFound_406Thrown() {
@@ -337,36 +320,16 @@ class InventoryControllerTest {
     }
 
     @Test
-    void getInventoryCount_businessNotFound_406Thrown() {
-        inventoryController = new InventoryController(businessRepository, inventoryItemRepository, productRepository);
-        when(businessRepository.getBusinessById(1L)).thenThrow(new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE));
-        ResponseStatusException exception = assertThrows(ResponseStatusException.class,
-                () -> inventoryController.getInventoryCount(1L, request));
-        Assertions.assertEquals(HttpStatus.NOT_ACCEPTABLE, exception.getStatus());
-    }
-
-    @Test
     void getInventory_emptyInventory_emptyArrayReturned() {
-        List<InventoryItem> emptyInventory = new ArrayList<>();
+        Page<InventoryItem> emptyInventory = Page.empty();
         inventoryController = new InventoryController(businessRepository, inventoryItemRepository, productRepository);
         when(businessRepository.getBusinessById(1L)).thenReturn(mockBusiness);
         when(productRepository.findAllByBusiness(mockBusiness)).thenReturn(mockProductList);
-        when(inventoryItemRepository.getInventoryByCatalogue(mockProductList)).thenReturn(emptyInventory);
-        JSONArray result = inventoryController.getInventory(1L, request, null, null, null, null);
-        Assertions.assertEquals(0, result.size());
+        when(inventoryItemRepository.findAllForBusiness(eq(mockBusiness), any())).thenReturn(emptyInventory);
+        JSONObject result = inventoryController.getInventory(1L, request, null, null, null, null);
+        Assertions.assertEquals(0, ((List<?>) result.get("results")).size());
     }
 
-    @Test
-    void getInventoryCount_emptyInventory_zeroReturned() {
-        List<InventoryItem> emptyInventory = new ArrayList<>();
-        inventoryController = new InventoryController(businessRepository, inventoryItemRepository, productRepository);
-        when(businessRepository.getBusinessById(1L)).thenReturn(mockBusiness);
-        when(productRepository.findAllByBusiness(mockBusiness)).thenReturn(mockProductList);
-        when(inventoryItemRepository.getInventoryByCatalogue(mockProductList)).thenReturn(emptyInventory);
-        JSONObject result = inventoryController.getInventoryCount(1L, request);
-        Assertions.assertTrue(result.containsKey("count"));
-        Assertions.assertEquals(0, result.getAsNumber("count"));
-    }
 
     @Test
     void getInventory_multipleItems_correctArrayReturned() throws Exception {
@@ -383,29 +346,11 @@ class InventoryControllerTest {
         inventoryController = new InventoryController(businessRepository, inventoryItemRepository, productRepository);
         when(businessRepository.getBusinessById(1L)).thenReturn(mockBusiness);
         when(productRepository.findAllByBusiness(mockBusiness)).thenReturn(mockProductList);
-        when(inventoryItemRepository.getInventoryByCatalogue(mockProductList)).thenReturn(inventory);
-        JSONArray result = inventoryController.getInventory(1L, request, null, null, null, null);
+        when(inventoryItemRepository.findAllForBusiness(eq(mockBusiness), any())).thenReturn(new PageImpl<>(inventory, Pageable.unpaged(), 1000));
+        JSONObject result = inventoryController.getInventory(1L, request, null, null, null, null);
         Assertions.assertEquals(expectedResponse, result);
     }
 
-    @Test
-    void getInventoryCount_multipleItems_correctCountReturned() throws Exception {
-        String futureDate = LocalDate.now().plus(50, ChronoUnit.DAYS).toString();
-
-        List<InventoryItem> inventory = new ArrayList<>();
-        inventory.add(new InventoryItem.Builder().withProduct(testProduct).withQuantity(1).withExpires(futureDate).build());
-        inventory.add(new InventoryItem.Builder().withProduct(testProduct).withQuantity(39).withExpires(futureDate).build());
-        inventory.add(new InventoryItem.Builder().withProduct(testProduct).withQuantity(54).withExpires(futureDate).build());
-
-        inventoryController = new InventoryController(businessRepository, inventoryItemRepository, productRepository);
-        when(businessRepository.getBusinessById(1L)).thenReturn(mockBusiness);
-        when(productRepository.findAllByBusiness(mockBusiness)).thenReturn(mockProductList);
-        when(inventoryItemRepository.getInventoryByCatalogue(mockProductList)).thenReturn(inventory);
-
-        JSONObject result = inventoryController.getInventoryCount(1L, request);
-        Assertions.assertTrue(result.containsKey("count"));
-        Assertions.assertEquals(3, result.getAsNumber("count"));
-    }
 
     @Test
     void retrievePaginatedInventory_firstPage_firstPageOfInventoryItems() throws Exception {
@@ -991,17 +936,19 @@ class InventoryControllerTest {
 
     @Test
     void retrieveSortedInventory_byBestBefore_correctOrderOfInventoryWithNullBottom() throws Exception {
+
         MvcResult result = mockMvc
                 .perform(MockMvcRequestBuilders.get("/businesses/1/inventory").param("orderBy", "bestBefore"))
                 .andExpect(status().isOk()).andReturn();
 
         JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
-        JSONArray responseBody = (JSONArray) parser.parse(result.getResponse().getContentAsString());
+        JSONObject responseBody = (JSONObject) parser.parse(result.getResponse().getContentAsString());
 
         assertEquals(7, responseBody.size());
 
         // there are different types of inventory items, so test the index positions of
         // the those types
+        JSONArray responseItems = (JSONArray) responseBody.get("results");
         JSONObject firstInventory = (JSONObject) responseBody.get(0);
         JSONObject secondInventory = (JSONObject) responseBody.get(2);
         JSONObject thirdInventory = (JSONObject) responseBody.get(4);

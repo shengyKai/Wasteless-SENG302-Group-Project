@@ -32,6 +32,10 @@ public interface InventoryItemRepository extends CrudRepository<InventoryItem, L
     @Query("SELECT i FROM InventoryItem i WHERE i.product.business = :business")
     Page<InventoryItem> findAllForBusiness(@Param("business") Business business, Pageable pageable);
 
+    @Query("SELECT i FROM InventoryItem i WHERE i.product.business = :business")
+    List<InventoryItem> findAllForBusiness(@Param("business") Business business);
+
+    public List<InventoryItem> findAllByProduct(@Param("product") Product product);
     /**
      * Gets a inventory item from the repository
      * If there is no inventory for the provided business and inventoryItemId
