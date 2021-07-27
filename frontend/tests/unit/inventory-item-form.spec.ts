@@ -92,7 +92,7 @@ const testProducts = [
 // Characters that are whitespace not including the space character.
 const whitespaceCharacters = ["\n", "\t"];
 
-// getProducts.mockResolvedValue(testProducts);
+getProducts.mockResolvedValue({results: testProducts, count: testProducts.length});
 
 const localVue = createLocalVue();
 
