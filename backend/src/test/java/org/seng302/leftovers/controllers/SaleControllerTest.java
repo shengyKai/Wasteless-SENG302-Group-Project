@@ -15,10 +15,7 @@ import org.seng302.leftovers.persistence.SaleItemRepository;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
 import org.seng302.leftovers.tools.SearchHelper;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -51,7 +48,7 @@ class SaleControllerTest {
 
     @Mock
     private BusinessRepository businessRepository;
-    @Spy
+    @Mock
     private SaleItemRepository saleItemRepository;
     @Mock
     private InventoryItemRepository inventoryItemRepository;
@@ -306,15 +303,8 @@ class SaleControllerTest {
     }
 
     @Test
-    void getSaleItemsForBusiness_validBusiness_doesNotCheckSessionPermissions() throws Exception {
-        mockMvc.perform(get("/businesses/1/listings"))
-                .andReturn();
-
-        verify(business, times(0)).checkSessionPermissions(any(HttpServletRequest.class));
-    }
-
-    @Test
     void getSaleItemsForBusiness_validBusinessNoSalesItem_returnsEmptyList() throws Exception {
+        when(saleItemRepository.findAllForBusiness(any(), any())).thenReturn(Page.empty());
         MvcResult result = mockMvc.perform(get("/businesses/1/listings"))
                 .andExpect(status().isOk())
                 .andReturn();
@@ -322,7 +312,11 @@ class SaleControllerTest {
         JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
         Object response = parser.parse(result.getResponse().getContentAsString());
 
-        assertEquals(new JSONArray(), response);
+        JSONObject expected = new JSONObject();
+        expected.appendField("count", 0);
+        expected.appendField("results", new JSONArray());
+
+        assertEquals(expected, response);
     }
 
     @Test
@@ -345,7 +339,7 @@ class SaleControllerTest {
         PageRequest expectedRequest = SearchHelper.getPageRequest(null,null, Sort.by(expectedOrder));
         verify(saleItemRepository).findAllForBusiness(any(), eq(expectedRequest));
     }
-//
+
     /**
      * Generates a consistently shuffled list of mock sale items
      * @return Mock sale item list
@@ -364,7 +358,7 @@ class SaleControllerTest {
         Collections.shuffle(mockItems, new Random(7));
         return mockItems;
     }
-//
+
     @Test
     void getSaleItemsForBusiness_noReverse_itemsAscending() throws Exception {
         var items = generateMockSaleItems();
@@ -385,7 +379,6 @@ class SaleControllerTest {
         saleItemRepository.saveAll(items);
 
         MvcResult result = mockMvc.perform(get("/businesses/1/listings")
-                .param("orderBy", "quantity")
                 .param("reverse", "false"))
                 .andExpect(status().isOk())
                 .andReturn();
@@ -403,7 +396,6 @@ class SaleControllerTest {
 
 
         MvcResult result = mockMvc.perform(get("/businesses/1/listings")
-                .param("orderBy", "quantity")
                 .param("reverse", "true"))
                 .andExpect(status().isOk())
                 .andReturn();
@@ -416,8 +408,7 @@ class SaleControllerTest {
     @Test
     void getSaleItemsForBusiness_resultsPerPageSet_firstPageReturned() throws Exception {
         var items = generateMockSaleItems();
-        when(saleItemRepository.findAllForBusiness(any(Business.class), any())).thenCallRealMethod();
-        saleItemRepository.saveAll(items);
+        when(saleItemRepository.findAllForBusiness(any(), any())).thenReturn(new PageImpl<>(items));
 
 
         MvcResult result = mockMvc.perform(get("/businesses/1/listings")
@@ -425,17 +416,16 @@ class SaleControllerTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
-        JSONObject response = (JSONObject) parser.parse(result.getResponse().getContentAsString());
+        Sort.Order expectedOrder = new Sort.Order(Sort.Direction.ASC, "created").ignoreCase();
+        PageRequest expectedRequest = SearchHelper.getPageRequest(null,4, Sort.by(expectedOrder));
 
-        JSONArray results = (JSONArray) response.get("results");
-        assertEquals(4, results.size());
+        verify(saleItemRepository).findAllForBusiness(any(), eq(expectedRequest));
     }
 
     @Test
     void getSaleItemsForBusiness_secondPageRequested_secondPageReturned() throws Exception {
         var items = generateMockSaleItems();
-        when(saleItemRepository.findAllForBusiness(any(Business.class), any())).thenCallRealMethod();
+        when(saleItemRepository.findAllForBusiness(any(Business.class), any())).thenReturn(new PageImpl<>(items));
         saleItemRepository.saveAll(items);
 
 
@@ -445,26 +435,9 @@ class SaleControllerTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
-        JSONObject response = (JSONObject) parser.parse(result.getResponse().getContentAsString());
+        Sort.Order expectedOrder = new Sort.Order(Sort.Direction.ASC, "created").ignoreCase();
+        PageRequest expectedRequest = SearchHelper.getPageRequest(2,4, Sort.by(expectedOrder));
 
-        JSONArray results = (JSONArray) response.get("results");
-        assertEquals(2, results.size());
-    }
-
-    @Test
-    void getSaleItemsForBusiness_count() throws Exception {
-        var items = generateMockSaleItems();
-        saleItemRepository.saveAll(items);
-
-
-        MvcResult result = mockMvc.perform(get("/businesses/1/listings"))
-                .andExpect(status().isOk())
-                .andReturn();
-
-        JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
-        JSONObject response = (JSONObject) parser.parse(result.getResponse().getContentAsString());
-
-        assertEquals(2, response.getAsNumber("count").intValue());
+        verify(saleItemRepository).findAllForBusiness(any(), eq(expectedRequest));
     }
 }

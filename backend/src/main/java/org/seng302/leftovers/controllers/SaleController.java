@@ -134,10 +134,9 @@ public class SaleController {
                                               @RequestParam(required = false) Integer page,
                                               @RequestParam(required = false) Integer resultsPerPage,
                                               @RequestParam(required = false) Boolean reverse) {
-        AuthenticationTokenManager.checkAuthenticationToken(request);
-        logger.info(() -> String.format("Getting sales item for business (businessId=%d).", id));
-
         try {
+            AuthenticationTokenManager.checkAuthenticationToken(request);
+            logger.info(() -> String.format("Getting sales item for business (businessId=%d).", id));
             Business business = businessRepository.getBusinessById(id);
 
             Sort.Direction direction = SearchHelper.getSortDirection(reverse);
