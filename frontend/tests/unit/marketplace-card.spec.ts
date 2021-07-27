@@ -60,7 +60,7 @@ describe('MarketplaceCard.vue', () => {
    * Finds the edit form dialog box upon clicking the edit button
    * @returns the edit confirmation dialog box
    */
-   async function findEditConfirmationDialog() {
+  async function findEditConfirmationDialog() {
     const editButton = wrapper.findComponent({ ref: 'editButton' });
     await editButton.trigger('click');
 

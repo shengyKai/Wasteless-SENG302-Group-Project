@@ -323,7 +323,7 @@ public class CardController {
     @GetMapping("/cards/search")
     public JSONObject searchCards(HttpServletRequest request,
                                   @RequestParam(name = "section") String sectionName,
-                                  @RequestParam(value="keywordIds", required = false) List<Long> keywordIds,
+                                  @RequestParam(value="keywordIds") List<Long> keywordIds,
                                   @RequestParam Boolean union,
                                   @RequestParam(required = false) String orderBy,
                                   @RequestParam(required = false) Integer page,
@@ -337,7 +337,6 @@ public class CardController {
             MarketplaceCard.Section section = MarketplaceCard.sectionFromString(sectionName);
 
             // fetch the keywords
-            keywordIds = Optional.ofNullable(keywordIds).orElse(Collections.emptyList());
             List<Keyword> keywords = Streamable.of(keywordRepository.findAllById(keywordIds)).toList();
             if (keywords.isEmpty()) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Failed to find a provided keyword");
