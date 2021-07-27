@@ -8,7 +8,7 @@ import net.minidev.json.JSONObject;
  * Event which is sent to system administrators to notify them of the creation of a new keyword.
  */
 @Entity
-public class CreateKeywordEvent extends Event {
+public class KeywordCreatedEvent extends Event {
 
     @OneToOne
     @JoinColumn(name = "new_keyword", unique = true, nullable = false)
@@ -21,13 +21,13 @@ public class CreateKeywordEvent extends Event {
     /**
      * Empty constructor to appease JPA
      */
-    protected CreateKeywordEvent() { }
+    protected KeywordCreatedEvent() { }
 
     /**
      * Constructor for the create keyword event.
      * @param newKeyword The keyword which has been created.
      */
-    public CreateKeywordEvent(Keyword newKeyword, User creator) {
+    public KeywordCreatedEvent(Keyword newKeyword, User creator) {
         this.newKeyword = newKeyword;
         this.creator = creator;
     }
