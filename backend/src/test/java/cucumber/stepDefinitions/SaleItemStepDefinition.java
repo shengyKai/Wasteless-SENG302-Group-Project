@@ -170,9 +170,10 @@ public class SaleItemStepDefinition {
     public void i_expect_to_be_see_the_sales_listings() throws Exception {
         assertEquals(200, mvcResult.getResponse().getStatus());
         JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
-        JSONArray response = (JSONArray) parser.parse(mvcResult.getResponse().getContentAsString());
+        JSONObject response = (JSONObject) parser.parse(mvcResult.getResponse().getContentAsString());
+        JSONArray results = (JSONArray) response.get("results");
 
-        for (Object obj : response) {
+        for (Object obj : results) {
             assertTrue(obj instanceof JSONObject);
             JSONObject json = (JSONObject)obj;
 
@@ -186,6 +187,6 @@ public class SaleItemStepDefinition {
             assertEquals(foundItem.get().getCloses().toString(), json.get("closes"));
         }
 
-        assertEquals(addedSaleItems.size(), response.size());
+        assertEquals(addedSaleItems.size(), response.getAsNumber("count").intValue());
     }
 }
