@@ -228,24 +228,25 @@ public class InventoryItem {
     public void setDates(String manufactured, String sellBy, String bestBefore, String expires) {
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE;
         //Checking expires is not null
-        if (expires == null) { //Will thrown an exception
+        if (expires != null) { //Will thrown an exception
             //Case 1: no attributes are null
-        } else if (sellBy != null && bestBefore != null) {
-            if ((sellBy.compareTo(bestBefore) > 0) || (bestBefore.compareTo(expires) > 0)) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                        "The best before date must be before the sell by date, and the expires date before the sell by.");
-            }
-            //Case 2: sell by is null and best before is not null
-        } else if (sellBy == null && bestBefore != null) {
-            if (bestBefore.compareTo(expires) > 0) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                        "The best before date must be before the expires date.");
-            }
-            //Case 3: best before is null and sell by is not null
-        } else if (bestBefore == null && sellBy != null) {
-            if (sellBy.compareTo(expires) > 0) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                        "The sell by date must be before the expires date.");
+            if (sellBy != null && bestBefore != null) {
+                if ((sellBy.compareTo(bestBefore) > 0) || (bestBefore.compareTo(expires) > 0)) {
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                            "The best before date must be before the sell by date, and the expires date before the sell by.");
+                }
+                //Case 2: sell by is null and best before is not null
+            } else if (sellBy == null && bestBefore != null) {
+                if (bestBefore.compareTo(expires) > 0) {
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                            "The best before date must be before the expires date.");
+                }
+                //Case 3: best before is null and sell by is not null
+            } else if (bestBefore == null && sellBy != null) {
+                if (sellBy.compareTo(expires) > 0) {
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                            "The sell by date must be before the expires date.");
+                }
             }
         }
         //Case 4: best before is null and sell by is null, no validation needed

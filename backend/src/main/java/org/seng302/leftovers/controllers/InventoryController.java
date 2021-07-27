@@ -142,6 +142,8 @@ public class InventoryController {
             invItem.setDates(manufactured, sellBy, bestBefore, expires);
 
             inventoryItemRepository.save(invItem);
+        } catch (ResponseStatusException exception) {
+            throw exception;
         } catch (Exception exception) {
             logger.warn(exception);
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The data provided was invalid");
