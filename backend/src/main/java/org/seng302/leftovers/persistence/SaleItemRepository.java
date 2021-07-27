@@ -2,6 +2,9 @@ package org.seng302.leftovers.persistence;
 
 import org.seng302.leftovers.entities.Business;
 import org.seng302.leftovers.entities.SaleItem;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
@@ -18,5 +21,5 @@ public interface SaleItemRepository extends CrudRepository<SaleItem, Long> {
      * @return List of sale items for the business
      */
     @Query("SELECT s FROM SaleItem s WHERE s.inventoryItem.product.business = :business")
-    List<SaleItem> findAllForBusiness(@Param("business") Business business);
+    Page<SaleItem> findAllForBusiness(@Param("business") Business business, Pageable pageable);
 }

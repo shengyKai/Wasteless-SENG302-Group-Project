@@ -3,29 +3,39 @@ package org.seng302.leftovers.controllers;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mockito.*;
-import org.seng302.leftovers.entities.*;
+import org.seng302.leftovers.entities.CreateKeywordEvent;
+import org.seng302.leftovers.entities.Keyword;
+import org.seng302.leftovers.entities.User;
 import org.seng302.leftovers.exceptions.AccessTokenException;
+import org.seng302.leftovers.persistence.CreateKeywordEventRepository;
 import org.seng302.leftovers.persistence.KeywordRepository;
+import org.seng302.leftovers.persistence.UserRepository;
+import org.seng302.leftovers.service.KeywordService;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.text.ParseException;
-import java.util.*;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.AdditionalMatchers.not;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -40,7 +50,26 @@ class KeywordControllerTest {
     @Mock
     private KeywordRepository keywordRepository;
 
+    @Mock
+    private KeywordService keywordService;
+
+    @Mock
+    private CreateKeywordEventRepository createKeywordEventRepository;
+
+    @Mock
+    private UserRepository userRepository;
+
+    @Mock
+    private User mockUser;
+
+    @Mock
+    private CreateKeywordEvent mockEvent;
+
+    @Captor
+    private ArgumentCaptor<User> userArgumentCaptor;
+
     private MockedStatic<AuthenticationTokenManager> authenticationTokenManager;
+    private final HashMap<String, Object> sessionAttributes = new HashMap<>();
 
     @BeforeEach
     public void setUp() throws ParseException {
@@ -50,8 +79,11 @@ class KeywordControllerTest {
         authenticationTokenManager = Mockito.mockStatic(AuthenticationTokenManager.class);
 
         when(keywordRepository.findByName(any())).thenReturn(Optional.empty());
+        when(createKeywordEventRepository.getByNewKeyword(any())).thenReturn(Optional.of(mockEvent));
 
-        var keywordController = new KeywordController(keywordRepository);
+        sessionAttributes.put("accountId", 12L);
+
+        var keywordController = new KeywordController(keywordRepository, keywordService, createKeywordEventRepository, userRepository);
         mockMvc = MockMvcBuilders.standaloneSetup(keywordController).build();
     }
 
@@ -77,7 +109,7 @@ class KeywordControllerTest {
     }
 
     @Test
-    void searchKeywords_withAuthentication_returnsKeywordList() throws Exception {
+    void searchKeywords_noQueryPresent_returnsAllKeywordList() throws Exception {
         List<Keyword> keywords = new ArrayList<>();
         for (String keywordName : List.of("Keyword One", "Keyword Two", "Keyword Three")) {
             Keyword mockKeyword = mock(Keyword.class);
@@ -105,6 +137,48 @@ class KeywordControllerTest {
         expected.addAll(keywords.stream().map(Keyword::constructJSONObject).collect(Collectors.toList()));
 
         assertEquals(expected, response);
+    }
+
+    @Test
+    void searchKeywords_QueryEmpty_returnsAllKeywordList() throws Exception {
+        List<Keyword> keywords = new ArrayList<>();
+        for (String keywordName : List.of("Keyword One", "Keyword Two", "Keyword Three")) {
+            Keyword mockKeyword = mock(Keyword.class);
+
+            JSONObject mockResponse = new JSONObject();
+            mockResponse.put("name", keywordName);
+            when(mockKeyword.constructJSONObject()).thenReturn(mockResponse);
+
+            keywords.add(mockKeyword);
+        }
+
+        when(keywordRepository.findByOrderByNameAsc()).thenReturn(keywords);
+
+        MvcResult result = mockMvc.perform(get("/keywords/search")
+                .param("searchQuery", ""))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        verify(keywordRepository).findByOrderByNameAsc();
+
+        JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
+        Object response = parser.parse(result.getResponse().getContentAsString());
+
+        JSONArray expected = new JSONArray();
+
+        expected.addAll(keywords.stream().map(Keyword::constructJSONObject).collect(Collectors.toList()));
+
+        assertEquals(expected, response);
+    }
+
+    @Test
+    void searchKeywords_withSearchTerm_doesPredicateSearch() throws Exception {
+        MvcResult result = mockMvc.perform(get("/keywords/search")
+                .param("searchQuery", "One"))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        verify(keywordRepository).findAll(any(Specification.class)); // couldn't find a way to mock the abstract method
     }
 
     @Test
@@ -170,6 +244,8 @@ class KeywordControllerTest {
         authenticationTokenManager.verify(() -> AuthenticationTokenManager.sessionIsAdmin(any()));
         verify(keywordRepository, times(1)).findById(99L);
         verify(keywordRepository, times(1)).delete(mockKeyword); // Keyword is deleted
+        verify(createKeywordEventRepository, times(1)).getByNewKeyword(mockKeyword);
+        verify(createKeywordEventRepository, times(1)).delete(mockEvent);   // Event is deleted
     }
 
     @Test
@@ -237,16 +313,20 @@ class KeywordControllerTest {
     @Test
     void addKeyword_validRequest_201Response() throws Exception {
         when(keywordRepository.save(any())).thenAnswer(keyword -> keyword.getArgument(0));
+        when(userRepository.findById(12L)).thenReturn(Optional.of(mockUser));
 
         JSONObject json = new JSONObject();
         json.put("name", "Dance");
 
-        mockMvc.perform(post("/keywords")
+        mockMvc.perform(MockMvcRequestBuilders.post("/keywords")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(json.toJSONString()))
+                .content(json.toJSONString())
+                .sessionAttrs(sessionAttributes))
                 .andExpect(status().isCreated())
                 .andReturn();
 
         verify(keywordRepository, times(1)).save(any());
+        verify(keywordService, times(1)).sendNewKeywordEvent(any(), userArgumentCaptor.capture());
+        assertEquals(mockUser, userArgumentCaptor.getValue());
     }
 }

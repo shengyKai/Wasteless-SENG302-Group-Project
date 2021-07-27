@@ -3,8 +3,12 @@ package org.seng302.leftovers.entities;
 import net.minidev.json.JSONObject;
 import org.junit.jupiter.api.*;
 import org.seng302.leftovers.persistence.*;
+import org.seng302.leftovers.tools.SearchHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -34,6 +38,7 @@ class SaleItemTests {
     Business testBusiness;
     Product testProduct;
     InventoryItem inventoryItem;
+    PageRequest templatePageRequest;
 
 
     void createTestObjects() throws Exception {
@@ -99,6 +104,8 @@ class SaleItemTests {
 
     @BeforeAll
     void initialise() {
+        Sort.Order expectedOrder = new Sort.Order(Sort.Direction.ASC, "price").ignoreCase();
+        templatePageRequest = SearchHelper.getPageRequest(null,null, Sort.by(expectedOrder));
         clearDatabase();
     }
 
@@ -438,10 +445,11 @@ class SaleItemTests {
                 .build();
         saleItem = saleItemRepository.save(saleItem);
 
-        List<SaleItem> foundItems = saleItemRepository.findAllForBusiness(testBusiness);
 
-        assertEquals(1, foundItems.size());
-        SaleItem foundItem = foundItems.get(0);
+        Page<SaleItem> foundItems = saleItemRepository.findAllForBusiness(testBusiness, templatePageRequest);
+
+        assertEquals(1, foundItems.getTotalElements());
+        SaleItem foundItem = foundItems.getContent().get(0);
 
         assertEquals(saleItem.getSaleId(), foundItem.getSaleId());
         assertEquals(saleItem.getInventoryItem().getId(), foundItem.getInventoryItem().getId());
@@ -480,13 +488,13 @@ class SaleItemTests {
         }
 
         // Make sure that the found items correspond 1 to 1 with the generated items
-        List<SaleItem> foundItems = saleItemRepository.findAllForBusiness(testBusiness);
+        Page<SaleItem> foundItems = saleItemRepository.findAllForBusiness(testBusiness, templatePageRequest);
         for (SaleItem foundItem : foundItems) {
             SaleItem matchingItem = saleItems.get(foundItem.getSaleId());
             assertNotNull(matchingItem);
             assertEquals(matchingItem.getMoreInfo(), foundItem.getMoreInfo());
         }
-        assertEquals(saleItems.size(), foundItems.size());
+        assertEquals(saleItems.size(), foundItems.getTotalElements());
     }
 
     @Test
@@ -526,12 +534,12 @@ class SaleItemTests {
         }
 
         // Make sure that the found items correspond 1 to 1 with the generated items
-        List<SaleItem> foundItems = saleItemRepository.findAllForBusiness(testBusiness);
+        Page<SaleItem> foundItems = saleItemRepository.findAllForBusiness(testBusiness, templatePageRequest);
         for (SaleItem foundItem : foundItems) {
             SaleItem matchingItem = saleItems.get(foundItem.getSaleId());
             assertNotNull(matchingItem);
             assertEquals(matchingItem.getMoreInfo(), foundItem.getMoreInfo());
         }
-        assertEquals(saleItems.size(), foundItems.size());
+        assertEquals(saleItems.size(), foundItems.getTotalElements());
     }
 }
