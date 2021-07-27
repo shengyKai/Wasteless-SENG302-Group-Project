@@ -27,7 +27,9 @@ import org.seng302.leftovers.entities.User;
 import org.seng302.leftovers.persistence.KeywordRepository;
 import org.seng302.leftovers.persistence.MarketplaceCardRepository;
 import org.seng302.leftovers.service.CardService;
+import org.seng302.leftovers.tools.JsonTools;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
@@ -82,6 +84,8 @@ public class CardStepDefinition {
 
     @Autowired
     private SessionFactory sessionFactory;
+
+    private JSONObject modifyParameters;
 
     @Given("a card exists")
     public void a_card_exists() {
@@ -403,5 +407,60 @@ public class CardStepDefinition {
 
         assertEquals(expectedTitles.size(), response.get("count"));
         assertEquals(new HashSet<>(expectedTitles), actualTitles);
+    }
+
+    @When("I try to updated the fields of the card to:")
+    public void i_try_to_updated_the_fields_of_the_card_to(Map<String, String> properties) {
+        MarketplaceCard card = cardContext.getLast();
+
+        modifyParameters = new JSONObject(properties);
+
+        String keywords = modifyParameters.getAsString("keywords");
+        modifyParameters.remove("keywords");
+
+        List<Long> keywordIds = Arrays.stream(keywords.split(","))
+                .map(keywordRepository::findByName)
+                .map(keyword -> keyword.map(Keyword::getID).orElse(9999L))
+                .collect(Collectors.toList());
+        modifyParameters.put("keywordIds", keywordIds);
+
+        requestContext.performRequest(put("/cards/" + card.getID())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(modifyParameters.toJSONString()));
+    }
+
+    @Then("The card is not updated")
+    public void the_card_is_not_updated() {
+        MarketplaceCard card = cardContext.getLast();
+        MarketplaceCard updatedCard = marketplaceCardRepository.getCard(card.getID());
+
+        assertEquals(card.getSection(), updatedCard.getSection());
+        assertEquals(card.getTitle(), updatedCard.getTitle());
+        assertEquals(card.getDescription(), updatedCard.getDescription());
+
+        Set<Long> expectedKeywordIds = card.getKeywords().stream()
+                .map(Keyword::getID)
+                .collect(Collectors.toSet());
+        Set<Long> actualKeywordIds = updatedCard.getKeywords().stream()
+                .map(Keyword::getID)
+                .collect(Collectors.toSet());
+        assertEquals(expectedKeywordIds, actualKeywordIds);
+    }
+
+    @Then("The card is updated")
+    public void the_card_is_updated() {
+        MarketplaceCard updatedCard = marketplaceCardRepository.getCard(cardContext.getLast().getID());
+
+        assertEquals(modifyParameters.getAsString("section"), updatedCard.getSection().getName());
+        assertEquals(modifyParameters.getAsString("title"), updatedCard.getTitle());
+        assertEquals(modifyParameters.getAsString("description"), updatedCard.getDescription());
+
+        Set<Long> expectedKeywordIds = Arrays.stream(JsonTools.parseLongArrayFromJsonField(modifyParameters, "keywordIds"))
+                .boxed()
+                .collect(Collectors.toSet());
+        Set<Long> actualKeywordIds = updatedCard.getKeywords().stream()
+                .map(Keyword::getID)
+                .collect(Collectors.toSet());
+        assertEquals(expectedKeywordIds, actualKeywordIds);
     }
 }
