@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import cucumber.context.CardContext;
+import cucumber.context.EventContext;
 import cucumber.context.RequestContext;
 import cucumber.context.UserContext;
 import io.cucumber.datatable.DataTable;
@@ -196,47 +197,11 @@ public class CardStepDefinition {
                 .param("userId", userContext.getLast().getUserID().toString()));
     }
 
-    private List<JSONObject> parseEvents(MockHttpServletResponse response, String channel) throws UnsupportedEncodingException, ParseException {
-        String content = response.getContentAsString();
-        JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
-
-        List<JSONObject> events = new ArrayList<>();
-
-        // Iterable of lines that are not comments
-        Iterator<String> lineIterator = content.lines().filter(line -> !line.startsWith(":")).iterator();
-
-        while (lineIterator.hasNext()) {
-            // Every iteration parses a single event
-            // Expects the format:
-            //  field:$(channel_name)
-            //  data:$(data)
-            //  --empty-line--
-
-            String fieldLine = lineIterator.next();
-            Assertions.assertTrue(fieldLine.startsWith("event:"));
-            String foundChannel = fieldLine.substring("event:".length());
-
-            Assertions.assertTrue(lineIterator.hasNext());
-            String dataLine = lineIterator.next();
-            Assertions.assertTrue(dataLine.startsWith("data:"));
-            String data = dataLine.substring("data:".length());
-
-            Assertions.assertTrue(lineIterator.hasNext());
-            Assertions.assertEquals("", lineIterator.next());
-
-            if (foundChannel.equals(channel)) {
-                events.add(parser.parse(data, JSONObject.class));
-            }
-        }
-
-        return events;
-    }
-
     @Then("I have received a message telling me the card is about to expire")
     public void i_have_received_a_message_telling_me_the_card_is_about_to_expire()
             throws JsonProcessingException, UnsupportedEncodingException, ParseException {
 
-        List<JSONObject> events = parseEvents(requestContext.getLastResult().getResponse(), "newsfeed");
+        List<JSONObject> events = EventContext.parseEvents(requestContext.getLastResult().getResponse(), "newsfeed");
 
         Assertions.assertEquals(1, events.size());
         JSONObject event = events.get(0);
@@ -255,7 +220,7 @@ public class CardStepDefinition {
 
     @Then("I have received a message telling me the card has expired")
     public void i_have_received_a_message_telling_me_the_card_has_expired() throws UnsupportedEncodingException, ParseException {
-        List<JSONObject> events = parseEvents(requestContext.getLastResult().getResponse(), "newsfeed");
+        List<JSONObject> events = EventContext.parseEvents(requestContext.getLastResult().getResponse(), "newsfeed");
 
         Assertions.assertEquals(1, events.size());
         JSONObject event = events.get(0);
