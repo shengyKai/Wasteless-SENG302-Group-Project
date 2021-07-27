@@ -2,9 +2,10 @@ import axios, { AxiosError, AxiosInstance, AxiosRequestConfig } from 'axios';
 
 import * as api from '@/api/internal';
 import { AxiosResponse } from 'axios';
-import { CreateProduct, CreateUser, InventoryItem, MaybeError, Product, Sale } from '@/api/internal';
+import { CreateProduct, CreateUser, InventoryItem, MaybeError, Product, Sale, SearchResults } from '@/api/internal';
 import { castMock } from '../utils';
 import { is, Reason } from 'typescript-is';
+
 
 jest.mock('axios', () => ({
   create: jest.fn(function() {
@@ -129,6 +130,13 @@ const testSaleItem: Sale = {
   created: '1-1-1900',
 };
 
+function searchResult(list: any[]) : SearchResults<any> {
+  return {
+    count: list.length,
+    results: list
+  };
+}
+
 const testFile = new File([], 'test_file');
 let testFormData = new FormData();
 testFormData.append('file', testFile);
@@ -249,23 +257,8 @@ const apiCalls: Partial<ApiCalls> = {
         reverse: false,
       }
     },
-    result: [testSaleItem],
+    result: searchResult([testSaleItem]),
     failedTypeCheckResponse: 'Response is not Sale array',
-    extraStatusMessages: {
-      401: 'You have been logged out. Please login again and retry',
-      406: 'The given business does not exist',
-    },
-  },
-  getBusinessSalesCount: {
-    parameters: [666],
-    httpMethod: 'get',
-    url: '/businesses/666/listings/count',
-    body: undefined,
-    apiResult: {
-      count: 100,
-    },
-    result: 100,
-    failedTypeCheckResponse: 'Response is not a number',
     extraStatusMessages: {
       401: 'You have been logged out. Please login again and retry',
       406: 'The given business does not exist',
