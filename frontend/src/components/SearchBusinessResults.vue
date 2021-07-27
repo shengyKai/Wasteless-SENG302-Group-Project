@@ -20,21 +20,22 @@
         solo-inverted
         hide-details
         :items="[
+          { text: 'Search By Name',    value: 'type_0'   },
           { text: ' Accomodation and Food Services',   value: 'type_1'  },
-          { text: 'Charitable organisation',     value: 'type_2'     },
-          { text: 'non-profit organisation',  value: 'type_3'  },
-          { text: 'Retail trade',    value: 'type_4'   },
+          { text: 'Charitable Organisation',     value: 'type_2'     },
+          { text: 'Non-Profit Organisation',  value: 'type_3'  },
+          { text: 'Retail Trade',    value: 'type_4'   },
         ]"
         prepend-inner-icon="mdi-sort-variant"
-        label="Search by Business type"
+        label="Filter by Business type"
       />
       <!-- Toggle button for user to choose partially or fully matched results -->
       <v-btn-toggle class="toggle" v-model="reverse" mandatory>
         <v-btn depressed color="primary" :value="false">
-          <v-icon>mdi-circle-half-full</v-icon>
+          OR
         </v-btn>
         <v-btn depressed color="primary" :value="true">
-          <v-icon>mdi-circle</v-icon>
+          AND
         </v-btn>
       </v-btn-toggle>
     </v-toolbar>
