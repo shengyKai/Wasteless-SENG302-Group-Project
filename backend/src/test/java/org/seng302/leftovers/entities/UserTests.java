@@ -549,7 +549,7 @@ class UserTests {
      */
     @Test
     void checkInvalidBioCharacters() {
-        String[] invalidBios = {"dummy भारतभारत", "bladummy网络网络", "hahadummy.קום.קום" };
+        String[] invalidBios = {"\n", "\t", "\uD83D\uDE02", "\uFFFF"};
         for (String bio : invalidBios) {
             try {
                 testUser.setBio(bio);

@@ -7,7 +7,7 @@
     >
       <v-card>
         <v-card-title>
-          Create Marketplace Card
+          {{ modalTitle }}
         </v-card-title>
         <v-container class="pa-6">
           <v-row>
@@ -66,7 +66,7 @@
                       <v-text-field
                         label="Search for a keyword" v-model="keywordFilter"
                         :autofocus="true"
-                        @input="searchKeywords"
+                        @input="searchKeywords()"
                         hint="Keyword name"
                       />
                     </v-list-item-content>
@@ -82,8 +82,8 @@
             <v-card-actions>
               <v-spacer/>
               <div class="error--text" v-if="feedback !== undefined">{{ feedback }}</div>
-              <v-btn text color="primary" :disabled="!valid" @click="createCard">
-                Create Card
+              <v-btn text color="primary" :disabled="!valid" @click="submit">
+                {{ submitText }}
               </v-btn>
               <v-btn text color="primary" @click="closeDialog">
                 Cancel
@@ -100,17 +100,21 @@
 import {createMarketplaceCard, searchKeywords, createNewKeyword} from '../../api/internal';
 export default {
   name: "MarketplaceCard",
+  props: {
+    user: Object,
+    previousCard: Object,
+  },
   data() {
     return {
-      title: "",
-      description: "",
+      title: this.previousCard?.title ?? "",
+      description: this.previousCard?.description ?? "",
       allKeywords: [],
-      selectedKeywords: [],
+      selectedKeywords: this.previousCard?.keywords ?? [],
       keywordFilter: "",
       dialog: true,
       errorMessage: undefined,
       sections: [{text: "For Sale", value: "ForSale"}, {text: "Wanted", value: "Wanted"}, {text: "Exchange", value: "Exchange"}],
-      selectedSection: undefined,
+      selectedSection: this.previousCard?.section ?? undefined,
       allowedCharsRegex: /^[\s\d\p{L}\p{P}]*$/u,
     };
   },
@@ -145,13 +149,6 @@ export default {
     },
     titleField() {
       return this.$refs.titleField;
-    },
-    user() {
-      if (this.$store.state.createMarketplaceCardDialog !== undefined) {
-        return this.$store.state.createMarketplaceCardDialog;
-      } else {
-        return undefined;
-      }
     },
     creator() {
       return this.user.firstName + ' ' + this.user.lastName;
@@ -207,7 +204,22 @@ export default {
         return 'Section must be selected';
       }
       return undefined;
-    }
+    },
+    isCreate() {
+      return this.previousCard === undefined;
+    },
+    modalTitle() {
+      if (this.isCreate) {
+        return "Create Marketplace Card";
+      }
+      return "Modify Marketplace Card";
+    },
+    submitText() {
+      if (this.isCreate) {
+        return "Create Card";
+      }
+      return "Save Card";
+    },
   },
   methods: {
     async addNewKeyword() {
@@ -231,7 +243,7 @@ export default {
     closeDialog() {
       this.$emit('closeDialog');
     },
-    async createCard() {
+    async submit() {
       this.errorMessage = undefined;
       let card = {
         creatorId: this.user.id,
@@ -240,7 +252,12 @@ export default {
         description: this.description,
         keywordIds: this.selectedKeywords,
       };
-      let response = await createMarketplaceCard(card);
+      let response;
+      if (this.isCreate) {
+        response = await createMarketplaceCard(card);
+      } else {
+        response = "Edit endpoint not yet implemented";
+      }
       if (typeof response === 'string') {
         this.errorMessage = response;
       } else {

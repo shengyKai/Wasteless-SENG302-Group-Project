@@ -4,7 +4,7 @@
     <UserActionPanel v-else />
     <div class="newsfeed">
       <!-- Newsfeed -->
-      <div v-if="$store.getters.events.length === 0" class="text-center">
+      <div v-if="$store.getters.events.length === 0 || isBusiness" class="text-center">
         No items in your feed
       </div>
       <v-card

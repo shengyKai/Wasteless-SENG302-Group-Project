@@ -48,10 +48,7 @@
               <hr>
 
               <!-- DGAA/GAA Indicator -->
-              <v-list-item v-if="isDGAA" class="admin link" @click="viewAdmin">
-                <v-list-item-title class="admin"> ADMIN </v-list-item-title>
-              </v-list-item>
-              <v-list-item v-else-if="isAdmin" class="admin">
+              <v-list-item v-if="isAdmin" class="admin" @click="viewAdmin">
                 <v-list-item-title class="admin"> ADMIN </v-list-item-title>
               </v-list-item>
 
