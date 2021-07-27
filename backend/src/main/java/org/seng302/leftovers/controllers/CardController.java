@@ -154,7 +154,7 @@ public class CardController {
         long[] keywordIds = JsonTools.parseLongArrayFromJsonField(properties, "keywordIds");
 
         if (keywordIds.length == 0) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "At least one keyword must be provided");
+            return List.of();
         }
 
         List<Keyword> keywords = new ArrayList<>();
@@ -162,7 +162,7 @@ public class CardController {
                 Arrays.stream(keywordIds).boxed().collect(Collectors.toList())
         ).forEach(keywords::add);
 
-        if (keywords.isEmpty()) { // findAllById will return an empty iterable if a keyword id is invalid
+        if (keywords.isEmpty()) { // findAllById will return an empty iterable if any keyword id is invalid
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid keyword ID");
         }
 

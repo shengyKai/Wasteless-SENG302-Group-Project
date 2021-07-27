@@ -486,6 +486,34 @@ class CardControllerTest {
         verify(marketplaceCardRepository, times(0)).save(any(MarketplaceCard.class));
     }
 
+    // MODIFY CARD TESTS
+
+    @Test
+    void modifyCard_invalidAuthToken_401Response() throws Exception {
+        createCardJson.remove("creatorId"); // Will not need this field
+
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.checkAuthenticationToken(any())).thenThrow(new AccessTokenException());
+        mockMvc.perform(put("/cards/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(createCardJson.toString()))
+                .andExpect(status().isUnauthorized());
+        authenticationTokenManager.verify(() -> AuthenticationTokenManager.checkAuthenticationToken(any()));
+        verify(marketplaceCardRepository, times(0)).save(any());
+    }
+
+    @Test
+    void modifyCard_noPermissionForCreatorAccount_403Response() throws Exception {
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), any())).thenReturn(false);
+        mockMvc.perform(post("/cards")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(createCardJson.toString()))
+                .andExpect(status().isForbidden());
+        authenticationTokenManager.verify(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), any()));
+        verify(marketplaceCardRepository, times(0)).save(any());
+    }
+
+
+
     // GET CARDS TESTS
 
     @Test
