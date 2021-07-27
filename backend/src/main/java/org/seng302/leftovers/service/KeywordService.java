@@ -33,14 +33,14 @@ public class KeywordService {
      * Sends create keyword event to default global application admin and all other global application admins.
      * @param keyword The keyword that has been created.
      */
-    public void sendNewKeywordEvent(Keyword keyword) {
+    public void sendNewKeywordEvent(Keyword keyword, User creator) {
         List<User> adminList = userRepository.findAllByRole("defaultGlobalApplicationAdmin");
         adminList.addAll(userRepository.findAllByRole("globalApplicationAdmin"));
         Set<User> adminSet = new HashSet<User>(adminList);
 
         logger.info("Sending keyword creation notification for keyword \"{}\" to system administrators",
                 keyword.getName());
-        KeywordCreatedEvent newKeywordEvent = new KeywordCreatedEvent(keyword);
+        KeywordCreatedEvent newKeywordEvent = new CreateKeywordEvent(keyword, creator);
         eventService.addUsersToEvent(adminSet, newKeywordEvent);
     }
 }
