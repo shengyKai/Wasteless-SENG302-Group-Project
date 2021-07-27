@@ -26,10 +26,8 @@ import org.seng302.leftovers.tools.SearchHelper;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * This controller handles requests involving marketplace cards
@@ -91,6 +89,28 @@ public class CardController {
         }
     }
 
+    @PutMapping("/cards/{id}")
+    public void modifyCard(HttpServletRequest request, @PathVariable Long id, @RequestBody JSONObject cardProperties) {
+        logger.info("Request to modify existing card (id={})", id);
+        AuthenticationTokenManager.checkAuthenticationToken(request);
+        try {
+            MarketplaceCard card = marketplaceCardRepository.findById(id)
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "Card not found"));
+
+            // Updates fields
+            card.setSection(MarketplaceCard.sectionFromString(cardProperties.getAsString("section")));
+            card.setTitle(cardProperties.getAsString("title"));
+            card.setDescription(cardProperties.getAsString("description"));
+            card.setKeywords(getCardKeywordsFromProperties(cardProperties));
+
+            // Save result
+            marketplaceCardRepository.save(card);
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            throw e;
+        }
+    }
+
     /**
      * Endpoint to delete the marketplace card with the provided card id.
      * If the user is unauthorised then a 401 response is returned
@@ -126,6 +146,30 @@ public class CardController {
     }
 
     /**
+     * Fetches the list of card keywords from the JSONObject attribute "keywordIds"
+     * @param properties User provided JSONObject with an attribute "keywordIds" that is a list of keyword ids
+     * @return List of keywords from "keywordIds"
+     */
+    private List<Keyword> getCardKeywordsFromProperties(JSONObject properties) {
+        long[] keywordIds = JsonTools.parseLongArrayFromJsonField(properties, "keywordIds");
+
+        if (keywordIds.length == 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "At least one keyword must be provided");
+        }
+
+        List<Keyword> keywords = new ArrayList<>();
+        keywordRepository.findAllById(
+                Arrays.stream(keywordIds).boxed().collect(Collectors.toList())
+        ).forEach(keywords::add);
+
+        if (keywords.isEmpty()) { // findAllById will return an empty iterable if a keyword id is invalid
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid keyword ID");
+        }
+
+        return keywords;
+    }
+
+    /**
      * Retrieve the User and Keywords associated with this card from the database and use them to construct the
      * marketplace card with the properties given by the json object. A response status exception with 400 status
      * will be thrown if any part of the given json has invalid format.
@@ -149,15 +193,8 @@ public class CardController {
                 .withCreator(creator)
                 .build();
 
-        // Retrieve all the keywords and add them to the card
-        long[] keywordIds = JsonTools.parseLongArrayFromJsonField(cardProperties, "keywordIds");
-        for (long keywordId : keywordIds) {
-            Optional<Keyword> optional = keywordRepository.findById(keywordId);
-            if (optional.isEmpty()) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, String.format("Keyword with ID %d does not exist", keywordId));
-            }
-            card.addKeyword(optional.get());
-        }
+        // Adds keywords
+        card.setKeywords(getCardKeywordsFromProperties(cardProperties));
 
         return card;
     }

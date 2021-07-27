@@ -190,6 +190,18 @@ public class MarketplaceCard {
     }
 
     /**
+     * Validates and replaces all the keywords for this Markeplace Card
+     * @param keywords New keywords for this card
+     */
+    public void setKeywords(List<Keyword> keywords) {
+        if (keywords.contains(null)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Keyword cannot be null");
+        }
+        this.keywords.clear();
+        this.keywords.addAll(keywords);
+    }
+
+    /**
      * Removes the provided keyword from this marketplace card
      * @param keyword Keyword to remove to card
      */
@@ -398,9 +410,7 @@ public class MarketplaceCard {
             } else {
                 card.setCloses(closes);
             }
-            for (Keyword keyword : keywords) {
-                card.addKeyword(keyword);
-            }
+            card.setKeywords(keywords);
             return card;
         }
     }
