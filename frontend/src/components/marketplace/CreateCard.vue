@@ -125,14 +125,8 @@ export default {
 
     this.titleField.setAttribute("style", "height:" + (this.titleField.scrollHeight) + "px;overflow-y:hidden;");
     this.titleField.addEventListener("input", OnInput);
-    getKeywords()
-      .then((response) => {
-        if (typeof response === 'string') {
-          this.allKeywords = [];
-        } else {
-          this.allKeywords = response;
-        }})
-      .catch(() => (this.allKeywords = []));
+
+    this.loadKeywords();
   },
   computed: {
     selectedKeywordsNames() {
@@ -219,6 +213,16 @@ export default {
     }
   },
   methods: {
+    loadKeywords() {
+      getKeywords()
+        .then((response) => {
+          if (typeof response === 'string') {
+            this.allKeywords = [];
+          } else {
+            this.allKeywords = response;
+          }})
+        .catch(() => (this.allKeywords = []));
+    },
     async addNewKeyword() {
       if (this.keywordFilter.length > 0) {
         let keyword = {
@@ -228,14 +232,8 @@ export default {
         if (typeof result === 'string') {
           this.errorMessage = result;
         } else { // Reload the keywords to show the newly added one
-          getKeywords()
-            .then((response) => {
-              if (typeof response === 'string') {
-                this.allKeywords = [];
-              } else {
-                this.allKeywords = response;
-              }})
-            .catch(() => (this.allKeywords = []));
+          this.loadKeywords();
+          this.selectedKeywords.push(result);
         }
       }
     },

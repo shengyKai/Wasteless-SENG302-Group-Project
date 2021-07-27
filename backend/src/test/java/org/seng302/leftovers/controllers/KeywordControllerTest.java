@@ -19,9 +19,9 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.security.Key;
 import java.text.ParseException;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -194,7 +194,7 @@ class KeywordControllerTest {
 
     @Test
     void addKeyword_keywordAlreadyExists_400Response() throws Exception {
-        when(keywordRepository.findByOrderByNameAsc()).thenReturn(Arrays.asList(new Keyword("Dance")));
+        when(keywordRepository.findAll()).thenReturn(Arrays.asList(new Keyword("Dance")));
 
         JSONObject json = new JSONObject();
         json.put("name", "Dance");
@@ -205,8 +205,16 @@ class KeywordControllerTest {
                 .andExpect(status().isBadRequest())
                 .andReturn();
 
-        verify(keywordRepository, times(1)).findByOrderByNameAsc();
+        verify(keywordRepository, times(1)).findAll();
         verify(keywordRepository, times(0)).save(any());
+    }
+
+    @Test
+    void addKeyword_strangeFormatting_NameValid() {
+        when(keywordRepository.save(any())).thenAnswer(keyword -> keyword.getArgument(0));
+
+        Keyword formattedKeyword = KeywordController.formatKeyword("dAnce iS   cOol", keywordRepository);
+        assertEquals("Dance Is Cool", formattedKeyword.getName());
     }
 
     @Test

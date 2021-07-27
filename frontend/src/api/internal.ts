@@ -1002,8 +1002,9 @@ export async function getMarketplaceCardsByUser(userId: number, resultsPerPage: 
 /**
  * Creates a new keyword to associate with marketplace cards
  * @param keyword string to set as new marketplace card keyword object
+ * @returns keyword id
  */
-export async function createNewKeyword(keyword: CreateKeyword) : Promise<MaybeError<undefined>> {
+export async function createNewKeyword(keyword: CreateKeyword) : Promise<MaybeError<number>> {
   let response;
   try {
     response = await instance.post(`/keywords`, keyword);
@@ -1014,5 +1015,5 @@ export async function createNewKeyword(keyword: CreateKeyword) : Promise<MaybeEr
     if (status === 401) return 'You have been logged out. Please login again and retry';
     return 'Request failed: ' + error.response?.data.message;
   }
-  return response.data;
+  return response.data.keywordId;
 }

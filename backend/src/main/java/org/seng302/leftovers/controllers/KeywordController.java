@@ -96,17 +96,7 @@ public class KeywordController {
             AuthenticationTokenManager.checkAuthenticationToken(request);
 
             // Formats keyword to have capitals at the start of each word
-            String[] words = name.split(" ");
-            StringBuilder formattedName = new StringBuilder();
-            for (String word : words) {
-                formattedName.append(Character.toUpperCase(word.charAt(0))).append(word.substring(1).toLowerCase()).append(" ");
-            }
-            Keyword keyword = new Keyword(formattedName.toString().strip()); // Also validates name
-            for (Keyword keywords : keywordRepository.findByOrderByNameAsc()) {
-                if (keywords.getName().equalsIgnoreCase(name)) {
-                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Keyword with the given name already exists");
-                }
-            }
+            Keyword keyword = formatKeyword(name, keywordRepository);
 
             keyword = keywordRepository.save(keyword);
             JSONObject json = new JSONObject();
@@ -118,5 +108,30 @@ public class KeywordController {
             logger.error(e.getMessage());
             throw e;
         }
+    }
+
+    /**
+     * Formats and checks uniqueness of keyword
+     * @param name to be turned into keyword
+     * @param keywordRepository so method can be static
+     * @return created keyword or not unique error
+     */
+    public static Keyword formatKeyword(String name, KeywordRepository keywordRepository) {
+        String[] words = name.split(" ");
+        StringBuilder formattedName = new StringBuilder();
+        for (String word : words) {
+            if (word.length() > 1) { // 2+ characters, normal
+                formattedName.append(Character.toUpperCase(word.charAt(0))).append(word.substring(1).toLowerCase()).append(" ");
+            } else if (word.length() == 1) { // 1 character, likely a vowel that doesn't need capitalisation
+                formattedName.append(word).append(" ");
+            } // else space, ignore
+        }
+        Keyword keyword = new Keyword(formattedName.toString().strip());
+        for (Keyword keywords : keywordRepository.findAll()) {
+            if (keywords.getName().equalsIgnoreCase(name)) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Keyword with the given name already exists");
+            }
+        }
+        return keyword;
     }
 }
