@@ -44,11 +44,11 @@ function makeTestUser(userId: number) {
 }
 
 jest.mock('@/api/internal', () => ({
-  getKeywords: jest.fn(),
+  searchKeywords: jest.fn(),
   createMarketplaceCard: jest.fn(),
 }));
 
-const getKeywords = castMock(api.getKeywords);
+const searchKeywords = castMock(api.searchKeywords);
 const createMarketplaceCard = castMock(api.createMarketplaceCard);
 Vue.use(Vuetify);
 const localVue = createLocalVue();
@@ -100,7 +100,7 @@ describe('MarketplaceCardFrom.vue', () => {
       const elem = document.createElement('div');
       document.body.appendChild(elem);
 
-      getKeywords.mockResolvedValue([]);
+      searchKeywords.mockResolvedValue([]);
 
       // We have to mock the $router.go method to prevent errors.
       appWrapper = mount(App, {
@@ -318,7 +318,7 @@ describe('MarketplaceCardFrom.vue', () => {
       const elem = document.createElement('div');
       document.body.appendChild(elem);
 
-      getKeywords.mockResolvedValue([]);
+      searchKeywords.mockResolvedValue([]);
       // We have to mock the $router.go method to prevent errors.
       appWrapper = mount(App, {
         stubs: ['router-link', 'router-view'],
