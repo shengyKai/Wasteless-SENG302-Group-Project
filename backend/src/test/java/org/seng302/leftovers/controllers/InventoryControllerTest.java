@@ -2,9 +2,12 @@ package org.seng302.leftovers.controllers;
 
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
-import org.junit.jupiter.api.Assertions;
+
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
@@ -16,10 +19,17 @@ import org.seng302.leftovers.persistence.BusinessRepository;
 import org.seng302.leftovers.persistence.InventoryItemRepository;
 import org.seng302.leftovers.persistence.ProductRepository;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
+import org.seng302.leftovers.tools.SearchHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -33,6 +43,7 @@ import net.minidev.json.parser.JSONParser;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import java.lang.reflect.Field;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -40,11 +51,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.Assert.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -81,9 +88,14 @@ class InventoryControllerTest {
     private Product testProduct3;
     private Product testProductNull;
 
+    private MockedStatic<AuthenticationTokenManager> authenticationTokenManager;
+
     @BeforeEach
     public void setup() throws Exception {
         MockitoAnnotations.openMocks(this);
+
+        // By default this will mock checkAuthenticationToken method to do nothing, which simulates a valid authentication token
+        authenticationTokenManager = Mockito.mockStatic(AuthenticationTokenManager.class);
 
         testUser = new User.Builder()
                 .withFirstName("Andy")
@@ -102,6 +114,9 @@ class InventoryControllerTest {
                 .withAddress(Location.covertAddressStringToLocation("108,Albert Road,Ashburton,Christchurch,New Zealand,Canterbury,8041"))
                 .withPrimaryOwner(testUser)
                 .build();
+        Field businessIdField = Business.class.getDeclaredField("id");
+        businessIdField.setAccessible(true);
+        businessIdField.set(testBusiness, 1L);
         testProduct = new Product.Builder()
                 .withProductCode("BEANS")
                 .withBusiness(testBusiness)
@@ -140,11 +155,15 @@ class InventoryControllerTest {
         when(businessSpy.getId()).thenReturn(1L);
         when(businessRepository.getBusinessById(any())).thenReturn(businessSpy); // use our business
         doNothing().when(businessSpy).checkSessionPermissions(any()); // mock successful authentication
-        when(productRepository.findAllByBusiness(any())).thenReturn(mockProductList);
-        when(inventoryItemRepository.getInventoryByCatalogue(any())).thenReturn(inventory);
+        // when(inventoryItemRepository.findAllForBusiness(businessSpy, any())).thenReturn(inventory);
 
-        var controller = new InventoryController(businessRepository, inventoryItemRepository, productRepository);
-        mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
+        inventoryController = new InventoryController(businessRepository, inventoryItemRepository, productRepository);
+        mockMvc = MockMvcBuilders.standaloneSetup(inventoryController).build();
+    }
+
+    @AfterEach
+    void tearDown() {
+        authenticationTokenManager.close();
     }
 
     /**
@@ -182,34 +201,33 @@ class InventoryControllerTest {
 
     @Test
     void addInventory_normalUser_cannotAddInventory403() throws Exception {
-        try (MockedStatic<AuthenticationTokenManager> authenticationTokenManager = Mockito.mockStatic(AuthenticationTokenManager.class)) {
-            authenticationTokenManager
-                    .when(() -> AuthenticationTokenManager
-                            .checkAuthenticationToken(any()))
-                    .then(invocation -> null); // mock a valid session
-            Business businessSpy = spy(testBusiness);
-            when(businessRepository.getBusinessById(any())).thenReturn(businessSpy);
-            sessionAuthToken.put("accountId", 1L); // use a random account
+        Business businessSpy = spy(testBusiness);
+        when(businessRepository.getBusinessById(any())).thenReturn(businessSpy);
+        sessionAuthToken.put("accountId", 1L); // use a random account
 
-            mockMvc.perform(MockMvcRequestBuilders
-                    .post("/businesses/1/inventory")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(generateInventoryCreateInfo().toString())
-                    .sessionAttrs(sessionAuthToken))
-                    .andExpect(status().isForbidden());
-        }
+        mockMvc.perform(MockMvcRequestBuilders
+                .post("/businesses/1/inventory")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(generateInventoryCreateInfo().toString())
+                .sessionAttrs(sessionAuthToken))
+                .andExpect(status().isForbidden());
     }
 
     @Test
     void addInventory_notLoggedIn_cannotAddInventory401() throws Exception {
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.checkAuthenticationToken(any()))
+                .thenThrow(new AccessTokenException());
         Business businessSpy = spy(testBusiness);
-        when(businessRepository.getBusinessById(any())).thenReturn(businessSpy);
+        when(businessRepository.getBusinessById(any())).thenReturn(businessSpy); // use our business
+        doCallRealMethod().when(businessSpy).checkSessionPermissions(any());
 
         mockMvc.perform(MockMvcRequestBuilders
                 .post("/businesses/1/inventory")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(generateInventoryCreateInfo().toString()))
                 .andExpect(status().isUnauthorized());
+
+        authenticationTokenManager.verify(() -> AuthenticationTokenManager.checkAuthenticationToken(any()));
     }
 
     @Test
@@ -289,22 +307,12 @@ class InventoryControllerTest {
 
     @Test
     void getInventory_unverifiedAccessToken_401Thrown() throws Exception {
-        inventoryController = new InventoryController(businessRepository, inventoryItemRepository, productRepository);
-        when(businessRepository.getBusinessById(1L)).thenReturn(mockBusiness);
-        doThrow(new AccessTokenException()).when(mockBusiness).checkSessionPermissions(any());
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.checkAuthenticationToken(any()))
+                .thenThrow(new AccessTokenException());
         ResponseStatusException exception = assertThrows(ResponseStatusException.class,
                 () -> inventoryController.getInventory(1L, request, null, null, null, null));
-        Assertions.assertEquals(HttpStatus.UNAUTHORIZED, exception.getStatus());
-    }
-
-    @Test
-    void getInventoryCount_unverifiedAccessToken_401Thrown() {
-        inventoryController = new InventoryController(businessRepository, inventoryItemRepository, productRepository);
-        when(businessRepository.getBusinessById(1L)).thenReturn(mockBusiness);
-        doThrow(new AccessTokenException()).when(mockBusiness).checkSessionPermissions(any());
-        ResponseStatusException exception = assertThrows(ResponseStatusException.class,
-                () -> inventoryController.getInventoryCount(1L, request));
-        Assertions.assertEquals(HttpStatus.UNAUTHORIZED, exception.getStatus());
+        assertEquals(HttpStatus.UNAUTHORIZED, exception.getStatus());
+        authenticationTokenManager.verify(() -> AuthenticationTokenManager.checkAuthenticationToken(any()));
     }
 
     @Test
@@ -314,839 +322,111 @@ class InventoryControllerTest {
         doThrow(new ResponseStatusException(HttpStatus.FORBIDDEN)).when(mockBusiness).checkSessionPermissions(any());
         ResponseStatusException exception = assertThrows(ResponseStatusException.class,
                 () -> inventoryController.getInventory(1L, request, null, null, null, null));
-        Assertions.assertEquals(HttpStatus.FORBIDDEN, exception.getStatus());
-    }
-
-    @Test
-    void getInventoryCount_insufficientPermissions_403Thrown() {
-        inventoryController = new InventoryController(businessRepository, inventoryItemRepository, productRepository);
-        when(businessRepository.getBusinessById(1L)).thenReturn(mockBusiness);
-        doThrow(new ResponseStatusException(HttpStatus.FORBIDDEN)).when(mockBusiness).checkSessionPermissions(any());
-        ResponseStatusException exception = assertThrows(ResponseStatusException.class,
-                () -> inventoryController.getInventoryCount(1L, request));
-        Assertions.assertEquals(HttpStatus.FORBIDDEN, exception.getStatus());
+        assertEquals(HttpStatus.FORBIDDEN, exception.getStatus());
     }
 
     @Test
     void getInventory_businessNotFound_406Thrown() {
-        inventoryController = new InventoryController(businessRepository, inventoryItemRepository, productRepository);
         when(businessRepository.getBusinessById(1L)).thenThrow(new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE));
         ResponseStatusException exception = assertThrows(ResponseStatusException.class,
                 () -> inventoryController.getInventory(1L, request, null, null, null, null));
-        Assertions.assertEquals(HttpStatus.NOT_ACCEPTABLE, exception.getStatus());
+        assertEquals(HttpStatus.NOT_ACCEPTABLE, exception.getStatus());
     }
 
     @Test
-    void getInventoryCount_businessNotFound_406Thrown() {
-        inventoryController = new InventoryController(businessRepository, inventoryItemRepository, productRepository);
-        when(businessRepository.getBusinessById(1L)).thenThrow(new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE));
-        ResponseStatusException exception = assertThrows(ResponseStatusException.class,
-                () -> inventoryController.getInventoryCount(1L, request));
-        Assertions.assertEquals(HttpStatus.NOT_ACCEPTABLE, exception.getStatus());
-    }
-
-    @Test
-    void getInventory_emptyInventory_emptyArrayReturned() {
-        List<InventoryItem> emptyInventory = new ArrayList<>();
-        inventoryController = new InventoryController(businessRepository, inventoryItemRepository, productRepository);
+    void getInventory_emptyInventory_emptyPageReturned() {
         when(businessRepository.getBusinessById(1L)).thenReturn(mockBusiness);
-        when(productRepository.findAllByBusiness(mockBusiness)).thenReturn(mockProductList);
-        when(inventoryItemRepository.getInventoryByCatalogue(mockProductList)).thenReturn(emptyInventory);
-        JSONArray result = inventoryController.getInventory(1L, request, null, null, null, null);
-        Assertions.assertEquals(0, result.size());
+        when(inventoryItemRepository.findAllForBusiness(eq(mockBusiness), any())).thenReturn(Page.empty());
+        JSONObject result = inventoryController.getInventory(1L, request, null, null, null, null);
+
+        verify(inventoryItemRepository, times(1)).findAllForBusiness(eq(mockBusiness), any());
+
+        assertEquals(0L, ((List<?>) result.get("results")).size());
+        assertEquals(0L, result.get("count"));
+        assertEquals(2L, result.size());
     }
 
-    @Test
-    void getInventoryCount_emptyInventory_zeroReturned() {
-        List<InventoryItem> emptyInventory = new ArrayList<>();
-        inventoryController = new InventoryController(businessRepository, inventoryItemRepository, productRepository);
-        when(businessRepository.getBusinessById(1L)).thenReturn(mockBusiness);
-        when(productRepository.findAllByBusiness(mockBusiness)).thenReturn(mockProductList);
-        when(inventoryItemRepository.getInventoryByCatalogue(mockProductList)).thenReturn(emptyInventory);
-        JSONObject result = inventoryController.getInventoryCount(1L, request);
-        Assertions.assertTrue(result.containsKey("count"));
-        Assertions.assertEquals(0, result.getAsNumber("count"));
-    }
 
     @Test
-    void getInventory_multipleItems_correctArrayReturned() throws Exception {
+    void getInventory_inventoryWithItems_pageWithItemsReturned() throws Exception {
         String futureDate = LocalDate.now().plus(50, ChronoUnit.DAYS).toString();
-        List<InventoryItem> inventory = new ArrayList<>();
-        JSONArray expectedResponse = new JSONArray();
-        inventory.add(new InventoryItem.Builder().withProduct(testProduct).withQuantity(1).withExpires(futureDate).build());
-        inventory.add(new InventoryItem.Builder().withProduct(testProduct).withQuantity(39).withExpires(futureDate).build());
-        inventory.add(new InventoryItem.Builder().withProduct(testProduct).withQuantity(54).withExpires(futureDate).build());
-        for (InventoryItem item : inventory) {
-            expectedResponse.appendElement(item.constructJSONObject());
-        }
+        List<InventoryItem> items = List.of(
+                new InventoryItem.Builder().withProduct(testProduct).withQuantity(1).withExpires(futureDate).build(),
+                new InventoryItem.Builder().withProduct(testProduct).withQuantity(39).withExpires(futureDate).build(),
+                new InventoryItem.Builder().withProduct(testProduct).withQuantity(54).withExpires(futureDate).build()
+        );
 
-        inventoryController = new InventoryController(businessRepository, inventoryItemRepository, productRepository);
+        Page<InventoryItem> inventory = new PageImpl<>(items, Pageable.unpaged(), 1000L);
         when(businessRepository.getBusinessById(1L)).thenReturn(mockBusiness);
-        when(productRepository.findAllByBusiness(mockBusiness)).thenReturn(mockProductList);
-        when(inventoryItemRepository.getInventoryByCatalogue(mockProductList)).thenReturn(inventory);
-        JSONArray result = inventoryController.getInventory(1L, request, null, null, null, null);
-        Assertions.assertEquals(expectedResponse, result);
+        when(inventoryItemRepository.findAllForBusiness(eq(mockBusiness), any())).thenReturn(inventory);
+        JSONObject result = inventoryController.getInventory(1L, request, null, null, null, null);
+        
+        JSONArray expectedArray = new JSONArray();
+        items.stream().map(InventoryItem::constructJSONObject).forEach(expectedArray::add);
+        
+        
+        assertEquals(expectedArray, result.get("results"));
+        assertEquals(1000L, result.get("count"));
+        assertEquals(2L, result.size());
     }
 
-    @Test
-    void getInventoryCount_multipleItems_correctCountReturned() throws Exception {
-        String futureDate = LocalDate.now().plus(50, ChronoUnit.DAYS).toString();
-
-        List<InventoryItem> inventory = new ArrayList<>();
-        inventory.add(new InventoryItem.Builder().withProduct(testProduct).withQuantity(1).withExpires(futureDate).build());
-        inventory.add(new InventoryItem.Builder().withProduct(testProduct).withQuantity(39).withExpires(futureDate).build());
-        inventory.add(new InventoryItem.Builder().withProduct(testProduct).withQuantity(54).withExpires(futureDate).build());
-
-        inventoryController = new InventoryController(businessRepository, inventoryItemRepository, productRepository);
-        when(businessRepository.getBusinessById(1L)).thenReturn(mockBusiness);
-        when(productRepository.findAllByBusiness(mockBusiness)).thenReturn(mockProductList);
-        when(inventoryItemRepository.getInventoryByCatalogue(mockProductList)).thenReturn(inventory);
-
-        JSONObject result = inventoryController.getInventoryCount(1L, request);
-        Assertions.assertTrue(result.containsKey("count"));
-        Assertions.assertEquals(3, result.getAsNumber("count"));
-    }
 
     @Test
-    void retrievePaginatedInventory_firstPage_firstPageOfInventoryItems() throws Exception {
-        MvcResult result = mockMvc.perform(
+    void retrievePaginatedInventory_firstPage_firstRequested() throws Exception {
+        when(inventoryItemRepository.findAllForBusiness(any(), any())).thenReturn(Page.empty());
+        mockMvc.perform(
                 MockMvcRequestBuilders.get("/businesses/1/inventory").param("page", "1").param("resultsPerPage", "2"))
                 .andExpect(status().isOk()).andReturn();
 
-        JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
-        JSONArray responseBody = (JSONArray) parser.parse(result.getResponse().getContentAsString());
-
-        // Check length should be 2 products
-        assertEquals(2, responseBody.size());
-
-        // Check the two products are the expected ones
-        JSONObject firstInventory = (JSONObject) responseBody.get(0);
-        JSONObject secondInventory = (JSONObject) responseBody.get(1);
-
-        // Because the default sorting option is by Product code, the two product codes
-        // we have are "BEANS"
-        // "HAM" and "VEGE" respectively, so the order should still stay the same as per
-        // how they were added
-        // in addSeveralInventoryItemsToAnInventory()
-        // using the differing quantities of the inventory items to identify that the
-        // pagination
-        // works as intended
-        assertEquals("1", firstInventory.getAsString("quantity"));
-        assertEquals("2", secondInventory.getAsString("quantity"));
+        PageRequest expectedPageRequest = SearchHelper.getPageRequest(1, 2, Sort.by(new Sort.Order(Direction.ASC, "product.productCode").ignoreCase()));
+        verify(inventoryItemRepository, times(1)).findAllForBusiness(testBusiness, expectedPageRequest);
     }
 
     @Test
-    void retrievePaginatedInventory_secondPage_secondPageOfInventoryItems() throws Exception {
-        MvcResult result = mockMvc.perform(
+    void retrievePaginatedInventory_secondPage_secondPageRequested() throws Exception {
+        when(inventoryItemRepository.findAllForBusiness(any(), any())).thenReturn(Page.empty());
+        mockMvc.perform(
                 MockMvcRequestBuilders.get("/businesses/1/inventory").param("page", "2").param("resultsPerPage", "2"))
                 .andExpect(status().isOk()).andReturn();
 
-        JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
-        JSONArray responseBody = (JSONArray) parser.parse(result.getResponse().getContentAsString());
-
-        // Check length should be 2 products
-        assertEquals(2, responseBody.size());
-
-        // Check the two products are the expected ones
-        JSONObject firstInventory = (JSONObject) responseBody.get(0);
-        JSONObject secondInventory = (JSONObject) responseBody.get(1);
-
-        // Because the default sorting option is by Product code, the two product codes
-        // we have are "BEANS"
-        // "HAM" and "VEGE" respectively, so the order should still stay the same as per
-        // how they were added
-        // in addSeveralInventoryItemsToAnInventory()
-        // using the differing quantities of the inventory items to identify that the
-        // pagination
-        // works as intended
-        assertEquals("3", firstInventory.getAsString("quantity"));
-        assertEquals("4", secondInventory.getAsString("quantity"));
+        PageRequest expectedPageRequest = SearchHelper.getPageRequest(2, 2, Sort.by(new Sort.Order(Direction.ASC, "product.productCode").ignoreCase()));
+        verify(inventoryItemRepository, times(1)).findAllForBusiness(testBusiness, expectedPageRequest);
     }
 
-    @Test
-    void retrieveSortedInventory_byName_correctOrderOfInventory() throws Exception {
-        MvcResult result = mockMvc
-                .perform(MockMvcRequestBuilders.get("/businesses/1/inventory").param("orderBy", "name"))
+    @ParameterizedTest
+    @CsvSource({
+            ",product.productCode",
+            "productCode,product.productCode",
+            "name,product.name",
+            "description,product.description",
+            "manufacturer,product.manufacturer",
+            "recommendedRetailPrice,product.recommendedRetailPrice",
+            "created,product.created",
+            "quantity,quantity",
+            "pricePerItem,pricePerItem",
+            "totalPrice,totalPrice",
+            "sellBy,sellBy",
+            "bestBefore,bestBefore",
+            "expires,expires",
+    })
+    void retrieveSortedInventory_byProvidedField_requestedOrderingByField(String orderBy, String ordering) throws Exception {
+        when(inventoryItemRepository.findAllForBusiness(any(), any())).thenReturn(Page.empty());
+        mockMvc.perform(MockMvcRequestBuilders.get("/businesses/1/inventory").param("orderBy", orderBy))
                 .andExpect(status().isOk()).andReturn();
-
-        JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
-        JSONArray responseBody = (JSONArray) parser.parse(result.getResponse().getContentAsString());
-
-        assertEquals(7, responseBody.size());
-
-        // there are different types of inventory items, so test the index positions of
-        // the those types
-        JSONObject firstInventory = (JSONObject) responseBody.get(0);
-        JSONObject secondInventory = (JSONObject) responseBody.get(2);
-        JSONObject thirdInventory = (JSONObject) responseBody.get(4);
-
-        // the ordering is as such because the names are "another name", "some Name" and
-        // "some Name 2"
-        assertEquals(testProduct3.getName(), ((JSONObject) firstInventory.get("product")).getAsString("name"));
-        assertEquals(testProduct.getName(), ((JSONObject) secondInventory.get("product")).getAsString("name"));
-        assertEquals(testProduct2.getName(), ((JSONObject) thirdInventory.get("product")).getAsString("name"));
+        
+        PageRequest expectedPageRequest = SearchHelper.getPageRequest(null, null, Sort.by(new Sort.Order(Direction.ASC, ordering).ignoreCase()));
+        verify(inventoryItemRepository, times(1)).findAllForBusiness(testBusiness, expectedPageRequest);
     }
 
     @Test
-    void retrieveSortedInventory_byNameReverse_correctOrderOfInventory() throws Exception {
-        MvcResult result = mockMvc.perform(
+    void retrieveSortedInventory_reversed_reverseOrderingRequested() throws Exception {
+        when(inventoryItemRepository.findAllForBusiness(any(), any())).thenReturn(Page.empty());
+        mockMvc.perform(
                 MockMvcRequestBuilders.get("/businesses/1/inventory").param("reverse", "true").param("orderBy", "name"))
                 .andExpect(status().isOk()).andReturn();
 
-        JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
-        JSONArray responseBody = (JSONArray) parser.parse(result.getResponse().getContentAsString());
-
-        assertEquals(7, responseBody.size());
-
-        // there are different types of inventory items, so test the index positions of
-        // the those types
-        JSONObject firstInventory = (JSONObject) responseBody.get(0);
-        JSONObject secondInventory = (JSONObject) responseBody.get(1);
-        JSONObject thirdInventory = (JSONObject) responseBody.get(3);
-        JSONObject fourthInventory = (JSONObject) responseBody.get(5);
-
-        // the ordering is as such because the names are "some Name 2", "some Name" and
-        // "another name"
-        assertEquals(testProductNull.getName(), ((JSONObject) firstInventory.get("product")).getAsString("name"));
-        assertEquals(testProduct2.getName(), ((JSONObject) secondInventory.get("product")).getAsString("name"));
-        assertEquals(testProduct.getName(), ((JSONObject) thirdInventory.get("product")).getAsString("name"));
-        assertEquals(testProduct3.getName(), ((JSONObject) fourthInventory.get("product")).getAsString("name"));
-    }
-
-    @Test
-    void retrieveSortedInventory_byDescription_correctOrderOfInventoryWithNullBottom() throws Exception {
-        MvcResult result = mockMvc
-                .perform(MockMvcRequestBuilders.get("/businesses/1/inventory").param("orderBy", "description"))
-                .andExpect(status().isOk()).andReturn();
-
-        JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
-        JSONArray responseBody = (JSONArray) parser.parse(result.getResponse().getContentAsString());
-
-        assertEquals(7, responseBody.size());
-
-        // there are different types of inventory items, so test the index positions of
-        // the those types
-        JSONObject firstInventory = (JSONObject) responseBody.get(0);
-        JSONObject secondInventory = (JSONObject) responseBody.get(2);
-        JSONObject thirdInventory = (JSONObject) responseBody.get(4);
-        JSONObject fourthInventory = (JSONObject) responseBody.get(6);
-
-        // the ordering is as such because the names are "another description", "some
-        // description" and "some description 2"
-        assertEquals(testProduct3.getDescription(),
-                ((JSONObject) firstInventory.get("product")).getAsString("description"));
-        assertEquals(testProduct.getDescription(),
-                ((JSONObject) secondInventory.get("product")).getAsString("description"));
-        assertEquals(testProduct2.getDescription(),
-                ((JSONObject) thirdInventory.get("product")).getAsString("description"));
-        assertEquals(testProductNull.getDescription(),
-                ((JSONObject) fourthInventory.get("product")).getAsString("description"));
-    }
-
-    @Test
-    void retrieveSortedInventory_byDescriptionReverse_correctOrderOfInventoryWithNullTop() throws Exception {
-        MvcResult result = mockMvc.perform(MockMvcRequestBuilders.get("/businesses/1/inventory")
-                .param("reverse", "true").param("orderBy", "description")).andExpect(status().isOk()).andReturn();
-
-        JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
-        JSONArray responseBody = (JSONArray) parser.parse(result.getResponse().getContentAsString());
-
-        assertEquals(7, responseBody.size());
-
-        // there are different types of inventory items, so test the index positions of
-        // the those types
-        JSONObject firstInventory = (JSONObject) responseBody.get(0);
-        JSONObject secondInventory = (JSONObject) responseBody.get(1);
-        JSONObject thirdInventory = (JSONObject) responseBody.get(3);
-        JSONObject fourthInventory = (JSONObject) responseBody.get(5);
-
-        // the ordering is as such because the names are "some description", "some
-        // description 2" and "another description"
-        assertEquals(testProductNull.getDescription(),
-                ((JSONObject) firstInventory.get("product")).getAsString("description"));
-        assertEquals(testProduct2.getDescription(),
-                ((JSONObject) secondInventory.get("product")).getAsString("description"));
-        assertEquals(testProduct.getDescription(),
-                ((JSONObject) thirdInventory.get("product")).getAsString("description"));
-        assertEquals(testProduct3.getDescription(),
-                ((JSONObject) fourthInventory.get("product")).getAsString("description"));
-    }
-
-    @Test
-    void retrieveSortedInventory_byManufacturer_correctOrderOfInventoryWithNullBottom() throws Exception {
-        MvcResult result = mockMvc
-                .perform(MockMvcRequestBuilders.get("/businesses/1/inventory").param("orderBy", "manufacturer"))
-                .andExpect(status().isOk()).andReturn();
-
-        JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
-        JSONArray responseBody = (JSONArray) parser.parse(result.getResponse().getContentAsString());
-
-        assertEquals(7, responseBody.size());
-
-        // there are different types of inventory items, so test the index positions of
-        // the those types
-        JSONObject firstInventory = (JSONObject) responseBody.get(0);
-        JSONObject secondInventory = (JSONObject) responseBody.get(2);
-        JSONObject thirdInventory = (JSONObject) responseBody.get(4);
-        JSONObject fourthInventory = (JSONObject) responseBody.get(6);
-
-        // same idea as the above tests
-        assertEquals(testProduct3.getManufacturer(),
-                ((JSONObject) firstInventory.get("product")).getAsString("manufacturer"));
-        assertEquals(testProduct.getManufacturer(),
-                ((JSONObject) secondInventory.get("product")).getAsString("manufacturer"));
-        assertEquals(testProduct2.getManufacturer(),
-                ((JSONObject) thirdInventory.get("product")).getAsString("manufacturer"));
-        assertEquals(testProductNull.getManufacturer(),
-                ((JSONObject) fourthInventory.get("product")).getAsString("manufacturer"));
-    }
-
-    @Test
-    void retrieveSortedInventory_byManufacturerReverse_correctOrderOfInventoryWithNullTop() throws Exception {
-        MvcResult result = mockMvc.perform(MockMvcRequestBuilders.get("/businesses/1/inventory")
-                .param("reverse", "true").param("orderBy", "manufacturer")).andExpect(status().isOk()).andReturn();
-
-        JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
-        JSONArray responseBody = (JSONArray) parser.parse(result.getResponse().getContentAsString());
-
-        assertEquals(7, responseBody.size());
-
-        // there are different types of inventory items, so test the index positions of
-        // the those types
-        JSONObject firstInventory = (JSONObject) responseBody.get(0);
-        JSONObject secondInventory = (JSONObject) responseBody.get(1);
-        JSONObject thirdInventory = (JSONObject) responseBody.get(3);
-        JSONObject fourthInventory = (JSONObject) responseBody.get(5);
-
-        // same idea as the above tests
-        assertEquals(testProductNull.getManufacturer(),
-                ((JSONObject) firstInventory.get("product")).getAsString("manufacturer"));
-        assertEquals(testProduct2.getManufacturer(),
-                ((JSONObject) secondInventory.get("product")).getAsString("manufacturer"));
-        assertEquals(testProduct.getManufacturer(),
-                ((JSONObject) thirdInventory.get("product")).getAsString("manufacturer"));
-        assertEquals(testProduct3.getManufacturer(),
-                ((JSONObject) fourthInventory.get("product")).getAsString("manufacturer"));
-    }
-
-    @Test
-    void retrieveSortedInventory_byRecommendedRetailPrice_correctOrderOfInventoryWithNullBottom() throws Exception {
-        MvcResult result = mockMvc.perform(
-                MockMvcRequestBuilders.get("/businesses/1/inventory").param("orderBy", "recommendedRetailPrice"))
-                .andExpect(status().isOk()).andReturn();
-
-        JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
-        JSONArray responseBody = (JSONArray) parser.parse(result.getResponse().getContentAsString());
-
-        assertEquals(7, responseBody.size());
-
-        // there are different types of inventory items, so test the index positions of
-        // the those types
-        JSONObject firstInventory = (JSONObject) responseBody.get(0);
-        JSONObject secondInventory = (JSONObject) responseBody.get(2);
-        JSONObject thirdInventory = (JSONObject) responseBody.get(4);
-        JSONObject fourthInventory = (JSONObject) responseBody.get(6);
-
-        // same idea as the above tests
-        assertEquals(testProduct.getRecommendedRetailPrice().toString(),
-                ((JSONObject) firstInventory.get("product")).getAsString("recommendedRetailPrice"));
-        assertEquals(testProduct2.getRecommendedRetailPrice().toString(),
-                ((JSONObject) secondInventory.get("product")).getAsString("recommendedRetailPrice"));
-        assertEquals(testProduct3.getRecommendedRetailPrice().toString(),
-                ((JSONObject) thirdInventory.get("product")).getAsString("recommendedRetailPrice"));
-        // Cannot toString a null value, so just compare with null instead
-        assertEquals(null, ((JSONObject) fourthInventory.get("product")).getAsString("recommendedRetailPrice"));
-    }
-
-    @Test
-    void retrieveSortedInventory_byRecommendedRetailPriceReverse_correctOrderOfInventoryWithNullTop() throws Exception {
-        MvcResult result = mockMvc.perform(MockMvcRequestBuilders.get("/businesses/1/inventory")
-                .param("reverse", "true").param("orderBy", "recommendedRetailPrice")).andExpect(status().isOk())
-                .andReturn();
-
-        JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
-        JSONArray responseBody = (JSONArray) parser.parse(result.getResponse().getContentAsString());
-
-        assertEquals(7, responseBody.size());
-
-        // there are different types of inventory items, so test the index positions of
-        // the those types
-        JSONObject firstInventory = (JSONObject) responseBody.get(0);
-        JSONObject secondInventory = (JSONObject) responseBody.get(1);
-        JSONObject thirdInventory = (JSONObject) responseBody.get(3);
-        JSONObject fourthInventory = (JSONObject) responseBody.get(5);
-
-        // same idea as the above tests
-        // Cannot toString a null value, so just compare with null instead
-        assertEquals(null, ((JSONObject) firstInventory.get("product")).getAsString("recommendedRetailPrice"));
-        assertEquals(testProduct3.getRecommendedRetailPrice().toString(),
-                ((JSONObject) secondInventory.get("product")).getAsString("recommendedRetailPrice"));
-        assertEquals(testProduct2.getRecommendedRetailPrice().toString(),
-                ((JSONObject) thirdInventory.get("product")).getAsString("recommendedRetailPrice"));
-        assertEquals(testProduct.getRecommendedRetailPrice().toString(),
-                ((JSONObject) fourthInventory.get("product")).getAsString("recommendedRetailPrice"));
-    }
-
-    @Test
-    void retrieveSortedInventory_byCreated_correctOrderOfInventory() throws Exception {
-        MvcResult result = mockMvc
-                .perform(MockMvcRequestBuilders.get("/businesses/1/inventory").param("orderBy", "created"))
-                .andExpect(status().isOk()).andReturn();
-
-        JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
-        JSONArray responseBody = (JSONArray) parser.parse(result.getResponse().getContentAsString());
-
-        assertEquals(7, responseBody.size());
-
-        // there are different types of inventory items, so test the index positions of
-        // the those types
-        JSONObject firstInventory = (JSONObject) responseBody.get(0);
-        JSONObject secondInventory = (JSONObject) responseBody.get(2);
-        JSONObject thirdInventory = (JSONObject) responseBody.get(4);
-
-        // same idea as the above tests
-        assertEquals(testProduct.getCreated().toString(), ((JSONObject) firstInventory.get("product")).get("created"));
-        assertEquals(testProduct2.getCreated().toString(), ((JSONObject) secondInventory.get("product")).get("created"));
-        assertEquals(testProduct3.getCreated().toString(), ((JSONObject) thirdInventory.get("product")).get("created"));
-    }
-
-    @Test
-    void retrieveSortedInventory_byCreatedReverse_correctOrderOfInventory() throws Exception {
-        MvcResult result = mockMvc.perform(MockMvcRequestBuilders.get("/businesses/1/inventory")
-                .param("reverse", "true").param("orderBy", "created")).andExpect(status().isOk()).andReturn();
-
-        JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
-        JSONArray responseBody = (JSONArray) parser.parse(result.getResponse().getContentAsString());
-
-        assertEquals(7, responseBody.size());
-
-        // there are different types of inventory items, so test the index positions of
-        // the those types
-        JSONObject firstInventory = (JSONObject) responseBody.get(0);
-        JSONObject secondInventory = (JSONObject) responseBody.get(1);
-        JSONObject thirdInventory = (JSONObject) responseBody.get(3);
-        JSONObject fourthInventory = (JSONObject) responseBody.get(5);
-
-        // same idea as the above tests
-        assertEquals(testProductNull.getCreated().toString(), ((JSONObject) firstInventory.get("product")).get("created"));
-        assertEquals(testProduct3.getCreated().toString(), ((JSONObject) secondInventory.get("product")).get("created"));
-        assertEquals(testProduct2.getCreated().toString(), ((JSONObject) thirdInventory.get("product")).get("created"));
-        assertEquals(testProduct.getCreated().toString(), ((JSONObject) fourthInventory.get("product")).get("created"));
-    }
-
-    @Test
-    void retrieveSortedInventory_byQuantity_correctOrderOfInventory() throws Exception {
-        MvcResult result = mockMvc
-                .perform(MockMvcRequestBuilders.get("/businesses/1/inventory").param("orderBy", "quantity"))
-                .andExpect(status().isOk()).andReturn();
-
-        JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
-        JSONArray responseBody = (JSONArray) parser.parse(result.getResponse().getContentAsString());
-
-        assertEquals(7, responseBody.size());
-
-        // there are different types of inventory items, so test the index positions of
-        // the those types
-        JSONObject firstInventory = (JSONObject) responseBody.get(0);
-        JSONObject secondInventory = (JSONObject) responseBody.get(2);
-        JSONObject thirdInventory = (JSONObject) responseBody.get(4);
-
-        // same idea as the above tests
-        assertEquals("1", firstInventory.getAsString("quantity"));
-        assertEquals("3", secondInventory.getAsString("quantity"));
-        assertEquals("5", thirdInventory.getAsString("quantity"));
-    }
-
-    @Test
-    void retrieveSortedInventory_byQuantityReverse_correctOrderOfInventory() throws Exception {
-        MvcResult result = mockMvc.perform(MockMvcRequestBuilders.get("/businesses/1/inventory")
-                .param("reverse", "true").param("orderBy", "quantity")).andExpect(status().isOk()).andReturn();
-
-        JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
-        JSONArray responseBody = (JSONArray) parser.parse(result.getResponse().getContentAsString());
-
-        assertEquals(7, responseBody.size());
-
-        // there are different types of inventory items, so test the index positions of
-        // the those types
-        JSONObject firstInventory = (JSONObject) responseBody.get(0);
-        JSONObject secondInventory = (JSONObject) responseBody.get(1);
-        JSONObject thirdInventory = (JSONObject) responseBody.get(3);
-        JSONObject fourthInventory = (JSONObject) responseBody.get(5);
-
-        // same idea as the above tests
-        assertEquals("7", firstInventory.getAsString("quantity"));
-        assertEquals("6", secondInventory.getAsString("quantity"));
-        assertEquals("4", thirdInventory.getAsString("quantity"));
-        assertEquals("2", fourthInventory.getAsString("quantity"));
-    }
-
-    @Test
-    void retrieveSortedInventory_byPricePerItem_correctOrderOfInventoryWithNullBottom() throws Exception {
-        MvcResult result = mockMvc
-                .perform(MockMvcRequestBuilders.get("/businesses/1/inventory").param("orderBy", "pricePerItem"))
-                .andExpect(status().isOk()).andReturn();
-
-        JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
-        JSONArray responseBody = (JSONArray) parser.parse(result.getResponse().getContentAsString());
-
-        assertEquals(7, responseBody.size());
-
-        // there are different types of inventory items, so test the index positions of
-        // the those types
-        JSONObject firstInventory = (JSONObject) responseBody.get(0);
-        JSONObject secondInventory = (JSONObject) responseBody.get(2);
-        JSONObject thirdInventory = (JSONObject) responseBody.get(4);
-        JSONObject fourthInventory = (JSONObject) responseBody.get(6);
-
-        // same idea as the above tests
-        assertEquals("1", firstInventory.getAsString("pricePerItem"));
-        assertEquals("3", secondInventory.getAsString("pricePerItem"));
-        assertEquals("5", thirdInventory.getAsString("pricePerItem"));
-        assertEquals(null, fourthInventory.getAsString("pricePerItem"));
-    }
-
-    @Test
-    void retrieveSortedInventory_byPricePerItemReverse_correctOrderOfInventoryWithNullTop() throws Exception {
-        MvcResult result = mockMvc.perform(MockMvcRequestBuilders.get("/businesses/1/inventory")
-                .param("reverse", "true").param("orderBy", "pricePerItem")).andExpect(status().isOk()).andReturn();
-
-        JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
-        JSONArray responseBody = (JSONArray) parser.parse(result.getResponse().getContentAsString());
-
-        assertEquals(7, responseBody.size());
-
-        // there are different types of inventory items, so test the index positions of
-        // the those types
-        JSONObject firstInventory = (JSONObject) responseBody.get(0);
-        JSONObject secondInventory = (JSONObject) responseBody.get(1);
-        JSONObject thirdInventory = (JSONObject) responseBody.get(3);
-        JSONObject fourthInventory = (JSONObject) responseBody.get(5);
-
-        // same idea as the above tests
-        assertEquals(null, firstInventory.getAsString("pricePerItem"));
-        assertEquals("6", secondInventory.getAsString("pricePerItem"));
-        assertEquals("4", thirdInventory.getAsString("pricePerItem"));
-        assertEquals("2", fourthInventory.getAsString("pricePerItem"));
-    }
-
-    @Test
-    void retrieveSortedInventory_byTotalPrice_correctOrderOfInventoryWithNullBottom() throws Exception {
-        MvcResult result = mockMvc
-                .perform(MockMvcRequestBuilders.get("/businesses/1/inventory").param("orderBy", "totalPrice"))
-                .andExpect(status().isOk()).andReturn();
-
-        JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
-        JSONArray responseBody = (JSONArray) parser.parse(result.getResponse().getContentAsString());
-
-        assertEquals(7, responseBody.size());
-
-        // there are different types of inventory items, so test the index positions of
-        // the those types
-        JSONObject firstInventory = (JSONObject) responseBody.get(0);
-        JSONObject secondInventory = (JSONObject) responseBody.get(2);
-        JSONObject thirdInventory = (JSONObject) responseBody.get(4);
-        JSONObject fourthInventory = (JSONObject) responseBody.get(6);
-
-        // same idea as the above tests
-        assertEquals("1", firstInventory.getAsString("totalPrice"));
-        assertEquals("3", secondInventory.getAsString("totalPrice"));
-        assertEquals("5", thirdInventory.getAsString("totalPrice"));
-        assertEquals(null, fourthInventory.getAsString("totalPrice"));
-    }
-
-    @Test
-    void retrieveSortedInventory_byTotalPriceReverse_correctOrderOfInventoryWithNullTop() throws Exception {
-        MvcResult result = mockMvc.perform(MockMvcRequestBuilders.get("/businesses/1/inventory")
-                .param("reverse", "true").param("orderBy", "totalPrice")).andExpect(status().isOk()).andReturn();
-
-        JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
-        JSONArray responseBody = (JSONArray) parser.parse(result.getResponse().getContentAsString());
-
-        assertEquals(7, responseBody.size());
-
-        // there are different types of inventory items, so test the index positions of
-        // the those types
-        JSONObject firstInventory = (JSONObject) responseBody.get(0);
-        JSONObject secondInventory = (JSONObject) responseBody.get(1);
-        JSONObject thirdInventory = (JSONObject) responseBody.get(3);
-        JSONObject fourthInventory = (JSONObject) responseBody.get(5);
-
-        // same idea as the above tests
-        assertEquals(null, firstInventory.getAsString("totalPrice"));
-        assertEquals("6", secondInventory.getAsString("totalPrice"));
-        assertEquals("4", thirdInventory.getAsString("totalPrice"));
-        assertEquals("2", fourthInventory.getAsString("totalPrice"));
-    }
-
-    @Test
-    void retrieveSortedInventory_byManufactured_correctOrderOfInventoryWithNullBottom() throws Exception {
-        MvcResult result = mockMvc
-                .perform(MockMvcRequestBuilders.get("/businesses/1/inventory").param("orderBy", "manufactured"))
-                .andExpect(status().isOk()).andReturn();
-
-        JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
-        JSONArray responseBody = (JSONArray) parser.parse(result.getResponse().getContentAsString());
-
-        assertEquals(7, responseBody.size());
-
-        // there are different types of inventory items, so test the index positions of
-        // the those types
-        JSONObject firstInventory = (JSONObject) responseBody.get(0);
-        JSONObject secondInventory = (JSONObject) responseBody.get(2);
-        JSONObject thirdInventory = (JSONObject) responseBody.get(4);
-        JSONObject fourthInventory = (JSONObject) responseBody.get(6);
-
-        // same idea as the above tests
-
-        // the dates below correspond to the dates created in
-        // addSeveralInventoryItemsToAnInventory(),
-        // just that it is in the JSON format from the database
-        assertEquals("2020-01-01", firstInventory.get("manufactured").toString());
-        assertEquals("2020-03-01", secondInventory.get("manufactured").toString());
-        assertEquals("2020-06-06", thirdInventory.get("manufactured").toString());
-        assertEquals(null, fourthInventory.get("manufactured"));
-    }
-
-    @Test
-    void retrieveSortedInventory_byManufacturedReverse_correctOrderOfInventoryWithNullTop() throws Exception {
-        MvcResult result = mockMvc.perform(MockMvcRequestBuilders.get("/businesses/1/inventory")
-                .param("reverse", "true").param("orderBy", "manufactured")).andExpect(status().isOk()).andReturn();
-
-        JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
-        JSONArray responseBody = (JSONArray) parser.parse(result.getResponse().getContentAsString());
-
-        assertEquals(7, responseBody.size());
-
-        // there are different types of inventory items, so test the index positions of
-        // the those types
-        JSONObject firstInventory = (JSONObject) responseBody.get(0);
-        JSONObject secondInventory = (JSONObject) responseBody.get(1);
-        JSONObject thirdInventory = (JSONObject) responseBody.get(3);
-        JSONObject fourthInventory = (JSONObject) responseBody.get(5);
-
-        // same idea as the above tests
-        assertEquals(null, firstInventory.get("manufactured"));
-        // the dates below correspond to the dates created in
-        // addSeveralInventoryItemsToAnInventory(),
-        // just that it is in the JSON format from the database
-        assertEquals("2020-06-06", secondInventory.get("manufactured").toString());
-        assertEquals("2020-03-01", thirdInventory.get("manufactured").toString());
-        assertEquals("2020-01-01", fourthInventory.get("manufactured").toString());
-    }
-
-    @Test
-    void retrieveSortedInventory_bySellBy_correctOrderOfInventoryWithNullBottom() throws Exception {
-        MvcResult result = mockMvc
-                .perform(MockMvcRequestBuilders.get("/businesses/1/inventory").param("orderBy", "sellBy"))
-                .andExpect(status().isOk()).andReturn();
-
-        JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
-        JSONArray responseBody = (JSONArray) parser.parse(result.getResponse().getContentAsString());
-
-        assertEquals(7, responseBody.size());
-
-        // there are different types of inventory items, so test the index positions of
-        // the those types
-        JSONObject firstInventory = (JSONObject) responseBody.get(0);
-        JSONObject secondInventory = (JSONObject) responseBody.get(2);
-        JSONObject thirdInventory = (JSONObject) responseBody.get(4);
-        JSONObject fourthInventory = (JSONObject) responseBody.get(6);
-
-        // the dates below correspond to the dates created in
-        // addSeveralInventoryItemsToAnInventory(),
-        // just that it is in the JSON format from the database
-        assertEquals("2026-02-01", firstInventory.get("sellBy").toString());
-        assertEquals("2027-02-01", secondInventory.get("sellBy").toString());
-        assertEquals("2028-02-01", thirdInventory.get("sellBy").toString());
-        assertEquals(null, fourthInventory.get("sellBy"));
-    }
-
-    @Test
-    void retrieveSortedInventory_bySellByReverse_correctOrderOfInventoryWithNullTop() throws Exception {
-        MvcResult result = mockMvc.perform(MockMvcRequestBuilders.get("/businesses/1/inventory")
-                .param("reverse", "true").param("orderBy", "sellBy")).andExpect(status().isOk()).andReturn();
-
-        JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
-        JSONArray responseBody = (JSONArray) parser.parse(result.getResponse().getContentAsString());
-
-        assertEquals(7, responseBody.size());
-
-        // there are different types of inventory items, so test the index positions of
-        // the those types
-        JSONObject firstInventory = (JSONObject) responseBody.get(0);
-        JSONObject secondInventory = (JSONObject) responseBody.get(1);
-        JSONObject thirdInventory = (JSONObject) responseBody.get(3);
-        JSONObject fourthInventory = (JSONObject) responseBody.get(5);
-
-        // same idea as the above tests
-        assertEquals(null, firstInventory.get("sellBy"));
-        // the dates below correspond to the dates created in
-        // addSeveralInventoryItemsToAnInventory(),
-        // just that it is in the JSON format from the database
-        assertEquals("2028-02-01", secondInventory.get("sellBy").toString());
-        assertEquals("2027-02-01", thirdInventory.get("sellBy").toString());
-        assertEquals("2026-02-01", fourthInventory.get("sellBy").toString());
-    }
-
-    @Test
-    void retrieveSortedInventory_byBestBefore_correctOrderOfInventoryWithNullBottom() throws Exception {
-        MvcResult result = mockMvc
-                .perform(MockMvcRequestBuilders.get("/businesses/1/inventory").param("orderBy", "bestBefore"))
-                .andExpect(status().isOk()).andReturn();
-
-        JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
-        JSONArray responseBody = (JSONArray) parser.parse(result.getResponse().getContentAsString());
-
-        assertEquals(7, responseBody.size());
-
-        // there are different types of inventory items, so test the index positions of
-        // the those types
-        JSONObject firstInventory = (JSONObject) responseBody.get(0);
-        JSONObject secondInventory = (JSONObject) responseBody.get(2);
-        JSONObject thirdInventory = (JSONObject) responseBody.get(4);
-        JSONObject fourthInventory = (JSONObject) responseBody.get(6);
-
-        // the dates below correspond to the dates created in
-        // addSeveralInventoryItemsToAnInventory(),
-        // just that it is in the JSON format from the database
-        assertEquals("2027-03-01", firstInventory.get("bestBefore").toString());
-        assertEquals("2028-03-01", secondInventory.get("bestBefore").toString());
-        assertEquals("2029-02-01", thirdInventory.get("bestBefore").toString());
-        assertEquals(null, fourthInventory.get("bestBefore"));
-    }
-
-    @Test
-    void retrieveSortedInventory_byBestBeforeReverse_correctOrderOfInventoryWithNullTop() throws Exception {
-        MvcResult result = mockMvc.perform(MockMvcRequestBuilders.get("/businesses/1/inventory")
-                .param("reverse", "true").param("orderBy", "bestBefore")).andExpect(status().isOk()).andReturn();
-
-        JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
-        JSONArray responseBody = (JSONArray) parser.parse(result.getResponse().getContentAsString());
-
-        assertEquals(7, responseBody.size());
-
-        // there are different types of inventory items, so test the index positions of
-        // the those types
-        JSONObject firstInventory = (JSONObject) responseBody.get(0);
-        JSONObject secondInventory = (JSONObject) responseBody.get(1);
-        JSONObject thirdInventory = (JSONObject) responseBody.get(3);
-        JSONObject fourthInventory = (JSONObject) responseBody.get(5);
-
-        // same idea as the above tests
-        assertEquals(null, firstInventory.get("bestBefore"));
-        // the dates below correspond to the dates created in
-        // addSeveralInventoryItemsToAnInventory(),
-        // just that it is in the JSON format from the database
-        assertEquals("2029-02-01", secondInventory.get("bestBefore").toString());
-        assertEquals("2028-03-01", thirdInventory.get("bestBefore").toString());
-        assertEquals("2027-03-01", fourthInventory.get("bestBefore").toString());
-    }
-
-    @Test
-    void retrieveSortedInventory_byExpiry_correctOrderOfInventoryWithNullBottom() throws Exception {
-        MvcResult result = mockMvc
-                .perform(MockMvcRequestBuilders.get("/businesses/1/inventory").param("orderBy", "expiry"))
-                .andExpect(status().isOk()).andReturn();
-
-        JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
-        JSONArray responseBody = (JSONArray) parser.parse(result.getResponse().getContentAsString());
-
-        assertEquals(7, responseBody.size());
-
-        // there are different types of inventory items, so test the index positions of
-        // the those types
-        JSONObject firstInventory = (JSONObject) responseBody.get(0);
-        JSONObject secondInventory = (JSONObject) responseBody.get(2);
-        JSONObject thirdInventory = (JSONObject) responseBody.get(4);
-        JSONObject fourthInventory = (JSONObject) responseBody.get(6);
-
-        // the dates below correspond to the dates created in
-        // addSeveralInventoryItemsToAnInventory(),
-        // just that it is in the JSON format from the database
-        assertEquals("2028-01-01", firstInventory.get("expires").toString());
-        assertEquals("2029-01-01", secondInventory.get("expires").toString());
-        assertEquals("2030-06-06", thirdInventory.get("expires").toString());
-        assertEquals("2031-06-06", fourthInventory.get("expires").toString());
-    }
-
-    @Test
-    void retrieveSortedInventory_byExpiryReverse_correctOrderOfInventoryWithNullTop() throws Exception {
-        MvcResult result = mockMvc.perform(MockMvcRequestBuilders.get("/businesses/1/inventory")
-                .param("reverse", "true").param("orderBy", "expires")).andExpect(status().isOk()).andReturn();
-
-        JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
-        JSONArray responseBody = (JSONArray) parser.parse(result.getResponse().getContentAsString());
-
-        assertEquals(7, responseBody.size());
-
-        // there are different types of inventory items, so test the index positions of
-        // the those types
-        JSONObject firstInventory = (JSONObject) responseBody.get(0);
-        JSONObject secondInventory = (JSONObject) responseBody.get(1);
-        JSONObject thirdInventory = (JSONObject) responseBody.get(3);
-        JSONObject fourthInventory = (JSONObject) responseBody.get(5);
-
-        // same idea as the above tests
-        assertEquals("2031-06-06", firstInventory.get("expires").toString());
-        // the dates below correspond to the dates created in
-        // addSeveralInventoryItemsToAnInventory(),
-        // just that it is in the JSON format from the database
-        assertEquals("2030-06-06", secondInventory.get("expires").toString());
-        assertEquals("2029-01-01", thirdInventory.get("expires").toString());
-        assertEquals("2028-01-01", fourthInventory.get("expires").toString());
-    }
-
-    @Test
-    void retrieveSortedInventory_byDefaultProductCode_correctOrderOfInventory() throws Exception {
-        MvcResult result = mockMvc.perform(MockMvcRequestBuilders.get("/businesses/1/inventory"))
-                .andExpect(status().isOk()).andReturn();
-
-        JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
-        JSONArray responseBody = (JSONArray) parser.parse(result.getResponse().getContentAsString());
-
-        assertEquals(7, responseBody.size());
-
-        // there are different types of inventory items, so test the index positions of
-        // the those types
-        JSONObject firstInventory = (JSONObject) responseBody.get(0);
-        JSONObject secondInventory = (JSONObject) responseBody.get(2);
-        JSONObject thirdInventory = (JSONObject) responseBody.get(4);
-
-        assertEquals(testProduct.getProductCode(),
-                ((JSONObject) firstInventory.get("product")).getAsString("id"));
-        assertEquals(testProduct2.getProductCode(),
-                ((JSONObject) secondInventory.get("product")).getAsString("id"));
-        assertEquals(testProduct3.getProductCode(),
-                ((JSONObject) thirdInventory.get("product")).getAsString("id"));
-    }
-
-    @Test
-    void retrieveSortedInventory_byDefaultProductCodeReverse_correctOrderOfInventory() throws Exception {
-        MvcResult result = mockMvc
-                .perform(MockMvcRequestBuilders.get("/businesses/1/inventory").param("reverse", "true"))
-                .andExpect(status().isOk()).andReturn();
-
-        JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
-        JSONArray responseBody = (JSONArray) parser.parse(result.getResponse().getContentAsString());
-
-        assertEquals(7, responseBody.size());
-
-        // there are different types of inventory items, so test the index positions of
-        // the those types
-        JSONObject firstInventory = (JSONObject) responseBody.get(0);
-        JSONObject secondInventory = (JSONObject) responseBody.get(1);
-        JSONObject thirdInventory = (JSONObject) responseBody.get(3);
-        JSONObject fourthInventory = (JSONObject) responseBody.get(5);
-
-        assertEquals(testProductNull.getProductCode(),
-                ((JSONObject) firstInventory.get("product")).getAsString("id"));
-        assertEquals(testProduct3.getProductCode(),
-                ((JSONObject) secondInventory.get("product")).getAsString("id"));
-        assertEquals(testProduct2.getProductCode(),
-                ((JSONObject) thirdInventory.get("product")).getAsString("id"));
-        assertEquals(testProduct.getProductCode(),
-                ((JSONObject) fourthInventory.get("product")).getAsString("id"));
+        PageRequest expectedPageRequest = SearchHelper.getPageRequest(null, null, Sort.by(new Sort.Order(Direction.DESC, "product.name").ignoreCase()));
+        verify(inventoryItemRepository, times(1)).findAllForBusiness(testBusiness, expectedPageRequest);
     }
 
     /**

@@ -3,6 +3,10 @@ package org.seng302.leftovers.persistence;
 import org.seng302.leftovers.entities.Business;
 import org.seng302.leftovers.entities.InventoryItem;
 import org.seng302.leftovers.entities.Product;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
@@ -13,32 +17,25 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Optional;
 
+
+
+
+
 @Repository
 public interface InventoryItemRepository extends CrudRepository<InventoryItem, Long> {
 
     /**
-     * Find all then inventory items in the repository which belong to the given product.
-     * @param product The product which owns the inventory items.
-     * @return A list of inventory items belonging to the product.
+     * Finds all the inventory items for a given business
+     * @param business Business to get all inventory items form
+     * @return List of inventory items for the business
      */
+    @Query("SELECT i FROM InventoryItem i WHERE i.product.business = :business")
+    Page<InventoryItem> findAllForBusiness(@Param("business") Business business, Pageable pageable);
+
+    @Query("SELECT i FROM InventoryItem i WHERE i.product.business = :business")
+    List<InventoryItem> findAllForBusiness(@Param("business") Business business);
+
     public List<InventoryItem> findAllByProduct(@Param("product") Product product);
-
-    /**
-     * This method takes a list of product items and returns all the inventory items where the product
-     * of the item is in the given list. It can be used to find all items from a business's catalogue by
-     * passing in the business's calalogue as the arguement.
-     * @param catalogue A list of products
-     * @return A list of inventory items with products that correspond to those in the catalogue.
-     */
-    default List<InventoryItem> getInventoryByCatalogue(List<Product> catalogue) {
-        List<InventoryItem> inventory = new ArrayList<>();
-        for (Product product : catalogue) {
-            List<InventoryItem> productInvItems = findAllByProduct(product);
-            inventory.addAll(productInvItems);
-        }
-        return inventory;
-    }
-
     /**
      * Gets a inventory item from the repository
      * If there is no inventory for the provided business and inventoryItemId
