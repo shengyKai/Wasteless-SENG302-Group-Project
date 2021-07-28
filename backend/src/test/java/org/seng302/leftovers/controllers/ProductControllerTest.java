@@ -32,7 +32,10 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.Cookie;
+import java.lang.reflect.Field;
 import java.text.ParseException;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -129,10 +132,6 @@ class ProductControllerTest {
 
     @BeforeEach
     void setUp() throws ParseException {
-        productRepository.deleteAll();
-        businessRepository.deleteAll();
-        userRepository.deleteAll();
-        imageRepository.deleteAll();
 
         Sort.Order expectedOrder = new Sort.Order(Sort.Direction.ASC, "created").ignoreCase();
         templateRequest = SearchHelper.getPageRequest(null,null, Sort.by(expectedOrder));
@@ -196,16 +195,20 @@ class ProductControllerTest {
 
     @AfterEach
     void tearDown() {
+        imageRepository.deleteAll();
+        productRepository.deleteAll();
         businessRepository.deleteAll();
         userRepository.deleteAll();
-        productRepository.deleteAll();
-        imageRepository.deleteAll();
     }
 
     /**
      * Adds several products to a catalogue
      */
     void addSeveralProductsToACatalogue() {
+        Field field = assertDoesNotThrow(() -> Product.class.getDeclaredField("created"));
+        field.setAccessible(true);
+        Instant now = Instant.now();
+
         try (Session session = sessionFactory.openSession()) {
             session.beginTransaction();
             var testBusiness = session.find(Business.class, testBusiness1.getId());
@@ -217,6 +220,7 @@ class ProductControllerTest {
                     .withRecommendedRetailPrice("9000.03")
                     .withBusiness(testBusiness)
                     .build();
+            field.set(product1, now.plus(1L, ChronoUnit.SECONDS));
             Product product2 = new Product.Builder()
                     .withProductCode("ALMOND-MILK-100")
                     .withName("Almond Milk")
@@ -225,6 +229,7 @@ class ProductControllerTest {
                     .withRecommendedRetailPrice("10.02")
                     .withBusiness(testBusiness)
                     .build();
+            field.set(product2, now.plus(2L, ChronoUnit.SECONDS));
             Product product3 = new Product.Builder()
                     .withProductCode("COFFEE-7")
                     .withName("Generic Brand Coffee")
@@ -233,6 +238,7 @@ class ProductControllerTest {
                     .withRecommendedRetailPrice("4.02")
                     .withBusiness(testBusiness)
                     .build();
+            field.set(product3, now.plus(3L, ChronoUnit.SECONDS));
             Product product4 = new Product.Builder()
                     .withProductCode("DARK-CHOCOLATE")
                     .withName("Dark Chocolate")
@@ -241,6 +247,7 @@ class ProductControllerTest {
                     .withRecommendedRetailPrice("6.07")
                     .withBusiness(testBusiness)
                     .build();
+            field.set(product4, now.plus(4L, ChronoUnit.SECONDS));
             session.save(product1);
             session.save(product2);
             session.save(product3);
@@ -250,6 +257,8 @@ class ProductControllerTest {
 //            productRepository.save(product2);
 //            productRepository.save(product3);
             session.getTransaction().commit();
+        } catch (IllegalAccessException e) {
+            fail();
         }
     }
 
