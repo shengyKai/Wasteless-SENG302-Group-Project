@@ -10,11 +10,11 @@ import { getStore, resetStoreForTesting } from '@/store';
 
 jest.mock('@/api/internal', () => ({
   getMarketplaceCardsBySection: jest.fn(),
-  getKeywords: jest.fn(),
+  searchKeywords: jest.fn(),
 }));
 
 const getMarketplaceCardsBySection = castMock(api.getMarketplaceCardsBySection);
-const getKeywords = castMock(api.getKeywords);
+const getKeywords = castMock(api.searchKeywords);
 Vue.use(Vuetify);
 
 const localVue = createLocalVue();

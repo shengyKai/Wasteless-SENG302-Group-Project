@@ -141,7 +141,6 @@ import MarketplaceCard from "../cards/MarketplaceCard";
 import MarketplaceCardForm from "./MarketplaceCardForm.vue";
 import {getMarketplaceCardsBySection, getMarketplaceCardsBySectionAndKeywords} from "../../api/internal.ts";
 import { SECTION_NAMES } from '@/utils';
-import { getKeywords } from '../../api/internal.ts';
 
 export default {
   data() {

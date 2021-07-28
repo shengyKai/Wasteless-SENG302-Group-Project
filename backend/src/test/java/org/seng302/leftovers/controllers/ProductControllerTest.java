@@ -129,10 +129,6 @@ class ProductControllerTest {
 
     @BeforeEach
     void setUp() throws ParseException {
-        productRepository.deleteAll();
-        businessRepository.deleteAll();
-        userRepository.deleteAll();
-        imageRepository.deleteAll();
 
         Sort.Order expectedOrder = new Sort.Order(Sort.Direction.ASC, "created").ignoreCase();
         templateRequest = SearchHelper.getPageRequest(null,null, Sort.by(expectedOrder));
@@ -196,10 +192,10 @@ class ProductControllerTest {
 
     @AfterEach
     void tearDown() {
+        imageRepository.deleteAll();
+        productRepository.deleteAll();
         businessRepository.deleteAll();
         userRepository.deleteAll();
-        productRepository.deleteAll();
-        imageRepository.deleteAll();
     }
 
     /**
