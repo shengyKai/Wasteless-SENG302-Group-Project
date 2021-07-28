@@ -60,7 +60,7 @@
       SearchBusinessResultItem-->
       <template v-for="(business, index) in businesss">
         <v-divider v-if="business === undefined" :key="'divider-'+index"/>
-        <BusinessSearchResult v-else :key="business.id" :business="business"/>
+        <SearchBusinessResult v-else :key="business.id" :business="business"/>
       </template>
     </v-list>
     <!--paginate results-->
@@ -78,12 +78,12 @@
 </template>
 
 <script>
-import BusinessSearchResult from './cards/BusinessSearchResult';
+import SearchBusinessResult from './cards/SearchBusinessResult';
 import { searchBusinesses, BUSINESS_TYPES } from '../api/internal';
 import { debounce } from '../utils';
 
 export default {
-  name: 'SearchBusinessResults',
+  name: 'SearchBusinessPage',
   data() {
     return {
       /**
@@ -174,6 +174,7 @@ export default {
     businessTypeOptions() {
       const tempBusinessTypes = [];
       tempBusinessTypes.push({text: "Any", value: undefined});
+      console.log(BUSINESS_TYPES);
       for (let businessType of BUSINESS_TYPES) {
         tempBusinessTypes.push({text: businessType, value: businessType});
       }
@@ -197,12 +198,16 @@ export default {
       if (this.selectedBusinessType === 'Any') {
         filterBusinessType = undefined;
       }
+      let queryToSend = this.searchedQuery;
+      if (this.searchQuery === "") {
+        queryToSend = undefined;
+      }
       if (!this.searchQuery && filterBusinessType === undefined) return; // If the current search query is empty, do not search
 
       this.searchedQuery = this.searchQuery;
 
       const value = await searchBusinesses(
-        this.searchedQuery,
+        queryToSend,
         filterBusinessType,
         this.currentPage,
         this.resultsPerPage,
@@ -248,7 +253,7 @@ export default {
   },
 
   components: {
-    BusinessSearchResult,
+    SearchBusinessResult,
   },
 };
 </script>
