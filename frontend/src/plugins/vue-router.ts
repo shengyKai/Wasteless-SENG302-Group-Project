@@ -49,7 +49,15 @@ const routes = [
   {
     path: "/business/:id",
     component: BusinessProfile,
-    props: (route:any) =>({searchData:{searchQuery: route.query.searchQuery, businessType: route.query.businessType, page: route.query.page, orderBy: route.query.orderBy, reverse: route.query.reverse}}),
+    name: "businessProfile",
+    props: (route:any) =>({
+      searchQuery: route.query.searchQuery,
+      businessType: route.query.businessType,
+      page: route.query.page,
+      orderBy: route.query.orderBy,
+      reverse: route.query.reverse === 'true' ? true : false
+    }
+    ),
     meta: { title: 'Business' }
   },
   {

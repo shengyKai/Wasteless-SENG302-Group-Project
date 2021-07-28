@@ -1,8 +1,10 @@
 <template>
   <div>
-    <v-col class="text-right mt-4 mb-n16">
-      <v-btn >Return to search</v-btn>
-    </v-col>
+    <v-row v-if="fromSearch">
+      <v-col class="text-right mt-4 mb-n16">
+        <v-btn >Return to search</v-btn>
+      </v-col>
+    </v-row>
     <v-card class="body">
       <div class="top-section">
         <div>
@@ -62,7 +64,7 @@ export default {
     };
   },
   props: {
-    searchData: undefined,
+    searchData: Object,
   },
 
   watch: {
@@ -101,6 +103,14 @@ export default {
     administrators() {
       return this.business?.administrators || [];
     },
+
+    fromSearch() {
+      return this.businessType !== undefined
+          || this.orderBy !== undefined
+          || this.page !== undefined
+          || this.reverse !== undefined
+          || this.searchQuery !== undefined;
+    }
   },
 
   methods: {

@@ -60,7 +60,7 @@
       SearchBusinessResultItem-->
       <template v-for="(business, index) in businesss">
         <v-divider v-if="business === undefined" :key="'divider-'+index"/>
-        <SearchBusinessResult v-else :key="business.id" :business="business"/>
+        <SearchBusinessResult v-else :key="business.id" :business="business" @view-profile="viewProfile(business.id)" />
       </template>
     </v-list>
     <!--paginate results-->
@@ -202,7 +202,7 @@ export default {
       if (this.searchQuery === "") {
         queryToSend = undefined;
       }
-      if (!this.searchQuery && filterBusinessType === undefined) return; // If the current search query is empty, do not search
+      if (!queryToSend && filterBusinessType === undefined) return; // If the current search query is empty, do not search
 
       this.searchedQuery = this.searchQuery;
 
@@ -222,6 +222,16 @@ export default {
         this.error = undefined;
       }
     },
+    async viewProfile(id) {
+      const searchData = {
+        searchQuery: this.searchQuery,
+        businessType: this.selectedBusinessType,
+        page: this.page,
+        orderBy: this.orderBy,
+        reverse: this.reverse.toString()
+      };
+      await this.$router.push({name: 'businessProfile', params:{...searchData, id}});
+    }
   },
 
   watch: {

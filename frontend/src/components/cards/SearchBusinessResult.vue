@@ -24,7 +24,7 @@ export default {
       return convertAddressToReadableText(address, "partial");
     },
     viewBusinessProfile() {
-      this.$router.push("/business/" + this.business.id);
+      this.$emit("view-profile");
     }
   },
 };
