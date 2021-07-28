@@ -60,7 +60,7 @@ describe('index.vue', () => {
           },
           readableAddress: "1 Some Street Name",
         };
-      }
+      },
     });
   });
 

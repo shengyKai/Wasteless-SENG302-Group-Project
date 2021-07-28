@@ -26,7 +26,7 @@ describe("Admin.vue", () => {
     id: 12,
     name: "Dance",
     created: "2021-01-01",
-  }]
+  }];
 
   beforeEach(async () => {
     const localVue = createLocalVue();
@@ -68,4 +68,4 @@ describe("Admin.vue", () => {
     expect(wrapper.vm.error).toBe("Error!");
   });
 
-})
+});

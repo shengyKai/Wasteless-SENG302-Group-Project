@@ -162,7 +162,7 @@ function createOptions(): StoreOptions<StoreData> {
        */
       removeEvent(state, id: number) {
         Vue.delete(state.eventMap, id);
-      }
+      },
     },
     getters: {
       isLoggedIn(state) {
