@@ -174,7 +174,6 @@ export default {
     businessTypeOptions() {
       const tempBusinessTypes = [];
       tempBusinessTypes.push({text: "Any", value: undefined});
-      console.log(BUSINESS_TYPES);
       for (let businessType of BUSINESS_TYPES) {
         tempBusinessTypes.push({text: businessType, value: businessType});
       }
