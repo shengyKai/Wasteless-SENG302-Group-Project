@@ -167,12 +167,16 @@ public class InventoryStepDefinition  {
         //because now the inventory sorts by product code on default, so it has to be sorted before comparing
         Comparator<InventoryItem> sort = Comparator.comparing(inventoryItem -> inventoryItem.getProduct().getProductCode());
         inventory.sort(sort);
-        
+
+        JSONObject expectedPage = new JSONObject();
+
         JSONArray jsonArray = new JSONArray();
         for (InventoryItem item : inventory) {
             jsonArray.appendElement(item.constructJSONObject());
         }
-        String expectedResponse = jsonArray.toJSONString();
+        expectedPage.put("results", jsonArray);
+        expectedPage.put("count", jsonArray.size());
+        String expectedResponse = expectedPage.toJSONString();
 
         String responseBody = mvcResult.getResponse().getContentAsString();
         assertEquals(objectMapper.readTree(expectedResponse), objectMapper.readTree(responseBody));

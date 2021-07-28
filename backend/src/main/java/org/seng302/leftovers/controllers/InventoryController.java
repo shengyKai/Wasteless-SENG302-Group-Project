@@ -201,9 +201,9 @@ public class InventoryController {
                                 @RequestParam(required = false) Integer resultsPerPage,
                                 @RequestParam(required = false) Boolean reverse) {
         try {
-        AuthenticationTokenManager.checkAuthenticationToken(request);
         logger.info("Getting inventory item for business (businessId={}).", businessId);
         Business business = businessRepository.getBusinessById(businessId);
+        business.checkSessionPermissions(request);
 
         Sort.Direction direction = SearchHelper.getSortDirection(reverse);
         Sort.Order sortOrder = getInventoryItemOrder(orderBy, direction);

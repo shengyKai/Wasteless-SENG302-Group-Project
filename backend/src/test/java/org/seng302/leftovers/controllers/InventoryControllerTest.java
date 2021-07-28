@@ -316,6 +316,16 @@ class InventoryControllerTest {
     }
 
     @Test
+    void getInventory_insufficientPermissions_403Thrown() {
+        inventoryController = new InventoryController(businessRepository, inventoryItemRepository, productRepository);
+        when(businessRepository.getBusinessById(1L)).thenReturn(mockBusiness);
+        doThrow(new ResponseStatusException(HttpStatus.FORBIDDEN)).when(mockBusiness).checkSessionPermissions(any());
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class,
+                () -> inventoryController.getInventory(1L, request, null, null, null, null));
+        assertEquals(HttpStatus.FORBIDDEN, exception.getStatus());
+    }
+
+    @Test
     void getInventory_businessNotFound_406Thrown() {
         when(businessRepository.getBusinessById(1L)).thenThrow(new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE));
         ResponseStatusException exception = assertThrows(ResponseStatusException.class,
