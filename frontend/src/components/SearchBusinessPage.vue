@@ -198,11 +198,11 @@ export default {
       if (this.selectedBusinessType === 'Any') {
         filterBusinessType = undefined;
       }
-      let queryToSend = this.searchedQuery;
-      if (this.searchQuery === "") {
+      let queryToSend = this.searchQuery;
+      if (queryToSend === "") {
         queryToSend = undefined;
       }
-      if (!this.searchQuery && filterBusinessType === undefined) return; // If the current search query is empty, do not search
+      if (queryToSend === undefined && filterBusinessType === undefined) return; // If the current search query is empty, do not search
 
       this.searchedQuery = this.searchQuery;
 
