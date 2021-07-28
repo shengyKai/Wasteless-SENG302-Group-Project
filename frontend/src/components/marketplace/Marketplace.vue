@@ -48,7 +48,6 @@
             item-text="name"
             item-value="id"
             multiple
-            @click="selectedKeywords=undefined"
           >
             <template v-slot:prepend-item>
               <v-list-item>
@@ -57,7 +56,6 @@
                     label="Search for a keyword" v-model="keywordFilter"
                     clearable
                     :autofocus="true"
-                    @click:clear="resetSearch"
                     hint="Keyword name"
                   />
                 </v-list-item-content>
@@ -65,7 +63,7 @@
             </template>
           </v-select>
           <!-- Toggle button for user to choose partially or fully matched results -->
-          <v-btn-toggle class="toggle" v-model="reverse" mandatory>
+          <v-btn-toggle class="toggle" v-model="andOr" mandatory>
             <v-btn depressed color="primary" :value="false">
               AND
             </v-btn>
@@ -77,7 +75,7 @@
 
         <v-col cols="4" class="text-right" >
           <!---Link to modal for creating new card--->
-          <v-btn type="button" color="secondary" @click="showCreateCard" rounded>
+          <v-btn type="button" color="secondary" @click="showCreateCard=true" rounded>
             Create card
           </v-btn>
         </v-col>
@@ -139,7 +137,7 @@
 <script>
 import MarketplaceCard from "../cards/MarketplaceCard";
 import MarketplaceCardForm from "./MarketplaceCardForm.vue";
-import {getMarketplaceCardsBySection, getMarketplaceCardsBySectionAndKeywords} from "../../api/internal.ts";
+import {getMarketplaceCardsBySection, getMarketplaceCardsBySectionAndKeywords, searchKeywords} from "../../api/internal.ts";
 import { SECTION_NAMES } from '@/utils';
 
 export default {
@@ -192,13 +190,27 @@ export default {
        * creation date should be descending by default.
        */
       reverse: true,
+      andOr: true,
       showCreateCard: false,
     };
+  },
+  mounted() {
+    searchKeywords()
+      .then((response) => {
+        if (typeof response === 'string') {
+          this.allKeywords = [];
+        } else {
+          this.allKeywords = response;
+        }})
+      .catch(() => (this.allKeywords = []));
   },
   computed: {
     user() {
       return this.$store.state.user;
-    }
+    },
+    filteredKeywordList() {
+      return this.allKeywords.filter(x => this.filterKeywords(x));
+    },
   },
   methods: {
     /**
@@ -228,6 +240,10 @@ export default {
           this.totalResults[key] = value.count;
         }
       }
+    },
+    filterKeywords(keyword) {
+      const filterText = this.keywordFilter ?? '';
+      return keyword.name.toLowerCase().includes(filterText.toLowerCase());
     },
     /**
      * The total number of pages required to show all the users
