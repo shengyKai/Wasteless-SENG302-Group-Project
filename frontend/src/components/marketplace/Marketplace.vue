@@ -63,7 +63,7 @@
             </template>
           </v-select>
           <!-- Toggle button for user to choose partially or fully matched results -->
-          <v-btn-toggle class="toggle" v-model="andOr" mandatory>
+          <v-btn-toggle class="toggle" v-model="unionSearch" mandatory>
             <v-btn depressed color="primary" :value="false">
               AND
             </v-btn>
@@ -190,7 +190,6 @@ export default {
        * creation date should be descending by default.
        */
       reverse: true,
-      andOr: true,
       showCreateCard: false,
     };
   },
@@ -221,10 +220,10 @@ export default {
       this.error = undefined;
 
       let results;
-      if (this.keywordIds.length === 0) {
+      if (this.selectedKeywords.length === 0) {
         results = await Promise.all(sections.map(key => getMarketplaceCardsBySection(key, this.currentPage[key], this.resultsPerPage, this.orderBy, this.reverse)));
       } else {
-        results = await Promise.all(sections.map(key => getMarketplaceCardsBySectionAndKeywords(this.keywordIds,key, this.unionSearch, this.currentPage[key], this.resultsPerPage, this.orderBy, this.reverse)));
+        results = await Promise.all(sections.map(key => getMarketplaceCardsBySectionAndKeywords(this.selectedKeywords,key, this.unionSearch, this.currentPage[key], this.resultsPerPage, this.orderBy, this.reverse)));
       }
 
       for (let i = 0; i<sections.length; i++) {
@@ -278,6 +277,12 @@ export default {
     MarketplaceCardForm,
   },
   watch: {
+    unionSearch() {
+      this.updateSections(this.sections);
+    },
+    selectedKeywords() {
+      this.updateSections(this.sections);
+    },
     orderBy() {
       this.updateSections(this.sections);
     },
