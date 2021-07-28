@@ -12,6 +12,7 @@ public class ProductGenerator {
     private final Connection conn;
     private final CommerceNameGenerator commerceNameGenerator = CommerceNameGenerator.getInstance();
     private final ProductImageGenerator imageGenerator;
+    private HashSet<String> productCodeHash = new HashSet();
 
 
     //predefined lists
@@ -40,10 +41,16 @@ public class ProductGenerator {
         String productWord = "";
         int numLetters = random.nextInt(20);
         for (int i=0; i < numLetters; i++) {
-            productWord += random.nextInt(26) + 'A';
+            char character = (char) (random.nextInt(26) + 'A');
+            productWord += character;
         }
-        int productNumber = random.nextInt(99999);
-        return productWord + productNumber;
+        int productNumber = random.nextInt(999999);
+        String productCode = productWord + productNumber;
+        while (productCodeHash.contains(productCode)) {
+            productNumber = random.nextInt(999999);
+            productCode = productWord + productNumber;
+        }
+        return productCode;
     }
 
     /**

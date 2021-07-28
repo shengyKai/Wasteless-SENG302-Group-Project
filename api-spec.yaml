@@ -455,7 +455,7 @@ paths:
             type: integer
         - name: orderBy
           in: query
-          description: Card property to order results by
+          description: Product property to order results by
           schema:
             type: string
             enum:
@@ -476,9 +476,16 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Product'
+                allOf:
+                  - $ref: '#/components/schemas/Page'
+                  - type: object
+                    required:
+                      - results
+                    properties:
+                      results:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Product'
         '401':
           $ref: '#/components/responses/UnauthorizedError'
         '403':
@@ -773,9 +780,16 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/InventoryItem'
+                allOf:
+                  - $ref: '#/components/schemas/Page'
+                  - type: object
+                    required:
+                      - results
+                    properties:
+                      results:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/InventoryItem'
         '401':
           $ref: '#/components/responses/UnauthorizedError'
         '403':

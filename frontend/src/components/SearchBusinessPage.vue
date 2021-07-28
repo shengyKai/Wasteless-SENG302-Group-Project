@@ -174,7 +174,6 @@ export default {
     businessTypeOptions() {
       const tempBusinessTypes = [];
       tempBusinessTypes.push({text: "Any", value: undefined});
-      console.log(BUSINESS_TYPES);
       for (let businessType of BUSINESS_TYPES) {
         tempBusinessTypes.push({text: businessType, value: businessType});
       }
@@ -198,11 +197,11 @@ export default {
       if (this.selectedBusinessType === 'Any') {
         filterBusinessType = undefined;
       }
-      let queryToSend = this.searchedQuery;
-      if (this.searchQuery === "") {
+      let queryToSend = this.searchQuery;
+      if (queryToSend === "") {
         queryToSend = undefined;
       }
-      if (!queryToSend && filterBusinessType === undefined) return; // If the current search query is empty, do not search
+      if (queryToSend === undefined && filterBusinessType === undefined) return; // If the current search query is empty, do not search
 
       this.searchedQuery = this.searchQuery;
 
@@ -222,16 +221,6 @@ export default {
         this.error = undefined;
       }
     },
-    async viewProfile(id) {
-      const searchData = {
-        searchQuery: this.searchQuery,
-        businessType: this.selectedBusinessType,
-        page: this.currentPage.toString(),
-        orderBy: this.orderBy,
-        reverse: this.reverse.toString()
-      };
-      await this.$router.push({name: 'businessProfile', params:{id}, query:{...searchData}});
-    }
   },
 
   watch: {
@@ -265,13 +254,6 @@ export default {
   components: {
     SearchBusinessResult,
   },
-  mounted() {
-    this.searchQuery = this.$route.query.searchQuery || this.searchQuery;
-    this.selectedBusinessType = this.$route.query.businessType || this.selectedBusinessType;
-    this.currentPage = this.$route.query.page? parseInt(this.$route.query.page.toString()) : this.currentPage;
-    this.reverse = this.$route.query.reverse === "true";
-    this.orderBy = this.$route.query.orderBy || this.orderBy;
-  }
 };
 </script>
 

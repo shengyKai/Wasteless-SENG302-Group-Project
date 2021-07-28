@@ -217,6 +217,48 @@ public class InventoryItem {
         }
         this.totalPrice = totalPrice;
     }
+
+    /**
+     * Sets all the dates does validation at the same time to prevent issues from setting them individually
+     * @param manufactured the date when the product was manufactured
+     * @param sellBy the date when the product will need to be sold before
+     * @param bestBefore the date when the product will no longer be its best
+     * @param expires the date when the product will expire and should be disposed of
+     */
+    public void setDates(String manufactured, String sellBy, String bestBefore, String expires) {
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE;
+        //Checking expires is not null
+        if (expires != null) { //Will thrown an exception
+            //Case 1: no attributes are null
+            if (sellBy != null && bestBefore != null) {
+                if ((sellBy.compareTo(bestBefore) > 0) || (bestBefore.compareTo(expires) > 0)) {
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                            "The best before date must be before the sell by date, and the expires date before the sell by.");
+                }
+                //Case 2: sell by is null and best before is not null
+            } else if (sellBy == null && bestBefore != null) {
+                if (bestBefore.compareTo(expires) > 0) {
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                            "The best before date must be before the expires date.");
+                }
+                //Case 3: best before is null and sell by is not null
+            } else if (bestBefore == null && sellBy != null) {
+                if (sellBy.compareTo(expires) > 0) {
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                            "The sell by date must be before the expires date.");
+                }
+            }
+        }
+        //Case 4: best before is null and sell by is null, no validation needed
+
+        if (expires == null) { setExpires(null); } else { setExpires(LocalDate.parse(expires, dateTimeFormatter)); }
+        if (sellBy == null ) { setSellBy(null); } else { setSellBy(LocalDate.parse(sellBy, dateTimeFormatter)); }
+        if (bestBefore == null ) { setBestBefore(null); } else { setBestBefore(LocalDate.parse(bestBefore, dateTimeFormatter)); }
+        //Manufactured needs no extra validation as is the only date that can and must before today
+        if (manufactured == null ) { setManufactured(null); } else {setManufactured(LocalDate.parse(manufactured,
+                dateTimeFormatter)); }
+    }
+
     /**
      * Sets the date of when the product was manufactured
      * @param manufactured the date when the product was manufactured

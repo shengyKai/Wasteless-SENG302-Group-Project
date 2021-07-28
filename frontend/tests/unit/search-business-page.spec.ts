@@ -10,6 +10,7 @@ import { castMock, flushQueue } from './utils';
 
 jest.mock('@/api/internal', () => ({
   searchBusinesses: jest.fn(),
+  BUSINESS_TYPES: ['Accommodation and Food Services', 'Retail Trade', 'Charitable organisation', 'Non-profit organisation'],
 }));
 
 // Debounce adds a delay on updates to search query that we need to get rid of
@@ -92,12 +93,6 @@ describe('SearchBusinessPage.vue', () => {
     return wrapper.findComponent({name: 'v-alert'});
   }
 
-  it('The search query passed in from the url is searched', () => {
-    setResults(createTestBusinesses(5));
-    createWrapper();
-    expect(searchBusinesses).toBeCalledWith('test_query', undefined, 1, RESULTS_PER_PAGE, 'relevance', false);
-  });
-
   it('The search results should be displayed somewhere', async () => {
     let users = createTestBusinesses(5);
     setResults(users);
@@ -148,9 +143,12 @@ describe('SearchBusinessPage.vue', () => {
     createWrapper();
     await flushQueue();
     // Update the search box
-    const searchBox = wrapper.findComponent({ name: 'v-text-field' });
-    await searchBox.findAll('input').at(0).setValue('new_test_query');
-    expect(searchBusinesses).lastCalledWith('new_test_query', 1, RESULTS_PER_PAGE, 'relevance', false);
+    await wrapper.setData({
+      searchQuery: 'new_test_query',
+    });
+    console.log(wrapper.vm.searchQuery);
+    await wrapper.vm.updateResults();
+    expect(searchBusinesses).lastCalledWith('new_test_query', undefined, 1, RESULTS_PER_PAGE, 'name', false);
   });
 
   it('If there are many pages then there should be a pagination component with many pages', async () => {
