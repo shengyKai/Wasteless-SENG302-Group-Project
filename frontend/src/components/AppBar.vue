@@ -6,9 +6,6 @@
       <!-- Space between the app name and the controls -->
       <div class="spacer"/>
 
-      <!-- Search Bar component to perform search and show result, if not on search page -->
-      <SearchBar v-if="$route.path !== '/search'" />
-
       <!-- Profile Menu -->
       <div class="flex-center">
         <!-- Dropdown menu for selecting role which user is currently acting as -->
@@ -88,14 +85,12 @@
 </template>
 
 <script>
-import SearchBar from "./utils/SearchBar";
 import UserAvatar from "./utils/UserAvatar";
 import { USER_ROLES } from "../utils";
 
 export default {
   name: "AppBar",
   components: {
-    SearchBar,
     UserAvatar,
   },
   data() {
