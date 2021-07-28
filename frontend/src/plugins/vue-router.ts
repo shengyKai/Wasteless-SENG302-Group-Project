@@ -53,7 +53,7 @@ const routes = [
     props: (route:any) =>({
       searchQuery: route.query.searchQuery,
       businessType: route.query.businessType,
-      page: route.query.page,
+      page: parseInt(route.query.page),
       orderBy: route.query.orderBy,
       reverse: route.query.reverse === 'true' ? true : false
     }

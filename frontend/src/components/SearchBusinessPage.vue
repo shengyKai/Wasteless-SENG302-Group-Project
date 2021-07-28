@@ -226,7 +226,7 @@ export default {
       const searchData = {
         searchQuery: this.searchQuery,
         businessType: this.selectedBusinessType,
-        page: this.page,
+        page: this.currentPage.toString(),
         orderBy: this.orderBy,
         reverse: this.reverse.toString()
       };
