@@ -21,29 +21,31 @@ const instance: Mocked<Pick<AxiosInstance, 'get', 'put'>> = axios.instance;
 
 describe("Test GET /businesses/:businessId/inventory endpoint", () => {
   it('When response is a inventory array with all fields, the result will be an inventory array', async () => {
-    const responseData = [
-      {
-        id: 1,
-        product: {
-          id: "test_product",
-          name: "test_product_name",
-          description: "test_description",
-          manufacturer: "test_manufacturer",
-          recommendedRetailPrice: 1,
-          created: "test_date",
-          images: [],
-          countryOfSale: "test_country",
-        },
-        quantity: 1,
-        remainingQuantity: 1,
-        pricePerItem: 1,
-        totalPrice: 1,
-        manufactured: "test_manufacturer",
-        sellBy: "test_date",
-        bestBefore: "test_date",
-        expires: "test_date"
-      }
-    ];
+    const responseData: api.SearchResults<api.InventoryItem> = {
+      count: 5,
+      results: [
+        {
+          id: 1,
+          product: {
+            id: "test_product",
+            name: "test_product_name",
+            description: "test_description",
+            manufacturer: "test_manufacturer",
+            recommendedRetailPrice: 1,
+            created: "test_date",
+            images: [],
+            countryOfSale: "test_country",
+          },
+          quantity: 1,
+          remainingQuantity: 1,
+          pricePerItem: 1,
+          totalPrice: 1,
+          manufactured: "test_manufacturer",
+          sellBy: "test_date",
+          bestBefore: "test_date",
+          expires: "test_date"
+        }
+      ]};
     instance.get.mockResolvedValueOnce({
       data: responseData
     });
@@ -52,19 +54,22 @@ describe("Test GET /businesses/:businessId/inventory endpoint", () => {
   });
 
   it('When response is a inventory array with the required fields, the result will be an inventory array', async () => {
-    const responseData = [
-      {
-        id: 1,
-        product: {
-          id: 'ID-VALUE',
-          name: 'test_name',
-          images: []
-        },
-        quantity: 9,
-        remainingQuantity: 5,
-        expires: "test_date"
-      }
-    ];
+    const responseData: api.SearchResults<api.InventoryItem> = {
+      count: 100,
+      results: [
+        {
+          id: 1,
+          product: {
+            id: 'ID-VALUE',
+            name: 'test_name',
+            images: []
+          },
+          quantity: 9,
+          remainingQuantity: 5,
+          expires: "test_date"
+        }
+      ]
+    };
     instance.get.mockResolvedValueOnce({
       data: responseData
     });
@@ -73,8 +78,9 @@ describe("Test GET /businesses/:businessId/inventory endpoint", () => {
   });
 
   it('When response is a inventory array with a missing required field, the result will be an error message stating invalid format', async () => {
-    const responseData = [
-      {
+    const responseData = {
+      count: 4,
+      results: [{
         id: 1,
         product: {
           id: 'ID-VALUE',
@@ -82,8 +88,8 @@ describe("Test GET /businesses/:businessId/inventory endpoint", () => {
           images: []
         },
         quantity: 9
-      }
-    ];
+      }]
+    };
     instance.get.mockResolvedValueOnce({
       data: responseData
     });
@@ -145,61 +151,6 @@ describe("Test GET /businesses/:businessId/inventory endpoint", () => {
     instance.get.mockRejectedValueOnce("Server is down");
     const message = await api.getInventory(7, 1, 10, "name", false);
     expect(message).toEqual('Failed to reach backend');
-  });
-});
-
-describe("Test GET /businesses/:businessId/inventory/count endpoint", () => {
-  it('When response is a number containing the total number of results, the result will be a number', async () => {
-    const responseData = {
-      count: 9
-    };
-    instance.get.mockResolvedValueOnce({
-      data: responseData
-    });
-    const inventories = await api.getInventoryCount(7);
-    expect(inventories).toEqual(responseData.count);
-  });
-
-  it('When response is not a number, the result will be an error message stating that the response is not a number', async () => {
-    const responseData = {
-      count: "some_number"
-    };
-    instance.get.mockResolvedValueOnce({
-      data: responseData
-    });
-    const inventories = await api.getInventoryCount(7);
-    expect(inventories).toEqual("Response is not number");
-  });
-
-  it('When response is not a number, the result will be an error message stating that the response is not a number', async () => {
-    const responseData = {
-      count: "some_number"
-    };
-    instance.get.mockResolvedValueOnce({
-      data: responseData
-    });
-    const inventories = await api.getInventoryCount(7);
-    expect(inventories).toEqual("Response is not number");
-  });
-
-  it('When response is undefined status, the result will be an error message stating unable to reach backend', async () => {
-    instance.get.mockRejectedValueOnce({
-      response: {
-        status: undefined,
-      }
-    });
-    const inventories = await api.getInventoryCount(7);
-    expect(inventories).toEqual("Failed to reach backend");
-  });
-
-  it('When response is any other error status number, the result will be an error message stating the request failed', async () => {
-    instance.get.mockRejectedValueOnce({
-      response: {
-        status: 999,
-      }
-    });
-    const inventories = await api.getInventoryCount(7);
-    expect(inventories).toEqual("Request failed: 999");
   });
 });
 

@@ -61,6 +61,7 @@
     <v-pagination
       v-model="currentPage"
       :length="totalPages"
+      :total-visible="11"
       circle
     />
     <!--Text to display range of results out of total number of results-->
@@ -76,7 +77,7 @@
 <script>
 import InventoryItem from "./cards/InventoryItem.vue";
 import InventoryItemForm from "./BusinessProfile/InventoryItemForm.vue";
-import {getInventory, getInventoryCount} from "@/api/internal";
+import {getInventory} from "@/api/internal";
 
 export default {
   name: "Inventory",
@@ -107,7 +108,7 @@ export default {
       /**
        * The current search result order
        */
-      orderBy: 'creationDate',
+      orderBy: 'created',
       /**
        * Currently selected page (1 is first page)
        */
@@ -166,12 +167,13 @@ export default {
         this.orderBy,
         this.reverse
       );
-      this.totalResults = await getInventoryCount(this.businessId);
       if (typeof value === 'string') {
         this.inventoryItems = [];
+        this.totalResults = 0;
         this.error = value;
       } else {
-        this.inventoryItems = value;
+        this.inventoryItems = value.results;
+        this.totalResults = value.count;
         this.error = undefined;
       }
     },

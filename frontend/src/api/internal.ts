@@ -715,7 +715,7 @@ type InventoryOrderBy = 'name' | 'description' | 'manufacturer' | 'recommendedRe
  * @param reverse
  * @return a list of inventory items
  */
-export async function getInventory(businessId: number, page: number, resultsPerPage: number, orderBy: InventoryOrderBy, reverse: boolean): Promise<MaybeError<InventoryItem[]>> {
+export async function getInventory(businessId: number, page: number, resultsPerPage: number, orderBy: InventoryOrderBy, reverse: boolean): Promise<MaybeError<SearchResults<InventoryItem>>> {
   let response;
   try {
     response = await instance.get(`/businesses/${businessId}/inventory`, {
@@ -735,34 +735,10 @@ export async function getInventory(businessId: number, page: number, resultsPerP
     return 'Request failed: ' + status;
   }
 
-  if (!is<InventoryItem[]>(response.data)) {
+  if (!is<SearchResults<InventoryItem>>(response.data)) {
     return 'Response is not inventory array';
   }
   return response.data;
-}
-
-/**
-   * Sends a query for the total number of inventory items in the business
-   *
-   * @param businessId Business id to identify with the database to retrieve the inventory count
-   * @returns Number of inventory items or an error message
-   */
-export async function getInventoryCount(businessId: number): Promise<MaybeError<number>> {
-  let response;
-  try {
-    response = await instance.get(`/businesses/${businessId}/inventory/count`);
-  } catch (error) {
-    let status: number | undefined = error.response?.status;
-
-    if (status === undefined) return 'Failed to reach backend';
-    return `Request failed: ${status}`;
-  }
-
-  if (typeof response.data?.count !== 'number') {
-    return 'Response is not number';
-  }
-
-  return response.data.count;
 }
 
 /**
