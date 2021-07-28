@@ -46,15 +46,14 @@ export default {
         return;
       }
       for (let event of this.$store.getters.events) {
-        console.log(event.type);
-        if (event.type === 'CreateKeywordEvent' && event.keyword.id === this.keyword.id) {
+        if (event.type === 'KeywordCreatedEvent' && event.keyword.id === this.keyword.id) {
           this.$store.commit("removeEvent", event.id);
           break;
         }
       }
 
 
-      this.$emit('keyword-deleted');
+      this.$emit('keywordDeleted');
       this.$emit('closeDialog');
     },
   }
