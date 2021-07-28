@@ -10,10 +10,11 @@ import { getStore, resetStoreForTesting } from '@/store';
 
 jest.mock('@/api/internal', () => ({
   getMarketplaceCardsBySection: jest.fn(),
+  searchKeywords: jest.fn(),
 }));
 
 const getMarketplaceCardsBySection = castMock(api.getMarketplaceCardsBySection);
-
+const getKeywords = castMock(api.searchKeywords);
 Vue.use(Vuetify);
 
 const localVue = createLocalVue();
@@ -62,6 +63,11 @@ describe('Marketplace.vue', () => {
       count: 1,
       results: [testMarketplaceCard],
     });
+    getKeywords.mockResolvedValue([{
+      id: 1,
+      name: "dance",
+      created: "2020-01-02",
+    }]);
     createWrapper();
   });
 

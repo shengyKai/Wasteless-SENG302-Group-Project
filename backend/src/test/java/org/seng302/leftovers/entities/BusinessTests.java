@@ -926,6 +926,6 @@ class BusinessTests {
         
 
         testBusiness1 = businessRepository.save(testBusiness1);
-        assertEquals(2, productRepository.getAllByBusiness(testBusiness1).size());
+        assertEquals(2, productRepository.findAllByBusiness(testBusiness1).size());
     }
 }

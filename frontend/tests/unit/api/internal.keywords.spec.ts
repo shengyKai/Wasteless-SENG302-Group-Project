@@ -9,7 +9,8 @@ jest.mock('axios', () => ({
   ),
   instance: {
     get: jest.fn(),
-    post: jest.fn()
+    post: jest.fn(),
+    delete: jest.fn(),
   },
 }));
 
@@ -17,7 +18,7 @@ jest.mock('axios', () => ({
 type Mocked<T extends { [k: string]: (...args: any[]) => any }> = { [k in keyof T]: jest.Mock<ReturnType<T[k]>, Parameters<T[k]>> }
 
 // @ts-ignore - We've added an instance attribute in the mock declaration that mimics a AxiosInstance
-const instance: Mocked<Pick<AxiosInstance, 'get' | 'post'>> = axios.instance;
+const instance: Mocked<Pick<AxiosInstance, 'get' | 'post' | 'delete'>> = axios.instance;
 
 describe("Test GET /keywords/search endpoint", () => {
   const invalidKeyword = {
@@ -125,5 +126,63 @@ describe("Test POST /keywords endpoint", () => {
     };
     const createdKeyword = await api.createNewKeyword(keyword);
     expect(createdKeyword).toEqual("Failed to reach backend");
+
+
+  });
+
+
+  describe("Test DELETE /keywords/id endpoint", () => {
+    it('When provided with a keyword id which exists and a keyword is successfully deleted on the backend, there will be no return message', async ()=>{
+      instance.delete.mockResolvedValueOnce({
+        response: {
+          status: 200
+        }
+      });
+      const response = await api.deleteKeyword(1);
+      expect(response).toEqual(undefined);
+    });
+
+    it('When API deletion request is successfully resolved but there is an invalid access token, a message is returned about the missing/invalid token', async ()=>{
+      instance.delete.mockRejectedValueOnce({
+        response: {
+          status: 401
+        }
+      });
+      const response = await api.deleteKeyword(1);
+      expect(response).toEqual('You have been logged out. Please login again and retry');
+    });
+
+    it('When API deletion request is successfully resolved but there is an invalid authorisation, a message is returned about the invalid authorisation', async ()=>{
+      instance.delete.mockRejectedValueOnce({
+        response: {
+          status: 403
+        }
+      });
+      const response = await api.deleteKeyword(1);
+      expect(response).toEqual('Invalid authorization for keyword deletion');
+    });
+
+    it('When API deletion request is successfully resolved but the keyword id does not exist, a message is returned about the unfindable keyword', async ()=>{
+      instance.delete.mockRejectedValueOnce({
+        response: {
+          status: 406
+        }
+      });
+      const response = await api.deleteKeyword(1);
+      expect(response).toEqual('Keyword not found');
+    });
+
+    it('When API deletion request is successfully resolved but an unspecified error in the backend occurs, a message is returned about the error', async ()=>{
+      instance.delete.mockRejectedValueOnce({
+        response: {
+          status: 500,
+          data: {
+            message: "Some error message"
+          }
+        }
+      });
+      const response = await api.deleteKeyword(1);
+      expect(response).toEqual('Request failed: Some error message');
+    });
   });
 });

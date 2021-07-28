@@ -12,5 +12,6 @@ exports[`KeywordCreated.vue Must match snapshot 1`] = `
     John Smith has added "TestKeywordName"
   </div>
   <div class="v-card__actions justify-center"><button type="button" class="v-btn v-btn--is-elevated v-btn--has-bg theme--light v-size--default error"><span class="v-btn__content">Remove</span></button></div>
+  <!---->
 </div>
 `;

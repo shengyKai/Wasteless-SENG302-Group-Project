@@ -346,7 +346,7 @@ describe('MarketplaceCardFrom.vue', () => {
       expect(wrapper.vm.title).toBe(previousCard.title);
       expect(wrapper.vm.description).toBe(previousCard.description);
       expect(wrapper.vm.selectedSection).toBe(previousCard.section);
-      expect(wrapper.vm.selectedKeywords).toBe(previousCard.keywords);
+      expect(wrapper.vm.selectedKeywords).toStrictEqual([39]);
     });
 
     it('Modal title is "Edit Marketplace Card"', () => {

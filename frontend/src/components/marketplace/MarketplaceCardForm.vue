@@ -97,7 +97,8 @@
 </template>
 
 <script>
-import {createMarketplaceCard, searchKeywords, createNewKeyword} from '../../api/internal';
+import {createMarketplaceCard, createNewKeyword, searchKeywords, modifyMarketplaceCard} from '@/api/internal';
+
 export default {
   name: "MarketplaceCard",
   props: {
@@ -131,6 +132,14 @@ export default {
     this.titleField.addEventListener("input", OnInput);
 
     this.searchKeywords();
+
+    if (this.previousCard) {
+      const prevKeywordIds = [];
+      for (let keyword of this.previousCard.keywords) {
+        prevKeywordIds.push(keyword.id);
+      }
+      this.selectedKeywords = prevKeywordIds;
+    }
   },
   computed: {
     selectedKeywordsNames() {
@@ -246,7 +255,6 @@ export default {
     async submit() {
       this.errorMessage = undefined;
       let card = {
-        creatorId: this.user.id,
         section: this.selectedSection,
         title: this.title,
         description: this.description,
@@ -254,9 +262,10 @@ export default {
       };
       let response;
       if (this.isCreate) {
+        card.creatorId = this.user.id;
         response = await createMarketplaceCard(card);
       } else {
-        response = "Edit endpoint not yet implemented";
+        response = await modifyMarketplaceCard(this.previousCard.id, card);
       }
       if (typeof response === 'string') {
         this.errorMessage = response;

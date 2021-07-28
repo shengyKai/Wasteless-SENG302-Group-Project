@@ -335,7 +335,6 @@ export default {
       };
 
       let response = await createUser(user);
-      console.log(response);
       if (response === undefined ) {
         this.$emit('showLogin');
         return;

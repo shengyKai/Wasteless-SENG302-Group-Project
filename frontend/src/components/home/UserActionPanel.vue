@@ -24,6 +24,22 @@
                 <v-list-item-title>Add Business</v-list-item-title>
               </v-list-item-content>
             </v-list-item>
+            <v-list-item @click="viewUserSearch">
+              <v-list-item-icon>
+                <v-icon>mdi-account-search</v-icon>
+              </v-list-item-icon>
+              <v-list-item-content>
+                <v-list-item-title>Search Users</v-list-item-title>
+              </v-list-item-content>
+            </v-list-item>
+            <v-list-item @click="viewBusinessSearch">
+              <v-list-item-icon>
+                <v-icon>mdi-briefcase-search</v-icon>
+              </v-list-item-icon>
+              <v-list-item-content>
+                <v-list-item-title>Search Businesses</v-list-item-title>
+              </v-list-item-content>
+            </v-list-item>
             <v-list-item @click="viewMarketplace">
               <v-list-item-icon>
                 <v-icon>mdi-store</v-icon>
@@ -60,6 +76,12 @@
       </v-btn>
       <v-btn icon @click="viewCreateBusiness" class="action-button">
         <v-icon large>mdi-briefcase-plus</v-icon>
+      </v-btn>
+      <v-btn icon @click="viewUserSearch" class="action-button">
+        <v-icon large>mdi-account-search</v-icon>
+      </v-btn>
+      <v-btn icon @click="viewBusinessSearch" class="action-button">
+        <v-icon large>mdi-briefcase-search</v-icon>
       </v-btn>
       <v-btn icon @click="viewMarketplace" class="action-button">
         <v-icon large>mdi-store</v-icon>
@@ -100,6 +122,18 @@ export default {
       this.$store.commit('showCreateBusiness');
     },
     /**
+     * Redirect to the user search page
+     */
+    viewUserSearch() {
+      this.$router.push("/search");
+    },
+    /**
+     * Redirect to the business search page
+     */
+    viewBusinessSearch() {
+      this.$router.push("/search/business");
+    },
+    /**
      * Redirect to marketplace page
      */
     viewMarketplace() {
@@ -111,6 +145,9 @@ export default {
     viewMyCards() {
       this.$router.push(`/usercards/${this.$store.state.user.id}`);
     },
+    /**
+     * Redirect to the admin page
+     */
     viewAdminDashboard() {
       this.$router.push("/admin");
     }
@@ -135,7 +172,7 @@ export default {
 
 .action-pane {
   margin-right: 10px;
-  max-height: 350px;
+  max-height: 500px;
 }
 
 

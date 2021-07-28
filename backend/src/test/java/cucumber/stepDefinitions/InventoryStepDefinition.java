@@ -162,18 +162,21 @@ public class InventoryStepDefinition  {
     public void the_inventory_of_the_business_is_returned_to_me() throws UnsupportedEncodingException, JsonProcessingException {
         assertEquals(200, mvcResult.getResponse().getStatus());
 
-        List<Product> catalogue = productRepository.findAllByBusiness(businessContext.getLast());
-        List<InventoryItem> inventory = inventoryItemRepository.getInventoryByCatalogue(catalogue);
+        List<InventoryItem> inventory = inventoryItemRepository.findAllForBusiness(businessContext.getLast());
 
         //because now the inventory sorts by product code on default, so it has to be sorted before comparing
         Comparator<InventoryItem> sort = Comparator.comparing(inventoryItem -> inventoryItem.getProduct().getProductCode());
         inventory.sort(sort);
-        
+
+        JSONObject expectedPage = new JSONObject();
+
         JSONArray jsonArray = new JSONArray();
         for (InventoryItem item : inventory) {
             jsonArray.appendElement(item.constructJSONObject());
         }
-        String expectedResponse = jsonArray.toJSONString();
+        expectedPage.put("results", jsonArray);
+        expectedPage.put("count", jsonArray.size());
+        String expectedResponse = expectedPage.toJSONString();
 
         String responseBody = mvcResult.getResponse().getContentAsString();
         assertEquals(objectMapper.readTree(expectedResponse), objectMapper.readTree(responseBody));
@@ -271,7 +274,7 @@ public class InventoryStepDefinition  {
     @Then("I expect to be prevented from creating the inventory item")
     public void i_expect_to_be_prevented_from_creating_inventory_item() {
         assertEquals(400, mvcResult.getResponse().getStatus());
-        Product product = productRepository.getAllByBusiness(businessContext.getLast()).stream().filter(x -> x.getProductCode().equals(this.productCode)).collect(Collectors.toList()).get(0);
+        Product product = productRepository.findAllByBusiness(businessContext.getLast()).stream().filter(x -> x.getProductCode().equals(this.productCode)).collect(Collectors.toList()).get(0);
         List<InventoryItem> inventory = inventoryItemRepository.findAllByProduct(product);
         assertEquals(1, inventory.size());
 
@@ -280,7 +283,7 @@ public class InventoryStepDefinition  {
     @Then("I expect the inventory item to be created")
     public void i_expect_the_inventory_to_be_created() {
         assertEquals(200, mvcResult.getResponse().getStatus());
-        Product product = productRepository.getAllByBusiness(businessContext.getLast()).stream().filter(x -> x.getProductCode().equals(this.productCode)).collect(Collectors.toList()).get(0);
+        Product product = productRepository.findAllByBusiness(businessContext.getLast()).stream().filter(x -> x.getProductCode().equals(this.productCode)).collect(Collectors.toList()).get(0);
         List<InventoryItem> inventory = inventoryItemRepository.findAllByProduct(product);
         assertTrue(inventory.stream().anyMatch(x-> x.getQuantity() == quantity));
     }

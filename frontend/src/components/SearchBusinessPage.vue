@@ -12,30 +12,37 @@
         label="Search"
         autofocus
       />
-      <v-spacer/>
-      <!-- Dropdown select box to allow user search by business type -->
       <v-select
+        class="ml-2"
+        style="max-width: 300px"
+        v-model="selectedBusinessType"
+        flat
+        solo-inverted
+        hide-details
+        :items="businessTypeOptions"
+        item-text="text"
+        item-value="value"
+        prepend-inner-icon="mdi-sort-variant"
+        label="Filter by Business type"
+      />
+      <v-spacer/>
+      <!-- Dropdown select box to allow user to change ordering of businesses -->
+      <v-select
+        style="max-width: 300px"
         v-model="orderBy"
         flat
         solo-inverted
         hide-details
-        :items="[
-          { text: 'Search By Name',    value: 'type_0'   },
-          { text: ' Accomodation and Food Services',   value: 'type_1'  },
-          { text: 'Charitable Organisation',     value: 'type_2'     },
-          { text: 'Non-Profit Organisation',  value: 'type_3'  },
-          { text: 'Retail Trade',    value: 'type_4'   },
-        ]"
+        :items="orderByOptions"
         prepend-inner-icon="mdi-sort-variant"
-        label="Filter by Business type"
+        label="Order By"
       />
-      <!-- Toggle button for user to choose partially or fully matched results -->
       <v-btn-toggle class="toggle" v-model="reverse" mandatory>
-        <v-btn depressed color="primary" :value="false">
-          OR
+        <v-btn depressed color="secondary" :value="false">
+          <v-icon>mdi-arrow-up</v-icon>
         </v-btn>
-        <v-btn depressed color="primary" :value="true">
-          AND
+        <v-btn depressed color="secondary" :value="true">
+          <v-icon>mdi-arrow-down</v-icon>
         </v-btn>
       </v-btn-toggle>
     </v-toolbar>
@@ -53,7 +60,7 @@
       SearchBusinessResultItem-->
       <template v-for="(business, index) in businesss">
         <v-divider v-if="business === undefined" :key="'divider-'+index"/>
-        <SearchResultItem v-else :key="business.id" :business="business"/>
+        <SearchBusinessResult v-else :key="business.id" :business="business"/>
       </template>
     </v-list>
     <!--paginate results-->
@@ -71,12 +78,12 @@
 </template>
 
 <script>
-import SearchResultItem from './cards/SearchResultItem';
-import { search } from '../api/internal';
+import SearchBusinessResult from './cards/SearchBusinessResult';
+import { searchBusinesses, BUSINESS_TYPES } from '../api/internal';
 import { debounce } from '../utils';
 
 export default {
-  name: 'SearchBusinessResults',
+  name: 'SearchBusinessPage',
   data() {
     return {
       /**
@@ -103,7 +110,7 @@ export default {
       /**
        * The current search result order
        */
-      orderBy: 'relevance',
+      orderBy: 'name',
       /**
        * Currently selected page (1 is first page)
        */
@@ -117,6 +124,18 @@ export default {
        * This function is rate limited to avoid too many queries to the backend.
        */
       debouncedUpdateQuery: debounce(this.updateSearchQuery, 500),
+      /**
+       * Business type to filter search by
+       */
+      selectedBusinessType: undefined,
+      /**
+       * Options for ordering the business search results
+       */
+      orderByOptions: [
+        {text: "Name", value: "name"},
+        {text: "Location", value: "location"},
+        {text: "Business Type", value: "businessType"}
+      ],
     };
   },
 
@@ -152,6 +171,14 @@ export default {
       const pageEndIndex = pageStartIndex + this.businesss.length;
       return`Displaying ${pageStartIndex + 1} - ${pageEndIndex} of ${this.totalResults} results`;
     },
+    businessTypeOptions() {
+      const tempBusinessTypes = [];
+      tempBusinessTypes.push({text: "Any", value: undefined});
+      for (let businessType of BUSINESS_TYPES) {
+        tempBusinessTypes.push({text: businessType, value: businessType});
+      }
+      return tempBusinessTypes;
+    }
   },
   methods: {
     /**
@@ -166,12 +193,21 @@ export default {
      * This function gets called when the search results need to be updated
      */
     async updateResults() {
-      if (!this.searchQuery) return; // If the current search query is empty, do not search
+      let filterBusinessType = this.selectedBusinessType;
+      if (this.selectedBusinessType === 'Any') {
+        filterBusinessType = undefined;
+      }
+      let queryToSend = this.searchQuery;
+      if (queryToSend === "") {
+        queryToSend = undefined;
+      }
+      if (queryToSend === undefined && filterBusinessType === undefined) return; // If the current search query is empty, do not search
 
       this.searchedQuery = this.searchQuery;
 
-      const value = await search (
-        this.searchedQuery,
+      const value = await searchBusinesses(
+        queryToSend,
+        filterBusinessType,
         this.currentPage,
         this.resultsPerPage,
         this.orderBy,
@@ -210,10 +246,13 @@ export default {
       // Ensures that the current page is at least 1 and less than or equal to the total number of pages.
       this.currentPage = Math.max(Math.min(this.currentPage, this.totalPages), 1);
     },
+    selectedBusinessType() {
+      this.updateResults();
+    },
   },
 
   components: {
-    SearchResultItem,
+    SearchBusinessResult,
   },
 };
 </script>
@@ -222,4 +261,5 @@ export default {
 .toggle {
   margin-left: 10px;
 }
+
 </style>

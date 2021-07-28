@@ -190,5 +190,4 @@ public class InventoryItemGeneratorTest {
             fail();
         }
     }
-    //TODO Add verification of date data
 }

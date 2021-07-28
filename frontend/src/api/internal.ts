@@ -164,12 +164,15 @@ export type InventoryItem = {
 
 export type MarketplaceCardSection = 'ForSale' | 'Wanted' | 'Exchange'
 
-export type CreateMarketplaceCard = {
-  creatorId: number,
+export type ModifyMarketplaceCard = {
   section: MarketplaceCardSection,
   title: string,
   description?: string,
   keywordIds: number[],
+}
+
+export type CreateMarketplaceCard = ModifyMarketplaceCard & {
+  creatorId: number,
 };
 
 export type Keyword = {
@@ -524,7 +527,8 @@ type ProductOrderBy = 'name' | 'description' | 'manufacturer' | 'recommendedReta
  * @param reverse
  * @return a list of products
  */
-export async function getProducts(businessId: number, page: number, resultsPerPage: number, orderBy: ProductOrderBy, reverse: boolean): Promise<MaybeError<Product[]>> {
+export async function getProducts(businessId: number, page: number, resultsPerPage: number, orderBy: ProductOrderBy, reverse: boolean):
+  Promise<MaybeError<SearchResults<Product>>>{
   let response;
   try {
     response = await instance.get(`/businesses/${businessId}/products`, {
@@ -544,34 +548,10 @@ export async function getProducts(businessId: number, page: number, resultsPerPa
     return 'Request failed: ' + status;
   }
 
-  if (!is<Product[]>(response.data)) {
+  if (!is<SearchResults<Product>>(response.data)) {
     return 'Response is not product array';
   }
   return response.data;
-}
-
-/**
- * Sends a query for the total number of products in the business
- *
- * @param buisnessId Business id to identify with the database to retrieve the product count
- * @returns Number of products or an error message
- */
-export async function getProductCount(buisnessId: number): Promise<MaybeError<number>> {
-  let response;
-  try {
-    response = await instance.get(`/businesses/${buisnessId}/products/count`);
-  } catch (error) {
-    let status: number | undefined = error.response?.status;
-
-    if (status === undefined) return 'Failed to reach backend';
-    return `Request failed: ${status}`;
-  }
-
-  if (typeof response.data?.count !== 'number') {
-    return 'Response is not number';
-  }
-
-  return response.data.count;
 }
 
 /**
@@ -739,7 +719,7 @@ type InventoryOrderBy = 'name' | 'description' | 'manufacturer' | 'recommendedRe
  * @param reverse
  * @return a list of inventory items
  */
-export async function getInventory(businessId: number, page: number, resultsPerPage: number, orderBy: InventoryOrderBy, reverse: boolean): Promise<MaybeError<InventoryItem[]>> {
+export async function getInventory(businessId: number, page: number, resultsPerPage: number, orderBy: InventoryOrderBy, reverse: boolean): Promise<MaybeError<SearchResults<InventoryItem>>> {
   let response;
   try {
     response = await instance.get(`/businesses/${businessId}/inventory`, {
@@ -759,34 +739,10 @@ export async function getInventory(businessId: number, page: number, resultsPerP
     return 'Request failed: ' + status;
   }
 
-  if (!is<InventoryItem[]>(response.data)) {
+  if (!is<SearchResults<InventoryItem>>(response.data)) {
     return 'Response is not inventory array';
   }
   return response.data;
-}
-
-/**
-   * Sends a query for the total number of inventory items in the business
-   *
-   * @param businessId Business id to identify with the database to retrieve the inventory count
-   * @returns Number of inventory items or an error message
-   */
-export async function getInventoryCount(businessId: number): Promise<MaybeError<number>> {
-  let response;
-  try {
-    response = await instance.get(`/businesses/${businessId}/inventory/count`);
-  } catch (error) {
-    let status: number | undefined = error.response?.status;
-
-    if (status === undefined) return 'Failed to reach backend';
-    return `Request failed: ${status}`;
-  }
-
-  if (typeof response.data?.count !== 'number') {
-    return 'Response is not number';
-  }
-
-  return response.data.count;
 }
 
 /**
@@ -855,6 +811,22 @@ export async function createMarketplaceCard(marketplaceCard: CreateMarketplaceCa
     return 'Invalid response format';
   }
   return response.data.cardId;
+}
+
+export async function modifyMarketplaceCard(cardId: number, marketplaceCard: ModifyMarketplaceCard) {
+  try {
+    await instance.put(`/cards/${cardId}`, marketplaceCard);
+  } catch (error) {
+    let status: number | undefined = error.response?.status;
+    if (status === undefined) return 'Failed to reach backend';
+    if (status === 401) return 'You have been logged out. Please login again and retry';
+    if (status === 403) return 'Operation not permitted';
+    if (status === 406) return 'Marketplace card not found';
+    if (status === 400) return 'Invalid parameters: ' + error.response?.data.message;
+
+    return 'Request failed: ' + status;
+  }
+  return undefined;
 }
 
 type CardOrderBy = 'created' | 'title' | 'closes' | 'creatorFirstName' | 'creatorLastName'
@@ -1043,4 +1015,22 @@ export async function createNewKeyword(keyword: CreateKeyword) : Promise<MaybeEr
     return 'Request failed: ' + error.response?.data.message;
   }
   return response.data.keywordId;
+}
+
+/**
+ * Deletes a keyword from the keyword list
+ * @param keyword The id of the community marketplace keyword
+ */
+export async function deleteKeyword(keywordId: number) : Promise<MaybeError<undefined>> {
+  try {
+    await instance.delete(`/keywords/${keywordId}`);
+  } catch (error) {
+    let status: number | undefined = error.response?.status;
+    if (status === undefined) return 'Failed to reach backend';
+    if (status === 401) return 'You have been logged out. Please login again and retry';
+    if (status === 403) return 'Invalid authorization for keyword deletion';
+    if (status === 406) return 'Keyword not found';
+    return 'Request failed: ' + error.response?.data.message;
+  }
+  return undefined;
 }
