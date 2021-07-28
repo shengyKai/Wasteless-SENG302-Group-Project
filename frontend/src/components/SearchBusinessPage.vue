@@ -60,7 +60,7 @@
       SearchBusinessResultItem-->
       <template v-for="(business, index) in businesss">
         <v-divider v-if="business === undefined" :key="'divider-'+index"/>
-        <SearchBusinessResult v-else :key="business.id" :business="business"/>
+        <SearchBusinessResult v-else :key="business.id" :business="business" @view-profile="viewProfile(business.id)" />
       </template>
     </v-list>
     <!--paginate results-->
