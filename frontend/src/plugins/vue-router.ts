@@ -5,7 +5,7 @@ import Auth from "../components/Auth/index.vue";
 import admin from "../components/admin/Admin.vue";
 import ProfilePage from "../components/UserProfile.vue";
 import BusinessProfile from "../components/BusinessProfile/index.vue";
-import SearchBusinessResults from "../components/SearchBusinessResults.vue";
+import SearchBusinessResults from "../components/SearchBusinessPage.vue";
 import SearchResults from "../components/SearchResults.vue";
 import HomePage from "../components/home/HomePage.vue";
 import ProductCatalogue from "../components/ProductCatalogue.vue";
