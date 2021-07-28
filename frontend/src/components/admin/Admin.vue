@@ -94,6 +94,13 @@ export default {
   components: {
     DeleteKeyword,
   },
+  watch: {
+    keywordToDelete() {
+      if (!this.keywordToDelete) {
+        this.setKeywords();
+      }
+    }
+  },
 };
 </script>
 

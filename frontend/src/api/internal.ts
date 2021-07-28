@@ -1002,3 +1002,21 @@ export async function createNewKeyword(keyword: string) : Promise<MaybeError<und
   // Task 219
   return undefined;
 }
+
+/**
+ * Deletes a keyword from the keyword list
+ * @param keyword The id of the community marketplace keyword
+ */
+export async function deleteKeyword(keywordId: number) : Promise<MaybeError<undefined>> {
+  try {
+    await instance.delete(`/keywords/${keywordId}`);
+  } catch (error) {
+    let status: number | undefined = error.response?.status;
+    if (status === undefined) return 'Failed to reach backend';
+    if (status === 401) return 'You have been logged out. Please login again and retry';
+    if (status === 403) return 'Invalid authorization for keyword deletion';
+    if (status === 406) return 'Keyword not found';
+    return 'Request failed: ' + error.response?.data.message;
+  }
+  return undefined;
+}
