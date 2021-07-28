@@ -172,7 +172,7 @@ export default {
 
 .action-pane {
   margin-right: 10px;
-  max-height: 400px;
+  max-height: 500px;
 }
 
 
