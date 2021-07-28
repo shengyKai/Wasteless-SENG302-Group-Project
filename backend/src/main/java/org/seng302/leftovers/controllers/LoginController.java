@@ -50,15 +50,8 @@ public class LoginController {
         } else {
             PasswordAuthenticator.verifyPassword(password, matchingAccount.getAuthenticationCode());
 
-            // If they are a DGAA, set their permissions
-            if (matchingAccount.getRole().equals("defaultGlobalApplicationAdmin")) {
-                AuthenticationTokenManager.setAuthenticationToken(request, response);
-                AuthenticationTokenManager.setAuthenticationTokenDGAA(request);
-            } else {
-                // Must be a user
-                Optional<User> accountAsUser = userRepository.findById(matchingAccount.getUserID());
-                AuthenticationTokenManager.setAuthenticationToken(request, response, accountAsUser.orElseThrow());
-            }
+            Optional<User> accountAsUser = userRepository.findById(matchingAccount.getUserID());
+            AuthenticationTokenManager.setAuthenticationToken(request, response, accountAsUser.orElseThrow());
             try {
                 response.setStatus(200);
                 response.setContentType("application/json");
