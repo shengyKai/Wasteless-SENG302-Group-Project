@@ -50,14 +50,6 @@ const routes = [
     path: "/business/:id",
     component: BusinessProfile,
     name: "businessProfile",
-    props: (route:any) =>({
-      searchQuery: route.query.searchQuery,
-      businessType: route.query.businessType,
-      page: parseInt(route.query.page),
-      orderBy: route.query.orderBy,
-      reverse: route.query.reverse === 'true' ? true : false
-    }
-    ),
     meta: { title: 'Business' }
   },
   {

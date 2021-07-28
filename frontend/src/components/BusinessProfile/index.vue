@@ -2,7 +2,7 @@
   <div>
     <v-row v-if="fromSearch">
       <v-col class="text-right mt-4 mb-n16">
-        <v-btn >Return to search</v-btn>
+        <v-btn @click="returnToSearch" color="primary">Return to search</v-btn>
       </v-col>
     </v-row>
     <v-card class="body">
@@ -63,10 +63,6 @@ export default {
       readableAddress: ""
     };
   },
-  props: {
-    searchData: Object,
-  },
-
   watch: {
     $route: {
       handler() {
@@ -105,11 +101,12 @@ export default {
     },
 
     fromSearch() {
-      return this.businessType !== undefined
-          || this.orderBy !== undefined
-          || this.page !== undefined
-          || this.reverse !== undefined
-          || this.searchQuery !== undefined;
+      console.log();
+      return this.$route.query.businessType !== undefined
+          || this.$route.query.orderBy !== undefined
+          || this.$route.query.page !== undefined
+          || this.$route.query.reverse !== undefined
+          || this.$route.query.searchQuery !== undefined;
     }
   },
 
@@ -117,6 +114,9 @@ export default {
     goSalePage() {
       this.$router.push(`/business/${this.business.id}/listings`);
     },
+    async returnToSearch() {
+      await this.$router.push({path: '/search/business', query:{...this.$route.query}});
+    }
   }
 };
 </script>

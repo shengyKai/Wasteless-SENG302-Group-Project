@@ -230,7 +230,7 @@ export default {
         orderBy: this.orderBy,
         reverse: this.reverse.toString()
       };
-      await this.$router.push({name: 'businessProfile', params:{...searchData, id}});
+      await this.$router.push({name: 'businessProfile', params:{id}, query:{...searchData}});
     }
   },
 
@@ -265,6 +265,13 @@ export default {
   components: {
     SearchBusinessResult,
   },
+  mounted() {
+    this.searchQuery = this.$route.query.searchQuery || this.searchQuery;
+    this.selectedBusinessType = this.$route.query.businessType || this.selectedBusinessType;
+    this.currentPage = this.$route.query.page? parseInt(this.$route.query.page.toString()) : this.currentPage;
+    this.reverse = this.$route.query.reverse === "true";
+    this.orderBy = this.$route.query.orderBy || this.orderBy;
+  }
 };
 </script>
 
