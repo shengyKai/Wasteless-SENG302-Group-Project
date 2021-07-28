@@ -221,10 +221,8 @@ export default {
 
       let results;
       if (this.selectedKeywords.length === 0) {
-        console.log("B");
         results = await Promise.all(sections.map(key => getMarketplaceCardsBySection(key, this.currentPage[key], this.resultsPerPage, this.orderBy, this.reverse)));
       } else {
-        console.log("A");
         results = await Promise.all(sections.map(key => getMarketplaceCardsBySectionAndKeywords(this.selectedKeywords,key, this.unionSearch, this.currentPage[key], this.resultsPerPage, this.orderBy, this.reverse)));
       }
 
