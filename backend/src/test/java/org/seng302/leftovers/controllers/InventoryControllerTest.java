@@ -4,7 +4,6 @@ import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -44,6 +43,7 @@ import net.minidev.json.parser.JSONParser;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import java.lang.reflect.Field;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -51,12 +51,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.jupiter.api.assertEquals;
-import static org.junit.jupiter.api.assertNotEquals;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -119,6 +114,9 @@ class InventoryControllerTest {
                 .withAddress(Location.covertAddressStringToLocation("108,Albert Road,Ashburton,Christchurch,New Zealand,Canterbury,8041"))
                 .withPrimaryOwner(testUser)
                 .build();
+        Field businessIdField = Business.class.getDeclaredField("id");
+        businessIdField.setAccessible(true);
+        businessIdField.set(testBusiness, 1L);
         testProduct = new Product.Builder()
                 .withProductCode("BEANS")
                 .withBusiness(testBusiness)
@@ -159,8 +157,8 @@ class InventoryControllerTest {
         doNothing().when(businessSpy).checkSessionPermissions(any()); // mock successful authentication
         // when(inventoryItemRepository.findAllForBusiness(businessSpy, any())).thenReturn(inventory);
 
-        var controller = new InventoryController(businessRepository, inventoryItemRepository, productRepository);
-        mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
+        inventoryController = new InventoryController(businessRepository, inventoryItemRepository, productRepository);
+        mockMvc = MockMvcBuilders.standaloneSetup(inventoryController).build();
     }
 
     @AfterEach
@@ -217,14 +215,19 @@ class InventoryControllerTest {
 
     @Test
     void addInventory_notLoggedIn_cannotAddInventory401() throws Exception {
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.checkAuthenticationToken(any()))
+                .thenThrow(new AccessTokenException());
         Business businessSpy = spy(testBusiness);
-        when(businessRepository.getBusinessById(any())).thenReturn(businessSpy);
+        when(businessRepository.getBusinessById(any())).thenReturn(businessSpy); // use our business
+        doCallRealMethod().when(businessSpy).checkSessionPermissions(any());
 
         mockMvc.perform(MockMvcRequestBuilders
                 .post("/businesses/1/inventory")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(generateInventoryCreateInfo().toString()))
                 .andExpect(status().isUnauthorized());
+
+        authenticationTokenManager.verify(() -> AuthenticationTokenManager.checkAuthenticationToken(any()));
     }
 
     @Test
@@ -304,28 +307,16 @@ class InventoryControllerTest {
 
     @Test
     void getInventory_unverifiedAccessToken_401Thrown() throws Exception {
-        inventoryController = new InventoryController(businessRepository, inventoryItemRepository, productRepository);
-        when(businessRepository.getBusinessById(1L)).thenReturn(mockBusiness);
-        doThrow(new AccessTokenException()).when(mockBusiness).checkSessionPermissions(any());
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.checkAuthenticationToken(any()))
+                .thenThrow(new AccessTokenException());
         ResponseStatusException exception = assertThrows(ResponseStatusException.class,
                 () -> inventoryController.getInventory(1L, request, null, null, null, null));
         assertEquals(HttpStatus.UNAUTHORIZED, exception.getStatus());
+        authenticationTokenManager.verify(() -> AuthenticationTokenManager.checkAuthenticationToken(any()));
     }
-
-    @Test
-    void getInventory_insufficientPermissions_403Thrown() {
-        inventoryController = new InventoryController(businessRepository, inventoryItemRepository, productRepository);
-        when(businessRepository.getBusinessById(1L)).thenReturn(mockBusiness);
-        doThrow(new ResponseStatusException(HttpStatus.FORBIDDEN)).when(mockBusiness).checkSessionPermissions(any());
-        ResponseStatusException exception = assertThrows(ResponseStatusException.class,
-                () -> inventoryController.getInventory(1L, request, null, null, null, null));
-        assertEquals(HttpStatus.FORBIDDEN, exception.getStatus());
-    }
-
 
     @Test
     void getInventory_businessNotFound_406Thrown() {
-        inventoryController = new InventoryController(businessRepository, inventoryItemRepository, productRepository);
         when(businessRepository.getBusinessById(1L)).thenThrow(new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE));
         ResponseStatusException exception = assertThrows(ResponseStatusException.class,
                 () -> inventoryController.getInventory(1L, request, null, null, null, null));
@@ -340,9 +331,9 @@ class InventoryControllerTest {
 
         verify(inventoryItemRepository, times(1)).findAllForBusiness(eq(mockBusiness), any());
 
-        assertEquals(0, ((List<?>) result.get("results")).size());
-        assertEquals(0, result.get("count"));
-        assertEquals(2, result.size());
+        assertEquals(0L, ((List<?>) result.get("results")).size());
+        assertEquals(0L, result.get("count"));
+        assertEquals(2L, result.size());
     }
 
 
@@ -365,29 +356,31 @@ class InventoryControllerTest {
         
         
         assertEquals(expectedArray, result.get("results"));
-        assertEquals(1000, result.get("count"));
-        assertEquals(2, result.size());
+        assertEquals(1000L, result.get("count"));
+        assertEquals(2L, result.size());
     }
 
 
     @Test
     void retrievePaginatedInventory_firstPage_firstRequested() throws Exception {
+        when(inventoryItemRepository.findAllForBusiness(any(), any())).thenReturn(Page.empty());
         mockMvc.perform(
                 MockMvcRequestBuilders.get("/businesses/1/inventory").param("page", "1").param("resultsPerPage", "2"))
                 .andExpect(status().isOk()).andReturn();
 
         PageRequest expectedPageRequest = SearchHelper.getPageRequest(1, 2, Sort.by(new Sort.Order(Direction.ASC, "product.productCode").ignoreCase()));
-        verify(inventoryItemRepository, times(1)).findAllForBusiness(mockBusiness, expectedPageRequest);
+        verify(inventoryItemRepository, times(1)).findAllForBusiness(testBusiness, expectedPageRequest);
     }
 
     @Test
     void retrievePaginatedInventory_secondPage_secondPageRequested() throws Exception {
+        when(inventoryItemRepository.findAllForBusiness(any(), any())).thenReturn(Page.empty());
         mockMvc.perform(
                 MockMvcRequestBuilders.get("/businesses/1/inventory").param("page", "2").param("resultsPerPage", "2"))
                 .andExpect(status().isOk()).andReturn();
 
         PageRequest expectedPageRequest = SearchHelper.getPageRequest(2, 2, Sort.by(new Sort.Order(Direction.ASC, "product.productCode").ignoreCase()));
-        verify(inventoryItemRepository, times(1)).findAllForBusiness(mockBusiness, expectedPageRequest);
+        verify(inventoryItemRepository, times(1)).findAllForBusiness(testBusiness, expectedPageRequest);
     }
 
     @ParameterizedTest
@@ -407,22 +400,23 @@ class InventoryControllerTest {
             "expires,expires",
     })
     void retrieveSortedInventory_byProvidedField_requestedOrderingByField(String orderBy, String ordering) throws Exception {
-        mockMvc
-                .perform(MockMvcRequestBuilders.get("/businesses/1/inventory").param("orderBy", orderBy))
+        when(inventoryItemRepository.findAllForBusiness(any(), any())).thenReturn(Page.empty());
+        mockMvc.perform(MockMvcRequestBuilders.get("/businesses/1/inventory").param("orderBy", orderBy))
                 .andExpect(status().isOk()).andReturn();
         
         PageRequest expectedPageRequest = SearchHelper.getPageRequest(null, null, Sort.by(new Sort.Order(Direction.ASC, ordering).ignoreCase()));
-        verify(inventoryItemRepository, times(1)).findAllForBusiness(mockBusiness, expectedPageRequest);
+        verify(inventoryItemRepository, times(1)).findAllForBusiness(testBusiness, expectedPageRequest);
     }
 
     @Test
     void retrieveSortedInventory_reversed_reverseOrderingRequested() throws Exception {
+        when(inventoryItemRepository.findAllForBusiness(any(), any())).thenReturn(Page.empty());
         mockMvc.perform(
                 MockMvcRequestBuilders.get("/businesses/1/inventory").param("reverse", "true").param("orderBy", "name"))
                 .andExpect(status().isOk()).andReturn();
 
-        PageRequest expectedPageRequest = SearchHelper.getPageRequest(null, null, Sort.by(new Sort.Order(Direction.DESC, "product.productCode").ignoreCase()));
-        verify(inventoryItemRepository, times(1)).findAllForBusiness(mockBusiness, expectedPageRequest);
+        PageRequest expectedPageRequest = SearchHelper.getPageRequest(null, null, Sort.by(new Sort.Order(Direction.DESC, "product.name").ignoreCase()));
+        verify(inventoryItemRepository, times(1)).findAllForBusiness(testBusiness, expectedPageRequest);
     }
 
     /**

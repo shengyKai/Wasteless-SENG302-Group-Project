@@ -228,7 +228,7 @@ public class InventoryController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The provided ordering is invalid");
         }
 
-        if (orderBy.equals("productCode") {
+        if (orderBy.equals("productCode")) {
             orderBy = "product.productCode";
         }
         if (orderBy.equals("name")) {
