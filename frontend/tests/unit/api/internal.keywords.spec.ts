@@ -85,10 +85,7 @@ describe("Test POST /keywords endpoint", () => {
       name: "New keyword"
     };
     const createdKeyword = await api.createNewKeyword(keyword);
-    let expectedResponse = {
-      keywordId: 1
-    };
-    expect(createdKeyword).toEqual(expectedResponse);
+    expect(createdKeyword).toEqual(1);
   });
 
   it("Keyword already exists", async () => {
@@ -101,7 +98,7 @@ describe("Test POST /keywords endpoint", () => {
       name: "New keyword"
     };
     const createdKeyword = await api.createNewKeyword(keyword);
-    expect(createdKeyword).toEqual("This keyword already exists");
+    expect(createdKeyword).toEqual("This keyword already exists or is of invalid format");
   });
 
   it("Unauthorised call to create keyword", async () => {

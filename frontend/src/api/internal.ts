@@ -1038,7 +1038,7 @@ export async function createNewKeyword(keyword: CreateKeyword) : Promise<MaybeEr
   } catch (error) {
     let status: number | undefined = error.response?.status;
     if (status === undefined) return 'Failed to reach backend';
-    if (status === 400) return 'This keyword already exists or of is invalid format';
+    if (status === 400) return 'This keyword already exists or is of invalid format';
     if (status === 401) return 'You have been logged out. Please login again and retry';
     return 'Request failed: ' + error.response?.data.message;
   }
