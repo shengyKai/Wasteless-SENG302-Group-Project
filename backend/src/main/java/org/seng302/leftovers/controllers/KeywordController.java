@@ -149,7 +149,7 @@ public class KeywordController {
      * @param keywordRepository so method can be static
      * @return created keyword or not unique error
      */
-    public static Keyword formatKeyword(String name, KeywordRepository keywordRepository) {
+    public static Keyword formatKeyword(String name, KeywordRepository keywordRepository) throws ResponseStatusException {
         String[] words = name.split(" ");
         StringBuilder formattedName = new StringBuilder();
         for (String word : words) {
@@ -161,7 +161,7 @@ public class KeywordController {
         }
         Keyword keyword = new Keyword(formattedName.toString().strip());
         for (Keyword keywords : keywordRepository.findAll()) {
-            if (keywords.getName().equalsIgnoreCase(name)) {
+            if (keywords.getName().equals(keyword.getName())) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Keyword with the given name already exists");
             }
         }
