@@ -232,11 +232,16 @@ export default {
   },
   methods: {
     async addNewKeyword() {
-      const matches = this.filterKeywords(this.keywordFilter + " ");
-      if (this.keywordFilter !== "" && matches.size() === 0) {
-        const result = await createNewKeyword(this.keyword);
+      if (this.keywordFilter.length > 0) {
+        let keyword = {
+          name: this.keywordFilter
+        };
+        const result = await createNewKeyword(keyword);
         if (typeof result === 'string') {
           this.errorMessage = result;
+        } else {
+          await this.searchKeywords();
+          this.selectedKeywords.push(result);
         }
       }
     },
