@@ -307,12 +307,11 @@ class InventoryControllerTest {
 
     @Test
     void getInventory_unverifiedAccessToken_401Thrown() throws Exception {
-        authenticationTokenManager.when(() -> AuthenticationTokenManager.checkAuthenticationToken(any()))
-                .thenThrow(new AccessTokenException());
+        when(businessRepository.getBusinessById(1L)).thenReturn(mockBusiness);
+        doThrow(new ResponseStatusException(HttpStatus.UNAUTHORIZED)).when(mockBusiness).checkSessionPermissions(any());
         ResponseStatusException exception = assertThrows(ResponseStatusException.class,
                 () -> inventoryController.getInventory(1L, request, null, null, null, null));
         assertEquals(HttpStatus.UNAUTHORIZED, exception.getStatus());
-        authenticationTokenManager.verify(() -> AuthenticationTokenManager.checkAuthenticationToken(any()));
     }
 
     @Test

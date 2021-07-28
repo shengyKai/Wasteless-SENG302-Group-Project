@@ -1,10 +1,11 @@
 <template>
   <div>
-    <v-container fluid>
-      <v-row align="center">
+    <v-toolbar dark color="primary" class="mb-1">
+      <v-row align="center" justify="space-between">
         <v-col
           class="d-flex"
-          cols="auto"
+          cols="4"
+
         >
           <!---Select component for the order in which the cards should be displayed--->
           <v-select
@@ -22,9 +23,7 @@
             prepend-inner-icon="mdi-sort-variant"
             label="Sort by"
           />
-        </v-col>
-        <v-col cols="auto">
-          <!---Reverse the order in which the cards should be displayed--->
+          <!---Reverse the order in which the cpl-16ards should be displayed--->
           <v-btn-toggle class="toggle" v-model="reverse" mandatory>
             <v-btn depressed color="primary" :value="false">
               <v-icon>mdi-arrow-up</v-icon>
@@ -35,29 +34,53 @@
           </v-btn-toggle>
         </v-col>
         <v-col
-          class="d-flex"
-          cols="auto"
-        >
-          <!---Search for cards by their keywords--->
-          <v-text-field
-            clearable
+          class="d-flex pl-16 mr-n16"
+          cols="4">
+          <v-select
             flat
-            solo-inverted
             hide-details
-            prepend-inner-icon="mdi-magnify"
-            label="Keywords"
-            autofocus
-          />
+            solo-inverted
+            no-data-text="No keywords found"
+            value = "keywords"
+            v-model="selectedKeywords"
+            :items="filteredKeywordList"
+            label="Select keywords"
+            item-text="name"
+            item-value="id"
+            multiple
+          >
+            <template v-slot:prepend-item>
+              <v-list-item>
+                <v-list-item-content>
+                  <v-text-field
+                    label="Search for a keyword" v-model="keywordFilter"
+                    clearable
+                    :autofocus="true"
+                    hint="Keyword name"
+                  />
+                </v-list-item-content>
+              </v-list-item>
+            </template>
+          </v-select>
+          <!-- Toggle button for user to choose partially or fully matched results -->
+          <v-btn-toggle class="toggle" v-model="andOr" mandatory>
+            <v-btn depressed color="primary" :value="false">
+              AND
+            </v-btn>
+            <v-btn depressed color="primary" :value="true">
+              OR
+            </v-btn>
+          </v-btn-toggle>
         </v-col>
-        <v-spacer/>
-        <v-col cols="auto" class="text-right" >
+
+        <v-col cols="4" class="text-right" >
           <!---Link to modal for creating new card--->
-          <v-btn type="button" color="primary" @click="showCreateCard=true" rounded>
+          <v-btn type="button" color="secondary" @click="showCreateCard=true" rounded>
             Create card
           </v-btn>
         </v-col>
       </v-row>
-    </v-container>
+    </v-toolbar>
     <v-alert
       v-if="error !== undefined"
       type="error"
@@ -114,12 +137,23 @@
 <script>
 import MarketplaceCard from "../cards/MarketplaceCard";
 import MarketplaceCardForm from "./MarketplaceCardForm.vue";
-import {getMarketplaceCardsBySection, getMarketplaceCardsBySectionAndKeywords} from "../../api/internal.ts";
+import {getMarketplaceCardsBySection, getMarketplaceCardsBySectionAndKeywords, searchKeywords} from "../../api/internal.ts";
 import { SECTION_NAMES } from '@/utils';
 
 export default {
   data() {
     return {
+      title: "",
+      description: "",
+      allKeywords: [],
+      selectedKeywords: [],
+      keywordFilter: "",
+      dialog: true,
+      errorMessage: undefined,
+      // sections: [{text: "For Sale", value: "ForSale"}, {text: "Wanted", value: "Wanted"}, {text: "Exchange", value: "Exchange"}],
+      selectedSection: undefined,
+      allowedCharsRegex: /^[\s\d\p{L}\p{P}]*$/u,
+
       tab: null,
       sectionNames: SECTION_NAMES,
       keywordIds: [],
@@ -156,13 +190,27 @@ export default {
        * creation date should be descending by default.
        */
       reverse: true,
+      andOr: true,
       showCreateCard: false,
     };
+  },
+  mounted() {
+    searchKeywords()
+      .then((response) => {
+        if (typeof response === 'string') {
+          this.allKeywords = [];
+        } else {
+          this.allKeywords = response;
+        }})
+      .catch(() => (this.allKeywords = []));
   },
   computed: {
     user() {
       return this.$store.state.user;
-    }
+    },
+    filteredKeywordList() {
+      return this.allKeywords.filter(x => this.filterKeywords(x));
+    },
   },
   methods: {
     /**
@@ -192,6 +240,10 @@ export default {
           this.totalResults[key] = value.count;
         }
       }
+    },
+    filterKeywords(keyword) {
+      const filterText = this.keywordFilter ?? '';
+      return keyword.name.toLowerCase().includes(filterText.toLowerCase());
     },
     /**
      * The total number of pages required to show all the users
