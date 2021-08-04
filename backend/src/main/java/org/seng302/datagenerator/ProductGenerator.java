@@ -11,13 +11,9 @@ public class ProductGenerator {
     private final Random random = new Random();
     private final Connection conn;
     private final CommerceNameGenerator commerceNameGenerator = CommerceNameGenerator.getInstance();
+    private final DescriptionGenerator descriptionGenerator = DescriptionGenerator.getInstance();
     private final ProductImageGenerator imageGenerator;
     private HashSet<String> productCodeHash = new HashSet();
-
-
-    //predefined lists
-    String[] DESCRIPTIONS = {"Good for your gut", "May contain traces of peanuts", "Helps improve grades"};
-    //TODO when description generator finished hook it up
 
     public ProductGenerator(Connection conn) {
         this.conn = conn;
@@ -85,7 +81,7 @@ public class ProductGenerator {
 
         stmt.setObject(1, getCountryOfBusiness(businessId));
         stmt.setObject(2, Instant.now());
-        stmt.setObject(3, DESCRIPTIONS[random.nextInt(DESCRIPTIONS.length)]);
+        stmt.setObject(3, descriptionGenerator.randomDescription());
         stmt.setObject(4, commerceNameGenerator.randomManufacturerName());
         stmt.setObject(5, productName);
         stmt.setObject(6, generateProductCode());
