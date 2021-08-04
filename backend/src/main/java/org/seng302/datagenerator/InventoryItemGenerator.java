@@ -128,7 +128,7 @@ public class InventoryItemGenerator {
         List<Long> generatedInvItemIds = new ArrayList<>();
         for (int i=0; i < invItemCount; i++) {
             clear();
-            long productId = productIds.get(0);
+            long productId = productIds.get(random.nextInt(productIds.size()));
 
             System.out.println(String.format("Creating Inventory Item %d / %d", i+1, invItemCount));
             int progress = (int) (((float)(i+1) / (float)invItemCount) * 100);
