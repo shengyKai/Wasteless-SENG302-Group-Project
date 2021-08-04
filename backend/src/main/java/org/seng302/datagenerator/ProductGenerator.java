@@ -87,7 +87,6 @@ public class ProductGenerator {
         stmt.setObject(6, generateProductCode());
         stmt.setObject(7, generateRRP());
         stmt.setObject(8, businessId);
-        System.out.println(stmt);
         stmt.executeUpdate();
         ResultSet keys = stmt.getGeneratedKeys();
         keys.next();
