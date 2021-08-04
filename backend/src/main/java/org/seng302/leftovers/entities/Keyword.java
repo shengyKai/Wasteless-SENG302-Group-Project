@@ -2,6 +2,8 @@ package org.seng302.leftovers.entities;
 
 import lombok.NoArgsConstructor;
 import net.minidev.json.JSONObject;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -25,6 +27,7 @@ public class Keyword {
     private Instant created;
 
     @ManyToMany(mappedBy = "keywords")
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private List<MarketplaceCard> cards = new ArrayList<>();
 
     /**
@@ -97,12 +100,5 @@ public class Keyword {
                 ", name='" + name + '\'' +
                 ", created=" + created +
                 '}';
-    }
-
-    @PreRemove
-    private void preRemove() {
-        for (MarketplaceCard card : cards) {
-            card.removeKeyword(this);
-        }
     }
 }
