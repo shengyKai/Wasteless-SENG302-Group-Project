@@ -126,13 +126,10 @@ public class KeywordController {
             AuthenticationTokenManager.checkAuthenticationToken(request);
 
             // Formats keyword to have capitals at the start of each word
-            System.out.println("There");
             Keyword keyword = new Keyword(name);
-            System.out.println("Here");
             if (keywordRepository.findByName(keyword.getName()).isPresent()) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Keyword with the given name already exists");
             }
-            System.out.println("Tier");
 
             User creator = findUserFromRequest(request);
             keyword = keywordRepository.save(keyword);
