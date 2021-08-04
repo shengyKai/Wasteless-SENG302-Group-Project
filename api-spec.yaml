@@ -1677,6 +1677,38 @@ paths:
                       - 3
         '403':
           description: 'Forbidden: Returned if a DGAA user attempts to generate demo data.'
+  /feed/delete/{id}:
+    delete:
+      tags:
+        - 'U32: Managing my feed'
+        - Feed
+      summary: Deleting an item from the user feed
+      security:
+        - CookieAuth:
+            - user
+            - business
+            - globalApplicationAdmin
+            - defaultGlobalApplicationAdmin
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: ID of the item to delete (item refers to event entity)
+          example: 10
+      responses:
+        '200':
+          description: Item successfully deleted from the feed
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: >-
+            Forbidden: Returned when a user or business who does not have
+            this item on there feed tries to delete this item.
+        '406':
+           description: >-
+             Not Acceptable: Returned when a feed with an ID does not exist.
 components:
   securitySchemes:
     CookieAuth:
