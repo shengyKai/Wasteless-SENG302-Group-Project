@@ -5,6 +5,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.runner.RunWith;
+import org.seng302.leftovers.entities.Business;
+import org.seng302.leftovers.entities.Product;
 import org.seng302.leftovers.persistence.BusinessRepository;
 import org.seng302.leftovers.persistence.ProductRepository;
 import org.seng302.leftovers.persistence.UserRepository;
@@ -17,8 +19,9 @@ import org.springframework.test.context.junit4.SpringRunner;
 import java.sql.*;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.*;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes={Main.class})
@@ -179,6 +182,25 @@ public class ProductGeneratorTest {
         long productsInDBAfter = getNumProductsInDB();
         if (productsInDB != productsInDBAfter) {
             fail();
+        }
+    }
+
+    // Checking the generated product code is valid
+    @Test
+    void generateProducts_generateFiveHundredProductsCheckProductCodes_productCodesValid() throws SQLException {
+        List<Long> businessIds = generateUserAndBusiness(1, 1);
+        Business business = businessRepository.getBusinessById(businessIds.get(0));
+        List<Long> productIds = productGenerator.generateProducts(businessIds, 500);
+        for (Long productId: productIds) {
+            Product productRepo = productRepository.findById(productId).get();
+            var newProduct = new Product.Builder()
+                    .withProductCode(productRepo.getProductCode())
+                    .withName("Fresh Orange")
+                    .withDescription("This is a fresh orange")
+                    .withManufacturer("Apple")
+                    .withRecommendedRetailPrice("2.01")
+                    .withBusiness(business);
+            assertDoesNotThrow(newProduct::build, "foo" + productRepo.getProductCode());
         }
     }
 }
