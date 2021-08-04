@@ -1,4 +1,6 @@
 package org.seng302.datagenerator;
+import org.hibernate.SessionFactory;
+import org.mockito.Mock;
 import org.seng302.leftovers.Main;
 
 import org.junit.jupiter.api.Test;
@@ -6,6 +8,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.runner.RunWith;
 import org.seng302.leftovers.entities.Business;
+import org.seng302.leftovers.entities.Location;
 import org.seng302.leftovers.entities.Product;
 import org.seng302.leftovers.persistence.BusinessRepository;
 import org.seng302.leftovers.persistence.ProductRepository;
@@ -22,6 +25,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes={Main.class})
@@ -189,18 +193,23 @@ public class ProductGeneratorTest {
     @Test
     void generateProducts_generateFiveHundredProductsCheckProductCodes_productCodesValid() throws SQLException {
         List<Long> businessIds = generateUserAndBusiness(1, 1);
-        Business business = businessRepository.getBusinessById(businessIds.get(0));
+        //Business business = businessRepository.getBusinessById(businessIds.get(0));
+        Business business = mock(Business.class);
+        Location location = mock(Location.class);
+        when(business.getAddress()).thenReturn(location);
+        when(location.getCountry()).thenReturn("EllaLand");
         List<Long> productIds = productGenerator.generateProducts(businessIds, 500);
         for (Long productId: productIds) {
-            Product productRepo = productRepository.findById(productId).get();
+            Product product = productRepository.findById(productId).get();
             var newProduct = new Product.Builder()
-                    .withProductCode(productRepo.getProductCode())
+                    .withProductCode(product.getProductCode())
                     .withName("Fresh Orange")
                     .withDescription("This is a fresh orange")
                     .withManufacturer("Apple")
                     .withRecommendedRetailPrice("2.01")
                     .withBusiness(business);
-            assertDoesNotThrow(newProduct::build, "foo" + productRepo.getProductCode());
+            System.out.println(business);
+            assertDoesNotThrow(newProduct::build, product.getProductCode());
         }
     }
 }
