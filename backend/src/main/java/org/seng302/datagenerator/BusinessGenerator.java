@@ -1,6 +1,7 @@
 package org.seng302.datagenerator;
 
 import org.apache.catalina.User;
+import org.seng302.leftovers.entities.Business;
 import org.seng302.leftovers.entities.Location;
 
 import java.sql.*;
@@ -17,9 +18,6 @@ public class BusinessGenerator {
     private final DescriptionGenerator descriptionGenerator = DescriptionGenerator.getInstance();
     private final CommerceNameGenerator commerceNameGenerator = CommerceNameGenerator.getInstance();
 
-    //predefined lists
-    String[] BUSINESSTYPES = {"Accommodation and Food Services", "Retail Trade", "Charitable organisation", "Non-profit organisation"};
-
     public BusinessGenerator(Connection conn) { this.conn = conn; }
 
     /**
@@ -34,7 +32,7 @@ public class BusinessGenerator {
                 + "VALUES (?, ?, ?, ?, ?, ?)",
                 Statement.RETURN_GENERATED_KEYS
         );
-        stmt.setObject(1, BUSINESSTYPES[random.nextInt(BUSINESSTYPES.length)]); //business type
+        stmt.setObject(1, Business.getBusinessTypes().get(random.nextInt(Business.getBusinessTypes().size())));
         stmt.setObject(2, Instant.now()); //date created
         stmt.setObject(3, descriptionGenerator.randomDescription());
         stmt.setObject(4, commerceNameGenerator.randomBusinessName());

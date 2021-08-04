@@ -22,9 +22,7 @@ public class UserGenerator {
     private Connection conn;
     private LocationGenerator locationGenerator = LocationGenerator.getInstance();
     private PersonNameGenerator personNameGenerator = PersonNameGenerator.getInstance();
-
-    //predefined lists
-    private static final String[] BIOS = {"I enjoy running on the weekends", "Beaches are fun", "Got to focus on my career", "If only I went to a better university", "Read documentation yeah right", "My cats keep me going", "All I need is food"};
+    private final DescriptionGenerator descriptionGenerator = DescriptionGenerator.getInstance();
 
     public UserGenerator(Connection conn) {
         this.conn = conn;
@@ -172,7 +170,7 @@ public class UserGenerator {
             statement.setObject(4, fullName.getNickname()); //nickname
             statement.setObject(5, generatePhNum()); //phone number
             statement.setObject(6, generateDOB()); //date of birth
-            statement.setObject(7, BIOS[random.nextInt(BIOS.length)]); //bio
+            statement.setObject(7, descriptionGenerator.randomDescription()); //bio
             statement.setObject(8, Instant.now()); //date created
             statement.setObject(9, userId);
             statement.setObject(10, addressId);
