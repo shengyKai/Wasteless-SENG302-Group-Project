@@ -39,8 +39,7 @@ public class ProductGenerator {
      */
     public String generateProductCode() {
         String productWord = "";
-        int numLetters = random.nextInt(20);
-        for (int i=0; i < numLetters; i++) {
+        for (int i=0; i < 9; i++) {
             char character = (char) (random.nextInt(26) + 'A');
             productWord += character;
         }
