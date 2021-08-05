@@ -1542,6 +1542,47 @@ paths:
           $ref: '#/components/responses/BadRequestError'
         '401':
           $ref: '#/components/responses/UnauthorizedError'
+  /feed/tags/{id}:
+    post:
+      tags:
+        - 'U32: Managing my feed'
+        - Feed
+      summary: Add tags to items on your feed
+      security:
+        - CookieAuth:
+            - user
+            - business
+            - globalApplicationAdmin
+            - defaultGlobalApplicationAdmin
+      parameters:
+        - name: id
+          in: path
+          description: Item on feed
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - tags
+              properties:
+                tags:
+                  type: [string]
+                  description: A tag to be associated with the the item on the news feed
+      responses:
+        '200':
+          description: Item successfully deleted from the feed
+        '400':
+          description: 'Bad Request: invalid tag providing'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: >-
+            Forbidden: Returned when a user or business who does not have
+            this item on there feed tries to add a tag to them
   /demo/generate:
     post:
       tags:
