@@ -185,7 +185,7 @@ export default {
      * This function is called when the search query changes.
      */
     async updateSearchQuery() {
-      this.currentPage = 1; // Makes sure we start on the first page
+      this.currentPage = this.$route.query.page ? parseInt(this.$route.query.page) : 1; // Makes sure we start on the first page
       this.results = undefined; // Remove results
       await this.updateResults();
     },
