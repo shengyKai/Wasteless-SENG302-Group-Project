@@ -3,6 +3,22 @@
     <BusinessActionPanel v-if="isBusiness" />
     <UserActionPanel v-else />
     <div class="newsfeed">
+      <!---Select component for the order in which the cards should be displayed--->
+      <v-select
+        v-model="filterBy"
+        flat
+        solo-inverted
+        hide-details
+        :items="[
+          { text: 'Tag filter 1', value: 'tag1'},
+          { text: 'Tag filter 2', value: 'tag2'},
+          { text: 'Tag filter 3', value: 'tag3'},
+          { text: 'Tag filter 4', value: 'tag4'},
+          { text: 'Tag filter 5', value: 'tag5'},
+        ]"
+        prepend-inner-icon="mdi-sort-variant"
+        label="Filter by"
+      />
       <!-- Newsfeed -->
       <div v-if="$store.getters.events.length === 0 || isBusiness" class="text-center">
         No items in your feed
