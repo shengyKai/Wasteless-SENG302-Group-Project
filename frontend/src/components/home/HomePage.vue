@@ -27,6 +27,7 @@
         multiple
         chips
       >
+        <!--Allows to access each chip's property in the v-select so that manipulation of the chip's color is possible -->
         <template #selection="{ item }">
           <v-chip :color="item.color">{{item.text}}</v-chip>
         </template>
@@ -37,7 +38,7 @@
       </div>
       <v-card
         v-else
-        v-for="event in $store.getters.events"
+        v-for="event in events"
         :key="event.id"
         outlined
         rounded="lg"
@@ -79,8 +80,9 @@ export default {
   },
   data() {
     return {
-      filterBy: "",
-      filterList: []
+      filterBy: [],
+      // ATTENTION, "events" is to be used with the frontend only pagination with "filterBy" above.
+      events: this.$store.getters.events
     };
   },
   computed: {
@@ -103,6 +105,11 @@ export default {
       if (!this.isBusiness) return undefined;
       return [...Array(10).keys()].map(i => `Item ${i}`);
     },
+  },
+  methods: {
+    filterEvents() {
+      //TODO once things has been finalised
+    }
   }
 };
 </script>
