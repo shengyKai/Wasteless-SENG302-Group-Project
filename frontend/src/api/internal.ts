@@ -1034,3 +1034,21 @@ export async function deleteKeyword(keywordId: number) : Promise<MaybeError<unde
   }
   return undefined;
 }
+
+/**
+ * Deletes a notification from your feed
+ * @param notificationId The id of the notification to be deleted
+ */
+export async function deleteNotification(notificationId: number) : Promise<MaybeError<undefined>> {
+  try {
+    await instance.delete(`/feed/delete/${notificationId}`);
+  } catch (error) {
+    let status: number | undefined = error.response?.status;
+    if (status === undefined) return 'Failed to reach backend';
+    if (status === 401) return 'You have been logged out. Please login again and retry';
+    if (status === 403) return 'Invalid authorization for notification removal';
+    if (status === 406) return 'Notification not found';
+    return 'Request failed: ' + error.response?.data.message;
+  }
+  return undefined;
+}
