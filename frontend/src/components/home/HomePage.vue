@@ -19,6 +19,15 @@
         prepend-inner-icon="mdi-sort-variant"
         label="Filter by"
       />
+      <v-chip
+        v-for="chip in filterList"
+        :key="chip"
+        class="ma-2"
+        close
+        @click:close="removeChip(chip)"
+      >
+        {{ chip }}
+      </v-chip>
       <!-- Newsfeed -->
       <div v-if="$store.getters.events.length === 0 || isBusiness" class="text-center">
         No items in your feed
@@ -65,6 +74,13 @@ export default {
     DeleteEvent,
     KeywordCreated,
   },
+  data() {
+    return {
+      filterBy: "",
+      chip1: true,
+      filterList: []
+    };
+  },
   computed: {
     /**
      * Current active user role
@@ -85,6 +101,18 @@ export default {
       if (!this.isBusiness) return undefined;
       return [...Array(10).keys()].map(i => `Item ${i}`);
     },
+  },
+  watch: {
+    filterBy: function() {
+      this.filterList.push(this.filterBy);
+      console.log(this.filterList);
+    }
+  },
+  methods: {
+    removeChip(chip) {
+      const index = this.filterList.indexOf(chip);
+      this.filterList.splice(index, 1);
+    }
   }
 };
 </script>
