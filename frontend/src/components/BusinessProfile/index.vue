@@ -101,7 +101,6 @@ export default {
     },
 
     fromSearch() {
-      console.log();
       return this.$route.query.businessType !== undefined
           || this.$route.query.orderBy !== undefined
           || this.$route.query.page !== undefined

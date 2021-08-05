@@ -50,7 +50,7 @@ const routes = [
     path: "/business/:id",
     component: BusinessProfile,
     name: "businessProfile",
-    meta: { title: 'Business' }
+    meta: { title: 'Business' },
   },
   {
     path: "/admin",
