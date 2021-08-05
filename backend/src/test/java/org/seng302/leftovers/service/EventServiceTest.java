@@ -10,8 +10,6 @@ import org.seng302.leftovers.entities.Event;
 import org.seng302.leftovers.entities.MessageEvent;
 import org.seng302.leftovers.entities.User;
 import org.seng302.leftovers.persistence.EventRepository;
-import org.seng302.leftovers.service.EventService;
-import org.seng302.leftovers.service.EventServiceImpl;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -81,7 +79,7 @@ public class EventServiceTest {
 
     @Test
     void createEmitterForUser_userWithNoEvents_noEventsEmitted() throws IOException {
-        when(eventRepository.getAllByNotifiedUsersOrderByCreated(mockUser)).thenReturn(List.of());
+        when(eventRepository.getAllByNotifiedUserOrderByCreated(mockUser)).thenReturn(List.of());
 
         SseEmitter emitter = eventService.createEmitterForUser(mockUser);
 
@@ -90,7 +88,7 @@ public class EventServiceTest {
 
     @Test
     void createEmitterForUser_userWithNoEvents_hasAssignedEmitterCallbacks() {
-        when(eventRepository.getAllByNotifiedUsersOrderByCreated(mockUser)).thenReturn(List.of());
+        when(eventRepository.getAllByNotifiedUserOrderByCreated(mockUser)).thenReturn(List.of());
 
         SseEmitter emitter = eventService.createEmitterForUser(mockUser);
 
@@ -102,7 +100,7 @@ public class EventServiceTest {
     void createEmitterForUser_userWithOneEvent_emitsEventWithSettings() throws IOException {
         Event event = new MessageEvent("foo");
 
-        when(eventRepository.getAllByNotifiedUsersOrderByCreated(mockUser)).thenReturn(List.of(event)); // Add initial event
+        when(eventRepository.getAllByNotifiedUserOrderByCreated(mockUser)).thenReturn(List.of(event)); // Add initial event
 
         SseEmitter emitter = eventService.createEmitterForUser(mockUser);
 

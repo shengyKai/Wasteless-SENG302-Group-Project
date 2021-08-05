@@ -7,9 +7,12 @@ let lastErrorTime = Number.MIN_VALUE;
 
 export type AnyEvent = MessageEvent | ExpiryEvent | DeleteEvent | KeywordCreatedEvent;
 
+export type Tag = 'none' | 'red' | 'orange' | 'yellow' | 'green' | 'blue' | 'purple'
+
 type BaseEvent<T extends string> = {
   id: number,
   created: string,
+  tag: Tag,
   type: T,
 }
 

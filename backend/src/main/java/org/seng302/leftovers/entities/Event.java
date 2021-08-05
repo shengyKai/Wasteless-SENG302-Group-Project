@@ -4,8 +4,6 @@ import net.minidev.json.JSONObject;
 
 import javax.persistence.*;
 import java.time.Instant;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * Abstract event entity for some component that will appear on a user's newsfeed
@@ -20,16 +18,31 @@ public abstract class Event {
     @Column(nullable = false)
     private Instant created = Instant.now();
 
-    @ManyToMany
-    @JoinTable(name = "event_users")
-    private Set<User> notifiedUsers = new HashSet<>();
+    @Enumerated(EnumType.ORDINAL)
+    @Column(nullable = false)
+    private Tag tag = Tag.NONE;
+
+    @ManyToOne
+    @JoinColumn(name = "event_user", nullable = false)
+    private User notifiedUser;
+
+    protected Event() {} // Required by JPA
+
+    /**
+     * Construct new event
+     * @param notifiedUser User that the event will notify
+     */
+    protected Event(User notifiedUser) {
+        this.notifiedUser = notifiedUser;
+    }
 
     /**
      * Constructs a JSON representation of this event.
      * The fields provided by event are:
-     *   id - Long id of the event
+     *   id      - Long id of the event
      *   created - String creation time
-     *   type - Type name of the event (equal to class name)
+     *   tag     - Tag of the event
+     *   type    - Type name of the event (equal to class name)
      * Subclasses are expected to override this method and add their own attributes.
      * @return JSON object containing event data
      */
@@ -38,6 +51,7 @@ public abstract class Event {
         json.appendField("id", this.getId());
         json.appendField("created", this.getCreated().toString());
         json.appendField("type", this.getClass().getSimpleName());
+        json.appendField("tag", this.getTag());
         return json;
     }
 
@@ -58,11 +72,26 @@ public abstract class Event {
     }
 
     /**
-     * Adds a set of users to this event.
-     * This method is only expected to be called from EventService, since it does not notify the users
-     * @param users Users to add
+     * Gets the tag for this event
+     * @return Tag colour of the event
      */
-    public void addUsers(Set<User> users) {
-        notifiedUsers.addAll(users);
+    public Tag getTag() {
+        return tag;
+    }
+
+    /**
+     * Changes the tag for the event
+     * @param tag New event tag
+     */
+    public void setTag(Tag tag) {
+        this.tag = tag;
+    }
+
+    /**
+     * Returns the user that this event will appear on their home feed
+     * @return The notified user
+     */
+    public User getNotifiedUser() {
+        return notifiedUser;
     }
 }

@@ -14,5 +14,5 @@ public interface EventRepository extends CrudRepository<Event, Long> {
      * @param user User to find events for
      * @return List of events the user needs to be notified of
      */
-    List<Event> getAllByNotifiedUsersOrderByCreated(User user);
+    List<Event> getAllByNotifiedUserOrderByCreated(User user);
 }

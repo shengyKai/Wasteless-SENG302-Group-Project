@@ -61,7 +61,7 @@ public class CardService {
             try (Session session = sessionFactory.openSession()) {
                 card = session.find(MarketplaceCard.class, card.getID());
                 ExpiryEvent event = new ExpiryEvent(card);
-                eventService.addUserToEvent(card.getCreator(), event);
+                eventService.saveEvent(event);
             }
             logger.info("Expiry notification event sent for card {}", card.getID());
         }
@@ -87,7 +87,7 @@ public class CardService {
             }
 
             DeleteEvent deleteEvent = new DeleteEvent(card);
-            eventService.addUserToEvent(card.getCreator(), deleteEvent);
+            eventService.saveEvent(deleteEvent);
 
             marketplaceCardRepository.delete(card);
             logger.info("Card {} deleted from marketplace repository", card.getID());
