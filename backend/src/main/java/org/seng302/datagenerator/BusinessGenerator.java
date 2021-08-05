@@ -1,6 +1,7 @@
 package org.seng302.datagenerator;
 
 import org.apache.catalina.User;
+import org.seng302.leftovers.entities.Business;
 import org.seng302.leftovers.entities.Location;
 
 import java.sql.*;
@@ -13,13 +14,9 @@ import static org.seng302.datagenerator.Main.*;
 public class BusinessGenerator {
     private Random random = new Random();
     private Connection conn;
-    private LocationGenerator locationGenerator = LocationGenerator.getInstance();
-
-    //predefined lists
-    String[] BUSINESSTYPES = {"Accommodation and Food Services", "Retail Trade", "Charitable organisation", "Non-profit organisation"};
-    String[] DESCRIPTIONS = {"This is a Japanese restaurant, the best Ramen and Sake.", "We are non-profit organisation focused on bringing New Zealand's extreme housing unaffordability down to a managable unaffordable housing market.",
-    "We are a non-profit focused on making sure all SENG302 students get enough sleep"};
-    String[] NAMES = {"Japan Food", "Sleep Saviour", "Ed Sheeran Church", "Unaffordable Housing"};
+    private final LocationGenerator locationGenerator = LocationGenerator.getInstance();
+    private final DescriptionGenerator descriptionGenerator = DescriptionGenerator.getInstance();
+    private final CommerceNameGenerator commerceNameGenerator = CommerceNameGenerator.getInstance();
 
     public BusinessGenerator(Connection conn) { this.conn = conn; }
 
@@ -35,10 +32,10 @@ public class BusinessGenerator {
                 + "VALUES (?, ?, ?, ?, ?, ?)",
                 Statement.RETURN_GENERATED_KEYS
         );
-        stmt.setObject(1, BUSINESSTYPES[random.nextInt(BUSINESSTYPES.length)]); //business type
+        stmt.setObject(1, Business.getBusinessTypes().get(random.nextInt(Business.getBusinessTypes().size())));
         stmt.setObject(2, Instant.now()); //date created
-        stmt.setObject(3, DESCRIPTIONS[random.nextInt(DESCRIPTIONS.length)]); //description
-        stmt.setObject(4, NAMES[random.nextInt(NAMES.length)]);
+        stmt.setObject(3, descriptionGenerator.randomDescription());
+        stmt.setObject(4, commerceNameGenerator.randomBusinessName());
         stmt.setObject(5, addressId);
         stmt.setObject(6, ownerId);
         stmt.executeUpdate();

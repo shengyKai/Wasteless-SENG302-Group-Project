@@ -1,10 +1,15 @@
 package org.seng302.datagenerator;
+import org.hibernate.SessionFactory;
+import org.mockito.Mock;
 import org.seng302.leftovers.Main;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.runner.RunWith;
+import org.seng302.leftovers.entities.Business;
+import org.seng302.leftovers.entities.Location;
+import org.seng302.leftovers.entities.Product;
 import org.seng302.leftovers.persistence.BusinessRepository;
 import org.seng302.leftovers.persistence.ProductRepository;
 import org.seng302.leftovers.persistence.UserRepository;
@@ -17,8 +22,10 @@ import org.springframework.test.context.junit4.SpringRunner;
 import java.sql.*;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes={Main.class})
@@ -72,9 +79,7 @@ public class ProductGeneratorTest {
         stmt.executeQuery();
         ResultSet results = stmt.getResultSet();
         results.next();
-        if (results.getLong(1) != 1) {
-            fail();
-        }
+        assertEquals(results.getLong(1), 1);
     }
 
     /**
@@ -155,9 +160,7 @@ public class ProductGeneratorTest {
         List<Long> businessIds = generateUserAndBusiness(1, 1);
         List<Long> productIds = productGenerator.generateProducts(businessIds, 0);
         long productsInDBAfter = getNumProductsInDB();
-        if (productsInDB != productsInDBAfter) {
-            fail();
-        }
+        assertEquals(productsInDB, productsInDBAfter);
     }
 
     @Test
@@ -166,9 +169,7 @@ public class ProductGeneratorTest {
         List<Long> businessIds = generateUserAndBusiness(1, 1);
         List<Long> productIds = productGenerator.generateProducts(businessIds, -1);
         long productsInDBAfter = getNumProductsInDB();
-        if (productsInDB != productsInDBAfter) {
-            fail();
-        }
+        assertEquals(productsInDB, productsInDBAfter);
     }
 
     @Test
@@ -177,8 +178,29 @@ public class ProductGeneratorTest {
         List<Long> businessIds = generateUserAndBusiness(1, 1);
         List<Long> productIds = productGenerator.generateProducts(businessIds, -10);
         long productsInDBAfter = getNumProductsInDB();
-        if (productsInDB != productsInDBAfter) {
-            fail();
+        assertEquals(productsInDB, productsInDBAfter);
+    }
+
+    // Checking the generated product code is valid
+    @Test
+    void generateProducts_generateFiveHundredProductsCheckProductCodes_productCodesValid() throws SQLException {
+        List<Long> businessIds = generateUserAndBusiness(1, 1);
+        Business business = mock(Business.class);
+        Location location = mock(Location.class);
+        when(business.getAddress()).thenReturn(location);
+        when(location.getCountry()).thenReturn("EllaLand");
+        List<Long> productIds = productGenerator.generateProducts(businessIds, 500);
+        for (Long productId: productIds) {
+            Product product = productRepository.findById(productId).get();
+            var newProduct = new Product.Builder()
+                    .withProductCode(product.getProductCode())
+                    .withName("Fresh Orange")
+                    .withDescription("This is a fresh orange")
+                    .withManufacturer("Apple")
+                    .withRecommendedRetailPrice("2.01")
+                    .withBusiness(business);
+            System.out.println(business);
+            assertDoesNotThrow(newProduct::build, product.getProductCode());
         }
     }
 }

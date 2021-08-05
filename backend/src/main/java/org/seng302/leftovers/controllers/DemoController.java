@@ -199,7 +199,11 @@ public class DemoController {
 
         List<Long> allInventoryItems = new ArrayList<>();
         if (options.containsKey("inventoryItemInitial"))
-            Arrays.stream(JsonTools.parseLongArrayFromJsonField(options, "saleItemInitial")).boxed().forEach(allInventoryItems::add);
+            Arrays.stream(JsonTools.parseLongArrayFromJsonField(options, "inventoryItemInitial")).boxed().forEach(allInventoryItems::add);
+
+        List<Long> allSaleItems = new ArrayList<>();
+        if (options.containsKey("saleItemInitial"))
+            Arrays.stream(JsonTools.parseLongArrayFromJsonField(options, "saleItemInitial")).boxed().forEach(allSaleItems::add);
 
         boolean generateImages = Optional.ofNullable((Boolean)options.get("generateImages")).orElse(true);
 
