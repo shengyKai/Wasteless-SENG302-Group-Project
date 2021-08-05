@@ -5,29 +5,32 @@
     <div class="newsfeed">
       <!---Select component for the order in which the cards should be displayed--->
       <v-select
+        color="primary"
         v-model="filterBy"
         flat
         solo-inverted
         hide-details
         :items="[
-          { text: 'Tag filter 1', value: 'tag1'},
-          { text: 'Tag filter 2', value: 'tag2'},
-          { text: 'Tag filter 3', value: 'tag3'},
-          { text: 'Tag filter 4', value: 'tag4'},
-          { text: 'Tag filter 5', value: 'tag5'},
+          { text: 'Tag filter 1', value: 'tag1', color: 'red'},
+          { text: 'Tag filter 2', value: 'tag2', color: 'blue'},
+          { text: 'Tag filter 3', value: 'tag3', color: 'green'},
+          { text: 'Tag filter 4', value: 'tag4', color: 'red'},
+          { text: 'Tag filter 5', value: 'tag5', color: 'blue'},
+          { text: 'Tag filter 6', value: 'tag6', color: 'green'},
+          { text: 'Tag filter 7', value: 'tag7', color: 'red'},
+          { text: 'Tag filter 8', value: 'tag8', color: 'blue'},
+          { text: 'Tag filter 9', value: 'tag9', color: 'green'},
+          { text: 'Tag filter 0', value: 'tag0', color: 'red'},
         ]"
         prepend-inner-icon="mdi-sort-variant"
         label="Filter by"
-      />
-      <v-chip
-        v-for="chip in filterList"
-        :key="chip"
-        class="ma-2"
-        close
-        @click:close="removeChip(chip)"
+        multiple
+        chips
       >
-        {{ chip }}
-      </v-chip>
+        <template #selection="{ item }">
+          <v-chip :color="item.color">{{item.text}}</v-chip>
+        </template>
+      </v-select>
       <!-- Newsfeed -->
       <div v-if="$store.getters.events.length === 0 || isBusiness" class="text-center">
         No items in your feed
@@ -77,7 +80,6 @@ export default {
   data() {
     return {
       filterBy: "",
-      chip1: true,
       filterList: []
     };
   },
@@ -101,18 +103,6 @@ export default {
       if (!this.isBusiness) return undefined;
       return [...Array(10).keys()].map(i => `Item ${i}`);
     },
-  },
-  watch: {
-    filterBy: function() {
-      this.filterList.push(this.filterBy);
-      console.log(this.filterList);
-    }
-  },
-  methods: {
-    removeChip(chip) {
-      const index = this.filterList.indexOf(chip);
-      this.filterList.splice(index, 1);
-    }
   }
 };
 </script>
