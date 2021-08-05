@@ -47,13 +47,13 @@ public class ProductImageGenerator {
      */
     public void addImageToProduct(Long productId, String productName) throws SQLException {
         String noun = productName.split(" ")[1];
-        Optional<InputStream> image = findImage(noun);
+        Optional<Resource> image = findImage(noun);
         if (image.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Could not locate file for product name:" + productName);
         }
 
         String filename = UUID.randomUUID().toString();
-        Optional<String> fileType = getExtension(image.get().toString());
+        Optional<String> fileType = getExtension(image.get().getFilename());
         if (fileType.isPresent()) {
             filename += "." + fileType.get();
         } else {
@@ -84,19 +84,12 @@ public class ProductImageGenerator {
      * @return Optional of type InputStream.
      * @throws IOException
      */
-    private Optional<InputStream> findImage(String noun) {
+    private Optional<Resource> findImage(String noun) {
         Optional<Resource> file = Arrays.stream(demoImages)
                 .filter(res -> Objects.requireNonNull(res.getFilename())
                 .replaceFirst("[.][^.]+$", "").equals(noun.toLowerCase(Locale.ROOT)))
                 .findFirst();
-
-        return file.map(resource -> {
-            try {
-                return resource.getInputStream();
-            } catch (IOException e) {
-                throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "An error occurred reading an image file:" + e.getMessage());
-            }
-        });
+        return file;
     }
 
     /**
@@ -105,9 +98,9 @@ public class ProductImageGenerator {
      * @param fileName The name of the file to save
      * @return true if file successfully saved.
      */
-    private boolean saveImageToSystem(InputStream demoImage, String fileName) {
+    private boolean saveImageToSystem(Resource resource, String fileName) {
         try {
-            store(demoImage, fileName);
+            store(resource.getInputStream(), fileName);
             return true;
         } catch (Exception e) {
             return false;
