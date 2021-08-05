@@ -187,7 +187,7 @@ export default {
     async updateSearchQuery() {
       this.currentPage = 1; // Makes sure we start on the first page
       this.results = undefined; // Remove results
-      this.updateResults();
+      await this.updateResults();
     },
     /**
      * This function gets called when the search results need to be updated
