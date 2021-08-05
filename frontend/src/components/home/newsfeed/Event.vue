@@ -1,10 +1,12 @@
 <template>
   <div>
     <div class="delete">
-      <v-btn color="red" @click="removeNotification">
+      <v-btn class="delete-button" color="red" @click="removeNotification">
         <v-icon>mdi-delete</v-icon>
-        {{ errorMessage }}
       </v-btn>
+      <div class="deletion-error">
+        {{ errorMessage }}
+      </div>
     </div>
     <v-card-title>
       {{ title }}
@@ -69,5 +71,11 @@ export default {
 .delete {
   float: right;
   margin: 0.25em;
+}
+.delete-button {
+   float: right;
+ }
+.deletion-error {
+  color: red;
 }
 </style>
