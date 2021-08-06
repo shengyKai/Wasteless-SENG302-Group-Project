@@ -1,7 +1,7 @@
 <template>
   <div>
-    <v-row v-if="fromSearch">
-      <v-col class="text-right mt-4 mb-n16">
+    <v-row v-if="fromSearch" class="mb-n16 mt-6">
+      <v-col class="text-right mt-16 mb-n16">
         <v-btn @click="returnToSearch" color="primary">Return to search</v-btn>
       </v-col>
     </v-row>
