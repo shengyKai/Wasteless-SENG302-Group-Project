@@ -55,6 +55,8 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-rest'
     // ability to expose RESTFul services (with controllers)
     implementation 'org.springframework.boot:spring-boot-starter-web'
+    // validate requests
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
     // security starter package
     //implementation 'org.springframework.boot:spring-boot-starter-security'
     //implementation 'org.springframework.security:spring-security-test'
@@ -82,6 +84,7 @@ dependencies {
 
     // entityManagerFactory
     implementation 'javax.xml.bind:jaxb-api:2.3.0'
+    implementation 'javax.validation:validation-api'
 
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
     // Required for MockMvc autoconfigure
