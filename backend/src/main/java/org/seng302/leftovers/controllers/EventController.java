@@ -22,7 +22,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
-import java.util.*;
 
 /**
  * Controller for the /events/* endpoints.
@@ -118,14 +117,20 @@ public class EventController {
         }
     }
 
-    @DeleteMapping("/feed/{id}}")
+    @DeleteMapping("/feed/{id}")
     public void deleteEvent(HttpServletRequest request, @PathVariable Long id) {
         LOGGER.info("Request to delete event (id={}) from feed", id);
         try {
             // Check that authentication token is present and valid
             AuthenticationTokenManager.checkAuthenticationToken(request);
+            Event event = eventRepository.findById(id)
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "Event not found, unable to delete"));
 
+            if (!AuthenticationTokenManager.sessionCanSeePrivate(request, event.getNotifiedUser().getUserID())) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Current user does not have permission to delete this event");
+            }
 
+            eventRepository.deleteById(id);
         } catch (Exception e) {
             LOGGER.error(e.getMessage());
             throw e;
