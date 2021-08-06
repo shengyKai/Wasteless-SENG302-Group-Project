@@ -2,7 +2,7 @@
 
 exports[`DeleteEvent.vue Card has been deleted from the database Must match snapshot 1`] = `
 <div>
-  <div class="delete"><button type="button" class="delete-button v-btn v-btn--is-elevated v-btn--has-bg theme--light v-size--default red"><span class="v-btn__content"><i aria-hidden="true" class="v-icon notranslate mdi mdi-delete theme--light"></i></span></button>
+  <div class="delete"><button type="button" class="v-icon notranslate deleteButton v-icon--link mdi mdi-trash-can theme--light red--text"></button>
     <div class="deletion-error">
 
     </div>
