@@ -1,0 +1,1886 @@
+{
+	"info": {
+		"_postman_id": "29873b73-48f7-4383-9fe7-1dd53897b7d4",
+		"name": "Wasteless",
+		"description": "API specification for the SENG302 2021 project\n\nContact Support:\n Email: seng302@canterbury.ac.nz",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "users",
+			"item": [
+				{
+					"name": "Register",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"firstName\": \"John\",\n    \"lastName\": \"Smith\",\n    \"email\": \"johnsmith99@gmail.com\",\n    \"dateOfBirth\": \"1999-04-27\",\n    \"homeAddress\": {\n        \"country\": \"New Zealand\",\n        \"streetNumber\": \"3/24\",\n        \"streetName\": \"Ilam Road\",\n        \"city\": \"Christchurch\",\n        \"region\": \"Canterbury\",\n        \"postcode\": \"90210\"\n    },\n    \"password\": \"1337-H%nt3r2\",\n    \"middleName\": \"Hector\",\n    \"nickname\": \"Jonny\",\n    \"bio\": \"Likes long walks on the beach\",\n    \"phoneNumber\": \"+64 3 555 0129\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/users",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Set auth_token and user_id after login\", function() {",
+									"    const authToken = pm.response.json().token;",
+									"    if (typeof authToken !== \"undefined\") {",
+									"        pm.globals.set(\"auth_token\", authToken);",
+									"    }",
+									"    const userId = pm.response.json().userId;",
+									"    if (typeof userId !== \"undefined\") {",
+									"        pm.globals.set(\"user_id\", userId);",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"123andyelliot@gmail.com\",\n    \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login DGAA",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Set auth_token and user_id after login\", function() {",
+									"    const authToken = pm.response.json().token;",
+									"    if (typeof authToken !== \"undefined\") {",
+									"        pm.globals.set(\"auth_token\", authToken);",
+									"    }",
+									"    const userId = pm.response.json().userId;",
+									"    if (typeof userId !== \"undefined\") {",
+									"        pm.globals.set(\"user_id\", userId);",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"wasteless@seng302.com\",\n    \"password\": \"{{dgaaPassword}}\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Search",
+					"request": {
+						"auth": {
+							"type": "apikey",
+							"apikey": [
+								{
+									"key": "key",
+									"value": "JSESSIONID",
+									"type": "string"
+								},
+								{
+									"key": "value",
+									"value": true,
+									"type": "boolean"
+								},
+								{
+									"key": "in",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/users/search?page=1&resultsPerPage=10&orderBy=firstName&reverse=false&searchQuery=",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								"search"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1",
+									"description": "The page index to select"
+								},
+								{
+									"key": "resultsPerPage",
+									"value": "10",
+									"description": "The maximum number of results"
+								},
+								{
+									"key": "orderBy",
+									"value": "firstName",
+									"description": "Ordering criteria"
+								},
+								{
+									"key": "reverse",
+									"value": "false",
+									"description": "Whether to flip the order. Default is descending relevance and ascending others."
+								},
+								{
+									"key": "searchQuery",
+									"value": ""
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get User",
+					"request": {
+						"auth": {
+							"type": "apikey",
+							"apikey": [
+								{
+									"key": "key",
+									"value": "JSESSIONID",
+									"type": "string"
+								},
+								{
+									"key": "value",
+									"value": true,
+									"type": "boolean"
+								},
+								{
+									"key": "in",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/users/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{user_id}}",
+									"type": "string",
+									"description": "(Required) User ID"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Make Admin",
+					"request": {
+						"auth": {
+							"type": "apikey",
+							"apikey": [
+								{
+									"key": "key",
+									"value": "JSESSIONID",
+									"type": "string"
+								},
+								{
+									"key": "value",
+									"value": true,
+									"type": "boolean"
+								},
+								{
+									"key": "in",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/users/:id/makeAdmin",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								":id",
+								"makeAdmin"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "2",
+									"type": "string",
+									"description": "(Required) User ID"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Revoke Admin",
+					"request": {
+						"auth": {
+							"type": "apikey",
+							"apikey": [
+								{
+									"key": "key",
+									"value": "JSESSIONID",
+									"type": "string"
+								},
+								{
+									"key": "value",
+									"value": true,
+									"type": "boolean"
+								},
+								{
+									"key": "in",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/users/:id/revokeAdmin",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								":id",
+								"revokeAdmin"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "81327126",
+									"type": "string",
+									"description": "(Required) User ID"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get all cards for a given user",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/users/:id/cards",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								":id",
+								"cards"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "19"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "businesses",
+			"item": [
+				{
+					"name": "products",
+					"item": [
+						{
+							"name": "images",
+							"item": [
+								{
+									"name": "Add Image",
+									"request": {
+										"auth": {
+											"type": "apikey",
+											"apikey": [
+												{
+													"key": "key",
+													"value": "JSESSIONID",
+													"type": "string"
+												},
+												{
+													"key": "value",
+													"value": true,
+													"type": "boolean"
+												},
+												{
+													"key": "in",
+													"value": "header",
+													"type": "string"
+												}
+											]
+										},
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "image/png"
+											}
+										],
+										"body": {
+											"mode": "formdata",
+											"formdata": [
+												{
+													"key": "file",
+													"type": "file",
+													"src": "/home/nathan/Pictures/dumbledore.jpg"
+												}
+											]
+										},
+										"url": {
+											"raw": "{{baseUrl}}/businesses/:businessId/products/:productId/images",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"businesses",
+												":businessId",
+												"products",
+												":productId",
+												"images"
+											],
+											"variable": [
+												{
+													"key": "businessId",
+													"value": "2",
+													"type": "string",
+													"description": "(Required) ID of business to search catalogue of"
+												},
+												{
+													"key": "productId",
+													"value": "WATT-420-BEANS",
+													"type": "string",
+													"description": "(Required) ID (Product Code) of product to try to find in catalogue"
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Delete Image",
+									"request": {
+										"auth": {
+											"type": "apikey",
+											"apikey": [
+												{
+													"key": "key",
+													"value": "JSESSIONID",
+													"type": "string"
+												},
+												{
+													"key": "value",
+													"value": true,
+													"type": "boolean"
+												},
+												{
+													"key": "in",
+													"value": "header",
+													"type": "string"
+												}
+											]
+										},
+										"method": "DELETE",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/businesses/:businessId/products/:productId/images/:imageId",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"businesses",
+												":businessId",
+												"products",
+												":productId",
+												"images",
+												":imageId"
+											],
+											"variable": [
+												{
+													"key": "businessId",
+													"value": "10",
+													"type": "string",
+													"description": "(Required) ID of business that owns product"
+												},
+												{
+													"key": "productId",
+													"value": "NATHAN-APPLE-70",
+													"type": "string",
+													"description": "(Required) ID (Product Code) of product to delete image for"
+												},
+												{
+													"key": "imageId",
+													"value": "14",
+													"type": "string",
+													"description": "(Required) ID of the image to delete"
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Set Primary Image",
+									"request": {
+										"auth": {
+											"type": "apikey",
+											"apikey": [
+												{
+													"key": "key",
+													"value": "JSESSIONID",
+													"type": "string"
+												},
+												{
+													"key": "value",
+													"value": true,
+													"type": "boolean"
+												},
+												{
+													"key": "in",
+													"value": "header",
+													"type": "string"
+												}
+											]
+										},
+										"method": "PUT",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/businesses/:businessId/products/:productId/images/:imageId/makePrimary",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"businesses",
+												":businessId",
+												"products",
+												":productId",
+												"images",
+												":imageId",
+												"makePrimary"
+											],
+											"variable": [
+												{
+													"key": "businessId",
+													"value": "81327126",
+													"type": "string",
+													"description": "(Required) ID of business that owns product"
+												},
+												{
+													"key": "productId",
+													"value": "aliquip cupidatat occaecat elit esse",
+													"type": "string",
+													"description": "(Required) ID (Product Code) of product to update primary image for"
+												},
+												{
+													"key": "imageId",
+													"value": "81327126",
+													"type": "string",
+													"description": "(Required) ID of the image to set as being the primary image for product"
+												}
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						},
+						{
+							"name": "Get Products",
+							"request": {
+								"auth": {
+									"type": "apikey",
+									"apikey": [
+										{
+											"key": "key",
+											"value": "JSESSIONID",
+											"type": "string"
+										},
+										{
+											"key": "value",
+											"value": true,
+											"type": "boolean"
+										},
+										{
+											"key": "in",
+											"value": "header",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/businesses/:id/products?orderBy=productCode&reverse=false&page=1&resultsPerPage=10",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"businesses",
+										":id",
+										"products"
+									],
+									"query": [
+										{
+											"key": "orderBy",
+											"value": "productCode",
+											"description": "Sets the column to sort by"
+										},
+										{
+											"key": "reverse",
+											"value": "false",
+											"description": "Whether reverse the result order (default ascending)"
+										},
+										{
+											"key": "page",
+											"value": "1",
+											"description": "Sets the current page (1 indexed)"
+										},
+										{
+											"key": "resultsPerPage",
+											"value": "10",
+											"description": "Sets the maximum number of results"
+										}
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "1"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Add Product",
+							"request": {
+								"auth": {
+									"type": "apikey",
+									"apikey": [
+										{
+											"key": "key",
+											"value": "JSESSIONID",
+											"type": "string"
+										},
+										{
+											"key": "value",
+											"value": true,
+											"type": "boolean"
+										},
+										{
+											"key": "in",
+											"value": "header",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"Watties Baked Beans - 420g can\",\n    \"id\": \"WATT-420-BEANS\",\n    \"description\": \"Baked Beans as they should be.\",\n    \"manufacturer\": \"Apple\",\n    \"recommendedRetailPrice\": 2.2\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/businesses/:id/products",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"businesses",
+										":id",
+										"products"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "1",
+											"type": "string",
+											"description": "(Required) Business ID"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Modify Product",
+							"request": {
+								"auth": {
+									"type": "apikey",
+									"apikey": [
+										{
+											"key": "key",
+											"value": "JSESSIONID",
+											"type": "string"
+										},
+										{
+											"key": "value",
+											"value": true,
+											"type": "boolean"
+										},
+										{
+											"key": "in",
+											"value": "header",
+											"type": "string"
+										}
+									]
+								},
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"Watties Baked Beans - 420g can\",\n    \"id\": \"WATT-420-BEANS\",\n    \"description\": \"Baked Beans as they should be.\",\n    \"recommendedRetailPrice\": 2.2\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/businesses/:businessId/products/:productId",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"businesses",
+										":businessId",
+										"products",
+										":productId"
+									],
+									"variable": [
+										{
+											"key": "businessId",
+											"value": "1",
+											"type": "string",
+											"description": "(Required) ID of business to search catalogue of"
+										},
+										{
+											"key": "productId",
+											"value": "NATHAN-APPLE-70",
+											"type": "string",
+											"description": "(Required) ID (Product Code) of product to try to find in catalogue"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "inventory",
+					"item": [
+						{
+							"name": "Get Inventory",
+							"request": {
+								"auth": {
+									"type": "apikey",
+									"apikey": [
+										{
+											"key": "key",
+											"value": "JSESSIONID",
+											"type": "string"
+										},
+										{
+											"key": "value",
+											"value": true,
+											"type": "boolean"
+										},
+										{
+											"key": "in",
+											"value": "header",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/businesses/:id/inventory/",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"businesses",
+										":id",
+										"inventory",
+										""
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "1",
+											"description": "(Required) Business ID"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Add Inventory Item",
+							"request": {
+								"auth": {
+									"type": "apikey",
+									"apikey": [
+										{
+											"key": "key",
+											"value": "JSESSIONID",
+											"type": "string"
+										},
+										{
+											"key": "value",
+											"value": true,
+											"type": "boolean"
+										},
+										{
+											"key": "in",
+											"value": "header",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"productId\": \"AAA\",\n    \"quantity\": 4,\n    \"expires\": \"2024-09-28\",\n    \"pricePerItem\": 6.5,\n    \"totalPrice\": 21.99,\n    \"manufactured\": \"2020-12-17\",\n    \"sellBy\": \"2022-11-20\",\n    \"bestBefore\": \"2023-01-01\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/businesses/:id/inventory/",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"businesses",
+										":id",
+										"inventory",
+										""
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "1",
+											"description": "(Required) Business ID"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Modify Inventory Item",
+							"request": {
+								"auth": {
+									"type": "apikey",
+									"apikey": [
+										{
+											"key": "key",
+											"value": "JSESSIONID",
+											"type": "string"
+										},
+										{
+											"key": "value",
+											"value": true,
+											"type": "boolean"
+										},
+										{
+											"key": "in",
+											"value": "header",
+											"type": "string"
+										}
+									]
+								},
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"productId\": \"NATHAN-APPLE-70\",\n    \"quantity\": 99,\n    \"expires\": \"2022-09-28\",\n    \"pricePerItem\": 6.5,\n    \"totalPrice\": 21.99,\n    \"manufactured\": \"2009-12-17\",\n    \"sellBy\": \"2021-11-20\",\n    \"bestBefore\": \"2022-01-01\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/businesses/:businessId/inventory/:inventoryItemId",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"businesses",
+										":businessId",
+										"inventory",
+										":inventoryItemId"
+									],
+									"variable": [
+										{
+											"key": "businessId",
+											"value": "1",
+											"description": "(Required) ID of business to search catalogue of"
+										},
+										{
+											"key": "inventoryItemId",
+											"value": "1",
+											"description": "(Required) ID of inventory item to update"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "listings",
+					"item": [
+						{
+							"name": "Get Listings",
+							"request": {
+								"auth": {
+									"type": "apikey",
+									"apikey": [
+										{
+											"key": "key",
+											"value": "JSESSIONID",
+											"type": "string"
+										},
+										{
+											"key": "value",
+											"value": true,
+											"type": "boolean"
+										},
+										{
+											"key": "in",
+											"value": "header",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/businesses/:id/listings?orderBy=quantity&reverse=true&page=1",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"businesses",
+										":id",
+										"listings"
+									],
+									"query": [
+										{
+											"key": "orderBy",
+											"value": "quantity",
+											"description": "Ordering to user"
+										},
+										{
+											"key": "reverse",
+											"value": "true",
+											"description": "Whether to reverse the order (default ascending)"
+										},
+										{
+											"key": "page",
+											"value": "1",
+											"description": "Page index to start results from (1 indexed)"
+										},
+										{
+											"key": "resultsPerPage",
+											"value": "2",
+											"description": "Maximum number of results per page",
+											"disabled": true
+										}
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "1",
+											"description": "(Required) Business ID"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Add Listing",
+							"request": {
+								"auth": {
+									"type": "apikey",
+									"apikey": [
+										{
+											"key": "key",
+											"value": "JSESSIONID",
+											"type": "string"
+										},
+										{
+											"key": "value",
+											"value": true,
+											"type": "boolean"
+										},
+										{
+											"key": "in",
+											"value": "header",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"inventoryItemId\": 1,\n    \"quantity\": 2,\n    \"price\": \"100.99\",\n    \"moreInfo\": \"Seller may be willing to consider near offers\",\n    \"closes\": \"2021-07-20\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/businesses/:id/listings",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"businesses",
+										":id",
+										"listings"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "1",
+											"description": "(Required) Business ID"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Register Business",
+					"request": {
+						"auth": {
+							"type": "apikey",
+							"apikey": [
+								{
+									"key": "key",
+									"value": "JSESSIONID",
+									"type": "string"
+								},
+								{
+									"key": "value",
+									"value": true,
+									"type": "boolean"
+								},
+								{
+									"key": "in",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Lumbridge General Store\",\n    \"address\": {\n        \"country\": \"New Zealand\",\n        \"streetNumber\": \"3/24\",\n        \"streetName\": \"Ilam Road\",\n        \"district\": \"Whereever\",\n        \"city\": \"Christchurch\",\n        \"region\": \"Canterbury\",\n        \"postcode\": \"90210\"\n    },\n    \"businessType\": \"Retail Trade\",\n    \"primaryAdministratorId\": 1,\n    \"description\": \"A one-stop shop for all your adventuring needs\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/businesses",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"businesses"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Business",
+					"request": {
+						"auth": {
+							"type": "apikey",
+							"apikey": [
+								{
+									"key": "key",
+									"value": "JSESSIONID",
+									"type": "string"
+								},
+								{
+									"key": "value",
+									"value": true,
+									"type": "boolean"
+								},
+								{
+									"key": "in",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/businesses/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"businesses",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1",
+									"type": "string",
+									"description": "(Required) Business ID"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Add Admin",
+					"request": {
+						"auth": {
+							"type": "apikey",
+							"apikey": [
+								{
+									"key": "key",
+									"value": "JSESSIONID",
+									"type": "string"
+								},
+								{
+									"key": "value",
+									"value": true,
+									"type": "boolean"
+								},
+								{
+									"key": "in",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"userId\": 1\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/businesses/:id/makeAdministrator",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"businesses",
+								":id",
+								"makeAdministrator"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1",
+									"type": "string",
+									"description": "(Required) Business ID"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Remove Admin",
+					"request": {
+						"auth": {
+							"type": "apikey",
+							"apikey": [
+								{
+									"key": "key",
+									"value": "JSESSIONID",
+									"type": "string"
+								},
+								{
+									"key": "value",
+									"value": true,
+									"type": "boolean"
+								},
+								{
+									"key": "in",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"userId\": 1\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/businesses/:id/removeAdministrator",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"businesses",
+								":id",
+								"removeAdministrator"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1",
+									"type": "string",
+									"description": "(Required) Business ID"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Search Businesses",
+					"request": {
+						"auth": {
+							"type": "apikey",
+							"apikey": [
+								{
+									"key": "key",
+									"value": "JSESSIONID",
+									"type": "string"
+								},
+								{
+									"key": "value",
+									"value": true,
+									"type": "boolean"
+								},
+								{
+									"key": "in",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/businesses/search?searchQuery=Housing&businessType=Retail Trade",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"businesses",
+								"search"
+							],
+							"query": [
+								{
+									"key": "searchQuery",
+									"value": "Housing"
+								},
+								{
+									"key": "businessType",
+									"value": "Retail Trade"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "cards",
+			"item": [
+				{
+					"name": "Search for cards based on some keywords",
+					"request": {
+						"auth": {
+							"type": "apikey",
+							"apikey": [
+								{
+									"key": "key",
+									"value": "JSESSIONID",
+									"type": "string"
+								},
+								{
+									"key": "value",
+									"value": true,
+									"type": "boolean"
+								},
+								{
+									"key": "in",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/cards/search?keywordIds=1&keywordIds=3&section=Wanted&union=true",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"cards",
+								"search"
+							],
+							"query": [
+								{
+									"key": "keywordIds",
+									"value": "1",
+									"description": "(Required) The IDs of keywords by which cards are being searched"
+								},
+								{
+									"key": "keywordIds",
+									"value": "3",
+									"description": "(Required) The IDs of keywords by which cards are being searched"
+								},
+								{
+									"key": "section",
+									"value": "Wanted",
+									"description": "(Required) The section for which cards should be retrieved."
+								},
+								{
+									"key": "union",
+									"value": "true",
+									"description": "(Required) Whether or not to get cards that match ANY of the keywords, or only cards that match ALL of the keywords. True = Match ANY, False = Match ALL"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Retrieve all cards for a given section",
+					"request": {
+						"auth": {
+							"type": "apikey",
+							"apikey": [
+								{
+									"key": "key",
+									"value": "JSESSIONID",
+									"type": "string"
+								},
+								{
+									"key": "value",
+									"value": true,
+									"type": "boolean"
+								},
+								{
+									"key": "in",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/cards?section=Wanted&resultsPerPage=8&orderBy=creatorFirstName&reverse=true",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"cards"
+							],
+							"query": [
+								{
+									"key": "section",
+									"value": "Wanted",
+									"description": "(Required) The section for which cards should be retrieved."
+								},
+								{
+									"key": "resultsPerPage",
+									"value": "8"
+								},
+								{
+									"key": "orderBy",
+									"value": "creatorFirstName"
+								},
+								{
+									"key": "reverse",
+									"value": "true"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create a new card to go on the community marketplace",
+					"request": {
+						"auth": {
+							"type": "apikey",
+							"apikey": [
+								{
+									"key": "key",
+									"value": "JSESSIONID",
+									"type": "string"
+								},
+								{
+									"key": "value",
+									"value": true,
+									"type": "boolean"
+								},
+								{
+									"key": "in",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"1982 Lada Samara\",\n    \"creatorId\": 2,\n    \"section\": \"Wanted\",\n    \"keywordIds\": [\n        4,\n        3\n    ],\n    \"description\": \"Beige, suitable for a hen house. Fair condition. Some rust. As is, where is. Will swap for budgerigar.\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/cards",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"cards"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete a community marketplace card",
+					"request": {
+						"auth": {
+							"type": "apikey",
+							"apikey": [
+								{
+									"key": "key",
+									"value": "JSESSIONID",
+									"type": "string"
+								},
+								{
+									"key": "value",
+									"value": true,
+									"type": "boolean"
+								},
+								{
+									"key": "in",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/cards/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"cards",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1",
+									"description": "(Required) The id of the card to get."
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Retrieve a specific card",
+					"request": {
+						"auth": {
+							"type": "apikey",
+							"apikey": [
+								{
+									"key": "key",
+									"value": "JSESSIONID",
+									"type": "string"
+								},
+								{
+									"key": "value",
+									"value": true,
+									"type": "boolean"
+								},
+								{
+									"key": "in",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/cards/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"cards",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "500",
+									"description": "(Required) The id of the card to get."
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Extend the display period of a card that is nearing expiry",
+					"request": {
+						"auth": {
+							"type": "apikey",
+							"apikey": [
+								{
+									"key": "key",
+									"value": "JSESSIONID",
+									"type": "string"
+								},
+								{
+									"key": "value",
+									"value": true,
+									"type": "boolean"
+								},
+								{
+									"key": "in",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/cards/:id/extenddisplayperiod",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"cards",
+								":id",
+								"extenddisplayperiod"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1",
+									"description": "(Required) The id of the card to get."
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "keywords",
+			"item": [
+				{
+					"name": "Create a new system-wide keyword",
+					"request": {
+						"auth": {
+							"type": "apikey",
+							"apikey": [
+								{
+									"key": "key",
+									"value": "JSESSIONID",
+									"type": "string"
+								},
+								{
+									"key": "value",
+									"value": true,
+									"type": "boolean"
+								},
+								{
+									"key": "in",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Vehicle Twos\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/keywords",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"keywords"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Search for keywords by partial (or complete) name",
+					"request": {
+						"auth": {
+							"type": "apikey",
+							"apikey": [
+								{
+									"key": "key",
+									"value": "JSESSIONID",
+									"type": "string"
+								},
+								{
+									"key": "value",
+									"value": true,
+									"type": "boolean"
+								},
+								{
+									"key": "in",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/keywords/search?searchQuery=do esse laboris no",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"keywords",
+								"search"
+							],
+							"query": [
+								{
+									"key": "searchQuery",
+									"value": "do esse laboris no",
+									"description": "(Required) Criteria to search keywords for, all partial and complete matches are returned"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete a keyword as an admin",
+					"request": {
+						"auth": {
+							"type": "apikey",
+							"apikey": [
+								{
+									"key": "key",
+									"value": "JSESSIONID",
+									"type": "string"
+								},
+								{
+									"key": "value",
+									"value": true,
+									"type": "boolean"
+								},
+								{
+									"key": "in",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/keywords/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"keywords",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1",
+									"description": "(Required) ID of keyword to delete"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Generate Data",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"userCount\": 10,\n    \"_businessCount\": 10,\n    \"_businessInitial\": [11],\n    \"_productCount\" : 10,\n    \"_inventoryItemCount\": 100,\n    \"_saleItemCount\": 1000,\n    \"cardCount\": 1000,\n    \"generateImages\": false\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/demo/generate",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"demo",
+						"generate"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Load demo data",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/demo/load",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"demo",
+						"load"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Message event",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"message\": \"One more?\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/events/globalmessage",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"events",
+						"globalmessage"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Hmmm",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "localhost:9500",
+					"host": [
+						"localhost"
+					],
+					"port": "9500"
+				},
+				"description": "        "
+			},
+			"response": []
+		}
+	],
+	"auth": {
+		"type": "apikey",
+		"apikey": [
+			{
+				"key": "key",
+				"value": "JSESSIONID",
+				"type": "string"
+			},
+			{
+				"key": "value",
+				"value": true,
+				"type": "boolean"
+			},
+			{
+				"key": "in",
+				"value": "header",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "localhost:9499"
+		}
+	]
+}
