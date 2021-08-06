@@ -86,4 +86,18 @@ public class EventController {
             throw e;
         }
     }
+
+    @DeleteMapping("/event/globalmessage")
+    public void deleteEvent(HttpServletRequest request, @PathVariable Long id) {
+        LOGGER.info("Request to delete event (id={})", id);
+        try {
+            // Check that authentication token is present and valid
+            AuthenticationTokenManager.checkAuthenticationToken(request);
+
+
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            throw e;
+        }
+    }
 }
