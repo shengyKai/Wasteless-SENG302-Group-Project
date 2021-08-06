@@ -35,7 +35,8 @@ public class KeywordStepDefinition {
     @Autowired
     private UserContext userContext;
 
-    private JSONObject notification;
+    @Autowired
+    private EventContext eventContext;
 
     @When("I add a new keyword {string}")
     public void i_add_a_new_keyword(String keyword) {
@@ -79,28 +80,13 @@ public class KeywordStepDefinition {
                 .content(body.toJSONString()));
     }
 
-    @SneakyThrows
-    @Then("I receive a notification")
-    public void i_receive_a_notification() {
-        List<JSONObject> events = EventContext.parseEvents(requestContext.getLastResult().getResponse(), "newsfeed");
-
-        Assertions.assertEquals(1, events.size());
-        notification = events.get(0);
-    }
-
     @Then("The notification contains the keyword {string}")
     public void the_notification_contains_the_keyword(String keyword) {
+        JSONObject notification = eventContext.lastReceivedEvents("newsfeed").get(0);
+
         Assertions.assertEquals("KeywordCreatedEvent", notification.get("type"));
         JSONObject keywordJson = new JSONObject((Map<String, ?>) notification.get("keyword"));
         Assertions.assertEquals(keyword, keywordJson.get("name"));
-    }
-
-    @SneakyThrows
-    @Then("I have not received a notification")
-    public void i_have_not_received_a_notification() {
-        List<JSONObject> events = EventContext.parseEvents(requestContext.getLastResult().getResponse(), "newsfeed");
-
-        Assertions.assertEquals(0, events.size());
     }
 
     @When("I search for keywords with text {string}")
