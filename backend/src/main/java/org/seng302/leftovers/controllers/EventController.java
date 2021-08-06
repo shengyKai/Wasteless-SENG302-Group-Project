@@ -87,9 +87,9 @@ public class EventController {
         }
     }
 
-    @DeleteMapping("/event/globalmessage")
+    @DeleteMapping("/feed/{id}}")
     public void deleteEvent(HttpServletRequest request, @PathVariable Long id) {
-        LOGGER.info("Request to delete event (id={})", id);
+        LOGGER.info("Request to delete event (id={}) from feed", id);
         try {
             // Check that authentication token is present and valid
             AuthenticationTokenManager.checkAuthenticationToken(request);
