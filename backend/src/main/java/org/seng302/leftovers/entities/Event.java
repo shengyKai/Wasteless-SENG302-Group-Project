@@ -1,6 +1,10 @@
 package org.seng302.leftovers.entities;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.SneakyThrows;
 import net.minidev.json.JSONObject;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 import javax.persistence.*;
 import java.time.Instant;
@@ -47,11 +51,14 @@ public abstract class Event {
      * @return JSON object containing event data
      */
     public JSONObject constructJSONObject() {
+        ObjectMapper objectMapper = new ObjectMapper();
+
         JSONObject json = new JSONObject();
         json.appendField("id", this.getId());
         json.appendField("created", this.getCreated().toString());
         json.appendField("type", this.getClass().getSimpleName());
-        json.appendField("tag", this.getTag());
+        json.appendField("tag", objectMapper.convertValue(this.getTag(), String.class));
+
         return json;
     }
 
@@ -84,6 +91,9 @@ public abstract class Event {
      * @param tag New event tag
      */
     public void setTag(Tag tag) {
+        if (tag == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tag cannot be null");
+        }
         this.tag = tag;
     }
 

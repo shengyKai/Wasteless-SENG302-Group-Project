@@ -26,7 +26,7 @@ import static org.mockito.Mockito.*;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
-public class EventServiceTest {
+class EventServiceTest {
 
     @Mock
     private EventRepository eventRepository;
@@ -98,7 +98,7 @@ public class EventServiceTest {
 
     @Test
     void createEmitterForUser_userWithOneEvent_emitsEventWithSettings() throws IOException {
-        Event event = new MessageEvent("foo");
+        Event event = new MessageEvent(mockUser,"foo");
 
         when(eventRepository.getAllByNotifiedUserOrderByCreated(mockUser)).thenReturn(List.of(event)); // Add initial event
 
@@ -108,12 +108,14 @@ public class EventServiceTest {
     }
 
     @Test
-    void addUsersToEvent_addUserToEvent_userNotifiedOfEvent() throws IOException {
+    void addUsersToEvent_saveEvent_userNotifiedOfEvent() throws IOException {
         // There's no real way around this implicit dependency
         SseEmitter emitter = eventService.createEmitterForUser(mockUser);
         verify(emitter, times(0)).send(any());
 
         Event event = mock(Event.class);
+
+        when(event.getNotifiedUser()).thenReturn(mockUser);
 
         // Make sure that event is send-able
         var mockEventJson = new JSONObject();
@@ -122,31 +124,10 @@ public class EventServiceTest {
 
         when(eventRepository.save(event)).thenReturn(event);
 
-        assertEquals(event, eventService.addUsersToEvent(Set.of(mockUser), event));
+        assertEquals(event, eventService.saveEvent( event)); // Call function
 
-        verify(event).addUsers(Set.of(mockUser));
         verify(eventRepository).save(event);
 
         verifyEmitterHasSentEvent(emitter, event);
-    }
-
-    @Test
-    void addUsersToEvent_addDifferentUserToEvent_mainUserNotNotifiedOfEvent() throws IOException {
-        // There's no real way around this implicit dependency
-        SseEmitter emitter = eventService.createEmitterForUser(mockUser);
-        verify(emitter, times(0)).send(any());
-
-        Event event = mock(Event.class);
-        when(eventRepository.save(event)).thenReturn(event);
-
-        var otherMockUser = mock(User.class);
-
-        eventService.addUsersToEvent(Set.of(otherMockUser), event); // Adding different user to event
-
-        verify(event, times(1)).addUsers(Set.of(otherMockUser)); // Other user should have been added to event
-        verify(eventRepository).save(event);
-
-        verify(event, times(0)).constructJSONObject(); // Event is not sent so therefore this shouldn't be called
-        verify(emitter, times(0)).send(any());
     }
 }
