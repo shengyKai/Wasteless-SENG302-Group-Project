@@ -9,7 +9,7 @@ import java.util.List;
 /**
  * Entity representing the communication between a marketplace card creator and a prospective buyer
  *
- * In future this entity could be extended to support more then two participants and be associated with different topics
+ * In future this entity could be extended to support more than two participants and be associated with different topics
  */
 @Table(uniqueConstraints={
         @UniqueConstraint(columnNames = {"card_id", "buyer_id"})
@@ -28,7 +28,7 @@ public class Conversation {
     @JoinColumn(name = "buyer_id", nullable = false)
     private User buyer;
 
-    @OneToMany(mappedBy = "conversation", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "conversation", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
     @OrderBy("created DESC")
     private List<Message> messages = new ArrayList<>();
 

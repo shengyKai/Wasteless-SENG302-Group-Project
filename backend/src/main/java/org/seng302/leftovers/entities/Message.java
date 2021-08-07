@@ -34,12 +34,17 @@ public class Message {
 
     /**
      * Construct a new message
+     * @param conversation Conversation to send message to
      * @param sender Sender of the message
      * @param content Initial message content
      */
-    public Message(User sender, String content) {
+    public Message(Conversation conversation, User sender, String content) {
+        if (conversation == null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Message conversation cannot be null");
+        this.conversation = conversation;
+
         if (sender == null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Message sender cannot be null");
         this.sender = sender;
+
         setContent(content);
     }
 
@@ -89,10 +94,10 @@ public class Message {
      */
     public void setContent(String content) {
         if (content == null || content.isBlank()) {
-            content = "";
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Message cannot be empty");
         }
         if (content.length() > 200) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Messages must be 200 characters or less");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Message must be 200 characters or less");
         }
         this.content = content;
     }

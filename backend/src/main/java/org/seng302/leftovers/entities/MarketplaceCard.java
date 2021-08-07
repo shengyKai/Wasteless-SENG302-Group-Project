@@ -46,7 +46,7 @@ public class MarketplaceCard {
     @JoinTable(name = "card_keywords")
     private List<Keyword> keywords = new ArrayList<>();
 
-    @OneToMany(mappedBy = "card", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "card", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
     private List<Conversation> conversations = new ArrayList<>();
 
 
