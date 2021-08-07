@@ -92,4 +92,10 @@ public class EventStepDefinition {
         Long eventId = eventContext.getLast().getId();
         Assertions.assertFalse(eventRepository.existsById(eventId));
     }
+
+    @Then("The event is not deleted from my feed")
+    public void the_event_is_not_deleted_from_my_feed() {
+        Long eventId = eventContext.getLast().getId();
+        Assertions.assertTrue(eventRepository.existsById(eventId));
+    }
 }
