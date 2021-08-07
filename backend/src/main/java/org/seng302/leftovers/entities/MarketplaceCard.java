@@ -46,6 +46,9 @@ public class MarketplaceCard {
     @JoinTable(name = "card_keywords")
     private List<Keyword> keywords = new ArrayList<>();
 
+    @OneToMany(mappedBy = "card", fetch = FetchType.LAZY)
+    private List<Conversation> conversations = new ArrayList<>();
+
 
     /**
      * Gets the id (will be unique among marketplace cards)
