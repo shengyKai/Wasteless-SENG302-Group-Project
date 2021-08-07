@@ -1677,6 +1677,53 @@ paths:
                       - 3
         '403':
           description: 'Forbidden: Returned if a DGAA user attempts to generate demo data.'
+    /feed:
+    get:
+      tags:
+        - 'U32: Managing my feed'
+        - Feed
+      summary: Filter feed based on event tag
+      security:
+        - CookieAuth:
+            - user
+            - business
+            - globalApplicationAdmin
+            - defaultGlobalApplicationAdmin
+      parameters:
+        - name: tag
+          in: query
+          description: Tag (in terms of colour) to filter by
+          schema:
+            type: string
+            example: red
+            enum:
+              - none
+              - red
+              - orange
+              - yellow
+              - green
+              - blue
+              - purple
+      responses:
+        '200':
+          description: Request successful, a (possibly empty) list of events is returned along with total count
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Page'
+                  - type: object
+                    required:
+                      - results
+                    properties:
+                      results:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Business'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
   /feed/{id}/tag:
     put:
       tags:
