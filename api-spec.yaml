@@ -1692,18 +1692,13 @@ paths:
       parameters:
         - name: tag
           in: query
-          description: Tag (in terms of colour) to filter by
+          description: Multiple tags (in terms of colour) to filter by
           schema:
-            type: string
+            type: array
+            items: 
+              $ref: '#/components/schemas/Tag'
             example: red
-            enum:
-              - none
-              - red
-              - orange
-              - yellow
-              - green
-              - blue
-              - purple
+
       responses:
         '200':
           description: Request successful, a (possibly empty) list of events is returned along with total count
@@ -1719,7 +1714,7 @@ paths:
                       results:
                         type: array
                         items:
-                          $ref: '#/components/schemas/Business'
+                          $ref: '#/components/schemas/Event'
         '401':
           $ref: '#/components/responses/UnauthorizedError'
         '400':
@@ -2274,3 +2269,35 @@ components:
           example: 70
           readOnly: true
           description: Total number of results
+    Event:
+      type: object
+      description: Event entity
+      required: 
+        - id
+        - created
+        - tag
+      properties:
+        id:
+          type: integer
+          example: 100
+          readOnly: true
+          description: Automatically generated and assigned by the server
+        created:
+          type: string
+          format: date-time
+          example: '2020-07-14T14:32:00Z'
+          readOnly: true
+          description: Date and time when the event was created
+        tag:
+          $ref: '#/components/schemas/Tag'
+    Tag:
+      type: string
+      description: Name of the tag (colour name) for the event
+      enum:
+        - none
+        - red
+        - orange
+        - yellow
+        - green
+        - blue
+        - purple
