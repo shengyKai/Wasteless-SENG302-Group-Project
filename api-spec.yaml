@@ -1332,6 +1332,8 @@ paths:
           description: >-
             New message is added to the conversation. If the conversation did 
             not already exist then a new conversation is created.
+        '400':
+          $ref: '#/components/responses/BadRequestError'
         '401':
           $ref: '#/components/responses/UnauthorizedError'
         '403':
