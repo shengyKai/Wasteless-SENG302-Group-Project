@@ -1677,7 +1677,7 @@ paths:
                       - 3
         '403':
           description: 'Forbidden: Returned if a DGAA user attempts to generate demo data.'
-    /feed:
+  /feed:
     get:
       tags:
         - 'U32: Managing my feed'
