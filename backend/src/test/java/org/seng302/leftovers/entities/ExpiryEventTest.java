@@ -67,6 +67,7 @@ class ExpiryEventTest {
         expiryEventRepository.save(testEvent);
         String expectedJsonString = String.format("{\"id\":%d," +
                 "\"created\":\"%s\"," +
+                "\"tag\":\"none\"," +
                 "\"type\":\"ExpiryEvent\"," +
                 "\"card\":%s}",
                 testEvent.getId(),

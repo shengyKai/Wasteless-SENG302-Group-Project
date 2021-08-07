@@ -13,7 +13,6 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -59,7 +58,7 @@ public class EventServiceImpl implements EventService {
 
         LOGGER.info("Adding event emitter for user (id={}) total for user {}", user.getUserID(), userConnections.size());
 
-        for (Event event : eventRepository.getAllByNotifiedUsersOrderByCreated(user)) {
+        for (Event event : eventRepository.getAllByNotifiedUserOrderByCreated(user)) {
             emitEvent(emitter, event);
         }
 
@@ -67,25 +66,22 @@ public class EventServiceImpl implements EventService {
     }
 
     /**
-     * Adds a set of users to the provided event.
+     * Save/update an event
      * It will also immediately notify connected users of the event
      * This method should be used in place of eventRepository.save
      *
-     * @param users Set of users to notify
-     * @param event Event to notify users of
-     * @return Updated event
+     * @param event Event to update and notify the recipient
+     * @return Saved modified event
      */
     @Override
-    public Event addUsersToEvent(Set<User> users, Event event) {
-        event.addUsers(users);
+    public <T extends Event> T saveEvent(T event) {
         event = eventRepository.save(event);
 
-        LOGGER.info("Adding {} users to event (id={})", users.size(), event.getId());
+        LOGGER.info("Updating event (id={})", event.getId());
 
-        for (User user : users) {
-            for (SseEmitter emitter : new ArrayList<>(connections.getOrDefault(user.getUserID(), List.of()))) {
-                emitEvent(emitter, event);
-            }
+        Long userId = event.getNotifiedUser().getUserID();
+        for (SseEmitter emitter : new ArrayList<>(connections.getOrDefault(userId, List.of()))) {
+            emitEvent(emitter, event);
         }
 
         return event;
