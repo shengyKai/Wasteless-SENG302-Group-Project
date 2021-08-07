@@ -3,6 +3,11 @@ Feature: U32 - Managing my feed
     Given A user exists
     And An event is sent to the user
 
+  Scenario: AC1 - I can delete any item from my feed
+    Given I am logged into my account
+    When I try to delete an event from my feed
+    Then The event is deleted and my feed is empty
+
   Scenario: AC6 - I can add a tag to a item
     Given I am logged into my account
     When I try to change the event tag to "blue"
