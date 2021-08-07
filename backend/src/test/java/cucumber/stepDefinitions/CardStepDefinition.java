@@ -81,6 +81,9 @@ public class CardStepDefinition {
     private RequestContext requestContext;
 
     @Autowired
+    private EventContext eventContext;
+
+    @Autowired
     private CardService cardService;
 
     @Autowired
@@ -195,17 +198,11 @@ public class CardStepDefinition {
         initiateCardCheckEvents.invoke(cardService);
     }
 
-    @When("I check my notification feed")
-    public void i_check_my_notification_feed() {
-        requestContext.performRequest(get("/events/emitter")
-                .param("userId", userContext.getLast().getUserID().toString()));
-    }
-
     @Then("I have received a message telling me the card is about to expire")
     public void i_have_received_a_message_telling_me_the_card_is_about_to_expire()
             throws JsonProcessingException, UnsupportedEncodingException, ParseException {
 
-        List<JSONObject> events = EventContext.parseEvents(requestContext.getLastResult().getResponse(), "newsfeed");
+        List<JSONObject> events = eventContext.lastReceivedEvents("newsfeed");
 
         Assertions.assertEquals(1, events.size());
         JSONObject event = events.get(0);
@@ -224,7 +221,7 @@ public class CardStepDefinition {
 
     @Then("I have received a message telling me the card has expired")
     public void i_have_received_a_message_telling_me_the_card_has_expired() throws UnsupportedEncodingException, ParseException {
-        List<JSONObject> events = EventContext.parseEvents(requestContext.getLastResult().getResponse(), "newsfeed");
+        List<JSONObject> events = eventContext.lastReceivedEvents("newsfeed");
 
         Assertions.assertEquals(1, events.size());
         JSONObject event = events.get(0);

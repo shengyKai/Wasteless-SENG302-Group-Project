@@ -40,8 +40,10 @@ public class KeywordService {
 
         logger.info("Sending keyword creation notification for keyword \"{}\" to system administrators",
                 keyword.getName());
-        KeywordCreatedEvent newKeywordEvent = new KeywordCreatedEvent(keyword, creator);
-        eventService.addUsersToEvent(adminSet, newKeywordEvent);
+        for (User admin : adminSet) {
+            KeywordCreatedEvent newKeywordEvent = new KeywordCreatedEvent(admin, creator, keyword);
+            eventService.saveEvent(newKeywordEvent);
+        }
     }
 }
 

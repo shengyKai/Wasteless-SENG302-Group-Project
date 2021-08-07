@@ -157,7 +157,7 @@ class MarketplaceCardRepositoryTest {
         card = marketplaceCardRepository.save(card);
 
         ExpiryEvent event = new ExpiryEvent(card);
-        eventService.addUserToEvent(card.getCreator(), event);
+        eventService.saveEvent(event);
         Assertions.assertTrue(expiryEventRepository.getByExpiringCard(card).isPresent());
 
         List<MarketplaceCard> results = marketplaceCardRepository.getAllExpiringBeforeWithoutEvent(cutoff);

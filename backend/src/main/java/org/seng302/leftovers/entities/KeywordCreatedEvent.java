@@ -25,9 +25,12 @@ public class KeywordCreatedEvent extends Event {
 
     /**
      * Constructor for the create keyword event.
+     * @param notifiedUser User to notify of the new keyword
+     * @param creator User that made the new keyword
      * @param newKeyword The keyword which has been created.
      */
-    public KeywordCreatedEvent(Keyword newKeyword, User creator) {
+    public KeywordCreatedEvent(User notifiedUser, User creator, Keyword newKeyword) {
+        super(notifiedUser);
         this.newKeyword = newKeyword;
         this.creator = creator;
     }

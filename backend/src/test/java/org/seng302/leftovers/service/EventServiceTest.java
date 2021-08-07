@@ -10,8 +10,6 @@ import org.seng302.leftovers.entities.Event;
 import org.seng302.leftovers.entities.MessageEvent;
 import org.seng302.leftovers.entities.User;
 import org.seng302.leftovers.persistence.EventRepository;
-import org.seng302.leftovers.service.EventService;
-import org.seng302.leftovers.service.EventServiceImpl;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -28,7 +26,7 @@ import static org.mockito.Mockito.*;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
-public class EventServiceTest {
+class EventServiceTest {
 
     @Mock
     private EventRepository eventRepository;
@@ -81,7 +79,7 @@ public class EventServiceTest {
 
     @Test
     void createEmitterForUser_userWithNoEvents_noEventsEmitted() throws IOException {
-        when(eventRepository.getAllByNotifiedUsersOrderByCreated(mockUser)).thenReturn(List.of());
+        when(eventRepository.getAllByNotifiedUserOrderByCreated(mockUser)).thenReturn(List.of());
 
         SseEmitter emitter = eventService.createEmitterForUser(mockUser);
 
@@ -90,7 +88,7 @@ public class EventServiceTest {
 
     @Test
     void createEmitterForUser_userWithNoEvents_hasAssignedEmitterCallbacks() {
-        when(eventRepository.getAllByNotifiedUsersOrderByCreated(mockUser)).thenReturn(List.of());
+        when(eventRepository.getAllByNotifiedUserOrderByCreated(mockUser)).thenReturn(List.of());
 
         SseEmitter emitter = eventService.createEmitterForUser(mockUser);
 
@@ -100,9 +98,9 @@ public class EventServiceTest {
 
     @Test
     void createEmitterForUser_userWithOneEvent_emitsEventWithSettings() throws IOException {
-        Event event = new MessageEvent("foo");
+        Event event = new MessageEvent(mockUser,"foo");
 
-        when(eventRepository.getAllByNotifiedUsersOrderByCreated(mockUser)).thenReturn(List.of(event)); // Add initial event
+        when(eventRepository.getAllByNotifiedUserOrderByCreated(mockUser)).thenReturn(List.of(event)); // Add initial event
 
         SseEmitter emitter = eventService.createEmitterForUser(mockUser);
 
@@ -110,12 +108,14 @@ public class EventServiceTest {
     }
 
     @Test
-    void addUsersToEvent_addUserToEvent_userNotifiedOfEvent() throws IOException {
+    void addUsersToEvent_saveEvent_userNotifiedOfEvent() throws IOException {
         // There's no real way around this implicit dependency
         SseEmitter emitter = eventService.createEmitterForUser(mockUser);
         verify(emitter, times(0)).send(any());
 
         Event event = mock(Event.class);
+
+        when(event.getNotifiedUser()).thenReturn(mockUser);
 
         // Make sure that event is send-able
         var mockEventJson = new JSONObject();
@@ -124,31 +124,10 @@ public class EventServiceTest {
 
         when(eventRepository.save(event)).thenReturn(event);
 
-        assertEquals(event, eventService.addUsersToEvent(Set.of(mockUser), event));
+        assertEquals(event, eventService.saveEvent( event)); // Call function
 
-        verify(event).addUsers(Set.of(mockUser));
         verify(eventRepository).save(event);
 
         verifyEmitterHasSentEvent(emitter, event);
-    }
-
-    @Test
-    void addUsersToEvent_addDifferentUserToEvent_mainUserNotNotifiedOfEvent() throws IOException {
-        // There's no real way around this implicit dependency
-        SseEmitter emitter = eventService.createEmitterForUser(mockUser);
-        verify(emitter, times(0)).send(any());
-
-        Event event = mock(Event.class);
-        when(eventRepository.save(event)).thenReturn(event);
-
-        var otherMockUser = mock(User.class);
-
-        eventService.addUsersToEvent(Set.of(otherMockUser), event); // Adding different user to event
-
-        verify(event, times(1)).addUsers(Set.of(otherMockUser)); // Other user should have been added to event
-        verify(eventRepository).save(event);
-
-        verify(event, times(0)).constructJSONObject(); // Event is not sent so therefore this shouldn't be called
-        verify(emitter, times(0)).send(any());
     }
 }

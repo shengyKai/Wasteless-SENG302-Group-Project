@@ -16,11 +16,14 @@ public class ExpiryEvent extends Event {
     @JoinColumn(name = "expiring_card", unique = true, nullable = false)
     private MarketplaceCard expiringCard;
 
-    protected ExpiryEvent() {
+    protected ExpiryEvent() {} // Required by JPA
 
-    }
-
+    /**
+     * Creates a new event for a expiring card
+     * @param expiringCard Card that is about to expire
+     */
     public ExpiryEvent(MarketplaceCard expiringCard) {
+        super(expiringCard.getCreator());
         this.expiringCard = expiringCard;
     }
 

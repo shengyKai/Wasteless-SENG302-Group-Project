@@ -17,10 +17,14 @@ public class DeleteEvent extends Event {
     @Column(nullable = false)
     private String title;
 
-    protected DeleteEvent() {
-    }
+    protected DeleteEvent() {} // Required by JPA
 
+    /**
+     * Creates a new event for a deleted card
+     * @param deletedCard Card that will be deleted
+     */
     public DeleteEvent(MarketplaceCard deletedCard) {
+        super(deletedCard.getCreator());
         section = deletedCard.getSection();
         title = deletedCard.getTitle();
     }
