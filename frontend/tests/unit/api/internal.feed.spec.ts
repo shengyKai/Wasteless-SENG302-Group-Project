@@ -17,7 +17,7 @@ type Mocked<T extends { [k: string]: (...args: any[]) => any }> = { [k in keyof 
 // @ts-ignore - We've added an instance attribute in the mock declaration that mimics a AxiosInstance
 const instance: Mocked<Pick<AxiosInstance, 'delete' >> = axios.instance;
 
-describe("Test DELETE /feed/delete/{id} endpoint", () => {
+describe("Test DELETE /feed/{id} endpoint", () => {
   it("Notification is deleted successfully, no response", async () => {
     instance.delete.mockResolvedValueOnce({
       response: {

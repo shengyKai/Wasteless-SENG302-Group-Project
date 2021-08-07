@@ -87,8 +87,8 @@ public class EventStepDefinition {
         requestContext.performRequest(delete("/feed/" + eventContext.getLast().getId()));
     }
 
-    @Then("The event is deleted and my feed is empty")
-    public void the_event_is_deleted_and_my_feed_is_empty() {
+    @Then("The event is deleted")
+    public void the_event_is_deleted() {
         Long eventId = eventContext.getLast().getId();
         Assertions.assertFalse(eventRepository.existsById(eventId));
     }

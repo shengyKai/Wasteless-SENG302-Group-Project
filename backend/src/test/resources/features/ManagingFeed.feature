@@ -6,7 +6,7 @@ Feature: U32 - Managing my feed
   Scenario: AC1 - I can delete any item from my feed
     Given I am logged into my account
     When I try to delete an event from my feed
-    Then The event is deleted and my feed is empty
+    Then The event is deleted
 
   Scenario: Unauthorised users cannot delete my items from my feed
     When I try to delete an event from my feed
