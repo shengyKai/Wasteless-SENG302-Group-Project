@@ -172,7 +172,7 @@ class EventControllerTest {
 
     @ParameterizedTest
     @EnumSource(Tag.class)
-    void setEventTag_validTag_20ResponseAndTagUpdated(Tag tag) throws Exception {
+    void setEventTag_validTag_200ResponseAndTagUpdated(Tag tag) throws Exception {
         var json = new JSONObject();
         json.put("value", tag.toString().toLowerCase());
         mockMvc.perform(
