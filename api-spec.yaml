@@ -1748,8 +1748,8 @@ paths:
           $ref: '#/components/responses/UnauthorizedError'
         '403':
           description: >-
-            Forbidden: Returned when a user or business who does not have
-            this item on there feed tries to delete this item.
+            Forbidden: Returned when a user or business does not have
+            the permission to delete the item on the feed.
         '406':
            description: >-
              Not Acceptable: Returned when a feed with an ID does not exist.

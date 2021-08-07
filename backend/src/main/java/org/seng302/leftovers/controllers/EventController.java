@@ -117,6 +117,10 @@ public class EventController {
         }
     }
 
+    /**
+     * Deletes a event from the home feed of the user
+     * @param id ID of the event to be deleted
+     */
     @DeleteMapping("/feed/{id}")
     public void deleteEvent(HttpServletRequest request, @PathVariable Long id) {
         LOGGER.info("Request to delete event (id={}) from feed", id);
@@ -130,7 +134,7 @@ public class EventController {
                 throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Current user does not have permission to delete this event");
             }
 
-            eventRepository.deleteById(id);
+            eventRepository.delete(event);
         } catch (Exception e) {
             LOGGER.error(e.getMessage());
             throw e;
