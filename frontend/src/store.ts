@@ -303,6 +303,12 @@ function createOptions(): StoreOptions<StoreData> {
         }
         return 'Failed to delete notification';
       },
+      async deleteAllEventsPermenant(context) {
+        for (let event of context.state.temporaryDeletedEvents) {
+          deleteNotification(event.id);
+        }
+        context.state.temporaryDeletedEvents = [];
+      }
     }
   };
 }

@@ -69,4 +69,12 @@ new Vue({
   vuetify,
   router,
   template: '<App/>',
+  created() {
+    window.addEventListener('beforeunload', this.beforeClose);
+  },
+  methods: {
+    beforeClose() {
+      this.$store.dispatch('deleteAllEventsPermenant');
+    }
+  }
 });
