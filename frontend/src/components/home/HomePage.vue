@@ -10,18 +10,7 @@
         flat
         solo-inverted
         hide-details
-        :items="[
-          { text: '', value: 'tag1', color: 'red'},
-          { text: 'Tag', value: 'tag2', color: 'blue'},
-          { text: 'Bookmark', value: 'tag3', color: 'green'},
-          { text: 'Tag filter 4', value: 'tag4', color: 'red'},
-          { text: 'Tag filter 5', value: 'tag5', color: 'blue'},
-          { text: 'Tag filter 6', value: 'tag6', color: 'green'},
-          { text: 'Tag filter 7', value: 'tag7', color: 'red'},
-          { text: 'Tag filter 8', value: 'tag8', color: 'blue'},
-          { text: 'Tag filter 9', value: 'tag9', color: 'green'},
-          { text: 'Tag filter 0', value: 'tag0', color: 'red'},
-        ]"
+        :items="colours"
         prepend-inner-icon="mdi-sort-variant"
         label="Filter by"
         multiple
@@ -29,7 +18,7 @@
       >
         <!--Allows to access each chip's property in the v-select so that manipulation of the chip's color is possible -->
         <template #selection="{ item }">
-          <v-chip :color="item.color" label>
+          <v-chip :color="item" label>
             <v-icon left>
               mdi-label
             </v-icon>
@@ -94,8 +83,6 @@ export default {
   data() {
     return {
       filterBy: [],
-      // // ATTENTION, "events" is to be used with the frontend only pagination with "filterBy" above.
-      // events: this.$store.getters.events,
       /**
        * Currently selected page (1 is first page)
        */
@@ -104,9 +91,13 @@ export default {
        * Number of results per a result page
        */
       resultsPerPage: 10,
+      colours: ['none', 'red', 'orange', 'yellow', 'green', 'blue', 'purple']
     };
   },
   computed: {
+    /**
+     * The event array sliced so that it can do pagination natively.
+     */
     events() {
       const pageStartIndex = (this.currentPage - 1) * this.resultsPerPage;
       return this.$store.getters.events.slice(pageStartIndex, (pageStartIndex + this.resultsPerPage));
@@ -155,7 +146,7 @@ export default {
         pageEndIndex = pageStartIndex + (this.totalResults % this.resultsPerPage);
       }
       return `Displaying ${pageStartIndex + 1} - ${pageEndIndex} of ${this.totalResults} results`;
-    },
+    }
   },
   methods: {
     filterEvents() {
