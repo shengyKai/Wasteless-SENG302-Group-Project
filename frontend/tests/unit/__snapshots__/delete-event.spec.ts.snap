@@ -16,5 +16,19 @@ exports[`DeleteEvent.vue Card has been deleted from the database Must match snap
   <div class="v-card__text">
     Your marketplace card "Card title" in the For Sale section has been removed from the marketplace
   </div>
+  <div class="v-item-group theme--light v-expansion-panels">
+    <div aria-expanded="false" class="v-expansion-panel"><button type="button" class="v-expansion-panel-header" label="">
+        <div><span class="v-chip v-chip--label theme--light v-size--default pink white--text"><span class="v-chip__content"><i aria-hidden="true" class="v-icon notranslate v-icon--left mdi mdi-label theme--light"></i>
+            Current Tag
+          </span></span></div>
+        <transition-stub name="fade-transition">
+          <div class="v-expansion-panel-header__icon"><i aria-hidden="true" class="v-icon notranslate mdi mdi-chevron-down theme--light"></i></div>
+        </transition-stub>
+      </button>
+      <transition-stub name="expand-transition">
+        <!---->
+      </transition-stub>
+    </div>
+  </div>
 </div>
 `;
