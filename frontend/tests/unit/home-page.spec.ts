@@ -45,6 +45,7 @@ describe('HomePage.vue', () => {
     const event: AnyEvent = {
       type: 'MessageEvent',
       id: 7,
+      tag: 'none',
       created: new Date().toString(),
       message: 'Hello world',
     };
@@ -60,6 +61,7 @@ describe('HomePage.vue', () => {
     const event: AnyEvent = {
       type: 'MessageEvent',
       id: 7,
+      tag: 'none',
       created: new Date().toString(),
       message: 'Hello world',
     };

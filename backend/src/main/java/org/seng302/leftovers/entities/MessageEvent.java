@@ -19,9 +19,11 @@ public class MessageEvent extends Event {
 
     /**
      * Constructs a message event with the given initial message
+     * @param notifiedUser User to send the message to
      * @param message Initial event message
      */
-    public MessageEvent(String message) {
+    public MessageEvent(User notifiedUser, String message) {
+        super(notifiedUser);
         setMessage(message);
     }
 

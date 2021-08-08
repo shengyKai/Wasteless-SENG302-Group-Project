@@ -2,6 +2,11 @@
 
 exports[`KeywordCreated.vue Must match snapshot 1`] = `
 <div>
+  <div class="delete"><button type="button" class="v-icon notranslate deleteButton v-icon--link mdi mdi-trash-can theme--light red--text"></button>
+    <div class="deletion-error">
+
+    </div>
+  </div>
   <div class="v-card__title">
     Keyword "TestKeywordName" has been created
   </div>

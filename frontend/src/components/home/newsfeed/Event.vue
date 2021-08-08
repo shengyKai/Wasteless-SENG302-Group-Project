@@ -1,5 +1,16 @@
 <template>
   <div>
+    <div class="delete">
+      <v-icon class="deleteButton"
+              color="red"
+              @click.stop="removeNotification"
+      >
+        mdi-trash-can
+      </v-icon>
+      <div class="deletion-error">
+        {{ errorMessage }}
+      </div>
+    </div>
     <v-card-title>
       {{ title }}
     </v-card-title>
@@ -12,6 +23,7 @@
 
 <script>
 import { formatDate } from '@/utils';
+import {deleteNotification} from "@/api/internal";
 
 export default {
   name: 'Event',
@@ -24,6 +36,11 @@ export default {
       type: Object,
       required: true,
     },
+  },
+  data() {
+    return {
+      errorMessage: undefined
+    };
   },
   computed: {
     /**
@@ -40,5 +57,29 @@ export default {
       return formatDate(this.event.created);
     },
   },
+  methods: {
+    async removeNotification() {
+      const result = await deleteNotification(this.event.id);
+      if (typeof result === 'string') {
+        this.errorMessage = result;
+      } else {
+        this.$store.commit('removeEvent', this.event.id);
+      }
+    }
+  }
 };
 </script>
+
+<style>
+.delete {
+  float: right;
+  margin: 0.25em;
+}
+.deleteButton {
+  float: right;
+  margin: 0.25em;
+}
+.deletion-error {
+  color: red;
+}
+</style>

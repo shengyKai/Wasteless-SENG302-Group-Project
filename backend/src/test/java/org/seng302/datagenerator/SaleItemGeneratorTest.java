@@ -239,7 +239,7 @@ public class SaleItemGeneratorTest {
         LocalDate closes = LocalDate.parse(generatedDates[0]);
         LocalDate created = LocalDate.parse(generatedDates[1].substring(0, 10));
 
-        assertTrue(closes.isAfter(created));
+        assertTrue(closes.compareTo(created) >= 0);
     }
 
     @Test

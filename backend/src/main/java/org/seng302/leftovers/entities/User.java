@@ -48,7 +48,7 @@ public class User extends Account {
     @OneToMany(mappedBy = "primaryOwner", fetch = FetchType.LAZY)
     private Set<Business> businessesOwned = new HashSet<>();
 
-    @ManyToMany(mappedBy = "notifiedUsers", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "notifiedUser", fetch = FetchType.LAZY)
     private Set<Event> events = new HashSet<>();
 
     /* Matches:

@@ -1,11 +1,14 @@
 package org.seng302.leftovers.controllers;
 
+import lombok.Getter;
 import net.minidev.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.seng302.leftovers.entities.MessageEvent;
 import org.seng302.leftovers.entities.Event;
+import org.seng302.leftovers.entities.Tag;
 import org.seng302.leftovers.entities.User;
+import org.seng302.leftovers.persistence.EventRepository;
 import org.seng302.leftovers.persistence.UserRepository;
 import org.seng302.leftovers.service.EventService;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
@@ -17,7 +20,8 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.*;
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 
 /**
  * Controller for the /events/* endpoints.
@@ -31,10 +35,39 @@ public class EventController {
 
     private final EventService eventService;
 
+    private final EventRepository eventRepository;
+
     @Autowired
-    public EventController(UserRepository userRepository, EventService eventService) {
+    public EventController(UserRepository userRepository, EventService eventService, EventRepository eventRepository) {
         this.userRepository = userRepository;
         this.eventService = eventService;
+        this.eventRepository = eventRepository;
+    }
+
+    private static class SetTag {
+        @NotNull
+        public Tag value;
+    }
+
+    @PutMapping("/feed/{eventId}/tag")
+    public void setEventTag(@PathVariable long eventId, @Valid @RequestBody SetTag body, HttpServletRequest request) {
+        LOGGER.info("Requested update of event tag (eventId={}, tag={})", eventId, body.value);
+
+        AuthenticationTokenManager.checkAuthenticationToken(request);
+        try {
+            Event event = eventRepository.findById(eventId)
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "Event not found"));
+
+            if (!AuthenticationTokenManager.sessionCanSeePrivate(request, event.getNotifiedUser().getUserID())) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Current user does not have permission to modify this event");
+            }
+
+            event.setTag(body.value);
+            eventService.saveEvent(event);
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            throw e;
+        }
     }
 
     /**
@@ -74,13 +107,34 @@ public class EventController {
                 throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Insufficient permissions to send global message");
             }
 
-            Event event = new MessageEvent(messageInfo.getAsString("message"));
+            String message = messageInfo.getAsString("message");
+            userRepository.findAll().forEach(user -> eventService.saveEvent(new MessageEvent(user, message)));
 
-            Set<User> allUsers = new HashSet<>();
-            userRepository.findAll().forEach(allUsers::add);
-
-            eventService.addUsersToEvent(allUsers, event);
             response.setStatus(201);
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            throw e;
+        }
+    }
+
+    /**
+     * Deletes a event from the home feed of the user
+     * @param id ID of the event to be deleted
+     */
+    @DeleteMapping("/feed/{id}")
+    public void deleteEvent(HttpServletRequest request, @PathVariable Long id) {
+        LOGGER.info("Request to delete event (id={}) from feed", id);
+        try {
+            // Check that authentication token is present and valid
+            AuthenticationTokenManager.checkAuthenticationToken(request);
+            Event event = eventRepository.findById(id)
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "Event not found, unable to delete"));
+
+            if (!AuthenticationTokenManager.sessionCanSeePrivate(request, event.getNotifiedUser().getUserID())) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Current user does not have permission to delete this event");
+            }
+
+            eventRepository.delete(event);
         } catch (Exception e) {
             LOGGER.error(e.getMessage());
             throw e;
