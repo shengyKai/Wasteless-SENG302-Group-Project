@@ -92,7 +92,7 @@
           <v-icon v-if="!isCardOwner"
                   ref="messageButton"
                   color="primary"
-                  @click.stop="messageOwnerDialog = true"
+                  @click.stop="messageOwnerDialog = true; directMessageContent=''"
                   v-bind="attrs"
                   v-on="on"
           >
@@ -111,22 +111,36 @@
           <v-card-subtitle>
             Your message will appear on their feed
           </v-card-subtitle>
-          <v-card-text>
-            <v-textarea/>
-          </v-card-text>
-          <v-card-actions>
-            <v-spacer/>
-            <v-btn color="primary"
-                   text
-                   @click="sendMessage">
-              Send
-            </v-btn>
-            <v-btn color="primary"
-                   text
-                   @click="messageOwnerDialog = false">
-              Cancel
-            </v-btn>
-          </v-card-actions>
+          <v-form v-model="directMessageValid" ref="directMessageForm">
+            <v-card-text>
+              <v-textarea
+                solo
+                outlined
+                clearable
+                prepend-inner-icon="mdi-comment"
+                no-resize
+                counter
+                :rules="mandatoryRules().concat(maxCharRules())"
+                :value="directMessageContent"/>
+            </v-card-text>
+            <v-card-actions>
+              <v-alert v-if="directMessageError !== undefined" color="red" type="error" dense text>
+                {{directMessageError}}
+              </v-alert>
+              <v-spacer/>
+              <v-btn color="primary"
+                     text
+                     :disabled="!directMessageValid"
+                     @click="sendMessage">
+                Send
+              </v-btn>
+              <v-btn color="primary"
+                     text
+                     @click="messageOwnerDialog = false; directMessageError = undefined">
+                Cancel
+              </v-btn>
+            </v-card-actions>
+          </v-form>
         </v-card>
       </v-dialog>
     </v-card-actions>
@@ -137,9 +151,10 @@
 </template>
 
 <script>
-import { formatDate, SECTION_NAMES } from '@/utils';
-import { deleteMarketplaceCard } from '../../api/internal.ts';
+import {formatDate, maxCharRules, SECTION_NAMES} from '@/utils';
+import {deleteMarketplaceCard, messageConversation} from '../../api/internal.ts';
 import MarketplaceCardForm from '../marketplace/MarketplaceCardForm.vue';
+import {mandatoryRules} from "@/utils";
 
 export default {
   name: "MarketplaceCard",
@@ -148,6 +163,11 @@ export default {
       deleteCardDialog: false,
       editCardDialog: false,
       messageOwnerDialog: false,
+      directMessageContent: '',
+      directMessageError: undefined,
+      directMessageValid: false,
+      mandatoryRules: () => mandatoryRules,
+      maxCharRules: () => maxCharRules(200),
     };
   },
   components: {
@@ -217,6 +237,15 @@ export default {
     async deleteCard(cardId) {
       let response = await deleteMarketplaceCard(cardId);
       this.$emit("delete-card", response);
+    },
+    async sendMessage() {
+      this.directMessageError = undefined;
+      let response = await messageConversation(this.content.id, this.$store.state.user.id, this.$store.state.user.id, this.directMessageContent);
+      if (typeof response === 'string') {
+        this.directMessageError = response;
+      } else {
+        this.messageOwnerDialog = false;
+      }
     },
   }
 };
