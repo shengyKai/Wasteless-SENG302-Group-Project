@@ -34,6 +34,7 @@ import Vue from 'vue';
 import vuetify from './plugins/vuetify';
 import router from './plugins/vue-router';
 import './plugins/vuex';
+import { getStore } from './store';
 
 // Set Page Title
 router.afterEach((to, from) => {
@@ -73,8 +74,9 @@ new Vue({
     window.addEventListener('beforeunload', this.beforeClose);
   },
   methods: {
-    beforeClose() {
-      this.$store.dispatch('deleteAllEventsPermenant');
+    async beforeClose() {
+      console.log("Before close");
+      await getStore().dispatch('deleteAllEventsPermenant');
     }
   }
 });

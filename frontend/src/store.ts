@@ -305,7 +305,8 @@ function createOptions(): StoreOptions<StoreData> {
       },
       async deleteAllEventsPermenant(context) {
         for (let event of context.state.temporaryDeletedEvents) {
-          deleteNotification(event.id);
+          console.log(event);
+          await deleteNotification(event.id);
         }
         context.state.temporaryDeletedEvents = [];
       }
