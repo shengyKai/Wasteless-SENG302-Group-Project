@@ -11,9 +11,9 @@
         solo-inverted
         hide-details
         :items="[
-          { text: 'Tag filter 1', value: 'tag1', color: 'red'},
-          { text: 'Tag filter 2', value: 'tag2', color: 'blue'},
-          { text: 'Tag filter 3', value: 'tag3', color: 'green'},
+          { text: '', value: 'tag1', color: 'red'},
+          { text: 'Tag', value: 'tag2', color: 'blue'},
+          { text: 'Bookmark', value: 'tag3', color: 'green'},
           { text: 'Tag filter 4', value: 'tag4', color: 'red'},
           { text: 'Tag filter 5', value: 'tag5', color: 'blue'},
           { text: 'Tag filter 6', value: 'tag6', color: 'green'},
@@ -29,15 +29,16 @@
       >
         <!--Allows to access each chip's property in the v-select so that manipulation of the chip's color is possible -->
         <template #selection="{ item }">
-          <v-chip :color="item.color">{{item.text}}</v-chip>
+          <v-chip :color="item.color" label>
+            <v-icon left>
+              mdi-label
+            </v-icon>
+            {{item.text}}
+          </v-chip>
         </template>
       </v-select>
       <!-- Newsfeed -->
-      <div v-if="$store.getters.events.length === 0 || isBusiness" class="text-center">
-        No items in your feed
-      </div>
       <v-card
-        v-else
         v-for="event in events"
         :key="event.id"
         outlined
@@ -57,6 +58,18 @@
           </v-card-text>
         </template>
       </v-card>
+      <!--paginate results-->
+      <v-pagination
+        v-if="$store.getters.events.length !== 0 || !isBusiness"
+        v-model="currentPage"
+        :total-visible="10"
+        :length="totalPages"
+        circle
+      />
+      <!--Text to display range of results out of total number of results-->
+      <v-row justify="center" no-gutters>
+        {{ resultsMessage }}
+      </v-row>
     </div>
   </div>
 </template>
@@ -81,11 +94,23 @@ export default {
   data() {
     return {
       filterBy: [],
-      // ATTENTION, "events" is to be used with the frontend only pagination with "filterBy" above.
-      events: this.$store.getters.events
+      // // ATTENTION, "events" is to be used with the frontend only pagination with "filterBy" above.
+      // events: this.$store.getters.events,
+      /**
+       * Currently selected page (1 is first page)
+       */
+      currentPage: 1,
+      /**
+       * Number of results per a result page
+       */
+      resultsPerPage: 10,
     };
   },
   computed: {
+    events() {
+      const pageStartIndex = (this.currentPage - 1) * this.resultsPerPage;
+      return this.$store.getters.events.slice(pageStartIndex, (pageStartIndex + this.resultsPerPage));
+    },
     /**
      * Current active user role
      */
@@ -104,6 +129,32 @@ export default {
     inventoryItems() {
       if (!this.isBusiness) return undefined;
       return [...Array(10).keys()].map(i => `Item ${i}`);
+    },
+    /**
+     * Total number of results
+     */
+    totalResults() {
+      if (this.$store.getters.events.length === undefined) return 0;
+      return this.$store.getters.events.length;
+    },
+    /**
+     * The total number of pages required to show all the events
+     * May be 0 if there are no results
+     */
+    totalPages () {
+      return Math.ceil(this.totalResults / this.resultsPerPage);
+    },
+    /**
+     * The message displayed at the bottom of the page to show how many events there are
+     */
+    resultsMessage() {
+      if (this.$store.getters.events.length === 0) return 'No items in your feed';
+      const pageStartIndex = (this.currentPage - 1) * this.resultsPerPage;
+      let pageEndIndex = pageStartIndex + this.resultsPerPage;
+      if (pageEndIndex > this.totalResults) {
+        pageEndIndex = pageStartIndex + (this.totalResults % this.resultsPerPage);
+      }
+      return `Displaying ${pageStartIndex + 1} - ${pageEndIndex} of ${this.totalResults} results`;
     },
   },
   methods: {
