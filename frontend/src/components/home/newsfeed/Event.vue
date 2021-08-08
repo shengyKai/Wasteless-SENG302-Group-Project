@@ -18,10 +18,10 @@
       {{ date }}, {{ time }}
     </v-card-subtitle>
     <slot/>
-
+    <!-- Expansion panel for user to view their option about the available tag to choose from  -->
     <v-expansion-panels>
       <v-expansion-panel>
-
+        <!-- The persistent chip that shows the tag for the message (default will be no colour) -->
         <v-expansion-panel-header
           label
         >
@@ -38,11 +38,16 @@
             </v-chip>
           </div>
         </v-expansion-panel-header>
+        <!--  The expansion panel's content that run through a loop of colours which at the same time set the colour of the chip
+              Make the code more maintainable as it will be easy to modify colour in future and get the index
+              Trigger a method when the chip is clicked (will use the index to trigger)
+        -->
         <v-expansion-panel-content>
           <div>
             Change your Tag:
           </div>
           <v-chip
+            class="mr-1"
             v-for="colour in colours"
             :key=colour
             :color="colour"
@@ -109,6 +114,10 @@ export default {
         this.$store.commit('removeEvent', this.event.id);
       }
     },
+    /**
+     * This should be a method that allows user to change their current tag colour into the desired colour
+     * Currently only alert `changing tag`, functionality will be implemented in another task
+     */
     changeTag () {
       alert('Changing Tag...');
     },
