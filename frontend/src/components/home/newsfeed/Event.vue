@@ -3,9 +3,9 @@
     <v-card-title>
       You have removed a notification from your feed
     </v-card-title>
-    <v-card-subtitle>
-      Press undo to restore the notification "{{ title }}" to your feed.
-    </v-card-subtitle>
+    <v-card-text>
+      Press undo in the next {{ remainingTime }} seconds to restore the notification "{{ title }}" to your feed.
+    </v-card-text>
     <v-card-actions class="justify-center">
       <v-btn color="secondary" @click="undoDelete"> Undo </v-btn>
     </v-card-actions>
@@ -37,6 +37,7 @@
 
 <script>
 import { formatDate } from '@/utils';
+import synchronizedTime from '@/components/utils/Methods/synchronizedTime';
 
 export default {
   name: 'Event',
@@ -54,6 +55,7 @@ export default {
     return {
       errorMessage: undefined,
       deleted: false,
+      deletionTime: undefined,
     };
   },
   computed: {
@@ -70,6 +72,15 @@ export default {
     date() {
       return formatDate(this.event.created);
     },
+    remainingTime() {
+      if (this.deletionTime) {
+        const timeDifference = Math.floor((this.deletionTime - synchronizedTime.now) / 1000) + 10;
+        if (timeDifference > 0) {
+          return timeDifference;
+        }
+      }
+      return 0;
+    }
   },
   methods: {
     /**
@@ -79,6 +90,7 @@ export default {
     async removeNotification() {
       this.$store.commit('deleteEventTemporary', this.event);
       this.deleted = true;
+      this.deletionTime = synchronizedTime.now;
       setTimeout(() => {
         if (this.deleted === true) {
           this.$store.dispatch('deleteEventPermenant', this.event.id)
