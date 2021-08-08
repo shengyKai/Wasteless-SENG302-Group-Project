@@ -48,11 +48,9 @@ export type StoreData = {
    */
   eventMap: Record<number, AnyEvent>,
   /**
-   * A record of all the events which have been temporarily deleted on the frontend, but have
-   * not been permanently deleted on the backend as the 10 second window for reversing deletion
-   * has not passed.
+   * The id numbers of all events which have been staged for deletion.
    */
-  temporaryDeletedEvents: AnyEvent[],
+  eventForDeletionIds: number[],
 };
 
 function createOptions(): StoreOptions<StoreData> {
@@ -65,7 +63,7 @@ function createOptions(): StoreOptions<StoreData> {
       createInventoryDialog: undefined,
       createSaleItemDialog: undefined,
       eventMap: [],
-      temporaryDeletedEvents: [],
+      eventForDeletionIds: [],
     },
     mutations: {
       setUser(state, payload: User) {
@@ -171,18 +169,18 @@ function createOptions(): StoreOptions<StoreData> {
         Vue.delete(state.eventMap, id);
       },
       /**
-       * Add an event to the list of events to be stored until they are permenatly deleted.
+       * Add an event id to the list of event ids to be stored until the events are permenatly deleted.
        * Events on this list will be deleted when the browser/tab closes.
        */
-      deleteEventTemporary(state, event: AnyEvent) {
-        state.temporaryDeletedEvents.push(event);
+      stageEventForDeletion(state, eventId: number) {
+        state.eventForDeletionIds.push(eventId);
       },
       /**
-       * Remove an event to the list of events to be stored until they are permenatly deleted,
+       * Remove an event id from the list of event ids to be stored until the events are permenatly deleted,
        * so that it is not deleted when the browser/tab closes.
        */
-      restoreDeletedEvent(state, id: number) {
-        state.temporaryDeletedEvents = state.temporaryDeletedEvents.filter(event => event.id !== id);
+      unstageEventForDeletion(state, eventId: number) {
+        state.eventForDeletionIds = state.eventForDeletionIds.filter(id => id !== eventId);
       }
     },
     getters: {
@@ -283,32 +281,36 @@ function createOptions(): StoreOptions<StoreData> {
         return undefined;
       },
       /**
-       * If the event is in the list of temporarily deleted events, send a request to the backend to permenantly
+       * If the event is in the list of events staged for deletion, send a request to the backend to permenantly
        * delete the event. Otherwise return an error message.
-       * @param id The id number of the event to be deleted.
+       * @param context The current context of the store.
+       * @param eventId The id number of the event to be deleted.
        * @returns An error message or undefined.
        */
-      async deleteEventPermenant(context, id: number) {
-        const eventToDelete = context.state.temporaryDeletedEvents.filter(event => event.id === id);
-        if (eventToDelete.length === 1) {
-          // Event must be removed from list of temporary deleted events even if request is not successful
-          // as if request is unsuccessful event notification will reappear on newsfeed.
-          context.state.temporaryDeletedEvents = context.state.temporaryDeletedEvents.filter(event => event.id !== id);
-          const response = await deleteNotification(id);
+      async deleteStagedEvent(context, eventId: number) {
+        // Check that the event has been staged for deletion
+        const eventToDeleteId = context.state.eventForDeletionIds.filter(id => id === eventId);
+        if (eventToDeleteId.length === 1) {
+          // Remove event from list of events staged for deletion
+          context.state.eventForDeletionIds = context.state.eventForDeletionIds.filter(id => id !== eventId);
+          const response = await deleteNotification(eventId);
           if (typeof response === 'string') {
             return response;
           } else {
             return undefined;
           }
         }
-        return 'Failed to delete notification';
+        return 'Notification not staged for deletion';
       },
-      async deleteAllEventsPermenant(context) {
-        for (let event of context.state.temporaryDeletedEvents) {
-          console.log(event);
-          await deleteNotification(event.id);
+      /**
+       * Send a request to the backend to ermanently delete all events which have been staged for deletion.
+       * @param context The current context of the store.
+       */
+      async deleteAllStagedEvents(context) {
+        for (let eventId of context.state.eventForDeletionIds) {
+          await deleteNotification(eventId);
         }
-        context.state.temporaryDeletedEvents = [];
+        context.state.eventForDeletionIds = [];
       }
     }
   };

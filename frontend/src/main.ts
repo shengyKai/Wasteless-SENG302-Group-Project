@@ -74,9 +74,11 @@ new Vue({
     window.addEventListener('beforeunload', this.beforeClose);
   },
   methods: {
+    /**
+     * Delete all events which have been staged for deletion before the window closes.
+     */
     async beforeClose() {
-      console.log("Before close");
-      await getStore().dispatch('deleteAllEventsPermenant');
+      await getStore().dispatch('deleteAllStagedEvents');
     }
   }
 });
