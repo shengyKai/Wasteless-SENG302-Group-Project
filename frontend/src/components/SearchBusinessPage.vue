@@ -89,7 +89,7 @@ export default {
       /**
        * The contents of the search box.
        */
-      searchQuery: this.$route.query.query || '',
+      searchQuery: this.$route.query.searchQuery || '',
       /**
        * Current query that is being searched.
        */
@@ -106,15 +106,15 @@ export default {
       /**
        * Whether to reverse the search order
        */
-      reverse: false,
+      reverse: this.$route.query.reverse === "true" || false,
       /**
        * The current search result order
        */
-      orderBy: 'name',
+      orderBy: this.$route.query.orderBy || 'name',
       /**
        * Currently selected page (1 is first page)
        */
-      currentPage: 1,
+      currentPage: this.$route.query.page ? parseInt(this.$route.query.page) : 1,
       /**
        * Number of results per a result page
        */
@@ -127,7 +127,7 @@ export default {
       /**
        * Business type to filter search by
        */
-      selectedBusinessType: undefined,
+      selectedBusinessType: this.$route.query.businessType || undefined,
       /**
        * Options for ordering the business search results
        */
@@ -185,9 +185,9 @@ export default {
      * This function is called when the search query changes.
      */
     async updateSearchQuery() {
-      this.currentPage = 1; // Makes sure we start on the first page
+      this.currentPage = this.$route.query.page ? parseInt(this.$route.query.page) : 1; // Makes sure we start on the first page
       this.results = undefined; // Remove results
-      this.updateResults();
+      await this.updateResults();
     },
     /**
      * This function gets called when the search results need to be updated
@@ -221,6 +221,21 @@ export default {
         this.error = undefined;
       }
     },
+    /**
+     * Visits a given business's profile page
+     * Populates route query so this page can be returned to
+     * @param businessId Id of the business to visit
+     */
+    async viewProfile(businessId) {
+      const query = {
+        businessType : this.selectedBusinessType,
+        orderBy : this.orderBy,
+        page : this.currentPage.toString(),
+        reverse : this.reverse.toString(),
+        searchQuery : this.searchQuery
+      };
+      await this.$router.push({name: 'businessProfile',params:{id:businessId} , query});
+    }
   },
 
   watch: {
@@ -250,7 +265,6 @@ export default {
       this.updateResults();
     },
   },
-
   components: {
     SearchBusinessResult,
   },

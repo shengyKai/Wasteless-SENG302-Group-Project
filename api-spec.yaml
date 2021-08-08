@@ -45,6 +45,7 @@ tags:
   - name: 'UCM5: Find my cards'
   - name: 'UCM6: Keyword management'
   - name: 'UCM7: Keyword search'
+  - name: 'UCM8: Contacting other marketplace users'
   - name: 'UCM9: Edit card'
   - name: Users
     description: Grouping of endpoints related to the User entity
@@ -1283,6 +1284,65 @@ paths:
             not the creator of AND the user is not a GAA
         '406':
           $ref: '#/components/responses/NotAcceptableError'
+  '/cards/{cardId}/conversations/{buyerId}':
+    post:
+      tags:
+        - 'UCM8: Contacting other marketplace users'
+        - Cards / community marketplace
+      summary: Add a message to a conversation about a marketplace card
+      parameters:
+        - name: cardId
+          in: path
+          description: The id of the card being discussed
+          required: true
+          schema:
+            type: integer
+            example: 40
+        - name: buyerId
+          in: path
+          description: The id of the prospective buyer in the conversation
+          required: true
+          schema:
+            type: integer
+            example: 3
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - senderId
+                - message
+              properties:
+                senderId:
+                  type: integer
+                  description: Sender of the message
+                  example: 3
+                message:
+                  type: string
+                  description: Content of the message
+                  example: Hello World!
+      security:
+        - CookieAuth:
+            - user
+            - globalApplicationAdmin
+            - defaultGlobalApplicationAdmin
+      responses:
+        '200':
+          description: >-
+            New message is added to the conversation. If the conversation did 
+            not already exist then a new conversation is created.
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: >-
+            Forbidden: Returned when a user who is neither the creator of the
+            card, card buyer, GAA or DGAA tries to send add a message to the conversation.
+            Also occurs if the card creator tries to initiate a conversation.
+        '406':
+          $ref: '#/components/responses/NotAcceptableError'
   '/cards/{id}/extenddisplayperiod':
     put:
       tags:
@@ -1748,8 +1808,8 @@ paths:
           $ref: '#/components/responses/UnauthorizedError'
         '403':
           description: >-
-            Forbidden: Returned when a user or business who does not have
-            this item on there feed tries to delete this item.
+            Forbidden: Returned when a user or business does not have
+            the permission to delete the item on the feed.
         '406':
            description: >-
              Not Acceptable: Returned when a feed with an ID does not exist.

@@ -18,10 +18,12 @@ import org.seng302.leftovers.persistence.UserRepository;
 import org.seng302.leftovers.service.EventService;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.server.ResponseStatusException;
 
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.*;
@@ -292,5 +294,40 @@ class EventControllerTest {
                 .andReturn();
 
         verify(eventService).createEmitterForUser(mockUser);
+    }
+
+    @Test
+    void deleteEvent_validIdAndUser_200ResponseAndEventDeleted() throws Exception {
+        mockMvc.perform(
+                delete("/feed/2"))
+                .andExpect(status().isOk());
+
+        verify(eventRepository, times(1)).delete(any());
+    }
+
+    @Test
+    void deleteEvent_doesNotHavePermission_403ResponseAndNoEventDeleted() throws Exception {
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), any())).thenReturn(false);
+        mockMvc.perform(
+                delete("/feed/2"))
+                .andExpect(status().isForbidden());
+        verify(eventRepository, times(0)).delete(any());
+    }
+
+    @Test
+    void deleteEvent_eventOnFeedDoesNotExist_406ResponseAndNoEventDeleted() throws Exception {
+        mockMvc.perform(
+                delete("/feed/10"))
+                .andExpect(status().isNotAcceptable());
+        verify(eventRepository, times(0)).delete(any());
+    }
+
+    @Test
+    void deleteEvent_noAuthToken_401ResponseAndNoEventDeleted() throws Exception {
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.checkAuthenticationToken(any())).thenThrow(new AccessTokenException());
+        mockMvc.perform(
+                delete("/feed/10"))
+                .andExpect(status().isUnauthorized());
+        verify(eventRepository, times(0)).delete(any());
     }
 }

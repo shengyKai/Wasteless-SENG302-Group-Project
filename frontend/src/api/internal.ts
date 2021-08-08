@@ -1041,8 +1041,9 @@ export async function deleteKeyword(keywordId: number) : Promise<MaybeError<unde
  */
 export async function deleteNotification(notificationId: number) : Promise<MaybeError<undefined>> {
   try {
-    await instance.delete(`/feed/delete/${notificationId}`);
+    await instance.delete(`/feed/${notificationId}`);
   } catch (error) {
+    console.log(notificationId);
     let status: number | undefined = error.response?.status;
     if (status === undefined) return 'Failed to reach backend';
     if (status === 401) return 'You have been logged out. Please login again and retry';

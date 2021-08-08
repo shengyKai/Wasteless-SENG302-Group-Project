@@ -22,7 +22,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
-import java.util.*;
 
 /**
  * Controller for the /events/* endpoints.
@@ -112,6 +111,30 @@ public class EventController {
             userRepository.findAll().forEach(user -> eventService.saveEvent(new MessageEvent(user, message)));
 
             response.setStatus(201);
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            throw e;
+        }
+    }
+
+    /**
+     * Deletes a event from the home feed of the user
+     * @param id ID of the event to be deleted
+     */
+    @DeleteMapping("/feed/{id}")
+    public void deleteEvent(HttpServletRequest request, @PathVariable Long id) {
+        LOGGER.info("Request to delete event (id={}) from feed", id);
+        try {
+            // Check that authentication token is present and valid
+            AuthenticationTokenManager.checkAuthenticationToken(request);
+            Event event = eventRepository.findById(id)
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "Event not found, unable to delete"));
+
+            if (!AuthenticationTokenManager.sessionCanSeePrivate(request, event.getNotifiedUser().getUserID())) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Current user does not have permission to delete this event");
+            }
+
+            eventRepository.delete(event);
         } catch (Exception e) {
             LOGGER.error(e.getMessage());
             throw e;
