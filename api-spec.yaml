@@ -2287,3 +2287,35 @@ components:
           example: 70
           readOnly: true
           description: Total number of results
+    Event:
+      type: object
+      description: Event entity
+      required: 
+        - id
+        - created
+        - tag
+      properties:
+        id:
+          type: integer
+          example: 100
+          readOnly: true
+          description: Automatically generated and assigned by the server
+        created:
+          type: string
+          format: date-time
+          example: '2020-07-14T14:32:00Z'
+          readOnly: true
+          description: Date and time when the event was created
+        tag:
+          $ref: '#/components/schemas/Tag'
+    Tag:
+      type: string
+      description: Name of the tag (colour name) for the event
+      enum:
+        - none
+        - red
+        - orange
+        - yellow
+        - green
+        - blue
+        - purple
