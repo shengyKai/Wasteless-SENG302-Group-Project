@@ -1,4 +1,4 @@
-import { User, Business, getUser, login, InventoryItem } from './api/internal';
+import { User, Business, getUser, login, InventoryItem, deleteNotification } from './api/internal';
 import { AnyEvent, initialiseEventSourceForUser, addEventMessageHandler } from './api/events';
 import Vuex, { Store, StoreOptions } from 'vuex';
 import { COOKIE, deleteCookie, getCookie, isTesting, setCookie } from './utils';
@@ -47,6 +47,12 @@ export type StoreData = {
    * This is a sparse array
    */
   eventMap: Record<number, AnyEvent>,
+  /**
+   * A record of all the events which have been temporarily deleted on the frontend, but have
+   * not been permanently deleted on the backend as the 10 second window for reversing deletion
+   * has not passed.
+   */
+  temporaryDeletedEvents: AnyEvent[],
 };
 
 function createOptions(): StoreOptions<StoreData> {
@@ -59,6 +65,7 @@ function createOptions(): StoreOptions<StoreData> {
       createInventoryDialog: undefined,
       createSaleItemDialog: undefined,
       eventMap: [],
+      temporaryDeletedEvents: [],
     },
     mutations: {
       setUser(state, payload: User) {
@@ -163,6 +170,20 @@ function createOptions(): StoreOptions<StoreData> {
       removeEvent(state, id: number) {
         Vue.delete(state.eventMap, id);
       },
+      /**
+       * Add an event to the list of events to be stored until they are permenatly deleted.
+       * Events on this list will be deleted when the browser/tab closes.
+       */
+      deleteEventTemporary(state, event: AnyEvent) {
+        state.temporaryDeletedEvents.push(event);
+      },
+      /**
+       * Remove an event to the list of events to be stored until they are permenatly deleted,
+       * so that it is not deleted when the browser/tab closes.
+       */
+      restoreDeletedEvent(state, id: number) {
+        state.temporaryDeletedEvents = state.temporaryDeletedEvents.filter(event => event.id !== id);
+      }
     },
     getters: {
       isLoggedIn(state) {
@@ -260,7 +281,28 @@ function createOptions(): StoreOptions<StoreData> {
         context.dispatch('startUserFeed');
 
         return undefined;
-      }
+      },
+      /**
+       * If the event is in the list of temporarily deleted events, send a request to the backend to permenantly
+       * delete the event. Otherwise return an error message.
+       * @param id The id number of the event to be deleted.
+       * @returns An error message or undefined.
+       */
+      async deleteEventPermenant(context, id: number) {
+        const eventToDelete = context.state.temporaryDeletedEvents.filter(event => event.id === id);
+        if (eventToDelete.length === 1) {
+          // Event must be removed from list of temporary deleted events even if request is not successful
+          // as if request is unsuccessful event notification will reappear on newsfeed.
+          context.state.temporaryDeletedEvents = context.state.temporaryDeletedEvents.filter(event => event.id !== id);
+          const response = await deleteNotification(id);
+          if (typeof response === 'string') {
+            return response;
+          } else {
+            return undefined;
+          }
+        }
+        return 'Failed to delete notification';
+      },
     }
   };
 }

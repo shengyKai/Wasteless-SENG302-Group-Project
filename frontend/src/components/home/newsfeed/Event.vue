@@ -1,5 +1,19 @@
 <template>
-  <div>
+  <div v-if="deleted">
+    <v-card-title>
+      You have removed a notification from your feed
+    </v-card-title>
+    <v-card-subtitle>
+      Press undo to restore the notification "{{ title }}" to your feed.
+    </v-card-subtitle>
+    <v-card-actions class="justify-center">
+      <v-btn color="secondary" @click="undoDelete"> Undo </v-btn>
+    </v-card-actions>
+    <v-card-text class="justify-center">
+      <div class="error--text" v-if="errorMessage !== undefined">{{ errorMessage }}</div>
+    </v-card-text>
+  </div>
+  <div v-else>
     <div class="delete">
       <v-icon class="deleteButton"
               color="red"
@@ -23,7 +37,6 @@
 
 <script>
 import { formatDate } from '@/utils';
-import {deleteNotification} from "@/api/internal";
 
 export default {
   name: 'Event',
@@ -39,7 +52,8 @@ export default {
   },
   data() {
     return {
-      errorMessage: undefined
+      errorMessage: undefined,
+      deleted: false,
     };
   },
   computed: {
@@ -58,14 +72,35 @@ export default {
     },
   },
   methods: {
+    /**
+     * Temporarily remove a notification from the feed, then delete it permenently if the action has
+     * not been reversed after 10 seconds.
+     */
     async removeNotification() {
-      const result = await deleteNotification(this.event.id);
-      if (typeof result === 'string') {
-        this.errorMessage = result;
-      } else {
-        this.$store.commit('removeEvent', this.event.id);
+      this.$store.commit('deleteEventTemporary', this.event);
+      this.deleted = true;
+      setTimeout(() => {
+        if (this.deleted === true) {
+          this.$store.dispatch('deleteEventPermenant', this.event.id)
+            .then(content => {
+              if (typeof content === 'string') {
+                this.errorMessage = content;
+                this.deleted = false;
+              } else {
+                this.$store.commit('removeEvent', this.event.id);
+              }
+            });
+        }
       }
-    }
+      , 10000);
+    },
+    /**
+     * Undo the deteletion of a temporarily deleted event and restore it to the user's feed.
+     */
+    async undoDelete() {
+      this.deleted = false;
+      this.$store.commit('restoreDeletedEvent', this.event.id);
+    },
   }
 };
 </script>
