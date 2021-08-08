@@ -38,9 +38,10 @@
       </div>
     </v-card-text>
     <v-divider/>
-    <v-card-actions v-if="isCardOwnerOrAdmin && showActions">
+    <v-card-actions v-if="showActions">
       <v-spacer/>
-      <v-icon ref="editButton"
+      <v-icon v-if="isCardOwnerOrAdmin"
+              ref="editButton"
               class="mr-2"
               color="primary"
               @click.stop="editCardDialog = true"
@@ -48,13 +49,13 @@
         mdi-pencil
       </v-icon>
 
-      <v-icon ref="deleteButton"
+      <v-icon v-if="isCardOwnerOrAdmin"
+              ref="deleteButton"
               color="primary"
               @click.stop="deleteCardDialog = true"
       >
         mdi-trash-can
       </v-icon>
-
       <v-dialog
         ref="deleteDialog"
         v-model="deleteCardDialog"
@@ -86,6 +87,48 @@
           </v-card-actions>
         </v-card>
       </v-dialog>
+      <v-tooltip bottom>
+        <template v-slot:activator="{on, attrs }">
+          <v-icon v-if="!isCardOwner"
+                  ref="messageButton"
+                  color="primary"
+                  @click.stop="messageOwnerDialog = true"
+                  v-bind="attrs"
+                  v-on="on"
+          >
+            mdi-email
+          </v-icon>
+        </template>
+        Ask this person a question
+      </v-tooltip>
+      <v-dialog ref="messageDialog"
+                v-model="messageOwnerDialog"
+                max-width="600px">
+        <v-card>
+          <v-card-title>
+            Send a message to {{content.creator.firstName}}
+          </v-card-title>
+          <v-card-subtitle>
+            Your message will appear on their feed
+          </v-card-subtitle>
+          <v-card-text>
+            <v-textarea/>
+          </v-card-text>
+          <v-card-actions>
+            <v-spacer/>
+            <v-btn color="primary"
+                   text
+                   @click="sendMessage">
+              Send
+            </v-btn>
+            <v-btn color="primary"
+                   text
+                   @click="messageOwnerDialog = false">
+              Cancel
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
     </v-card-actions>
     <template v-if="editCardDialog">
       <MarketplaceCardForm :user="$store.state.user" :previousCard="content" @closeDialog="editCardDialog=false"/>
@@ -104,6 +147,7 @@ export default {
     return {
       deleteCardDialog: false,
       editCardDialog: false,
+      messageOwnerDialog: false,
     };
   },
   components: {
@@ -153,9 +197,12 @@ export default {
     },
     // To ensure only the card owner, DGAA or GAA is able to execute an action relating to the marketplace card
     isCardOwnerOrAdmin() {
-      return (this.$store.state.user.id === this.content.creator.id)
+      return this.isCardOwner
             || (this.$store.getters.role === "defaultGlobalApplicationAdmin")
             || (this.$store.getters.role === "globalApplicationAdmin");
+    },
+    isCardOwner() {
+      return (this.$store.state.user.id === this.content.creator.id);
     },
     section() {
       return SECTION_NAMES[this.content.section];
