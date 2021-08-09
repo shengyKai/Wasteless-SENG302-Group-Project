@@ -18,11 +18,13 @@
       >
         <!--Allows to access each chip's property in the v-select so that manipulation of the chip's color is possible -->
         <template #selection="{ item }">
-          <v-chip :color="item" label>
+          <v-chip :color="item"
+                  label
+                  text-color="white">
             <v-icon left>
               mdi-label
             </v-icon>
-            {{item.text}}
+            Tag
           </v-chip>
         </template>
       </v-select>
