@@ -45,8 +45,8 @@
       </v-container>
     </v-card>
     <v-form v-model="valid">
-      <v-card class="business-modify">
-        <div v-if='modifyBusiness'>
+      <div v-if='modifyBusiness'>
+        <v-card class="business-modify">
           <v-card-title class="title">Modify Business Details</v-card-title>
           <v-card-text>
             <v-col>
@@ -138,37 +138,37 @@
             <v-btn
               type="submit"
               color="primary">
-              Modify Business
+              Update Business
+            </v-btn>
+            <v-btn
+              class="modify-business-button white--text"
+              color="purple"
+              @click="modifyBusiness = false"
+            >
+              <v-icon
+                class="expand-icon"
+                color="white"
+              >
+                mdi-arrow-expand-up
+              </v-icon>Modify Business
             </v-btn>
           </v-card-actions>
-          <v-btn
-            class="modify-business-button white--text"
-            color="purple"
-            @click="modifyBusiness = false"
+        </v-card>
+      </div>
+      <div v-else>
+        <v-btn
+          class="modify-business-button business-modify white--text"
+          color="purple"
+          @click="modifyBusiness = true"
+        >
+          <v-icon
+            class="expand-icon"
+            color="white"
           >
-            <v-icon
-              class="expand-icon"
-              color="white"
-            >
-              mdi-arrow-expand-up
-            </v-icon>Modify Business
-          </v-btn>
-        </div>
-        <div v-else>
-          <v-btn
-            class="modify-business-button white--text"
-            color="purple"
-            @click="modifyBusiness = true"
-          >
-            <v-icon
-              class="expand-icon"
-              color="white"
-            >
-              mdi-arrow-expand-down
-            </v-icon>Modify Business
-          </v-btn>
-        </div>
-      </v-card>
+            mdi-arrow-expand-down
+          </v-icon>Modify Business
+        </v-btn>
+      </div>
     </v-form>
   </div>
 </template>
@@ -287,7 +287,7 @@ export default {
 
 .modify-business-button {
   display: block;
-  margin-left: 48%;
+  margin-right: 48%;
 }
 
 .expand-icon {
