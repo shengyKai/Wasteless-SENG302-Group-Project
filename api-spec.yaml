@@ -371,8 +371,13 @@ paths:
           New business account data, id will be generated automatically by the
           server
       responses:
-        '201':
+        '200':
           description: Business account successfully modified
+        '403':
+          description: >-
+            Forbidden: Returned when the user making the request is not the
+            primary administrator of the business AND is not a global
+            application admin.
         '401':
           $ref: '#/components/responses/UnauthorizedError'
   '/businesses/{id}/makeAdministrator':
