@@ -1063,6 +1063,11 @@ export async function deleteNotification(notificationId: number) : Promise<Maybe
   return undefined;
 }
 
+/**
+ * Modifies a business given a business id and an updated business object
+ * @param businessId Id of the business which is to be updated
+ * @param business Business object with all the fields to be updated.
+ */
 export async function modifyBusiness(businessId: number, business: ModifyBusiness) {
   try {
     await instance.put(`/businesses/${businessId}`, business);
@@ -1070,9 +1075,7 @@ export async function modifyBusiness(businessId: number, business: ModifyBusines
     let status: number | undefined = error.response?.status;
     if (status === undefined) return 'Failed to reach backend';
     if (status === 401) return 'You have been logged out. Please login again and retry';
-    if (status === 403) return 'Operation not permitted';
-    if (status === 406) return 'Marketplace card not found';
-    if (status === 400) return 'Invalid parameters: ' + error.response?.data.message;
+    if (status === 403) return 'Invalid authorization for modifying this business';
 
     return 'Request failed: ' + status;
   }
