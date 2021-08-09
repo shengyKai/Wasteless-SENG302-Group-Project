@@ -7,7 +7,7 @@ import {User, MarketplaceCard, Keyword } from '@/api/internal';
 import HomePage from '@/components/home/HomePage.vue';
 import { getStore, resetStoreForTesting, StoreData } from '@/store';
 
-import { AnyEvent } from '@/api/events';
+import { AnyEvent, DeleteEvent, ExpiryEvent, KeywordCreatedEvent } from '@/api/events';
 
 Vue.use(Vuetify);
 const localVue = createLocalVue();
@@ -49,9 +49,10 @@ describe('HomePage.vue', () => {
     localVue.use(Vuex);
     resetStoreForTesting();
     store = getStore();
+    store.state.user = testUser;
 
     wrapper = mount(HomePage, {
-      stubs: ['BusinessActionPanel', 'UserActionPanel', 'GlobalMessage'],
+      stubs: ['BusinessActionPanel', 'UserActionPanel', 'GlobalMessage' , 'ExpiryEvent', 'DeleteEvent', 'KeywordCreated'],
       localVue,
       vuetify,
       store,
@@ -84,9 +85,9 @@ describe('HomePage.vue', () => {
   });
 
   it('If an expiry event is posted to the store then it should be displayed in the newsfeed', async () => {
-    const event: AnyEvent = {
+    const event: ExpiryEvent = {
       type: 'ExpiryEvent',
-      id: 7,
+      id: 2,
       tag: 'none',
       created: new Date().toString(),
       card: testMarketPlaceCard,
@@ -100,7 +101,7 @@ describe('HomePage.vue', () => {
   });
 
   it('If delete event is posted to the store then it should be displayed in the newsfeed', async () => {
-    const event: AnyEvent = {
+    const event: DeleteEvent = {
       type: 'DeleteEvent',
       id: 7,
       tag: 'none',
@@ -117,7 +118,7 @@ describe('HomePage.vue', () => {
   });
 
   it('If an keyword created event is posted to the store then it should be displayed in the newsfeed', async () => {
-    const event: AnyEvent = {
+    const event: KeywordCreatedEvent = {
       type: 'KeywordCreatedEvent',
       id: 7,
       tag: 'none',
