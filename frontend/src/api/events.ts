@@ -16,20 +16,20 @@ type BaseEvent<T extends string> = {
   type: T,
 }
 
-type MessageEvent = BaseEvent<'MessageEvent'> & {
+export type MessageEvent = BaseEvent<'MessageEvent'> & {
   message: string
 }
 
-type ExpiryEvent = BaseEvent<'ExpiryEvent'> & {
+export type ExpiryEvent = BaseEvent<'ExpiryEvent'> & {
   card: MarketplaceCard
 }
 
-type DeleteEvent = BaseEvent<'DeleteEvent'> & {
+export type DeleteEvent = BaseEvent<'DeleteEvent'> & {
   title: string,
   section: MarketplaceCardSection
 }
 
-type KeywordCreatedEvent = BaseEvent<'KeywordCreatedEvent'> & {
+export type KeywordCreatedEvent = BaseEvent<'KeywordCreatedEvent'> & {
   keyword: Keyword,
   creator: User
 }
