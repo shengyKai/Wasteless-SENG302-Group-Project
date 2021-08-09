@@ -44,6 +44,92 @@
         </v-row>
       </v-container>
     </v-card>
+
+    <v-form v-model="valid">
+      <v-card class="business-modify">
+        <v-card-title>Modify Business Details</v-card-title>
+        <v-card-text>
+          <v-col>
+            <v-row>
+              <v-text-field
+                label="New name of the business"
+                v-model="newBusinessName"
+              />
+            </v-row>
+            <v-row>
+              <v-text-field
+                label="New description of the business"
+                v-model="newDescription"
+              />
+            </v-row>
+            <v-row>
+              <v-select
+                label="New business type of the business"
+                v-model="newBusinessType"
+                :items="businessTypes"
+              />
+            </v-row>
+          </v-col>
+          <v-card-title>Address</v-card-title>
+          <v-col>
+            <v-row>
+              <v-text-field
+                label="New street address"
+                v-model="newStreetAddress"
+              />
+            </v-row>
+            <v-row>
+              <v-text-field
+                label="New district"
+                v-model="newDistrict"
+              />
+            </v-row>
+            <v-row>
+              <v-text-field
+                label="New city"
+                v-model="newCity"
+              />
+            </v-row>
+            <v-row>
+              <v-text-field
+                label="New region"
+                v-model="newRegion"
+              />
+            </v-row>
+            <v-row>
+              <v-text-field
+                label="New country"
+                v-model="newCountry"
+              />
+            </v-row>
+            <v-row>
+              <v-text-field
+                label="New postcode"
+                v-model="newPostcode"
+              />
+            </v-row>
+          </v-col>
+          <v-card-title>Administrators</v-card-title>
+          <v-col>
+            <v-row>
+              <v-card-subtitle>Remove admin placeholder</v-card-subtitle>
+            </v-row>
+          </v-col>
+          <v-col>
+            <v-row>
+              <v-card-subtitle>Add admin placeholder</v-card-subtitle>
+            </v-row>
+          </v-col>
+        </v-card-text>
+        <v-card-actions>
+          <v-btn
+            type="submit"
+            color="primary">
+            Modify Business
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-form>
   </div>
 </template>
 
@@ -60,7 +146,22 @@ export default {
        * The business that this profile is for.
        */
       business: {},
-      readableAddress: ""
+      readableAddress: "",
+      businessTypes: [
+        'Accommodation and Food Services',
+        'Charitable organisation',
+        'Non-profit organisation',
+        'Retail Trade',
+      ],
+      newBusinessName: "",
+      newDescription: "",
+      newBusinessType: "",
+      newStreetAddress: "",
+      newDistrict: "",
+      newCity: "",
+      newRegion: "",
+      newCountry: "",
+      newPostcode: "",
     };
   },
   watch: {
@@ -136,5 +237,9 @@ export default {
 
 .link-chip {
   margin-right: 4px;
+}
+
+.business-modify {
+  margin-top: 20px;
 }
 </style>
