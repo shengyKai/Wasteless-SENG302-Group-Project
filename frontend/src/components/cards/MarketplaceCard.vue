@@ -121,7 +121,7 @@
                 no-resize
                 counter
                 :rules="mandatoryRules().concat(maxCharRules())"
-                :value="directMessageContent"/>
+                v-model="directMessageContent"/>
             </v-card-text>
             <v-card-actions>
               <v-alert v-if="directMessageError !== undefined" color="red" type="error" dense text>
@@ -136,7 +136,7 @@
               </v-btn>
               <v-btn color="primary"
                      text
-                     @click="messageOwnerDialog = false; directMessageError = undefined">
+                     @click="messageOwnerDialog = false; directMessageError = undefined; directMessageContent=''">
                 Cancel
               </v-btn>
             </v-card-actions>
