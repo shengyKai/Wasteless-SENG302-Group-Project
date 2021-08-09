@@ -302,16 +302,6 @@ function createOptions(): StoreOptions<StoreData> {
         }
         return 'Notification not staged for deletion';
       },
-      /**
-       * Send a request to the backend to ermanently delete all events which have been staged for deletion.
-       * @param context The current context of the store.
-       */
-      async deleteAllStagedEvents(context) {
-        for (let eventId of context.state.eventForDeletionIds) {
-          await deleteNotification(eventId);
-        }
-        context.state.eventForDeletionIds = [];
-      }
     }
   };
 }

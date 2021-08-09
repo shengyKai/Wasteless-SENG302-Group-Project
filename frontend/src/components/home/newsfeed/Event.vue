@@ -1,10 +1,10 @@
 <template>
   <div v-if="deleted">
     <v-card-title>
-      You have removed a notification from your feed
+      You notification will be deleted
     </v-card-title>
     <v-card-text>
-      Press undo in the next {{ remainingTime }} seconds to restore the notification "{{ title }}" to your feed.
+      Press undo in the next {{ remainingTime }} seconds to cancel deletion of the notification "{{ title }}."
     </v-card-text>
     <v-card-actions class="justify-center">
       <v-btn color="secondary" ref="undoButton" @click="undoDelete"> Undo </v-btn>

@@ -1043,12 +1043,12 @@ export async function deleteNotification(notificationId: number) : Promise<Maybe
   try {
     await instance.delete(`/feed/${notificationId}`);
   } catch (error) {
-    console.warn(error.response);
     let status: number | undefined = error.response?.status;
     if (status === undefined) return 'Failed to reach backend';
     if (status === 401) return 'You have been logged out. Please login again and retry';
     if (status === 403) return 'Invalid authorization for notification removal';
-    if (status === 406) return 'Notification not found';
+    // If the notification is not found on the backend, respond the same way as if it was successfully deleted.
+    if (status === 406) return undefined;
     return 'Request failed: ' + error.response?.data.message;
   }
   return undefined;

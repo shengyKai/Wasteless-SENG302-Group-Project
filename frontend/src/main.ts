@@ -70,15 +70,12 @@ new Vue({
   vuetify,
   router,
   template: '<App/>',
-  created() {
-    window.addEventListener('beforeunload', this.beforeClose);
+  beforeMount() {
+    window.addEventListener("beforeunload", event => {
+      if (getStore().state.eventForDeletionIds.length === 0) return;
+      event.preventDefault();
+      // Chrome requires returnValue to be set.
+      event.returnValue = "";
+    });
   },
-  methods: {
-    /**
-     * Delete all events which have been staged for deletion before the window closes.
-     */
-    async beforeClose() {
-      await getStore().dispatch('deleteAllStagedEvents');
-    }
-  }
 });

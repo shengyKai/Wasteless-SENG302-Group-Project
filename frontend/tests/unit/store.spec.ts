@@ -62,26 +62,4 @@ describe('store.ts', () => {
 
   });
 
-  describe('deleteAllStagedEvents', () => {
-
-    beforeEach(() => {
-      store.commit('stageEventForDeletion', 17);
-      store.commit('stageEventForDeletion', 90);
-      store.commit('stageEventForDeletion', 22);
-    });
-
-    it('Removes all events from the list of events staged for deletion', async () => {
-      expect(store.state.eventForDeletionIds.length).toBe(3);
-      await store.dispatch('deleteAllStagedEvents');
-      expect(store.state.eventForDeletionIds.length).toBe(0);
-    });
-
-    it('Calls API endpoint to permenantly delete events once for each event in the list', async () => {
-      const callTimesBefore = deleteNotification.mock.calls.length;
-      await store.dispatch('deleteAllStagedEvents');
-      expect(deleteNotification).toBeCalledTimes(callTimesBefore + 3);
-    });
-
-  });
-
 });
