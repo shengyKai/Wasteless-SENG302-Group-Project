@@ -36,7 +36,7 @@ const testMarketPlaceCard: MarketplaceCard = {
   title: "test_title",
   description: "test_desription",
   keywords: [testKeyword]
-}
+};
 
 describe('HomePage.vue', () => {
   // Container for the HomePage under test

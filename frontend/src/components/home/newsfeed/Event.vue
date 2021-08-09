@@ -64,7 +64,51 @@
       </v-expansion-panel>
     </v-expansion-panels>
 
-
+    <v-row
+      justify="start"
+      style="min-height: 10px;"
+    >
+      <v-col class="shrink">
+        <v-chip
+          class="ma-2"
+          color="primary"
+          @click="expand = !expand"
+          label
+          text-color="white"
+        >
+          <v-icon left>
+            mdi-label
+          </v-icon>
+          Current Tag
+        </v-chip>
+        <v-expand-transition>
+          <v-card
+            v-show="expand"
+            height="70"
+            width="1000"
+            class="mx-auto"
+          >
+            <div class="font-weight-medium">
+              Change your Tag:
+            </div>
+            <v-chip
+              class="ma-1"
+              v-for="colour in colours"
+              :key=colour
+              :color="colour"
+              label
+              text-color="white"
+              @click="changeTag"
+            >
+              <v-icon left>
+                mdi-label
+              </v-icon>
+              Tag
+            </v-chip>
+          </v-card>
+        </v-expand-transition>
+      </v-col>
+    </v-row>
   </div>
 </template>
 
@@ -86,6 +130,7 @@ export default {
   },
   data() {
     return {
+      expand: false,
       colours: ['none', 'red', 'orange', 'yellow', 'green', 'blue', 'purple'],
       errorMessage: undefined
     };
