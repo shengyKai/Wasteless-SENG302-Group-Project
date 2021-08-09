@@ -44,104 +44,130 @@
         </v-row>
       </v-container>
     </v-card>
-
     <v-form v-model="valid">
       <v-card class="business-modify">
-        <v-card-title>Modify Business Details</v-card-title>
-        <v-card-text>
-          <v-col>
-            <v-row>
-              <v-text-field
-                label="New name of the business"
-                v-model="newBusinessName"
-              />
-            </v-row>
-            <v-row>
-              <v-text-field
-                label="New description of the business"
-                v-model="newDescription"
-              />
-            </v-row>
-            <v-row>
-              <v-select
-                label="New business type of the business"
-                v-model="newBusinessType"
-                :items="businessTypes"
-              />
-            </v-row>
-          </v-col>
-          <v-card-title>Address</v-card-title>
-          <v-col>
-            <v-row>
-              <v-text-field
-                label="New street address"
-                v-model="newStreetAddress"
-              />
-            </v-row>
-            <v-row>
-              <v-text-field
-                label="New district"
-                v-model="newDistrict"
-              />
-            </v-row>
-            <v-row>
-              <v-text-field
-                label="New city"
-                v-model="newCity"
-              />
-            </v-row>
-            <v-row>
-              <v-text-field
-                label="New region"
-                v-model="newRegion"
-              />
-            </v-row>
-            <v-row>
-              <v-text-field
-                label="New country"
-                v-model="newCountry"
-              />
-            </v-row>
-            <v-row>
-              <v-text-field
-                label="New postcode"
-                v-model="newPostcode"
-              />
-            </v-row>
-          </v-col>
-          <v-card-title>Remove Administrators</v-card-title>
-          <v-col>
-            <v-row>
-              <span v-for="admin in administrators" :key="admin.id">
-                <v-chip color="red" text-color="white"> {{ admin.firstName }} {{ admin.lastName }} </v-chip>
-              </span>
-            </v-row>
-          </v-col>
-          <v-card-title>Images</v-card-title>
-          <v-col>
-            <v-row>
-              <v-card-subtitle>Primary image placeholder</v-card-subtitle>
-            </v-row>
-          </v-col>
-          <v-col>
-            <v-row>
-              <v-card-subtitle>regular images placeholder</v-card-subtitle>
-            </v-row>
-          </v-col>
-          <v-col>
-            <v-row>
-              <v-card-subtitle>upload images placeholder</v-card-subtitle>
-            </v-row>
-          </v-col>
-        </v-card-text>
-        <v-card-actions>
+        <div v-if='modifyBusiness'>
+          <v-card-title class="title">Modify Business Details</v-card-title>
+          <v-card-text>
+            <v-col>
+              <v-row>
+                <v-text-field
+                  label="New name of the business"
+                  v-model="newBusinessName"
+                />
+              </v-row>
+              <v-row>
+                <v-text-field
+                  label="New description of the business"
+                  v-model="newDescription"
+                />
+              </v-row>
+              <v-row>
+                <v-select
+                  label="New business type of the business"
+                  v-model="newBusinessType"
+                  :items="businessTypes"
+                />
+              </v-row>
+            </v-col>
+            <v-card-title>Address</v-card-title>
+            <v-col>
+              <v-row>
+                <v-text-field
+                  label="New street address"
+                  v-model="newStreetAddress"
+                />
+              </v-row>
+              <v-row>
+                <v-text-field
+                  label="New district"
+                  v-model="newDistrict"
+                />
+              </v-row>
+              <v-row>
+                <v-text-field
+                  label="New city"
+                  v-model="newCity"
+                />
+              </v-row>
+              <v-row>
+                <v-text-field
+                  label="New region"
+                  v-model="newRegion"
+                />
+              </v-row>
+              <v-row>
+                <v-text-field
+                  label="New country"
+                  v-model="newCountry"
+                />
+              </v-row>
+              <v-row>
+                <v-text-field
+                  label="New postcode"
+                  v-model="newPostcode"
+                />
+              </v-row>
+            </v-col>
+            <v-card-title>Remove Administrators</v-card-title>
+            <v-col>
+              <v-row>
+                <span v-for="admin in administrators" :key="admin.id">
+                  <v-chip color="red" text-color="white"> {{ admin.firstName }} {{ admin.lastName }} </v-chip>
+                </span>
+              </v-row>
+            </v-col>
+            <v-card-title>Images</v-card-title>
+            <v-col>
+              <v-row>
+                <v-card-subtitle>Primary image placeholder</v-card-subtitle>
+              </v-row>
+            </v-col>
+            <v-col>
+              <v-row>
+                <v-card-subtitle>regular images placeholder</v-card-subtitle>
+              </v-row>
+            </v-col>
+            <v-col>
+              <v-row>
+                <v-card-subtitle>upload images placeholder</v-card-subtitle>
+              </v-row>
+            </v-col>
+          </v-card-text>
+          <v-card-actions>
+            <v-btn
+              type="submit"
+              color="primary">
+              Modify Business
+            </v-btn>
+          </v-card-actions>
           <v-btn
-            type="submit"
-            color="primary">
-            Modify Business
+            class="modify-business-button white--text"
+            color="purple"
+            @click="modifyBusiness = false"
+          >
+            <v-icon
+              class="expand-icon"
+              color="white"
+            >
+              mdi-arrow-expand-up
+            </v-icon>Modify Business
           </v-btn>
-        </v-card-actions>
-
+        </div>
+        <div v-else>
+          <v-btn
+            class="modify-business-button white--text"
+            color="purple"
+            @click="modifyBusiness = true"
+          >
+            <v-icon
+              class="expand-icon"
+              color="white"
+            >
+              mdi-arrow-expand-down
+            </v-icon>Modify Business
+          </v-btn>
+        </div>
       </v-card>
     </v-form>
   </div>
@@ -168,6 +194,7 @@ export default {
         'Non-profit organisation',
         'Retail Trade',
       ],
+      modifyBusiness: false,
       newBusinessName: "",
       newDescription: "",
       newBusinessType: "",
@@ -256,5 +283,14 @@ export default {
 
 .business-modify {
   margin-top: 20px;
+}
+
+.modify-business-button {
+  display: block;
+  margin-left: 48%;
+}
+
+.expand-icon {
+  padding-right: 10px;
 }
 </style>
