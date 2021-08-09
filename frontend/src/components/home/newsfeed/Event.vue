@@ -18,57 +18,13 @@
       {{ date }}, {{ time }}
     </v-card-subtitle>
     <slot/>
-    <!-- Expansion panel for user to view their option about the available tag to choose from  -->
-    <v-expansion-panels>
-      <v-expansion-panel>
-        <!-- The persistent chip that shows the tag for the message (default will be no colour) -->
-        <v-expansion-panel-header
-          label
-        >
-          <div>
-            <v-chip
-              color="pink"
-              label
-              text-color="white"
-            >
-              <v-icon left>
-                mdi-label
-              </v-icon>
-              Current Tag
-            </v-chip>
-          </div>
-        </v-expansion-panel-header>
-        <!--  The expansion panel's content that run through a loop of colours which at the same time set the colour of the chip
-              Make the code more maintainable as it will be easy to modify colour in future and get the index
-              Trigger a method when the chip is clicked (will use the index to trigger)
-        -->
-        <v-expansion-panel-content>
-          <div>
-            Change your Tag:
-          </div>
-          <v-chip
-            class="mr-1"
-            v-for="colour in colours"
-            :key=colour
-            :color="colour"
-            label
-            text-color="white"
-            @click="changeTag"
-          >
-            <v-icon left>
-              mdi-label
-            </v-icon>
-            Tag
-          </v-chip>
-        </v-expansion-panel-content>
-      </v-expansion-panel>
-    </v-expansion-panels>
-
+    <!-- For user to view their option about the available tag to choose from  -->
     <v-row
       justify="start"
       style="min-height: 10px;"
     >
       <v-col class="shrink">
+        <!-- The persistent chip that shows the tag for the message (default will be no colour) -->
         <v-chip
           class="ma-2"
           color="primary"
@@ -91,6 +47,10 @@
             <div class="font-weight-medium">
               Change your Tag:
             </div>
+            <!--  Content that run through a loop of colours which at the same time set the colour of the chip
+              Make the code more maintainable as it will be easy to modify colour in future and get the index
+              Trigger a method when the chip is clicked (will use the index to trigger)
+        -->
             <v-chip
               class="ma-1"
               v-for="colour in colours"
