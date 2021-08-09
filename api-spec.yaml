@@ -23,6 +23,7 @@ tags:
   - name: 'U5: Creating Business Accounts'
   - name: 'U6: Acting as Individual or Business'
     description: All necessary API endpoints are found in prior stories
+  - name: 'U11: Modifying Businesses'
   - name: 'U13: Home page'
     description: >-
       No endpoints required for this story specifically, but several will likely
@@ -336,6 +337,44 @@ paths:
           $ref: '#/components/responses/UnauthorizedError'
         '406':
           $ref: '#/components/responses/NotAcceptableError'
+    put:
+      tags:
+        - 'U11: Modifying Businesses'
+        - Business Accounts
+      summary: Modifies an existing business entity
+      security:
+        - CookieAuth:
+            - user
+            - globalApplicationAdmin
+            - defaultGlobalApplicationAdmin
+      parameters:
+        - name: id
+          in: path
+          description: Business ID
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/Business'
+                - type: object
+                  required:
+                    - updateProductCountry
+                  properties:
+                    updateProductCountry:
+                      type: boolean
+                      description: Whether to change existing products' countries of sale to the new country
+        description: >-
+          New business account data, id will be generated automatically by the
+          server
+      responses:
+        '201':
+          description: Business account successfully modified
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
   '/businesses/{id}/makeAdministrator':
     put:
       tags:
@@ -1762,11 +1801,11 @@ paths:
             schema:
               type: object
               required:
-                - tags
+                - value
               properties:
-                tags:
-                  type: [ string ]
-                  description: A tag to be associated with the the item on the news feed
+                value: 
+                  $ref: '#/components/schemas/Tag'
+                  
       responses:
         '200':
           description: Item successfully deleted from the feed
