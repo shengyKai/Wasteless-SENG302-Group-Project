@@ -2,8 +2,8 @@ import Vue from 'vue';
 import Vuex, { Store } from 'vuex';
 import Vuetify from 'vuetify';
 import {createLocalVue, mount, Wrapper} from '@vue/test-utils';
-import MarketplaceCard from '@/components/cards/MarketplaceCard.vue';
-import { deleteMarketplaceCard, MarketplaceCardSection, User } from '@/api/internal';
+
+import {User, MarketplaceCard, Keyword } from '@/api/internal';
 import HomePage from '@/components/home/HomePage.vue';
 import { getStore, resetStoreForTesting, StoreData } from '@/store';
 
@@ -20,30 +20,23 @@ const testUser: User = {
   homeAddress: { country: 'test_country', city: 'test_city', district: 'test_district'},
 };
 
-const testMarketplaceCard = {
+const testKeyword: Keyword = {
+  id: 1,
+  name: "Edward",
+  created: "01/01/2020"
+};
+
+const testMarketPlaceCard: MarketplaceCard = {
   id: 1,
   creator: testUser,
   section: 'ForSale',
-  created: '2021-03-10',
-  lastRenewed: '2021-03-10',
-  title: 'test_card_title',
-  description: 'test_card_description',
-  keywords: [{id: 3, name: 'test_keyword_1'}, {id: 4, name: 'test_keyword_2'}],
-};
-
-  /**
-   * Creates the environment used for testing. The marketplace card being viewed
-   * can be altered by changing the contents of the card
-   */
-   function generateWrapper(properties?: Partial<{showActions: boolean, showSection: boolean}>) {
-    // Creating wrapper around MarketplaceCard with data-app to appease vuetify
-    const App = localVue.component('App', {
-      components: { MarketplaceCard },
-      template: `
-      <div data-app>
-        <MarketplaceCard :content="testMarketplaceCard" :showActions="showActions" :showSection="showSection"/>
-      </div>`
-    });
+  created: "01/01/2020",
+  lastRenewed: "02/01/2020",
+  displayPeriodEnd: "05/01/2020",
+  title: "test_title",
+  description: "test_desription",
+  keywords: [testKeyword]
+}
 
 describe('HomePage.vue', () => {
   // Container for the HomePage under test
@@ -62,14 +55,7 @@ describe('HomePage.vue', () => {
       localVue,
       vuetify,
       store,
-      data() {
-        return {
-          testMarketplaceCard: testMarketplaceCard,
-          showActions: true,
-          showSection: false,
-          ...properties
-        };
-    }});
+    });
   });
 
   it('If no events are posted then there should be no events in the newsfeed', () => {
@@ -95,7 +81,6 @@ describe('HomePage.vue', () => {
     let newsfeedItem = wrapper.findComponent({name: 'GlobalMessage'});
     expect(newsfeedItem.exists()).toBeTruthy();
     expect(newsfeedItem.props().event).toBe(event);
-    console.log(newsfeedItem.props());
   });
 
   it('If an expiry event is posted to the store then it should be displayed in the newsfeed', async () => {
@@ -104,15 +89,52 @@ describe('HomePage.vue', () => {
       id: 7,
       tag: 'none',
       created: new Date().toString(),
-      card: { MarketplaceCard },
+      card: testMarketPlaceCard,
     };
     store.commit('addEvent', event);
     await Vue.nextTick();
 
-    let newsfeedItem = wrapper.findComponent({name: 'GlobalMessage'});
+    let newsfeedItem = wrapper.findComponent({name: 'ExpiryEvent'});
     expect(newsfeedItem.exists()).toBeTruthy();
     expect(newsfeedItem.props().event).toBe(event);
-    console.log(newsfeedItem.props());
+  });
+
+  it('If delete event is posted to the store then it should be displayed in the newsfeed', async () => {
+    const event: AnyEvent = {
+      type: 'DeleteEvent',
+      id: 7,
+      tag: 'none',
+      created: new Date().toString(),
+      title: "test_title",
+      section: "ForSale"
+    };
+    store.commit('addEvent', event);
+    await Vue.nextTick();
+
+    let newsfeedItem = wrapper.findComponent({name: 'DeleteEvent'});
+    expect(newsfeedItem.exists()).toBeTruthy();
+    expect(newsfeedItem.props().event).toBe(event);
+  });
+
+  it('If an keyword created event is posted to the store then it should be displayed in the newsfeed', async () => {
+    const event: AnyEvent = {
+      type: 'KeywordCreatedEvent',
+      id: 7,
+      tag: 'none',
+      created: new Date().toString(),
+      keyword: {
+        id: 1,
+        name: "EDWARD",
+        created: "2012/01/01"
+      },
+      creator: testUser
+    };
+    store.commit('addEvent', event);
+    await Vue.nextTick();
+
+    let newsfeedItem = wrapper.findComponent({name: 'KeywordCreated'});
+    expect(newsfeedItem.exists()).toBeTruthy();
+    expect(newsfeedItem.props().event).toBe(event);
   });
 
   it('If an event is posted to the store then the message "No items in your feed" should not be shown', async () => {
