@@ -86,7 +86,7 @@ export default {
   },
   data() {
     return {
-      colours: ['NONE', 'red', 'orange', 'yellow', 'green', 'blue', 'purple'],
+      colours: ['none', 'red', 'orange', 'yellow', 'green', 'blue', 'purple'],
       errorMessage: undefined
     };
   },
