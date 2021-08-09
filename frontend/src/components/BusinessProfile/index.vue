@@ -109,15 +109,28 @@
               />
             </v-row>
           </v-col>
-          <v-card-title>Administrators</v-card-title>
+          <v-card-title>Remove Administrators</v-card-title>
           <v-col>
             <v-row>
-              <v-card-subtitle>Remove admin placeholder</v-card-subtitle>
+              <span v-for="admin in administrators" :key="admin.id">
+                <v-chip color="red" text-color="white"> {{ admin.firstName }} {{ admin.lastName }} </v-chip>
+              </span>
+            </v-row>
+          </v-col>
+          <v-card-title>Images</v-card-title>
+          <v-col>
+            <v-row>
+              <v-card-subtitle>Primary image placeholder</v-card-subtitle>
             </v-row>
           </v-col>
           <v-col>
             <v-row>
-              <v-card-subtitle>Add admin placeholder</v-card-subtitle>
+              <v-card-subtitle>regular images placeholder</v-card-subtitle>
+            </v-row>
+          </v-col>
+          <v-col>
+            <v-row>
+              <v-card-subtitle>upload images placeholder</v-card-subtitle>
             </v-row>
           </v-col>
         </v-card-text>
@@ -128,6 +141,7 @@
             Modify Business
           </v-btn>
         </v-card-actions>
+
       </v-card>
     </v-form>
   </div>
@@ -148,6 +162,7 @@ export default {
       business: {},
       readableAddress: "",
       businessTypes: [
+        'Do not change',
         'Accommodation and Food Services',
         'Charitable organisation',
         'Non-profit organisation',
