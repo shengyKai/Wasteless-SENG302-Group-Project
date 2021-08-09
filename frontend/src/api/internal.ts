@@ -103,6 +103,15 @@ export type CreateBusiness = {
   businessType: BusinessType,
 };
 
+export type ModifyBusiness = {
+  primaryAdministratorId: number,
+  name: string,
+  description?: string,
+  address: Location,
+  businessType: BusinessType,
+  updateProductCountry: boolean
+}
+
 export type Image = {
   id: number,
   filename: string,
@@ -1050,6 +1059,22 @@ export async function deleteNotification(notificationId: number) : Promise<Maybe
     if (status === 403) return 'Invalid authorization for notification removal';
     if (status === 406) return 'Notification not found';
     return 'Request failed: ' + error.response?.data.message;
+  }
+  return undefined;
+}
+
+export async function modifyBusiness(businessId: number, business: ModifyBusiness) {
+  try {
+    await instance.put(`/businesses/${businessId}`, business);
+  } catch (error) {
+    let status: number | undefined = error.response?.status;
+    if (status === undefined) return 'Failed to reach backend';
+    if (status === 401) return 'You have been logged out. Please login again and retry';
+    if (status === 403) return 'Operation not permitted';
+    if (status === 406) return 'Marketplace card not found';
+    if (status === 400) return 'Invalid parameters: ' + error.response?.data.message;
+
+    return 'Request failed: ' + status;
   }
   return undefined;
 }
