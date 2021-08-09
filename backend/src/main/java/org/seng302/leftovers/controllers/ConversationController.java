@@ -14,8 +14,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
+import java.util.Set;
 
 
 @RestController
@@ -44,6 +47,15 @@ public class ConversationController {
         var senderId = JsonTools.parseLongFromJsonField(body, "senderId");
         var content = JsonTools.parseStringFromJsonField(body, "message");
         var sender = userRepository.getUser(senderId);
+
+        // Is the currently logged in user == senderId or an admin
+        if (!AuthenticationTokenManager.sessionCanSeePrivate(request, senderId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You do not have permission to post to this conversation");
+        }
+        // Is the sender card creator or potential buyer or admin?
+        if (!Set.of(buyer, card.getCreator()).contains(sender) && !AuthenticationTokenManager.sessionIsAdmin(request)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You do not have permission to post to this conversation");
+        }
 
         var conversation = conversationRepository.findByCardAndBuyer(card, buyer).orElse(new Conversation(card, buyer));
         var message = new Message(conversation, sender, content);
