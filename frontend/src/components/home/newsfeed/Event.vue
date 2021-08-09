@@ -7,7 +7,7 @@
       Press undo in the next {{ remainingTime }} seconds to restore the notification "{{ title }}" to your feed.
     </v-card-text>
     <v-card-actions class="justify-center">
-      <v-btn color="secondary" @click="undoDelete"> Undo </v-btn>
+      <v-btn color="secondary" ref="undoButton" @click="undoDelete"> Undo </v-btn>
     </v-card-actions>
     <v-card-text class="justify-center">
       <div class="error--text" v-if="errorMessage !== undefined">{{ errorMessage }}</div>
@@ -16,6 +16,7 @@
   <div v-else>
     <div class="delete">
       <v-icon class="deleteButton"
+              ref="deleteButton"
               color="red"
               @click.stop="initiateDeletion"
       >
@@ -72,6 +73,9 @@ export default {
     date() {
       return formatDate(this.event.created);
     },
+    /**
+     * The time remaining before this event is permenantly deleted.
+     */
     remainingTime() {
       if (this.deletionTime) {
         const timeDifference = Math.floor((this.deletionTime - synchronizedTime.now) / 1000) + 10;
