@@ -48,41 +48,49 @@ describe('Test GET businesses/search endpoind', () => {
   const invalidBusinessList: any[] = validBusinessList.concat([invalidBusiness]);
 
   it('When API request is successfully resolved and contains a valid list of businesses, returns that list', async () => {
+    const responseData = {
+      results: validBusinessList,
+      count: 10
+    }
     instance.get.mockResolvedValueOnce({
-      data: {
-        validBusinessList,
-      }
+      data: responseData
     });
     const response = await api.searchBusinesses('Query', 'Accommodation and Food Services', 2, 10, "created", false);
-    expect(response).toEqual(validBusinessList);
+    expect(response).toEqual(responseData);
   });
 
   it('When API request is successfully resolved and contains a list which is not in a valid format, returns a message saying the format is invalid', async () => {
+    const responseData = {
+      results: invalidBusinessList,
+      count: 10
+    }
     instance.get.mockResolvedValueOnce({
-      data: {
-        invalidBusinessList,
-      }
+      data: responseData
     });
     const response = await api.searchBusinesses('Query', 'Accommodation and Food Services', 2, 10, "created", false);
-    expect(response).toEqual("Response was not a business array");
+    expect(response).toEqual("Response is not business array");
   });
 
   it('When API request is successfully resolved and contains an empty body, returns an empty list', async () => {
     const emptyList: any[] = [];
+    const responseData = {
+      results: emptyList,
+      count: 0
+    }
     instance.get.mockResolvedValueOnce({
-      data: {
-        emptyList,
-      }
+      data: responseData
     });
     const response = await api.searchBusinesses('Query', 'Accommodation and Food Services', 2, 10, "created", false);
-    expect(response).toEqual([]);
+    expect(response).toEqual(responseData);
   });
 
   it('When API request is unsuccessfully resolved with a 400 status code, returns an error with the message received from the backend', async () => {
     instance.get.mockRejectedValueOnce({
-      status: 400,
-      data: {
-        message: "Query too long",
+      response: {
+        status: 400,
+        data: {
+          message: "Query too long",
+        }
       }
     });
     const response = await api.searchBusinesses('Query', 'Accommodation and Food Services', 2, 10, "created", false);
@@ -91,7 +99,9 @@ describe('Test GET businesses/search endpoind', () => {
 
   it('When API request is unsuccessfully resolved with a 401 status code, returns an error with a message that the user has been logged out', async () => {
     instance.get.mockRejectedValueOnce({
-      status: 401,
+      response: {
+        status: 401
+      }
     });
     const response = await api.searchBusinesses('Query', 'Accommodation and Food Services', 2, 10, "created", false);
     expect(response).toEqual("You have been logged out. Please login again and retry");
@@ -99,7 +109,9 @@ describe('Test GET businesses/search endpoind', () => {
 
   it('When API request is unsuccessfully resolved with any other status code, returns and error message with that status code', async () => {
     instance.get.mockRejectedValueOnce({
-      status: 999,
+      response: {
+        status: 999
+      }
     });
     const response = await api.searchBusinesses('Query', 'Accommodation and Food Services', 2, 10, "created", false);
     expect(response).toEqual("Request failed: 999");
@@ -107,7 +119,9 @@ describe('Test GET businesses/search endpoind', () => {
 
   it('When API request is resolved with an undefined status message, failed to reach backend error message is returned', async () => {
     instance.get.mockRejectedValueOnce({
-      status: undefined,
+      response: {
+        status: undefined
+      }
     });
     const response = await api.searchBusinesses('Query', 'Accommodation and Food Services', 2, 10, "created", false);
     expect(response).toEqual("Failed to reach backend");
