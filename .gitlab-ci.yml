@@ -87,6 +87,13 @@ jest:
       - frontend/src/**/*
       when: always
 
+# Postman collection
+postman:
+  stage: test
+  script:
+    - npm install -g newman
+    - newman run Wasteless.postman_collection.json
+
 # Export sonarqube (static code analysis) reports
 dev-sonarqube:
   stage: sonarqube
@@ -208,3 +215,4 @@ deploy-production-frontend:
   only:
     - tags
     - master
+
