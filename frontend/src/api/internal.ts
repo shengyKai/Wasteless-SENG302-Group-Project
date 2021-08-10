@@ -1053,3 +1053,19 @@ export async function deleteNotification(notificationId: number) : Promise<Maybe
   }
   return undefined;
 }
+
+  type Tag = 'none' | 'red' | 'orange' | 'yellow' | 'green' | 'blue' | 'purple'
+
+export async function setEventTag(notificationId: number, colour: Tag) : Promise<MaybeError<undefined>> {
+  try {
+    await instance.put(`/feed/${notificationId}/tag`);
+  } catch (error) {
+    let status: number | undefined = error.response?.status;
+    if (status === undefined) return 'Failed to reach backend';
+    if (status === 401) return 'You have been logged out. Please login again and retry';
+    if (status === 403) return 'Invalid authorization for Notification tagging';
+    if (status === 406) return 'Event not found';
+    return 'Request failed: ' + error.response?.data.message;
+  }
+  return undefined;
+}

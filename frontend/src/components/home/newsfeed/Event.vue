@@ -23,20 +23,28 @@
       justify="start"
       style="min-height: 10px;"
     >
+
       <v-col class="shrink">
         <!-- The persistent chip that shows the tag for the message (default will be no colour) -->
-        <v-chip
-          class="ma-2"
-          color="primary"
-          @click="expand = !expand"
-          label
-          text-color="white"
-        >
-          <v-icon left>
-            mdi-label
-          </v-icon>
-          Current Tag
-        </v-chip>
+        <v-tooltip bottom>
+          <template v-slot:activator="{ on, attrs }">
+            <v-chip
+              class="ma-2"
+              color="primary"
+              @click="expand = !expand"
+              label
+              text-color="white"
+              v-bind="attrs"
+              v-on="on"
+            >
+              <v-icon left>
+                mdi-label
+              </v-icon>
+              Tag
+            </v-chip>
+          </template>
+          <span>DEEZ NUTS</span>
+        </v-tooltip>
         <v-expand-transition>
           <v-card
             v-show="expand"
