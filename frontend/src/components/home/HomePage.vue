@@ -98,6 +98,9 @@ export default {
     };
   },
   computed: {
+    storeEvents() {
+      return this.$store.getters.events;
+    },
     // /**
     //  * The event array sliced so that it can do pagination natively.
     //  */
@@ -128,8 +131,8 @@ export default {
      * Total number of results from the store
      */
     totalResults() {
-      if (this.$store.getters.events.length === undefined) return 0;
-      return this.$store.getters.events.length;
+      if (this.storeEvents.length === undefined) return 0;
+      return this.storeEvents.length;
     },
     /**
      * The total number of pages required to show all the events
@@ -151,15 +154,8 @@ export default {
       return `Displaying ${pageStartIndex + 1} - ${pageEndIndex} of ${this.totalResults} results`;
     }
   },
-  /**
-   * Called when data changes, before the DOM is patched. This is a good place to access the existing DOM before an update
-   * The vuex store was not able to retrieve the updated event list with mounted or created, and with this hook, we are able
-   * to update the event list on a data change.
-   */
-  mounted() {
-    console.log("1");
+  created() {
     this.updateEvents();
-    console.log("2");
   },
   watch: {
     /**
@@ -169,12 +165,11 @@ export default {
       this.updateEvents();
     },
     filterBy: function() {
-      console.log("a1");
       if (this.filterBy.length === 0) {
         this.updateEvents();
       } else {
-        this.events = this.$store.getters.events.filter(object => {
-          return this.filterBy.includes(object.tag);
+        this.events = this.storeEvents.filter(event => {
+          return this.filterBy.includes(event.tag);
         });
       }
     }
@@ -184,13 +179,9 @@ export default {
      * Main logic for the frontend native pagination. Slices the list based on what page the user is in, and only shows
      * the results for that page.
      */
-    async updateEvents() {
-      console.log("a");
+    updateEvents() {
       const pageStartIndex = (this.currentPage - 1) * this.resultsPerPage;
-      console.log("b");
-      console.log(this.$store.getters.events);
-      this.events = await this.$store.getters.events.slice(pageStartIndex, (pageStartIndex + this.resultsPerPage));
-      console.log("c");
+      this.events = this.storeEvents.slice(pageStartIndex, (pageStartIndex + this.resultsPerPage));
     }
   }
 };

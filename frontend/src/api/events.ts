@@ -40,14 +40,11 @@ export type KeywordCreatedEvent = BaseEvent<'KeywordCreatedEvent'> & {
  * @param userId user to try listening events from
  */
 export function initialiseEventSourceForUser(userId: number): void {
-  console.log("bb1");
   eventSource?.close();
 
-  console.log("bb2");
   eventSource = new EventSource(EMITTER_URL + "?userId=" + encodeURIComponent(userId), {
     withCredentials: true,
   });
-  console.log("bb3");
   eventSource.addEventListener("error", (event) => {
     if (eventSource.readyState === EventSource.CLOSED) {
       return;
@@ -66,7 +63,5 @@ export function initialiseEventSourceForUser(userId: number): void {
  * @param handler Event handler
  */
 export function addEventMessageHandler(handler: (event: AnyEvent) => void): void {
-  console.log("bb4");
   eventSource.addEventListener('newsfeed' as any, (event) => handler(JSON.parse(event.data)));
-  console.log("bb5");
 }
