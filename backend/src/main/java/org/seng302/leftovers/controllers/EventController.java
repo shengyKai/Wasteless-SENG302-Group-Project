@@ -4,6 +4,7 @@ import lombok.Getter;
 import net.minidev.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.seng302.leftovers.dto.SetTagDTO;
 import org.seng302.leftovers.entities.MessageEvent;
 import org.seng302.leftovers.entities.Event;
 import org.seng302.leftovers.entities.Tag;
@@ -44,13 +45,8 @@ public class EventController {
         this.eventRepository = eventRepository;
     }
 
-    private static class SetTag {
-        @NotNull
-        public Tag value;
-    }
-
     @PutMapping("/feed/{eventId}/tag")
-    public void setEventTag(@PathVariable long eventId, @Valid @RequestBody SetTag body, HttpServletRequest request) {
+    public void setEventTag(@PathVariable long eventId, @Valid @RequestBody SetTagDTO body, HttpServletRequest request) {
         LOGGER.info("Requested update of event tag (eventId={}, tag={})", eventId, body.value);
 
         AuthenticationTokenManager.checkAuthenticationToken(request);
