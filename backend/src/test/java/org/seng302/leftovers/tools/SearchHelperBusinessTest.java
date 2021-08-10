@@ -134,7 +134,7 @@ public class SearchHelperBusinessTest {
         createBusinesses();
         Specification<Business> specification = SearchHelper.constructSpecificationFromBusinessSearch("\"Joe\"", null);
         List<Business> matches = businessRepository.findAll(specification);
-        assertEquals(0, matches.size());
+        assertEquals(2, matches.size());
     }
 
 
@@ -143,7 +143,7 @@ public class SearchHelperBusinessTest {
         createBusinesses();
         Specification<Business> specification = SearchHelper.constructSpecificationFromBusinessSearch("'Joe'", null);
         List<Business> matches = businessRepository.findAll(specification);
-        assertEquals(0, matches.size());
+        assertEquals(2, matches.size());
     }
 
 
@@ -170,7 +170,7 @@ public class SearchHelperBusinessTest {
         createBusinesses();
         Specification<Business> specification = SearchHelper.constructSpecificationFromBusinessSearch("\"joe's garage\"", null);
         List<Business> matches = businessRepository.findAll(specification);
-        assertEquals(0, matches.size());
+        assertEquals(1, matches.size());
     }
 
 
@@ -179,7 +179,7 @@ public class SearchHelperBusinessTest {
         createBusinesses();
         Specification<Business> specification = SearchHelper.constructSpecificationFromBusinessSearch("'steves workshop'", null);
         List<Business> matches = businessRepository.findAll(specification);
-        assertEquals(0, matches.size());
+        assertEquals(1, matches.size());
     }
 
     @Test
