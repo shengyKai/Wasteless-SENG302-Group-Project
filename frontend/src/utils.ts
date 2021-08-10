@@ -214,7 +214,7 @@ export const emailRules = [
 export const mandatoryRules = [
   //All fields with the class "required" will go through this ruleset to ensure the field is not empty.
   //if it does not follow the format, display error message
-  (field: string) => !!field || 'Field is required'
+  (field: string | null) => !!field || 'Field is required'
 ];
 
 export const passwordRules = [
@@ -232,7 +232,7 @@ export const nameRules = [
 
 export function maxCharRules(size: number) {
   return [
-    (field: string) => (field.length <= size) || `Reached max character limit: ${size}`
+    (field: string) => (field === null || field.length <= size) || `Reached max character limit: ${size}`
   ];
 }
 

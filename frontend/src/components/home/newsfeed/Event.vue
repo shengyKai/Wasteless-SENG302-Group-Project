@@ -18,53 +18,57 @@
       {{ date }}, {{ time }}
     </v-card-subtitle>
     <slot/>
-    <!-- Expansion panel for user to view their option about the available tag to choose from  -->
-    <v-expansion-panels>
-      <v-expansion-panel>
+    <!-- For user to view their option about the available tag to choose from  -->
+    <v-row
+      justify="start"
+      style="min-height: 10px;"
+    >
+      <v-col class="shrink">
         <!-- The persistent chip that shows the tag for the message (default will be no colour) -->
-        <v-expansion-panel-header
+        <v-chip
+          class="ma-2"
+          color="primary"
+          @click="expand = !expand"
           label
+          text-color="white"
         >
-          <div>
+          <v-icon left>
+            mdi-label
+          </v-icon>
+          Current Tag
+        </v-chip>
+        <v-expand-transition>
+          <v-card
+            v-show="expand"
+            height="70"
+            width="1000"
+            class="mx-auto"
+          >
+            <div class="font-weight-medium">
+              Change your Tag:
+            </div>
+            <!--  Content that run through a loop of colours which at the same time set the colour of the chip
+              Make the code more maintainable as it will be easy to modify colour in future and get the index
+              Trigger a method when the chip is clicked (will use the index to trigger)
+        -->
             <v-chip
-              color="pink"
+              class="ma-1"
+              v-for="colour in colours"
+              :key=colour
+              :color="colour"
               label
               text-color="white"
+              @click="changeTag"
             >
               <v-icon left>
                 mdi-label
               </v-icon>
-              Current Tag
+              Tag
             </v-chip>
-          </div>
-        </v-expansion-panel-header>
-        <!--  The expansion panel's content that run through a loop of colours which at the same time set the colour of the chip
-              Make the code more maintainable as it will be easy to modify colour in future and get the index
-              Trigger a method when the chip is clicked (will use the index to trigger)
-        -->
-        <v-expansion-panel-content>
-          <div>
-            Change your Tag:
-          </div>
-          <v-chip
-            class="mr-1"
-            v-for="colour in colours"
-            :key=colour
-            :color="colour"
-            label
-            text-color="white"
-            @click="changeTag"
-          >
-            <v-icon left>
-              mdi-label
-            </v-icon>
-            Tag
-          </v-chip>
-        </v-expansion-panel-content>
-      </v-expansion-panel>
-    </v-expansion-panels>
-
-
+          </v-card>
+        </v-expand-transition>
+      </v-col>
+    </v-row>
   </div>
 </template>
 
@@ -86,6 +90,7 @@ export default {
   },
   data() {
     return {
+      expand: false,
       colours: ['none', 'red', 'orange', 'yellow', 'green', 'blue', 'purple'],
       errorMessage: undefined
     };

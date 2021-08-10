@@ -230,7 +230,7 @@ export async function search(query: string, pageIndex: number, resultsPerPage: n
     let status: number | undefined = error.response?.status;
 
     if (status === undefined) return 'Failed to reach backend';
-    return `Request failed: ${status}`;
+    return `Request failed: ${error.response.data.message}`;
   }
 
   if (!is<SearchResults<User>>(response.data)) {
@@ -1043,12 +1043,35 @@ export async function deleteNotification(notificationId: number) : Promise<Maybe
   try {
     await instance.delete(`/feed/${notificationId}`);
   } catch (error) {
-    console.log(notificationId);
     let status: number | undefined = error.response?.status;
     if (status === undefined) return 'Failed to reach backend';
     if (status === 401) return 'You have been logged out. Please login again and retry';
     if (status === 403) return 'Invalid authorization for notification removal';
     if (status === 406) return 'Notification not found';
+    return 'Request failed: ' + error.response?.data.message;
+  }
+  return undefined;
+}
+
+/**
+ * Adds a message to a conversation about a marketplace card
+ * @param cardId The ID of the card
+ * @param senderId The ID of the sender of the message
+ * @param buyerId The ID of the prospective buyer in the conversation
+ * @param message The contents of the message
+ */
+export async function messageConversation(cardId: number, senderId: number, buyerId: number, message: string) : Promise<MaybeError<undefined>> {
+  try {
+    await instance.post(`/cards/${cardId}/conversations/${buyerId}`,{
+      senderId,
+      message
+    });
+  } catch (error) {
+    let status: number | undefined = error.response?.status;
+    if (status === undefined) return 'Failed to reach backend';
+    if (status === 401) return 'You have been logged out. Please login again and retry';
+    if (status === 403) return 'You do not have permission to edit this conversation';
+    if (status === 406) return 'Unable to post message, the card does not exist';
     return 'Request failed: ' + error.response?.data.message;
   }
   return undefined;
