@@ -13,6 +13,7 @@ import Inventory from "../components/Inventory.vue";
 import SalePage from "../components/SalePage.vue";
 import Marketplace from "../components/marketplace/Marketplace.vue";
 import UserCards from "../components/marketplace/UserCards.vue";
+import ConversationReply from "../components/cards/ConversationReply.vue";
 
 Vue.use(VueRouter);
 
@@ -91,6 +92,11 @@ const routes = [
     path: '/usercards/:id',
     component: UserCards,
     meta: { title: 'User Cards' },
+  },
+  {
+    path: '/reply',
+    component: ConversationReply,
+    meta: { title: 'Replyyyyyy' },
   },
   {
     path: "*",
