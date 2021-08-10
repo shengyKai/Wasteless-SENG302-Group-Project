@@ -59,7 +59,7 @@
             </div>
             <!--  Content that run through a loop of colours which at the same time set the colour of the chip
               Make the code more maintainable as it will be easy to modify colour in future and get the index
-              Trigger a method when the chip is clicked (will use the index to trigger)
+              Trigger a tagNotification when the chip is clicked (will take the colour as param)
         -->
             <div class="ml-3">
               <v-chip
