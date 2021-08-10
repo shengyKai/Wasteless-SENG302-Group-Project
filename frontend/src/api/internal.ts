@@ -1037,11 +1037,11 @@ export async function deleteKeyword(keywordId: number) : Promise<MaybeError<unde
 
 /**
  * Deletes a notification from your feed
- * @param notificationId The id of the notification to be deleted
+ * @param eventId The id of the notification to be deleted
  */
-export async function deleteNotification(notificationId: number) : Promise<MaybeError<undefined>> {
+export async function deleteNotification(eventId: number) : Promise<MaybeError<undefined>> {
   try {
-    await instance.delete(`/feed/${notificationId}`);
+    await instance.delete(`/feed/${eventId}`);
   } catch (error) {
     let status: number | undefined = error.response?.status;
     if (status === undefined) return 'Failed to reach backend';
@@ -1072,6 +1072,25 @@ export async function messageConversation(cardId: number, senderId: number, buye
     if (status === 401) return 'You have been logged out. Please login again and retry';
     if (status === 403) return 'You do not have permission to edit this conversation';
     if (status === 406) return 'Unable to post message, the card does not exist';
+    return 'Request failed: ' + error.response?.data.message;
+  }
+  return undefined;
+}
+
+  type Tag = 'none' | 'red' | 'orange' | 'yellow' | 'green' | 'blue' | 'purple'
+
+export async function setEventTag(eventId: number, colour: Tag) : Promise<MaybeError<undefined>> {
+  try {
+    await instance.put(`/feed/${eventId}/tag`, {
+      value: colour
+    }
+    );
+  } catch (error) {
+    let status: number | undefined = error.response?.status;
+    if (status === undefined) return 'Failed to reach backend';
+    if (status === 401) return 'You have been logged out. Please login again and retry';
+    if (status === 403) return 'Invalid authorization for Event tagging';
+    if (status === 406) return 'Event not found';
     return 'Request failed: ' + error.response?.data.message;
   }
   return undefined;
