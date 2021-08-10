@@ -119,8 +119,8 @@
                 clearable
                 prepend-inner-icon="mdi-comment"
                 no-resize
-                counter
-                :rules="mandatoryRules().concat(maxCharRules())"
+                :counter="200"
+                :rules="mandatoryRules.concat(maxCharRules())"
                 v-model="directMessageContent"/>
             </v-card-text>
             <v-card-actions>
@@ -166,7 +166,7 @@ export default {
       directMessageContent: '',
       directMessageError: undefined,
       directMessageValid: false,
-      mandatoryRules: () => mandatoryRules,
+      mandatoryRules,
       maxCharRules: () => maxCharRules(200),
     };
   },

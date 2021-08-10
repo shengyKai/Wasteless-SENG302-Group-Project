@@ -61,7 +61,7 @@ describe('MarketplaceCard.vue', () => {
    * Finds the edit form dialog box upon clicking the edit button
    * @returns the edit confirmation dialog box
    */
-  async function findEditConfirmationDialog() {
+  async function openEditConfirmationDialog() {
     const editButton = wrapper.findComponent({ ref: 'editButton' });
     await editButton.trigger('click');
 
@@ -73,7 +73,7 @@ describe('MarketplaceCard.vue', () => {
    * Finds the delete confirmation dialog box upon clicking the delete button
    * @returns the delete confirmation dialog box
    */
-  async function findDeleteConfirmationDialog() {
+  async function openDeleteConfirmationDialog() {
     const deleteButton = wrapper.findComponent({ ref: 'deleteButton' });
     await deleteButton.trigger('click');
 
@@ -84,7 +84,7 @@ describe('MarketplaceCard.vue', () => {
    * Finds the message dialog box upon clicking the message button
    * @returns the message dialog box
    */
-  async function findConversationDialog() {
+  async function openConversationDialog() {
     const messageButton = wrapper.findComponent({ref:'messageButton'});
     await messageButton.trigger('click');
 
@@ -237,7 +237,7 @@ describe('MarketplaceCard.vue', () => {
   });
 
   it("The deleteMarketplaceCard method must be called and the dialog box should not be visible, upon clicking the delete button in the confirmation dialog box", async () => {
-    const deleteConfirmationDialog = await findDeleteConfirmationDialog();
+    const deleteConfirmationDialog = await openDeleteConfirmationDialog();
     const dialogDeleteButton = findButton('Delete', deleteConfirmationDialog);
     await dialogDeleteButton.trigger("click");
     expect(deleteMarketplaceCard).toBeCalledWith(testMarketplaceCard.id);
@@ -245,7 +245,7 @@ describe('MarketplaceCard.vue', () => {
   });
 
   it("The dialog box should not be visible if the cancel button is clicked in the confirmation dialog box", async () => {
-    const deleteConfirmationDialog = await findDeleteConfirmationDialog();
+    const deleteConfirmationDialog = await openDeleteConfirmationDialog();
     const dialogCancelButton = findButton('Cancel', deleteConfirmationDialog);
     await dialogCancelButton.trigger("click");
     expect(wrapper.vm.deleteCardDialog).toBeFalsy();
@@ -381,7 +381,7 @@ describe('MarketplaceCard.vue', () => {
   it("The messageConversation method must be called and the dialog box should not be visible, upon clicking the send button in the message dialog box", async () => {
     setUpStore(3, 'user'); // must not be the owner
     generateWrapper();
-    const messageDialog = await findConversationDialog();
+    const messageDialog = await openConversationDialog();
     await wrapper.setData({
       directMessageValid: true
     });
@@ -395,7 +395,7 @@ describe('MarketplaceCard.vue', () => {
   it("The dialog box should not be visible if the cancel button is clicked in the conversation dialog box", async () => {
     setUpStore(3, 'user'); // must not be the owner
     generateWrapper();
-    const messageDialog = await findConversationDialog();
+    const messageDialog = await openConversationDialog();
     const dialogCancelButton = findButton('Cancel', messageDialog);
     await dialogCancelButton.trigger("click");
     expect(wrapper.vm.messageOwnerDialog).toBeFalsy();
@@ -404,7 +404,7 @@ describe('MarketplaceCard.vue', () => {
   it("The conversation message must be at least 1 character. The send button is disabled otherwise", async () => {
     setUpStore(3, 'user'); // must not be the owner
     generateWrapper();
-    const messageDialog = await findConversationDialog();
+    const messageDialog = await openConversationDialog();
     console.log(messageDialog.text());
     const dialogSendButton = findButton('Send', messageDialog);
     expect(wrapper.vm.directMessageValid).toBeFalsy();
