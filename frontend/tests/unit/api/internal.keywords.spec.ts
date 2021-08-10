@@ -1,4 +1,4 @@
-import * as api from '@/api/internal';
+import { createNewKeyword, deleteKeyword, searchKeywords } from '@/api/internal';
 import axios, { AxiosError, AxiosInstance } from 'axios';
 
 jest.mock('axios', () => ({
@@ -34,13 +34,13 @@ describe("Test GET /keywords/search endpoint", () => {
     instance.get.mockResolvedValueOnce({
       data: defaultWords
     });
-    const keywords = await api.searchKeywords("query");
+    const keywords = await searchKeywords("query");
     expect(keywords).toEqual(defaultWords);
   });
 
   it("When API request is resolved without a status code, failed to reach backend error message is returned", async () => {
     instance.get.mockRejectedValueOnce({});
-    const keywords = await api.searchKeywords("query");
+    const keywords = await searchKeywords("query");
     expect(keywords).toEqual("Failed to reach backend");
   });
 
@@ -50,7 +50,7 @@ describe("Test GET /keywords/search endpoint", () => {
         status: 401,
       }
     });
-    const keywords = await api.searchKeywords("query");
+    const keywords = await searchKeywords("query");
     expect(keywords).toEqual('You have been logged out. Please login again and retry');
   });
 
@@ -60,7 +60,7 @@ describe("Test GET /keywords/search endpoint", () => {
         status: 999,
       }
     });
-    const keywords = await api.searchKeywords("query");
+    const keywords = await searchKeywords("query");
     expect(keywords).toEqual('Request failed: 999');
   });
 
@@ -70,7 +70,7 @@ describe("Test GET /keywords/search endpoint", () => {
         invalidKeywordList
       }
     });
-    const keywords = await api.searchKeywords("query");
+    const keywords = await searchKeywords("query");
     expect(keywords).toEqual('Response is not Keyword array');
   });
 });
@@ -85,7 +85,7 @@ describe("Test POST /keywords endpoint", () => {
     let keyword = {
       name: "New keyword"
     };
-    const createdKeyword = await api.createNewKeyword(keyword);
+    const createdKeyword = await createNewKeyword(keyword);
     expect(createdKeyword).toEqual(1);
   });
 
@@ -98,7 +98,7 @@ describe("Test POST /keywords endpoint", () => {
     let keyword = {
       name: "New keyword"
     };
-    const createdKeyword = await api.createNewKeyword(keyword);
+    const createdKeyword = await createNewKeyword(keyword);
     expect(createdKeyword).toEqual("This keyword already exists or is of invalid format");
   });
 
@@ -111,7 +111,7 @@ describe("Test POST /keywords endpoint", () => {
     let keyword = {
       name: "New keyword"
     };
-    const createdKeyword = await api.createNewKeyword(keyword);
+    const createdKeyword = await createNewKeyword(keyword);
     expect(createdKeyword).toEqual("You have been logged out. Please login again and retry");
   });
 
@@ -124,7 +124,7 @@ describe("Test POST /keywords endpoint", () => {
     let keyword = {
       name: "New keyword"
     };
-    const createdKeyword = await api.createNewKeyword(keyword);
+    const createdKeyword = await createNewKeyword(keyword);
     expect(createdKeyword).toEqual("Failed to reach backend");
 
 
@@ -138,7 +138,7 @@ describe("Test POST /keywords endpoint", () => {
           status: 200
         }
       });
-      const response = await api.deleteKeyword(1);
+      const response = await deleteKeyword(1);
       expect(response).toEqual(undefined);
     });
 
@@ -148,7 +148,7 @@ describe("Test POST /keywords endpoint", () => {
           status: 401
         }
       });
-      const response = await api.deleteKeyword(1);
+      const response = await deleteKeyword(1);
       expect(response).toEqual('You have been logged out. Please login again and retry');
     });
 
@@ -158,7 +158,7 @@ describe("Test POST /keywords endpoint", () => {
           status: 403
         }
       });
-      const response = await api.deleteKeyword(1);
+      const response = await deleteKeyword(1);
       expect(response).toEqual('Invalid authorization for keyword deletion');
     });
 
@@ -168,7 +168,7 @@ describe("Test POST /keywords endpoint", () => {
           status: 406
         }
       });
-      const response = await api.deleteKeyword(1);
+      const response = await deleteKeyword(1);
       expect(response).toEqual('Keyword not found');
     });
 
@@ -181,7 +181,7 @@ describe("Test POST /keywords endpoint", () => {
           }
         }
       });
-      const response = await api.deleteKeyword(1);
+      const response = await deleteKeyword(1);
       expect(response).toEqual('Request failed: Some error message');
     });
   });
