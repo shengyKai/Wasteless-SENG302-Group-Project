@@ -230,7 +230,7 @@ export async function search(query: string, pageIndex: number, resultsPerPage: n
     let status: number | undefined = error.response?.status;
 
     if (status === undefined) return 'Failed to reach backend';
-    return `Request failed: ${status}`;
+    return `Request failed: ${error.response.data.message}`;
   }
 
   if (!is<SearchResults<User>>(response.data)) {
