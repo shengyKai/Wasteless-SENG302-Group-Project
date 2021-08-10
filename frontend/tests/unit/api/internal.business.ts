@@ -1,4 +1,4 @@
-import * as api from '@/api/internal';
+import { Business, searchBusinesses } from '@/api/internal';
 import axios, { AxiosInstance } from 'axios';
 
 jest.mock('axios', () => ({
@@ -20,7 +20,7 @@ const instance: Mocked<Pick<AxiosInstance, 'get' >> = axios.instance;
 
 describe('Test GET businesses/search endpoind', () => {
 
-  let validBusiness: api.Business = {
+  let validBusiness: Business = {
     id: 88,
     primaryAdministratorId: 50,
     name: "Valid business",
@@ -39,7 +39,7 @@ describe('Test GET businesses/search endpoind', () => {
     potato: "Potato",
   };
 
-  const validBusinessList: api.Business[] = [];
+  const validBusinessList: Business[] = [];
   for (let i = 0; i < 10; i++) {
     validBusiness.id = i;
     validBusinessList.push(validBusiness);
@@ -53,7 +53,7 @@ describe('Test GET businesses/search endpoind', () => {
         validBusinessList,
       }
     });
-    const response = await api.searchBusinesses('Query', 'Accommodation and Food Services', 2, 10, "created", false);
+    const response = await searchBusinesses('Query', 'Accommodation and Food Services', 2, 10, "created", false);
     expect(response).toEqual(validBusinessList);
   });
 
@@ -63,7 +63,7 @@ describe('Test GET businesses/search endpoind', () => {
         invalidBusinessList,
       }
     });
-    const response = await api.searchBusinesses('Query', 'Accommodation and Food Services', 2, 10, "created", false);
+    const response = await searchBusinesses('Query', 'Accommodation and Food Services', 2, 10, "created", false);
     expect(response).toEqual("Response was not a business array");
   });
 
@@ -74,7 +74,7 @@ describe('Test GET businesses/search endpoind', () => {
         emptyList,
       }
     });
-    const response = await api.searchBusinesses('Query', 'Accommodation and Food Services', 2, 10, "created", false);
+    const response = await searchBusinesses('Query', 'Accommodation and Food Services', 2, 10, "created", false);
     expect(response).toEqual([]);
   });
 
@@ -85,7 +85,7 @@ describe('Test GET businesses/search endpoind', () => {
         message: "Query too long",
       }
     });
-    const response = await api.searchBusinesses('Query', 'Accommodation and Food Services', 2, 10, "created", false);
+    const response = await searchBusinesses('Query', 'Accommodation and Food Services', 2, 10, "created", false);
     expect(response).toEqual("Invalid search query: Query too long");
   });
 
@@ -93,7 +93,7 @@ describe('Test GET businesses/search endpoind', () => {
     instance.get.mockRejectedValueOnce({
       status: 401,
     });
-    const response = await api.searchBusinesses('Query', 'Accommodation and Food Services', 2, 10, "created", false);
+    const response = await searchBusinesses('Query', 'Accommodation and Food Services', 2, 10, "created", false);
     expect(response).toEqual("You have been logged out. Please login again and retry");
   });
 
@@ -101,7 +101,7 @@ describe('Test GET businesses/search endpoind', () => {
     instance.get.mockRejectedValueOnce({
       status: 999,
     });
-    const response = await api.searchBusinesses('Query', 'Accommodation and Food Services', 2, 10, "created", false);
+    const response = await searchBusinesses('Query', 'Accommodation and Food Services', 2, 10, "created", false);
     expect(response).toEqual("Request failed: 999");
   });
 
@@ -109,13 +109,13 @@ describe('Test GET businesses/search endpoind', () => {
     instance.get.mockRejectedValueOnce({
       status: undefined,
     });
-    const response = await api.searchBusinesses('Query', 'Accommodation and Food Services', 2, 10, "created", false);
+    const response = await searchBusinesses('Query', 'Accommodation and Food Services', 2, 10, "created", false);
     expect(response).toEqual("Failed to reach backend");
   });
 
   it('When API request is resolved without a status code, failed to reach backend error message is returned', async () => {
     instance.get.mockRejectedValueOnce({});
-    const response = await api.searchBusinesses('Query', 'Accommodation and Food Services', 2, 10, "created", false);
+    const response = await searchBusinesses('Query', 'Accommodation and Food Services', 2, 10, "created", false);
     expect(response).toEqual("Failed to reach backend");
   });
 
