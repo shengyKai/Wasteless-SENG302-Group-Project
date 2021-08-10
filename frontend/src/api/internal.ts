@@ -30,6 +30,7 @@
  */
 import axios from 'axios';
 import { is } from 'typescript-is';
+import { Tag } from './events';
 
 const SERVER_URL = process.env.VUE_APP_SERVER_ADD;
 
@@ -1052,8 +1053,6 @@ export async function deleteNotification(eventId: number) : Promise<MaybeError<u
   }
   return undefined;
 }
-
-  type Tag = 'none' | 'red' | 'orange' | 'yellow' | 'green' | 'blue' | 'purple'
 
 export async function setEventTag(eventId: number, colour: Tag) : Promise<MaybeError<undefined>> {
   try {

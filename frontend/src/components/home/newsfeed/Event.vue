@@ -43,7 +43,7 @@
               Tag
             </v-chip>
           </template>
-          <span>DEEZ NUTS</span>
+          <span>Click to view the available tags.</span>
         </v-tooltip>
         <v-expand-transition>
           <v-card
@@ -145,6 +145,7 @@ export default {
         this.error = result;
       } else {
         this.error = undefined;
+        this.expand = false;
       }
     },
     /**
