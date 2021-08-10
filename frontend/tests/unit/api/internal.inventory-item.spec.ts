@@ -1,5 +1,5 @@
 import { CreateInventoryItem, getInventory, InventoryItem, modifyInventoryItem, SearchResults } from '@/api/internal';
-import axios, { AxiosError, AxiosInstance } from 'axios';
+import axios, {AxiosInstance } from 'axios';
 
 jest.mock('axios', () => ({
   create: jest.fn(function () {

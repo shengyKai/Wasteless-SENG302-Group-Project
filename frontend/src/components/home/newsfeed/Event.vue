@@ -132,6 +132,13 @@ export default {
         this.$store.commit('removeEvent', this.event.id);
       }
     },
+
+    /**
+     * Call the setEventTag endpoint when user click on the tag changing button
+     * Will render error message if the response returned with one 
+     * @param this.event.id To pass the endpoint for the event user wan to update
+     * @param colour        Take the colour that user wan to change the tag into
+     */
     async tagNotification(colour) {
       const result = await setEventTag(this.event.id, colour);
       if (typeof result === 'string') {
