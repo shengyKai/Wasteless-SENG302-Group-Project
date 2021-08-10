@@ -157,7 +157,9 @@ export default {
    * to update the event list on a data change.
    */
   mounted() {
+    console.log("1");
     this.updateEvents();
+    console.log("2");
   },
   watch: {
     /**
@@ -167,6 +169,7 @@ export default {
       this.updateEvents();
     },
     filterBy: function() {
+      console.log("a1");
       if (this.filterBy.length === 0) {
         this.updateEvents();
       } else {
@@ -181,9 +184,13 @@ export default {
      * Main logic for the frontend native pagination. Slices the list based on what page the user is in, and only shows
      * the results for that page.
      */
-    updateEvents() {
+    async updateEvents() {
+      console.log("a");
       const pageStartIndex = (this.currentPage - 1) * this.resultsPerPage;
-      this.events = this.$store.getters.events.slice(pageStartIndex, (pageStartIndex + this.resultsPerPage));
+      console.log("b");
+      console.log(this.$store.getters.events);
+      this.events = await this.$store.getters.events.slice(pageStartIndex, (pageStartIndex + this.resultsPerPage));
+      console.log("c");
     }
   }
 };

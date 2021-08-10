@@ -189,9 +189,12 @@ function createOptions(): StoreOptions<StoreData> {
        * @param context The store context
        */
       startUserFeed(context) {
+        console.log("aa1");
         context.state.eventMap = []; // Clear events
         initialiseEventSourceForUser(context.state.user!.id); // Make event handler
+        console.log("aa2");
         addEventMessageHandler(event => context.commit('addEvent', event));
+        console.log("aa3");
       },
       /**
        * Attempts to automatically log in the provided user id with the current authentication cookies.
