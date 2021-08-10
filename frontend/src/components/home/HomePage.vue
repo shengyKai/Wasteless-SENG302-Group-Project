@@ -93,17 +93,18 @@ export default {
        * Number of results per a result page
        */
       resultsPerPage: 10,
-      colours: ['none', 'red', 'orange', 'yellow', 'green', 'blue', 'purple']
+      colours: ['none', 'red', 'orange', 'yellow', 'green', 'blue', 'purple'],
+      events: []
     };
   },
   computed: {
-    /**
-     * The event array sliced so that it can do pagination natively.
-     */
-    events() {
-      const pageStartIndex = (this.currentPage - 1) * this.resultsPerPage;
-      return this.$store.getters.events.slice(pageStartIndex, (pageStartIndex + this.resultsPerPage));
-    },
+    // /**
+    //  * The event array sliced so that it can do pagination natively.
+    //  */
+    // events() {
+    //   const pageStartIndex = (this.currentPage - 1) * this.resultsPerPage;
+    //   return this.$store.getters.events.slice(pageStartIndex, (pageStartIndex + this.resultsPerPage));
+    // },
     /**
      * Current active user role
      */
@@ -124,7 +125,7 @@ export default {
       return [...Array(10).keys()].map(i => `Item ${i}`);
     },
     /**
-     * Total number of results
+     * Total number of results from the store
      */
     totalResults() {
       if (this.$store.getters.events.length === undefined) return 0;
@@ -141,7 +142,7 @@ export default {
      * The message displayed at the bottom of the page to show how many events there are
      */
     resultsMessage() {
-      if (this.$store.getters.events.length === 0) return 'No items in your feed';
+      if (this.totalResults === 0) return 'No items in your feed';
       const pageStartIndex = (this.currentPage - 1) * this.resultsPerPage;
       let pageEndIndex = pageStartIndex + this.resultsPerPage;
       if (pageEndIndex > this.totalResults) {
@@ -150,9 +151,33 @@ export default {
       return `Displaying ${pageStartIndex + 1} - ${pageEndIndex} of ${this.totalResults} results`;
     }
   },
+  /**
+   * Called when data changes, before the DOM is patched. This is a good place to access the existing DOM before an update
+   * The vuex store was not able to retrieve the updated event list with mounted or created, and with this hook, we are able
+   * to update the event list on a data change.
+   */
+  beforeUpdate() {
+    this.updateEvents();
+  },
+  watch: {
+    /**
+     * Watch the currentPage so that it can update the event list as needed.
+     */
+    currentPage: function() {
+      this.updateEvents();
+    }
+  },
   methods: {
     filterEvents() {
       //TODO once things has been finalised
+    },
+    /**
+     * Main logic for the frontend native pagination. Slices the list based on what page the user is in, and only shows
+     * the results for that page.
+     */
+    updateEvents() {
+      const pageStartIndex = (this.currentPage - 1) * this.resultsPerPage;
+      this.events = this.$store.getters.events.slice(pageStartIndex, (pageStartIndex + this.resultsPerPage));
     }
   }
 };
