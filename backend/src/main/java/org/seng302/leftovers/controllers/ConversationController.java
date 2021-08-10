@@ -10,6 +10,7 @@ import org.seng302.leftovers.tools.AuthenticationTokenManager;
 import org.seng302.leftovers.tools.JsonTools;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 import java.util.Set;
 
@@ -38,8 +40,16 @@ public class ConversationController {
         this.messageRepository = messageRepository;
     }
 
+    /**
+     * POST endpoint for posting a new message to a conversation regarding a marketplace card.
+     * A conversation consists of a marketplace card and a potential buyer
+     * The conversation may not exist, if so a new conversation is created
+     * @param cardId The ID of the card
+     * @param buyerId The ID of the potential buyer
+     * @param body Consists of senderId and message content
+     */
     @PostMapping("/cards/{cardId}/conversations/{buyerId}")
-    public void postMarketplaceCardMessage(HttpServletRequest request, @PathVariable Long cardId, @PathVariable Long buyerId, @RequestBody JSONObject body) {
+    public ResponseEntity postMarketplaceCardMessage(HttpServletRequest request, @PathVariable Long cardId, @PathVariable Long buyerId, @RequestBody JSONObject body) {
         AuthenticationTokenManager.checkAuthenticationToken(request);
 
         var card = marketplaceCardRepository.getCard(cardId, HttpStatus.NOT_ACCEPTABLE);
@@ -58,10 +68,15 @@ public class ConversationController {
         }
 
         var conversation = conversationRepository.findByCardAndBuyer(card, buyer).orElse(new Conversation(card, buyer));
-        var message = new Message(conversation, sender, content);
+
+        // The first message must be from the buyer
+        if (conversation.getMessages().isEmpty() && sender == card.getCreator()) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You cannot start a conversation with this person");
+        }
 
         logger.info("Posting a message to conversation about card {}, with sender {}", card.getID(), sender.getUserID());
         conversationRepository.save(conversation);
-        messageRepository.save(message);
+        messageRepository.save(new Message(conversation, sender, content));
+        return new ResponseEntity(HttpStatus.CREATED);
     }
 }

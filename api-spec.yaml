@@ -1372,7 +1372,7 @@ paths:
             - globalApplicationAdmin
             - defaultGlobalApplicationAdmin
       responses:
-        '200':
+        '201':
           description: >-
             New message is added to the conversation. If the conversation did 
             not already exist then a new conversation is created.
