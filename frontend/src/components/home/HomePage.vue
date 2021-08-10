@@ -156,7 +156,7 @@ export default {
    * The vuex store was not able to retrieve the updated event list with mounted or created, and with this hook, we are able
    * to update the event list on a data change.
    */
-  beforeUpdate() {
+  mounted() {
     this.updateEvents();
   },
   watch: {
@@ -165,12 +165,18 @@ export default {
      */
     currentPage: function() {
       this.updateEvents();
+    },
+    filterBy: function() {
+      if (this.filterBy.length === 0) {
+        this.updateEvents();
+      } else {
+        this.events = this.$store.getters.events.filter(object => {
+          return this.filterBy.includes(object.tag);
+        });
+      }
     }
   },
   methods: {
-    filterEvents() {
-      //TODO once things has been finalised
-    },
     /**
      * Main logic for the frontend native pagination. Slices the list based on what page the user is in, and only shows
      * the results for that page.
