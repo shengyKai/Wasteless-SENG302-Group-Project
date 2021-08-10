@@ -39,6 +39,7 @@ import GlobalMessage from "./newsfeed/GlobalMessage.vue";
 import ExpiryEvent from './newsfeed/ExpiryEvent.vue';
 import DeleteEvent from './newsfeed/DeleteEvent.vue';
 import KeywordCreated from './newsfeed/KeywordCreated.vue';
+import MessageEvent from './newsfeed/MessageEvent.vue';
 
 export default {
   components: {
@@ -48,6 +49,7 @@ export default {
     ExpiryEvent,
     DeleteEvent,
     KeywordCreated,
+    MessageEvent
   },
   computed: {
     /**

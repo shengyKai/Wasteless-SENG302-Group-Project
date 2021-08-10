@@ -1,48 +1,46 @@
 <template>
-  <!--<Event :event="event" :title="title">-->
-  <div>
-    <v-card-text v-bind:style="{ height: computedHeight }">
-      New message from: {{userName}}
-      Regarding: "{{cardTitle}}" in the {{section}} section of the Marketplace
-      {{message}}
+  <Event :event="event" :title="title">
+    <v-card-text class="d-flex flex-column align-start">
+      <p class="card-details">New message from: {{userName}}</p>
+      <p class="card-details">Regarding: "{{cardTitle}}" in the {{section}} section of the Marketplace</p>
+      <p class="card-details" v-bind:style="{'-webkit-line-clamp': lines}">{{message}}</p>
     </v-card-text>
-    <div class="foot-tools">
+    <v-card-actions class="foot-tools">
       <v-icon v-if="expanded" @click="expand" title="Collapse text">mdi-arrow-up-drop-circle</v-icon>
       <v-icon v-else @click="expand" title="Expand text">mdi-arrow-down-drop-circle</v-icon>
       <v-btn text color="primary" @click="sendReply">reply</v-btn>
-    </div>
-  </div>
-  <!--</Event>-->
+    </v-card-actions>
+  </Event>
 </template>
 
 <script>
-//import Event from './Event';
+import Event from './Event';
 
 export default {
   name: "MessageEvent",
   components: {
-    //Event
+    Event
   },
   props: {
-    //event: {
-    //  type: Object,
-    //  required: true,
-    //},
+    event: {
+      type: Object,
+      required: true,
+    },
   },
   data() {
     return {
       title: "New message",
       expanded: false,
-      computedHeight: '200em'
+      lines: 3
     };
   },
   methods: {
     expand() {
       this.expanded = !this.expanded;
       if (this.expanded) {
-        this.computedHeight = undefined;
+        this.lines = undefined;
       } else {
-        this.computedHeight = '200em';
+        this.lines = 3;
       }
     },
     sendReply() {
@@ -75,5 +73,15 @@ export default {
 .foot-tools {
   display: flex;
   flex-wrap: wrap;
+  position: absolute;
+  bottom:3px;
+  right:3px;
+}
+.card-details {
+  float: left;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 </style>
