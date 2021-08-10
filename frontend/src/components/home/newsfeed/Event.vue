@@ -23,7 +23,6 @@
       justify="start"
       style="min-height: 10px;"
     >
-
       <v-col class="shrink">
         <!-- The persistent chip that shows the tag for the message (default will be no colour) -->
         <v-tooltip bottom>
@@ -81,12 +80,70 @@
         </v-expand-transition>
       </v-col>
     </v-row>
+    <v-tooltip bottom>
+      <template v-slot:activator="{on, attrs }">
+        <v-icon v-if="!isCardOwner"
+                ref="messageButton"
+                color="primary"
+                @click.stop="messageOwnerDialog = true; directMessageContent=''"
+                v-bind="attrs"
+                v-on="on"
+        >
+          mdi-reply
+        </v-icon>
+      </template>
+      Reply to this message
+    </v-tooltip>
+    <v-dialog ref="messageDialog"
+              v-model="messageOwnerDialog"
+              max-width="600px">
+      <v-card>
+        <v-card color='secondary lighten-2'>
+          <v-card-title>
+            <strong>Send a message to {{firstName}}</strong>
+          </v-card-title>
+          <v-card-subtitle>
+            Your message will appear on their feed
+          </v-card-subtitle>
+        </v-card>
+        <v-form v-model="directMessageValid" ref="directMessageForm">
+          <v-card-text>
+            <v-textarea
+              solo
+              outlined
+              clearable
+              prepend-inner-icon="mdi-comment"
+              no-resize
+              :counter="200"
+              :rules="mandatoryRules.concat(maxCharRules())"
+              v-model="directMessageContent"/>
+          </v-card-text>
+          <v-card-actions>
+            <v-alert v-if="directMessageError !== undefined" color="red" type="error" dense text>
+              {{directMessageError}}
+            </v-alert>
+            <v-spacer/>
+            <v-btn color="primary"
+                   text
+                   :disabled="!directMessageValid"
+                   @click="sendMessage">
+              Send
+            </v-btn>
+            <v-btn color="primary"
+                   text
+                   @click="messageOwnerDialog = false; directMessageError = undefined; directMessageContent=''">
+              Cancel
+            </v-btn>
+          </v-card-actions>
+        </v-form>
+      </v-card>
+    </v-dialog>
   </div>
 </template>
 
 <script>
-import { formatDate } from '@/utils';
-import {deleteNotification} from "@/api/internal";
+import { formatDate, maxCharRules, mandatoryRules, } from '@/utils';
+import {deleteNotification, messageConversation} from "@/api/internal";
 import { setEventTag } from '../../../api/internal';
 
 export default {
@@ -103,6 +160,16 @@ export default {
   },
   data() {
     return {
+      deleteCardDialog: false,
+      editCardDialog: false,
+      messageOwnerDialog: false,
+      directMessageContent: '',
+      directMessageError: undefined,
+      directMessageValid: false,
+      mandatoryRules,
+      maxCharRules: () => maxCharRules(200),
+      firstname: "haha",
+
       expand: false,
       colours: ['none', 'red', 'orange', 'yellow', 'green', 'blue', 'purple'],
       error: undefined
@@ -130,6 +197,15 @@ export default {
         this.error = result;
       } else {
         this.$store.commit('removeEvent', this.event.id);
+      }
+    },
+    async sendMessage() {
+      this.directMessageError = undefined;
+      let response = await messageConversation(this.content.id, this.$store.state.user.id, this.$store.state.user.id, this.directMessageContent);
+      if (typeof response === 'string') {
+        this.directMessageError = response;
+      } else {
+        this.messageOwnerDialog = false;
       }
     },
 

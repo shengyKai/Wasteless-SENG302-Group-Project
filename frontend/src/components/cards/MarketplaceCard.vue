@@ -105,12 +105,14 @@
                 v-model="messageOwnerDialog"
                 max-width="600px">
         <v-card>
-          <v-card-title>
-            Send a message to {{content.creator.firstName}}
-          </v-card-title>
-          <v-card-subtitle>
-            Your message will appear on their feed
-          </v-card-subtitle>
+          <v-card color='secondary lighten-2'>
+            <v-card-title>
+              <strong>Send a message to {{content.creator.firstName}}</strong>
+            </v-card-title>
+            <v-card-subtitle>
+              Your message will appear on their feed
+            </v-card-subtitle>
+          </v-card>
           <v-form v-model="directMessageValid" ref="directMessageForm">
             <v-card-text>
               <v-textarea
