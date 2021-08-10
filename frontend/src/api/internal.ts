@@ -1058,7 +1058,7 @@ export async function deleteNotification(notificationId: number) : Promise<Maybe
 
 export async function setEventTag(notificationId: number, colour: Tag) : Promise<MaybeError<undefined>> {
   try {
-    await instance.put(`/feed/${notificationId}/tag`);
+    await instance.put(`/feed/${notificationId}/tag`, colour);
   } catch (error) {
     let status: number | undefined = error.response?.status;
     if (status === undefined) return 'Failed to reach backend';

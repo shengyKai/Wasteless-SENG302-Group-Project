@@ -8,7 +8,7 @@
         mdi-trash-can
       </v-icon>
       <div class="deletion-error">
-        {{ errorMessage }}
+        {{ error }}
       </div>
     </div>
     <v-card-title>
@@ -83,6 +83,7 @@
 <script>
 import { formatDate } from '@/utils';
 import {deleteNotification} from "@/api/internal";
+import { setEventTag } from '../../../api/internal';
 
 export default {
   name: 'Event',
@@ -99,8 +100,9 @@ export default {
   data() {
     return {
       expand: false,
+      tagColour: "",
       colours: ['none', 'red', 'orange', 'yellow', 'green', 'blue', 'purple'],
-      errorMessage: undefined
+      error: undefined
     };
   },
   computed: {
@@ -122,9 +124,17 @@ export default {
     async removeNotification() {
       const result = await deleteNotification(this.event.id);
       if (typeof result === 'string') {
-        this.errorMessage = result;
+        this.error = result;
       } else {
         this.$store.commit('removeEvent', this.event.id);
+      }
+    },
+    async tagNotification() {
+      const result = await setEventTag(this.event.id, this.tagColour);
+      if (typeof result === 'string') {
+        this.error = result;
+      } else {
+        this.error = undefined;
       }
     },
     /**
@@ -132,6 +142,8 @@ export default {
      * Currently only alert `changing tag`, functionality will be implemented in another task
      */
     changeTag () {
+      console.log("A");
+      console.log(this.tagColour);
       alert('Changing Tag...');
     },
   }
