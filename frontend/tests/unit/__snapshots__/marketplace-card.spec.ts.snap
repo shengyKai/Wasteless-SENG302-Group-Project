@@ -28,6 +28,9 @@ exports[`MarketplaceCard.vue Must match snapshot 1`] = `
     <div class="spacer"></div> <button type="button" class="v-icon notranslate mr-2 v-icon--link mdi mdi-pencil theme--light primary--text"></button> <button type="button" class="v-icon notranslate v-icon--link mdi mdi-trash-can theme--light primary--text"></button>
     <div role="dialog" class="v-dialog__container">
       <!---->
+    </div> <span class="v-tooltip v-tooltip--bottom"><!----></span>
+    <div role="dialog" class="v-dialog__container">
+      <!---->
     </div>
   </div>
   <!---->
