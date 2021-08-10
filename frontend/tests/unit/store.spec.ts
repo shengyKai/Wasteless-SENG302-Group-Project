@@ -21,6 +21,26 @@ describe('store.ts', () => {
     store = getStore();
   });
 
+  it('areEventsStaged returns false if no events have been added to the list of events to be deleted', () => {
+    expect(store.state.eventForDeletionIds.length).toBe(0);
+    expect(store.getters.areEventsStaged).toBeFalsy();
+  })
+
+  it('areEventsStaged returns true if one event have been added to the list of events to be deleted', () => {
+    store.commit('stageEventForDeletion', 100);
+    expect(store.state.eventForDeletionIds.length).toBe(1);
+    expect(store.getters.areEventsStaged).toBeTruthy();
+  })
+
+  it('areEventsStaged returns true if multiple events have been added to the list of events to be deleted', () => {
+    store.commit('stageEventForDeletion', 18);
+    store.commit('stageEventForDeletion', 31);
+    store.commit('stageEventForDeletion', 44);
+    expect(store.state.eventForDeletionIds.length).toBe(3);
+    expect(store.getters.areEventsStaged).toBeTruthy();
+  })
+
+
   describe('deleteStagedEvent', () => {
 
     it('Returns error message if event is not staged for deletion', async () => {

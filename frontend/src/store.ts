@@ -200,6 +200,14 @@ function createOptions(): StoreOptions<StoreData> {
         events.sort((a, b) => +new Date(b.created) - +new Date(a.created));
         return events;
       },
+      /**
+       * Returns true if there are any events in the list of events staged for deletion, otherwise returns false.
+       * @param state Current state of the store.
+       * @returns True if there are events staged for deletion, false otherwise.
+       */
+      areEventsStaged(state) {
+        return state.eventForDeletionIds.length !== 0;
+      },
     },
     actions: {
       /**

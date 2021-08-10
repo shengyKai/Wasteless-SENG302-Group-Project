@@ -70,9 +70,13 @@ new Vue({
   vuetify,
   router,
   template: '<App/>',
+  /**
+   * Before the window closes, check if any events have been staged for detetion and
+   * if they have warn the user.
+   */
   beforeMount() {
     window.addEventListener("beforeunload", event => {
-      if (getStore().state.eventForDeletionIds.length === 0) return;
+      if (!getStore().getters.areEventsStaged) return;
       event.preventDefault();
       // Chrome requires returnValue to be set.
       event.returnValue = "";
