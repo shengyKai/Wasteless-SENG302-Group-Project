@@ -29,8 +29,8 @@
         <v-tooltip bottom>
           <template v-slot:activator="{ on, attrs }">
             <v-chip
-              class="ma-2"
-              color="primary"
+              class="ma-2 ml-4 mb-3"
+              :color="event.tag"
               @click="expand = !expand"
               label
               text-color="white"
@@ -53,26 +53,30 @@
             class="mx-auto"
           >
             <div class="font-weight-medium">
-              Change your Tag:
+              <span class="ml-4">
+                Change your Tag:
+              </span>
             </div>
             <!--  Content that run through a loop of colours which at the same time set the colour of the chip
               Make the code more maintainable as it will be easy to modify colour in future and get the index
               Trigger a method when the chip is clicked (will use the index to trigger)
         -->
-            <v-chip
-              class="ma-1"
-              v-for="colour in colours"
-              :key=colour
-              :color="colour"
-              label
-              text-color="white"
-              @click="changeTag"
-            >
-              <v-icon left>
-                mdi-label
-              </v-icon>
-              Tag
-            </v-chip>
+            <div class="ml-3">
+              <v-chip
+                class="ma-1"
+                v-for="colour in colours"
+                :key=colour
+                :color="colour"
+                label
+                text-color="white"
+                @click="tagNotification(colour)"
+              >
+                <v-icon left>
+                  mdi-label
+                </v-icon>
+                Tag
+              </v-chip>
+            </div>
           </v-card>
         </v-expand-transition>
       </v-col>
@@ -100,7 +104,6 @@ export default {
   data() {
     return {
       expand: false,
-      tagColour: "",
       colours: ['none', 'red', 'orange', 'yellow', 'green', 'blue', 'purple'],
       error: undefined
     };
@@ -129,8 +132,8 @@ export default {
         this.$store.commit('removeEvent', this.event.id);
       }
     },
-    async tagNotification() {
-      const result = await setEventTag(this.event.id, this.tagColour);
+    async tagNotification(colour) {
+      const result = await setEventTag(this.event.id, colour);
       if (typeof result === 'string') {
         this.error = result;
       } else {
@@ -141,11 +144,6 @@ export default {
      * This should be a method that allows user to change their current tag colour into the desired colour
      * Currently only alert `changing tag`, functionality will be implemented in another task
      */
-    changeTag () {
-      console.log("A");
-      console.log(this.tagColour);
-      alert('Changing Tag...');
-    },
   }
 };
 </script>
