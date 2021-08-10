@@ -3,14 +3,40 @@ import Vuex, { Store } from 'vuex';
 import Vuetify from 'vuetify';
 import {createLocalVue, mount, Wrapper} from '@vue/test-utils';
 
+import {User, MarketplaceCard, Keyword } from '@/api/internal';
 import HomePage from '@/components/home/HomePage.vue';
 import { getStore, resetStoreForTesting, StoreData } from '@/store';
 
-import { AnyEvent } from '@/api/events';
+import { AnyEvent, DeleteEvent, ExpiryEvent, KeywordCreatedEvent } from '@/api/events';
 
 Vue.use(Vuetify);
 const localVue = createLocalVue();
 
+const testUser: User = {
+  id: 2,
+  firstName: 'test_firstname',
+  lastName: 'test_lastname',
+  email: 'test_email',
+  homeAddress: { country: 'test_country', city: 'test_city', district: 'test_district'},
+};
+
+const testKeyword: Keyword = {
+  id: 1,
+  name: "Edward",
+  created: "01/01/2020"
+};
+
+const testMarketPlaceCard: MarketplaceCard = {
+  id: 1,
+  creator: testUser,
+  section: 'ForSale',
+  created: "01/01/2020",
+  lastRenewed: "02/01/2020",
+  displayPeriodEnd: "05/01/2020",
+  title: "test_title",
+  description: "test_desription",
+  keywords: [testKeyword]
+};
 
 describe('HomePage.vue', () => {
   // Container for the HomePage under test
@@ -23,9 +49,10 @@ describe('HomePage.vue', () => {
     localVue.use(Vuex);
     resetStoreForTesting();
     store = getStore();
+    store.state.user = testUser;
 
     wrapper = mount(HomePage, {
-      stubs: ['BusinessActionPanel', 'UserActionPanel', 'GlobalMessage'],
+      stubs: ['BusinessActionPanel', 'UserActionPanel', 'GlobalMessage' , 'ExpiryEvent', 'DeleteEvent', 'KeywordCreated'],
       localVue,
       vuetify,
       store,
@@ -41,7 +68,7 @@ describe('HomePage.vue', () => {
     expect(wrapper.text()).toContain('No items in your feed');
   });
 
-  it('If an event is posted to the store then it should be displayed in the newsfeed', async () => {
+  it('If an message event is posted to the store then it should be displayed in the newsfeed', async () => {
     const event: AnyEvent = {
       type: 'MessageEvent',
       id: 7,
@@ -53,6 +80,60 @@ describe('HomePage.vue', () => {
     await Vue.nextTick();
 
     let newsfeedItem = wrapper.findComponent({name: 'GlobalMessage'});
+    expect(newsfeedItem.exists()).toBeTruthy();
+    expect(newsfeedItem.props().event).toBe(event);
+  });
+
+  it('If an expiry event is posted to the store then it should be displayed in the newsfeed', async () => {
+    const event: ExpiryEvent = {
+      type: 'ExpiryEvent',
+      id: 2,
+      tag: 'none',
+      created: new Date().toString(),
+      card: testMarketPlaceCard,
+    };
+    store.commit('addEvent', event);
+    await Vue.nextTick();
+
+    let newsfeedItem = wrapper.findComponent({name: 'ExpiryEvent'});
+    expect(newsfeedItem.exists()).toBeTruthy();
+    expect(newsfeedItem.props().event).toBe(event);
+  });
+
+  it('If delete event is posted to the store then it should be displayed in the newsfeed', async () => {
+    const event: DeleteEvent = {
+      type: 'DeleteEvent',
+      id: 7,
+      tag: 'none',
+      created: new Date().toString(),
+      title: "test_title",
+      section: "ForSale"
+    };
+    store.commit('addEvent', event);
+    await Vue.nextTick();
+
+    let newsfeedItem = wrapper.findComponent({name: 'DeleteEvent'});
+    expect(newsfeedItem.exists()).toBeTruthy();
+    expect(newsfeedItem.props().event).toBe(event);
+  });
+
+  it('If an keyword created event is posted to the store then it should be displayed in the newsfeed', async () => {
+    const event: KeywordCreatedEvent = {
+      type: 'KeywordCreatedEvent',
+      id: 7,
+      tag: 'none',
+      created: new Date().toString(),
+      keyword: {
+        id: 1,
+        name: "EDWARD",
+        created: "2012/01/01"
+      },
+      creator: testUser
+    };
+    store.commit('addEvent', event);
+    await Vue.nextTick();
+
+    let newsfeedItem = wrapper.findComponent({name: 'KeywordCreated'});
     expect(newsfeedItem.exists()).toBeTruthy();
     expect(newsfeedItem.props().event).toBe(event);
   });

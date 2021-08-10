@@ -280,19 +280,20 @@ public class SearchHelper {
                                               List<PredicateType> predicateTypesByIndex, List<String> fieldNames) {
         int i = 0;
         while (i < searchTokens.size()) {
-            if (searchTokens.get(i).startsWith("\"") || searchTokens.get(i).startsWith("'")) {
-                String termWithoutQuotes = searchTokens.get(i).substring(1, searchTokens.get(i).length() - 1);
-                searchSpecs.add(buildExactMatchSpec(termWithoutQuotes, fieldNames));
-                if (i + 1 < searchTokens.size()) {
-                    PredicateType predicateType = getPredicateType(searchTokens.get(i + 1));
-                    predicateTypesByIndex.add(predicateType);
-                }
-            } else if (!(searchTokens.get(i).equalsIgnoreCase("and") || searchTokens.get(i).equalsIgnoreCase("or"))) {
-                searchSpecs.add(buildPartialMatchSpec(searchTokens.get(i), fieldNames));
-                if (i + 1 < searchTokens.size()) {
-                    PredicateType predicateType = getPredicateType(searchTokens.get(i + 1));
-                    predicateTypesByIndex.add(predicateType);
-                }
+            String token = searchTokens.get(i);
+            if ((token.startsWith("\"") || token.startsWith("'")) && token.length() > 1) {
+                String termWithoutQuotes = token.substring(1, token.length() - 1);
+                searchSpecs.add(buildPartialMatchSpec(termWithoutQuotes, fieldNames));
+
+            } else if (!(token.equalsIgnoreCase("and") || token.equalsIgnoreCase("or"))) {
+                searchSpecs.add(buildPartialMatchSpec(token, fieldNames));
+            } else {
+                i++;
+                continue; // The current token is an operator so skip it
+            }
+            if (i + 1 < searchTokens.size()) {
+                PredicateType predicateType = getPredicateType(searchTokens.get(i + 1));
+                predicateTypesByIndex.add(predicateType);
             }
             i++;
         }
@@ -417,7 +418,7 @@ public class SearchHelper {
                 termEndingIndex++;
             }
             if (!foundClosingQuote) {
-                SearchFormatException searchFormatException = new SearchFormatException("Search string contains opening quote but" +
+                SearchFormatException searchFormatException = new SearchFormatException("Search string contains opening quote but " +
                         "no closing quote.");
                 logger.error(searchFormatException.getMessage());
                 throw(searchFormatException);
