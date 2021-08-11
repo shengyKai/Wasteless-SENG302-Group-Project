@@ -94,11 +94,6 @@ const routes = [
     meta: { title: 'User Cards' },
   },
   {
-    path: '/reply',
-    component: ConversationReply,
-    meta: { title: 'Replyyyyyy' },
-  },
-  {
     path: "*",
     component: NotFound,
     meta: { title: 'Not Found' }
