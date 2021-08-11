@@ -100,42 +100,47 @@
       <v-card>
         <v-card color='secondary lighten-2'>
           <v-card-title>
-            <strong>Send a message to {{firstName}}</strong>
+            Send a message to {{firstName}}
           </v-card-title>
           <v-card-subtitle>
             Your message will appear on their feed
           </v-card-subtitle>
         </v-card>
-        <v-form v-model="directMessageValid" ref="directMessageForm">
-          <v-card-text>
-            <v-textarea
-              solo
-              outlined
-              clearable
-              prepend-inner-icon="mdi-comment"
-              no-resize
-              :counter="200"
-              :rules="mandatoryRules.concat(maxCharRules())"
-              v-model="directMessageContent"/>
-          </v-card-text>
-          <v-card-actions>
-            <v-alert v-if="directMessageError !== undefined" color="red" type="error" dense text>
-              {{directMessageError}}
-            </v-alert>
-            <v-spacer/>
-            <v-btn color="primary"
-                   text
-                   :disabled="!directMessageValid"
-                   @click="sendMessage">
-              Send
-            </v-btn>
-            <v-btn color="primary"
-                   text
-                   @click="messageOwnerDialog = false; directMessageError = undefined; directMessageContent=''">
-              Cancel
-            </v-btn>
-          </v-card-actions>
-        </v-form>
+        <v-parallax
+          dark
+          src="https://cdn.vuetifyjs.com/images/backgrounds/vbanner.jpg"
+        >
+          <v-form v-model="directMessageValid" ref="directMessageForm">
+            <v-card-text>
+              <v-textarea
+                solo
+                outlined
+                clearable
+                prepend-inner-icon="mdi-comment"
+                no-resize
+                :counter="200"
+                :rules="mandatoryRules.concat(maxCharRules())"
+                v-model="directMessageContent"/>
+            </v-card-text>
+            <v-card-actions>
+              <v-alert v-if="directMessageError !== undefined" color="red" type="error" dense text>
+                {{directMessageError}}
+              </v-alert>
+              <v-spacer/>
+              <v-btn color="primary"
+                     text
+                     :disabled="!directMessageValid"
+                     @click="sendMessage">
+                Send
+              </v-btn>
+              <v-btn color="primary"
+                     text
+                     @click="messageOwnerDialog = false; directMessageError = undefined; directMessageContent=''">
+                Cancel
+              </v-btn>
+            </v-card-actions>
+          </v-form>
+        </v-parallax>
       </v-card>
     </v-dialog>
   </div>
