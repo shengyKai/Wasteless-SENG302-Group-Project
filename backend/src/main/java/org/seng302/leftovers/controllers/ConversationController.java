@@ -22,14 +22,16 @@ import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 import java.util.Set;
 
-
+/**
+ * This controller handles requests involving Conversations between Users
+ */
 @RestController
 public class ConversationController {
     private final MarketplaceCardRepository marketplaceCardRepository;
     private final UserRepository userRepository;
     private final MessageRepository messageRepository;
     private final ConversationRepository conversationRepository;
-    private final Logger logger = LogManager.getLogger(CardController.class.getName());
+    private final Logger logger = LogManager.getLogger(ConversationController.class.getName());
 
 
     @Autowired
@@ -63,14 +65,14 @@ public class ConversationController {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You do not have permission to post to this conversation");
         }
         // Is the sender card creator or potential buyer or admin?
-        if (!Set.of(buyer, card.getCreator()).contains(sender) && !AuthenticationTokenManager.sessionIsAdmin(request)) {
+        if (!List.of(buyer, card.getCreator()).contains(sender) && !AuthenticationTokenManager.sessionIsAdmin(request)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You do not have permission to post to this conversation");
         }
 
         var conversation = conversationRepository.findByCardAndBuyer(card, buyer).orElse(new Conversation(card, buyer));
 
         // The first message must be from the buyer
-        if (conversation.getMessages().isEmpty() && sender == card.getCreator()) {
+        if (conversation.getMessages().isEmpty() && sender.equals(card.getCreator())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You cannot start a conversation with this person");
         }
 
