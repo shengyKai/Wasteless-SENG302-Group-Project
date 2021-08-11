@@ -2,11 +2,7 @@
 
 exports[`KeywordCreated.vue Must match snapshot 1`] = `
 <div>
-  <div class="delete"><button type="button" class="v-icon notranslate deleteButton v-icon--link mdi mdi-trash-can theme--light red--text"></button>
-    <div class="deletion-error">
-
-    </div>
-  </div>
+  <div class="delete"><button type="button" class="v-icon notranslate deleteButton v-icon--link mdi mdi-trash-can theme--light red--text"></button></div>
   <div class="v-card__title">
     Keyword "TestKeywordName" has been created
   </div>
@@ -18,6 +14,9 @@ exports[`KeywordCreated.vue Must match snapshot 1`] = `
   </div>
   <div class="v-card__actions justify-center"><button type="button" class="v-btn v-btn--is-elevated v-btn--has-bg theme--light v-size--default error"><span class="v-btn__content">Remove</span></button></div>
   <!---->
+  <div class="v-card__text justify-center">
+    <!---->
+  </div>
   <div class="row justify-start" style="min-height: 10px;">
     <div class="shrink col"><span class="ma-2 ml-4 mb-3 v-chip v-chip--clickable v-chip--label v-chip--no-color theme--light v-size--default white--text" aria-haspopup="true" aria-expanded="false"><span class="v-chip__content"><i aria-hidden="true" class="v-icon notranslate v-icon--left mdi mdi-label theme--light"></i>
             Tag
