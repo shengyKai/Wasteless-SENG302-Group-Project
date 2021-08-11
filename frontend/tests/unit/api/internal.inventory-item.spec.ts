@@ -1,5 +1,5 @@
-import * as api from '@/api/internal';
-import axios, { AxiosError, AxiosInstance } from 'axios';
+import { CreateInventoryItem, getInventory, InventoryItem, modifyInventoryItem, SearchResults } from '@/api/internal';
+import axios, {AxiosInstance } from 'axios';
 
 jest.mock('axios', () => ({
   create: jest.fn(function () {
@@ -21,7 +21,7 @@ const instance: Mocked<Pick<AxiosInstance, 'get', 'put'>> = axios.instance;
 
 describe("Test GET /businesses/:businessId/inventory endpoint", () => {
   it('When response is a inventory array with all fields, the result will be an inventory array', async () => {
-    const responseData: api.SearchResults<api.InventoryItem> = {
+    const responseData: SearchResults<InventoryItem> = {
       count: 5,
       results: [
         {
@@ -49,12 +49,12 @@ describe("Test GET /businesses/:businessId/inventory endpoint", () => {
     instance.get.mockResolvedValueOnce({
       data: responseData
     });
-    const inventories = await api.getInventory(7, 1, 10, "name", false);
+    const inventories = await getInventory(7, 1, 10, "name", false);
     expect(inventories).toEqual(responseData);
   });
 
   it('When response is a inventory array with the required fields, the result will be an inventory array', async () => {
-    const responseData: api.SearchResults<api.InventoryItem> = {
+    const responseData: SearchResults<InventoryItem> = {
       count: 100,
       results: [
         {
@@ -73,7 +73,7 @@ describe("Test GET /businesses/:businessId/inventory endpoint", () => {
     instance.get.mockResolvedValueOnce({
       data: responseData
     });
-    const inventories = await api.getInventory(7, 1, 10, "name", false);
+    const inventories = await getInventory(7, 1, 10, "name", false);
     expect(inventories).toEqual(responseData);
   });
 
@@ -93,7 +93,7 @@ describe("Test GET /businesses/:businessId/inventory endpoint", () => {
     instance.get.mockResolvedValueOnce({
       data: responseData
     });
-    const inventories = await api.getInventory(7, 1, 10, "name", false);
+    const inventories = await getInventory(7, 1, 10, "name", false);
     expect(inventories).toEqual("Response is not inventory array");
   });
 
@@ -103,7 +103,7 @@ describe("Test GET /businesses/:businessId/inventory endpoint", () => {
         status: undefined,
       }
     });
-    const inventories = await api.getInventory(7, 1, 10, "name", false);
+    const inventories = await getInventory(7, 1, 10, "name", false);
     expect(inventories).toEqual("Failed to reach backend");
   });
 
@@ -113,7 +113,7 @@ describe("Test GET /businesses/:businessId/inventory endpoint", () => {
         status: 401,
       }
     });
-    const inventories = await api.getInventory(7, 1, 10, "name", false);
+    const inventories = await getInventory(7, 1, 10, "name", false);
     expect(inventories).toEqual("You have been logged out. Please login again and retry");
   });
 
@@ -123,7 +123,7 @@ describe("Test GET /businesses/:businessId/inventory endpoint", () => {
         status: 403,
       }
     });
-    const inventories = await api.getInventory(7, 1, 10, "name", false);
+    const inventories = await getInventory(7, 1, 10, "name", false);
     expect(inventories).toEqual("Not an admin of the business");
   });
 
@@ -133,7 +133,7 @@ describe("Test GET /businesses/:businessId/inventory endpoint", () => {
         status: 406,
       }
     });
-    const inventories = await api.getInventory(7, 1, 10, "name", false);
+    const inventories = await getInventory(7, 1, 10, "name", false);
     expect(inventories).toEqual("Business not found");
   });
 
@@ -143,20 +143,20 @@ describe("Test GET /businesses/:businessId/inventory endpoint", () => {
         status: 999,
       }
     });
-    const inventories = await api.getInventory(7, 1, 10, "name", false);
+    const inventories = await getInventory(7, 1, 10, "name", false);
     expect(inventories).toEqual("Request failed: 999");
   });
 
   it('When a response without a status is received, the result returns an error message indicating that the server could not be reached', async () => {
     instance.get.mockRejectedValueOnce("Server is down");
-    const message = await api.getInventory(7, 1, 10, "name", false);
+    const message = await getInventory(7, 1, 10, "name", false);
     expect(message).toEqual('Failed to reach backend');
   });
 });
 
 describe("Test PUT /businesses/:businessId/inventory/:inventoryItemId endpoint", () => {
 
-  const invItem: api.CreateInventoryItem = {
+  const invItem: CreateInventoryItem = {
     productId: "ABC",
     quantity: 4,
     expires: "2023-02-11",
@@ -168,7 +168,7 @@ describe("Test PUT /businesses/:businessId/inventory/:inventoryItemId endpoint",
         status: 200,
       }
     });
-    const message = await api.modifyInventoryItem(7, 1, invItem);
+    const message = await modifyInventoryItem(7, 1, invItem);
     expect(message).toBe(undefined);
   });
 
@@ -178,7 +178,7 @@ describe("Test PUT /businesses/:businessId/inventory/:inventoryItemId endpoint",
         status: undefined,
       }
     });
-    const message = await api.modifyInventoryItem(7, 1, invItem);
+    const message = await modifyInventoryItem(7, 1, invItem);
     expect(message).toEqual("Failed to reach backend");
   });
 
@@ -188,7 +188,7 @@ describe("Test PUT /businesses/:businessId/inventory/:inventoryItemId endpoint",
         status: 401,
       }
     });
-    const message = await api.modifyInventoryItem(7, 1, invItem);
+    const message = await modifyInventoryItem(7, 1, invItem);
     expect(message).toEqual("Missing/Invalid access token");
   });
 
@@ -198,7 +198,7 @@ describe("Test PUT /businesses/:businessId/inventory/:inventoryItemId endpoint",
         status: 403,
       }
     });
-    const message = await api.modifyInventoryItem(7, 1, invItem);
+    const message = await modifyInventoryItem(7, 1, invItem);
     expect(message).toEqual("Operation not permitted");
   });
 
@@ -208,7 +208,7 @@ describe("Test PUT /businesses/:businessId/inventory/:inventoryItemId endpoint",
         status: 406,
       }
     });
-    const message = await api.modifyInventoryItem(7, 1, invItem);
+    const message = await modifyInventoryItem(7, 1, invItem);
     expect(message).toEqual("Inventory item/Business not found");
   });
 
@@ -221,7 +221,7 @@ describe("Test PUT /businesses/:businessId/inventory/:inventoryItemId endpoint",
         }
       },
     });
-    const message = await api.modifyInventoryItem(7, 1, invItem);
+    const message = await modifyInventoryItem(7, 1, invItem);
     expect(message).toEqual("Invalid parameters: Quantity too high");
   });
 
@@ -231,13 +231,13 @@ describe("Test PUT /businesses/:businessId/inventory/:inventoryItemId endpoint",
         status: 999,
       }
     });
-    const message = await api.modifyInventoryItem(7, 1, invItem);
+    const message = await modifyInventoryItem(7, 1, invItem);
     expect(message).toEqual("Request failed: 999");
   });
 
   it('When a response without a status is received, the result returns an error message indicating that the server could not be reached', async () => {
     instance.put.mockRejectedValueOnce("Server is down");
-    const message = await api.modifyInventoryItem(7, 1, invItem);
+    const message = await modifyInventoryItem(7, 1, invItem);
     expect(message).toEqual("Failed to reach backend");
   });
 

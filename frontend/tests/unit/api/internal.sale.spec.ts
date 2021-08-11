@@ -1,5 +1,5 @@
-import * as api from '@/api/internal';
-import axios, { AxiosError, AxiosInstance } from 'axios';
+import { createSaleItem, getBusinessSales } from '@/api/internal';
+import axios, {AxiosInstance } from 'axios';
 jest.mock('axios', () => ({
   create: jest.fn(function () {
     // @ts-ignore
@@ -62,7 +62,7 @@ describe("Test GET /businesses/:businessId/listings endpoint", () => {
     instance.get.mockResolvedValueOnce({
       data: responseData
     });
-    const sales = await api.getBusinessSales(7, 1, 1, 'created', false);
+    const sales = await getBusinessSales(7, 1, 1, 'created', false);
     expect(sales).toEqual(responseData);
   });
 
@@ -107,7 +107,7 @@ describe("Test GET /businesses/:businessId/listings endpoint", () => {
     instance.get.mockResolvedValueOnce({
       data: responseData
     });
-    const sales = await api.getBusinessSales(7, 1, 1, 'created', false);
+    const sales = await getBusinessSales(7, 1, 1, 'created', false);
     expect(sales).toEqual(responseData);
   });
 
@@ -149,7 +149,7 @@ describe("Test GET /businesses/:businessId/listings endpoint", () => {
     instance.get.mockResolvedValueOnce({
       data: responseData
     });
-    const inventories = await api.getBusinessSales(7, 1, 1, 'created', false);
+    const inventories = await getBusinessSales(7, 1, 1, 'created', false);
     expect(inventories).toEqual("Response is not Sale array");
   });
 
@@ -159,7 +159,7 @@ describe("Test GET /businesses/:businessId/listings endpoint", () => {
         status: undefined,
       }
     });
-    const inventories = await api.getBusinessSales(7, 1, 1, 'created', false);
+    const inventories = await getBusinessSales(7, 1, 1, 'created', false);
     expect(inventories).toEqual("Failed to reach backend");
   });
 
@@ -169,7 +169,7 @@ describe("Test GET /businesses/:businessId/listings endpoint", () => {
         status: 401,
       }
     });
-    const inventories = await api.getBusinessSales(7, 1, 1, 'created', false);
+    const inventories = await getBusinessSales(7, 1, 1, 'created', false);
     expect(inventories).toEqual("You have been logged out. Please login again and retry");
   });
 
@@ -179,7 +179,7 @@ describe("Test GET /businesses/:businessId/listings endpoint", () => {
         status: 406,
       }
     });
-    const inventories = await api.getBusinessSales(7, 1, 1, 'created', false);
+    const inventories = await getBusinessSales(7, 1, 1, 'created', false);
     expect(inventories).toEqual("The given business does not exist");
   });
 
@@ -189,13 +189,13 @@ describe("Test GET /businesses/:businessId/listings endpoint", () => {
         status: 999,
       }
     });
-    const inventories = await api.getBusinessSales(7, 1, 1, 'created', false);
+    const inventories = await getBusinessSales(7, 1, 1, 'created', false);
     expect(inventories).toEqual("Request failed: 999");
   });
 
   it('When a response without a status is received, the result returns an error message indicating that the server could not be reached', async () => {
     instance.get.mockRejectedValueOnce("Server is down");
-    const message = await api.getBusinessSales(7, 1, 1, 'created', false);
+    const message = await getBusinessSales(7, 1, 1, 'created', false);
     expect(message).toEqual('Failed to reach backend');
   });
 
@@ -212,7 +212,7 @@ describe("Test GET /businesses/:businessId/listings endpoint", () => {
         "listingId": 1
       }
     });
-    const salesItemResponse = await api.createSaleItem(1, salesItem);
+    const salesItemResponse = await createSaleItem(1, salesItem);
     expect(salesItemResponse).toEqual({
       "listingId": 1
     });
@@ -229,7 +229,7 @@ describe("Test GET /businesses/:businessId/listings endpoint", () => {
         "listingId": 1
       }
     });
-    const salesItemResponse = await api.createSaleItem(1, salesItem);
+    const salesItemResponse = await createSaleItem(1, salesItem);
     expect(salesItemResponse).toEqual({
       "listingId": 1
     });
@@ -248,7 +248,7 @@ describe("Test GET /businesses/:businessId/listings endpoint", () => {
         status: 400
       }
     });
-    const errorResponse = await api.createSaleItem(1, salesItem);
+    const errorResponse = await createSaleItem(1, salesItem);
     expect(errorResponse).toEqual('Invalid data with the Sale Item');
   });
 
@@ -263,7 +263,7 @@ describe("Test GET /businesses/:businessId/listings endpoint", () => {
         status: 403
       }
     });
-    const errorResponse = await api.createSaleItem(1, salesItem);
+    const errorResponse = await createSaleItem(1, salesItem);
     expect(errorResponse).toEqual('Operation not permitted');
   });
 
@@ -276,7 +276,7 @@ describe("Test GET /businesses/:businessId/listings endpoint", () => {
     instance.post.mockRejectedValueOnce({
       response: {}
     });
-    const errorResponse = await api.createSaleItem(1, salesItem);
+    const errorResponse = await createSaleItem(1, salesItem);
     expect(errorResponse).toEqual('Failed to reach backend');
   });
 
@@ -291,7 +291,7 @@ describe("Test GET /businesses/:businessId/listings endpoint", () => {
         status: 500
       }
     });
-    const errorResponse = await api.createSaleItem(1, salesItem);
+    const errorResponse = await createSaleItem(1, salesItem);
     expect(errorResponse).toEqual('Request failed: 500');
   });
 });

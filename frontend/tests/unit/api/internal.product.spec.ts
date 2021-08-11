@@ -1,6 +1,5 @@
 import { getProducts, Product, Image, SearchResults } from "@/api/internal";
-import { countryCodeRules } from "@/utils";
-import axios, { AxiosError, AxiosInstance } from 'axios';
+import axios, {AxiosInstance } from 'axios';
 
 jest.mock('axios', () => ({
   create: jest.fn(function() {
