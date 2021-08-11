@@ -30,7 +30,7 @@
       </v-select>
       <!-- Newsfeed -->
       <v-card
-        v-for="event in $store.getters.events"
+        v-for="event in eventsPage"
         :key="event.id"
         outlined
         rounded="lg"
@@ -94,20 +94,12 @@ export default {
        */
       resultsPerPage: 10,
       colours: ['none', 'red', 'orange', 'yellow', 'green', 'blue', 'purple'],
-      events: []
     };
   },
   computed: {
     storeEvents() {
       return this.$store.getters.events;
     },
-    // /**
-    //  * The event array sliced so that it can do pagination natively.
-    //  */
-    // events() {
-    //   const pageStartIndex = (this.currentPage - 1) * this.resultsPerPage;
-    //   return this.$store.getters.events.slice(pageStartIndex, (pageStartIndex + this.resultsPerPage));
-    // },
     /**
      * Current active user role
      */
@@ -131,8 +123,8 @@ export default {
      * Total number of results from the store
      */
     totalResults() {
-      if (this.storeEvents.length === undefined) return 0;
-      return this.storeEvents.length;
+      if (this.events.length === undefined) return 0;
+      return this.events.length;
     },
     /**
      * The total number of pages required to show all the events
@@ -152,38 +144,18 @@ export default {
         pageEndIndex = pageStartIndex + (this.totalResults % this.resultsPerPage);
       }
       return `Displaying ${pageStartIndex + 1} - ${pageEndIndex} of ${this.totalResults} results`;
-    }
-  },
-  created() {
-    this.updateEvents();
-  },
-  watch: {
-    /**
-     * Watch the currentPage so that it can update the event list as needed.
-     */
-    currentPage: function() {
-      this.updateEvents();
     },
-    filterBy: function() {
-      if (this.filterBy.length === 0) {
-        this.updateEvents();
-      } else {
-        this.events = this.storeEvents.filter(event => {
-          return this.filterBy.includes(event.tag);
-        });
-      }
+    events() {
+      if (this.filterBy.length === 0) return this.storeEvents;
+      return this.storeEvents.filter(event => {
+        return this.filterBy.includes(event.tag);
+      });
+    },
+    eventsPage() {
+      const pageStartIndex = (this.currentPage - 1) * this.resultsPerPage;
+      return this.events.slice(pageStartIndex, (pageStartIndex + this.resultsPerPage));
     }
   },
-  methods: {
-    /**
-     * Main logic for the frontend native pagination. Slices the list based on what page the user is in, and only shows
-     * the results for that page.
-     */
-    updateEvents() {
-      const pageStartIndex = (this.currentPage - 1) * this.resultsPerPage;
-      this.events = this.storeEvents.slice(pageStartIndex, (pageStartIndex + this.resultsPerPage));
-    }
-  }
 };
 </script>
 
