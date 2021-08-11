@@ -7,6 +7,7 @@
       <v-select
         color="primary"
         v-model="filterBy"
+        class="mb-1"
         flat
         solo-inverted
         hide-details
@@ -18,7 +19,7 @@
       >
         <!--Allows to access each chip's property in the v-select so that manipulation of the chip's color is possible -->
         <template #selection="{ item }">
-          <v-chip :color="item"
+          <v-chip :color="item.value"
                   label
                   text-color="white">
             <v-icon left>
@@ -84,6 +85,9 @@ export default {
   },
   data() {
     return {
+      /**
+       * The list of colour attributes to filter by
+       */
       filterBy: [],
       /**
        * Currently selected page (1 is first page)
@@ -93,10 +97,15 @@ export default {
        * Number of results per a result page
        */
       resultsPerPage: 10,
-      colours: ['none', 'red', 'orange', 'yellow', 'green', 'blue', 'purple'],
+      colours: [{text: "None", value: 'none'}, {text: "Red", value: 'red'}, {text: "Orange", value: 'orange'},
+        {text: "Yellow", value: 'yellow'}, {text: "Green", value: 'green'}, {text: "Blue", value: 'blue'},
+        {text: "Purple", value: 'purple'}],
     };
   },
   computed: {
+    /**
+     * The events retrieved from the store
+     */
     storeEvents() {
       return this.$store.getters.events;
     },
@@ -145,12 +154,18 @@ export default {
       }
       return `Displaying ${pageStartIndex + 1} - ${pageEndIndex} of ${this.totalResults} results`;
     },
+    /**
+     * The events list which is filtered after retrieving from the store
+     */
     events() {
       if (this.filterBy.length === 0) return this.storeEvents;
       return this.storeEvents.filter(event => {
         return this.filterBy.includes(event.tag);
       });
     },
+    /**
+     * The events list after pagination for each page
+     */
     eventsPage() {
       const pageStartIndex = (this.currentPage - 1) * this.resultsPerPage;
       return this.events.slice(pageStartIndex, (pageStartIndex + this.resultsPerPage));
