@@ -64,6 +64,17 @@ public interface MarketplaceCardRepository extends CrudRepository<MarketplaceCar
     }
 
     /**
+     * Fetches a marketplace card from the database for the given card id. This method will also check that
+     * the card exists and will throw a 404 response exception if no card exists with the given id.
+     * @param id Card id to filter by
+     * @param status The HttpStatus to throw if a card is not found
+     * @return Marketplace card with the given id
+     */
+    default MarketplaceCard getCard(Long id, HttpStatus status) {
+        return findById(id).orElseThrow(() -> new ResponseStatusException(status, "No card exists with the given id"));
+    }
+
+    /**
      * Return all cards which have an closing data before the given cutoff data and which do not already have an associated
      * expiry event.
      * @param cutOff Cards with a closing date earlier than this date will be returned.
