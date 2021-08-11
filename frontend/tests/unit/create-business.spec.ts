@@ -47,8 +47,6 @@ function makeTestUser(userId: number) {
     },
     businessesAdministered: [],
   };
-
-
   return user;
 }
 
