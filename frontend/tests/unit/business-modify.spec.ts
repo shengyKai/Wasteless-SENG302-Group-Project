@@ -1,11 +1,12 @@
 import Vue from 'vue';
-import Vuex from 'vuex';
+import Vuex, { Store } from 'vuex';
 import Vuetify from 'vuetify';
 import { createLocalVue, Wrapper, mount } from '@vue/test-utils';
 
 import ModifyBusiness from '@/components/BusinessProfile/index.vue';
 import {castMock} from "./utils";
 import * as api from '@/api/internal';
+import {getStore, resetStoreForTesting} from '@/store';
 import {User, Location, Business} from "@/api/internal";
 
 jest.mock('@/api/internal', () => ({
@@ -76,3 +77,118 @@ function createTestBusiness(businessId: number, primaryAdminId: number, admins: 
   };
   return business;
 }
+
+describe('modifyBusiness.vue', () => {
+  // Container for the wrapper that goes around Modify Business
+  let appWrapper: Wrapper<any>;
+
+  // Container for the ModifyBusiness used in these tests
+  let wrapper: Wrapper<any>;
+
+  const diacritics = ['À','È','Ì','Ò','Ù','à','è','ì','ò','ù','Á','É','Í','Ó','Ú','Ý','á','é','í','ó','ú','ý','Â','Ê','Î','Ô','Û','â','ê','î','ô','û','Ã','Ñ','Õ','ã','ñ','õ','Ä','Ë','Ï','Ö','Ü','Ÿ','ä','ë','ï','ö','ü','ÿ'];
+
+  /**
+   * Sets up the test ModifyBusiness instance
+   */
+  beforeEach(() => {
+    const vuetify = new Vuetify();
+    localVue.use(Vuex);
+    resetStoreForTesting();
+    let store = getStore();
+    store.state.user = createTestUser(1);
+    //TODO Gonna need help setting this up
+    //store.state.business = createTestBusiness(1);
+  })
+
+  /**
+   * Finds the update button in the Modify Business form
+   * 
+   * @returns A wrapper around the update button
+   */
+  function findUpdateButton() {
+    const buttons = wrapper.findAllComponents({ name: 'v-btn' });
+    const filtered = buttons.filter(button => button.text().includes('Update Business'));
+    expect(filtered.length).toBe(1);
+    return filtered.at(0);
+  }
+
+  it('Valid if no fields are provided', async () => {
+    //TODO
+  });
+
+  it('Valid if all fields are provided', async () => {
+    //TODO
+  });
+
+  it('Valid if the new name of the business is provided', async () => {
+    //TODO
+  });
+
+  it('Valid if the new description of the business is provided', async () => {
+    //TODO
+  });
+
+  it('Valid if the new business type of the business is provided', async () => {
+    //TODO
+  });
+
+  it('Valid if the new street address is provided', async () => {
+    //TODO
+  });
+
+  it('Valid if the new district is provided', async () => {
+    //TODO
+  });
+
+  it('Valid if the new city is provided', async () => {
+    //TODO
+  });
+
+  it('Valid if the new region is provided', async () => {
+    //TODO
+  });
+
+  it('Valid if the new country is provided', async () => {
+    //TODO
+  });
+
+  it('Valid if the new postcode is provided', async () => {
+    //TODO
+  });
+
+  it('Invalid if the new business name is too long', async () => {
+    //TODO
+  });
+
+  it('Invalid if the new description is too long', async () => {
+    //TODO
+  });
+
+  it('Invalid if the street address contains a character', async () => {
+    //TODO
+  });
+
+  it('Invalid if the street address is too long', async () => {
+    //TODO
+  });
+
+  it('Invalid if the district is too long', async () => {
+    //TODO
+  });
+
+  it('Invalid if the city is too long', async () => {
+    //TODO
+  });
+
+  it('Invalid if the region is too long', async () => {
+    //TODO
+  });
+
+  it('Invalid if the country is too long', async () => {
+    //TODO
+  });
+
+  it('Invalid if postcode is too long', async () => {
+    //TODO
+  });
+})

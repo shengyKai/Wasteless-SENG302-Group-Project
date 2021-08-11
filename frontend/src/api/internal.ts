@@ -382,7 +382,7 @@ export async function createBusiness(business: CreateBusiness): Promise<MaybeErr
 
 /**
  * Modifies a business
- * 
+ *
  * @param businessId The business id of the business to be modified
  * @param business The properties to modify a business with
  * @returns undefined if operation is successful, otherwise a string error.
