@@ -111,7 +111,13 @@ public class BusinessController {
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "Business not found"));
 
             loggedInUserHasPermissions(request, business);
+            if (!AuthenticationTokenManager.sessionCanSeePrivate(request, body.getPrimaryAdministratorId())) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User does not have permission to change the owner to this user");
+            }
+            User newOwner = userRepository.findById(body.getPrimaryAdministratorId())
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Updated primary administrator does not exist"));
 
+            business.setPrimaryOwner(newOwner);
             business.setName(body.getName());
             business.setDescription(body.getDescription());
             business.setAddress(body.getAddress().createLocation());
