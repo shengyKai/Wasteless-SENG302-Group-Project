@@ -110,6 +110,13 @@
                 />
               </v-row>
               <v-row>
+                <v-btn-toggle
+                  v-model="updateProductCountry"
+                >
+                  <v-btn>Update catalogue entries to new country</v-btn>
+                </v-btn-toggle>
+              </v-row>
+              <v-row>
                 <v-text-field
                   label="New postcode"
                   v-model="newPostcode"
@@ -218,6 +225,7 @@ export default {
       newRegion: "",
       newCountry: "",
       newPostcode: "",
+      updateProductCountry: true,
       valid: false,
       maxCharRules: () => maxCharRules(100),
       maxCharDescriptionRules: () => maxCharRules(200),
