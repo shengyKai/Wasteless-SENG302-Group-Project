@@ -117,11 +117,11 @@
                 />
               </v-row>
             </v-col>
-            <v-card-title>Remove Administrators</v-card-title>
+            <v-card-title>Change Primary Administrator</v-card-title>
             <v-col>
               <v-row>
                 <span v-for="admin in administrators" :key="admin.id">
-                  <v-chip color="red" text-color="white"> {{ admin.firstName }} {{ admin.lastName }} </v-chip>
+                  <v-chip :color="getAdminColour(admin)" text-color="white"> {{ admin.firstName }} {{ admin.lastName }} </v-chip>
                 </span>
               </v-row>
             </v-col>
@@ -280,7 +280,15 @@ export default {
     },
     async returnToSearch() {
       await this.$router.push({path: '/search/business', query:{...this.$route.query}});
-    }
+    },
+
+    getAdminColour(admin) {
+      if (admin.id === this.business.primaryAdministratorId) {
+        return "red";
+      } else {
+        return "green";
+      }
+    },
   }
 };
 </script>
