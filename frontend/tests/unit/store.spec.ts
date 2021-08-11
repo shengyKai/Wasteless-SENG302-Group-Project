@@ -21,6 +21,26 @@ describe('store.ts', () => {
     store = getStore();
   });
 
+  it('areEventsStaged returns false if no events have been added to the list of events to be deleted', () => {
+    expect(store.state.eventForDeletionIds.length).toBe(0);
+    expect(store.getters.areEventsStaged).toBeFalsy();
+  })
+
+  it('areEventsStaged returns true if one event have been added to the list of events to be deleted', () => {
+    store.commit('stageEventForDeletion', 100);
+    expect(store.state.eventForDeletionIds.length).toBe(1);
+    expect(store.getters.areEventsStaged).toBeTruthy();
+  })
+
+  it('areEventsStaged returns true if multiple events have been added to the list of events to be deleted', () => {
+    store.commit('stageEventForDeletion', 18);
+    store.commit('stageEventForDeletion', 31);
+    store.commit('stageEventForDeletion', 44);
+    expect(store.state.eventForDeletionIds.length).toBe(3);
+    expect(store.getters.areEventsStaged).toBeTruthy();
+  })
+
+
   describe('deleteStagedEvent', () => {
 
     it('Returns error message if event is not staged for deletion', async () => {
@@ -58,28 +78,6 @@ describe('store.ts', () => {
       expect(store.state.eventForDeletionIds.includes(100)).toBeTruthy;
       const response = await store.dispatch('deleteStagedEvent', 100);
       expect(response).toBe('This is an error message');
-    });
-
-  });
-
-  describe('deleteAllStagedEvents', () => {
-
-    beforeEach(() => {
-      store.commit('stageEventForDeletion', 17);
-      store.commit('stageEventForDeletion', 90);
-      store.commit('stageEventForDeletion', 22);
-    });
-
-    it('Removes all events from the list of events staged for deletion', async () => {
-      expect(store.state.eventForDeletionIds.length).toBe(3);
-      await store.dispatch('deleteAllStagedEvents');
-      expect(store.state.eventForDeletionIds.length).toBe(0);
-    });
-
-    it('Calls API endpoint to permenantly delete events once for each event in the list', async () => {
-      const callTimesBefore = deleteNotification.mock.calls.length;
-      await store.dispatch('deleteAllStagedEvents');
-      expect(deleteNotification).toBeCalledTimes(callTimesBefore + 3);
     });
 
   });

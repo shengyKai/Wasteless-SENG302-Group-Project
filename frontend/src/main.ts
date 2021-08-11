@@ -70,15 +70,16 @@ new Vue({
   vuetify,
   router,
   template: '<App/>',
-  created() {
-    window.addEventListener('beforeunload', this.beforeClose);
+  /**
+   * Before the window closes, check if any events have been staged for detetion and
+   * if they have warn the user.
+   */
+  beforeMount() {
+    window.addEventListener("beforeunload", event => {
+      if (!getStore().getters.areEventsStaged) return;
+      event.preventDefault();
+      // Chrome requires returnValue to be set.
+      event.returnValue = "";
+    });
   },
-  methods: {
-    /**
-     * Delete all events which have been staged for deletion before the window closes.
-     */
-    async beforeClose() {
-      await getStore().dispatch('deleteAllStagedEvents');
-    }
-  }
 });

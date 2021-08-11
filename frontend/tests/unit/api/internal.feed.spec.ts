@@ -49,14 +49,14 @@ describe("Test DELETE /feed/{id} endpoint", () => {
     expect(response).toEqual("Invalid authorization for notification removal");
   });
 
-  it("Notification with given ID cannot be accessed, not found returned", async () => {
+  it("Notification with given ID cannot be found, undefined returned", async () => {
     instance.delete.mockRejectedValueOnce({
       response: {
         status: 406
       }
     });
     const response = await deleteNotification(1);
-    expect(response).toEqual("Notification not found");
+    expect(response).toEqual(undefined);
   });
 });
 

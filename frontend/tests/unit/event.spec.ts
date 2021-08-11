@@ -93,16 +93,6 @@ describe('Event.vue', () => {
       });
     });
 
-    it('Delete button is present', () => {
-      const buttons = wrapper.findAllComponents({ ref: 'deleteButton' });
-      expect(buttons.length).toBe(1);
-    });
-
-    it('Undo button is not present', () => {
-      const buttons = wrapper.findAllComponents({ ref: 'undoButton' });
-      expect(buttons.length).toBe(0);
-    });
-
     it('When deletion is finalized, method to permanently delete event is not called', async () => {
       await wrapper.vm.finalizeDeletion();
       expect(deleteNotification).toBeCalledTimes(0);
@@ -113,14 +103,6 @@ describe('Event.vue', () => {
       expect(wrapper.vm.deleted).toBeTruthy();
     });
 
-    it('When user tries to delete event, display changes to show undo button', async () => {
-      await wrapper.vm.initiateDeletion();
-      const deleteButtons = wrapper.findAllComponents({ ref: 'deleteButton' });
-      expect(deleteButtons.length).toBe(1);
-      const undoButtons = wrapper.findAllComponents({ ref: 'undoButton' });
-      expect(undoButtons.length).toBe(0);
-    });
-
   });
 
   describe('Event has been set to be deleted', () => {
@@ -129,16 +111,6 @@ describe('Event.vue', () => {
       await wrapper.setData({
         deleted: true,
       });
-    });
-
-    it('Undo button is present', () => {
-      const buttons = wrapper.findAllComponents({ ref: 'undoButton' });
-      expect(buttons.length).toBe(1);
-    });
-
-    it('Delete button is not present', () => {
-      const buttons = wrapper.findAllComponents({ ref: 'deleteButton' });
-      expect(buttons.length).toBe(0);
     });
 
     it('Remaining time is difference between current time and 10 secs after deletion time if this is positive', async () => {
@@ -164,14 +136,6 @@ describe('Event.vue', () => {
     it('When user tries to undo deletion, event is no longer set to be deleted', async () => {
       await wrapper.vm.undoDelete();
       expect(wrapper.vm.deleted).toBeFalsy();
-    });
-
-    it('When user tries to undo deletion, display changes to original event view', async () => {
-      await wrapper.vm.undoDelete();
-      const deleteButtons = wrapper.findAllComponents({ ref: 'deleteButton' });
-      expect(deleteButtons.length).toBe(1);
-      const undoButtons = wrapper.findAllComponents({ ref: 'undoButton' });
-      expect(undoButtons.length).toBe(0);
     });
 
   });
