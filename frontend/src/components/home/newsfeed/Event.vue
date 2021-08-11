@@ -22,9 +22,6 @@
       >
         mdi-trash-can
       </v-icon>
-      <div class="deletion-error">
-        {{ errorMessage }}
-      </div>
     </div>
     <v-card-title>
       {{ title }}
@@ -33,6 +30,9 @@
       {{ date }}, {{ time }}
     </v-card-subtitle>
     <slot/>
+    <v-card-text class="justify-center">
+      <div class="error--text" v-if="errorMessage !== undefined">{{ errorMessage }}</div>
+    </v-card-text>
     <!-- For user to view their option about the available tag to choose from  -->
     <v-row
       justify="start"
@@ -40,18 +40,25 @@
     >
       <v-col class="shrink">
         <!-- The persistent chip that shows the tag for the message (default will be no colour) -->
-        <v-chip
-          class="ma-2"
-          color="primary"
-          @click="expand = !expand"
-          label
-          text-color="white"
-        >
-          <v-icon left>
-            mdi-label
-          </v-icon>
-          Current Tag
-        </v-chip>
+        <v-tooltip bottom>
+          <template v-slot:activator="{ on, attrs }">
+            <v-chip
+              class="ma-2 ml-4 mb-3"
+              :color="event.tag"
+              @click="expand = !expand"
+              label
+              text-color="white"
+              v-bind="attrs"
+              v-on="on"
+            >
+              <v-icon left>
+                mdi-label
+              </v-icon>
+              Tag
+            </v-chip>
+          </template>
+          <span>Click to view the available tags.</span>
+        </v-tooltip>
         <v-expand-transition>
           <v-card
             v-show="expand"
@@ -60,26 +67,30 @@
             class="mx-auto"
           >
             <div class="font-weight-medium">
-              Change your Tag:
+              <span class="ml-4">
+                Change your Tag:
+              </span>
             </div>
             <!--  Content that run through a loop of colours which at the same time set the colour of the chip
               Make the code more maintainable as it will be easy to modify colour in future and get the index
-              Trigger a method when the chip is clicked (will use the index to trigger)
+              Trigger a tagNotification when the chip is clicked (will take the colour as param)
         -->
-            <v-chip
-              class="ma-1"
-              v-for="colour in colours"
-              :key=colour
-              :color="colour"
-              label
-              text-color="white"
-              @click="changeTag"
-            >
-              <v-icon left>
-                mdi-label
-              </v-icon>
-              Tag
-            </v-chip>
+            <div class="ml-3">
+              <v-chip
+                class="ma-1"
+                v-for="colour in colours"
+                :key=colour
+                :color="colour"
+                label
+                text-color="white"
+                @click="tagNotification(colour)"
+              >
+                <v-icon left>
+                  mdi-label
+                </v-icon>
+                Tag
+              </v-chip>
+            </div>
           </v-card>
         </v-expand-transition>
       </v-col>
@@ -90,6 +101,7 @@
 <script>
 import { formatDate } from '@/utils';
 import synchronizedTime from '@/components/utils/Methods/synchronizedTime';
+import { setEventTag } from '../../../api/internal';
 
 export default {
   name: 'Event',
@@ -152,7 +164,7 @@ export default {
     },
     /**
      * Permanently delete an event if the deletion has not been undone. Restore the event to the feed
-     * and display an error message if the deletion was not successful.
+     * and display an errorMessage message if the deletion was not successful.
      */
     async finalizeDeletion() {
       if (this.deleted === true) {
@@ -167,6 +179,22 @@ export default {
           });
       }
     },
+
+    /**
+     * Call the setEventTag endpoint when user click on the tag changing button
+     * Will render errorMessage message if the response returned with one
+     * @param this.event.id To pass the endpoint for the event user wan to update
+     * @param colour        Take the colour that user wan to change the tag into
+     */
+    async tagNotification(colour) {
+      const result = await setEventTag(this.event.id, colour);
+      if (typeof result === 'string') {
+        this.errorMessage = result;
+      } else {
+        this.errorMessage = undefined;
+        this.expand = false;
+      }
+    },
     /**
      * Undo the deteletion of a temporarily deleted event and restore it to the user's feed.
      */
@@ -177,9 +205,6 @@ export default {
     /* This should be a method that allows user to change their current tag colour into the desired colour
      * Currently only alert `changing tag`, functionality will be implemented in another task
      */
-    changeTag () {
-      alert('Changing Tag...');
-    },
   }
 };
 </script>
