@@ -80,6 +80,7 @@
         </v-expand-transition>
       </v-col>
       <v-col class="float=right">
+        <!-- Tooltip for the reply button telling user what they can do with this button -->
         <v-tooltip bottom >
           <template v-slot:activator="{on, attrs }">
             <v-icon v-if="!isCardOwner"
@@ -97,10 +98,12 @@
         </v-tooltip>
       </v-col>
     </v-row>
+    <!-- Dialog that stay consistent with the firstMessage(in primary colour), replyMessage(in secondary colour) -->
     <v-dialog ref="messageDialog"
               v-model="messageOwnerDialog"
               max-width="600px">
       <v-card>
+        <!-- The 'TITLE' of the replyMessage component -->
         <v-card color='secondary lighten-2'>
           <v-card-title>
             Send a message to {{firstName}}
@@ -109,6 +112,7 @@
             Your message will appear on their feed
           </v-card-subtitle>
         </v-card>
+        <!-- The Message body input component -->
         <v-form v-model="directMessageValid" ref="directMessageForm">
           <v-card-text>
             <v-textarea
@@ -121,6 +125,7 @@
               :rules="mandatoryRules.concat(maxCharRules())"
               v-model="directMessageContent"/>
           </v-card-text>
+          <!-- Submit and Cancel button for the replyMessage component -->
           <v-card-actions>
             <v-alert v-if="directMessageError !== undefined" color="red" type="error" dense text>
               {{directMessageError}}

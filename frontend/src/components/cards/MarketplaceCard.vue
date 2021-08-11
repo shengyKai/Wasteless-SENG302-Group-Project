@@ -101,11 +101,13 @@
         </template>
         Ask this person a question
       </v-tooltip>
+      <!-- Dialog for firstMessage(in primary colour), replyMessage(in secondary colour) -->
       <v-dialog ref="messageDialog"
                 v-model="messageOwnerDialog"
                 max-width="600px">
         <v-card>
-          <v-card color='secondary lighten-2'>
+          <!-- The 'TITLE' of the firstMessage component -->
+          <v-card color='primary lighten-3'>
             <v-card-title>
               <strong>Send a message to {{content.creator.firstName}}</strong>
             </v-card-title>
@@ -113,6 +115,7 @@
               Your message will appear on their feed
             </v-card-subtitle>
           </v-card>
+          <!-- The Message body input component -->
           <v-form v-model="directMessageValid" ref="directMessageForm">
             <v-card-text>
               <v-textarea
@@ -125,6 +128,7 @@
                 :rules="mandatoryRules.concat(maxCharRules())"
                 v-model="directMessageContent"/>
             </v-card-text>
+            <!-- Submit and Cancel button for the replyMessage component -->
             <v-card-actions>
               <v-alert v-if="directMessageError !== undefined" color="red" type="error" dense text>
                 {{directMessageError}}
