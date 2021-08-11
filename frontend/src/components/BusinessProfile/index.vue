@@ -69,7 +69,6 @@
                   label="New business type of the business"
                   v-model="newBusinessType"
                   :items="businessTypes"
-                  :rules="mandatoryRules()"
                 />
               </v-row>
             </v-col>
@@ -146,7 +145,8 @@
           <v-card-actions>
             <v-btn
               type="submit"
-              color="primary">
+              color="primary"
+              :disabled="!valid">
               Update Business
             </v-btn>
             <v-btn
@@ -187,7 +187,6 @@ import { getBusiness } from '../../api/internal';
 import convertAddressToReadableText from '@/components/utils/Methods/convertJsonAddressToReadableText';
 import {
   maxCharRules,
-  mandatoryRules,
   alphabetRules,
   alphabetExtendedSingleLineRules,
   alphabetExtendedMultilineRules,
@@ -222,7 +221,6 @@ export default {
       valid: false,
       maxCharRules: () => maxCharRules(100),
       maxCharDescriptionRules: () => maxCharRules(200),
-      mandatoryRules: () => mandatoryRules,
       alphabetExtendedSingleLineRules: () => alphabetExtendedSingleLineRules,
       alphabetExtendedMultilineRules: () => alphabetExtendedMultilineRules,
       alphabetRules: () => alphabetRules,
