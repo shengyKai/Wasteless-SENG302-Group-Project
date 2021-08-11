@@ -1,4 +1,4 @@
-import * as api from '@/api/internal';
+import { createMarketplaceCard, CreateMarketplaceCard, deleteMarketplaceCard, extendMarketplaceCardExpiry, getMarketplaceCardsBySectionAndKeywords, getMarketplaceCardsByUser, MarketplaceCard, modifyMarketplaceCard, ModifyMarketplaceCard, User } from '@/api/internal';
 import axios, { AxiosInstance } from 'axios';
 
 jest.mock('axios', () => ({
@@ -23,7 +23,7 @@ const instance: Mocked<Pick<AxiosInstance, 'post' | 'delete' | 'put' | 'get' >> 
 
 describe("Test POST /cards endpoint", () => {
 
-  const marketplaceCard : api.CreateMarketplaceCard = {
+  const marketplaceCard : CreateMarketplaceCard = {
     creatorId: 1,
     section: "Exchange",
     title: "Title",
@@ -36,7 +36,7 @@ describe("Test POST /cards endpoint", () => {
         cardId: 15
       }
     });
-    const response = await api.createMarketplaceCard(marketplaceCard);
+    const response = await createMarketplaceCard(marketplaceCard);
     expect(response).toEqual(15);
   });
 
@@ -46,7 +46,7 @@ describe("Test POST /cards endpoint", () => {
         notCardId: 15
       }
     });
-    const response = await api.createMarketplaceCard(marketplaceCard);
+    const response = await createMarketplaceCard(marketplaceCard);
     expect(response).toEqual('Invalid response format');
   });
 
@@ -56,7 +56,7 @@ describe("Test POST /cards endpoint", () => {
         cardId: "Not a number"
       }
     });
-    const response = await api.createMarketplaceCard(marketplaceCard);
+    const response = await createMarketplaceCard(marketplaceCard);
     expect(response).toEqual('Invalid response format');
   });
 
@@ -69,7 +69,7 @@ describe("Test POST /cards endpoint", () => {
         }
       }
     });
-    const response = await api.createMarketplaceCard(marketplaceCard);
+    const response = await createMarketplaceCard(marketplaceCard);
     expect(response).toEqual("Incorrect marketplace card format: Title too long");
   });
 
@@ -79,7 +79,7 @@ describe("Test POST /cards endpoint", () => {
         status: 401,
       }
     });
-    const response = await api.createMarketplaceCard(marketplaceCard);
+    const response = await createMarketplaceCard(marketplaceCard);
     expect(response).toEqual("You have been logged out. Please login again and retry");
   });
 
@@ -89,7 +89,7 @@ describe("Test POST /cards endpoint", () => {
         status: 403,
       }
     });
-    const response = await api.createMarketplaceCard(marketplaceCard);
+    const response = await createMarketplaceCard(marketplaceCard);
     expect(response).toEqual("A user cannot create a marketplace card for another user");
   });
 
@@ -102,7 +102,7 @@ describe("Test POST /cards endpoint", () => {
         }
       }
     });
-    const response = await api.createMarketplaceCard(marketplaceCard);
+    const response = await createMarketplaceCard(marketplaceCard);
     expect(response).toEqual("Request failed: The server is having a bad day");
   });
 
@@ -112,7 +112,7 @@ describe("Test POST /cards endpoint", () => {
         status: undefined,
       }
     });
-    const response = await api.createMarketplaceCard(marketplaceCard);
+    const response = await createMarketplaceCard(marketplaceCard);
     expect(response).toEqual("Failed to reach backend");
   });
 });
@@ -124,7 +124,7 @@ describe("Test DELETE /cards/{id} endpoint", () => {
         status: 200
       }
     });
-    const response = await api.deleteMarketplaceCard(1);
+    const response = await deleteMarketplaceCard(1);
     expect(response).toEqual(undefined);
   });
 
@@ -134,7 +134,7 @@ describe("Test DELETE /cards/{id} endpoint", () => {
         status: 401
       }
     });
-    const response = await api.deleteMarketplaceCard(1);
+    const response = await deleteMarketplaceCard(1);
     expect(response).toEqual('You have been logged out. Please login again and retry');
   });
 
@@ -144,7 +144,7 @@ describe("Test DELETE /cards/{id} endpoint", () => {
         status: 403
       }
     });
-    const response = await api.deleteMarketplaceCard(1);
+    const response = await deleteMarketplaceCard(1);
     expect(response).toEqual('Invalid authorization for card deletion');
   });
 
@@ -154,7 +154,7 @@ describe("Test DELETE /cards/{id} endpoint", () => {
         status: 406
       }
     });
-    const response = await api.deleteMarketplaceCard(1);
+    const response = await deleteMarketplaceCard(1);
     expect(response).toEqual('Marketplace card not found');
   });
 
@@ -167,7 +167,7 @@ describe("Test DELETE /cards/{id} endpoint", () => {
         }
       }
     });
-    const response = await api.deleteMarketplaceCard(1);
+    const response = await deleteMarketplaceCard(1);
     expect(response).toEqual('Request failed: Some error message');
   });
 });
@@ -179,7 +179,7 @@ describe("Test PUT /cards/{id}/extenddisplayperiod endpoint", () => {
         status: 200
       }
     });
-    const response = await api.extendMarketplaceCardExpiry(1);
+    const response = await extendMarketplaceCardExpiry(1);
     expect(response).toEqual(undefined);
   });
 
@@ -189,7 +189,7 @@ describe("Test PUT /cards/{id}/extenddisplayperiod endpoint", () => {
         status: 401
       }
     });
-    const response = await api.extendMarketplaceCardExpiry(1);
+    const response = await extendMarketplaceCardExpiry(1);
     expect(response).toEqual('You have been logged out. Please login again and retry');
   });
 
@@ -199,7 +199,7 @@ describe("Test PUT /cards/{id}/extenddisplayperiod endpoint", () => {
         status: 403
       }
     });
-    const response = await api.extendMarketplaceCardExpiry(1);
+    const response = await extendMarketplaceCardExpiry(1);
     expect(response).toEqual('Invalid authorization for card expiry extension');
   });
 
@@ -209,7 +209,7 @@ describe("Test PUT /cards/{id}/extenddisplayperiod endpoint", () => {
         status: 406
       }
     });
-    const response = await api.extendMarketplaceCardExpiry(1);
+    const response = await extendMarketplaceCardExpiry(1);
     expect(response).toEqual('Marketplace card not found');
   });
 
@@ -222,7 +222,7 @@ describe("Test PUT /cards/{id}/extenddisplayperiod endpoint", () => {
         }
       }
     });
-    const response = await api.extendMarketplaceCardExpiry(1);
+    const response = await extendMarketplaceCardExpiry(1);
     expect(response).toEqual('Request failed: Some error message');
   });
 });
@@ -234,7 +234,7 @@ describe("Test DELETE /cards/{id} endpoint", () => {
         status: 200
       }
     });
-    const response = await api.deleteMarketplaceCard(1);
+    const response = await deleteMarketplaceCard(1);
     expect(response).toEqual(undefined);
   });
 
@@ -244,7 +244,7 @@ describe("Test DELETE /cards/{id} endpoint", () => {
         status: 401
       }
     });
-    const response = await api.deleteMarketplaceCard(1);
+    const response = await deleteMarketplaceCard(1);
     expect(response).toEqual('You have been logged out. Please login again and retry');
   });
 
@@ -254,7 +254,7 @@ describe("Test DELETE /cards/{id} endpoint", () => {
         status: 403
       }
     });
-    const response = await api.deleteMarketplaceCard(1);
+    const response = await deleteMarketplaceCard(1);
     expect(response).toEqual('Invalid authorization for card deletion');
   });
 
@@ -264,7 +264,7 @@ describe("Test DELETE /cards/{id} endpoint", () => {
         status: 406
       }
     });
-    const response = await api.deleteMarketplaceCard(1);
+    const response = await deleteMarketplaceCard(1);
     expect(response).toEqual('Marketplace card not found');
   });
 
@@ -277,13 +277,13 @@ describe("Test DELETE /cards/{id} endpoint", () => {
         }
       }
     });
-    const response = await api.deleteMarketplaceCard(1);
+    const response = await deleteMarketplaceCard(1);
     expect(response).toEqual('Request failed: Some error message');
   });
 });
 
 describe("Test GET /users/{userId}/cards endpoint", () => {
-  const user : api.User = {
+  const user : User = {
     id: 1,
     firstName: "some firstName",
     lastName: "some lastName",
@@ -293,7 +293,7 @@ describe("Test GET /users/{userId}/cards endpoint", () => {
     }
   };
 
-  const marketplaceCard : api.MarketplaceCard = {
+  const marketplaceCard : MarketplaceCard = {
     id: 2,
     creator: user,
     section: "Exchange",
@@ -311,7 +311,7 @@ describe("Test GET /users/{userId}/cards endpoint", () => {
     instance.get.mockResolvedValueOnce({
       data: responseData
     });
-    const response = await api.getMarketplaceCardsByUser(1, 12, 1);
+    const response = await getMarketplaceCardsByUser(1, 12, 1);
     expect(response).toEqual(responseData);
   });
 
@@ -321,7 +321,7 @@ describe("Test GET /users/{userId}/cards endpoint", () => {
         status: 400
       }
     });
-    const response = await api.getMarketplaceCardsByUser(1, 12, 1);
+    const response = await getMarketplaceCardsByUser(1, 12, 1);
     expect(response).toEqual("The page does not exist");
   });
 
@@ -331,7 +331,7 @@ describe("Test GET /users/{userId}/cards endpoint", () => {
         status: 401
       }
     });
-    const response = await api.getMarketplaceCardsByUser(1, 12, 1);
+    const response = await getMarketplaceCardsByUser(1, 12, 1);
     expect(response).toEqual("You have been logged out. Please login again and retry");
   });
 
@@ -341,7 +341,7 @@ describe("Test GET /users/{userId}/cards endpoint", () => {
         status: 406
       }
     });
-    const response = await api.getMarketplaceCardsByUser(1, 12, 1);
+    const response = await getMarketplaceCardsByUser(1, 12, 1);
     expect(response).toEqual("The user does not exist");
   });
 
@@ -354,7 +354,7 @@ describe("Test GET /users/{userId}/cards endpoint", () => {
         }
       }
     });
-    const response = await api.getMarketplaceCardsByUser(1, 12, 1);
+    const response = await getMarketplaceCardsByUser(1, 12, 1);
     expect(response).toEqual("Request failed: Some error message");
   });
 
@@ -362,13 +362,13 @@ describe("Test GET /users/{userId}/cards endpoint", () => {
     instance.get.mockResolvedValueOnce({
       response: {}
     });
-    const response = await api.getMarketplaceCardsByUser(1, 12, 1);
+    const response = await getMarketplaceCardsByUser(1, 12, 1);
     expect(response).toEqual("Response is not card array");
   });
 
   describe("Test PUT /cards/:id endpoint", () => {
 
-    const card: api.ModifyMarketplaceCard = {
+    const card: ModifyMarketplaceCard = {
       section: "ForSale",
       title: "1982 Lada Samara",
       description: "Beige, suitable for a hen house. Fair condition. Some rust. As is, where is. Will swap for budgerigar.",
@@ -381,7 +381,7 @@ describe("Test GET /users/{userId}/cards endpoint", () => {
           status: 200,
         }
       });
-      const message = await api.modifyMarketplaceCard(7, card);
+      const message = await modifyMarketplaceCard(7, card);
       expect(message).toBe(undefined);
     });
 
@@ -391,7 +391,7 @@ describe("Test GET /users/{userId}/cards endpoint", () => {
           status: undefined,
         }
       });
-      const message = await api.modifyMarketplaceCard(7, card);
+      const message = await modifyMarketplaceCard(7, card);
       expect(message).toEqual("Failed to reach backend");
     });
 
@@ -401,7 +401,7 @@ describe("Test GET /users/{userId}/cards endpoint", () => {
           status: 401,
         }
       });
-      const message = await api.modifyMarketplaceCard(7, card);
+      const message = await modifyMarketplaceCard(7, card);
       expect(message).toEqual("You have been logged out. Please login again and retry");
     });
 
@@ -411,7 +411,7 @@ describe("Test GET /users/{userId}/cards endpoint", () => {
           status: 403,
         }
       });
-      const message = await api.modifyMarketplaceCard(7, card);
+      const message = await modifyMarketplaceCard(7, card);
       expect(message).toEqual("Operation not permitted");
     });
 
@@ -421,7 +421,7 @@ describe("Test GET /users/{userId}/cards endpoint", () => {
           status: 406,
         }
       });
-      const message = await api.modifyMarketplaceCard(7, card);
+      const message = await modifyMarketplaceCard(7, card);
       expect(message).toEqual("Marketplace card not found");
     });
 
@@ -434,7 +434,7 @@ describe("Test GET /users/{userId}/cards endpoint", () => {
           }
         },
       });
-      const message = await api.modifyMarketplaceCard(7, card);
+      const message = await modifyMarketplaceCard(7, card);
       expect(message).toEqual("Invalid parameters: Title too long");
     });
 
@@ -444,20 +444,20 @@ describe("Test GET /users/{userId}/cards endpoint", () => {
           status: 999,
         }
       });
-      const message = await api.modifyMarketplaceCard(7, card);
+      const message = await modifyMarketplaceCard(7, card);
       expect(message).toEqual("Request failed: 999");
     });
 
     it('When a response without a status is received, the result returns an error message indicating that the server could not be reached', async () => {
       instance.put.mockRejectedValueOnce("Server is down");
-      const message = await api.modifyMarketplaceCard(7, card);
+      const message = await modifyMarketplaceCard(7, card);
       expect(message).toEqual("Failed to reach backend");
     });
 
   });
 
   describe("Test GET /cards/search endpoint", () => {
-    const user : api.User = {
+    const user : User = {
       id: 1,
       firstName: "some firstName",
       lastName: "some lastName",
@@ -466,7 +466,7 @@ describe("Test GET /users/{userId}/cards endpoint", () => {
         country: "some country"
       }
     };
-    const marketplaceCard : api.MarketplaceCard = {
+    const marketplaceCard : MarketplaceCard = {
       id: 2,
       creator: user,
       section: "Exchange",
@@ -484,7 +484,7 @@ describe("Test GET /users/{userId}/cards endpoint", () => {
       instance.get.mockResolvedValueOnce({
         data: responseData
       });
-      const response = await api.getMarketplaceCardsBySectionAndKeywords([],'Wanted', false, 1, 10, "created", false);
+      const response = await getMarketplaceCardsBySectionAndKeywords([],'Wanted', false, 1, 10, "created", false);
       expect(response).toEqual(responseData);
     });
 
@@ -494,7 +494,7 @@ describe("Test GET /users/{userId}/cards endpoint", () => {
           status: 400
         }
       });
-      const response = await api.getMarketplaceCardsBySectionAndKeywords([],'Wanted', false, 1, 10, "created", false);
+      const response = await getMarketplaceCardsBySectionAndKeywords([],'Wanted', false, 1, 10, "created", false);
       expect(response).toEqual("The given section does not exist");
     });
 
@@ -504,7 +504,7 @@ describe("Test GET /users/{userId}/cards endpoint", () => {
           status: 401
         }
       });
-      const response = await api.getMarketplaceCardsBySectionAndKeywords([],'Wanted', false, 1, 10, "created", false);
+      const response = await getMarketplaceCardsBySectionAndKeywords([],'Wanted', false, 1, 10, "created", false);
       expect(response).toEqual("You have been logged out. Please login again and retry");
     });
 
@@ -517,7 +517,7 @@ describe("Test GET /users/{userId}/cards endpoint", () => {
           }
         }
       });
-      const response = await api.getMarketplaceCardsBySectionAndKeywords([],'Wanted', false, 1, 10, "created", false);
+      const response = await getMarketplaceCardsBySectionAndKeywords([],'Wanted', false, 1, 10, "created", false);
       expect(response).toEqual("Request failed: Some error message");
     });
 
@@ -525,7 +525,7 @@ describe("Test GET /users/{userId}/cards endpoint", () => {
       instance.get.mockResolvedValueOnce({
         response: {}
       });
-      const response = await api.getMarketplaceCardsBySectionAndKeywords([],'Wanted', false, 1, 10, "created", false);
+      const response = await getMarketplaceCardsBySectionAndKeywords([],'Wanted', false, 1, 10, "created", false);
       expect(response).toEqual("Response is not card array");
     });
 
