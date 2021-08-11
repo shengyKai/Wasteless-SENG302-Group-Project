@@ -30,6 +30,7 @@
  */
 import axios from 'axios';
 import { is } from 'typescript-is';
+import { Tag } from './events';
 
 const SERVER_URL = process.env.VUE_APP_SERVER_ADD;
 
@@ -1055,6 +1056,28 @@ export async function deleteNotification(eventId: number) : Promise<MaybeError<u
 }
 
 /**
+ * Tag an event with a coloured tag
+ * @param eventid The ID of the event
+ * @param colour  The colour of the tag user wan to set
+ */
+export async function setEventTag(eventId: number, colour: Tag) : Promise<MaybeError<undefined>> {
+  try {
+    await instance.put(`/feed/${eventId}/tag`, {
+      value: colour
+    }
+    );
+  } catch (error) {
+    let status: number | undefined = error.response?.status;
+    if (status === undefined) return 'Failed to reach backend';
+    if (status === 401) return 'You have been logged out. Please login again and retry';
+    if (status === 403) return 'Invalid authorization for Event tagging';
+    if (status === 406) return 'Event not found';
+    return 'Request failed: ' + error.response?.data.message;
+  }
+  return undefined;
+}
+
+/**
  * Adds a message to a conversation about a marketplace card
  * @param cardId The ID of the card
  * @param senderId The ID of the sender of the message
@@ -1073,25 +1096,6 @@ export async function messageConversation(cardId: number, senderId: number, buye
     if (status === 401) return 'You have been logged out. Please login again and retry';
     if (status === 403) return 'You do not have permission to edit this conversation';
     if (status === 406) return 'Unable to post message, the card does not exist';
-    return 'Request failed: ' + error.response?.data.message;
-  }
-  return undefined;
-}
-
-  type Tag = 'none' | 'red' | 'orange' | 'yellow' | 'green' | 'blue' | 'purple'
-
-export async function setEventTag(eventId: number, colour: Tag) : Promise<MaybeError<undefined>> {
-  try {
-    await instance.put(`/feed/${eventId}/tag`, {
-      value: colour
-    }
-    );
-  } catch (error) {
-    let status: number | undefined = error.response?.status;
-    if (status === undefined) return 'Failed to reach backend';
-    if (status === 401) return 'You have been logged out. Please login again and retry';
-    if (status === 403) return 'Invalid authorization for Event tagging';
-    if (status === 406) return 'Event not found';
     return 'Request failed: ' + error.response?.data.message;
   }
   return undefined;

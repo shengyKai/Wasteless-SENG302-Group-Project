@@ -30,7 +30,7 @@
       </v-select>
       <!-- Newsfeed -->
       <v-card
-        v-for="event in events"
+        v-for="event in $store.getters.events"
         :key="event.id"
         outlined
         rounded="lg"
