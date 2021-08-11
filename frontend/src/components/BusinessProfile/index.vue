@@ -54,12 +54,14 @@
                 <v-text-field
                   label="New name of the business"
                   v-model="newBusinessName"
+                  :rules="maxCharRules().concat(alphabetExtendedSingleLineRules())"
                 />
               </v-row>
               <v-row>
                 <v-text-field
                   label="New description of the business"
                   v-model="newDescription"
+                  :rules="maxCharDescriptionRules().concat(alphabetExtendedMultilineRules())"
                 />
               </v-row>
               <v-row>
@@ -67,6 +69,7 @@
                   label="New business type of the business"
                   v-model="newBusinessType"
                   :items="businessTypes"
+                  :rules="mandatoryRules()"
                 />
               </v-row>
             </v-col>
@@ -76,36 +79,42 @@
                 <v-text-field
                   label="New street address"
                   v-model="newStreetAddress"
+                  :rules="streetRules()"
                 />
               </v-row>
               <v-row>
                 <v-text-field
                   label="New district"
                   v-model="newDistrict"
+                  :rules="maxCharRules().concat(alphabetRules())"
                 />
               </v-row>
               <v-row>
                 <v-text-field
                   label="New city"
                   v-model="newCity"
+                  :rules="maxCharRules().concat(alphabetRules())"
                 />
               </v-row>
               <v-row>
                 <v-text-field
                   label="New region"
                   v-model="newRegion"
+                  :rules="maxCharRules().concat(alphabetRules())"
                 />
               </v-row>
               <v-row>
                 <v-text-field
                   label="New country"
                   v-model="newCountry"
+                  :rules="maxCharRules().concat(alphabetRules())"
                 />
               </v-row>
               <v-row>
                 <v-text-field
                   label="New postcode"
                   v-model="newPostcode"
+                  :rules="maxCharRules().concat(postcodeRules())"
                 />
               </v-row>
             </v-col>
@@ -176,15 +185,21 @@
 <script>
 import { getBusiness } from '../../api/internal';
 import convertAddressToReadableText from '@/components/utils/Methods/convertJsonAddressToReadableText';
+import {
+  maxCharRules,
+  mandatoryRules,
+  alphabetRules,
+  alphabetExtendedSingleLineRules,
+  alphabetExtendedMultilineRules,
+  streetNumRulesWNull,
+  postCodeRules,
+} from '@/utils';
 
 export default {
   name: 'BusinessProfile',
 
   data() {
     return {
-      /**
-       * The business that this profile is for.
-       */
       business: {},
       readableAddress: "",
       businessTypes: [
@@ -204,6 +219,15 @@ export default {
       newRegion: "",
       newCountry: "",
       newPostcode: "",
+      valid: false,
+      maxCharRules: () => maxCharRules(100),
+      maxCharDescriptionRules: () => maxCharRules(200),
+      mandatoryRules: () => mandatoryRules,
+      alphabetExtendedSingleLineRules: () => alphabetExtendedSingleLineRules,
+      alphabetExtendedMultilineRules: () => alphabetExtendedMultilineRules,
+      alphabetRules: () => alphabetRules,
+      streetRules: () => streetNumRulesWNull,
+      postcodeRules: () => postCodeRules
     };
   },
   watch: {

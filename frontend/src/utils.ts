@@ -249,6 +249,10 @@ export const streetNumRules = [
   (field: string) => (field && field.length <= 109) || 'Reached max character limit 109 ',
   (field: string) => regxStreet().test(field) || 'Must contain unit number and street name'
 ];
+export const streetNumRulesWNull = [
+  (field: string) => (field.length >= 0 && field.length <= 109) || 'Reached max character limit 109 ',
+  (field: string) => (field.length === 0 || regxStreet().test(field)) || 'Must contain unit number and street name if not empty'
+];
 
 export const quantityRules = [
   (field: string) => regxNumerical().test(field) || 'Must contain an integer',
