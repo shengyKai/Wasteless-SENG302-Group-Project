@@ -1,9 +1,24 @@
 <template>
-  <div>
+  <div v-if="deleted">
+    <v-card-title>
+      You have removed a notification from your feed
+    </v-card-title>
+    <v-card-text>
+      Press undo in the next {{ remainingTime }} seconds to restore the notification "{{ title }}" to your feed.
+    </v-card-text>
+    <v-card-actions class="justify-center">
+      <v-btn color="secondary" ref="undoButton" @click="undoDelete"> Undo </v-btn>
+    </v-card-actions>
+    <v-card-text class="justify-center">
+      <div class="error--text" v-if="errorMessage !== undefined">{{ errorMessage }}</div>
+    </v-card-text>
+  </div>
+  <div v-else>
     <div class="delete">
       <v-icon class="deleteButton"
+              ref="deleteButton"
               color="red"
-              @click.stop="removeNotification"
+              @click.stop="initiateDeletion"
       >
         mdi-trash-can
       </v-icon>
@@ -88,6 +103,7 @@
 import { formatDate } from '@/utils';
 import {deleteNotification} from "@/api/internal";
 import { setEventTag } from '../../../api/internal';
+import synchronizedTime from '@/components/utils/Methods/synchronizedTime';
 
 export default {
   name: 'Event',
@@ -105,7 +121,9 @@ export default {
     return {
       expand: false,
       colours: ['none', 'red', 'orange', 'yellow', 'green', 'blue', 'purple'],
-      error: undefined
+      error: undefined,
+      deleted: false,
+      deletionTime: undefined,
     };
   },
   computed: {
@@ -122,6 +140,18 @@ export default {
     date() {
       return formatDate(this.event.created);
     },
+    /**
+     * The time remaining before this event is permenantly deleted.
+     */
+    remainingTime() {
+      if (this.deletionTime) {
+        const timeDifference = Math.floor((this.deletionTime - synchronizedTime.now) / 1000) + 10;
+        if (timeDifference > 0) {
+          return timeDifference;
+        }
+      }
+      return 0;
+    }
   },
   methods: {
     async removeNotification() {
@@ -151,6 +181,40 @@ export default {
      * This should be a method that allows user to change their current tag colour into the desired colour
      * Currently only alert `changing tag`, functionality will be implemented in another task
      */
+    /**
+     * Temporarily remove a notification from the feed, and set a timeout to delete it permanently
+     * if no action is taken within 10 seconds.
+     */
+    async initiateDeletion() {
+      this.$store.commit('stageEventForDeletion', this.event.id);
+      this.deleted = true;
+      this.deletionTime = synchronizedTime.now;
+      setTimeout(() => this.finalizeDeletion(), 10000);
+    },
+    /**
+     * Permanently delete an event if the deletion has not been undone. Restore the event to the feed
+     * and display an error message if the deletion was not successful.
+     */
+    async finalizeDeletion() {
+      if (this.deleted === true) {
+        this.$store.dispatch('deleteStagedEvent', this.event.id)
+          .then(content => {
+            if (typeof content === 'string') {
+              this.errorMessage = content;
+              this.deleted = false;
+            } else {
+              this.$store.commit('removeEvent', this.event.id);
+            }
+          });
+      }
+    },
+    /**
+     * Undo the deteletion of a temporarily deleted event and restore it to the user's feed.
+     */
+    async undoDelete() {
+      this.deleted = false;
+      this.$store.commit('unstageEventForDeletion', this.event.id);
+    },
   }
 };
 </script>

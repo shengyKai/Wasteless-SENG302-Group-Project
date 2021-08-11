@@ -1,4 +1,4 @@
-import { User, Business, getUser, login, InventoryItem } from './api/internal';
+import { User, Business, getUser, login, InventoryItem, deleteNotification } from './api/internal';
 import { AnyEvent, initialiseEventSourceForUser, addEventMessageHandler } from './api/events';
 import Vuex, { Store, StoreOptions } from 'vuex';
 import { COOKIE, deleteCookie, getCookie, isTesting, setCookie } from './utils';
@@ -47,6 +47,10 @@ export type StoreData = {
    * This is a sparse array
    */
   eventMap: Record<number, AnyEvent>,
+  /**
+   * The id numbers of all events which have been staged for deletion.
+   */
+  eventForDeletionIds: number[],
 };
 
 function createOptions(): StoreOptions<StoreData> {
@@ -59,6 +63,7 @@ function createOptions(): StoreOptions<StoreData> {
       createInventoryDialog: undefined,
       createSaleItemDialog: undefined,
       eventMap: [],
+      eventForDeletionIds: [],
     },
     mutations: {
       setUser(state, payload: User) {
@@ -163,6 +168,20 @@ function createOptions(): StoreOptions<StoreData> {
       removeEvent(state, id: number) {
         Vue.delete(state.eventMap, id);
       },
+      /**
+       * Add an event id to the list of event ids to be stored until the events are permenatly deleted.
+       * Events on this list will be deleted when the browser/tab closes.
+       */
+      stageEventForDeletion(state, eventId: number) {
+        state.eventForDeletionIds.push(eventId);
+      },
+      /**
+       * Remove an event id from the list of event ids to be stored until the events are permenatly deleted,
+       * so that it is not deleted when the browser/tab closes.
+       */
+      unstageEventForDeletion(state, eventId: number) {
+        state.eventForDeletionIds = state.eventForDeletionIds.filter(id => id !== eventId);
+      }
     },
     getters: {
       isLoggedIn(state) {
@@ -260,6 +279,38 @@ function createOptions(): StoreOptions<StoreData> {
         context.dispatch('startUserFeed');
 
         return undefined;
+      },
+      /**
+       * If the event is in the list of events staged for deletion, send a request to the backend to permenantly
+       * delete the event. Otherwise return an error message.
+       * @param context The current context of the store.
+       * @param eventId The id number of the event to be deleted.
+       * @returns An error message or undefined.
+       */
+      async deleteStagedEvent(context, eventId: number) {
+        // Check that the event has been staged for deletion
+        const eventToDeleteId = context.state.eventForDeletionIds.filter(id => id === eventId);
+        if (eventToDeleteId.length === 1) {
+          // Remove event from list of events staged for deletion
+          context.state.eventForDeletionIds = context.state.eventForDeletionIds.filter(id => id !== eventId);
+          const response = await deleteNotification(eventId);
+          if (typeof response === 'string') {
+            return response;
+          } else {
+            return undefined;
+          }
+        }
+        return 'Notification not staged for deletion';
+      },
+      /**
+       * Send a request to the backend to ermanently delete all events which have been staged for deletion.
+       * @param context The current context of the store.
+       */
+      async deleteAllStagedEvents(context) {
+        for (let eventId of context.state.eventForDeletionIds) {
+          await deleteNotification(eventId);
+        }
+        context.state.eventForDeletionIds = [];
       }
     }
   };
