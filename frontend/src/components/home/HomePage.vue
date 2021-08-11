@@ -52,7 +52,7 @@
       </v-card>
       <!--paginate results-->
       <v-pagination
-        v-if="$store.getters.events.length !== 0 || !isBusiness"
+        v-if="storeEvents.length !== 0 || !isBusiness"
         v-model="currentPage"
         :total-visible="10"
         :length="totalPages"
@@ -171,6 +171,15 @@ export default {
       return this.events.slice(pageStartIndex, (pageStartIndex + this.resultsPerPage));
     }
   },
+  watch: {
+    /**
+     * Watch the changes in filterBy because if the user is in the second page while the page is filtered, the currentPage will
+     * not be reverted back to the first page, which will cause the events to not be sliced/filtered properly.
+     */
+    filterBy: function() {
+      this.currentPage = 1;
+    }
+  }
 };
 </script>
 
