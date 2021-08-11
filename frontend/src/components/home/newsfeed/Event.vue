@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="delete">
+    <div class="float=right ma-1">
       <v-icon class="deleteButton"
               color="red"
               @click.stop="removeNotification"
@@ -23,7 +23,7 @@
       justify="start"
       style="min-height: 10px;"
     >
-      <v-col class="shrink">
+      <v-col cols="10">
         <!-- The persistent chip that shows the tag for the message (default will be no colour) -->
         <v-tooltip bottom>
           <template v-slot:activator="{ on, attrs }">
@@ -79,21 +79,24 @@
           </v-card>
         </v-expand-transition>
       </v-col>
+      <v-col class="float=right">
+        <v-tooltip bottom >
+          <template v-slot:activator="{on, attrs }">
+            <v-icon v-if="!isCardOwner"
+                    ref="messageButton"
+                    color="primary"
+                    @click.stop="messageOwnerDialog = true; directMessageContent=''"
+                    v-bind="attrs"
+                    v-on="on"
+                    class="mt-4 ml-12"
+            >
+              mdi-reply
+            </v-icon>
+          </template>
+          Reply to this message
+        </v-tooltip>
+      </v-col>
     </v-row>
-    <v-tooltip bottom>
-      <template v-slot:activator="{on, attrs }">
-        <v-icon v-if="!isCardOwner"
-                ref="messageButton"
-                color="primary"
-                @click.stop="messageOwnerDialog = true; directMessageContent=''"
-                v-bind="attrs"
-                v-on="on"
-        >
-          mdi-reply
-        </v-icon>
-      </template>
-      Reply to this message
-    </v-tooltip>
     <v-dialog ref="messageDialog"
               v-model="messageOwnerDialog"
               max-width="600px">
@@ -106,41 +109,36 @@
             Your message will appear on their feed
           </v-card-subtitle>
         </v-card>
-        <v-parallax
-          dark
-          src="https://cdn.vuetifyjs.com/images/backgrounds/vbanner.jpg"
-        >
-          <v-form v-model="directMessageValid" ref="directMessageForm">
-            <v-card-text>
-              <v-textarea
-                solo
-                outlined
-                clearable
-                prepend-inner-icon="mdi-comment"
-                no-resize
-                :counter="200"
-                :rules="mandatoryRules.concat(maxCharRules())"
-                v-model="directMessageContent"/>
-            </v-card-text>
-            <v-card-actions>
-              <v-alert v-if="directMessageError !== undefined" color="red" type="error" dense text>
-                {{directMessageError}}
-              </v-alert>
-              <v-spacer/>
-              <v-btn color="primary"
-                     text
-                     :disabled="!directMessageValid"
-                     @click="sendMessage">
-                Send
-              </v-btn>
-              <v-btn color="primary"
-                     text
-                     @click="messageOwnerDialog = false; directMessageError = undefined; directMessageContent=''">
-                Cancel
-              </v-btn>
-            </v-card-actions>
-          </v-form>
-        </v-parallax>
+        <v-form v-model="directMessageValid" ref="directMessageForm">
+          <v-card-text>
+            <v-textarea
+              solo
+              outlined
+              clearable
+              prepend-inner-icon="mdi-comment"
+              no-resize
+              :counter="200"
+              :rules="mandatoryRules.concat(maxCharRules())"
+              v-model="directMessageContent"/>
+          </v-card-text>
+          <v-card-actions>
+            <v-alert v-if="directMessageError !== undefined" color="red" type="error" dense text>
+              {{directMessageError}}
+            </v-alert>
+            <v-spacer/>
+            <v-btn color="primary"
+                   text
+                   :disabled="!directMessageValid"
+                   @click="sendMessage">
+              Send
+            </v-btn>
+            <v-btn color="primary"
+                   text
+                   @click="messageOwnerDialog = false; directMessageError = undefined; directMessageContent=''">
+              Cancel
+            </v-btn>
+          </v-card-actions>
+        </v-form>
       </v-card>
     </v-dialog>
   </div>
@@ -238,10 +236,6 @@ export default {
 </script>
 
 <style>
-.delete {
-  float: right;
-  margin: 0.25em;
-}
 .deleteButton {
   float: right;
   margin: 0.25em;
