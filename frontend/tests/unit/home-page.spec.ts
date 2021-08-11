@@ -43,6 +43,31 @@ describe('HomePage.vue', () => {
   let wrapper: Wrapper<any>;
   let store: Store<StoreData>;
 
+  async function addMultipleEvents() {
+    for (let i=0; i < 6; i++) {
+      let event: AnyEvent = {
+        type: 'MessageEvent',
+        id: i,
+        tag: 'none',
+        created: new Date().toString(),
+        message: 'None event',
+      };
+      store.commit('addEvent', event);
+      await Vue.nextTick();
+    }
+    for (let i=6; i < 12; i++) {
+      let event: AnyEvent = {
+        type: 'MessageEvent',
+        id: i,
+        tag: 'red',
+        created: new Date().toString(),
+        message: 'Red event',
+      };
+      store.commit('addEvent', event);
+      await Vue.nextTick();
+    }
+  }
+
   beforeEach(() => {
     const vuetify = new Vuetify();
 
@@ -150,5 +175,10 @@ describe('HomePage.vue', () => {
     await Vue.nextTick();
 
     expect(wrapper.text()).not.toContain('No items in your feed');
+  });
+
+  it.only('If there are more than 10 events in the store for the user, pagination will be available for the user', async () => {
+    await addMultipleEvents();
+    expect(wrapper.vm.totalPages).toEqual(2);
   });
 });
