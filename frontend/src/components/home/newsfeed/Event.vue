@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="delete">
+    <div class="float=right ma-1">
       <v-icon class="deleteButton"
               color="red"
               @click.stop="removeNotification"
@@ -23,7 +23,7 @@
       justify="start"
       style="min-height: 10px;"
     >
-      <v-col class="shrink">
+      <v-col cols="10">
         <!-- The persistent chip that shows the tag for the message (default will be no colour) -->
         <v-tooltip bottom>
           <template v-slot:activator="{ on, attrs }">
@@ -79,33 +79,40 @@
           </v-card>
         </v-expand-transition>
       </v-col>
+      <v-col class="float=right">
+        <!-- Tooltip for the reply button telling user what they can do with this button -->
+        <v-tooltip bottom >
+          <template v-slot:activator="{on, attrs }">
+            <v-icon v-if="!isCardOwner"
+                    ref="messageButton"
+                    color="primary"
+                    @click.stop="messageOwnerDialog = true; directMessageContent=''"
+                    v-bind="attrs"
+                    v-on="on"
+                    class="mt-4 ml-12"
+            >
+              mdi-reply
+            </v-icon>
+          </template>
+          Reply to this message
+        </v-tooltip>
+      </v-col>
     </v-row>
-    <v-tooltip bottom>
-      <template v-slot:activator="{on, attrs }">
-        <v-icon v-if="!isCardOwner"
-                ref="messageButton"
-                color="primary"
-                @click.stop="messageOwnerDialog = true; directMessageContent=''"
-                v-bind="attrs"
-                v-on="on"
-        >
-          mdi-reply
-        </v-icon>
-      </template>
-      Reply to this message
-    </v-tooltip>
+    <!-- Dialog that stay consistent with the firstMessage(in primary colour), replyMessage(in secondary colour) -->
     <v-dialog ref="messageDialog"
               v-model="messageOwnerDialog"
               max-width="600px">
       <v-card>
+        <!-- The 'TITLE' of the replyMessage component -->
         <v-card color='secondary lighten-2'>
           <v-card-title>
-            <strong>Send a message to {{firstName}}</strong>
+            Send a message to {{firstName}}
           </v-card-title>
           <v-card-subtitle>
             Your message will appear on their feed
           </v-card-subtitle>
         </v-card>
+        <!-- The Message body input component -->
         <v-form v-model="directMessageValid" ref="directMessageForm">
           <v-card-text>
             <v-textarea
@@ -118,6 +125,7 @@
               :rules="mandatoryRules.concat(maxCharRules())"
               v-model="directMessageContent"/>
           </v-card-text>
+          <!-- Submit and Cancel button for the replyMessage component -->
           <v-card-actions>
             <v-alert v-if="directMessageError !== undefined" color="red" type="error" dense text>
               {{directMessageError}}
@@ -233,10 +241,6 @@ export default {
 </script>
 
 <style>
-.delete {
-  float: right;
-  margin: 0.25em;
-}
 .deleteButton {
   float: right;
   margin: 0.25em;
