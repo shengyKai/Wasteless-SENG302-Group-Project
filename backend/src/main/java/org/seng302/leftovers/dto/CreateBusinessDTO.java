@@ -4,8 +4,11 @@ import lombok.Getter;
 import lombok.ToString;
 import javax.validation.constraints.NotNull;
 
-@ToString
+/**
+ * A DTO representing the parameters passed to a POST /businesses request
+ */
 @Getter
+@ToString
 public class CreateBusinessDTO {
     @NotNull
     private Long primaryAdministratorId;

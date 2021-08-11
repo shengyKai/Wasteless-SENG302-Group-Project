@@ -1,10 +1,8 @@
 package cucumber.stepDefinitions;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import cucumber.context.BusinessContext;
 import cucumber.context.RequestContext;
 import cucumber.context.UserContext;
-import io.cucumber.datatable.DataTable;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
@@ -12,7 +10,6 @@ import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
 import org.junit.Assert;
-import org.seng302.leftovers.dto.ModifyBusinessDTO;
 import org.seng302.leftovers.entities.*;
 import org.seng302.leftovers.persistence.BusinessRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +22,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 
 
-import java.io.UnsupportedEncodingException;
 import java.text.ParseException;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -123,15 +119,23 @@ public class BusinessStepDefinition {
                 .param("businessType", businessType));
     }
 
-    private void placeValueAtPath(Map<String, Object> mapping, List<String> path, Object value) {
+    /**
+     * Sets a value through a multi layered mapping.
+     * E.g. Calling with a path of "a","b","c" will do mapping.get("a").get("b").put("c", value) and will create any
+     * required intermediate maps
+     * @param mapping Multi-layered map
+     * @param path List of keys/subkeys
+     * @param value Value to place at the end of the path
+     */
+    private void setValueAtPath(Map<String, Object> mapping, List<String> path, Object value) {
+        String head = path.get(0);
         if (path.size() == 1) {
-            mapping.put(path.get(0), value);
+            mapping.put(head, value);
         } else {
-            String head = path.get(0);
             if (!mapping.containsKey(head)) {
                 mapping.put(head, new HashMap<>());
             }
-            placeValueAtPath((Map<String, Object>)mapping.get(head), path.subList(1, path.size()), value);
+            setValueAtPath((Map<String, Object>)mapping.get(head), path.subList(1, path.size()), value);
         }
     }
 
@@ -140,7 +144,7 @@ public class BusinessStepDefinition {
         modifyParameters = new JSONObject();
         for (var entry : dataTable.entrySet()) {
             List<String> path = Arrays.asList(entry.getKey().split("\\."));
-            placeValueAtPath(modifyParameters, path, entry.getValue());
+            setValueAtPath(modifyParameters, path, entry.getValue());
         }
 
         String adminName = (String)modifyParameters.remove("primaryAdministrator");

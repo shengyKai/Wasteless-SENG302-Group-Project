@@ -47,16 +47,6 @@ public class BusinessController {
     }
 
     /**
-     * Parses the address part of the business info and constructs a location object using the Location class function
-     * @param businessInfo Business info
-     * @return A new Location object containing the business address
-     */
-    private Location parseLocation(JSONObject businessInfo) {
-        JSONObject businessLocation = new JSONObject((Map<String, ?>) businessInfo.get("address")) ;
-        return Location.parseLocationFromJson(businessLocation);
-    }
-
-    /**
      * POST endpoint for registering a new business.
      * Ensures that the given primary business owner is an existing User.
      * Adds the business to the database if all of the business information is valid.

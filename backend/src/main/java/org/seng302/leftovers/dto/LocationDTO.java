@@ -4,6 +4,9 @@ import lombok.Getter;
 import lombok.ToString;
 import org.seng302.leftovers.entities.Location;
 
+/**
+ * A DTO representing the standard full JSON representation of a Location
+ */
 @Getter
 @ToString
 public class LocationDTO {
