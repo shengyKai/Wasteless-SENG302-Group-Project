@@ -110,7 +110,10 @@ public class BusinessController {
             if (body.getUpdateProductCountry()) {
                 List<Product> catalogue = business.getCatalogue();
                 String countryToChange = body.getAddress().getCountry();
+                // Iterate through each product in the catalogue and change their country to the specified country
                 for (Product product : catalogue) {
+                    // ASK should we check the previous country and compare? so if the country now and the new country
+                    // is the same, we throw an error?
                     product.setCountryOfSale(countryToChange);
                 }
             }
