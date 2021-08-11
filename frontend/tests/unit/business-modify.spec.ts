@@ -56,12 +56,23 @@ function createTestUser(userId: number) {
   return user;
 }
 
-
-//function createTestBusiness(businessId: number, adminId: number, admins: User[]) {
-//  let business: Business = {
-//    id: businessId,
-//    primaryAdministratorId: adminId,
-//    administrators: admins,
-//    name: 'test_businessname' + b
-//  }
-//}
+/**
+ * Creates a test business with the given business id
+ *
+ * @param businessId The business id to use
+ * @param primaryAdminId the id of the user who will be the primary administrator
+ * @param admins a list of users to be the administrators of the businesses
+ */
+function createTestBusiness(businessId: number, primaryAdminId: number, admins: User[]) {
+  let business: Business = {
+    id: businessId,
+    primaryAdministratorId: primaryAdminId,
+    administrators: admins,
+    name: 'test_businessname' + businessId,
+    description: 'test_description' + businessId,
+    address: createTestLocation(),
+    businessType: 'Charitable organisation',
+    created: '2/6/2006'
+  };
+  return business;
+}
