@@ -6,10 +6,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.seng302.leftovers.dto.CreateBusinessDTO;
 import org.seng302.leftovers.dto.ModifyBusinessDTO;
-import org.seng302.leftovers.entities.Business;
-import org.seng302.leftovers.entities.Location;
-import org.seng302.leftovers.entities.MarketplaceCard;
-import org.seng302.leftovers.entities.User;
+import org.seng302.leftovers.entities.*;
 import org.seng302.leftovers.persistence.BusinessRepository;
 import org.seng302.leftovers.persistence.UserRepository;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
@@ -27,10 +24,7 @@ import org.springframework.web.server.ResponseStatusException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 @RestController
 public class BusinessController {
@@ -114,7 +108,11 @@ public class BusinessController {
             business.setBusinessType(body.getBusinessType());
 
             if (body.getUpdateProductCountry()) {
-                // TODO Do something
+                List<Product> catalogue = business.getCatalogue();
+                String countryToChange = body.getAddress().getCountry();
+                for (Product product : catalogue) {
+                    product.setCountryOfSale(countryToChange);
+                }
             }
 
             businessRepository.save(business);

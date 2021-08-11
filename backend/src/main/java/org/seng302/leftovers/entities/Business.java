@@ -288,6 +288,14 @@ public class Business {
     }
 
     /**
+     * Returns the business's product catalogue.
+     * @return product catalogue of the business.
+     */
+    public List<Product> getCatalogue() {
+        return this.catalogue;
+    }
+
+    /**
      * Construct a JSON object representing the business. The JSON object includes an array of JSON
      * representations of the users who are administrators of the business, and a JSON representation
      * of the business's address, as well as simple attributes for all the other properties of the
