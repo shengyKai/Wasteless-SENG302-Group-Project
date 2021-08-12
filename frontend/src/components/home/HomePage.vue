@@ -2,7 +2,7 @@
   <div class="page-container">
     <BusinessActionPanel v-if="isBusiness" />
     <UserActionPanel v-else />
-    <div class="newsfeed">
+    <div class="newsfeed" v-if="!isBusiness">
       <!---Select component for the order in which the cards should be displayed--->
       <v-select
         color="primary"
@@ -25,7 +25,6 @@
             <v-icon left>
               mdi-label
             </v-icon>
-            Tag
           </v-chip>
         </template>
       </v-select>
@@ -97,9 +96,16 @@ export default {
        * Number of results per a result page
        */
       resultsPerPage: 10,
+      /**
+       * A list for the v-select component so that the text and the value can be displayed appropriately
+       */
       colours: [{text: "None", value: 'none'}, {text: "Red", value: 'red'}, {text: "Orange", value: 'orange'},
         {text: "Yellow", value: 'yellow'}, {text: "Green", value: 'green'}, {text: "Blue", value: 'blue'},
         {text: "Purple", value: 'purple'}],
+      /**
+       * An attribute to check if the events list is a filtered events list or not
+       */
+      isFiltered: false
     };
   },
   computed: {
@@ -146,7 +152,11 @@ export default {
      * The message displayed at the bottom of the page to show how many events there are
      */
     resultsMessage() {
-      if (this.totalResults === 0) return 'No items in your feed';
+      if (this.totalResults === 0 && !this.isFiltered) {
+        return 'No items in your feed';
+      } else if (this.totalResults === 0 && this.isFiltered) {
+        return 'No items matches the filter';
+      }
       const pageStartIndex = (this.currentPage - 1) * this.resultsPerPage;
       let pageEndIndex = pageStartIndex + this.resultsPerPage;
       if (pageEndIndex > this.totalResults) {
@@ -176,9 +186,17 @@ export default {
      * Watch the changes in filterBy because if the user is in the second page while the page is filtered, the currentPage will
      * not be reverted back to the first page, which will cause the events to not be sliced/filtered properly.
      */
-    filterBy: function() {
+    filterBy: function(filterList) {
+      if (filterList.length === 0) {
+        this.isFiltered = false;
+      } else {
+        this.isFiltered = true;
+      }
       this.currentPage = 1;
-    }
+    },
+    // eventsPage: function(events) {
+    //   if (events.length === 0 && this.currentPage !== 1) this.currentPage -= 1;
+    // }
   }
 };
 </script>
