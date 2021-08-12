@@ -63,8 +63,8 @@
       </v-container>
     </v-card>
     <v-row justify="center">
-      <v-col cols="5">
-        <v-card max-width=900px>
+      <v-col cols="10">
+        <v-card max-width=1800px>
           <v-form>
             <div v-if='modifyBusiness'>
               <v-card class="mt-5 ">
@@ -72,14 +72,26 @@
                 <v-card-text>
                   <v-container>
                     <v-row no-gutters>
-                      <v-col>
+                      <v-col cols="6">
                         <v-text-field
                           filled
                           dense
-                          class="required"
+                          class="required mr-1"
                           v-model="business"
                           label="Name of business"
                           :rules="mandatoryRules().concat(maxCharRules()).concat(alphabetExtendedSingleLineRules())"
+                          outlined
+                        />
+                      </v-col>
+                      <v-col cols="6">
+                        <v-select
+                          filled
+                          dense
+                          class="required ml-1"
+                          v-model="businessType"
+                          :items="businessTypes"
+                          label="Business Type"
+                          :rules="mandatoryRules()"
                           outlined
                         />
                       </v-col>
@@ -95,60 +107,51 @@
                         />
                       </v-col>
                       <v-col cols="12">
-                        <v-select
-                          filled
-                          dense
-                          class="required"
-                          v-model="businessType"
-                          :items="businessTypes"
-                          label="Business Type"
-                          :rules="mandatoryRules()"
-                          outlined
-                        />
+                        <v-card-title class="primary-text">Address</v-card-title>
                       </v-col>
-                      <v-card-title class="primary-text">Address</v-card-title>
-                      <v-col cols="12">
+                      <v-col cols="16">
                         <v-text-field
-                          class="required"
+                          class="required mr-1"
                           v-model="streetAddress"
                           label="Company Street Address"
                           :rules="mandatoryRules().concat(streetRules())"
                           outlined/>
                       </v-col>
-                      <v-col cols="12">
+                      <v-col cols="6">
                         <LocationAutocomplete
                           type="district"
+                          class="ml-1"
                           v-model="district"
                           :rules="maxCharRules().concat(alphabetRules())"
                         />
                       </v-col>
-                      <v-col cols="12">
+                      <v-col cols="6">
                         <LocationAutocomplete
                           type="city"
-                          class="required"
+                          class="required mr-1"
                           v-model="city"
                           :rules="mandatoryRules().concat(maxCharRules()).concat(alphabetRules())"
                         />
                       </v-col>
-                      <v-col cols="12">
+                      <v-col cols="6">
                         <LocationAutocomplete
                           type="region"
-                          class="required"
+                          class="required ml-1"
                           v-model="region"
                           :rules="mandatoryRules().concat(maxCharRules()).concat(alphabetRules())"
                         />
                       </v-col>
-                      <v-col cols="12">
+                      <v-col cols="6">
                         <LocationAutocomplete
                           type="country"
-                          class="required"
+                          class="required mr-1"
                           v-model="country"
                           :rules="mandatoryRules().concat(maxCharRules()).concat(alphabetRules())"
                         />
                       </v-col>
-                      <v-col cols="12">
+                      <v-col cols="6">
                         <v-text-field
-                          class="required"
+                          class="required ml-1"
                           v-model="postcode"
                           label="Postcode"
                           :rules="mandatoryRules().concat(maxCharRules()).concat(postcodeRules())"
