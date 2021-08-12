@@ -48,7 +48,7 @@
               <v-btn
                 class="white--text"
                 color="secondary"
-                @click="modifyBusiness = true"
+                @click="modifyBusiness = true; prefillModifyFields()"
               >
                 <v-icon
                   class="expand-icon"
@@ -74,14 +74,15 @@
                     <v-row no-gutters>
                       <v-col cols="6">
                         <v-text-field
-                          filled
                           dense
                           class="mr-1"
-                          v-model="business"
+                          v-model="businessName"
                           label="Name of business"
                           :rules="maxCharRules().concat(alphabetExtendedSingleLineRules())"
                           outlined
-                        />
+                        >
+                          {business.name}
+                        </v-text-field>
                       </v-col>
                       <v-col cols="6">
                         <v-select
@@ -96,14 +97,15 @@
                       </v-col>
                       <v-col cols="12">
                         <v-textarea
-                          filled
                           dense
                           v-model="description"
                           label="Description"
                           :rules="maxCharDescriptionRules().concat(alphabetExtendedMultilineRules())"
                           rows="3"
                           outlined
-                        />
+                        >
+                          {business.description}
+                        </v-textarea>
                       </v-col>
                       <v-col cols="12">
                         <v-card-title class="primary-text">Address</v-card-title>
@@ -245,7 +247,8 @@ export default {
       readableAddress: "",
       errorMessage: undefined,
       dialog: true,
-      business: 'as',
+      business: '',
+      businessName: '',
       description: '',
       businessType: [],
       streetAddress: '',
@@ -341,6 +344,18 @@ export default {
       } else {
         this.updateProductCountry = true;
       }
+    },
+    prefillModifyFields() {
+      console.log(this.business);
+      this.businessName = this.business.name;
+      this.businessType = this.business.businessType;
+      this.description = this.business.description;
+      this.streetAddress = this.business.address.streetNumber + "" + this.business.address.streetName;
+      this.district = this.business.address.district;
+      this.city = this.business.address.city;
+      this.region = this.business.address.region;
+      this.country = this.business.address.country;
+      this.postcode = this.business.address.postcode;
     }
   }
 };
