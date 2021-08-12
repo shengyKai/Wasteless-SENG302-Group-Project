@@ -65,101 +65,123 @@
     <v-row justify="center">
       <v-col cols="5">
         <v-card max-width=900px>
-          <v-form v-model="valid">
+          <v-form>
             <div v-if='modifyBusiness'>
-              <v-card class="mt-5">
+              <v-card class="mt-5 ">
                 <v-card-title class="primary-text">Modify Business Details</v-card-title>
                 <v-card-text>
-                  <v-col>
-                    <v-row>
-                      <v-col cols="">
+                  <v-container>
+                    <v-row no-gutters>
+                      <v-col>
                         <v-text-field
-                          label="New name of the business"
                           filled
-                          rounded
                           dense
-                          v-model="newBusinessName"
-                          clearable
+                          class="required"
+                          v-model="business"
+                          label="Name of business"
+                          :rules="mandatoryRules().concat(maxCharRules()).concat(alphabetExtendedSingleLineRules())"
+                          outlined
+                        />
+                      </v-col>
+                      <v-col cols="12">
+                        <v-textarea
+                          filled
+                          dense
+                          v-model="description"
+                          label="Description"
+                          :rules="maxCharDescriptionRules().concat(alphabetExtendedMultilineRules())"
+                          rows="3"
+                          outlined
+                        />
+                      </v-col>
+                      <v-col cols="12">
+                        <v-select
+                          filled
+                          dense
+                          class="required"
+                          v-model="businessType"
+                          :items="businessTypes"
+                          label="Business Type"
+                          :rules="mandatoryRules()"
+                          outlined
+                        />
+                      </v-col>
+                      <v-card-title class="primary-text">Address</v-card-title>
+                      <v-col cols="12">
+                        <v-text-field
+                          class="required"
+                          v-model="streetAddress"
+                          label="Company Street Address"
+                          :rules="mandatoryRules().concat(streetRules())"
+                          outlined/>
+                      </v-col>
+                      <v-col cols="12">
+                        <LocationAutocomplete
+                          type="district"
+                          v-model="district"
+                          :rules="maxCharRules().concat(alphabetRules())"
+                        />
+                      </v-col>
+                      <v-col cols="12">
+                        <LocationAutocomplete
+                          type="city"
+                          class="required"
+                          v-model="city"
+                          :rules="mandatoryRules().concat(maxCharRules()).concat(alphabetRules())"
+                        />
+                      </v-col>
+                      <v-col cols="12">
+                        <LocationAutocomplete
+                          type="region"
+                          class="required"
+                          v-model="region"
+                          :rules="mandatoryRules().concat(maxCharRules()).concat(alphabetRules())"
+                        />
+                      </v-col>
+                      <v-col cols="12">
+                        <LocationAutocomplete
+                          type="country"
+                          class="required"
+                          v-model="country"
+                          :rules="mandatoryRules().concat(maxCharRules()).concat(alphabetRules())"
+                        />
+                      </v-col>
+                      <v-col cols="12">
+                        <v-text-field
+                          class="required"
+                          v-model="postcode"
+                          label="Postcode"
+                          :rules="mandatoryRules().concat(maxCharRules()).concat(postcodeRules())"
+                          outlined
                         />
                       </v-col>
                     </v-row>
-                    <v-row>
-                      <v-text-field
-                        label="New description of the business"
-                        v-model="newDescription"
-                      />
-                    </v-row>
-                    <v-row>
-                      <v-select
-                        label="New business type of the business"
-                        v-model="newBusinessType"
-                        :items="businessTypes"
-                      />
-                    </v-row>
-                  </v-col>
-                  <v-card-title>Address</v-card-title>
-                  <v-col>
-                    <v-row>
-                      <v-text-field
-                        label="New street address"
-                        v-model="newStreetAddress"
-                      />
-                    </v-row>
-                    <v-row>
-                      <v-text-field
-                        label="New district"
-                        v-model="newDistrict"
-                      />
-                    </v-row>
-                    <v-row>
-                      <v-text-field
-                        label="New city"
-                        v-model="newCity"
-                      />
-                    </v-row>
-                    <v-row>
-                      <v-text-field
-                        label="New region"
-                        v-model="newRegion"
-                      />
-                    </v-row>
-                    <v-row>
-                      <v-text-field
-                        label="New country"
-                        v-model="newCountry"
-                      />
-                    </v-row>
-                    <v-row>
-                      <v-text-field
-                        label="New postcode"
-                        v-model="newPostcode"
-                      />
-                    </v-row>
-                  </v-col>
-                  <v-card-title>Remove Administrators</v-card-title>
-                  <v-col>
-                    <v-row>
-                      <span v-for="admin in administrators" :key="admin.id">
-                        <v-chip color="red" text-color="white"> {{ admin.firstName }} {{ admin.lastName }} </v-chip>
-                      </span>
-                    </v-row>
-                  </v-col>
-                  <v-card-title>Images</v-card-title>
-                  <v-col>
-                    <v-row>
-                      <v-card-subtitle>Primary image placeholder</v-card-subtitle>
-                    </v-row>
-                  </v-col>
-                  <v-col>
-                    <v-row>
-                      <v-card-subtitle>regular images placeholder</v-card-subtitle>
-                    </v-row>
-                  </v-col>
-                  <v-col>
-                    <v-row>
-                      <v-card-subtitle>upload images placeholder</v-card-subtitle>
-                    </v-row>
-                  </v-col>
+                    <v-card-title>Remove Administrators</v-card-title>
+                    <v-col>
+                      <v-row>
+                        <span v-for="admin in administrators" :key="admin.id">
+                          <v-chip @click="showAlert" color="red" text-color="white"> {{ admin.firstName }} {{ admin.lastName }} </v-chip>
+                        </span>
+                      </v-row>
+                    </v-col>
+                    <v-card-title>Images</v-card-title>
+                    <v-col>
+                      <v-row>
+                        <v-card-subtitle>Primary image placeholder</v-card-subtitle>
+                      </v-row>
+                    </v-col>
+                    <v-col>
+                      <v-row>
+                        <v-card-subtitle>regular images placeholder</v-card-subtitle>
+                      </v-row>
+                    </v-col>
+                    <v-col>
+                      <v-row>
+                        <v-card-subtitle>upload images placeholder</v-card-subtitle>
+                      </v-row>
+                    </v-col>
+                    <p class="error-text" v-if ="errorMessage !== undefined"> {{errorMessage}} </p>
+                  </v-container>
                 </v-card-text>
                 <v-card-actions>
                   <v-row justify="end">
@@ -204,36 +226,53 @@
 </template>
 
 <script>
+import LocationAutocomplete from '@/components/utils/LocationAutocomplete';
 import { getBusiness } from '../../api/internal';
 import convertAddressToReadableText from '@/components/utils/Methods/convertJsonAddressToReadableText';
-
+import {
+  alphabetExtendedMultilineRules,
+  alphabetExtendedSingleLineRules, alphabetRules,
+  mandatoryRules,
+  maxCharRules, postCodeRules, streetNumRules
+} from "@/utils";
 export default {
   name: 'BusinessProfile',
-
+  components: {
+    LocationAutocomplete,
+  },
   data() {
     return {
       /**
        * The business that this profile is for.
        */
-      business: {},
+      modifyBusiness: false,
       readableAddress: "",
+      errorMessage: undefined,
+      dialog: true,
+      business: 'as',
+      description: '',
+      businessType: [],
+      streetAddress: '',
+      district: '',
+      city: '',
+      region: '',
+      country: '',
+      postcode: '',
       businessTypes: [
-        'Do not change',
         'Accommodation and Food Services',
         'Charitable organisation',
         'Non-profit organisation',
         'Retail Trade',
       ],
-      modifyBusiness: false,
-      newBusinessName: "",
-      newDescription: "",
-      newBusinessType: "",
-      newStreetAddress: "",
-      newDistrict: "",
-      newCity: "",
-      newRegion: "",
-      newCountry: "",
-      newPostcode: "",
+      valid: false,
+      maxCharRules: () => maxCharRules(100),
+      maxCharDescriptionRules: ()=> maxCharRules(200),
+      mandatoryRules: ()=> mandatoryRules,
+      alphabetExtendedSingleLineRules: ()=> alphabetExtendedSingleLineRules,
+      alphabetExtendedMultilineRules: ()=> alphabetExtendedMultilineRules,
+      alphabetRules: ()=> alphabetRules,
+      streetRules: ()=> streetNumRules,
+      postcodeRules: ()=> postCodeRules
     };
   },
   watch: {
@@ -288,6 +327,9 @@ export default {
     },
     async returnToSearch() {
       await this.$router.push({path: '/search/business', query:{...this.$route.query}});
+    },
+    showAlert() {
+      alert("I am the admin");
     }
   }
 };
