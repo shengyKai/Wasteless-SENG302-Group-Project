@@ -380,6 +380,58 @@ paths:
             application admin.
         '401':
           $ref: '#/components/responses/UnauthorizedError'
+  '/businesses/{businessId}/images':
+    post:
+      tags:
+        - 'U11: Modifying Businesses'
+        - Catalogue / Products
+      summary: Upload a new image for some photo
+      security:
+        - CookieAuth:
+            - user
+            - globalApplicationAdmin
+            - defaultGlobalApplicationAdmin
+      parameters:
+        - name: businessId
+          in: path
+          description: ID of business to search catalogue of
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                filename:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+      responses:
+        '201':
+          description: Image created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  imageId:
+                    type: integer
+                    description: The ID of the image that has just been created
+                    example: 1234
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: >-
+            Forbidden: Returned when a user tries to add an image for a product
+            that it is in a catalogue for a business they do not administer AND
+            the user is not a global application admin
+        '406':
+          $ref: '#/components/responses/NotAcceptableError'
   '/businesses/{id}/makeAdministrator':
     put:
       tags:
