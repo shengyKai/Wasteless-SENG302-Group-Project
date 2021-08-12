@@ -5,7 +5,7 @@
         <v-btn @click="returnToSearch" color="primary">Return to search</v-btn>
       </v-col>
     </v-row>
-    <v-card class="body">
+    <v-card class="body" v-if='!modifyBusiness'>
       <div class="top-section">
         <div>
           <h1>
@@ -42,131 +42,13 @@
             </span>
           </v-col>
         </v-row>
-      </v-container>
-      <v-form v-model="valid">
-        <div v-if='modifyBusiness'>
-          <v-card class="business-modify">
-            <v-card-title class="title">Modify Business Details</v-card-title>
-            <v-card-text>
-              <v-col>
-                <v-row>
-                  <v-text-field
-                    label="New name of the business"
-                    v-model="newBusinessName"
-                  />
-                </v-row>
-                <v-row>
-                  <v-text-field
-                    label="New description of the business"
-                    v-model="newDescription"
-                  />
-                </v-row>
-                <v-row>
-                  <v-select
-                    label="New business type of the business"
-                    v-model="newBusinessType"
-                    :items="businessTypes"
-                  />
-                </v-row>
-              </v-col>
-              <v-card-title>Address</v-card-title>
-              <v-col>
-                <v-row>
-                  <v-text-field
-                    label="New street address"
-                    v-model="newStreetAddress"
-                  />
-                </v-row>
-                <v-row>
-                  <v-text-field
-                    label="New district"
-                    v-model="newDistrict"
-                  />
-                </v-row>
-                <v-row>
-                  <v-text-field
-                    label="New city"
-                    v-model="newCity"
-                  />
-                </v-row>
-                <v-row>
-                  <v-text-field
-                    label="New region"
-                    v-model="newRegion"
-                  />
-                </v-row>
-                <v-row>
-                  <v-text-field
-                    label="New country"
-                    v-model="newCountry"
-                  />
-                </v-row>
-                <v-row>
-                  <v-text-field
-                    label="New postcode"
-                    v-model="newPostcode"
-                  />
-                </v-row>
-              </v-col>
-              <v-card-title>Remove Administrators</v-card-title>
-              <v-col>
-                <v-row>
-                  <span v-for="admin in administrators" :key="admin.id">
-                    <v-chip color="red" text-color="white"> {{ admin.firstName }} {{ admin.lastName }} </v-chip>
-                  </span>
-                </v-row>
-              </v-col>
-              <v-card-title>Images</v-card-title>
-              <v-col>
-                <v-row>
-                  <v-card-subtitle>Primary image placeholder</v-card-subtitle>
-                </v-row>
-              </v-col>
-              <v-col>
-                <v-row>
-                  <v-card-subtitle>regular images placeholder</v-card-subtitle>
-                </v-row>
-              </v-col>
-              <v-col>
-                <v-row>
-                  <v-card-subtitle>upload images placeholder</v-card-subtitle>
-                </v-row>
-              </v-col>
-            </v-card-text>
-            <v-card-actions>
-              <v-row justify="end">
-                <v-col cols="2" class="ma-1 mr-n14">
-                  <v-btn
-                    type="submit"
-                    color="primary">
-                    Update Business
-                  </v-btn>
-                </v-col>
-                <v-col cols="2" class="ma-1 mr-3">
-                  <v-btn
-                    class="white--text"
-                    color="secondary"
-                    @click="modifyBusiness = false"
-                  >
-                    <v-icon
-                      class="expand-icon text-right"
-                      color="white"
-                    >
-                      mdi-file-cancel
-                    </v-icon>Discard changes.
-                  </v-btn>
-                </v-col>
-              </v-row>
-            </v-card-actions>
-          </v-card>
-        </div>
-        <div v-else >
+        <div v-if='!modifyBusiness'>
           <v-row justify="end">
             <v-col cols="2">
               <v-btn
                 class="white--text"
                 color="secondary"
-                @click="viewCreateBusiness"
+                @click="modifyBusiness = true"
               >
                 <v-icon
                   class="expand-icon"
@@ -178,8 +60,145 @@
             </v-col>
           </v-row>
         </div>
-      </v-form>
+      </v-container>
     </v-card>
+    <v-row justify="center">
+      <v-col cols="5">
+        <v-card max-width=900px>
+          <v-form v-model="valid">
+            <div v-if='modifyBusiness'>
+              <v-card class="mt-5">
+                <v-card-title class="primary-text">Modify Business Details</v-card-title>
+                <v-card-text>
+                  <v-col>
+                    <v-row>
+                      <v-col cols="">
+                        <v-text-field
+                          label="New name of the business"
+                          filled
+                          rounded
+                          dense
+                          v-model="newBusinessName"
+                          clearable
+                        />
+                      </v-col>
+                    </v-row>
+                    <v-row>
+                      <v-text-field
+                        label="New description of the business"
+                        v-model="newDescription"
+                      />
+                    </v-row>
+                    <v-row>
+                      <v-select
+                        label="New business type of the business"
+                        v-model="newBusinessType"
+                        :items="businessTypes"
+                      />
+                    </v-row>
+                  </v-col>
+                  <v-card-title>Address</v-card-title>
+                  <v-col>
+                    <v-row>
+                      <v-text-field
+                        label="New street address"
+                        v-model="newStreetAddress"
+                      />
+                    </v-row>
+                    <v-row>
+                      <v-text-field
+                        label="New district"
+                        v-model="newDistrict"
+                      />
+                    </v-row>
+                    <v-row>
+                      <v-text-field
+                        label="New city"
+                        v-model="newCity"
+                      />
+                    </v-row>
+                    <v-row>
+                      <v-text-field
+                        label="New region"
+                        v-model="newRegion"
+                      />
+                    </v-row>
+                    <v-row>
+                      <v-text-field
+                        label="New country"
+                        v-model="newCountry"
+                      />
+                    </v-row>
+                    <v-row>
+                      <v-text-field
+                        label="New postcode"
+                        v-model="newPostcode"
+                      />
+                    </v-row>
+                  </v-col>
+                  <v-card-title>Remove Administrators</v-card-title>
+                  <v-col>
+                    <v-row>
+                      <span v-for="admin in administrators" :key="admin.id">
+                        <v-chip color="red" text-color="white"> {{ admin.firstName }} {{ admin.lastName }} </v-chip>
+                      </span>
+                    </v-row>
+                  </v-col>
+                  <v-card-title>Images</v-card-title>
+                  <v-col>
+                    <v-row>
+                      <v-card-subtitle>Primary image placeholder</v-card-subtitle>
+                    </v-row>
+                  </v-col>
+                  <v-col>
+                    <v-row>
+                      <v-card-subtitle>regular images placeholder</v-card-subtitle>
+                    </v-row>
+                  </v-col>
+                  <v-col>
+                    <v-row>
+                      <v-card-subtitle>upload images placeholder</v-card-subtitle>
+                    </v-row>
+                  </v-col>
+                </v-card-text>
+                <v-card-actions>
+                  <v-row justify="end">
+                    <v-col cols="2" class="ma-1 mr-7">
+                      <v-btn
+                        type="submit"
+                        color="primary">
+                        <v-icon
+                          class="expand-icon"
+                          color="white"
+                        >
+                          mdi-file-upload-outline
+                        </v-icon>
+                        Submit
+                      </v-btn>
+                    </v-col>
+                    <v-col cols="4" class="ma-1 mr-n9">
+                      <v-btn
+                        class="white--text"
+                        color="secondary"
+                        @click="modifyBusiness = false"
+                      >
+                        <v-icon
+                          class="expand-icon"
+                          color="white"
+                        >
+                          mdi-file-cancel-outline
+                        </v-icon>
+                        Discard
+                      </v-btn>
+                    </v-col>
+                  </v-row>
+                </v-card-actions>
+              </v-card>
+            </div>
+          </v-form>
+        </v-card>
+      </v-col>
+    </v-row>
 
   </div>
 </template>
@@ -264,12 +283,6 @@ export default {
   },
 
   methods: {
-    /**
-     * Shows the create business dialog
-     */
-    viewCreateBusiness() {
-      this.$store.commit('showCreateBusiness');
-    },
     goSalePage() {
       this.$router.push(`/business/${this.business.id}/listings`);
     },
