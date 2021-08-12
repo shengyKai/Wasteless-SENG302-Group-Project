@@ -165,21 +165,6 @@
                       </v-row>
                     </v-col>
                     <v-card-title>Images</v-card-title>
-                    <v-col>
-                      <v-row>
-                        <v-card-subtitle>Primary image placeholder</v-card-subtitle>
-                      </v-row>
-                    </v-col>
-                    <v-col>
-                      <v-row>
-                        <v-card-subtitle>regular images placeholder</v-card-subtitle>
-                      </v-row>
-                    </v-col>
-                    <v-col>
-                      <v-row>
-                        <v-card-subtitle>upload images placeholder</v-card-subtitle>
-                      </v-row>
-                    </v-col>
                     <p class="error-text" v-if ="errorMessage !== undefined"> {{errorMessage}} </p>
                   </v-container>
                 </v-card-text>
