@@ -1,20 +1,6 @@
 <template>
-  <div v-if="deleted">
-    <v-card-title>
-      You notification will be deleted
-    </v-card-title>
-    <v-card-text>
-      Press undo in the next {{ remainingTime }} seconds to cancel deletion of the notification "{{ title }}."
-    </v-card-text>
-    <v-card-actions class="justify-center">
-      <v-btn color="secondary" ref="undoButton" @click="undoDelete"> Undo </v-btn>
-    </v-card-actions>
-    <v-card-text class="justify-center">
-      <div class="error--text" v-if="errorMessage !== undefined">{{ errorMessage }}</div>
-    </v-card-text>
-  </div>
-  <div v-else>
-    <div class="delete">
+  <div>
+    <div class="float=right ma-1">
       <v-icon class="deleteButton"
               ref="deleteButton"
               color="red"
@@ -38,8 +24,7 @@
       justify="start"
       style="min-height: 10px;"
     >
-
-      <v-col class="shrink">
+      <v-col cols="10">
         <!-- The persistent chip that shows the tag for the message (default will be no colour) -->
         <v-tooltip bottom>
           <template v-slot:activator="{ on, attrs }">
@@ -95,13 +80,79 @@
           </v-card>
         </v-expand-transition>
       </v-col>
+      <v-col class="float=right">
+        <!-- Tooltip for the reply button telling user what they can do with this button -->
+        <v-tooltip bottom >
+          <template v-slot:activator="{on, attrs }">
+            <v-icon v-if="!isCardOwner"
+                    ref="messageButton"
+                    color="primary"
+                    @click.stop="messageOwnerDialog = true; directMessageContent=''"
+                    v-bind="attrs"
+                    v-on="on"
+                    class="mt-4 ml-12"
+            >
+              mdi-reply
+            </v-icon>
+          </template>
+          Reply to this message
+        </v-tooltip>
+      </v-col>
     </v-row>
+    <!-- Dialog that stay consistent with the firstMessage(in primary colour), replyMessage(in secondary colour) -->
+    <v-dialog ref="messageDialog"
+              v-model="messageOwnerDialog"
+              max-width="600px">
+      <v-card>
+        <!-- The 'TITLE' of the replyMessage component -->
+        <v-card color='secondary lighten-2'>
+          <v-card-title>
+            Send a message to {{firstName}}
+          </v-card-title>
+          <v-card-subtitle>
+            Your message will appear on their feed
+          </v-card-subtitle>
+        </v-card>
+        <!-- The Message body input component -->
+        <v-form v-model="directMessageValid" ref="directMessageForm">
+          <v-card-text>
+            <v-textarea
+              solo
+              outlined
+              clearable
+              prepend-inner-icon="mdi-comment"
+              no-resize
+              :counter="200"
+              :rules="mandatoryRules.concat(maxCharRules())"
+              v-model="directMessageContent"/>
+          </v-card-text>
+          <!-- Submit and Cancel button for the replyMessage component -->
+          <v-card-actions>
+            <v-alert v-if="directMessageError !== undefined" color="red" type="error" dense text>
+              {{directMessageError}}
+            </v-alert>
+            <v-spacer/>
+            <v-btn color="primary"
+                   text
+                   :disabled="!directMessageValid"
+                   @click="sendMessage">
+              Send
+            </v-btn>
+            <v-btn color="primary"
+                   text
+                   @click="messageOwnerDialog = false; directMessageError = undefined; directMessageContent=''">
+              Cancel
+            </v-btn>
+          </v-card-actions>
+        </v-form>
+      </v-card>
+    </v-dialog>
   </div>
 </template>
 
 <script>
-import { formatDate } from '@/utils';
-import {deleteNotification} from "@/api/internal";
+import { formatDate, maxCharRules, mandatoryRules, } from '@/utils';
+import {deleteNotification, messageConversation} from "@/api/internal";
 import { setEventTag } from '../../../api/internal';
 import synchronizedTime from '@/components/utils/Methods/synchronizedTime';
 
@@ -119,6 +170,16 @@ export default {
   },
   data() {
     return {
+      deleteCardDialog: false,
+      editCardDialog: false,
+      messageOwnerDialog: false,
+      directMessageContent: '',
+      directMessageError: undefined,
+      directMessageValid: false,
+      mandatoryRules,
+      maxCharRules: () => maxCharRules(200),
+      firstname: "haha",
+
       expand: false,
       colours: ['none', 'red', 'orange', 'yellow', 'green', 'blue', 'purple'],
       error: undefined,
@@ -161,6 +222,15 @@ export default {
         this.error = result;
       } else {
         this.$store.commit('removeEvent', this.event.id);
+      }
+    },
+    async sendMessage() {
+      this.directMessageError = undefined;
+      let response = await messageConversation(this.content.id, this.$store.state.user.id, this.$store.state.user.id, this.directMessageContent);
+      if (typeof response === 'string') {
+        this.directMessageError = response;
+      } else {
+        this.messageOwnerDialog = false;
       }
     },
 
@@ -222,10 +292,6 @@ export default {
 </script>
 
 <style>
-.delete {
-  float: right;
-  margin: 0.25em;
-}
 .deleteButton {
   float: right;
   margin: 0.25em;
