@@ -180,14 +180,16 @@ describe('HomePage.vue', () => {
         await Vue.nextTick();
       }
     }
+    
+    beforeEach(async () => {
+      await addMultipleEvents();
+    });
 
     it('If there are more than 10 events in the store for the user, pagination will be available for the user', async () => {
-      await addMultipleEvents();
       expect(wrapper.vm.totalPages).toEqual(2);
     });
   
     it('If there are more than 10 events in the store for the user, the user can navigate to the second page and see the correct results', async () => {
-      await addMultipleEvents();
       let events = wrapper.findAllComponents({ name: "GlobalMessage" });
       // Number of events should be 10 because each page only allows space for 10 events
       expect(events.length).toEqual(10);
@@ -207,7 +209,6 @@ describe('HomePage.vue', () => {
     });
   
     it('If there are events with different tag colours, the user can filter them to the colour of interest and see the correct results', async () => {
-      await addMultipleEvents();
       await wrapper.setData({
         filterBy: ["red"]
       });
@@ -226,7 +227,6 @@ describe('HomePage.vue', () => {
     });
   
     it('If there are events with different tag colours, the user can filter them with multiple colours and see the correct results', async () => {
-      await addMultipleEvents();
       await wrapper.setData({
         filterBy: ["red", "none"]
       });
@@ -245,7 +245,6 @@ describe('HomePage.vue', () => {
     });
   
     it('If the user filters with tags which are not in the events, no results will be shown', async () => {
-      await addMultipleEvents();
       await wrapper.setData({
         filterBy: ["blue", "purple"]
       });

@@ -101,11 +101,7 @@ export default {
        */
       colours: [{text: "None", value: 'none'}, {text: "Red", value: 'red'}, {text: "Orange", value: 'orange'},
         {text: "Yellow", value: 'yellow'}, {text: "Green", value: 'green'}, {text: "Blue", value: 'blue'},
-        {text: "Purple", value: 'purple'}],
-      /**
-       * An attribute to check if the events list is a filtered events list or not
-       */
-      isFiltered: false
+        {text: "Purple", value: 'purple'}]
     };
   },
   computed: {
@@ -179,6 +175,12 @@ export default {
     eventsPage() {
       const pageStartIndex = (this.currentPage - 1) * this.resultsPerPage;
       return this.events.slice(pageStartIndex, (pageStartIndex + this.resultsPerPage));
+    },
+    /**
+     * An attribute to check if the events list is a filtered events list or not
+     */
+    isFiltered() {
+      return this.filterBy.length !== 0;
     }
   },
   watch: {
@@ -186,12 +188,7 @@ export default {
      * Watch the changes in filterBy because if the user is in the second page while the page is filtered, the currentPage will
      * not be reverted back to the first page, which will cause the events to not be sliced/filtered properly.
      */
-    filterBy: function(filterList) {
-      if (filterList.length === 0) {
-        this.isFiltered = false;
-      } else {
-        this.isFiltered = true;
-      }
+    filterBy: function() {
       this.currentPage = 1;
     },
     /**
