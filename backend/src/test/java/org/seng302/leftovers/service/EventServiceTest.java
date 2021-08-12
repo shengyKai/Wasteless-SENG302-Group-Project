@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mockito.*;
 import org.seng302.leftovers.entities.Event;
-import org.seng302.leftovers.entities.MessageEvent;
+import org.seng302.leftovers.entities.GlobalMessageEvent;
 import org.seng302.leftovers.entities.User;
 import org.seng302.leftovers.persistence.EventRepository;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -18,7 +18,6 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.List;
-import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -98,7 +97,7 @@ class EventServiceTest {
 
     @Test
     void createEmitterForUser_userWithOneEvent_emitsEventWithSettings() throws IOException {
-        Event event = new MessageEvent(mockUser,"foo");
+        Event event = new GlobalMessageEvent(mockUser,"foo");
 
         when(eventRepository.getAllByNotifiedUserOrderByCreated(mockUser)).thenReturn(List.of(event)); // Add initial event
 

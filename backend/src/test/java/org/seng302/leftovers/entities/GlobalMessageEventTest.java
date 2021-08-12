@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class MessageEventTest {
+class GlobalMessageEventTest {
 
     @Autowired
     private EventRepository eventRepository;
@@ -55,26 +55,26 @@ class MessageEventTest {
 
     @Test
     void createMessageEvent_nullMessage_400Response() {
-        var exception = assertThrows(ResponseStatusException.class, () -> new MessageEvent(user, null));
+        var exception = assertThrows(ResponseStatusException.class, () -> new GlobalMessageEvent(user, null));
         assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
         assertEquals("Message cannot be null", exception.getReason());
     }
 
     @Test
     void createMessageEvent_someMessage_createsEventWithMessage() {
-        var event = assertDoesNotThrow(() -> new MessageEvent(user, "Foo"));
+        var event = assertDoesNotThrow(() -> new GlobalMessageEvent(user, "Foo"));
         assertEquals("Foo", event.getMessage());
     }
 
     @Test
     void constructJSONObject_withMessage_correctJson() {
-        MessageEvent event = new MessageEvent(user, "Foo");
+        GlobalMessageEvent event = new GlobalMessageEvent(user, "Foo");
         event = eventRepository.save(event); // Make sure to get an ID
 
         JSONObject json = event.constructJSONObject();
         assertEquals(event.getId(), json.get("id"));
         assertEquals(event.getCreated().toString(), json.get("created"));
-        assertEquals("MessageEvent", json.get("type"));
+        assertEquals("GlobalMessageEvent", json.get("type"));
         assertEquals("none", json.get("tag"));
         assertEquals("Foo", json.get("message"));
         assertEquals(5, json.size());

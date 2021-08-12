@@ -11,18 +11,18 @@ import javax.persistence.Entity;
  * Event for a message sent by an administrator to a user
  */
 @Entity
-public class MessageEvent extends Event {
+public class GlobalMessageEvent extends Event {
     @Column(nullable = false)
     private String message;
 
-    protected MessageEvent() {}
+    protected GlobalMessageEvent() {}
 
     /**
      * Constructs a message event with the given initial message
      * @param notifiedUser User to send the message to
      * @param message Initial event message
      */
-    public MessageEvent(User notifiedUser, String message) {
+    public GlobalMessageEvent(User notifiedUser, String message) {
         super(notifiedUser);
         setMessage(message);
     }

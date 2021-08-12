@@ -6,12 +6,11 @@ import cucumber.context.UserContext;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
-import lombok.SneakyThrows;
 import net.minidev.json.JSONObject;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.seng302.leftovers.entities.Event;
-import org.seng302.leftovers.entities.MessageEvent;
+import org.seng302.leftovers.entities.GlobalMessageEvent;
 import org.seng302.leftovers.persistence.EventRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -43,7 +42,7 @@ public class EventStepDefinition {
 
     @Given("An event is sent to the user")
     public void an_event_is_sent_to_the_user() {
-        Event event = new MessageEvent(userContext.getLast(), "Test message");
+        Event event = new GlobalMessageEvent(userContext.getLast(), "Test message");
         eventContext.save(event);
     }
 
