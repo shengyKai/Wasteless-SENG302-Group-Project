@@ -166,7 +166,7 @@
               <v-btn
                 class="white--text"
                 color="secondary"
-                @click="modifyBusiness = true"
+                @click="viewCreateBusiness"
               >
                 <v-icon
                   class="expand-icon"
@@ -264,6 +264,12 @@ export default {
   },
 
   methods: {
+    /**
+     * Shows the create business dialog
+     */
+    viewCreateBusiness() {
+      this.$store.commit('showCreateBusiness');
+    },
     goSalePage() {
       this.$router.push(`/business/${this.business.id}/listings`);
     },
