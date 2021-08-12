@@ -6,6 +6,7 @@ import org.apache.logging.log4j.Logger;
 import org.seng302.leftovers.entities.Conversation;
 import org.seng302.leftovers.entities.Message;
 import org.seng302.leftovers.persistence.*;
+import org.seng302.leftovers.service.MessageService;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
 import org.seng302.leftovers.tools.JsonTools;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,15 +32,18 @@ public class ConversationController {
     private final UserRepository userRepository;
     private final MessageRepository messageRepository;
     private final ConversationRepository conversationRepository;
+    private final MessageService messageService;
     private final Logger logger = LogManager.getLogger(ConversationController.class.getName());
 
 
     @Autowired
-    public ConversationController(MarketplaceCardRepository marketplaceCardRepository, ConversationRepository conversationRepository, UserRepository userRepository, MessageRepository messageRepository) {
+    public ConversationController(MarketplaceCardRepository marketplaceCardRepository, ConversationRepository conversationRepository,
+                                  UserRepository userRepository, MessageRepository messageRepository, MessageService messageService) {
         this.marketplaceCardRepository = marketplaceCardRepository;
         this.conversationRepository = conversationRepository;
         this.userRepository = userRepository;
         this.messageRepository = messageRepository;
+        this.messageService = messageService;
     }
 
     /**
@@ -78,7 +82,10 @@ public class ConversationController {
 
         logger.info("Posting a message to conversation about card {}, with sender {}", card.getID(), sender.getUserID());
         conversationRepository.save(conversation);
-        messageRepository.save(new Message(conversation, sender, content));
+
+        var message = new Message(conversation, sender, content);
+        message = messageRepository.save(message);
+        messageService.notifyConversationParticipants(message, buyer, card.getCreator());
         return new ResponseEntity(HttpStatus.CREATED);
     }
 }
