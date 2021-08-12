@@ -42,25 +42,29 @@ public class BusinessStepDefinition {
 
     private JSONObject modifyParameters;
 
-    public void saveMultipleProductsToBusiness(int amount, Business business) {
+    /**
+     * Method to save multiple products into the latest business saved in the businessContext
+     * @param amount Number of products to generate to save into the business
+     */
+    public void saveMultipleProductsToBusiness(int amount) {
         try (Session session = sessionFactory.openSession()) {
             session.beginTransaction();
-            var business1 = session.find(Business.class, business.getId());
+            var business = session.find(Business.class, businessContext.getLast().getId());
             for (int i = 0; i < amount; i++) {
                 var product = new Product.Builder()
-                        .withBusiness(business1)
+                        .withBusiness(business)
                         .withDescription("some description")
                         .withManufacturer("Some manufacturer")
                         .withName("Some prod")
                         .withProductCode("PROD" + String.valueOf(i))
                         .withRecommendedRetailPrice("123")
                         .build();
-                business1.addToCatalogue(product);
+                business.addToCatalogue(product);
                 session.save(product);
             }
-            session.save(business1);
+            session.save(business);
             session.getTransaction().commit();
-            businessContext.save(business1);
+            businessContext.save(business);
         }
     }
 
@@ -221,7 +225,7 @@ public class BusinessStepDefinition {
     @Given("There are products related to the business")
     public void there_are_products_related_to_the_business() {
         Business business = businessRepository.getBusinessById(businessContext.getLast().getId());
-        saveMultipleProductsToBusiness(5, business);
+        saveMultipleProductsToBusiness(5);
     }
 
     @Then("The all of the business product's country of sale is updated")
