@@ -11,9 +11,11 @@ import org.junit.runner.RunWith;
 import org.mockito.*;
 import org.seng302.leftovers.entities.Business;
 import org.seng302.leftovers.entities.Location;
+import org.seng302.leftovers.entities.Product;
 import org.seng302.leftovers.entities.User;
 import org.seng302.leftovers.exceptions.AccessTokenException;
 import org.seng302.leftovers.persistence.BusinessRepository;
+import org.seng302.leftovers.persistence.ProductRepository;
 import org.seng302.leftovers.persistence.UserRepository;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -24,6 +26,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -50,11 +53,19 @@ class BusinessControllerModifyTest {
     @Mock
     private UserRepository userRepository;
     @Mock
+    private ProductRepository productRepository;
+    @Mock
     private Business mockBusiness;
     @Mock
     private User mockOwner;
     @Mock
     private User mockNonOwner;
+    @Mock
+    private Product mockProduct1;
+    @Mock
+    private Product mockProduct2;
+    @Mock
+    private Product mockProduct3;
 
     private MockedStatic<AuthenticationTokenManager> authenticationTokenManager;
 
@@ -310,5 +321,47 @@ class BusinessControllerModifyTest {
 
         authenticationTokenManager.verify(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), isNull()));
         verify(businessRepository, times(1)).save(mockBusiness);
+    }
+
+    @Test
+    void modifyBusiness_isOwnerAndUpdateCurrencyForOneProduct_200ResponseAndCurrencyUpdated() throws Exception {
+        when(mockBusiness.getCatalogue()).thenReturn(List.of(mockProduct1));
+        var json = createValidRequest();
+        mockMvc.perform(
+                put("/businesses/" + mockBusinessId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json.toString())
+                        .sessionAttrs(createSessionForUser(mockOwnerId)))
+                .andExpect(status().isOk())
+                .andReturn();
+        
+        var addressCaptor = ArgumentCaptor.forClass(Location.class);
+        verify(mockBusiness, times(1)).setAddress(addressCaptor.capture());
+        String country = addressCaptor.getValue().getCountry();
+
+        verify(mockBusiness, times(1)).getCatalogue();
+        verify(mockProduct1, times(1)).setCountryOfSale("New Zealand");
+    }
+
+    @Test
+    void modifyBusiness_isOwnerAndUpdateCurrencyForMultipleProducts_200ResponseAndCurrencyUpdated() throws Exception {
+        when(mockBusiness.getCatalogue()).thenReturn(List.of(mockProduct1, mockProduct2, mockProduct3));
+        var json = createValidRequest();
+        mockMvc.perform(
+                put("/businesses/" + mockBusinessId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json.toString())
+                        .sessionAttrs(createSessionForUser(mockOwnerId)))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        var addressCaptor = ArgumentCaptor.forClass(Location.class);
+        verify(mockBusiness, times(1)).setAddress(addressCaptor.capture());
+        String country = addressCaptor.getValue().getCountry();
+
+        verify(mockBusiness, times(1)).getCatalogue();
+        verify(mockProduct1, times(1)).setCountryOfSale("New Zealand");
+        verify(mockProduct2, times(1)).setCountryOfSale("New Zealand");
+        verify(mockProduct3, times(1)).setCountryOfSale("New Zealand");
     }
 }
