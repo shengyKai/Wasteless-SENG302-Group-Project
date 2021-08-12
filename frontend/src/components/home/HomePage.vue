@@ -194,9 +194,12 @@ export default {
       }
       this.currentPage = 1;
     },
-    // eventsPage: function(events) {
-    //   if (events.length === 0 && this.currentPage !== 1) this.currentPage -= 1;
-    // }
+    /**
+     * Ensures that the current page is at least 1 and less than or equal to the total number of pages.
+     */
+    totalPages: function() {
+      this.currentPage = Math.max(Math.min(this.currentPage, this.totalPages), 1);
+    }
   }
 };
 </script>
