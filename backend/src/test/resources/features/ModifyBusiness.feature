@@ -139,6 +139,7 @@ Feature: U11 - Modifying Businesses
   Scenario: AC2 - I cannot change the business owner to a user that I do not have permissions for
     Given A user exists with name "Tim"
     And I am logged into "Dave" account
+    And There are products related to the business
     When I try to updated the fields of the business to:
       | primaryAdministrator | Tim               |
       | name                 | Dave's Prison     |
@@ -154,3 +155,20 @@ Feature: U11 - Modifying Businesses
       | updateProductCountry | false             |
     Then The request fails due to bad request
     And The business is not updated
+
+  Scenario: AC3 - I choose to update the currency of all of my business products based on the new address
+    Given I am logged into "Dave" account
+    When I try to updated the fields of the business to:
+      | primaryAdministrator | Dave               |
+      | name                 | Dave's Prison     |
+      | description          | Wow, really cool  |
+      | address.streetNumber | 10                |
+      | address.streetName   | Downing Street    |
+      | address.district     | Westminster       |
+      | address.city         | London            |
+      | address.region       | England           |
+      | address.country      | UK                |
+      | address.postcode     | 9999              |
+      | businessType         | Retail Trade      |
+      | updateProductCountry | true              |
+    Then The all of the business product's country of sale is updated

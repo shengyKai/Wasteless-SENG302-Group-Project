@@ -15,7 +15,6 @@ import org.seng302.leftovers.entities.Product;
 import org.seng302.leftovers.entities.User;
 import org.seng302.leftovers.exceptions.AccessTokenException;
 import org.seng302.leftovers.persistence.BusinessRepository;
-import org.seng302.leftovers.persistence.ProductRepository;
 import org.seng302.leftovers.persistence.UserRepository;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -52,8 +51,6 @@ class BusinessControllerModifyTest {
     private BusinessRepository businessRepository;
     @Mock
     private UserRepository userRepository;
-    @Mock
-    private ProductRepository productRepository;
     @Mock
     private Business mockBusiness;
     @Mock
@@ -360,8 +357,8 @@ class BusinessControllerModifyTest {
         String country = addressCaptor.getValue().getCountry();
 
         verify(mockBusiness, times(1)).getCatalogue();
-        verify(mockProduct1, times(1)).setCountryOfSale("New Zealand");
-        verify(mockProduct2, times(1)).setCountryOfSale("New Zealand");
-        verify(mockProduct3, times(1)).setCountryOfSale("New Zealand");
+        verify(mockProduct1, times(1)).setCountryOfSale(country);
+        verify(mockProduct2, times(1)).setCountryOfSale(country);
+        verify(mockProduct3, times(1)).setCountryOfSale(country);
     }
 }

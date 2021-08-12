@@ -38,6 +38,21 @@ public class BusinessStepDefinition {
 
     private JSONObject modifyParameters;
 
+    public void saveMultipleProductsToBusiness(int amount, Business business) {
+        for (int i = 0; i < amount; i++) {
+            var product = new Product.Builder()
+                    .withBusiness(business)
+                    .withDescription("some description")
+                    .withManufacturer("Some manufacturer")
+                    .withName("Some prod")
+                    .withProductCode("PROD" + String.valueOf(i))
+                    .withRecommendedRetailPrice("123")
+                    .build();
+            business.addToCatalogue(product);
+        }
+        businessContext.save(business);
+    }
+
     @Given("the business {string} exists")
     public void businessExists(String name) throws ParseException {
 
@@ -190,5 +205,22 @@ public class BusinessStepDefinition {
         assertEquals(business.getBusinessType(), updatedBusiness.getBusinessType());
         assertEquals(expectedOwnerAndAdminIds,   actualOwnerAndAdminIds);
         assertEquals(business.getAddress(),      updatedBusiness.getAddress());
+    }
+
+    @Given("There are products related to the business")
+    public void there_are_products_related_to_the_business() {
+        Business business = businessRepository.getBusinessById(businessContext.getLast().getId());
+        saveMultipleProductsToBusiness(5, business);
+    }
+
+    @Then("The all of the business product's country of sale is updated")
+    public void the_all_of_the_business_product_s_country_of_sale_is_updated() {
+        Map<String, Object> addressParams = (Map<String, Object>)modifyParameters.get("address");
+
+        Business business = businessRepository.getBusinessById(businessContext.getLast().getId());
+        List<Product> catalogue = business.getCatalogue();
+        for (Product product : catalogue) {
+            assertEquals(product.getCountryOfSale(), addressParams.get("country"));
+        }
     }
 }
