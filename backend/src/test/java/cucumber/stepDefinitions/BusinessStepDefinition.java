@@ -9,12 +9,14 @@ import io.cucumber.java.en.When;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
+import org.hibernate.Session;
 import org.junit.Assert;
 import org.seng302.leftovers.entities.*;
 import org.seng302.leftovers.persistence.BusinessRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MvcResult;
+import org.hibernate.SessionFactory;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -35,8 +37,36 @@ public class BusinessStepDefinition {
     private UserContext userContext;
     @Autowired
     private RequestContext requestContext;
+    @Autowired
+    private SessionFactory sessionFactory;
 
     private JSONObject modifyParameters;
+
+    /**
+     * Method to save multiple products into the latest business saved in the businessContext
+     * @param amount Number of products to generate to save into the business
+     */
+    public void saveMultipleProductsToBusiness(int amount) {
+        try (Session session = sessionFactory.openSession()) {
+            session.beginTransaction();
+            var business = session.find(Business.class, businessContext.getLast().getId());
+            for (int i = 0; i < amount; i++) {
+                var product = new Product.Builder()
+                        .withBusiness(business)
+                        .withDescription("some description")
+                        .withManufacturer("Some manufacturer")
+                        .withName("Some prod")
+                        .withProductCode("PROD" + String.valueOf(i))
+                        .withRecommendedRetailPrice("123")
+                        .build();
+                business.addToCatalogue(product);
+                session.save(product);
+            }
+            session.save(business);
+            session.getTransaction().commit();
+            businessContext.save(business);
+        }
+    }
 
     @Given("the business {string} exists")
     public void businessExists(String name) throws ParseException {
@@ -190,5 +220,24 @@ public class BusinessStepDefinition {
         assertEquals(business.getBusinessType(), updatedBusiness.getBusinessType());
         assertEquals(expectedOwnerAndAdminIds,   actualOwnerAndAdminIds);
         assertEquals(business.getAddress(),      updatedBusiness.getAddress());
+    }
+
+    @Given("There are products related to the business")
+    public void there_are_products_related_to_the_business() {
+        Business business = businessRepository.getBusinessById(businessContext.getLast().getId());
+        saveMultipleProductsToBusiness(5);
+    }
+
+    @Then("The all of the business product's country of sale is updated")
+    public void the_all_of_the_business_product_s_country_of_sale_is_updated() {
+        Map<String, Object> addressParams = (Map<String, Object>)modifyParameters.get("address");
+
+        try (Session session = sessionFactory.openSession()) {
+            var business = session.find(Business.class, businessContext.getLast().getId());
+            List<Product> catalogue = business.getCatalogue();
+            for (Product product : catalogue) {
+                assertEquals(product.getCountryOfSale(), addressParams.get("country"));
+            }
+        }
     }
 }
