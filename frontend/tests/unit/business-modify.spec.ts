@@ -101,7 +101,7 @@ describe('modifyBusiness.vue', () => {
 
     const App = localVue.component('App', {
       components: { ModifyBusiness },
-      template: '<div data-app><index/></div>'
+      template: '<div data-app><ModifyBusiness/></div>'
     });
 
     const elem = document.createElement('div');
