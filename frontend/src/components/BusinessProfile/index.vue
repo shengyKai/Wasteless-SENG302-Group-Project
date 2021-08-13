@@ -65,7 +65,7 @@
     <v-row justify="center">
       <v-col cols="10">
         <v-card max-width=1800px>
-          <v-form>
+          <v-form v-model="valid">
             <div v-if='modifyBusiness'>
               <v-card class="mt-5 ">
                 <v-card-title class="primary-text">Modify Business Details</v-card-title>
