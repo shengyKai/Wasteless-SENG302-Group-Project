@@ -178,7 +178,7 @@ public class Business {
      * If the requested user is less than 16 years of age, a 403 forbidden status is thrown.
      * @param owner Owner of business
      */
-    private void setPrimaryOwner(User owner) {
+    public void setPrimaryOwner(User owner) {
         if (owner == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The business must have a primary owner");
         }

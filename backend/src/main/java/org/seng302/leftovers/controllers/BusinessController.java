@@ -4,6 +4,8 @@ import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.seng302.leftovers.dto.CreateBusinessDTO;
+import org.seng302.leftovers.dto.ModifyBusinessDTO;
 import org.seng302.leftovers.entities.Business;
 import org.seng302.leftovers.entities.Location;
 import org.seng302.leftovers.entities.MarketplaceCard;
@@ -24,6 +26,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import javax.validation.Valid;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -44,45 +47,17 @@ public class BusinessController {
     }
 
     /**
-     * Parses the address part of the business info and constructs a location object using the Location class function
-     * @param businessInfo Business info
-     * @return A new Location object containing the business address
-     */
-    private Location parseLocation(JSONObject businessInfo) {
-        JSONObject businessLocation = new JSONObject((Map<String, ?>) businessInfo.get("address")) ;
-        return Location.parseLocationFromJson(businessLocation);
-    }
-
-    /**
-     * Check that the JSON body for the POST endpoint is present and has all the required fields.
-     * @param businessInfo The JSON body of the request sent to the POST businesses endpoint.
-     */
-    private void checkRegisterJson(JSONObject businessInfo) {
-        if (businessInfo == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Request must contain a JSON body");
-        }
-        if (businessInfo.get("primaryAdministratorId") == null ||
-            businessInfo.get("name") == null ||
-            businessInfo.get("description") == null ||
-            businessInfo.get("businessType") == null ||
-            businessInfo.get("address") == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Request body must contain the fields " +
-            "\"primaryAdministratorId\", \"name\", \"description\" and \"businessType\"");
-        }
-    }
-
-    /**
      * POST endpoint for registering a new business.
      * Ensures that the given primary business owner is an existing User.
      * Adds the business to the database if all of the business information is valid.
-     * @param businessInfo A Json object containing all of the business's details from the registration form.
+     * @param body A Json object containing all of the business's details from the registration form.
      */
     @PostMapping("/businesses")
-    public ResponseEntity<Void> register(@RequestBody JSONObject businessInfo, HttpServletRequest req) {
+    public ResponseEntity<Void> register(@Valid @RequestBody CreateBusinessDTO body, HttpServletRequest req) {
         try {
             AuthenticationTokenManager.checkAuthenticationToken(req);
             // Make sure this is an existing user ID
-            Optional<User> primaryOwner = userRepository.findById(Long.parseLong((businessInfo.getAsString("primaryAdministratorId"))));
+            Optional<User> primaryOwner = userRepository.findById(body.getPrimaryAdministratorId());
 
             if (primaryOwner.isEmpty()) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
@@ -92,15 +67,13 @@ public class BusinessController {
                         "You don't have permission to set the provided Primary Owner");
             }
 
-            checkRegisterJson(businessInfo);
-            Location address = parseLocation(businessInfo); // Get the address for the business
             // Build the business
             Business newBusiness = new Business.Builder()
                     .withPrimaryOwner(primaryOwner.get())
-                    .withBusinessType(businessInfo.getAsString("businessType"))
-                    .withDescription(businessInfo.getAsString("description"))
-                    .withName(businessInfo.getAsString("name"))
-                    .withAddress(address)
+                    .withBusinessType(body.getBusinessType())
+                    .withDescription(body.getDescription())
+                    .withName(body.getName())
+                    .withAddress(body.getAddress().createLocation())
                     .build();
 
             businessRepository.save(newBusiness); // Save the new business
@@ -110,6 +83,44 @@ public class BusinessController {
         } catch (Exception err) {
             logger.error(err.getMessage());
             throw err;
+        }
+    }
+
+    /**
+     * PUT endpoint for modifying an existing business.
+     * Ensures that the given primary business owner is an existing User.
+     * Adds the business to the database if all of the business information is valid.
+     * @param body A Json object containing all of the business's details from the modification form.
+     */
+    @PutMapping("/businesses/{id}")
+    public void modifyBusiness(@PathVariable Long id, @Valid @RequestBody ModifyBusinessDTO body, HttpServletRequest request) {
+        logger.info("Updating business (businessId={})", id);
+        AuthenticationTokenManager.checkAuthenticationToken(request);
+        try {
+            Business business = businessRepository.findById(id)
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "Business not found"));
+
+            loggedInUserHasPermissions(request, business);
+            if (!AuthenticationTokenManager.sessionCanSeePrivate(request, body.getPrimaryAdministratorId())) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User does not have permission to change the owner to this user");
+            }
+            User newOwner = userRepository.findById(body.getPrimaryAdministratorId())
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Updated primary administrator does not exist"));
+
+            business.setPrimaryOwner(newOwner);
+            business.setName(body.getName());
+            business.setDescription(body.getDescription());
+            business.setAddress(body.getAddress().createLocation());
+            business.setBusinessType(body.getBusinessType());
+
+            if (body.getUpdateProductCountry()) {
+                // TODO Do something
+            }
+
+            businessRepository.save(business);
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            throw e;
         }
     }
 

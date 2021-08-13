@@ -10,25 +10,33 @@ import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
 import org.junit.Assert;
-import org.seng302.leftovers.entities.Business;
-import org.seng302.leftovers.entities.Location;
+import org.seng302.leftovers.entities.*;
+import org.seng302.leftovers.persistence.BusinessRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MvcResult;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 
 
-import java.io.UnsupportedEncodingException;
 import java.text.ParseException;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class BusinessStepDefinition {
     @Autowired
     private BusinessContext businessContext;
-
+    @Autowired
+    private BusinessRepository businessRepository;
     @Autowired
     private UserContext userContext;
     @Autowired
     private RequestContext requestContext;
+
+    private JSONObject modifyParameters;
 
     @Given("the business {string} exists")
     public void businessExists(String name) throws ParseException {
@@ -109,5 +117,78 @@ public class BusinessStepDefinition {
         requestContext.performRequest(get("/businesses/search")
                 .param("searchQuery", query)
                 .param("businessType", businessType));
+    }
+
+    /**
+     * Sets a value through a multi layered mapping.
+     * E.g. Calling with a path of "a","b","c" will do mapping.get("a").get("b").put("c", value) and will create any
+     * required intermediate maps
+     * @param mapping Multi-layered map
+     * @param path List of keys/subkeys
+     * @param value Value to place at the end of the path
+     */
+    private void setValueAtPath(Map<String, Object> mapping, List<String> path, Object value) {
+        String head = path.get(0);
+        if (path.size() == 1) {
+            mapping.put(head, value);
+        } else {
+            if (!mapping.containsKey(head)) {
+                mapping.put(head, new HashMap<>());
+            }
+            setValueAtPath((Map<String, Object>)mapping.get(head), path.subList(1, path.size()), value);
+        }
+    }
+
+    @When("I try to updated the fields of the business to:")
+    public void i_try_to_updated_the_fields_of_the_business_to(Map<String, Object> dataTable) {
+        modifyParameters = new JSONObject();
+        for (var entry : dataTable.entrySet()) {
+            List<String> path = Arrays.asList(entry.getKey().split("\\."));
+            setValueAtPath(modifyParameters, path, entry.getValue());
+        }
+
+        String adminName = (String)modifyParameters.remove("primaryAdministrator");
+        if (adminName != null) {
+            modifyParameters.put("primaryAdministratorId", userContext.getByName(adminName).getUserID());
+        }
+
+        Business business = businessContext.getLast();
+        requestContext.performRequest(put("/businesses/" + business.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(this.modifyParameters.toJSONString()));
+    }
+
+    @Then("The business is updated")
+    public void the_business_is_updated() {
+        Business business = businessRepository.getBusinessById(businessContext.getLast().getId());
+        assertEquals(modifyParameters.get("name"), business.getName());
+        assertEquals(modifyParameters.get("description"), business.getDescription());
+        assertEquals(modifyParameters.get("businessType"), business.getBusinessType());
+        assertEquals(modifyParameters.get("primaryAdministratorId"), business.getPrimaryOwner().getUserID());
+
+        Map<String, Object> addressParams = (Map<String, Object>)modifyParameters.get("address");
+        Location address = business.getAddress();
+        assertEquals(addressParams.get("streetNumber"), address.getStreetNumber());
+        assertEquals(addressParams.get("streetName"), address.getStreetName());
+        assertEquals(addressParams.get("district"), address.getDistrict());
+        assertEquals(addressParams.get("city"), address.getCity());
+        assertEquals(addressParams.get("region"), address.getRegion());
+        assertEquals(addressParams.get("country"), address.getCountry());
+        assertEquals(addressParams.get("postcode"), address.getPostCode());
+    }
+
+    @Then("The business is not updated")
+    public void the_business_is_not_updated() {
+        Business business = businessContext.getLast();
+        Business updatedBusiness = businessRepository.getBusinessById(business.getId());
+
+        Set<Long> expectedOwnerAndAdminIds = business.getOwnerAndAdministrators().stream().map(User::getUserID).collect(Collectors.toSet());
+        Set<Long> actualOwnerAndAdminIds   = updatedBusiness.getOwnerAndAdministrators().stream().map(User::getUserID).collect(Collectors.toSet());
+
+        assertEquals(business.getName(),         updatedBusiness.getName());
+        assertEquals(business.getDescription(),  updatedBusiness.getDescription());
+        assertEquals(business.getBusinessType(), updatedBusiness.getBusinessType());
+        assertEquals(expectedOwnerAndAdminIds,   actualOwnerAndAdminIds);
+        assertEquals(business.getAddress(),      updatedBusiness.getAddress());
     }
 }
