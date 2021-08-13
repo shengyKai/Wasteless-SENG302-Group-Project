@@ -75,7 +75,7 @@
                       <v-col cols="6">
                         <v-text-field
                           dense
-                          class="mr-1"
+                          class="mr-1 required"
                           v-model="businessName"
                           label="Name of business"
                           :rules="maxCharRules().concat(alphabetExtendedSingleLineRules())"
@@ -86,9 +86,8 @@
                       </v-col>
                       <v-col cols="6">
                         <v-select
-                          filled
                           dense
-                          class="ml-1"
+                          class="ml-1 required"
                           v-model="businessType"
                           :items="businessTypes"
                           label="Business Type"
@@ -112,7 +111,7 @@
                       </v-col>
                       <v-col cols="16">
                         <v-text-field
-                          class="mr-1"
+                          class="mr-1 required"
                           v-model="streetAddress"
                           label="Company Street Address"
                           :rules="streetRulesWNull()"
@@ -129,7 +128,7 @@
                       <v-col cols="6">
                         <LocationAutocomplete
                           type="city"
-                          class="mr-1"
+                          class="mr-1 required"
                           v-model="city"
                           :rules="maxCharRules().concat(alphabetRules())"
                         />
@@ -137,7 +136,7 @@
                       <v-col cols="6">
                         <LocationAutocomplete
                           type="region"
-                          class="ml-1"
+                          class="ml-1 required"
                           v-model="region"
                           :rules="maxCharRules().concat(alphabetRules())"
                         />
@@ -145,14 +144,14 @@
                       <v-col cols="6">
                         <LocationAutocomplete
                           type="country"
-                          class="mr-1"
+                          class="mr-1 required"
                           v-model="country"
                           :rules="maxCharRules().concat(alphabetRules())"
                         />
                       </v-col>
                       <v-col cols="6">
                         <v-text-field
-                          class="ml-1"
+                          class="ml-1 required"
                           v-model="postcode"
                           label="Postcode"
                           :rules="maxCharRules().concat(postcodeRules())"
