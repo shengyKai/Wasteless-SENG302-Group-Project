@@ -78,7 +78,7 @@
                           class="mr-1 required"
                           v-model="businessName"
                           label="Name of business"
-                          :rules="maxCharRules().concat(alphabetExtendedSingleLineRules())"
+                          :rules="mandatoryRules().concat(maxCharRules()).concat(alphabetExtendedSingleLineRules())"
                           outlined
                         >
                           {business.name}
@@ -91,6 +91,7 @@
                           v-model="businessType"
                           :items="businessTypes"
                           label="Business Type"
+                          :rules="mandatoryRules()"
                           outlined
                         />
                       </v-col>
@@ -114,7 +115,7 @@
                           class="mr-1 required"
                           v-model="streetAddress"
                           label="Company Street Address"
-                          :rules="streetRulesWNull()"
+                          :rules="mandatoryRules().concat(streetRules())"
                           outlined/>
                       </v-col>
                       <v-col cols="6">
@@ -130,7 +131,7 @@
                           type="city"
                           class="mr-1 required"
                           v-model="city"
-                          :rules="maxCharRules().concat(alphabetRules())"
+                          :rules="mandatoryRules().concat(maxCharRules()).concat(alphabetRules())"
                         />
                       </v-col>
                       <v-col cols="6">
@@ -138,7 +139,7 @@
                           type="region"
                           class="ml-1 required"
                           v-model="region"
-                          :rules="maxCharRules().concat(alphabetRules())"
+                          :rules="mandatoryRules().concat(maxCharRules()).concat(alphabetRules())"
                         />
                       </v-col>
                       <v-col cols="6">
@@ -146,7 +147,7 @@
                           type="country"
                           class="mr-1 required"
                           v-model="country"
-                          :rules="maxCharRules().concat(alphabetRules())"
+                          :rules="mandatoryRules().concat(maxCharRules()).concat(alphabetRules())"
                         />
                       </v-col>
                       <v-col cols="6">
@@ -154,7 +155,7 @@
                           class="ml-1 required"
                           v-model="postcode"
                           label="Postcode"
-                          :rules="maxCharRules().concat(postcodeRules())"
+                          :rules="mandatoryRules().concat(maxCharRules()).concat(postcodeRules())"
                           outlined
                         />
                       </v-col>
@@ -230,7 +231,7 @@ import {
   alphabetExtendedMultilineRules,
   alphabetExtendedSingleLineRules, alphabetRules,
   mandatoryRules,
-  maxCharRules, postCodeRules, streetNumRulesWNull
+  maxCharRules, postCodeRules, streetNumRules
 } from "@/utils";
 export default {
   name: 'BusinessProfile',
@@ -270,7 +271,7 @@ export default {
       alphabetExtendedSingleLineRules: ()=> alphabetExtendedSingleLineRules,
       alphabetExtendedMultilineRules: ()=> alphabetExtendedMultilineRules,
       alphabetRules: ()=> alphabetRules,
-      streetRulesWNull: ()=> streetNumRulesWNull,
+      streetRules: ()=> streetNumRules,
       postcodeRules: ()=> postCodeRules
     };
   },
