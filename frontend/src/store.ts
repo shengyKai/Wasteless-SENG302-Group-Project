@@ -22,6 +22,11 @@ export type StoreData = {
   activeRole: UserRole | null,
 
   /**
+   * Object representing the current logged in business.
+   */
+  business: Business | null,
+
+  /**
    * The global error message that is displayed at the top of the screen.
    *
    * This is the most intruding method for displaying errors and should only be used for errors that
@@ -53,6 +58,7 @@ function createOptions(): StoreOptions<StoreData> {
   return {
     state: {
       user: null,
+      business: null,
       activeRole: null,
       globalError: null,
       createBusinessDialogShown: false,
@@ -73,6 +79,9 @@ function createOptions(): StoreOptions<StoreData> {
           deleteCookie(COOKIE.USER.toLowerCase());
           setCookie(COOKIE.USER, payload.id);
         }
+      },
+      setBusiness(state, payload: Business) {
+        state.business = payload;
       },
       /**
        * Adds or replaces a event in the event list

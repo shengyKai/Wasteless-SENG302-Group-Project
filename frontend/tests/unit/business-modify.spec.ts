@@ -19,7 +19,7 @@ const localVue = createLocalVue();
 
 /**
  * Creates a test location
- * 
+ *
  * @returns The generated location
  */
 function createTestLocation() {
@@ -95,14 +95,37 @@ describe('modifyBusiness.vue', () => {
     localVue.use(Vuex);
     resetStoreForTesting();
     let store = getStore();
-    store.state.user = createTestUser(1);
-    //TODO Gonna need help setting this up
-    //store.state.business = createTestBusiness(1);
-  })
+    let testUser = createTestUser(1);
+    store.state.user = testUser;
+    store.state.business = createTestBusiness(1, testUser.id, [testUser]);
+
+    const App = localVue.component('App', {
+      components: { ModifyBusiness },
+      template: '<div data-app><index/></div>'
+    });
+
+    const elem = document.createElement('div');
+    document.body.appendChild(elem);
+
+    appWrapper = mount(App, {
+      stubs: ['router-link', 'router-view'],
+      mocks: {
+        $router: {
+          go: () => {return;},
+        }
+      },
+      localVue,
+      vuetify,
+      attachTo: elem,
+      store: store,
+    });
+
+    wrapper = appWrapper.getComponent(ModifyBusiness);
+  });
 
   /**
    * Finds the update button in the Modify Business form
-   * 
+   *
    * @returns A wrapper around the update button
    */
   function findUpdateButton() {
@@ -191,4 +214,4 @@ describe('modifyBusiness.vue', () => {
   it('Invalid if postcode is too long', async () => {
     //TODO
   });
-})
+});
