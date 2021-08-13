@@ -186,7 +186,9 @@
                     <v-col cols="2" class="ma-1 mr-7">
                       <v-btn
                         type="submit"
-                        color="primary">
+                        color="primary"
+                        :disabled="!valid"
+                      >
                         <v-icon
                           class="expand-icon"
                           color="white"
@@ -350,7 +352,7 @@ export default {
       this.businessName = this.business.name;
       this.businessType = this.business.businessType;
       this.description = this.business.description;
-      this.streetAddress = this.business.address.streetNumber + "" + this.business.address.streetName;
+      this.streetAddress = this.business.address.streetNumber + " " + this.business.address.streetName;
       this.district = this.business.address.district;
       this.city = this.business.address.city;
       this.region = this.business.address.region;
