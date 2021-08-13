@@ -1,11 +1,14 @@
 package org.seng302.leftovers.persistence;
 
+import lombok.Builder;
 import org.seng302.leftovers.entities.Event;
 import org.seng302.leftovers.entities.User;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -49,6 +52,16 @@ public interface UserRepository extends CrudRepository<User, Long>, JpaSpecifica
     List<User> getAllByEvents(Event event);
     
     List<User> findAllByRole(String role);
+
+    /**
+     * Gets a user with the given ID
+     * If not user is found, a response status exception is thrown with 406: Not acceptable
+     * @param id ID of the user to get
+     * @return A found user
+     */
+    default User getUser(Long id) {
+        return findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "The given user does not exist"));
+    }
 }
 
 

@@ -2,7 +2,11 @@
 
 exports[`KeywordCreated.vue Must match snapshot 1`] = `
 <div>
-  <div class="delete"><button type="button" class="v-icon notranslate deleteButton v-icon--link mdi mdi-trash-can theme--light red--text"></button></div>
+  <div class="float=right ma-1"><button type="button" class="v-icon notranslate deleteButton v-icon--link mdi mdi-trash-can theme--light red--text"></button>
+    <div class="deletion-error">
+
+    </div>
+  </div>
   <div class="v-card__title">
     Keyword "TestKeywordName" has been created
   </div>
@@ -18,7 +22,7 @@ exports[`KeywordCreated.vue Must match snapshot 1`] = `
     <!---->
   </div>
   <div class="row justify-start" style="min-height: 10px;">
-    <div class="shrink col"><span class="ma-2 ml-4 mb-3 v-chip v-chip--clickable v-chip--label v-chip--no-color theme--light v-size--default white--text" aria-haspopup="true" aria-expanded="false"><span class="v-chip__content"><i aria-hidden="true" class="v-icon notranslate v-icon--left mdi mdi-label theme--light"></i>
+    <div class="col col-10"><span class="ma-2 ml-4 mb-3 v-chip v-chip--clickable v-chip--label v-chip--no-color theme--light v-size--default white--text" aria-haspopup="true" aria-expanded="false"><span class="v-chip__content"><i aria-hidden="true" class="v-icon notranslate v-icon--left mdi mdi-label theme--light"></i>
             Tag
           </span></span><span class="v-tooltip v-tooltip--bottom"><!----></span>
       <transition-stub name="expand-transition">
@@ -44,6 +48,10 @@ exports[`KeywordCreated.vue Must match snapshot 1`] = `
         </div>
       </transition-stub>
     </div>
+    <div class="float=right col"><button type="button" aria-haspopup="true" aria-expanded="false" class="v-icon notranslate mt-4 ml-12 v-icon--link mdi mdi-reply theme--light primary--text"></button><span class="v-tooltip v-tooltip--bottom"><!----></span></div>
+  </div>
+  <div role="dialog" class="v-dialog__container">
+    <!---->
   </div>
 </div>
 `;
