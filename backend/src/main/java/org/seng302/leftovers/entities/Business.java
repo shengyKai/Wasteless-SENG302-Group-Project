@@ -52,6 +52,11 @@ public class Business {
     )
     private Set<User> administrators = new HashSet<>();
 
+    @OrderColumn(name="image_order")
+    @OneToMany(fetch = FetchType.LAZY)
+    @JoinColumn(name="business_id")
+    private List<Image> images = new ArrayList<>();
+
     /**
      * Gets the id
      * @return Business Id
@@ -296,6 +301,24 @@ public class Business {
     }
 
     /**
+     * Adds a single image to the Business` list of images
+     * @param image An image entity to be linked to this business
+     */
+    public void addImage(Image image) {
+        images.add(image);
+    }
+
+    /**
+     * Removes a given image from the list of business images
+     * @param image The image to remove
+     */
+    public void removeImage(Image image) {
+        if (!this.images.remove(image)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot remove image");
+        }
+    }
+
+    /**
      * Construct a JSON object representing the business. The JSON object includes an array of JSON
      * representations of the users who are administrators of the business, and a JSON representation
      * of the business's address, as well as simple attributes for all the other properties of the
@@ -313,6 +336,11 @@ public class Business {
         if (fullAdminDetails) {
             object.put("administrators", constructAdminJsonArray());
         }
+        JSONArray jsonImages = new JSONArray();
+        for (Image image : images) {
+            jsonImages.add(image.constructJSONObject());
+        }
+        object.put("images", jsonImages);
         object.put("primaryAdministratorId", primaryOwner.getUserID());
         object.put("address", getAddress().constructFullJson());
         object.put("businessType", businessType);
@@ -339,7 +367,7 @@ public class Business {
         JSONArray adminJsons = new JSONArray();
         List<User> admins = new ArrayList<>();
         admins.addAll(getOwnerAndAdministrators());
-        Collections.sort(admins, (User user1, User user2) -> 
+        Collections.sort(admins, (User user1, User user2) ->
             user1.getUserID().compareTo(user2.getUserID()));
         for (User admin : admins) {
             adminJsons.add(admin.constructPublicJson());
