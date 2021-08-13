@@ -60,9 +60,7 @@
             </v-col>
           </v-row>
         </div>
-        <div v-if="modifyBusiness">
-          <ModifyBusiness/>
-        </div>
+        <ModifyBusiness v-if="modifyBusiness"/>
       </v-container>
     </v-card>
   </div>
