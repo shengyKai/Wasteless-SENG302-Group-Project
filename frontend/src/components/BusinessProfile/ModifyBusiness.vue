@@ -17,9 +17,7 @@
                         label="Name of business"
                         :rules="mandatoryRules().concat(maxCharRules()).concat(alphabetExtendedSingleLineRules())"
                         outlined
-                      >
-                        {business.name}
-                      </v-text-field>
+                      />
                     </v-col>
                     <v-col cols="6">
                       <v-select
@@ -40,9 +38,7 @@
                         :rules="maxCharDescriptionRules().concat(alphabetExtendedMultilineRules())"
                         rows="3"
                         outlined
-                      >
-                        {business.description}
-                      </v-textarea>
+                      />
                     </v-col>
                     <v-col cols="12">
                       <v-card-title class="primary-text">Address</v-card-title>
