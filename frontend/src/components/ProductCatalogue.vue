@@ -1,57 +1,74 @@
 <template>
   <div>
     <v-toolbar dark color="primary">
-      <v-text-field
-        clearable
-        flat
-        solo-inverted
-        hide-details
-        v-model="searchQuery"
-        prepend-inner-icon="mdi-magnify"
-        label="Search"
-        autofocus
-      />
-      <v-select
-        v-model="orderBy"
-        flat
-        solo-inverted
-        hide-details
-        :items="[
-          { text: 'Product Code',               value: 'productCode'},
-          { text: 'Product Name',               value: 'name'},
-          { text: 'Description',                value: 'description'},
-          { text: 'Manufacturer',               value: 'manufacturer'}
-        ]"
-        prepend-inner-icon="mdi-sort-variant"
-        label="Search by"
-      />
-      <v-spacer/>
-      <v-select
-        v-model="orderBy"
-        flat
-        solo-inverted
-        hide-details
-        :items="[
-          { text: 'Product Code',               value: 'productCode'},
-          { text: 'Product Name',               value: 'name'},
-          { text: 'Description',                value: 'description'},
-          { text: 'Manufacturer',               value: 'manufacturer'},
-          { text: 'Recommended Retail Price',   value: 'recommendedRetailPrice'},
-          { text: 'Date Added',                 value: 'created'},
-        ]"
-        prepend-inner-icon="mdi-sort-variant"
-        label="Sort by"
-      />
-      <v-col class="text-right">
-        <v-btn-toggle class="toggle" v-model="reverse" mandatory>
-          <v-btn depressed color="primary" :value="false">
-            <v-icon>mdi-arrow-up</v-icon>
-          </v-btn>
-          <v-btn depressed color="primary" :value="true">
-            <v-icon>mdi-arrow-down</v-icon>
-          </v-btn>
-        </v-btn-toggle>
-      </v-col>
+      <v-row>
+        <v-col cols="4">
+          <v-text-field
+            clearable
+            flat
+            solo-inverted
+            hide-details
+            v-model="searchQuery"
+            prepend-inner-icon="mdi-magnify"
+            label="Search"
+            autofocus
+          />
+        </v-col>
+        <v-col cols="4">
+          <v-select
+            v-model="searchBy"
+            flat
+            solo-inverted
+            hide-details
+            :items="[
+              { text: 'Product Code',               value: 'productCode'},
+              { text: 'Product Name',               value: 'name'},
+              { text: 'Description',                value: 'description'},
+              { text: 'Manufacturer',               value: 'manufacturer'}
+            ]"
+            prepend-inner-icon="mdi-shopping-search"
+            label="Search by"
+            multiple
+          >
+            <template v-slot:selection="{ item, index }">
+              <span v-if="searchBy.length === 1">{{ item.text }} &nbsp;</span>
+              <span v-else-if="index < maxDisplay">{{ item.text }}, &nbsp;</span>
+              <span
+                v-if="index === maxDisplay"
+                class="grey--text caption"
+              >(+{{ searchBy.length - maxDisplay }} search)</span>
+            </template>
+          </v-select>
+        </v-col>
+        <v-col cols="3">
+          <v-select
+            v-model="orderBy"
+            flat
+            solo-inverted
+            hide-details
+            :items="[
+              { text: 'Product Code',               value: 'productCode'},
+              { text: 'Product Name',               value: 'name'},
+              { text: 'Description',                value: 'description'},
+              { text: 'Manufacturer',               value: 'manufacturer'},
+              { text: 'Recommended Retail Price',   value: 'recommendedRetailPrice'},
+              { text: 'Date Added',                 value: 'created'},
+            ]"
+            prepend-inner-icon="mdi-sort-variant"
+            label="Sort by"
+          />
+        </v-col>
+        <v-col class="text-right" cols="1">
+          <v-btn-toggle class="toggle" v-model="reverse" mandatory>
+            <v-btn depressed color="primary" :value="false">
+              <v-icon>mdi-arrow-up</v-icon>
+            </v-btn>
+            <v-btn depressed color="primary" :value="true">
+              <v-icon>mdi-arrow-down</v-icon>
+            </v-btn>
+          </v-btn-toggle>
+        </v-col>
+      </v-row>
     </v-toolbar>
 
     <v-alert
@@ -124,7 +141,9 @@ export default {
        * Total number of results for all pages
        */
       totalResults: 0,
-      businessId: null
+      businessId: null,
+      maxDisplay: 2, // how many selections will be displayed on `<v-select/>`
+      searchBy: []
     };
   },
   computed: {
