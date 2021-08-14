@@ -1131,7 +1131,7 @@ export async function searchCatalogue(businessId: number, query: string, pageInd
     if (status === 401) return 'You have been logged out. Please login again and retry';
     if (status === 403) return 'You do not have permission to access this product catalogue';
     if (status === undefined) return 'Failed to reach backend';
-    return `Request failed: ${error.response.data.message}`;
+    return `Request failed: ${error.response?.data.message}`;
   }
 
   if (!is<SearchResults<Product>>(response.data)) {
