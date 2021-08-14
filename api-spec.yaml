@@ -1827,6 +1827,7 @@ paths:
               - relevance
               - description
               - manufacturer
+              - product code
       responses:
         '200':
           description: 'Request successful, a (possibly empty) list of products is returned'
