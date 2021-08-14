@@ -1,6 +1,31 @@
 <template>
   <div>
     <v-toolbar dark color="primary">
+      <v-text-field
+        clearable
+        flat
+        solo-inverted
+        hide-details
+        v-model="searchQuery"
+        prepend-inner-icon="mdi-magnify"
+        label="Search"
+        autofocus
+      />
+      <v-select
+        v-model="orderBy"
+        flat
+        solo-inverted
+        hide-details
+        :items="[
+          { text: 'Product Code',               value: 'productCode'},
+          { text: 'Product Name',               value: 'name'},
+          { text: 'Description',                value: 'description'},
+          { text: 'Manufacturer',               value: 'manufacturer'}
+        ]"
+        prepend-inner-icon="mdi-sort-variant"
+        label="Search by"
+      />
+      <v-spacer/>
       <v-select
         v-model="orderBy"
         flat
