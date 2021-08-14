@@ -60,9 +60,9 @@
             </v-col>
           </v-row>
         </div>
-        <ModifyBusiness v-if="modifyBusiness"/>
       </v-container>
     </v-card>
+    <ModifyBusiness v-if="modifyBusiness"/>
   </div>
 </template>
 
