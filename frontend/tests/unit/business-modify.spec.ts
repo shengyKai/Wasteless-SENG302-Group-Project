@@ -135,11 +135,35 @@ describe('modifyBusiness.vue', () => {
     return filtered.at(0);
   }
 
-  it('Valid if no fields are provided', async () => {
+  /**
+   * Adds all the fields that are required for the create business form to be valid
+   *
+   * These are:
+   * - Business name
+   * - Business type
+   * - Street address line 1
+   * - City
+   * - Region
+   * - Country
+   * - Postcode
+   */
+  async function populateRequiredFields() {
+    await wrapper.setData({
+      business: 'Business Name',
+      businessType: 'Business Type',
+      streetAddress: '1 Street',
+      city: 'City',
+      region: 'Region',
+      country: 'Country',
+      postcode: '1234',
+    });
+  }
+
+  it('Valid if all fields are provided', async () => {
     //TODO
   });
 
-  it('Valid if all fields are provided', async () => {
+  it('Invalid is no fields are provided', async () => {
     //TODO
   });
 
@@ -179,6 +203,42 @@ describe('modifyBusiness.vue', () => {
     //TODO
   });
 
+  it('Invalid if the new business name is empty', async () => {
+    //TODO
+  });
+
+  it('Invalid if the new business type is empty', async () => {
+    //TODO
+  });
+
+  it('Valid if the new description is empty', async () => {
+    //TODO
+  });
+
+  it('Invalid if the new street address is empty', async () => {
+    //TODO
+  });
+
+  it('Valid if the new district is empty', async () => {
+    //TODO
+  });
+
+  it('Invalid if the new city is empty', async () => {
+    //TODO
+  });
+
+  it('Invalid if the new state is empty', async () => {
+    //TODO
+  });
+
+  it('Invalid if the new country is empty', async () => {
+    //TODO
+  });
+
+  it('Invalid if the new postcode is empty', async () => {
+    //TODO
+  });
+
   it('Invalid if the new business name is too long', async () => {
     //TODO
   });
@@ -188,6 +248,14 @@ describe('modifyBusiness.vue', () => {
   });
 
   it('Invalid if the street address contains a character', async () => {
+    //TODO
+  });
+
+  it('Invalid if the street address only contains a number', async() => {
+    //TODO
+  });
+
+  it('Invalid if the street address only contains a word', async() => {
     //TODO
   });
 
