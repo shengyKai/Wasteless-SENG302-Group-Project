@@ -301,7 +301,13 @@ public class Business {
     }
 
     /**
-     * Adds a single image to the Business` list of images
+     * Returns the images associated with this business.
+     * @return List of business images
+     */
+    public List<Image> getImages() { return this.images; }
+
+    /**
+     * Adds a single image to the Business`s list of images
      * @param image An image entity to be linked to this business
      */
     public void addImage(Image image) {

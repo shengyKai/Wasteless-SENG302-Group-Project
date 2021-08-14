@@ -130,7 +130,7 @@ public class ProductImageGenerator {
      * @throws SQLException
      */
     private long createInsertImageSQL(Long productId, String filename) throws SQLException {
-        PreparedStatement stmt = conn.prepareStatement("INSERT INTO image (filename, image_id, image_order) " +
+        PreparedStatement stmt = conn.prepareStatement("INSERT INTO image (filename, product_id, image_order) " +
                 "VALUES (?,?,?)",
                 Statement.RETURN_GENERATED_KEYS
         );

@@ -86,7 +86,7 @@ public class ProductImageGeneratorTest {
      */
     private void checkRequiredFieldsNotNull(Long productId, int expectedCount) throws SQLException {
         PreparedStatement stmt = conn.prepareStatement(
-                "SELECT COUNT(*) FROM image WHERE image_id = ? AND filename IS NOT NULL AND image_order IS NOT NULL"
+                "SELECT COUNT(*) FROM image WHERE product_id = ? AND filename IS NOT NULL AND image_order IS NOT NULL"
         );
         stmt.setObject(1, productId);
         stmt.executeQuery();

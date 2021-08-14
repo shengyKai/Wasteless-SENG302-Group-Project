@@ -321,9 +321,9 @@ public class BusinessController {
      */
     @PostMapping("/businesses/{businessId}/images")
     public ResponseEntity<Void> uploadImage(@PathVariable Long businessId, @RequestParam("file") MultipartFile file, HttpServletRequest request) {
+        logger.info("Adding business image (businessId={})", businessId);
         AuthenticationTokenManager.checkAuthenticationToken(request);
         try {
-            logger.info("Adding business image (businessId={})", businessId);
             Business business = businessRepository.getBusinessById(businessId);
             business.checkSessionPermissions(request);
 
