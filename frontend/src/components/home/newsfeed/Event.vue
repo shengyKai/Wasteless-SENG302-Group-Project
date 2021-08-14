@@ -289,9 +289,6 @@ export default {
       this.deleted = false;
       this.$store.commit('unstageEventForDeletion', this.event.id);
     },
-    /* This should be a method that allows user to change their current tag colour into the desired colour
-     * Currently only alert `changing tag`, functionality will be implemented in another task
-     */
   }
 };
 </script>

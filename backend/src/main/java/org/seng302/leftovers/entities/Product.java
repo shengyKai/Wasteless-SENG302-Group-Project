@@ -50,7 +50,7 @@ public class Product {
 
     @OrderColumn(name="image_order")
     @OneToMany(fetch = FetchType.EAGER)
-    @JoinColumn(name="image_id")
+    @JoinColumn(name="product_id")
     private List<Image> productImages = new ArrayList<>();
 
 
