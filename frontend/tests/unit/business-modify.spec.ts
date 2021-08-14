@@ -164,11 +164,6 @@ describe('modifyBusiness.vue', () => {
     expect(wrapper.vm.valid).toBeTruthy();
   });
 
-  it('Invalid is no fields are provided', async () => {
-    await Vue.nextTick();
-    expect(wrapper.vm.valid).toBeFalsy();
-  });
-
   it('Valid if the new name of the business is provided', async () => {
     await populateRequiredFields();
     await wrapper.setData({
@@ -190,11 +185,9 @@ describe('modifyBusiness.vue', () => {
   it('Valid if the new business type of the business is provided', async () => {
     await populateRequiredFields();
     await wrapper.setData({
-      businessName: 'Retail Trade'
+      businessType: 'Retail Trade'
     });
-    // await Vue.nextTick();
-    await flushQueue();
-    console.log(wrapper.vm.businessType);
+    await Vue.nextTick();
     expect(wrapper.vm.valid).toBeTruthy();
   });
 
@@ -246,7 +239,7 @@ describe('modifyBusiness.vue', () => {
   it('Valid if the new postcode is provided', async () => {
     await populateRequiredFields();
     await wrapper.setData({
-      postcode: 'Fabian Fabrication'
+      postcode: '8041'
     });
     await Vue.nextTick();
     expect(wrapper.vm.valid).toBeTruthy();
