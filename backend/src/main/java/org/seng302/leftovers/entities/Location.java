@@ -19,6 +19,7 @@ import java.util.Map;
 @ToString // generate a toString method
 @Entity // declare this class as a JPA entity (that can be mapped to a SQL table)
 public class Location {
+    private static final String NAME_REGEX = "[ \\p{L}-'.]+";
 
     @Id // this field (attribute) is the table primary key
     @GeneratedValue(strategy = GenerationType.IDENTITY) // autoincrement the ID
@@ -51,22 +52,16 @@ public class Location {
      */
     public static Location covertAddressStringToLocation(String address) {
         List<String> addressComponents = Arrays.asList(address.split(","));
-        try {
-            String streetNumber = addressComponents.get(0);
-            String streetName = addressComponents.get(1);
-            String district = addressComponents.get(2);
-            String city = addressComponents.get(3);
-            String country = addressComponents.get(4);
-            String region = addressComponents.get(5);
-            String postCode = addressComponents.get(6);
-            Location.Builder locationBuilder = new Location.Builder().atStreetNumber(streetNumber).onStreet(streetName)
-                    .inCity(city).inRegion(region).inCountry(country).withPostCode(postCode).atDistrict(district);
-            Location location = locationBuilder.build();
-            return location;
-        } catch (Exception e) {
-            throw e;
-        }
-        
+        String streetNumber = addressComponents.get(0);
+        String streetName = addressComponents.get(1);
+        String district = addressComponents.get(2);
+        String city = addressComponents.get(3);
+        String country = addressComponents.get(4);
+        String region = addressComponents.get(5);
+        String postCode = addressComponents.get(6);
+        Builder locationBuilder = new Builder().atStreetNumber(streetNumber).onStreet(streetName)
+                .inCity(city).inRegion(region).inCountry(country).withPostCode(postCode).atDistrict(district);
+        return locationBuilder.build();
     }
 
     /**
@@ -75,7 +70,7 @@ public class Location {
      * @return A Location object representing the given address
      */
     public static Location parseLocationFromJson(JSONObject json) {
-        Location address = new Builder()
+        return new Builder()
                 .inCountry(json.getAsString("country"))
                 .inCity(json.getAsString("city"))
                 .inRegion(json.getAsString("region"))
@@ -84,7 +79,6 @@ public class Location {
                 .withPostCode(json.getAsString("postcode"))
                 .atDistrict(json.getAsString("district"))
                 .build();
-        return address;
     }
 
     /**
@@ -141,7 +135,7 @@ public class Location {
      * @return true if the street name is valid, false otherwise
      */
     public boolean checkValidStreetName(String streetName) {
-        if (streetName != null && streetName.length() <= 100 && streetName.length() > 0 && streetName.matches("[ \\p{L}-'.]+")) {
+        if (streetName != null && streetName.length() <= 100 && streetName.length() > 0 && streetName.matches(NAME_REGEX)) {
             return true;
         } else {
             return false;
@@ -157,7 +151,7 @@ public class Location {
      * @return true if the city name is valid, false otherwise
      */
     public boolean checkValidCity(String city) {
-        if (city != null && city.length() < 100 && city.length() > 0 && city.matches("[ \\p{L}.'-]+")) {
+        if (city != null && city.length() < 100 && city.length() > 0 && city.matches(NAME_REGEX)) {
             return true;
         } else {
             return false;
@@ -173,7 +167,7 @@ public class Location {
      * @return true if the region name is valid, false otherwise
      */
     public boolean checkValidRegion(String region) {
-        if (region != null && region.length() < 100 && region.length() > 0 && region.matches("[ \\p{L}.'-]+")) {
+        if (region != null && region.length() < 100 && region.length() > 0 && region.matches(NAME_REGEX)) {
             return true;
         } else {
             return false;
@@ -189,7 +183,7 @@ public class Location {
      * @return true if the country name is valid, false otherwise
      */
     public boolean checkValidCountry(String country) {
-        if (country != null && country.length() < 100 && country.length() > 0 && country.matches("[ \\p{L}.'-]+")) {
+        if (country != null && country.length() < 100 && country.length() > 0 && country.matches(NAME_REGEX)) {
             return true;
         } else {
             return false;
@@ -221,7 +215,7 @@ public class Location {
      * @return true if the district is valid, false otherwise
      */
     public boolean checkValidDistrict(String district) {
-        if (district == "" || district == null || (district.length() <= 100 && district.matches("[\\p{L}0-9.'-]+"))) {
+        if (district == null || district.isEmpty() || (district.length() <= 100 && district.matches("[ \\p{L}0-9.'-]+"))) {
             return true;
         } else {
             return false;
