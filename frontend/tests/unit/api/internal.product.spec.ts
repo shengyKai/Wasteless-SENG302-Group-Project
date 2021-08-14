@@ -1,4 +1,4 @@
-import { getProducts, Product, Image, SearchResults } from "@/api/internal";
+import { getProducts, Product, Image, SearchResults, searchCatalogue } from "@/api/internal";
 import axios, {AxiosInstance } from 'axios';
 
 jest.mock('axios', () => ({
@@ -122,5 +122,35 @@ describe('Test GET /businesses/:id/products endpoint', () => {
       }});
     const message = await getProducts(1, 1, 1, "created", false);
     expect(message).toEqual('Request failed: 732');
+  });
+});
+
+describe('Test GET /businesses/${businessId}/products/search endpoint', () => {
+  const image : Image = {
+    id: 1,
+    filename: "",
+    thumbnailFilename: ""
+  };
+
+  const responseData: SearchResults<Product> = {
+    results : [{
+      id: "",
+      name: "",
+      description: "",
+      manufacturer: "",
+      recommendedRetailPrice: 10,
+      created: "",
+      images: [image],
+      countryOfSale: "",
+    }],
+    count : 7,
+  };
+
+  it.only('When response returns with a 200 response, searchCatalogue returns with a product array', async () => {
+    instance.get.mockResolvedValueOnce({
+      data: responseData
+    });
+    const response = await searchCatalogue(1, "some query", 1, 10, ["name"], "description", true);
+    expect(response).toEqual(responseData);
   });
 });

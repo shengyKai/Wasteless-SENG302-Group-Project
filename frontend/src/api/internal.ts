@@ -1113,7 +1113,7 @@ export async function messageConversation(cardId: number, senderId: number, buye
  * @param orderBy Specifies the method used to sort the results
  * @param reverse Specifies whether to reverse the search results (default order is descending for relevance and ascending for all other orders)
  */
-export async function searchCatalogue(businessId: number, query: string, pageIndex: number, resultsPerPage: number, searchBy: Array<ProductSearchBy>, orderBy: UserOrderBy, reverse: boolean): Promise<MaybeError<SearchResults<Product>>> {
+export async function searchCatalogue(businessId: number, query: string, pageIndex: number, resultsPerPage: number, searchBy: Array<ProductSearchBy>, orderBy: ProductOrderBy, reverse: boolean): Promise<MaybeError<SearchResults<Product>>> {
   let response;
   try {
     response = await instance.get(`/businesses/${businessId}/products/search`, {
