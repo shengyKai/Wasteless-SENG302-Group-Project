@@ -1,7 +1,7 @@
 <template>
   <div>
     <v-toolbar dark color="primary">
-      <v-row>
+      <v-row no-gutters>
         <v-col cols="4">
           <v-text-field
             clearable
