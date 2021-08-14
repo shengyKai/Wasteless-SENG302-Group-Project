@@ -140,9 +140,22 @@ export default {
        * Total number of results for all pages
        */
       totalResults: 0,
+      /**
+       * ID of the business
+       */
       businessId: null,
-      maxDisplay: 2, // how many selections will be displayed on `<v-select/>`
-      searchBy: []
+      /**
+       * User input query to search the catalogue with
+       */
+      searchQuery: "",
+      /**
+       * List of product attributes to search along with the searchQuery
+       */
+      searchBy: [],
+      /**
+       * How many selections will be displayed on `<v-select/>` for SearchBy
+       */
+      maxDisplay: 2
     };
   },
   computed: {
@@ -158,8 +171,6 @@ export default {
      */
     resultsMessage() {
       if (this.products.length === 0) return 'There are no results to show';
-
-
       const pageStartIndex = (this.currentPage - 1) * this.resultsPerPage;
       const pageEndIndex = pageStartIndex + this.products.length;
       return`Displaying ${pageStartIndex + 1} - ${pageEndIndex} of ${this.totalResults} results`;
@@ -195,7 +206,7 @@ export default {
         this.totalResults = value.count;
         this.error = undefined;
       }
-    },
+    }
   },
 
   watch: {
