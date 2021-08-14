@@ -240,7 +240,7 @@ class EventControllerTest {
 
         verify(eventService).saveEvent(eventCaptor.capture());
 
-        assertEquals("this that", eventCaptor.getValue().getMessage());
+        assertEquals("this that", eventCaptor.getValue().getGlobalMessage());
         assertEquals(mockUser, eventCaptor.getValue().getNotifiedUser());
     }
 

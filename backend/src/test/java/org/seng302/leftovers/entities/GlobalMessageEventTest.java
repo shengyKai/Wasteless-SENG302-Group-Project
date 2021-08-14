@@ -63,7 +63,7 @@ class GlobalMessageEventTest {
     @Test
     void createMessageEvent_someMessage_createsEventWithMessage() {
         var event = assertDoesNotThrow(() -> new GlobalMessageEvent(user, "Foo"));
-        assertEquals("Foo", event.getMessage());
+        assertEquals("Foo", event.getGlobalMessage());
     }
 
     @Test

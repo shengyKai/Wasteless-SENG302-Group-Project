@@ -12,38 +12,38 @@ import javax.persistence.Entity;
  */
 @Entity
 public class GlobalMessageEvent extends Event {
-    @Column(nullable = false)
-    private String message;
+    @Column(nullable = false, name="global_message")
+    private String globalMessage;
 
     protected GlobalMessageEvent() {}
 
     /**
      * Constructs a message event with the given initial message
      * @param notifiedUser User to send the message to
-     * @param message Initial event message
+     * @param globalMessage Initial event message
      */
-    public GlobalMessageEvent(User notifiedUser, String message) {
+    public GlobalMessageEvent(User notifiedUser, String globalMessage) {
         super(notifiedUser);
-        setMessage(message);
+        setGlobalMessage(globalMessage);
     }
 
     /**
      * Sets this event's message
-     * @param message Message to set
+     * @param content Message to set
      */
-    public void setMessage(String message) {
-        if (message == null) {
+    public void setGlobalMessage(String content) {
+        if (content == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Message cannot be null");
         }
-        this.message = message;
+        this.globalMessage = content;
     }
 
     /**
      * Gets the message for this event
      * @return Event message
      */
-    public String getMessage() {
-        return message;
+    public String getGlobalMessage() {
+        return globalMessage;
     }
 
     /**
@@ -53,7 +53,7 @@ public class GlobalMessageEvent extends Event {
     @Override
     public JSONObject constructJSONObject() {
         JSONObject json = super.constructJSONObject();
-        json.put("message", message);
+        json.put("message", globalMessage);
         return json;
     }
 }

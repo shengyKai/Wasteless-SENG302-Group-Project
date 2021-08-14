@@ -159,7 +159,7 @@ describe('HomePage.vue', () => {
     async function addMultipleEvents() {
       for (let i=0; i < 4; i++) {
         let event: AnyEvent = {
-          type: 'MessageEvent',
+          type: 'GlobalMessageEvent',
           id: i,
           tag: 'none',
           created: new Date().toString(),
@@ -170,7 +170,7 @@ describe('HomePage.vue', () => {
       }
       for (let i=4; i < 12; i++) {
         let event: AnyEvent = {
-          type: 'MessageEvent',
+          type: 'GlobalMessageEvent',
           id: i,
           tag: 'red',
           created: new Date().toString(),
