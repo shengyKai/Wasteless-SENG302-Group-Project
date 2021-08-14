@@ -111,6 +111,7 @@ describe('ProductImageUploader.vue', () => {
       preventDefault: jest.fn(),
     };
     wrapper.vm.onDrop(event);
+    // The updated value is passed to the parent component
     expect(appWrapper.vm.file).toBe(testFile);
     expect(wrapper.vm.isDragging).toBeFalsy();
     expect(event.preventDefault).toBeCalled();
