@@ -92,7 +92,8 @@ describe('ProductCatalogue.vue', () => {
       },
       data() {
         return {
-          searchQuery: "something"
+          searchQuery: "something",
+          searchBy: ["productCode", "name"]
         };
       },
       localVue,
@@ -193,6 +194,46 @@ describe('ProductCatalogue.vue', () => {
     expect(wrapper.text()).toContain('There are no results to show');
   });
 
+  it('If there is a change in the orderBy attribute, the product results will be updated', async () => {
+    setResults(createTestProducts(5));
+    createGetProductWrapper();
+    await wrapper.setData({
+      orderBy: "description"
+    })
+    await Vue.nextTick();
+    expect(getProducts).toHaveBeenCalledWith(100, 1, RESULTS_PER_PAGE, 'description', false);
+  });
+
+  it('If there is a change in the reverse attribute, the product results will be updated', async () => {
+    setResults(createTestProducts(5));
+    createGetProductWrapper();
+    await wrapper.setData({
+      reverse: true
+    })
+    await Vue.nextTick();
+    expect(getProducts).toHaveBeenCalledWith(100, 1, RESULTS_PER_PAGE, 'productCode', true);
+  });
+
+  it('If there is a change in the currentPage attribute, the product results will be updated', async () => {
+    setResults(createTestProducts(5));
+    createGetProductWrapper();
+    await wrapper.setData({
+      currentPage: 2
+    })
+    await Vue.nextTick();
+    expect(getProducts).toHaveBeenCalledWith(100, 2, RESULTS_PER_PAGE, 'productCode', false);
+  });
+
+  it('If there is a change in the resultsPerPage attribute, the product results will be updated', async () => {
+    setResults(createTestProducts(5));
+    createGetProductWrapper();
+    await wrapper.setData({
+      resultsPerPage: 5
+    })
+    await Vue.nextTick();
+    expect(getProducts).toHaveBeenCalledWith(100, 1, 5, 'productCode', false);
+  });
+
   it("If the search query is empty, getProducts will be called", async() => {
     setResults(createTestProducts(5));
     createGetProductWrapper();
@@ -219,5 +260,11 @@ describe('ProductCatalogue.vue', () => {
     // searchCatalogue will then be called afterwards when it realises that the searchQuery attribute
     // is not empty
     expect(searchCatalogue).toHaveBeenCalled();
+  });
+
+  it("If the user uses the searchQuery and searchBy, searchCatalogue will be called with the respective parameters", async() => {
+    setResults(createTestProducts(5));
+    createSearchCatalogueWrapper();
+    expect(searchCatalogue).toHaveBeenCalledWith(100, "something", 1, RESULTS_PER_PAGE, ["productCode", "name"], "productCode", false);
   });
 });
