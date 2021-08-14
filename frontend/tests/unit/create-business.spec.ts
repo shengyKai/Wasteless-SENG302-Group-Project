@@ -142,7 +142,7 @@ describe('CreateBusiness.vue', () => {
     await wrapper.setData({
       business: 'Business Name',
       businessType: 'Business Type',
-      streetAddress: '1 Street',
+      streetAddress: '1 Elizabeth Street',
       city: 'City',
       region: 'Region',
       country: 'Country',
@@ -229,7 +229,7 @@ describe('CreateBusiness.vue', () => {
   it.each(diacritics)('Valid when street contains the character "%s"', async (char) => {
     await populateRequiredFields();
     await wrapper.setData({
-      streetAddress: '5 ' + char,
+      streetAddress: '5 ' + char + ' Street',
     });
     await Vue.nextTick();
     expect(wrapper.vm.valid).toBeTruthy();
@@ -334,7 +334,7 @@ describe('CreateBusiness.vue', () => {
       businessType: 'Business Type',
       address: {
         streetNumber: '1',
-        streetName: 'Street',
+        streetName: 'Elizabeth Street',
         district: '',
         city: 'City',
         region: 'Region',

@@ -90,7 +90,7 @@ describe('modifyBusiness.vue', () => {
    * The jsdom environment doesn't declare the fetch function, hence we need to implement it
    * ourselves to make LocationAutocomplete not crash.
    */
-   beforeAll(() => {
+  beforeAll(() => {
     globalThis.fetch = async () => {
       return {
         json() {
@@ -168,7 +168,7 @@ describe('modifyBusiness.vue', () => {
     await wrapper.setData({
       businessName: 'Business Name',
       businessType: 'Retail Trade',
-      streetAddress: '1 Street',
+      streetAddress: '1 Elizabeth Street',
       city: 'City',
       region: 'Region',
       country: 'Country',
@@ -383,7 +383,7 @@ describe('modifyBusiness.vue', () => {
   it('Invalid if the street address only contains a word', async() => {
     await populateRequiredFields();
     await wrapper.setData({
-      streetAddress: 'Elizabeth'
+      streetAddress: 'Elizabeth Street'
     });
     await Vue.nextTick();
     expect(wrapper.vm.valid).toBeFalsy();
@@ -392,10 +392,37 @@ describe('modifyBusiness.vue', () => {
   it('Invalid if the street address is too long', async () => {
     await populateRequiredFields();
     await wrapper.setData({
-      streetAddress: 'e'.repeat(110)
+      streetAddress: '69 Street ' + 'e'.repeat(100)
     });
     await Vue.nextTick();
     expect(wrapper.vm.valid).toBeFalsy();
+  });
+
+  it('Valid if the street have has 1st in it', async () => {
+    await populateRequiredFields();
+    await wrapper.setData({
+      streetAddress: '1 1st Avenue'
+    });
+    await Vue.nextTick();
+    expect(wrapper.vm.valid).toBeTruthy();
+  });
+
+  it('Valid if the street have has 2nd in it', async () => {
+    await populateRequiredFields();
+    await wrapper.setData({
+      streetAddress: '69 2nd Street'
+    });
+    await Vue.nextTick();
+    expect(wrapper.vm.valid).toBeTruthy();
+  });
+
+  it('Valid if the street have has 3rd in it', async () => {
+    await populateRequiredFields();
+    await wrapper.setData({
+      streetAddress: '419 3rd Crescent'
+    });
+    await Vue.nextTick();
+    expect(wrapper.vm.valid).toBeTruthy();
   });
 
   it('Invalid if the district is too long', async () => {

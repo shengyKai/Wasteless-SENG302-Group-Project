@@ -405,7 +405,6 @@ describe('MarketplaceCard.vue', () => {
     setUpStore(3, 'user'); // must not be the owner
     generateWrapper();
     const messageDialog = await openConversationDialog();
-    console.log(messageDialog.text());
     const dialogSendButton = findButton('Send', messageDialog);
     expect(wrapper.vm.directMessageValid).toBeFalsy();
     expect(dialogSendButton.props().disabled).toBeTruthy();
