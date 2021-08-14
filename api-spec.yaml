@@ -1824,10 +1824,26 @@ paths:
             type: string
             enum:
               - name
-              - relevance
               - description
               - manufacturer
               - product code
+        - name: reverse
+          in: query
+          description: Whether to flip default sort order (default is ascending)
+          schema:
+            type: boolean
+        - name: orderBy
+          in: query
+          description: Product property to order results by
+          schema:
+            type: string
+            enum:
+              - name
+              - description
+              - manufacturer
+              - recommendedRetailPrice
+              - created
+              - productCode
       responses:
         '200':
           description: 'Request successful, a (possibly empty) list of products is returned'
