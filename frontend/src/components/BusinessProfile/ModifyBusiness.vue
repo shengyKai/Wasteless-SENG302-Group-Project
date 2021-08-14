@@ -157,8 +157,6 @@
 
 <script>
 import LocationAutocomplete from '@/components/utils/LocationAutocomplete';
-import { getBusiness } from '../../api/internal';
-import convertAddressToReadableText from '@/components/utils/Methods/convertJsonAddressToReadableText';
 import {
   alphabetExtendedMultilineRules,
   alphabetExtendedSingleLineRules, alphabetRules,
@@ -170,29 +168,31 @@ export default {
   components: {
     LocationAutocomplete,
   },
+  props: {
+    business: Object
+  },
   data() {
     return {
       readableAddress: "",
       errorMessage: undefined,
       dialog: true,
-      business: '',
-      businessName: '',
-      description: '',
-      businessType: [],
-      streetAddress: '',
-      district: '',
-      city: '',
-      region: '',
-      country: '',
-      postcode: '',
+      businessName: this.business.name,
+      description: this.business.description,
+      businessType: this.business.businessType,
+      streetAddress: this.business.address.streetNumber + " " + this.business.address.streetName,
+      district: this.business.address.district,
+      city: this.business.address.city,
+      region: this.business.address.region,
+      country: this.business.address.country,
+      postcode: this.business.address.postcode,
       businessTypes: [
         'Accommodation and Food Services',
         'Charitable organisation',
         'Non-profit organisation',
         'Retail Trade',
       ],
-      valid: false,
       updateProductCountry: true,
+      valid: false,
       maxCharRules: () => maxCharRules(100),
       maxCharDescriptionRules: ()=> maxCharRules(200),
       mandatoryRules: ()=> mandatoryRules,
@@ -202,37 +202,6 @@ export default {
       streetRules: ()=> streetNumRules,
       postcodeRules: ()=> postCodeRules
     };
-  },
-  watch: {
-    $route: {
-      handler() {
-        const id = parseInt(this.$route.params.id);
-        if (isNaN(id)) return;
-
-        getBusiness(id).then((value) => {
-          if (typeof value === 'string') {
-            this.$store.commit('setError', value);
-          } else {
-            this.business = value;
-            this.readableAddress = convertAddressToReadableText(value.address, "full");
-          }
-        });
-      },
-      immediate: true,
-    }
-  },
-
-  prefillModifyFields() {
-    console.log(this.business);
-    this.businessName = this.business.name;
-    this.businessType = this.business.businessType;
-    this.description = this.business.description;
-    this.streetAddress = this.business.address.streetNumber + " " + this.business.address.streetName;
-    this.district = this.business.address.district;
-    this.city = this.business.address.city;
-    this.region = this.business.address.region;
-    this.country = this.business.address.country;
-    this.postcode = this.business.address.postcode;
   },
 
   methods: {
