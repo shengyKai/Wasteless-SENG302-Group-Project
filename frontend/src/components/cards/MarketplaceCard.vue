@@ -101,16 +101,21 @@
         </template>
         Ask this person a question
       </v-tooltip>
+      <!-- Dialog for firstMessage(in primary colour), replyMessage(in secondary colour) -->
       <v-dialog ref="messageDialog"
                 v-model="messageOwnerDialog"
                 max-width="600px">
         <v-card>
-          <v-card-title>
-            Send a message to {{content.creator.firstName}}
-          </v-card-title>
-          <v-card-subtitle>
-            Your message will appear on their feed
-          </v-card-subtitle>
+          <!-- The 'TITLE' of the firstMessage component -->
+          <v-card color='primary lighten-3'>
+            <v-card-title>
+              <strong>Send a message to {{content.creator.firstName}}</strong>
+            </v-card-title>
+            <v-card-subtitle>
+              Your message will appear on their feed
+            </v-card-subtitle>
+          </v-card>
+          <!-- The Message body input component -->
           <v-form v-model="directMessageValid" ref="directMessageForm">
             <v-card-text>
               <v-textarea
@@ -123,6 +128,7 @@
                 :rules="mandatoryRules.concat(maxCharRules())"
                 v-model="directMessageContent"/>
             </v-card-text>
+            <!-- Submit and Cancel button for the replyMessage component -->
             <v-card-actions>
               <v-alert v-if="directMessageError !== undefined" color="red" type="error" dense text>
                 {{directMessageError}}
@@ -151,10 +157,9 @@
 </template>
 
 <script>
-import {formatDate, maxCharRules, SECTION_NAMES} from '@/utils';
+import {formatDate, maxCharRules, mandatoryRules, SECTION_NAMES} from '@/utils';
 import {deleteMarketplaceCard, messageConversation} from '../../api/internal.ts';
 import MarketplaceCardForm from '../marketplace/MarketplaceCardForm.vue';
-import {mandatoryRules} from "@/utils";
 
 export default {
   name: "MarketplaceCard",
