@@ -84,6 +84,24 @@ describe('modifyBusiness.vue', () => {
   // Container for the ModifyBusiness used in these tests
   let wrapper: Wrapper<any>;
 
+  /**
+   * Executes before all the tests.
+   *
+   * The jsdom environment doesn't declare the fetch function, hence we need to implement it
+   * ourselves to make LocationAutocomplete not crash.
+   */
+   beforeAll(() => {
+    globalThis.fetch = async () => {
+      return {
+        json() {
+          return {
+            features: [],
+          };
+        }
+      } as any;
+    };
+  });
+
   const diacritics = ['À','È','Ì','Ò','Ù','à','è','ì','ò','ù','Á','É','Í','Ó','Ú','Ý','á','é','í','ó','ú','ý','Â','Ê','Î','Ô','Û','â','ê','î','ô','û','Ã','Ñ','Õ','ã','ñ','õ','Ä','Ë','Ï','Ö','Ü','Ÿ','ä','ë','ï','ö','ü','ÿ'];
 
   let testUser: User;
@@ -265,11 +283,10 @@ describe('modifyBusiness.vue', () => {
 
   it('Valid if the new description is empty', async () => {
     await populateRequiredFields();
-    // await wrapper.setData({
-    //   description: ''
-    // });
+    await wrapper.setData({
+      description: ''
+    });
     await Vue.nextTick();
-    console.log(wrapper.vm.district);
     expect(wrapper.vm.valid).toBeTruthy();
   });
 
