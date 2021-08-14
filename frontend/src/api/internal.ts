@@ -96,6 +96,10 @@ export type Business = {
   created?: string,
 };
 
+export type ModifyBusiness = Business & {
+  updateProductCountry: boolean,
+}
+
 export type CreateBusiness = {
   primaryAdministratorId: number,
   name: string,
@@ -371,6 +375,24 @@ export async function createBusiness(business: CreateBusiness): Promise<MaybeErr
     if (status === 401) return 'You have been logged out. Please login again and retry';
 
     return error.response.data.message;
+  }
+
+  return undefined;
+}
+
+/**
+ * Modifies a business
+ *
+ * @param businessId The business id of the business to be modified
+ * @param business The properties to modify a business with
+ * @returns undefined if operation is successful, otherwise a string error.
+ */
+export async function modifyBusiness(businessId: number, business: ModifyBusiness): Promise<MaybeError<undefined>> {
+  try {
+    await instance.put(`/businesses/${businessId}`, business);
+  } catch (error) {
+    //TODO for frontend api task
+    return "placeholder";
   }
 
   return undefined;
