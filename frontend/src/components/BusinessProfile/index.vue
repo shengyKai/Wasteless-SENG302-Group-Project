@@ -62,7 +62,11 @@
         </div>
       </v-container>
     </v-card>
-    <ModifyBusiness :business="business" v-if="modifyBusiness"/>
+    <ModifyBusiness
+      :business="business"
+      v-if="modifyBusiness"
+      @discardModifyBusiness="modifyBusiness=false"
+    />
   </div>
 </template>
 

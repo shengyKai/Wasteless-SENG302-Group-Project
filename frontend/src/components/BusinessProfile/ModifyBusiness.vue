@@ -135,6 +135,7 @@
                     <v-btn
                       class="white--text"
                       color="secondary"
+                      @click="discardButton"
                     >
                       <v-icon
                         class="expand-icon"
@@ -219,6 +220,9 @@ export default {
         this.updateProductCountry = true;
       }
     },
+    discardButton() {
+      this.$emit('discardModifyBusiness');
+    }
   }
 };
 </script>
