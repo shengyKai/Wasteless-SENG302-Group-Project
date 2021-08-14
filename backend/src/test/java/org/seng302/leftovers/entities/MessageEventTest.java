@@ -9,6 +9,10 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
+
+import java.time.Instant;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
@@ -18,49 +22,138 @@ import static org.mockito.Mockito.when;
 class MessageEventTest {
 
     @Mock
-    User mockUser;
+    User buyer;
     @Mock
-    MarketplaceCard mockCard;
+    User seller;
     @Mock
-    Message mockMessage;
+    User bystander;
     @Mock
-    Conversation mockConversation;
-
-
-    MessageEvent messageEvent;
+    MarketplaceCard card;
+    @Mock
+    Message firstMessage;
+    @Mock
+    Message secondMessage;
+    @Mock
+    Conversation eventConversation;
+    @Mock
+    Conversation otherConversation;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
 
-        var userJson = new JSONObject();
-        userJson.appendField("id", 92);
-        when(mockUser.constructPublicJson()).thenReturn(userJson);
+        var buyerJson = new JSONObject();
+        buyerJson.appendField("id", 92);
+        when(buyer.constructPublicJson()).thenReturn(buyerJson);
+
+        var sellerJson = new JSONObject();
+        sellerJson.appendField("id", 38);
+        when(seller.constructPublicJson()).thenReturn(sellerJson);
 
         var messageJson = new JSONObject();
         messageJson.appendField("id", 20);
-        when(mockMessage.constructJSONObject()).thenReturn(messageJson);
+        when(firstMessage.constructJSONObject()).thenReturn(messageJson);
 
         var cardJson = new JSONObject();
         cardJson.appendField("id", 520);
-        when(mockCard.constructJSONObject()).thenReturn(cardJson);
+        when(card.constructJSONObject()).thenReturn(cardJson);
 
-        when(mockMessage.getConversation()).thenReturn(mockConversation);
-        when(mockConversation.getCard()).thenReturn(mockCard);
+        when(buyer.getUserID()).thenReturn(92L);
+        when(seller.getUserID()).thenReturn(38L);
+        when(bystander.getUserID()).thenReturn(171L);
 
-        messageEvent = new MessageEvent(mockUser, mockMessage);
+        when(firstMessage.getConversation()).thenReturn(eventConversation);
+
+        when(eventConversation.getCard()).thenReturn(card);
+        when(eventConversation.getBuyer()).thenReturn(buyer);
+        when(eventConversation.getCard().getCreator()).thenReturn(seller);
+        when(eventConversation.getId()).thenReturn(13L);
+
+        when(otherConversation.getId()).thenReturn(99L);
+    }
+
+    @Test
+    void messageEventConstructor_notifiedUserIsSeller_participantTypeSetToSeller() {
+        var messageEvent = new MessageEvent(seller, firstMessage);
+        assertEquals(MessageEvent.ParticipantType.SELLER, messageEvent.getParticipantType());
+    }
+
+    @Test
+    void messageEventConstructor_notifiedUserIsBuyer_participantTypeSetToBuyer() {
+        var messageEvent = new MessageEvent(buyer, firstMessage);
+        assertEquals(MessageEvent.ParticipantType.BUYER, messageEvent.getParticipantType());
+    }
+
+    @Test
+    void messageEventConstructor_notifiedUserIsNotConversationParticipant_responseStatusExceptionThrown() {
+        var exception = assertThrows(ResponseStatusException.class, () -> new MessageEvent(bystander, firstMessage));
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, exception.getStatus());
+        assertEquals("Notification can only be sent to buyer or seller of card", exception.getReason());
+    }
+
+    @Test
+    void setMessage_messageInConversation_messageUpdated() {
+        when(secondMessage.getConversation()).thenReturn(eventConversation);
+        var messageEvent = new MessageEvent(seller, firstMessage);
+        messageEvent.setMessage(secondMessage);
+        assertEquals(secondMessage, messageEvent.getMessage());
+    }
+
+    @Test
+    void setMessage_messageInConversation_createdUpdated() {
+        when(secondMessage.getConversation()).thenReturn(eventConversation);
+        var messageEvent = new MessageEvent(seller, firstMessage);
+
+        var before = Instant.now();
+        messageEvent.setMessage(secondMessage);
+        var after = Instant.now();
+
+        assertFalse(before.isAfter(messageEvent.getCreated()));
+        assertFalse(after.isBefore(messageEvent.getCreated()));
+    }
+
+    @Test
+    void setMessage_messageNotInConversation_responseStatusExceptionThrown() {
+        when(secondMessage.getConversation()).thenReturn(otherConversation);
+        var messageEvent = new MessageEvent(seller, firstMessage);
+
+        var exception = assertThrows(ResponseStatusException.class, () -> messageEvent.setMessage(secondMessage));
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, exception.getStatus());
+        assertEquals("The message associated with a message event can only be changed to a new message in the " +
+                "original conversation.", exception.getReason());
+    }
+
+    @Test
+    void setMessage_messageNotInConversation_messageUnchanged() {
+        when(secondMessage.getConversation()).thenReturn(otherConversation);
+        var messageEvent = new MessageEvent(seller, firstMessage);
+
+        assertThrows(ResponseStatusException.class, () -> messageEvent.setMessage(secondMessage));
+        assertEquals(firstMessage, messageEvent.getMessage());
+    }
+
+    @Test
+    void setMessage_messageNotInConversation_createdUnchanged() {
+        when(secondMessage.getConversation()).thenReturn(otherConversation);
+        var messageEvent = new MessageEvent(seller, firstMessage);
+        var createdBefore = messageEvent.getCreated();
+
+        assertThrows(ResponseStatusException.class, () -> messageEvent.setMessage(secondMessage));
+        assertEquals(createdBefore, messageEvent.getCreated());
     }
 
     @Test
     void constructJSONObject_jsonHasExpectedFormat() {
+        var messageEvent = new MessageEvent(buyer, firstMessage);
         var messageEventJson = messageEvent.constructJSONObject();
         assertEquals("MessageEvent", messageEventJson.getAsString("type"));
         assertEquals(messageEvent.getCreated().toString(), messageEventJson.getAsString("created"));
         assertEquals("none", messageEventJson.getAsString("tag"));
         assertEquals(messageEvent.getId(), messageEventJson.getAsNumber("id"));
-        assertEquals(mockCard.constructJSONObject().toJSONString(), messageEventJson.getAsString("card"));
-        assertEquals(mockMessage.constructJSONObject().toJSONString(), messageEventJson.getAsString("message"));
-        assertEquals(6, messageEventJson.size());
+        assertEquals(card.constructJSONObject().toJSONString(), messageEventJson.getAsString("card"));
+        assertEquals(firstMessage.constructJSONObject().toJSONString(), messageEventJson.getAsString("message"));
+        assertEquals("buyer", messageEventJson.getAsString("participantType"));
+        assertEquals(7, messageEventJson.size());
     }
 
 }
