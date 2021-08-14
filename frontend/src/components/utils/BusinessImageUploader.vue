@@ -35,6 +35,7 @@
 
 <script>
 import ImageSelector from "@/components/utils/ImageSelector";
+import {uploadBusinessImage} from "@/api/internal";
 
 export default {
   name: "BusinessImageUploader",
@@ -61,7 +62,7 @@ export default {
       this.isLoading = true;
       this.errorMessage = undefined;
 
-      let response = "NOT IMPLEMENTED";
+      let response = await uploadBusinessImage(this.businessId, this.file);
 
       this.isLoading = false;
       if (response !== undefined) {

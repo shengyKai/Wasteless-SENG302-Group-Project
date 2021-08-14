@@ -174,9 +174,9 @@
                       class="mr-1 font-weight-medium action-button"
                       color="primary"
                     >
-                      Upload Image
+                      Upload a new image
                     </v-chip>
-                    <BusinessImageUploader v-model="showImageUploaderForm"/>
+                    <BusinessImageUploader :business-id="business.id" v-model="showImageUploaderForm"/>
                     <p class="error-text" v-if ="errorMessage !== undefined"> {{errorMessage}} </p>
                   </v-container>
                 </v-card-text>
