@@ -247,7 +247,7 @@ export const alphabetRules = [
 ];
 export const streetNumRules = [
   (field: string) => (field && field.length <= 109) || 'Reached max character limit 109 ',
-  (field: string) => regxStreet().test(field) || 'Must contain unit number and street name'
+  (field: string) => regxStreet().test(field) || 'Must contain unit number and two words for the street name'
 ];
 
 export const quantityRules = [
