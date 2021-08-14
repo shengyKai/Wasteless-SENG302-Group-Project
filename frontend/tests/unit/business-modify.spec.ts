@@ -3,7 +3,7 @@ import Vuex, { Store } from 'vuex';
 import Vuetify from 'vuetify';
 import { createLocalVue, Wrapper, mount } from '@vue/test-utils';
 
-import ModifyBusiness from '@/components/BusinessProfile/index.vue';
+import ModifyBusiness from '@/components/BusinessProfile/ModifyBusiness.vue';
 import {castMock} from "./utils";
 import * as api from '@/api/internal';
 import {getStore, resetStoreForTesting} from '@/store';
@@ -160,126 +160,274 @@ describe('modifyBusiness.vue', () => {
   }
 
   it('Valid if all fields are provided', async () => {
-    //TODO
+    await populateRequiredFields();
+    await Vue.nextTick();
+    expect(wrapper.vm.valid).toBeTruthy();
   });
 
   it('Invalid is no fields are provided', async () => {
-    //TODO
+    await Vue.nextTick();
+    expect(wrapper.vm.valid).toBeFalsy();
   });
 
   it('Valid if the new name of the business is provided', async () => {
-    //TODO
+    await populateRequiredFields();
+    await wrapper.setData({
+      businessName: 'Fabian Fabrication'
+    });
+    await Vue.nextTick();
+    expect(wrapper.vm.valid).toBeTruthy();
   });
 
   it('Valid if the new description of the business is provided', async () => {
-    //TODO
+    await populateRequiredFields();
+    await wrapper.setData({
+      description: 'Fabian Fabrication focuses on the highest quality fabrication that works for you'
+    });
+    await Vue.nextTick();
+    expect(wrapper.vm.valid).toBeTruthy();
   });
 
   it('Valid if the new business type of the business is provided', async () => {
-    //TODO
+    await populateRequiredFields();
+    await wrapper.setData({
+      businessName: 'Retail Trade'
+    });
+    await Vue.nextTick();
+    expect(wrapper.vm.valid).toBeTruthy();
   });
 
   it('Valid if the new street address is provided', async () => {
-    //TODO
+    await populateRequiredFields();
+    await wrapper.setData({
+      streetAddress: '69 Happy Street'
+    });
+    await Vue.nextTick();
+    expect(wrapper.vm.valid).toBeTruthy();
   });
 
   it('Valid if the new district is provided', async () => {
-    //TODO
+    await populateRequiredFields();
+    await wrapper.setData({
+      district: 'Riccarton'
+    });
+    await Vue.nextTick();
+    expect(wrapper.vm.valid).toBeTruthy();
   });
 
   it('Valid if the new city is provided', async () => {
-    //TODO
+    await populateRequiredFields();
+    await wrapper.setData({
+      city: 'Christchurch'
+    });
+    await Vue.nextTick();
+    expect(wrapper.vm.valid).toBeTruthy();
   });
 
   it('Valid if the new region is provided', async () => {
-    //TODO
+    await populateRequiredFields();
+    await wrapper.setData({
+      region: 'Canterbury'
+    });
+    await Vue.nextTick();
+    expect(wrapper.vm.valid).toBeTruthy();
   });
 
   it('Valid if the new country is provided', async () => {
-    //TODO
+    await populateRequiredFields();
+    await wrapper.setData({
+      country: 'New Zealand'
+    });
+    await Vue.nextTick();
+    expect(wrapper.vm.valid).toBeTruthy();
   });
 
   it('Valid if the new postcode is provided', async () => {
-    //TODO
+    await populateRequiredFields();
+    await wrapper.setData({
+      postcode: 'Fabian Fabrication'
+    });
+    await Vue.nextTick();
+    expect(wrapper.vm.valid).toBeTruthy();
   });
 
   it('Invalid if the new business name is empty', async () => {
-    //TODO
+    await populateRequiredFields();
+    await wrapper.setData({
+      businessName: ''
+    });
+    await Vue.nextTick();
+    expect(wrapper.vm.valid).toBeFalsy();
   });
 
   it('Invalid if the new business type is empty', async () => {
-    //TODO
+    await populateRequiredFields();
+    await wrapper.setData({
+      businessType: ''
+    });
+    await Vue.nextTick();
+    expect(wrapper.vm.valid).toBeFalsy();
   });
 
   it('Valid if the new description is empty', async () => {
-    //TODO
+    await populateRequiredFields();
+    await wrapper.setData({
+      description: ''
+    });
+    await Vue.nextTick();
+    expect(wrapper.vm.valid).toBeTruthy();
   });
 
   it('Invalid if the new street address is empty', async () => {
-    //TODO
+    await populateRequiredFields();
+    await wrapper.setData({
+      streetAddress: ''
+    });
+    await Vue.nextTick();
+    expect(wrapper.vm.valid).toBeFalsy();
   });
 
   it('Valid if the new district is empty', async () => {
-    //TODO
+    await populateRequiredFields();
+    await wrapper.setData({
+      district: ''
+    });
+    await Vue.nextTick();
+    expect(wrapper.vm.valid).toBeTruthy();
   });
 
   it('Invalid if the new city is empty', async () => {
-    //TODO
+    await populateRequiredFields();
+    await wrapper.setData({
+      city: ''
+    });
+    await Vue.nextTick();
+    expect(wrapper.vm.valid).toBeFalsy();
   });
 
-  it('Invalid if the new state is empty', async () => {
-    //TODO
+  it('Invalid if the new region is empty', async () => {
+    await populateRequiredFields();
+    await wrapper.setData({
+      region: ''
+    });
+    await Vue.nextTick();
+    expect(wrapper.vm.valid).toBeFalsy();
   });
 
   it('Invalid if the new country is empty', async () => {
-    //TODO
+    await populateRequiredFields();
+    await wrapper.setData({
+      country: ''
+    });
+    await Vue.nextTick();
+    expect(wrapper.vm.valid).toBeFalsy();
   });
 
   it('Invalid if the new postcode is empty', async () => {
-    //TODO
+    await populateRequiredFields();
+    await wrapper.setData({
+      postcode: ''
+    });
+    await Vue.nextTick();
+    expect(wrapper.vm.valid).toBeFalsy();
   });
 
   it('Invalid if the new business name is too long', async () => {
-    //TODO
+    await populateRequiredFields();
+    await wrapper.setData({
+      businessName: 'e'.repeat(101)
+    });
+    await Vue.nextTick();
+    expect(wrapper.vm.valid).toBeFalsy();
   });
 
   it('Invalid if the new description is too long', async () => {
-    //TODO
+    await populateRequiredFields();
+    await wrapper.setData({
+      description: 'e'.repeat(201)
+    });
+    await Vue.nextTick();
+    expect(wrapper.vm.valid).toBeFalsy();
   });
 
   it('Invalid if the street address contains a character', async () => {
-    //TODO
+    await populateRequiredFields();
+    await wrapper.setData({
+      streetAddress: '69 Eliz@beth Street'
+    });
+    await Vue.nextTick();
+    expect(wrapper.vm.valid).toBeFalsy();
   });
 
   it('Invalid if the street address only contains a number', async() => {
-    //TODO
+    await populateRequiredFields();
+    await wrapper.setData({
+      streetAddress: '69'
+    });
+    await Vue.nextTick();
+    expect(wrapper.vm.valid).toBeFalsy();
   });
 
   it('Invalid if the street address only contains a word', async() => {
-    //TODO
+    await populateRequiredFields();
+    await wrapper.setData({
+      streetAddress: 'Elizabeth'
+    });
+    await Vue.nextTick();
+    expect(wrapper.vm.valid).toBeFalsy();
   });
 
   it('Invalid if the street address is too long', async () => {
-    //TODO
+    await populateRequiredFields();
+    await wrapper.setData({
+      streetAddress: 'e'.repeat(110)
+    });
+    await Vue.nextTick();
+    expect(wrapper.vm.valid).toBeFalsy();
   });
 
   it('Invalid if the district is too long', async () => {
-    //TODO
+    await populateRequiredFields();
+    await wrapper.setData({
+      district: 'e'.repeat(101)
+    });
+    await Vue.nextTick();
+    expect(wrapper.vm.valid).toBeFalsy();
   });
 
   it('Invalid if the city is too long', async () => {
-    //TODO
+    await populateRequiredFields();
+    await wrapper.setData({
+      city: 'e'.repeat(101)
+    });
+    await Vue.nextTick();
+    expect(wrapper.vm.valid).toBeFalsy();
   });
 
   it('Invalid if the region is too long', async () => {
-    //TODO
+    await populateRequiredFields();
+    await wrapper.setData({
+      region: 'e'.repeat(101)
+    });
+    await Vue.nextTick();
+    expect(wrapper.vm.valid).toBeFalsy();
   });
 
   it('Invalid if the country is too long', async () => {
-    //TODO
+    await populateRequiredFields();
+    await wrapper.setData({
+      country: 'e'.repeat(101)
+    });
+    await Vue.nextTick();
+    expect(wrapper.vm.valid).toBeFalsy();
   });
 
   it('Invalid if postcode is too long', async () => {
-    //TODO
+    await populateRequiredFields();
+    await wrapper.setData({
+      postcode: 'e'.repeat(101)
+    });
+    await Vue.nextTick();
+    expect(wrapper.vm.valid).toBeFalsy();
   });
 });
