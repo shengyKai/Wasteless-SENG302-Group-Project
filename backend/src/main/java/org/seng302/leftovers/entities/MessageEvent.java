@@ -113,7 +113,7 @@ public class MessageEvent extends Event {
 
         JSONObject jsonObject = super.constructJSONObject();
         jsonObject.appendField("message", message.constructJSONObject());
-        jsonObject.appendField("card", conversation.getCard().constructJSONObject());
+        jsonObject.appendField("conversation", conversation.constructJSONObject());
         jsonObject.appendField("participantType", objectMapper.convertValue(participantType, String.class));
         return jsonObject;
     }

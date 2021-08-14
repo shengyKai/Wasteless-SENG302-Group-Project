@@ -58,6 +58,10 @@ class MessageEventTest {
         cardJson.appendField("id", 520);
         when(card.constructJSONObject()).thenReturn(cardJson);
 
+        var conversationJson = new JSONObject();
+        conversationJson.appendField("id", 13);
+        when(eventConversation.constructJSONObject()).thenReturn(conversationJson);
+
         when(buyer.getUserID()).thenReturn(92L);
         when(seller.getUserID()).thenReturn(38L);
         when(bystander.getUserID()).thenReturn(171L);
@@ -150,7 +154,7 @@ class MessageEventTest {
         assertEquals(messageEvent.getCreated().toString(), messageEventJson.getAsString("created"));
         assertEquals("none", messageEventJson.getAsString("tag"));
         assertEquals(messageEvent.getId(), messageEventJson.getAsNumber("id"));
-        assertEquals(card.constructJSONObject().toJSONString(), messageEventJson.getAsString("card"));
+        assertEquals(eventConversation.constructJSONObject().toJSONString(), messageEventJson.getAsString("conversation"));
         assertEquals(firstMessage.constructJSONObject().toJSONString(), messageEventJson.getAsString("message"));
         assertEquals("buyer", messageEventJson.getAsString("participantType"));
         assertEquals(7, messageEventJson.size());

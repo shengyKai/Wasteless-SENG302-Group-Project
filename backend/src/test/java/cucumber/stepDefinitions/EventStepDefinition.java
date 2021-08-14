@@ -63,7 +63,7 @@ public class EventStepDefinition {
     @When("I check my notification feed")
     public void i_check_my_notification_feed() {
         requestContext.performRequest(get("/events/emitter")
-                .param("userId", userContext.getLast().getUserID().toString()));
+                .param("userId", requestContext.getLoggedInId().toString()));
     }
 
     @When("I try to change the event tag to {string}")
