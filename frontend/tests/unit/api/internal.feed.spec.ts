@@ -56,7 +56,7 @@ describe("Test DELETE /feed/{id} endpoint", () => {
       }
     });
     const response = await deleteNotification(1);
-    expect(response).toEqual(undefined);
+    expect(response).toBe(undefined);
   });
 });
 

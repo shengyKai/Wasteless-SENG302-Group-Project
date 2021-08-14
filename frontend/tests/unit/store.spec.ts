@@ -24,13 +24,13 @@ describe('store.ts', () => {
   it('areEventsStaged returns false if no events have been added to the list of events to be deleted', () => {
     expect(store.state.eventForDeletionIds.length).toBe(0);
     expect(store.getters.areEventsStaged).toBeFalsy();
-  })
+  });
 
   it('areEventsStaged returns true if one event have been added to the list of events to be deleted', () => {
     store.commit('stageEventForDeletion', 100);
     expect(store.state.eventForDeletionIds.length).toBe(1);
     expect(store.getters.areEventsStaged).toBeTruthy();
-  })
+  });
 
   it('areEventsStaged returns true if multiple events have been added to the list of events to be deleted', () => {
     store.commit('stageEventForDeletion', 18);
@@ -38,7 +38,7 @@ describe('store.ts', () => {
     store.commit('stageEventForDeletion', 44);
     expect(store.state.eventForDeletionIds.length).toBe(3);
     expect(store.getters.areEventsStaged).toBeTruthy();
-  })
+  });
 
 
   describe('deleteStagedEvent', () => {
