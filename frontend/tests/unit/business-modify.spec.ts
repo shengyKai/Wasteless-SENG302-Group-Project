@@ -4,7 +4,7 @@ import Vuetify from 'vuetify';
 import { createLocalVue, Wrapper, mount } from '@vue/test-utils';
 
 import ModifyBusiness from '@/components/BusinessProfile/ModifyBusiness.vue';
-import {castMock} from "./utils";
+import {castMock, flushQueue} from "./utils";
 import * as api from '@/api/internal';
 import {User, Location, Business} from "@/api/internal";
 
@@ -23,13 +23,13 @@ const localVue = createLocalVue();
  */
 function createTestLocation() {
   let location: Location = {
-    streetNumber: 'test_street_number',
-    streetName: 'test_streetAddress',
-    city: 'test_city',
-    region: 'test_region',
-    postcode: 'test_postcode',
-    district: 'test_district',
-    country: 'test_country'
+    streetNumber: '10',
+    streetName: 'Downing Street',
+    city: 'London',
+    region: 'England',
+    postcode: '1234',
+    district: 'Westminster',
+    country: 'United Kingdom'
   };
   return location;
 }
@@ -149,7 +149,7 @@ describe('modifyBusiness.vue', () => {
   async function populateRequiredFields() {
     await wrapper.setData({
       businessName: 'Business Name',
-      businessType: 'Business Type',
+      businessType: 'Retail Trade',
       streetAddress: '1 Street',
       city: 'City',
       region: 'Region',
@@ -192,7 +192,9 @@ describe('modifyBusiness.vue', () => {
     await wrapper.setData({
       businessName: 'Retail Trade'
     });
-    await Vue.nextTick();
+    // await Vue.nextTick();
+    await flushQueue();
+    console.log(wrapper.vm.businessType);
     expect(wrapper.vm.valid).toBeTruthy();
   });
 
@@ -270,10 +272,11 @@ describe('modifyBusiness.vue', () => {
 
   it('Valid if the new description is empty', async () => {
     await populateRequiredFields();
-    await wrapper.setData({
-      description: ''
-    });
+    // await wrapper.setData({
+    //   description: ''
+    // });
     await Vue.nextTick();
+    console.log(wrapper.vm.district);
     expect(wrapper.vm.valid).toBeTruthy();
   });
 
