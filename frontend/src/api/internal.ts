@@ -1100,3 +1100,42 @@ export async function messageConversation(cardId: number, senderId: number, buye
   }
   return undefined;
 }
+
+export type productSearchBy = 'name' | 'description' | 'manufacturer' | 'product code';
+
+/**
+ * Sends a search query to the backend to search a business's product catalogue.
+ * @param businessId 
+ * @param query 
+ * @param pageIndex 
+ * @param resultsPerPage 
+ * @param searchBy 
+ * @param orderBy 
+ * @param reverse 
+ * @returns 
+ */
+ export async function searchCatalogue(businessId: number, query: string, pageIndex: number, resultsPerPage: number, searchBy: Array<productSearchBy>, orderBy: UserOrderBy, reverse: boolean): Promise<MaybeError<SearchResults<Product>>> {
+  let response;
+  try {
+    response = await instance.get('/users/search', {
+      params: {
+        searchQuery: query,
+        page: pageIndex,
+        resultsPerPage,
+        orderBy,
+        reverse: reverse.toString(),
+      }
+    });
+  } catch (error) {
+    let status: number | undefined = error.response?.status;
+
+    if (status === undefined) return 'Failed to reach backend';
+    return `Request failed: ${error.response.data.message}`;
+  }
+
+  if (!is<SearchResults<User>>(response.data)) {
+    return 'Response is not user array';
+  }
+
+  return response.data;
+}

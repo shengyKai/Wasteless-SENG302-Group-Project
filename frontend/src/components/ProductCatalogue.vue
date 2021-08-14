@@ -31,11 +31,10 @@
             multiple
           >
             <template v-slot:selection="{ item, index }">
-              <span v-if="searchBy.length === 1">{{ item.text }} &nbsp;</span>
-              <span v-else-if="index < maxDisplay">{{ item.text }}, &nbsp;</span>
+              <span v-if="index < maxDisplay">{{ item.text }}, &nbsp;</span>
               <span
                 v-if="index === maxDisplay"
-                class="grey--text caption"
+                class="white--text caption"
               >(+{{ searchBy.length - maxDisplay }} search)</span>
             </template>
           </v-select>
