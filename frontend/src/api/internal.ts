@@ -1122,7 +1122,7 @@ export async function uploadBusinessImage(businessId: number, file: File): Promi
     if (status === 400) return 'Invalid image';
     if (status === 401) return 'You have been logged out. Please login again and retry';
     if (status === 403) return 'Operation not permitted';
-    if (status === 406) return 'Product/Business not found';
+    if (status === 406) return 'Business not found';
     if (status === 413) return 'Image too large';
     return 'Request failed: ' + error.response?.data.message;
   }
