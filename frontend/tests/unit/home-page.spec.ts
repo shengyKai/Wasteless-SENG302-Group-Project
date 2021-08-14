@@ -180,7 +180,7 @@ describe('HomePage.vue', () => {
         await Vue.nextTick();
       }
     }
-    
+
     beforeEach(async () => {
       await addMultipleEvents();
     });
@@ -188,14 +188,14 @@ describe('HomePage.vue', () => {
     it('If there are more than 10 events in the store for the user, pagination will be available for the user', async () => {
       expect(wrapper.vm.totalPages).toEqual(2);
     });
-  
+
     it('If there are more than 10 events in the store for the user, the user can navigate to the second page and see the correct results', async () => {
       let events = wrapper.findAllComponents({ name: "GlobalMessage" });
       // Number of events should be 10 because each page only allows space for 10 events
       expect(events.length).toEqual(10);
       // Check the results message
       expect(wrapper.text()).toContain("Displaying 1 - 10 of 12 results");
-  
+
       // Set the page to 2
       await wrapper.setData({
         currentPage: 2
@@ -203,38 +203,38 @@ describe('HomePage.vue', () => {
       events = wrapper.findAllComponents({ name: "GlobalMessage" });
       // Since there are 12 events total, the second page should only have 2 events
       expect(events.length).toEqual(2);
-  
+
       // Check the results message
       expect(wrapper.text()).toContain("Displaying 11 - 12 of 12 results");
     });
-  
+
     it('If there are events with different tag colours, the user can filter them to the colour of interest and see the correct results', async () => {
       await wrapper.setData({
         filterBy: ["red"]
       });
-  
+
       let events = wrapper.findAllComponents({ name: "GlobalMessage" });
       // Number of events should be 8 because there are only 8 red tagged events
       expect(events.length).toEqual(8);
-  
+
       await wrapper.setData({
         filterBy: ["none"]
       });
-  
+
       events = wrapper.findAllComponents({ name: "GlobalMessage" });
       // Number of events should be 4 because there are only 4 none tagged events
       expect(events.length).toEqual(4);
     });
-  
+
     it('If there are events with different tag colours, the user can filter them with multiple colours and see the correct results', async () => {
       await wrapper.setData({
         filterBy: ["red", "none"]
       });
-  
+
       let events = wrapper.findAllComponents({ name: "GlobalMessage" });
       // Number of events should be 10 because there are 12 red and none tagged events total and 10 are showed in the first page
       expect(events.length).toEqual(10);
-  
+
       // Set the page to 2
       await wrapper.setData({
         currentPage: 2
@@ -243,15 +243,15 @@ describe('HomePage.vue', () => {
       // Number of events should be 2 because there are 12 red and none tagged events total and 2 are showed in the second page
       expect(events.length).toEqual(2);
     });
-  
+
     it('If the user filters with tags which are not in the events, no results will be shown', async () => {
       await wrapper.setData({
         filterBy: ["blue", "purple"]
       });
-  
+
       let events = wrapper.findAllComponents({ name: "GlobalMessage" });
       expect(events.length).toEqual(0);
       expect(wrapper.text()).toContain("No items matches the filter");
     });
-  })
+  });
 });

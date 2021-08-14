@@ -205,6 +205,8 @@ type BusinessOrderBy = 'created' | 'name' | 'location' | 'businessType';
 
 export type SearchResults<T> = { results: T[], count: number }
 
+export type ProductSearchBy = 'name' | 'description' | 'manufacturer' | 'product code';
+
 /**
  * Sends a search query to the backend.
  *
@@ -1101,40 +1103,39 @@ export async function messageConversation(cardId: number, senderId: number, buye
   return undefined;
 }
 
-export type productSearchBy = 'name' | 'description' | 'manufacturer' | 'product code';
-
 /**
  * Sends a search query to the backend to search a business's product catalogue.
- * @param businessId 
- * @param query 
- * @param pageIndex 
- * @param resultsPerPage 
- * @param searchBy 
- * @param orderBy 
- * @param reverse 
- * @returns 
+ * @param businessId ID of the business whose product catalogue is about to be searched
+ * @param query Query string to search for
+ * @param pageIndex Index of page to start the results from (1 = first page)
+ * @param resultsPerPage Number of results to return per page
+ * @param searchBy List of product properties to search with
+ * @param orderBy Specifies the method used to sort the results
+ * @param reverse Specifies whether to reverse the search results (default order is descending for relevance and ascending for all other orders)
  */
- export async function searchCatalogue(businessId: number, query: string, pageIndex: number, resultsPerPage: number, searchBy: Array<productSearchBy>, orderBy: UserOrderBy, reverse: boolean): Promise<MaybeError<SearchResults<Product>>> {
+ export async function searchCatalogue(businessId: number, query: string, pageIndex: number, resultsPerPage: number, searchBy: Array<ProductSearchBy>, orderBy: UserOrderBy, reverse: boolean): Promise<MaybeError<SearchResults<Product>>> {
   let response;
   try {
-    response = await instance.get('/users/search', {
+    response = await instance.get(`/businesses/${businessId}/products/search`, {
       params: {
         searchQuery: query,
         page: pageIndex,
-        resultsPerPage,
-        orderBy,
+        resultsPerPage: resultsPerPage,
+        searchBy: searchBy,
         reverse: reverse.toString(),
+        orderBy: orderBy,
       }
     });
   } catch (error) {
     let status: number | undefined = error.response?.status;
-
+    if (status === 401) return 'You have been logged out. Please login again and retry';
+    if (status === 403) return 'You do not have permission to access this product catalogue';
     if (status === undefined) return 'Failed to reach backend';
     return `Request failed: ${error.response.data.message}`;
   }
 
-  if (!is<SearchResults<User>>(response.data)) {
-    return 'Response is not user array';
+  if (!is<SearchResults<Product>>(response.data)) {
+    return 'Response is not product array';
   }
 
   return response.data;
