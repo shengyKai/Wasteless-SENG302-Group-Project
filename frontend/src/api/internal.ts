@@ -205,7 +205,7 @@ type BusinessOrderBy = 'created' | 'name' | 'location' | 'businessType';
 
 export type SearchResults<T> = { results: T[], count: number }
 
-export type ProductSearchBy = 'name' | 'description' | 'manufacturer' | 'product code';
+export type ProductSearchBy = 'name' | 'description' | 'manufacturer' | 'productCode';
 
 /**
  * Sends a search query to the backend.

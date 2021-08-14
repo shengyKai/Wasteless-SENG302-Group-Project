@@ -103,8 +103,9 @@
 </template>
 
 <script>
-import { getProducts} from '../api/internal';
+import { getProducts, searchCatalogue } from '../api/internal';
 import ProductCatalogueItem from './cards/ProductCatalogueItem.vue';
+import { debounce } from '../utils';
 
 export default {
   name: "ProductCatalogue",
@@ -155,7 +156,12 @@ export default {
       /**
        * How many selections will be displayed on `<v-select/>` for SearchBy
        */
-      maxDisplay: 2
+      maxDisplay: 2,
+      /**
+       * Function that is called whenever the "searchQuery" variable is updated.
+       * This function is rate limited to avoid too many queries to the backend.
+       */
+      debouncedUpdateQuery: debounce(this.updateSearchQuery, 500),
     };
   },
   computed: {
@@ -182,7 +188,7 @@ export default {
   methods: {
     /**
      * This function gets called when the product list needs to be updated.
-     * The page index, results per page, order by and reverse variables notify this function.
+     * The page index, results per page, order by, reverse and searchQuery(indirectly) variables notify this function.
      */
     async updateResults() {
       this.businessId = parseInt(this.$route.params.id);
@@ -190,13 +196,31 @@ export default {
         this.error = `Invalid business id "${this.$route.params.id}"`;
         return;
       }
-      const value = await getProducts (
-        this.businessId,
-        this.currentPage,
-        this.resultsPerPage,
-        this.orderBy,
-        this.reverse
-      );
+      // Default value into a string so that if either method fails to retrieve results, it will be caught by
+      // the if condition below.
+      let value = '';
+      // If the length of searchQuery is 0, means there is no point to use the searchCatalogue endpoint
+      // Instead, a normal getProducts endpoint would be sufficient
+      // Else, we use the searchCatalogue endpoint to retrieve a list of products
+      if (this.searchQuery.length === 0) {
+        value = await getProducts (
+          this.businessId,
+          this.currentPage,
+          this.resultsPerPage,
+          this.orderBy,
+          this.reverse
+        );
+      } else {
+        value = await searchCatalogue (
+          this.businessId,
+          this.searchQuery,
+          this.currentPage,
+          this.resultsPerPage,
+          this.searchBy,
+          this.orderBy,
+          this.reverse
+        );
+      }
       if (typeof value === 'string') {
         this.products = [];
         this.totalResults = 0;
@@ -206,10 +230,24 @@ export default {
         this.totalResults = value.count;
         this.error = undefined;
       }
-    }
+    },
+    /**
+     * This function is called when the search query changes.
+     */
+    async updateSearchQuery() {
+      this.currentPage = 1; // Makes sure we start on the first page
+      this.results = undefined; // Remove results
+      this.updateResults();
+    },
   },
 
   watch: {
+    searchQuery: {
+      handler() {
+        this.debouncedUpdateQuery();
+      },
+      immediate: true,
+    },
     orderBy() {
       this.updateResults();
     },
