@@ -168,6 +168,15 @@
                       </v-row>
                     </v-col>
                     <v-card-title>Images</v-card-title>
+                    <v-chip
+                      @click="showImageUploaderForm=true"
+                      medium
+                      class="mr-1 font-weight-medium action-button"
+                      color="primary"
+                    >
+                      Upload Image
+                    </v-chip>
+                    <BusinessImageUploader v-model="showImageUploaderForm"/>
                     <p class="error-text" v-if ="errorMessage !== undefined"> {{errorMessage}} </p>
                   </v-container>
                 </v-card-text>
@@ -223,9 +232,11 @@ import {
   mandatoryRules,
   maxCharRules, postCodeRules, streetNumRules
 } from "@/utils";
+import BusinessImageUploader from "@/components/utils/BusinessImageUploader";
 export default {
   name: 'BusinessProfile',
   components: {
+    BusinessImageUploader,
     LocationAutocomplete,
   },
   data() {
@@ -252,6 +263,7 @@ export default {
         'Non-profit organisation',
         'Retail Trade',
       ],
+      showImageUploaderForm: false,
       valid: false,
       maxCharRules: () => maxCharRules(100),
       maxCharDescriptionRules: ()=> maxCharRules(200),
