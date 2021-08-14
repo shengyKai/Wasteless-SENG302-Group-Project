@@ -2,6 +2,7 @@ package org.seng302.leftovers.service;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpStatus;
@@ -23,7 +24,9 @@ import java.util.stream.Stream;
 @Service
 public class StorageServiceImpl implements StorageService {
     private static final Logger logger = LogManager.getLogger(StorageServiceImpl.class.getName());
-    private final Path root = Paths.get("uploads");
+
+    @Value("${storage-directory}")
+    private Path root;
 
     @Override
     public void init() {

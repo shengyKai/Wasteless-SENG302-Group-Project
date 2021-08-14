@@ -1,5 +1,6 @@
 package org.seng302.datagenerator;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.http.HttpStatus;
@@ -22,11 +23,14 @@ import java.util.stream.Stream;
 
 public class ProductImageGenerator {
 
-    private final Path userUploadsRoot = Paths.get("uploads");
+    private Path userUploadsRoot;
     private final Connection conn;
     private Resource[] demoImages;
 
     public ProductImageGenerator(Connection conn) {
+        this.conn = conn;
+
+        userUploadsRoot = Paths.get(ExampleDataFileReader.readPropertiesFile("/application.properties").get("storage-directory"));
         try {
             var loader = ProductImageGenerator.class.getClassLoader();
             PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver(loader);
@@ -34,7 +38,6 @@ public class ProductImageGenerator {
         } catch (IOException e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,"Could not initialize example images folder.");
         }
-        this.conn = conn;
     }
 
     /**
@@ -103,6 +106,7 @@ public class ProductImageGenerator {
             store(resource.getInputStream(), fileName);
             return true;
         } catch (Exception e) {
+            System.out.println(e.getMessage());
             return false;
         }
     }
