@@ -189,18 +189,6 @@ export default {
         this.updateProductCountry = true;
       }
     },
-    prefillModifyFields() {
-      console.log(this.business);
-      this.businessName = this.business.name;
-      this.businessType = this.business.businessType;
-      this.description = this.business.description;
-      this.streetAddress = this.business.address.streetNumber + " " + this.business.address.streetName;
-      this.district = this.business.address.district;
-      this.city = this.business.address.city;
-      this.region = this.business.address.region;
-      this.country = this.business.address.country;
-      this.postcode = this.business.address.postcode;
-    }
   }
 };
 </script>
@@ -210,13 +198,11 @@ export default {
     padding: 16px;
     width: 100%;
     margin-top: 140px;
-    /* text-align: center; */
 }
 
 .top-section {
   display: flex;
   flex-wrap: wrap;
-  /* justify-content: center; */
 }
 
 .link-chip {

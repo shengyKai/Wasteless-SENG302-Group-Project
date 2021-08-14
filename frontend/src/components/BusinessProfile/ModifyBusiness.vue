@@ -232,13 +232,11 @@ export default {
     padding: 16px;
     width: 100%;
     margin-top: 140px;
-    /* text-align: center; */
 }
 
 .top-section {
   display: flex;
   flex-wrap: wrap;
-  /* justify-content: center; */
 }
 
 .link-chip {
