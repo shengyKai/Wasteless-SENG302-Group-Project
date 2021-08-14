@@ -6,7 +6,6 @@ import { createLocalVue, Wrapper, mount } from '@vue/test-utils';
 import ModifyBusiness from '@/components/BusinessProfile/ModifyBusiness.vue';
 import {castMock} from "./utils";
 import * as api from '@/api/internal';
-import {getStore, resetStoreForTesting} from '@/store';
 import {User, Location, Business} from "@/api/internal";
 
 jest.mock('@/api/internal', () => ({
@@ -87,21 +86,17 @@ describe('modifyBusiness.vue', () => {
 
   const diacritics = ['À','È','Ì','Ò','Ù','à','è','ì','ò','ù','Á','É','Í','Ó','Ú','Ý','á','é','í','ó','ú','ý','Â','Ê','Î','Ô','Û','â','ê','î','ô','û','Ã','Ñ','Õ','ã','ñ','õ','Ä','Ë','Ï','Ö','Ü','Ÿ','ä','ë','ï','ö','ü','ÿ'];
 
+  let testUser: User;
+
   /**
    * Sets up the test ModifyBusiness instance
    */
   beforeEach(() => {
+    testUser = createTestUser(1);
     const vuetify = new Vuetify();
-    localVue.use(Vuex);
-    resetStoreForTesting();
-    let store = getStore();
-    let testUser = createTestUser(1);
-    store.state.user = testUser;
-    store.state.business = createTestBusiness(1, testUser.id, [testUser]);
-
     const App = localVue.component('App', {
       components: { ModifyBusiness },
-      template: '<div data-app><ModifyBusiness/></div>'
+      template: '<div data-app><ModifyBusiness :business="thingy"/></div>',
     });
 
     const elem = document.createElement('div');
@@ -117,7 +112,11 @@ describe('modifyBusiness.vue', () => {
       localVue,
       vuetify,
       attachTo: elem,
-      store: store,
+      data() {
+        return {
+          thingy: createTestBusiness(1, testUser.id, [testUser]),
+        };
+      }
     });
 
     wrapper = appWrapper.getComponent(ModifyBusiness);
@@ -149,7 +148,7 @@ describe('modifyBusiness.vue', () => {
    */
   async function populateRequiredFields() {
     await wrapper.setData({
-      business: 'Business Name',
+      businessName: 'Business Name',
       businessType: 'Business Type',
       streetAddress: '1 Street',
       city: 'City',
