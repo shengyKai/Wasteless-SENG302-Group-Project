@@ -10,9 +10,11 @@ import { castMock, flushQueue } from './utils';
 
 jest.mock('@/api/internal', () => ({
   getProducts: jest.fn(),
+  searchCatalogue: jest.fn()
 }));
 
 const getProducts = castMock(api.getProducts);
+const searchCatalogue = castMock(api.searchCatalogue);
 
 Vue.use(Vuetify);
 
@@ -76,6 +78,7 @@ describe('ProductCatalogue.vue', () => {
    */
   function setResults(products: api.SearchResults<Product>) {
     getProducts.mockResolvedValue(products);
+    searchCatalogue.mockResolvedValue(products);
   }
 
   /**
@@ -156,4 +159,22 @@ describe('ProductCatalogue.vue', () => {
     await flushQueue();
     expect(wrapper.text()).toContain('There are no results to show');
   });
+
+  it("If the search query is empty, getProducts will be called", async() => {
+    setResults(createTestProducts(5));
+    createWrapper();
+    expect(getProducts).toHaveBeenCalled();
+    expect(searchCatalogue).not.toHaveBeenCalled();
+  })
+
+  it.only("If the search query is not empty, searchCatalogue will be called", async() => {
+    setResults(createTestProducts(5));
+    createWrapper();
+    await wrapper.setData({
+      searchQuery: "something"
+    });
+    await Vue.nextTick();
+    expect(getProducts).not.toHaveBeenCalled();
+    expect(searchCatalogue).toHaveBeenCalled();
+  })
 });
