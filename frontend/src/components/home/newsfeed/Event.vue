@@ -64,7 +64,7 @@
             <v-card
               v-show="expand"
               height="70"
-              width="1000"
+              width="1200"
               class="mx-auto"
             >
               <div class="font-weight-medium">
@@ -89,13 +89,12 @@
                   <v-icon left>
                     mdi-label
                   </v-icon>
-                  Tag
                 </v-chip>
               </div>
             </v-card>
           </v-expand-transition>
         </v-col>
-        <v-col class="float=right">
+        <v-col cols="1">
           <!-- Tooltip for the reply button telling user what they can do with this button -->
           <v-tooltip bottom >
             <template v-slot:activator="{on, attrs }">
