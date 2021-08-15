@@ -3,7 +3,7 @@ import Vue from 'vue';
 import Vuetify from 'vuetify';
 import { createLocalVue, mount, Wrapper } from '@vue/test-utils';
 import InventoryItem from '@/components/cards/InventoryItem.vue';
-// import ProductImageCarousel from "@/components/utils/ProductImageCarousel.vue";
+// import ProductImageCarousel from "@/components/utils/ImageCarousel.vue";
 import FullProductDescription from "@/components/utils/FullProductDescription.vue";
 
 import Vuex, { Store } from 'vuex';

@@ -5,63 +5,65 @@
         <v-btn @click="returnToSearch" color="primary">Return to search</v-btn>
       </v-col>
     </v-row>
-    <v-card class="body" v-if='!modifyBusiness'>
-      <div class="top-section">
-        <div>
-          <h1>
-            {{ business.name }}
-          </h1>
-          <p><b>Created:</b> {{ createdMsg }}</p>
-          <v-btn outlined color="primary" @click="goSalePage" :value="false">
-            Sale listings
-          </v-btn>
+    <div v-if='!modifyBusiness' style="margin-top: 100px">
+      <v-card>
+        <ImageCarousel v-if="businessImages" :imagesList="businessImages" :showControls="permissionToActAsBusiness"/>
+      </v-card>
+      <v-card class="body">
+        <div class="top-section">
+          <div>
+            <h1>{{ business.name }}</h1>
+            <p><b>Created:</b> {{ createdMsg }}</p>
+            <v-btn outlined color="primary" @click="goSalePage" :value="false">
+              Sale listings
+            </v-btn>
+          </div>
         </div>
-      </div>
+        <v-container fluid>
+          <v-row>
+            <v-col cols="12" sm="6">
+              <h4>Address</h4>
+              {{ readableAddress }}
+            </v-col>
+            <v-col cols="12" sm="6">
+              <h4>Category</h4>
+              {{ business.businessType }}
+            </v-col>
 
-      <v-container fluid>
-        <v-row>
-          <v-col cols="12" sm="6">
-            <h4>Address</h4>
-            {{ readableAddress }}
-          </v-col>
-          <v-col cols="12" sm="6">
-            <h4>Category</h4>
-            {{ business.businessType }}
-          </v-col>
-
-          <v-col cols="12">
-            <h4>Description</h4>
-            {{ business.description }}
-          </v-col>
-          <v-col cols="12">
-            <h4>Administrators</h4>
-            <span v-for="admin in administrators" :key="admin.id">
-              <router-link :to="'/profile/' + admin.id">
-                <v-chip class="link-chip link" :color="getAdminColour(admin)" text-color="white"> {{ admin.firstName }} {{ admin.lastName }} </v-chip>
-              </router-link>
-            </span>
-          </v-col>
-        </v-row>
-        <div v-if='!modifyBusiness'>
-          <v-row justify="end">
-            <v-col cols="2">
-              <v-btn
-                class="white--text"
-                color="secondary"
-                @click="modifyBusiness = true;"
-              >
-                <v-icon
-                  class="expand-icon"
-                  color="white"
-                >
-                  mdi-file-document-edit-outline
-                </v-icon>Modify Business
-              </v-btn>
+            <v-col cols="12">
+              <h4>Description</h4>
+              {{ business.description }}
+            </v-col>
+            <v-col cols="12">
+              <h4>Administrators</h4>
+              <span v-for="admin in administrators" :key="admin.id">
+                <router-link :to="'/profile/' + admin.id">
+                  <v-chip class="link-chip link" :color="getAdminColour(admin)" text-color="white"> {{ admin.firstName }} {{ admin.lastName }} </v-chip>
+                </router-link>
+              </span>
             </v-col>
           </v-row>
-        </div>
-      </v-container>
-    </v-card>
+          <div v-if='!modifyBusiness'>
+            <v-row justify="end">
+              <v-col cols="2">
+                <v-btn
+                  class="white--text"
+                  color="secondary"
+                  @click="modifyBusiness = true;"
+                >
+                  <v-icon
+                    class="expand-icon"
+                    color="white"
+                  >
+                    mdi-file-document-edit-outline
+                  </v-icon>Modify Business
+                </v-btn>
+              </v-col>
+            </v-row>
+          </div>
+        </v-container>
+      </v-card>
+    </div>
     <ModifyBusiness
       :business="business"
       v-if="modifyBusiness"
@@ -73,7 +75,7 @@
 
 <script>
 import ModifyBusiness from '@/components/BusinessProfile/ModifyBusiness';
-import { getBusiness } from '../../api/internal';
+import { getBusiness } from '@/api/internal';
 import convertAddressToReadableText from '@/components/utils/Methods/convertJsonAddressToReadableText';
 import {
   alphabetExtendedMultilineRules,
@@ -81,9 +83,11 @@ import {
   mandatoryRules,
   maxCharRules, postCodeRules, streetNumRules
 } from "@/utils";
+import ImageCarousel from "@/components/utils/ImageCarousel";
 export default {
   name: 'BusinessProfile',
   components: {
+    ImageCarousel,
     ModifyBusiness
   },
   data() {
@@ -108,6 +112,7 @@ export default {
         'Non-profit organisation',
         'Retail Trade',
       ],
+      showImageUploaderForm: false,
       valid: false,
       updateProductCountry: true,
       maxCharRules: () => maxCharRules(100),
@@ -146,6 +151,18 @@ export default {
     administrators() {
       return this.business?.administrators || [];
     },
+    isActingAsCurrentBusiness() {
+      const isBusiness =  this.$store.state.activeRole?.type === 'business';
+      if (!isBusiness) return false;
+      const user = this.$store.state.user;
+      return user.businessesAdministered.map(business => business.id).includes(this.business.id);
+    },
+    permissionToActAsBusiness() {
+      const user = this.$store.state.user;
+      return this.isActingAsCurrentBusiness ||
+          user.role === 'defaultGlobalApplicationAdmin' ||
+          user.role === 'globalApplicationAdmin';
+    },
 
     fromSearch() {
       return this.$route.query.businessType !== undefined
@@ -153,6 +170,9 @@ export default {
           || this.$route.query.page !== undefined
           || this.$route.query.reverse !== undefined
           || this.$route.query.searchQuery !== undefined;
+    },
+    businessImages() {
+      return this.business.images;
     }
   },
 
@@ -207,7 +227,7 @@ export default {
 .body {
     padding: 16px;
     width: 100%;
-    margin-top: 140px;
+    /*margin-top: 140px;*/
 }
 
 .top-section {
