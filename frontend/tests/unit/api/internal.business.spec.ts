@@ -1,4 +1,4 @@
-import { Business, searchBusinesses } from '@/api/internal';
+import {Business, searchBusinesses, makeBusinessImagePrimary} from '@/api/internal';
 import axios, { AxiosInstance } from 'axios';
 
 jest.mock('axios', () => ({
@@ -9,6 +9,7 @@ jest.mock('axios', () => ({
   ),
   instance: {
     get: jest.fn(),
+    put: jest.fn(),
   },
 }));
 
@@ -16,7 +17,7 @@ jest.mock('axios', () => ({
 type Mocked<T extends { [k: string]: (...args: any[]) => any }> = { [k in keyof T]: jest.Mock<ReturnType<T[k]>, Parameters<T[k]>> }
 
 // @ts-ignore - We've added an instance attribute in the mock declaration that mimics a AxiosInstance
-const instance: Mocked<Pick<AxiosInstance, 'get' >> = axios.instance;
+const instance: Mocked<Pick<AxiosInstance, 'get' | 'put' >> = axios.instance;
 
 describe('Test GET businesses/search endpoind', () => {
 
@@ -119,4 +120,70 @@ describe('Test GET businesses/search endpoind', () => {
     expect(response).toEqual("Failed to reach backend");
   });
 
+});
+
+describe("PUT /businesses/{businessId}/images/{imageId}/makeprimary", ()=> {
+
+  it('When the API request is successfully resolved, nothing is returned', async () => {
+    instance.put.mockResolvedValueOnce({
+      response: {
+        status: 201
+      }
+    });
+    const response = await makeBusinessImagePrimary(1, 1);
+    expect(response).toEqual(undefined);
+  });
+
+  it('When the session is invalid, message telling user to log back in', async () => {
+    instance.put.mockRejectedValueOnce({
+      response: {
+        status: 401
+      }
+    });
+    const response = await makeBusinessImagePrimary(1, 1);
+    expect(response).toEqual("You have been logged out. Please login again and retry");
+  });
+
+  it('When the user has invalid permission, permission error', async () => {
+    instance.put.mockRejectedValueOnce({
+      response: {
+        status: 403
+      }
+    });
+    const response = await makeBusinessImagePrimary(1, 1);
+    expect(response).toEqual("Operation not permitted");
+  });
+
+  it('When business does not exists, business or image not found error', async () => {
+    instance.put.mockRejectedValueOnce({
+      response: {
+        status: 406
+      }
+    });
+    const response = await makeBusinessImagePrimary(1, 1);
+    expect(response).toEqual("Business or Image not found");
+  });
+
+  it('When response is undefined, failed to reach backend', async () => {
+    instance.put.mockRejectedValueOnce({
+      response: {
+        status: undefined
+      }
+    });
+    const response = await makeBusinessImagePrimary(1, 1);
+    expect(response).toEqual("Failed to reach backend");
+  });
+
+  it('Any other response, message should be displayed', async () => {
+    instance.put.mockRejectedValueOnce({
+      response: {
+        status: 123,
+        data: {
+          message: "message from server"
+        }
+      }
+    });
+    const response = await makeBusinessImagePrimary(1, 1);
+    expect(response).toEqual("Request failed: message from server");
+  });
 });
