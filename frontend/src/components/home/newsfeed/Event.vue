@@ -283,37 +283,6 @@ export default {
       }
     },
     /**
-     * This should be a method that allows user to change their current tag colour into the desired colour
-     * Currently only alert `changing tag`, functionality will be implemented in another task
-     */
-    /**
-     * Temporarily remove a notification from the feed, and set a timeout to delete it permanently
-     * if no action is taken within 10 seconds.
-     */
-    async initiateDeletion() {
-      this.$store.commit('stageEventForDeletion', this.event.id);
-      this.deleted = true;
-      this.deletionTime = synchronizedTime.now;
-      setTimeout(() => this.finalizeDeletion(), 10000);
-    },
-    /**
-     * Permanently delete an event if the deletion has not been undone. Restore the event to the feed
-     * and display an error message if the deletion was not successful.
-     */
-    async finalizeDeletion() {
-      if (this.deleted === true) {
-        this.$store.dispatch('deleteStagedEvent', this.event.id)
-          .then(content => {
-            if (typeof content === 'string') {
-              this.errorMessage = content;
-              this.deleted = false;
-            } else {
-              this.$store.commit('removeEvent', this.event.id);
-            }
-          });
-      }
-    },
-    /**
      * Undo the deteletion of a temporarily deleted event and restore it to the user's feed.
      */
     async undoDelete() {

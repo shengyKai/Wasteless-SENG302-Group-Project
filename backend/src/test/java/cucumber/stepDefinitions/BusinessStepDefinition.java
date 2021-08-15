@@ -11,24 +11,34 @@ import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
 import org.hibernate.Session;
 import org.junit.Assert;
+import org.seng302.datagenerator.ExampleDataFileReader;
 import org.seng302.leftovers.entities.*;
 import org.seng302.leftovers.persistence.BusinessRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MvcResult;
 import org.hibernate.SessionFactory;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import javax.transaction.Transactional;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.ParseException;
 import java.util.*;
 import java.util.stream.Collectors;
 
 public class BusinessStepDefinition {
+    @Value("${storage-directory}")
+    private Path root;
+
     @Autowired
     private BusinessContext businessContext;
     @Autowired
@@ -241,5 +251,43 @@ public class BusinessStepDefinition {
                 assertEquals(product.getCountryOfSale(), addressParams.get("country"));
             }
         }
+    }
+
+    @When("I try to upload the image {string} to the business")
+    public void i_try_to_upload_the_image_to_the_business(String filename) throws IOException {
+        String contentType;
+        if (filename.endsWith(".png")) {
+            contentType = "image/png";
+        } else if (filename.endsWith(".jpg")) {
+            contentType = "image/jpeg";
+        } else if (filename.endsWith(".txt")) {
+            contentType = "text/plain";
+        } else {
+            fail("Could not parse content type for: \"" + filename + "\"");
+            return;
+        }
+
+        InputStream stream = ExampleDataFileReader.class.getResourceAsStream("/" + filename);
+        requestContext.performRequest(multipart("/businesses/" + businessContext.getLast().getId() + "/images")
+                .file(new MockMultipartFile("file", filename, contentType, stream)));
+    }
+
+    @Transactional
+    @Then("The business has no images")
+    public void the_business_has_no_images() {
+        Business business = businessRepository.getBusinessById(businessContext.getLast().getId());
+        assertEquals(0, business.getImages().size());
+    }
+
+    @Transactional
+    @Then("The business has one image")
+    public void the_business_has_one_image() {
+        Business business = businessRepository.getBusinessById(businessContext.getLast().getId());
+        assertEquals(1, business.getImages().size());
+        Image image = business.getImages().get(0);
+        assertNotNull(image.getFilename());
+
+        Path imagePath = root.resolve(image.getFilename());
+        assertTrue(imagePath.toFile().exists());
     }
 }

@@ -9,17 +9,16 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.junit.runner.RunWith;
 import org.mockito.*;
-import org.seng302.leftovers.entities.Business;
-import org.seng302.leftovers.entities.Location;
-import org.seng302.leftovers.entities.Product;
-import org.seng302.leftovers.entities.User;
+import org.seng302.leftovers.entities.*;
 import org.seng302.leftovers.exceptions.AccessTokenException;
 import org.seng302.leftovers.persistence.BusinessRepository;
 import org.seng302.leftovers.persistence.UserRepository;
+import org.seng302.leftovers.service.ImageService;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -34,12 +33,13 @@ import static org.mockito.AdditionalMatchers.or;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
-class BusinessControllerModifyTest {
+class BusinessControllerMockedTest {
 
     private MockMvc mockMvc;
 
@@ -52,6 +52,8 @@ class BusinessControllerModifyTest {
     @Mock
     private UserRepository userRepository;
     @Mock
+    private ImageService imageService;
+    @Mock
     private Business mockBusiness;
     @Mock
     private User mockOwner;
@@ -63,6 +65,8 @@ class BusinessControllerModifyTest {
     private Product mockProduct2;
     @Mock
     private Product mockProduct3;
+    @Mock
+    private Image mockImage;
 
     private MockedStatic<AuthenticationTokenManager> authenticationTokenManager;
 
@@ -87,8 +91,11 @@ class BusinessControllerModifyTest {
 
         when(businessRepository.findById(mockBusinessId)).thenReturn(Optional.of(mockBusiness));
         when(businessRepository.findById(not(eq(mockBusinessId)))).thenReturn(Optional.empty());
+        when(businessRepository.getBusinessById(any())).thenAnswer(CALLS_REAL_METHODS);
 
-        BusinessController businessController = new BusinessController(businessRepository, userRepository);
+        when(imageService.create(any())).thenReturn(mockImage);
+
+        BusinessController businessController = new BusinessController(businessRepository, userRepository, imageService);
         mockMvc = MockMvcBuilders.standaloneSetup(businessController).build();
     }
 
@@ -360,5 +367,78 @@ class BusinessControllerModifyTest {
         verify(mockProduct1, times(1)).setCountryOfSale(country);
         verify(mockProduct2, times(1)).setCountryOfSale(country);
         verify(mockProduct3, times(1)).setCountryOfSale(country);
+    }
+
+    /**
+     * Creates a mock multipart file
+     * @return Mock file
+     */
+    private MockMultipartFile createMockUpload() {
+        return new MockMultipartFile("file", "filename.txt", "image/jpeg", new byte[100]);
+    }
+
+    @Test
+    void uploadImage_notLoggedIn_401Response() throws Exception {
+        // Mock the AuthenticationTokenManager to respond as it would when the authentication token is missing or invalid
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.checkAuthenticationToken(any()))
+                .thenThrow(new AccessTokenException());
+
+        mockMvc.perform(multipart("/businesses/" + mockBusinessId + "/images")
+                .file(createMockUpload()))
+                .andExpect(status().isUnauthorized())
+                .andReturn();
+
+        // Check that the authentication token manager was called
+        authenticationTokenManager.verify(() -> AuthenticationTokenManager.checkAuthenticationToken(any()));
+        verify(businessRepository, times(0)).save(any());
+    }
+
+    @Test
+    void uploadImage_businessDoesNotExist_406Response() throws Exception {
+        mockMvc.perform(multipart("/businesses/9999/images")
+                .file(createMockUpload()))
+                .andExpect(status().isNotAcceptable())
+                .andReturn();
+
+        verify(businessRepository, times(1)).findById(9999L);
+        verify(businessRepository, times(0)).save(any());
+    }
+
+    @Test
+    void uploadImage_notAuthorisedForBusiness_403Response() throws Exception {
+        doThrow(new ResponseStatusException(HttpStatus.FORBIDDEN)).when(mockBusiness).checkSessionPermissions(any());
+
+        mockMvc.perform(multipart("/businesses/" + mockBusinessId + "/images")
+                .file(createMockUpload()))
+                .andExpect(status().isForbidden())
+                .andReturn();
+
+        verify(mockBusiness, times(1)).checkSessionPermissions(any());
+        verify(businessRepository, times(0)).save(any());
+    }
+
+    @Test
+    void uploadImage_invalidImage_400Response() throws Exception {
+        when(imageService.create(any())).thenThrow(new ResponseStatusException(HttpStatus.BAD_REQUEST));
+
+        mockMvc.perform(multipart("/businesses/" + mockBusinessId + "/images")
+                .file(createMockUpload()))
+                .andExpect(status().isBadRequest())
+                .andReturn();
+
+        verify(imageService, times(1)).create(any());
+        verify(businessRepository, times(0)).save(any());
+    }
+
+    @Test
+    void uploadImage_validRequest_201ResponseAndCreated() throws Exception {
+        mockMvc.perform(multipart("/businesses/" + mockBusinessId + "/images")
+                .file(createMockUpload()))
+                .andExpect(status().isCreated())
+                .andReturn();
+
+        verify(imageService, times(1)).create(any());
+        verify(mockBusiness, times(1)).addImage(mockImage);
+        verify(businessRepository, times(1)).save(mockBusiness);
     }
 }

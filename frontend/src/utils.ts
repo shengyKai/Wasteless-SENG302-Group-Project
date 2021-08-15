@@ -194,7 +194,7 @@ export function regxCountryCode() {
  Returns a Regex that matches a valid street address
  */
 export function regxStreet() {
-  return /^(([0-9]+|[0-9]+\/[0-9]+)[\p{L}]?)(?=\s[\p{L}])([\p{L}0-9-.' ]+)$/u;
+  return /^(([0-9]+|[0-9]+\/[0-9]+)[\p{L}]?)\s([\p{L}0-9-.' ]+)\s([\p{L}\-.' ]+)$/u;
 }
 /**
  Returns a Regex that matches a valid product code
@@ -247,7 +247,7 @@ export const alphabetRules = [
 ];
 export const streetNumRules = [
   (field: string) => (field && field.length <= 109) || 'Reached max character limit 109 ',
-  (field: string) => regxStreet().test(field) || 'Must contain unit number and street name'
+  (field: string) => regxStreet().test(field) || 'Must contain unit number and two words for the street name'
 ];
 
 export const quantityRules = [

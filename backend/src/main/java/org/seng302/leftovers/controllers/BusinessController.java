@@ -1,6 +1,5 @@
 package org.seng302.leftovers.controllers;
 
-import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -9,9 +8,11 @@ import org.seng302.leftovers.dto.ModifyBusinessDTO;
 import org.seng302.leftovers.entities.*;
 import org.seng302.leftovers.persistence.BusinessRepository;
 import org.seng302.leftovers.persistence.UserRepository;
+import org.seng302.leftovers.service.ImageService;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
 import org.seng302.leftovers.tools.JsonTools;
 import org.seng302.leftovers.tools.SearchHelper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -19,6 +20,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.HttpServletRequest;
@@ -30,14 +32,16 @@ import java.util.*;
 public class BusinessController {
     private final BusinessRepository businessRepository;
     private final UserRepository userRepository;
+    private final ImageService imageService;
     private static final Logger logger = LogManager.getLogger(BusinessController.class.getName());
 
     private static final Set<String> VALID_BUSINESS_ORDERINGS = Set.of("created", "name", "location", "businessType");
 
-
-    public BusinessController(BusinessRepository businessRepository, UserRepository userRepository) {
+    @Autowired
+    public BusinessController(BusinessRepository businessRepository, UserRepository userRepository, ImageService imageService) {
         this.businessRepository = businessRepository;
         this.userRepository = userRepository;
+        this.imageService = imageService;
     }
 
     /**
@@ -307,5 +311,30 @@ public class BusinessController {
 
         Page<Business> results = businessRepository.findAll(specification, pageRequest);
         return JsonTools.constructPageJSON(results.map(Business::constructJson));
+    }
+
+    /**
+     * Adds a new image to the business' image list
+     * @param businessId Identifier of business to add image to
+     * @param file Uploaded image
+     * @return Empty response with 201 if successful
+     */
+    @PostMapping("/businesses/{businessId}/images")
+    public ResponseEntity<Void> uploadImage(@PathVariable Long businessId, @RequestParam("file") MultipartFile file, HttpServletRequest request) {
+        logger.info("Adding business image (businessId={})", businessId);
+        AuthenticationTokenManager.checkAuthenticationToken(request);
+        try {
+            Business business = businessRepository.getBusinessById(businessId);
+            business.checkSessionPermissions(request);
+
+            Image image = imageService.create(file);
+            business.addImage(image);
+            businessRepository.save(business);
+
+            return new ResponseEntity<>(HttpStatus.CREATED);
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            throw e;
+        }
     }
 }

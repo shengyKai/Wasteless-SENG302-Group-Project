@@ -12,6 +12,7 @@ import org.seng302.leftovers.exceptions.BusinessNotFoundException;
 import org.seng302.leftovers.persistence.BusinessRepository;
 import org.seng302.leftovers.persistence.ImageRepository;
 import org.seng302.leftovers.persistence.ProductRepository;
+import org.seng302.leftovers.service.ImageService;
 import org.seng302.leftovers.service.StorageService;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
 import org.seng302.leftovers.tools.SearchHelper;
@@ -26,7 +27,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.swing.SortOrder;
 
 import java.util.*;
 
@@ -38,14 +38,14 @@ public class ProductController {
 
     private final ProductRepository productRepository;
     private final BusinessRepository businessRepository;
-    private final StorageService storageService;
+    private final ImageService imageService;
     private final ImageRepository imageRepository;
     private static final Logger logger = LogManager.getLogger(ProductController.class.getName());
     @Autowired
-    public ProductController(ProductRepository productRepository, BusinessRepository businessRepository, StorageService storageService, ImageRepository imageRepository) {
+    public ProductController(ProductRepository productRepository, BusinessRepository businessRepository, ImageService imageService, ImageRepository imageRepository) {
         this.productRepository = productRepository;
         this.businessRepository = businessRepository;
-        this.storageService = storageService;
+        this.imageService = imageService;
         this.imageRepository = imageRepository;
     }
 
@@ -204,13 +204,19 @@ public class ProductController {
         Product product = productRepository.getProduct(business, productId); // get the product + sanity checks
         Image image = imageRepository.getImageByProductAndId(product, imageId); // get the image + sanity checks
 
-        product.removeProductImage(image);
-        imageRepository.delete(image);
-        storageService.deleteOne(image.getFilename());
+        imageService.delete(image);
 
+        product.removeProductImage(image);
         productRepository.save(product);
     }
 
+    /**
+     * Adds a new image to the product's image list
+     * @param businessId Business of product
+     * @param productCode Unique within business product code
+     * @param file Uploaded image
+     * @return Empty response with 201 if successful
+     */
     @PostMapping("/businesses/{businessId}/products/{productCode}/images")
     public ResponseEntity<Void> uploadImage(@PathVariable Long businessId, @PathVariable String productCode, @RequestParam("file") MultipartFile file, HttpServletRequest request) {
         try {
@@ -224,23 +230,10 @@ public class ProductController {
             // Will throw 406 response status exception if product does not exist
             Product product = productRepository.getProduct(business, productCode);
 
-            validateImage(file);
+            Image image = imageService.create(file);
 
-            String filename = UUID.randomUUID().toString();
-            if ("image/jpeg".equals(file.getContentType())) {
-                filename += ".jpg";
-            } else if ("image/png".equals(file.getContentType())) {
-                filename += ".png";
-            } else {
-                assert false; // We've already validated the image type so this should not be possible.
-            }
-
-            Image image = new Image(null, null);
-            image.setFilename(filename);
-            image = imageRepository.save(image);
             product.addProductImage(image);
             productRepository.save(product);
-            storageService.store(file, filename);             //store the file using storageService
 
             return new ResponseEntity<>(HttpStatus.CREATED);
         } catch (Exception e) {
@@ -280,12 +273,5 @@ public class ProductController {
         product.setProductImages(images); // apply the changes
         productRepository.save(product);
         logger.info(() -> String.format("Set Image %d of product \"%s\" as the primary image", image.getID(), product.getName()));
-    }
-
-    public void validateImage(MultipartFile file) {
-        String contentType = file.getContentType();
-        if(contentType == null || !(contentType.equals("image/jpeg") || contentType.equals("image/png"))) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid image format. Must be jpeg or png");
-        }
     }
 }

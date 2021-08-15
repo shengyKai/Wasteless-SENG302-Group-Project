@@ -172,3 +172,33 @@ Feature: U11 - Modifying Businesses
       | businessType         | Retail Trade      |
       | updateProductCountry | true              |
     Then The all of the business product's country of sale is updated
+
+  Scenario: AC1 - A non logged in user cannot upload images
+    When I try to upload the image "point.png" to the business
+    Then The request fails due to not authorised
+    And The business has no images
+
+  Scenario: AC1 - A user that is not a business admin cannot upload images
+    Given A user exists with name "Tim"
+    And I am logged into "Tim" account
+    When I try to upload the image "point.png" to the business
+    Then The request fails due to forbidden
+    And The business has no images
+
+  Scenario: AC4 - I can upload a .png image to the business
+    Given I am logged into "Dave" account
+    When I try to upload the image "point.png" to the business
+    Then The request succeeds and a entity is created
+    And The business has one image
+
+  Scenario: AC4 - I can upload a .jpg image to the business
+    Given I am logged into "Dave" account
+    When I try to upload the image "point.jpg" to the business
+    Then The request succeeds and a entity is created
+    And The business has one image
+
+  Scenario: AC4 - I cannot upload a non-image as an image
+    Given I am logged into "Dave" account
+    When I try to upload the image "point.txt" to the business
+    Then The request fails due to bad request
+    And The business has no images
