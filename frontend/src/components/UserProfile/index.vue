@@ -17,6 +17,9 @@
 
       <!-- List of available actions -->
       <div class="action-menu">
+        <v-btn v-if="isViewingOwnProfile===true" icon @click="$router.push('/profile/modify')">
+          <v-icon>mdi-cog</v-icon>
+        </v-btn>
         <v-dialog
           v-if="isActingAsBusiness && isViewingOwnProfile===false"
           v-model="removeAdminDialog"
@@ -24,7 +27,7 @@
           max-width="300"
         >
           <template #activator="{ on: dialog, attrs}">
-            <v-tooltip bottom >
+            <v-tooltip bottom>
               <template #activator="{ on: tooltip}">
                 <v-btn
                   icon
@@ -224,12 +227,12 @@
 </template>
 
 <script>
-import { getUser, makeBusinessAdmin, removeBusinessAdmin, makeAdmin, revokeAdmin } from '../api/internal';
-import UserAvatar from './utils/UserAvatar';
-import convertAddressToReadableText from './utils/Methods/convertJsonAddressToReadableText';
+import { getUser, makeBusinessAdmin, removeBusinessAdmin, makeAdmin, revokeAdmin } from '../../api/internal';
+import UserAvatar from '@/components/utils/UserAvatar';
+import convertAddressToReadableText from '@/components/utils/Methods/convertJsonAddressToReadableText';
 
 export default {
-  name: 'ProfilePage',
+  name: 'UserProfile',
   data() {
     return {
       /**

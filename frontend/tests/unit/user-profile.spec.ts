@@ -4,7 +4,7 @@ import Vuex, { Store } from 'vuex';
 import {createLocalVue, Wrapper, mount, createWrapper} from '@vue/test-utils';
 
 import { getStore, resetStoreForTesting, StoreData } from '@/store';
-import UserProfile from '@/components/UserProfile.vue';
+import UserProfile from '@/components/UserProfile/UserProfile.vue';
 
 import * as api from '@/api/internal';
 import { castMock, flushQueue } from './utils';
