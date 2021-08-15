@@ -137,6 +137,22 @@ class ImageServiceTest {
     }
 
     @Test
+    void create_invalidImage_400Exception() throws IOException {
+        MultipartFile file = mock(MultipartFile.class);
+        when(file.getInputStream()).thenReturn(mockInputStream);
+        when(file.getContentType()).thenReturn("image/png");
+
+        imageIO.when(() -> ImageIO.read(mockInputStream)).thenReturn(null);
+
+        var exception = assertThrows(ResponseStatusException.class, () -> imageService.create(file));
+        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
+        assertEquals("Invalid image provided", exception.getReason());
+
+        verify(imageRepository, times(0)).save(any());
+        verify(storageService, times(0)).store(any(), any());
+    }
+
+    @Test
     void delete_imageProvided_imageAndThumbnailDeleted() {
         imageService.delete(mockImage);
         verify(imageRepository, times(1)).delete(mockImage);
