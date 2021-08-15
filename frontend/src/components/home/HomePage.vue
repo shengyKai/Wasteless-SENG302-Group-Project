@@ -6,6 +6,8 @@
       <!-- Newsfeed -->
       <div v-if="$store.getters.events.length === 0 || isBusiness" class="text-center">
         No items in your feed
+        <!-- Example message card - move to appropriate place once message has an event type -->
+        <v-card><MessageEvent :event="{id: 1, created: ''}"/></v-card>
       </div>
       <v-card
         v-else
@@ -39,6 +41,7 @@ import GlobalMessage from "./newsfeed/GlobalMessage.vue";
 import ExpiryEvent from './newsfeed/ExpiryEvent.vue';
 import DeleteEvent from './newsfeed/DeleteEvent.vue';
 import KeywordCreated from './newsfeed/KeywordCreated.vue';
+import MessageEvent from './newsfeed/MessageEvent.vue';
 
 export default {
   components: {
@@ -47,7 +50,8 @@ export default {
     GlobalMessage,
     ExpiryEvent,
     DeleteEvent,
-    KeywordCreated
+    KeywordCreated,
+    MessageEvent
   },
   computed: {
     /**

@@ -1,9 +1,10 @@
 <template>
   <Event :event="event" :title="title">
-    <v-card-text class="d-flex flex-column align-start">
-      <p class="card-details">New message from: {{userName}}</p>
-      <p class="card-details">Regarding: "{{cardTitle}}" in the {{section}} section of the Marketplace</p>
-      <p class="card-details" v-bind:style="{'-webkit-line-clamp': lines}">{{message}}</p>
+    <v-card-text class="d-flex flex-column align-start" style="text-align: left">
+      <strong>
+        Regarding: "{{cardTitle}}" in the {{section}} section of the Marketplace
+      </strong> <br>
+      <div class="card-details" v-bind:style="{'-webkit-line-clamp': lines}">{{message}}</div>
     </v-card-text>
     <v-card-actions class="foot-tools">
       <v-icon v-if="expanded" @click="expand" title="Collapse text">mdi-arrow-up-drop-circle</v-icon>
@@ -29,7 +30,6 @@ export default {
   },
   data() {
     return {
-      title: "New message",
       expanded: false,
       lines: 3
     };
@@ -49,6 +49,9 @@ export default {
   },
   computed: {
     // Fluff placeholder
+    title() {
+      return "New message from: " + this.userName;
+    },
     userName() {
       // First name + Last name + ?(Nickname)
       return "Test Name";
@@ -83,5 +86,6 @@ export default {
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
+  text-align: left;
 }
 </style>
