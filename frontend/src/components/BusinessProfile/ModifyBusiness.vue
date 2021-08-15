@@ -280,6 +280,12 @@ export default {
       };
 
       const result = await modifyBusiness(this.business.id, modifiedFields);
+      /**
+       * If the result is a string, means it is an error message, of which it will show up on the page.
+       * As such, the modify page will still remain.
+       * If the result is undefined(the else case) then an event will be emitted to the parent component, BusinessProfile/index.vue
+       * and the modifyBusiness attribute there will be false, thus changing the page to the usual business profile page.
+       */
       if (typeof result === 'string') {
         this.errorMessage = result;
       } else {

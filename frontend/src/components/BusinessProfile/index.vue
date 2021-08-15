@@ -180,6 +180,11 @@ export default {
         this.updateProductCountry = true;
       }
     },
+    /**
+     * Updates the business profile page to show the updated details of the business.
+     * This method is separated from the $route watcher as it is reused for the ModifyBusiness page on a successful
+     * api call, which will update the business profile page to the latest information.
+     */
     updateBusiness() {
       this.modifyBusiness = false;
       const id = parseInt(this.$route.params.id);
