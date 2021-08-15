@@ -34,7 +34,7 @@ public class BusinessController {
     private final BusinessRepository businessRepository;
     private final UserRepository userRepository;
     private final ImageService imageService;
-    private final ImageRepository imageRepository
+    private final ImageRepository imageRepository;
     private static final Logger logger = LogManager.getLogger(BusinessController.class.getName());
 
     private static final Set<String> VALID_BUSINESS_ORDERINGS = Set.of("created", "name", "location", "businessType");
@@ -341,7 +341,13 @@ public class BusinessController {
         }
     }
 
-    @PutMapping("/businesses/{businessId/images/{imageId}/makeprimary")
+    /**
+     * Sets the new primary image to be displayed for a business
+     * @param businessId The ID of the business to modify
+     * @param imageId The ID of the image to set as primary image
+     * @return Empty response with 200 if successful
+     */
+    @PutMapping("/businesses/{businessId}/images/{imageId}/makeprimary")
     public ResponseEntity<Void> makeImagePrimary(@PathVariable Long businessId, @PathVariable Long imageId, HttpServletRequest request) {
         logger.info("Making business image primary (businessId={}, imageId={})", businessId, imageId);
         AuthenticationTokenManager.checkAuthenticationToken(request);
@@ -351,6 +357,9 @@ public class BusinessController {
 
             Image image = imageRepository.getImageById(imageId);
             var images = business.getImages();
+            if (!images.contains(image)) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You cannot modify this image");
+            }
             if (images.get(0).equals(image)) {
                 return new ResponseEntity<>(HttpStatus.OK);
             }
