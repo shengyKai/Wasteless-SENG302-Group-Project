@@ -7,7 +7,7 @@ import Vue from 'vue';
 import Vuetify from 'vuetify';
 import { createLocalVue, mount, Wrapper } from '@vue/test-utils';
 import ProductCatalogueItem from '@/components/cards/ProductCatalogueItem.vue';
-// import ProductImageCarousel from "@/components/utils/ProductImageCarousel.vue";
+// import ProductImageCarousel from "@/components/utils/ImageCarousel.vue";
 import FullProductDescription from "@/components/utils/FullProductDescription.vue";
 
 import * as api from "@/api/internal";

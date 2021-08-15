@@ -3,13 +3,13 @@ import Vuex from 'vuex';
 import Vuetify from 'vuetify';
 import { createLocalVue, Wrapper, mount } from '@vue/test-utils';
 
-import ProductImageCarousel from '@/components/utils/ProductImageCarousel.vue';
+import ProductImageCarousel from '@/components/utils/ImageCarousel.vue';
 
 Vue.use(Vuetify);
 
 const localVue = createLocalVue();
 
-describe('ProductImageCarousel.vue', () => {
+describe('ImageCarousel.vue', () => {
   // Container for the wrapper around ProductImageCarousel
   let appWrapper: Wrapper<any>;
 
@@ -29,7 +29,11 @@ describe('ProductImageCarousel.vue', () => {
     // Creating wrapper around ProductImageCarousel with data-app to appease vuetify
     const App = localVue.component('App', {
       components: { ProductImageCarousel },
-      template: `<div data-app><ProductImageCarousel :productImages="[{id: 7, filename:'test_filename'}, {id: 11, filename: 'test_filename2'}]" :showControls="showControls"/></div>`,
+      template: `
+        <div data-app>
+        <ProductImageCarousel imagesList="[{id: 7, filename:'test_filename'}, {id: 11, filename: 'test_filename2'}]"
+                              :showControls="showControls"/>
+        </div>`,
     });
 
     // Put the ProductImageCarousel component inside a div in the global document,

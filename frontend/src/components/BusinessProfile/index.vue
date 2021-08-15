@@ -7,7 +7,7 @@
     </v-row>
     <div v-if='!modifyBusiness' style="margin-top: 100px">
       <v-card>
-        <ProductImageCarousel v-if="businessImages" :productImages="businessImages" :showControls="false"/>
+        <ImageCarousel v-if="businessImages" :imagesList="businessImages" :showControls="false"/>
       </v-card>
       <v-card class="body">
         <div class="top-section">
@@ -82,11 +82,11 @@ import {
   mandatoryRules,
   maxCharRules, postCodeRules, streetNumRules
 } from "@/utils";
-import ProductImageCarousel from "@/components/utils/ProductImageCarousel";
+import ImageCarousel from "@/components/utils/ImageCarousel";
 export default {
   name: 'BusinessProfile',
   components: {
-    ProductImageCarousel,
+    ImageCarousel,
     ModifyBusiness
   },
   data() {

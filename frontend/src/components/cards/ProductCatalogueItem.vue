@@ -9,8 +9,8 @@
         </v-col>
         <v-col cols="12" md="3" v-else>
           <!-- feed the productImages into the carousel child component -->
-          <ProductImageCarousel
-            :productImages="product.images"
+          <ImageCarousel
+            :imagesList="product.images"
             :showControls="true"
             v-on:change-primary-image="setPrimaryImage"
             @delete-image="deleteImage"
@@ -153,7 +153,7 @@
 <script>
 //This component requires two other custom components, one to display the product image, one to view more of the product's description
 import FullProductDescription from "../utils/FullProductDescription.vue";
-import ProductImageCarousel from "../utils/ProductImageCarousel.vue";
+import ImageCarousel from "../utils/ImageCarousel.vue";
 import { currencyFromCountry } from "@/api/currency";
 import ProductImageUploader from "../utils/ProductImageUploader";
 import ProductForm from "../BusinessProfile/ProductForm.vue";
@@ -169,7 +169,7 @@ export default {
   },
   components: {
     FullProductDescription,
-    ProductImageCarousel,
+    ImageCarousel,
     ProductImageUploader,
     ProductForm,
   },
