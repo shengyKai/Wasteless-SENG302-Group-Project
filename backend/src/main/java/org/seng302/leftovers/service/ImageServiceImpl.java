@@ -58,8 +58,11 @@ public class ImageServiceImpl implements ImageService {
         BufferedImage original;
         try (InputStream stream = file.getInputStream()) {
             original = ImageIO.read(stream);
-        } catch (IOException exception) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Failed to interpret input as image", exception);
+        } catch (IOException e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed get input stream", e);
+        }
+        if (original == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid image provided");
         }
 
         BufferedImage scaled = ImageTools.generateThumbnail(original);
@@ -69,7 +72,7 @@ public class ImageServiceImpl implements ImageService {
         try (InputStream stream = file.getInputStream()) {
             storageService.store(stream, filename);
         } catch (IOException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Failed to save image", e);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to save image", e);
         }
 
         if (scaled == original) { // Scaled is identity to original, therefore original is already thumbnail sized

@@ -1,5 +1,6 @@
 package org.seng302.leftovers.service;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -7,11 +8,10 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.*;
 import org.seng302.leftovers.entities.Image;
 import org.seng302.leftovers.persistence.ImageRepository;
+import org.seng302.leftovers.tools.ImageTools;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockMultipartFile;
@@ -19,7 +19,10 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.io.InputStream;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -34,14 +37,33 @@ class ImageServiceTest {
     private StorageService storageService;
     @Mock
     private Image mockImage;
+    @Mock
+    private BufferedImage mockSourceImage;
+    @Mock
+    private BufferedImage mockScaledImage;
+    @Mock
+    private InputStream mockInputStream;
+    @Mock
+    private InputStream mockScaledInputStream;
 
     private ImageService imageService;
+
+    private MockedStatic<ImageIO> imageIO;
+    private MockedStatic<ImageTools> imageTools;
 
     @BeforeEach
     void setup() {
         MockitoAnnotations.openMocks(this);
 
         when(mockImage.getFilename()).thenReturn("test_filename.png");
+        when(mockImage.getFilenameThumbnail()).thenReturn("test_filename.thumb.png");
+
+        imageIO = Mockito.mockStatic(ImageIO.class);
+        imageIO.when(() -> ImageIO.read(mockInputStream)).thenReturn(mockSourceImage);
+
+        imageTools = Mockito.mockStatic(ImageTools.class);
+        imageTools.when(() -> ImageTools.generateThumbnail(mockSourceImage)).thenReturn(mockScaledImage);
+        imageTools.when(() -> ImageTools.writeImage(eq(mockScaledImage), any())).thenReturn(mockScaledInputStream);
 
         // Return input value
         when(imageRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
@@ -49,29 +71,51 @@ class ImageServiceTest {
         imageService = new ImageServiceImpl(imageRepository, storageService);
     }
 
-    /**
-     * Creates a mock multipart file
-     * @param contentType Content type for the generated file
-     * @return Mock file with provided content type
-     */
-    private MultipartFile createMockUpload(String contentType) {
-        return new MockMultipartFile("file", "filename.txt", contentType, new byte[100]);
+    @AfterEach
+    void tearDown() {
+        imageIO.close();
+        imageTools.close();
     }
 
     @ParameterizedTest
     @CsvSource({
-            "image/png,.png",
-            "image/jpeg,.jpg"
+            "image/png,png",
+            "image/jpeg,jpg"
     })
-    void create_validImageType_imageSaved(String contentType, String expectedExtension) throws IOException {
-        MultipartFile file = createMockUpload(contentType);
+    void create_validImageType_imageSaved(String contentType, String expectedFormat) throws IOException {
+        MultipartFile file = mock(MultipartFile.class);
+        when(file.getInputStream()).thenReturn(mockInputStream);
+        when(file.getContentType()).thenReturn(contentType);
 
         Image image = assertDoesNotThrow(() -> imageService.create(file));
 
         verify(imageRepository, times(1)).save(image);
 
-        assertTrue(image.getFilename().endsWith(expectedExtension));
-        assertNull(image.getFilenameThumbnail());
+        assertTrue(image.getFilename().endsWith("." + expectedFormat));
+
+        String[] parts = image.getFilename().split("\\.");
+        assertEquals(String.join(".", parts[0], "thumb", parts[1]), image.getFilenameThumbnail());
+
+        imageTools.verify(() -> ImageTools.writeImage(mockScaledImage, expectedFormat));
+
+        verify(storageService, times(1)).store(file.getInputStream(), image.getFilename());
+        verify(storageService, times(1)).store(mockScaledInputStream, image.getFilenameThumbnail());
+    }
+
+    @Test
+    void create_alreadyThumbnailSized_noExtraThumbnailSaved() throws IOException {
+        MultipartFile file = mock(MultipartFile.class);
+        when(file.getInputStream()).thenReturn(mockInputStream);
+        when(file.getContentType()).thenReturn("image/png");
+
+        imageTools.when(() -> ImageTools.generateThumbnail(mockSourceImage)).thenReturn(mockSourceImage);
+
+        Image image = assertDoesNotThrow(() -> imageService.create(file));
+
+        verify(imageRepository, times(1)).save(image);
+        assertEquals(image.getFilename(), image.getFilenameThumbnail());
+
+        imageTools.verify(times(0), () -> ImageTools.writeImage(any(), any()));
 
         verify(storageService, times(1)).store(file.getInputStream(), image.getFilename());
     }
@@ -79,8 +123,10 @@ class ImageServiceTest {
     @ParameterizedTest
     @NullSource
     @ValueSource(strings = {"image/gif", "image/svg+xml", "image/strange"})
-    void create_invalidImageType_400Exception(String contentType) {
-        MultipartFile file = createMockUpload(contentType);
+    void create_invalidImageType_400Exception(String contentType) throws IOException {
+        MultipartFile file = mock(MultipartFile.class);
+        when(file.getInputStream()).thenReturn(mockInputStream);
+        when(file.getContentType()).thenReturn(contentType);
 
         var exception = assertThrows(ResponseStatusException.class, () -> imageService.create(file));
         assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
@@ -91,9 +137,27 @@ class ImageServiceTest {
     }
 
     @Test
-    void delete_imageProvided_imageDeleted() {
+    void delete_imageProvided_imageAndThumbnailDeleted() {
         imageService.delete(mockImage);
         verify(imageRepository, times(1)).delete(mockImage);
+        verify(storageService, times(1)).deleteOne(mockImage.getFilename());
+        verify(storageService, times(1)).deleteOne(mockImage.getFilenameThumbnail());
+    }
+
+    @Test
+    void delete_noThumbnail_thumbnailNotDeleted() {
+        when(mockImage.getFilenameThumbnail()).thenReturn(null);
+
+        imageService.delete(mockImage);
+        verify(storageService, times(0)).deleteOne(mockImage.getFilenameThumbnail());
+    }
+
+    @Test
+    void delete_thumbnailSameAsNormal_fileNotDeletedTwice() {
+        String filename = mockImage.getFilename();
+        when(mockImage.getFilenameThumbnail()).thenReturn(filename);
+
+        imageService.delete(mockImage);
         verify(storageService, times(1)).deleteOne(mockImage.getFilename());
     }
 }

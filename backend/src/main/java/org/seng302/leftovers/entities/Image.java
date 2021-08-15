@@ -36,7 +36,6 @@ public class Image {
      * Empty constructor to make spring happy
      */
     protected Image() {
-
     }
 
     public JSONObject constructJSONObject() {
