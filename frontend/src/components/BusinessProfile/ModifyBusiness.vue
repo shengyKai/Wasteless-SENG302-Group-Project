@@ -106,8 +106,27 @@
                   <v-col>
                     <v-row>
                       <span v-for="admin in administrators" :key="admin.id">
-                        <v-chip @click="showAlert" color="red" text-color="white"> {{ admin.firstName }} {{ admin.lastName }} </v-chip>
+                        <v-chip
+                          v-if="isPrimaryAdmin(admin)"
+                          class="admin-chip"
+                          color="red"
+                          text-color="white"
+                        >
+                          {{ admin.firstName }} {{ admin.lastName }}
+                        </v-chip>
+                        <v-chip
+                          v-else
+                          class="admin-chip"
+                          color="green"
+                          text-color="white"
+                          @click="showAlert(admin)"
+                        >
+                          {{ admin.firstName }} {{ admin.lastName }}
+                        </v-chip>
                       </span>
+                      <v-alert v-if="showChangeAdminAlert" color="red" type="error" dense text>
+                        {{ primaryAdminAlertMsg }}
+                      </v-alert>
                     </v-row>
                   </v-col>
                   <v-card-title>Images</v-card-title>
@@ -194,6 +213,9 @@ export default {
       ],
       updateProductCountry: true,
       valid: false,
+      showChangeAdminAlert: false,
+      primaryAdminAlertMsg: "",
+      primaryAdministratorId: this.business.primaryAdministratorId,
       maxCharRules: () => maxCharRules(100),
       maxCharDescriptionRules: ()=> maxCharRules(200),
       mandatoryRules: ()=> mandatoryRules,
@@ -201,17 +223,17 @@ export default {
       alphabetExtendedMultilineRules: ()=> alphabetExtendedMultilineRules,
       alphabetRules: ()=> alphabetRules,
       streetRules: ()=> streetNumRules,
-      postcodeRules: ()=> postCodeRules
+      postcodeRules: ()=> postCodeRules,
     };
   },
-
+  computed: {
+    administrators() {
+      return this.business?.administrators || [];
+    }
+  },
   methods: {
-    getAdminColour(admin) {
-      if (admin.id === this.business.primaryAdministratorId) {
-        return "red";
-      } else {
-        return "green";
-      }
+    isPrimaryAdmin(admin) {
+      return admin.id === this.primaryAdministratorId;
     },
     changeUpdateCountries() {
       if (this.updateProductCountry) {
@@ -219,10 +241,22 @@ export default {
       } else {
         this.updateProductCountry = true;
       }
+      console.log(this.business);
     },
     discardButton() {
       this.$emit('discardModifyBusiness');
-    }
+    },
+    showAlert(admin) {
+      this.showChangeAdminAlert = true;
+      if (admin.id !== this.business.primaryAdministratorId) {
+        this.showChangeAdminAlert = true;
+        this.primaryAdminAlertMsg = `Primary admin will be changed to ${admin.firstName} ${admin.lastName}`;
+      } else {
+        this.showChangeAdminAlert = false;
+        this.primaryAdminAlertMsg = "";
+      }
+      this.primaryAdministratorId = admin.id;
+    },
   }
 };
 </script>
@@ -239,7 +273,7 @@ export default {
   flex-wrap: wrap;
 }
 
-.link-chip {
+.admin-chip {
   margin-right: 4px;
 }
 
