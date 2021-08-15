@@ -96,6 +96,10 @@ export type Business = {
   created?: string,
 };
 
+export type ModifyBusiness = Business & {
+  updateProductCountry: boolean,
+}
+
 export type CreateBusiness = {
   primaryAdministratorId: number,
   name: string,
@@ -371,6 +375,24 @@ export async function createBusiness(business: CreateBusiness): Promise<MaybeErr
     if (status === 401) return 'You have been logged out. Please login again and retry';
 
     return error.response.data.message;
+  }
+
+  return undefined;
+}
+
+/**
+ * Modifies a business
+ *
+ * @param businessId The business id of the business to be modified
+ * @param business The properties to modify a business with
+ * @returns undefined if operation is successful, otherwise a string error.
+ */
+export async function modifyBusiness(businessId: number, business: ModifyBusiness): Promise<MaybeError<undefined>> {
+  try {
+    await instance.put(`/businesses/${businessId}`, business);
+  } catch (error) {
+    //TODO for frontend api task
+    return "placeholder";
   }
 
   return undefined;
@@ -1048,7 +1070,8 @@ export async function deleteNotification(eventId: number) : Promise<MaybeError<u
     if (status === undefined) return 'Failed to reach backend';
     if (status === 401) return 'You have been logged out. Please login again and retry';
     if (status === 403) return 'Invalid authorization for notification removal';
-    if (status === 406) return 'Notification not found';
+    // If the notification is not found on the backend, respond the same way as if it was successfully deleted.
+    if (status === 406) return undefined;
     return 'Request failed: ' + error.response?.data.message;
   }
   return undefined;

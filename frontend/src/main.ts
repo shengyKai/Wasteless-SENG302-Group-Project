@@ -34,6 +34,7 @@ import Vue from 'vue';
 import vuetify from './plugins/vuetify';
 import router from './plugins/vue-router';
 import './plugins/vuex';
+import { getStore } from './store';
 
 // Set Page Title
 router.afterEach((to, from) => {
@@ -69,4 +70,16 @@ new Vue({
   vuetify,
   router,
   template: '<App/>',
+  /**
+   * Before the window closes, check if any events have been staged for detetion and
+   * if they have warn the user.
+   */
+  beforeMount() {
+    window.addEventListener("beforeunload", event => {
+      if (!getStore().getters.areEventsStaged) return;
+      event.preventDefault();
+      // Chrome requires returnValue to be set.
+      event.returnValue = "";
+    });
+  },
 });

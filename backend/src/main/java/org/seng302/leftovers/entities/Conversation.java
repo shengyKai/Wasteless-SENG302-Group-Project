@@ -1,6 +1,9 @@
 package org.seng302.leftovers.entities;
 
 
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
+
 import javax.persistence.*;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -40,6 +43,9 @@ public class Conversation {
      * @param buyer Prospective buyer user
      */
     public Conversation(MarketplaceCard card, User buyer) {
+        if (card.getCreator().equals(buyer)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You cannot create a conversation with yourself");
+        }
         this.card = card;
         this.buyer = buyer;
     }
