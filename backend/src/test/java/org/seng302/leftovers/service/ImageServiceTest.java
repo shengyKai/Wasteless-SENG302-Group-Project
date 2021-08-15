@@ -19,6 +19,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.io.IOException;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -61,7 +63,7 @@ class ImageServiceTest {
             "image/png,.png",
             "image/jpeg,.jpg"
     })
-    void create_validImageType_imageSaved(String contentType, String expectedExtension) {
+    void create_validImageType_imageSaved(String contentType, String expectedExtension) throws IOException {
         MultipartFile file = createMockUpload(contentType);
 
         Image image = assertDoesNotThrow(() -> imageService.create(file));
@@ -71,7 +73,7 @@ class ImageServiceTest {
         assertTrue(image.getFilename().endsWith(expectedExtension));
         assertNull(image.getFilenameThumbnail());
 
-        verify(storageService, times(1)).store(file, image.getFilename());
+        verify(storageService, times(1)).store(file.getInputStream(), image.getFilename());
     }
 
     @ParameterizedTest
