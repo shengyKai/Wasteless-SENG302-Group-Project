@@ -119,7 +119,7 @@
                           class="admin-chip"
                           color="green"
                           text-color="white"
-                          @click="showAlert(admin)"
+                          @click="changePrimaryAdmin(admin)"
                         >
                           {{ admin.firstName }} {{ admin.lastName }}
                         </v-chip>
@@ -246,7 +246,14 @@ export default {
     discardButton() {
       this.$emit('discardModifyBusiness');
     },
-    showAlert(admin) {
+    /**
+     * When the user clicks on an administrator a popup message will appear stating that they
+     * have changed that user to the primary administrator of the business. Additionally, the
+     * colour of said user will change to red, whilst the existing primary administrator will
+     * change to green. Futhermore, if the original primary administrator is clicked this
+     * message will not appear.
+     */
+    changePrimaryAdmin(admin) {
       this.showChangeAdminAlert = true;
       if (admin.id !== this.business.primaryAdministratorId) {
         this.showChangeAdminAlert = true;
