@@ -111,14 +111,19 @@
                     </v-row>
                   </v-col>
                   <v-card-title>Images</v-card-title>
-                  <v-chip
-                    @click="showImageUploaderForm=true"
-                    medium
-                    class="mr-1 font-weight-medium action-button"
+                  <v-btn
                     color="primary"
+                    outlined
+                    @click="showImageUploaderForm=true"
                   >
-                    Upload a new image
-                  </v-chip>
+                    <v-icon
+                      class="expand-icon"
+                      color="primary"
+                    >
+                      mdi-upload
+                    </v-icon>
+                    Upload new image
+                  </v-btn>
                   <BusinessImageUploader :business-id="business.id" v-model="showImageUploaderForm"/>
                   <p class="error-text" v-if ="errorMessage !== undefined"> {{errorMessage}} </p>
                 </v-container>
