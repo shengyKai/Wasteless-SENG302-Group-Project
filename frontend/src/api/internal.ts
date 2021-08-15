@@ -1115,7 +1115,7 @@ export async function messageConversation(cardId: number, senderId: number, buye
  * @param businessId Id of the business which is to be updated
  * @param business Business object with all the fields to be updated.
  */
- export async function modifyBusiness(businessId: number, business: ModifyBusiness) {
+export async function modifyBusiness(businessId: number, business: ModifyBusiness) {
   try {
     await instance.put(`/businesses/${businessId}`, business);
   } catch (error) {

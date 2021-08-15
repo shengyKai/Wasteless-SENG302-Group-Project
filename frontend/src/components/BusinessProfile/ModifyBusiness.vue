@@ -3,7 +3,7 @@
     <v-row justify="center">
       <v-col cols="10">
         <v-card max-width=1800px>
-          <v-form v-model="valid">
+          <v-form v-model="valid"  @submit="proceedWithModifyBusiness">
             <v-card class="mt-5 ">
               <v-card-title class="primary-text">Modify Business Details</v-card-title>
               <v-card-text>
@@ -121,6 +121,7 @@
                       type="submit"
                       color="primary"
                       :disabled="!valid"
+                      @
                     >
                       <v-icon
                         class="expand-icon"
@@ -164,6 +165,9 @@ import {
   mandatoryRules,
   maxCharRules, postCodeRules, streetNumRules
 } from "@/utils";
+import { modifyBusiness } from '@/api/internal';
+
+
 export default {
   name: 'ModifyBusiness',
   components: {
@@ -222,6 +226,34 @@ export default {
     },
     discardButton() {
       this.$emit('discardModifyBusiness');
+    },
+    proceedWithModifyBusiness() {
+      /**
+       * Get the street number and name from the street address field.
+       */
+      const streetParts = this.streetAddress.split(" ");
+      const streetNum = streetParts[0];
+      const streetName = streetParts.slice(1, streetParts.length).join(" ");
+
+      // Set up the modified fields
+      let modifiedFields = {
+        primaryAdministratorId: this.$store.state.user.id,
+        name: this.businessName,
+        description: this.description,
+        address: {
+          streetNumber: streetNum,
+          streetName: streetName,
+          district: this.district,
+          city: this.city,
+          region: this.region,
+          country: this.country,
+          postcode: this.postcode
+        },
+        businessType: this.businessType,
+        updateProductCountry: this.updateProductCountry
+      };
+
+      modifyBusiness(this.business.id, modifiedFields);
     }
   }
 };
