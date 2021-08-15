@@ -22,6 +22,7 @@
           <template #activator="{ on, attrs }">
             <v-btn
               v-if="isViewingOwnProfile===true || currentUserRole!=='user'"
+              ref="settingsButton"
               icon
               color="primary"
               v-bind="attrs"
