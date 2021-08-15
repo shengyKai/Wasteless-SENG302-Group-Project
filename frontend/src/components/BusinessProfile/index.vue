@@ -7,7 +7,7 @@
     </v-row>
     <div v-if='!modifyBusiness' style="margin-top: 100px">
       <v-card>
-        <ImageCarousel v-if="businessImages" :imagesList="businessImages" :showControls="false"/>
+        <ImageCarousel v-if="businessImages" :imagesList="businessImages" :showControls="permissionToActAsBusiness"/>
       </v-card>
       <v-card class="body">
         <div class="top-section">
@@ -158,6 +158,18 @@ export default {
 
     administrators() {
       return this.business?.administrators || [];
+    },
+    isActingAsCurrentBusiness() {
+      const isBusiness =  this.$store.state.activeRole?.type === 'business';
+      if (!isBusiness) return false;
+      const user = this.$store.state.user;
+      return user.businessesAdministered.map(business => business.id).includes(this.business.id);
+    },
+    permissionToActAsBusiness() {
+      const user = this.$store.state.user;
+      return this.isActingAsCurrentBusiness ||
+          user.role === 'defaultGlobalApplicationAdmin' ||
+          user.role === 'globalApplicationAdmin';
     },
 
     fromSearch() {
