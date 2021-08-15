@@ -4,7 +4,7 @@
       <v-col cols="8">
         <v-expand-transition>
           <div v-show="!moreInfo">
-            <ProductImageCarousel imagesList="product.images" :productId="product.id" />
+            <ImageCarousel :imagesList="product.images" :productId="product.id" />
             <v-card-title>{{ saleItem.quantity + " × " + product.name }}</v-card-title>
             <v-card-subtitle>{{ retailPrice }}</v-card-subtitle>
 
@@ -68,14 +68,14 @@
 </template>
 
 <script>
-import ProductImageCarousel from "@/components/utils/ImageCarousel";
+import ImageCarousel from "@/components/utils/ImageCarousel";
 import FullProductDescription from "@/components/utils/FullProductDescription";
 import { currencyFromCountry } from "@/api/currency";
 import { formatDate, formatPrice } from '@/utils';
 
 export default {
   name: "SaleItem",
-  components: {FullProductDescription, ProductImageCarousel},
+  components: {FullProductDescription, ImageCarousel},
   data() {
     return {
       moreInfo: false,

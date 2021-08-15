@@ -33,10 +33,11 @@
               </v-alert>
             </v-col>
           </v-row>
-          <p><b>Created:</b> {{ createdMsg }}</p>
-          <v-btn outlined color="primary" @click="goSalePage" :value="false" width="150">
-            Sale listings
-          </v-btn>
+            <p><b>Created:</b> {{ createdMsg }}</p>
+            <v-btn outlined color="primary" @click="goSalePage" :value="false">
+              Sale listings
+            </v-btn>
+          </div>
         </div>
         <v-container fluid>
           <v-row>
@@ -130,6 +131,7 @@ export default {
         'Non-profit organisation',
         'Retail Trade',
       ],
+      showImageUploaderForm: false,
       valid: false,
       updateProductCountry: true,
       maxCharRules: () => maxCharRules(100),
