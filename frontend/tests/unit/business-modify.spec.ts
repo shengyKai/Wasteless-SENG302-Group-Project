@@ -105,12 +105,17 @@ describe('modifyBusiness.vue', () => {
   const diacritics = ['À','È','Ì','Ò','Ù','à','è','ì','ò','ù','Á','É','Í','Ó','Ú','Ý','á','é','í','ó','ú','ý','Â','Ê','Î','Ô','Û','â','ê','î','ô','û','Ã','Ñ','Õ','ã','ñ','õ','Ä','Ë','Ï','Ö','Ü','Ÿ','ä','ë','ï','ö','ü','ÿ'];
 
   let testUser: User;
+  const testAdmins: User[] = [];
 
   /**
    * Sets up the test ModifyBusiness instance
    */
   beforeEach(() => {
     testUser = createTestUser(1);
+    testAdmins.push(testUser);
+    testAdmins.push(createTestUser(69));
+    testAdmins.push(createTestUser(3));
+    const business = createTestBusiness(44, 1, testAdmins);
     const vuetify = new Vuetify();
     const App = localVue.component('App', {
       components: { ModifyBusiness },
@@ -132,12 +137,16 @@ describe('modifyBusiness.vue', () => {
       attachTo: elem,
       data() {
         return {
-          thingy: createTestBusiness(1, testUser.id, [testUser]),
+          thingy: business
         };
       }
     });
 
     wrapper = appWrapper.getComponent(ModifyBusiness);
+  });
+
+  afterEach(() => {
+    appWrapper.destroy();
   });
 
   /**
@@ -468,5 +477,37 @@ describe('modifyBusiness.vue', () => {
     });
     await Vue.nextTick();
     expect(wrapper.vm.valid).toBeFalsy();
+  });
+
+  describe('changing primary administrator', () => {
+    // const admins: User[] = [];
+    // beforeEach( async() => {
+    //   admins.push(createTestUser(1));
+    //   admins.push(createTestUser(69));
+    //   admins.push(createTestUser(3));
+    //   const business = createTestBusiness(44, 69, admins);
+    //   await wrapper.setProps({
+    //     business: business
+    //   });
+    // });
+
+    it('Primary admin is changed and alert message is shown when non-primary admin is selected', async() => {
+      const currentPrimaryAdmin = testAdmins[0];
+      const newPrimaryAdmin = testAdmins[1];
+      expect(wrapper.vm.isPrimaryAdmin(newPrimaryAdmin)).toBeFalsy();
+      expect(wrapper.vm.isPrimaryAdmin(currentPrimaryAdmin)).toBeTruthy();
+      wrapper.vm.changePrimaryAdmin(newPrimaryAdmin);
+      expect(wrapper.vm.isPrimaryAdmin(newPrimaryAdmin)).toBeTruthy();
+      expect(wrapper.vm.isPrimaryAdmin(currentPrimaryAdmin)).toBeFalsy();
+      expect(wrapper.vm.primaryAdminAlertMsg).toEqual(`Primary admin will be changed to ${newPrimaryAdmin.firstName} ${newPrimaryAdmin.lastName}`);
+    });
+
+    it('Primary admin stays the same and alert message is not shown when primary admin is selected', async() => {
+      const primaryAdmin = testAdmins[0];
+      expect(wrapper.vm.isPrimaryAdmin(primaryAdmin)).toBeTruthy();
+      wrapper.vm.changePrimaryAdmin(primaryAdmin);
+      expect(wrapper.vm.isPrimaryAdmin(primaryAdmin)).toBeTruthy();
+      expect(wrapper.vm.primaryAdminAlertMsg).toEqual('');
+    });
   });
 });
