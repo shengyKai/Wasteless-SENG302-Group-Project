@@ -94,15 +94,55 @@
                     </v-col>
                     <v-col>
                       <v-btn
-                        @click="changeUpdateCountries"
+                        v-if="updateProductCountry"
+                        ref="updateCurrencyButton"
+                        @click.stop="currencyConfirmDialog = true"
                       >
-                        Update catalogue entries to new country
+                        Update catalogue's currency
+                        <v-icon class="ml-2"  medium> mdi-cloud-upload </v-icon>
                       </v-btn>
-                      <v-icon v-if="updateProductCountry" large> mdi-check </v-icon>
-                      <v-icon v-if="!updateProductCountry" large> mdi-close </v-icon>
+                      <v-btn
+                        v-else
+                        ref="updateCurrencyButton"
+                        @click.stop="updateProductCountry = true"
+                      >
+                        Remove Currency update
+                        <v-icon class="ml-2"  medium> mdi-close-circle </v-icon>
+                      </v-btn>
                     </v-col>
+                    <v-dialog
+                      ref="confirmDialog"
+                      v-model="currencyConfirmDialog"
+                      max-width="300px"
+                    >
+                      <v-card>
+                        <v-card-title>
+                          Are you sure?
+                        </v-card-title>
+                        <v-card-text>
+                          Updating catalogue entries will change all of the listed product(s) currency according to your new location
+                        </v-card-text>
+                        <v-card-actions>
+                          <v-spacer/>
+                          <v-btn
+                            color="primary"
+                            text
+                            @click="updateProductCountry = false; currencyConfirmDialog = false;"
+                          >
+                            Save Change
+                          </v-btn>
+                          <v-btn
+                            color="primary"
+                            text
+                            @click="currencyConfirmDialog = false"
+                          >
+                            Cancel
+                          </v-btn>
+                        </v-card-actions>
+                      </v-card>
+                    </v-dialog>
                   </v-row>
-                  <div v-if="userIsPrimaryAdmin">
+                  <div v-if="userIsPrimaryAdmin" class="mt-5">
                     <v-card-title>Change Primary Administrator</v-card-title>
                     <v-col>
                       <v-row>
@@ -151,22 +191,22 @@
               </v-card-text>
               <v-card-actions>
                 <v-row justify="end">
-                  <v-col cols="2" class="ma-1 mr-7">
+                  <v-col cols="1" class="ma-1 mr-7">
                     <v-btn
                       type="submit"
                       color="primary"
-                      :disabled="!valid"
                     >
                       <v-icon
                         class="expand-icon"
                         color="white"
+
                       >
                         mdi-file-upload-outline
                       </v-icon>
                       Submit
                     </v-btn>
                   </v-col>
-                  <v-col cols="4" class="ma-1 mr-n9">
+                  <v-col cols="2" class="ma-1 mr-n9">
                     <v-btn
                       class="white--text"
                       color="secondary"
@@ -211,6 +251,7 @@ export default {
   },
   data() {
     return {
+      currencyConfirmDialog: false,
       serverUrl: process.env.VUE_APP_SERVER_ADD,
       readableAddress: "",
       errorMessage: undefined,
@@ -257,13 +298,6 @@ export default {
   methods: {
     adminIsPrimary(admin) {
       return admin.id === this.primaryAdministratorId;
-    },
-    changeUpdateCountries() {
-      if (this.updateProductCountry) {
-        this.updateProductCountry = false;
-      } else {
-        this.updateProductCountry = true;
-      }
     },
     discardButton() {
       this.$emit('discardModifyBusiness');
