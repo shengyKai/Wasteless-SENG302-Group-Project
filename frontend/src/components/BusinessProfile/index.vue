@@ -205,15 +205,25 @@ export default {
   },
 
   methods: {
+    /**
+     * Reroutes user to this business' sales page
+     */
     goSalePage() {
       this.$router.push(`/business/${this.business.id}/listings`);
     },
+    /**
+     * Returns to the search page, keeping the search parameters
+     */
     async returnToSearch() {
       await this.$router.push({path: '/search/business', query:{...this.$route.query}});
     },
     showAlert() {
       alert("I am the admin");
     },
+
+    /**
+     * Returns the appropriate color of the admin for their chip
+     */
     getAdminColour(admin) {
       if (admin.id === this.business.primaryAdministratorId) {
         return "red";
@@ -221,6 +231,9 @@ export default {
         return "green";
       }
     },
+    /**
+     * Switches whether to update the products' country to the new country
+     */
     changeUpdateCountries() {
       this.updateProductCountry = !this.updateProductCountry;
     },
