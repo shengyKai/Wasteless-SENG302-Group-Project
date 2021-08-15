@@ -57,6 +57,21 @@ public class JsonTools {
     }
 
     /**
+     * Attempts to fetch the contents of the given field as a string.
+     * Throws a Bad Request if the field is not present
+     * @param json The JSON to parse
+     * @param fieldName The name of the field to return
+     * @return String containing value of given field
+     */
+    public static String parseStringFromJsonField(JSONObject json, String fieldName) {
+        if (json.containsKey(fieldName)) {
+            return json.getAsString(fieldName);
+        } else {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, String.format("%s is not present", fieldName));
+        }
+    }
+
+    /**
      * This method will return the field with the given name from the given json as a long[] if it can be converted to
      * that format, or will throw a bad request exception if the field cannot be converted to that format.
      * @param json The JSONObject to retrieve the field from.

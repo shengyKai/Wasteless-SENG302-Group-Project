@@ -1,9 +1,9 @@
 package org.seng302.leftovers.controllers;
 
-import lombok.Getter;
 import net.minidev.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.seng302.leftovers.dto.WrappedValueDTO;
 import org.seng302.leftovers.entities.MessageEvent;
 import org.seng302.leftovers.entities.Event;
 import org.seng302.leftovers.entities.Tag;
@@ -21,7 +21,6 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
 
 /**
  * Controller for the /events/* endpoints.
@@ -44,14 +43,14 @@ public class EventController {
         this.eventRepository = eventRepository;
     }
 
-    private static class SetTag {
-        @NotNull
-        public Tag value;
-    }
-
+    /**
+     * PUT endpoint for setting the tag of a event.
+     * @param eventId The event to be modified
+     * @param body The request body
+     */
     @PutMapping("/feed/{eventId}/tag")
-    public void setEventTag(@PathVariable long eventId, @Valid @RequestBody SetTag body, HttpServletRequest request) {
-        LOGGER.info("Requested update of event tag (eventId={}, tag={})", eventId, body.value);
+    public void setEventTag(@PathVariable long eventId, @Valid @RequestBody WrappedValueDTO<Tag> body, HttpServletRequest request) {
+        LOGGER.info("Requested update of event tag (eventId={}, tag={})", eventId, body.getValue());
 
         AuthenticationTokenManager.checkAuthenticationToken(request);
         try {
@@ -62,7 +61,7 @@ public class EventController {
                 throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Current user does not have permission to modify this event");
             }
 
-            event.setTag(body.value);
+            event.setTag(body.getValue());
             eventService.saveEvent(event);
         } catch (Exception e) {
             LOGGER.error(e.getMessage());

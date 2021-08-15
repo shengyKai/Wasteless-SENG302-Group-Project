@@ -38,9 +38,10 @@
       </div>
     </v-card-text>
     <v-divider/>
-    <v-card-actions v-if="isCardOwnerOrAdmin && showActions">
+    <v-card-actions v-if="showActions">
       <v-spacer/>
-      <v-icon ref="editButton"
+      <v-icon v-if="isCardOwnerOrAdmin"
+              ref="editButton"
               class="mr-2"
               color="primary"
               @click.stop="editCardDialog = true"
@@ -48,13 +49,13 @@
         mdi-pencil
       </v-icon>
 
-      <v-icon ref="deleteButton"
+      <v-icon v-if="isCardOwnerOrAdmin"
+              ref="deleteButton"
               color="primary"
               @click.stop="deleteCardDialog = true"
       >
         mdi-trash-can
       </v-icon>
-
       <v-dialog
         ref="deleteDialog"
         v-model="deleteCardDialog"
@@ -86,6 +87,68 @@
           </v-card-actions>
         </v-card>
       </v-dialog>
+      <v-tooltip bottom>
+        <template v-slot:activator="{on, attrs }">
+          <v-icon v-if="!isCardOwner"
+                  ref="messageButton"
+                  color="primary"
+                  @click.stop="messageOwnerDialog = true; directMessageContent=''"
+                  v-bind="attrs"
+                  v-on="on"
+          >
+            mdi-email
+          </v-icon>
+        </template>
+        Ask this person a question
+      </v-tooltip>
+      <!-- Dialog for firstMessage(in primary colour), replyMessage(in secondary colour) -->
+      <v-dialog ref="messageDialog"
+                v-model="messageOwnerDialog"
+                max-width="600px">
+        <v-card>
+          <!-- The 'TITLE' of the firstMessage component -->
+          <v-card color='primary lighten-3'>
+            <v-card-title>
+              <strong>Send a message to {{content.creator.firstName}}</strong>
+            </v-card-title>
+            <v-card-subtitle>
+              Your message will appear on their feed
+            </v-card-subtitle>
+          </v-card>
+          <!-- The Message body input component -->
+          <v-form v-model="directMessageValid" ref="directMessageForm">
+            <v-card-text>
+              <v-textarea
+                solo
+                outlined
+                clearable
+                prepend-inner-icon="mdi-comment"
+                no-resize
+                :counter="200"
+                :rules="mandatoryRules.concat(maxCharRules())"
+                v-model="directMessageContent"/>
+            </v-card-text>
+            <!-- Submit and Cancel button for the replyMessage component -->
+            <v-card-actions>
+              <v-alert v-if="directMessageError !== undefined" color="red" type="error" dense text>
+                {{directMessageError}}
+              </v-alert>
+              <v-spacer/>
+              <v-btn color="primary"
+                     text
+                     :disabled="!directMessageValid"
+                     @click="sendMessage">
+                Send
+              </v-btn>
+              <v-btn color="primary"
+                     text
+                     @click="messageOwnerDialog = false; directMessageError = undefined; directMessageContent=''">
+                Cancel
+              </v-btn>
+            </v-card-actions>
+          </v-form>
+        </v-card>
+      </v-dialog>
     </v-card-actions>
     <template v-if="editCardDialog">
       <MarketplaceCardForm :user="$store.state.user" :previousCard="content" @closeDialog="editCardDialog=false"/>
@@ -94,8 +157,8 @@
 </template>
 
 <script>
-import { formatDate, SECTION_NAMES } from '@/utils';
-import { deleteMarketplaceCard } from '../../api/internal.ts';
+import {formatDate, maxCharRules, mandatoryRules, SECTION_NAMES} from '@/utils';
+import {deleteMarketplaceCard, messageConversation} from '../../api/internal.ts';
 import MarketplaceCardForm from '../marketplace/MarketplaceCardForm.vue';
 
 export default {
@@ -104,6 +167,12 @@ export default {
     return {
       deleteCardDialog: false,
       editCardDialog: false,
+      messageOwnerDialog: false,
+      directMessageContent: '',
+      directMessageError: undefined,
+      directMessageValid: false,
+      mandatoryRules,
+      maxCharRules: () => maxCharRules(200),
     };
   },
   components: {
@@ -153,9 +222,12 @@ export default {
     },
     // To ensure only the card owner, DGAA or GAA is able to execute an action relating to the marketplace card
     isCardOwnerOrAdmin() {
-      return (this.$store.state.user.id === this.content.creator.id)
+      return this.isCardOwner
             || (this.$store.getters.role === "defaultGlobalApplicationAdmin")
             || (this.$store.getters.role === "globalApplicationAdmin");
+    },
+    isCardOwner() {
+      return (this.$store.state.user.id === this.content.creator.id);
     },
     section() {
       return SECTION_NAMES[this.content.section];
@@ -170,6 +242,15 @@ export default {
     async deleteCard(cardId) {
       let response = await deleteMarketplaceCard(cardId);
       this.$emit("delete-card", response);
+    },
+    async sendMessage() {
+      this.directMessageError = undefined;
+      let response = await messageConversation(this.content.id, this.$store.state.user.id, this.$store.state.user.id, this.directMessageContent);
+      if (typeof response === 'string') {
+        this.directMessageError = response;
+      } else {
+        this.messageOwnerDialog = false;
+      }
     },
   }
 };

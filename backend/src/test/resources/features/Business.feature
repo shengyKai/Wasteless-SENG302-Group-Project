@@ -14,15 +14,12 @@ Feature: U23 Search for Business
     When I search with query "New World"
     Then I expect business "New World" to be returned
 
-  Scenario: AC2 - Terms that are quoted must be matched exactly
+  Scenario: AC2 - Terms that are quoted must act as a single term
     Given the business "New World" exists
-    When I search with query "'New'"
-    Then I don't expect business "New World" to be returned
-
-  Scenario: AC2 - Terms that are quoted must be matched exactly
-    Given the business "New World" exists
+    And the business "Old World" exists
     When I search with query "'New World'"
     Then I expect business "New World" to be returned
+    And I don't expect business "Old World" to be returned
 
   Scenario: AC2 - If I enter more than one term, then I can specify results match both terms
     Given the business "New World" exists

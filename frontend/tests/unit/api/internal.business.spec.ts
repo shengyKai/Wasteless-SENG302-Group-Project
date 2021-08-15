@@ -1,4 +1,4 @@
-import * as api from '@/api/internal';
+import { Business, searchBusinesses, ModifyBusiness, modifyBusiness } from '@/api/internal';
 import axios, { AxiosInstance } from 'axios';
 
 jest.mock('axios', () => ({
@@ -21,7 +21,7 @@ const instance: Mocked<Pick<AxiosInstance, 'get' | 'put' >> = axios.instance;
 
 describe('Test GET businesses/search endpoind', () => {
 
-  let validBusiness: api.Business = {
+  let validBusiness: Business = {
     id: 88,
     primaryAdministratorId: 50,
     name: "Valid business",
@@ -40,7 +40,7 @@ describe('Test GET businesses/search endpoind', () => {
     potato: "Potato",
   };
 
-  const validBusinessList: api.Business[] = [];
+  const validBusinessList: Business[] = [];
   for (let i = 0; i < 10; i++) {
     validBusiness.id = i;
     validBusinessList.push(validBusiness);
@@ -56,7 +56,7 @@ describe('Test GET businesses/search endpoind', () => {
     instance.get.mockResolvedValueOnce({
       data: responseData
     });
-    const response = await api.searchBusinesses('Query', 'Accommodation and Food Services', 2, 10, "created", false);
+    const response = await searchBusinesses('Query', 'Accommodation and Food Services', 2, 10, "created", false);
     expect(response).toEqual(responseData);
   });
 
@@ -68,8 +68,8 @@ describe('Test GET businesses/search endpoind', () => {
     instance.get.mockResolvedValueOnce({
       data: responseData
     });
-    const response = await api.searchBusinesses('Query', 'Accommodation and Food Services', 2, 10, "created", false);
-    expect(response).toEqual("Response is not business array");
+    const response = await searchBusinesses('Query', 'Accommodation and Food Services', 2, 10, "created", false);
+    expect(response).toEqual("Response is not a business array");
   });
 
   it('When API request is successfully resolved and contains an empty body, returns an empty list', async () => {
@@ -81,7 +81,7 @@ describe('Test GET businesses/search endpoind', () => {
     instance.get.mockResolvedValueOnce({
       data: responseData
     });
-    const response = await api.searchBusinesses('Query', 'Accommodation and Food Services', 2, 10, "created", false);
+    const response = await searchBusinesses('Query', 'Accommodation and Food Services', 2, 10, "created", false);
     expect(response).toEqual(responseData);
   });
 
@@ -94,7 +94,7 @@ describe('Test GET businesses/search endpoind', () => {
         }
       }
     });
-    const response = await api.searchBusinesses('Query', 'Accommodation and Food Services', 2, 10, "created", false);
+    const response = await searchBusinesses('Query', 'Accommodation and Food Services', 2, 10, "created", false);
     expect(response).toEqual("Invalid search query: Query too long");
   });
 
@@ -104,7 +104,7 @@ describe('Test GET businesses/search endpoind', () => {
         status: 401
       }
     });
-    const response = await api.searchBusinesses('Query', 'Accommodation and Food Services', 2, 10, "created", false);
+    const response = await searchBusinesses('Query', 'Accommodation and Food Services', 2, 10, "created", false);
     expect(response).toEqual("You have been logged out. Please login again and retry");
   });
 
@@ -114,7 +114,7 @@ describe('Test GET businesses/search endpoind', () => {
         status: 999
       }
     });
-    const response = await api.searchBusinesses('Query', 'Accommodation and Food Services', 2, 10, "created", false);
+    const response = await searchBusinesses('Query', 'Accommodation and Food Services', 2, 10, "created", false);
     expect(response).toEqual("Request failed: 999");
   });
 
@@ -124,20 +124,20 @@ describe('Test GET businesses/search endpoind', () => {
         status: undefined
       }
     });
-    const response = await api.searchBusinesses('Query', 'Accommodation and Food Services', 2, 10, "created", false);
+    const response = await searchBusinesses('Query', 'Accommodation and Food Services', 2, 10, "created", false);
     expect(response).toEqual("Failed to reach backend");
   });
 
   it('When API request is resolved without a status code, failed to reach backend error message is returned', async () => {
     instance.get.mockRejectedValueOnce({});
-    const response = await api.searchBusinesses('Query', 'Accommodation and Food Services', 2, 10, "created", false);
+    const response = await searchBusinesses('Query', 'Accommodation and Food Services', 2, 10, "created", false);
     expect(response).toEqual("Failed to reach backend");
   });
 
 });
 
 describe('Test PUT /businesses/${businessId} endpoint', () => {
-  let business: api.ModifyBusiness = {
+  let business: ModifyBusiness = {
     primaryAdministratorId: 50,
     name: "Valid business",
     address: {
@@ -158,7 +158,7 @@ describe('Test PUT /businesses/${businessId} endpoint', () => {
         status: 200,
       }
     });
-    const response = await api.modifyBusiness(88, business);
+    const response = await modifyBusiness(88, business);
     expect(response).toEqual(undefined);
   });
 
@@ -168,7 +168,7 @@ describe('Test PUT /businesses/${businessId} endpoint', () => {
         status: undefined
       }
     });
-    const response = await api.modifyBusiness(88, business);
+    const response = await modifyBusiness(88, business);
     expect(response).toEqual("Failed to reach backend");
   });
 
@@ -178,7 +178,7 @@ describe('Test PUT /businesses/${businessId} endpoint', () => {
         status: 401
       }
     });
-    const response = await api.modifyBusiness(88, business);
+    const response = await modifyBusiness(88, business);
     expect(response).toEqual("You have been logged out. Please login again and retry");
   });
 
@@ -188,7 +188,7 @@ describe('Test PUT /businesses/${businessId} endpoint', () => {
         status: 403
       }
     });
-    const response = await api.modifyBusiness(88, business);
+    const response = await modifyBusiness(88, business);
     expect(response).toEqual("Invalid authorization for modifying this business");
   });
 
@@ -198,7 +198,7 @@ describe('Test PUT /businesses/${businessId} endpoint', () => {
         status: 999
       }
     });
-    const response = await api.modifyBusiness(88, business);
+    const response = await modifyBusiness(88, business);
     expect(response).toEqual("Request failed: 999");
   });
 })

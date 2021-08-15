@@ -5,12 +5,13 @@ import Vuex from 'vuex';
 import { createLocalVue, mount, Wrapper } from '@vue/test-utils';
 import MarketplaceCard from '@/components/cards/MarketplaceCard.vue';
 
-import { deleteMarketplaceCard, MarketplaceCardSection, User } from '@/api/internal';
+import { deleteMarketplaceCard, messageConversation, MarketplaceCardSection, User } from '@/api/internal';
 import { flushQueue } from './utils';
 import { SECTION_NAMES } from '@/utils';
 
 jest.mock('@/api/internal', () => ({
   deleteMarketplaceCard: jest.fn(),
+  messageConversation: jest.fn(),
 }));
 
 Vue.use(Vuetify);
@@ -60,7 +61,7 @@ describe('MarketplaceCard.vue', () => {
    * Finds the edit form dialog box upon clicking the edit button
    * @returns the edit confirmation dialog box
    */
-  async function findEditConfirmationDialog() {
+  async function openEditConfirmationDialog() {
     const editButton = wrapper.findComponent({ ref: 'editButton' });
     await editButton.trigger('click');
 
@@ -72,12 +73,23 @@ describe('MarketplaceCard.vue', () => {
    * Finds the delete confirmation dialog box upon clicking the delete button
    * @returns the delete confirmation dialog box
    */
-  async function findDeleteConfirmationDialog() {
+  async function openDeleteConfirmationDialog() {
     const deleteButton = wrapper.findComponent({ ref: 'deleteButton' });
     await deleteButton.trigger('click');
 
     const dialogs = wrapper.findAllComponents({ name: "v-dialog" });
     return dialogs.at(0);
+  }
+  /**
+   * Finds the message dialog box upon clicking the message button
+   * @returns the message dialog box
+   */
+  async function openConversationDialog() {
+    const messageButton = wrapper.findComponent({ref:'messageButton'});
+    await messageButton.trigger('click');
+
+    const dialogs = wrapper.findAllComponents({ name: "v-dialog" });
+    return dialogs.at(1);
   }
 
   /**
@@ -225,7 +237,7 @@ describe('MarketplaceCard.vue', () => {
   });
 
   it("The deleteMarketplaceCard method must be called and the dialog box should not be visible, upon clicking the delete button in the confirmation dialog box", async () => {
-    const deleteConfirmationDialog = await findDeleteConfirmationDialog();
+    const deleteConfirmationDialog = await openDeleteConfirmationDialog();
     const dialogDeleteButton = findButton('Delete', deleteConfirmationDialog);
     await dialogDeleteButton.trigger("click");
     expect(deleteMarketplaceCard).toBeCalledWith(testMarketplaceCard.id);
@@ -233,7 +245,7 @@ describe('MarketplaceCard.vue', () => {
   });
 
   it("The dialog box should not be visible if the cancel button is clicked in the confirmation dialog box", async () => {
-    const deleteConfirmationDialog = await findDeleteConfirmationDialog();
+    const deleteConfirmationDialog = await openDeleteConfirmationDialog();
     const dialogCancelButton = findButton('Cancel', deleteConfirmationDialog);
     await dialogCancelButton.trigger("click");
     expect(wrapper.vm.deleteCardDialog).toBeFalsy();
@@ -342,5 +354,66 @@ describe('MarketplaceCard.vue', () => {
     expect(wrapper.vm.dateString).toBe('Posted 01 Mar 2021, Renewed 01 Apr 2021');
   });
 
+  it("Must not be able to find the message icon if the user is the owner of the card", async () => {
+    setUpStore(2, "user");
+    generateWrapper();
+    const buttons = wrapper.findAllComponents({ ref: 'messageButton' });
+    expect(buttons.length).toBe(0);
+  });
+
+  it("Must be able to find the message icon if the user is not the owner of the card", async () => {
+    setUpStore(3, "user");
+    generateWrapper();
+    const buttons = wrapper.findAllComponents({ ref: 'messageButton' });
+    expect(buttons.length).toBe(1);
+  });
+
+  it("Must trigger message dialog box upon clicking message icon", async () => {
+    setUpStore(3, 'user'); // must not be the owner
+    generateWrapper();
+    expect(wrapper.vm.messageOwnerDialog).toBeFalsy();
+    //This button is an icon, so a reference is used to identify it instead of its button text
+    const deleteButton = wrapper.findComponent({ ref: 'messageButton' });
+    await deleteButton.trigger('click');
+    expect(wrapper.vm.messageOwnerDialog).toBeTruthy();
+  });
+
+  it("The messageConversation method must be called and the dialog box should not be visible, upon clicking the send button in the message dialog box", async () => {
+    setUpStore(3, 'user'); // must not be the owner
+    generateWrapper();
+    const messageDialog = await openConversationDialog();
+    await wrapper.setData({
+      directMessageValid: true
+    });
+    await Vue.nextTick();
+    const dialogSendButton = findButton('Send', messageDialog);
+    await dialogSendButton.trigger("click");
+    expect(messageConversation).toBeCalledWith(1, 3, 3, "");
+    expect(wrapper.vm.messageOwnerDialog).toBeFalsy();
+  });
+
+  it("The dialog box should not be visible if the cancel button is clicked in the conversation dialog box", async () => {
+    setUpStore(3, 'user'); // must not be the owner
+    generateWrapper();
+    const messageDialog = await openConversationDialog();
+    const dialogCancelButton = findButton('Cancel', messageDialog);
+    await dialogCancelButton.trigger("click");
+    expect(wrapper.vm.messageOwnerDialog).toBeFalsy();
+  });
+
+  it("The conversation message must be at least 1 character. The send button is disabled otherwise", async () => {
+    setUpStore(3, 'user'); // must not be the owner
+    generateWrapper();
+    const messageDialog = await openConversationDialog();
+    const dialogSendButton = findButton('Send', messageDialog);
+    expect(wrapper.vm.directMessageValid).toBeFalsy();
+    expect(dialogSendButton.props().disabled).toBeTruthy();
+    await wrapper.setData({
+      directMessageContent: "A long message"
+    });
+    await Vue.nextTick();
+    expect(wrapper.vm.directMessageValid).toBeTruthy();
+    expect(dialogSendButton.props().disabled).toBeFalsy();
+  });
 
 });

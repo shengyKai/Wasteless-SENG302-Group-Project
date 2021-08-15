@@ -10,7 +10,10 @@ import org.seng302.leftovers.persistence.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.util.FileSystemUtils;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.*;
 import java.util.List;
 import java.util.Map;
@@ -18,8 +21,9 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.fail;
 
 @RunWith(SpringRunner.class)
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(classes={Main.class})
-public class ProductImageGeneratorTest {
+class ProductImageGeneratorTest {
 
     private static final String PRODUCT_NOUNS_FILE = "product-nouns.txt";
     private static final String PRODUCT_ADJECTIVES_FILE = "product-adjectives.txt";
@@ -68,6 +72,12 @@ public class ProductImageGeneratorTest {
         conn.close();
     }
 
+    @AfterAll
+    void finalise() {
+        Path root = Paths.get(ExampleDataFileReader.readPropertiesFile("/application.properties").get("storage-directory"));
+        FileSystemUtils.deleteRecursively(root.toFile());
+    }
+
     /**
      * Sets up a test user and a test business
      * Useful for creating test products
@@ -86,7 +96,7 @@ public class ProductImageGeneratorTest {
      */
     private void checkRequiredFieldsNotNull(Long productId, int expectedCount) throws SQLException {
         PreparedStatement stmt = conn.prepareStatement(
-                "SELECT COUNT(*) FROM image WHERE image_id = ? AND filename IS NOT NULL AND image_order IS NOT NULL"
+                "SELECT COUNT(*) FROM image WHERE product_id = ? AND filename IS NOT NULL AND image_order IS NOT NULL"
         );
         stmt.setObject(1, productId);
         stmt.executeQuery();

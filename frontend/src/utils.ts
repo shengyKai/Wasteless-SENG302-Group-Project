@@ -194,7 +194,7 @@ export function regxCountryCode() {
  Returns a Regex that matches a valid street address
  */
 export function regxStreet() {
-  return /^(([0-9]+|[0-9]+\/[0-9]+)[\p{L}]?)(?=\s[\p{L}])([\p{L}0-9-.' ]+)$/u;
+  return /^(([0-9]+|[0-9]+\/[0-9]+)[\p{L}]?)\s([\p{L}0-9-.' ]+)\s([\p{L}\-.' ]+)$/u;
 }
 /**
  Returns a Regex that matches a valid product code
@@ -214,7 +214,7 @@ export const emailRules = [
 export const mandatoryRules = [
   //All fields with the class "required" will go through this ruleset to ensure the field is not empty.
   //if it does not follow the format, display error message
-  (field: string) => !!field || 'Field is required'
+  (field: string | null) => !!field || 'Field is required'
 ];
 
 export const passwordRules = [
@@ -232,7 +232,7 @@ export const nameRules = [
 
 export function maxCharRules(size: number) {
   return [
-    (field: string) => (field.length <= size) || `Reached max character limit: ${size}`
+    (field: string) => (field === null || field.length <= size) || `Reached max character limit: ${size}`
   ];
 }
 
@@ -247,7 +247,7 @@ export const alphabetRules = [
 ];
 export const streetNumRules = [
   (field: string) => (field && field.length <= 109) || 'Reached max character limit 109 ',
-  (field: string) => regxStreet().test(field) || 'Must contain unit number and street name'
+  (field: string) => regxStreet().test(field) || 'Must contain unit number and two words for the street name'
 ];
 
 export const quantityRules = [

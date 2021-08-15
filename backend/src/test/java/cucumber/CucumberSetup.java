@@ -5,12 +5,20 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.cucumber.java.After;
 import io.cucumber.java.Before;
 import org.seng302.leftovers.persistence.*;
+import org.seng302.leftovers.service.StorageService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+
 public class CucumberSetup {
+    @Value("${storage-directory}")
+    private Path root;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -40,15 +48,18 @@ public class CucumberSetup {
     private ExpiryEventRepository expiryEventRepository;
     @Autowired
     private ImageRepository imageRepository;
+    @Autowired
+    private StorageService storageService;
 
     /**
      * Set up the mockMvc object for mocking API requests, and remove everything from the repositories.
      */
     @Before(order = 1)
-    public void Setup() {
+    public void Setup() throws IOException {
         objectMapper.enable(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT);
         mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
         clearDatabase();
+        Files.createDirectory(root);
     }
     
     @After
@@ -71,6 +82,7 @@ public class CucumberSetup {
         userRepository.deleteAll();
         accountRepository.deleteAll();
         imageRepository.deleteAll();
+        storageService.deleteAll();
     }
 
 }

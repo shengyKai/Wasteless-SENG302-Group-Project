@@ -23,6 +23,7 @@ tags:
   - name: 'U5: Creating Business Accounts'
   - name: 'U6: Acting as Individual or Business'
     description: All necessary API endpoints are found in prior stories
+  - name: 'U11: Modifying Businesses'
   - name: 'U13: Home page'
     description: >-
       No endpoints required for this story specifically, but several will likely
@@ -35,6 +36,7 @@ tags:
   - name: 'U22: List sale'
   - name: 'U23: Search for business'
   - name: 'U26: Example data'
+  - name: 'U28: Product Catalogue search'
   - name: 'UCM1: Community marketplace'
     description: >-
       No endpoints required here yet, these will come from the subsequent
@@ -336,6 +338,49 @@ paths:
           $ref: '#/components/responses/UnauthorizedError'
         '406':
           $ref: '#/components/responses/NotAcceptableError'
+    put:
+      tags:
+        - 'U11: Modifying Businesses'
+        - Business Accounts
+      summary: Modifies an existing business entity
+      security:
+        - CookieAuth:
+            - user
+            - globalApplicationAdmin
+            - defaultGlobalApplicationAdmin
+      parameters:
+        - name: id
+          in: path
+          description: Business ID
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/Business'
+                - type: object
+                  required:
+                    - updateProductCountry
+                  properties:
+                    updateProductCountry:
+                      type: boolean
+                      description: Whether to change existing products' countries of sale to the new country
+        description: >-
+          New business account data, id will be generated automatically by the
+          server
+      responses:
+        '200':
+          description: Business account successfully modified
+        '403':
+          description: >-
+            Forbidden: Returned when the user making the request is not the
+            primary administrator of the business AND is not a global
+            application admin.
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
   '/businesses/{id}/makeAdministrator':
     put:
       tags:
@@ -1328,7 +1373,7 @@ paths:
             - globalApplicationAdmin
             - defaultGlobalApplicationAdmin
       responses:
-        '200':
+        '201':
           description: >-
             New message is added to the conversation. If the conversation did 
             not already exist then a new conversation is created.
@@ -1737,6 +1782,91 @@ paths:
                       - 3
         '403':
           description: 'Forbidden: Returned if a DGAA user attempts to generate demo data.'
+  /businesses/{businessId}/products/search:
+    get:
+      tags:
+        - 'U28: Product Catalogue search'
+        - Product
+      summary: Product search within a business's product catalogue
+      security:
+        - CookieAuth:
+            - user
+            - globalApplicationAdmin
+            - defaultGlobalApplicationAdmin
+      description: "Product search within a business's product catalogue"
+      parameters:
+        - name: businessId
+          in: path
+          description: ID of business for the product catalogue search
+          required: true
+          schema:
+            type: integer
+        - in: query
+          name: searchQuery
+          schema:
+            type: string
+          description: >-
+            Criteria to search products for, e.g: product’s full name 
+        - name: page
+          in: query
+          description: The page number to retrieve (1 indexed)
+          schema:
+            type: integer
+        - name: resultsPerPage
+          in: query
+          description: The number of results to show per page
+          schema:
+            type: integer
+        - name: searchBy
+          in: query
+          description: Product property to search the products by
+          schema:
+            type: string
+            enum:
+              - name
+              - description
+              - manufacturer
+              - product code
+        - name: reverse
+          in: query
+          description: Whether to flip default sort order (default is ascending)
+          schema:
+            type: boolean
+        - name: orderBy
+          in: query
+          description: Product property to order results by
+          schema:
+            type: string
+            enum:
+              - name
+              - description
+              - manufacturer
+              - recommendedRetailPrice
+              - created
+              - productCode
+      responses:
+        '200':
+          description: 'Request successful, a (possibly empty) list of products is returned'
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Page'
+                  - type: object
+                    required:
+                      - results
+                    properties:
+                      results:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Product'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: >-
+            Forbidden: Returned when the user making the request is not an
+            administrator of the business AND is not a global
+            application admin.
   /feed/{id}/tag:
     put:
       tags:
@@ -1762,11 +1892,11 @@ paths:
             schema:
               type: object
               required:
-                - tags
+                - value
               properties:
-                tags:
-                  type: [ string ]
-                  description: A tag to be associated with the the item on the news feed
+                value: 
+                  $ref: '#/components/schemas/Tag'
+                  
       responses:
         '200':
           description: Item successfully deleted from the feed
@@ -2187,7 +2317,7 @@ components:
         streetName:
           type: string
           example: Ilam Road
-        suburb:
+        district:
           type: string
           example: Upper Riccarton
         city:
