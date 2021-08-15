@@ -29,6 +29,7 @@
         </template>
       </v-select>
       <!-- Newsfeed -->
+      <!-- Example message - move inside for loop once message is an event type -->
       <v-card><MessageEvent :event="{id: 1, created: ''}"/></v-card>
       <v-card
         v-for="event in eventsPage"
