@@ -64,8 +64,10 @@ public class BusinessStepDefinition {
             }
             session.save(business);
             session.getTransaction().commit();
+            session.close();
             businessContext.save(business);
         }
+
     }
 
     @Given("the business {string} exists")
