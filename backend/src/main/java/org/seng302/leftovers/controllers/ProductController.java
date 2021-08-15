@@ -50,6 +50,7 @@ public class ProductController {
     }
 
     private static final Set<String> VALID_ORDERINGS = Set.of("name", "description", "manufacturer","recommendedRetailPrice", "created", "productCode");
+    private static final Set<String> VALID_SEARCHES = Set.of("name", "description", "manufacturer", "productCode");
 
     /**
      * REST GET method to retrieve all the products with a business's catalogue.
@@ -71,15 +72,7 @@ public class ProductController {
         logger.info(() -> String.format("Retrieving catalogue from business with id %d.", id));
         Optional<Business> business = businessRepository.findById(id);
 
-        orderBy = Optional.ofNullable(orderBy).orElse("productCode");
-        if (!VALID_ORDERINGS.contains(orderBy)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "OrderBy term " + orderBy + " is invalid");
-        }
-
-        List<Sort.Order> sortOrder;
-        Sort.Direction direction = SearchHelper.getSortDirection(reverse);
-        sortOrder = List.of(new Sort.Order(direction, orderBy ).ignoreCase());
-
+        List<Sort.Order> sortOrder = getSortOrder(orderBy, reverse);
     
         if (business.isEmpty()) {
             BusinessNotFoundException notFound = new BusinessNotFoundException();
@@ -101,7 +94,64 @@ public class ProductController {
         }
     }
 
+    /**
+     * GET endpoint to retrieve products from a business with searching
+     * @param id of business
+     * @param request HTTP request
+     * @param searchQuery to match searchBy field
+     * @param page of results to return
+     * @param resultsPerPage products per page and amount to return
+     * @param searchBy field of product to search
+     * @param reverse most or least relevant
+     * @param orderBy field to sort results by
+     * @return List of products
+     */
+    @GetMapping("/businesses/{id}/products/search")
+    public JSONObject retrieveCatalogueSearch(@PathVariable Long id,
+                                              HttpServletRequest request,
+                                              @RequestParam(required = false) String searchQuery,
+                                              @RequestParam(required = false) Integer page,
+                                              @RequestParam(required = false) Integer resultsPerPage,
+                                              @RequestParam(required = false) String searchBy,
+                                              @RequestParam(required = false) Boolean reverse,
+                                              @RequestParam(required = false) String orderBy
+                                              ) {
+        logger.info("Get catalogue by business id.");
+        AuthenticationTokenManager.checkAuthenticationToken(request);
 
+        logger.info(() -> String.format("Retrieving catalogue from business with id %d.", id));
+        Optional<Business> business = businessRepository.findById(id);
+
+        searchBy = Optional.ofNullable(searchBy).orElse("name");
+        if (!VALID_SEARCHES.contains(searchBy)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "SearchBy term " + searchBy + " is invalid");
+        }
+
+        List<Sort.Order> sortOrder = getSortOrder(orderBy, reverse);
+
+        // Backend logic to be implemented
+        JSONObject json = new JSONObject();
+        return json;
+    }
+
+    /**
+     * How to sort your results
+     * @param orderBy Field to sort results by
+     * @param reverse Whether results should be forward or backward
+     * @return sortOrder
+     */
+    private List<Sort.Order> getSortOrder(String orderBy, Boolean reverse) {
+        orderBy = Optional.ofNullable(orderBy).orElse("productCode");
+        if (!VALID_ORDERINGS.contains(orderBy)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "OrderBy term " + orderBy + " is invalid");
+        }
+
+        List<Sort.Order> sortOrder;
+        Sort.Direction direction = SearchHelper.getSortDirection(reverse);
+        sortOrder = List.of(new Sort.Order(direction, orderBy ).ignoreCase());
+        return sortOrder;
+    }
+    
     /**
      * POST endpoint for adding a product to a businesses catalogue.
      * This is only accessible to the DGAA, the business owner or a business admin.
