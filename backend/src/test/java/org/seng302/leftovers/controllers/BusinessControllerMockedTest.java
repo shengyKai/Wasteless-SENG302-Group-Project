@@ -12,6 +12,7 @@ import org.mockito.*;
 import org.seng302.leftovers.entities.*;
 import org.seng302.leftovers.exceptions.AccessTokenException;
 import org.seng302.leftovers.persistence.BusinessRepository;
+import org.seng302.leftovers.persistence.ImageRepository;
 import org.seng302.leftovers.persistence.UserRepository;
 import org.seng302.leftovers.service.ImageService;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
@@ -54,6 +55,8 @@ class BusinessControllerMockedTest {
     @Mock
     private ImageService imageService;
     @Mock
+    ImageRepository imageRepository;
+    @Mock
     private Business mockBusiness;
     @Mock
     private User mockOwner;
@@ -95,7 +98,7 @@ class BusinessControllerMockedTest {
 
         when(imageService.create(any())).thenReturn(mockImage);
 
-        BusinessController businessController = new BusinessController(businessRepository, userRepository, imageService);
+        BusinessController businessController = new BusinessController(businessRepository, userRepository, imageService, imageRepository);
         mockMvc = MockMvcBuilders.standaloneSetup(businessController).build();
     }
 
