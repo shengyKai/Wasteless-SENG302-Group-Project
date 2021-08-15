@@ -15,7 +15,9 @@ exports[`KeywordCreated.vue Must match snapshot 1`] = `
     </div>
     <div class="v-card__actions justify-center"><button type="button" class="v-btn v-btn--is-elevated v-btn--has-bg theme--light v-size--default error"><span class="v-btn__content">Remove</span></button></div>
     <!---->
-    <!---->
+    <div class="v-card__text justify-center">
+      <!---->
+    </div>
     <div class="row justify-start" style="min-height: 10px;">
       <div class="col col-10"><span class="ma-2 ml-4 mb-3 v-chip v-chip--clickable v-chip--label v-chip--no-color theme--light v-size--default white--text" aria-haspopup="true" aria-expanded="false"><span class="v-chip__content"><i aria-hidden="true" class="v-icon notranslate v-icon--left mdi mdi-label theme--light"></i>
               Tag
@@ -43,6 +45,10 @@ exports[`KeywordCreated.vue Must match snapshot 1`] = `
           </div>
         </transition-stub>
       </div>
+      <div class="float=right col"><button type="button" aria-haspopup="true" aria-expanded="false" class="v-icon notranslate mt-4 ml-12 v-icon--link mdi mdi-reply theme--light primary--text"></button><span class="v-tooltip v-tooltip--bottom"><!----></span></div>
+    </div>
+    <div role="dialog" class="v-dialog__container">
+      <!---->
     </div>
   </div>
 </div>

@@ -208,4 +208,3 @@ deploy-production-frontend:
   only:
     - tags
     - master
-
