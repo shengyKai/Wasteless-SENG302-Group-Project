@@ -105,7 +105,7 @@ describe('modifyBusiness.vue', () => {
   const diacritics = ['À','È','Ì','Ò','Ù','à','è','ì','ò','ù','Á','É','Í','Ó','Ú','Ý','á','é','í','ó','ú','ý','Â','Ê','Î','Ô','Û','â','ê','î','ô','û','Ã','Ñ','Õ','ã','ñ','õ','Ä','Ë','Ï','Ö','Ü','Ÿ','ä','ë','ï','ö','ü','ÿ'];
 
   let testUser: User;
-  const testAdmins: User[] = [];
+  let testAdmins: User[] = [];
 
   /**
    * Sets up the test ModifyBusiness instance
@@ -147,6 +147,7 @@ describe('modifyBusiness.vue', () => {
 
   afterEach(() => {
     appWrapper.destroy();
+    testAdmins = [];
   });
 
   /**
@@ -480,17 +481,6 @@ describe('modifyBusiness.vue', () => {
   });
 
   describe('changing primary administrator', () => {
-    // const admins: User[] = [];
-    // beforeEach( async() => {
-    //   admins.push(createTestUser(1));
-    //   admins.push(createTestUser(69));
-    //   admins.push(createTestUser(3));
-    //   const business = createTestBusiness(44, 69, admins);
-    //   await wrapper.setProps({
-    //     business: business
-    //   });
-    // });
-
     it('Primary admin is changed and alert message is shown when non-primary admin is selected', async() => {
       const currentPrimaryAdmin = testAdmins[0];
       const newPrimaryAdmin = testAdmins[1];
