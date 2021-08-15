@@ -66,6 +66,7 @@
       :business="business"
       v-if="modifyBusiness"
       @discardModifyBusiness="modifyBusiness=false"
+      @modifySuccess="updateBusiness"
     />
   </div>
 </template>
@@ -122,17 +123,7 @@ export default {
   watch: {
     $route: {
       handler() {
-        const id = parseInt(this.$route.params.id);
-        if (isNaN(id)) return;
-
-        getBusiness(id).then((value) => {
-          if (typeof value === 'string') {
-            this.$store.commit('setError', value);
-          } else {
-            this.business = value;
-            this.readableAddress = convertAddressToReadableText(value.address, "full");
-          }
-        });
+        this.updateBusiness();
       },
       immediate: true,
     }
@@ -189,6 +180,20 @@ export default {
         this.updateProductCountry = true;
       }
     },
+    updateBusiness() {
+      this.modifyBusiness = false;
+      const id = parseInt(this.$route.params.id);
+      if (isNaN(id)) return;
+
+      getBusiness(id).then((value) => {
+        if (typeof value === 'string') {
+          this.$store.commit('setError', value);
+        } else {
+          this.business = value;
+          this.readableAddress = convertAddressToReadableText(value.address, "full");
+        }
+      });
+    }
   }
 };
 </script>
