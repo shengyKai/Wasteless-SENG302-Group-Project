@@ -1,7 +1,7 @@
 <template>
   <v-container>
-    <v-form>
-      <v-card>
+    <v-form v-model="valid">
+      <v-card class="pb-2">
         <v-card-title class="primary-text">Modify Profile</v-card-title>
         <v-card-text>
           <v-tabs v-model="tab">
@@ -260,16 +260,19 @@
 
 
           <!-- Update -->
-          <v-divider class="mb-2"/>
-          <p class="error-text" v-if ="errorMessage !== undefined"> {{errorMessage}} </p>
-          <!-- :disabled="!valid" -->
-          <v-btn
-            type="submit"
-            color="primary"
-            @click.prevent="updateProfile"
-          >
-            Update profile
-          </v-btn>
+          <v-divider/>
+          <v-row class="mt-2 px-2" justify="end">
+            <p class="error-text" v-if ="errorMessage !== undefined"> {{errorMessage}} </p>
+            <v-btn
+              class="ml-2"
+              type="submit"
+              :disabled="!valid"
+              color="primary"
+              @click.prevent="updateProfile"
+            >
+              Update profile
+            </v-btn>
+          </v-row>
         </v-card-text>
       </v-card>
     </v-form>
@@ -279,6 +282,7 @@
 <script>
 import LocationAutocomplete from '@/components/utils/LocationAutocomplete';
 
+import { getUser } from '@/api/internal';
 import { mandatoryRules } from '@/utils';
 
 export default {
@@ -287,28 +291,22 @@ export default {
     LocationAutocomplete,
   },
   data() {
-    const initialUser = this.$store.state.user;
-    let countryCode = '';
-    let phoneDigits = '';
-    if (initialUser.phoneNumber !== undefined) {
-      let parts = initialUser.phoneNumber.split(' ');
-      countryCode = parts[0];
-      phoneDigits = parts.slice(1).join(' ');
-    }
     return {
       tab: 'location',
       valid: false,
       user: {
-        firstName: initialUser.firstName ?? '',
-        lastName: initialUser.lastName ?? '',
-        middleName: initialUser.middleName ?? '',
-        nickname: initialUser.nickname ?? '',
-        bio: initialUser.bio ?? '',
-        email: initialUser.email ?? '',
-        dateOfBirth: initialUser.dateOfBirth ?? '',
-        phoneNumber: '',
+        email: '',
         password: '',
         oldPassword: '', // Not sure if this is the final field name
+
+        firstName: '',
+        middleName: '',
+        lastName: '',
+        bio: '',
+        nickname: '',
+        dateOfBirth: '',
+        phoneNumber: '',
+
         homeAddress: {
           streetNumber: '',
           streetName: '',
@@ -317,12 +315,12 @@ export default {
           region: '',
           country: '',
           postcode: '',
-          ...initialUser.homeAddress,
         }
       },
-      countryCode,
-      phoneDigits,
+      countryCode: '',
+      phoneDigits: '',
       confirmPassword: '',
+      streetAddress: '',
 
       showDatePicker: false,
 
@@ -331,7 +329,6 @@ export default {
       showOldPassword: false,
 
       errorMessage: undefined,
-      streetAddress: initialUser.homeAddress.streetNumber + ' ' + initialUser.homeAddress.streetName,
     };
   },
   methods: {
@@ -339,10 +336,10 @@ export default {
       console.log(JSON.parse(JSON.stringify(this.user)));
     },
     updatePhoneNumber() {
-      this.user.phoneNumber = this.countryCode + ' ' + this.phone;
+      this.user.phoneNumber = this.countryCode + ' ' + this.phoneDigits;
     },
     passwordChange() {
-
+      // TODO Write implementation
     },
   },
   watch: {
@@ -351,6 +348,38 @@ export default {
         const streetParts = this.streetAddress.split(" ");
         this.user.homeAddress.streetNumber = streetParts[0];
         this.user.homeAddress.streetName = streetParts.slice(1).join(" ");
+      },
+      immediate: true,
+    },
+    countryCode() { this.updatePhoneNumber(); },
+    phoneDigits() { this.updatePhoneNumber(); },
+    $route: {
+      async handler() {
+        const id = parseInt(this.$route.params.id);
+        if (isNaN(id)) return;
+
+        let user;
+        if (id === this.$store.state.user.id) {
+          user = this.$store.state.user;
+        } else {
+          user = await getUser(id);
+        }
+        this.user.firstName = user.firstName ?? '',
+        this.user.lastName = user.lastName ?? '',
+        this.user.middleName = user.middleName ?? '',
+        this.user.nickname = user.nickname ?? '',
+        this.user.bio = user.bio ?? '',
+        this.user.email = user.email ?? '',
+        this.user.dateOfBirth = user.dateOfBirth ?? '',
+
+        this.user.homeAddress = user.homeAddress;
+        this.streetAddress = user.homeAddress.streetNumber + ' ' + user.homeAddress.streetName;
+
+        if (user.phoneNumber !== undefined) {
+          let parts = user.phoneNumber.split(' ');
+          this.countryCode = parts[0];
+          this.phoneDigits = parts.slice(1).join(' ');
+        }
       },
       immediate: true,
     },

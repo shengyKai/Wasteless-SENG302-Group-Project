@@ -17,9 +17,22 @@
 
       <!-- List of available actions -->
       <div class="action-menu">
-        <v-btn v-if="isViewingOwnProfile===true" icon @click="$router.push('/profile/modify')">
-          <v-icon>mdi-cog</v-icon>
-        </v-btn>
+
+        <v-tooltip bottom>
+          <template #activator="{ on, attrs }">
+            <v-btn
+              v-if="isViewingOwnProfile===true || currentUserRole!=='user'"
+              icon
+              color="primary"
+              v-bind="attrs"
+              v-on="on"
+              @click="$router.push(`/profile/${user.id}/modify`)"
+            >
+              <v-icon>mdi-cog</v-icon>
+            </v-btn>
+          </template>
+          <span>Modify Profile</span>
+        </v-tooltip>
         <v-dialog
           v-if="isActingAsBusiness && isViewingOwnProfile===false"
           v-model="removeAdminDialog"

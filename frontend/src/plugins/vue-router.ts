@@ -44,7 +44,7 @@ const routes = [
     meta: { title: 'Profile' }
   },
   {
-    path: "/profile/modify",
+    path: "/profile/:id/modify",
     component: ModifyUserPage,
     meta: { title: 'Modify user' },
   },
