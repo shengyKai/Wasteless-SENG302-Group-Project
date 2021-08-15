@@ -1166,7 +1166,7 @@ export async function makeBusinessImagePrimary(businessId: number, imageId: numb
     if (status === 403) return 'Operation not permitted';
     if (status === 406) return 'Business or Image not found';
 
-    return 'Request failed: ' + status;
+    return 'Request failed: ' + error.response?.data.message;
   }
   return undefined;
 }

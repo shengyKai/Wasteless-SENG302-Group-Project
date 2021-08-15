@@ -222,19 +222,7 @@ export default {
       }
     },
     changeUpdateCountries() {
-      if (this.updateProductCountry) {
-        this.updateProductCountry = false;
-      } else {
-        this.updateProductCountry = true;
-      }
-    },
-    /**
-     * Deletes a given image
-     * @param imageId ID of the image to delete
-     */
-    deleteImage(imageId) {
-      console.log(imageId);
-      //todo
+      this.updateProductCountry = !this.updateProductCountry;
     },
     /**
      * Sets the given image as primary image to be displayed
