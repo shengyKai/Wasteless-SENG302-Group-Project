@@ -4,7 +4,7 @@ import Vuex, { Store } from 'vuex';
 import {createLocalVue, Wrapper, mount, createWrapper} from '@vue/test-utils';
 
 import { getStore, resetStoreForTesting, StoreData } from '@/store';
-import UserProfile from '@/components/UserProfile.vue';
+import UserProfile from '@/components/UserProfile/index.vue';
 
 import * as api from '@/api/internal';
 import { castMock, flushQueue } from './utils';
@@ -64,7 +64,7 @@ function makeTestBusiness(businessId: number, administrators?: number[]) {
  * @param applicationAdmin True if you want the user to be an system administrator
  * @returns The generated user
  */
-function makeTestUser(userId: number, businesses?: number[], applicationAdmin?: boolean) {
+function makeTestUser(userId: number, businesses?: number[], role?: api.UserRole) {
   let user: User = {
     id:  userId,
     firstName: 'test_firstname' + userId,
@@ -84,7 +84,7 @@ function makeTestUser(userId: number, businesses?: number[], applicationAdmin?: 
       district: 'test_district',
       country: 'test_country' + userId
     },
-    role: applicationAdmin ? 'globalApplicationAdmin' : 'user'
+    role: role ?? 'user'
   };
 
   if (businesses !== undefined) {
@@ -128,7 +128,7 @@ describe('UserProfile.vue', () => {
 
     getUser.mockImplementation(async userId => {
       if (userId === 200) {
-        return makeTestUser(userId, [userId, userId + 1], true);
+        return makeTestUser(userId, [userId, userId + 1], 'globalApplicationAdmin');
       }
       return makeTestUser(userId, [userId, userId + 1]);
     });
@@ -150,8 +150,6 @@ describe('UserProfile.vue', () => {
       }
       return "Some error string";
     });
-
-    generateWrapper(100);
   });
 
   /**
@@ -215,247 +213,266 @@ describe('UserProfile.vue', () => {
     }
   }
 
-  it('Fetches user with "getUser"', () => {
-    expect(getUser).toBeCalledWith(100);
-  });
+  describe('Viewing user 100 (regular user) as user 1 (regular user)', () => {
+    beforeEach(() => {
+      generateWrapper(100);
+    });
 
-  it('Renders first name', () => {
-    expect(wrapper.text()).toContain('test_firstname100');
-  });
+    it('Fetches user with "getUser"', () => {
+      expect(getUser).toBeCalledWith(100);
+    });
 
-  it('Renders last name', () => {
-    expect(wrapper.text()).toContain('test_lastname100');
-  });
+    it('Renders first name', () => {
+      expect(wrapper.text()).toContain('test_firstname100');
+    });
 
-  it('Renders nickname', () => {
-    expect(wrapper.text()).toContain('test_nickname100');
-  });
+    it('Renders last name', () => {
+      expect(wrapper.text()).toContain('test_lastname100');
+    });
 
-  it('Renders bio', () => {
-    expect(wrapper.text()).toContain('test_biography100');
-  });
+    it('Renders nickname', () => {
+      expect(wrapper.text()).toContain('test_nickname100');
+    });
 
-  it('Renders email', () => {
-    expect(wrapper.text()).toContain('test_email100');
-  });
+    it('Renders bio', () => {
+      expect(wrapper.text()).toContain('test_biography100');
+    });
 
-  it('Renders phone number', () => {
-    expect(wrapper.text()).toContain('test_phone_number100');
-  });
+    it('Renders email', () => {
+      expect(wrapper.text()).toContain('test_email100');
+    });
 
-  it('Does not render street address as normal user', () => {
-    expect(wrapper.text()).not.toContain('test_street1');
-  });
+    it('Renders phone number', () => {
+      expect(wrapper.text()).toContain('test_phone_number100');
+    });
 
-  it('Does not render street number as normal user', () => {
-    expect(wrapper.text()).not.toContain('test_street_number');
-  });
+    it('Does not render street address as normal user', () => {
+      expect(wrapper.text()).not.toContain('test_street1');
+    });
 
-  it('Renders city as normal user', () => {
-    expect(wrapper.text()).toContain('test_city');
-  });
+    it('Does not render street number as normal user', () => {
+      expect(wrapper.text()).not.toContain('test_street_number');
+    });
 
-  it('Renders region as normal user', () => {
-    expect(wrapper.text()).toContain('test_region');
-  });
+    it('Renders city as normal user', () => {
+      expect(wrapper.text()).toContain('test_city');
+    });
 
-  it('Does not render postcode as normal user', () => {
-    expect(wrapper.text()).not.toContain('test_postcode');
-  });
+    it('Renders region as normal user', () => {
+      expect(wrapper.text()).toContain('test_region');
+    });
 
-  it('Does not render district as normal user', () => {
-    expect(wrapper.text()).not.toContain('test_district');
-  });
+    it('Does not render postcode as normal user', () => {
+      expect(wrapper.text()).not.toContain('test_postcode');
+    });
 
-  it('Renders country as normal user', () => {
-    expect(wrapper.text()).toContain('test_country100');
-  });
+    it('Does not render district as normal user', () => {
+      expect(wrapper.text()).not.toContain('test_district');
+    });
 
-  it('Renders birthday', () => {
-    expect(wrapper.text()).toContain('01 Jan 1900');
-  });
+    it('Renders country as normal user', () => {
+      expect(wrapper.text()).toContain('test_country100');
+    });
 
-  it('Renders computed creation message', () => {
-    expect(wrapper.text()).toContain(wrapper.vm.createdMsg);
-  });
+    it('Renders birthday', () => {
+      expect(wrapper.text()).toContain('01 Jan 1900');
+    });
 
-  it('Creation message is in valid format', () => {
-    expect(wrapper.vm.createdMsg).toMatch(/[0-9]{1,2} [A-Z][a-z]{2} [0-9]+ \([0-9]+ months ago\)/);
-  });
+    it('Renders computed creation message', () => {
+      expect(wrapper.text()).toContain(wrapper.vm.createdMsg);
+    });
 
-  it('User businesses are displayed', async () => {
-    await Vue.nextTick();
-    expect(wrapper.text()).toContain('test_business_name100');
-    expect(wrapper.text()).toContain('test_business_name101');
-  });
+    it('Creation message is in valid format', () => {
+      expect(wrapper.vm.createdMsg).toMatch(/[0-9]{1,2} [A-Z][a-z]{2} [0-9]+ \([0-9]+ months ago\)/);
+    });
 
-  it('If acting as a business then there should be a add admin button', async () => {
-    actAsBusiness(1);
-    await Vue.nextTick();
-    let addAdmin = wrapper.findComponent({ ref: 'addAdminButton' });
-    expect(addAdmin.exists()).toBeTruthy();
-  });
+    it('User businesses are displayed', async () => {
+      await Vue.nextTick();
+      expect(wrapper.text()).toContain('test_business_name100');
+      expect(wrapper.text()).toContain('test_business_name101');
+    });
 
-  it('If not acting as a business then there should not be a add admin button', async () => {
-    await flushQueue();
-    let addAdmin = wrapper.findComponent({ ref: 'addAdminButton' });
-    expect(addAdmin.exists()).toBeFalsy();
-  });
+    it('If acting as different user then the user being viewed, then I should not be able to modify the user', async () => {
+      let settingsButton = wrapper.findComponent({ref: 'settingsButton'});
+      expect(settingsButton.exists()).toBeFalsy();
+    });
 
-  it('If not an administrator of the active business then the "add admin" button should be enabled', async () => {
-    actAsBusiness(1);
-    await flushQueue();
-    let addAdmin = wrapper.findComponent({ ref: 'addAdminButton' });
-    expect(addAdmin.props().disabled).toBeFalsy();
-  });
+    it('If acting as a business then there should be a add admin button', async () => {
+      actAsBusiness(1);
+      await Vue.nextTick();
+      let addAdmin = wrapper.findComponent({ ref: 'addAdminButton' });
+      expect(addAdmin.exists()).toBeTruthy();
+    });
 
-  it('If already an administrator of the active business then the "add admin" button should be disabled', async () => {
-    actAsBusiness(100); // Business 100 has an administrator with userId = 100
-    await flushQueue();
-    let addAdmin = wrapper.findComponent({ ref: 'addAdminButton' });
-    expect(addAdmin.props().disabled).toBeTruthy();
-  });
+    it('If not acting as a business then there should not be a add admin button', async () => {
+      await flushQueue();
+      let addAdmin = wrapper.findComponent({ ref: 'addAdminButton' });
+      expect(addAdmin.exists()).toBeFalsy();
+    });
 
-  it('If the "add admin" button is clicked then the "makeBusinessAdmin" function should be called', async () => {
-    actAsBusiness(1);
-    await flushQueue();
-    // Ensure that the "makeBusinessAdmin" operation is successful
-    makeBusinessAdmin.mockResolvedValue(undefined);
-    let addAdmin = wrapper.findComponent({ ref: 'addAdminButton' });
-    addAdmin.trigger('click');
-    await flushQueue();
-    let confirm = wrapper.findComponent({ref: 'confirmButton' });
-    confirm.trigger('click');
-    await flushQueue();
-    expect(makeBusinessAdmin).lastCalledWith(1, 100); // Must be called with bussinessId, userId
-    expect(store.state.globalError).toBeNull();
-  });
+    it('If not an administrator of the active business then the "add admin" button should be enabled', async () => {
+      actAsBusiness(1);
+      await flushQueue();
+      let addAdmin = wrapper.findComponent({ ref: 'addAdminButton' });
+      expect(addAdmin.props().disabled).toBeFalsy();
+    });
 
-  it('If "makeBusinessAdmin" function results in an error then this error should be shown', async () => {
-    actAsBusiness(1);
-    await flushQueue();
-    // Ensure that the "makeBusinessAdmin" operation fails
-    makeBusinessAdmin.mockResolvedValue('test_error_message');
-    let addAdmin = wrapper.findComponent({ ref: 'addAdminButton' });
-    addAdmin.trigger('click');
-    await flushQueue();
-    let confirm = wrapper.findComponent({ref: 'confirmButton' });
-    confirm.trigger('click');
-    await flushQueue();
-    expect(makeBusinessAdmin).lastCalledWith(1, 100); // Must be called with bussinessId, userId
-    expect(store.state.globalError).toBe('test_error_message');
-  });
+    it('If already an administrator of the active business then the "add admin" button should be disabled', async () => {
+      actAsBusiness(100); // Business 100 has an administrator with userId = 100
+      await flushQueue();
+      let addAdmin = wrapper.findComponent({ ref: 'addAdminButton' });
+      expect(addAdmin.props().disabled).toBeTruthy();
+    });
 
-  it('If acting as a business there should be a "remove admin" button', async () => {
-    actAsBusiness(1);
-    await Vue.nextTick();
-    let addAdmin = wrapper.findComponent({ ref: 'removeAdminButton' });
-    expect(addAdmin.exists()).toBeTruthy();
-  });
+    it('If the "add admin" button is clicked then the "makeBusinessAdmin" function should be called', async () => {
+      actAsBusiness(1);
+      await flushQueue();
+      // Ensure that the "makeBusinessAdmin" operation is successful
+      makeBusinessAdmin.mockResolvedValue(undefined);
+      let addAdmin = wrapper.findComponent({ ref: 'addAdminButton' });
+      addAdmin.trigger('click');
+      await flushQueue();
+      let confirm = wrapper.findComponent({ref: 'confirmButton' });
+      confirm.trigger('click');
+      await flushQueue();
+      expect(makeBusinessAdmin).lastCalledWith(1, 100); // Must be called with bussinessId, userId
+      expect(store.state.globalError).toBeNull();
+    });
 
-  it('If not acting as a business then there should not be a remove admin button', async () => {
-    await flushQueue();
-    let addAdmin = wrapper.findComponent({ ref: 'removeAdminButton' });
-    expect(addAdmin.exists()).toBeFalsy();
-  });
+    it('If "makeBusinessAdmin" function results in an error then this error should be shown', async () => {
+      actAsBusiness(1);
+      await flushQueue();
+      // Ensure that the "makeBusinessAdmin" operation fails
+      makeBusinessAdmin.mockResolvedValue('test_error_message');
+      let addAdmin = wrapper.findComponent({ ref: 'addAdminButton' });
+      addAdmin.trigger('click');
+      await flushQueue();
+      let confirm = wrapper.findComponent({ref: 'confirmButton' });
+      confirm.trigger('click');
+      await flushQueue();
+      expect(makeBusinessAdmin).lastCalledWith(1, 100); // Must be called with bussinessId, userId
+      expect(store.state.globalError).toBe('test_error_message');
+    });
 
-  it('If not an administrator of the active business then the "remove admin" button should be disabled', async () => {
-    actAsBusiness(1);
-    await flushQueue();
-    let addAdmin = wrapper.findComponent({ ref: 'removeAdminButton' });
-    expect(addAdmin.props().disabled).toBeTruthy();
-  });
+    it('If acting as a business there should be a "remove admin" button', async () => {
+      actAsBusiness(1);
+      await Vue.nextTick();
+      let addAdmin = wrapper.findComponent({ ref: 'removeAdminButton' });
+      expect(addAdmin.exists()).toBeTruthy();
+    });
 
-  it('If an administrator of the active business then the "remove admin" button should be enabled', async () => {
-    actAsBusiness(100); // Business 100 has an administrator with userId = 100
-    await flushQueue();
-    let addAdmin = wrapper.findComponent({ ref: 'removeAdminButton' });
-    expect(addAdmin.props().disabled).toBeFalsy();
-  });
+    it('If not acting as a business then there should not be a remove admin button', async () => {
+      await flushQueue();
+      let addAdmin = wrapper.findComponent({ ref: 'removeAdminButton' });
+      expect(addAdmin.exists()).toBeFalsy();
+    });
 
-  it('If the "remove admin" button is clicked then the "removeBusinessAdmin" function should be called', async () => {
-    actAsBusiness(100);
-    await flushQueue();
-    // Ensure that the "makeBusinessAdmin" operation is successful
-    removeBusinessAdmin.mockResolvedValue(undefined);
-    let removeAdmin = wrapper.findComponent({ ref: 'removeAdminButton' });
-    removeAdmin.trigger('click');
-    await flushQueue();
-    let confirm = wrapper.findComponent({ref: 'confirmButton' });
-    confirm.trigger('click');
-    await flushQueue();
-    expect(removeBusinessAdmin).lastCalledWith(100, 100); // Must be called with bussinessId, userId
-    expect(store.state.globalError).toBeNull();
-  });
+    it('If not an administrator of the active business then the "remove admin" button should be disabled', async () => {
+      actAsBusiness(1);
+      await flushQueue();
+      let addAdmin = wrapper.findComponent({ ref: 'removeAdminButton' });
+      expect(addAdmin.props().disabled).toBeTruthy();
+    });
 
-  it('If "removeBusinessAdmin" function results in an error then this error should be shown', async () => {
-    actAsBusiness(100);
-    await flushQueue();
-    // Ensure that the "makeBusinessAdmin" operation fails
-    removeBusinessAdmin.mockResolvedValue('test_error_message');
-    let removeAdmin = wrapper.findComponent({ ref: 'removeAdminButton' });
-    removeAdmin.trigger('click');
-    await flushQueue();
-    let confirm = wrapper.findComponent({ref: 'confirmButton' });
-    confirm.trigger('click');
-    await flushQueue();
-    expect(removeBusinessAdmin).lastCalledWith(100, 100); // Must be called with bussinessId, userId
-    expect(store.state.globalError).toBe('test_error_message');
-  });
+    it('If an administrator of the active business then the "remove admin" button should be enabled', async () => {
+      actAsBusiness(100); // Business 100 has an administrator with userId = 100
+      await flushQueue();
+      let addAdmin = wrapper.findComponent({ ref: 'removeAdminButton' });
+      expect(addAdmin.props().disabled).toBeFalsy();
+    });
 
-  it('If not an Application admin, then there should not be a administrator chip', async () => {
-    let adminChip = wrapper.findComponent({ref:'administratorStatus'});
-    expect(adminChip.exists()).toBeFalsy();
+    it('If the "remove admin" button is clicked then the "removeBusinessAdmin" function should be called', async () => {
+      actAsBusiness(100);
+      await flushQueue();
+      // Ensure that the "makeBusinessAdmin" operation is successful
+      removeBusinessAdmin.mockResolvedValue(undefined);
+      let removeAdmin = wrapper.findComponent({ ref: 'removeAdminButton' });
+      removeAdmin.trigger('click');
+      await flushQueue();
+      let confirm = wrapper.findComponent({ref: 'confirmButton' });
+      confirm.trigger('click');
+      await flushQueue();
+      expect(removeBusinessAdmin).lastCalledWith(100, 100); // Must be called with bussinessId, userId
+      expect(store.state.globalError).toBeNull();
+    });
+
+    it('If "removeBusinessAdmin" function results in an error then this error should be shown', async () => {
+      actAsBusiness(100);
+      await flushQueue();
+      // Ensure that the "makeBusinessAdmin" operation fails
+      removeBusinessAdmin.mockResolvedValue('test_error_message');
+      let removeAdmin = wrapper.findComponent({ ref: 'removeAdminButton' });
+      removeAdmin.trigger('click');
+      await flushQueue();
+      let confirm = wrapper.findComponent({ref: 'confirmButton' });
+      confirm.trigger('click');
+      await flushQueue();
+      expect(removeBusinessAdmin).lastCalledWith(100, 100); // Must be called with bussinessId, userId
+      expect(store.state.globalError).toBe('test_error_message');
+    });
+
+    it('If not an Application admin, then there should not be a administrator chip', async () => {
+      let adminChip = wrapper.findComponent({ref:'administratorStatus'});
+      expect(adminChip.exists()).toBeFalsy();
+    });
   });
 
   it('If acting as application admin and viewing an admin, then there should be a administrator chip', async () => {
-    appWrapper.destroy();
     // change the current user into a GAA
-    store.state.user = makeTestUser(1, [1], true);
-    //regenerate wrapper for a GAA profile
+    store.state.user = makeTestUser(1, [1], 'globalApplicationAdmin');
+    // Generate wrapper for a GAA profile
     generateWrapper(200);
     await flushQueue();
     let adminChip = wrapper.findComponent({ref:'administratorStatus'});
     expect(adminChip.exists()).toBeTruthy();
   });
 
-  it('If acting as DGAA viewing a user, there should be a make admin button', async () => {
-    appWrapper.destroy();
-    // change the current user into a DGAA
+  it('If acting as the same user, then the settings option should be available', async () => {
+    // Set current user
     store.state.user = makeTestUser(1, [1]);
-    store.state.user.role = "defaultGlobalApplicationAdmin";
-    //regenerate wrapper for a normal user profile
-    generateWrapper(100);
+    // Generate wrapper for the same user's profile
+    generateWrapper(1);
     await flushQueue();
-    let adminChip = wrapper.findComponent({ref:'administratorStatus'});
-    expect(adminChip.exists()).toBeFalsy();
-    let makeAdminButton = wrapper.findComponent({ref:'makeAdminButton'});
-    expect(makeAdminButton.exists()).toBeTruthy();
+    let settingsButton = wrapper.findComponent({ref: 'settingsButton'});
+    expect(settingsButton.exists()).toBeTruthy();
   });
 
-  it('If acting as DGAA viewing a user, the DGAA can make the user into a application admin(GAA)', async () => {
-    appWrapper.destroy();
-    // change the current user into a DGAA
-    store.state.user = makeTestUser(1, [1]);
-    store.state.user.role = "defaultGlobalApplicationAdmin";
-    //regenerate wrapper for a normal user profile
-    generateWrapper(100);
-    await flushQueue();
-    let makeAdminButton = wrapper.findComponent({ref:'makeAdminButton'});
-    await makeAdminButton.trigger('click');
-    let adminChip = wrapper.findComponent({ref:'administratorStatus'});
-    expect(adminChip.exists()).toBeTruthy();
-    expect(wrapper.vm.user.role).toEqual("globalApplicationAdmin");
-    await flushQueue();
-    expect(makeAdminButton.exists()).toBeFalsy();
+  describe('Viewing user 100 as user 1 (default global application admin)', () => {
+    beforeEach(async () => {
+      // change the current user into a DGAA
+      store.state.user = makeTestUser(1, [1], 'defaultGlobalApplicationAdmin');
+      // Generate wrapper for a normal user profile
+      generateWrapper(100);
+      await flushQueue();
+    });
+
+    it('If acting as DGAA viewing a user, there should be a make admin button', async () => {
+      let adminChip = wrapper.findComponent({ref:'administratorStatus'});
+      expect(adminChip.exists()).toBeFalsy();
+      let makeAdminButton = wrapper.findComponent({ref:'makeAdminButton'});
+      expect(makeAdminButton.exists()).toBeTruthy();
+    });
+
+    it('If acting as DGAA viewing a user, the DGAA can make the user into a application admin(GAA)', async () => {
+      let makeAdminButton = wrapper.findComponent({ref:'makeAdminButton'});
+      await makeAdminButton.trigger('click');
+      let adminChip = wrapper.findComponent({ref:'administratorStatus'});
+      expect(adminChip.exists()).toBeTruthy();
+      expect(wrapper.vm.user.role).toEqual("globalApplicationAdmin");
+      await flushQueue();
+      expect(makeAdminButton.exists()).toBeFalsy();
+    });
+
+    it('If acting as a DGAA viewing a user, the DGAA should be able to modify the user', async () => {
+      let settingsButton = wrapper.findComponent({ref: 'settingsButton'});
+      expect(settingsButton.exists()).toBeTruthy();
+    });
   });
 
   it('If acting as DGAA viewing a GAA, the DGAA can revoke the GAA into a normal user', async () => {
-    appWrapper.destroy();
     // change the current user into a DGAA
-    store.state.user = makeTestUser(1, [1]);
-    store.state.user.role = "defaultGlobalApplicationAdmin";
-    //regenerate wrapper for a GAA profile
+    store.state.user = makeTestUser(1, [1], 'defaultGlobalApplicationAdmin');
+    // Generate wrapper for a GAA profile
     generateWrapper(200);
     await flushQueue();
     let adminChip = wrapper.findComponent({ref:'administratorStatus'});

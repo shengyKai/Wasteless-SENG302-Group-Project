@@ -42,6 +42,7 @@ const instance = axios.create({
 
 export type MaybeError<T> = T | string;
 
+export type UserRole = "user" | "globalApplicationAdmin" | "defaultGlobalApplicationAdmin"
 export type User = {
   id: number,
   firstName: string,
@@ -54,7 +55,7 @@ export type User = {
   phoneNumber?: string,
   homeAddress: Location,
   created?: string,
-  role?: "user" | "globalApplicationAdmin" | "defaultGlobalApplicationAdmin",
+  role?: UserRole,
   businessesAdministered?: Business[],
 };
 
