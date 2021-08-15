@@ -132,6 +132,20 @@
                     </v-col>
                   </div>
                   <v-card-title>Images</v-card-title>
+                  <v-btn
+                    color="primary"
+                    outlined
+                    @click="showImageUploaderForm=true"
+                  >
+                    <v-icon
+                      class="expand-icon"
+                      color="primary"
+                    >
+                      mdi-upload
+                    </v-icon>
+                    Upload new image
+                  </v-btn>
+                  <BusinessImageUploader :business-id="business.id" v-model="showImageUploaderForm"/>
                   <p class="error-text" v-if ="errorMessage !== undefined"> {{errorMessage}} </p>
                 </v-container>
               </v-card-text>
@@ -179,6 +193,7 @@
 
 <script>
 import LocationAutocomplete from '@/components/utils/LocationAutocomplete';
+import BusinessImageUploader from "@/components/utils/BusinessImageUploader";
 import {
   alphabetExtendedMultilineRules,
   alphabetExtendedSingleLineRules, alphabetRules,
@@ -189,6 +204,7 @@ export default {
   name: 'ModifyBusiness',
   components: {
     LocationAutocomplete,
+    BusinessImageUploader,
   },
   props: {
     business: Object
@@ -198,6 +214,7 @@ export default {
       readableAddress: "",
       errorMessage: undefined,
       dialog: true,
+      administrators: this.business.administrators,
       businessName: this.business.name,
       description: this.business.description,
       businessType: this.business.businessType,
@@ -215,6 +232,8 @@ export default {
       ],
       updateProductCountry: true,
       valid: false,
+      showImageUploaderForm: false,
+      showAlert: false,
       showChangeAdminAlert: false,
       primaryAdminAlertMsg: "",
       primaryAdministratorId: this.business.primaryAdministratorId,
@@ -229,9 +248,6 @@ export default {
     };
   },
   computed: {
-    administrators() {
-      return this.business?.administrators || [];
-    },
     userIsPrimaryAdmin() {
       return this.$store.state.user.id === this.business.primaryAdministratorId;
     }

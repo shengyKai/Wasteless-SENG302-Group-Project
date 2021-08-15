@@ -19,10 +19,10 @@ type Mocked<T extends { [k: string]: (...args: any[]) => any }> = { [k in keyof 
 const instance: Mocked<Pick<AxiosInstance, 'post'>> = axios.instance;
 
 describe("Test POST /cards/{cardId}/conversations/{buyerId} endpoint", () => {
-  it("when the endpoint is called with valid parameters, a 200 response is returned", async () => {
+  it("when the endpoint is called with valid parameters, a 201 response is returned", async () => {
     instance.post.mockResolvedValueOnce({
       response: {
-        status: 200
+        status: 201
       }
     });
     const response = await api.messageConversation(1, 1, 1, "");
