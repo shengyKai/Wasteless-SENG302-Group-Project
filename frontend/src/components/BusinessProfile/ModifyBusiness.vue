@@ -3,7 +3,7 @@
     <v-row justify="center">
       <v-col cols="10">
         <v-card max-width=1800px>
-          <v-form v-model="valid"  @submit="proceedWithModifyBusiness">
+          <v-form v-model="valid"  @submit.prevent="proceedWithModifyBusiness">
             <v-card class="mt-5 ">
               <v-card-title class="primary-text">Modify Business Details</v-card-title>
               <v-card-text>
@@ -181,6 +181,7 @@ export default {
       readableAddress: "",
       errorMessage: undefined,
       dialog: true,
+      administrators: this.business.administrators,
       businessName: this.business.name,
       description: this.business.description,
       businessType: this.business.businessType,
@@ -227,7 +228,7 @@ export default {
     discardButton() {
       this.$emit('discardModifyBusiness');
     },
-    proceedWithModifyBusiness() {
+    async proceedWithModifyBusiness() {
       /**
        * Get the street number and name from the street address field.
        */
@@ -253,7 +254,10 @@ export default {
         updateProductCountry: this.updateProductCountry
       };
 
-      modifyBusiness(this.business.id, modifiedFields);
+      const result = await modifyBusiness(this.business.id, modifiedFields);
+      if (typeof result === 'string') {
+        this.errorMessage = result;
+      }
     }
   }
 };
