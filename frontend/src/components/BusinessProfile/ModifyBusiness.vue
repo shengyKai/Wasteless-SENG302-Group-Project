@@ -102,33 +102,35 @@
                       <v-icon v-if="!updateProductCountry" large> mdi-close </v-icon>
                     </v-col>
                   </v-row>
-                  <v-card-title>Change Primary Administrator</v-card-title>
-                  <v-col>
-                    <v-row>
-                      <span v-for="admin in administrators" :key="admin.id">
-                        <v-chip
-                          v-if="isPrimaryAdmin(admin)"
-                          class="admin-chip"
-                          color="red"
-                          text-color="white"
-                        >
-                          {{ admin.firstName }} {{ admin.lastName }}
-                        </v-chip>
-                        <v-chip
-                          v-else
-                          class="admin-chip"
-                          color="green"
-                          text-color="white"
-                          @click="changePrimaryAdmin(admin)"
-                        >
-                          {{ admin.firstName }} {{ admin.lastName }}
-                        </v-chip>
-                      </span>
-                      <v-alert v-if="showChangeAdminAlert" color="red" type="error" dense text>
-                        {{ primaryAdminAlertMsg }}
-                      </v-alert>
-                    </v-row>
-                  </v-col>
+                  <div v-if="userIsPrimaryAdmin">
+                    <v-card-title>Change Primary Administrator</v-card-title>
+                    <v-col>
+                      <v-row>
+                        <span v-for="admin in administrators" :key="admin.id">
+                          <v-chip
+                            v-if="adminIsPrimary(admin)"
+                            class="admin-chip"
+                            color="red"
+                            text-color="white"
+                          >
+                            {{ admin.firstName }} {{ admin.lastName }}
+                          </v-chip>
+                          <v-chip
+                            v-else
+                            class="admin-chip"
+                            color="green"
+                            text-color="white"
+                            @click="changePrimaryAdmin(admin)"
+                          >
+                            {{ admin.firstName }} {{ admin.lastName }}
+                          </v-chip>
+                        </span>
+                        <v-alert v-if="showChangeAdminAlert" color="red" type="error" dense text>
+                          {{ primaryAdminAlertMsg }}
+                        </v-alert>
+                      </v-row>
+                    </v-col>
+                  </div>
                   <v-card-title>Images</v-card-title>
                   <p class="error-text" v-if ="errorMessage !== undefined"> {{errorMessage}} </p>
                 </v-container>
@@ -229,10 +231,13 @@ export default {
   computed: {
     administrators() {
       return this.business?.administrators || [];
+    },
+    userIsPrimaryAdmin() {
+      return this.$store.state.user.id === this.business.primaryAdministratorId;
     }
   },
   methods: {
-    isPrimaryAdmin(admin) {
+    adminIsPrimary(admin) {
       return admin.id === this.primaryAdministratorId;
     },
     changeUpdateCountries() {
