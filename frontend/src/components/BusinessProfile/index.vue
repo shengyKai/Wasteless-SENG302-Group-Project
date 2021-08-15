@@ -74,7 +74,7 @@
 
 <script>
 import ModifyBusiness from '@/components/BusinessProfile/ModifyBusiness';
-import { getBusiness } from '../../api/internal';
+import { getBusiness } from '@/api/internal';
 import convertAddressToReadableText from '@/components/utils/Methods/convertJsonAddressToReadableText';
 import {
   alphabetExtendedMultilineRules,
@@ -111,6 +111,7 @@ export default {
         'Non-profit organisation',
         'Retail Trade',
       ],
+      showImageUploaderForm: false,
       valid: false,
       updateProductCountry: true,
       maxCharRules: () => maxCharRules(100),
