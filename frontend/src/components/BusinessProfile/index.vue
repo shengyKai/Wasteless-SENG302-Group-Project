@@ -33,11 +33,10 @@
               </v-alert>
             </v-col>
           </v-row>
-            <p><b>Created:</b> {{ createdMsg }}</p>
-            <v-btn outlined color="primary" @click="goSalePage" :value="false">
-              Sale listings
-            </v-btn>
-          </div>
+          <p><b>Created:</b> {{ createdMsg }}</p>
+          <v-btn outlined color="primary" @click="goSalePage" :value="false" width="150">
+            Sale listings
+          </v-btn>
         </div>
         <v-container fluid>
           <v-row>
@@ -49,7 +48,6 @@
               <h4>Category</h4>
               {{ business.businessType }}
             </v-col>
-
             <v-col cols="12">
               <h4>Description</h4>
               {{ business.description }}
@@ -84,6 +82,7 @@
         </v-container>
       </v-card>
     </div>
+
     <ModifyBusiness
       :business="business"
       v-if="modifyBusiness"
