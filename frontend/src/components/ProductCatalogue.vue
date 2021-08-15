@@ -1,7 +1,7 @@
 <template>
   <div>
     <v-toolbar dark color="primary">
-      <v-row no-gutters>
+      <v-row>
         <v-col cols="4">
           <v-text-field
             clearable
@@ -39,7 +39,7 @@
             </template>
           </v-select>
         </v-col>
-        <v-col cols="3">
+        <v-col cols="2">
           <v-select
             v-model="orderBy"
             flat
@@ -57,7 +57,7 @@
             label="Sort by"
           />
         </v-col>
-        <v-col class="text-right" cols="1">
+        <v-col cols="2" class="text-right">
           <v-btn-toggle class="toggle" v-model="reverse" mandatory>
             <v-btn depressed color="primary" :value="false">
               <v-icon>mdi-arrow-up</v-icon>
