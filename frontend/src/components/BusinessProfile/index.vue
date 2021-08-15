@@ -5,217 +5,76 @@
         <v-btn @click="returnToSearch" color="primary">Return to search</v-btn>
       </v-col>
     </v-row>
-    <v-card class="body" v-if='!modifyBusiness'>
-      <div class="top-section">
-        <div>
-          <h1>
-            {{ business.name }}
-          </h1>
-          <p><b>Created:</b> {{ createdMsg }}</p>
-          <v-btn outlined color="primary" @click="goSalePage" :value="false">
-            Sale listings
-          </v-btn>
+    <div v-if='!modifyBusiness' style="margin-top: 100px">
+      <v-card>
+        <ImageCarousel v-if="businessImages" :imagesList="businessImages" :showControls="permissionToActAsBusiness"/>
+      </v-card>
+      <v-card class="body">
+        <div class="top-section">
+          <div>
+            <h1>{{ business.name }}</h1>
+            <p><b>Created:</b> {{ createdMsg }}</p>
+            <v-btn outlined color="primary" @click="goSalePage" :value="false">
+              Sale listings
+            </v-btn>
+          </div>
         </div>
-      </div>
+        <v-container fluid>
+          <v-row>
+            <v-col cols="12" sm="6">
+              <h4>Address</h4>
+              {{ readableAddress }}
+            </v-col>
+            <v-col cols="12" sm="6">
+              <h4>Category</h4>
+              {{ business.businessType }}
+            </v-col>
 
-      <v-container fluid>
-        <v-row>
-          <v-col cols="12" sm="6">
-            <h4>Address</h4>
-            {{ readableAddress }}
-          </v-col>
-          <v-col cols="12" sm="6">
-            <h4>Category</h4>
-            {{ business.businessType }}
-          </v-col>
-
-          <v-col cols="12">
-            <h4>Description</h4>
-            {{ business.description }}
-          </v-col>
-          <v-col cols="12">
-            <h4>Administrators</h4>
-            <span v-for="admin in administrators" :key="admin.id">
-              <router-link :to="'/profile/' + admin.id">
-                <v-chip class="link-chip link" color="primary"> {{ admin.firstName }} {{ admin.lastName }} </v-chip>
-              </router-link>
-            </span>
-          </v-col>
-        </v-row>
-        <div v-if='!modifyBusiness'>
-          <v-row justify="end">
-            <v-col cols="2">
-              <v-btn
-                class="white--text"
-                color="secondary"
-                @click="modifyBusiness = true"
-              >
-                <v-icon
-                  class="expand-icon"
-                  color="white"
-                >
-                  mdi-file-document-edit-outline
-                </v-icon>Modify Business
-              </v-btn>
+            <v-col cols="12">
+              <h4>Description</h4>
+              {{ business.description }}
+            </v-col>
+            <v-col cols="12">
+              <h4>Administrators</h4>
+              <span v-for="admin in administrators" :key="admin.id">
+                <router-link :to="'/profile/' + admin.id">
+                  <v-chip class="link-chip link" :color="getAdminColour(admin)" text-color="white"> {{ admin.firstName }} {{ admin.lastName }} </v-chip>
+                </router-link>
+              </span>
             </v-col>
           </v-row>
-        </div>
-      </v-container>
-    </v-card>
-    <v-row justify="center">
-      <v-col cols="10">
-        <v-card max-width=1800px>
-          <v-form>
-            <div v-if='modifyBusiness'>
-              <v-card class="mt-5 ">
-                <v-card-title class="primary-text">Modify Business Details</v-card-title>
-                <v-card-text>
-                  <v-container>
-                    <v-row no-gutters>
-                      <v-col cols="6">
-                        <v-text-field
-                          filled
-                          dense
-                          class="required mr-1"
-                          v-model="business"
-                          label="Name of business"
-                          :rules="mandatoryRules().concat(maxCharRules()).concat(alphabetExtendedSingleLineRules())"
-                          outlined
-                        />
-                      </v-col>
-                      <v-col cols="6">
-                        <v-select
-                          filled
-                          dense
-                          class="required ml-1"
-                          v-model="businessType"
-                          :items="businessTypes"
-                          label="Business Type"
-                          :rules="mandatoryRules()"
-                          outlined
-                        />
-                      </v-col>
-                      <v-col cols="12">
-                        <v-textarea
-                          filled
-                          dense
-                          v-model="description"
-                          label="Description"
-                          :rules="maxCharDescriptionRules().concat(alphabetExtendedMultilineRules())"
-                          rows="3"
-                          outlined
-                        />
-                      </v-col>
-                      <v-col cols="12">
-                        <v-card-title class="primary-text">Address</v-card-title>
-                      </v-col>
-                      <v-col cols="16">
-                        <v-text-field
-                          class="required mr-1"
-                          v-model="streetAddress"
-                          label="Company Street Address"
-                          :rules="mandatoryRules().concat(streetRules())"
-                          outlined/>
-                      </v-col>
-                      <v-col cols="6">
-                        <LocationAutocomplete
-                          type="district"
-                          class="ml-1"
-                          v-model="district"
-                          :rules="maxCharRules().concat(alphabetRules())"
-                        />
-                      </v-col>
-                      <v-col cols="6">
-                        <LocationAutocomplete
-                          type="city"
-                          class="required mr-1"
-                          v-model="city"
-                          :rules="mandatoryRules().concat(maxCharRules()).concat(alphabetRules())"
-                        />
-                      </v-col>
-                      <v-col cols="6">
-                        <LocationAutocomplete
-                          type="region"
-                          class="required ml-1"
-                          v-model="region"
-                          :rules="mandatoryRules().concat(maxCharRules()).concat(alphabetRules())"
-                        />
-                      </v-col>
-                      <v-col cols="6">
-                        <LocationAutocomplete
-                          type="country"
-                          class="required mr-1"
-                          v-model="country"
-                          :rules="mandatoryRules().concat(maxCharRules()).concat(alphabetRules())"
-                        />
-                      </v-col>
-                      <v-col cols="6">
-                        <v-text-field
-                          class="required ml-1"
-                          v-model="postcode"
-                          label="Postcode"
-                          :rules="mandatoryRules().concat(maxCharRules()).concat(postcodeRules())"
-                          outlined
-                        />
-                      </v-col>
-                    </v-row>
-                    <v-card-title>Remove Administrators</v-card-title>
-                    <v-col>
-                      <v-row>
-                        <span v-for="admin in administrators" :key="admin.id">
-                          <v-chip @click="showAlert" color="red" text-color="white"> {{ admin.firstName }} {{ admin.lastName }} </v-chip>
-                        </span>
-                      </v-row>
-                    </v-col>
-                    <v-card-title>Images</v-card-title>
-                    <p class="error-text" v-if ="errorMessage !== undefined"> {{errorMessage}} </p>
-                  </v-container>
-                </v-card-text>
-                <v-card-actions>
-                  <v-row justify="end">
-                    <v-col cols="2" class="ma-1 mr-7">
-                      <v-btn
-                        type="submit"
-                        color="primary">
-                        <v-icon
-                          class="expand-icon"
-                          color="white"
-                        >
-                          mdi-file-upload-outline
-                        </v-icon>
-                        Submit
-                      </v-btn>
-                    </v-col>
-                    <v-col cols="4" class="ma-1 mr-n9">
-                      <v-btn
-                        class="white--text"
-                        color="secondary"
-                        @click="modifyBusiness = false"
-                      >
-                        <v-icon
-                          class="expand-icon"
-                          color="white"
-                        >
-                          mdi-file-cancel-outline
-                        </v-icon>
-                        Discard
-                      </v-btn>
-                    </v-col>
-                  </v-row>
-                </v-card-actions>
-              </v-card>
-            </div>
-          </v-form>
-        </v-card>
-      </v-col>
-    </v-row>
-
+          <div v-if='!modifyBusiness'>
+            <v-row justify="end">
+              <v-col cols="2">
+                <v-btn
+                  class="white--text"
+                  color="secondary"
+                  @click="modifyBusiness = true;"
+                >
+                  <v-icon
+                    class="expand-icon"
+                    color="white"
+                  >
+                    mdi-file-document-edit-outline
+                  </v-icon>Modify Business
+                </v-btn>
+              </v-col>
+            </v-row>
+          </div>
+        </v-container>
+      </v-card>
+    </div>
+    <ModifyBusiness
+      :business="business"
+      v-if="modifyBusiness"
+      @discardModifyBusiness="modifyBusiness=false"
+    />
   </div>
 </template>
 
 <script>
-import LocationAutocomplete from '@/components/utils/LocationAutocomplete';
-import { getBusiness } from '../../api/internal';
+import ModifyBusiness from '@/components/BusinessProfile/ModifyBusiness';
+import { getBusiness } from '@/api/internal';
 import convertAddressToReadableText from '@/components/utils/Methods/convertJsonAddressToReadableText';
 import {
   alphabetExtendedMultilineRules,
@@ -223,21 +82,21 @@ import {
   mandatoryRules,
   maxCharRules, postCodeRules, streetNumRules
 } from "@/utils";
+import ImageCarousel from "@/components/utils/ImageCarousel";
 export default {
   name: 'BusinessProfile',
   components: {
-    LocationAutocomplete,
+    ImageCarousel,
+    ModifyBusiness
   },
   data() {
     return {
-      /**
-       * The business that this profile is for.
-       */
       modifyBusiness: false,
       readableAddress: "",
       errorMessage: undefined,
       dialog: true,
-      business: 'as',
+      business: '',
+      businessName: '',
       description: '',
       businessType: [],
       streetAddress: '',
@@ -252,7 +111,9 @@ export default {
         'Non-profit organisation',
         'Retail Trade',
       ],
+      showImageUploaderForm: false,
       valid: false,
+      updateProductCountry: true,
       maxCharRules: () => maxCharRules(100),
       maxCharDescriptionRules: ()=> maxCharRules(200),
       mandatoryRules: ()=> mandatoryRules,
@@ -299,6 +160,18 @@ export default {
     administrators() {
       return this.business?.administrators || [];
     },
+    isActingAsCurrentBusiness() {
+      const isBusiness =  this.$store.state.activeRole?.type === 'business';
+      if (!isBusiness) return false;
+      const user = this.$store.state.user;
+      return user.businessesAdministered.map(business => business.id).includes(this.business.id);
+    },
+    permissionToActAsBusiness() {
+      const user = this.$store.state.user;
+      return this.isActingAsCurrentBusiness ||
+          user.role === 'defaultGlobalApplicationAdmin' ||
+          user.role === 'globalApplicationAdmin';
+    },
 
     fromSearch() {
       return this.$route.query.businessType !== undefined
@@ -306,6 +179,9 @@ export default {
           || this.$route.query.page !== undefined
           || this.$route.query.reverse !== undefined
           || this.$route.query.searchQuery !== undefined;
+    },
+    businessImages() {
+      return this.business.images;
     }
   },
 
@@ -318,7 +194,21 @@ export default {
     },
     showAlert() {
       alert("I am the admin");
-    }
+    },
+    getAdminColour(admin) {
+      if (admin.id === this.business.primaryAdministratorId) {
+        return "red";
+      } else {
+        return "green";
+      }
+    },
+    changeUpdateCountries() {
+      if (this.updateProductCountry) {
+        this.updateProductCountry = false;
+      } else {
+        this.updateProductCountry = true;
+      }
+    },
   }
 };
 </script>
@@ -327,14 +217,12 @@ export default {
 .body {
     padding: 16px;
     width: 100%;
-    margin-top: 140px;
-    /* text-align: center; */
+    /*margin-top: 140px;*/
 }
 
 .top-section {
   display: flex;
   flex-wrap: wrap;
-  /* justify-content: center; */
 }
 
 .link-chip {
