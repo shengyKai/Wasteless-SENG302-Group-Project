@@ -10,7 +10,7 @@
         </v-col>
         <v-col cols="auto" md="3" sm="12" v-else>
           <!-- feed the productImages into the carousel child component -->
-          <ProductImageCarousel :productImages="product.images" :showControls="false"/>
+          <ImageCarousel :imagesList="product.images" :showControls="false"/>
         </v-col>
 
         <!-- Info column -->
@@ -301,7 +301,7 @@
 <script>
 //This component requires two other custom components, one to display the product image, one to view more of the product's description
 import FullProductDescription from "../utils/FullProductDescription.vue";
-import ProductImageCarousel from "../utils/ProductImageCarousel.vue";
+import ImageCarousel from "../utils/ImageCarousel.vue";
 import InventoryItemForm from "../BusinessProfile/InventoryItemForm.vue";
 import { currencyFromCountry } from "@/api/currency";
 import { formatDate, formatPrice, trimToLength } from '@/utils';
@@ -315,7 +315,7 @@ export default {
   },
   components: {
     FullProductDescription,
-    ProductImageCarousel,
+    ImageCarousel,
     InventoryItemForm,
   },
   data() {
