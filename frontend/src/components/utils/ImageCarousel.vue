@@ -93,6 +93,9 @@ export default {
     deleteImage(imageId) {
       this.$emit("delete-image", imageId);
     },
+    forceClose() {
+      this.dialog = false;
+    }
   },
 };
 </script>

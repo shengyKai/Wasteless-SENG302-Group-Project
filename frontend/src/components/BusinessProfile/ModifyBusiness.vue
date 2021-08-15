@@ -225,14 +225,6 @@ export default {
     discardButton() {
       this.$emit('discardModifyBusiness');
     },
-    deleteImage(imageId) {
-      console.log(imageId);
-      //todo
-    },
-    makeImagePrimary(imageId) {
-      console.log(imageId);
-      //todo
-    },
   }
 };
 </script>

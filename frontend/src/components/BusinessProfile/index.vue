@@ -7,17 +7,36 @@
     </v-row>
     <div v-if='!modifyBusiness' style="margin-top: 100px">
       <v-card>
-        <ImageCarousel v-if="businessImages" :imagesList="businessImages" :showControls="permissionToActAsBusiness"/>
+        <ImageCarousel
+          v-if="businessImages"
+          :imagesList="businessImages"
+          :showControls="permissionToActAsBusiness"
+          @change-primary-image="makeImagePrimary"
+          ref="businessImageCarousel"
+        />
       </v-card>
       <v-card class="body">
-        <div class="top-section">
-          <div>
-            <h1>{{ business.name }}</h1>
-            <p><b>Created:</b> {{ createdMsg }}</p>
-            <v-btn outlined color="primary" @click="goSalePage" :value="false">
-              Sale listings
-            </v-btn>
-          </div>
+        <div class="d-flex flex-column">
+          <v-row>
+            <v-col cols="6">
+              <span><h1>{{ business.name }}</h1></span>
+            </v-col>
+            <v-col cols="6" class="d-flex justify-end">
+              <v-alert
+                class="ma-2 flex-grow-0"
+                v-if="errorMessage !== undefined"
+                type="error"
+                dismissible
+                @input="errorMessage = undefined"
+              >
+                {{ errorMessage }}
+              </v-alert>
+            </v-col>
+          </v-row>
+          <p><b>Created:</b> {{ createdMsg }}</p>
+          <v-btn outlined color="primary" @click="goSalePage" :value="false" width="150">
+            Sale listings
+          </v-btn>
         </div>
         <v-container fluid>
           <v-row>
@@ -74,7 +93,7 @@
 
 <script>
 import ModifyBusiness from '@/components/BusinessProfile/ModifyBusiness';
-import { getBusiness } from '../../api/internal';
+import {getBusiness, makeBusinessImagePrimary} from '../../api/internal';
 import convertAddressToReadableText from '@/components/utils/Methods/convertJsonAddressToReadableText';
 import {
   alphabetExtendedMultilineRules,
@@ -208,6 +227,26 @@ export default {
         this.updateProductCountry = true;
       }
     },
+    /**
+     * Deletes a given image
+     * @param imageId ID of the image to delete
+     */
+    deleteImage(imageId) {
+      console.log(imageId);
+      //todo
+    },
+    /**
+     * Sets the given image as primary image to be displayed
+     * @param imageId ID of the Image to set
+     */
+    async makeImagePrimary(imageId) {
+      this.errorMessage = undefined;
+      const result = await makeBusinessImagePrimary(this.business.id, imageId);
+      if (typeof result === 'string') {
+        this.errorMessage = result;
+        this.$refs.businessImageCarousel.forceClose();
+      }
+    },
   }
 };
 </script>
@@ -215,8 +254,6 @@ export default {
 <style scoped>
 .body {
     padding: 16px;
-    width: 100%;
-    /*margin-top: 140px;*/
 }
 
 .top-section {

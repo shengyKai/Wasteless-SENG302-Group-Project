@@ -157,7 +157,7 @@ import ImageCarousel from "../utils/ImageCarousel.vue";
 import { currencyFromCountry } from "@/api/currency";
 import ProductImageUploader from "../utils/ProductImageUploader";
 import ProductForm from "../BusinessProfile/ProductForm.vue";
-import { makeImagePrimary, deleteImage } from "@/api/internal";
+import { makeProductImagePrimary, deleteImage } from "@/api/internal";
 import { formatDate, formatPrice, trimToLength } from '@/utils';
 
 export default {
@@ -218,7 +218,7 @@ export default {
      * @param imageId Id of the currently selected image
      */
     async setPrimaryImage(imageId) {
-      let response = await makeImagePrimary(this.businessId, this.product.id, imageId);
+      let response = await makeProductImagePrimary(this.businessId, this.product.id, imageId);
       if (typeof response === 'string') {
         this.$store.commit('setError', response);
         return;
