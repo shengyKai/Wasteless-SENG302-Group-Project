@@ -246,7 +246,6 @@ export default {
       } else {
         this.updateProductCountry = true;
       }
-      console.log(this.business);
     },
     discardButton() {
       this.$emit('discardModifyBusiness');
