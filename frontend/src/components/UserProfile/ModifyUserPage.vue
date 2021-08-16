@@ -28,7 +28,6 @@
                     ref="password"
                     v-model="user.password"
                     label="New Password"
-                    @keyup="passwordChange"
                     :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
                     :type="showPassword ? 'text' : 'password'"
                     @click:append="showPassword = !showPassword"
@@ -267,6 +266,7 @@
               class="ml-2"
               type="submit"
               color="primary"
+              :disabled=!valid
               @click.prevent="updateProfile"
             >
               Update profile
@@ -342,9 +342,9 @@ export default {
   },
   methods: {
     updateProfile() {
-      if(this.password !== '') {
-        this.passwordChange();
-      }
+      // if(this.password !== '') {
+      //   this.passwordChange();
+      // }
       console.log(JSON.parse(JSON.stringify(this.user)));
     },
     updatePhoneNumber() {
@@ -353,11 +353,16 @@ export default {
     async passwordChange() {
       this.errorMessage = undefined;
       console.log("a");
-      this.errorMessage = await this.$store.dispatch("login", { email : this.user.email, password : this.password });
+      this.errorMessage = await this.$store.dispatch("login", { email : this.user.email, password : this.user.oldPassword });
       if(this.errorMessage !== "Invalid credentials") {
         console.log("b");
         console.log(this.$store);
+        console.log("AAA");
+        return true;
         //TODO
+      } else {
+        console.log("BBB");
+        return false;
       }
     },
   },
