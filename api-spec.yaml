@@ -36,6 +36,7 @@ tags:
   - name: 'U22: List sale'
   - name: 'U23: Search for business'
   - name: 'U26: Example data'
+  - name: 'U32: Managing my feed'
   - name: 'UCM1: Community marketplace'
     description: >-
       No endpoints required here yet, these will come from the subsequent
@@ -48,6 +49,7 @@ tags:
   - name: 'UCM7: Keyword search'
   - name: 'UCM8: Contacting other marketplace users'
   - name: 'UCM9: Edit card'
+  - name: 'Business Images'
   - name: Users
     description: Grouping of endpoints related to the User entity
   - name: Business Accounts
@@ -341,6 +343,7 @@ paths:
       tags:
         - 'U11: Modifying Businesses'
         - Business Accounts
+        - Business Images
       summary: Modifies an existing business entity
       security:
         - CookieAuth:
@@ -384,7 +387,8 @@ paths:
     post:
       tags:
         - 'U11: Modifying Businesses'
-        - Catalogue / Products
+        - Business Images
+        - Business Accounts
       summary: Upload a new image for some photo
       security:
         - CookieAuth:
@@ -436,7 +440,8 @@ paths:
     delete:
       tags:
         - 'U11: Modifying Businesses'
-        - Business Image
+        - Business Images
+        - Business Accounts
       summary: Delete an image of a business
       security:
         - CookieAuth:
@@ -472,7 +477,8 @@ paths:
     put:
       tags:
         - 'U11: Modifying Businesses'
-        - Business
+        - Business Images
+        - Business Accounts
       summary: Set an existing image to be the new primary image for the business
       security:
         - CookieAuth:
