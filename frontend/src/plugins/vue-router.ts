@@ -3,7 +3,8 @@ import VueRouter from "vue-router";
 
 import Auth from "../components/Auth/index.vue";
 import admin from "../components/admin/Admin.vue";
-import ProfilePage from "../components/UserProfile.vue";
+import ProfilePage from "../components/UserProfile/index.vue";
+import ModifyUserPage from "../components/UserProfile/ModifyUserPage.vue";
 import BusinessProfile from "../components/BusinessProfile/index.vue";
 import SearchBusinessResults from "../components/SearchBusinessPage.vue";
 import SearchResults from "../components/SearchResults.vue";
@@ -13,6 +14,7 @@ import Inventory from "../components/Inventory.vue";
 import SalePage from "../components/SalePage.vue";
 import Marketplace from "../components/marketplace/Marketplace.vue";
 import UserCards from "../components/marketplace/UserCards.vue";
+import ConversationReply from "../components/cards/ConversationReply.vue";
 
 Vue.use(VueRouter);
 
@@ -40,6 +42,11 @@ const routes = [
     path: "/profile",
     component: ProfilePage,
     meta: { title: 'Profile' }
+  },
+  {
+    path: "/profile/:id/modify",
+    component: ModifyUserPage,
+    meta: { title: 'Modify user' },
   },
   {
     path: "/profile/:id",

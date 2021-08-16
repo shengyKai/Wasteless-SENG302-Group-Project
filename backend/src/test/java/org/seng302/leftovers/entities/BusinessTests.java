@@ -672,6 +672,7 @@ class BusinessTests {
         json.remove("primaryAdministratorId");
         json.remove("administrators");
         json.remove("created");
+        json.remove("images");
         assertTrue(json.isEmpty());
     }
 
@@ -693,6 +694,7 @@ class BusinessTests {
             json.remove("id");
             json.remove("primaryAdministratorId");
             json.remove("created");
+            json.remove("images");
             assertTrue(json.isEmpty());
         }
     }
@@ -713,6 +715,7 @@ class BusinessTests {
             assertEquals(testBusiness1.getId().toString(), json.getAsString("id"));
             assertEquals(testBusiness1.getPrimaryOwner().getUserID().toString(), json.getAsString("primaryAdministratorId"));
             assertEquals(testBusiness1.getCreated().toString(), json.getAsString("created"));
+            assertEquals(List.of(), json.get("images"));
         }
     }
 

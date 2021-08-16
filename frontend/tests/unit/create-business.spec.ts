@@ -4,7 +4,7 @@ import Vuetify from 'vuetify';
 import { createLocalVue, Wrapper, mount } from '@vue/test-utils';
 
 import CreateBusiness from '@/components/BusinessProfile/CreateBusiness.vue';
-import {castMock} from "./utils";
+import {castMock, makeTestUser} from "./utils";
 import * as api from '@/api/internal';
 import { getStore, resetStoreForTesting } from '@/store';
 import {User} from "@/api/internal";
@@ -17,40 +17,6 @@ jest.mock('@/api/internal', () => ({
 const createBusiness = castMock(api.createBusiness);
 Vue.use(Vuetify);
 const localVue = createLocalVue();
-
-/**
- * Creates a test user with the given user id
- *
- * @param userId The user id to use
- * @param businesses The businesses for this user to administer
- * @returns The generated user
- */
-function makeTestUser(userId: number) {
-  let user: User = {
-    id:  userId,
-    firstName: 'test_firstname' + userId,
-    lastName: 'test_lastname' + userId,
-    nickname: 'test_nickname' + userId,
-    email: 'test_email' + userId,
-    bio: 'test_biography' + userId,
-    phoneNumber: 'test_phone_number' + userId,
-    dateOfBirth: '1/1/1900',
-    created: '1/5/2005',
-    homeAddress: {
-      streetNumber: 'test_street_number',
-      streetName: 'test_streetAddress',
-      city: 'test_city',
-      region: 'test_region',
-      postcode: 'test_postcode',
-      district: 'test_district',
-      country: 'test_country' + userId
-    },
-    businessesAdministered: [],
-  };
-
-
-  return user;
-}
 
 describe('CreateBusiness.vue', () => {
   // Container for the wrapper around CreateBusiness
@@ -144,7 +110,7 @@ describe('CreateBusiness.vue', () => {
     await wrapper.setData({
       business: 'Business Name',
       businessType: 'Business Type',
-      streetAddress: '1 Street',
+      streetAddress: '1 Elizabeth Street',
       city: 'City',
       region: 'Region',
       country: 'Country',
@@ -231,7 +197,7 @@ describe('CreateBusiness.vue', () => {
   it.each(diacritics)('Valid when street contains the character "%s"', async (char) => {
     await populateRequiredFields();
     await wrapper.setData({
-      streetAddress: '5 ' + char,
+      streetAddress: '5 ' + char + ' Street',
     });
     await Vue.nextTick();
     expect(wrapper.vm.valid).toBeTruthy();
@@ -336,7 +302,7 @@ describe('CreateBusiness.vue', () => {
       businessType: 'Business Type',
       address: {
         streetNumber: '1',
-        streetName: 'Street',
+        streetName: 'Elizabeth Street',
         district: '',
         city: 'City',
         region: 'Region',

@@ -1483,19 +1483,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              required:
-                - senderId
-                - message
-              properties:
-                senderId:
-                  type: integer
-                  description: Sender of the message
-                  example: 3
-                message:
-                  type: string
-                  description: Content of the message
-                  example: Hello World!
+              $ref: '#/components/schemas/Message'
       security:
         - CookieAuth:
             - user
@@ -1515,6 +1503,67 @@ paths:
             Forbidden: Returned when a user who is neither the creator of the
             card, card buyer, GAA or DGAA tries to send add a message to the conversation.
             Also occurs if the card creator tries to initiate a conversation.
+        '406':
+          $ref: '#/components/responses/NotAcceptableError'
+    get:
+      tags:
+        - 'UCM8: Contacting other marketplace users'
+        - Cards / community marketplace
+      summary: Get all the messages in a conversation about a marketplace card. Ordered from most-recent to least-recent.
+      parameters:
+        - name: cardId
+          in: path
+          description: The id of the card being discussed
+          required: true
+          schema:
+            type: integer
+            example: 40
+        - name: buyerId
+          in: path
+          description: The id of the prospective buyer in the conversation
+          required: true
+          schema:
+            type: integer
+            example: 3
+        - name: page
+          in: query
+          description: The page number to retrieve (1 indexed)
+          schema:
+            type: integer
+        - name: resultsPerPage
+          in: query
+          description: The number of results to show per page
+          schema:
+            type: integer
+      security:
+        - CookieAuth:
+            - user
+            - globalApplicationAdmin
+            - defaultGlobalApplicationAdmin
+      responses:
+        '200':
+          description: Request is successful, page of messages returned
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Page'
+                  - type: object
+                    required:
+                      - results
+                    properties:
+                      results:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Message'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: >-
+            Forbidden: Returned when a user who is neither the creator of the
+            card, card buyer, GAA or DGAA tries to fetch the messages.
         '406':
           $ref: '#/components/responses/NotAcceptableError'
   '/cards/{id}/extenddisplayperiod':
@@ -1911,6 +1960,96 @@ paths:
                       - 3
         '403':
           description: 'Forbidden: Returned if a DGAA user attempts to generate demo data.'
+  /businesses/{businessId}/products/search:
+    get:
+      tags:
+        - 'U28: Product Catalogue search'
+        - Product
+      summary: Product search within a business's product catalogue
+      security:
+        - CookieAuth:
+            - user
+            - globalApplicationAdmin
+            - defaultGlobalApplicationAdmin
+      description: "Product search within a business's product catalogue"
+      parameters:
+        - name: businessId
+          in: path
+          description: ID of business for the product catalogue search
+          required: true
+          schema:
+            type: integer
+        - in: query
+          name: searchQuery
+          schema:
+            type: string
+          description: >-
+            Criteria to search products for, e.g: product’s full name 
+        - name: page
+          in: query
+          description: The page number to retrieve (1 indexed)
+          schema:
+            type: integer
+        - name: resultsPerPage
+          in: query
+          description: The number of results to show per page
+          schema:
+            type: integer
+        - name: searchBy
+          in: query
+          description: Product property to search the products by
+          schema:
+            type: string
+            enum:
+              - name
+              - description
+              - manufacturer
+              - product code
+        - name: reverse
+          in: query
+          description: Whether to flip default sort order (default is ascending)
+          schema:
+            type: boolean
+        - name: orderBy
+          in: query
+          description: Product property to order results by
+          schema:
+            type: string
+            enum:
+              - name
+              - description
+              - manufacturer
+              - recommendedRetailPrice
+              - created
+              - productCode
+      responses:
+        '200':
+          description: 'Request successful, a (possibly empty) list of products is returned'
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Page'
+                  - type: object
+                    required:
+                      - results
+                    properties:
+                      results:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Product'
+        '400':
+          description: >-
+            Invalid search term provided
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: >-
+            Forbidden: Returned when the user making the request is not an
+            administrator of the business AND is not a global
+            application admin.
+        '406': 
+          $ref: '#/components/responses/NotAcceptableError'
   /feed/{id}/tag:
     put:
       tags:
@@ -2361,7 +2500,7 @@ components:
         streetName:
           type: string
           example: Ilam Road
-        suburb:
+        district:
           type: string
           example: Upper Riccarton
         city:
