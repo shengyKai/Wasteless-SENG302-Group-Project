@@ -78,7 +78,7 @@ public class RequestContext {
      * cookie.
      * @return The ID number of the authenticated user
      */
-    public long getLoggedInId() {
+    public Long getLoggedInId() {
         return loggedInUser.getUserID();
     }
 

@@ -36,7 +36,7 @@
         rounded="lg"
         class="newsfeed-item"
       >
-        <GlobalMessage v-if="event.type === 'MessageEvent'" :event="event"/>
+        <GlobalMessage v-if="event.type === 'GlobalMessageEvent'" :event="event"/>
         <ExpiryEvent v-else-if="event.type === 'ExpiryEvent'" :event="event"/>
         <DeleteEvent v-else-if="event.type === 'DeleteEvent'" :event="event"/>
         <KeywordCreated v-else-if="event.type === 'KeywordCreatedEvent'" :event="event"/>
