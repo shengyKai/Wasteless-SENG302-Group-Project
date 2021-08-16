@@ -39,33 +39,41 @@
             </template>
           </v-select>
         </v-col>
-        <v-col cols="2">
-          <v-select
-            v-model="orderBy"
-            flat
-            solo-inverted
-            hide-details
-            :items="[
-              { text: 'Product Code',               value: 'productCode'},
-              { text: 'Product Name',               value: 'name'},
-              { text: 'Description',                value: 'description'},
-              { text: 'Manufacturer',               value: 'manufacturer'},
-              { text: 'Recommended Retail Price',   value: 'recommendedRetailPrice'},
-              { text: 'Date Added',                 value: 'created'},
-            ]"
-            prepend-inner-icon="mdi-sort-variant"
-            label="Sort by"
-          />
-        </v-col>
-        <v-col cols="2" class="text-right">
-          <v-btn-toggle class="toggle" v-model="reverse" mandatory>
-            <v-btn depressed color="primary" :value="false">
-              <v-icon>mdi-arrow-up</v-icon>
-            </v-btn>
-            <v-btn depressed color="primary" :value="true">
-              <v-icon>mdi-arrow-down</v-icon>
-            </v-btn>
-          </v-btn-toggle>
+        <!-- The reason why the v-select for orderBy and the reversed buttons are bunched together in the same column is because
+        if they were given their own columns directly, the sizes of the components does not fit the aesthetic nicely. So by putting
+        them in the same column, I can reassign more spaces to them that is cols = 8 and cols = 4 respectively as compared to
+        cols = 3, cols = 1 if they were in separate columns. -->
+        <v-col cols="4" class="text-right">
+          <v-row>
+            <v-col cols="8">
+              <v-select
+                v-model="orderBy"
+                flat
+                solo-inverted
+                hide-details
+                :items="[
+                  { text: 'Product Code',               value: 'productCode'},
+                  { text: 'Product Name',               value: 'name'},
+                  { text: 'Description',                value: 'description'},
+                  { text: 'Manufacturer',               value: 'manufacturer'},
+                  { text: 'Recommended Retail Price',   value: 'recommendedRetailPrice'},
+                  { text: 'Date Added',                 value: 'created'},
+                ]"
+                prepend-inner-icon="mdi-sort-variant"
+                label="Sort by"
+              />
+            </v-col>
+            <v-col cols="4">
+              <v-btn-toggle class="toggle" v-model="reverse" mandatory>
+                <v-btn depressed color="primary" :value="false">
+                  <v-icon>mdi-arrow-up</v-icon>
+                </v-btn>
+                <v-btn depressed color="primary" :value="true">
+                  <v-icon>mdi-arrow-down</v-icon>
+                </v-btn>
+              </v-btn-toggle>
+            </v-col>
+          </v-row>
         </v-col>
       </v-row>
     </v-toolbar>

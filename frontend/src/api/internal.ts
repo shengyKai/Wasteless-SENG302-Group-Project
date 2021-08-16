@@ -1154,7 +1154,6 @@ export async function uploadBusinessImage(businessId: number, file: File): Promi
 
   return undefined;
 }
-<<<<<<< HEAD
 
 /**
  * Sends a search query to the backend to search a business's product catalogue.
@@ -1195,7 +1194,6 @@ export async function searchCatalogue(businessId: number, query: string, pageInd
 
   return response.data;
 }
-=======
 /**
  * Sets an image as the primary image for a business
  * @param businessId The ID of the business to change
@@ -1215,4 +1213,3 @@ export async function makeBusinessImagePrimary(businessId: number, imageId: numb
   }
   return undefined;
 }
->>>>>>> dev
