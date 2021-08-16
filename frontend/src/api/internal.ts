@@ -97,10 +97,6 @@ export type Business = {
   created?: string,
 };
 
-export type ModifyBusiness = Business & {
-  updateProductCountry: boolean,
-}
-
 export type CreateBusiness = {
   primaryAdministratorId: number,
   name: string,
@@ -108,6 +104,15 @@ export type CreateBusiness = {
   address: Location,
   businessType: BusinessType,
 };
+
+export type ModifyBusiness = {
+  primaryAdministratorId: number,
+  name: string,
+  description?: string,
+  address: Location,
+  businessType: BusinessType,
+  updateProductCountry: boolean
+}
 
 export type Image = {
   id: number,
@@ -378,24 +383,6 @@ export async function createBusiness(business: CreateBusiness): Promise<MaybeErr
     if (status === 401) return 'You have been logged out. Please login again and retry';
 
     return error.response.data.message;
-  }
-
-  return undefined;
-}
-
-/**
- * Modifies a business
- *
- * @param businessId The business id of the business to be modified
- * @param business The properties to modify a business with
- * @returns undefined if operation is successful, otherwise a string error.
- */
-export async function modifyBusiness(businessId: number, business: ModifyBusiness): Promise<MaybeError<undefined>> {
-  try {
-    await instance.put(`/businesses/${businessId}`, business);
-  } catch (error) {
-    //TODO for frontend api task
-    return "placeholder";
   }
 
   return undefined;
@@ -1208,6 +1195,25 @@ export async function makeBusinessImagePrimary(businessId: number, imageId: numb
     if (status === 401) return 'You have been logged out. Please login again and retry';
     if (status === 403) return 'Operation not permitted';
     if (status === 406) return 'Business or Image not found';
+
+    return 'Request failed: ' + error.response?.data.message;
+  }
+  return undefined;
+}
+
+/**
+ * Modifies a business given a business id and an updated business object
+ * @param businessId Id of the business which is to be updated
+ * @param business Business object with all the fields to be updated.
+ */
+export async function modifyBusiness(businessId: number, business: ModifyBusiness): Promise<MaybeError<undefined>> {
+  try {
+    await instance.put(`/businesses/${businessId}`, business);
+  } catch (error) {
+    let status: number | undefined = error.response?.status;
+    if (status === undefined) return 'Failed to reach backend';
+    if (status === 401) return 'You have been logged out. Please login again and retry';
+    if (status === 403) return 'Invalid authorization for modifying this business';
 
     return 'Request failed: ' + error.response?.data.message;
   }

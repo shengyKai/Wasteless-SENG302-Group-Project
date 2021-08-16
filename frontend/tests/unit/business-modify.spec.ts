@@ -10,7 +10,7 @@ import {User, Location, Business} from "@/api/internal";
 import { getStore, resetStoreForTesting } from '@/store';
 
 jest.mock('@/api/internal', () => ({
-  modifyBusiness: jest.fn(),
+  modifyBusiness: jest.fn()
 }));
 
 const modifyBusiness = castMock(api.modifyBusiness);
@@ -163,7 +163,7 @@ describe('modifyBusiness.vue', () => {
    */
   function findUpdateButton() {
     const buttons = wrapper.findAllComponents({ name: 'v-btn' });
-    const filtered = buttons.filter(button => button.text().includes('Update Business'));
+    const filtered = buttons.filter(button => button.text().includes('Submit'));
     expect(filtered.length).toBe(1);
     return filtered.at(0);
   }
@@ -484,6 +484,13 @@ describe('modifyBusiness.vue', () => {
     });
     await Vue.nextTick();
     expect(wrapper.vm.valid).toBeFalsy();
+  });
+
+  it("If all fields are populated with the right restrictions and the submit button is clicked, the modifyBusiness endpoint is called", async () => {
+    await populateRequiredFields();
+    const submitButton = findUpdateButton();
+    await submitButton.trigger('click');
+    expect(modifyBusiness).toHaveBeenCalled();
   });
 
   describe('changing primary administrator', () => {
