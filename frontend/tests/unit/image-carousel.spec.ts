@@ -3,21 +3,21 @@ import Vuex from 'vuex';
 import Vuetify from 'vuetify';
 import { createLocalVue, Wrapper, mount } from '@vue/test-utils';
 
-import ProductImageCarousel from '@/components/utils/ProductImageCarousel.vue';
+import ImageCarousel from '@/components/utils/ImageCarousel.vue';
 
 Vue.use(Vuetify);
 
 const localVue = createLocalVue();
 
-describe('ProductImageCarousel.vue', () => {
-  // Container for the wrapper around ProductImageCarousel
+describe('ImageCarousel.vue', () => {
+  // Container for the wrapper around ImageCarousel
   let appWrapper: Wrapper<any>;
 
-  // Container for the ProductImageCarousel under test
+  // Container for the ImageCarousel under test
   let wrapper: Wrapper<any>;
 
   /**
-   * Sets up the test ProductImageCarousel instance
+   * Sets up the test ImageCarousel instance
    *
    * Because the element we're testing has a v-dialog we need to take some extra sets to make it
    * work.
@@ -26,13 +26,17 @@ describe('ProductImageCarousel.vue', () => {
     localVue.use(Vuex);
     const vuetify = new Vuetify();
 
-    // Creating wrapper around ProductImageCarousel with data-app to appease vuetify
+    // Creating wrapper around ImageCarousel with data-app to appease vuetify
     const App = localVue.component('App', {
-      components: { ProductImageCarousel },
-      template: `<div data-app><ProductImageCarousel :productImages="[{id: 7, filename:'test_filename'}, {id: 11, filename: 'test_filename2'}]" :showControls="showControls"/></div>`,
+      components: { ImageCarousel },
+      template: `
+        <div data-app>
+        <ImageCarousel :imagesList="[{id: 7, filename:'test_filename'}, {id: 11, filename: 'test_filename2'}]"
+                              :showControls="showControls"/>
+        </div>`,
     });
 
-    // Put the ProductImageCarousel component inside a div in the global document,
+    // Put the ImageCarousel component inside a div in the global document,
     // this seems to make vuetify work correctly, but necessitates calling appWrapper.destroy
     const elem = document.createElement('div');
     document.body.appendChild(elem);
@@ -47,7 +51,7 @@ describe('ProductImageCarousel.vue', () => {
       }
     });
 
-    wrapper = appWrapper.getComponent(ProductImageCarousel);
+    wrapper = appWrapper.getComponent(ImageCarousel);
 
     await wrapper.setData({
       dialog: true,
@@ -57,7 +61,7 @@ describe('ProductImageCarousel.vue', () => {
   /**
    * Executes after every test case.
    *
-   * This function makes sure that the ProductImageCarousel component is removed from the global document
+   * This function makes sure that the ImageCarousel component is removed from the global document
    */
   afterEach(() => {
     appWrapper.destroy();
@@ -68,7 +72,6 @@ describe('ProductImageCarousel.vue', () => {
     expect(button.exists()).toBeTruthy();
 
     button.trigger('click');
-
     expect(wrapper.emitted()['delete-image']).toEqual([[7]]);
   });
 
