@@ -7,7 +7,7 @@ import * as api from '@/api/internal';
 
 import Vuex, { Store } from 'vuex';
 import { getStore, resetStoreForTesting, StoreData } from '@/store';
-import { castMock } from './utils';
+import { castMock, makeTestUser } from './utils';
 import synchronizedTime from '@/components/utils/Methods/synchronizedTime';
 
 Vue.use(Vuetify);
@@ -21,36 +21,6 @@ jest.mock('@/components/utils/Methods/synchronizedTime', () => ({
 }));
 
 const deleteNotification = castMock(api.deleteNotification);
-
-/**
- * Creates a test user with the given user id
- *
- * @param userId The user id to use
- * @returns The generated user
- */
-function makeTestUser(userId: number) {
-  return {
-    id:  userId,
-    firstName: 'test_firstname' + userId,
-    lastName: 'test_lastname' + userId,
-    nickname: 'test_nickname' + userId,
-    email: 'test_email' + userId,
-    bio: 'test_biography' + userId,
-    phoneNumber: 'test_phone_number' + userId,
-    dateOfBirth: '1/1/1900',
-    created: '1/5/2005',
-    homeAddress: {
-      streetNumber: 'test_street_number',
-      streetName: 'test_street1',
-      city: 'test_city',
-      region: 'test_region',
-      postcode: 'test_postcode',
-      district: 'test_district',
-      country: 'test_country' + userId
-    },
-    businessesAdministered: [],
-  };
-}
 
 describe('Event.vue', () => {
   let wrapper: Wrapper<any>;

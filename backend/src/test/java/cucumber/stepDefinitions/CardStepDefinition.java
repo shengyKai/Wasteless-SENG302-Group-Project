@@ -102,6 +102,18 @@ public class CardStepDefinition {
         cardContext.save(card);
     }
 
+    @Given("a card exists with title {string} and creator {string}")
+    public void a_card_exists_with_title_and_creator(String title, String creatorName) {
+        var creator = userContext.getByName(creatorName);
+        var card = new MarketplaceCard.Builder()
+                .withCreator(creator)
+                .withSection("Wanted")
+                .withTitle(title)
+                .withDescription("A cool vintage car")
+                .build();
+        cardContext.save(card);
+    }
+
     @Given("The card expiry is changed to less than a day from now")
     public void the_card_expiry_is_changed_to_less_than_a_day_from_now() {
         var card = cardContext.getLast();
