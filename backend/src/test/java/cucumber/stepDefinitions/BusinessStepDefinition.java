@@ -56,29 +56,23 @@ public class BusinessStepDefinition {
      * Method to save multiple products into the latest business saved in the businessContext
      * @param amount Number of products to generate to save into the business
      */
+    @Transactional
     public void saveMultipleProductsToBusiness(int amount) {
-        try (Session session = sessionFactory.openSession()) {
-            session.beginTransaction();
-            var business = session.find(Business.class, businessContext.getLast().getId());
-            for (int i = 0; i < amount; i++) {
-                var product = new Product.Builder()
-                        .withBusiness(business)
-                        .withDescription("some description")
-                        .withManufacturer("Some manufacturer")
-                        .withName("Some prod")
-                        .withProductCode("PROD" + String.valueOf(i))
-                        .withRecommendedRetailPrice("123")
-                        .build();
-                business.addToCatalogue(product);
-                session.save(product);
-            }
-            session.save(business);
-            session.getTransaction().commit();
-            session.close();
-            businessContext.save(business);
+        var business = businessContext.getLast();
+        for (int i = 0; i < amount; i++) {
+            var product = new Product.Builder()
+                    .withBusiness(business)
+                    .withDescription("some description")
+                    .withManufacturer("Some manufacturer")
+                    .withName("Some prod")
+                    .withProductCode("PROD" + String.valueOf(i))
+                    .withRecommendedRetailPrice("123")
+                    .build();
+            business.addToCatalogue(product);
         }
-
+        businessContext.save(business);
     }
+
 
     @Given("the business {string} exists")
     public void businessExists(String name) throws ParseException {

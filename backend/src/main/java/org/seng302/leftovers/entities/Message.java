@@ -111,8 +111,7 @@ public class Message {
     public JSONObject constructJSONObject() {
         JSONObject jsonObject = new JSONObject();
         jsonObject.appendField("id", id);
-        jsonObject.appendField("conversationId", conversation.getId());
-        jsonObject.appendField("sender", sender.constructPublicJson());
+        jsonObject.appendField("senderId", sender.getUserID());
         jsonObject.appendField("created", created.toString());
         jsonObject.appendField("content", content);
         return jsonObject;

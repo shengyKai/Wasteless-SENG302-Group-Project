@@ -97,10 +97,9 @@ class MessageTest {
         Message message = new Message(conversation, user, "Hello world!");
         JSONObject json = message.constructJSONObject();
         assertEquals(message.getId(), json.getAsNumber("id"));
-        assertEquals(message.getConversation().getId(), json.getAsNumber("conversationId"));
-        assertEquals(message.getSender().constructPublicJson().toJSONString(), json.getAsString("sender"));
+        assertEquals(message.getSender().getUserID(), (Long) json.getAsNumber("senderId"));
         assertEquals(message.getCreated().toString(), json.getAsString("created"));
         assertEquals(message.getContent(), json.getAsString("content"));
-        assertEquals(5, json.size());
+        assertEquals(4, json.size());
     }
 }

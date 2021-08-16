@@ -67,8 +67,19 @@ public class ConversationStepDefinition {
 
     private String getSenderNameFromMessageEventJson(JSONObject messageEventJSON) {
         var messageJSON = (JSONObject) messageEventJSON.get("message");
-        var senderJSON = (JSONObject) messageJSON.get("sender");
-        return senderJSON.getAsString("firstName");
+        var senderId = messageJSON.getAsNumber("senderId");
+        var conversationJSON = (JSONObject) messageEventJSON.get("conversation");
+        var buyerJSON = (JSONObject) conversationJSON.get("buyer");
+        if (buyerJSON.getAsNumber("id").equals(senderId)) {
+            return buyerJSON.getAsString("firstName");
+        }
+        var cardJSON = (JSONObject) conversationJSON.get("card");
+        var ownerJSON = (JSONObject) cardJSON.get("creator");
+        if (ownerJSON.getAsNumber("id").equals(senderId)) {
+            return ownerJSON.getAsString("firstName");
+        }
+        Assertions.fail("Sender ID should match buyer or owner ID");
+        return "";
     }
 
     private String getCardTitleFromMessageEventJson(JSONObject messageEventJSON) {
