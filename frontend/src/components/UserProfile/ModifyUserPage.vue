@@ -143,6 +143,7 @@
                 <!-- :max="maxDate" -->
                 <v-date-picker
                   v-model="user.dateOfBirth"
+                  :max="maxDate"
                   scrollable
                 >
                   <v-spacer/>
@@ -331,20 +332,18 @@ export default {
       phoneDigits: '',
       confirmPassword: '',
       streetAddress: '',
-
+      maxDate: '',
       showDatePicker: false,
-
       showPassword: false,
       showConfirmPassword: false,
       showOldPassword: false,
-
       errorMessage: undefined,
     };
   },
   mounted () {
     //sets maxDate and date of birth value
     this.maxDate = this.minimumDateOfBirth().toISOString().slice(0, 10);
-    this.dob = this.minimumDateOfBirth().toISOString().slice(0, 10);
+    this.user.dateOfBirth = this.minimumDateOfBirth().toISOString().slice(0, 10);
   },
   methods: {
     updateProfile() {
@@ -384,6 +383,7 @@ export default {
 
       return new Date(year - 13, month, day);
     },
+    //TODO get store business role, if exist then date =16 else date=13, n date will be fix
   },
   watch: {
     streetAddress: {
