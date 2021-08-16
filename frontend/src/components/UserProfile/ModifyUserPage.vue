@@ -262,10 +262,10 @@
 
           <!-- Update -->
           <v-divider/>
-          <v-row class="mt-2 px-2" justify="end">
-            <p class="error-text" v-if ="errorMessage !== undefined"> {{errorMessage}} </p>
+          <v-row class="mt-2 px-1" justify="end">
+            <p class="error-text mt-1" v-if ="errorMessage !== undefined"> {{errorMessage}} </p>
             <v-btn
-              class="ml-2"
+              class="ml-4"
               type="submit"
               color="primary"
               :disabled=!valid
@@ -380,10 +380,12 @@ export default {
       let year = today.getFullYear();
       let month = today.getMonth();
       let day = today.getDate();
-
+      console.log("A");
+      console.log(this.$store.state);
+      console.log(this.$store.user.businessesAdministered); //CANT
       return new Date(year - 13, month, day);
     },
-    //TODO get store business role, if exist then date =16 else date=13, n date will be fix
+    //TODO get store business role, if exist then year =16 else year=13, n date will be fix
   },
   watch: {
     streetAddress: {
@@ -451,13 +453,7 @@ export default {
       return () =>
         !(this.phoneDigits > 0 && this.countryCode.length < 1) || 'Country code must be present';
     }
-  },
-  //The computed property below is dependent on two user input fields, password and password confirmation.
-  //After the user has typed in the password field, the confirmPassword field would check this rule for each
-  //change(in this case, each keystroke), and compare it with the password field. If they are not the same,
-  //the error message "Passwords must match" will show up at the bottom of the confirmPassword field, until it
-  //is the same.
-
+  }
 
 };
 </script>
