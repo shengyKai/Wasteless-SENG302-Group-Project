@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "f4730c60-4c54-4e44-b360-683e856bcae6",
+		"_postman_id": "c9f4769c-7705-4ef7-ab47-bc4f0a265e21",
 		"name": "Leftovers tests",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -199,6 +199,25 @@
 		},
 		{
 			"name": "Create new card",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "48ae95c5-e960-4df9-9947-af7d1590570b",
+						"exec": [
+							"pm.test(\"Status code is 201\", function () {",
+							"    pm.response.to.have.status(201);",
+							"});",
+							"",
+							"const cardId = pm.response.json().cardId;",
+							"if (typeof cardId !== \"undefined\") {",
+							"    pm.globals.set(\"card_id\", cardId);",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
 			"request": {
 				"auth": {
 					"type": "apikey",
@@ -622,7 +641,7 @@
 					"variable": [
 						{
 							"key": "cardId",
-							"value": "{{card_id}}"
+							"value": "99999999"
 						},
 						{
 							"key": "buyerId",
@@ -723,15 +742,15 @@
 							"",
 							"const response = pm.response.json();",
 							"pm.test(\"Response contains correct count\", () => {",
-							"   pm.expect(response.count).to.be(1); ",
+							"   pm.expect(response.count).to.eql(1); ",
 							"});",
 							"",
 							"const result = response.results[0];",
 							"pm.test(\"Response contains message\", () => {",
-							"   pm.expect(result.content).to.be(\"hey dude!\") ",
+							"   pm.expect(result.content).to.eql(\"hey dude!\") ",
 							"});",
 							"pm.test(\"Response contains senderId\", () => {",
-							"   pm.expect(result.senderId).to.be(1); ",
+							"   pm.expect(result.senderId).to.eql(1); ",
 							"});"
 						],
 						"type": "text/javascript"
