@@ -266,7 +266,6 @@
             <v-btn
               class="ml-2"
               type="submit"
-              :disabled="!valid"
               color="primary"
               @click.prevent="updateProfile"
             >
@@ -343,13 +342,23 @@ export default {
   },
   methods: {
     updateProfile() {
+      if(this.password !== '') {
+        this.passwordChange();
+      }
       console.log(JSON.parse(JSON.stringify(this.user)));
     },
     updatePhoneNumber() {
       this.user.phoneNumber = this.countryCode + ' ' + this.phoneDigits;
     },
-    passwordChange() {
-      // TODO Write implementation
+    async passwordChange() {
+      this.errorMessage = undefined;
+      console.log("a");
+      this.errorMessage = await this.$store.dispatch("login", { email : this.user.email, password : this.password });
+      if(this.errorMessage !== "Invalid credentials") {
+        console.log("b");
+        console.log(this.$store);
+        //TODO
+      }
     },
   },
   watch: {
