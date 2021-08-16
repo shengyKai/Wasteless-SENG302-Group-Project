@@ -13,7 +13,20 @@ import java.util.Optional;
 @Repository
 public interface ImageRepository extends CrudRepository<Image, Long> {
 
+    /**
+     * Finds the image with the given filename
+     * @param filename Filename to find
+     * @return Relevant image entity
+     */
     Optional<Image> findByFilename(@Param("filename") String filename);
+
+    /**
+     * Finds the image with the given thumbnail filename
+     * @param filenameThumbnail Filename to find
+     * @return Relevant image entity
+     */
+    Optional<Image> findByFilenameThumbnail(@Param("filenameThumbnail") String filenameThumbnail);
+
     /**
      * Gets an image from the database that matches a given image Id. This method preforms a sanity check to ensure the
      * image does exist and if not throws a not accepted response status exception.

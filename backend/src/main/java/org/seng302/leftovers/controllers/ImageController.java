@@ -21,27 +21,32 @@ import java.util.Optional;
 
 @RestController
 public class ImageController {
-    private static final Logger logger = LogManager.getLogger(ImageController.class.getName());
+    private static final Logger logger = LogManager.getLogger(ImageController.class);
 
-    @Autowired
-    ImageRepository imageRepository;
-
-    @Autowired
+    private ImageRepository imageRepository;
     private StorageService storageService;
+
+    @Autowired
+    public ImageController(ImageRepository imageRepository, StorageService storageService) {
+        this.imageRepository = imageRepository;
+        this.storageService = storageService;
+    }
 
     @GetMapping("/media/images/{imageName}")
     public ResponseEntity<Resource> getImage(@PathVariable("imageName") String imageName, HttpServletRequest session) {
         logger.info(() -> String.format("Fetching image with name=%s", imageName));
         AuthenticationTokenManager.checkAuthenticationToken(session);
 
-        final Optional<Image> retrievedImage = imageRepository.findByFilename(imageName);
+        Optional<Image> retrievedImage = imageRepository.findByFilename(imageName);
+        if (retrievedImage.isEmpty()) {
+            retrievedImage = imageRepository.findByFilenameThumbnail(imageName);
+        }
         if (retrievedImage.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Failed to find image with the given name");
         }
-
-        Resource file = storageService.load(retrievedImage.get().getFilename());
+        Resource file = storageService.load(imageName);
         logger.warn(file.getDescription());
-        return ResponseEntity.status(HttpStatus.OK).contentType(guessMediaType(retrievedImage.get().getFilename())).body(file);
+        return ResponseEntity.status(HttpStatus.OK).contentType(guessMediaType(imageName)).body(file);
     }
 
     private MediaType guessMediaType(String filename) {
