@@ -1909,6 +1909,9 @@ paths:
                         type: array
                         items:
                           $ref: '#/components/schemas/Product'
+        '400':
+          description: >-
+            Invalid search term provided
         '401':
           $ref: '#/components/responses/UnauthorizedError'
         '403':
@@ -1916,6 +1919,8 @@ paths:
             Forbidden: Returned when the user making the request is not an
             administrator of the business AND is not a global
             application admin.
+        '406': 
+          $ref: '#/components/responses/NotAcceptableError'
   /feed/{id}/tag:
     put:
       tags:
@@ -2525,4 +2530,3 @@ components:
           type: string
           example: So how about them apples?
           description: User supplied content of the message
-        
