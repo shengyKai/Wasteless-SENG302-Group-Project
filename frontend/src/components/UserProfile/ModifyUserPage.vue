@@ -28,6 +28,7 @@
                     ref="password"
                     v-model="user.password"
                     label="New Password"
+                    @keyup="passwordCheck"
                     :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
                     :type="showPassword ? 'text' : 'password'"
                     @click:append="showPassword = !showPassword"
@@ -45,7 +46,7 @@
                     :append-icon="showConfirmPassword ? 'mdi-eye' : 'mdi-eye-off'"
                     :type="showConfirmPassword ? 'text' : 'password'"
                     @click:append="showConfirmPassword = !showConfirmPassword"
-                    :rules="passwordConfirmationRule.concat(maxMediumCharRules)"
+                    :rules="passwordRules.concat(passwordConfirmationRule).concat(maxMediumCharRules)"
                     outlined
                   />
                 </v-col>
@@ -88,7 +89,7 @@
                 </v-col>
 
                 <!-- INPUT: Last name -->
-                <v-col cols="12" sm="6" class="py-0">
+                <v-col cols="12" sm="6" class="pb-3">
                   <v-text-field
                     class="required"
                     v-model="user.lastName"
@@ -99,7 +100,7 @@
                 </v-col>
 
                 <!-- INPUT: Nickname -->
-                <v-col cols="12" sm="6" class="py-0">
+                <v-col cols="12" sm="6" class="pb-3">
                   <v-text-field
                     v-model="user.nickname"
                     label="Nickname"
@@ -340,30 +341,36 @@ export default {
       errorMessage: undefined,
     };
   },
+  mounted () {
+    //sets maxDate and date of birth value
+    this.maxDate = this.minimumDateOfBirth().toISOString().slice(0, 10);
+    this.dob = this.minimumDateOfBirth().toISOString().slice(0, 10);
+  },
   methods: {
     updateProfile() {
-      // if(this.password !== '') {
-      //   this.passwordChange();
-      // }
-      console.log(JSON.parse(JSON.stringify(this.user)));
+      if(this.passwordChange()) {
+        console.log(JSON.parse(JSON.stringify(this.user)));
+      }
+      else {
+        console.log("NOPE");
+      }
     },
     updatePhoneNumber() {
       this.user.phoneNumber = this.countryCode + ' ' + this.phoneDigits;
     },
     async passwordChange() {
       this.errorMessage = undefined;
-      console.log("a");
       this.errorMessage = await this.$store.dispatch("login", { email : this.user.email, password : this.user.oldPassword });
       if(this.errorMessage !== "Invalid credentials") {
-        console.log("b");
-        console.log(this.$store);
-        console.log("AAA");
+        console.log("Succeed");
         return true;
-        //TODO
       } else {
-        console.log("BBB");
+        console.log(this.errorMessage);
         return false;
       }
+    },
+    passwordCheck () {
+      this.$refs.confirmPassword.validate();
     },
   },
   watch: {
@@ -409,8 +416,6 @@ export default {
     },
   },
   computed: {
-    passwordConfirmationRule: () => [],
-    phoneRequiresCountryCodeRule: () => [],
     emailRules: () => emailRules,
     mandatoryRules: () => mandatoryRules,
     passwordRules: () => passwordRules,
@@ -425,19 +430,22 @@ export default {
     alphabetRules: () => alphabetRules,
     alphabetExtendedMultilineRules: () => alphabetExtendedMultilineRules,
     streetNumRules: () => streetNumRules,
+
+    passwordConfirmationRule () {
+      return () =>
+        this.user.password === this.confirmPassword || 'Passwords must match';
+    },
+    phoneRequiresCountryCodeRule () {
+      return () =>
+        !(this.phone.length > 0 && this.countryCode.length < 1) || 'Country code must be present';
+    }
   },
   //The computed property below is dependent on two user input fields, password and password confirmation.
   //After the user has typed in the password field, the confirmPassword field would check this rule for each
   //change(in this case, each keystroke), and compare it with the password field. If they are not the same,
   //the error message "Passwords must match" will show up at the bottom of the confirmPassword field, until it
   //is the same.
-  passwordConfirmationRule () {
-    return () =>
-      this.password === this.confirmPassword || 'Passwords must match';
-  },
-  phoneRequiresCountryCodeRule () {
-    return () =>
-      !(this.phone.length > 0 && this.countryCode.length < 1) || 'Country code must be present';
-  }
+
+
 };
 </script>
