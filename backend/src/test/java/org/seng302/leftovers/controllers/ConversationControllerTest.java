@@ -2,6 +2,11 @@ package org.seng302.leftovers.controllers;
 
 import net.minidev.json.JSONObject;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.runner.RunWith;
+import org.mockito.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
@@ -14,6 +19,7 @@ import org.seng302.leftovers.persistence.ConversationRepository;
 import org.seng302.leftovers.persistence.MarketplaceCardRepository;
 import org.seng302.leftovers.persistence.MessageRepository;
 import org.seng302.leftovers.persistence.UserRepository;
+import org.seng302.leftovers.service.MessageService;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -32,8 +38,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -51,6 +56,16 @@ public class ConversationControllerTest {
     private MessageRepository messageRepository;
     @Mock
     private ConversationRepository conversationRepository;
+    @Mock
+    private MessageService messageService;
+    @Mock
+    private Message message;
+    @Captor
+    private ArgumentCaptor<Message> messageArgumentCaptor;
+    @Captor
+    private ArgumentCaptor<User> buyerArgumentCaptor;
+    @Captor
+    private ArgumentCaptor<User> ownerArgumentCaptor;
 
     private MockedStatic<AuthenticationTokenManager> authenticationTokenManager;
 
@@ -124,7 +139,8 @@ public class ConversationControllerTest {
 
         when(marketplaceCardRepository.getCard(any(), any())).thenReturn(card);
 
-        conversationController = new ConversationController(marketplaceCardRepository, conversationRepository, userRepository, messageRepository);
+        conversationController = new ConversationController(marketplaceCardRepository, conversationRepository, userRepository,
+                messageRepository, messageService);
         mockMvc = MockMvcBuilders.standaloneSetup(conversationController).build();
     }
 
@@ -257,5 +273,21 @@ public class ConversationControllerTest {
                 .content(createMessageBody(1L, "")))
                 .andExpect(status().isBadRequest())
                 .andReturn();
+    }
+
+    @Test
+    void postMarketplaceCardMessage_canPost_notifyConversationParticipantsCalled() throws Exception {
+        when(conversationRepository.findByCardAndBuyer(any(),any())).thenReturn(Optional.empty()); // first message
+        when(messageRepository.save(any())).thenReturn(message);
+
+        mockMvc.perform(post("/cards/1/conversations/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(createMessageBody(1L)));
+
+        Mockito.verify(messageService, times(1)).notifyConversationParticipants(
+                messageArgumentCaptor.capture(), buyerArgumentCaptor.capture(), ownerArgumentCaptor.capture());
+        Assertions.assertEquals(message, messageArgumentCaptor.getValue());
+        Assertions.assertEquals(buyer, buyerArgumentCaptor.getValue());
+        Assertions.assertEquals(owner, ownerArgumentCaptor.getValue());
     }
 }
