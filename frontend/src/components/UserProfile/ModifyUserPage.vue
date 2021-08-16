@@ -372,6 +372,18 @@ export default {
     passwordCheck () {
       this.$refs.confirmPassword.validate();
     },
+    phoneNumberChange () {
+      this.$refs.countryCode.validate();
+    },
+    minimumDateOfBirth () {
+      //minimum age of a user must be 13
+      let today = new Date();
+      let year = today.getFullYear();
+      let month = today.getMonth();
+      let day = today.getDate();
+
+      return new Date(year - 13, month, day);
+    },
   },
   watch: {
     streetAddress: {
@@ -437,7 +449,7 @@ export default {
     },
     phoneRequiresCountryCodeRule () {
       return () =>
-        !(this.phone.length > 0 && this.countryCode.length < 1) || 'Country code must be present';
+        !(this.phoneDigits > 0 && this.countryCode.length < 1) || 'Country code must be present';
     }
   },
   //The computed property below is dependent on two user input fields, password and password confirmation.
