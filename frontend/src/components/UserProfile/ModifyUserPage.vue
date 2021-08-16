@@ -308,7 +308,7 @@ export default {
       user: {
         email: '',
         password: '',
-        oldPassword: '', // Not sure if this is the final field name
+        oldPassword: '',
 
         firstName: '',
         middleName: '',
@@ -341,13 +341,17 @@ export default {
     };
   },
   mounted () {
-    //sets maxDate and date of birth value
+    //sets maxDate
     this.maxDate = this.minimumDateOfBirth().toISOString().slice(0, 10);
-    this.user.dateOfBirth = this.minimumDateOfBirth().toISOString().slice(0, 10);
   },
   methods: {
+    /**
+     * Update Profile after linking up the modify endpoint
+     * Next person might have different idea of how/when the updateProfile button will be display
+     * Just here to setup everything
+    */
     updateProfile() {
-      if(this.passwordChange()) {
+      if(this.credentialsCheck()) {
         console.log(JSON.parse(JSON.stringify(this.user)));
       }
       else {
@@ -357,36 +361,52 @@ export default {
     updatePhoneNumber() {
       this.user.phoneNumber = this.countryCode + ' ' + this.phoneDigits;
     },
-    async passwordChange() {
+    /**
+     * Check the credentials of user by prompting user to input current password
+     * Attempt to perform login to check the credentials
+     * With the current store.state.user.email and oldPassword
+     * Return TRUE if this.errorMessage === "" as the init data
+     * Return False if this.errorMessage contain message
+     */
+    async credentialsCheck() {
       this.errorMessage = undefined;
-      this.errorMessage = await this.$store.dispatch("login", { email : this.user.email, password : this.user.oldPassword });
-      if(this.errorMessage !== "Invalid credentials") {
-        console.log("Succeed");
+      this.errorMessage = await this.$store.dispatch("login", { email : this.$store.state.user.email, password : this.user.oldPassword });
+      if(this.errorMessage === "") {
         return true;
       } else {
-        console.log(this.errorMessage);
         return false;
       }
     },
+    /**
+     * Apply validation rule on the confirmPassword field
+     */
     passwordCheck () {
       this.$refs.confirmPassword.validate();
     },
+    /**
+     * Apply validation rule on country code field
+     */
     phoneNumberChange () {
       this.$refs.countryCode.validate();
     },
+    /**
+     * Set the minimum age range in date picker according to the account
+     * Only showing differences between user and business account
+     * If account have have business or administered a business, then the minimum year =16
+     * Else a normal user account minimum year restriction will be 13
+     */
     minimumDateOfBirth () {
-      //minimum age of a user must be 13
       let today = new Date();
       let year = today.getFullYear();
       let month = today.getMonth();
       let day = today.getDate();
-      console.log("A");
-      console.log(this.$store.state.activeRole.type);
-      console.log(this.$store.state.user.businessesAdministered);
-      console.log(this.$store.state.user.businessesAdministered.length);
-      return new Date(year - 13, month, day);
+      if(this.$store.state.user.businessesAdministered.length >= 1) {
+        return new Date(year - 16, month, day);
+      }
+      else {
+        return new Date(year - 13, month, day);
+      }
     },
-    //TODO get store business role, if exist then year =16 else year=13, n date will be fix
   },
   watch: {
     streetAddress: {
@@ -430,6 +450,9 @@ export default {
       immediate: true,
     },
   },
+  /**
+   * Use all the imported validation rules from utils to be consistent within the web application.
+   */
   computed: {
     emailRules: () => emailRules,
     mandatoryRules: () => mandatoryRules,
@@ -446,10 +469,16 @@ export default {
     alphabetExtendedMultilineRules: () => alphabetExtendedMultilineRules,
     streetNumRules: () => streetNumRules,
 
+    /**
+     * Validation for new password confirming
+     */
     passwordConfirmationRule () {
       return () =>
         this.user.password === this.confirmPassword || 'Passwords must match';
     },
+    /**
+     * Validation for phone's country code
+     */
     phoneRequiresCountryCodeRule () {
       return () =>
         !(this.phoneDigits > 0 && this.countryCode.length < 1) || 'Country code must be present';
