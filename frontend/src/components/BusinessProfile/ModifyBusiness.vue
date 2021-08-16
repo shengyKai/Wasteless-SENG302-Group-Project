@@ -156,7 +156,6 @@
                       type="submit"
                       color="primary"
                       :disabled="!valid"
-                      @
                     >
                       <v-icon
                         class="expand-icon"
@@ -272,6 +271,7 @@ export default {
       this.$emit('discardModifyBusiness');
     },
     async proceedWithModifyBusiness() {
+      this.errorMessage = undefined;
       /**
        * Get the street number and name from the street address field.
        */
@@ -281,7 +281,7 @@ export default {
 
       // Set up the modified fields
       let modifiedFields = {
-        primaryAdministratorId: this.$store.state.user.id,
+        primaryAdministratorId: this.primaryAdministratorId,
         name: this.businessName,
         description: this.description,
         address: {

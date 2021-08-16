@@ -7,17 +7,36 @@
     </v-row>
     <div v-if='!modifyBusiness' style="margin-top: 100px">
       <v-card>
-        <ImageCarousel v-if="businessImages" :imagesList="businessImages" :showControls="permissionToActAsBusiness"/>
+        <ImageCarousel
+          v-if="businessImages"
+          :imagesList="businessImages"
+          :showControls="permissionToActAsBusiness"
+          @change-primary-image="makeImagePrimary"
+          ref="businessImageCarousel"
+        />
       </v-card>
       <v-card class="body">
-        <div class="top-section">
-          <div>
-            <h1>{{ business.name }}</h1>
-            <p><b>Created:</b> {{ createdMsg }}</p>
-            <v-btn outlined color="primary" @click="goSalePage" :value="false">
-              Sale listings
-            </v-btn>
-          </div>
+        <div class="d-flex flex-column">
+          <v-row>
+            <v-col cols="6">
+              <span><h1>{{ business.name }}</h1></span>
+            </v-col>
+            <v-col cols="6" class="d-flex justify-end">
+              <v-alert
+                class="ma-2 flex-grow-0"
+                v-if="errorMessage !== undefined"
+                type="error"
+                dismissible
+                @input="errorMessage = undefined"
+              >
+                {{ errorMessage }}
+              </v-alert>
+            </v-col>
+          </v-row>
+          <p><b>Created:</b> {{ createdMsg }}</p>
+          <v-btn outlined color="primary" @click="goSalePage" :value="false" width="150">
+            Sale listings
+          </v-btn>
         </div>
         <v-container fluid>
           <v-row>
@@ -29,7 +48,6 @@
               <h4>Category</h4>
               {{ business.businessType }}
             </v-col>
-
             <v-col cols="12">
               <h4>Description</h4>
               {{ business.description }}
@@ -64,6 +82,7 @@
         </v-container>
       </v-card>
     </div>
+
     <ModifyBusiness
       :business="business"
       v-if="modifyBusiness"
@@ -75,7 +94,7 @@
 
 <script>
 import ModifyBusiness from '@/components/BusinessProfile/ModifyBusiness';
-import { getBusiness } from '@/api/internal';
+import {getBusiness, makeBusinessImagePrimary} from '../../api/internal';
 import convertAddressToReadableText from '@/components/utils/Methods/convertJsonAddressToReadableText';
 import {
   alphabetExtendedMultilineRules,
@@ -177,15 +196,25 @@ export default {
   },
 
   methods: {
+    /**
+     * Reroutes user to this business' sales page
+     */
     goSalePage() {
       this.$router.push(`/business/${this.business.id}/listings`);
     },
+    /**
+     * Returns to the search page, keeping the search parameters
+     */
     async returnToSearch() {
       await this.$router.push({path: '/search/business', query:{...this.$route.query}});
     },
     showAlert() {
       alert("I am the admin");
     },
+
+    /**
+     * Returns the appropriate color of the admin for their chip
+     */
     getAdminColour(admin) {
       if (admin.id === this.business.primaryAdministratorId) {
         return "red";
@@ -193,11 +222,22 @@ export default {
         return "green";
       }
     },
+    /**
+     * Switches whether to update the products' country to the new country
+     */
     changeUpdateCountries() {
-      if (this.updateProductCountry) {
-        this.updateProductCountry = false;
-      } else {
-        this.updateProductCountry = true;
+      this.updateProductCountry = !this.updateProductCountry;
+    },
+    /**
+     * Sets the given image as primary image to be displayed
+     * @param imageId ID of the Image to set
+     */
+    async makeImagePrimary(imageId) {
+      this.errorMessage = undefined;
+      const result = await makeBusinessImagePrimary(this.business.id, imageId);
+      if (typeof result === 'string') {
+        this.errorMessage = result;
+        this.$refs.businessImageCarousel.forceClose();
       }
     },
     /**
@@ -226,8 +266,6 @@ export default {
 <style scoped>
 .body {
     padding: 16px;
-    width: 100%;
-    /*margin-top: 140px;*/
 }
 
 .top-section {
