@@ -107,39 +107,26 @@ public class ConversationController {
                                                             @PathVariable Long buyerId,
                                                             @RequestParam(required = false) Integer page,
                                                             @RequestParam(required = false) Integer resultsPerPage) {
+        logger.info("Request to get all messages in conversation regarding card (id={}) from with user (id={})", cardId, buyerId);
         AuthenticationTokenManager.checkAuthenticationToken(request);
 
-        var cardOptional = marketplaceCardRepository.findById(cardId);
-        if (cardOptional.isEmpty()) {
-            var exception = new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, String.format("No marketplace card with id %d", cardId));
-            logger.error(exception.getMessage());
-            throw exception;
+        try {
+            var card = marketplaceCardRepository.getCard(cardId, HttpStatus.NOT_ACCEPTABLE);
+            var buyer = userRepository.getUser(buyerId);
+
+            if (!AuthenticationTokenManager.sessionCanSeePrivate(request, buyerId)
+                    && !AuthenticationTokenManager.sessionCanSeePrivate(request, card.getCreator().getUserID())) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You do not have permission to view this conversation");
+            }
+
+            var conversation = conversationRepository.getConversation(card, buyer);
+            var pageRequest = SearchHelper.getPageRequest(page, resultsPerPage, Sort.by("created").descending());
+            var messages = messageRepository.findAllByConversation(conversation, pageRequest);
+
+            return new ResultPageDTO<>(messages.map(Message::constructJSONObject));
+        } catch (ResponseStatusException e) {
+            logger.error(e.getMessage());
+            throw e;
         }
-
-        var buyerOptional = userRepository.findById(buyerId);
-        if (buyerOptional.isEmpty()) {
-            var exception = new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, String.format("No user with id %d", buyerId));
-            logger.error(exception.getMessage());
-            throw exception;
-        }
-
-        if (!AuthenticationTokenManager.sessionCanSeePrivate(request, buyerId)
-                && !AuthenticationTokenManager.sessionCanSeePrivate(request, cardOptional.get().getCreator().getUserID())) {
-            var exception = new ResponseStatusException(HttpStatus.FORBIDDEN, "You do not have permission to view this conversation");
-            logger.error(exception.getMessage());
-            throw exception;
-        }
-
-        var conversationOptional = conversationRepository.findByCardAndBuyer(cardOptional.get(), buyerOptional.get());
-        if (conversationOptional.isEmpty()) {
-            var exception = new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, String.format("No messages regarding marketplace card (id=%d) from user (id=%d)", cardId, buyerId));
-            logger.error(exception.getMessage());
-            throw exception;
-        }
-
-        var pageRequest = SearchHelper.getPageRequest(page, resultsPerPage, Sort.by("created").descending());
-        var messages = messageRepository.findAllByConversation(conversationOptional.get(), pageRequest);
-
-        return new ResultPageDTO<>(messages.map(Message::constructJSONObject));
     }
 }
