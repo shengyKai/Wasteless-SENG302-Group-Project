@@ -23,7 +23,7 @@
 
               <!-- INPUT: Password -->
               <v-row>
-                <v-col cols="12" sm="6" class="pb-0">
+                <v-col cols="12" sm="6" class="pb-3">
                   <v-text-field
                     ref="password"
                     v-model="user.password"
@@ -283,7 +283,17 @@
 import LocationAutocomplete from '@/components/utils/LocationAutocomplete';
 
 import { getUser } from '@/api/internal';
-import { mandatoryRules } from '@/utils';
+import {
+  alphabetExtendedMultilineRules,
+  alphabetRules,
+  countryCodeRules,
+  emailRules,
+  mandatoryRules, maxCharRules,
+  nameRules,
+  passwordRules, phoneNumberRules,
+  postCodeRules,
+  streetNumRules,
+} from "@/utils";
 
 export default {
   name: 'ModifyUserPage',
@@ -385,22 +395,35 @@ export default {
     },
   },
   computed: {
-    mandatoryRules: () => mandatoryRules,
-    alphabetRules: () => [],
-    charBioRules: () => [],
-    alphabetExtendedMultilineRules: () => [],
-    countryCodeRules: () => [],
-    phoneNumberRules: () => [],
-    streetNumRules: () => [],
-    postCodeRules: () => [],
-    maxShortCharRules: () => [],
-    nameRules: () => [],
-    emailRules: () => [],
-    maxLongCharRules: () => [],
-    maxMediumCharRules: () => [],
-    passwordRules: () => [],
     passwordConfirmationRule: () => [],
     phoneRequiresCountryCodeRule: () => [],
+    emailRules: () => emailRules,
+    mandatoryRules: () => mandatoryRules,
+    passwordRules: () => passwordRules,
+    postCodeRules: () => postCodeRules,
+    nameRules: () => nameRules,
+    maxShortCharRules: () => maxCharRules(16),
+    maxMediumCharRules: () => maxCharRules(32),
+    maxLongCharRules: () => maxCharRules(100),
+    charBioRules: () => maxCharRules(200),
+    phoneNumberRules: () => phoneNumberRules,
+    countryCodeRules: () => countryCodeRules,
+    alphabetRules: () => alphabetRules,
+    alphabetExtendedMultilineRules: () => alphabetExtendedMultilineRules,
+    streetNumRules: () => streetNumRules,
+  },
+  //The computed property below is dependent on two user input fields, password and password confirmation.
+  //After the user has typed in the password field, the confirmPassword field would check this rule for each
+  //change(in this case, each keystroke), and compare it with the password field. If they are not the same,
+  //the error message "Passwords must match" will show up at the bottom of the confirmPassword field, until it
+  //is the same.
+  passwordConfirmationRule () {
+    return () =>
+      this.password === this.confirmPassword || 'Passwords must match';
+  },
+  phoneRequiresCountryCodeRule () {
+    return () =>
+      !(this.phone.length > 0 && this.countryCode.length < 1) || 'Country code must be present';
   }
 };
 </script>
