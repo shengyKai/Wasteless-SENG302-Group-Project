@@ -10,7 +10,7 @@ import org.junit.runner.RunWith;
 import org.mockito.*;
 import org.seng302.leftovers.entities.Event;
 import org.seng302.leftovers.entities.MessageEvent;
-import org.seng302.leftovers.entities.Tag;
+import org.seng302.leftovers.dto.Tag;
 import org.seng302.leftovers.entities.User;
 import org.seng302.leftovers.exceptions.AccessTokenException;
 import org.seng302.leftovers.persistence.EventRepository;
@@ -18,12 +18,10 @@ import org.seng302.leftovers.persistence.UserRepository;
 import org.seng302.leftovers.service.EventService;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.server.ResponseStatusException;
 
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.*;
@@ -33,7 +31,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import java.text.ParseException;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 import static org.mockito.AdditionalMatchers.not;
 import static org.mockito.ArgumentMatchers.any;

@@ -4,6 +4,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.seng302.leftovers.entities.Business;
 import org.seng302.leftovers.entities.Keyword;
+import org.seng302.leftovers.entities.Product;
 import org.seng302.leftovers.entities.User;
 import org.seng302.leftovers.exceptions.SearchFormatException;
 import org.seng302.leftovers.persistence.UserRepository;
@@ -198,6 +199,9 @@ public class SearchHelper {
         }
         return constructBusinessSpecificationFromSearchQuery(searchQuery)
                 .and(constructBusinessSpecificationFromType(businessType));
+    }
+
+    public static Specification<Product> constructSpecificationFromProductSearch(Business business, String searchQuery, List<Product> columns) {
 
     }
 
