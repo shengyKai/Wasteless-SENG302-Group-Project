@@ -36,7 +36,7 @@ tags:
   - name: 'U22: List sale'
   - name: 'U23: Search for business'
   - name: 'U26: Example data'
-  - name: 'U28: Product Catalogue search'
+  - name: 'U32: Managing my feed'
   - name: 'UCM1: Community marketplace'
     description: >-
       No endpoints required here yet, these will come from the subsequent
@@ -49,6 +49,7 @@ tags:
   - name: 'UCM7: Keyword search'
   - name: 'UCM8: Contacting other marketplace users'
   - name: 'UCM9: Edit card'
+  - name: 'Business Images'
   - name: Users
     description: Grouping of endpoints related to the User entity
   - name: Business Accounts
@@ -342,6 +343,7 @@ paths:
       tags:
         - 'U11: Modifying Businesses'
         - Business Accounts
+        - Business Images
       summary: Modifies an existing business entity
       security:
         - CookieAuth:
@@ -381,6 +383,133 @@ paths:
             application admin.
         '401':
           $ref: '#/components/responses/UnauthorizedError'
+  '/businesses/{businessId}/images':
+    post:
+      tags:
+        - 'U11: Modifying Businesses'
+        - Business Images
+        - Business Accounts
+      summary: Upload a new image for some photo
+      security:
+        - CookieAuth:
+            - user
+            - globalApplicationAdmin
+            - defaultGlobalApplicationAdmin
+      parameters:
+        - name: businessId
+          in: path
+          description: ID of business
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                filename:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+      responses:
+        '201':
+          description: Image created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  imageId:
+                    type: integer
+                    description: The ID of the image that has just been created
+                    example: 1234
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: >-
+            Forbidden: Returned when a user tries to add an image for the business
+            when they do not administer AND
+            the user is not a global application admin
+        '406':
+          $ref: '#/components/responses/NotAcceptableError'
+  '/businesses/{businessId}/images/{imageId}':
+    delete:
+      tags:
+        - 'U11: Modifying Businesses'
+        - Business Images
+        - Business Accounts
+      summary: Delete an image of a business
+      security:
+        - CookieAuth:
+            - user
+            - globalApplicationAdmin
+            - defaultGlobalApplicationAdmin
+      parameters:
+        - name: businessId
+          in: path
+          description: ID of business
+          required: true
+          schema:
+            type: integer
+        - name: imageId
+          in: path
+          description: ID of the image to delete
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Image deleted successfully
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: >-
+            Forbidden: Returned when a user tries to delete an image for a
+            business that it is in a catalogue for a business they do not
+            administer AND the user is not a global application admin
+        '406':
+          $ref: '#/components/responses/NotAcceptableError'
+  '/businesses/{businessId}/images/{imageId}/makeprimary':
+    put:
+      tags:
+        - 'U11: Modifying Businesses'
+        - Business Images
+        - Business Accounts
+      summary: Set an existing image to be the new primary image for the business
+      security:
+        - CookieAuth:
+            - user
+            - globalApplicationAdmin
+            - defaultGlobalApplicationAdmin
+      parameters:
+        - name: businessId
+          in: path
+          description: ID of business
+          required: true
+          schema:
+            type: integer
+        - name: imageId
+          in: path
+          description: ID of the image to set as being the primary image for product
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Primary image successfully updated
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: >-
+            Forbidden: Returned when a user tries to update the primary image
+            for the business that the user dont
+            administer AND the user is not a global application admin
+        '406':
+          $ref: '#/components/responses/NotAcceptableError'
   '/businesses/{id}/makeAdministrator':
     put:
       tags:
@@ -2503,30 +2632,3 @@ components:
         - green
         - blue
         - purple
-    Message:
-      type: object
-      description: Message between marketplace card users
-      required:
-        - id
-        - created
-        - senderId
-        - content
-      properties:
-        id:
-          type: integer
-          example: 100
-          readOnly: true
-          description: Automatically generated and assigned by the server
-        created:
-          type: string
-          example: '2021-07-15T05:10:00Z'
-          readOnly: true
-          description: Time the message was sent
-        senderId:
-          type: integer
-          example: 70
-          description: Identifier of the sender user
-        content:
-          type: string
-          example: So how about them apples?
-          description: User supplied content of the message
