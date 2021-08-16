@@ -45,7 +45,6 @@ public class ImageController {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Failed to find image with the given name");
         }
         Resource file = storageService.load(imageName);
-        logger.warn(file.getDescription());
         return ResponseEntity.status(HttpStatus.OK).contentType(guessMediaType(imageName)).body(file);
     }
 

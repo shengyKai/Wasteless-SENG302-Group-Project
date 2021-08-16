@@ -1,10 +1,7 @@
 package org.seng302.leftovers.controllers;
 
 import org.json.JSONObject;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.*;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
@@ -56,7 +53,7 @@ class ImageControllerTest {
     private Image testImage;
     private MockMvc mockMvc;
 
-    @BeforeAll
+    @BeforeEach
     private void setUp() {
         MockitoAnnotations.openMocks(this);
 
@@ -74,11 +71,11 @@ class ImageControllerTest {
         when(mockImageRepository.findByFilenameThumbnail(not(eq("foo.thumb.png")))).thenReturn(Optional.empty());
         when(mockImageRepository.findByFilenameThumbnail("foo.thumb.png")).thenReturn(Optional.of(mockImage));
 
-        ImageController eventController = new ImageController(mockImageRepository, mockStorageService);
-        mockMvc = MockMvcBuilders.standaloneSetup(eventController).build();
+        ImageController imageController = new ImageController(mockImageRepository, mockStorageService);
+        mockMvc = MockMvcBuilders.standaloneSetup(imageController).build();
     }
 
-    @AfterAll
+    @AfterEach
     void tearDown() {
         authenticationTokenManager.close();
         imageRepository.deleteAll();
@@ -120,9 +117,10 @@ class ImageControllerTest {
     }
 
     @Test
-    void requestImage_imageNotFound_406Response() throws Exception {
-        mockMvc.perform(get("/media/images/notfound.png"))
-                .andExpect(status().isNotAcceptable())
+    void requestImage_imageNotFound_404Response() throws Exception {
+        // Not sure why everything after and including the final dot is removed
+        mockMvc.perform(get("/media/images/notfound.png."))
+                .andExpect(status().isNotFound())
                 .andReturn();
 
         verify(mockImageRepository, times(1)).findByFilename("notfound.png");
@@ -131,8 +129,8 @@ class ImageControllerTest {
     }
 
     @Test
-    void requestImage_requestedImage_406Response() throws Exception {
-        mockMvc.perform(get("/media/images/foo.png"))
+    void requestImage_requestedImage_200Response() throws Exception {
+        mockMvc.perform(get("/media/images/foo.png."))
                 .andExpect(status().isOk())
                 .andReturn();
 
@@ -142,8 +140,8 @@ class ImageControllerTest {
     }
 
     @Test
-    void requestImage_requestedThumbnail_406Response() throws Exception {
-        mockMvc.perform(get("/media/images/foo.thumb.png"))
+    void requestImage_requestedThumbnail_200Response() throws Exception {
+        mockMvc.perform(get("/media/images/foo.thumb.png."))
                 .andExpect(status().isOk())
                 .andReturn();
 

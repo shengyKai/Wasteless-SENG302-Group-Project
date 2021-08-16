@@ -47,7 +47,6 @@ export default {
       if (url === undefined) {
         url = image.filename;
       }
-      url = url.substring(1);
       return new URL(url, process.env.VUE_APP_SERVER_ADD).href;
     },
   },
