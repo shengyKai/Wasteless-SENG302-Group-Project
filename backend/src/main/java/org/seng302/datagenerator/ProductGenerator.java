@@ -39,12 +39,16 @@ public class ProductGenerator {
             char character = (char) (random.nextInt(26) + 'A');
             productWord += character;
         }
-        int productNumber = random.nextInt(999999);
-        String productCode = productWord + productNumber;
-        while (productCodeHash.contains(productCode)) {
+
+        int productNumber;
+        String productCode;
+
+        do {
             productNumber = random.nextInt(999999);
             productCode = productWord + productNumber;
-        }
+        } while (productCodeHash.contains(productCode));
+
+        productCodeHash.add(productCode);
         return productCode;
     }
 
