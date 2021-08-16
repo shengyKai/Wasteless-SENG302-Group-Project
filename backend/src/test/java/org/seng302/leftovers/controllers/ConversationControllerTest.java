@@ -37,6 +37,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -289,5 +290,65 @@ public class ConversationControllerTest {
         Assertions.assertEquals(message, messageArgumentCaptor.getValue());
         Assertions.assertEquals(buyer, buyerArgumentCaptor.getValue());
         Assertions.assertEquals(owner, ownerArgumentCaptor.getValue());
+    }
+
+    @Test
+    void fetchMessagesInConversation_notLoggedIn_cannotFetchMessages() {
+        fail("Not yet implemented");
+    }
+
+    @Test
+    void fetchMessagesInConversation_cardDoesNotExist_cannotFetchMessages() {
+        fail("Not yet implemented");
+    }
+
+    @Test
+    void fetchMessagesInConversation_buyerDoesNotExist_cannotFetchMessages() {
+        fail("Not yet implemented");
+    }
+
+    @Test
+    void fetchMessagesInConversation_conversationDoesNotExist_cannotFetchMessages() {
+        fail("Not yet implemented");
+    }
+
+    @Test
+    void fetchMessagesInConversation_notConversationParticipantOrAdmin_cannotFetchMessages() {
+        fail("Not yet implemented");
+    }
+
+    @Test
+    void fetchMessagesInConversation_loggedInAsCardCreator_canFetchMessages() {
+        fail("Not yet implemented");
+    }
+
+    @Test
+    void fetchMessagesInConversation_loggedInAsCardResponder_canFetchMessages() {
+        fail("Not yet implemented");
+    }
+
+    @Test
+    void fetchMessagesInConversation_loggedInAsAdmin_canFetchMessages() {
+        fail("Not yet implemented");
+    }
+
+    @Test
+    void fetchMessagesInConversation_canFetchMessages_messagesSortedFromMostToLeastRecent() {
+        fail("Not yet implemented");
+    }
+
+    @Test
+    void fetchMessagesInConversation_canFetchMessages_requestedPageFetched() {
+        fail("Not yet implemented");
+    }
+
+    @Test
+    void fetchMessagesInConversation_singleMessageInConversation_responseHasExpectedFormat() {
+        fail("Not yet implemented");
+    }
+
+    @Test
+    void fetchMessagesInConversation_multipleMessagesInConversation_responseHasExpectedFormat() {
+        fail("Not yet implemented");
     }
 }

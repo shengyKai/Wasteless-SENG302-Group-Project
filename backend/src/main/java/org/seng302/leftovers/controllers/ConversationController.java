@@ -1,6 +1,5 @@
 package org.seng302.leftovers.controllers;
 
-import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -8,14 +7,14 @@ import org.seng302.leftovers.dto.ResultPageDTO;
 import org.seng302.leftovers.dto.SendMessageDTO;
 import org.seng302.leftovers.entities.Conversation;
 import org.seng302.leftovers.entities.Message;
-import org.seng302.leftovers.persistence.*;
+import org.seng302.leftovers.persistence.ConversationRepository;
+import org.seng302.leftovers.persistence.MarketplaceCardRepository;
+import org.seng302.leftovers.persistence.MessageRepository;
+import org.seng302.leftovers.persistence.UserRepository;
 import org.seng302.leftovers.service.MessageService;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
-import org.seng302.leftovers.tools.JsonTools;
 import org.seng302.leftovers.tools.SearchHelper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,10 +22,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.util.List;
-import java.util.Set;
 
 /**
  * This controller handles requests involving Conversations between Users
