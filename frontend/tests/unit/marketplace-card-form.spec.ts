@@ -4,44 +4,11 @@ import Vuetify from 'vuetify';
 import { createLocalVue, Wrapper, mount } from '@vue/test-utils';
 
 import MarketplaceCardForm from '@/components/marketplace/MarketplaceCardForm.vue';
-import {castMock} from "./utils";
+import {castMock, makeTestUser} from "./utils";
 import * as api from '@/api/internal';
 import { getStore, resetStoreForTesting } from '@/store';
 import {User} from "@/api/internal";
 import { ThisTypedComponentOptionsWithArrayProps } from 'vue/types/options';
-
-/**
- * Creates a test user with the given user id
- *
- * @param userId The user id to use
- * @returns The generated user
- */
-function makeTestUser(userId: number) {
-  let user: User = {
-    id:  userId,
-    firstName: 'test_firstname' + userId,
-    lastName: 'test_lastname' + userId,
-    nickname: 'test_nickname' + userId,
-    email: 'test_email' + userId,
-    bio: 'test_biography' + userId,
-    phoneNumber: 'test_phone_number' + userId,
-    dateOfBirth: '1/1/1900',
-    created: '1/5/2005',
-    homeAddress: {
-      streetNumber: 'test_street_number',
-      streetName: 'test_street1',
-      city: 'test_city',
-      region: 'test_region',
-      postcode: 'test_postcode',
-      district: 'test_district',
-      country: 'test_country' + userId
-    },
-    businessesAdministered: [],
-  };
-
-
-  return user;
-}
 
 jest.mock('@/api/internal', () => ({
   searchKeywords: jest.fn(),

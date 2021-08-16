@@ -42,6 +42,7 @@ const instance = axios.create({
 
 export type MaybeError<T> = T | string;
 
+export type UserRole = "user" | "globalApplicationAdmin" | "defaultGlobalApplicationAdmin"
 export type User = {
   id: number,
   firstName: string,
@@ -54,7 +55,7 @@ export type User = {
   phoneNumber?: string,
   homeAddress: Location,
   created?: string,
-  role?: "user" | "globalApplicationAdmin" | "defaultGlobalApplicationAdmin",
+  role?: UserRole,
   businessesAdministered?: Business[],
 };
 
@@ -503,7 +504,7 @@ export async function uploadProductImage(businessId: number, productCode: string
  * @param productId The ID of the product that has the image
  * @param imageId The ID of the image
  */
-export async function makeImagePrimary(businessId: number, productId: string, imageId: number): Promise<MaybeError<undefined>> {
+export async function makeProductImagePrimary(businessId: number, productId: string, imageId: number): Promise<MaybeError<undefined>> {
   try {
     await instance.put(`/businesses/${businessId}/products/${productId}/images/${imageId}/makeprimary`);
   } catch (error) {
@@ -1118,6 +1119,54 @@ export async function messageConversation(cardId: number, senderId: number, buye
     if (status === 401) return 'You have been logged out. Please login again and retry';
     if (status === 403) return 'You do not have permission to edit this conversation';
     if (status === 406) return 'Unable to post message, the card does not exist';
+    return 'Request failed: ' + error.response?.data.message;
+  }
+  return undefined;
+}
+
+/**
+ * Add an image to the given business
+ *
+ * @param businessId The business for which the product belongs
+ * @param file Image file to add
+ */
+export async function uploadBusinessImage(businessId: number, file: File): Promise<MaybeError<undefined>> {
+  try {
+    let formData = new FormData();
+    formData.append('file', file);
+    await instance.post(`/businesses/${businessId}/images`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
+  } catch (error) {
+    let status: number | undefined = error.response?.status;
+    if (status === undefined) return 'Failed to reach backend';
+    if (status === 400) return 'Invalid image';
+    if (status === 401) return 'You have been logged out. Please login again and retry';
+    if (status === 403) return 'Operation not permitted';
+    if (status === 406) return 'Business not found';
+    if (status === 413) return 'Image too large';
+    return 'Request failed: ' + error.response?.data.message;
+  }
+
+  return undefined;
+}
+/**
+ * Sets an image as the primary image for a business
+ * @param businessId The ID of the business to change
+ * @param imageId The ID of the image
+ */
+export async function makeBusinessImagePrimary(businessId: number, imageId: number): Promise<MaybeError<undefined>> {
+  try {
+    await instance.put(`/businesses/${businessId}/images/${imageId}/makeprimary`);
+  } catch (error) {
+    let status: number | undefined = error.response?.status;
+    if (status === undefined) return 'Failed to reach backend';
+    if (status === 401) return 'You have been logged out. Please login again and retry';
+    if (status === 403) return 'Operation not permitted';
+    if (status === 406) return 'Business or Image not found';
+
     return 'Request failed: ' + error.response?.data.message;
   }
   return undefined;

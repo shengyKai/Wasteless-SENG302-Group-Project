@@ -6,7 +6,7 @@
       <!--  v-bind="attrs" v-on="on" allows the v-dialog to use this link as the activator for the dialog box  height=100%-->
       <a v-bind="attrs" v-on="on">
         <!-- productImages[0] will be the primary image for the product. -->
-        <v-img height="200px" :src="serverUrl + productImages[0].filename" />
+        <v-img height="200px" :src="serverUrl + imagesList[0].filename" />
       </a>
     </template>
     <template>
@@ -18,9 +18,9 @@
       >
         <!-- iterate through each photo in productImages -->
         <v-carousel-item
-          v-for="(item, i) in productImages"
+          v-for="(item, i) in imagesList"
           :key="i"
-          :src="serverUrl + productImages[i].filename"
+          :src="serverUrl + imagesList[i].filename"
         >
           <v-tooltip bottom>
             <template #activator="{ on: tooltip }">
@@ -59,12 +59,12 @@
 </template>
 <script>
 export default {
-  name: "ProductImageCarousel",
+  name: "ImageCarousel",
   props: {
     /**
      * Array of image objects to display
      */
-    productImages: Array,
+    imagesList: Array,
     /**
      * Whether to show the make primary and delete image
      */
@@ -93,6 +93,9 @@ export default {
     deleteImage(imageId) {
       this.$emit("delete-image", imageId);
     },
+    forceClose() {
+      this.dialog = false;
+    }
   },
 };
 </script>

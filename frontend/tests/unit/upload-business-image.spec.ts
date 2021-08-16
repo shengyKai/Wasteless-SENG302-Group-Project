@@ -2,25 +2,25 @@ import Vue from 'vue';
 import Vuetify from 'vuetify';
 import { createLocalVue, Wrapper, mount } from '@vue/test-utils';
 
-import ProductImageUploader from '@/components/utils/ProductImageUploader.vue';
+import BusinessImageUploader from "@/components/utils/BusinessImageUploader.vue";
 import { castMock, flushQueue } from './utils';
 import * as api from '@/api/internal';
 
 jest.mock('@/api/internal', () => ({
-  uploadProductImage: jest.fn(),
+  uploadBusinessImage: jest.fn(),
 }));
 
-const uploadProductImage = castMock(api.uploadProductImage);
+const uploadBusinessImage = castMock(api.uploadBusinessImage);
 
 Vue.use(Vuetify);
 
 const localVue = createLocalVue();
 
-describe('ProductImageUploader.vue', () => {
-  // Container for the wrapper around ProductImageUploader
+describe('BusinessImageUploader.vue', () => {
+  // Container for the wrapper around BusinessImageUploader
   let appWrapper: Wrapper<any>;
 
-  // Container for the ProductImageUploader under test
+  // Container for the BusinessImageUploader under test
   let wrapper: Wrapper<any>;
 
 
@@ -39,7 +39,7 @@ describe('ProductImageUploader.vue', () => {
   });
 
   /**
-   * Sets up the test ProductImageUploader instance
+   * Sets up the test BusinessImageUploader instance
    *
    * Because the element we're testing has a v-dialog we need to take some extra sets to make it
    * work.
@@ -47,16 +47,16 @@ describe('ProductImageUploader.vue', () => {
   beforeEach(() => {
     const vuetify = new Vuetify();
 
-    // Creating wrapper around ProductImageUploader with data-app to appease vuetify
+    // Creating wrapper around BusinessImageUploader with data-app to appease vuetify
     const App = localVue.component('App', {
-      components: { ProductImageUploader },
+      components: { BusinessImageUploader },
       template: `
       <div data-app>
-        <ProductImageUploader v-model="showImageUploaderForm" :businessId="100" productCode="PRODUCT-ID"/>
+        <BusinessImageUploader v-model="showImageUploaderForm" :businessId="100"/>
       </div>`,
     });
 
-    // Put the ProductImageUploader component inside a div in the global document,
+    // Put the BusinessImageUploader component inside a div in the global document,
     // this seems to make vuetify work correctly, but necessitates calling appWrapper.destroy
     const elem = document.createElement('div');
     document.body.appendChild(elem);
@@ -72,20 +72,20 @@ describe('ProductImageUploader.vue', () => {
       }
     });
 
-    wrapper = appWrapper.getComponent(ProductImageUploader);
+    wrapper = appWrapper.getComponent(BusinessImageUploader);
   });
 
   /**
    * Executes after every test case.
    *
-   * This function makes sure that the ProductImageUploader component is removed from the global document
+   * This function makes sure that the BusinessImageUploader component is removed from the global document
    */
   afterEach(() => {
     appWrapper.destroy();
   });
 
   /**
-   * Finds the close button in the ProductImageUploader form
+   * Finds the close button in the BusinessImageUploader form
    *
    * @returns A Wrapper around the close button
    */
@@ -97,7 +97,7 @@ describe('ProductImageUploader.vue', () => {
   }
 
   /**
-   * Finds the create button in the ProductImageUploader form
+   * Finds the create button in the BusinessImageUploader form
    *
    * @returns A Wrapper around the create button
    */
@@ -128,13 +128,12 @@ describe('ProductImageUploader.vue', () => {
   it('When the create button is pressed then an api call should be made and is successful', async () => {
     const testFile = new File([], 'test_file');
     wrapper.vm.file = testFile;
-    uploadProductImage.mockResolvedValue(undefined); // Ensure that the operation is successful
+    uploadBusinessImage.mockResolvedValue(undefined); // Ensure that the operation is successful
     await Vue.nextTick();
     await findCreateButton().trigger('click'); // Click create button
     await Vue.nextTick();
-    expect(uploadProductImage).toBeCalledWith(
+    expect(uploadBusinessImage).toBeCalledWith(
       100,
-      'PRODUCT-ID',
       testFile
     );
     expect(appWrapper.vm.showImageUploaderForm).toBeFalsy();
@@ -143,7 +142,7 @@ describe('ProductImageUploader.vue', () => {
   it('When the create button is pressed and the api returns an error then the error should be shown', async () => {
     const testFile = new File([], 'test_file');
     wrapper.vm.file = testFile;
-    uploadProductImage.mockResolvedValue('test_error_message'); // Ensure that the operation fails
+    uploadBusinessImage.mockResolvedValue('test_error_message'); // Ensure that the operation fails
     await Vue.nextTick();
     await findCreateButton().trigger('click'); // Click create button
     await flushQueue();

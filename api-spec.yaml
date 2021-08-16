@@ -1354,19 +1354,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              required:
-                - senderId
-                - message
-              properties:
-                senderId:
-                  type: integer
-                  description: Sender of the message
-                  example: 3
-                message:
-                  type: string
-                  description: Content of the message
-                  example: Hello World!
+              $ref: '#/components/schemas/Message'
       security:
         - CookieAuth:
             - user
@@ -1386,6 +1374,67 @@ paths:
             Forbidden: Returned when a user who is neither the creator of the
             card, card buyer, GAA or DGAA tries to send add a message to the conversation.
             Also occurs if the card creator tries to initiate a conversation.
+        '406':
+          $ref: '#/components/responses/NotAcceptableError'
+    get:
+      tags:
+        - 'UCM8: Contacting other marketplace users'
+        - Cards / community marketplace
+      summary: Get all the messages in a conversation about a marketplace card. Ordered from most-recent to least-recent.
+      parameters:
+        - name: cardId
+          in: path
+          description: The id of the card being discussed
+          required: true
+          schema:
+            type: integer
+            example: 40
+        - name: buyerId
+          in: path
+          description: The id of the prospective buyer in the conversation
+          required: true
+          schema:
+            type: integer
+            example: 3
+        - name: page
+          in: query
+          description: The page number to retrieve (1 indexed)
+          schema:
+            type: integer
+        - name: resultsPerPage
+          in: query
+          description: The number of results to show per page
+          schema:
+            type: integer
+      security:
+        - CookieAuth:
+            - user
+            - globalApplicationAdmin
+            - defaultGlobalApplicationAdmin
+      responses:
+        '200':
+          description: Request is successful, page of messages returned
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Page'
+                  - type: object
+                    required:
+                      - results
+                    properties:
+                      results:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Message'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: >-
+            Forbidden: Returned when a user who is neither the creator of the
+            card, card buyer, GAA or DGAA tries to fetch the messages.
         '406':
           $ref: '#/components/responses/NotAcceptableError'
   '/cards/{id}/extenddisplayperiod':
@@ -2449,3 +2498,31 @@ components:
         - green
         - blue
         - purple
+    Message:
+      type: object
+      description: Message between marketplace card users
+      required:
+        - id
+        - created
+        - senderId
+        - content
+      properties:
+        id:
+          type: integer
+          example: 100
+          readOnly: true
+          description: Automatically generated and assigned by the server
+        created:
+          type: string
+          example: '2021-07-15T05:10:00Z'
+          readOnly: true
+          description: Time the message was sent
+        senderId:
+          type: integer
+          example: 70
+          description: Identifier of the sender user
+        content:
+          type: string
+          example: So how about them apples?
+          description: User supplied content of the message
+        

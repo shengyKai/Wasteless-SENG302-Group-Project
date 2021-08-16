@@ -102,15 +102,50 @@
                       <v-icon v-if="!updateProductCountry" large> mdi-close </v-icon>
                     </v-col>
                   </v-row>
-                  <v-card-title>Change Primary Administrator</v-card-title>
-                  <v-col>
-                    <v-row>
-                      <span v-for="admin in administrators" :key="admin.id">
-                        <v-chip @click="showAlert" color="red" text-color="white"> {{ admin.firstName }} {{ admin.lastName }} </v-chip>
-                      </span>
-                    </v-row>
-                  </v-col>
+                  <div v-if="userIsPrimaryAdmin">
+                    <v-card-title>Change Primary Administrator</v-card-title>
+                    <v-col>
+                      <v-row>
+                        <span v-for="admin in administrators" :key="admin.id">
+                          <v-chip
+                            v-if="adminIsPrimary(admin)"
+                            class="admin-chip"
+                            color="red"
+                            text-color="white"
+                          >
+                            {{ admin.firstName }} {{ admin.lastName }}
+                          </v-chip>
+                          <v-chip
+                            v-else
+                            class="admin-chip"
+                            color="green"
+                            text-color="white"
+                            @click="changePrimaryAdmin(admin)"
+                          >
+                            {{ admin.firstName }} {{ admin.lastName }}
+                          </v-chip>
+                        </span>
+                        <v-alert v-if="showChangeAdminAlert" color="red" type="error" dense text>
+                          {{ primaryAdminAlertMsg }}
+                        </v-alert>
+                      </v-row>
+                    </v-col>
+                  </div>
                   <v-card-title>Images</v-card-title>
+                  <v-btn
+                    color="primary"
+                    outlined
+                    @click="showImageUploaderForm=true"
+                  >
+                    <v-icon
+                      class="expand-icon"
+                      color="primary"
+                    >
+                      mdi-upload
+                    </v-icon>
+                    Upload new image
+                  </v-btn>
+                  <BusinessImageUploader :business-id="business.id" v-model="showImageUploaderForm"/>
                   <p class="error-text" v-if ="errorMessage !== undefined"> {{errorMessage}} </p>
                 </v-container>
               </v-card-text>
@@ -158,6 +193,7 @@
 
 <script>
 import LocationAutocomplete from '@/components/utils/LocationAutocomplete';
+import BusinessImageUploader from "@/components/utils/BusinessImageUploader";
 import {
   alphabetExtendedMultilineRules,
   alphabetExtendedSingleLineRules, alphabetRules,
@@ -168,15 +204,18 @@ export default {
   name: 'ModifyBusiness',
   components: {
     LocationAutocomplete,
+    BusinessImageUploader,
   },
   props: {
     business: Object
   },
   data() {
     return {
+      serverUrl: process.env.VUE_APP_SERVER_ADD,
       readableAddress: "",
       errorMessage: undefined,
       dialog: true,
+      administrators: this.business.administrators,
       businessName: this.business.name,
       description: this.business.description,
       businessType: this.business.businessType,
@@ -186,6 +225,7 @@ export default {
       region: this.business.address.region,
       country: this.business.address.country,
       postcode: this.business.address.postcode,
+      images: this.business.images || [],
       businessTypes: [
         'Accommodation and Food Services',
         'Charitable organisation',
@@ -194,6 +234,11 @@ export default {
       ],
       updateProductCountry: true,
       valid: false,
+      showImageUploaderForm: false,
+      showAlert: false,
+      showChangeAdminAlert: false,
+      primaryAdminAlertMsg: "",
+      primaryAdministratorId: this.business.primaryAdministratorId,
       maxCharRules: () => maxCharRules(100),
       maxCharDescriptionRules: ()=> maxCharRules(200),
       mandatoryRules: ()=> mandatoryRules,
@@ -201,17 +246,17 @@ export default {
       alphabetExtendedMultilineRules: ()=> alphabetExtendedMultilineRules,
       alphabetRules: ()=> alphabetRules,
       streetRules: ()=> streetNumRules,
-      postcodeRules: ()=> postCodeRules
+      postcodeRules: ()=> postCodeRules,
     };
   },
-
+  computed: {
+    userIsPrimaryAdmin() {
+      return this.$store.state.user.id === this.business.primaryAdministratorId;
+    }
+  },
   methods: {
-    getAdminColour(admin) {
-      if (admin.id === this.business.primaryAdministratorId) {
-        return "red";
-      } else {
-        return "green";
-      }
+    adminIsPrimary(admin) {
+      return admin.id === this.primaryAdministratorId;
     },
     changeUpdateCountries() {
       if (this.updateProductCountry) {
@@ -222,7 +267,25 @@ export default {
     },
     discardButton() {
       this.$emit('discardModifyBusiness');
-    }
+    },
+    /**
+     * When the user clicks on an administrator a popup message will appear stating that they
+     * have changed that user to the primary administrator of the business. Additionally, the
+     * colour of said user will change to red, whilst the existing primary administrator will
+     * change to green. Futhermore, if the original primary administrator is clicked this
+     * message will not appear.
+     */
+    changePrimaryAdmin(admin) {
+      this.showChangeAdminAlert = true;
+      if (admin.id !== this.business.primaryAdministratorId) {
+        this.showChangeAdminAlert = true;
+        this.primaryAdminAlertMsg = `Primary admin will be changed to ${admin.firstName} ${admin.lastName}`;
+      } else {
+        this.showChangeAdminAlert = false;
+        this.primaryAdminAlertMsg = "";
+      }
+      this.primaryAdministratorId = admin.id;
+    },
   }
 };
 </script>
@@ -239,7 +302,7 @@ export default {
   flex-wrap: wrap;
 }
 
-.link-chip {
+.admin-chip {
   margin-right: 4px;
 }
 
