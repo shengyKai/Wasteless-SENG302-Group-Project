@@ -29,6 +29,8 @@
         </template>
       </v-select>
       <!-- Newsfeed -->
+      <!-- Example message - move inside for loop once message is an event type -->
+      <v-card><MessageEvent :event="{id: 1, created: ''}"/></v-card>
       <v-card
         v-for="event in eventsPage"
         :key="event.id"
@@ -72,6 +74,7 @@ import GlobalMessage from "./newsfeed/GlobalMessage.vue";
 import ExpiryEvent from './newsfeed/ExpiryEvent.vue';
 import DeleteEvent from './newsfeed/DeleteEvent.vue';
 import KeywordCreated from './newsfeed/KeywordCreated.vue';
+import MessageEvent from './newsfeed/MessageEvent.vue';
 
 export default {
   components: {
@@ -81,6 +84,7 @@ export default {
     ExpiryEvent,
     DeleteEvent,
     KeywordCreated,
+    MessageEvent
   },
   data() {
     return {
