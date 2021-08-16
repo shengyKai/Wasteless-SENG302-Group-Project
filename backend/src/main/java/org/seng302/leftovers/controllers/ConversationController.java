@@ -1,5 +1,6 @@
 package org.seng302.leftovers.controllers;
 
+import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -10,13 +11,14 @@ import org.seng302.leftovers.persistence.*;
 import org.seng302.leftovers.service.MessageService;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
 import org.seng302.leftovers.tools.JsonTools;
+import org.seng302.leftovers.tools.SearchHelper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.HttpServletRequest;
@@ -89,5 +91,39 @@ public class ConversationController {
         message = messageRepository.save(message);
         messageService.notifyConversationParticipants(message, buyer, card.getCreator());
         return new ResponseEntity(HttpStatus.CREATED);
+    }
+
+    @GetMapping("/cards/{cardId}/conversations/{buyerId}")
+    public JSONObject fetchMessagesInConversation(HttpServletRequest request,
+                                                            @PathVariable Long cardId,
+                                                            @PathVariable Long buyerId,
+                                                            @RequestParam(required = false) Integer page,
+                                                            @RequestParam(required = false) Integer resultsPerPage) {
+        AuthenticationTokenManager.checkAuthenticationToken(request);
+
+        var cardOptional = marketplaceCardRepository.findById(cardId);
+        if (cardOptional.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, String.format("No marketplace card with id %d", cardId));
+        }
+
+        var buyerOptional = userRepository.findById(buyerId);
+        if (buyerOptional.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, String.format("No user with id %d", buyerId));
+        }
+
+        if (!AuthenticationTokenManager.sessionCanSeePrivate(request, buyerId)
+                && !AuthenticationTokenManager.sessionCanSeePrivate(request, cardOptional.get().getCreator().getUserID())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You do not have permission to view this conversation");
+        }
+
+        var conversationOptional = conversationRepository.findByCardAndBuyer(cardOptional.get(), buyerOptional.get());
+        if (conversationOptional.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, String.format("No messages regarding marketplace card (id=%d) from user (id=%d)", cardId, buyerId));
+        }
+
+        PageRequest pageRequest = SearchHelper.getPageRequest(page, resultsPerPage, Sort.by("created").descending());
+        Page<Message> messages = messageRepository.findAllByConversation(conversationOptional.get(), pageRequest);
+
+        return JsonTools.constructPageJSON(messages.map(Message::constructJSONObject));
     }
 }
