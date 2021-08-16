@@ -561,8 +561,8 @@
 					"script": {
 						"id": "470cf532-26f9-49e5-97e5-8a1f89f1ec81",
 						"exec": [
-							"pm.test(\"Status code is 400\", function () {",
-							"    pm.response.to.have.status(400);",
+							"pm.test(\"Status code is 406\", function () {",
+							"    pm.response.to.have.status(406);",
 							"});",
 							""
 						],
