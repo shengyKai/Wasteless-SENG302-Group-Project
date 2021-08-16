@@ -381,8 +381,9 @@ export default {
       let month = today.getMonth();
       let day = today.getDate();
       console.log("A");
-      console.log(this.$store.state);
-      console.log(this.$store.user.businessesAdministered); //CANT
+      console.log(this.$store.state.activeRole.type);
+      console.log(this.$store.state.user.businessesAdministered);
+      console.log(this.$store.state.user.businessesAdministered.length);
       return new Date(year - 13, month, day);
     },
     //TODO get store business role, if exist then year =16 else year=13, n date will be fix
