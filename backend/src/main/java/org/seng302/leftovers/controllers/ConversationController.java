@@ -4,6 +4,7 @@ import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.seng302.leftovers.dto.ResultPageDTO;
 import org.seng302.leftovers.dto.SendMessageDTO;
 import org.seng302.leftovers.entities.Conversation;
 import org.seng302.leftovers.entities.Message;
@@ -93,8 +94,18 @@ public class ConversationController {
         return new ResponseEntity(HttpStatus.CREATED);
     }
 
+    /**
+     * API endpoint for getting a page of messages from a conversation between a marketplace card owner and another
+     * user who has responded to the card.
+     * @param request The HTTP request, used for checking that the session is authenticated.
+     * @param cardId The ID number of the card which the conversation involves.
+     * @param buyerId The ID number of the user who has responded to the marketplace card.
+     * @param page The number of the page in the results.
+     * @param resultsPerPage The number of results per page to display.
+     * @return A page in the results displaying the requested number of messges.
+     */
     @GetMapping("/cards/{cardId}/conversations/{buyerId}")
-    public JSONObject fetchMessagesInConversation(HttpServletRequest request,
+    public ResultPageDTO<JSONObject> fetchMessagesInConversation(HttpServletRequest request,
                                                             @PathVariable Long cardId,
                                                             @PathVariable Long buyerId,
                                                             @RequestParam(required = false) Integer page,
@@ -103,27 +114,35 @@ public class ConversationController {
 
         var cardOptional = marketplaceCardRepository.findById(cardId);
         if (cardOptional.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, String.format("No marketplace card with id %d", cardId));
+            var exception = new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, String.format("No marketplace card with id %d", cardId));
+            logger.error(exception.getMessage());
+            throw exception;
         }
 
         var buyerOptional = userRepository.findById(buyerId);
         if (buyerOptional.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, String.format("No user with id %d", buyerId));
+            var exception = new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, String.format("No user with id %d", buyerId));
+            logger.error(exception.getMessage());
+            throw exception;
         }
 
         if (!AuthenticationTokenManager.sessionCanSeePrivate(request, buyerId)
                 && !AuthenticationTokenManager.sessionCanSeePrivate(request, cardOptional.get().getCreator().getUserID())) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You do not have permission to view this conversation");
+            var exception = new ResponseStatusException(HttpStatus.FORBIDDEN, "You do not have permission to view this conversation");
+            logger.error(exception.getMessage());
+            throw exception;
         }
 
         var conversationOptional = conversationRepository.findByCardAndBuyer(cardOptional.get(), buyerOptional.get());
         if (conversationOptional.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, String.format("No messages regarding marketplace card (id=%d) from user (id=%d)", cardId, buyerId));
+            var exception = new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, String.format("No messages regarding marketplace card (id=%d) from user (id=%d)", cardId, buyerId));
+            logger.error(exception.getMessage());
+            throw exception;
         }
 
-        PageRequest pageRequest = SearchHelper.getPageRequest(page, resultsPerPage, Sort.by("created").descending());
-        Page<Message> messages = messageRepository.findAllByConversation(conversationOptional.get(), pageRequest);
+        var pageRequest = SearchHelper.getPageRequest(page, resultsPerPage, Sort.by("created").descending());
+        var messages = messageRepository.findAllByConversation(conversationOptional.get(), pageRequest);
 
-        return JsonTools.constructPageJSON(messages.map(Message::constructJSONObject));
+        return new ResultPageDTO<>(messages.map(Message::constructJSONObject));
     }
 }
