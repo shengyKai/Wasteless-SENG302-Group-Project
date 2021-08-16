@@ -1179,8 +1179,10 @@ export async function searchCatalogue(businessId: number, query: string, pageInd
     });
   } catch (error) {
     let status: number | undefined = error.response?.status;
+    if (status === 400) return 'Invalid search query: ' + error.response?.data.message;
     if (status === 401) return 'You have been logged out. Please login again and retry';
     if (status === 403) return 'You do not have permission to access this product catalogue';
+    if (status === 406) return 'Business does not exist';
     if (status === undefined) return 'Failed to reach backend';
     return `Request failed: ${error.response?.data.message}`;
   }

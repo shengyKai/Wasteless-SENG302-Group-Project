@@ -188,6 +188,27 @@ describe('Test GET /businesses/${businessId}/products/search endpoint', () => {
     expect(message).toEqual('You do not have permission to access this product catalogue');
   });
 
+  it('When response has a 400 status, searchCatalogue returns an error message indicating that the search query is invalid', async () => {
+    instance.get.mockRejectedValueOnce({
+      response: {
+        status: 400,
+        data: {
+          message: "some error"
+        }
+      }});
+    const message = await searchCatalogue(1, "some query", 1, 10, ["name", "description"], "description", true);
+    expect(message).toEqual('Invalid search query: some error');
+  });
+
+  it('When response has a 403 status, searchCatalogue returns an error message indicating that the user is not an admin of the business', async () => {
+    instance.get.mockRejectedValueOnce({
+      response: {
+        status: 406,
+      }});
+    const message = await searchCatalogue(1, "some query", 1, 10, ["name", "description"], "description", true);
+    expect(message).toEqual('Business does not exist');
+  });
+
   it('When a response without a status is received, searchCatalogue returns an error message indicating that the server could not be reached', async () => {
     instance.get.mockRejectedValueOnce("Server is down");
     const message = await searchCatalogue(1, "some query", 1, 10, ["name", "description"], "description", true);
