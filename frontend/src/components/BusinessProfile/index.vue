@@ -18,10 +18,10 @@
       <v-card class="body">
         <div class="d-flex flex-column">
           <v-row>
-            <v-col cols="6">
+            <v-col cols="4">
               <span><h1>{{ business.name }}</h1></span>
             </v-col>
-            <v-col cols="6" class="d-flex justify-end">
+            <v-col cols="4" >
               <v-alert
                 class="ma-2 flex-grow-0"
                 v-if="errorMessage !== undefined"
@@ -31,6 +31,23 @@
               >
                 {{ errorMessage }}
               </v-alert>
+            </v-col>
+            <v-col class="d-flex justify-end" cols="8">
+              <v-tooltip bottom>
+                <template #activator="{ on, attrs }">
+                  <v-btn
+                    ref="settingsButton"
+                    icon
+                    color="primary"
+                    v-bind="attrs"
+                    v-on="on"
+                    @click="modifyBusiness = true;"
+                  >
+                    <v-icon>mdi-cog</v-icon>
+                  </v-btn>
+                </template>
+                <span>Modify Business Profile</span>
+              </v-tooltip>
             </v-col>
           </v-row>
           <p><b>Created:</b> {{ createdMsg }}</p>
@@ -61,24 +78,6 @@
               </span>
             </v-col>
           </v-row>
-          <div v-if='!modifyBusiness'>
-            <v-row justify="end">
-              <v-col cols="2">
-                <v-btn
-                  class="white--text"
-                  color="secondary"
-                  @click="modifyBusiness = true;"
-                >
-                  <v-icon
-                    class="expand-icon"
-                    color="white"
-                  >
-                    mdi-file-document-edit-outline
-                  </v-icon>Modify Business
-                </v-btn>
-              </v-col>
-            </v-row>
-          </div>
         </v-container>
       </v-card>
     </div>

@@ -193,32 +193,31 @@
                 <v-row justify="end">
                   <v-col cols="1" class="ma-1 mr-7">
                     <v-btn
+                      class="ml-3"
                       type="submit"
                       color="primary"
                     >
+                      Submit
                       <v-icon
-                        class="expand-icon"
+                        class=" ml-1"
                         color="white"
-
                       >
                         mdi-file-upload-outline
                       </v-icon>
-                      Submit
                     </v-btn>
                   </v-col>
                   <v-col cols="2" class="ma-1 mr-n9">
                     <v-btn
-                      class="white--text"
+                      class="ml-2"
                       color="secondary"
                       @click="discardButton"
-                    >
+                    > Discard
                       <v-icon
-                        class="expand-icon"
+                        class="ml-1"
                         color="white"
                       >
                         mdi-file-cancel-outline
                       </v-icon>
-                      Discard
                     </v-btn>
                   </v-col>
                 </v-row>
