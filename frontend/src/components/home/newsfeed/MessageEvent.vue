@@ -4,11 +4,21 @@
       <strong>
         Regarding: {{event.conversation.card.title}}
       </strong> <br>
-      <div class="card-details" v-bind:style="{'-webkit-line-clamp': lines}">{{event.message.content}}</div>
+      <v-btn @click="loadMore">Load more messages</v-btn>
+      <v-btn v-if="messages.length > 1">Hide messages</v-btn>
+      <div
+        v-for="message in messages"
+        :key="message.id"
+        class="elevation-2 pa-1 rounded-lg mt-1 message"
+        :class="{
+          'self-message'  : $store.state.user.id === message.senderId,
+          'other-message' : $store.state.user.id !== message.senderId,
+        }"
+      >
+        {{message.content}}
+      </div>
     </v-card-text>
     <v-card-actions class="foot-tools">
-      <v-icon v-if="expanded" @click="expand" title="Collapse text">mdi-arrow-up-drop-circle</v-icon>
-      <v-icon v-else @click="expand" title="Expand text">mdi-arrow-down-drop-circle</v-icon>
       <v-tooltip bottom >
         <template v-slot:activator="{on, attrs }">
           <v-icon ref="messageButton"
@@ -31,7 +41,7 @@
         <!-- The 'TITLE' of the replyMessage component -->
         <v-card color='secondary lighten-2'>
           <v-card-title>
-            Send a message to {{userName}}
+            Send a message to {{participant.firstName}}
           </v-card-title>
           <v-card-subtitle>
             Your message will appear on their feed
@@ -79,7 +89,7 @@
 <script>
 import Event from './Event';
 import {mandatoryRules, maxCharRules} from '@/utils';
-import {messageConversation} from "@/api/internal";
+import {getMessagesInConversation, messageConversation} from "@/api/internal";
 
 export default {
   name: "MessageEvent",
@@ -94,8 +104,7 @@ export default {
   },
   data() {
     return {
-      expanded: false,
-      lines: 3,
+      queriedMessages: [],
       mandatoryRules,
       messageOwnerDialog: false,
       directMessageContent: '',
@@ -105,13 +114,9 @@ export default {
     };
   },
   methods: {
-    expand() {
-      this.expanded = !this.expanded;
-      if (this.expanded) {
-        this.lines = undefined;
-      } else {
-        this.lines = 3;
-      }
+    async loadMore() {
+      let messages = await getMessagesInConversation(this.card.id, this.event.conversation.buyer.id, 1, this.queriedMessages.length + 10);
+      this.queriedMessages = messages.results;
     },
     async sendMessage() {
       this.directMessageError = undefined;
@@ -124,6 +129,14 @@ export default {
     },
   },
   computed: {
+    messages() {
+      if (this.queriedMessages.length !== 0) {
+        let messages = this.queriedMessages;
+        messages.reverse();
+        return messages;
+      }
+      return [this.event.message];
+    },
     // Fluff placeholder
     title() {
       // If the sender ID !== myId >
@@ -143,11 +156,12 @@ export default {
     card() {
       return this.event.conversation.card;
     },
-    userName() {
-      // First name + Last name + ?(Nickname)
-      return "Test Name";
+  },
+  watch: {
+    'event.message.id': function() {
+      this.queriedMessages = [];
     },
-  }
+  },
 };
 </script>
 
@@ -159,12 +173,22 @@ export default {
   bottom:3px;
   right:3px;
 }
-.card-details {
-  float: left;
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  text-align: left;
+
+.message {
+  word-wrap: break-word;
+  max-width: 100%;
 }
+
+.self-message {
+  background-color: var(--v-primary-base);
+  align-self: flex-end;
+}
+
+.other-message {
+  background-color: var(--v-lightGrey-base);
+  /* background-color: var(--v-secondary-lighten3); */
+  align-self: flex-start;
+}
+
+
 </style>
