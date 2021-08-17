@@ -28,10 +28,10 @@ Feature: UCM8 Contacting other marketplace users
 
   Scenario: The message recipient can view all messages in the conversation
     Given user "Joe" has sent a message regarding card "Pet rock"
-    And user "Doris" has sent a reply
+    And user "Doris" has sent a reply to the conversation with user "Joe" regarding card "Pet rock"
     And I am logged into "Joe" account
-    When I try to view all messages in the conversation
-    Then all messages in the conversation will be available to me
+    When I try to view all messages in the conversation with "Joe" regarding card "Pet rock"
+    Then all messages in the conversation with "Joe" regarding card "Pet rock" will be available to me
 
 
   Scenario: AC5 - I can reply to a message in my newsfeed
@@ -43,7 +43,7 @@ Feature: UCM8 Contacting other marketplace users
 
   Scenario: AC5 - The original sender receives a notification when I reply to a message
     Given user "Joe" has sent a message regarding card "Pet rock"
-    And user "Doris" has sent a reply
+    And user "Doris" has sent a reply to the conversation with user "Joe" regarding card "Pet rock"
     And I am logged into "Joe" account
     When I check my notification feed
     Then I have received a notification from a conversation that I am involved in
