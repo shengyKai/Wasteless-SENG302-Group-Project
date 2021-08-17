@@ -23,6 +23,7 @@ tags:
   - name: 'U5: Creating Business Accounts'
   - name: 'U6: Acting as Individual or Business'
     description: All necessary API endpoints are found in prior stories
+  - name: 'U10: Modifying Individuals'
   - name: 'U11: Modifying Businesses'
   - name: 'U13: Home page'
     description: >-
@@ -157,6 +158,48 @@ paths:
           $ref: '#/components/responses/UnauthorizedError'
         '406':
           $ref: '#/components/responses/NotAcceptableError'
+    put:
+      tags:
+        - Users
+        - 'U10: Modifying Individuals'
+      summary: Modifies an existing user entity
+      security:
+        - CookieAuth:
+            - user
+            - globalApplicationAdmin
+            - defaultGlobalApplicationAdmin
+      parameters:
+        - name: id
+          in: path
+          description: User ID
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/User'
+                - type: object
+                  required:
+                    - updateProductCountry
+                  properties:
+                    newPassword:
+                      type: string
+                      description: >- 
+                        The new password for the account
+        description: >-
+          Values containing the updated user account data. <br>If email edited or new password provided, field "password" must be provided
+      responses:
+        '200':
+          description: User account successfully modified
+        '403':
+          description: >-
+            Forbidden: Returned when the user making the request is neither the account owner or an
+            application admin.
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
   /users/search:
     get:
       tags:
@@ -343,7 +386,6 @@ paths:
       tags:
         - 'U11: Modifying Businesses'
         - Business Accounts
-        - Business Images
       summary: Modifies an existing business entity
       security:
         - CookieAuth:
@@ -2632,3 +2674,30 @@ components:
         - green
         - blue
         - purple
+    Message:
+      type: object
+      description: Message between marketplace card users
+      required:
+        - id
+        - created
+        - senderId
+        - content
+      properties:
+        id:
+          type: integer
+          example: 100
+          readOnly: true
+          description: Automatically generated and assigned by the server
+        created:
+          type: string
+          example: '2021-07-15T05:10:00Z'
+          readOnly: true
+          description: Time the message was sent
+        senderId:
+          type: integer
+          example: 70
+          description: Identifier of the sender user
+        content:
+          type: string
+          example: So how about them apples?
+          description: User supplied content of the message
