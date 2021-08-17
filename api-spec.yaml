@@ -2530,6 +2530,12 @@ components:
           example: '2020-07-14T14:52:00Z'
           readOnly: true
           description: Date and time when the account was created
+        images:
+          type: array
+          readOnly: true
+          description: List of images for this business, with the first image being the primary image.
+          items:
+            $ref: '#/components/schemas/Image'
     Address:
       type: object
       description: Entity representing some physical address

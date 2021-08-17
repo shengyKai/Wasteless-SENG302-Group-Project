@@ -285,10 +285,14 @@ public class BusinessStepDefinition {
         Business business = businessRepository.getBusinessById(businessContext.getLast().getId());
         assertEquals(1, business.getImages().size());
         Image image = business.getImages().get(0);
-        assertNotNull(image.getFilename());
 
+        assertNotNull(image.getFilename());
         Path imagePath = root.resolve(image.getFilename());
         assertTrue(imagePath.toFile().exists());
+
+        assertNotNull(image.getFilenameThumbnail());
+        Path thumbnailPath = root.resolve(image.getFilenameThumbnail());
+        assertTrue(thumbnailPath.toFile().exists());
     }
 
     @Given("The business {string} has primary image {string}")

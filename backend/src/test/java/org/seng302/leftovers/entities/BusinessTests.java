@@ -902,10 +902,10 @@ class BusinessTests {
 
     @Test
     void getCatalogue_multipleImages_noDuplicates() {
-        Image testImage1 = imageRepository.save(new Image("filename1", "thumbnailFilename1"));
-        Image testImage2 = imageRepository.save(new Image("filename2", "thumbnailFilename2"));
-        Image testImage3 = imageRepository.save(new Image("filename3", "thumbnailFilename3"));
-        Image testImage4 = imageRepository.save(new Image("filename4", "thumbnailFilename4"));
+        Image testImage1 = imageRepository.save(new Image("filename1.png", "thumbnailFilename1.png"));
+        Image testImage2 = imageRepository.save(new Image("filename2.png", "thumbnailFilename2.png"));
+        Image testImage3 = imageRepository.save(new Image("filename3.png", "thumbnailFilename3.png"));
+        Image testImage4 = imageRepository.save(new Image("filename4.png", "thumbnailFilename4.png"));
 
         Product testProduct1 = new Product.Builder()
             .withName("Product 1")
