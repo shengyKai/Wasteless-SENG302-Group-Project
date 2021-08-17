@@ -1,35 +1,37 @@
 package org.seng302.leftovers.tools;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.*;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.Mockito;
 import org.seng302.leftovers.controllers.DGAAController;
-import org.seng302.leftovers.entities.Business;
-import org.seng302.leftovers.entities.Keyword;
-import org.seng302.leftovers.entities.Location;
-import org.seng302.leftovers.entities.User;
+import org.seng302.leftovers.dto.ProductFilterOption;
+import org.seng302.leftovers.entities.*;
 import org.seng302.leftovers.exceptions.SearchFormatException;
-import org.seng302.leftovers.persistence.BusinessRepository;
-import org.seng302.leftovers.persistence.KeywordRepository;
-import org.seng302.leftovers.persistence.UserRepository;
-import org.seng302.leftovers.persistence.SpecificationsBuilder;
+import org.seng302.leftovers.persistence.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 
+import javax.transaction.Transactional;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @SpringBootTest
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class SearchHelperTest {
 
     /**
@@ -48,13 +50,23 @@ class SearchHelperTest {
     @Autowired
     private UserRepository userRepository;
     @Autowired
+    private BusinessRepository businessRepository;
+    @Autowired
     private DGAAController dgaaController;
     @Autowired
     private KeywordRepository keywordRepository;
+    @Autowired
+    private ProductRepository productRepository;
     /**
      * Speification for repository queries.
      */
     private Specification<User> spec;
+
+    @BeforeAll
+    void init() {
+        productRepository.deleteAll();
+        businessRepository.deleteAll();
+    }
 
     /**
      * Read user info from file UserSearchHelperTestData1.csv, use this information to construct User objects and add them to userList
@@ -62,8 +74,8 @@ class SearchHelperTest {
      * @throws IOException
      */
     @BeforeEach
-    void setUp() throws ParseException, IOException {
-        SpecificationsBuilder builder = new SpecificationsBuilder()
+    void setUp() throws IOException {
+        SpecificationsBuilder<User> builder = new SpecificationsBuilder<User>()
                 .with("firstName", ":", "andy", true)
                 .with("middleName", ":", "andy", true)
                 .with("lastName", ":", "andy", true)
@@ -82,8 +94,10 @@ class SearchHelperTest {
 
     @AfterEach
     void tearDown() {
-        userRepository.deleteAll();
         keywordRepository.deleteAll();
+        productRepository.deleteAll();
+        businessRepository.deleteAll();
+        userRepository.deleteAll();
     }
 
     private List<User> readUserFile(String filepath) throws IOException {
@@ -921,42 +935,6 @@ class SearchHelperTest {
         assertEquals(0, matchesSingle.size());
     }
 
-    /**
-     * Tests that the DGAA filter does not remove regular users
-     */
-    @Test
-    void removingDGAAAcountsDoesNotRemoveNormalAccounts() {
-        List<User> listCopy = new ArrayList<>(savedUserList);
-        List<User> filteredUserList = SearchHelper.removeDGAAAccountFromResults(listCopy);
-        assertEquals(savedUserList, filteredUserList);
-    }
-
-    /**
-     * Tests that the DGAA filter does not remove regular users
-     */
-    @Test
-    void removingDGAAAcountsDoesNotRemovesDGAA() throws ParseException {
-        List<User> listCopy = new ArrayList<>(savedUserList);
-
-        User dgaa = new User.Builder()
-                .withFirstName("Caroline")
-                .withMiddleName("Jane")
-                .withLastName("Smith")
-                .withNickName("Carrie")
-                .withEmail("carriesmith@hotmail.com")
-                .withPassword("h375dj82")
-                .withDob("2001-03-11")
-                .withPhoneNumber("+64 3 748 7562")
-                .withAddress(Location.covertAddressStringToLocation("24,Albert Road,Ashburton,Auckland,Auckland,New KZealand,0624"))
-                .build();
-        dgaa.setRole("defaultGlobalApplicationAdmin");
-
-        listCopy.add(3, dgaa);
-
-        List<User> filteredUserList = SearchHelper.removeDGAAAccountFromResults(listCopy);
-        assertEquals(savedUserList, filteredUserList);
-    }
-
     private void createKeywords() {
         Keyword keyword1 = new Keyword("Apples");
         Keyword keyword2 = new Keyword("Bananas");
@@ -1002,5 +980,168 @@ class SearchHelperTest {
 
         assertEquals(1, result.size());
         assertEquals("Apples",result.get(0).getName());
+    }
+
+    @Transactional
+    protected Business createBusiness() {
+        var testUser = userRepository.findAll().iterator().next();
+        var testBusiness = new Business.Builder()
+                .withPrimaryOwner(testUser)
+                .withBusinessType("Accommodation and Food Services")
+                .withDescription("DESCRIPTION")
+                .withName("BUSINESS_NAME")
+                .withAddress(Location.covertAddressStringToLocation("108,Albert Road,Ashburton,Christchurch,New Zealand,Canterbury,8041"))
+                .build();
+
+        return businessRepository.save(testBusiness);
+    }
+
+    @Test
+    void productBusinessSpecification_noProductsForBusiness_noProductsReturned() {
+        Business business = createBusiness();
+        productRepository.save(new Product.Builder()
+                .withProductCode("FOO")
+                .withName("Foo")
+                .withBusiness(business)
+                .build());
+        productRepository.save(new Product.Builder()
+                .withProductCode("BAR")
+                .withName("Bar")
+                .withBusiness(business)
+                .build());
+
+        Business business2 = createBusiness();
+        var products = productRepository.findAll(SearchHelper.productBusinessSpecification(business2));
+        assertEquals(0, products.size());
+    }
+
+    @Test
+    void productBusinessSpecification_productsExist_productsReturned() {
+        Business business = createBusiness();
+        productRepository.save(new Product.Builder()
+                .withBusiness(business)
+                .withProductCode("NOT-RETURNED")
+                .withName("Not Returned")
+                .build());
+
+        Business business2 = createBusiness();
+        productRepository.save(new Product.Builder()
+                .withBusiness(business2)
+                .withProductCode("A")
+                .withName("A")
+                .build());
+        productRepository.save(new Product.Builder()
+                .withBusiness(business2)
+                .withProductCode("B")
+                .withName("B")
+                .build());
+
+        var products = productRepository.findAll(SearchHelper.productBusinessSpecification(business2));
+        var productCodes = products.stream().map(Product::getProductCode).collect(Collectors.toSet());
+        assertEquals(Set.of("A", "B"), productCodes);
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            "code,productCode",
+            "product code,productCode",
+            "product AND name,name",
+            "wow,description",
+            "guy,manufacturer"
+    })
+    void constructBusinessSpecificationFromSearchQuery_matchingQuery_productReturned(String search, String column) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        var business = createBusiness();
+        productRepository.save(new Product.Builder()
+                .withBusiness(business)
+                .withProductCode("PRODUCT-CODE")
+                .withName("This is the product name")
+                .withDescription("Wow description")
+                .withManufacturer("Some guy")
+                .build());
+
+        ProductFilterOption option = objectMapper.convertValue(column, ProductFilterOption.class);
+        var products = productRepository.findAll(SearchHelper.productFilterSpecification(search, Set.of(option)));
+        assertEquals(1, products.size());
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            "code,name",
+            "code,description",
+            "code,manufacturer",
+            "product AND name,description",
+            "wow,manufacturer",
+            "guy,productCode",
+            "product AND wow,productCode"
+    })
+    void constructBusinessSpecificationFromSearchQuery_doesNotMatchQuery_noProductReturned(String search, String column) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        var business = createBusiness();
+        productRepository.save(new Product.Builder()
+                .withBusiness(business)
+                .withProductCode("PRODUCT-CODE")
+                .withName("This is the product name")
+                .withDescription("Wow description")
+                .withManufacturer("Some guy")
+                .build());
+
+        var option = objectMapper.convertValue(column, ProductFilterOption.class);
+        var products = productRepository.findAll(SearchHelper.productFilterSpecification(search, Set.of(option)));
+        assertEquals(0, products.size());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"product AND wow", "product OR code", "this"})
+    void constructBusinessSpecificationFromSearchQuery_emptyColumnSet_allColumnsSearched(String search) {
+        var business = createBusiness();
+        productRepository.save(new Product.Builder()
+                .withBusiness(business)
+                .withProductCode("PRODUCT-CODE")
+                .withName("This is the product name")
+                .withDescription("Wow description")
+                .withManufacturer("Some guy")
+                .build());
+
+        var products = productRepository.findAll(SearchHelper.productFilterSpecification(search, Set.of()));
+        assertEquals(1, products.size());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"product AND wow", "product OR code", "this"})
+    void constructBusinessSpecificationFromSearchQuery_fullColumnSet_allColumnsSearched(String search) {
+        var business = createBusiness();
+        productRepository.save(new Product.Builder()
+                .withBusiness(business)
+                .withProductCode("PRODUCT-CODE")
+                .withName("This is the product name")
+                .withDescription("Wow description")
+                .withManufacturer("Some guy")
+                .build());
+
+        var options = Set.of(ProductFilterOption.values());
+        var products = productRepository.findAll(SearchHelper.productFilterSpecification(search, options));
+        assertEquals(1, products.size());
+    }
+
+    @Test
+    void constructSpecificationFromProductSearch_searchMade_specificationsCombined() {
+        var business = mock(Business.class);
+        Specification<Product> businesSpec = mock(Specification.class);
+        Specification<Product> filterSpec = mock(Specification.class);
+        Specification<Product> combinedSpec = mock(Specification.class);
+
+        when(businesSpec.and(filterSpec)).thenReturn(combinedSpec);
+        when(filterSpec.and(businesSpec)).thenReturn(combinedSpec);
+
+        try (var searchHelper = Mockito.mockStatic(SearchHelper.class)) {
+            searchHelper.when(() -> SearchHelper.productBusinessSpecification(business)).thenReturn(businesSpec);
+            searchHelper.when(() -> SearchHelper.productFilterSpecification("hello", Set.of(ProductFilterOption.PRODUCT_CODE))).thenReturn(filterSpec);
+
+            searchHelper.when(() -> SearchHelper.constructSpecificationFromProductSearch(any(), any(), any())).thenCallRealMethod();
+
+            var resultSpec = SearchHelper.constructSpecificationFromProductSearch(business, "hello", Set.of(ProductFilterOption.PRODUCT_CODE));
+            assertEquals(combinedSpec, resultSpec);
+        }
     }
 }
