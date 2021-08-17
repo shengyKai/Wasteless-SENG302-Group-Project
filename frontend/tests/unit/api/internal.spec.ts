@@ -2,7 +2,7 @@ import axios, { AxiosError, AxiosInstance, AxiosRequestConfig } from 'axios';
 
 import * as api from '@/api/internal';
 import { AxiosResponse } from 'axios';
-import { CreateProduct, CreateUser, InventoryItem, MaybeError, Product, Sale, SearchResults } from '@/api/internal';
+import { CreateProduct, CreateUser, InventoryItem, MaybeError, Message, Product, Sale, SearchResults } from '@/api/internal';
 import { castMock } from '../utils';
 import { is, Reason } from 'typescript-is';
 
@@ -128,6 +128,13 @@ const testSaleItem: Sale = {
   quantity: 4,
   price: 1000,
   created: '1-1-1900',
+};
+
+const testMessage: Message = {
+  id: 7,
+  created: '1-1-1900',
+  senderId: 100,
+  content: 'Hello world',
 };
 
 function searchResult<T>(list: T[]) : SearchResults<T> {
@@ -276,6 +283,27 @@ const apiCalls: Partial<ApiCalls> = {
       406: 'Product/Business not found',
       400: 'Invalid parameters',
       409: 'Product code unavailable',
+    },
+  },
+  getMessagesInConversation: {
+    parameters: [3, 5, 2, 10],
+    httpMethod: 'get',
+    url: '/cards/3/conversations/5',
+    body: {
+      params: {
+        page: 2,
+        resultsPerPage: 10,
+      },
+    },
+    result: {
+      count: 10,
+      results: [testMessage],
+    },
+    failedTypeCheckResponse: 'Response is not page of messages',
+    extraStatusMessages: {
+      401: 'You have been logged out. Please login again and retry',
+      403: 'You do not have permission to view this conversation',
+      406: 'Unable to get messages, conversation does not exist',
     },
   },
 };
