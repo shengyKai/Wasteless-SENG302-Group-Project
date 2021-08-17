@@ -7,6 +7,7 @@ import org.seng302.leftovers.dto.CreateBusinessDTO;
 import org.seng302.leftovers.dto.ModifyBusinessDTO;
 import org.seng302.leftovers.entities.*;
 import org.seng302.leftovers.persistence.BusinessRepository;
+import org.seng302.leftovers.persistence.ImageRepository;
 import org.seng302.leftovers.persistence.UserRepository;
 import org.seng302.leftovers.service.ImageService;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
@@ -33,15 +34,17 @@ public class BusinessController {
     private final BusinessRepository businessRepository;
     private final UserRepository userRepository;
     private final ImageService imageService;
+    private final ImageRepository imageRepository;
     private static final Logger logger = LogManager.getLogger(BusinessController.class.getName());
 
     private static final Set<String> VALID_BUSINESS_ORDERINGS = Set.of("created", "name", "location", "businessType");
 
     @Autowired
-    public BusinessController(BusinessRepository businessRepository, UserRepository userRepository, ImageService imageService) {
+    public BusinessController(BusinessRepository businessRepository, UserRepository userRepository, ImageService imageService, ImageRepository imageRepository) {
         this.businessRepository = businessRepository;
         this.userRepository = userRepository;
         this.imageService = imageService;
+        this.imageRepository = imageRepository;
     }
 
     /**
@@ -332,6 +335,40 @@ public class BusinessController {
             businessRepository.save(business);
 
             return new ResponseEntity<>(HttpStatus.CREATED);
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            throw e;
+        }
+    }
+
+    /**
+     * Sets the new primary image to be displayed for a business
+     * @param businessId The ID of the business to modify
+     * @param imageId The ID of the image to set as primary image
+     * @return Empty response with 200 if successful
+     */
+    @PutMapping("/businesses/{businessId}/images/{imageId}/makeprimary")
+    public ResponseEntity<Void> makeImagePrimary(@PathVariable Long businessId, @PathVariable Long imageId, HttpServletRequest request) {
+        logger.info("Making business image primary (businessId={}, imageId={})", businessId, imageId);
+        AuthenticationTokenManager.checkAuthenticationToken(request);
+        try {
+            Business business = businessRepository.getBusinessById(businessId);
+            business.checkSessionPermissions(request);
+
+            Image image = imageRepository.getImageById(imageId);
+            var images = business.getImages();
+            // Ensure that the provided image belongs to this business. Otherwise, action is forbidden
+            if (!images.contains(image)) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You cannot modify this image");
+            }
+            if (images.get(0).equals(image)) {
+                return new ResponseEntity<>(HttpStatus.OK);
+            }
+            business.removeImage(image);
+            business.addImage(0, image);
+            businessRepository.save(business);
+
+            return new ResponseEntity<>(HttpStatus.OK);
         } catch (Exception e) {
             logger.error(e.getMessage());
             throw e;

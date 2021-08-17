@@ -87,6 +87,7 @@
       :business="business"
       v-if="modifyBusiness"
       @discardModifyBusiness="modifyBusiness=false"
+      @modifySuccess="updateBusiness"
     />
   </div>
 </template>
@@ -146,17 +147,7 @@ export default {
   watch: {
     $route: {
       handler() {
-        const id = parseInt(this.$route.params.id);
-        if (isNaN(id)) return;
-
-        getBusiness(id).then((value) => {
-          if (typeof value === 'string') {
-            this.$store.commit('setError', value);
-          } else {
-            this.business = value;
-            this.readableAddress = convertAddressToReadableText(value.address, "full");
-          }
-        });
+        this.updateBusiness();
       },
       immediate: true,
     }
@@ -249,6 +240,25 @@ export default {
         this.$refs.businessImageCarousel.forceClose();
       }
     },
+    /**
+     * Updates the business profile page to show the updated details of the business.
+     * This method is separated from the $route watcher as it is reused for the ModifyBusiness page on a successful
+     * api call, which will update the business profile page to the latest information.
+     */
+    updateBusiness() {
+      this.modifyBusiness = false;
+      const id = parseInt(this.$route.params.id);
+      if (isNaN(id)) return;
+
+      getBusiness(id).then((value) => {
+        if (typeof value === 'string') {
+          this.$store.commit('setError', value);
+        } else {
+          this.business = value;
+          this.readableAddress = convertAddressToReadableText(value.address, "full");
+        }
+      });
+    }
   }
 };
 </script>

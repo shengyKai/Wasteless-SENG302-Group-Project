@@ -196,7 +196,7 @@ class DemoControllerTest {
         // Verify that expected number of entities were loaded to the database
         verify(userRepository, times(8)).save(any(User.class));
         verify(businessRepository, times(1)).save(any(Business.class));
-        verify(productRepository, times(2)).save(any(Product.class));
+        verify(productRepository, times(1)).save(any(Product.class));
         verify(inventoryItemRepository, times(1)).save(any(InventoryItem.class));
         verify(saleItemRepository, times(1)).save(any(SaleItem.class));
     }

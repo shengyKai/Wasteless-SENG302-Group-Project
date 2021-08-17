@@ -39,12 +39,16 @@ public class ProductGenerator {
             char character = (char) (random.nextInt(26) + 'A');
             productWord += character;
         }
-        int productNumber = random.nextInt(999999);
-        String productCode = productWord + productNumber;
-        while (productCodeHash.contains(productCode)) {
+
+        int productNumber;
+        String productCode;
+
+        do {
             productNumber = random.nextInt(999999);
             productCode = productWord + productNumber;
-        }
+        } while (productCodeHash.contains(productCode));
+
+        productCodeHash.add(productCode);
         return productCode;
     }
 
@@ -127,7 +131,7 @@ public class ProductGenerator {
         try {
             for (int i=0; i < productCount; i++) {
                 clear();
-                long businessId = businessIds.get(0);
+                long businessId = businessIds.get(random.nextInt(businessIds.size()));
 
                 System.out.println(String.format("Creating Product %d / %d", i+1, productCount));
                 int progress = (int) (((float)(i+1) / (float)productCount) * 100);

@@ -95,11 +95,8 @@ export type Business = {
   address: Location,
   businessType: BusinessType,
   created?: string,
+  images?: Image[],
 };
-
-export type ModifyBusiness = Business & {
-  updateProductCountry: boolean,
-}
 
 export type CreateBusiness = {
   primaryAdministratorId: number,
@@ -108,6 +105,15 @@ export type CreateBusiness = {
   address: Location,
   businessType: BusinessType,
 };
+
+export type ModifyBusiness = {
+  primaryAdministratorId: number,
+  name: string,
+  description?: string,
+  address: Location,
+  businessType: BusinessType,
+  updateProductCountry: boolean
+}
 
 export type Image = {
   id: number,
@@ -209,6 +215,8 @@ type UserOrderBy = 'userId' | 'relevance' | 'firstName' | 'middleName' | 'lastNa
 type BusinessOrderBy = 'created' | 'name' | 'location' | 'businessType';
 
 export type SearchResults<T> = { results: T[], count: number }
+
+export type ProductSearchBy = 'name' | 'description' | 'manufacturer' | 'productCode';
 
 /**
  * Sends a search query to the backend.
@@ -376,24 +384,6 @@ export async function createBusiness(business: CreateBusiness): Promise<MaybeErr
     if (status === 401) return 'You have been logged out. Please login again and retry';
 
     return error.response.data.message;
-  }
-
-  return undefined;
-}
-
-/**
- * Modifies a business
- *
- * @param businessId The business id of the business to be modified
- * @param business The properties to modify a business with
- * @returns undefined if operation is successful, otherwise a string error.
- */
-export async function modifyBusiness(businessId: number, business: ModifyBusiness): Promise<MaybeError<undefined>> {
-  try {
-    await instance.put(`/businesses/${businessId}`, business);
-  } catch (error) {
-    //TODO for frontend api task
-    return "placeholder";
   }
 
   return undefined;
@@ -1152,6 +1142,46 @@ export async function uploadBusinessImage(businessId: number, file: File): Promi
 
   return undefined;
 }
+
+/**
+ * Sends a search query to the backend to search a business's product catalogue.
+ * @param businessId ID of the business whose product catalogue is about to be searched
+ * @param query Query string to search for
+ * @param pageIndex Index of page to start the results from (1 = first page)
+ * @param resultsPerPage Number of results to return per page
+ * @param searchBy List of product properties to search with
+ * @param orderBy Specifies the method used to sort the results
+ * @param reverse Specifies whether to reverse the search results (default order is descending for relevance and ascending for all other orders)
+ */
+export async function searchCatalogue(businessId: number, query: string, pageIndex: number, resultsPerPage: number, searchBy: Array<ProductSearchBy>, orderBy: ProductOrderBy, reverse: boolean): Promise<MaybeError<SearchResults<Product>>> {
+  let response;
+  try {
+    response = await instance.get(`/businesses/${businessId}/products/search`, {
+      params: {
+        searchQuery: query,
+        page: pageIndex,
+        resultsPerPage: resultsPerPage,
+        searchBy: searchBy,
+        reverse: reverse.toString(),
+        orderBy: orderBy,
+      }
+    });
+  } catch (error) {
+    let status: number | undefined = error.response?.status;
+    if (status === 400) return 'Invalid search query: ' + error.response?.data.message;
+    if (status === 401) return 'You have been logged out. Please login again and retry';
+    if (status === 403) return 'You do not have permission to access this product catalogue';
+    if (status === 406) return 'Business does not exist';
+    if (status === undefined) return 'Failed to reach backend';
+    return `Request failed: ${error.response?.data.message}`;
+  }
+
+  if (!is<SearchResults<Product>>(response.data)) {
+    return 'Response is not product array';
+  }
+
+  return response.data;
+}
 /**
  * Sets an image as the primary image for a business
  * @param businessId The ID of the business to change
@@ -1166,6 +1196,25 @@ export async function makeBusinessImagePrimary(businessId: number, imageId: numb
     if (status === 401) return 'You have been logged out. Please login again and retry';
     if (status === 403) return 'Operation not permitted';
     if (status === 406) return 'Business or Image not found';
+
+    return 'Request failed: ' + error.response?.data.message;
+  }
+  return undefined;
+}
+
+/**
+ * Modifies a business given a business id and an updated business object
+ * @param businessId Id of the business which is to be updated
+ * @param business Business object with all the fields to be updated.
+ */
+export async function modifyBusiness(businessId: number, business: ModifyBusiness): Promise<MaybeError<undefined>> {
+  try {
+    await instance.put(`/businesses/${businessId}`, business);
+  } catch (error) {
+    let status: number | undefined = error.response?.status;
+    if (status === undefined) return 'Failed to reach backend';
+    if (status === 401) return 'You have been logged out. Please login again and retry';
+    if (status === 403) return 'Invalid authorization for modifying this business';
 
     return 'Request failed: ' + error.response?.data.message;
   }
