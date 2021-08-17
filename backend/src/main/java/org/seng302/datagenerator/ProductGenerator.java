@@ -131,7 +131,7 @@ public class ProductGenerator {
         try {
             for (int i=0; i < productCount; i++) {
                 clear();
-                long businessId = businessIds.get(0);
+                long businessId = businessIds.get(random.nextInt(businessIds.size()));
 
                 System.out.println(String.format("Creating Product %d / %d", i+1, productCount));
                 int progress = (int) (((float)(i+1) / (float)productCount) * 100);
