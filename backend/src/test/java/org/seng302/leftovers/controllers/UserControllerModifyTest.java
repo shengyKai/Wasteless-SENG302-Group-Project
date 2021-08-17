@@ -1,84 +1,356 @@
 package org.seng302.leftovers.controllers;
 
+import lombok.SneakyThrows;
+import net.minidev.json.JSONObject;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.seng302.leftovers.entities.Location;
+import org.seng302.leftovers.entities.User;
+import org.seng302.leftovers.persistence.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.web.servlet.MockMvc;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
+
+import static jdk.internal.vm.compiler.word.LocationIdentity.any;
+import static org.mockito.Mockito.times;
+import static org.springframework.http.RequestEntity.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @AutoConfigureMockMvc
 public class UserControllerModifyTest {
+    private long mockUserId = 5L;
+
+    @Autowired
+    private MockMvc mockMvc;
+
+    @Autowired
+    private UserController userController;
+
+    @Mock
+    private HttpServletRequest request;
+    @Mock
+    private HttpSession session;
+
+    @MockBean
+    private UserRepository userRepository;
+
+    private User testUser;
+
+    @BeforeEach
+    public void setup() throws Exception {
+        MockitoAnnotations.openMocks(this);
+
+        testUser = new User.Builder()
+                .withFirstName("Andy")
+                .withMiddleName("Percy")
+                .withLastName("Elliot")
+                .withNickName("Ando")
+                .withEmail("123andyelliot@gmail.com")
+                .withPassword("password123")
+                .withDob("1987-04-12")
+                .withAddress(Location.covertAddressStringToLocation("108,Albert Road,Ashburton,Christchurch,New Zealand,Canterbury,8041"))
+                .build();
+        userRepository.save(testUser);
+
+
+    }
+
+    @SneakyThrows
+    private JSONObject createValidRequest() {
+        var jsonBody = new JSONObject();
+        jsonBody.put("email", "Ella@gmail.com");
+        jsonBody.put("firstName", "Ella");
+        jsonBody.put("lastName", "Ella");
+        jsonBody.put("dateOfBirth", "1999-06-26");
+        jsonBody.put("streetAddress", "69 Elizabeth Street");
+        jsonBody.put("city", "Christchurch");
+        jsonBody.put("region", "Auckland");
+        jsonBody.put("postcode", "8069");
+        return jsonBody;
+    }
+
+    private JSONObject createSessionForUser(Long userId) {
+        var json = new JSONObject();
+        json.put("accountId", userId);
+        return json;
+    }
 
     @Test
     void modifyUser_modifyWithValidFirstName_modifiedUser200() throws Exception {
+        var jsonBody = createValidRequest();
 
+        String newFirstName = "Nathan";
+        jsonBody.put("firstName", newFirstName);
+
+        mockMvc.perform(put("/profile/" + mockUserId + "/modify")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jsonBody.toString())
+                .sessionAttrs(createSessionForUser(mockUserId)))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        verify(userRepository, times(1)).findById(mockUserId);
+        verify(userRepository, times(0)).save(any());
+        assertEquals(userRepository.findById(mockUserId).getFirstName(), newFirstName);
     }
 
     @Test
     void modifyUser_modifyWithValidLastName_modifiedUser200() throws Exception {
+        var jsonBody = createValidRequest();
 
+        String newLastName = "John";
+        jsonBody.put("lastName", newLastName);
+
+        mockMvc.perform(put("/profile/" + mockUserId + "/modify")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jsonBody.toString())
+                .sessionAttrs(createSessionForUser(mockUserId)))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        verify(userRepository, times(1)).findById(mockUserId);
+        verify(userRepository, times(0)).save(any());
+        assertEquals(userRepository.findById(mockUserId).getLastName(), newLastName);
     }
 
     @Test
     void modifyUser_modifyWithValidMiddleName_modifiedUser200() throws Exception {
+        var jsonBody = createValidRequest();
 
+        String newMiddleName = "Johnson";
+        jsonBody.put("middleName", newMiddleName);
+
+        mockMvc.perform(put("/profile/" + mockUserId + "/modify")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jsonBody.toString())
+                .sessionAttrs(createSessionForUser(mockUserId)))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        verify(userRepository, times(1)).findById(mockUserId);
+        verify(userRepository, times(0)).save(any());
+        assertEquals(userRepository.findById(mockUserId).getMiddleName(), newMiddleName);
     }
 
     @Test
     void modifyUser_modifyWithValidNickname_modifiedUser200() throws Exception {
+        var jsonBody = createValidRequest();
 
+        String newNickname = "Johnson";
+        jsonBody.put("middleName", newNickname);
+
+        mockMvc.perform(put("/profile/" + mockUserId + "/modify")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jsonBody.toString())
+                .sessionAttrs(createSessionForUser(mockUserId)))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        verify(userRepository, times(1)).findById(mockUserId);
+        verify(userRepository, times(0)).save(any());
+        assertEquals(userRepository.findById(mockUserId).getNickname(), newNickname);
     }
 
     @Test
     void modifyUser_modifyWithValidBio_modifiedUser200() throws Exception {
+        var jsonBody = createValidRequest();
 
+        String newNickname = "Johnny";
+        jsonBody.put("nickname", newNickname);
+
+        mockMvc.perform(put("/profile/" + mockUserId + "/modify")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jsonBody.toString())
+                .sessionAttrs(createSessionForUser(mockUserId)))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        verify(userRepository, times(1)).findById(mockUserId);
+        verify(userRepository, times(0)).save(any());
+        assertEquals(userRepository.findById(mockUserId).getNickname(), newNickname);
     }
 
     @Test
     void modifyUser_modifyWithValidDateOfBirth_modifiedUser200() throws Exception {
+        var jsonBody = createValidRequest();
 
+        String newDateOfBirth = "1999-07-06";
+        jsonBody.put("dateOfBirth", newDateOfBirth);
+
+        mockMvc.perform(put("/profile/" + mockUserId + "/modify")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jsonBody.toString())
+                .sessionAttrs(createSessionForUser(mockUserId)))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        verify(userRepository, times(1)).findById(mockUserId);
+        verify(userRepository, times(0)).save(any());
+        assertEquals(userRepository.findById(mockUserId).getDob(), newDateOfBirth);
     }
 
     @Test
     void modifyUser_modifyWithValidPhoneNumber_modifiedUser200() throws Exception {
+        var jsonBody = createValidRequest();
 
+        String newPhoneNumber = "+64 3 555 0129";
+        jsonBody.put("phoneNumber", newPhoneNumber);
+
+        mockMvc.perform(put("/profile/" + mockUserId + "/modify")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jsonBody.toString())
+                .sessionAttrs(createSessionForUser(mockUserId)))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        verify(userRepository, times(1)).findById(mockUserId);
+        verify(userRepository, times(0)).save(any());
+        assertEquals(userRepository.findById(mockUserId).getPhNum(), newPhoneNumber);
     }
 
     @Test
     void modifyUser_modifyWithValidStreetNumber_modifiedUser200() throws Exception {
+        var jsonBody = createValidRequest();
 
+        String newStreetNumber = "59";
+        jsonBody.put("streetNumber", newStreetNumber);
+
+        mockMvc.perform(put("/profile/" + mockUserId + "/modify")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jsonBody.toString())
+                .sessionAttrs(createSessionForUser(mockUserId)))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        verify(userRepository, times(1)).findById(mockUserId);
+        verify(userRepository, times(0)).save(any());
+        assertEquals(userRepository.findById(mockUserId).getStreetNumber(), newStreetNumber);
     }
 
     @Test
     void modifyUser_modifyWithValidStreetName_modifiedUser200() throws Exception {
+        var jsonBody = createValidRequest();
 
+        String newStreetName = "Happy Street";
+        jsonBody.put("streetName", newStreetName);
+
+        mockMvc.perform(put("/profile/" + mockUserId + "/modify")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jsonBody.toString())
+                .sessionAttrs(createSessionForUser(mockUserId)))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        verify(userRepository, times(1)).findById(mockUserId);
+        verify(userRepository, times(0)).save(any());
+        assertEquals(userRepository.findById(mockUserId).getAddress().getStreetName(), newStreetName);
     }
 
     @Test
     void modifyUser_modifyWithValidDistrict_modifiedUser200() throws Exception {
+        var jsonBody = createValidRequest();
 
+        String newDistrict = "Sheepery";
+        jsonBody.put("district", newDistrict);
+
+        mockMvc.perform(put("/profile/" + mockUserId + "/modify")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jsonBody.toString())
+                .sessionAttrs(createSessionForUser(mockUserId)))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        verify(userRepository, times(1)).findById(mockUserId);
+        verify(userRepository, times(0)).save(any());
+        assertEquals(userRepository.findById(mockUserId).getAddress().getDistrict(), newDistrict);
     }
 
     @Test
     void modifyUser_modifyWithValidCity_modifiedUser200() throws Exception {
+        var jsonBody = createValidRequest();
 
+        String newCity = "Invercargill";
+        jsonBody.put("city", newCity);
+
+        mockMvc.perform(put("/profile/" + mockUserId + "/modify")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jsonBody.toString())
+                .sessionAttrs(createSessionForUser(mockUserId)))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        verify(userRepository, times(1)).findById(mockUserId);
+        verify(userRepository, times(0)).save(any());
+        assertEquals(userRepository.findById(mockUserId).getAddress().getCity(), newCity);
     }
 
     @Test
     void modifyUser_modifyWithValidRegion_modifiedUser200() throws Exception {
+        var jsonBody = createValidRequest();
 
+        String newRegion = "Clutha";
+        jsonBody.put("region", newRegion);
+
+        mockMvc.perform(put("/profile/" + mockUserId + "/modify")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jsonBody.toString())
+                .sessionAttrs(createSessionForUser(mockUserId)))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        verify(userRepository, times(1)).findById(mockUserId);
+        verify(userRepository, times(0)).save(any());
+        assertEquals(userRepository.findById(mockUserId).getAddress().getRegion(), newRegion);
     }
 
     @Test
     void modifyUser_modifyWithValidCountry_modifiedUser200() throws Exception {
+        var jsonBody = createValidRequest();
 
+        String newCountry = "Australia";
+        jsonBody.put("country", newCountry);
+
+        mockMvc.perform(put("/profile/" + mockUserId + "/modify")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jsonBody.toString())
+                .sessionAttrs(createSessionForUser(mockUserId)))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        verify(userRepository, times(1)).findById(mockUserId);
+        verify(userRepository, times(0)).save(any());
+        assertEquals(userRepository.findById(mockUserId).getAddress().getCountry(), newCountry);
     }
 
     @Test
     void modifyUser_modifyWithValidPostcode_modifiedUser200() throws Exception {
+        var jsonBody = createValidRequest();
 
+        String newPostcode = "90953";
+        jsonBody.put("postcode", newPostcode);
+
+        mockMvc.perform(put("/profile/" + mockUserId + "/modify")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jsonBody.toString())
+                .sessionAttrs(createSessionForUser(mockUserId)))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        verify(userRepository, times(1)).findById(mockUserId);
+        verify(userRepository, times(0)).save(any());
+        assertEquals(userRepository.findById(mockUserId).getAddress().getPostcode(), newPostcode);
     }
 
     @Test
