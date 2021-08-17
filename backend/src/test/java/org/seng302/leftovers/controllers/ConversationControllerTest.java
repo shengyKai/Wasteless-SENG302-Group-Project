@@ -13,6 +13,7 @@ import org.mockito.*;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
+import org.mockito.stubbing.Answer;
 import org.seng302.leftovers.entities.*;
 import org.seng302.leftovers.persistence.ConversationRepository;
 import org.seng302.leftovers.persistence.MarketplaceCardRepository;
@@ -144,7 +145,7 @@ public class ConversationControllerTest {
         existingMessage3 = new Message(conversation, buyer, "I want to go to bed");
 
         when(conversation.getMessages()).thenReturn(List.of(existingMessage1));
-        when(conversationRepository.findByCardAndBuyer(any(), any())).thenReturn(Optional.of(conversation));
+        when(conversationRepository.getConversation(card, buyer)).thenReturn(conversation);
 
         // Set up authentication manager respond as if user has correct permissions to post
         authenticationTokenManager = Mockito.mockStatic(AuthenticationTokenManager.class);
@@ -355,8 +356,8 @@ public class ConversationControllerTest {
     @Test
     @SneakyThrows
     void fetchMessagesInConversation_notConversationParticipantOrAdmin_cannotFetchMessages() {
-        authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(HttpServletRequest.class), 1L)).thenReturn(false);
-        authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(HttpServletRequest.class), 2L)).thenReturn(false);
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), eq(1L))).thenReturn(false);
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), eq(2L))).thenReturn(false);
 
         mockMvc.perform(get("/cards/1/conversations/1"))
                 .andExpect(status().isForbidden());
@@ -367,22 +368,40 @@ public class ConversationControllerTest {
     @Test
     @SneakyThrows
     void fetchMessagesInConversation_loggedInAsCardCreator_canFetchMessages() {
-        authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(HttpServletRequest.class), 1L)).thenReturn(false);
-        authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(HttpServletRequest.class), 2L)).thenReturn(true);
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), eq(1L))).thenReturn(false);
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), eq(2L))).thenReturn(true);
 
         mockMvc.perform(get("/cards/1/conversations/1"))
-                .andExpect(status().isAccepted());
+                .andExpect(status().isOk());
 
+        Mockito.verify(messageRepository, times(1))
+                .findAllByConversation(any(), any());
     }
 
     @Test
+    @SneakyThrows
     void fetchMessagesInConversation_loggedInAsCardResponder_canFetchMessages() {
-        fail("Not yet implemented");
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), eq(1L))).thenReturn(true);
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), eq(2L))).thenReturn(false);
+
+        mockMvc.perform(get("/cards/1/conversations/1"))
+                .andExpect(status().isOk());
+
+        Mockito.verify(messageRepository, times(1))
+                .findAllByConversation(any(), any());
     }
 
     @Test
+    @SneakyThrows
     void fetchMessagesInConversation_loggedInAsAdmin_canFetchMessages() {
-        fail("Not yet implemented");
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), eq(1L))).thenReturn(true);
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), eq(2L))).thenReturn(true);
+
+        mockMvc.perform(get("/cards/1/conversations/1"))
+                .andExpect(status().isOk());
+
+        Mockito.verify(messageRepository, times(1))
+                .findAllByConversation(any(), any());
     }
 
     @Test
@@ -415,14 +434,16 @@ public class ConversationControllerTest {
     @SneakyThrows
     void fetchMessagesInConversation_canFetchMessages_requestedPageFetched() {
         authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), any())).thenReturn(true);
-        mockMvc.perform(get("/cards/1/conversations/1"))
+        mockMvc.perform(get("/cards/1/conversations/1")
+                .param("page", "7")
+                .param("resultsPerPage", "30"))
                 .andExpect(status().isOk());
 
         Mockito.verify(messageRepository, times(1))
                 .findAllByConversation(conversationArgumentCaptor.capture(), pageRequestArgumentCaptor.capture());
 
-        Assertions.assertEquals(2, pageRequestArgumentCaptor.getValue().getPageNumber());
-        Assertions.assertEquals(10, pageRequestArgumentCaptor.getValue().getPageSize());
+        Assertions.assertEquals(6, pageRequestArgumentCaptor.getValue().getPageNumber());
+        Assertions.assertEquals(30, pageRequestArgumentCaptor.getValue().getPageSize());
     }
 
     @Test

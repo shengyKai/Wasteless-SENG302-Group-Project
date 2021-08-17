@@ -252,10 +252,6 @@ class ProductControllerTest {
             session.save(product2);
             session.save(product3);
             session.save(product4);
-//            productRepository.save(product4);
-//            productRepository.save(product1);
-//            productRepository.save(product2);
-//            productRepository.save(product3);
             session.getTransaction().commit();
         } catch (IllegalAccessException e) {
             fail();
