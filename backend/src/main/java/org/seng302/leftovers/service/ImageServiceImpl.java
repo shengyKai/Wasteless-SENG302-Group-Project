@@ -31,13 +31,13 @@ public class ImageServiceImpl implements ImageService {
 
     /**
      * Validates the provided image's content type and returns the appropriate extension
-     * @param file Uploaded file
+     * @param contentType The image's MIME type
      * @return Generated filename
      */
-    private String getExtension(MultipartFile file) {
-        if ("image/jpeg".equals(file.getContentType())) {
+    private String getExtension(String contentType) {
+        if ("image/jpeg".equals(contentType)) {
             return "jpg";
-        } else if ("image/png".equals(file.getContentType())) {
+        } else if ("image/png".equals(contentType)) {
             return "png";
         } else {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid image format. Must be jpeg or png");
@@ -53,7 +53,7 @@ public class ImageServiceImpl implements ImageService {
     @Override
     public Image create(MultipartFile file) {
         String name = UUID.randomUUID().toString();
-        String ext = getExtension(file);
+        String ext = getExtension(file.getContentType());
 
         BufferedImage original;
         try (InputStream stream = file.getInputStream()) {

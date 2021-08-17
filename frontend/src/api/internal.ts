@@ -95,6 +95,7 @@ export type Business = {
   address: Location,
   businessType: BusinessType,
   created?: string,
+  images?: Image[],
 };
 
 export type ModifyBusiness = Business & {
