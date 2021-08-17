@@ -1046,6 +1046,7 @@ class SearchHelperTest {
             "code,productCode",
             "product code,productCode",
             "product AND name,name",
+            "\"This is the\",name",
             "wow,description",
             "guy,manufacturer"
     })
@@ -1071,6 +1072,7 @@ class SearchHelperTest {
             "code,description",
             "code,manufacturer",
             "product AND name,description",
+            "\"the is\",name",
             "wow,manufacturer",
             "guy,productCode",
             "product AND wow,productCode"
@@ -1092,8 +1094,8 @@ class SearchHelperTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"product AND wow", "product OR code", "this"})
-    void constructBusinessSpecificationFromSearchQuery_emptyColumnSet_allColumnsSearched(String search) {
+    @ValueSource(strings = {"\"is the\"", "product OR code", "this"})
+    void constructBusinessSpecificationFromSearchQuery_emptyColumnSet_productNameSearched(String search) {
         var business = createBusiness();
         productRepository.save(new Product.Builder()
                 .withBusiness(business)

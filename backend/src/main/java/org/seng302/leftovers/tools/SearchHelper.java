@@ -234,7 +234,7 @@ public class SearchHelper {
         List<String> searchTokens = splitSearchStringIntoTerms(searchQuery);
 
         if (options.isEmpty()) {
-            options = Set.of(ProductFilterOption.values());
+            options = Set.of(ProductFilterOption.NAME);
         }
 
         ObjectMapper objectMapper = new ObjectMapper();
