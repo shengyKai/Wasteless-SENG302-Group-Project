@@ -865,9 +865,6 @@ class SearchHelperTest {
         userRepository.save(donaldSmith);
         List<User> result = SearchHelper.getSearchResultsOrderedByRelevance("Donald or Duck", userRepository, true);
 
-        System.out.println(result);
-        System.out.println(result.get(0));
-        System.out.println(result.get(1));
         assertEquals("Donald", result.get(0).getFirstName());
         assertEquals("Smith", result.get(0).getLastName());
         assertEquals("Lucy", result.get(1).getFirstName());

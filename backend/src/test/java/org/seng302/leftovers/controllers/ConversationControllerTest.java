@@ -1,20 +1,18 @@
 package org.seng302.leftovers.controllers;
 
 import lombok.SneakyThrows;
+import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
+import net.minidev.json.parser.JSONParser;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mockito.*;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
-import org.mockito.Spy;
 import org.seng302.leftovers.entities.*;
 import org.seng302.leftovers.persistence.ConversationRepository;
 import org.seng302.leftovers.persistence.MarketplaceCardRepository;
@@ -22,13 +20,11 @@ import org.seng302.leftovers.persistence.MessageRepository;
 import org.seng302.leftovers.persistence.UserRepository;
 import org.seng302.leftovers.service.MessageService;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
+import org.seng302.leftovers.tools.JsonTools;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
-import org.springframework.hateoas.UriTemplate;
+import org.springframework.data.domain.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -36,13 +32,11 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
-import java.util.HashMap;
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -68,6 +62,9 @@ public class ConversationControllerTest {
     private MessageService messageService;
     @Mock
     private Message message;
+
+    private Page<Message> messagePage;
+
     @Captor
     private ArgumentCaptor<Message> messageArgumentCaptor;
     @Captor
@@ -155,6 +152,9 @@ public class ConversationControllerTest {
         authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), any())).thenReturn(true);
 
         when(marketplaceCardRepository.getCard(any(), any())).thenReturn(card);
+
+        messagePage = new PageImpl<>(List.of(existingMessage1), Pageable.unpaged(), 1L);
+        Mockito.when(messageRepository.findAllByConversation(any(), any())).thenReturn(messagePage);
 
         conversationController = new ConversationController(marketplaceCardRepository, conversationRepository, userRepository,
                 messageRepository, messageService);
@@ -370,8 +370,6 @@ public class ConversationControllerTest {
         authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(HttpServletRequest.class), 1L)).thenReturn(false);
         authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(HttpServletRequest.class), 2L)).thenReturn(true);
 
-        Mockito.when(messageRepository.findAllByConversation(any(), any())).thenReturn(Page.of(existingMessage1));
-
         mockMvc.perform(get("/cards/1/conversations/1"))
                 .andExpect(status().isAccepted());
 
@@ -388,65 +386,85 @@ public class ConversationControllerTest {
     }
 
     @Test
+    @SneakyThrows
     void fetchMessagesInConversation_canFetchMessages_requestedConversationFetched() {
         authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), any())).thenReturn(true);
-        Mockito.verify(messageRepository.findAllByConversation(conversationArgumentCaptor.capture(), pageRequestArgumentCaptor.capture()), times(1));
-        Mockito.when(messageRepository.findAllByConversation(any(), any())).thenReturn(Page.of(existingMessage1));
-
         mockMvc.perform(get("/cards/1/conversations/1"))
-                .andExpect(status().isAccepted());
+                .andExpect(status().isOk());
+
+        Mockito.verify(messageRepository, times(1))
+                .findAllByConversation(conversationArgumentCaptor.capture(), pageRequestArgumentCaptor.capture());
 
         Assertions.assertEquals(conversation, conversationArgumentCaptor.getValue());
     }
 
     @Test
+    @SneakyThrows
     void fetchMessagesInConversation_canFetchMessages_messagesSortedFromMostToLeastRecent() {
         authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), any())).thenReturn(true);
-        Mockito.verify(messageRepository.findAllByConversation(conversationArgumentCaptor.capture(), pageRequestArgumentCaptor.capture()), times(1));
-        Mockito.when(messageRepository.findAllByConversation(any(), any())).thenReturn(Page.of(existingMessage1));
-
         mockMvc.perform(get("/cards/1/conversations/1"))
-                .andExpect(status().isAccepted());
+                .andExpect(status().isOk());
+
+        Mockito.verify(messageRepository, times(1))
+                .findAllByConversation(conversationArgumentCaptor.capture(), pageRequestArgumentCaptor.capture());
 
         Assertions.assertEquals(Sort.by("created").descending(), pageRequestArgumentCaptor.getValue().getSort());
     }
 
     @Test
+    @SneakyThrows
     void fetchMessagesInConversation_canFetchMessages_requestedPageFetched() {
         authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), any())).thenReturn(true);
-        Mockito.verify(messageRepository.findAllByConversation(conversationArgumentCaptor.capture(), pageRequestArgumentCaptor.capture()), times(1));
-        Mockito.when(messageRepository.findAllByConversation(any(), any())).thenReturn(Page.of(existingMessage1));
-
         mockMvc.perform(get("/cards/1/conversations/1"))
-                .andExpect(status().isAccepted());
+                .andExpect(status().isOk());
 
-        Assertions.assertEquals(2, pageRequestArgumentCaptor.getValue().getRequestedPage());
-        Assertions.assertEquals(10, pageRequestArgumentCaptor.getValue().getResultsPerPage());
+        Mockito.verify(messageRepository, times(1))
+                .findAllByConversation(conversationArgumentCaptor.capture(), pageRequestArgumentCaptor.capture());
+
+        Assertions.assertEquals(2, pageRequestArgumentCaptor.getValue().getPageNumber());
+        Assertions.assertEquals(10, pageRequestArgumentCaptor.getValue().getPageSize());
     }
 
     @Test
+    @SneakyThrows
     void fetchMessagesInConversation_singleMessageInConversation_responseHasExpectedFormat() {
         authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), any())).thenReturn(true);
-        Mockito.verify(messageRepository.findAllByConversation(conversationArgumentCaptor.capture(), pageRequestArgumentCaptor.capture()), times(1));
-        Mockito.when(messageRepository.findAllByConversation(any(), any())).thenReturn(Page.of(existingMessage1));
+        Mockito.when(messageRepository.findAllByConversation(any(), any())).thenReturn(messagePage);
 
-        var response = mockMvc.perform(get("/cards/1/conversations/1"))
-                .andExpect(status().isAccepted()).andReturn();
+        var result = mockMvc.perform(get("/cards/1/conversations/1"))
+                .andExpect(status().isOk()).andReturn();
 
-        
-        fail("Not yet implemented");
-
+        var parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
+        var response = (JSONObject) parser.parse(result.getResponse().getContentAsString());
+        assertEquals(1, response.getAsNumber("count"));
+        var resultArray = (JSONArray) response.get("results");
+        var messageJson = (JSONObject) resultArray.get(0);
+        assertEquals(existingMessage1.getCreated().toString(), messageJson.getAsString("created"));
+        assertEquals(existingMessage1.getSender().getUserID(), JsonTools.parseLongFromJsonField(messageJson, "senderId"));
+        assertEquals(existingMessage1.getContent(), messageJson.getAsString("content"));
     }
 
     @Test
+    @SneakyThrows
     void fetchMessagesInConversation_multipleMessagesInConversation_responseHasExpectedFormat() {
         authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), any())).thenReturn(true);
-        Mockito.verify(messageRepository.findAllByConversation(conversationArgumentCaptor.capture(), pageRequestArgumentCaptor.capture()), times(1));
-        Mockito.when(messageRepository.findAllByConversation(any(), any())).thenReturn(Page.of(existingMessage1, existingMessage2, existingMessage3));
+        messagePage = new PageImpl<>(List.of(existingMessage1, existingMessage2, existingMessage3), Pageable.unpaged(), 3L);
+        var expectedMessages = List.of(existingMessage1, existingMessage2, existingMessage3);
+        when(messageRepository.findAllByConversation(any(), any())).thenReturn(messagePage);
 
-        var response = mockMvc.perform(get("/cards/1/conversations/1"))
-                .andExpect(status().isAccepted()).andReturn();
+        var result = mockMvc.perform(get("/cards/1/conversations/1"))
+                .andExpect(status().isOk()).andReturn();
 
-        fail("Not yet implemented");
+        var parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
+        var response = (JSONObject) parser.parse(result.getResponse().getContentAsString());
+        assertEquals(3, response.getAsNumber("count"));
+        var resultArray = (JSONArray) response.get("results");
+        for (int i = 0; i < 3; i++) {
+            var messageJson = (JSONObject) resultArray.get(i);
+            var expectedMessage = expectedMessages.get(i);
+            assertEquals(expectedMessage.getCreated().toString(), messageJson.getAsString("created"));
+            assertEquals(expectedMessage.getSender().getUserID(), JsonTools.parseLongFromJsonField(messageJson, "senderId"));
+            assertEquals(expectedMessage.getContent(), messageJson.getAsString("content"));
+        }
     }
 }
