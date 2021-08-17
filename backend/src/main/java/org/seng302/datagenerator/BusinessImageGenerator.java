@@ -59,7 +59,7 @@ public class BusinessImageGenerator {
         for (int imageOrder = 0; imageOrder < numberOfImagesToGenerate; imageOrder++) {
             var image = findRandomImage();
             String filename = UUID.randomUUID().toString();
-            String fileType = getExtension(image.getFilename()).orElseThrow(new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Could not locate file type for:" + image.getFilename());
+            String fileType = getExtension(image.getFilename()).orElseThrow(() -> new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Could not locate file type for:" + image.getFilename()));
             filename += fileType;
 
             store(image, filename);

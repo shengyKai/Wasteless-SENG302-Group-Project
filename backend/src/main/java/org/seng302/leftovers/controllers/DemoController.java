@@ -1,5 +1,6 @@
 package org.seng302.leftovers.controllers;
 
+import lombok.Getter;
 import net.minidev.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -168,6 +169,22 @@ public class DemoController {
         return userList;
     }
 
+    /**
+     * DTO representing request body for generator options
+     */
+    @Getter
+    private class GeneratorRequest {
+      private int userCount = 0;
+      private int businessCount = 0;
+      private int productCount = 0;
+      private int inventoryItemCount = 0;
+      private int cardCount = 0;
+      private int saleItemCount = 0;
+
+      private List<Long> userInitial;
+
+    }
+
 
     /**
      * Generates a set of demo data (Using the more advanced generators)
@@ -175,7 +192,7 @@ public class DemoController {
      * @return JSON including generated Users, Businesses and Products IDs
      */
     @PostMapping("/demo/generate")
-    public JSONObject generate(HttpServletRequest request, @RequestBody JSONObject options) {
+    public JSONObject generate(HttpServletRequest request, @RequestBody GeneratorRequest options) {
         AuthenticationTokenManager.checkAuthenticationTokenDGAA(request);
 
         int userCount     = Optional.ofNullable(options.getAsNumber("userCount")).map(Number::intValue).orElse(0);
