@@ -16,12 +16,12 @@
         />
       </v-card>
       <v-card class="body">
-        <div class="d-flex flex-column">
+        <div class="d-flex flex-column" no-gutters>
           <v-row>
-            <v-col cols="4">
+            <v-col cols="11">
               <span><h1>{{ business.name }}</h1></span>
             </v-col>
-            <v-col cols="4" >
+            <!-- <v-col cols="4" >
               <v-alert
                 class="ma-2 flex-grow-0"
                 v-if="errorMessage !== undefined"
@@ -31,8 +31,8 @@
               >
                 {{ errorMessage }}
               </v-alert>
-            </v-col>
-            <v-col class="d-flex justify-end" cols="8">
+            </v-col> -->
+            <v-col class="text-right">
               <v-tooltip bottom>
                 <template #activator="{ on, attrs }">
                   <v-btn

@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div  class="d-flex flex-column" no-gutters>
     <v-row justify="center">
       <v-col cols="10">
         <v-card max-width=1800px>
@@ -92,55 +92,19 @@
                         outlined
                       />
                     </v-col>
-                    <v-col>
-                      <v-btn
-                        v-if="updateProductCountry"
-                        ref="updateCurrencyButton"
-                        @click.stop="currencyConfirmDialog = true"
-                      >
-                        Update catalogue's currency
-                        <v-icon class="ml-2"  medium> mdi-cloud-upload </v-icon>
-                      </v-btn>
-                      <v-btn
-                        v-else
-                        ref="updateCurrencyButton"
-                        @click.stop="updateProductCountry = true"
-                      >
-                        Remove Currency update
-                        <v-icon class="ml-2"  medium> mdi-close-circle </v-icon>
-                      </v-btn>
-                    </v-col>
-                    <v-dialog
-                      ref="confirmDialog"
-                      v-model="currencyConfirmDialog"
-                      max-width="300px"
+                    <v-col
+                      cols="12"
+                      sm="4"
+                      md="4"
                     >
-                      <v-card>
-                        <v-card-title>
-                          Are you sure?
-                        </v-card-title>
-                        <v-card-text>
-                          Updating catalogue entries will change all of the listed product(s) currency according to your new location
-                        </v-card-text>
-                        <v-card-actions>
-                          <v-spacer/>
-                          <v-btn
-                            color="primary"
-                            text
-                            @click="updateProductCountry = false; currencyConfirmDialog = false;"
-                          >
-                            Save Change
-                          </v-btn>
-                          <v-btn
-                            color="primary"
-                            text
-                            @click="currencyConfirmDialog = false"
-                          >
-                            Cancel
-                          </v-btn>
-                        </v-card-actions>
-                      </v-card>
-                    </v-dialog>
+                      <v-checkbox
+                        v-model="updateProductCountry"
+                        label="Update catalogue's currency"
+                        color="primary"
+                        hide-details
+                        @click.stop="currencyConfirmDialog = true"
+                      />
+                    </v-col>
                   </v-row>
                   <div v-if="userIsPrimaryAdmin" class="mt-5">
                     <v-card-title>Change Primary Administrator</v-card-title>
@@ -190,30 +154,26 @@
                 </v-container>
               </v-card-text>
               <v-card-actions>
-                <v-row justify="end">
-                  <v-col cols="1" class="ma-1 mr-7">
+                <v-row>
+                  <v-col class="text-right">
                     <v-btn
-                      class="ml-3"
                       type="submit"
                       color="primary"
                     >
                       Submit
                       <v-icon
-                        class=" ml-1"
+                        class="ml-1 mr-1"
                         color="white"
                       >
                         mdi-file-upload-outline
                       </v-icon>
                     </v-btn>
-                  </v-col>
-                  <v-col cols="2" class="ma-1 mr-n9">
                     <v-btn
-                      class="ml-2"
                       color="secondary"
+                      class="ml-2"
                       @click="discardButton"
                     > Discard
                       <v-icon
-                        class="ml-1"
                         color="white"
                       >
                         mdi-file-cancel-outline
@@ -221,6 +181,37 @@
                     </v-btn>
                   </v-col>
                 </v-row>
+                <v-dialog
+                  ref="confirmDialog"
+                  v-model="currencyConfirmDialog"
+                  max-width="300px"
+                >
+                  <v-card>
+                    <v-card-title>
+                      Are you sure?
+                    </v-card-title>
+                    <v-card-text>
+                      Updating location for catalogue entries will change all of the listed product(s) currency accordingly
+                    </v-card-text>
+                    <v-card-actions>
+                      <v-spacer/>
+                      <v-btn
+                        color="primary"
+                        text
+                        @click="currencyConfirmDialog = false; updateProductCountry = true;"
+                      >
+                        Save Change
+                      </v-btn>
+                      <v-btn
+                        color="primary"
+                        text
+                        @click="currencyConfirmDialog = false; updateProductCountry = false;"
+                      >
+                        Cancel
+                      </v-btn>
+                    </v-card-actions>
+                  </v-card>
+                </v-dialog>
               </v-card-actions>
             </v-card>
           </v-form>
@@ -272,7 +263,7 @@ export default {
         'Non-profit organisation',
         'Retail Trade',
       ],
-      updateProductCountry: true,
+      updateProductCountry: false,
       valid: false,
       showImageUploaderForm: false,
       showAlert: false,
