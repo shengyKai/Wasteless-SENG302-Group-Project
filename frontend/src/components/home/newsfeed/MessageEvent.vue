@@ -2,9 +2,9 @@
   <Event :event="event" :title="title">
     <v-card-text class="d-flex flex-column align-start" style="text-align: left">
       <strong>
-        Regarding: "{{cardTitle}}" in the {{section}} section of the Marketplace
+        Regarding: {{event.conversation.card.title}}
       </strong> <br>
-      <div class="card-details" v-bind:style="{'-webkit-line-clamp': lines}">{{message}}</div>
+      <div class="card-details" v-bind:style="{'-webkit-line-clamp': lines}">{{event.message.content}}</div>
     </v-card-text>
     <v-card-actions class="foot-tools">
       <v-icon v-if="expanded" @click="expand" title="Collapse text">mdi-arrow-up-drop-circle</v-icon>
@@ -126,24 +126,27 @@ export default {
   computed: {
     // Fluff placeholder
     title() {
-      return "New message from: " + this.userName;
+      // If the sender ID !== myId >
+      if(this.event.message.senderId === this.$store.state.user.id) {
+        return "Conversation with " + this.participant.firstName;
+      } else {
+        return "New message from: " + this.participant.firstName;
+      }
+    },
+    participant() {
+      if (this.$store.state.user.id === this.card.creator.id) {
+        return this.event.conversation.buyer;
+      } else {
+        return this.card.creator;
+      }
+    },
+    card() {
+      return this.event.conversation.card;
     },
     userName() {
       // First name + Last name + ?(Nickname)
       return "Test Name";
     },
-    cardTitle() {
-      return "Hungry for apples?";
-    },
-    section() {
-      return "For Sale";
-    },
-    message() {
-      return "Voluptas quaerat consequatur esse nihil ipsa sed natus sed. Autem et atque pariatur optio porro. Ex odio " +
-          "perferendis voluptas nihil suscipit earum at et. Ab eum corporis deleniti. Repudiandae quaerat totam numquam " +
-          "quis iusto tempore. Harum omnis totam ut.  Commodi quibusdam quo provident temporibus. Ut est porro mollitia " +
-          "est quidem magnam ex. Modi accusantium beatae quas aut.";
-    }
   }
 };
 </script>
