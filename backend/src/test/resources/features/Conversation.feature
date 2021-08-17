@@ -26,6 +26,14 @@ Feature: UCM8 Contacting other marketplace users
     And the card title "Pet rock" is included in the notification
     And the card owner name "Doris" is included in the notification
 
+  Scenario: The message recipient can view all messages in the conversation
+    Given user "Joe" has sent a message regarding card "Pet rock"
+    And user "Doris" has sent a reply
+    And I am logged into "Joe" account
+    When I try to view all messages in the conversation
+    Then all messages in the conversation will be available to me
+
+
   Scenario: AC5 - I can reply to a message in my newsfeed
     Given user "Joe" has sent a message regarding card "Pet rock"
     And I am logged into "Doris" account
