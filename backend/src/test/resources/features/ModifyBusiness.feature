@@ -202,3 +202,20 @@ Feature: U11 - Modifying Businesses
     When I try to upload the image "point.txt" to the business
     Then The request fails due to bad request
     And The business has no images
+
+  Scenario: AC1 - A user that is not a business admin cannot set the primary image
+    Given A user exists with name "Joe"
+    And I am logged into "Joe" account
+    And The business "Dave's playhouse" has primary image "point.jpg"
+    And The business "Dave's playhouse" has image "apple.jpg"
+    When I try to set the primary image for "Dave's playhouse" to "apple.jpg"
+    Then The request fails due to forbidden
+    And Image "point.jpg" is the primary image for "Dave's playhouse"
+
+  Scenario: AC5 - I can set the primary image for my business
+    Given I am logged into "Dave" account
+    And The business "Dave's playhouse" has primary image "point.jpg"
+    And The business "Dave's playhouse" has image "apple.jpg"
+    When I try to set the primary image for "Dave's playhouse" to "apple.jpg"
+    Then The request succeeds
+    And Image "apple.jpg" is the primary image for "Dave's playhouse"

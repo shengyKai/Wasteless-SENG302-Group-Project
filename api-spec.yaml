@@ -36,7 +36,7 @@ tags:
   - name: 'U22: List sale'
   - name: 'U23: Search for business'
   - name: 'U26: Example data'
-  - name: 'U28: Product Catalogue search'
+  - name: 'U32: Managing my feed'
   - name: 'UCM1: Community marketplace'
     description: >-
       No endpoints required here yet, these will come from the subsequent
@@ -49,6 +49,7 @@ tags:
   - name: 'UCM7: Keyword search'
   - name: 'UCM8: Contacting other marketplace users'
   - name: 'UCM9: Edit card'
+  - name: 'Business Images'
   - name: Users
     description: Grouping of endpoints related to the User entity
   - name: Business Accounts
@@ -342,6 +343,7 @@ paths:
       tags:
         - 'U11: Modifying Businesses'
         - Business Accounts
+        - Business Images
       summary: Modifies an existing business entity
       security:
         - CookieAuth:
@@ -381,6 +383,133 @@ paths:
             application admin.
         '401':
           $ref: '#/components/responses/UnauthorizedError'
+  '/businesses/{businessId}/images':
+    post:
+      tags:
+        - 'U11: Modifying Businesses'
+        - Business Images
+        - Business Accounts
+      summary: Upload a new image for some photo
+      security:
+        - CookieAuth:
+            - user
+            - globalApplicationAdmin
+            - defaultGlobalApplicationAdmin
+      parameters:
+        - name: businessId
+          in: path
+          description: ID of business
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                filename:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+      responses:
+        '201':
+          description: Image created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  imageId:
+                    type: integer
+                    description: The ID of the image that has just been created
+                    example: 1234
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: >-
+            Forbidden: Returned when a user tries to add an image for the business
+            when they do not administer AND
+            the user is not a global application admin
+        '406':
+          $ref: '#/components/responses/NotAcceptableError'
+  '/businesses/{businessId}/images/{imageId}':
+    delete:
+      tags:
+        - 'U11: Modifying Businesses'
+        - Business Images
+        - Business Accounts
+      summary: Delete an image of a business
+      security:
+        - CookieAuth:
+            - user
+            - globalApplicationAdmin
+            - defaultGlobalApplicationAdmin
+      parameters:
+        - name: businessId
+          in: path
+          description: ID of business
+          required: true
+          schema:
+            type: integer
+        - name: imageId
+          in: path
+          description: ID of the image to delete
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Image deleted successfully
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: >-
+            Forbidden: Returned when a user tries to delete an image for a
+            business that it is in a catalogue for a business they do not
+            administer AND the user is not a global application admin
+        '406':
+          $ref: '#/components/responses/NotAcceptableError'
+  '/businesses/{businessId}/images/{imageId}/makeprimary':
+    put:
+      tags:
+        - 'U11: Modifying Businesses'
+        - Business Images
+        - Business Accounts
+      summary: Set an existing image to be the new primary image for the business
+      security:
+        - CookieAuth:
+            - user
+            - globalApplicationAdmin
+            - defaultGlobalApplicationAdmin
+      parameters:
+        - name: businessId
+          in: path
+          description: ID of business
+          required: true
+          schema:
+            type: integer
+        - name: imageId
+          in: path
+          description: ID of the image to set as being the primary image for product
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Primary image successfully updated
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: >-
+            Forbidden: Returned when a user tries to update the primary image
+            for the business that the user dont
+            administer AND the user is not a global application admin
+        '406':
+          $ref: '#/components/responses/NotAcceptableError'
   '/businesses/{id}/makeAdministrator':
     put:
       tags:
@@ -1354,19 +1483,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              required:
-                - senderId
-                - message
-              properties:
-                senderId:
-                  type: integer
-                  description: Sender of the message
-                  example: 3
-                message:
-                  type: string
-                  description: Content of the message
-                  example: Hello World!
+              $ref: '#/components/schemas/Message'
       security:
         - CookieAuth:
             - user
@@ -1386,6 +1503,67 @@ paths:
             Forbidden: Returned when a user who is neither the creator of the
             card, card buyer, GAA or DGAA tries to send add a message to the conversation.
             Also occurs if the card creator tries to initiate a conversation.
+        '406':
+          $ref: '#/components/responses/NotAcceptableError'
+    get:
+      tags:
+        - 'UCM8: Contacting other marketplace users'
+        - Cards / community marketplace
+      summary: Get all the messages in a conversation about a marketplace card. Ordered from most-recent to least-recent.
+      parameters:
+        - name: cardId
+          in: path
+          description: The id of the card being discussed
+          required: true
+          schema:
+            type: integer
+            example: 40
+        - name: buyerId
+          in: path
+          description: The id of the prospective buyer in the conversation
+          required: true
+          schema:
+            type: integer
+            example: 3
+        - name: page
+          in: query
+          description: The page number to retrieve (1 indexed)
+          schema:
+            type: integer
+        - name: resultsPerPage
+          in: query
+          description: The number of results to show per page
+          schema:
+            type: integer
+      security:
+        - CookieAuth:
+            - user
+            - globalApplicationAdmin
+            - defaultGlobalApplicationAdmin
+      responses:
+        '200':
+          description: Request is successful, page of messages returned
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Page'
+                  - type: object
+                    required:
+                      - results
+                    properties:
+                      results:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Message'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: >-
+            Forbidden: Returned when a user who is neither the creator of the
+            card, card buyer, GAA or DGAA tries to fetch the messages.
         '406':
           $ref: '#/components/responses/NotAcceptableError'
   '/cards/{id}/extenddisplayperiod':
@@ -1860,6 +2038,9 @@ paths:
                         type: array
                         items:
                           $ref: '#/components/schemas/Product'
+        '400':
+          description: >-
+            Invalid search term provided
         '401':
           $ref: '#/components/responses/UnauthorizedError'
         '403':
@@ -1867,6 +2048,8 @@ paths:
             Forbidden: Returned when the user making the request is not an
             administrator of the business AND is not a global
             application admin.
+        '406': 
+          $ref: '#/components/responses/NotAcceptableError'
   /feed/{id}/tag:
     put:
       tags:

@@ -8,9 +8,9 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.runner.RunWith;
 import org.mockito.*;
-import org.seng302.leftovers.entities.Event;
-import org.seng302.leftovers.entities.MessageEvent;
 import org.seng302.leftovers.dto.Tag;
+import org.seng302.leftovers.entities.Event;
+import org.seng302.leftovers.entities.GlobalMessageEvent;
 import org.seng302.leftovers.entities.User;
 import org.seng302.leftovers.exceptions.AccessTokenException;
 import org.seng302.leftovers.persistence.EventRepository;
@@ -236,11 +236,11 @@ class EventControllerTest {
                 .andExpect(status().isCreated())
                 .andReturn();
 
-        ArgumentCaptor<MessageEvent> eventCaptor = ArgumentCaptor.forClass(MessageEvent.class);
+        ArgumentCaptor<GlobalMessageEvent> eventCaptor = ArgumentCaptor.forClass(GlobalMessageEvent.class);
 
         verify(eventService).saveEvent(eventCaptor.capture());
 
-        assertEquals("this that", eventCaptor.getValue().getMessage());
+        assertEquals("this that", eventCaptor.getValue().getGlobalMessage());
         assertEquals(mockUser, eventCaptor.getValue().getNotifiedUser());
     }
 

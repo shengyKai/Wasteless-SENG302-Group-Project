@@ -98,6 +98,15 @@ public abstract class Event {
     }
 
     /**
+     * Update the date this event was created. Used when one event represents multiple notifications which replace
+     * each other.
+     * @param created The date the replacement event was created.
+     */
+    protected void setCreated(Instant created) {
+        this.created = created;
+    }
+
+    /**
      * Returns the user that this event will appear on their home feed
      * @return The notified user
      */
