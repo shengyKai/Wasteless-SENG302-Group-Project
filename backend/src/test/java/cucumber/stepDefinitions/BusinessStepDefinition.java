@@ -298,7 +298,7 @@ public class BusinessStepDefinition {
     @Given("The business {string} has primary image {string}")
     public void the_business_has_primary_image_with_name(String businessName, String imageName) {
         Business business = businessContext.getByName(businessName);
-        Image image = new Image(imageName, imageName + "_thumbnail");
+        Image image = new Image(imageName, imageName + "_thumbnail.png");
         image = imageContext.save(image);
         business.addImage(0, image);
         business = businessContext.save(business);
@@ -311,7 +311,7 @@ public class BusinessStepDefinition {
     @Given("The business {string} has image {string}")
     public void the_business_has_image_with_name(String businessName, String imageName) {
         Business business = businessContext.getByName(businessName);
-        Image image = new Image(imageName, imageName + "_thumbnail");
+        Image image = new Image(imageName, imageName + "_thumbnail.png");
         image = imageContext.save(image);
         business.addImage(image);
         business = businessContext.save(business);
