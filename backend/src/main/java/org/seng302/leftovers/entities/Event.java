@@ -1,8 +1,8 @@
 package org.seng302.leftovers.entities;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.SneakyThrows;
 import net.minidev.json.JSONObject;
+import org.seng302.leftovers.dto.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 

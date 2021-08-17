@@ -26,7 +26,7 @@ public class SpecificationsBuilder<T> {
      * @param isOrPredicate Determines if predicate will be AND / OR
      * @return The builder
      */
-    public SpecificationsBuilder with(String key, String operation, Object value, boolean isOrPredicate) {
+    public SpecificationsBuilder<T> with(String key, String operation, Object value, boolean isOrPredicate) {
         params.add(new SearchCriteria(key, operation, value, isOrPredicate));
         return this;
     }
