@@ -6,6 +6,7 @@ import {createLocalVue, mount, Wrapper} from '@vue/test-utils';
 
 import ModifyUserPage from '@/components/UserProfile/ModifyUserPage.vue';
 import { getStore, resetStoreForTesting } from '@/store';
+import { Business } from '@/api/internal';
 
 Vue.use(Vuetify);
 Vue.use(Vuex);
@@ -16,6 +17,28 @@ describe('ModifyUserPage.vue', () => {
 
   beforeEach(() => {
     resetStoreForTesting();
+
+    location: Location = {
+      streetNumber: '10',
+      streetName: 'Downing Street',
+      city: 'London',
+      region: 'England',
+      postcode: '1234',
+      district: 'Westminster',
+      country: 'United Kingdom'
+    };
+
+    let business: Business = {
+      id: 7,
+      primaryAdministratorId: 1,
+      administrators: admins,
+      name: 'Selling DeeZ Nuts' + 7,
+      description: 'test_description' + 7,
+      address: createTestLocation(),
+      businessType: 'Charitable organisation',
+      created: '2/6/2006'
+    };
+    
     let store = getStore();
     store.state.user = {
       id: 1,
@@ -29,6 +52,7 @@ describe('ModifyUserPage.vue', () => {
       },
       phoneNumber: '+64 123 321 123'
     };
+    store.state.user.businessesAdministered = business;
 
     let vuetify = new Vuetify();
     wrapper = mount(ModifyUserPage, {

@@ -400,6 +400,7 @@ export default {
       let year = today.getFullYear();
       let month = today.getMonth();
       let day = today.getDate();
+      console.log(this.$store.state.user.businessesAdministered);
       if(this.$store.state.user.businessesAdministered.length >= 1) {
         return new Date(year - 16, month, day);
       }
