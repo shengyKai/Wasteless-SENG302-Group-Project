@@ -12,5 +12,6 @@ public enum ProductFilterOption {
     @JsonProperty("manufacturer")
     MANUFACTURER,
 
-
+    @JsonProperty("productCode")
+    PRODUCT_CODE
 }

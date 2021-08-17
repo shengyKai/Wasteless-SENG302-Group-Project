@@ -1,7 +1,10 @@
 package org.seng302.leftovers.tools;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.Data;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.seng302.leftovers.dto.ProductFilterOption;
 import org.seng302.leftovers.entities.Business;
 import org.seng302.leftovers.entities.Keyword;
 import org.seng302.leftovers.entities.Product;
@@ -27,6 +30,16 @@ public class SearchHelper {
 
     private enum PredicateType {
         OR, AND
+    }
+
+    /**
+     * Object representing a query that is not yet combined into a single spec.
+     * @param <T> Entity type to apply spec on
+     */
+    @Data
+    private static class SearchQuery<T> {
+        private final List<Specification<T>> searchSpecs;
+        private final List<PredicateType> predicateTypes;
     }
 
     /**
@@ -166,12 +179,8 @@ public class SearchHelper {
         List<String> searchTokens = splitSearchStringIntoTerms(searchQuery);
 
         var fieldNames = Arrays.asList("firstName", "lastName", "nickname", "middleName");
-
-        List<Specification<User>> searchSpecs = new ArrayList<>();
-        List<PredicateType> predicateTypesByIndex = new ArrayList<>();
-        parseSearchTokens(searchTokens, searchSpecs, predicateTypesByIndex, fieldNames);
-
-        return buildCompoundSpecification(searchSpecs, predicateTypesByIndex)
+        SearchQuery<User> parsedQuery = parseSearchTokens(searchTokens, fieldNames);
+        return buildCompoundSpecification(parsedQuery)
                 .and(isNotDGAASpec());
     }
 
@@ -201,8 +210,46 @@ public class SearchHelper {
                 .and(constructBusinessSpecificationFromType(businessType));
     }
 
-    public static Specification<Product> constructSpecificationFromProductSearch(Business business, String searchQuery, List<Product> columns) {
+    /**
+     * Creates a specification matching a product that is in a business and matches given searchQuery over the provided columns.
+     * @param business Business to select products from
+     * @param searchQuery Query to filter product by
+     * @param options Columns to apply the query over
+     * @return User product search specification
+     */
+    public static Specification<Product> constructSpecificationFromProductSearch(Business business, String searchQuery, Set<ProductFilterOption> options) {
+        return productBusinessSpecification(business).and(productFilterSpecification(searchQuery, options));
+    }
 
+    /**
+     * Creates a specification matching a product that matches the given searchQuery over the provided columns.
+     * If no columns are provided, then all columns are tested.
+     * Does not filter products by business
+     *
+     * @param searchQuery User provided search query
+     * @param options Set of columns to filter by
+     * @return Specification for filtering products by user search query
+     */
+    public static Specification<Product> productFilterSpecification(String searchQuery, Set<ProductFilterOption> options) {
+        List<String> searchTokens = splitSearchStringIntoTerms(searchQuery);
+
+        if (options.isEmpty()) {
+            options = Set.of(ProductFilterOption.values());
+        }
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        List<String> columnNames = options.stream().map(option -> objectMapper.convertValue(option, String.class)).collect(Collectors.toList());
+
+        return buildCompoundSpecification(parseSearchTokens(searchTokens, columnNames));
+    }
+
+    /**
+     * Creates a specification matching all products that belong to the provided business
+     * @param business Business to filter products by
+     * @return Specification filtering products to the business
+     */
+    public static Specification<Product> productBusinessSpecification(Business business) {
+        return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("business"), business);
     }
 
     /**
@@ -217,10 +264,8 @@ public class SearchHelper {
         List<String> searchTokens = splitSearchStringIntoTerms(searchQuery);
         List<String> fieldNames = Collections.singletonList("name");
 
-        List<Specification<Business>> searchSpecs = new ArrayList<>();
-        List<PredicateType> predicateTypesByIndex = new ArrayList<>();
-        parseSearchTokens(searchTokens, searchSpecs, predicateTypesByIndex, fieldNames);
-        return buildCompoundSpecification(searchSpecs, predicateTypesByIndex);
+        SearchQuery<Business> searchSpecs = parseSearchTokens(searchTokens, fieldNames);
+        return buildCompoundSpecification(searchSpecs);
     }
 
     /**
@@ -243,20 +288,20 @@ public class SearchHelper {
      * @return Specification of type Keyword
      */
     public static Specification<Keyword> constructKeywordSpecificationFromSearchQuery(String searchQuery) {
-        return buildPartialMatchSpec(searchQuery ,Collections.singletonList("name"));
+        return buildPartialMatchSpec(searchQuery, Collections.singletonList("name"));
     }
 
     /**
-     * This method takes a list of user specifications and a list of predicate types. It combines the individual
-     * specifications into one specification depending on the prediate type. The specification at index i in searchSpecs
-     * is followed by the predicate type at index i in predicateTypes e.g. for 'a AND b', a would be at index 0 in the
-     * list of specifications and AND would be at index 0 in the list of predicate types.
-     * @param searchSpecs A list of N user specifications to be combined.
-     * @param predicateTypes A list of N-1 predicate types to use when combining the specifications.
+     * This method takes a SearchQuery which is a list of user specifications and a list of predicate types. It combines
+     * the individual specifications into one specification depending on the prediate type. The specification at index i
+     * in searchSpecs is followed by the predicate type at index i in predicateTypes e.g. for 'a AND b', a would be at
+     * index 0 in the list of specifications and AND would be at index 0 in the list of predicate types.
      * @return A compound specification made up of individual specifications linked by predicates.
      */
-    private static <T> Specification<T> buildCompoundSpecification(List<Specification<T>> searchSpecs,
-                                                                   List<PredicateType> predicateTypes) {
+    private static <T> Specification<T> buildCompoundSpecification(SearchQuery<T> searchQuery) {
+        List<Specification<T>> searchSpecs = searchQuery.getSearchSpecs();
+        List<PredicateType> predicateTypes = searchQuery.getPredicateTypes();
+
         Specification<T> result = searchSpecs.get(0);
         for (int i = 1; i < searchSpecs.size(); i++) {
             if (predicateTypes.get(i-1).equals(PredicateType.OR)) {
@@ -276,12 +321,12 @@ public class SearchHelper {
      * 'AND' and 'OR' tokens are used to determine what predicate should be used to chain specifications, with AND being
      * the default if no predicate token is present.
      * @param searchTokens A list of single words or phrases in quotes from the user's search string.
-     * @param searchSpecs An empty list which the specifications will be added to.
-     * @param predicateTypesByIndex An empty list which the predicates will be added to.
      * @param fieldNames A list of field names to compare against
+     * @return SearchQuery is a list of specifications matching a field and a parallel list of predicate types.
      */
-    private static <T> void parseSearchTokens(List<String> searchTokens, List<Specification<T>> searchSpecs,
-                                              List<PredicateType> predicateTypesByIndex, List<String> fieldNames) {
+    private static <T> SearchQuery<T> parseSearchTokens(List<String> searchTokens, List<String> fieldNames) {
+        List<Specification<T>> searchSpecs = new ArrayList<>();
+        List<PredicateType> predicateTypesByIndex = new ArrayList<>();
         int i = 0;
         while (i < searchTokens.size()) {
             String token = searchTokens.get(i);
@@ -308,6 +353,7 @@ public class SearchHelper {
             throw(searchFormatException);
         }
 
+        return new SearchQuery<>(searchSpecs, predicateTypesByIndex);
     }
 
     /**
@@ -536,18 +582,6 @@ public class SearchHelper {
     }
 
     /**
-     * Filters out the DGAA accounts from a list of users
-     * @param userList List of users to filter
-     * @return Filtered list of users
-     */
-    public static List<User> removeDGAAAccountFromResults(List<User> userList) {
-        return userList
-                .stream()
-                .filter(user -> !user.getRole().equals("defaultGlobalApplicationAdmin"))
-                .collect(Collectors.toList());
-    }
-
-    /**
      * This method checks addedIds to see if the given user has already been added to noDuplicatesList. If they have not,
      * the user is added to noDuplicatesList and their id is added to addedIds.
      * @param noDuplicatesList A list which users will be added to if they are not duplicates of users already in the list.
@@ -562,9 +596,4 @@ public class SearchHelper {
             }
         }
     }
-
-
-
-
-
 }
