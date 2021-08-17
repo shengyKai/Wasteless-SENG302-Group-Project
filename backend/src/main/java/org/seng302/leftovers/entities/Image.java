@@ -8,6 +8,7 @@ import javax.persistence.*;
 import javax.persistence.Id;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 @Entity
 public class Image {
@@ -164,5 +165,18 @@ public class Image {
     @Override
     public String toString() {
         return "IMAGE_"+this.getID().toString();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Image image = (Image) o;
+        return id.equals(image.id) && filename.equals(image.filename) && Objects.equals(filenameThumbnail, image.filenameThumbnail);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, filename, filenameThumbnail);
     }
 }

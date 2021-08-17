@@ -1,6 +1,7 @@
 package cucumber.stepDefinitions;
 
 import cucumber.context.BusinessContext;
+import cucumber.context.ImageContext;
 import cucumber.context.RequestContext;
 import cucumber.context.UserContext;
 import io.cucumber.java.en.Given;
@@ -14,6 +15,7 @@ import org.junit.Assert;
 import org.seng302.datagenerator.ExampleDataFileReader;
 import org.seng302.leftovers.entities.*;
 import org.seng302.leftovers.persistence.BusinessRepository;
+import org.seng302.leftovers.persistence.ImageRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
@@ -30,7 +32,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.text.ParseException;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -44,11 +45,16 @@ public class BusinessStepDefinition {
     @Autowired
     private BusinessRepository businessRepository;
     @Autowired
+    private ImageRepository imageRepository;
+    @Autowired
+    private ImageContext imageContext;
+    @Autowired
     private UserContext userContext;
     @Autowired
     private RequestContext requestContext;
     @Autowired
     private SessionFactory sessionFactory;
+
 
     private JSONObject modifyParameters;
 
@@ -283,5 +289,58 @@ public class BusinessStepDefinition {
 
         Path imagePath = root.resolve(image.getFilename());
         assertTrue(imagePath.toFile().exists());
+    }
+
+    @Given("The business {string} has primary image {string}")
+    public void the_business_has_primary_image_with_name(String businessName, String imageName) {
+        Business business = businessContext.getByName(businessName);
+        Image image = new Image(imageName, imageName + "_thumbnail");
+        image = imageContext.save(image);
+        business.addImage(0, image);
+        business = businessContext.save(business);
+
+        assertFalse(business.getImages().isEmpty());
+        assertEquals(image, business.getImages().get(0));
+
+    }
+
+    @Given("The business {string} has image {string}")
+    public void the_business_has_image_with_name(String businessName, String imageName) {
+        Business business = businessContext.getByName(businessName);
+        Image image = new Image(imageName, imageName + "_thumbnail");
+        image = imageContext.save(image);
+        business.addImage(image);
+        business = businessContext.save(business);
+
+        assertFalse(business.getImages().isEmpty());
+        assertTrue(business.getImages().contains(image));
+
+    }
+    @Transactional
+    @When("I try to set the primary image for {string} to {string}")
+    public void i_try_set_primary_image_to(String businessName, String imageName) {
+        Image image = imageContext.getByName(imageName);
+        Business business = businessRepository.getBusinessById(businessContext.getByName(businessName).getId());
+
+        assertFalse(business.getImages().isEmpty());
+        assertNotEquals(image, business.getImages().get(0));
+
+        requestContext.performRequest(
+                put("/businesses/"
+                        + business.getId()
+                        + "/images/"
+                        + image.getID()
+                        + "/makeprimary"));
+
+    }
+
+    @Transactional
+    @Then("Image {string} is the primary image for {string}")
+    public void image_is_the_primary_image(String imageName, String businessName) {
+        Image image = imageContext.getByName(imageName);
+        Business business = businessRepository.getBusinessById(businessContext.getByName(businessName).getId());
+
+        assertFalse(business.getImages().isEmpty());
+        assertEquals(image, business.getImages().get(0)); // index zero is primary image
     }
 }
