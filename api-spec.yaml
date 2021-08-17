@@ -190,7 +190,7 @@ paths:
                       description: >- 
                         The new password for the account
         description: >-
-          Values containing the updated user account data
+          Values containing the updated user account data. <br>If email edited or new password provided, field "password" must be provided
       responses:
         '200':
           description: User account successfully modified
