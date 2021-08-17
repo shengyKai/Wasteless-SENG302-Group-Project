@@ -357,6 +357,7 @@ public class BusinessController {
 
             Image image = imageRepository.getImageById(imageId);
             var images = business.getImages();
+            // Ensure that the provided image belongs to this business. Otherwise, action is forbidden
             if (!images.contains(image)) {
                 throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You cannot modify this image");
             }
