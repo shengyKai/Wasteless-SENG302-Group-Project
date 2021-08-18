@@ -4,6 +4,7 @@ import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.seng302.leftovers.dto.CreateUserDTO;
 import org.seng302.leftovers.dto.ModifyUserDTO;
 import org.seng302.leftovers.entities.Account;
 import org.seng302.leftovers.entities.Location;
@@ -46,37 +47,29 @@ public class UserController {
      * @param userinfo A Json object containing all of the user's details from the registration form.
      */
     @PostMapping("/users")
-    public void register(@RequestBody JSONObject userinfo, HttpServletRequest request, HttpServletResponse response) {
+    public void register(@Valid @RequestBody CreateUserDTO userinfo, HttpServletRequest request, HttpServletResponse response) {
         logger.info("Register");
         try {
-            Account.checkEmailUniqueness(userinfo.getAsString("email"), userRepository);
+            Account.checkEmailUniqueness(userinfo.getEmail(), userRepository);
         } catch (EmailInUseException inUseException) {
             logger.error(inUseException.getMessage());
             throw inUseException;
         }
         try {
-            JSONObject rawAddress;
-            try {
-                rawAddress = new JSONObject((Map<String, ?>) userinfo.get("homeAddress"));
-            } catch (ClassCastException e) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                        "Location not provided");
-            }
 
-            Location homeAddress = Location.parseLocationFromJson(rawAddress);
-
+            Location homeAddress = userinfo.getHomeAddress().createLocation();
 
             User user = new User.Builder()
-                    .withFirstName(userinfo.getAsString("firstName"))
-                    .withMiddleName(userinfo.getAsString("middleName"))
-                    .withLastName(userinfo.getAsString("lastName"))
-                    .withNickName(userinfo.getAsString("nickname"))
-                    .withBio(userinfo.getAsString("bio"))
+                    .withFirstName(userinfo.getFirstName())
+                    .withMiddleName(userinfo.getMiddleName())
+                    .withLastName(userinfo.getLastName())
+                    .withNickName(userinfo.getNickname())
+                    .withBio(userinfo.getBio())
                     .withAddress(homeAddress)
-                    .withPhoneNumber(userinfo.getAsString("phoneNumber"))
-                    .withDob(userinfo.getAsString("dateOfBirth"))
-                    .withEmail(userinfo.getAsString("email"))
-                    .withPassword(userinfo.getAsString("password"))
+                    .withPhoneNumber(userinfo.getPhoneNumber())
+                    .withDob(userinfo.getDateOfBirth())
+                    .withEmail(userinfo.getEmail())
+                    .withPassword(userinfo.getPassword())
                     .build();
             User newUser = userRepository.save(user);
             AuthenticationTokenManager.setAuthenticationToken(request, response, newUser);
