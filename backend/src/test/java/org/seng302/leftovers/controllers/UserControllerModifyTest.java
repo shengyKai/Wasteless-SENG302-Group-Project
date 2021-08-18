@@ -2,14 +2,17 @@ package org.seng302.leftovers.controllers;
 
 import lombok.SneakyThrows;
 import net.minidev.json.JSONObject;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.MockitoAnnotations;
 import org.seng302.leftovers.entities.Location;
 import org.seng302.leftovers.entities.User;
 import org.seng302.leftovers.persistence.UserRepository;
+import org.seng302.leftovers.tools.AuthenticationTokenManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -22,7 +25,6 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -46,26 +48,17 @@ public class UserControllerModifyTest {
     @MockBean
     private UserRepository userRepository;
 
-    private User testUser;
+    private MockedStatic<AuthenticationTokenManager> authenticationTokenManager;
 
     @BeforeEach
     public void setup() throws Exception {
         MockitoAnnotations.openMocks(this);
 
-        testUser = new User.Builder()
-                .withFirstName("Andy")
-                .withMiddleName("Percy")
-                .withLastName("Elliot")
-                .withNickName("Ando")
-                .withEmail("123andyelliot@gmail.com")
-                .withPassword("password123")
-                .withDob("1987-04-12")
-                .withAddress(Location.covertAddressStringToLocation("108,Albert Road,Ashburton,Christchurch,New Zealand,Canterbury,8041"))
-                .build();
-        userRepository.save(testUser);
-
-
+        //TODO Mock properly
     }
+
+    @AfterEach
+    public void tearDown() { authenticationTokenManager.close(); }
 
     @SneakyThrows
     private JSONObject createValidRequest() {
@@ -103,8 +96,7 @@ public class UserControllerModifyTest {
                 .andReturn();
 
         verify(userRepository, times(1)).findById(mockUserId).get();
-        verify(userRepository, times(0)).save(any());
-        assertEquals(userRepository.findById(mockUserId).get().getFirstName(), newFirstName);
+        verify(userRepository, times(1)).save(any());
     }
 
     @Test
@@ -123,8 +115,7 @@ public class UserControllerModifyTest {
                 .andReturn();
 
         verify(userRepository, times(1)).findById(mockUserId).get();
-        verify(userRepository, times(0)).save(any());
-        assertEquals(userRepository.findById(mockUserId).get().getLastName(), newLastName);
+        verify(userRepository, times(1)).save(any());
     }
 
     @Test
@@ -143,8 +134,7 @@ public class UserControllerModifyTest {
                 .andReturn();
 
         verify(userRepository, times(1)).findById(mockUserId).get();
-        verify(userRepository, times(0)).save(any());
-        assertEquals(userRepository.findById(mockUserId).get().getMiddleName(), newMiddleName);
+        verify(userRepository, times(1)).save(any());
     }
 
     @Test
@@ -163,8 +153,7 @@ public class UserControllerModifyTest {
                 .andReturn();
 
         verify(userRepository, times(1)).findById(mockUserId).get();
-        verify(userRepository, times(0)).save(any());
-        assertEquals(userRepository.findById(mockUserId).get().getNickname(), newNickname);
+        verify(userRepository, times(1)).save(any());
     }
 
     @Test
@@ -183,8 +172,7 @@ public class UserControllerModifyTest {
                 .andReturn();
 
         verify(userRepository, times(1)).findById(mockUserId).get();
-        verify(userRepository, times(0)).save(any());
-        assertEquals(userRepository.findById(mockUserId).get().getNickname(), newNickname);
+        verify(userRepository, times(1)).save(any());
     }
 
     @Test
@@ -203,8 +191,7 @@ public class UserControllerModifyTest {
                 .andReturn();
 
         verify(userRepository, times(1)).findById(mockUserId).get();
-        verify(userRepository, times(0)).save(any());
-        assertEquals(userRepository.findById(mockUserId).get().getDob(), newDateOfBirth);
+        verify(userRepository, times(1)).save(any());
     }
 
     @Test
@@ -223,8 +210,7 @@ public class UserControllerModifyTest {
                 .andReturn();
 
         verify(userRepository, times(1)).findById(mockUserId).get();
-        verify(userRepository, times(0)).save(any());
-        assertEquals(userRepository.findById(mockUserId).get().getPhNum(), newPhoneNumber);
+        verify(userRepository, times(1)).save(any());
     }
 
     @Test
@@ -243,8 +229,7 @@ public class UserControllerModifyTest {
                 .andReturn();
 
         verify(userRepository, times(1)).findById(mockUserId).get();
-        verify(userRepository, times(0)).save(any());
-        assertEquals(userRepository.findById(mockUserId).get().getAddress().getStreetNumber(), newStreetNumber);
+        verify(userRepository, times(1)).save(any());
     }
 
     @Test
@@ -263,8 +248,7 @@ public class UserControllerModifyTest {
                 .andReturn();
 
         verify(userRepository, times(1)).findById(mockUserId).get();
-        verify(userRepository, times(0)).save(any());
-        assertEquals(userRepository.findById(mockUserId).get().getAddress().getStreetName(), newStreetName);
+        verify(userRepository, times(1)).save(any());
     }
 
     @Test
@@ -283,8 +267,7 @@ public class UserControllerModifyTest {
                 .andReturn();
 
         verify(userRepository, times(1)).findById(mockUserId).get();
-        verify(userRepository, times(0)).save(any());
-        assertEquals(userRepository.findById(mockUserId).get().getAddress().getDistrict(), newDistrict);
+        verify(userRepository, times(1)).save(any());
     }
 
     @Test
@@ -303,8 +286,7 @@ public class UserControllerModifyTest {
                 .andReturn();
 
         verify(userRepository, times(1)).findById(mockUserId).get();
-        verify(userRepository, times(0)).save(any());
-        assertEquals(userRepository.findById(mockUserId).get().getAddress().getCity(), newCity);
+        verify(userRepository, times(1)).save(any());
     }
 
     @Test
@@ -323,8 +305,7 @@ public class UserControllerModifyTest {
                 .andReturn();
 
         verify(userRepository, times(1)).findById(mockUserId).get();
-        verify(userRepository, times(0)).save(any());
-        assertEquals(userRepository.findById(mockUserId).get().getAddress().getRegion(), newRegion);
+        verify(userRepository, times(1)).save(any());
     }
 
     @Test
@@ -343,8 +324,7 @@ public class UserControllerModifyTest {
                 .andReturn();
 
         verify(userRepository, times(1)).findById(mockUserId).get();
-        verify(userRepository, times(0)).save(any());
-        assertEquals(userRepository.findById(mockUserId).get().getAddress().getCountry(), newCountry);
+        verify(userRepository, times(1)).save(any());
     }
 
     @Test
@@ -363,8 +343,7 @@ public class UserControllerModifyTest {
                 .andReturn();
 
         verify(userRepository, times(1)).findById(mockUserId).get();
-        verify(userRepository, times(0)).save(any());
-        assertEquals(userRepository.findById(mockUserId).get().getAddress().getPostCode(), newPostcode);
+        verify(userRepository, times(1)).save(any());
     }
 
     @Test
