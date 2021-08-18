@@ -82,6 +82,10 @@ export type CreateUser = {
   password: string,
 };
 
+export type ModifyUser = CreateUser & {
+  newPassword: string
+}
+
 export type BusinessType = 'Accommodation and Food Services' | 'Retail Trade' | 'Charitable organisation' | 'Non-profit organisation';
 
 export const BUSINESS_TYPES: BusinessType[] = ['Accommodation and Food Services', 'Retail Trade', 'Charitable organisation', 'Non-profit organisation'];
@@ -324,6 +328,28 @@ export async function createUser(user: CreateUser): Promise<MaybeError<undefined
     return 'Request failed: ' + status;
   }
 
+  return undefined;
+}
+
+/**
+ * Update the parameters of a user by sending a request with the new parameters to the backend.
+ * Will return undefined if the request is successful, or a string error message explaining why
+ * the request failed if it is unsuccessful.
+ * @param userId The id number of the user to be updated.
+ * @returns Undefined if request succeeds or a string error message if it does not.
+ */
+export async function modifyUser(userId: number, user: ModifyUser): Promise<MaybeError<undefined>> {
+  try {
+    await instance.put(`/users/${userId}`, user);
+  } catch (error) {
+    let status: number | undefined = error.response?.status;
+    if (status === undefined) return 'Failed to reach backend';
+    if (status === 400) return 'Invalid details entered: ' + error.response?.data.message;
+    if (status === 401) return 'You have been logged out. Please login again and retry';
+    if (status === 403) return 'Cannot update user: ' + error.response?.data.message; 
+    if (status === 406) return 'User does not exist';
+    return 'Request failed: ' + error.response?.data.message;
+  }
   return undefined;
 }
 
@@ -1213,8 +1239,10 @@ export async function modifyBusiness(businessId: number, business: ModifyBusines
   } catch (error) {
     let status: number | undefined = error.response?.status;
     if (status === undefined) return 'Failed to reach backend';
+    if (status === 400) return 'Invalid details entered: ' + error.response?.data.message;
     if (status === 401) return 'You have been logged out. Please login again and retry';
     if (status === 403) return 'Invalid authorization for modifying this business';
+    if (status === 406) return 'Business does not exist';
 
     return 'Request failed: ' + error.response?.data.message;
   }

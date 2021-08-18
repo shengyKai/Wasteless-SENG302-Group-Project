@@ -177,6 +177,19 @@ describe('Test PUT /businesses/${businessId} endpoint', () => {
     expect(response).toEqual("Failed to reach backend");
   });
 
+  it('When API request is unsuccessful and gives a 401 error, returns a message saying the details are invalid along with a reason from the backend', async () => {
+    instance.put.mockRejectedValueOnce({
+      response: {
+        status: 400,
+        data: {
+          message: 'Name too long',
+        }
+      }
+    });
+    const response = await modifyBusiness(88, business);
+    expect(response).toEqual("Invalid details entered: Name too long");
+  });
+
   it('When API request is unsuccessful and gives a 401 error, returns a message stating user has been logged out', async () => {
     instance.put.mockRejectedValueOnce({
       response: {
@@ -196,6 +209,17 @@ describe('Test PUT /businesses/${businessId} endpoint', () => {
     const response = await modifyBusiness(88, business);
     expect(response).toEqual("Invalid authorization for modifying this business");
   });
+
+  it('When API request is unsuccessful and gives a 406 error, returns a message saying the business does not exist', async () => {
+    instance.put.mockRejectedValueOnce({
+      response: {
+        status: 406
+      }
+    });
+    const response = await modifyBusiness(88, business);
+    expect(response).toEqual("Business does not exist");
+  });
+
 
   it('When API request is unsuccessful and gives an uncaught error status, returns a message stating that error status and a message', async () => {
     instance.put.mockRejectedValueOnce({
