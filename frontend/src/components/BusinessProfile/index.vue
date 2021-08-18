@@ -61,7 +61,7 @@
               </span>
             </v-col>
           </v-row>
-          <div v-if='!modifyBusiness'>
+          <div v-if='!modifyBusiness && permissionToActAsBusiness'>
             <v-row justify="end">
               <v-col cols="2">
                 <v-btn
@@ -166,7 +166,6 @@ export default {
 
       return `${parts[2]} ${parts[1]} ${parts[3]} (${diffMonths} months ago)`;
     },
-
     administrators() {
       return this.business?.administrators || [];
     },
