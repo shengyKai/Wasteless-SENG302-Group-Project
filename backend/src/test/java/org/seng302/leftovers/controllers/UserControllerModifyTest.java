@@ -14,6 +14,7 @@ import org.seng302.leftovers.entities.Location;
 import org.seng302.leftovers.entities.User;
 import org.seng302.leftovers.persistence.UserRepository;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
+import org.seng302.leftovers.tools.PasswordAuthenticator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -39,6 +40,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 public class UserControllerModifyTest {
     private long mockUserId = 5L;
+    private String validCurrentPassword = "HappyBoiGeorge69#";
 
     @Autowired
     private MockMvc mockMvc;
@@ -58,7 +60,6 @@ public class UserControllerModifyTest {
     @Mock
     private Location mockLocation;
 
-
     private MockedStatic<AuthenticationTokenManager> authenticationTokenManager;
 
     @BeforeEach
@@ -74,7 +75,8 @@ public class UserControllerModifyTest {
         when(mockUser.getMiddleName()).thenReturn("bananas");
         when(mockUser.getNickname()).thenReturn("cool gal");
         when(mockUser.getDob()).thenReturn(LocalDate.parse("1999-06-26"));
-        //when(mockUser.getAuthenticationCode()).thenReturn("cool gal");
+        when(mockUser.getAuthenticationCode()).thenReturn(
+                PasswordAuthenticator.generateAuthenticationCode(validCurrentPassword));
         when(mockUser.getAddress()).thenReturn(mockLocation);
 
         when(mockLocation.getCountry()).thenReturn("New Zealand");
@@ -393,32 +395,123 @@ public class UserControllerModifyTest {
 
     @Test
     void modifyUser_modifyWithValidEmailAndPasswords_modifiedUser200() throws Exception {
+        var jsonBody = createValidRequest();
 
+        String newEmail = "Nathan@gmail.com";
+        String currentPassword = validCurrentPassword;
+        String newPassword = "HmmmmmmmmBoiGeorge6`9#";
+        jsonBody.put("email", newEmail);
+        jsonBody.put("password", currentPassword);
+        jsonBody.put("newPassword", newPassword);
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .put("/profile/" + mockUserId + "/modify")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(jsonBody.toString())
+                        .sessionAttrs(createSessionForUser(mockUserId)))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        verify(userRepository, times(1)).findById(mockUserId).get();
+        verify(userRepository, times(1)).save(any());
+        verify(mockUser, times(1)).setEmail(newEmail);
+        verify(mockUser, times(1)).setAuthenticationCodeFromPassword(newPassword);
     }
 
     @Test
-    void modifyUser_modifyWithOnlyValidEmail_notModifiedUser403() throws Exception {
+    void modifyUser_modifyWithEmailNoPassword_notModifiedUser400() throws Exception {
+        var jsonBody = createValidRequest();
 
+        mockMvc.perform(MockMvcRequestBuilders
+                        .put("/profile/" + mockUserId + "/modify")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(jsonBody.toString())
+                        .sessionAttrs(createSessionForUser(mockUserId)))
+                .andExpect(status().isBadRequest())
+                .andReturn();
+
+        verify(userRepository, times(1)).findById(mockUserId).get();
+        verify(userRepository, times(0)).save(any());
     }
 
     @Test
-    void modifyUser_modifyWithOnlyValidCurrentPassword_notModifiedUser403() throws Exception {
+    void modifyUser_modifyWithEmailAndWrongPassword_notModifiedUser403() throws Exception {
+        var jsonBody = createValidRequest();
 
+        String wrongPassword = "GettingASufficientAmountOfSleep#69";
+        jsonBody.put("password", wrongPassword);
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .put("/profile/" + mockUserId + "/modify")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(jsonBody.toString())
+                        .sessionAttrs(createSessionForUser(mockUserId)))
+                .andExpect(status().isForbidden())
+                .andReturn();
+
+        verify(userRepository, times(1)).findById(mockUserId).get();
+        verify(userRepository, times(0)).save(any());
     }
 
     @Test
-    void modifyUser_modifyWithOnlyValidNewPassword_notModifiedUser403() throws Exception {
+    void modifyUser_modifyWithEmailWrongPasswordAndNewPassword_notModifiedUser403() throws Exception {
+        var jsonBody = createValidRequest();
 
+        String wrongPassword = "GettingASufficientAmountOfSleep#69";
+        String newPassword = "NotHavingAGoodTimeCovid$490";
+        jsonBody.put("password", wrongPassword);
+        jsonBody.put("newPassword", newPassword);
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .put("/profile/" + mockUserId + "/modify")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(jsonBody.toString())
+                        .sessionAttrs(createSessionForUser(mockUserId)))
+                .andExpect(status().isBadRequest())
+                .andReturn();
+
+        verify(userRepository, times(1)).findById(mockUserId).get();
+        verify(userRepository, times(0)).save(any());
+    }
+
+    @Test
+    void modifyUser_modifyWithNewPasswordNoCurrentPassword_notModifiedUser400() throws Exception {
+        var jsonBody = createValidRequest();
+
+        String newPassword = "NotHavingAGoodTimeCovid$490";
+        jsonBody.put("newPassword", newPassword);
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .put("/profile/" + mockUserId + "/modify")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(jsonBody.toString())
+                        .sessionAttrs(createSessionForUser(mockUserId)))
+                .andExpect(status().isBadRequest())
+                .andReturn();
+
+        verify(userRepository, times(1)).findById(mockUserId).get();
+        verify(userRepository, times(0)).save(any());
     }
 
     @Test
     void modifyUser_modifyEmailInvalid_userNotModified400() throws Exception {
+        var jsonBody = createValidRequest();
+        String currentPassword = validCurrentPassword;
+        jsonBody.put("password", currentPassword);
 
-    }
+        doThrow(new ResponseStatusException(HttpStatus.BAD_REQUEST))
+                .when(mockUser).setEmail(any());
 
-    @Test
-    void modifyUser_modifyInvalidPassword_userNotModified400() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders
+                        .put("/profile/" + mockUserId + "/modify")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(jsonBody.toString())
+                        .sessionAttrs(createSessionForUser(mockUserId)))
+                .andExpect(status().isBadRequest())
+                .andReturn();
 
+        verify(userRepository, times(0)).save(any());
+        verify(mockUser, times(1)).setEmail(any());
     }
 
     @Test
