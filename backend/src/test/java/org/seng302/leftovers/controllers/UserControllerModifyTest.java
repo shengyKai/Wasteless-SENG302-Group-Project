@@ -27,6 +27,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.HttpServletRequest;
@@ -44,8 +45,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class UserControllerModifyTest {
     private long mockUserId = 5L;
     private String validCurrentPassword = "HappyBoiGeorge69#";
-
-    @Autowired
+    
     private MockMvc mockMvc;
 
     private UserController userController;
@@ -95,6 +95,7 @@ public class UserControllerModifyTest {
         when(mockLocation.getStreetName()).thenReturn("Arthur street");
 
         userController = new UserController(userRepository);
+        mockMvc = MockMvcBuilders.standaloneSetup(userController).build();
     }
 
     @AfterEach
