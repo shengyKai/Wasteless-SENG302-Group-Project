@@ -51,11 +51,6 @@ public class UserController {
         logger.info("Register");
         try {
             Account.checkEmailUniqueness(userinfo.getEmail(), userRepository);
-        } catch (EmailInUseException inUseException) {
-            logger.error(inUseException.getMessage());
-            throw inUseException;
-        }
-        try {
 
             Location homeAddress = userinfo.getHomeAddress().createLocation();
 
@@ -75,12 +70,10 @@ public class UserController {
             AuthenticationTokenManager.setAuthenticationToken(request, response, newUser);
             response.setStatus(201);
             logger.info("User has been registered.");
-        } catch (ResponseStatusException responseError) {
-            logger.error(responseError.getMessage());
-            throw responseError;
-        } catch (DateTimeParseException e) {
+
+        } catch (Exception e) {
             logger.error(e.getMessage());
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Could not process date of birth.");
+            throw e;
         }
 
     }

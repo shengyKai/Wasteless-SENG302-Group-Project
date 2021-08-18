@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.persistence.*;
+import java.time.DateTimeException;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -495,9 +496,13 @@ public class User extends Account {
          * @return Builder with date of birth set.
          */
         public Builder withDob(String dobString) {
-            DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE;
-            this.dob = LocalDate.parse(dobString, dateTimeFormatter);
-            return this;
+            try {
+                DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE;
+                this.dob = LocalDate.parse(dobString, dateTimeFormatter);
+                return this;
+            } catch (DateTimeException e) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Could not parse date of birth");
+            }
         }
 
         /**
