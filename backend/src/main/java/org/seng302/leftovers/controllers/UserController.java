@@ -4,6 +4,7 @@ import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.seng302.leftovers.dto.ModifyUserDTO;
 import org.seng302.leftovers.entities.Account;
 import org.seng302.leftovers.entities.Location;
 import org.seng302.leftovers.entities.User;
@@ -21,6 +22,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
 import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Map;
@@ -86,6 +88,23 @@ public class UserController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Could not process date of birth.");
         }
 
+    }
+
+    @PutMapping("/users/{id}")
+    public void modifyUser(@PathVariable Long id, @Valid @RequestBody ModifyUserDTO body, HttpServletRequest request) {
+        logger.info("Updating user (userId={})", id);
+        AuthenticationTokenManager.checkAuthenticationToken(request);
+        try {
+            User user = userRepository.getUser(id);
+
+            if (!AuthenticationTokenManager.sessionCanSeePrivate(request, id)) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                        "You do not have permission to modify another user");
+            }
+        } catch (Exception e) {
+            throw e;
+        }
+        //TODO Finish
     }
 
     /**
