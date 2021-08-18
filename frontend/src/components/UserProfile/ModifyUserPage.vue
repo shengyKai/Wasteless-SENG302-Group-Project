@@ -28,11 +28,10 @@
                     ref="password"
                     v-model="user.password"
                     label="New Password"
-                    @keyup="passwordCheck"
                     :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
                     :type="showPassword ? 'text' : 'password'"
                     @click:append="showPassword = !showPassword"
-                    :rules="passwordRules2.concat(maxMediumCharRules)"
+                    :rules="passwordRules.concat(maxMediumCharRules)"
                     outlined
                   />
                 </v-col>
@@ -42,11 +41,12 @@
                   <v-text-field
                     ref="confirmPassword"
                     v-model="confirmPassword"
+                    @keyup="passwordCheck"
                     label="Confirm New Password"
                     :append-icon="showConfirmPassword ? 'mdi-eye' : 'mdi-eye-off'"
                     :type="showConfirmPassword ? 'text' : 'password'"
                     @click:append="showConfirmPassword = !showConfirmPassword"
-                    :rules="passwordRules2.concat(passwordConfirmationRule).concat(maxMediumCharRules)"
+                    :rules="passwordRules.concat(passwordConfirmationRule).concat(maxMediumCharRules)"
                     outlined
                   />
                 </v-col>
@@ -60,7 +60,7 @@
                 :append-icon="showOldPassword ? 'mdi-eye' : 'mdi-eye-off'"
                 :type="showOldPassword ? 'text' : 'password'"
                 @click:append="showOldPassword = !showOldPassword"
-                :rules="passwordRules2.concat(maxMediumCharRules)"
+                :rules="passwordRules.concat(maxMediumCharRules)"
                 outlined
               />
             </v-tab-item>
@@ -194,7 +194,6 @@
 
               </v-row>
             </v-tab-item>
-
             <!-- TAB: Address -->
             <v-tab-item key="address">
               <!-- INPUT: Street -->
@@ -291,7 +290,7 @@ import {
   emailRules,
   mandatoryRules, maxCharRules,
   nameRules,
-  passwordRules, passwordRules2, phoneNumberRules,
+  passwordRules, phoneNumberRules,
   postCodeRules,
   streetNumRules,
 } from "@/utils";
@@ -307,8 +306,8 @@ export default {
       valid: false,
       user: {
         email: '',
-        password: '',
-        oldPassword: '',
+        password: undefined,
+        oldPassword: undefined,
 
         firstName: '',
         middleName: '',
@@ -330,7 +329,7 @@ export default {
       },
       countryCode: '',
       phoneDigits: '',
-      confirmPassword: "",
+      confirmPassword: undefined,
       streetAddress: '',
       maxDate: '',
       showDatePicker: false,
@@ -343,6 +342,17 @@ export default {
   mounted () {
     //sets maxDate
     this.maxDate = this.minimumDateOfBirth().toISOString().slice(0, 10);
+    console.log("Mount");
+    console.log(this.user.password);
+    console.log(this.user.oldPassword);
+    console.log(this.confirmPassword);
+    console.log("endMount");
+    // if(this.user.password.length === 0
+    //     && this.user.oldPassword.length === 0
+    //     && this.confirmPassword.length === 0) {
+    //   console.log("A");
+    //   this.valid === false;
+    // }
   },
   methods: {
     /**
@@ -450,7 +460,6 @@ export default {
       },
       immediate: true,
     },
-
   },
   /**
    * Use all the imported validation rules from utils to be consistent within the web application.
@@ -470,16 +479,18 @@ export default {
     alphabetRules: () => alphabetRules,
     alphabetExtendedMultilineRules: () => alphabetExtendedMultilineRules,
     streetNumRules: () => streetNumRules,
-    passwordRules2: () => passwordRules2,
-
 
     /**
      * Validation for new password confirming
      */
     passwordConfirmationRule () {
       return () =>
-        this.user.password === this.confirmPassword || 'Passwords must match';
+        this.user.password === this.confirmPassword || 'New passwords and confirm password must match';
     },
+    // currentPasswordRule () {
+    //   return () =>
+    //     this.user.password.length !== 0 && this.oldPassword <= 7 || 'Current password incalid';
+    // },
     /**
      * Validation for phone's country code
      */

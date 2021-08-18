@@ -232,7 +232,7 @@ export const nameRules = [
 
 export function maxCharRules(size: number) {
   return [
-    (field: string) => (field === null || field.length <= size) || `Reached max character limit: ${size}`
+    (field: string) => (field.length <= size) || `Reached max character limit: ${size}`
   ];
 }
 
@@ -279,9 +279,4 @@ export const productCodeRules = [
   (field: string) => field.length <= 15 || 'Reached max character limit: 15',
   (field: string) => !/ /.test(field) || 'Must not contain a space',
   (field: string) => regxProductCode().test(field) || 'Must be all uppercase letters, numbers and dashes.',
-];
-
-export const passwordRules2 = [
-  (field: string) => (field.length !== 0 || field.length >= 7) || 'Password must have 7+ characters',
-  (field: string) => regxPassword().test(field) || 'Must have at least one number and one letter'
 ];

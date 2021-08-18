@@ -16,15 +16,15 @@ Vue.use(Vuex);
  * @param count Number of users to create
  * @returns List of test users
  */
- function createTestBusinesses() {
+function createTestBusinesses() {
   let result: Business[] = [];
-    result.push({
-      id: 7,
-      name: 'test_name',
-      primaryAdministratorId: 1,
-      businessType: "Accommodation and Food Services",
-      address: { city: 'test_city', country: 'test_country'},
-    });
+  result.push({
+    id: 7,
+    name: 'test_name',
+    primaryAdministratorId: 1,
+    businessType: "Accommodation and Food Services",
+    address: { city: 'test_city', country: 'test_country'},
+  });
   return result;
 }
 
@@ -70,10 +70,10 @@ describe('ModifyUserPage.vue', () => {
         }
       },
     });
-  }); 
+  });
   it('Email should be prefilled', async () => {
     await wrapper.setData({
-      user:{ 
+      user:{
         email: "some@email.com",
         firstName: "some firstName"
       }
@@ -83,7 +83,7 @@ describe('ModifyUserPage.vue', () => {
 
   it('First Name should be prefilled', async () => {
     await wrapper.setData({
-      user:{ 
+      user:{
         firstName: "some firstName"
       }
     });
@@ -92,7 +92,7 @@ describe('ModifyUserPage.vue', () => {
 
   it('Last name should be prefilled', async () => {
     await wrapper.setData({
-      user:{ 
+      user:{
         lastName: "some lastName"
       }
     });
@@ -101,7 +101,7 @@ describe('ModifyUserPage.vue', () => {
 
   it('Middle Name should be prefilled', async () => {
     await wrapper.setData({
-      user:{ 
+      user:{
         middleName: "some middleName"
       }
     });
@@ -110,7 +110,7 @@ describe('ModifyUserPage.vue', () => {
 
   it('Nick name should be prefilled', async () => {
     await wrapper.setData({
-      user:{ 
+      user:{
         nickName: "some nickName"
       }
     });
@@ -119,7 +119,7 @@ describe('ModifyUserPage.vue', () => {
 
   it('Bio should be prefilled', async () => {
     await wrapper.setData({
-      user:{ 
+      user:{
         bio: "some bio"
       }
     });
@@ -128,7 +128,7 @@ describe('ModifyUserPage.vue', () => {
 
   it('Date of birth should be prefilled', async () => {
     await wrapper.setData({
-      user:{ 
+      user:{
         dateOfBirth: "2010-01-01"
       }
     });
@@ -175,11 +175,11 @@ describe('ModifyUserPage.vue', () => {
     expect(wrapper.vm.user.phoneNumber).toBe('+65 111');
   });
 
-//   it("Testing out all inputs, such that the user can only press the update button " +
-//   "after inputting valid formats for all fields", () => {
-//   const updateButton = wrapper.find(".v-btn");
-//   expect(updateButton.props().disabled).toBeFalsy();
-// });
+  //   it("Testing out all inputs, such that the user can only press the update button " +
+  //   "after inputting valid formats for all fields", () => {
+  //   const updateButton = wrapper.find(".v-btn");
+  //   expect(updateButton.props().disabled).toBeFalsy();
+  // });
 
   it("Testing for invalid email format,with no '@'", async () => {
     const updateButton = wrapper.find(".v-btn");
