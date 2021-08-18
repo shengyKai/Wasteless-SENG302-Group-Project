@@ -71,7 +71,7 @@ describe('ModifyUserPage.vue', () => {
       },
     });
   });
-  it('Email should be prefilled', async () => {
+  it.only('Email should be prefilled', async () => {
     await wrapper.setData({
       user:{
         email: "some@email.com",
@@ -175,11 +175,11 @@ describe('ModifyUserPage.vue', () => {
     expect(wrapper.vm.user.phoneNumber).toBe('+65 111');
   });
 
-  //   it("Testing out all inputs, such that the user can only press the update button " +
-  //   "after inputting valid formats for all fields", () => {
-  //   const updateButton = wrapper.find(".v-btn");
-  //   expect(updateButton.props().disabled).toBeFalsy();
-  // });
+  it("Testing out all inputs, such that the user can only press the update button " +
+    "after inputting valid formats for all fields", () => {
+    const updateButton = wrapper.find(".v-btn");
+    expect(updateButton.props().disabled).toBeFalsy();
+  });
 
   it("Testing for invalid email format,with no '@'", async () => {
     const updateButton = wrapper.find(".v-btn");
@@ -231,13 +231,4 @@ describe('ModifyUserPage.vue', () => {
     expect(updateButton.props().disabled).toBeTruthy();
   });
 
-
-  // it('Valid if the new country is provided', async () => {
-  //   const updateButton = wrapper.find(".v-btn");
-  //   await wrapper.setData({
-  //     user: {homeaddress: {country:"NewZealand"}}
-  //   });
-  //   await Vue.nextTick();
-  //   expect(updateButton.props().disabled).toBeFalsy();
-  // });
 });
