@@ -44,16 +44,19 @@ describe('ModifyUserPage.vue', () => {
       id: 1,
       firstName: "some firstName",
       lastName: "some lastName",
+      middleName: "some middleName",
+      nickname: "some nickName",
+      bio: "some bio",
       email: "some email",
+      dateOfBirth: "2010-01-01",
+      phoneNumber: '+64 123 321 123',
       homeAddress: {
         streetNumber: '11',
         streetName: 'Test lane',
         country: "some country"
       },
-      phoneNumber: '+64 123 321 123',
       businessesAdministered: business,
     };
-
     let vuetify = new Vuetify();
     wrapper = mount(ModifyUserPage, {
       stubs: ['router-link', 'router-view'],
@@ -68,10 +71,23 @@ describe('ModifyUserPage.vue', () => {
         }
       },
     });
-  });
+  }); 
 
   it('Street number and name should be joined together when prefilled', () => {
     expect(wrapper.vm.streetAddress).toBe('11 Test lane');
+  });
+
+  it('Country should be prefilled', () => {
+    expect(wrapper.vm.user.email).toBe("some country");
+  });
+
+  it('Street number and name should be updated when the combined field is modified', async () => {
+    await wrapper.setData({
+      streetAddress: '13 Other place',
+    });
+    await Vue.nextTick();
+    expect(wrapper.vm.user.homeAddress.streetNumber).toBe('13');
+    expect(wrapper.vm.user.homeAddress.streetName).toBe('Other place');
   });
 
   it('Street number and name should be updated when the combined field is modified', async () => {
@@ -96,4 +112,21 @@ describe('ModifyUserPage.vue', () => {
     await Vue.nextTick();
     expect(wrapper.vm.user.phoneNumber).toBe('+65 111');
   });
+
+  it("Testing out all inputs, such that the user can only press the update button " +
+  "after inputting valid formats for all fields", () => {
+  const updateButton = wrapper.find(".v-btn");
+  expect(updateButton.props().disabled).toBeFalsy();
+});
+
+  // it.only("Testing for invalid email format,with no '@'", async () => {
+  //   const updateButton = wrapper.find(".v-btn");
+  //   console.log(wrapper.vm.user.email);
+  //   await wrapper.setData({
+  //     email: "someemail.com"
+  //   });
+  //   await Vue.nextTick();
+  //   expect(updateButton.props().disabled).toBeTruthy();
+  // });
+
 });
