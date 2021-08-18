@@ -2,6 +2,7 @@ package org.seng302.leftovers.controllers;
 
 import lombok.SneakyThrows;
 import net.minidev.json.JSONObject;
+import org.apache.tomcat.jni.Address;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,6 +26,9 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+import java.time.LocalDate;
+import java.util.Date;
+
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -37,7 +41,6 @@ public class UserControllerModifyTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @Autowired
     private UserController userController;
 
     @Mock
@@ -48,13 +51,39 @@ public class UserControllerModifyTest {
     @MockBean
     private UserRepository userRepository;
 
+    @Mock
+    private User testUser;
+    @Mock
+    private Location mockLocation;
+
+
     private MockedStatic<AuthenticationTokenManager> authenticationTokenManager;
 
     @BeforeEach
     public void setup() throws Exception {
         MockitoAnnotations.openMocks(this);
 
-        //TODO Mock properly
+        when(userRepository.getUser(mockUserId)).thenReturn(testUser);
+
+        when(testUser.getUserID()).thenReturn(mockUserId);
+        when(testUser.getBio()).thenReturn("Ella@gmail.com");
+        when(testUser.getFirstName()).thenReturn("Ella");
+        when(testUser.getLastName()).thenReturn("Ella");
+        when(testUser.getMiddleName()).thenReturn("bananas");
+        when(testUser.getNickname()).thenReturn("cool gal");
+        when(testUser.getDob()).thenReturn(LocalDate.parse("1999-06-26"));
+        //when(testUser.getAuthenticationCode()).thenReturn("cool gal");
+        when(testUser.getAddress()).thenReturn(mockLocation);
+
+        when(mockLocation.getCountry()).thenReturn("New Zealand");
+        when(mockLocation.getCity()).thenReturn("Christchurch");
+        when(mockLocation.getDistrict()).thenReturn("District");
+        when(mockLocation.getRegion()).thenReturn("Canterbury");
+        when(mockLocation.getPostCode()).thenReturn("1234");
+        when(mockLocation.getStreetNumber()).thenReturn("68");
+        when(mockLocation.getStreetName()).thenReturn("Arthur street");
+
+        userController = new UserController(userRepository);
     }
 
     @AfterEach
@@ -97,6 +126,7 @@ public class UserControllerModifyTest {
 
         verify(userRepository, times(1)).findById(mockUserId).get();
         verify(userRepository, times(1)).save(any());
+        verify(testUser, times(1)).setFirstName(newFirstName);
     }
 
     @Test
@@ -116,6 +146,7 @@ public class UserControllerModifyTest {
 
         verify(userRepository, times(1)).findById(mockUserId).get();
         verify(userRepository, times(1)).save(any());
+        verify(testUser, times(1)).setLastName(newLastName);
     }
 
     @Test
@@ -135,6 +166,7 @@ public class UserControllerModifyTest {
 
         verify(userRepository, times(1)).findById(mockUserId).get();
         verify(userRepository, times(1)).save(any());
+        verify(testUser, times(1)).setMiddleName(newMiddleName);
     }
 
     @Test
@@ -154,14 +186,15 @@ public class UserControllerModifyTest {
 
         verify(userRepository, times(1)).findById(mockUserId).get();
         verify(userRepository, times(1)).save(any());
+        verify(testUser, times(1)).setNickname(newNickname);
     }
 
     @Test
     void modifyUser_modifyWithValidBio_modifiedUser200() throws Exception {
         var jsonBody = createValidRequest();
 
-        String newNickname = "Johnny";
-        jsonBody.put("nickname", newNickname);
+        String newBio = "Johnny";
+        jsonBody.put("nickname", newBio);
 
         mockMvc.perform(MockMvcRequestBuilders
                         .put("/profile/" + mockUserId + "/modify")
@@ -173,6 +206,7 @@ public class UserControllerModifyTest {
 
         verify(userRepository, times(1)).findById(mockUserId).get();
         verify(userRepository, times(1)).save(any());
+        verify(testUser, times(1)).setBio(newBio);
     }
 
     @Test
@@ -192,6 +226,7 @@ public class UserControllerModifyTest {
 
         verify(userRepository, times(1)).findById(mockUserId).get();
         verify(userRepository, times(1)).save(any());
+        verify(testUser, times(1)).setDob(LocalDate.parse(newDateOfBirth));
     }
 
     @Test
@@ -211,6 +246,7 @@ public class UserControllerModifyTest {
 
         verify(userRepository, times(1)).findById(mockUserId).get();
         verify(userRepository, times(1)).save(any());
+        verify(testUser, times(1)).setPhNum(newPhoneNumber);
     }
 
     @Test
@@ -230,6 +266,7 @@ public class UserControllerModifyTest {
 
         verify(userRepository, times(1)).findById(mockUserId).get();
         verify(userRepository, times(1)).save(any());
+        verify(testUser, times(1)).setAddress(any());
     }
 
     @Test
@@ -249,6 +286,7 @@ public class UserControllerModifyTest {
 
         verify(userRepository, times(1)).findById(mockUserId).get();
         verify(userRepository, times(1)).save(any());
+        verify(testUser, times(1)).setAddress(any());
     }
 
     @Test
@@ -268,6 +306,7 @@ public class UserControllerModifyTest {
 
         verify(userRepository, times(1)).findById(mockUserId).get();
         verify(userRepository, times(1)).save(any());
+        verify(testUser, times(1)).setAddress(any());
     }
 
     @Test
@@ -287,7 +326,7 @@ public class UserControllerModifyTest {
 
         verify(userRepository, times(1)).findById(mockUserId).get();
         verify(userRepository, times(1)).save(any());
-    }
+        verify(testUser, times(1)).setAddress(any());    }
 
     @Test
     void modifyUser_modifyWithValidRegion_modifiedUser200() throws Exception {
@@ -306,7 +345,7 @@ public class UserControllerModifyTest {
 
         verify(userRepository, times(1)).findById(mockUserId).get();
         verify(userRepository, times(1)).save(any());
-    }
+        verify(testUser, times(1)).setAddress(any());    }
 
     @Test
     void modifyUser_modifyWithValidCountry_modifiedUser200() throws Exception {
@@ -325,7 +364,7 @@ public class UserControllerModifyTest {
 
         verify(userRepository, times(1)).findById(mockUserId).get();
         verify(userRepository, times(1)).save(any());
-    }
+        verify(testUser, times(1)).setAddress(any());    }
 
     @Test
     void modifyUser_modifyWithValidPostcode_modifiedUser200() throws Exception {
@@ -344,7 +383,7 @@ public class UserControllerModifyTest {
 
         verify(userRepository, times(1)).findById(mockUserId).get();
         verify(userRepository, times(1)).save(any());
-    }
+        verify(testUser, times(1)).setAddress(any());    }
 
     @Test
     void modifyUser_modifyWithValidEmailAndPasswords_modifiedUser200() throws Exception {
