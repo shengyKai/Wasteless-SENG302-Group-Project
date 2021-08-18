@@ -129,7 +129,7 @@ public class UserControllerModifyTest {
         jsonBody.put("firstName", newFirstName);
 
         mockMvc.perform(MockMvcRequestBuilders
-                .put("/profile/" + mockUserId + "/modify")
+                .put("/users/" + mockUserId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(jsonBody.toString())
                 .sessionAttrs(createSessionForUser(mockUserId)))
@@ -137,7 +137,7 @@ public class UserControllerModifyTest {
                 .andReturn();
 
         verify(userRepository, times(1)).findById(mockUserId).get();
-        verify(userRepository, times(1)).save(any());
+        verify(userRepository, times(1)).save(mockUser);
         verify(mockUser, times(1)).setFirstName(newFirstName);
     }
 
@@ -149,7 +149,7 @@ public class UserControllerModifyTest {
         jsonBody.put("lastName", newLastName);
 
         mockMvc.perform(MockMvcRequestBuilders
-                        .put("/profile/" + mockUserId + "/modify")
+                        .put("/users/" + mockUserId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonBody.toString())
                         .sessionAttrs(createSessionForUser(mockUserId)))
@@ -157,7 +157,7 @@ public class UserControllerModifyTest {
                 .andReturn();
 
         verify(userRepository, times(1)).findById(mockUserId).get();
-        verify(userRepository, times(1)).save(any());
+        verify(userRepository, times(1)).save(mockUser);
         verify(mockUser, times(1)).setLastName(newLastName);
     }
 
@@ -169,7 +169,7 @@ public class UserControllerModifyTest {
         jsonBody.put("middleName", newMiddleName);
 
         mockMvc.perform(MockMvcRequestBuilders
-                        .put("/profile/" + mockUserId + "/modify")
+                        .put("/users/" + mockUserId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonBody.toString())
                         .sessionAttrs(createSessionForUser(mockUserId)))
@@ -177,7 +177,7 @@ public class UserControllerModifyTest {
                 .andReturn();
 
         verify(userRepository, times(1)).findById(mockUserId).get();
-        verify(userRepository, times(1)).save(any());
+        verify(userRepository, times(1)).save(mockUser);
         verify(mockUser, times(1)).setMiddleName(newMiddleName);
     }
 
@@ -189,7 +189,7 @@ public class UserControllerModifyTest {
         jsonBody.put("middleName", newNickname);
 
         mockMvc.perform(MockMvcRequestBuilders
-                        .put("/profile/" + mockUserId + "/modify")
+                        .put("/users/" + mockUserId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonBody.toString())
                         .sessionAttrs(createSessionForUser(mockUserId)))
@@ -197,7 +197,7 @@ public class UserControllerModifyTest {
                 .andReturn();
 
         verify(userRepository, times(1)).findById(mockUserId).get();
-        verify(userRepository, times(1)).save(any());
+        verify(userRepository, times(1)).save(mockUser);
         verify(mockUser, times(1)).setNickname(newNickname);
     }
 
@@ -209,7 +209,7 @@ public class UserControllerModifyTest {
         jsonBody.put("nickname", newBio);
 
         mockMvc.perform(MockMvcRequestBuilders
-                        .put("/profile/" + mockUserId + "/modify")
+                        .put("/users/" + mockUserId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonBody.toString())
                         .sessionAttrs(createSessionForUser(mockUserId)))
@@ -217,7 +217,7 @@ public class UserControllerModifyTest {
                 .andReturn();
 
         verify(userRepository, times(1)).findById(mockUserId).get();
-        verify(userRepository, times(1)).save(any());
+        verify(userRepository, times(1)).save(mockUser);
         verify(mockUser, times(1)).setBio(newBio);
     }
 
@@ -229,7 +229,7 @@ public class UserControllerModifyTest {
         jsonBody.put("dateOfBirth", newDateOfBirth);
 
         mockMvc.perform(MockMvcRequestBuilders
-                        .put("/profile/" + mockUserId + "/modify")
+                        .put("/users/" + mockUserId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonBody.toString())
                         .sessionAttrs(createSessionForUser(mockUserId)))
@@ -237,7 +237,7 @@ public class UserControllerModifyTest {
                 .andReturn();
 
         verify(userRepository, times(1)).findById(mockUserId).get();
-        verify(userRepository, times(1)).save(any());
+        verify(userRepository, times(1)).save(mockUser);
         verify(mockUser, times(1)).setDob(LocalDate.parse(newDateOfBirth));
     }
 
@@ -249,7 +249,7 @@ public class UserControllerModifyTest {
         jsonBody.put("phoneNumber", newPhoneNumber);
 
         mockMvc.perform(MockMvcRequestBuilders
-                        .put("/profile/" + mockUserId + "/modify")
+                        .put("/users/" + mockUserId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonBody.toString())
                         .sessionAttrs(createSessionForUser(mockUserId)))
@@ -257,7 +257,7 @@ public class UserControllerModifyTest {
                 .andReturn();
 
         verify(userRepository, times(1)).findById(mockUserId).get();
-        verify(userRepository, times(1)).save(any());
+        verify(userRepository, times(1)).save(mockUser);
         verify(mockUser, times(1)).setPhNum(newPhoneNumber);
     }
 
@@ -269,7 +269,7 @@ public class UserControllerModifyTest {
         jsonBody.put("streetNumber", newStreetNumber);
 
         mockMvc.perform(MockMvcRequestBuilders
-                        .put("/profile/" + mockUserId + "/modify")
+                        .put("/users/" + mockUserId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonBody.toString())
                         .sessionAttrs(createSessionForUser(mockUserId)))
@@ -277,7 +277,7 @@ public class UserControllerModifyTest {
                 .andReturn();
 
         verify(userRepository, times(1)).findById(mockUserId).get();
-        verify(userRepository, times(1)).save(any());
+        verify(userRepository, times(1)).save(mockUser);
         verify(mockUser, times(1)).setAddress(any());
     }
 
@@ -289,7 +289,7 @@ public class UserControllerModifyTest {
         jsonBody.put("streetName", newStreetName);
 
         mockMvc.perform(MockMvcRequestBuilders
-                        .put("/profile/" + mockUserId + "/modify")
+                        .put("/users/" + mockUserId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonBody.toString())
                         .sessionAttrs(createSessionForUser(mockUserId)))
@@ -297,7 +297,7 @@ public class UserControllerModifyTest {
                 .andReturn();
 
         verify(userRepository, times(1)).findById(mockUserId).get();
-        verify(userRepository, times(1)).save(any());
+        verify(userRepository, times(1)).save(mockUser);
         verify(mockUser, times(1)).setAddress(any());
     }
 
@@ -309,7 +309,7 @@ public class UserControllerModifyTest {
         jsonBody.put("district", newDistrict);
 
         mockMvc.perform(MockMvcRequestBuilders
-                        .put("/profile/" + mockUserId + "/modify")
+                        .put("/users/" + mockUserId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonBody.toString())
                         .sessionAttrs(createSessionForUser(mockUserId)))
@@ -317,7 +317,7 @@ public class UserControllerModifyTest {
                 .andReturn();
 
         verify(userRepository, times(1)).findById(mockUserId).get();
-        verify(userRepository, times(1)).save(any());
+        verify(userRepository, times(1)).save(mockUser);
         verify(mockUser, times(1)).setAddress(any());
     }
 
@@ -329,7 +329,7 @@ public class UserControllerModifyTest {
         jsonBody.put("city", newCity);
 
         mockMvc.perform(MockMvcRequestBuilders
-                        .put("/profile/" + mockUserId + "/modify")
+                        .put("/users/" + mockUserId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonBody.toString())
                         .sessionAttrs(createSessionForUser(mockUserId)))
@@ -337,7 +337,7 @@ public class UserControllerModifyTest {
                 .andReturn();
 
         verify(userRepository, times(1)).findById(mockUserId).get();
-        verify(userRepository, times(1)).save(any());
+        verify(userRepository, times(1)).save(mockUser);
         verify(mockUser, times(1)).setAddress(any());
     }
 
@@ -349,7 +349,7 @@ public class UserControllerModifyTest {
         jsonBody.put("region", newRegion);
 
         mockMvc.perform(MockMvcRequestBuilders
-                        .put("/profile/" + mockUserId + "/modify")
+                        .put("/users/" + mockUserId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonBody.toString())
                         .sessionAttrs(createSessionForUser(mockUserId)))
@@ -357,7 +357,7 @@ public class UserControllerModifyTest {
                 .andReturn();
 
         verify(userRepository, times(1)).findById(mockUserId).get();
-        verify(userRepository, times(1)).save(any());
+        verify(userRepository, times(1)).save(mockUser);
         verify(mockUser, times(1)).setAddress(any());
     }
 
@@ -369,7 +369,7 @@ public class UserControllerModifyTest {
         jsonBody.put("country", newCountry);
 
         mockMvc.perform(MockMvcRequestBuilders
-                        .put("/profile/" + mockUserId + "/modify")
+                        .put("/users/" + mockUserId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonBody.toString())
                         .sessionAttrs(createSessionForUser(mockUserId)))
@@ -377,7 +377,7 @@ public class UserControllerModifyTest {
                 .andReturn();
 
         verify(userRepository, times(1)).findById(mockUserId).get();
-        verify(userRepository, times(1)).save(any());
+        verify(userRepository, times(1)).save(mockUser);
         verify(mockUser, times(1)).setAddress(any());
     }
 
@@ -389,7 +389,7 @@ public class UserControllerModifyTest {
         jsonBody.put("postcode", newPostcode);
 
         mockMvc.perform(MockMvcRequestBuilders
-                        .put("/profile/" + mockUserId + "/modify")
+                        .put("/users/" + mockUserId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonBody.toString())
                         .sessionAttrs(createSessionForUser(mockUserId)))
@@ -397,7 +397,7 @@ public class UserControllerModifyTest {
                 .andReturn();
 
         verify(userRepository, times(1)).findById(mockUserId).get();
-        verify(userRepository, times(1)).save(any());
+        verify(userRepository, times(1)).save(mockUser);
         verify(mockUser, times(1)).setAddress(any());
     }
 
@@ -413,7 +413,7 @@ public class UserControllerModifyTest {
         jsonBody.put("newPassword", newPassword);
 
         mockMvc.perform(MockMvcRequestBuilders
-                        .put("/profile/" + mockUserId + "/modify")
+                        .put("/users/" + mockUserId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonBody.toString())
                         .sessionAttrs(createSessionForUser(mockUserId)))
@@ -421,7 +421,7 @@ public class UserControllerModifyTest {
                 .andReturn();
 
         verify(userRepository, times(1)).findById(mockUserId).get();
-        verify(userRepository, times(1)).save(any());
+        verify(userRepository, times(1)).save(mockUser);
         verify(mockUser, times(1)).setEmail(newEmail);
         verify(mockUser, times(1)).setAuthenticationCodeFromPassword(newPassword);
     }
@@ -431,7 +431,7 @@ public class UserControllerModifyTest {
         var jsonBody = createValidRequest();
 
         mockMvc.perform(MockMvcRequestBuilders
-                        .put("/profile/" + mockUserId + "/modify")
+                        .put("/users/" + mockUserId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonBody.toString())
                         .sessionAttrs(createSessionForUser(mockUserId)))
@@ -439,7 +439,7 @@ public class UserControllerModifyTest {
                 .andReturn();
 
         verify(userRepository, times(1)).findById(mockUserId).get();
-        verify(userRepository, times(0)).save(any());
+        verify(userRepository, times(0)).save(mockUser);
     }
 
     @Test
@@ -450,7 +450,7 @@ public class UserControllerModifyTest {
         jsonBody.put("password", wrongPassword);
 
         mockMvc.perform(MockMvcRequestBuilders
-                        .put("/profile/" + mockUserId + "/modify")
+                        .put("/users/" + mockUserId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonBody.toString())
                         .sessionAttrs(createSessionForUser(mockUserId)))
@@ -458,7 +458,7 @@ public class UserControllerModifyTest {
                 .andReturn();
 
         verify(userRepository, times(1)).findById(mockUserId).get();
-        verify(userRepository, times(0)).save(any());
+        verify(userRepository, times(0)).save(mockUser);
     }
 
     @Test
@@ -471,7 +471,7 @@ public class UserControllerModifyTest {
         jsonBody.put("newPassword", newPassword);
 
         mockMvc.perform(MockMvcRequestBuilders
-                        .put("/profile/" + mockUserId + "/modify")
+                        .put("/users/" + mockUserId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonBody.toString())
                         .sessionAttrs(createSessionForUser(mockUserId)))
@@ -479,7 +479,7 @@ public class UserControllerModifyTest {
                 .andReturn();
 
         verify(userRepository, times(1)).findById(mockUserId).get();
-        verify(userRepository, times(0)).save(any());
+        verify(userRepository, times(0)).save(mockUser);
     }
 
     @Test
@@ -490,7 +490,7 @@ public class UserControllerModifyTest {
         jsonBody.put("newPassword", newPassword);
 
         mockMvc.perform(MockMvcRequestBuilders
-                        .put("/profile/" + mockUserId + "/modify")
+                        .put("/users/" + mockUserId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonBody.toString())
                         .sessionAttrs(createSessionForUser(mockUserId)))
@@ -498,7 +498,7 @@ public class UserControllerModifyTest {
                 .andReturn();
 
         verify(userRepository, times(1)).findById(mockUserId).get();
-        verify(userRepository, times(0)).save(any());
+        verify(userRepository, times(0)).save(mockUser);
     }
 
     @Test
@@ -511,14 +511,14 @@ public class UserControllerModifyTest {
                 .when(mockUser).setEmail(any());
 
         mockMvc.perform(MockMvcRequestBuilders
-                        .put("/profile/" + mockUserId + "/modify")
+                        .put("/users/" + mockUserId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonBody.toString())
                         .sessionAttrs(createSessionForUser(mockUserId)))
                 .andExpect(status().isBadRequest())
                 .andReturn();
 
-        verify(userRepository, times(0)).save(any());
+        verify(userRepository, times(0)).save(mockUser);
         verify(mockUser, times(1)).setEmail(any());
     }
 
@@ -530,14 +530,14 @@ public class UserControllerModifyTest {
                 .when(mockUser).setFirstName(any());
 
         mockMvc.perform(MockMvcRequestBuilders
-                        .put("/profile/" + mockUserId + "/modify")
+                        .put("/users/" + mockUserId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonBody.toString())
                         .sessionAttrs(createSessionForUser(mockUserId)))
                 .andExpect(status().isBadRequest())
                 .andReturn();
 
-        verify(userRepository, times(0)).save(any());
+        verify(userRepository, times(0)).save(mockUser);
         verify(mockUser, times(1)).setFirstName(any());
     }
 
@@ -549,14 +549,14 @@ public class UserControllerModifyTest {
                 .when(mockUser).setMiddleName(any());
 
         mockMvc.perform(MockMvcRequestBuilders
-                        .put("/profile/" + mockUserId + "/modify")
+                        .put("/users/" + mockUserId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonBody.toString())
                         .sessionAttrs(createSessionForUser(mockUserId)))
                 .andExpect(status().isBadRequest())
                 .andReturn();
 
-        verify(userRepository, times(0)).save(any());
+        verify(userRepository, times(0)).save(mockUser);
         verify(mockUser, times(1)).setMiddleName(any());
     }
 
@@ -568,14 +568,14 @@ public class UserControllerModifyTest {
                 .when(mockUser).setLastName(any());
 
         mockMvc.perform(MockMvcRequestBuilders
-                        .put("/profile/" + mockUserId + "/modify")
+                        .put("/users/" + mockUserId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonBody.toString())
                         .sessionAttrs(createSessionForUser(mockUserId)))
                 .andExpect(status().isBadRequest())
                 .andReturn();
 
-        verify(userRepository, times(0)).save(any());
+        verify(userRepository, times(0)).save(mockUser);
         verify(mockUser, times(1)).setLastName(any());
     }
 
@@ -587,14 +587,15 @@ public class UserControllerModifyTest {
                 .when(mockUser).setNickname(any());
 
         mockMvc.perform(MockMvcRequestBuilders
-                        .put("/profile/" + mockUserId + "/modify")
+                        .put("/users/" + mockUserId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonBody.toString())
                         .sessionAttrs(createSessionForUser(mockUserId)))
                 .andExpect(status().isBadRequest())
                 .andReturn();
 
-        verify(userRepository, times(0)).save(any());
+        
+        verify(userRepository, times(0)).save(mockUser);
         verify(mockUser, times(1)).setNickname(any());
     }
 
@@ -606,14 +607,14 @@ public class UserControllerModifyTest {
                 .when(mockUser).setBio(any());
 
         mockMvc.perform(MockMvcRequestBuilders
-                        .put("/profile/" + mockUserId + "/modify")
+                        .put("/users/" + mockUserId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonBody.toString())
                         .sessionAttrs(createSessionForUser(mockUserId)))
                 .andExpect(status().isBadRequest())
                 .andReturn();
 
-        verify(userRepository, times(0)).save(any());
+        verify(userRepository, times(0)).save(mockUser);
         verify(mockUser, times(1)).setBio(any());
     }
 
@@ -625,14 +626,14 @@ public class UserControllerModifyTest {
                 .when(mockUser).setBio(any());
 
         mockMvc.perform(MockMvcRequestBuilders
-                        .put("/profile/" + mockUserId + "/modify")
+                        .put("/users/" + mockUserId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonBody.toString())
                         .sessionAttrs(createSessionForUser(mockUserId)))
                 .andExpect(status().isBadRequest())
                 .andReturn();
 
-        verify(userRepository, times(0)).save(any());
+        verify(userRepository, times(0)).save(mockUser);
         verify(mockUser, times(1)).setBio(any());
     }
 
@@ -644,14 +645,14 @@ public class UserControllerModifyTest {
                 .when(mockUser).setPhNum(any());
 
         mockMvc.perform(MockMvcRequestBuilders
-                        .put("/profile/" + mockUserId + "/modify")
+                        .put("/users/" + mockUserId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonBody.toString())
                         .sessionAttrs(createSessionForUser(mockUserId)))
                 .andExpect(status().isBadRequest())
                 .andReturn();
 
-        verify(userRepository, times(0)).save(any());
+        verify(userRepository, times(0)).save(mockUser);
         verify(mockUser, times(1)).setPhNum(any());
     }
 
@@ -663,14 +664,14 @@ public class UserControllerModifyTest {
                 .when(mockUser).setAddress(any());
 
         mockMvc.perform(MockMvcRequestBuilders
-                        .put("/profile/" + mockUserId + "/modify")
+                        .put("/users/" + mockUserId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonBody.toString())
                         .sessionAttrs(createSessionForUser(mockUserId)))
                 .andExpect(status().isBadRequest())
                 .andReturn();
 
-        verify(userRepository, times(0)).save(any());
+        verify(userRepository, times(0)).save(mockUser);
         verify(mockUser, times(1)).setAddress(any());
     }
 
@@ -682,14 +683,14 @@ public class UserControllerModifyTest {
                 .when(mockUser).setAddress(any());
 
         mockMvc.perform(MockMvcRequestBuilders
-                        .put("/profile/" + mockUserId + "/modify")
+                        .put("/users/" + mockUserId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonBody.toString())
                         .sessionAttrs(createSessionForUser(mockUserId)))
                 .andExpect(status().isBadRequest())
                 .andReturn();
 
-        verify(userRepository, times(0)).save(any());
+        verify(userRepository, times(0)).save(mockUser);
         verify(mockUser, times(1)).setAddress(any());
     }
 
@@ -701,14 +702,14 @@ public class UserControllerModifyTest {
                 .when(mockUser).setAddress(any());
 
         mockMvc.perform(MockMvcRequestBuilders
-                        .put("/profile/" + mockUserId + "/modify")
+                        .put("/users/" + mockUserId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonBody.toString())
                         .sessionAttrs(createSessionForUser(mockUserId)))
                 .andExpect(status().isBadRequest())
                 .andReturn();
 
-        verify(userRepository, times(0)).save(any());
+        verify(userRepository, times(0)).save(mockUser);
         verify(mockUser, times(1)).setAddress(any());
     }
 
@@ -720,14 +721,14 @@ public class UserControllerModifyTest {
                 .when(mockUser).setAddress(any());
 
         mockMvc.perform(MockMvcRequestBuilders
-                        .put("/profile/" + mockUserId + "/modify")
+                        .put("/users/" + mockUserId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonBody.toString())
                         .sessionAttrs(createSessionForUser(mockUserId)))
                 .andExpect(status().isBadRequest())
                 .andReturn();
 
-        verify(userRepository, times(0)).save(any());
+        verify(userRepository, times(0)).save(mockUser);
         verify(mockUser, times(1)).setAddress(any());
     }
 
@@ -739,14 +740,14 @@ public class UserControllerModifyTest {
                 .when(mockUser).setAddress(any());
 
         mockMvc.perform(MockMvcRequestBuilders
-                        .put("/profile/" + mockUserId + "/modify")
+                        .put("/users/" + mockUserId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonBody.toString())
                         .sessionAttrs(createSessionForUser(mockUserId)))
                 .andExpect(status().isBadRequest())
                 .andReturn();
 
-        verify(userRepository, times(0)).save(any());
+        verify(userRepository, times(0)).save(mockUser);
         verify(mockUser, times(1)).setAddress(any());
     }
 
@@ -758,14 +759,14 @@ public class UserControllerModifyTest {
                 .when(mockUser).setAddress(any());
 
         mockMvc.perform(MockMvcRequestBuilders
-                        .put("/profile/" + mockUserId + "/modify")
+                        .put("/users/" + mockUserId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonBody.toString())
                         .sessionAttrs(createSessionForUser(mockUserId)))
                 .andExpect(status().isBadRequest())
                 .andReturn();
 
-        verify(userRepository, times(0)).save(any());
+        verify(userRepository, times(0)).save(mockUser);
         verify(mockUser, times(1)).setAddress(any());
     }
 
@@ -777,7 +778,7 @@ public class UserControllerModifyTest {
         var jsonBody = createValidRequest();
 
         mockMvc.perform(MockMvcRequestBuilders
-                .put("/profile/" + mockUserId + "/modify")
+                .put("/users/" + mockUserId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(jsonBody.toString())
                 .sessionAttrs(createSessionForUser(mockUserId)))
@@ -785,7 +786,7 @@ public class UserControllerModifyTest {
                 .andReturn();
 
         authenticationTokenManager.verify(() -> AuthenticationTokenManager.checkAuthenticationToken(any()));
-        verify(userRepository, times(0)).save(any());
+        verify(userRepository, times(0)).save(mockUser);
     }
 
     @Test
@@ -795,7 +796,7 @@ public class UserControllerModifyTest {
         var jsonBody = createValidRequest();
 
         mockMvc.perform(MockMvcRequestBuilders
-                .put("/profile/" + mockUserId + "/modify")
+                .put("/users/" + mockUserId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(jsonBody.toString())
                 .sessionAttrs(createSessionForUser(mockUserId)))
@@ -803,7 +804,7 @@ public class UserControllerModifyTest {
                 .andReturn();
 
         authenticationTokenManager.verify(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(),any()));
-        verify(userRepository, times(0)).save(any());
+        verify(userRepository, times(0)).save(mockUser);
     }
 }
 
