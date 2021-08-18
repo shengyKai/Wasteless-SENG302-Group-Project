@@ -244,7 +244,7 @@ public class UserControllerModifyTest {
 
         verify(userRepository, times(1)).findById(mockUserId).get();
         verify(userRepository, times(0)).save(any());
-        assertEquals(userRepository.findById(mockUserId).get().getStreetNumber(), newStreetNumber);
+        assertEquals(userRepository.findById(mockUserId).get().getAddress().getStreetNumber(), newStreetNumber);
     }
 
     @Test
