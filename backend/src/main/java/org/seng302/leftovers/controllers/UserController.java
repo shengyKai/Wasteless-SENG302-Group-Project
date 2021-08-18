@@ -12,6 +12,7 @@ import org.seng302.leftovers.exceptions.EmailInUseException;
 import org.seng302.leftovers.exceptions.UserNotFoundException;
 import org.seng302.leftovers.persistence.UserRepository;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
+import org.seng302.leftovers.tools.PasswordAuthenticator;
 import org.seng302.leftovers.tools.SearchHelper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
@@ -23,6 +24,7 @@ import org.springframework.web.server.ResponseStatusException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+import java.security.NoSuchAlgorithmException;
 import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Map;
@@ -90,8 +92,32 @@ public class UserController {
 
     }
 
+    /**
+     * Checks whether the provided password matches the password for this user.
+     * Throws BAD_REQUEST if password is null
+     * Throws FORBIDDEN if password does not match account password
+     * @param user The user to check against
+     * @param providedPassword The provided password to verify
+     */
+    private void verifyPassword(User user, String providedPassword) throws Exception {
+        if (providedPassword == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The current password must be provided when changing email or password");
+        }
+        String hashedPassword = PasswordAuthenticator.generateAuthenticationCode(providedPassword);
+        if (!hashedPassword.equals(user.getAuthenticationCode())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "The provided password is incorrect!");
+        }
+    }
+
+    /**
+     * PUT endpoint for modifying an existing user
+     * User must have valid permission to make this action.
+     * If the email is changed or the password has been requested to be changed, the current password must be provided.
+     * @param id The ID of the user to modify
+     * @param body A Json object containing all of the user's details from the modification form
+     */
     @PutMapping("/users/{id}")
-    public void modifyUser(@PathVariable Long id, @Valid @RequestBody ModifyUserDTO body, HttpServletRequest request) {
+    public void modifyUser(@PathVariable Long id, @Valid @RequestBody ModifyUserDTO body, HttpServletRequest request) throws Exception {
         logger.info("Updating user (userId={})", id);
         AuthenticationTokenManager.checkAuthenticationToken(request);
         try {
@@ -101,6 +127,28 @@ public class UserController {
                 throw new ResponseStatusException(HttpStatus.FORBIDDEN,
                         "You do not have permission to modify another user");
             }
+
+            // check if email changed
+            if (!body.getEmail().equals(user.getEmail())) {
+                verifyPassword(user, body.getPassword());
+                user.setEmail(body.getEmail());
+            }
+            // check if password changed
+            if (body.getNewPassword() != null) {
+                verifyPassword(user, body.getPassword());
+                user.setAuthenticationCodeFromPassword(body.getNewPassword());
+            }
+
+            user.setFirstName(body.getFirstName());
+            user.setMiddleName(body.getMiddleName());
+            user.setLastName(body.getLastName());
+            user.setNickname(body.getNickname());
+            user.setBio(body.getBio());
+            user.setDob(body.getDOBAsLocalDate());
+            user.setPhNum(body.getPhoneNumber());
+            user.setAddress(body.getHomeAddress().createLocation());
+
+            userRepository.save(user);
 
         } catch (Exception e) {
             logger.error(e.getMessage());

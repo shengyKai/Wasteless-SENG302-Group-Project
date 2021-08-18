@@ -1,5 +1,8 @@
 package org.seng302.leftovers.dto;
 
+import lombok.Getter;
+import lombok.ToString;
+
 import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -7,6 +10,8 @@ import java.time.format.DateTimeFormatter;
 /**
  * A baseline UserDTO to build more children from
  */
+@Getter
+@ToString
 public class UserDTO {
     @NotNull
     private String email;
