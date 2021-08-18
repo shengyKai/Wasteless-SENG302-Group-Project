@@ -1,5 +1,5 @@
 import Vue from 'vue';
-import Vuex from 'vuex';
+import Vuex, { Store } from 'vuex';
 import Vuetify from 'vuetify';
 
 import {createLocalVue, mount, Wrapper} from '@vue/test-utils';
@@ -78,7 +78,7 @@ describe('ModifyUserPage.vue', () => {
   });
 
   it('Country should be prefilled', () => {
-    expect(wrapper.vm.user.email).toBe("some country");
+    expect(wrapper.vm.user.homeAddress.country).toBe("some country");
   });
 
   it('Street number and name should be updated when the combined field is modified', async () => {
@@ -119,14 +119,14 @@ describe('ModifyUserPage.vue', () => {
   expect(updateButton.props().disabled).toBeFalsy();
 });
 
-  // it.only("Testing for invalid email format,with no '@'", async () => {
-  //   const updateButton = wrapper.find(".v-btn");
-  //   console.log(wrapper.vm.user.email);
-  //   await wrapper.setData({
-  //     email: "someemail.com"
-  //   });
-  //   await Vue.nextTick();
-  //   expect(updateButton.props().disabled).toBeTruthy();
-  // });
+  it.only("Testing for invalid email format,with no '@'", async () => {
+    const updateButton = wrapper.find(".v-btn");
+    await wrapper.setData({
+      user:{email: "someemail.com"
+      }
+    });
+    await Vue.nextTick();
+    expect(updateButton.props().disabled).toBeTruthy();
+  });
 
 });
