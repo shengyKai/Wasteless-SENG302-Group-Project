@@ -18,7 +18,6 @@ Vue.use(Vuex);
  */
  function createTestBusinesses() {
   let result: Business[] = [];
-
     result.push({
       id: 7,
       name: 'test_name',
@@ -72,6 +71,69 @@ describe('ModifyUserPage.vue', () => {
       },
     });
   }); 
+  it('Email should be prefilled', async () => {
+    await wrapper.setData({
+      user:{ 
+        email: "some@email.com",
+        firstName: "some firstName"
+      }
+    });
+    expect(wrapper.vm.user.email).toBe("some@email.com");
+  });
+
+  it('First Name should be prefilled', async () => {
+    await wrapper.setData({
+      user:{ 
+        firstName: "some firstName"
+      }
+    });
+    expect(wrapper.vm.user.firstName).toBe("some firstName");
+  });
+
+  it('Last name should be prefilled', async () => {
+    await wrapper.setData({
+      user:{ 
+        lastName: "some lastName"
+      }
+    });
+    expect(wrapper.vm.user.lastName).toBe("some lastName");
+  });
+
+  it('Middle Name should be prefilled', async () => {
+    await wrapper.setData({
+      user:{ 
+        middleName: "some middleName"
+      }
+    });
+    expect(wrapper.vm.user.middleName).toBe("some middleName");
+  });
+
+  it('Nick name should be prefilled', async () => {
+    await wrapper.setData({
+      user:{ 
+        nickName: "some nickName"
+      }
+    });
+    expect(wrapper.vm.user.nickName).toBe("some nickName");
+  });
+
+  it('Bio should be prefilled', async () => {
+    await wrapper.setData({
+      user:{ 
+        bio: "some bio"
+      }
+    });
+    expect(wrapper.vm.user.bio).toBe("some bio");
+  });
+
+  it('Date of birth should be prefilled', async () => {
+    await wrapper.setData({
+      user:{ 
+        dateOfBirth: "2010-01-01"
+      }
+    });
+    expect(wrapper.vm.user.dateOfBirth).toBe("2010-01-01");
+  });
 
   it('Street number and name should be joined together when prefilled', () => {
     expect(wrapper.vm.streetAddress).toBe('11 Test lane');
@@ -119,14 +181,63 @@ describe('ModifyUserPage.vue', () => {
   expect(updateButton.props().disabled).toBeFalsy();
 });
 
-  it.only("Testing for invalid email format,with no '@'", async () => {
+  // it("Testing for invalid email format,with no '@'", async () => {
+  //   const updateButton = wrapper.find(".v-btn");
+  //   await wrapper.setData({
+  //     user:{email: "someemail.com"
+  //     }
+  //   });
+  //   await Vue.nextTick();
+  //   expect(updateButton.props().disabled).toBeTruthy();
+  // });
+
+  // it("Testing for invalid firstName format,with '@' ", async () => {
+  //   const updateButton = wrapper.find(".v-btn");
+  //   await wrapper.setData({
+  //     user:{firstName: "some firstName@"
+  //     }
+  //   });
+  //   await Vue.nextTick();
+  //   expect(updateButton.props().disabled).toBeTruthy();
+  // });
+
+  // it("Testing for invalid lastName format,with '@' ", async () => {
+  //   const updateButton = wrapper.find(".v-btn");
+  //   await wrapper.setData({
+  //     user:{lastName: "some lastName@"
+  //     }
+  //   });
+  //   await Vue.nextTick();
+  //   expect(updateButton.props().disabled).toBeTruthy();
+  // });
+
+  // it("Testing for invalid middleName format,with '@' ", async () => {
+  //   const updateButton = wrapper.find(".v-btn");
+  //   await wrapper.setData({
+  //     user:{middleName: "some middleName@"
+  //     }
+  //   });
+  //   await Vue.nextTick();
+  //   expect(updateButton.props().disabled).toBeTruthy();
+  // });
+
+  // it("Testing for invalid date of birth format,with '@' ", async () => {
+  //   const updateButton = wrapper.find(".v-btn");
+  //   await wrapper.setData({
+  //     user:{dateOfBirth: "65a4sdasd"
+  //     }
+  //   });
+  //   await Vue.nextTick();
+  //   expect(updateButton.props().disabled).toBeTruthy();
+  // });
+
+
+  it('Valid if the new country is provided', async () => {
     const updateButton = wrapper.find(".v-btn");
     await wrapper.setData({
-      user:{email: "someemail.com"
-      }
+      user: {homeaddress: {country:"NewZealand"}}
     });
     await Vue.nextTick();
-    expect(updateButton.props().disabled).toBeTruthy();
+    expect(updateButton.props().disabled).toBeFalsy();
   });
-
 });

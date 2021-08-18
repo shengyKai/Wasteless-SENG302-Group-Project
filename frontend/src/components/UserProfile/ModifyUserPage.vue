@@ -269,7 +269,7 @@
               type="submit"
               color="primary"
               :disabled=!valid
-              @click.prevent="updateProfile"
+              @click="updateProfile"
             >
               Update profile
             </v-btn>
@@ -304,7 +304,7 @@ export default {
   data() {
     return {
       tab: 'location',
-      valid: false,
+      valid: true,
       user: {
         email: '',
         password: '',
