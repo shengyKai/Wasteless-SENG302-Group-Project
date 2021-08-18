@@ -326,9 +326,8 @@ export async function createUser(user: CreateUser): Promise<MaybeError<undefined
     let status: number | undefined = error.response?.status;
 
     if (status === undefined) return 'Failed to reach backend';
-    if (status === 400) return 'Invalid create user request';
     if (status === 409) return 'Email in use';
-    return 'Request failed: ' + status;
+    return error.response.data?.message;
   }
 
   return undefined;
