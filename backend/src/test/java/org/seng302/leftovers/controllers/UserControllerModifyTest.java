@@ -18,10 +18,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -52,7 +54,7 @@ public class UserControllerModifyTest {
     private UserRepository userRepository;
 
     @Mock
-    private User testUser;
+    private User mockUser;
     @Mock
     private Location mockLocation;
 
@@ -63,17 +65,17 @@ public class UserControllerModifyTest {
     public void setup() throws Exception {
         MockitoAnnotations.openMocks(this);
 
-        when(userRepository.getUser(mockUserId)).thenReturn(testUser);
+        when(userRepository.getUser(mockUserId)).thenReturn(mockUser);
 
-        when(testUser.getUserID()).thenReturn(mockUserId);
-        when(testUser.getBio()).thenReturn("Ella@gmail.com");
-        when(testUser.getFirstName()).thenReturn("Ella");
-        when(testUser.getLastName()).thenReturn("Ella");
-        when(testUser.getMiddleName()).thenReturn("bananas");
-        when(testUser.getNickname()).thenReturn("cool gal");
-        when(testUser.getDob()).thenReturn(LocalDate.parse("1999-06-26"));
-        //when(testUser.getAuthenticationCode()).thenReturn("cool gal");
-        when(testUser.getAddress()).thenReturn(mockLocation);
+        when(mockUser.getUserID()).thenReturn(mockUserId);
+        when(mockUser.getBio()).thenReturn("Ella@gmail.com");
+        when(mockUser.getFirstName()).thenReturn("Ella");
+        when(mockUser.getLastName()).thenReturn("Ella");
+        when(mockUser.getMiddleName()).thenReturn("bananas");
+        when(mockUser.getNickname()).thenReturn("cool gal");
+        when(mockUser.getDob()).thenReturn(LocalDate.parse("1999-06-26"));
+        //when(mockUser.getAuthenticationCode()).thenReturn("cool gal");
+        when(mockUser.getAddress()).thenReturn(mockLocation);
 
         when(mockLocation.getCountry()).thenReturn("New Zealand");
         when(mockLocation.getCity()).thenReturn("Christchurch");
@@ -126,7 +128,7 @@ public class UserControllerModifyTest {
 
         verify(userRepository, times(1)).findById(mockUserId).get();
         verify(userRepository, times(1)).save(any());
-        verify(testUser, times(1)).setFirstName(newFirstName);
+        verify(mockUser, times(1)).setFirstName(newFirstName);
     }
 
     @Test
@@ -146,7 +148,7 @@ public class UserControllerModifyTest {
 
         verify(userRepository, times(1)).findById(mockUserId).get();
         verify(userRepository, times(1)).save(any());
-        verify(testUser, times(1)).setLastName(newLastName);
+        verify(mockUser, times(1)).setLastName(newLastName);
     }
 
     @Test
@@ -166,7 +168,7 @@ public class UserControllerModifyTest {
 
         verify(userRepository, times(1)).findById(mockUserId).get();
         verify(userRepository, times(1)).save(any());
-        verify(testUser, times(1)).setMiddleName(newMiddleName);
+        verify(mockUser, times(1)).setMiddleName(newMiddleName);
     }
 
     @Test
@@ -186,7 +188,7 @@ public class UserControllerModifyTest {
 
         verify(userRepository, times(1)).findById(mockUserId).get();
         verify(userRepository, times(1)).save(any());
-        verify(testUser, times(1)).setNickname(newNickname);
+        verify(mockUser, times(1)).setNickname(newNickname);
     }
 
     @Test
@@ -206,7 +208,7 @@ public class UserControllerModifyTest {
 
         verify(userRepository, times(1)).findById(mockUserId).get();
         verify(userRepository, times(1)).save(any());
-        verify(testUser, times(1)).setBio(newBio);
+        verify(mockUser, times(1)).setBio(newBio);
     }
 
     @Test
@@ -226,7 +228,7 @@ public class UserControllerModifyTest {
 
         verify(userRepository, times(1)).findById(mockUserId).get();
         verify(userRepository, times(1)).save(any());
-        verify(testUser, times(1)).setDob(LocalDate.parse(newDateOfBirth));
+        verify(mockUser, times(1)).setDob(LocalDate.parse(newDateOfBirth));
     }
 
     @Test
@@ -246,7 +248,7 @@ public class UserControllerModifyTest {
 
         verify(userRepository, times(1)).findById(mockUserId).get();
         verify(userRepository, times(1)).save(any());
-        verify(testUser, times(1)).setPhNum(newPhoneNumber);
+        verify(mockUser, times(1)).setPhNum(newPhoneNumber);
     }
 
     @Test
@@ -266,7 +268,7 @@ public class UserControllerModifyTest {
 
         verify(userRepository, times(1)).findById(mockUserId).get();
         verify(userRepository, times(1)).save(any());
-        verify(testUser, times(1)).setAddress(any());
+        verify(mockUser, times(1)).setAddress(any());
     }
 
     @Test
@@ -286,7 +288,7 @@ public class UserControllerModifyTest {
 
         verify(userRepository, times(1)).findById(mockUserId).get();
         verify(userRepository, times(1)).save(any());
-        verify(testUser, times(1)).setAddress(any());
+        verify(mockUser, times(1)).setAddress(any());
     }
 
     @Test
@@ -306,7 +308,7 @@ public class UserControllerModifyTest {
 
         verify(userRepository, times(1)).findById(mockUserId).get();
         verify(userRepository, times(1)).save(any());
-        verify(testUser, times(1)).setAddress(any());
+        verify(mockUser, times(1)).setAddress(any());
     }
 
     @Test
@@ -326,7 +328,8 @@ public class UserControllerModifyTest {
 
         verify(userRepository, times(1)).findById(mockUserId).get();
         verify(userRepository, times(1)).save(any());
-        verify(testUser, times(1)).setAddress(any());    }
+        verify(mockUser, times(1)).setAddress(any());
+    }
 
     @Test
     void modifyUser_modifyWithValidRegion_modifiedUser200() throws Exception {
@@ -345,7 +348,8 @@ public class UserControllerModifyTest {
 
         verify(userRepository, times(1)).findById(mockUserId).get();
         verify(userRepository, times(1)).save(any());
-        verify(testUser, times(1)).setAddress(any());    }
+        verify(mockUser, times(1)).setAddress(any());
+    }
 
     @Test
     void modifyUser_modifyWithValidCountry_modifiedUser200() throws Exception {
@@ -364,7 +368,8 @@ public class UserControllerModifyTest {
 
         verify(userRepository, times(1)).findById(mockUserId).get();
         verify(userRepository, times(1)).save(any());
-        verify(testUser, times(1)).setAddress(any());    }
+        verify(mockUser, times(1)).setAddress(any());
+    }
 
     @Test
     void modifyUser_modifyWithValidPostcode_modifiedUser200() throws Exception {
@@ -383,7 +388,8 @@ public class UserControllerModifyTest {
 
         verify(userRepository, times(1)).findById(mockUserId).get();
         verify(userRepository, times(1)).save(any());
-        verify(testUser, times(1)).setAddress(any());    }
+        verify(mockUser, times(1)).setAddress(any());
+    }
 
     @Test
     void modifyUser_modifyWithValidEmailAndPasswords_modifiedUser200() throws Exception {
@@ -406,153 +412,260 @@ public class UserControllerModifyTest {
     }
 
     @Test
-    void modifyUser_modifyWithNullMiddleName_userModified200() throws Exception {
+    void modifyUser_modifyEmailInvalid_userNotModified400() throws Exception {
 
     }
 
     @Test
-    void modifyUser_modifyWithNullNickname_userModified200() throws Exception {
+    void modifyUser_modifyInvalidPassword_userNotModified400() throws Exception {
 
     }
 
     @Test
-    void modifyUser_modifyWithNullBio_userModified200() throws Exception {
+    void modifyUser_modifyInvalidFirstName_userNotModified400() throws Exception {
+        var jsonBody = createValidRequest();
 
+        doThrow(new ResponseStatusException(HttpStatus.BAD_REQUEST))
+                .when(mockUser).setFirstName(any());
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .put("/profile/" + mockUserId + "/modify")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(jsonBody.toString())
+                        .sessionAttrs(createSessionForUser(mockUserId)))
+                .andExpect(status().isBadRequest())
+                .andReturn();
+
+        verify(userRepository, times(0)).save(any());
+        verify(mockUser, times(1)).setFirstName(any());
     }
 
     @Test
-    void modifyUser_modifyWithNullPhoneNumber_userModified200() throws Exception {
+    void modifyUser_modifyInvalidMiddleName_userNotModified400() throws Exception {
+        var jsonBody = createValidRequest();
 
+        doThrow(new ResponseStatusException(HttpStatus.BAD_REQUEST))
+                .when(mockUser).setMiddleName(any());
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .put("/profile/" + mockUserId + "/modify")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(jsonBody.toString())
+                        .sessionAttrs(createSessionForUser(mockUserId)))
+                .andExpect(status().isBadRequest())
+                .andReturn();
+
+        verify(userRepository, times(0)).save(any());
+        verify(mockUser, times(1)).setMiddleName(any());
     }
 
     @Test
-    void modifyUser_modifyWithNullDistrict_userModified200() throws Exception {
+    void modifyUser_modifyInvalidLastName_userNotModified400() throws Exception {
+        var jsonBody = createValidRequest();
 
+        doThrow(new ResponseStatusException(HttpStatus.BAD_REQUEST))
+                .when(mockUser).setLastName(any());
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .put("/profile/" + mockUserId + "/modify")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(jsonBody.toString())
+                        .sessionAttrs(createSessionForUser(mockUserId)))
+                .andExpect(status().isBadRequest())
+                .andReturn();
+
+        verify(userRepository, times(0)).save(any());
+        verify(mockUser, times(1)).setLastName(any());
     }
 
     @Test
-    void modifyUser_modifyWithNullEmailAndPassword_userNotModified400() throws Exception {
+    void modifyUser_modifyInvalidNickname_userNotModified400() throws Exception {
+        var jsonBody = createValidRequest();
 
+        doThrow(new ResponseStatusException(HttpStatus.BAD_REQUEST))
+                .when(mockUser).setNickname(any());
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .put("/profile/" + mockUserId + "/modify")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(jsonBody.toString())
+                        .sessionAttrs(createSessionForUser(mockUserId)))
+                .andExpect(status().isBadRequest())
+                .andReturn();
+
+        verify(userRepository, times(0)).save(any());
+        verify(mockUser, times(1)).setNickname(any());
     }
 
     @Test
-    void modifyUser_modifyWithNullFirstName_userNotModified400() throws Exception {
+    void modifyUser_modifyInvalidBio_userNotModified400() throws Exception {
+        var jsonBody = createValidRequest();
 
+        doThrow(new ResponseStatusException(HttpStatus.BAD_REQUEST))
+                .when(mockUser).setBio(any());
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .put("/profile/" + mockUserId + "/modify")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(jsonBody.toString())
+                        .sessionAttrs(createSessionForUser(mockUserId)))
+                .andExpect(status().isBadRequest())
+                .andReturn();
+
+        verify(userRepository, times(0)).save(any());
+        verify(mockUser, times(1)).setBio(any());
     }
 
     @Test
-    void modifyUser_modifyWithNullLastName_userNotModified400() throws Exception {
+    void modifyUser_modifyInvalidDateOfBirth_userNotModified400() throws Exception {
+        var jsonBody = createValidRequest();
 
+        doThrow(new ResponseStatusException(HttpStatus.BAD_REQUEST))
+                .when(mockUser).setBio(any());
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .put("/profile/" + mockUserId + "/modify")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(jsonBody.toString())
+                        .sessionAttrs(createSessionForUser(mockUserId)))
+                .andExpect(status().isBadRequest())
+                .andReturn();
+
+        verify(userRepository, times(0)).save(any());
+        verify(mockUser, times(1)).setBio(any());
     }
 
     @Test
-    void modifyUser_modifyWithNullDateOfBirth_userNotModified400() throws Exception {
+    void modifyUser_modifyInvalidPhoneNumber_userNotModified400() throws Exception {
+        var jsonBody = createValidRequest();
 
+        doThrow(new ResponseStatusException(HttpStatus.BAD_REQUEST))
+                .when(mockUser).setPhNum(any());
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .put("/profile/" + mockUserId + "/modify")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(jsonBody.toString())
+                        .sessionAttrs(createSessionForUser(mockUserId)))
+                .andExpect(status().isBadRequest())
+                .andReturn();
+
+        verify(userRepository, times(0)).save(any());
+        verify(mockUser, times(1)).setPhNum(any());
     }
 
     @Test
-    void modifyUser_modifyWithNullStreetAddress_userNotModified400() throws Exception {
+    void modifyUser_modifyInvalidStreetAddress_userNotModified400() throws Exception {
+        var jsonBody = createValidRequest();
 
+        doThrow(new ResponseStatusException(HttpStatus.BAD_REQUEST))
+                .when(mockUser).setAddress(any());
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .put("/profile/" + mockUserId + "/modify")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(jsonBody.toString())
+                        .sessionAttrs(createSessionForUser(mockUserId)))
+                .andExpect(status().isBadRequest())
+                .andReturn();
+
+        verify(userRepository, times(0)).save(any());
+        verify(mockUser, times(1)).setAddress(any());
     }
 
     @Test
-    void modifyUser_modifyWithNullCity_userNotModified400() throws Exception {
+    void modifyUser_modifyInvalidDistrict_userNotModified400() throws Exception {
+        var jsonBody = createValidRequest();
 
+        doThrow(new ResponseStatusException(HttpStatus.BAD_REQUEST))
+                .when(mockUser).setAddress(any());
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .put("/profile/" + mockUserId + "/modify")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(jsonBody.toString())
+                        .sessionAttrs(createSessionForUser(mockUserId)))
+                .andExpect(status().isBadRequest())
+                .andReturn();
+
+        verify(userRepository, times(0)).save(any());
+        verify(mockUser, times(1)).setAddress(any());
     }
 
     @Test
-    void modifyUser_modifyWithNullRegion_userNotModified400() throws Exception {
+    void modifyUser_modifyInvalidCity_userNotModified400() throws Exception {
+        var jsonBody = createValidRequest();
 
+        doThrow(new ResponseStatusException(HttpStatus.BAD_REQUEST))
+                .when(mockUser).setAddress(any());
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .put("/profile/" + mockUserId + "/modify")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(jsonBody.toString())
+                        .sessionAttrs(createSessionForUser(mockUserId)))
+                .andExpect(status().isBadRequest())
+                .andReturn();
+
+        verify(userRepository, times(0)).save(any());
+        verify(mockUser, times(1)).setAddress(any());
     }
 
     @Test
-    void modifyUser_modifyWithNullCountry_userNotModified400() throws Exception {
+    void modifyUser_modifyInvalidRegion_userNotModified400() throws Exception {
+        var jsonBody = createValidRequest();
 
+        doThrow(new ResponseStatusException(HttpStatus.BAD_REQUEST))
+                .when(mockUser).setAddress(any());
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .put("/profile/" + mockUserId + "/modify")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(jsonBody.toString())
+                        .sessionAttrs(createSessionForUser(mockUserId)))
+                .andExpect(status().isBadRequest())
+                .andReturn();
+
+        verify(userRepository, times(0)).save(any());
+        verify(mockUser, times(1)).setAddress(any());
     }
 
     @Test
-    void modifyUser_modifyWithNullPostcode_userNotModified400() throws Exception {
+    void modifyUser_modifyInvalidCountry_userNotModified400() throws Exception {
+        var jsonBody = createValidRequest();
 
+        doThrow(new ResponseStatusException(HttpStatus.BAD_REQUEST))
+                .when(mockUser).setAddress(any());
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .put("/profile/" + mockUserId + "/modify")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(jsonBody.toString())
+                        .sessionAttrs(createSessionForUser(mockUserId)))
+                .andExpect(status().isBadRequest())
+                .andReturn();
+
+        verify(userRepository, times(0)).save(any());
+        verify(mockUser, times(1)).setAddress(any());
     }
 
     @Test
-    void modifyUser_modifyEmailTooLong_userNotModified400() throws Exception {
+    void modifyUser_modifyInvalidPostcode_userNotModified400() throws Exception {
+        var jsonBody = createValidRequest();
 
-    }
+        doThrow(new ResponseStatusException(HttpStatus.BAD_REQUEST))
+                .when(mockUser).setAddress(any());
 
-    @Test
-    void modifyUser_modifyTooLongPassword_userNotModified400() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders
+                        .put("/profile/" + mockUserId + "/modify")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(jsonBody.toString())
+                        .sessionAttrs(createSessionForUser(mockUserId)))
+                .andExpect(status().isBadRequest())
+                .andReturn();
 
-    }
-
-    @Test
-    void modifyUser_modifyTooLongFirstName_userNotModified400() throws Exception {
-
-    }
-
-    @Test
-    void modifyUser_modifyTooLongMiddleName_userNotModified400() throws Exception {
-
-    }
-
-    @Test
-    void modifyUser_modifyTooLongLastName_userNotModified400() throws Exception {
-
-    }
-
-    @Test
-    void modifyUser_modifyTooLongNickname_userNotModified400() throws Exception {
-
-    }
-
-    @Test
-    void modifyUser_modifyTooLongBio_userNotModified400() throws Exception {
-
-    }
-
-    @Test
-    void modifyUser_modifyTooLongDateOfBirth_userNotModified400() throws Exception {
-
-    }
-
-    @Test
-    void modifyUser_modifyTooShortDateOfBirth_userNotModified400() throws Exception {
-
-    }
-
-    @Test
-    void modifyUser_modifyTooLongPhoneNumber_userNotModified400() throws Exception {
-
-    }
-
-    @Test
-    void modifyUser_modifyTooLongStreetAddress_userNotModified400() throws Exception {
-
-    }
-
-    @Test
-    void modifyUser_modifyTooLongDistrict_userNotModified400() throws Exception {
-
-    }
-
-    @Test
-    void modifyUser_modifyTooLongCity_userNotModified400() throws Exception {
-
-    }
-
-    @Test
-    void modifyUser_modifyTooLongRegion_userNotModified400() throws Exception {
-
-    }
-
-    @Test
-    void modifyUser_modifyTooLongCountry_userNotModified400() throws Exception {
-
-    }
-
-    @Test
-    void modifyUser_modifyTooLongPostcode_userNotModified400() throws Exception {
-
+        verify(userRepository, times(0)).save(any());
+        verify(mockUser, times(1)).setAddress(any());
     }
 }
 

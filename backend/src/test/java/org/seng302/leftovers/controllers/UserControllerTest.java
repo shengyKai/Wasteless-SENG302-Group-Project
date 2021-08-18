@@ -136,6 +136,7 @@ class UserControllerTest {
         List<User> userList = new ArrayList<User>();
         String row;
         BufferedReader csvReader = new BufferedReader(new FileReader(filename));
+        BufferedReader csvReader = new BufferedReader(new FileReader(filename));
         while ((row = csvReader.readLine()) != null) {
             try {
                 String[] userData = row.split("\\|");
