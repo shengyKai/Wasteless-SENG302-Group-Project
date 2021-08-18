@@ -101,10 +101,11 @@ public class UserController {
                 throw new ResponseStatusException(HttpStatus.FORBIDDEN,
                         "You do not have permission to modify another user");
             }
+
         } catch (Exception e) {
+            logger.error(e.getMessage());
             throw e;
         }
-        //TODO Finish
     }
 
     /**
