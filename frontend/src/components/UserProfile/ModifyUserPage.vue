@@ -32,7 +32,7 @@
                     :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
                     :type="showPassword ? 'text' : 'password'"
                     @click:append="showPassword = !showPassword"
-                    :rules="passwordRules.concat(maxMediumCharRules)"
+                    :rules="passwordRules2.concat(maxMediumCharRules)"
                     outlined
                   />
                 </v-col>
@@ -46,7 +46,7 @@
                     :append-icon="showConfirmPassword ? 'mdi-eye' : 'mdi-eye-off'"
                     :type="showConfirmPassword ? 'text' : 'password'"
                     @click:append="showConfirmPassword = !showConfirmPassword"
-                    :rules="passwordRules.concat(passwordConfirmationRule).concat(maxMediumCharRules)"
+                    :rules="passwordRules2.concat(passwordConfirmationRule).concat(maxMediumCharRules)"
                     outlined
                   />
                 </v-col>
@@ -60,7 +60,7 @@
                 :append-icon="showOldPassword ? 'mdi-eye' : 'mdi-eye-off'"
                 :type="showOldPassword ? 'text' : 'password'"
                 @click:append="showOldPassword = !showOldPassword"
-                :rules="passwordRules.concat(maxMediumCharRules)"
+                :rules="passwordRules2.concat(maxMediumCharRules)"
                 outlined
               />
             </v-tab-item>
@@ -291,7 +291,7 @@ import {
   emailRules,
   mandatoryRules, maxCharRules,
   nameRules,
-  passwordRules, phoneNumberRules,
+  passwordRules, passwordRules2, phoneNumberRules,
   postCodeRules,
   streetNumRules,
 } from "@/utils";
@@ -304,7 +304,7 @@ export default {
   data() {
     return {
       tab: 'location',
-      valid: true,
+      valid: false,
       user: {
         email: '',
         password: '',
@@ -330,7 +330,7 @@ export default {
       },
       countryCode: '',
       phoneDigits: '',
-      confirmPassword: '',
+      confirmPassword: "",
       streetAddress: '',
       maxDate: '',
       showDatePicker: false,
@@ -450,6 +450,7 @@ export default {
       },
       immediate: true,
     },
+
   },
   /**
    * Use all the imported validation rules from utils to be consistent within the web application.
@@ -469,6 +470,8 @@ export default {
     alphabetRules: () => alphabetRules,
     alphabetExtendedMultilineRules: () => alphabetExtendedMultilineRules,
     streetNumRules: () => streetNumRules,
+    passwordRules2: () => passwordRules2,
+
 
     /**
      * Validation for new password confirming

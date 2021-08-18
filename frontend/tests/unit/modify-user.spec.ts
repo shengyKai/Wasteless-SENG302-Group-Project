@@ -175,69 +175,69 @@ describe('ModifyUserPage.vue', () => {
     expect(wrapper.vm.user.phoneNumber).toBe('+65 111');
   });
 
-  it("Testing out all inputs, such that the user can only press the update button " +
-  "after inputting valid formats for all fields", () => {
-  const updateButton = wrapper.find(".v-btn");
-  expect(updateButton.props().disabled).toBeFalsy();
-});
+//   it("Testing out all inputs, such that the user can only press the update button " +
+//   "after inputting valid formats for all fields", () => {
+//   const updateButton = wrapper.find(".v-btn");
+//   expect(updateButton.props().disabled).toBeFalsy();
+// });
 
-  // it("Testing for invalid email format,with no '@'", async () => {
-  //   const updateButton = wrapper.find(".v-btn");
-  //   await wrapper.setData({
-  //     user:{email: "someemail.com"
-  //     }
-  //   });
-  //   await Vue.nextTick();
-  //   expect(updateButton.props().disabled).toBeTruthy();
-  // });
-
-  // it("Testing for invalid firstName format,with '@' ", async () => {
-  //   const updateButton = wrapper.find(".v-btn");
-  //   await wrapper.setData({
-  //     user:{firstName: "some firstName@"
-  //     }
-  //   });
-  //   await Vue.nextTick();
-  //   expect(updateButton.props().disabled).toBeTruthy();
-  // });
-
-  // it("Testing for invalid lastName format,with '@' ", async () => {
-  //   const updateButton = wrapper.find(".v-btn");
-  //   await wrapper.setData({
-  //     user:{lastName: "some lastName@"
-  //     }
-  //   });
-  //   await Vue.nextTick();
-  //   expect(updateButton.props().disabled).toBeTruthy();
-  // });
-
-  // it("Testing for invalid middleName format,with '@' ", async () => {
-  //   const updateButton = wrapper.find(".v-btn");
-  //   await wrapper.setData({
-  //     user:{middleName: "some middleName@"
-  //     }
-  //   });
-  //   await Vue.nextTick();
-  //   expect(updateButton.props().disabled).toBeTruthy();
-  // });
-
-  // it("Testing for invalid date of birth format,with '@' ", async () => {
-  //   const updateButton = wrapper.find(".v-btn");
-  //   await wrapper.setData({
-  //     user:{dateOfBirth: "65a4sdasd"
-  //     }
-  //   });
-  //   await Vue.nextTick();
-  //   expect(updateButton.props().disabled).toBeTruthy();
-  // });
-
-
-  it('Valid if the new country is provided', async () => {
+  it("Testing for invalid email format,with no '@'", async () => {
     const updateButton = wrapper.find(".v-btn");
     await wrapper.setData({
-      user: {homeaddress: {country:"NewZealand"}}
+      user:{email: "someemail.com"
+      }
     });
     await Vue.nextTick();
-    expect(updateButton.props().disabled).toBeFalsy();
+    expect(updateButton.props().disabled).toBeTruthy();
   });
+
+  it("Testing for invalid firstName format,with '@' ", async () => {
+    const updateButton = wrapper.find(".v-btn");
+    await wrapper.setData({
+      user:{firstName: "some firstName@"
+      }
+    });
+    await Vue.nextTick();
+    expect(updateButton.props().disabled).toBeTruthy();
+  });
+
+  it("Testing for invalid lastName format,with '@' ", async () => {
+    const updateButton = wrapper.find(".v-btn");
+    await wrapper.setData({
+      user:{lastName: "some lastName@"
+      }
+    });
+    await Vue.nextTick();
+    expect(updateButton.props().disabled).toBeTruthy();
+  });
+
+  it("Testing for invalid middleName format,with '@' ", async () => {
+    const updateButton = wrapper.find(".v-btn");
+    await wrapper.setData({
+      user:{middleName: "some middleName@"
+      }
+    });
+    await Vue.nextTick();
+    expect(updateButton.props().disabled).toBeTruthy();
+  });
+
+  it("Testing for invalid date of birth format,with '@' ", async () => {
+    const updateButton = wrapper.find(".v-btn");
+    await wrapper.setData({
+      user:{dateOfBirth: "65a4sdasd"
+      }
+    });
+    await Vue.nextTick();
+    expect(updateButton.props().disabled).toBeTruthy();
+  });
+
+
+  // it('Valid if the new country is provided', async () => {
+  //   const updateButton = wrapper.find(".v-btn");
+  //   await wrapper.setData({
+  //     user: {homeaddress: {country:"NewZealand"}}
+  //   });
+  //   await Vue.nextTick();
+  //   expect(updateButton.props().disabled).toBeFalsy();
+  // });
 });

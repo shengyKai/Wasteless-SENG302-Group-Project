@@ -280,3 +280,8 @@ export const productCodeRules = [
   (field: string) => !/ /.test(field) || 'Must not contain a space',
   (field: string) => regxProductCode().test(field) || 'Must be all uppercase letters, numbers and dashes.',
 ];
+
+export const passwordRules2 = [
+  (field: string) => (field.length !== 0 || field.length >= 7) || 'Password must have 7+ characters',
+  (field: string) => regxPassword().test(field) || 'Must have at least one number and one letter'
+];
