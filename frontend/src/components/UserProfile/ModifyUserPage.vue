@@ -342,24 +342,11 @@ export default {
     };
   },
   mounted () {
-    //sets maxDate
     this.maxDate = this.minimumDateOfBirth().toISOString().slice(0, 10);
-    console.log("Mount");
-    console.log(this.user.password);
-    console.log(this.user.oldPassword);
-    console.log(this.confirmPassword);
-    console.log("endMount");
-    // if(this.user.password.length === 0
-    //     && this.user.oldPassword.length === 0
-    //     && this.confirmPassword.length === 0) {
-    //   console.log("A");
-    //   this.valid === false;
-    // }
+
   },
   methods: {
-
     validateAllfield() {
-      console.log("AA");
       this.$refs.oldPassword.validate(true);
     },
     /**
@@ -409,7 +396,7 @@ export default {
     /**
      * Set the minimum age range in date picker according to the account
      * Only showing differences between user and business account
-     * If account have have business or administered a business, then the minimum year =16
+     * If account have have business or administered a business, then the minimum year = 16
      * Else a normal user account minimum year restriction will be 13
      */
     minimumDateOfBirth () {
@@ -493,18 +480,25 @@ export default {
       ];
     },
     /**
-     * Validation for new password confirming
+     * Validation for new password and confirm password field matching
      */
     passwordConfirmationRule () {
       return () =>
         this.user.password === this.confirmPassword || 'New passwords and confirm password must match';
     },
 
+    /**
+     * Validation rules for new password
+     * Not applying rules if the field is empty else validate with passwordRules
+     */
     passwordNONO () {
       if(this.user.password.length === 0) return [];
       else return passwordRules;
     },
 
+    /**
+     * Validate rules for phone number
+     */
     phoneRequiresCountryCodeRule () {
       return () =>
         !(this.phoneDigits > 0 && this.countryCode.length < 1) || 'Country code must be present';

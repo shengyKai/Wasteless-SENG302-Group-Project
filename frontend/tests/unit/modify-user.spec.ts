@@ -71,7 +71,7 @@ describe('ModifyUserPage.vue', () => {
       },
     });
   });
-  it.only('Email should be prefilled', async () => {
+  it('Email should be prefilled', async () => {
     await wrapper.setData({
       user:{
         email: "some@email.com",
