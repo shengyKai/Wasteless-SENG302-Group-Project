@@ -35,6 +35,7 @@ import javax.servlet.http.HttpSession;
 
 import java.time.LocalDate;
 import java.util.Date;
+import java.util.Optional;
 
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -74,9 +75,11 @@ public class UserControllerModifyTest {
         authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), eq(mockUserId))).thenReturn(true);
 
         when(userRepository.getUser(mockUserId)).thenReturn(mockUser);
+        when(userRepository.findById(mockUserId)).thenReturn(Optional.of(mockUser));
 
         when(mockUser.getUserID()).thenReturn(mockUserId);
-        when(mockUser.getBio()).thenReturn("Ella@gmail.com");
+        when(mockUser.getBio()).thenReturn("Some bio");
+        when(mockUser.getEmail()).thenReturn("Ella@gmail.com");
         when(mockUser.getFirstName()).thenReturn("Ella");
         when(mockUser.getLastName()).thenReturn("Ella");
         when(mockUser.getMiddleName()).thenReturn("bananas");
@@ -104,14 +107,20 @@ public class UserControllerModifyTest {
     @SneakyThrows
     private JSONObject createValidRequest() {
         var jsonBody = new JSONObject();
+        Location address = new Location.Builder()
+                .inCountry("Spain")
+                .inCity("Christchurch")
+                .inRegion("Region")
+                .atStreetNumber("24")
+                .onStreet("Cool street")
+                .withPostCode("1238")
+                .atDistrict("DistrictArea")
+                .build();
         jsonBody.put("email", "Ella@gmail.com");
         jsonBody.put("firstName", "Ella");
         jsonBody.put("lastName", "Ella");
         jsonBody.put("dateOfBirth", "1999-06-26");
-        jsonBody.put("streetAddress", "69 Elizabeth Street");
-        jsonBody.put("city", "Christchurch");
-        jsonBody.put("region", "Auckland");
-        jsonBody.put("postcode", "8069");
+        jsonBody.put("homeAddress", address.constructFullJson());
         return jsonBody;
     }
 
