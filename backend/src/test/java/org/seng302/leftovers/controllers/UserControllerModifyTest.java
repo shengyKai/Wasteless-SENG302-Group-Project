@@ -9,9 +9,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.seng302.leftovers.entities.Location;
 import org.seng302.leftovers.entities.User;
+import org.seng302.leftovers.exceptions.AccessTokenException;
+import org.seng302.leftovers.exceptions.InsufficientPermissionException;
 import org.seng302.leftovers.persistence.UserRepository;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
 import org.seng302.leftovers.tools.PasswordAuthenticator;
@@ -65,6 +68,10 @@ public class UserControllerModifyTest {
     @BeforeEach
     public void setup() throws Exception {
         MockitoAnnotations.openMocks(this);
+
+        // By default this will mock checkAuthenticationToken method to do nothing, which simulates a valid authentication token
+        authenticationTokenManager = Mockito.mockStatic(AuthenticationTokenManager.class);
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), eq(mockUserId))).thenReturn(true);
 
         when(userRepository.getUser(mockUserId)).thenReturn(mockUser);
 
@@ -759,6 +766,43 @@ public class UserControllerModifyTest {
 
         verify(userRepository, times(0)).save(any());
         verify(mockUser, times(1)).setAddress(any());
+    }
+
+
+    @Test
+    void modifyUser_invalidSession_userNotModified401() throws Exception {
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.checkAuthenticationToken(any()))
+                .thenThrow(new AccessTokenException());
+        var jsonBody = createValidRequest();
+
+        mockMvc.perform(MockMvcRequestBuilders
+                .put("/profile/" + mockUserId + "/modify")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jsonBody.toString())
+                .sessionAttrs(createSessionForUser(mockUserId)))
+                .andExpect(status().isUnauthorized())
+                .andReturn();
+
+        authenticationTokenManager.verify(() -> AuthenticationTokenManager.checkAuthenticationToken(any()));
+        verify(userRepository, times(0)).save(any());
+    }
+
+    @Test
+    void modifyUser_invalidPermission_userNotModified401() throws Exception {
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), any()))
+                .thenThrow(new InsufficientPermissionException());
+        var jsonBody = createValidRequest();
+
+        mockMvc.perform(MockMvcRequestBuilders
+                .put("/profile/" + mockUserId + "/modify")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jsonBody.toString())
+                .sessionAttrs(createSessionForUser(mockUserId)))
+                .andExpect(status().isForbidden())
+                .andReturn();
+
+        authenticationTokenManager.verify(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(),any()));
+        verify(userRepository, times(0)).save(any());
     }
 }
 
