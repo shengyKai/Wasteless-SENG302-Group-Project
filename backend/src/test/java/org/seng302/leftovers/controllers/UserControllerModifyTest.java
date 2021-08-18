@@ -56,7 +56,7 @@ public class UserControllerModifyTest {
     @Mock
     private HttpSession session;
 
-    @MockBean
+    @Mock
     private UserRepository userRepository;
 
     @Mock
@@ -145,7 +145,7 @@ public class UserControllerModifyTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        verify(userRepository, times(1)).findById(mockUserId).get();
+        verify(userRepository, times(1)).getUser(mockUserId);
         verify(userRepository, times(1)).save(mockUser);
         verify(mockUser, times(1)).setFirstName(newFirstName);
     }
@@ -165,7 +165,7 @@ public class UserControllerModifyTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        verify(userRepository, times(1)).findById(mockUserId).get();
+        verify(userRepository, times(1)).getUser(mockUserId);
         verify(userRepository, times(1)).save(mockUser);
         verify(mockUser, times(1)).setLastName(newLastName);
     }
@@ -185,7 +185,7 @@ public class UserControllerModifyTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        verify(userRepository, times(1)).findById(mockUserId).get();
+        verify(userRepository, times(1)).getUser(mockUserId);
         verify(userRepository, times(1)).save(mockUser);
         verify(mockUser, times(1)).setMiddleName(newMiddleName);
     }
@@ -195,7 +195,7 @@ public class UserControllerModifyTest {
         var jsonBody = createValidRequest();
 
         String newNickname = "Johnson";
-        jsonBody.put("middleName", newNickname);
+        jsonBody.put("nickname", newNickname);
 
         mockMvc.perform(MockMvcRequestBuilders
                         .put("/users/" + mockUserId)
@@ -205,7 +205,7 @@ public class UserControllerModifyTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        verify(userRepository, times(1)).findById(mockUserId).get();
+        verify(userRepository, times(1)).getUser(mockUserId);
         verify(userRepository, times(1)).save(mockUser);
         verify(mockUser, times(1)).setNickname(newNickname);
     }
@@ -214,8 +214,8 @@ public class UserControllerModifyTest {
     void modifyUser_modifyWithValidBio_modifiedUser200() throws Exception {
         var jsonBody = createValidRequest();
 
-        String newBio = "Johnny";
-        jsonBody.put("nickname", newBio);
+        String newBio = "hello --  welcome to my page";
+        jsonBody.put("bio", newBio);
 
         mockMvc.perform(MockMvcRequestBuilders
                         .put("/users/" + mockUserId)
@@ -225,7 +225,7 @@ public class UserControllerModifyTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        verify(userRepository, times(1)).findById(mockUserId).get();
+        verify(userRepository, times(1)).getUser(mockUserId);
         verify(userRepository, times(1)).save(mockUser);
         verify(mockUser, times(1)).setBio(newBio);
     }
@@ -245,7 +245,7 @@ public class UserControllerModifyTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        verify(userRepository, times(1)).findById(mockUserId).get();
+        verify(userRepository, times(1)).getUser(mockUserId);
         verify(userRepository, times(1)).save(mockUser);
         verify(mockUser, times(1)).setDob(LocalDate.parse(newDateOfBirth));
     }
@@ -265,7 +265,7 @@ public class UserControllerModifyTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        verify(userRepository, times(1)).findById(mockUserId).get();
+        verify(userRepository, times(1)).getUser(mockUserId);
         verify(userRepository, times(1)).save(mockUser);
         verify(mockUser, times(1)).setPhNum(newPhoneNumber);
     }
@@ -285,7 +285,7 @@ public class UserControllerModifyTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        verify(userRepository, times(1)).findById(mockUserId).get();
+        verify(userRepository, times(1)).getUser(mockUserId);
         verify(userRepository, times(1)).save(mockUser);
         verify(mockUser, times(1)).setAddress(any());
     }
@@ -305,7 +305,7 @@ public class UserControllerModifyTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        verify(userRepository, times(1)).findById(mockUserId).get();
+        verify(userRepository, times(1)).getUser(mockUserId);
         verify(userRepository, times(1)).save(mockUser);
         verify(mockUser, times(1)).setAddress(any());
     }
@@ -325,7 +325,7 @@ public class UserControllerModifyTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        verify(userRepository, times(1)).findById(mockUserId).get();
+        verify(userRepository, times(1)).getUser(mockUserId);
         verify(userRepository, times(1)).save(mockUser);
         verify(mockUser, times(1)).setAddress(any());
     }
@@ -345,7 +345,7 @@ public class UserControllerModifyTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        verify(userRepository, times(1)).findById(mockUserId).get();
+        verify(userRepository, times(1)).getUser(mockUserId);
         verify(userRepository, times(1)).save(mockUser);
         verify(mockUser, times(1)).setAddress(any());
     }
@@ -365,7 +365,7 @@ public class UserControllerModifyTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        verify(userRepository, times(1)).findById(mockUserId).get();
+        verify(userRepository, times(1)).getUser(mockUserId);
         verify(userRepository, times(1)).save(mockUser);
         verify(mockUser, times(1)).setAddress(any());
     }
@@ -385,7 +385,7 @@ public class UserControllerModifyTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        verify(userRepository, times(1)).findById(mockUserId).get();
+        verify(userRepository, times(1)).getUser(mockUserId);
         verify(userRepository, times(1)).save(mockUser);
         verify(mockUser, times(1)).setAddress(any());
     }
@@ -405,7 +405,7 @@ public class UserControllerModifyTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        verify(userRepository, times(1)).findById(mockUserId).get();
+        verify(userRepository, times(1)).getUser(mockUserId);
         verify(userRepository, times(1)).save(mockUser);
         verify(mockUser, times(1)).setAddress(any());
     }
@@ -429,7 +429,7 @@ public class UserControllerModifyTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        verify(userRepository, times(1)).findById(mockUserId).get();
+        verify(userRepository, times(1)).getUser(mockUserId);
         verify(userRepository, times(1)).save(mockUser);
         verify(mockUser, times(1)).setEmail(newEmail);
         verify(mockUser, times(1)).setAuthenticationCodeFromPassword(newPassword);
@@ -438,6 +438,7 @@ public class UserControllerModifyTest {
     @Test
     void modifyUser_modifyWithEmailNoPassword_notModifiedUser400() throws Exception {
         var jsonBody = createValidRequest();
+        jsonBody.put("email", "HappyDog2@gmail.com");
 
         mockMvc.perform(MockMvcRequestBuilders
                         .put("/users/" + mockUserId)
@@ -447,14 +448,14 @@ public class UserControllerModifyTest {
                 .andExpect(status().isBadRequest())
                 .andReturn();
 
-        verify(userRepository, times(1)).findById(mockUserId).get();
+        verify(userRepository, times(1)).getUser(mockUserId);
         verify(userRepository, times(0)).save(mockUser);
     }
 
     @Test
     void modifyUser_modifyWithEmailAndWrongPassword_notModifiedUser403() throws Exception {
         var jsonBody = createValidRequest();
-
+        jsonBody.put("email", "FrostyCookie123@gmail.com");
         String wrongPassword = "GettingASufficientAmountOfSleep#69";
         jsonBody.put("password", wrongPassword);
 
@@ -466,7 +467,7 @@ public class UserControllerModifyTest {
                 .andExpect(status().isForbidden())
                 .andReturn();
 
-        verify(userRepository, times(1)).findById(mockUserId).get();
+        verify(userRepository, times(1)).getUser(mockUserId);
         verify(userRepository, times(0)).save(mockUser);
     }
 
@@ -484,10 +485,10 @@ public class UserControllerModifyTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonBody.toString())
                         .sessionAttrs(createSessionForUser(mockUserId)))
-                .andExpect(status().isBadRequest())
+                .andExpect(status().isForbidden())
                 .andReturn();
 
-        verify(userRepository, times(1)).findById(mockUserId).get();
+        verify(userRepository, times(1)).getUser(mockUserId);
         verify(userRepository, times(0)).save(mockUser);
     }
 
@@ -506,7 +507,7 @@ public class UserControllerModifyTest {
                 .andExpect(status().isBadRequest())
                 .andReturn();
 
-        verify(userRepository, times(1)).findById(mockUserId).get();
+        verify(userRepository, times(1)).getUser(mockUserId);
         verify(userRepository, times(0)).save(mockUser);
     }
 
@@ -514,6 +515,7 @@ public class UserControllerModifyTest {
     void modifyUser_modifyEmailInvalid_userNotModified400() throws Exception {
         var jsonBody = createValidRequest();
         String currentPassword = validCurrentPassword;
+        jsonBody.put("email", "oops!");
         jsonBody.put("password", currentPassword);
 
         doThrow(new ResponseStatusException(HttpStatus.BAD_REQUEST))

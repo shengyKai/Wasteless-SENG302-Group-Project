@@ -3,6 +3,7 @@ package cucumber.stepDefinitions;
 import cucumber.context.BusinessContext;
 import cucumber.context.RequestContext;
 import cucumber.context.UserContext;
+import cucumber.utils.CucumberUtils;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
@@ -155,32 +156,14 @@ public class BusinessStepDefinition {
                 .param("businessType", businessType));
     }
 
-    /**
-     * Sets a value through a multi layered mapping.
-     * E.g. Calling with a path of "a","b","c" will do mapping.get("a").get("b").put("c", value) and will create any
-     * required intermediate maps
-     * @param mapping Multi-layered map
-     * @param path List of keys/subkeys
-     * @param value Value to place at the end of the path
-     */
-    private void setValueAtPath(Map<String, Object> mapping, List<String> path, Object value) {
-        String head = path.get(0);
-        if (path.size() == 1) {
-            mapping.put(head, value);
-        } else {
-            if (!mapping.containsKey(head)) {
-                mapping.put(head, new HashMap<>());
-            }
-            setValueAtPath((Map<String, Object>)mapping.get(head), path.subList(1, path.size()), value);
-        }
-    }
+
 
     @When("I try to updated the fields of the business to:")
     public void i_try_to_updated_the_fields_of_the_business_to(Map<String, Object> dataTable) {
         modifyParameters = new JSONObject();
         for (var entry : dataTable.entrySet()) {
             List<String> path = Arrays.asList(entry.getKey().split("\\."));
-            setValueAtPath(modifyParameters, path, entry.getValue());
+            CucumberUtils.setValueAtPath(modifyParameters, path, entry.getValue());
         }
 
         String adminName = (String)modifyParameters.remove("primaryAdministrator");
