@@ -17,6 +17,7 @@
                 class="required"
                 v-model="user.email"
                 label="Email"
+                @keyup="validateAllfield"
                 :rules="mandatoryRules.concat(emailRules).concat(maxLongCharRules)"
                 outlined
               />
@@ -28,10 +29,11 @@
                     ref="password"
                     v-model="user.password"
                     label="New Password"
+                    @keyup="validateAllfield"
                     :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
                     :type="showPassword ? 'text' : 'password'"
                     @click:append="showPassword = !showPassword"
-                    :rules="passwordRules.concat(maxMediumCharRules)"
+                    :rules="passwordNONO"
                     outlined
                   />
                 </v-col>
@@ -46,7 +48,7 @@
                     :append-icon="showConfirmPassword ? 'mdi-eye' : 'mdi-eye-off'"
                     :type="showConfirmPassword ? 'text' : 'password'"
                     @click:append="showConfirmPassword = !showConfirmPassword"
-                    :rules="passwordRules.concat(passwordConfirmationRule).concat(maxMediumCharRules)"
+                    :rules="passwordNONO.concat(passwordConfirmationRule)"
                     outlined
                   />
                 </v-col>
@@ -60,7 +62,7 @@
                 :append-icon="showOldPassword ? 'mdi-eye' : 'mdi-eye-off'"
                 :type="showOldPassword ? 'text' : 'password'"
                 @click:append="showOldPassword = !showOldPassword"
-                :rules="passwordRules.concat(maxMediumCharRules)"
+                :rules="currentPassword"
                 outlined
               />
             </v-tab-item>
@@ -306,8 +308,8 @@ export default {
       valid: false,
       user: {
         email: '',
-        password: undefined,
-        oldPassword: undefined,
+        password: '',
+        oldPassword: '',
 
         firstName: '',
         middleName: '',
@@ -329,7 +331,7 @@ export default {
       },
       countryCode: '',
       phoneDigits: '',
-      confirmPassword: undefined,
+      confirmPassword: '',
       streetAddress: '',
       maxDate: '',
       showDatePicker: false,
@@ -355,6 +357,11 @@ export default {
     // }
   },
   methods: {
+
+    validateAllfield() {
+      console.log("AA");
+      this.$refs.oldPassword.validate(true);
+    },
     /**
      * Update Profile after linking up the modify endpoint
      * Next person might have different idea of how/when the updateProfile button will be display
@@ -480,6 +487,11 @@ export default {
     alphabetExtendedMultilineRules: () => alphabetExtendedMultilineRules,
     streetNumRules: () => streetNumRules,
 
+    currentPassword () {
+      return [() =>
+        ((this.user.password.length === 0 && this.user.email === this.$store.state.user.email) || this.user.oldPassword.length > 0) || 'need current password'
+      ];
+    },
     /**
      * Validation for new password confirming
      */
@@ -487,13 +499,12 @@ export default {
       return () =>
         this.user.password === this.confirmPassword || 'New passwords and confirm password must match';
     },
-    // currentPasswordRule () {
-    //   return () =>
-    //     this.user.password.length !== 0 && this.oldPassword <= 7 || 'Current password incalid';
-    // },
-    /**
-     * Validation for phone's country code
-     */
+
+    passwordNONO () {
+      if(this.user.password.length === 0) return [];
+      else return passwordRules;
+    },
+
     phoneRequiresCountryCodeRule () {
       return () =>
         !(this.phoneDigits > 0 && this.countryCode.length < 1) || 'Country code must be present';

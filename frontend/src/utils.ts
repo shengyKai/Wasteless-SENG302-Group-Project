@@ -232,7 +232,7 @@ export const nameRules = [
 
 export function maxCharRules(size: number) {
   return [
-    (field: string) => (field.length <= size) || `Reached max character limit: ${size}`
+    (field: string) => (field === null || field.length <= size) || `Reached max character limit: ${size}`
   ];
 }
 
