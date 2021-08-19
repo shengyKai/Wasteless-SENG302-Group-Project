@@ -359,11 +359,14 @@ export default {
   },
   async mounted () {
     await this.setUser();
-    this.$refs.modifyForm.validate();
+    this.validateAllField();
     this.maxDate = this.minimumDateOfBirth().toISOString().slice(0, 10);
 
   },
   methods: {
+    validateAllField() {
+      this.$refs.modifyForm.validate();
+    },
     /**
      * Send a request to the backend to update the user using the details entered in this form.
     */

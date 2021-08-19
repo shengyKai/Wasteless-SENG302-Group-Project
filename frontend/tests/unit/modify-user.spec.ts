@@ -208,12 +208,12 @@ describe("ModifyUserPage.vue", () => {
     const updateButton = wrapper.findComponent({ref: 'updateButton'});
     console.log(wrapper.vm.user.firstName);
     await wrapper.setData({
-      user: { firstName: "some firstName@" },
+      user: {firstName: "some firstName@" },
     });
     await Vue.nextTick();
     console.log(JSON.stringify(wrapper.vm.user));
-    wrapper.vm.$refs.modifyForm.validate();
-    // wrapper.vm.$refs.firstName.validate(true);
+    wrapper.vm.validateAllField();
+    console.log(wrapper.vm.valid);
     expect(wrapper.vm.valid).toBeFalsy();
     expect(updateButton.props().disabled).toBeTruthy();
   });
@@ -382,6 +382,8 @@ describe("ModifyUserPage.vue", () => {
       },
     });
     await Vue.nextTick();
+    console.log(JSON.stringify(wrapper.vm.user));
+    wrapper.vm.$refs.modifyForm.validate();
     expect(updateButton.props().disabled).toBeTruthy();
   });
 
