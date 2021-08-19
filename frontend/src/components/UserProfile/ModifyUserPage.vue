@@ -1,6 +1,6 @@
 <template>
   <v-container>
-    <v-form v-model="valid">
+    <v-form v-model="valid" ref="modifyForm">
       <v-card class="pb-2">
         <v-card-title class="primary-text">Modify Profile</v-card-title>
         <v-card-text>
@@ -358,6 +358,7 @@ export default {
   },
   async mounted () {
     await this.setUser();
+    this.$refs.modifyForm.validate();
     this.maxDate = this.minimumDateOfBirth().toISOString().slice(0, 10);
 
   },
