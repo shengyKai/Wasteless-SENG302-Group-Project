@@ -21,7 +21,7 @@
         <v-tooltip bottom>
           <template #activator="{ on, attrs }">
             <v-btn
-              v-if="isViewingOwnProfile===true || currentUserRole!=='user'"
+              v-if="(isViewingOwnProfile===true || currentUserRole!=='user') && user.role !== 'defaultGlobalApplicationAdmin'"
               ref="settingsButton"
               icon
               color="primary"
