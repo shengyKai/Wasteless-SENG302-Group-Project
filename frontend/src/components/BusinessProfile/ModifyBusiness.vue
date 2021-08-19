@@ -299,11 +299,11 @@ export default {
   methods: {
     adminIsPrimary(admin) {
       if(admin.id === this.primaryAdministratorId && this.newAdminId === '') {
-        console.log("I am admin, no choose new admin");
+        console.log("I am Primary Admin");
         return true;
       }
       else if(admin.id === this.newAdminId) {
-        console.log("Newperson is admin");
+        console.log("Newperson is Admin");
         return true;
       }
       return false;
@@ -321,13 +321,16 @@ export default {
       const streetName = streetParts.slice(1, streetParts.length).join(" ");
 
       if(this.newAdminId !== '') {
-        this.primaryAdministratorId = this.newAdminId;
         console.log("There is new admin, id = " + this.newAdminId);
+      } else {
+        this.newAdminId = this.$store.state.user.id;
       }
+
+      console.log(this.newAdminId);
       // Set up the modified fields
       let modifiedFields = {
-        // primaryAdministratorId: this.primaryAdministratorId,
-        primaryAdministratorId: 2,
+        primaryAdministratorId: this.$store.state.user.id,
+        // newAdminId: this.newAdminId,
         name: this.businessName,
         description: this.description,
         address: {
@@ -349,13 +352,9 @@ export default {
        * If the result is undefined(the else case) then an event will be emitted to the parent component, BusinessProfile/index.vue
        * and the modifyBusiness attribute there will be false, thus changing the page to the usual business profile page.
        */
-      console.log("AAA");
       if (typeof result === 'string') {
-        this.primaryAdministratorId = this.$store.state.user.id;
-        console.log("BBB");
         this.errorMessage = result;
       } else {
-        console.log("CCC");
         this.$emit("modifySuccess");
       }
     },
@@ -370,11 +369,11 @@ export default {
       this.showChangeAdminAlert = true;
       if (admin.id !== this.business.primaryAdministratorId) {
         this.primaryAdminAlertMsg = `Primary admin will be changed to ${admin.firstName} ${admin.lastName}`;
+        this.newAdminId = admin.id;
       } else {
         this.showChangeAdminAlert = false;
         this.primaryAdminAlertMsg = "";
       }
-      this.newAdminId = admin.id;
     },
   }
 };
