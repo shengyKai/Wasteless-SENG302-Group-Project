@@ -1121,6 +1121,14 @@ export async function messageConversation(cardId: number, senderId: number, buye
 }
 
 
+/**
+ * Gets a page of messages in a convesation about a marketplace card.
+ * @param cardId The ID of the card
+ * @param buyerId The ID of the prospective buyer in the conversation
+ * @param pageIndex Index of page to start the results from (1 = first page)
+ * @param resultsPerPage Number of results to return per page
+ * @returns Page of messages within the convesation or else a string error
+ */
 export async function getMessagesInConversation(cardId: number, buyerId: number, pageIndex: number, resultsPerPage: number): Promise<MaybeError<SearchResults<Message>>> {
   let response;
   try {

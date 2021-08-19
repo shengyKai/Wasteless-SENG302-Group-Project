@@ -312,6 +312,7 @@ const apiCalls: Partial<ApiCalls> = {
       403: 'You do not have permission to view this conversation',
       406: 'Unable to get messages, conversation does not exist',
     },
+    usesServerMessage: true,
   },
 };
 
