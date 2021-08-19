@@ -180,8 +180,8 @@ describe("ModifyUserPage.vue", () => {
       await wrapper.setData({
         user: {
           email: "someone@email.com",
-          password:"somepassword111",
-          oldPassword: "password123"
+          newPassword:"somepassword111",
+          password: "password123"
         },
         confirmPassword: "somepassword111"
       });
@@ -317,7 +317,7 @@ describe("ModifyUserPage.vue", () => {
     const updateButton = wrapper.find(".v-btn");
     await wrapper.setData({
       user: {
-        password: "asdqwe123",
+        newPassword: "asdqwe123",
       },
       confirmPassword: "",
     });
@@ -329,8 +329,8 @@ describe("ModifyUserPage.vue", () => {
     const updateButton = wrapper.find(".v-btn");
     await wrapper.setData({
       user: {
-        password: "asdqwe123",
-        oldPassword: "",
+        newPassword: "asdqwe123",
+        password: "",
       },
     });
     await Vue.nextTick();
@@ -341,8 +341,8 @@ describe("ModifyUserPage.vue", () => {
     const updateButton = wrapper.find(".v-btn");
     await wrapper.setData({
       user: {
-        password: "asdqwe123",
-        oldPassword: "",
+        newPassword: "asdqwe123",
+        password: "",
       },
       confirmPassword: "",
     });
@@ -354,8 +354,8 @@ describe("ModifyUserPage.vue", () => {
     const updateButton = wrapper.find(".v-btn");
     await wrapper.setData({
       user: {
+        newPassword: "asdqwe123",
         password: "asdqwe123",
-        oldPassword: "asdqwe123",
       },
       confirmPassword: "rtyrty543",
     });
@@ -368,7 +368,7 @@ describe("ModifyUserPage.vue", () => {
     await wrapper.setData({
       user: {
         email: "some@email.com",
-        oldPassword: "",
+        password: "",
       },
     });
     await Vue.nextTick();
@@ -380,8 +380,8 @@ describe("ModifyUserPage.vue", () => {
     await wrapper.setData({
       user: {
         email: "some@email.com",
-        password: "",
-        oldPassword: "qweqwe123",
+        newPassword: "",
+        password: "qweqwe123",
       },
       confirmPassword: "",
     });
@@ -394,8 +394,8 @@ describe("ModifyUserPage.vue", () => {
     await wrapper.setData({
       user: {
         email: "some@email.com",
-        password: "asdasd123",
-        oldPassword: "qweqwe123",
+        newPassword: "asdasd123",
+        password: "qweqwe123",
       },
       confirmPassword: "asdasd123",
     });
