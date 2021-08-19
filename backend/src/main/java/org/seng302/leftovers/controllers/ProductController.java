@@ -5,6 +5,7 @@ import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.seng302.leftovers.dto.ProductFilterOption;
 import org.seng302.leftovers.entities.Business;
 import org.seng302.leftovers.entities.Image;
 import org.seng302.leftovers.entities.Product;
@@ -13,10 +14,10 @@ import org.seng302.leftovers.persistence.BusinessRepository;
 import org.seng302.leftovers.persistence.ImageRepository;
 import org.seng302.leftovers.persistence.ProductRepository;
 import org.seng302.leftovers.service.ImageService;
-import org.seng302.leftovers.service.StorageService;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
 import org.seng302.leftovers.tools.SearchHelper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -29,6 +30,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * This class handles requests for retrieving and saving products
@@ -50,7 +52,7 @@ public class ProductController {
     }
 
     private static final Set<String> VALID_ORDERINGS = Set.of("name", "description", "manufacturer","recommendedRetailPrice", "created", "productCode");
-    private static final Set<String> VALID_SEARCHES = Set.of("name", "description", "manufacturer", "productCode");
+    private static final Set<ProductFilterOption> VALID_SEARCHES = Set.of(ProductFilterOption.NAME, ProductFilterOption.DESCRIPTION, ProductFilterOption.MANUFACTURER, ProductFilterOption.PRODUCT_CODE);
 
     /**
      * REST GET method to retrieve all the products with a business's catalogue.
@@ -83,14 +85,7 @@ public class ProductController {
             PageRequest pageablePage = SearchHelper.getPageRequest(page, resultsPerPage, Sort.by(sortOrder));
             Page<Product> catalogue = productRepository.getAllByBusiness(business.get(), pageablePage);
 
-            JSONArray responseBody = new JSONArray();
-            for (Product product: catalogue) {
-                responseBody.appendElement(product.constructJSONObject());
-            }
-            JSONObject json = new JSONObject();
-            json.put("count", catalogue.getTotalElements());
-            json.put("results", responseBody);
-            return json;
+            return createProductResultJSON(catalogue);
         }
     }
 
@@ -112,7 +107,7 @@ public class ProductController {
                                               @RequestParam(required = false) String searchQuery,
                                               @RequestParam(required = false) Integer page,
                                               @RequestParam(required = false) Integer resultsPerPage,
-                                              @RequestParam(required = false) String searchBy,
+                                              @RequestParam(required = false) ProductFilterOption searchBy,
                                               @RequestParam(required = false) Boolean reverse,
                                               @RequestParam(required = false) String orderBy
                                               ) {
@@ -122,15 +117,40 @@ public class ProductController {
         logger.info(() -> String.format("Retrieving catalogue from business with id %d.", id));
         Optional<Business> business = businessRepository.findById(id);
 
-        searchBy = Optional.ofNullable(searchBy).orElse("name");
+        searchBy = Optional.ofNullable(searchBy).orElse(ProductFilterOption.NAME);
         if (!VALID_SEARCHES.contains(searchBy)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "SearchBy term " + searchBy + " is invalid");
         }
 
-        List<Sort.Order> sortOrder = getSortOrder(orderBy, reverse);
+        if (business.isEmpty()) {
+            BusinessNotFoundException notFound = new BusinessNotFoundException();
+            logger.error(notFound.getMessage());
+            throw notFound;
+        } else {
+            business.get().checkSessionPermissions(request);
+            List<Sort.Order> sortOrder = getSortOrder(orderBy, reverse);
+            PageRequest pageablePage = SearchHelper.getPageRequest(page, resultsPerPage, Sort.by(sortOrder));
+            Specification<Product> prodSpec = SearchHelper.constructSpecificationFromProductSearch(business.get(), searchQuery, Set.of(searchBy));
 
-        // Backend logic to be implemented
+            Page<Product> catalogue = productRepository.findAll(prodSpec, pageablePage);
+
+            return createProductResultJSON(catalogue);
+        }
+    }
+
+    /**
+     * Creates a JSON of results from getting the products
+     * @param catalogue Page of found products to return
+     * @return JSON of products to pass to frontend
+     */
+    private JSONObject createProductResultJSON(Page<Product> catalogue) {
+        JSONArray responseBody = new JSONArray();
+        for (Product product: catalogue) {
+            responseBody.appendElement(product.constructJSONObject());
+        }
         JSONObject json = new JSONObject();
+        json.put("count", catalogue.getTotalElements());
+        json.put("results", responseBody);
         return json;
     }
 
