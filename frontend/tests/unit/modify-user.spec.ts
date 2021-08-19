@@ -6,7 +6,7 @@ import {createLocalVue, mount, Wrapper} from '@vue/test-utils';
 
 import ModifyUserPage from '@/components/UserProfile/ModifyUserPage.vue';
 import { getStore, resetStoreForTesting } from '@/store';
-import { Business, User } from '@/api/internal';
+import { Business, BUSINESS_TYPES, User } from '@/api/internal';
 
 Vue.use(Vuetify);
 Vue.use(Vuex);
@@ -178,7 +178,7 @@ describe('ModifyUserPage.vue', () => {
     expect(updateButton.props().disabled).toBeFalsy();
   });
 
-  it("Testing for invalid email format,with no '@'", async () => {
+  it("Invalid email format,with no '@'", async () => {
     const updateButton = wrapper.find(".v-btn");
     await wrapper.setData({
       user:{email: "someemail.com"
@@ -188,7 +188,7 @@ describe('ModifyUserPage.vue', () => {
     expect(updateButton.props().disabled).toBeTruthy();
   });
 
-  it("Testing for invalid firstName format,with '@' ", async () => {
+  it("Invalid firstName format,with '@' ", async () => {
     const updateButton = wrapper.find(".v-btn");
     await wrapper.setData({
       user:{firstName: "some firstName@"
@@ -198,7 +198,7 @@ describe('ModifyUserPage.vue', () => {
     expect(updateButton.props().disabled).toBeTruthy();
   });
 
-  it("Testing for invalid lastName format,with '@' ", async () => {
+  it("Invalid lastName format,with '@' ", async () => {
     const updateButton = wrapper.find(".v-btn");
     await wrapper.setData({
       user:{lastName: "some lastName@"
@@ -208,7 +208,7 @@ describe('ModifyUserPage.vue', () => {
     expect(updateButton.props().disabled).toBeTruthy();
   });
 
-  it("Testing for invalid middleName format,with '@' ", async () => {
+  it("Invalid middleName format,with '@' ", async () => {
     const updateButton = wrapper.find(".v-btn");
     await wrapper.setData({
       user:{middleName: "some middleName@"
@@ -218,13 +218,97 @@ describe('ModifyUserPage.vue', () => {
     expect(updateButton.props().disabled).toBeTruthy();
   });
 
-  it("Testing for invalid date of birth format,with '@' ", async () => {
+  it("Invalid date of birth format,with '@' ", async () => {
     const updateButton = wrapper.find(".v-btn");
     await wrapper.setData({
       user:{dateOfBirth: "65a4sdasd"
       }
     });
     await Vue.nextTick();
+    expect(updateButton.props().disabled).toBeTruthy();
+  });
+
+  it("Testing for empty date of birth field", async () => {
+    const updateButton = wrapper.find(".v-btn");
+    await wrapper.setData({
+      user:{dateOfBirth: ""
+      }
+    });
+    await Vue.nextTick();
+    expect(updateButton.props().disabled).toBeTruthy();
+  });
+
+  it("Invalid date of birth format", async () => {
+    const updateButton = wrapper.find(".v-btn");
+    await wrapper.setData({
+      user:{dateOfBirth: "01-01-01"
+      }
+    });
+    await Vue.nextTick();
+    expect(updateButton.props().disabled).toBeTruthy();
+  });
+
+  it("Invalid date of birth format -- too young", async () => {
+    const updateButton = wrapper.find(".v-btn");
+    await wrapper.setData({
+      user:{dateOfBirth: "2020-01-01"
+      }
+    });
+    await Vue.nextTick();
+    expect(updateButton.props().disabled).toBeTruthy();
+  });
+
+  it("Invalid date of birth format -- too old", async () => {
+    const updateButton = wrapper.find(".v-btn");
+    await wrapper.setData({
+      user:{dateOfBirth: "2050-01-01"
+      }
+    });
+    await Vue.nextTick();
+    expect(updateButton.props().disabled).toBeTruthy();
+  });
+
+  it("Invalid date of birth format, should be 13years from now when no business", async () => {
+    const updateButton = wrapper.find(".v-btn");
+    await wrapper.setData({
+      user:{dateOfBirth: "2009-01-01",
+            businessAdministered: []
+      }
+    });
+    await Vue.nextTick();
+    expect(updateButton.props().disabled).toBeTruthy();
+  });
+
+  it("Invalid date of birth format should be 16years from now when have business", async () => {
+    const updateButton = wrapper.find(".v-btn");
+    let business = createTestBusinesses();
+    await wrapper.setData({
+      user:{dateOfBirth: "2008-01-01",
+            businessAdministered: business
+      }
+    });
+    await Vue.nextTick();
+    expect(updateButton.props().disabled).toBeTruthy();
+  });
+  
+  it.only('Invalid phone number, missing countryCode', async () => {
+    console.log(wrapper.vm.user);
+    await wrapper.setData({
+      countryCode: '+',
+      phoneDigits: '111',
+    });
+    await Vue.nextTick();
+    const updateButton = wrapper.find(".v-btn");
+    expect(updateButton.props().disabled).toBeTruthy();
+  });
+
+  it('Invalid phone number, missing phoneDigits', async () => {
+    await wrapper.setData({
+      countryCode: '+64',
+      phoneDigits: '',
+    });
+    await Vue.nextTick();
+    const updateButton = wrapper.find(".v-btn");
     expect(updateButton.props().disabled).toBeTruthy();
   });
 
