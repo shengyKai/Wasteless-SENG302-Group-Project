@@ -325,12 +325,10 @@ export default {
       } else {
         this.newAdminId = this.$store.state.user.id;
       }
-
-      console.log(this.newAdminId);
       // Set up the modified fields
       let modifiedFields = {
-        primaryAdministratorId: this.$store.state.user.id,
-        // newAdminId: this.newAdminId,
+        id: this.$store.state.user.id,
+        primaryAdministratorId: this.newAdminId,
         name: this.businessName,
         description: this.description,
         address: {
@@ -369,11 +367,11 @@ export default {
       this.showChangeAdminAlert = true;
       if (admin.id !== this.business.primaryAdministratorId) {
         this.primaryAdminAlertMsg = `Primary admin will be changed to ${admin.firstName} ${admin.lastName}`;
-        this.newAdminId = admin.id;
       } else {
         this.showChangeAdminAlert = false;
         this.primaryAdminAlertMsg = "";
       }
+      this.newAdminId = admin.id;
     },
   }
 };
