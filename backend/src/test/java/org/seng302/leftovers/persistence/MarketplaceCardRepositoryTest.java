@@ -110,8 +110,6 @@ class MarketplaceCardRepositoryTest {
         card = marketplaceCardRepository.save(card);
 
         List<MarketplaceCard> cards = marketplaceCardRepository.getAllBySection(section);
-        System.out.println(cards);
-        System.out.println(card);
         Assertions.assertTrue(cards.contains(card));
 
     }

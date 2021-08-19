@@ -1,8 +1,8 @@
 package org.seng302.leftovers.entities;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.SneakyThrows;
 import net.minidev.json.JSONObject;
+import org.seng302.leftovers.dto.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -95,6 +95,15 @@ public abstract class Event {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tag cannot be null");
         }
         this.tag = tag;
+    }
+
+    /**
+     * Update the date this event was created. Used when one event represents multiple notifications which replace
+     * each other.
+     * @param created The date the replacement event was created.
+     */
+    protected void setCreated(Instant created) {
+        this.created = created;
     }
 
     /**

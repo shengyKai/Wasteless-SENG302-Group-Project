@@ -867,22 +867,9 @@ class UserTests {
     @Test
     void constructPublicJsonBusinessesAdministeredTrueTest() {
         try (Session session = sessionFactory.openSession()) {
-        System.out.println("Before");
-        //try (Session session = sessionFactory.openSession()){
-            //var transaction = session.beginTransaction();
             addBusinessesAdministeredToTestUser();
-            //transaction.commit();
-        //}
-        System.out.println("After");
-
-
-
-            System.out.println("Wow" + testUser.getUserID());
 
             testUser = session.find(User.class, testUser.getUserID());
-
-            System.out.println(businessRepository.findAll());
-            System.out.println(testUser.getBusinessesAdministeredAndOwned());
 
             List<Business> testBusinesses = new ArrayList<>();
             testBusinesses.addAll(testUser.getBusinessesAdministeredAndOwned());

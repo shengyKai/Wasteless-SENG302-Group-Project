@@ -41,6 +41,7 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
@@ -579,8 +580,7 @@ class BusinessControllerTest {
         String jsonString = String.format("{\"userId\": %d}", testAdmin.getUserID());
         setCurrentUser(owner.getUserID());
 
-        mockMvc.perform(MockMvcRequestBuilders
-                .put(String.format("/businesses/%d/makeAdministrator", testBusiness.getId()))
+        mockMvc.perform(put(String.format("/businesses/%d/makeAdministrator", testBusiness.getId()))
                 .content(jsonString)
                 .sessionAttrs(sessionAuthToken)
                 .cookie(authCookie)
@@ -616,8 +616,7 @@ class BusinessControllerTest {
 
         loginAsDgaa();
 
-        mockMvc.perform(MockMvcRequestBuilders
-                .put(String.format("/businesses/%d/makeAdministrator", testBusiness.getId()))
+        mockMvc.perform(put(String.format("/businesses/%d/makeAdministrator", testBusiness.getId()))
                 .content(jsonString)
                 .sessionAttrs(sessionAuthToken)
                 .cookie(authCookie)
@@ -653,8 +652,7 @@ class BusinessControllerTest {
 
         loginAsGlobalAdmin();
 
-        mockMvc.perform(MockMvcRequestBuilders
-                .put(String.format("/businesses/%d/makeAdministrator", testBusiness.getId()))
+        mockMvc.perform(put(String.format("/businesses/%d/makeAdministrator", testBusiness.getId()))
                 .content(jsonString)
                 .sessionAttrs(sessionAuthToken)
                 .cookie(authCookie)
@@ -692,8 +690,7 @@ class BusinessControllerTest {
 
         setCurrentUser(99999L); // LOGGED IN AS SOMEONE WHO IS NOT BUSINESS OWNER
 
-        mockMvc.perform(MockMvcRequestBuilders
-                .put(String.format("/businesses/%d/makeAdministrator", testBusiness.getId()))
+        mockMvc.perform(put(String.format("/businesses/%d/makeAdministrator", testBusiness.getId()))
                 .content(jsonString)
                 .sessionAttrs(sessionAuthToken)
                 .cookie(authCookie)
@@ -725,8 +722,7 @@ class BusinessControllerTest {
         testAdmin = userRepository.save(testAdmin);
         String jsonString = String.format("{\"userId\": %d}", testAdmin.getUserID());
 
-        mockMvc.perform(MockMvcRequestBuilders
-                .put(String.format("/businesses/%d/makeAdministrator", testBusiness.getId()))
+        mockMvc.perform(put(String.format("/businesses/%d/makeAdministrator", testBusiness.getId()))
                 .content(jsonString)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
@@ -744,8 +740,7 @@ class BusinessControllerTest {
         String jsonString = String.format("{\"userId\": %d}", unusedId);
         setCurrentUser(owner.getUserID());
 
-        mockMvc.perform(MockMvcRequestBuilders
-                .put(String.format("/businesses/%d/makeAdministrator", testBusiness.getId()))
+        mockMvc.perform(put(String.format("/businesses/%d/makeAdministrator", testBusiness.getId()))
                 .content(jsonString)
                 .sessionAttrs(sessionAuthToken)
                 .cookie(authCookie)
@@ -778,8 +773,7 @@ class BusinessControllerTest {
         String jsonString = String.format("{\"userId\": %d}", testAdmin.getUserID());
         setCurrentUser(owner.getUserID());
 
-        mockMvc.perform(MockMvcRequestBuilders
-                .put(String.format("/businesses/%d/makeAdministrator", 99999L))
+        mockMvc.perform(put(String.format("/businesses/%d/makeAdministrator", 99999L))
                 .content(jsonString)
                 .sessionAttrs(sessionAuthToken)
                 .cookie(authCookie)
@@ -815,8 +809,7 @@ class BusinessControllerTest {
         String jsonString = String.format("{\"userId\": %d}", testAdmin.getUserID());
         setCurrentUser(owner.getUserID());
 
-        mockMvc.perform(MockMvcRequestBuilders
-                .put(String.format("/businesses/%d/makeAdministrator", testBusiness.getId()))
+        mockMvc.perform(put(String.format("/businesses/%d/makeAdministrator", testBusiness.getId()))
                 .content(jsonString)
                 .sessionAttrs(sessionAuthToken)
                 .cookie(authCookie)
@@ -855,8 +848,7 @@ class BusinessControllerTest {
         String jsonString = String.format("{\"userId\": %d}", testAdmin.getUserID());
         setCurrentUser(owner.getUserID());
 
-        mockMvc.perform(MockMvcRequestBuilders
-                .put(String.format("/businesses/%d/removeAdministrator", testBusiness.getId()))
+        mockMvc.perform(put(String.format("/businesses/%d/removeAdministrator", testBusiness.getId()))
                 .content(jsonString)
                 .sessionAttrs(sessionAuthToken)
                 .cookie(authCookie)
@@ -893,8 +885,7 @@ class BusinessControllerTest {
         String jsonString = String.format("{\"userId\": %d}", testAdmin.getUserID());
         setCurrentUser(owner.getUserID());
 
-        mockMvc.perform(MockMvcRequestBuilders
-                .put(String.format("/businesses/%d/removeAdministrator", testBusiness.getId()))
+        mockMvc.perform(put(String.format("/businesses/%d/removeAdministrator", testBusiness.getId()))
                 .content(jsonString)
                 .sessionAttrs(sessionAuthToken)
                 .cookie(authCookie)
@@ -913,8 +904,7 @@ class BusinessControllerTest {
         String jsonString = String.format("{\"userId\": %d}", 99999L);
         setCurrentUser(owner.getUserID());
 
-        mockMvc.perform(MockMvcRequestBuilders
-                .put(String.format("/businesses/%d/removeAdministrator", testBusiness.getId()))
+        mockMvc.perform(put(String.format("/businesses/%d/removeAdministrator", testBusiness.getId()))
                 .content(jsonString)
                 .sessionAttrs(sessionAuthToken)
                 .cookie(authCookie)
@@ -951,8 +941,7 @@ class BusinessControllerTest {
 
         loginAsDgaa(); // session is setup as a DGAA now
 
-        mockMvc.perform(MockMvcRequestBuilders
-                .put(String.format("/businesses/%d/removeAdministrator", testBusiness.getId()))
+        mockMvc.perform(put(String.format("/businesses/%d/removeAdministrator", testBusiness.getId()))
                 .content(jsonString)
                 .sessionAttrs(sessionAuthToken)
                 .cookie(authCookie)
@@ -991,8 +980,7 @@ class BusinessControllerTest {
 
         loginAsGlobalAdmin(); // session is setup as a global admin now
 
-        mockMvc.perform(MockMvcRequestBuilders
-                .put(String.format("/businesses/%d/removeAdministrator", testBusiness.getId()))
+        mockMvc.perform(put(String.format("/businesses/%d/removeAdministrator", testBusiness.getId()))
                 .content(jsonString)
                 .sessionAttrs(sessionAuthToken)
                 .cookie(authCookie)
@@ -1186,5 +1174,4 @@ class BusinessControllerTest {
                 .cookie(authCookie))
                 .andExpect(status().isBadRequest());
     }
-
 }

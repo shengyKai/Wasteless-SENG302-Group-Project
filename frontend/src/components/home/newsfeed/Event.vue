@@ -31,8 +31,8 @@
         {{ date }}, {{ time }}
       </v-card-subtitle>
       <slot/>
-      <v-card-text class="justify-center">
-        <div class="error--text" v-if="errorMessage !== undefined">{{ errorMessage }}</div>
+      <v-card-text class="justify-center" v-if="errorMessage !== undefined">
+        <div class="error--text">{{ errorMessage }}</div>
       </v-card-text>
       <!-- For user to view their option about the available tag to choose from  -->
       <v-row
@@ -114,62 +114,14 @@
           </v-expand-transition>
         </v-col>
       </v-row>
-      <!-- Dialog that stay consistent with the firstMessage(in primary colour), replyMessage(in secondary colour) -->
-      <v-dialog ref="messageDialog"
-                v-model="messageOwnerDialog"
-                max-width="600px">
-        <v-card>
-          <!-- The 'TITLE' of the replyMessage component -->
-          <v-card color='secondary lighten-2'>
-            <v-card-title>
-              Send a message to {{firstName}}
-            </v-card-title>
-            <v-card-subtitle>
-              Your message will appear on their feed
-            </v-card-subtitle>
-          </v-card>
-          <!-- The Message body input component -->
-          <v-form v-model="directMessageValid" ref="directMessageForm">
-            <v-card-text>
-              <v-textarea
-                solo
-                outlined
-                clearable
-                prepend-inner-icon="mdi-comment"
-                no-resize
-                :counter="200"
-                :rules="mandatoryRules.concat(maxCharRules())"
-                v-model="directMessageContent"/>
-            </v-card-text>
-            <!-- Submit and Cancel button for the replyMessage component -->
-            <v-card-actions>
-              <v-alert v-if="directMessageError !== undefined" color="red" type="error" dense text>
-                {{directMessageError}}
-              </v-alert>
-              <v-spacer/>
-              <v-btn color="primary"
-                     text
-                     :disabled="!directMessageValid"
-                     @click="sendMessage">
-                Send
-              </v-btn>
-              <v-btn color="primary"
-                     text
-                     @click="messageOwnerDialog = false; directMessageError = undefined; directMessageContent=''">
-                Cancel
-              </v-btn>
-            </v-card-actions>
-          </v-form>
-        </v-card>
-      </v-dialog>
     </div>
   </div>
 </template>
 
 <script>
 import synchronizedTime from '@/components/utils/Methods/synchronizedTime';
-import { formatDate, maxCharRules, mandatoryRules, } from '@/utils';
-import { setEventTag, messageConversation} from "@/api/internal";
+import { formatDate } from '@/utils';
+import { setEventTag } from "@/api/internal";
 
 export default {
   name: 'Event',
@@ -190,13 +142,6 @@ export default {
       deletionTime: undefined,
       deleteCardDialog: false,
       editCardDialog: false,
-      messageOwnerDialog: false,
-      directMessageContent: '',
-      directMessageError: undefined,
-      directMessageValid: false,
-      mandatoryRules,
-      maxCharRules: () => maxCharRules(200),
-      firstname: "haha",
 
       expand: false,
       colours: ['none', 'red', 'orange', 'yellow', 'green', 'blue', 'purple'],
@@ -255,15 +200,6 @@ export default {
               this.$store.commit('removeEvent', this.event.id);
             }
           });
-      }
-    },
-    async sendMessage() {
-      this.directMessageError = undefined;
-      let response = await messageConversation(this.content.id, this.$store.state.user.id, this.$store.state.user.id, this.directMessageContent);
-      if (typeof response === 'string') {
-        this.directMessageError = response;
-      } else {
-        this.messageOwnerDialog = false;
       }
     },
 

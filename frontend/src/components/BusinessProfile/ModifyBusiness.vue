@@ -3,7 +3,7 @@
     <v-row justify="center">
       <v-col cols="10">
         <v-card max-width=1800px>
-          <v-form v-model="valid">
+          <v-form v-model="valid"  @submit.prevent="proceedWithModifyBusiness">
             <v-card class="mt-5 ">
               <v-card-title class="primary-text">Modify Business Details</v-card-title>
               <v-card-text>
@@ -230,6 +230,8 @@ import {
   mandatoryRules,
   maxCharRules, postCodeRules, streetNumRules
 } from "@/utils";
+import { modifyBusiness } from '@/api/internal';
+
 export default {
   name: 'ModifyBusiness',
   components: {
@@ -291,6 +293,46 @@ export default {
     },
     discardButton() {
       this.$emit('discardModifyBusiness');
+    },
+    async proceedWithModifyBusiness() {
+      this.errorMessage = undefined;
+      /**
+       * Get the street number and name from the street address field.
+       */
+      const streetParts = this.streetAddress.split(" ");
+      const streetNum = streetParts[0];
+      const streetName = streetParts.slice(1, streetParts.length).join(" ");
+
+      // Set up the modified fields
+      let modifiedFields = {
+        primaryAdministratorId: this.primaryAdministratorId,
+        name: this.businessName,
+        description: this.description,
+        address: {
+          streetNumber: streetNum,
+          streetName: streetName,
+          district: this.district,
+          city: this.city,
+          region: this.region,
+          country: this.country,
+          postcode: this.postcode
+        },
+        businessType: this.businessType,
+        updateProductCountry: this.updateProductCountry
+      };
+
+      const result = await modifyBusiness(this.business.id, modifiedFields);
+      /**
+       * If the result is a string, means it is an error message, of which it will show up on the page.
+       * As such, the modify page will still remain.
+       * If the result is undefined(the else case) then an event will be emitted to the parent component, BusinessProfile/index.vue
+       * and the modifyBusiness attribute there will be false, thus changing the page to the usual business profile page.
+       */
+      if (typeof result === 'string') {
+        this.errorMessage = result;
+      } else {
+        this.$emit("modifySuccess");
+      }
     },
     /**
      * When the user clicks on an administrator a popup message will appear stating that they

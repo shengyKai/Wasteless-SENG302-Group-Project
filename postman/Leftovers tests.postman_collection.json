@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "1e3c7c9e-7cac-4448-a1d9-e66f3d9dca9c",
+		"_postman_id": "f4730c60-4c54-4e44-b360-683e856bcae6",
 		"name": "Leftovers tests",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -198,6 +198,74 @@
 			"response": []
 		},
 		{
+			"name": "Create new card",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "48ae95c5-e960-4df9-9947-af7d1590570b",
+						"exec": [
+							"pm.test(\"Status code is 201\", function () {",
+							"    pm.response.to.have.status(201);",
+							"});",
+							"",
+							"const cardId = pm.response.json().cardId;",
+							"if (typeof cardId !== \"undefined\") {",
+							"    pm.globals.set(\"card_id\", cardId);",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "apikey",
+					"apikey": [
+						{
+							"key": "key",
+							"value": "JSESSIONID",
+							"type": "string"
+						},
+						{
+							"key": "value",
+							"value": true,
+							"type": "boolean"
+						},
+						{
+							"key": "in",
+							"value": "header",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"title\": \"1982 Lada Samara\",\n    \"creatorId\": {{user_id}},\n    \"section\": \"Wanted\",\n    \"keywordIds\": [\n    ],\n    \"description\": \"Beige, suitable for a hen house. Fair condition. Some rust. As is, where is. Will swap for budgerigar.\"\n}",
+					"options": {
+						"raw": {}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/cards",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"cards"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "Create Business",
 			"event": [
 				{
@@ -334,7 +402,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n  \"primaryAdministratorId\": {{user_id}},\n  \"name\": \"Lumbridge General Store 2\",\n  \"description\": \"A one-stop shop for all your adventuring needs and stuff\",\n  \"address\": {\n    \"streetNumber\": \"420\",\n    \"streetName\": \"Ilam Road\",\n    \"suburb\": \"Upper Riccarton\",\n    \"city\": \"Christchurches\",\n    \"region\": \"Canterburies\",\n    \"country\": \"New Zealands\",\n    \"postcode\": \"9021\"\n  },\n  \"businessType\": \"Retail Trade\"\n}",
+					"raw": "{\n  \"primaryAdministratorId\": {{user_id}},\n  \"name\": \"Lumbridge General Store 2\",\n  \"description\": \"A one-stop shop for all your adventuring needs and stuff\",\n  \"address\": {\n    \"streetNumber\": \"420\",\n    \"streetName\": \"Ilam Road\",\n    \"suburb\": \"Upper Riccarton\",\n    \"city\": \"Christchurches\",\n    \"region\": \"Canterburies\",\n    \"country\": \"New Zealands\",\n    \"postcode\": \"9021\"\n  },\n  \"businessType\": \"Retail Trade\",\n  \"updateProductCountry\": false\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -498,6 +566,362 @@
 							"key": "id",
 							"value": "{{keyword_id}}",
 							"description": "(Required) ID of keyword to delete"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get messages in conversation - No conversation",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "470cf532-26f9-49e5-97e5-8a1f89f1ec81",
+						"exec": [
+							"pm.test(\"Status code is 406\", function () {",
+							"    pm.response.to.have.status(406);",
+							"});",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "apikey",
+					"apikey": [
+						{
+							"key": "key",
+							"value": "JSESSIONID",
+							"type": "string"
+						},
+						{
+							"key": "value",
+							"value": true,
+							"type": "boolean"
+						},
+						{
+							"key": "in",
+							"value": "header",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/cards/:cardId/conversations/:buyerId?resultsPerPage=15&page=1",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"cards",
+						":cardId",
+						"conversations",
+						":buyerId"
+					],
+					"query": [
+						{
+							"key": "resultsPerPage",
+							"value": "15"
+						},
+						{
+							"key": "page",
+							"value": "1"
+						}
+					],
+					"variable": [
+						{
+							"key": "cardId",
+							"value": "99999999"
+						},
+						{
+							"key": "buyerId",
+							"value": "1"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Add a message to a conversation",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "0050520c-74fd-48db-a45c-b25765c295c7",
+						"exec": [
+							"pm.test(\"Status code is 201\", function () {",
+							"    pm.response.to.have.status(201);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "apikey",
+					"apikey": [
+						{
+							"key": "key",
+							"value": "JSESSIONID",
+							"type": "string"
+						},
+						{
+							"key": "value",
+							"value": true,
+							"type": "boolean"
+						},
+						{
+							"key": "in",
+							"value": "header",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"senderId\": 1,\n    \"message\": \"hey dude!\"\n}",
+					"options": {
+						"raw": {}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/cards/:cardId/conversations/:buyerId",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"cards",
+						":cardId",
+						"conversations",
+						":buyerId"
+					],
+					"variable": [
+						{
+							"key": "cardId",
+							"value": "{{card_id}}"
+						},
+						{
+							"key": "buyerId",
+							"value": "1"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get messages in conversation - Blue sky",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "470cf532-26f9-49e5-97e5-8a1f89f1ec81",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"const response = pm.response.json();",
+							"pm.test(\"Response contains correct count\", () => {",
+							"   pm.expect(response.count).to.eql(1); ",
+							"});",
+							"",
+							"const result = response.results[0];",
+							"pm.test(\"Response contains message\", () => {",
+							"   pm.expect(result.content).to.eql(\"hey dude!\") ",
+							"});",
+							"pm.test(\"Response contains senderId\", () => {",
+							"   pm.expect(result.senderId).to.eql(1); ",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "apikey",
+					"apikey": [
+						{
+							"key": "key",
+							"value": "JSESSIONID",
+							"type": "string"
+						},
+						{
+							"key": "value",
+							"value": true,
+							"type": "boolean"
+						},
+						{
+							"key": "in",
+							"value": "header",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/cards/:cardId/conversations/:buyerId?resultsPerPage=15&page=1",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"cards",
+						":cardId",
+						"conversations",
+						":buyerId"
+					],
+					"query": [
+						{
+							"key": "resultsPerPage",
+							"value": "15"
+						},
+						{
+							"key": "page",
+							"value": "1"
+						}
+					],
+					"variable": [
+						{
+							"key": "cardId",
+							"value": "{{card_id}}"
+						},
+						{
+							"key": "buyerId",
+							"value": "1"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Modify User - Successfully",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "69b25559-d404-426c-8a89-5dd3b2662627",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"firstName\": \"Dave\",\n    \"lastName\": \"Johnson\",\n    \"email\": \"johnsmith88@gmail.com\",\n    \"dateOfBirth\": \"1998-04-27\",\n    \"homeAddress\": {\n        \"country\": \"New Zealand\",\n        \"streetNumber\": \"16\",\n        \"streetName\": \"Waimairi Road\",\n        \"city\": \"Christchurch\",\n        \"region\": \"Canterbury\",\n        \"postcode\": \"90210\"\n    },\n    \"password\": \"1337-H%nt3r2\",\n    \"middleName\": \"Hector\",\n    \"nickname\": \"Davo\",\n    \"bio\": \"Hates long walks on the beach\",\n    \"phoneNumber\": \"+64 3 555 0128\",\n    \"newPassword\": \"ILoveTurtles800\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/users/:id",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"users",
+						":id"
+					],
+					"variable": [
+						{
+							"key": "id",
+							"value": "{{user_id}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Modify User - Password not provided",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "69b25559-d404-426c-8a89-5dd3b2662627",
+						"exec": [
+							"pm.test(\"Status code is 403\", function () {",
+							"    pm.response.to.have.status(403);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"firstName\": \"Dave\",\n    \"lastName\": \"Johnson\",\n    \"email\": \"johnsmith88@gmail.com\",\n    \"dateOfBirth\": \"1998-04-27\",\n    \"homeAddress\": {\n        \"country\": \"New Zealand\",\n        \"streetNumber\": \"16\",\n        \"streetName\": \"Waimairi Road\",\n        \"city\": \"Christchurch\",\n        \"region\": \"Canterbury\",\n        \"postcode\": \"90210\"\n    },\n    \"middleName\": \"Hector\",\n    \"nickname\": \"Davo\",\n    \"bio\": \"Hates long walks on the beach\",\n    \"phoneNumber\": \"+64 3 555 0128\",\n    \"newPassword\": \"ILoveTurtles800\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/users/:id",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"users",
+						":id"
+					],
+					"variable": [
+						{
+							"key": "id",
+							"value": "{{user_id}}"
 						}
 					]
 				}
