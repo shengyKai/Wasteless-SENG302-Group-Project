@@ -2,7 +2,6 @@ package org.seng302.leftovers.dto;
 
 import lombok.Getter;
 import lombok.ToString;
-import org.seng302.leftovers.entities.Tag;
 
 import javax.validation.constraints.NotNull;
 

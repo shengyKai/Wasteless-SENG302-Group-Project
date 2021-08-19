@@ -14,6 +14,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
@@ -41,10 +42,10 @@ public class StorageServiceImpl implements StorageService {
     }
 
     @Override
-    public void store(MultipartFile file, String filename) {
+    public void store(InputStream file, String filename) {
         logger.info(() -> String.format("Storing image with filename=%s", filename));
         try {
-            Files.copy(file.getInputStream(), this.root.resolve(filename));
+            Files.copy(file, this.root.resolve(filename));
             
         } catch (Exception e) {
             logger.error(e);

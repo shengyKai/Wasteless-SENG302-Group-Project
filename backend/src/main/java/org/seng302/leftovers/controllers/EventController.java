@@ -3,10 +3,10 @@ package org.seng302.leftovers.controllers;
 import net.minidev.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.seng302.leftovers.entities.GlobalMessageEvent;
 import org.seng302.leftovers.dto.WrappedValueDTO;
-import org.seng302.leftovers.entities.MessageEvent;
 import org.seng302.leftovers.entities.Event;
-import org.seng302.leftovers.entities.Tag;
+import org.seng302.leftovers.dto.Tag;
 import org.seng302.leftovers.entities.User;
 import org.seng302.leftovers.persistence.EventRepository;
 import org.seng302.leftovers.persistence.UserRepository;
@@ -107,7 +107,7 @@ public class EventController {
             }
 
             String message = messageInfo.getAsString("message");
-            userRepository.findAll().forEach(user -> eventService.saveEvent(new MessageEvent(user, message)));
+            userRepository.findAll().forEach(user -> eventService.saveEvent(new GlobalMessageEvent(user, message)));
 
             response.setStatus(201);
         } catch (Exception e) {

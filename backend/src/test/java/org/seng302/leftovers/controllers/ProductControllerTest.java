@@ -252,10 +252,6 @@ class ProductControllerTest {
             session.save(product2);
             session.save(product3);
             session.save(product4);
-//            productRepository.save(product4);
-//            productRepository.save(product1);
-//            productRepository.save(product2);
-//            productRepository.save(product3);
             session.getTransaction().commit();
         } catch (IllegalAccessException e) {
             fail();
@@ -1134,15 +1130,27 @@ class ProductControllerTest {
                 .andReturn();
     }
 
-    /**
-     * Tests that uploading an image with a valid content type returns a created response.
-     */
+
     @Test
-    void uploadingImageToProductSucceedsWithValidImage() throws Exception {
+    void uploadProductImage_invalidImageData_400Response() throws Exception {
         setCurrentUser(ownerUser.getUserID());
         addSeveralProductsToACatalogue();
 
         MockMultipartFile file = new MockMultipartFile("file", "filename.txt", "image/jpeg", new byte[100]);
+        mockMvc.perform(multipart(String.format("/businesses/%d/products/NATHAN-APPLE-70/images", testBusiness1.getId()))
+                .file(file)
+                .sessionAttrs(sessionAuthToken)
+                .cookie(authCookie))
+                .andExpect(status().isBadRequest())
+                .andReturn();
+    }
+
+    @Test
+    void uploadProductImage_validImageData_201Response() throws Exception {
+        setCurrentUser(ownerUser.getUserID());
+        addSeveralProductsToACatalogue();
+
+        MockMultipartFile file = new MockMultipartFile("file", "filename.txt", "image/png", ProductControllerTest.class.getResourceAsStream("/point.png"));
         mockMvc.perform(multipart(String.format("/businesses/%d/products/NATHAN-APPLE-70/images", testBusiness1.getId()))
                 .file(file)
                 .sessionAttrs(sessionAuthToken)

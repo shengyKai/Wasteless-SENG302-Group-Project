@@ -574,7 +574,6 @@ public class InventoryStepDefinition  {
     @Then("the best before date of the inventory item with the id {long} will be {string}")
     public void the_best_before_date_of_the_inventory_item_with_the_version_will_be(
             long invItemId, String bestBefore) {
-        System.out.println(mvcResult.getResponse().getErrorMessage());
         assertEquals(200, mvcResult.getResponse().getStatus());
         InventoryItem invItem = inventoryItemRepository.getInventoryItemByBusinessAndId(
                 businessContext.getLast(), invItemId);

@@ -1,9 +1,9 @@
 <template>
-  <div>
+  <div  class="d-flex flex-column" no-gutters>
     <v-row justify="center">
       <v-col cols="10">
         <v-card max-width=1800px>
-          <v-form v-model="valid">
+          <v-form v-model="valid"  @submit.prevent="proceedWithModifyBusiness">
             <v-card class="mt-5 ">
               <v-card-title class="primary-text">Modify Business Details</v-card-title>
               <v-card-text>
@@ -92,17 +92,21 @@
                         outlined
                       />
                     </v-col>
-                    <v-col>
-                      <v-btn
-                        @click="changeUpdateCountries"
-                      >
-                        Update catalogue entries to new country
-                      </v-btn>
-                      <v-icon v-if="updateProductCountry" large> mdi-check </v-icon>
-                      <v-icon v-if="!updateProductCountry" large> mdi-close </v-icon>
+                    <v-col
+                      cols="12"
+                      sm="4"
+                      md="4"
+                    >
+                      <v-checkbox
+                        v-model="updateProductCountry"
+                        label="Update catalogue's currency"
+                        color="primary"
+                        hide-details
+                        @click.stop="currencyConfirmDialog = true"
+                      />
                     </v-col>
                   </v-row>
-                  <div v-if="userIsPrimaryAdmin">
+                  <div v-if="userIsPrimaryAdmin" class="mt-5">
                     <v-card-title>Change Primary Administrator</v-card-title>
                     <v-col>
                       <v-row>
@@ -150,38 +154,64 @@
                 </v-container>
               </v-card-text>
               <v-card-actions>
-                <v-row justify="end">
-                  <v-col cols="2" class="ma-1 mr-7">
+                <v-row>
+                  <v-col class="text-right">
                     <v-btn
                       type="submit"
                       color="primary"
-                      :disabled="!valid"
                     >
+                      Submit
                       <v-icon
-                        class="expand-icon"
+                        class="ml-1 mr-1"
                         color="white"
                       >
                         mdi-file-upload-outline
                       </v-icon>
-                      Submit
                     </v-btn>
-                  </v-col>
-                  <v-col cols="4" class="ma-1 mr-n9">
                     <v-btn
-                      class="white--text"
                       color="secondary"
+                      class="ml-2"
                       @click="discardButton"
-                    >
+                    > Discard
                       <v-icon
-                        class="expand-icon"
                         color="white"
                       >
                         mdi-file-cancel-outline
                       </v-icon>
-                      Discard
                     </v-btn>
                   </v-col>
                 </v-row>
+                <v-dialog
+                  ref="confirmDialog"
+                  v-model="currencyConfirmDialog"
+                  max-width="300px"
+                >
+                  <v-card>
+                    <v-card-title>
+                      Are you sure?
+                    </v-card-title>
+                    <v-card-text>
+                      Updating location for catalogue entries will change all of the listed product(s) currency accordingly
+                    </v-card-text>
+                    <v-card-actions>
+                      <v-spacer/>
+                      <v-btn
+                        color="primary"
+                        text
+                        @click="currencyConfirmDialog = false; updateProductCountry = true;"
+                      >
+                        Save Change
+                      </v-btn>
+                      <v-btn
+                        color="primary"
+                        text
+                        @click="currencyConfirmDialog = false; updateProductCountry = false;"
+                      >
+                        Cancel
+                      </v-btn>
+                    </v-card-actions>
+                  </v-card>
+                </v-dialog>
               </v-card-actions>
             </v-card>
           </v-form>
@@ -200,6 +230,8 @@ import {
   mandatoryRules,
   maxCharRules, postCodeRules, streetNumRules
 } from "@/utils";
+import { modifyBusiness } from '@/api/internal';
+
 export default {
   name: 'ModifyBusiness',
   components: {
@@ -211,6 +243,8 @@ export default {
   },
   data() {
     return {
+      currencyConfirmDialog: false,
+      serverUrl: process.env.VUE_APP_SERVER_ADD,
       readableAddress: "",
       errorMessage: undefined,
       dialog: true,
@@ -224,13 +258,14 @@ export default {
       region: this.business.address.region,
       country: this.business.address.country,
       postcode: this.business.address.postcode,
+      images: this.business.images || [],
       businessTypes: [
         'Accommodation and Food Services',
         'Charitable organisation',
         'Non-profit organisation',
         'Retail Trade',
       ],
-      updateProductCountry: true,
+      updateProductCountry: false,
       valid: false,
       showImageUploaderForm: false,
       showAlert: false,
@@ -256,15 +291,48 @@ export default {
     adminIsPrimary(admin) {
       return admin.id === this.primaryAdministratorId;
     },
-    changeUpdateCountries() {
-      if (this.updateProductCountry) {
-        this.updateProductCountry = false;
-      } else {
-        this.updateProductCountry = true;
-      }
-    },
     discardButton() {
       this.$emit('discardModifyBusiness');
+    },
+    async proceedWithModifyBusiness() {
+      this.errorMessage = undefined;
+      /**
+       * Get the street number and name from the street address field.
+       */
+      const streetParts = this.streetAddress.split(" ");
+      const streetNum = streetParts[0];
+      const streetName = streetParts.slice(1, streetParts.length).join(" ");
+
+      // Set up the modified fields
+      let modifiedFields = {
+        primaryAdministratorId: this.primaryAdministratorId,
+        name: this.businessName,
+        description: this.description,
+        address: {
+          streetNumber: streetNum,
+          streetName: streetName,
+          district: this.district,
+          city: this.city,
+          region: this.region,
+          country: this.country,
+          postcode: this.postcode
+        },
+        businessType: this.businessType,
+        updateProductCountry: this.updateProductCountry
+      };
+
+      const result = await modifyBusiness(this.business.id, modifiedFields);
+      /**
+       * If the result is a string, means it is an error message, of which it will show up on the page.
+       * As such, the modify page will still remain.
+       * If the result is undefined(the else case) then an event will be emitted to the parent component, BusinessProfile/index.vue
+       * and the modifyBusiness attribute there will be false, thus changing the page to the usual business profile page.
+       */
+      if (typeof result === 'string') {
+        this.errorMessage = result;
+      } else {
+        this.$emit("modifySuccess");
+      }
     },
     /**
      * When the user clicks on an administrator a popup message will appear stating that they

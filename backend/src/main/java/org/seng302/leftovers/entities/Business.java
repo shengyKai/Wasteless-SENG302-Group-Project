@@ -315,6 +315,15 @@ public class Business {
     }
 
     /**
+     * Adds a single image to the Business's list of images at given index
+     * @param index Index to insert the new image
+     * @param image An image entity to be linked to this business
+     */
+    public void addImage(int index, Image image) {
+        images.add(index, image);
+    }
+
+    /**
      * Removes a given image from the list of business images
      * @param image The image to remove
      */

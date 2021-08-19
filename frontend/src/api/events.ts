@@ -5,7 +5,7 @@ const EMITTER_URL = process.env.VUE_APP_SERVER_ADD + '/events/emitter';
 let eventSource: EventSource;
 let lastErrorTime = Number.MIN_VALUE;
 
-export type AnyEvent = MessageEvent | ExpiryEvent | DeleteEvent | KeywordCreatedEvent;
+export type AnyEvent = GlobalMessageEvent | ExpiryEvent | DeleteEvent | KeywordCreatedEvent;
 
 export type Tag = 'none' | 'red' | 'orange' | 'yellow' | 'green' | 'blue' | 'purple'
 
@@ -16,7 +16,7 @@ type BaseEvent<T extends string> = {
   type: T,
 }
 
-export type MessageEvent = BaseEvent<'MessageEvent'> & {
+export type GlobalMessageEvent = BaseEvent<'GlobalMessageEvent'> & {
   message: string
 }
 

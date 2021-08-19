@@ -199,7 +199,6 @@ public class ProductGeneratorTest {
                     .withManufacturer("Apple")
                     .withRecommendedRetailPrice("2.01")
                     .withBusiness(business);
-            System.out.println(business);
             assertDoesNotThrow(newProduct::build, product.getProductCode());
         }
     }
