@@ -1,14 +1,13 @@
 <template>
   <div>
     <v-row v-if="fromSearch" class="mb-n16 mt-6">
-      <v-col class="text-right mt-16 mb-n16">
+      <v-col class="text-right mt-16 mb-n8">
         <v-btn @click="returnToSearch" color="primary">Return to search</v-btn>
       </v-col>
     </v-row>
     <div v-if='!modifyBusiness' style="margin-top: 100px">
-      <v-card>
+      <v-card v-if="businessImages && businessImages.length > 0">
         <ImageCarousel
-          v-if="businessImages"
           :imagesList="businessImages"
           :showControls="permissionToActAsBusiness"
           @change-primary-image="makeImagePrimary"
