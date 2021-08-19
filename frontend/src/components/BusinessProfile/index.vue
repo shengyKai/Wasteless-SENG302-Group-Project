@@ -31,7 +31,7 @@
                 {{ errorMessage }}
               </v-alert>
             </v-col> -->
-            <v-col class="text-right">
+            <v-col class="text-right" v-if='!modifyBusiness && permissionToActAsBusiness'>
               <v-tooltip bottom>
                 <template #activator="{ on, attrs }">
                   <v-btn
@@ -164,7 +164,6 @@ export default {
 
       return `${parts[2]} ${parts[1]} ${parts[3]} (${diffMonths} months ago)`;
     },
-
     administrators() {
       return this.business?.administrators || [];
     },

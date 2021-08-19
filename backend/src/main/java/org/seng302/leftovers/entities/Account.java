@@ -51,7 +51,7 @@ public abstract class Account {
         if (validEmail && !email.trim().isEmpty() && email.length() <= 100) {
             this.email = email;
         } else {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Email must not be empty and must consist of an email prefix, a @ symbol and a domain, and less than 100 char");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email must not be empty and must consist of an email prefix, a @ symbol and a domain, and less than 100 char");
         }
     }
 
