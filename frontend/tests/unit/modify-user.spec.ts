@@ -226,10 +226,10 @@ describe("ModifyUserPage.vue", () => {
         expect(updateButton.props().disabled).toBeTruthy();
     });
 
-    it("Invalid date of birth format,with '@' ", async () => {
+    it("Invalid date of birth format,with unexpected char and symbol'@' ", async () => {
         const updateButton = wrapper.find(".v-btn");
         await wrapper.setData({
-            user: { dateOfBirth: "65a4sdasd" },
+            user: { dateOfBirth: "65a4sd@asd" },
         });
         await Vue.nextTick();
         expect(updateButton.props().disabled).toBeTruthy();
