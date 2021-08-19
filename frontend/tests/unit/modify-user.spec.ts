@@ -32,7 +32,7 @@ describe("ModifyUserPage.vue", () => {
   let wrapper: Wrapper<any>;
   const localVue = createLocalVue();
 
-  beforeEach(() => {
+  beforeEach(async () => {
     resetStoreForTesting();
     let business = createTestBusinesses();
     let store = getStore();
@@ -43,7 +43,7 @@ describe("ModifyUserPage.vue", () => {
       middleName: "some middleName",
       nickname: "some nickName",
       bio: "some bio",
-      email: "some email",
+      email: "someemail@gmail.com",
       dateOfBirth: "2010-01-01",
       phoneNumber: "+64 123 321 123",
       homeAddress: {
@@ -67,6 +67,8 @@ describe("ModifyUserPage.vue", () => {
         },
       },
     });
+
+    await wrapper.vm.setUser();
   });
   it("Email should be prefilled", async () => {
     await wrapper.setData({
@@ -176,7 +178,7 @@ describe("ModifyUserPage.vue", () => {
     "Testing out all inputs, such that the user can only press the update button " +
             "after inputting valid formats for all fields",
     async () => {
-      const updateButton = wrapper.find(".v-btn");
+      const updateButton = wrapper.findComponent({ref: 'updateButton'});
       await wrapper.setData({
         user: {
           email: "someone@email.com",
@@ -191,25 +193,33 @@ describe("ModifyUserPage.vue", () => {
   );
 
   it("Invalid email format,with no '@'", async () => {
-    const updateButton = wrapper.find(".v-btn");
+    const updateButton = wrapper.findComponent({ref: 'updateButton'});
     await wrapper.setData({
-      user: { email: "someemail.com" },
+      user: {
+        email: "someemail.com",
+        password: "abc"
+      },
     });
     await Vue.nextTick();
     expect(updateButton.props().disabled).toBeTruthy();
   });
 
-  it("Invalid firstName format,with '@' ", async () => {
-    const updateButton = wrapper.find(".v-btn");
+  it.only("Invalid firstName format,with '@' ", async () => {
+    const updateButton = wrapper.findComponent({ref: 'updateButton'});
+    console.log(wrapper.vm.user.firstName);
     await wrapper.setData({
       user: { firstName: "some firstName@" },
     });
     await Vue.nextTick();
+    console.log(JSON.stringify(wrapper.vm.user));
+    wrapper.vm.$refs.modifyForm.validate();
+    // wrapper.vm.$refs.firstName.validate(true);
+    expect(wrapper.vm.valid).toBeFalsy();
     expect(updateButton.props().disabled).toBeTruthy();
   });
 
   it("Invalid lastName format,with '@' ", async () => {
-    const updateButton = wrapper.find(".v-btn");
+    const updateButton = wrapper.findComponent({ref: 'updateButton'});
     await wrapper.setData({
       user: { lastName: "some lastName@" },
     });
@@ -218,7 +228,7 @@ describe("ModifyUserPage.vue", () => {
   });
 
   it("Invalid middleName format, with '@' ", async () => {
-    const updateButton = wrapper.find(".v-btn");
+    const updateButton = wrapper.findComponent({ref: 'updateButton'});
     await wrapper.setData({
       user: { middleName: "some middleName@" },
     });
@@ -227,7 +237,7 @@ describe("ModifyUserPage.vue", () => {
   });
 
   it("Invalid date of birth format,with unexpected char and symbol'@' ", async () => {
-    const updateButton = wrapper.find(".v-btn");
+    const updateButton = wrapper.findComponent({ref: 'updateButton'});
     await wrapper.setData({
       user: { dateOfBirth: "65a4sd@asd" },
     });
@@ -236,7 +246,7 @@ describe("ModifyUserPage.vue", () => {
   });
 
   it("Testing for empty date of birth field", async () => {
-    const updateButton = wrapper.find(".v-btn");
+    const updateButton = wrapper.findComponent({ref: 'updateButton'});
     await wrapper.setData({
       user: { dateOfBirth: "" },
     });
@@ -245,7 +255,7 @@ describe("ModifyUserPage.vue", () => {
   });
 
   it("Invalid date of birth format", async () => {
-    const updateButton = wrapper.find(".v-btn");
+    const updateButton = wrapper.findComponent({ref: 'updateButton'});
     await wrapper.setData({
       user: { dateOfBirth: "01-01-01" },
     });
@@ -254,7 +264,7 @@ describe("ModifyUserPage.vue", () => {
   });
 
   it("Invalid date of birth format -- too young", async () => {
-    const updateButton = wrapper.find(".v-btn");
+    const updateButton = wrapper.findComponent({ref: 'updateButton'});
     await wrapper.setData({
       user: { dateOfBirth: "2020-01-01" },
     });
@@ -263,7 +273,7 @@ describe("ModifyUserPage.vue", () => {
   });
 
   it("Invalid date of birth format -- too old", async () => {
-    const updateButton = wrapper.find(".v-btn");
+    const updateButton = wrapper.findComponent({ref: 'updateButton'});
     await wrapper.setData({
       user: { dateOfBirth: "2050-01-01" },
     });
@@ -272,7 +282,7 @@ describe("ModifyUserPage.vue", () => {
   });
 
   it("Invalid date of birth format, should be 13years from now when no business", async () => {
-    const updateButton = wrapper.find(".v-btn");
+    const updateButton = wrapper.findComponent({ref: 'updateButton'});
     await wrapper.setData({
       user: { dateOfBirth: "2009-01-01", businessAdministered: [] },
     });
@@ -281,7 +291,7 @@ describe("ModifyUserPage.vue", () => {
   });
 
   it("Invalid date of birth format should be 16years from now when have business", async () => {
-    const updateButton = wrapper.find(".v-btn");
+    const updateButton = wrapper.findComponent({ref: 'updateButton'});
     let business = createTestBusinesses();
     await wrapper.setData({
       user: {
@@ -299,7 +309,7 @@ describe("ModifyUserPage.vue", () => {
       phoneDigits: "111",
     });
     await Vue.nextTick();
-    const updateButton = wrapper.find(".v-btn");
+    const updateButton = wrapper.findComponent({ref: 'updateButton'});
     expect(updateButton.props().disabled).toBeTruthy();
   });
 
@@ -309,12 +319,12 @@ describe("ModifyUserPage.vue", () => {
       phoneDigits: "",
     });
     await Vue.nextTick();
-    const updateButton = wrapper.find(".v-btn");
+    const updateButton = wrapper.findComponent({ref: 'updateButton'});
     expect(updateButton.props().disabled).toBeTruthy();
   });
 
   it("New password field not empty, confirmPassword is empty.", async () => {
-    const updateButton = wrapper.find(".v-btn");
+    const updateButton = wrapper.findComponent({ref: 'updateButton'});
     await wrapper.setData({
       user: {
         newPassword: "asdqwe123",
@@ -326,7 +336,7 @@ describe("ModifyUserPage.vue", () => {
   });
 
   it("New password field not empty, currentPassword is empty.", async () => {
-    const updateButton = wrapper.find(".v-btn");
+    const updateButton = wrapper.findComponent({ref: 'updateButton'});
     await wrapper.setData({
       user: {
         newPassword: "asdqwe123",
@@ -338,7 +348,7 @@ describe("ModifyUserPage.vue", () => {
   });
 
   it("New password field not empty, confirmPassword & currentPassword is empty.", async () => {
-    const updateButton = wrapper.find(".v-btn");
+    const updateButton = wrapper.findComponent({ref: 'updateButton'});
     await wrapper.setData({
       user: {
         newPassword: "asdqwe123",
@@ -351,7 +361,7 @@ describe("ModifyUserPage.vue", () => {
   });
 
   it("New password field not empty and confirmPassword dosent match.", async () => {
-    const updateButton = wrapper.find(".v-btn");
+    const updateButton = wrapper.findComponent({ref: 'updateButton'});
     await wrapper.setData({
       user: {
         newPassword: "asdqwe123",
@@ -364,7 +374,7 @@ describe("ModifyUserPage.vue", () => {
   });
 
   it("Email field is modified and currentPassword is empty.", async () => {
-    const updateButton = wrapper.find(".v-btn");
+    const updateButton = wrapper.findComponent({ref: 'updateButton'});
     await wrapper.setData({
       user: {
         email: "some@email.com",
@@ -376,7 +386,7 @@ describe("ModifyUserPage.vue", () => {
   });
 
   it("Email field is modified and currentPassword was not empty.", async () => {
-    const updateButton = wrapper.find(".v-btn");
+    const updateButton = wrapper.findComponent({ref: 'updateButton'});
     await wrapper.setData({
       user: {
         email: "some@email.com",
@@ -390,7 +400,7 @@ describe("ModifyUserPage.vue", () => {
   });
 
   it("Email and password(s) field is modified and currentPassword was not empty.", async () => {
-    const updateButton = wrapper.find(".v-btn");
+    const updateButton = wrapper.findComponent({ref: 'updateButton'});
     await wrapper.setData({
       user: {
         email: "some@email.com",

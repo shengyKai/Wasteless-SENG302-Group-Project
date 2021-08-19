@@ -44,7 +44,6 @@
                   <v-text-field
                     ref="confirmPassword"
                     v-model="confirmPassword"
-                    @keyup="passwordCheck"
                     label="Confirm New Password"
                     :append-icon="showConfirmPassword ? 'mdi-eye' : 'mdi-eye-off'"
                     :type="showConfirmPassword ? 'text' : 'password'"
@@ -74,6 +73,7 @@
               <v-row>
                 <v-col cols="12" sm="6" class="pb-0">
                   <v-text-field
+                    ref="firstName"
                     class="required"
                     v-model="user.firstName"
                     label="First name"
@@ -268,6 +268,7 @@
           <v-row class="mt-2 px-1" justify="end">
             <p class="error-text mt-1" v-if ="errorMessage !== undefined"> {{errorMessage}} </p>
             <v-btn
+              ref="updateButton"
               class="ml-4"
               type="submit"
               color="primary"
@@ -436,6 +437,7 @@ export default {
      */
     validateCurrentPassword() {
       this.$refs.oldPassword.validate(true);
+      this.$refs.confirmPassword.validate(true);
     },
     /**
      * Apply validation rule on the confirmPassword field
