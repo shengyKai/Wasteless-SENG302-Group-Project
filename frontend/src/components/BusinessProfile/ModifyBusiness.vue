@@ -9,7 +9,7 @@
               <v-card-text>
                 <v-container>
                   <v-row no-gutters>
-                    <v-col cols="6">
+                    <v-col cols="12" sm="6">
                       <v-text-field
                         dense
                         class="mr-1 required"
@@ -19,7 +19,7 @@
                         outlined
                       />
                     </v-col>
-                    <v-col cols="6">
+                    <v-col cols="12" sm="6">
                       <v-select
                         dense
                         class="ml-1 required"
@@ -30,7 +30,7 @@
                         outlined
                       />
                     </v-col>
-                    <v-col cols="12">
+                    <v-col cols="12" sm="12">
                       <v-textarea
                         dense
                         v-model="description"
@@ -40,10 +40,10 @@
                         outlined
                       />
                     </v-col>
-                    <v-col cols="12">
-                      <v-card-title class="primary-text">Address</v-card-title>
+                    <v-col cols="12" sm="12">
+                      <v-card-title class="primary-text mt-n7">Address</v-card-title>
                     </v-col>
-                    <v-col cols="16">
+                    <v-col cols="12" sm="6">
                       <v-text-field
                         class="mr-1 required"
                         v-model="streetAddress"
@@ -51,7 +51,7 @@
                         :rules="mandatoryRules().concat(streetRules())"
                         outlined/>
                     </v-col>
-                    <v-col cols="6">
+                    <v-col cols="12" sm="6">
                       <LocationAutocomplete
                         type="district"
                         class="ml-1"
@@ -59,7 +59,7 @@
                         :rules="maxCharRules().concat(alphabetRules())"
                       />
                     </v-col>
-                    <v-col cols="6">
+                    <v-col cols="12" sm="6">
                       <LocationAutocomplete
                         type="city"
                         class="mr-1 required"
@@ -67,7 +67,7 @@
                         :rules="mandatoryRules().concat(maxCharRules()).concat(alphabetRules())"
                       />
                     </v-col>
-                    <v-col cols="6">
+                    <v-col cols="12" sm="6">
                       <LocationAutocomplete
                         type="region"
                         class="ml-1 required"
@@ -75,7 +75,7 @@
                         :rules="mandatoryRules().concat(maxCharRules()).concat(alphabetRules())"
                       />
                     </v-col>
-                    <v-col cols="6">
+                    <v-col cols="12" sm="6">
                       <LocationAutocomplete
                         type="country"
                         class="mr-1 required"
@@ -83,7 +83,7 @@
                         :rules="mandatoryRules().concat(maxCharRules()).concat(alphabetRules())"
                       />
                     </v-col>
-                    <v-col cols="6">
+                    <v-col cols="12" sm="6">
                       <v-text-field
                         class="ml-1 required"
                         v-model="postcode"
@@ -93,27 +93,27 @@
                       />
                     </v-col>
                     <v-col
+                      class="text-right"
                       cols="12"
-                      sm="4"
-                      md="4"
+                      sm="12"
                     >
                       <v-checkbox
                         v-model="updateProductCountry"
+                        class="mt-n5"
                         label="Update catalogue's currency"
                         color="primary"
                         hide-details
-                        @click.stop="currencyConfirmDialog = true"
                       />
                     </v-col>
                   </v-row>
-                  <div v-if="userIsPrimaryAdmin" class="mt-5">
+                  <div v-if="userIsPrimaryAdmin" class="mt-1">
                     <v-card-title>Change Primary Administrator</v-card-title>
-                    <v-col>
-                      <v-row>
+                    <v-row>
+                      <v-col>
                         <span v-for="admin in administrators" :key="admin.id">
                           <v-chip
                             v-if="adminIsPrimary(admin)"
-                            class="admin-chip"
+                            class="ma-1 ml-0"
                             color="red"
                             text-color="white"
                           >
@@ -121,7 +121,7 @@
                           </v-chip>
                           <v-chip
                             v-else
-                            class="admin-chip"
+                            class="ma-1 ml-0"
                             color="green"
                             text-color="white"
                             @click="changePrimaryAdmin(admin)"
@@ -129,13 +129,15 @@
                             {{ admin.firstName }} {{ admin.lastName }}
                           </v-chip>
                         </span>
-                        <v-alert v-if="showChangeAdminAlert" color="red" type="error" dense text>
-                          {{ primaryAdminAlertMsg }}
-                        </v-alert>
-                      </v-row>
-                    </v-col>
+                      </v-col>
+                    </v-row>
+                    <v-row>
+                      <v-alert v-if="showChangeAdminAlert" color="red" type="error" dense text>
+                        {{ primaryAdminAlertMsg }}
+                      </v-alert>
+                    </v-row>
                   </div>
-                  <v-card-title>Images</v-card-title>
+                  <v-card-title class="mt-n3">Images</v-card-title>
                   <v-btn
                     color="primary"
                     outlined
@@ -159,6 +161,7 @@
                     <v-btn
                       type="submit"
                       color="primary"
+                      @click.prevent="currencyConfirmDialog = true;"
                     >
                       Submit
                       <v-icon
@@ -198,14 +201,14 @@
                       <v-btn
                         color="primary"
                         text
-                        @click="currencyConfirmDialog = false; updateProductCountry = true;"
+                        @click="proceedWithModifyBusiness();"
                       >
                         Save Change
                       </v-btn>
                       <v-btn
                         color="primary"
                         text
-                        @click="currencyConfirmDialog = false; updateProductCountry = false;"
+                        @click="currencyConfirmDialog = false;"
                       >
                         Cancel
                       </v-btn>
@@ -295,6 +298,7 @@ export default {
       this.$emit('discardModifyBusiness');
     },
     async proceedWithModifyBusiness() {
+      console.log("AAA");
       this.errorMessage = undefined;
       /**
        * Get the street number and name from the street address field.
@@ -320,7 +324,9 @@ export default {
         businessType: this.businessType,
         updateProductCountry: this.updateProductCountry
       };
-
+      console.log("BBB");
+      console.log(modifiedFields);
+      console.log("CCC");
       const result = await modifyBusiness(this.business.id, modifiedFields);
       /**
        * If the result is a string, means it is an error message, of which it will show up on the page.
@@ -342,6 +348,7 @@ export default {
      * message will not appear.
      */
     changePrimaryAdmin(admin) {
+      console.log("EEE");
       this.showChangeAdminAlert = true;
       if (admin.id !== this.business.primaryAdministratorId) {
         this.showChangeAdminAlert = true;
@@ -366,10 +373,6 @@ export default {
 .top-section {
   display: flex;
   flex-wrap: wrap;
-}
-
-.admin-chip {
-  margin-right: 4px;
 }
 
 .business-modify {
