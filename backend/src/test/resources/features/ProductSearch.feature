@@ -21,7 +21,7 @@ Feature: U28 Product Search
 
   Scenario: AC4 - No fields selected, searches all
     And No product fields are selected
-    When I search the catalogue for "Example"
+    When I search the catalogue for "EXPL"
     Then 1 products are returned
 
   Scenario: AC4 - Only selected fields are searched single

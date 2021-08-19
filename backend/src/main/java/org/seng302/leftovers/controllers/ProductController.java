@@ -119,7 +119,7 @@ public class ProductController {
         Optional<Business> business = businessRepository.findById(id);
 
         // Convert searchBy into ProductFilterOption type and check valid
-        searchBy = Optional.ofNullable(searchBy).orElse(Collections.singletonList("name"));
+        searchBy = Optional.ofNullable(searchBy).orElse(Arrays.asList("name", "description", "manufacturer", "productCode"));
         Set<ProductFilterOption> searchSet = new HashSet<>();
         ObjectMapper objectMapper = new ObjectMapper();
         for (String col : searchBy) {
