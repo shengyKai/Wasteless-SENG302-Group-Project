@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.persistence.*;
+import java.time.DateTimeException;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -491,12 +492,20 @@ public class User extends Account {
 
         /**
          * Set the builder's date of birth. This field is required.
-         * @param dobString a string representing the user's date of birth in format yyyy-MM-dd.
+         * @param dob a LocalDate representing the user's date of birth.
+         * @return Builder with date of birth set.
+         */
+        public Builder withDob(LocalDate dob) {
+            this.dob = dob;
+            return this;
+        }
+        /**
+         * Set the builder's date of birth. This field is required.
+         * @param dobString a String representing the user's date of birth.
          * @return Builder with date of birth set.
          */
         public Builder withDob(String dobString) {
-            DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE;
-            this.dob = LocalDate.parse(dobString, dateTimeFormatter);
+            this.dob = LocalDate.parse(dobString);
             return this;
         }
 

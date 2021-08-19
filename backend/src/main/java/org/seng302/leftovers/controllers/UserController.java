@@ -4,6 +4,8 @@ import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.seng302.leftovers.dto.CreateUserDTO;
+import org.seng302.leftovers.dto.ModifyUserDTO;
 import org.seng302.leftovers.entities.Account;
 import org.seng302.leftovers.entities.Location;
 import org.seng302.leftovers.entities.User;
@@ -11,6 +13,7 @@ import org.seng302.leftovers.exceptions.EmailInUseException;
 import org.seng302.leftovers.exceptions.UserNotFoundException;
 import org.seng302.leftovers.persistence.UserRepository;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
+import org.seng302.leftovers.tools.PasswordAuthenticator;
 import org.seng302.leftovers.tools.SearchHelper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
@@ -21,6 +24,8 @@ import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
+import java.security.NoSuchAlgorithmException;
 import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Map;
@@ -42,50 +47,83 @@ public class UserController {
      * @param userinfo A Json object containing all of the user's details from the registration form.
      */
     @PostMapping("/users")
-    public void register(@RequestBody JSONObject userinfo, HttpServletRequest request, HttpServletResponse response) {
+    public void register(@Valid @RequestBody CreateUserDTO userinfo, HttpServletRequest request, HttpServletResponse response) {
         logger.info("Register");
         try {
-            Account.checkEmailUniqueness(userinfo.getAsString("email"), userRepository);
-        } catch (EmailInUseException inUseException) {
-            logger.error(inUseException.getMessage());
-            throw inUseException;
-        }
-        try {
-            JSONObject rawAddress;
-            try {
-                rawAddress = new JSONObject((Map<String, ?>) userinfo.get("homeAddress"));
-            } catch (ClassCastException e) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                        "Location not provided");
-            }
+            Account.checkEmailUniqueness(userinfo.getEmail(), userRepository);
 
-            Location homeAddress = Location.parseLocationFromJson(rawAddress);
-
+            Location homeAddress = userinfo.getHomeAddress().createLocation();
 
             User user = new User.Builder()
-                    .withFirstName(userinfo.getAsString("firstName"))
-                    .withMiddleName(userinfo.getAsString("middleName"))
-                    .withLastName(userinfo.getAsString("lastName"))
-                    .withNickName(userinfo.getAsString("nickname"))
-                    .withBio(userinfo.getAsString("bio"))
+                    .withFirstName(userinfo.getFirstName())
+                    .withMiddleName(userinfo.getMiddleName())
+                    .withLastName(userinfo.getLastName())
+                    .withNickName(userinfo.getNickname())
+                    .withBio(userinfo.getBio())
                     .withAddress(homeAddress)
-                    .withPhoneNumber(userinfo.getAsString("phoneNumber"))
-                    .withDob(userinfo.getAsString("dateOfBirth"))
-                    .withEmail(userinfo.getAsString("email"))
-                    .withPassword(userinfo.getAsString("password"))
+                    .withPhoneNumber(userinfo.getPhoneNumber())
+                    .withDob(userinfo.getDateOfBirth())
+                    .withEmail(userinfo.getEmail())
+                    .withPassword(userinfo.getPassword())
                     .build();
             User newUser = userRepository.save(user);
             AuthenticationTokenManager.setAuthenticationToken(request, response, newUser);
             response.setStatus(201);
             logger.info("User has been registered.");
-        } catch (ResponseStatusException responseError) {
-            logger.error(responseError.getMessage());
-            throw responseError;
-        } catch (DateTimeParseException e) {
+
+        } catch (Exception e) {
             logger.error(e.getMessage());
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Could not process date of birth.");
+            throw e;
         }
 
+    }
+
+
+    /**
+     * PUT endpoint for modifying an existing user
+     * User must have valid permission to make this action.
+     * If the email is changed or the password has been requested to be changed, the current password must be provided.
+     * @param id The ID of the user to modify
+     * @param body A Json object containing all of the user's details from the modification form
+     */
+    @PutMapping("/users/{id}")
+    public void modifyUser(@PathVariable Long id, @Valid @RequestBody ModifyUserDTO body, HttpServletRequest request) {
+        logger.info("Updating user (userId={})", id);
+        AuthenticationTokenManager.checkAuthenticationToken(request);
+        try {
+            User user = userRepository.getUser(id);
+
+            if (!AuthenticationTokenManager.sessionCanSeePrivate(request, id)) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                        "You do not have permission to modify another user");
+            }
+
+            // check if email changed
+            if (!body.getEmail().equals(user.getEmail())) {
+                PasswordAuthenticator.verifyPassword(body.getPassword(),user.getAuthenticationCode());
+                user.setEmail(body.getEmail());
+            }
+            // check if password changed
+            if (body.getNewPassword() != null) {
+                PasswordAuthenticator.verifyPassword(body.getPassword(), user.getAuthenticationCode());
+                user.setAuthenticationCodeFromPassword(body.getNewPassword());
+            }
+
+            user.setFirstName(body.getFirstName());
+            user.setMiddleName(body.getMiddleName());
+            user.setLastName(body.getLastName());
+            user.setNickname(body.getNickname());
+            user.setBio(body.getBio());
+            user.setDob(body.getDateOfBirth());
+            user.setPhNum(body.getPhoneNumber());
+            user.setAddress(body.getHomeAddress().createLocation());
+
+            userRepository.save(user);
+
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            throw e;
+        }
     }
 
     /**

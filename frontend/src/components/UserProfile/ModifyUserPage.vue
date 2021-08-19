@@ -17,23 +17,25 @@
                 class="required"
                 v-model="user.email"
                 label="Email"
+                @keyup="validateCurrentPassword"
                 :rules="mandatoryRules.concat(emailRules).concat(maxLongCharRules)"
                 outlined
               />
 
               <!-- INPUT: Password -->
               <v-row>
-                <v-col cols="12" sm="6" class="pb-0">
+                <v-col cols="12" sm="6" class="pb-3">
                   <v-text-field
                     ref="password"
                     v-model="user.password"
                     label="New Password"
-                    @keyup="passwordChange"
+                    @keyup="validateCurrentPassword"
                     :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
                     :type="showPassword ? 'text' : 'password'"
                     @click:append="showPassword = !showPassword"
-                    :rules="passwordRules.concat(maxMediumCharRules)"
+                    :rules="newPasswordRule"
                     outlined
+                    autocomplete="new-password"
                   />
                 </v-col>
 
@@ -42,12 +44,14 @@
                   <v-text-field
                     ref="confirmPassword"
                     v-model="confirmPassword"
+                    @keyup="passwordCheck"
                     label="Confirm New Password"
                     :append-icon="showConfirmPassword ? 'mdi-eye' : 'mdi-eye-off'"
                     :type="showConfirmPassword ? 'text' : 'password'"
                     @click:append="showConfirmPassword = !showConfirmPassword"
-                    :rules="passwordConfirmationRule.concat(maxMediumCharRules)"
+                    :rules="newPasswordRule.concat(passwordConfirmationRule)"
                     outlined
+                    autocomplete="new-password"
                   />
                 </v-col>
               </v-row>
@@ -60,7 +64,7 @@
                 :append-icon="showOldPassword ? 'mdi-eye' : 'mdi-eye-off'"
                 :type="showOldPassword ? 'text' : 'password'"
                 @click:append="showOldPassword = !showOldPassword"
-                :rules="passwordRules.concat(maxMediumCharRules)"
+                :rules="currentPasswordRule"
                 outlined
               />
             </v-tab-item>
@@ -89,7 +93,7 @@
                 </v-col>
 
                 <!-- INPUT: Last name -->
-                <v-col cols="12" sm="6" class="py-0">
+                <v-col cols="12" sm="6" class="pb-3">
                   <v-text-field
                     class="required"
                     v-model="user.lastName"
@@ -100,7 +104,7 @@
                 </v-col>
 
                 <!-- INPUT: Nickname -->
-                <v-col cols="12" sm="6" class="py-0">
+                <v-col cols="12" sm="6" class="pb-3">
                   <v-text-field
                     v-model="user.nickname"
                     label="Nickname"
@@ -143,6 +147,7 @@
                 <!-- :max="maxDate" -->
                 <v-date-picker
                   v-model="user.dateOfBirth"
+                  :max="maxDate"
                   scrollable
                 >
                   <v-spacer/>
@@ -193,7 +198,6 @@
 
               </v-row>
             </v-tab-item>
-
             <!-- TAB: Address -->
             <v-tab-item key="address">
               <!-- INPUT: Street -->
@@ -261,14 +265,14 @@
 
           <!-- Update -->
           <v-divider/>
-          <v-row class="mt-2 px-2" justify="end">
-            <p class="error-text" v-if ="errorMessage !== undefined"> {{errorMessage}} </p>
+          <v-row class="mt-2 px-1" justify="end">
+            <p class="error-text mt-1" v-if ="errorMessage !== undefined"> {{errorMessage}} </p>
             <v-btn
-              class="ml-2"
+              class="ml-4"
               type="submit"
-              :disabled="!valid"
               color="primary"
-              @click.prevent="updateProfile"
+              :disabled=!valid
+              @click="updateProfile"
             >
               Update profile
             </v-btn>
@@ -283,7 +287,17 @@
 import LocationAutocomplete from '@/components/utils/LocationAutocomplete';
 
 import { getUser } from '@/api/internal';
-import { mandatoryRules } from '@/utils';
+import {
+  alphabetExtendedMultilineRules,
+  alphabetRules,
+  countryCodeRules,
+  emailRules,
+  mandatoryRules, maxCharRules,
+  nameRules,
+  passwordRules, phoneNumberRules,
+  postCodeRules,
+  streetNumRules,
+} from "@/utils";
 
 export default {
   name: 'ModifyUserPage',
@@ -297,7 +311,7 @@ export default {
       user: {
         email: '',
         password: '',
-        oldPassword: '', // Not sure if this is the final field name
+        oldPassword: '',
 
         firstName: '',
         middleName: '',
@@ -321,25 +335,65 @@ export default {
       phoneDigits: '',
       confirmPassword: '',
       streetAddress: '',
-
+      maxDate: '',
       showDatePicker: false,
-
       showPassword: false,
       showConfirmPassword: false,
       showOldPassword: false,
-
       errorMessage: undefined,
     };
   },
+  mounted () {
+    this.maxDate = this.minimumDateOfBirth().toISOString().slice(0, 10);
+
+  },
   methods: {
+    /**
+     * Update Profile after linking up the modify endpoint
+     * Next person might have different idea of how/when the updateProfile button will be display
+     * Just here to setup everything
+    */
     updateProfile() {
       console.log(JSON.parse(JSON.stringify(this.user)));
     },
     updatePhoneNumber() {
       this.user.phoneNumber = this.countryCode + ' ' + this.phoneDigits;
     },
-    passwordChange() {
-      // TODO Write implementation
+    /**
+     * Apply validation rule on the currentPassword field
+     */
+    validateCurrentPassword() {
+      this.$refs.oldPassword.validate(true);
+    },
+    /**
+     * Apply validation rule on the confirmPassword field
+     */
+    passwordCheck () {
+      this.$refs.confirmPassword.validate();
+    },
+    /**
+     * Apply validation rule on country code field
+     */
+    phoneNumberChange () {
+      this.$refs.countryCode.validate();
+    },
+    /**
+     * Set the minimum age range in date picker according to the account
+     * Only showing differences between user and business account
+     * If account have have business or administered a business, then the minimum year = 16
+     * Else a normal user account minimum year restriction will be 13
+     */
+    minimumDateOfBirth () {
+      let today = new Date();
+      let year = today.getFullYear();
+      let month = today.getMonth();
+      let day = today.getDate();
+      if(this.$store.state.user.businessesAdministered.length >= 1) {
+        return new Date(year - 16, month, day);
+      }
+      else {
+        return new Date(year - 13, month, day);
+      }
     },
   },
   watch: {
@@ -384,23 +438,59 @@ export default {
       immediate: true,
     },
   },
+  /**
+   * Use all the imported validation rules from utils to be consistent within the web application.
+   */
   computed: {
+    emailRules: () => emailRules,
     mandatoryRules: () => mandatoryRules,
-    alphabetRules: () => [],
-    charBioRules: () => [],
-    alphabetExtendedMultilineRules: () => [],
-    countryCodeRules: () => [],
-    phoneNumberRules: () => [],
-    streetNumRules: () => [],
-    postCodeRules: () => [],
-    maxShortCharRules: () => [],
-    nameRules: () => [],
-    emailRules: () => [],
-    maxLongCharRules: () => [],
-    maxMediumCharRules: () => [],
-    passwordRules: () => [],
-    passwordConfirmationRule: () => [],
-    phoneRequiresCountryCodeRule: () => [],
+    passwordRules: () => passwordRules,
+    postCodeRules: () => postCodeRules,
+    nameRules: () => nameRules,
+    maxShortCharRules: () => maxCharRules(16),
+    maxMediumCharRules: () => maxCharRules(32),
+    maxLongCharRules: () => maxCharRules(100),
+    charBioRules: () => maxCharRules(200),
+    phoneNumberRules: () => phoneNumberRules,
+    countryCodeRules: () => countryCodeRules,
+    alphabetRules: () => alphabetRules,
+    alphabetExtendedMultilineRules: () => alphabetExtendedMultilineRules,
+    streetNumRules: () => streetNumRules,
+
+    /**
+     * Validation for currentPassword field
+     * Will be applied/triggered when newPassword or email field(s) is modified
+     */
+    currentPasswordRule () {
+      return [() =>
+        ((this.user.password.length === 0 && this.user.email === this.$store.state.user.email) || this.user.oldPassword.length > 0) || 'Current password must be entered to change password or email'
+      ];
+    },
+    /**
+     * Validation for new password and confirm password field matching
+     */
+    passwordConfirmationRule () {
+      return () =>
+        this.user.password === this.confirmPassword || 'New passwords and confirm password must match';
+    },
+
+    /**
+     * Validation rules for new password
+     * Not applying rules if the field is empty else validate with passwordRules
+     */
+    newPasswordRule () {
+      if(this.user.password.length === 0) return [];
+      else return passwordRules;
+    },
+
+    /**
+     * Validate rules for phone number
+     */
+    phoneRequiresCountryCodeRule () {
+      return () =>
+        !(this.phoneDigits > 0 && this.countryCode.length < 1) || 'Country code must be present';
+    }
   }
+
 };
 </script>
