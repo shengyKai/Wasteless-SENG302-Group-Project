@@ -1,7 +1,7 @@
 <template>
   <div>
-    <v-row v-if="fromSearch" class="mb-n16 mt-6">
-      <v-col class="text-right mt-16 mb-n16">
+    <v-row v-if="fromSearch && !modifyBusiness" class="mb-n16 mt-6">
+      <v-col class="text-right mt-10 mb-n10">
         <v-btn @click="returnToSearch" color="primary">Return to search</v-btn>
       </v-col>
     </v-row>
@@ -16,12 +16,12 @@
         />
       </v-card>
       <v-card class="body">
-        <div class="d-flex flex-column">
+        <div class="d-flex flex-column" no-gutters>
           <v-row>
-            <v-col cols="6">
+            <v-col cols="11">
               <span><h1>{{ business.name }}</h1></span>
             </v-col>
-            <v-col cols="6" class="d-flex justify-end">
+            <!-- <v-col cols="4" >
               <v-alert
                 class="ma-2 flex-grow-0"
                 v-if="errorMessage !== undefined"
@@ -31,6 +31,23 @@
               >
                 {{ errorMessage }}
               </v-alert>
+            </v-col> -->
+            <v-col class="text-right">
+              <v-tooltip bottom>
+                <template #activator="{ on, attrs }">
+                  <v-btn
+                    ref="settingsButton"
+                    icon
+                    color="primary"
+                    v-bind="attrs"
+                    v-on="on"
+                    @click="modifyBusiness = true;"
+                  >
+                    <v-icon>mdi-cog</v-icon>
+                  </v-btn>
+                </template>
+                <span>Modify Business Profile</span>
+              </v-tooltip>
             </v-col>
           </v-row>
           <p><b>Created:</b> {{ createdMsg }}</p>
@@ -61,24 +78,6 @@
               </span>
             </v-col>
           </v-row>
-          <div v-if='!modifyBusiness'>
-            <v-row justify="end">
-              <v-col cols="2">
-                <v-btn
-                  class="white--text"
-                  color="secondary"
-                  @click="modifyBusiness = true;"
-                >
-                  <v-icon
-                    class="expand-icon"
-                    color="white"
-                  >
-                    mdi-file-document-edit-outline
-                  </v-icon>Modify Business
-                </v-btn>
-              </v-col>
-            </v-row>
-          </div>
         </v-container>
       </v-card>
     </div>
@@ -87,6 +86,7 @@
       :business="business"
       v-if="modifyBusiness"
       @discardModifyBusiness="modifyBusiness=false"
+      @modifySuccess="updateBusiness"
     />
   </div>
 </template>
@@ -146,17 +146,7 @@ export default {
   watch: {
     $route: {
       handler() {
-        const id = parseInt(this.$route.params.id);
-        if (isNaN(id)) return;
-
-        getBusiness(id).then((value) => {
-          if (typeof value === 'string') {
-            this.$store.commit('setError', value);
-          } else {
-            this.business = value;
-            this.readableAddress = convertAddressToReadableText(value.address, "full");
-          }
-        });
+        this.updateBusiness();
       },
       immediate: true,
     }
@@ -249,6 +239,25 @@ export default {
         this.$refs.businessImageCarousel.forceClose();
       }
     },
+    /**
+     * Updates the business profile page to show the updated details of the business.
+     * This method is separated from the $route watcher as it is reused for the ModifyBusiness page on a successful
+     * api call, which will update the business profile page to the latest information.
+     */
+    updateBusiness() {
+      this.modifyBusiness = false;
+      const id = parseInt(this.$route.params.id);
+      if (isNaN(id)) return;
+
+      getBusiness(id).then((value) => {
+        if (typeof value === 'string') {
+          this.$store.commit('setError', value);
+        } else {
+          this.business = value;
+          this.readableAddress = convertAddressToReadableText(value.address, "full");
+        }
+      });
+    }
   }
 };
 </script>

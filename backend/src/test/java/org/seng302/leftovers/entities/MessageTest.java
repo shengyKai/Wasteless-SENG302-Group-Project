@@ -1,5 +1,8 @@
 package org.seng302.leftovers.entities;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import net.minidev.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -8,6 +11,8 @@ import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.seng302.leftovers.persistence.MessageRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
@@ -16,6 +21,7 @@ import java.time.Instant;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @SpringBootTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -80,5 +86,20 @@ class MessageTest {
 
         assertFalse(before.isAfter(message.getCreated()));
         assertFalse(after.isBefore(message.getCreated()));
+    }
+
+    @Test
+    void constructJSONObject_jsonHasExpectedFormat() throws JsonProcessingException {
+        JSONObject userJson = new JSONObject();
+        userJson.appendField("id", 967);
+        when(conversation.getId()).thenReturn(44L);
+        when(user.constructPublicJson()).thenReturn(userJson);
+        Message message = new Message(conversation, user, "Hello world!");
+        JSONObject json = message.constructJSONObject();
+        assertEquals(message.getId(), json.getAsNumber("id"));
+        assertEquals(message.getSender().getUserID(), (Long) json.getAsNumber("senderId"));
+        assertEquals(message.getCreated().toString(), json.getAsString("created"));
+        assertEquals(message.getContent(), json.getAsString("content"));
+        assertEquals(4, json.size());
     }
 }

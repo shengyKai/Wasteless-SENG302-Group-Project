@@ -7,6 +7,7 @@ package org.seng302.datagenerator;
 import java.sql.*;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.io.File;
@@ -32,14 +33,8 @@ public class UserGenerator {
      * Randomly generates the date of birth of the user
      * @return the user's date of birth
      */
-    private String generateDOB() {
-        String day = String.valueOf(random.nextInt(27) + 1); // +1 as the day cannot be zero
-        String month = String.valueOf(random.nextInt(11) + 1); // +1 as the month cannot be zero
-        //year must be more than a year in the past
-        String year = String.valueOf(random.nextInt(2006) + 1); // +1 as the year cannot be zero
-        while (year.length() < 4) year = "0" + year;
-
-        return year +"-"+ month +"-"+ day;
+    private LocalDate generateDOB() {
+        return randomDate(LocalDate.of(1900, 1, 1), LocalDate.of(2006, 1, 1));
     }
 
     /**

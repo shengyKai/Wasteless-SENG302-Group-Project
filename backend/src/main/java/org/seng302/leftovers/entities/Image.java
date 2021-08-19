@@ -8,6 +8,7 @@ import javax.persistence.*;
 import javax.persistence.Id;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 @Entity
 public class Image {
@@ -28,15 +29,14 @@ public class Image {
      * @param filenameThumbnail the directory where the image's thumbnail is located
      */
     public Image(String filename, String filenameThumbnail) {
-        this.filename = filename;
-        this.filenameThumbnail = filenameThumbnail;
+        setFilename(filename);
+        setFilenameThumbnail(filenameThumbnail);
     }
 
     /**
      * Empty constructor to make spring happy
      */
     protected Image() {
-
     }
 
     public JSONObject constructJSONObject() {
@@ -65,38 +65,6 @@ public class Image {
             }
         }
         return false;
-    }
-
-    /**
-     * A helper function to confirm that the filename thumbnail contains the string "_thumbnail" before the image type
-     * @param filenameThumbnail the thumbnail filename
-     * @return true if the thumbnail filename contains "_thumbnail" before the image type
-     */
-    private boolean checkContainsUnderscoreThumbnail(String filenameThumbnail) {
-        if (filenameThumbnail.length() > 14 &&
-            "_thumbnail".equals(filenameThumbnail.substring(filenameThumbnail.length() - 14, filenameThumbnail.length() - 4))
-        ) {
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * A helper function to check the filename does not contain any illegal characters
-     * @param filename the name of the directory
-     * @return true if the the filename does not contain any illegal characters, false otherwise
-     */
-    private boolean checkContainsIllegalCharacters(String filename) {
-        // A list of illegal characters that cannot exist within a filename directory string
-        final List<String> illegalCharacters = Arrays.asList(".", "\n", "\t", "\\", ",");
-
-        String filenameSubStr = filename.substring(0, filename.length() - 4);
-        for (String characters: illegalCharacters) {
-            if (filenameSubStr.contains(characters)) {
-                return false;
-            }
-        }
-        return true;
     }
 
     /**
@@ -134,8 +102,6 @@ public class Image {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Spaces are not allowed in the filename");
         } else if (!checkImageFormats(filename)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "An invalid image format was provided");
-        } else if (!checkContainsIllegalCharacters(filename)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "An illegal character was in the filename");
         }
         this.filename = filename;
     }
@@ -153,10 +119,6 @@ public class Image {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Spaces are not allowed in the thumbnail filename");
         } else if (!checkImageFormats(filenameThumbnail)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "An invalid image format was provided");
-        } else if (!checkContainsUnderscoreThumbnail(filenameThumbnail)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The thumbnail filename does not contain an _thumbnail");
-        } else if (!checkContainsIllegalCharacters(filenameThumbnail)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "An illegal character was in the filename");
         }
         this.filenameThumbnail = filenameThumbnail;
     }
@@ -164,5 +126,18 @@ public class Image {
     @Override
     public String toString() {
         return "IMAGE_"+this.getID().toString();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Image image = (Image) o;
+        return id.equals(image.id) && filename.equals(image.filename) && Objects.equals(filenameThumbnail, image.filenameThumbnail);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, filename, filenameThumbnail);
     }
 }

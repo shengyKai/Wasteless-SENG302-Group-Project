@@ -68,9 +68,9 @@ describe('HomePage.vue', () => {
     expect(wrapper.text()).toContain('No items in your feed');
   });
 
-  it('If an message event is posted to the store then it should be displayed in the newsfeed', async () => {
+  it('If an global message event is posted to the store then it should be displayed in the newsfeed', async () => {
     const event: AnyEvent = {
-      type: 'MessageEvent',
+      type: 'GlobalMessageEvent',
       id: 7,
       tag: 'none',
       created: new Date().toString(),
@@ -140,7 +140,7 @@ describe('HomePage.vue', () => {
 
   it('If an event is posted to the store then the message "No items in your feed" should not be shown', async () => {
     const event: AnyEvent = {
-      type: 'MessageEvent',
+      type: 'GlobalMessageEvent',
       id: 7,
       tag: 'none',
       created: new Date().toString(),
@@ -159,7 +159,7 @@ describe('HomePage.vue', () => {
     async function addMultipleEvents() {
       for (let i=0; i < 4; i++) {
         let event: AnyEvent = {
-          type: 'MessageEvent',
+          type: 'GlobalMessageEvent',
           id: i,
           tag: 'none',
           created: new Date().toString(),
@@ -170,7 +170,7 @@ describe('HomePage.vue', () => {
       }
       for (let i=4; i < 12; i++) {
         let event: AnyEvent = {
-          type: 'MessageEvent',
+          type: 'GlobalMessageEvent',
           id: i,
           tag: 'red',
           created: new Date().toString(),
