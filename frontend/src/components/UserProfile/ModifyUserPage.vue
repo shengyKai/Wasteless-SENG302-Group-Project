@@ -27,7 +27,7 @@
                 <v-col cols="12" sm="6" class="pb-3">
                   <v-text-field
                     ref="password"
-                    v-model="user.password"
+                    v-model="user.newPassword"
                     label="New Password"
                     @keyup="validateCurrentPassword"
                     :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
@@ -59,7 +59,7 @@
               <!-- INPUT: Current Password -->
               <v-text-field
                 ref="oldPassword"
-                v-model="user.oldPassword"
+                v-model="user.password"
                 label="Current Password"
                 :append-icon="showOldPassword ? 'mdi-eye' : 'mdi-eye-off'"
                 :type="showOldPassword ? 'text' : 'password'"
@@ -177,7 +177,7 @@
                     ref="countryCode"
                     v-model="countryCode"
                     label="Country Code"
-                    :rules="countryCodeRules.concat(phoneRequiresCountryCodeRule)"
+                    :rules="countryCodeRules.concat(phoneRequiresCountryCodeRules)"
                     outlined
                   />
                 </v-col>
@@ -191,6 +191,7 @@
                     label="Phone"
                     v-model="phoneDigits"
                     :rules="phoneNumberRules"
+                    @keyup="phoneNumberChange"
                     outlined
                   />
                 </v-col>
@@ -321,8 +322,8 @@ export default {
       valid: false,
       user: {
         email: '',
+        newPassword: '',
         password: '',
-        oldPassword: '',
 
         firstName: '',
         middleName: '',
@@ -369,8 +370,8 @@ export default {
       let modifiedUser = {
         ...this.user
       };
+      if (this.user.newPassword === "") modifiedUser.newPassword = undefined;
       if (this.user.password === "") modifiedUser.password = undefined;
-      if (this.user.oldPassword === "") modifiedUser.oldPassword = undefined;
       modifyUser(this.id, modifiedUser)
         .then(response => {
           if (typeof response === 'string') {
@@ -508,13 +509,9 @@ export default {
      * Will be applied/triggered when newPassword or email field(s) is modified
      */
     currentPasswordRule () {
-      console.log(this.previousUser.email);
-      console.log(this.user.email);
-      console.log(this.user.email === this.previousUser.email);
-      console.log(this.user.oldPassword.length > 0);
       return [
-        () => (this.user.password.length === 0 || this.user.oldPassword.length > 0) || 'Current password must be entered to change password',
-        () => (this.user.email === this.previousUser.email || this.user.oldPassword.length > 0) || 'Current password must be entered to change email'
+        () => (this.user.newPassword.length === 0 || this.user.password.length > 0) || 'Current password must be entered to change password',
+        () => (this.user.email === this.previousUser.email || this.user.password.length > 0) || 'Current password must be entered to change email'
       ];
     },
     /**
@@ -522,7 +519,7 @@ export default {
      */
     passwordConfirmationRule () {
       return () =>
-        this.user.password === this.confirmPassword || 'New passwords and confirm password must match';
+        this.user.newPassword === this.confirmPassword || 'New passwords and confirm password must match';
     },
 
     /**
@@ -530,16 +527,18 @@ export default {
      * Not applying rules if the field is empty else validate with passwordRules
      */
     newPasswordRule () {
-      if(this.user.password.length === 0) return [];
+      if(this.user.newPassword.length === 0) return [];
       else return passwordRules;
     },
 
     /**
      * Validate rules for phone number
      */
-    phoneRequiresCountryCodeRule () {
-      return () =>
-        !(this.phoneDigits > 0 && this.countryCode.length < 1) || 'Country code must be present';
+    phoneRequiresCountryCodeRules () {
+      return [
+        () => !(this.phoneDigits.length > 0 && this.countryCode.length < 1) || 'Country code must be present',
+        () => !(this.phoneDigits.length < 1 && this.countryCode.length > 0) || 'Cannot enter country code without phone number',
+      ];
     }
   }
 
