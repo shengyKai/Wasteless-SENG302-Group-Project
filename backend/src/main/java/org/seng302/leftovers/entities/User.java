@@ -492,17 +492,12 @@ public class User extends Account {
 
         /**
          * Set the builder's date of birth. This field is required.
-         * @param dobString a string representing the user's date of birth in format yyyy-MM-dd.
+         * @param dob a LocalDate representing the user's date of birth.
          * @return Builder with date of birth set.
          */
-        public Builder withDob(String dobString) {
-            try {
-                DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE;
-                this.dob = LocalDate.parse(dobString, dateTimeFormatter);
-                return this;
-            } catch (DateTimeException e) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Could not parse date of birth");
-            }
+        public Builder withDob(LocalDate dob) {
+            this.dob = dob;
+            return this;
         }
 
         /**

@@ -78,22 +78,6 @@ public class UserController {
 
     }
 
-    /**
-     * Checks whether the provided password matches the password for this user.
-     * Throws BAD_REQUEST if password is null
-     * Throws FORBIDDEN if password does not match account password
-     * @param user The user to check against
-     * @param providedPassword The provided password to verify
-     */
-    private void verifyPassword(User user, String providedPassword) throws Exception {
-        if (providedPassword == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The current password must be provided when changing email or password");
-        }
-        String hashedPassword = PasswordAuthenticator.generateAuthenticationCode(providedPassword);
-        if (!hashedPassword.equals(user.getAuthenticationCode())) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "The provided password is incorrect!");
-        }
-    }
 
     /**
      * PUT endpoint for modifying an existing user
@@ -116,12 +100,12 @@ public class UserController {
 
             // check if email changed
             if (!body.getEmail().equals(user.getEmail())) {
-                verifyPassword(user, body.getPassword());
+                PasswordAuthenticator.verifyPassword(body.getPassword(),user.getAuthenticationCode());
                 user.setEmail(body.getEmail());
             }
             // check if password changed
             if (body.getNewPassword() != null) {
-                verifyPassword(user, body.getPassword());
+                PasswordAuthenticator.verifyPassword(body.getPassword(), user.getAuthenticationCode());
                 user.setAuthenticationCodeFromPassword(body.getNewPassword());
             }
 
@@ -130,7 +114,7 @@ public class UserController {
             user.setLastName(body.getLastName());
             user.setNickname(body.getNickname());
             user.setBio(body.getBio());
-            user.setDob(body.getDOBAsLocalDate());
+            user.setDob(body.getDateOfBirth());
             user.setPhNum(body.getPhoneNumber());
             user.setAddress(body.getHomeAddress().createLocation());
 
