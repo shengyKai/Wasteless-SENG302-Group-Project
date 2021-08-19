@@ -10,6 +10,7 @@
                 <v-container>
                   <v-row no-gutters>
                     <v-col cols="12" sm="6">
+                      <!-- INPUT: Business Name -->
                       <v-text-field
                         dense
                         class="mr-1 required"
@@ -20,6 +21,7 @@
                       />
                     </v-col>
                     <v-col cols="12" sm="6">
+                      <!-- INPUT: Business Type -->
                       <v-select
                         dense
                         class="ml-1 required"
@@ -31,6 +33,7 @@
                       />
                     </v-col>
                     <v-col cols="12" sm="12">
+                      <!-- INPUT: Description -->
                       <v-textarea
                         dense
                         v-model="description"
@@ -44,6 +47,7 @@
                       <v-card-title class="primary-text mt-n7">Address</v-card-title>
                     </v-col>
                     <v-col cols="12" sm="6">
+                      <!-- INPUT: Street Address -->
                       <v-text-field
                         class="mr-1 required"
                         v-model="streetAddress"
@@ -52,6 +56,7 @@
                         outlined/>
                     </v-col>
                     <v-col cols="12" sm="6">
+                      <!-- INPUT: District -->
                       <LocationAutocomplete
                         type="district"
                         class="ml-1"
@@ -60,6 +65,7 @@
                       />
                     </v-col>
                     <v-col cols="12" sm="6">
+                      <!-- INPUT: City -->
                       <LocationAutocomplete
                         type="city"
                         class="mr-1 required"
@@ -68,6 +74,7 @@
                       />
                     </v-col>
                     <v-col cols="12" sm="6">
+                      <!-- INPUT: Region -->
                       <LocationAutocomplete
                         type="region"
                         class="ml-1 required"
@@ -76,6 +83,7 @@
                       />
                     </v-col>
                     <v-col cols="12" sm="6">
+                      <!-- INPUT: Country -->
                       <LocationAutocomplete
                         type="country"
                         class="mr-1 required"
@@ -84,6 +92,7 @@
                       />
                     </v-col>
                     <v-col cols="12" sm="6">
+                      <!-- INPUT: Postcode -->
                       <v-text-field
                         class="ml-1 required"
                         v-model="postcode"
@@ -97,6 +106,7 @@
                       cols="12"
                       sm="12"
                     >
+                      <!-- INPUT: Update Currency -->
                       <v-checkbox
                         v-model="updateProductCountry"
                         class="mt-n5"
@@ -106,10 +116,11 @@
                       />
                     </v-col>
                   </v-row>
-                  <div v-if="userIsPrimaryAdmin" class="mt-1">
+                  <div v-if="isPrimaryOwner | isSystemAdmin" class="mt-1">
                     <v-card-title>Change Primary Administrator</v-card-title>
                     <v-row>
                       <v-col>
+                        <!-- INPUT: Admin -->
                         <span v-for="admin in administrators" :key="admin.id">
                           <v-chip
                             v-if="adminIsPrimary(admin)"
@@ -124,7 +135,7 @@
                             class="ma-1 ml-0"
                             color="green"
                             text-color="white"
-                            @click="changePrimaryAdmin(admin)"
+                            @click="changePrimaryOwner(admin)"
                           >
                             {{ admin.firstName }} {{ admin.lastName }}
                           </v-chip>
@@ -138,6 +149,7 @@
                     </v-row>
                   </div>
                   <v-card-title class="mt-n3">Images</v-card-title>
+                  <!-- INPUT: Image Uploader -->
                   <v-btn
                     color="primary"
                     outlined
@@ -152,12 +164,13 @@
                     Upload new image
                   </v-btn>
                   <BusinessImageUploader :business-id="business.id" v-model="showImageUploaderForm"/>
-                  <p class="error-text" v-if ="errorMessage !== undefined"> {{errorMessage}} </p>
+                  <p class="error-text mt-2" v-if ="errorMessage !== undefined"> {{errorMessage}} </p>
                 </v-container>
               </v-card-text>
               <v-card-actions>
                 <v-row>
                   <v-col class="text-right">
+                    <!-- INPUT: Submit -->
                     <v-btn
                       type="submit"
                       color="primary"
@@ -171,6 +184,7 @@
                         mdi-file-upload-outline
                       </v-icon>
                     </v-btn>
+                    <!-- INPUT: Discard -->
                     <v-btn
                       color="secondary"
                       class="ml-2"
@@ -189,6 +203,7 @@
                   v-model="currencyConfirmDialog"
                   max-width="300px"
                 >
+                  <!-- INPUT: Confirm Dialog -->
                   <v-card>
                     <v-card-title>
                       Are you sure?
@@ -231,7 +246,8 @@ import {
   alphabetExtendedMultilineRules,
   alphabetExtendedSingleLineRules, alphabetRules,
   mandatoryRules,
-  maxCharRules, postCodeRules, streetNumRules
+  maxCharRules, postCodeRules, streetNumRules,
+  USER_ROLES
 } from "@/utils";
 import { modifyBusiness } from '@/api/internal';
 
@@ -243,11 +259,6 @@ export default {
   },
   props: {
     business: Object
-  },
-  mounted() {
-    console.log("Business primary admin = " + this.business.primaryAdministratorId);
-    console.log("My ID = " + this.$store.state.user.id);
-    console.log("Start");
   },
   data() {
     return {
@@ -280,7 +291,7 @@ export default {
       showChangeAdminAlert: false,
       primaryAdminAlertMsg: "",
       primaryAdministratorId: this.business.primaryAdministratorId,
-      newAdminId : '',
+      newOwnerId : '',
       maxCharRules: () => maxCharRules(100),
       maxCharDescriptionRules: ()=> maxCharRules(200),
       mandatoryRules: ()=> mandatoryRules,
@@ -291,44 +302,60 @@ export default {
       postcodeRules: ()=> postCodeRules,
     };
   },
+  mounted() {
+    console.log(this.$store.state.activeRole.type);
+  },
   computed: {
-    userIsPrimaryAdmin() {
+    /**
+     * Check if the current user is the admin of the system
+     */
+    isSystemAdmin() {
+      return [USER_ROLES.DGAA, USER_ROLES.GAA].includes(
+        this.$store.getters.role
+      );
+    },
+    /**
+     * Check if the current user is the primary owner of the business
+     */
+    isPrimaryOwner() {
       return this.$store.state.user.id === this.business.primaryAdministratorId;
     }
   },
   methods: {
+    /**
+     * Loop through all admin to identify business primary owner
+     * Return TRUE if the current looping chip is primary owner and no other chip is selected by user
+     * If other chip is selected, the chip will be displayed as primary owner with message prompted
+     */
     adminIsPrimary(admin) {
-      if(admin.id === this.primaryAdministratorId && this.newAdminId === '') {
-        console.log("I am Primary Admin");
-        return true;
-      }
-      else if(admin.id === this.newAdminId) {
-        console.log("Newperson is Admin");
-        return true;
-      }
+      if(admin.id === this.primaryAdministratorId && this.newOwnerId === '') return true;
+      else if(admin.id === this.newOwnerId) return true;
       return false;
     },
+    /**
+     * Execute the discard modify functionality and render business profile
+     */
     discardButton() {
       this.$emit('discardModifyBusiness');
     },
+    /**
+     * Action(s) of modifying a business
+     * Get the street number and name from the street address field.
+     * Check existence of new selected primary owner, update to new owner or remain unchange
+     * Set up the modified fields
+     * Calling API
+     */
     async proceedWithModifyBusiness() {
       this.errorMessage = undefined;
-      /**
-       * Get the street number and name from the street address field.
-       */
+
       const streetParts = this.streetAddress.split(" ");
       const streetNum = streetParts[0];
       const streetName = streetParts.slice(1, streetParts.length).join(" ");
 
-      if(this.newAdminId !== '') {
-        console.log("There is new admin, id = " + this.newAdminId);
-      } else {
-        this.newAdminId = this.$store.state.user.id;
-      }
-      // Set up the modified fields
+      if(this.newOwnerId === '') this.newOwnerId = this.$store.state.user.id;
       let modifiedFields = {
         id: this.$store.state.user.id,
-        primaryAdministratorId: this.newAdminId,
+        primaryAdministratorId: this.newOwnerId,
         name: this.businessName,
         description: this.description,
         address: {
@@ -360,18 +387,18 @@ export default {
      * When the user clicks on an administrator a popup message will appear stating that they
      * have changed that user to the primary administrator of the business. Additionally, the
      * colour of said user will change to red, whilst the existing primary administrator will
-     * change to green. Futhermore, if the original primary administrator is clicked this
+     * change to green. Futhermore, if the original primary owner is clicked this
      * message will not appear.
      */
-    changePrimaryAdmin(admin) {
-      this.showChangeAdminAlert = true;
+    changePrimaryOwner(admin) {
       if (admin.id !== this.business.primaryAdministratorId) {
         this.primaryAdminAlertMsg = `Primary admin will be changed to ${admin.firstName} ${admin.lastName}`;
+        this.showChangeAdminAlert = true;
       } else {
         this.showChangeAdminAlert = false;
         this.primaryAdminAlertMsg = "";
       }
-      this.newAdminId = admin.id;
+      this.newOwnerId = admin.id;
     },
   }
 };
