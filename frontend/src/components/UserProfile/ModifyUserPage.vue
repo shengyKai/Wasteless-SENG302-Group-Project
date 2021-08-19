@@ -144,7 +144,6 @@
                     outlined
                   />
                 </template>
-                <!-- :max="maxDate" -->
                 <v-date-picker
                   v-model="user.dateOfBirth"
                   :max="maxDate"
@@ -272,9 +271,20 @@
               type="submit"
               color="primary"
               :disabled=!valid
-              @click="updateProfile"
+              @click.prevent="updateProfile"
             >
               Update profile
+            </v-btn>
+            <v-btn
+              color="secondary"
+              class="ml-2"
+              @click="$router.push(`/profile/${id}`);"
+            > Discard
+              <v-icon
+                color="white"
+              >
+                mdi-file-cancel-outline
+              </v-icon>
             </v-btn>
           </v-row>
         </v-card-text>
@@ -286,7 +296,7 @@
 <script>
 import LocationAutocomplete from '@/components/utils/LocationAutocomplete';
 
-import { getUser } from '@/api/internal';
+import { getUser, modifyUser } from '@/api/internal';
 import {
   alphabetExtendedMultilineRules,
   alphabetRules,
@@ -306,6 +316,7 @@ export default {
   },
   data() {
     return {
+      id: undefined,
       tab: 'location',
       valid: false,
       user: {
@@ -331,6 +342,7 @@ export default {
           postcode: '',
         }
       },
+      previousUser: {},
       countryCode: '',
       phoneDigits: '',
       confirmPassword: '',
@@ -343,18 +355,76 @@ export default {
       errorMessage: undefined,
     };
   },
-  mounted () {
+  async mounted () {
+    await this.setUser();
     this.maxDate = this.minimumDateOfBirth().toISOString().slice(0, 10);
 
   },
   methods: {
     /**
-     * Update Profile after linking up the modify endpoint
-     * Next person might have different idea of how/when the updateProfile button will be display
-     * Just here to setup everything
+     * Send a request to the backend to update the user using the details entered in this form.
     */
-    updateProfile() {
-      console.log(JSON.parse(JSON.stringify(this.user)));
+    async updateProfile() {
+      this.errorMessage = undefined;
+      let modifiedUser = {
+        ...this.user
+      };
+      if (this.user.password === "") modifiedUser.password = undefined;
+      if (this.user.oldPassword === "") modifiedUser.oldPassword = undefined;
+      modifyUser(this.id, modifiedUser)
+        .then(response => {
+          if (typeof response === 'string') {
+            this.errorMessage = response;
+          } else if (this.id === this.$store.state.user.id) {
+            this.updateStoreUser();
+          } else {
+            this.$router.push(`/profile/${this.id}`);
+          }
+        });
+    },
+    /**
+     * Setup all the fields of the user associated with this page.
+     */
+    async setUser() {
+      this.id = parseInt(this.$route.params.id);
+      if (isNaN(this.id)) return;
+
+      if (this.id === this.$store.state.user.id) {
+        this.previousUser = this.$store.state.user;
+      } else {
+        this.previousUser = await getUser(this.id);
+      }
+      this.user.firstName = this.previousUser.firstName ?? '',
+      this.user.lastName = this.previousUser.lastName ?? '',
+      this.user.middleName = this.previousUser.middleName ?? '',
+      this.user.nickname = this.previousUser.nickname ?? '',
+      this.user.bio = this.previousUser.bio ?? '',
+      this.user.email = this.previousUser.email ?? '',
+      this.user.dateOfBirth = this.previousUser.dateOfBirth ?? '',
+
+      this.user.homeAddress = this.previousUser.homeAddress;
+      this.streetAddress = this.previousUser.homeAddress.streetNumber + ' ' + this.previousUser.homeAddress.streetName;
+
+      if (this.previousUser.phoneNumber !== undefined) {
+        let parts = this.previousUser.phoneNumber.split(' ');
+        this.countryCode = parts[0];
+        this.phoneDigits = parts.slice(1).join(' ');
+      }
+    },
+    /**
+     * Set the attributes of the user in active user in the store to those retrieved from the backend using the
+     * user id on this page.
+     */
+    updateStoreUser() {
+      getUser(this.id)
+        .then(response => {
+          if (typeof response === 'string') {
+            this.errorMessage = response;
+          } else {
+            this.$store.state.user = response;
+            this.$router.push(`/profile/${this.id}`);
+          }
+        });
     },
     updatePhoneNumber() {
       this.user.phoneNumber = this.countryCode + ' ' + this.phoneDigits;
@@ -388,7 +458,7 @@ export default {
       let year = today.getFullYear();
       let month = today.getMonth();
       let day = today.getDate();
-      if(this.$store.state.user.businessesAdministered.length >= 1) {
+      if(this.previousUser.businessesAdministered.length >= 1) {
         return new Date(year - 16, month, day);
       }
       else {
@@ -409,31 +479,7 @@ export default {
     phoneDigits() { this.updatePhoneNumber(); },
     $route: {
       async handler() {
-        const id = parseInt(this.$route.params.id);
-        if (isNaN(id)) return;
-
-        let user;
-        if (id === this.$store.state.user.id) {
-          user = this.$store.state.user;
-        } else {
-          user = await getUser(id);
-        }
-        this.user.firstName = user.firstName ?? '',
-        this.user.lastName = user.lastName ?? '',
-        this.user.middleName = user.middleName ?? '',
-        this.user.nickname = user.nickname ?? '',
-        this.user.bio = user.bio ?? '',
-        this.user.email = user.email ?? '',
-        this.user.dateOfBirth = user.dateOfBirth ?? '',
-
-        this.user.homeAddress = user.homeAddress;
-        this.streetAddress = user.homeAddress.streetNumber + ' ' + user.homeAddress.streetName;
-
-        if (user.phoneNumber !== undefined) {
-          let parts = user.phoneNumber.split(' ');
-          this.countryCode = parts[0];
-          this.phoneDigits = parts.slice(1).join(' ');
-        }
+        await this.setUser();
       },
       immediate: true,
     },
@@ -462,8 +508,13 @@ export default {
      * Will be applied/triggered when newPassword or email field(s) is modified
      */
     currentPasswordRule () {
-      return [() =>
-        ((this.user.password.length === 0 && this.user.email === this.$store.state.user.email) || this.user.oldPassword.length > 0) || 'Current password must be entered to change password or email'
+      console.log(this.previousUser.email);
+      console.log(this.user.email);
+      console.log(this.user.email === this.previousUser.email);
+      console.log(this.user.oldPassword.length > 0);
+      return [
+        () => (this.user.password.length === 0 || this.user.oldPassword.length > 0) || 'Current password must be entered to change password',
+        () => (this.user.email === this.previousUser.email || this.user.oldPassword.length > 0) || 'Current password must be entered to change email'
       ];
     },
     /**

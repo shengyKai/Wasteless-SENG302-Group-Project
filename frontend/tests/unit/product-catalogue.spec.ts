@@ -199,7 +199,7 @@ describe('ProductCatalogue.vue', () => {
     createGetProductWrapper();
     await wrapper.setData({
       orderBy: "description"
-    })
+    });
     await Vue.nextTick();
     expect(getProducts).toHaveBeenCalledWith(100, 1, RESULTS_PER_PAGE, 'description', false);
   });
@@ -209,7 +209,7 @@ describe('ProductCatalogue.vue', () => {
     createGetProductWrapper();
     await wrapper.setData({
       reverse: true
-    })
+    });
     await Vue.nextTick();
     expect(getProducts).toHaveBeenCalledWith(100, 1, RESULTS_PER_PAGE, 'productCode', true);
   });
@@ -219,7 +219,7 @@ describe('ProductCatalogue.vue', () => {
     createGetProductWrapper();
     await wrapper.setData({
       currentPage: 2
-    })
+    });
     await Vue.nextTick();
     expect(getProducts).toHaveBeenCalledWith(100, 2, RESULTS_PER_PAGE, 'productCode', false);
   });
@@ -229,7 +229,7 @@ describe('ProductCatalogue.vue', () => {
     createGetProductWrapper();
     await wrapper.setData({
       resultsPerPage: 5
-    })
+    });
     await Vue.nextTick();
     expect(getProducts).toHaveBeenCalledWith(100, 1, 5, 'productCode', false);
   });

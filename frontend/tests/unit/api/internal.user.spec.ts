@@ -34,7 +34,7 @@ describe('Test PUT /users/{userId} endpoint', () => {
       region: "Canterbury",
       country: "New Zealand"
     }
-  }
+  };
 
   it('When API request is successfully resolved, returns undefined', async () => {
     instance.put.mockResolvedValueOnce({

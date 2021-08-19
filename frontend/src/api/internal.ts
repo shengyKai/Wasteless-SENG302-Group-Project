@@ -345,7 +345,7 @@ export async function modifyUser(userId: number, user: ModifyUser): Promise<Mayb
     if (status === undefined) return 'Failed to reach backend';
     if (status === 400) return 'Invalid details entered: ' + error.response?.data.message;
     if (status === 401) return 'You have been logged out. Please login again and retry';
-    if (status === 403) return 'Cannot update user: ' + error.response?.data.message; 
+    if (status === 403) return 'Cannot update user: ' + error.response?.data.message;
     if (status === 406) return 'User does not exist';
     return 'Request failed: ' + error.response?.data.message;
   }
