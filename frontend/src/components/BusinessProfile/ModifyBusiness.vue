@@ -244,6 +244,11 @@ export default {
   props: {
     business: Object
   },
+  mounted() {
+    console.log("Business primary admin = " + this.business.primaryAdministratorId);
+    console.log("My ID = " + this.$store.state.user.id);
+    console.log("Start");
+  },
   data() {
     return {
       currencyConfirmDialog: false,
@@ -275,6 +280,7 @@ export default {
       showChangeAdminAlert: false,
       primaryAdminAlertMsg: "",
       primaryAdministratorId: this.business.primaryAdministratorId,
+      newAdminId : '',
       maxCharRules: () => maxCharRules(100),
       maxCharDescriptionRules: ()=> maxCharRules(200),
       mandatoryRules: ()=> mandatoryRules,
@@ -292,13 +298,20 @@ export default {
   },
   methods: {
     adminIsPrimary(admin) {
-      return admin.id === this.primaryAdministratorId;
+      if(admin.id === this.primaryAdministratorId && this.newAdminId === '') {
+        console.log("I am admin, no choose new admin");
+        return true;
+      }
+      else if(admin.id === this.newAdminId) {
+        console.log("Newperson is admin");
+        return true;
+      }
+      return false;
     },
     discardButton() {
       this.$emit('discardModifyBusiness');
     },
     async proceedWithModifyBusiness() {
-      console.log("AAA");
       this.errorMessage = undefined;
       /**
        * Get the street number and name from the street address field.
@@ -307,9 +320,14 @@ export default {
       const streetNum = streetParts[0];
       const streetName = streetParts.slice(1, streetParts.length).join(" ");
 
+      if(this.newAdminId !== '') {
+        this.primaryAdministratorId = this.newAdminId;
+        console.log("There is new admin, id = " + this.newAdminId);
+      }
       // Set up the modified fields
       let modifiedFields = {
-        primaryAdministratorId: this.primaryAdministratorId,
+        // primaryAdministratorId: this.primaryAdministratorId,
+        primaryAdministratorId: 2,
         name: this.businessName,
         description: this.description,
         address: {
@@ -324,9 +342,6 @@ export default {
         businessType: this.businessType,
         updateProductCountry: this.updateProductCountry
       };
-      console.log("BBB");
-      console.log(modifiedFields);
-      console.log("CCC");
       const result = await modifyBusiness(this.business.id, modifiedFields);
       /**
        * If the result is a string, means it is an error message, of which it will show up on the page.
@@ -334,9 +349,13 @@ export default {
        * If the result is undefined(the else case) then an event will be emitted to the parent component, BusinessProfile/index.vue
        * and the modifyBusiness attribute there will be false, thus changing the page to the usual business profile page.
        */
+      console.log("AAA");
       if (typeof result === 'string') {
+        this.primaryAdministratorId = this.$store.state.user.id;
+        console.log("BBB");
         this.errorMessage = result;
       } else {
+        console.log("CCC");
         this.$emit("modifySuccess");
       }
     },
@@ -348,16 +367,14 @@ export default {
      * message will not appear.
      */
     changePrimaryAdmin(admin) {
-      console.log("EEE");
       this.showChangeAdminAlert = true;
       if (admin.id !== this.business.primaryAdministratorId) {
-        this.showChangeAdminAlert = true;
         this.primaryAdminAlertMsg = `Primary admin will be changed to ${admin.firstName} ${admin.lastName}`;
       } else {
         this.showChangeAdminAlert = false;
         this.primaryAdminAlertMsg = "";
       }
-      this.primaryAdministratorId = admin.id;
+      this.newAdminId = admin.id;
     },
   }
 };
