@@ -87,7 +87,7 @@ public class UserController {
      * @param body A Json object containing all of the user's details from the modification form
      */
     @PutMapping("/users/{id}")
-    public void modifyUser(@PathVariable Long id, @Valid @RequestBody ModifyUserDTO body, HttpServletRequest request) throws Exception {
+    public void modifyUser(@PathVariable Long id, @Valid @RequestBody ModifyUserDTO body, HttpServletRequest request) {
         logger.info("Updating user (userId={})", id);
         AuthenticationTokenManager.checkAuthenticationToken(request);
         try {

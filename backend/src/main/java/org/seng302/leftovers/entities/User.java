@@ -499,6 +499,15 @@ public class User extends Account {
             this.dob = dob;
             return this;
         }
+        /**
+         * Set the builder's date of birth. This field is required.
+         * @param dobString a String representing the user's date of birth.
+         * @return Builder with date of birth set.
+         */
+        public Builder withDob(String dobString) {
+            this.dob = LocalDate.parse(dobString);
+            return this;
+        }
 
         /**
          * Set the builder's phone number. This field is optional.

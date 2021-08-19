@@ -52,11 +52,6 @@ public class UserControllerModifyTest {
     private UserController userController;
 
     @Mock
-    private HttpServletRequest request;
-    @Mock
-    private HttpSession session;
-
-    @Mock
     private UserRepository userRepository;
 
     @Mock
@@ -89,14 +84,6 @@ public class UserControllerModifyTest {
                 PasswordAuthenticator.generateAuthenticationCode(validCurrentPassword));
         when(mockUser.getAddress()).thenReturn(mockLocation);
 
-        when(mockLocation.getCountry()).thenReturn("New Zealand");
-        when(mockLocation.getCity()).thenReturn("Christchurch");
-        when(mockLocation.getDistrict()).thenReturn("District");
-        when(mockLocation.getRegion()).thenReturn("Canterbury");
-        when(mockLocation.getPostCode()).thenReturn("1234");
-        when(mockLocation.getStreetNumber()).thenReturn("68");
-        when(mockLocation.getStreetName()).thenReturn("Arthur street");
-
         userController = new UserController(userRepository);
         mockMvc = MockMvcBuilders.standaloneSetup(userController).build();
     }
@@ -124,290 +111,52 @@ public class UserControllerModifyTest {
         return jsonBody;
     }
 
-    private JSONObject createSessionForUser(Long userId) {
-        var json = new JSONObject();
-        json.put("accountId", userId);
-        return json;
-    }
-
     @Test
-    void modifyUser_modifyWithValidFirstName_modifiedUser200() throws Exception {
+    void modifyUser_modifyWithValidFields_modifiedUser200() throws Exception {
         var jsonBody = createValidRequest();
-
+        Location address = new Location.Builder()
+                .inCountry("Australia")
+                .inCity("Brisbane")
+                .inRegion("Ozzy")
+                .atStreetNumber("62")
+                .onStreet("Walnut street")
+                .withPostCode("9876")
+                .atDistrict("Outback")
+                .build();
+        JSONObject jsonAddress = address.constructFullJson();
+        jsonBody.put("homeAddress", jsonAddress);
         String newFirstName = "Nathan";
         jsonBody.put("firstName", newFirstName);
-
-        mockMvc.perform(MockMvcRequestBuilders
-                .put("/users/" + mockUserId)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(jsonBody.toString())
-                .sessionAttrs(createSessionForUser(mockUserId)))
-                .andExpect(status().isOk())
-                .andReturn();
-
-        verify(userRepository, times(1)).getUser(mockUserId);
-        verify(userRepository, times(1)).save(mockUser);
-        verify(mockUser, times(1)).setFirstName(newFirstName);
-    }
-
-    @Test
-    void modifyUser_modifyWithValidLastName_modifiedUser200() throws Exception {
-        var jsonBody = createValidRequest();
-
         String newLastName = "John";
         jsonBody.put("lastName", newLastName);
-
-        mockMvc.perform(MockMvcRequestBuilders
-                        .put("/users/" + mockUserId)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(jsonBody.toString())
-                        .sessionAttrs(createSessionForUser(mockUserId)))
-                .andExpect(status().isOk())
-                .andReturn();
-
-        verify(userRepository, times(1)).getUser(mockUserId);
-        verify(userRepository, times(1)).save(mockUser);
-        verify(mockUser, times(1)).setLastName(newLastName);
-    }
-
-    @Test
-    void modifyUser_modifyWithValidMiddleName_modifiedUser200() throws Exception {
-        var jsonBody = createValidRequest();
-
         String newMiddleName = "Johnson";
         jsonBody.put("middleName", newMiddleName);
-
-        mockMvc.perform(MockMvcRequestBuilders
-                        .put("/users/" + mockUserId)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(jsonBody.toString())
-                        .sessionAttrs(createSessionForUser(mockUserId)))
-                .andExpect(status().isOk())
-                .andReturn();
-
-        verify(userRepository, times(1)).getUser(mockUserId);
-        verify(userRepository, times(1)).save(mockUser);
-        verify(mockUser, times(1)).setMiddleName(newMiddleName);
-    }
-
-    @Test
-    void modifyUser_modifyWithValidNickname_modifiedUser200() throws Exception {
-        var jsonBody = createValidRequest();
-
         String newNickname = "Johnson";
         jsonBody.put("nickname", newNickname);
-
-        mockMvc.perform(MockMvcRequestBuilders
-                        .put("/users/" + mockUserId)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(jsonBody.toString())
-                        .sessionAttrs(createSessionForUser(mockUserId)))
-                .andExpect(status().isOk())
-                .andReturn();
-
-        verify(userRepository, times(1)).getUser(mockUserId);
-        verify(userRepository, times(1)).save(mockUser);
-        verify(mockUser, times(1)).setNickname(newNickname);
-    }
-
-    @Test
-    void modifyUser_modifyWithValidBio_modifiedUser200() throws Exception {
-        var jsonBody = createValidRequest();
-
         String newBio = "hello --  welcome to my page";
         jsonBody.put("bio", newBio);
-
-        mockMvc.perform(MockMvcRequestBuilders
-                        .put("/users/" + mockUserId)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(jsonBody.toString())
-                        .sessionAttrs(createSessionForUser(mockUserId)))
-                .andExpect(status().isOk())
-                .andReturn();
-
-        verify(userRepository, times(1)).getUser(mockUserId);
-        verify(userRepository, times(1)).save(mockUser);
-        verify(mockUser, times(1)).setBio(newBio);
-    }
-
-    @Test
-    void modifyUser_modifyWithValidDateOfBirth_modifiedUser200() throws Exception {
-        var jsonBody = createValidRequest();
-
         String newDateOfBirth = "1999-07-06";
         jsonBody.put("dateOfBirth", newDateOfBirth);
-
-        mockMvc.perform(MockMvcRequestBuilders
-                        .put("/users/" + mockUserId)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(jsonBody.toString())
-                        .sessionAttrs(createSessionForUser(mockUserId)))
-                .andExpect(status().isOk())
-                .andReturn();
-
-        verify(userRepository, times(1)).getUser(mockUserId);
-        verify(userRepository, times(1)).save(mockUser);
-        verify(mockUser, times(1)).setDob(LocalDate.parse(newDateOfBirth));
-    }
-
-    @Test
-    void modifyUser_modifyWithValidPhoneNumber_modifiedUser200() throws Exception {
-        var jsonBody = createValidRequest();
-
         String newPhoneNumber = "+64 3 555 0129";
         jsonBody.put("phoneNumber", newPhoneNumber);
 
         mockMvc.perform(MockMvcRequestBuilders
                         .put("/users/" + mockUserId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(jsonBody.toString())
-                        .sessionAttrs(createSessionForUser(mockUserId)))
+                        .content(jsonBody.toString()))
                 .andExpect(status().isOk())
                 .andReturn();
 
         verify(userRepository, times(1)).getUser(mockUserId);
         verify(userRepository, times(1)).save(mockUser);
+        verify(mockUser, times(1)).setAddress(any());
+        verify(mockUser, times(1)).setFirstName(newFirstName);
+        verify(mockUser, times(1)).setLastName(newLastName);
+        verify(mockUser, times(1)).setMiddleName(newMiddleName);
+        verify(mockUser, times(1)).setNickname(newNickname);
+        verify(mockUser, times(1)).setBio(newBio);
+        verify(mockUser, times(1)).setDob(LocalDate.parse(newDateOfBirth));
         verify(mockUser, times(1)).setPhNum(newPhoneNumber);
-    }
-
-    @Test
-    void modifyUser_modifyWithValidStreetNumber_modifiedUser200() throws Exception {
-        var jsonBody = createValidRequest();
-
-        String newStreetNumber = "59";
-        jsonBody.put("streetNumber", newStreetNumber);
-
-        mockMvc.perform(MockMvcRequestBuilders
-                        .put("/users/" + mockUserId)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(jsonBody.toString())
-                        .sessionAttrs(createSessionForUser(mockUserId)))
-                .andExpect(status().isOk())
-                .andReturn();
-
-        verify(userRepository, times(1)).getUser(mockUserId);
-        verify(userRepository, times(1)).save(mockUser);
-        verify(mockUser, times(1)).setAddress(any());
-    }
-
-    @Test
-    void modifyUser_modifyWithValidStreetName_modifiedUser200() throws Exception {
-        var jsonBody = createValidRequest();
-
-        String newStreetName = "Happy Street";
-        jsonBody.put("streetName", newStreetName);
-
-        mockMvc.perform(MockMvcRequestBuilders
-                        .put("/users/" + mockUserId)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(jsonBody.toString())
-                        .sessionAttrs(createSessionForUser(mockUserId)))
-                .andExpect(status().isOk())
-                .andReturn();
-
-        verify(userRepository, times(1)).getUser(mockUserId);
-        verify(userRepository, times(1)).save(mockUser);
-        verify(mockUser, times(1)).setAddress(any());
-    }
-
-    @Test
-    void modifyUser_modifyWithValidDistrict_modifiedUser200() throws Exception {
-        var jsonBody = createValidRequest();
-
-        String newDistrict = "Sheepery";
-        jsonBody.put("district", newDistrict);
-
-        mockMvc.perform(MockMvcRequestBuilders
-                        .put("/users/" + mockUserId)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(jsonBody.toString())
-                        .sessionAttrs(createSessionForUser(mockUserId)))
-                .andExpect(status().isOk())
-                .andReturn();
-
-        verify(userRepository, times(1)).getUser(mockUserId);
-        verify(userRepository, times(1)).save(mockUser);
-        verify(mockUser, times(1)).setAddress(any());
-    }
-
-    @Test
-    void modifyUser_modifyWithValidCity_modifiedUser200() throws Exception {
-        var jsonBody = createValidRequest();
-
-        String newCity = "Invercargill";
-        jsonBody.put("city", newCity);
-
-        mockMvc.perform(MockMvcRequestBuilders
-                        .put("/users/" + mockUserId)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(jsonBody.toString())
-                        .sessionAttrs(createSessionForUser(mockUserId)))
-                .andExpect(status().isOk())
-                .andReturn();
-
-        verify(userRepository, times(1)).getUser(mockUserId);
-        verify(userRepository, times(1)).save(mockUser);
-        verify(mockUser, times(1)).setAddress(any());
-    }
-
-    @Test
-    void modifyUser_modifyWithValidRegion_modifiedUser200() throws Exception {
-        var jsonBody = createValidRequest();
-
-        String newRegion = "Clutha";
-        jsonBody.put("region", newRegion);
-
-        mockMvc.perform(MockMvcRequestBuilders
-                        .put("/users/" + mockUserId)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(jsonBody.toString())
-                        .sessionAttrs(createSessionForUser(mockUserId)))
-                .andExpect(status().isOk())
-                .andReturn();
-
-        verify(userRepository, times(1)).getUser(mockUserId);
-        verify(userRepository, times(1)).save(mockUser);
-        verify(mockUser, times(1)).setAddress(any());
-    }
-
-    @Test
-    void modifyUser_modifyWithValidCountry_modifiedUser200() throws Exception {
-        var jsonBody = createValidRequest();
-
-        String newCountry = "Australia";
-        jsonBody.put("country", newCountry);
-
-        mockMvc.perform(MockMvcRequestBuilders
-                        .put("/users/" + mockUserId)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(jsonBody.toString())
-                        .sessionAttrs(createSessionForUser(mockUserId)))
-                .andExpect(status().isOk())
-                .andReturn();
-
-        verify(userRepository, times(1)).getUser(mockUserId);
-        verify(userRepository, times(1)).save(mockUser);
-        verify(mockUser, times(1)).setAddress(any());
-    }
-
-    @Test
-    void modifyUser_modifyWithValidPostcode_modifiedUser200() throws Exception {
-        var jsonBody = createValidRequest();
-
-        String newPostcode = "90953";
-        jsonBody.put("postcode", newPostcode);
-
-        mockMvc.perform(MockMvcRequestBuilders
-                        .put("/users/" + mockUserId)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(jsonBody.toString())
-                        .sessionAttrs(createSessionForUser(mockUserId)))
-                .andExpect(status().isOk())
-                .andReturn();
-
-        verify(userRepository, times(1)).getUser(mockUserId);
-        verify(userRepository, times(1)).save(mockUser);
-        verify(mockUser, times(1)).setAddress(any());
     }
 
     @Test
@@ -424,8 +173,7 @@ public class UserControllerModifyTest {
         mockMvc.perform(MockMvcRequestBuilders
                         .put("/users/" + mockUserId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(jsonBody.toString())
-                        .sessionAttrs(createSessionForUser(mockUserId)))
+                        .content(jsonBody.toString()))
                 .andExpect(status().isOk())
                 .andReturn();
 
@@ -443,8 +191,7 @@ public class UserControllerModifyTest {
         mockMvc.perform(MockMvcRequestBuilders
                         .put("/users/" + mockUserId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(jsonBody.toString())
-                        .sessionAttrs(createSessionForUser(mockUserId)))
+                        .content(jsonBody.toString()))
                 .andExpect(status().isBadRequest())
                 .andReturn();
 
@@ -453,7 +200,7 @@ public class UserControllerModifyTest {
     }
 
     @Test
-    void modifyUser_modifyWithEmailAndWrongPassword_notModifiedUser403() throws Exception {
+    void modifyUser_modifyWithEmailAndWrongPassword_notModifiedUser400() throws Exception {
         var jsonBody = createValidRequest();
         jsonBody.put("email", "FrostyCookie123@gmail.com");
         String wrongPassword = "GettingASufficientAmountOfSleep#69";
@@ -462,9 +209,8 @@ public class UserControllerModifyTest {
         mockMvc.perform(MockMvcRequestBuilders
                         .put("/users/" + mockUserId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(jsonBody.toString())
-                        .sessionAttrs(createSessionForUser(mockUserId)))
-                .andExpect(status().isForbidden())
+                        .content(jsonBody.toString()))
+                .andExpect(status().isBadRequest())
                 .andReturn();
 
         verify(userRepository, times(1)).getUser(mockUserId);
@@ -472,7 +218,7 @@ public class UserControllerModifyTest {
     }
 
     @Test
-    void modifyUser_modifyWithEmailWrongPasswordAndNewPassword_notModifiedUser403() throws Exception {
+    void modifyUser_modifyWithEmailWrongPasswordAndNewPassword_notModifiedUser400() throws Exception {
         var jsonBody = createValidRequest();
 
         String wrongPassword = "GettingASufficientAmountOfSleep#69";
@@ -483,9 +229,8 @@ public class UserControllerModifyTest {
         mockMvc.perform(MockMvcRequestBuilders
                         .put("/users/" + mockUserId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(jsonBody.toString())
-                        .sessionAttrs(createSessionForUser(mockUserId)))
-                .andExpect(status().isForbidden())
+                        .content(jsonBody.toString()))
+                .andExpect(status().isBadRequest())
                 .andReturn();
 
         verify(userRepository, times(1)).getUser(mockUserId);
@@ -502,8 +247,7 @@ public class UserControllerModifyTest {
         mockMvc.perform(MockMvcRequestBuilders
                         .put("/users/" + mockUserId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(jsonBody.toString())
-                        .sessionAttrs(createSessionForUser(mockUserId)))
+                        .content(jsonBody.toString()))
                 .andExpect(status().isBadRequest())
                 .andReturn();
 
@@ -524,8 +268,7 @@ public class UserControllerModifyTest {
         mockMvc.perform(MockMvcRequestBuilders
                         .put("/users/" + mockUserId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(jsonBody.toString())
-                        .sessionAttrs(createSessionForUser(mockUserId)))
+                        .content(jsonBody.toString()))
                 .andExpect(status().isBadRequest())
                 .andReturn();
 
@@ -543,8 +286,7 @@ public class UserControllerModifyTest {
         mockMvc.perform(MockMvcRequestBuilders
                         .put("/users/" + mockUserId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(jsonBody.toString())
-                        .sessionAttrs(createSessionForUser(mockUserId)))
+                        .content(jsonBody.toString()))
                 .andExpect(status().isBadRequest())
                 .andReturn();
 
@@ -562,8 +304,7 @@ public class UserControllerModifyTest {
         mockMvc.perform(MockMvcRequestBuilders
                         .put("/users/" + mockUserId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(jsonBody.toString())
-                        .sessionAttrs(createSessionForUser(mockUserId)))
+                        .content(jsonBody.toString()))
                 .andExpect(status().isBadRequest())
                 .andReturn();
 
@@ -581,8 +322,7 @@ public class UserControllerModifyTest {
         mockMvc.perform(MockMvcRequestBuilders
                         .put("/users/" + mockUserId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(jsonBody.toString())
-                        .sessionAttrs(createSessionForUser(mockUserId)))
+                        .content(jsonBody.toString()))
                 .andExpect(status().isBadRequest())
                 .andReturn();
 
@@ -600,8 +340,7 @@ public class UserControllerModifyTest {
         mockMvc.perform(MockMvcRequestBuilders
                         .put("/users/" + mockUserId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(jsonBody.toString())
-                        .sessionAttrs(createSessionForUser(mockUserId)))
+                        .content(jsonBody.toString()))
                 .andExpect(status().isBadRequest())
                 .andReturn();
 
@@ -620,8 +359,7 @@ public class UserControllerModifyTest {
         mockMvc.perform(MockMvcRequestBuilders
                         .put("/users/" + mockUserId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(jsonBody.toString())
-                        .sessionAttrs(createSessionForUser(mockUserId)))
+                        .content(jsonBody.toString()))
                 .andExpect(status().isBadRequest())
                 .andReturn();
 
@@ -639,8 +377,7 @@ public class UserControllerModifyTest {
         mockMvc.perform(MockMvcRequestBuilders
                         .put("/users/" + mockUserId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(jsonBody.toString())
-                        .sessionAttrs(createSessionForUser(mockUserId)))
+                        .content(jsonBody.toString()))
                 .andExpect(status().isBadRequest())
                 .andReturn();
 
@@ -658,8 +395,7 @@ public class UserControllerModifyTest {
         mockMvc.perform(MockMvcRequestBuilders
                         .put("/users/" + mockUserId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(jsonBody.toString())
-                        .sessionAttrs(createSessionForUser(mockUserId)))
+                        .content(jsonBody.toString()))
                 .andExpect(status().isBadRequest())
                 .andReturn();
 
@@ -670,115 +406,168 @@ public class UserControllerModifyTest {
     @Test
     void modifyUser_modifyInvalidStreetAddress_userNotModified400() throws Exception {
         var jsonBody = createValidRequest();
-
-        doThrow(new ResponseStatusException(HttpStatus.BAD_REQUEST))
-                .when(mockUser).setAddress(any());
+        Location address = new Location.Builder()
+                .inCountry("Spain")
+                .inCity("Christchurch")
+                .inRegion("Region")
+                .atStreetNumber("24")
+                .onStreet("Cool street")
+                .withPostCode("1238")
+                .atDistrict("DistrictArea")
+                .build();
+        JSONObject jsonAddress = address.constructFullJson();
+        jsonAddress.put("streetName", "ÉÄ○b)");
+        jsonBody.put("homeAddress", jsonAddress);
 
         mockMvc.perform(MockMvcRequestBuilders
-                        .put("/users/" + mockUserId)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(jsonBody.toString())
-                        .sessionAttrs(createSessionForUser(mockUserId)))
+                .put("/users/" + mockUserId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jsonBody.toString()))
                 .andExpect(status().isBadRequest())
                 .andReturn();
 
         verify(userRepository, times(0)).save(mockUser);
-        verify(mockUser, times(1)).setAddress(any());
+        verify(mockUser, times(0)).setAddress(any());
+
     }
 
     @Test
     void modifyUser_modifyInvalidDistrict_userNotModified400() throws Exception {
         var jsonBody = createValidRequest();
 
-        doThrow(new ResponseStatusException(HttpStatus.BAD_REQUEST))
-                .when(mockUser).setAddress(any());
+        Location address = new Location.Builder()
+                .inCountry("Spain")
+                .inCity("Christchurch")
+                .inRegion("Region")
+                .atStreetNumber("24")
+                .onStreet("Cool street")
+                .withPostCode("1238")
+                .atDistrict("DistrictArea")
+                .build();
+        JSONObject jsonAddress = address.constructFullJson();
+        jsonAddress.put("district", "ÉÄ○b)");
+        jsonBody.put("homeAddress", jsonAddress);
 
         mockMvc.perform(MockMvcRequestBuilders
                         .put("/users/" + mockUserId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(jsonBody.toString())
-                        .sessionAttrs(createSessionForUser(mockUserId)))
+                        .content(jsonBody.toString()))
                 .andExpect(status().isBadRequest())
                 .andReturn();
 
         verify(userRepository, times(0)).save(mockUser);
-        verify(mockUser, times(1)).setAddress(any());
+        verify(mockUser, times(0)).setAddress(any());
     }
 
     @Test
     void modifyUser_modifyInvalidCity_userNotModified400() throws Exception {
         var jsonBody = createValidRequest();
-
-        doThrow(new ResponseStatusException(HttpStatus.BAD_REQUEST))
-                .when(mockUser).setAddress(any());
+        Location address = new Location.Builder()
+                .inCountry("Spain")
+                .inCity("Christchurch")
+                .inRegion("Region")
+                .atStreetNumber("24")
+                .onStreet("Cool street")
+                .withPostCode("1238")
+                .atDistrict("DistrictArea")
+                .build();
+        JSONObject jsonAddress = address.constructFullJson();
+        jsonAddress.put("city", "ÉÄ○b)");
+        jsonBody.put("homeAddress", jsonAddress);
 
         mockMvc.perform(MockMvcRequestBuilders
                         .put("/users/" + mockUserId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(jsonBody.toString())
-                        .sessionAttrs(createSessionForUser(mockUserId)))
+                        .content(jsonBody.toString()))
                 .andExpect(status().isBadRequest())
                 .andReturn();
 
         verify(userRepository, times(0)).save(mockUser);
-        verify(mockUser, times(1)).setAddress(any());
+        verify(mockUser, times(0)).setAddress(any());
     }
 
     @Test
     void modifyUser_modifyInvalidRegion_userNotModified400() throws Exception {
         var jsonBody = createValidRequest();
 
-        doThrow(new ResponseStatusException(HttpStatus.BAD_REQUEST))
-                .when(mockUser).setAddress(any());
+        Location address = new Location.Builder()
+                .inCountry("Spain")
+                .inCity("Christchurch")
+                .inRegion("Region")
+                .atStreetNumber("24")
+                .onStreet("Cool street")
+                .withPostCode("1238")
+                .atDistrict("DistrictArea")
+                .build();
+        JSONObject jsonAddress = address.constructFullJson();
+        jsonAddress.put("region", "ÉÄ○b)");
+        jsonBody.put("homeAddress", jsonAddress);
 
         mockMvc.perform(MockMvcRequestBuilders
                         .put("/users/" + mockUserId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(jsonBody.toString())
-                        .sessionAttrs(createSessionForUser(mockUserId)))
+                        .content(jsonBody.toString()))
                 .andExpect(status().isBadRequest())
                 .andReturn();
 
         verify(userRepository, times(0)).save(mockUser);
-        verify(mockUser, times(1)).setAddress(any());
+        verify(mockUser, times(0)).setAddress(any());
     }
 
     @Test
     void modifyUser_modifyInvalidCountry_userNotModified400() throws Exception {
         var jsonBody = createValidRequest();
 
-        doThrow(new ResponseStatusException(HttpStatus.BAD_REQUEST))
-                .when(mockUser).setAddress(any());
+        Location address = new Location.Builder()
+                .inCountry("Spain")
+                .inCity("Christchurch")
+                .inRegion("Region")
+                .atStreetNumber("24")
+                .onStreet("Cool street")
+                .withPostCode("1238")
+                .atDistrict("DistrictArea")
+                .build();
+        JSONObject jsonAddress = address.constructFullJson();
+        jsonAddress.put("country", "ÉÄ○b)");
+        jsonBody.put("homeAddress", jsonAddress);
 
         mockMvc.perform(MockMvcRequestBuilders
                         .put("/users/" + mockUserId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(jsonBody.toString())
-                        .sessionAttrs(createSessionForUser(mockUserId)))
+                        .content(jsonBody.toString()))
                 .andExpect(status().isBadRequest())
                 .andReturn();
 
         verify(userRepository, times(0)).save(mockUser);
-        verify(mockUser, times(1)).setAddress(any());
+        verify(mockUser, times(0)).setAddress(any());
     }
 
     @Test
     void modifyUser_modifyInvalidPostcode_userNotModified400() throws Exception {
         var jsonBody = createValidRequest();
 
-        doThrow(new ResponseStatusException(HttpStatus.BAD_REQUEST))
-                .when(mockUser).setAddress(any());
+        Location address = new Location.Builder()
+                .inCountry("Spain")
+                .inCity("Christchurch")
+                .inRegion("Region")
+                .atStreetNumber("24")
+                .onStreet("Cool street")
+                .withPostCode("1238")
+                .atDistrict("DistrictArea")
+                .build();
+        JSONObject jsonAddress = address.constructFullJson();
+        jsonAddress.put("postcode", "");
+        jsonBody.put("homeAddress", jsonAddress);
 
         mockMvc.perform(MockMvcRequestBuilders
                         .put("/users/" + mockUserId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(jsonBody.toString())
-                        .sessionAttrs(createSessionForUser(mockUserId)))
+                        .content(jsonBody.toString()))
                 .andExpect(status().isBadRequest())
                 .andReturn();
 
         verify(userRepository, times(0)).save(mockUser);
-        verify(mockUser, times(1)).setAddress(any());
+        verify(mockUser, times(0)).setAddress(any());
     }
 
 
@@ -791,8 +580,7 @@ public class UserControllerModifyTest {
         mockMvc.perform(MockMvcRequestBuilders
                 .put("/users/" + mockUserId)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(jsonBody.toString())
-                .sessionAttrs(createSessionForUser(mockUserId)))
+                .content(jsonBody.toString()))
                 .andExpect(status().isUnauthorized())
                 .andReturn();
 
@@ -801,7 +589,7 @@ public class UserControllerModifyTest {
     }
 
     @Test
-    void modifyUser_invalidPermission_userNotModified401() throws Exception {
+    void modifyUser_invalidPermission_userNotModified403() throws Exception {
         authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), any()))
                 .thenThrow(new InsufficientPermissionException());
         var jsonBody = createValidRequest();
@@ -809,8 +597,7 @@ public class UserControllerModifyTest {
         mockMvc.perform(MockMvcRequestBuilders
                 .put("/users/" + mockUserId)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(jsonBody.toString())
-                .sessionAttrs(createSessionForUser(mockUserId)))
+                .content(jsonBody.toString()))
                 .andExpect(status().isForbidden())
                 .andReturn();
 
