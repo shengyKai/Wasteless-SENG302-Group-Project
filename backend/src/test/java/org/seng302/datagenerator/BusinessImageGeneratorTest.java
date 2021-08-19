@@ -4,6 +4,7 @@ import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 import org.seng302.leftovers.Main;
 import org.seng302.leftovers.persistence.BusinessRepository;
 import org.seng302.leftovers.persistence.ImageRepository;
@@ -21,6 +22,9 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -50,7 +54,9 @@ public class BusinessImageGeneratorTest {
         //Creates generators
         this.userGenerator = new UserGenerator(conn);
         this.businessGenerator = new BusinessGenerator(conn);
-        this.businessImageGenerator = new BusinessImageGenerator(conn);
+        this.businessImageGenerator = Mockito.spy(new BusinessImageGenerator(conn));
+        doNothing().when(businessImageGenerator).store(any(), any());
+
     }
 
     @AfterEach

@@ -63,10 +63,11 @@ public class ProductImageGenerator {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Could not locate file type for:" + image.get().toString());
         }
 
-        if (saveImageToSystem(image.get(), filename)) {
+        try {
+            store(image.get().getInputStream(), filename);
             createInsertImageSQL(productId, filename);
-        } else {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Could save image to disk for: " + image.get().toString());
+        } catch (IOException e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Unable to get input stream from image: " + image.get().getFilename());
         }
     }
 
@@ -97,7 +98,7 @@ public class ProductImageGenerator {
 
     /**
      * Given an example image, copies the image into the images directory.
-     * @param demoImage The demo image to copy
+     * @param resource The demo image to copy
      * @param fileName The name of the file to save
      * @return true if file successfully saved.
      */

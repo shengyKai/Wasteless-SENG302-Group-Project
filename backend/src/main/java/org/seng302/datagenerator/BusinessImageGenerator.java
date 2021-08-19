@@ -126,7 +126,7 @@ public class BusinessImageGenerator {
      * @param filename name of the file
      * @return File type
      */
-    public Optional<String> getExtension(String filename) {
+    private Optional<String> getExtension(String filename) {
         return Optional.ofNullable(filename)
                 .filter(f -> f.contains("."))
                 .map(f -> f.substring(filename.lastIndexOf(".") + 1));

@@ -44,9 +44,6 @@ class ProductImageGeneratorTest {
     @Autowired
     private ImageRepository imageRepository;
 
-    private List<String> productNouns = ExampleDataFileReader.readExampleDataFile(PRODUCT_NOUNS_FILE);
-    private List<String> productAdjectives = ExampleDataFileReader.readExampleDataFile(PRODUCT_ADJECTIVES_FILE);
-
 
     @BeforeEach
     public void setup() throws SQLException {
