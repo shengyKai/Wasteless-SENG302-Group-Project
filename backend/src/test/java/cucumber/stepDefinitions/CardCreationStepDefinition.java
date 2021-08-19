@@ -126,7 +126,6 @@ public class CardCreationStepDefinition {
          try {
              createdCard = createCardFromMap(cardProperties);
          } catch (Exception e) {
-             System.out.println(e);
              // The card will not always be created as some scenarios use invalid data
              createdCard = null;
          }

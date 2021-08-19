@@ -8,6 +8,8 @@ import io.cucumber.gherkin.internal.com.eclipsesource.json.Json;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+import lombok.SneakyThrows;
+import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
 import org.hibernate.SessionFactory;
@@ -194,6 +196,7 @@ public class ConversationStepDefinition {
                 .param("userId", requestContext.getLoggedInId().toString()));
         List<JSONObject> events = eventContext.lastReceivedEvents("newsfeed");
 
+
         var notificationJSON = events.get(0);
         assertEquals("MessageEvent", notificationJSON.getAsString("type"));
         assertEquals(name, getSenderNameFromMessageEventJson(notificationJSON));
@@ -231,26 +234,55 @@ public class ConversationStepDefinition {
         assertEquals(content, latest.getContent());
     }
 
-    @Given("user {string} has sent a reply")
-    public void user_has_sent_a_reply(String name) {
-        requestContext.setLoggedInAccount(userContext.getByName(name));
-        requestContext.performRequest(get("/events/emitter")
-                .param("userId", requestContext.getLoggedInId().toString()));
-        List<JSONObject> events = eventContext.lastReceivedEvents("newsfeed");
-        var notificationJSON = events.get(0);
+    @Given("user {string} has sent a reply to the conversation with user {string} regarding card {string}")
+    public void user_has_sent_a_reply(String sender, String buyer, String cardTitle) {
+        requestContext.setLoggedInAccount(userContext.getByName(sender));
 
         JSONObject json = new JSONObject();
-        json.appendField("senderId", userContext.getByName(name).getUserID());
+        json.appendField("senderId", userContext.getByName(sender).getUserID());
         json.appendField("message", "Is this still available?");
         message = json.toJSONString();
 
-        var cardId = getCardIdFromMessageEventJson(notificationJSON);
-        var buyerId = getBuyerIdFromMessageEventJson(notificationJSON);
+        var cardId = cardContext.getByTitle(cardTitle).getID();
+        var buyerId = userContext.getByName(buyer).getUserID();
 
         requestContext.performRequest(
                 post(String.format("/cards/%d/conversations/%d", cardId, buyerId))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(message));
     }
+
+    @When("I try to view all messages in the conversation with {string} regarding card {string}")
+    public void i_try_to_view_all_messages_in_the_conversation(String buyerName, String cardTitle) {
+        var buyer = userContext.getByName(buyerName);
+        var card = cardContext.getByTitle(cardTitle);
+        requestContext.performRequest(
+                get(String.format("/cards/%d/conversations/%d", card.getID(), buyer.getUserID()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(message));
+    }
+
+    @SneakyThrows
+    @Then("all messages in the conversation with {string} regarding card {string} will be available to me")
+    public void all_messages_in_the_conversation_will_be_available_to_me(String buyerName, String cardTitle) {
+        var buyer = userContext.getByName(buyerName);
+        var card = cardContext.getByTitle(cardTitle);
+        var conversation = conversationRepository.getConversation(card, buyer);
+        var messages = messageRepository.findAllByConversationOrderByCreatedDesc(conversation);
+
+        JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
+        JSONObject response = parser.parse(requestContext.getLastResult().getResponse().getContentAsString(), JSONObject.class);
+
+        assertEquals(messages.size(), response.getAsNumber("count"));
+
+        var resultArray = (JSONArray) response.get("results");
+
+        for (int i = 0; i < resultArray.size(); i++) {
+            var messageJson = (JSONObject) resultArray.get(i);
+            assertEquals(messages.get(i).getContent(), messageJson.getAsString("content"));
+        }
+    }
+
+
 
 }

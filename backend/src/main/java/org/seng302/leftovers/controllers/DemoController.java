@@ -112,13 +112,6 @@ public class DemoController {
                     .withBusiness(business)
                     .build();
             product = productRepository.save(product);
-            Image image = new Image("https://i.picsum.photos/id/376/200/200.jpg?hmac=lM2SnAPO9nDnPBP5FjJOFIJSaRoPKUJRovk6goT_nA4", "https://i.picsum.photos/id/376/200/200.jpg?hmac=lM2SnAPO9nDnPBP5FjJOFIJSaRoPKUJRovk6goT_nA4");
-            image = imageRepository.save(image);
-            product.addProductImage(image);
-            Image image2 = new Image("https://i.picsum.photos/id/650/200/200.jpg?hmac=gu3C13pBxCSHokbnumczMYlmWRLt3CFGx1sDaPpfRnk", "https://i.picsum.photos/id/650/200/200.jpg?hmac=gu3C13pBxCSHokbnumczMYlmWRLt3CFGx1sDaPpfRnk");
-            image2 = imageRepository.save(image2);
-            product.addProductImage(image2);
-            product = productRepository.save(product);
 
 
             // Construct a demo inventory item for said product

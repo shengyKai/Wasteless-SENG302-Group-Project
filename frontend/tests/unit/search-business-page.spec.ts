@@ -43,6 +43,7 @@ function createTestBusinesses(count: number) {
       primaryAdministratorId: 3,
       businessType: "Accommodation and Food Services",
       address: { city: 'test_city' + i, country: 'test_country' + i },
+      images: [],
     });
   }
   return result;

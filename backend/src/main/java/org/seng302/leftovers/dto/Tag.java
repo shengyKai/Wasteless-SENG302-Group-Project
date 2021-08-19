@@ -1,4 +1,4 @@
-package org.seng302.leftovers.entities;
+package org.seng302.leftovers.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

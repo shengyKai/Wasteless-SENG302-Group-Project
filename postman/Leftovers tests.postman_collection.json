@@ -199,6 +199,25 @@
 		},
 		{
 			"name": "Create new card",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "48ae95c5-e960-4df9-9947-af7d1590570b",
+						"exec": [
+							"pm.test(\"Status code is 201\", function () {",
+							"    pm.response.to.have.status(201);",
+							"});",
+							"",
+							"const cardId = pm.response.json().cardId;",
+							"if (typeof cardId !== \"undefined\") {",
+							"    pm.globals.set(\"card_id\", cardId);",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
 			"request": {
 				"auth": {
 					"type": "apikey",
@@ -622,7 +641,7 @@
 					"variable": [
 						{
 							"key": "cardId",
-							"value": "{{card_id}}"
+							"value": "99999999"
 						},
 						{
 							"key": "buyerId",
@@ -723,15 +742,15 @@
 							"",
 							"const response = pm.response.json();",
 							"pm.test(\"Response contains correct count\", () => {",
-							"   pm.expect(response.count).to.be(1); ",
+							"   pm.expect(response.count).to.eql(1); ",
 							"});",
 							"",
 							"const result = response.results[0];",
 							"pm.test(\"Response contains message\", () => {",
-							"   pm.expect(result.content).to.be(\"hey dude!\") ",
+							"   pm.expect(result.content).to.eql(\"hey dude!\") ",
 							"});",
 							"pm.test(\"Response contains senderId\", () => {",
-							"   pm.expect(result.senderId).to.be(1); ",
+							"   pm.expect(result.senderId).to.eql(1); ",
 							"});"
 						],
 						"type": "text/javascript"
@@ -795,6 +814,114 @@
 						{
 							"key": "buyerId",
 							"value": "1"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Modify User - Successfully",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "69b25559-d404-426c-8a89-5dd3b2662627",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"firstName\": \"Dave\",\n    \"lastName\": \"Johnson\",\n    \"email\": \"johnsmith88@gmail.com\",\n    \"dateOfBirth\": \"1998-04-27\",\n    \"homeAddress\": {\n        \"country\": \"New Zealand\",\n        \"streetNumber\": \"16\",\n        \"streetName\": \"Waimairi Road\",\n        \"city\": \"Christchurch\",\n        \"region\": \"Canterbury\",\n        \"postcode\": \"90210\"\n    },\n    \"password\": \"1337-H%nt3r2\",\n    \"middleName\": \"Hector\",\n    \"nickname\": \"Davo\",\n    \"bio\": \"Hates long walks on the beach\",\n    \"phoneNumber\": \"+64 3 555 0128\",\n    \"newPassword\": \"ILoveTurtles800\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/users/:id",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"users",
+						":id"
+					],
+					"variable": [
+						{
+							"key": "id",
+							"value": "{{user_id}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Modify User - Password not provided",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "69b25559-d404-426c-8a89-5dd3b2662627",
+						"exec": [
+							"pm.test(\"Status code is 403\", function () {",
+							"    pm.response.to.have.status(403);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"firstName\": \"Dave\",\n    \"lastName\": \"Johnson\",\n    \"email\": \"johnsmith88@gmail.com\",\n    \"dateOfBirth\": \"1998-04-27\",\n    \"homeAddress\": {\n        \"country\": \"New Zealand\",\n        \"streetNumber\": \"16\",\n        \"streetName\": \"Waimairi Road\",\n        \"city\": \"Christchurch\",\n        \"region\": \"Canterbury\",\n        \"postcode\": \"90210\"\n    },\n    \"middleName\": \"Hector\",\n    \"nickname\": \"Davo\",\n    \"bio\": \"Hates long walks on the beach\",\n    \"phoneNumber\": \"+64 3 555 0128\",\n    \"newPassword\": \"ILoveTurtles800\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/users/:id",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"users",
+						":id"
+					],
+					"variable": [
+						{
+							"key": "id",
+							"value": "{{user_id}}"
 						}
 					]
 				}
