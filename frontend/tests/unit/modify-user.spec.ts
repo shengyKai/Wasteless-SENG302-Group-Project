@@ -217,7 +217,7 @@ describe("ModifyUserPage.vue", () => {
         expect(updateButton.props().disabled).toBeTruthy();
     });
 
-    it("Invalid middleName format,with '@' ", async () => {
+    it("Invalid middleName format, with '@' ", async () => {
         const updateButton = wrapper.find(".v-btn");
         await wrapper.setData({
             user: { middleName: "some middleName@" },

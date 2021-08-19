@@ -348,9 +348,6 @@ export default {
 
   },
   methods: {
-    validateCurrentPassword() {
-      this.$refs.oldPassword.validate(true);
-    },
     /**
      * Update Profile after linking up the modify endpoint
      * Next person might have different idea of how/when the updateProfile button will be display
@@ -361,6 +358,12 @@ export default {
     },
     updatePhoneNumber() {
       this.user.phoneNumber = this.countryCode + ' ' + this.phoneDigits;
+    },
+    /**
+     * Apply validation rule on the currentPassword field
+     */
+    validateCurrentPassword() {
+      this.$refs.oldPassword.validate(true);
     },
     /**
      * Apply validation rule on the confirmPassword field
