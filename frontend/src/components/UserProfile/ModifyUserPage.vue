@@ -62,7 +62,7 @@
                 :append-icon="showOldPassword ? 'mdi-eye' : 'mdi-eye-off'"
                 :type="showOldPassword ? 'text' : 'password'"
                 @click:append="showOldPassword = !showOldPassword"
-                :rules="currentPassword"
+                :rules="currentPasswordRule"
                 outlined
               />
             </v-tab-item>
@@ -355,31 +355,10 @@ export default {
      * Just here to setup everything
     */
     updateProfile() {
-      if(this.credentialsCheck()) {
-        console.log(JSON.parse(JSON.stringify(this.user)));
-      }
-      else {
-        console.log("NOPE");
-      }
+      console.log(JSON.parse(JSON.stringify(this.user)));
     },
     updatePhoneNumber() {
       this.user.phoneNumber = this.countryCode + ' ' + this.phoneDigits;
-    },
-    /**
-     * Check the credentials of user by prompting user to input current password
-     * Attempt to perform login to check the credentials
-     * With the current store.state.user.email and oldPassword
-     * Return TRUE if this.errorMessage === "" as the init data
-     * Return False if this.errorMessage contain message
-     */
-    async credentialsCheck() {
-      this.errorMessage = undefined;
-      this.errorMessage = await this.$store.dispatch("login", { email : this.$store.state.user.email, password : this.user.oldPassword });
-      if(this.errorMessage === "") {
-        return true;
-      } else {
-        return false;
-      }
     },
     /**
      * Apply validation rule on the confirmPassword field
