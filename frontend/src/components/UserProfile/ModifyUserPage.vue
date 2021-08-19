@@ -35,6 +35,7 @@
                     @click:append="showPassword = !showPassword"
                     :rules="newPasswordRule"
                     outlined
+                    autocomplete="new-password"
                   />
                 </v-col>
 
@@ -50,6 +51,7 @@
                     @click:append="showConfirmPassword = !showConfirmPassword"
                     :rules="newPasswordRule.concat(passwordConfirmationRule)"
                     outlined
+                    autocomplete="new-password"
                   />
                 </v-col>
               </v-row>
