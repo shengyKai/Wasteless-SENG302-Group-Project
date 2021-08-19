@@ -17,7 +17,7 @@
                 class="required"
                 v-model="user.email"
                 label="Email"
-                @keyup="validateAllfield"
+                @keyup="validateCurrentPassword"
                 :rules="mandatoryRules.concat(emailRules).concat(maxLongCharRules)"
                 outlined
               />
@@ -29,11 +29,11 @@
                     ref="password"
                     v-model="user.password"
                     label="New Password"
-                    @keyup="validateAllfield"
+                    @keyup="validateCurrentPassword"
                     :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
                     :type="showPassword ? 'text' : 'password'"
                     @click:append="showPassword = !showPassword"
-                    :rules="passwordNONO"
+                    :rules="newPasswordRule"
                     outlined
                   />
                 </v-col>
@@ -48,7 +48,7 @@
                     :append-icon="showConfirmPassword ? 'mdi-eye' : 'mdi-eye-off'"
                     :type="showConfirmPassword ? 'text' : 'password'"
                     @click:append="showConfirmPassword = !showConfirmPassword"
-                    :rules="passwordNONO.concat(passwordConfirmationRule)"
+                    :rules="newPasswordRule.concat(passwordConfirmationRule)"
                     outlined
                   />
                 </v-col>
@@ -346,7 +346,7 @@ export default {
 
   },
   methods: {
-    validateAllfield() {
+    validateCurrentPassword() {
       this.$refs.oldPassword.validate(true);
     },
     /**
@@ -404,7 +404,6 @@ export default {
       let year = today.getFullYear();
       let month = today.getMonth();
       let day = today.getDate();
-      // console.log(this.$store.state.user.businessesAdministered);
       if(this.$store.state.user.businessesAdministered.length >= 1) {
         return new Date(year - 16, month, day);
       }
@@ -474,9 +473,13 @@ export default {
     alphabetExtendedMultilineRules: () => alphabetExtendedMultilineRules,
     streetNumRules: () => streetNumRules,
 
-    currentPassword () {
+    /**
+     * Validation for currentPassword field
+     * Will be applied/triggered when newPassword or email field(s) is modified
+     */
+    currentPasswordRule () {
       return [() =>
-        ((this.user.password.length === 0 && this.user.email === this.$store.state.user.email) || this.user.oldPassword.length > 0) || 'need current password'
+        ((this.user.password.length === 0 && this.user.email === this.$store.state.user.email) || this.user.oldPassword.length > 0) || 'Current password must be entered to change password or email'
       ];
     },
     /**
@@ -491,7 +494,7 @@ export default {
      * Validation rules for new password
      * Not applying rules if the field is empty else validate with passwordRules
      */
-    passwordNONO () {
+    newPasswordRule () {
       if(this.user.password.length === 0) return [];
       else return passwordRules;
     },

@@ -28,9 +28,6 @@ function createTestBusinesses() {
   return result;
 }
 
-const diacritics = ['À','È','Ì','Ò','Ù','à','è','ì','ò','ù','Á','É','Í','Ó','Ú','Ý','á','é','í','ó','ú','ý','Â','Ê','Î','Ô','Û','â','ê','î','ô','û','Ã','Ñ','Õ','ã','ñ','õ','Ä','Ë','Ï','Ö','Ü','Ÿ','ä','ë','ï','ö','ü','ÿ'];
-
-
 describe('ModifyUserPage.vue', () => {
   let wrapper: Wrapper<any>;
   const localVue = createLocalVue();
