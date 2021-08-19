@@ -302,9 +302,6 @@ export default {
       postcodeRules: ()=> postCodeRules,
     };
   },
-  mounted() {
-    console.log(this.$store.state.activeRole.type);
-  },
   computed: {
     /**
      * Check if the current user is the admin of the system
@@ -354,7 +351,6 @@ export default {
 
       if(this.newOwnerId === '') this.newOwnerId = this.$store.state.user.id;
       let modifiedFields = {
-        id: this.$store.state.user.id,
         primaryAdministratorId: this.newOwnerId,
         name: this.businessName,
         description: this.description,
