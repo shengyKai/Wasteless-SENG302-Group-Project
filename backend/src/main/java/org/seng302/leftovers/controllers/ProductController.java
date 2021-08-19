@@ -1,6 +1,7 @@
 package org.seng302.leftovers.controllers;
 
 // import net.bytebuddy.asm.Advice.OffsetMapping.Sort;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
@@ -107,7 +108,7 @@ public class ProductController {
                                               @RequestParam(required = false) String searchQuery,
                                               @RequestParam(required = false) Integer page,
                                               @RequestParam(required = false) Integer resultsPerPage,
-                                              @RequestParam(required = false) ProductFilterOption searchBy,
+                                              @RequestParam(required = false) List<String> searchBy,
                                               @RequestParam(required = false) Boolean reverse,
                                               @RequestParam(required = false) String orderBy
                                               ) {
@@ -117,9 +118,19 @@ public class ProductController {
         logger.info(() -> String.format("Retrieving catalogue from business with id %d.", id));
         Optional<Business> business = businessRepository.findById(id);
 
-        searchBy = Optional.ofNullable(searchBy).orElse(ProductFilterOption.NAME);
-        if (!VALID_SEARCHES.contains(searchBy)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "SearchBy term " + searchBy + " is invalid");
+        // Convert searchBy into ProductFilterOption type and check valid
+        searchBy = Optional.ofNullable(searchBy).orElse(Collections.singletonList("name"));
+        Set<ProductFilterOption> searchSet = new HashSet<>();
+        ObjectMapper objectMapper = new ObjectMapper();
+        for (String col : searchBy) {
+            ProductFilterOption option = objectMapper.convertValue(col, ProductFilterOption.class);
+            searchSet.add(option);
+        }
+
+        for (ProductFilterOption field : searchSet) {
+            if (!VALID_SEARCHES.contains(field)) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "SearchBy term " + searchBy + " is invalid");
+            }
         }
 
         if (business.isEmpty()) {
@@ -130,7 +141,7 @@ public class ProductController {
             business.get().checkSessionPermissions(request);
             List<Sort.Order> sortOrder = getSortOrder(orderBy, reverse);
             PageRequest pageablePage = SearchHelper.getPageRequest(page, resultsPerPage, Sort.by(sortOrder));
-            Specification<Product> prodSpec = SearchHelper.constructSpecificationFromProductSearch(business.get(), searchQuery, Set.of(searchBy));
+            Specification<Product> prodSpec = SearchHelper.constructSpecificationFromProductSearch(business.get(), searchQuery, searchSet);
 
             Page<Product> catalogue = productRepository.findAll(prodSpec, pageablePage);
 
