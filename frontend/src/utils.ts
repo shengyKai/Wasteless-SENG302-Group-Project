@@ -54,6 +54,12 @@ export function formatDate(date: Date | string) {
   return `${parts[2]} ${parts[1]} ${parts[3]}`;
 }
 
+export function formatTime(date: Date | string) {
+  if (typeof date === 'string') date = new Date(date);
+  let fullTime = date.toTimeString().split(' ')[0];
+  return fullTime.split(':').splice(0, 2).join(':');
+}
+
 export function formatPrice(price : number) {
   if (Number.isInteger(price)) {
     return price.toString();

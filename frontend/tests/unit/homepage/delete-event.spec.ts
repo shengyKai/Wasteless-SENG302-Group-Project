@@ -6,7 +6,7 @@ import DeleteEvent from '@/components/home/newsfeed/DeleteEvent.vue';
 
 import Vuex, { Store } from 'vuex';
 import { getStore, resetStoreForTesting, StoreData } from '@/store';
-import { makeTestUser } from './utils';
+import { makeTestUser } from '../utils';
 
 Vue.use(Vuetify);
 

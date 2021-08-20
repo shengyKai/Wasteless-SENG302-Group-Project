@@ -31,7 +31,7 @@
         {{ date }}, {{ time }}
       </v-card-subtitle>
       <slot/>
-      <v-card-text class="justify-center" v-if="errorMessage !== undefined">
+      <v-card-text class="justify-center py-0" v-if="errorMessage !== undefined">
         <div class="error--text">{{ errorMessage }}</div>
       </v-card-text>
       <!-- For user to view their option about the available tag to choose from  -->
@@ -57,24 +57,6 @@
               </v-chip>
             </template>
             <span>Click to view the available tags.</span>
-          </v-tooltip>
-        </v-col>
-        <v-col class="text-right mr-5">
-          <!-- Tooltip for the reply button telling user what they can do with this button -->
-          <v-tooltip bottom >
-            <template v-slot:activator="{on, attrs }">
-              <v-icon v-if="!isCardOwner"
-                      ref="messageButton"
-                      color="primary"
-                      @click.stop="messageOwnerDialog = true; directMessageContent=''"
-                      v-bind="attrs"
-                      v-on="on"
-                      class="mt-4 ml-12"
-              >
-                mdi-reply
-              </v-icon>
-            </template>
-            Reply to this message
           </v-tooltip>
         </v-col>
       </v-row>
@@ -120,7 +102,7 @@
 
 <script>
 import synchronizedTime from '@/components/utils/Methods/synchronizedTime';
-import { formatDate } from '@/utils';
+import { formatDate, formatTime } from '@/utils';
 import { setEventTag } from "@/api/internal";
 
 export default {
@@ -134,6 +116,7 @@ export default {
       type: Object,
       required: true,
     },
+    error: String,
   },
   data() {
     return {
@@ -152,8 +135,7 @@ export default {
      * The time the event was created in a displayable format (hh:mm).
      */
     time() {
-      let fullTime = new Date(this.event.created).toTimeString().split(' ')[0];
-      return fullTime.split(':').splice(0, 2).join(':');
+      return formatTime(this.event.created);
     },
     /**
      * The date the event was created in a displayable format.
@@ -225,7 +207,15 @@ export default {
       this.deleted = false;
       this.$store.commit('unstageEventForDeletion', this.event.id);
     },
-  }
+  },
+  watch: {
+    error: {
+      handler() {
+        this.errorMessage = this.error;
+      },
+      immediate: true,
+    },
+  },
 };
 </script>
 

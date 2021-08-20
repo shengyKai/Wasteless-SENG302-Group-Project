@@ -209,6 +209,13 @@ export type MarketplaceCard = {
   keywords: Keyword[]
 }
 
+export type Message = {
+  id: number,
+  created: string,
+  senderId: number,
+  content: string,
+}
+
 export type CreateProduct = Omit<Product, 'created' | 'images'>;
 
 type UserOrderBy = 'userId' | 'relevance' | 'firstName' | 'middleName' | 'lastName' | 'nickname' | 'email';
@@ -1111,6 +1118,39 @@ export async function messageConversation(cardId: number, senderId: number, buye
     return 'Request failed: ' + error.response?.data.message;
   }
   return undefined;
+}
+
+
+/**
+ * Gets a page of messages in a convesation about a marketplace card.
+ * @param cardId The ID of the card
+ * @param buyerId The ID of the prospective buyer in the conversation
+ * @param pageIndex Index of page to start the results from (1 = first page)
+ * @param resultsPerPage Number of results to return per page
+ * @returns Page of messages within the convesation or else a string error
+ */
+export async function getMessagesInConversation(cardId: number, buyerId: number, pageIndex: number, resultsPerPage: number): Promise<MaybeError<SearchResults<Message>>> {
+  let response;
+  try {
+    response = await instance.get(`/cards/${cardId}/conversations/${buyerId}`, {
+      params: {
+        page: pageIndex,
+        resultsPerPage,
+      }
+    });
+  } catch (error) {
+    let status: number | undefined = error.response?.status;
+    if (status === undefined) return 'Failed to reach backend';
+    if (status === 401) return 'You have been logged out. Please login again and retry';
+    if (status === 403) return 'You do not have permission to view this conversation';
+    if (status === 406) return 'Unable to get messages, conversation does not exist';
+    return error.response?.data.message;
+  }
+
+  if (!is<SearchResults<Message>>(response.data)) {
+    return "Response is not page of messages";
+  }
+  return response.data;
 }
 
 /**
