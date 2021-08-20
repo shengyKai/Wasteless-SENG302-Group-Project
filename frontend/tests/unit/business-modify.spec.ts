@@ -499,32 +499,19 @@ describe('modifyBusiness.vue', () => {
   });
 
   describe('changing primary administrator', () => {
-    it.only('Primary admin is changed and alert message is shown when non-primary admin is selected', async() => {
+    it('Primary admin is changed and alert message is shown when non-primary admin is selected', async() => {
       const currentPrimaryAdmin = testAdmins[0];
       const newPrimaryAdmin = testAdmins[1];
       expect(wrapper.vm.adminIsPrimary(newPrimaryAdmin)).toBeFalsy();
       expect(wrapper.vm.adminIsPrimary(currentPrimaryAdmin)).toBeTruthy();
-      const submitButton = findSubmitButton("submit");
-      await submitButton.trigger('click');
-      const confirmButton = findSubmitButton("save change");
-      await confirmButton.trigger('click');
-      expect(modifyBusiness).toHaveBeenCalled();
-      console.log(currentPrimaryAdmin);
-      console.log(newPrimaryAdmin);
-      expect(wrapper.vm.adminIsPrimary(newPrimaryAdmin)).toBeTruthy();
-      expect(wrapper.vm.adminIsPrimary(currentPrimaryAdmin)).toBeFalsy();
+      wrapper.vm.changePrimaryOwner(newPrimaryAdmin);
       expect(wrapper.vm.primaryAdminAlertMsg).toEqual(`Primary admin will be changed to ${newPrimaryAdmin.firstName} ${newPrimaryAdmin.lastName}`);
     });
 
     it('Primary admin stays the same and alert message is not shown when primary admin is selected', async() => {
       const primaryAdmin = testAdmins[0];
       expect(wrapper.vm.adminIsPrimary(primaryAdmin)).toBeTruthy();
-      // wrapper.vm.changePrimaryAdmin(primaryAdmin);
-      const submitButton = findSubmitButton("submit");
-      await submitButton.trigger('click');
-      const confirmButton = findSubmitButton("save change");
-      await confirmButton.trigger('click');
-      expect(modifyBusiness).toHaveBeenCalled();
+      wrapper.vm.changePrimaryOwner(primaryAdmin);
       expect(wrapper.vm.adminIsPrimary(primaryAdmin)).toBeTruthy();
       expect(wrapper.vm.primaryAdminAlertMsg).toEqual('');
     });
