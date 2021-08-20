@@ -104,7 +104,7 @@ class ProductControllerDeleteImageTests {
                 .withPassword("IDoLikeBreaks69#H3!p")
                 .withBio("Did you know I had a second last name Yarker")
                 .withDob("1999-07-17")
-                .withPhoneNumber("+64 27 370 2682")
+                .withPhoneNumber("64273702682")
                 .withAddress(Location.covertAddressStringToLocation("6,Help Street,Place,Dunedin,New Zelaand,Otago,6959"))
                 .build();
         userRepository.save(testUser);
