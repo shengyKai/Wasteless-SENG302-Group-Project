@@ -9,88 +9,56 @@
         style="max-height: 400px; width: 100%;"
       >
         <template v-for="message in messages">
-          <v-tooltip :key="message.id" bottom>
-            <template v-slot:activator="{on, attrs}">
-              <div
-                v-bind="attrs"
-                v-on="on"
-                class="elevation-2 pa-1 rounded-lg mt-1 message"
-                :class="{
-                  'self-message'  : $store.state.user.id === message.senderId,
-                  'other-message' : $store.state.user.id !== message.senderId,
-                }"
-              >
-                {{message.content}}
-              </div>
-            </template>
-            {{ formatDate(message.created) }}, {{ formatTime(message.created) }}
-          </v-tooltip>
+          <div :key="message.id"
+               class="message"
+               :class="{
+                 'align-self-end'   : $store.state.user.id === message.senderId,
+                 'align-self-start' : $store.state.user.id !== message.senderId,
+               }"
+          >
+            <v-tooltip bottom>
+              <template v-slot:activator="{ on }">
+                <div
+                  v-on="on"
+                  class="elevation-2 pa-1 rounded-lg mt-1"
+                  :class="{
+                    'message-self'  : $store.state.user.id === message.senderId,
+                    'message-other' : $store.state.user.id !== message.senderId,
+                  }"
+                >
+                  {{message.content}}
+                </div>
+              </template>
+              {{ formatDate(message.created) }}, {{ formatTime(message.created) }}
+            </v-tooltip>
+          </div>
         </template>
-        <div class="align-center">
-          <v-btn @click="loadMore" outlined  class="align-center">Load more</v-btn>
+        <div class="align-self-center">
+          <v-btn v-if="!loadedAll" @click="loadMore" rounded depressed color="secondary" small>Load more</v-btn>
         </div>
       </div>
     </v-card-text>
     <v-row class="ma-0">
-      <v-col>
-        <v-textarea outlined auto-grow :rows="1" label="Enter Message" :counter="200">
-          <template v-slot:append-outer>
-            <v-btn color="primary">
-              Send
-            </v-btn>
-          </template>
-        </v-textarea>
+      <v-col class="pr-0">
+        <v-form v-model="directMessageValid">
+          <v-textarea
+            v-model="directMessageContent"
+            outlined
+            auto-grow
+            :rows="1"
+            label="Enter Message"
+            :counter="200"
+            prepend-inner-icon="mdi-comment"
+            :rules="mandatoryRules.concat(maxCharRules())"
+          />
+        </v-form>
+      </v-col>
+      <v-col cols="auto">
+        <v-btn color="primary" :disabled="!directMessageValid" @click="sendMessage">
+          Send
+        </v-btn>
       </v-col>
     </v-row>
-    <v-dialog ref="messageDialog"
-              v-model="messageOwnerDialog"
-              max-width="600px">
-      <v-card>
-        <!-- The 'TITLE' of the replyMessage component -->
-        <v-card color='secondary lighten-2'>
-          <v-card-title>
-            Send a message to {{participant.firstName}}
-          </v-card-title>
-          <v-card-subtitle>
-            Your message will appear on their feed
-          </v-card-subtitle>
-        </v-card>
-        <!-- The Message body input component -->
-        <v-form v-model="directMessageValid" ref="directMessageForm">
-          <v-card-text>
-            <v-textarea
-              solo
-              outlined
-              clearable
-              prepend-inner-icon="mdi-comment"
-              no-resize
-              :counter="200"
-              :rules="mandatoryRules.concat(maxCharRules())"
-              v-model="directMessageContent"/>
-          </v-card-text>
-          <!-- Submit and Cancel button for the replyMessage component -->
-          <v-card-actions>
-            <v-alert v-if="directMessageError !== undefined" color="red" type="error" dense text>
-              {{directMessageError}}
-            </v-alert>
-            <v-spacer/>
-            <v-btn color="primary"
-                   text
-                   :disabled="!directMessageValid"
-                   @click="sendMessage">
-              Send
-            </v-btn>
-            <v-btn color="primary"
-                   text
-                   @click="messageOwnerDialog = false;
-                           directMessageError = undefined;
-                           directMessageContent=''">
-              Cancel
-            </v-btn>
-          </v-card-actions>
-        </v-form>
-      </v-card>
-    </v-dialog>
   </Event>
 </template>
 
@@ -113,8 +81,9 @@ export default {
   },
   data() {
     return {
-      queriedMessages: [],
+      messages: [],
       mandatoryRules,
+      loadedAll: false,
       messageOwnerDialog: false,
       directMessageContent: '',
       directMessageError: undefined,
@@ -124,31 +93,32 @@ export default {
   },
   methods: {
     async loadMore() {
-      let messages = await getMessagesInConversation(this.card.id, this.event.conversation.buyer.id, 1, this.queriedMessages.length + 10);
-      this.queriedMessages = messages.results;
+      this.errorMessage = undefined;
+      let messages = await getMessagesInConversation(this.card.id, this.event.conversation.buyer.id, 1, this.messages.length + 10);
+
+      if (typeof messages === 'string') {
+        this.errorMessage = messages;
+        return;
+      }
+
+      if (this.messages.length === messages.results.length) {
+        this.loadedAll = true;
+      }
+
+      this.messages = messages.results;
     },
     async sendMessage() {
-      this.directMessageError = undefined;
-      let response = await messageConversation(this.content.id, this.$store.state.user.id, this.$store.state.user.id, this.directMessageContent);
+      this.errorMessage = undefined;
+      let response = await messageConversation(this.card.id, this.$store.state.user.id, this.buyer.id, this.directMessageContent);
       if (typeof response === 'string') {
-        this.directMessageError = response;
-      } else {
-        this.messageOwnerDialog = false;
+        this.errorMessage = response;
       }
     },
     formatDate,
     formatTime,
   },
   computed: {
-    messages() {
-      if (this.queriedMessages.length !== 0) {
-        return this.queriedMessages;
-      }
-      return [this.event.message];
-    },
-    // Fluff placeholder
     title() {
-      // If the sender ID !== myId >
       if(this.event.message.senderId === this.$store.state.user.id) {
         return "Conversation with " + this.participant.firstName;
       } else {
@@ -157,18 +127,24 @@ export default {
     },
     participant() {
       if (this.$store.state.user.id === this.card.creator.id) {
-        return this.event.conversation.buyer;
+        return this.buyer;
       } else {
         return this.card.creator;
       }
+    },
+    buyer() {
+      return this.event.conversation.buyer;
     },
     card() {
       return this.event.conversation.card;
     },
   },
   watch: {
-    'event.message.id': function() {
-      this.queriedMessages = [];
+    'event.message.id': {
+      handler() {
+        this.messages.unshift(this.event.message);
+      },
+      immediate: true,
     },
   },
 };
@@ -180,15 +156,13 @@ export default {
   max-width: 100%;
 }
 
-.self-message {
+.message-self {
   background-color: var(--v-primary-base);
   color: white;
-  align-self: flex-end;
 }
 
-.other-message {
+.message-other {
   background-color: var(--v-lightGrey-base);
-  align-self: flex-start;
 }
 
 
