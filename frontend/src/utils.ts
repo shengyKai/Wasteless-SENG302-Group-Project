@@ -181,14 +181,14 @@ export function regxPostCode() {
  Returns a Regex that matches a valid phone number
  */
 export function regxPhoneNumber() {
-  return /(^\(?\d{1,3}\)?[\s.-]?\d{3,4}[\s.-]?\d{4,5}$)|(^$)/;
+  return /(^[0-9]{4,12}$)/;
 }
 
 /**
  Returns a Regex that matches a country code
  */
 export function regxCountryCode() {
-  return /(^(\d{1,2}-)?\d{2}$)|(^$)/;
+  return /(^[0-9]{2,3}$)/;
 }
 /**
  Returns a Regex that matches a valid street address
