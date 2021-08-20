@@ -7,7 +7,7 @@ import * as api from '@/api/internal';
 
 import Vuex, { Store } from 'vuex';
 import { getStore, resetStoreForTesting, StoreData } from '@/store';
-import { castMock, makeTestUser } from './utils';
+import { castMock, makeTestUser } from '../utils';
 import synchronizedTime from '@/components/utils/Methods/synchronizedTime';
 
 Vue.use(Vuetify);
@@ -36,10 +36,6 @@ describe('Event.vue', () => {
     resetStoreForTesting();
     store = getStore();
     store.state.user = makeTestUser(1);
-
-    const app = document.createElement ("div");
-    app.setAttribute ("data-app", "true");
-    document.body.append (app);
 
     wrapper = mount(Event, {
       localVue,
@@ -71,6 +67,26 @@ describe('Event.vue', () => {
     it('When user tries to delete event, event is set to be deleted', async () => {
       await wrapper.vm.initiateDeletion();
       expect(wrapper.vm.deleted).toBeTruthy();
+    });
+
+    it('When an error message is passed to the event it is displayed', async () => {
+      await wrapper.setProps({
+        error: 'test_error_message',
+      });
+      await Vue.nextTick();
+      expect(wrapper.text()).toContain('test_error_message');
+    });
+
+    it('When a error message is passed to the event and then removed it is not displayed', async () => {
+      await wrapper.setProps({
+        error: 'test_error_message',
+      });
+      await Vue.nextTick();
+      await wrapper.setProps({
+        error: undefined,
+      });
+      await Vue.nextTick();
+      expect(wrapper.text()).not.toContain('test_error_message');
     });
 
   });

@@ -34,10 +34,13 @@ export type KeywordCreatedEvent = BaseEvent<'KeywordCreatedEvent'> & {
   creator: User
 }
 export type MessageEvent = BaseEvent<'MessageEvent'> & {
-  buyer: User,
-  card: MarketplaceCard,
-  participantType: string,
   message: Message,
+  participantType: 'buyer' | 'seller',
+  conversation: {
+    buyer: User,
+    card: MarketplaceCard,
+    id: number,
+  },
 }
 
 /**
