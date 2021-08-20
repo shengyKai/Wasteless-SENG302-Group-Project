@@ -112,6 +112,8 @@ export default {
       let response = await messageConversation(this.card.id, this.$store.state.user.id, this.buyer.id, this.directMessageContent);
       if (typeof response === 'string') {
         this.errorMessage = response;
+      } else {
+        this.directMessageContent = '';
       }
     },
     formatDate,

@@ -1,0 +1,73 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`MessageEvent.vue Matches snapshot 1`] = `
+<div>
+  <div class="delete">
+    <div class="float=right ma-1"><button type="button" class="v-icon notranslate deleteButton v-icon--link mdi mdi-trash-can theme--light red--text"></button></div>
+    <div class="v-card__title">
+      Conversation with test_firstname100
+    </div>
+    <div class="v-card__subtitle">
+      03 Jan 2021, 00:00
+    </div>
+    <div class="v-card__text"><strong>
+      Regarding: test_title
+    </strong> <br>
+      <div class="overflow-y-auto d-flex flex-column-reverse pa-1 rounded" style="max-height: 400px; width: 100%;">
+        <div class="message align-self-end">
+          <div class="elevation-2 pa-1 rounded-lg mt-1 message-self">
+            test message 1
+          </div><span class="v-tooltip v-tooltip--bottom"><!----></span>
+        </div>
+        <div class="align-self-center"><button type="button" class="v-btn v-btn--has-bg v-btn--rounded theme--light v-size--small secondary"><span class="v-btn__content">Load more</span></button></div>
+      </div>
+    </div>
+    <div class="row ma-0">
+      <div class="pr-0 col">
+        <form novalidate="novalidate" class="v-form">
+          <div class="v-input v-textarea v-textarea--auto-grow v-textarea--no-resize theme--light v-text-field v-text-field--enclosed v-text-field--outlined">
+            <div class="v-input__control">
+              <div class="v-input__slot">
+                <div class="v-input__prepend-inner">
+                  <div class="v-input__icon v-input__icon--prepend-inner"><i aria-hidden="true" class="v-icon notranslate mdi mdi-comment theme--light"></i></div>
+                </div>
+                <fieldset aria-hidden="true">
+                  <legend style="width: 0px;"><span>​</span></legend>
+                </fieldset>
+                <div class="v-text-field__slot"><label for="input-374" class="v-label theme--light" style="left: 0px; position: absolute;">Enter Message</label><textarea id="input-374" rows="1"></textarea></div>
+              </div>
+              <div class="v-text-field__details">
+                <div class="v-messages theme--light">
+                  <transition-group-stub tag="div" name="message-transition" class="v-messages__wrapper"></transition-group-stub>
+                </div>
+                <div class="v-counter theme--light">0 / 200</div>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="col col-auto"><button type="button" disabled="disabled" class="v-btn v-btn--disabled v-btn--has-bg theme--light v-size--default"><span class="v-btn__content">
+        Send
+      </span></button></div>
+    </div>
+    <!---->
+    <div class="row">
+      <div class="col"><span class="ma-2 ml-4 mb-3 v-chip v-chip--clickable v-chip--label theme--light v-size--default none white--text" aria-haspopup="true" aria-expanded="false"><span class="v-chip__content"><i aria-hidden="true" class="v-icon notranslate v-icon--left mdi mdi-label theme--light"></i>
+              Tag
+            </span></span><span class="v-tooltip v-tooltip--bottom"><!----></span></div>
+    </div>
+    <div class="row">
+      <div class="col">
+        <transition-stub name="expand-transition">
+          <div class="mx-auto v-card v-sheet theme--light" style="max-width: 1200px; display: none;">
+            <div class="font-weight-medium"><span class="ml-4">
+                Change your Tag:
+              </span></div>
+            <div class="ml-3"><span class="ma-1 v-chip v-chip--clickable v-chip--label theme--light v-size--default none white--text"><span class="v-chip__content"><i aria-hidden="true" class="v-icon notranslate v-icon--left mdi mdi-label theme--light"></i></span></span><span class="ma-1 v-chip v-chip--clickable v-chip--label theme--light v-size--default red white--text"><span class="v-chip__content"><i aria-hidden="true" class="v-icon notranslate v-icon--left mdi mdi-label theme--light"></i></span></span><span class="ma-1 v-chip v-chip--clickable v-chip--label theme--light v-size--default orange white--text"><span class="v-chip__content"><i aria-hidden="true" class="v-icon notranslate v-icon--left mdi mdi-label theme--light"></i></span></span><span class="ma-1 v-chip v-chip--clickable v-chip--label theme--light v-size--default yellow white--text"><span class="v-chip__content"><i aria-hidden="true" class="v-icon notranslate v-icon--left mdi mdi-label theme--light"></i></span></span><span class="ma-1 v-chip v-chip--clickable v-chip--label theme--light v-size--default green white--text"><span class="v-chip__content"><i aria-hidden="true" class="v-icon notranslate v-icon--left mdi mdi-label theme--light"></i></span></span><span class="ma-1 v-chip v-chip--clickable v-chip--label theme--light v-size--default blue white--text"><span class="v-chip__content"><i aria-hidden="true" class="v-icon notranslate v-icon--left mdi mdi-label theme--light"></i></span></span><span class="ma-1 v-chip v-chip--clickable v-chip--label theme--light v-size--default purple white--text"><span class="v-chip__content"><i aria-hidden="true" class="v-icon notranslate v-icon--left mdi mdi-label theme--light"></i></span></span></div>
+          </div>
+        </transition-stub>
+      </div>
+    </div>
+  </div>
+</div>
+`;
