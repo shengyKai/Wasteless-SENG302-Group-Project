@@ -62,14 +62,14 @@ describe("ModifyUserPage.vue", () => {
       homeAddress: {
         streetNumber: "11",
         streetName: "Test lane",
+        district: "Some district",
+        city: "some city",
+        region: "some region",
         country: "some country",
+        postcode: "1234",
       },
       businessesAdministered: business,
     };
-  });
-
-  afterEach(async () => {
-    await flushQueue();
   });
 
   describe('User is modifying their own profile', () => {
@@ -78,7 +78,6 @@ describe("ModifyUserPage.vue", () => {
       store.state.user = user;
       let vuetify = new Vuetify();
       wrapper = mount(ModifyUserPage, {
-        stubs: ["router-link", "router-view"],
         localVue,
         vuetify,
         store,
@@ -231,14 +230,10 @@ describe("ModifyUserPage.vue", () => {
 
     it("Invalid firstName format,with '@' ", async () => {
       const updateButton = wrapper.findComponent({ref: 'updateButton'});
-      console.log(wrapper.vm.user.firstName);
       await wrapper.setData({
-        user: {firstName: "some firstName@" },
+        user: {firstName: "some firstName@"}
       });
       await Vue.nextTick();
-      console.log(JSON.stringify(wrapper.vm.user));
-      wrapper.vm.validateAllField();
-      console.log(wrapper.vm.valid);
       expect(wrapper.vm.valid).toBeFalsy();
       expect(updateButton.props().disabled).toBeTruthy();
     });

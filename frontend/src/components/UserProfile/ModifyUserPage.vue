@@ -9,7 +9,7 @@
             <v-tab key="about">About</v-tab>
             <v-tab key="address">Address</v-tab>
           </v-tabs>
-          <v-tabs-items v-model="tab" class="pt-4">
+          <v-tabs-items v-model="tab" class="pt-4" :eager="true">
             <!-- TAB: Login -->
             <v-tab-item key="login">
               <!-- INPUT: Email -->
@@ -68,7 +68,7 @@
               />
             </v-tab-item>
             <!-- TAB: About -->
-            <v-tab-item key="about">
+            <v-tab-item key="about" :eager="true">
               <!-- INPUT: First name -->
               <v-row>
                 <v-col cols="12" sm="6" class="pb-0">
@@ -199,7 +199,7 @@
               </v-row>
             </v-tab-item>
             <!-- TAB: Address -->
-            <v-tab-item key="address">
+            <v-tab-item key="address" :eager="true">
               <!-- INPUT: Street -->
               <v-text-field
                 class="required"
