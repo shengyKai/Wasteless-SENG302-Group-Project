@@ -10,10 +10,10 @@ exports[`MessageEvent.vue Matches snapshot 1`] = `
     <div class="v-card__subtitle">
       03 Jan 2021, 00:00
     </div>
-    <div class="v-card__text"><strong>
+    <div class="v-card__text pb-1"><strong>
       Regarding: test_title
-    </strong> <br>
-      <div class="overflow-y-auto d-flex flex-column-reverse pa-1 rounded" style="max-height: 400px; width: 100%;">
+    </strong>
+      <div class="overflow-y-auto d-flex flex-column-reverse pa-1 rounded" style="max-height: 350px; width: 100%;">
         <div class="message align-self-end">
           <div class="elevation-2 pa-1 rounded-lg mt-1 message-self">
             test message 1
@@ -22,9 +22,9 @@ exports[`MessageEvent.vue Matches snapshot 1`] = `
         <div class="align-self-center"><button type="button" class="v-btn v-btn--has-bg v-btn--rounded theme--light v-size--small secondary"><span class="v-btn__content">Load more</span></button></div>
       </div>
     </div>
-    <div class="row ma-0">
-      <div class="pr-0 col">
-        <form novalidate="novalidate" class="v-form">
+    <form novalidate="novalidate" class="v-form">
+      <div class="row ma-0 mb-n3">
+        <div class="pr-0 py-0 col">
           <div class="v-input v-textarea v-textarea--auto-grow v-textarea--no-resize theme--light v-text-field v-text-field--enclosed v-text-field--outlined">
             <div class="v-input__control">
               <div class="v-input__slot">
@@ -44,12 +44,12 @@ exports[`MessageEvent.vue Matches snapshot 1`] = `
               </div>
             </div>
           </div>
-        </form>
+        </div>
+        <div class="py-0 col col-auto"><button type="button" class="v-btn v-btn--is-elevated v-btn--has-bg theme--light v-size--default primary"><span class="v-btn__content">
+          Send
+        </span></button></div>
       </div>
-      <div class="col col-auto"><button type="button" disabled="disabled" class="v-btn v-btn--disabled v-btn--has-bg theme--light v-size--default"><span class="v-btn__content">
-        Send
-      </span></button></div>
-    </div>
+    </form>
     <!---->
     <div class="row">
       <div class="col"><span class="ma-2 ml-4 mb-3 v-chip v-chip--clickable v-chip--label theme--light v-size--default none white--text" aria-haspopup="true" aria-expanded="false"><span class="v-chip__content"><i aria-hidden="true" class="v-icon notranslate v-icon--left mdi mdi-label theme--light"></i>

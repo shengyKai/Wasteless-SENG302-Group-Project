@@ -1,12 +1,12 @@
 <template>
   <Event :event="event" :title="title" :error="errorMessage">
-    <v-card-text>
+    <v-card-text class="pb-1">
       <strong>
         Regarding: {{event.conversation.card.title}}
-      </strong> <br>
+      </strong>
       <div
         class="overflow-y-auto d-flex flex-column-reverse pa-1 rounded"
-        style="max-height: 400px; width: 100%;"
+        style="max-height: 350px; width: 100%;"
       >
         <template v-for="message in messages">
           <div :key="message.id"
@@ -38,27 +38,28 @@
         </div>
       </div>
     </v-card-text>
-    <v-row class="ma-0">
-      <v-col class="pr-0">
-        <v-form v-model="directMessageValid">
+    <v-form v-model="directMessageValid" ref="sendForm">
+      <v-row class="ma-0 mb-n3">
+        <v-col class="pr-0 py-0">
           <v-textarea
             v-model="directMessageContent"
+            :error-messages="fieldEmptyError ? 'Message must be provided' : undefined"
             outlined
             auto-grow
             :rows="1"
             label="Enter Message"
             :counter="200"
             prepend-inner-icon="mdi-comment"
-            :rules="mandatoryRules.concat(maxCharRules())"
+            :rules="maxCharRules()"
           />
-        </v-form>
-      </v-col>
-      <v-col cols="auto">
-        <v-btn color="primary" :disabled="!directMessageValid" @click="sendMessage">
-          Send
-        </v-btn>
-      </v-col>
-    </v-row>
+        </v-col>
+        <v-col cols="auto" class="py-0">
+          <v-btn color="primary" :disabled="!directMessageValid" @click="sendMessage">
+            Send
+          </v-btn>
+        </v-col>
+      </v-row>
+    </v-form>
   </Event>
 </template>
 
@@ -84,10 +85,11 @@ export default {
       messages: [],
       mandatoryRules,
       loadedAll: false,
+      fieldEmptyError: false,
       messageOwnerDialog: false,
       directMessageContent: '',
       errorMessage: undefined,
-      directMessageValid: false,
+      directMessageValid: true,
       maxCharRules: () => maxCharRules(200),
     };
   },
@@ -101,7 +103,7 @@ export default {
         return;
       }
 
-      if (this.messages.length === messages.results.length) {
+      if (messages.results.length === messages.count) {
         this.loadedAll = true;
       }
 
@@ -109,6 +111,11 @@ export default {
     },
     async sendMessage() {
       this.errorMessage = undefined;
+      if (this.directMessageContent.length === 0) {
+        this.fieldEmptyError = true;
+        return;
+      }
+
       let response = await messageConversation(this.card.id, this.$store.state.user.id, this.buyer.id, this.directMessageContent);
       if (typeof response === 'string') {
         this.errorMessage = response;
@@ -147,6 +154,11 @@ export default {
         this.messages.unshift(this.event.message);
       },
       immediate: true,
+    },
+    directMessageContent() {
+      if (this.fieldEmptyError && this.directMessageContent.length !== 0) {
+        this.fieldEmptyError = false;
+      }
     },
   },
 };

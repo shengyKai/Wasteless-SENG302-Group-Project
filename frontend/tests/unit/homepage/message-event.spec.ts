@@ -116,8 +116,14 @@ describe('MessageEvent.vue', () => {
     expect(eventWrapper.vm.title).toBe('New message from: ' + sellerUser.firstName);
   });
 
-  it('If no message is provided then the send button is disabled', () => {
+  it('If no message is provided then the send button is enabled until a message tries to be sent', async () => {
+    expect(findSendButton().props().disabled).toBeFalsy();
+
+    await findSendButton().trigger('click');
+    await Vue.nextTick();
+
     expect(findSendButton().props().disabled).toBeTruthy();
+    expect(messageConversation).not.toBeCalled();
   });
 
   it('If the message is too long then the send button is disabled', async () => {
