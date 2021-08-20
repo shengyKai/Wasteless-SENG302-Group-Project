@@ -36,7 +36,7 @@ jest.mock('@/api/internal', () => ({
   getUser: jest.fn()
 }));
 
-jest.mock("@/components/utils/methods/autocomplete.ts", () => ({
+jest.mock("@/components/utils/Methods/autocomplete", () => ({
   insertResultsFromAPI: jest.fn().mockResolvedValue(undefined),
 }));
 
