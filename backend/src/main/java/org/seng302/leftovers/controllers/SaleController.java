@@ -147,7 +147,7 @@ public class SaleController {
 
             PageRequest pageRequest = SearchHelper.getPageRequest(page, resultsPerPage, Sort.by(sortOrder));
 
-            Specification<SaleItem> specification = SearchHelper.constructSpecificationFromSaleItemsFiltering(business);
+            Specification<SaleItem> specification = SearchHelper.constructSpecificationFromSaleItemsOrdering(business);
             Page<SaleItem> result = saleItemRepository.findAll(specification, pageRequest);
 
             return JsonTools.constructPageJSON(result.map(SaleItem::constructJSONObject));

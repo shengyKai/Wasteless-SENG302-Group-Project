@@ -594,7 +594,11 @@ public class SearchHelper {
         }
     }
 
-    public static Specification<SaleItem> constructSpecificationFromSaleItemsFiltering(Business business) {
+    public static Specification<SaleItem> constructSpecificationFromSaleItemsOrdering(Business business) {
         return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("inventoryItem").get("product").get("business"), business);
+    }
+
+    public static Specification<InventoryItem> constructSpecificationFromInventoryItemsOrdering(Business business) {
+        return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("product").get("business"), business);
     }
 }

@@ -7,11 +7,13 @@ import org.apache.logging.log4j.Logger;
 import org.seng302.leftovers.entities.Business;
 import org.seng302.leftovers.entities.InventoryItem;
 import org.seng302.leftovers.entities.Product;
+import org.seng302.leftovers.entities.SaleItem;
 import org.seng302.leftovers.persistence.BusinessRepository;
 import org.seng302.leftovers.persistence.InventoryItemRepository;
 import org.seng302.leftovers.persistence.ProductRepository;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
 import org.seng302.leftovers.tools.JsonTools;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
@@ -210,7 +212,8 @@ public class InventoryController {
 
         PageRequest pageRequest = SearchHelper.getPageRequest(page, resultsPerPage, Sort.by(sortOrder));
 
-        Page<InventoryItem> result = inventoryItemRepository.findAllForBusiness(business, pageRequest);
+        Specification<InventoryItem> specification = SearchHelper.constructSpecificationFromInventoryItemsOrdering(business);
+        Page<InventoryItem> result = inventoryItemRepository.findAll(specification, pageRequest);
         
         return JsonTools.constructPageJSON(result.map(InventoryItem::constructJSONObject));
 
