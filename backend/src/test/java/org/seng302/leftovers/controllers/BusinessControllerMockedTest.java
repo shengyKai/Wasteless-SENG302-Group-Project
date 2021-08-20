@@ -173,6 +173,7 @@ class BusinessControllerMockedTest {
     @Test
     void modifyBusiness_notOwner_403Response() throws Exception {
         var json = createValidRequest();
+        doThrow(new ResponseStatusException(HttpStatus.FORBIDDEN)).when(mockBusiness).checkSessionPermissions(any());
         mockMvc.perform(
                 put("/businesses/" + mockBusinessId)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -206,6 +207,7 @@ class BusinessControllerMockedTest {
         doThrow(new ResponseStatusException(HttpStatus.BAD_REQUEST)).when(mockBusiness).setPrimaryOwner(any());
 
         var json = createValidRequest();
+        json.put("primaryAdministratorId", mockNonOwnerId);
         mockMvc.perform(
                 put("/businesses/" + mockBusinessId)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -277,25 +279,9 @@ class BusinessControllerMockedTest {
     }
 
     @Test
-    void modifyBusiness_ownerChangedAndCannotSeePrivate_400Response() throws Exception {
-        var json = createValidRequest();
-        json.put("primaryAdministratorId", mockNonOwnerId);
-
-        mockMvc.perform(
-                put("/businesses/" + mockBusinessId)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(json.toString())
-                        .sessionAttrs(createSessionForUser(mockOwnerId)))
-                .andExpect(status().isBadRequest())
-                .andReturn();
-
-        authenticationTokenManager.verify(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), eq(mockNonOwnerId)));
-        verify(businessRepository, times(0)).save(any());
-    }
-
-    @Test
     void modifyBusiness_isOwner_200ResponseAndModified() throws Exception {
         var json = createValidRequest();
+        json.put("primaryAdministratorId", mockNonOwnerId);
         mockMvc.perform(
                 put("/businesses/" + mockBusinessId)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -304,7 +290,7 @@ class BusinessControllerMockedTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        verify(mockBusiness, times(1)).setPrimaryOwner(mockOwner);
+        verify(mockBusiness, times(1)).setPrimaryOwner(mockNonOwner);
         verify(mockBusiness, times(1)).setName((String)json.get("name"));
         verify(mockBusiness, times(1)).setDescription((String)json.get("description"));
         verify(mockBusiness, times(1)).setBusinessType((String)json.get("businessType"));
@@ -325,7 +311,7 @@ class BusinessControllerMockedTest {
 
     @Test
     void modifyBusiness_isAdmin_200Response() throws Exception {
-        authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), isNull())).thenReturn(true);
+        doNothing().when(mockBusiness).checkSessionPermissions(any());
 
         var json = createValidRequest();
         mockMvc.perform(
@@ -336,7 +322,7 @@ class BusinessControllerMockedTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        authenticationTokenManager.verify(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), isNull()));
+        verify(mockBusiness, times(1)).checkSessionPermissions(any());
         verify(businessRepository, times(1)).save(mockBusiness);
     }
 
