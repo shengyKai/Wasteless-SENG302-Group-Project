@@ -976,7 +976,7 @@ class UserTests {
                 .withPassword("1337-H%nt3r2")
                 .withBio("Likes long walks on the beach")
                 .withDob("2001-03-11")
-                .withPhoneNumber("+64 3 555 0129")
+                .withPhoneNumber("6435550129")
                 .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
                         "Canterbury,8041"))
                 .build();
@@ -1123,7 +1123,7 @@ class UserTests {
                 .withPassword("1337-H%nt3r2")
                 .withBio("Likes long walks on the beach")
                 .withDob("2001-03-11")
-                .withPhoneNumber("+64 3 555 0129")
+                .withPhoneNumber("6435550129")
                 .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
                         "Canterbury,8041"));
         User testUser = testBuilder.build();
@@ -1144,7 +1144,7 @@ class UserTests {
                 .withPassword("1337-H%nt3r2")
                 .withBio("Likes long walks on the beach")
                 .withDob("2001-03-11")
-                .withPhoneNumber("+64 3 555 0129")
+                .withPhoneNumber("6435550129")
                 .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
                         "Canterbury,8041"));
         User testUser = testBuilder.build();
@@ -1280,7 +1280,7 @@ class UserTests {
     @Test
     void buildWithPhoneNumberTest() {
         User user = testBuilder.build();
-        assertEquals("+64 3 555 0129", user.getPhNum());
+        assertEquals("6435550129", user.getPhNum());
     }
 
     /**
