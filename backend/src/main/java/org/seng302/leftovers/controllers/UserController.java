@@ -98,6 +98,11 @@ public class UserController {
                         "You do not have permission to modify another user");
             }
 
+            if(body.getEmail().equals("wasteless@seng302.com")) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                "DGAA profile are not permitted to be modified.");
+            }
+            
             // check if email changed
             if (!body.getEmail().equals(user.getEmail())) {
                 PasswordAuthenticator.verifyPassword(body.getPassword(),user.getAuthenticationCode());
