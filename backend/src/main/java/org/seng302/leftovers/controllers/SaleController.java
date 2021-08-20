@@ -60,6 +60,8 @@ public class SaleController {
             orderBy = "inventoryItem.product.productCode";
         } else if (orderBy.equals("productName")) {
             orderBy = "inventoryItem.product.name";
+        } else if (orderBy.equals("closing")) {
+            orderBy = "closes";
         }
         return new Sort.Order(direction, orderBy).ignoreCase();
     }
