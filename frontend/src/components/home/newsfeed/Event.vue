@@ -59,24 +59,6 @@
             <span>Click to view the available tags.</span>
           </v-tooltip>
         </v-col>
-        <v-col class="text-right mr-5">
-          <!-- Tooltip for the reply button telling user what they can do with this button -->
-          <v-tooltip bottom >
-            <template v-slot:activator="{on, attrs }">
-              <v-icon v-if="!isCardOwner"
-                      ref="messageButton"
-                      color="primary"
-                      @click.stop="messageOwnerDialog = true; directMessageContent=''"
-                      v-bind="attrs"
-                      v-on="on"
-                      class="mt-4 ml-12"
-              >
-                mdi-reply
-              </v-icon>
-            </template>
-            Reply to this message
-          </v-tooltip>
-        </v-col>
       </v-row>
       <v-row>
         <v-col>
@@ -120,7 +102,7 @@
 
 <script>
 import synchronizedTime from '@/components/utils/Methods/synchronizedTime';
-import { formatDate } from '@/utils';
+import { formatDate, formatTime } from '@/utils';
 import { setEventTag } from "@/api/internal";
 
 export default {
@@ -152,8 +134,7 @@ export default {
      * The time the event was created in a displayable format (hh:mm).
      */
     time() {
-      let fullTime = new Date(this.event.created).toTimeString().split(' ')[0];
-      return fullTime.split(':').splice(0, 2).join(':');
+      return formatTime(this.event.created);
     },
     /**
      * The date the event was created in a displayable format.

@@ -1,39 +1,47 @@
 <template>
   <Event :event="event" :title="title">
-    <v-card-text class="d-flex flex-column align-start" style="text-align: left">
+    <v-card-text>
       <strong>
         Regarding: {{event.conversation.card.title}}
       </strong> <br>
-      <v-btn @click="loadMore">Load more messages</v-btn>
-      <v-btn v-if="messages.length > 1">Hide messages</v-btn>
       <div
-        v-for="message in messages"
-        :key="message.id"
-        class="elevation-2 pa-1 rounded-lg mt-1 message"
-        :class="{
-          'self-message'  : $store.state.user.id === message.senderId,
-          'other-message' : $store.state.user.id !== message.senderId,
-        }"
+        class="overflow-y-auto d-flex flex-column-reverse pa-1 rounded"
+        style="max-height: 400px; width: 100%;"
       >
-        {{message.content}}
+        <template v-for="message in messages">
+          <v-tooltip :key="message.id" bottom>
+            <template v-slot:activator="{on, attrs}">
+              <div
+                v-bind="attrs"
+                v-on="on"
+                class="elevation-2 pa-1 rounded-lg mt-1 message"
+                :class="{
+                  'self-message'  : $store.state.user.id === message.senderId,
+                  'other-message' : $store.state.user.id !== message.senderId,
+                }"
+              >
+                {{message.content}}
+              </div>
+            </template>
+            {{ formatDate(message.created) }}, {{ formatTime(message.created) }}
+          </v-tooltip>
+        </template>
+        <div class="align-center">
+          <v-btn @click="loadMore" outlined  class="align-center">Load more</v-btn>
+        </div>
       </div>
     </v-card-text>
-    <v-card-actions class="foot-tools">
-      <v-tooltip bottom >
-        <template v-slot:activator="{on, attrs }">
-          <v-icon ref="messageButton"
-                  color="primary"
-                  @click.stop="messageOwnerDialog = true; directMessageContent=''"
-                  v-bind="attrs"
-                  v-on="on"
-                  class="ml-2"
-          >
-            mdi-reply
-          </v-icon>
-        </template>
-        Reply to this message
-      </v-tooltip>
-    </v-card-actions>
+    <v-row class="ma-0">
+      <v-col>
+        <v-textarea outlined auto-grow :rows="1" label="Enter Message" :counter="200">
+          <template v-slot:append-outer>
+            <v-btn color="primary">
+              Send
+            </v-btn>
+          </template>
+        </v-textarea>
+      </v-col>
+    </v-row>
     <v-dialog ref="messageDialog"
               v-model="messageOwnerDialog"
               max-width="600px">
@@ -90,6 +98,7 @@
 import Event from './Event';
 import {mandatoryRules, maxCharRules} from '@/utils';
 import {getMessagesInConversation, messageConversation} from "@/api/internal";
+import { formatDate, formatTime } from '@/utils';
 
 export default {
   name: "MessageEvent",
@@ -127,13 +136,13 @@ export default {
         this.messageOwnerDialog = false;
       }
     },
+    formatDate,
+    formatTime,
   },
   computed: {
     messages() {
       if (this.queriedMessages.length !== 0) {
-        let messages = this.queriedMessages;
-        messages.reverse();
-        return messages;
+        return this.queriedMessages;
       }
       return [this.event.message];
     },
@@ -166,14 +175,6 @@ export default {
 </script>
 
 <style scoped>
-.foot-tools {
-  display: flex;
-  flex-wrap: wrap;
-  position: absolute;
-  bottom:3px;
-  right:3px;
-}
-
 .message {
   word-wrap: break-word;
   max-width: 100%;
@@ -181,12 +182,12 @@ export default {
 
 .self-message {
   background-color: var(--v-primary-base);
+  color: white;
   align-self: flex-end;
 }
 
 .other-message {
   background-color: var(--v-lightGrey-base);
-  /* background-color: var(--v-secondary-lighten3); */
   align-self: flex-start;
 }
 
