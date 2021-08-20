@@ -439,8 +439,8 @@ export default {
      * Apply validation rule on the currentPassword field
      */
     validateCurrentPassword() {
-      this.$refs.oldPassword.validate(true);
-      this.$refs.confirmPassword.validate(true);
+      this.$refs.oldPassword?.validate(true);
+      this.$refs.confirmPassword?.validate(true);
     },
     /**
      * Apply validation rule on the confirmPassword field
