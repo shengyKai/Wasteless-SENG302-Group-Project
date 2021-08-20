@@ -157,8 +157,6 @@ class InventoryControllerTest {
         when(businessSpy.getId()).thenReturn(1L);
         when(businessRepository.getBusinessById(any())).thenReturn(businessSpy); // use our business
         doNothing().when(businessSpy).checkSessionPermissions(any()); // mock successful authentication
-        // when(inventoryItemRepository.findAllForBusiness(businessSpy, any())).thenReturn(inventory);
-//        when(inventoryItemRepository.findAll(any(), (PageRequest) any())).thenReturn(page);
 
         inventoryController = new InventoryController(businessRepository, inventoryItemRepository, productRepository);
         mockMvc = MockMvcBuilders.standaloneSetup(inventoryController).build();
