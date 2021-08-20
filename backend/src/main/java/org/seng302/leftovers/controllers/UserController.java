@@ -100,6 +100,7 @@ public class UserController {
             
             // check if email changed
             if (!body.getEmail().equals(user.getEmail())) {
+                Account.checkEmailUniqueness(body.getEmail(), userRepository);
                 PasswordAuthenticator.verifyPassword(body.getPassword(),user.getAuthenticationCode());
                 user.setEmail(body.getEmail());
             }
