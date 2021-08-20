@@ -1,5 +1,5 @@
 <template>
-  <Event :event="event" :title="title">
+  <Event :event="event" :title="title" :error="errorMessage">
     <v-card-text>
       <strong>
         Regarding: {{event.conversation.card.title}}
@@ -86,7 +86,7 @@ export default {
       loadedAll: false,
       messageOwnerDialog: false,
       directMessageContent: '',
-      directMessageError: undefined,
+      errorMessage: undefined,
       directMessageValid: false,
       maxCharRules: () => maxCharRules(200),
     };

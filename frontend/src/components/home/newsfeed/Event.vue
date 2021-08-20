@@ -31,7 +31,7 @@
         {{ date }}, {{ time }}
       </v-card-subtitle>
       <slot/>
-      <v-card-text class="justify-center" v-if="errorMessage !== undefined">
+      <v-card-text class="justify-center py-0" v-if="errorMessage !== undefined">
         <div class="error--text">{{ errorMessage }}</div>
       </v-card-text>
       <!-- For user to view their option about the available tag to choose from  -->
@@ -116,6 +116,7 @@ export default {
       type: Object,
       required: true,
     },
+    error: String,
   },
   data() {
     return {
@@ -206,7 +207,15 @@ export default {
       this.deleted = false;
       this.$store.commit('unstageEventForDeletion', this.event.id);
     },
-  }
+  },
+  watch: {
+    error: {
+      handler() {
+        this.errorMessage = this.error;
+      },
+      immediate: true,
+    },
+  },
 };
 </script>
 
