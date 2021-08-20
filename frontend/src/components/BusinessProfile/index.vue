@@ -6,9 +6,8 @@
       </v-col>
     </v-row>
     <div v-if='!modifyBusiness' style="margin-top: 100px">
-      <v-card>
+      <v-card v-if="businessImages && businessImages.length > 0">
         <ImageCarousel
-          v-if="businessImages"
           :imagesList="businessImages"
           :showControls="permissionToActAsBusiness"
           @change-primary-image="makeImagePrimary"
