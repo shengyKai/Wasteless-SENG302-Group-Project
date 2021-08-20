@@ -69,7 +69,7 @@ export type Location = {
   postcode?: string
 };
 
-export type CreateUser = {
+export type BaseUser = {
   firstName: string,
   lastName: string,
   middleName?: string,
@@ -79,11 +79,15 @@ export type CreateUser = {
   dateOfBirth: string,
   phoneNumber?: string,
   homeAddress: Location,
+};
+
+export type CreateUser = BaseUser & {
   password: string,
 };
 
-export type ModifyUser = CreateUser & {
-  newPassword: string
+export type ModifyUser = BaseUser & {
+  password?: string,
+  newPassword?: string
 }
 
 export type BusinessType = 'Accommodation and Food Services' | 'Retail Trade' | 'Charitable organisation' | 'Non-profit organisation';

@@ -421,7 +421,7 @@ export default {
      * Set the attributes of the user in active user in the store to those retrieved from the backend using the
      * user id on this page.
      */
-    updateStoreUser() {
+    async updateStoreUser() {
       getUser(this.id)
         .then(response => {
           if (typeof response === 'string') {
