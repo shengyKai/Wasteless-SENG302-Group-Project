@@ -237,10 +237,10 @@ export function maxCharRules(size: number) {
 }
 
 export const phoneNumberRules = [
-  (field: string) => regxPhoneNumber().test(field) || 'Must only contain 8-12 digits'
+  (field: string) => regxPhoneNumber().test(field) || 'Must only contain 4-12 digits'
 ];
 export const countryCodeRules = [
-  (field: string) => regxCountryCode().test(field) || 'Must only contain 2 digits.'
+  (field: string) => regxCountryCode().test(field) || 'Must only contain 2-3 digits.'
 ];
 export const alphabetRules = [
   (field: string) => (field.length === 0 || regxAlphabet().test(field)) || 'Naming must be valid'
