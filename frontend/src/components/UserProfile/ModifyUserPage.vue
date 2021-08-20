@@ -14,10 +14,10 @@
             <v-tab-item key="login">
               <!-- INPUT: Email -->
               <v-text-field
+                ref="email"
                 class="required"
                 v-model="user.email"
                 label="Email"
-                @keyup="validateCurrentPassword"
                 :rules="mandatoryRules.concat(emailRules).concat(maxLongCharRules)"
                 outlined
               />
@@ -29,7 +29,6 @@
                     ref="password"
                     v-model="user.newPassword"
                     label="New Password"
-                    @keyup="validateCurrentPassword"
                     :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
                     :type="showPassword ? 'text' : 'password'"
                     @click:append="showPassword = !showPassword"
@@ -191,7 +190,6 @@
                     label="Phone"
                     v-model="phoneDigits"
                     :rules="phoneNumberRules"
-                    @keyup="phoneNumberChange"
                     outlined
                   />
                 </v-col>
@@ -411,6 +409,7 @@ export default {
       this.user.homeAddress = this.previousUser.homeAddress;
       this.streetAddress = this.previousUser.homeAddress.streetNumber + ' ' + this.previousUser.homeAddress.streetName;
 
+
       if (this.previousUser.phoneNumber !== undefined) {
         let parts = this.previousUser.phoneNumber.split(' ');
         this.countryCode = parts[0];
@@ -434,6 +433,7 @@ export default {
     },
     updatePhoneNumber() {
       this.user.phoneNumber = this.countryCode + ' ' + this.phoneDigits;
+      this.$refs.countryCode.validate();
     },
     /**
      * Apply validation rule on the currentPassword field
@@ -447,12 +447,6 @@ export default {
      */
     passwordCheck () {
       this.$refs.confirmPassword.validate();
-    },
-    /**
-     * Apply validation rule on country code field
-     */
-    phoneNumberChange () {
-      this.$refs.countryCode.validate();
     },
     /**
      * Set the minimum age range in date picker according to the account
@@ -490,6 +484,8 @@ export default {
       },
       immediate: true,
     },
+    "user.newPassword"() { this.validateCurrentPassword(); },
+    "user.email"() { this.validateCurrentPassword(); }
   },
   /**
    * Use all the imported validation rules from utils to be consistent within the web application.

@@ -36,6 +36,10 @@ jest.mock('@/api/internal', () => ({
   getUser: jest.fn()
 }));
 
+jest.mock("@/components/utils/methods/autocomplete.ts", () => ({
+  insertResultsFromAPI: jest.fn().mockResolvedValue(undefined),
+}));
+
 const modifyUser = castMock(api.modifyUser);
 const getUser = castMock(api.getUser);
 
@@ -58,7 +62,7 @@ describe("ModifyUserPage.vue", () => {
       bio: "some bio",
       email: "someemail@gmail.com",
       dateOfBirth: "2010-01-01",
-      phoneNumber: "+64 123 321 123",
+      phoneNumber: "64 12345678",
       homeAddress: {
         streetNumber: "11",
         streetName: "Test lane",
@@ -185,8 +189,8 @@ describe("ModifyUserPage.vue", () => {
     });
 
     it("Phone number should be split apart when prefilled", () => {
-      expect(wrapper.vm.countryCode).toBe("+64");
-      expect(wrapper.vm.phoneDigits).toBe("123 321 123");
+      expect(wrapper.vm.countryCode).toBe("64");
+      expect(wrapper.vm.phoneDigits).toBe("12345678");
     });
 
     it("Phone number should be joined together when updated", async () => {
@@ -256,68 +260,10 @@ describe("ModifyUserPage.vue", () => {
       expect(updateButton.props().disabled).toBeTruthy();
     });
 
-    it("Invalid date of birth format,with unexpected char and symbol'@' ", async () => {
-      const updateButton = wrapper.findComponent({ref: 'updateButton'});
-      await wrapper.setData({
-        user: { dateOfBirth: "65a4sd@asd" },
-      });
-      await Vue.nextTick();
-      expect(updateButton.props().disabled).toBeTruthy();
-    });
-
     it("Testing for empty date of birth field", async () => {
       const updateButton = wrapper.findComponent({ref: 'updateButton'});
       await wrapper.setData({
         user: { dateOfBirth: "" },
-      });
-      await Vue.nextTick();
-      expect(updateButton.props().disabled).toBeTruthy();
-    });
-
-    it("Invalid date of birth format", async () => {
-      const updateButton = wrapper.findComponent({ref: 'updateButton'});
-      await wrapper.setData({
-        user: { dateOfBirth: "01-01-01" },
-      });
-      await Vue.nextTick();
-      expect(updateButton.props().disabled).toBeTruthy();
-    });
-
-    it("Invalid date of birth format -- too young", async () => {
-      const updateButton = wrapper.findComponent({ref: 'updateButton'});
-      await wrapper.setData({
-        user: { dateOfBirth: "2020-01-01" },
-      });
-      await Vue.nextTick();
-      expect(updateButton.props().disabled).toBeTruthy();
-    });
-
-    it("Invalid date of birth format -- too old", async () => {
-      const updateButton = wrapper.findComponent({ref: 'updateButton'});
-      await wrapper.setData({
-        user: { dateOfBirth: "2050-01-01" },
-      });
-      await Vue.nextTick();
-      expect(updateButton.props().disabled).toBeTruthy();
-    });
-
-    it("Invalid date of birth format, should be 13years from now when no business", async () => {
-      const updateButton = wrapper.findComponent({ref: 'updateButton'});
-      await wrapper.setData({
-        user: { dateOfBirth: "2009-01-01", businessAdministered: [] },
-      });
-      await Vue.nextTick();
-      expect(updateButton.props().disabled).toBeTruthy();
-    });
-
-    it("Invalid date of birth format should be 16years from now when have business", async () => {
-      const updateButton = wrapper.findComponent({ref: 'updateButton'});
-      let business = createTestBusinesses();
-      await wrapper.setData({
-        user: {
-          dateOfBirth: "2008-01-01",
-          businessAdministered: business,
-        },
       });
       await Vue.nextTick();
       expect(updateButton.props().disabled).toBeTruthy();
@@ -402,8 +348,6 @@ describe("ModifyUserPage.vue", () => {
         },
       });
       await Vue.nextTick();
-      console.log(JSON.stringify(wrapper.vm.user));
-      wrapper.vm.$refs.modifyForm.validate();
       expect(updateButton.props().disabled).toBeTruthy();
     });
 
@@ -432,6 +376,7 @@ describe("ModifyUserPage.vue", () => {
         confirmPassword: "asdasd123",
       });
       await Vue.nextTick();
+
       expect(updateButton.props().disabled).toBeFalsy();
     });
 
