@@ -170,7 +170,7 @@
                 <v-col
                   cols="12"
                   sm="4"
-                  class="pb-0"
+                  class="pb-3"
                 >
                   <v-text-field
                     ref="countryCode"
@@ -183,7 +183,7 @@
                 <v-col
                   cols="12"
                   sm="8"
-                  class="pb-0"
+                  class="pb-3"
                 >
                   <!-- INPUT: Phone -->
                   <v-text-field
