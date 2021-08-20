@@ -97,7 +97,7 @@ public class UserController {
                 throw new ResponseStatusException(HttpStatus.FORBIDDEN,
                         "You do not have permission to modify another user");
             }
-
+            
             // check if email changed
             if (!body.getEmail().equals(user.getEmail())) {
                 PasswordAuthenticator.verifyPassword(body.getPassword(),user.getAuthenticationCode());

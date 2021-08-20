@@ -181,14 +181,14 @@ export function regxPostCode() {
  Returns a Regex that matches a valid phone number
  */
 export function regxPhoneNumber() {
-  return /(^\(?\d{1,3}\)?[\s.-]?\d{3,4}[\s.-]?\d{4,5}$)|(^$)/;
+  return /(^[0-9]{4,12}$)/;
 }
 
 /**
  Returns a Regex that matches a country code
  */
 export function regxCountryCode() {
-  return /(^(\d{1,2}-)?\d{2}$)|(^$)/;
+  return /(^[0-9]{2,3}$)/;
 }
 /**
  Returns a Regex that matches a valid street address
@@ -237,10 +237,10 @@ export function maxCharRules(size: number) {
 }
 
 export const phoneNumberRules = [
-  (field: string) => regxPhoneNumber().test(field) || 'Must only contain 8-12 digits'
+  (field: string) => regxPhoneNumber().test(field) || 'Must only contain 4-12 digits'
 ];
 export const countryCodeRules = [
-  (field: string) => regxCountryCode().test(field) || 'Must only contain 2 digits.'
+  (field: string) => regxCountryCode().test(field) || 'Must only contain 2-3 digits.'
 ];
 export const alphabetRules = [
   (field: string) => (field.length === 0 || regxAlphabet().test(field)) || 'Naming must be valid'
