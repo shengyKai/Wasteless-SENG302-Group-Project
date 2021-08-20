@@ -16,6 +16,7 @@ import org.seng302.leftovers.tools.SearchHelper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
@@ -142,11 +143,12 @@ public class SaleController {
             Business business = businessRepository.getBusinessById(id);
 
             Sort.Direction direction = SearchHelper.getSortDirection(reverse);
-            Sort.Order sortOrder = getSaleItemOrder(orderBy, direction);
+            List<Sort.Order> sortOrder = List.of(getSaleItemOrder(orderBy, direction));
 
             PageRequest pageRequest = SearchHelper.getPageRequest(page, resultsPerPage, Sort.by(sortOrder));
 
-            Page<SaleItem> result = saleItemRepository.findAllForBusiness(business, pageRequest);
+            Specification<SaleItem> specification = SearchHelper.constructSpecificationFromSaleItemsFiltering(business);
+            Page<SaleItem> result = saleItemRepository.findAll(specification, pageRequest);
 
             return JsonTools.constructPageJSON(result.map(SaleItem::constructJSONObject));
 

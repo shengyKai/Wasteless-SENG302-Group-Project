@@ -5,10 +5,7 @@ import lombok.Data;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.seng302.leftovers.dto.ProductFilterOption;
-import org.seng302.leftovers.entities.Business;
-import org.seng302.leftovers.entities.Keyword;
-import org.seng302.leftovers.entities.Product;
-import org.seng302.leftovers.entities.User;
+import org.seng302.leftovers.entities.*;
 import org.seng302.leftovers.exceptions.SearchFormatException;
 import org.seng302.leftovers.persistence.UserRepository;
 import org.seng302.leftovers.persistence.SpecificationsBuilder;
@@ -595,5 +592,9 @@ public class SearchHelper {
                 noDuplicatesList.add(user);
             }
         }
+    }
+
+    public static Specification<SaleItem> constructSpecificationFromSaleItemsFiltering(Business business) {
+        return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("inventoryItem").get("product").get("business"), business);
     }
 }
