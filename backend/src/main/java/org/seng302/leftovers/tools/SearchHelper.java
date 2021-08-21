@@ -595,20 +595,22 @@ public class SearchHelper {
     }
 
     /**
-     *
-     * @param business
-     * @return
+     * This method constructs a specification which will match only those sale items whose business matches the business
+     * provided by calling private methods.
+     * @param business Business of interest to match with
+     * @return A specification for sale items which matches the business
      */
-    public static Specification<SaleItem> constructSpecificationFromSaleItemsOrdering(Business business) {
+    public static Specification<SaleItem> constructSpecificationFromSaleItemsFilter(Business business) {
         return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("inventoryItem").get("product").get("business"), business);
     }
 
     /**
-     *
-     * @param business
-     * @return
+     * This method constructs a specification which will match only those inventory items whose business matches the business
+     * provided by calling private methods.
+     * @param business Business of interest to match with
+     * @return A specification for inventory items which matches the business
      */
-    public static Specification<InventoryItem> constructSpecificationFromInventoryItemsOrdering(Business business) {
+    public static Specification<InventoryItem> constructSpecificationFromInventoryItemsFilter(Business business) {
         return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("product").get("business"), business);
     }
 }

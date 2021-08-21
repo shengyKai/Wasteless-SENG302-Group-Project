@@ -336,10 +336,10 @@ class InventoryControllerTest {
     @Test
     void getInventory_emptyInventory_emptyPageReturned() {
         when(businessRepository.getBusinessById(1L)).thenReturn(mockBusiness);
-        when(inventoryItemRepository.findAll(any(), (PageRequest) any())).thenReturn(Page.empty());
+        when(inventoryItemRepository.findAll(any(), any(PageRequest.class))).thenReturn(Page.empty());
         JSONObject result = inventoryController.getInventory(1L, request, null, null, null, null);
 
-        verify(inventoryItemRepository, times(1)).findAll(any(), (PageRequest) any());
+        verify(inventoryItemRepository, times(1)).findAll(any(), any(PageRequest.class));
 
         assertEquals(0L, ((List<?>) result.get("results")).size());
         assertEquals(0L, result.get("count"));
@@ -358,7 +358,7 @@ class InventoryControllerTest {
 
         Page<InventoryItem> inventory = new PageImpl<>(items, Pageable.unpaged(), 1000L);
         when(businessRepository.getBusinessById(1L)).thenReturn(mockBusiness);
-        when(inventoryItemRepository.findAll(any(), (PageRequest) any())).thenReturn(inventory);
+        when(inventoryItemRepository.findAll(any(), any(PageRequest.class))).thenReturn(inventory);
         JSONObject result = inventoryController.getInventory(1L, request, null, null, null, null);
         
         JSONArray expectedArray = new JSONArray();
@@ -373,12 +373,12 @@ class InventoryControllerTest {
 
     @Test
     void retrievePaginatedInventory_firstPage_firstRequested() throws Exception {
-        when(inventoryItemRepository.findAll(any(), (PageRequest) any())).thenReturn(Page.empty());
+        when(inventoryItemRepository.findAll(any(), any(PageRequest.class))).thenReturn(Page.empty());
         mockMvc.perform(
                 MockMvcRequestBuilders.get("/businesses/1/inventory").param("page", "1").param("resultsPerPage", "2"))
                 .andExpect(status().isOk()).andReturn();
 
-        Specification<InventoryItem> expectedSpecification = SearchHelper.constructSpecificationFromInventoryItemsOrdering(testBusiness);
+        Specification<InventoryItem> expectedSpecification = SearchHelper.constructSpecificationFromInventoryItemsFilter(testBusiness);
         PageRequest expectedPageRequest = SearchHelper.getPageRequest(1, 2, Sort.by(new Sort.Order(Direction.ASC, "product.productCode").ignoreCase()));
 
         verify(inventoryItemRepository, times(1)).findAll(specificationArgumentCaptor.capture(), pageRequestArgumentCaptor.capture());
@@ -388,12 +388,12 @@ class InventoryControllerTest {
 
     @Test
     void retrievePaginatedInventory_secondPage_secondPageRequested() throws Exception {
-        when(inventoryItemRepository.findAll(any(), (PageRequest) any())).thenReturn(Page.empty());
+        when(inventoryItemRepository.findAll(any(), any(PageRequest.class))).thenReturn(Page.empty());
         mockMvc.perform(
                 MockMvcRequestBuilders.get("/businesses/1/inventory").param("page", "2").param("resultsPerPage", "2"))
                 .andExpect(status().isOk()).andReturn();
 
-        Specification<InventoryItem> expectedSpecification = SearchHelper.constructSpecificationFromInventoryItemsOrdering(testBusiness);
+        Specification<InventoryItem> expectedSpecification = SearchHelper.constructSpecificationFromInventoryItemsFilter(testBusiness);
 
         PageRequest expectedPageRequest = SearchHelper.getPageRequest(2, 2, Sort.by(new Sort.Order(Direction.ASC, "product.productCode").ignoreCase()));
 
@@ -419,11 +419,11 @@ class InventoryControllerTest {
             "expires,expires",
     })
     void retrieveSortedInventory_byProvidedField_requestedOrderingByField(String orderBy, String ordering) throws Exception {
-        when(inventoryItemRepository.findAll(any(), (PageRequest) any())).thenReturn(Page.empty());
+        when(inventoryItemRepository.findAll(any(), any(PageRequest.class))).thenReturn(Page.empty());
         mockMvc.perform(MockMvcRequestBuilders.get("/businesses/1/inventory").param("orderBy", orderBy))
                 .andExpect(status().isOk()).andReturn();
 
-        Specification<InventoryItem> expectedSpecification = SearchHelper.constructSpecificationFromInventoryItemsOrdering(testBusiness);
+        Specification<InventoryItem> expectedSpecification = SearchHelper.constructSpecificationFromInventoryItemsFilter(testBusiness);
 
         PageRequest expectedPageRequest = SearchHelper.getPageRequest(null, null, Sort.by(new Sort.Order(Direction.ASC, ordering).ignoreCase()));
 
@@ -434,12 +434,12 @@ class InventoryControllerTest {
 
     @Test
     void retrieveSortedInventory_reversed_reverseOrderingRequested() throws Exception {
-        when(inventoryItemRepository.findAll(any(), (PageRequest) any())).thenReturn(Page.empty());
+        when(inventoryItemRepository.findAll(any(), any(PageRequest.class))).thenReturn(Page.empty());
         mockMvc.perform(
                 MockMvcRequestBuilders.get("/businesses/1/inventory").param("reverse", "true").param("orderBy", "name"))
                 .andExpect(status().isOk()).andReturn();
 
-        Specification<InventoryItem> expectedSpecification = SearchHelper.constructSpecificationFromInventoryItemsOrdering(testBusiness);
+        Specification<InventoryItem> expectedSpecification = SearchHelper.constructSpecificationFromInventoryItemsFilter(testBusiness);
 
         PageRequest expectedPageRequest = SearchHelper.getPageRequest(null, null, Sort.by(new Sort.Order(Direction.DESC, "product.name").ignoreCase()));
 

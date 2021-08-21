@@ -1,6 +1,5 @@
 package org.seng302.leftovers.controllers;
 
-import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -23,8 +22,6 @@ import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 
@@ -147,7 +144,7 @@ public class SaleController {
 
             PageRequest pageRequest = SearchHelper.getPageRequest(page, resultsPerPage, Sort.by(sortOrder));
 
-            Specification<SaleItem> specification = SearchHelper.constructSpecificationFromSaleItemsOrdering(business);
+            Specification<SaleItem> specification = SearchHelper.constructSpecificationFromSaleItemsFilter(business);
             Page<SaleItem> result = saleItemRepository.findAll(specification, pageRequest);
 
             return JsonTools.constructPageJSON(result.map(SaleItem::constructJSONObject));
