@@ -181,8 +181,8 @@ public class DemoController {
       private List<Long> productInitial = new ArrayList<>();
       private List<Long> inventoryItemInitial = new ArrayList<>();
       private List<Long> saleItemInitial = new ArrayList<>();
-      private Boolean generateProductImages;
-      private Boolean generateBusinessImages;
+      private Boolean generateProductImages = false;
+      private Boolean generateBusinessImages = false;
       private int businessImageMin = 0;
       private int businessImageMax = 3;
     }
