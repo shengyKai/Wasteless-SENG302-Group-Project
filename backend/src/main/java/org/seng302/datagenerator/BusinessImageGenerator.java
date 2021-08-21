@@ -26,6 +26,11 @@ public class BusinessImageGenerator {
             var loader = BusinessImageGenerator.class.getClassLoader();
             PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver(loader);
             this.demoImages = resolver.getResources("classpath*:org/seng302/datagenerator/example-business-images/**");
+            System.out.println("Resources are:");
+            for (var resouce : demoImages) {
+                System.out.println(resouce.getFilename());
+            }
+            System.out.println("done");
         } catch (IOException e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,"Could not initialize example images folder for businesses.");
         }
