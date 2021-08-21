@@ -1,11 +1,11 @@
-import { Keyword, MarketplaceCard, MarketplaceCardSection, User } from "./internal";
+import { Keyword, MarketplaceCard, MarketplaceCardSection, Message, User } from "./internal";
 
 const EMITTER_URL = process.env.VUE_APP_SERVER_ADD + '/events/emitter';
 
 let eventSource: EventSource;
 let lastErrorTime = Number.MIN_VALUE;
 
-export type AnyEvent = GlobalMessageEvent | ExpiryEvent | DeleteEvent | KeywordCreatedEvent;
+export type AnyEvent = GlobalMessageEvent | ExpiryEvent | DeleteEvent | KeywordCreatedEvent | MessageEvent;
 
 export type Tag = 'none' | 'red' | 'orange' | 'yellow' | 'green' | 'blue' | 'purple'
 
@@ -32,6 +32,15 @@ export type DeleteEvent = BaseEvent<'DeleteEvent'> & {
 export type KeywordCreatedEvent = BaseEvent<'KeywordCreatedEvent'> & {
   keyword: Keyword,
   creator: User
+}
+export type MessageEvent = BaseEvent<'MessageEvent'> & {
+  message: Message,
+  participantType: 'buyer' | 'seller',
+  conversation: {
+    buyer: User,
+    card: MarketplaceCard,
+    id: number,
+  },
 }
 
 /**

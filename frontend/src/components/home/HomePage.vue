@@ -30,7 +30,6 @@
       </v-select>
       <!-- Newsfeed -->
       <!-- Example message - move inside for loop once message is an event type -->
-      <v-card><MessageEvent :event="{id: 1, created: ''}"/></v-card>
       <v-card
         v-for="event in eventsPage"
         :key="event.id"
@@ -42,6 +41,7 @@
         <ExpiryEvent v-else-if="event.type === 'ExpiryEvent'" :event="event"/>
         <DeleteEvent v-else-if="event.type === 'DeleteEvent'" :event="event"/>
         <KeywordCreated v-else-if="event.type === 'KeywordCreatedEvent'" :event="event"/>
+        <MessageEvent v-else-if="event.type === 'MessageEvent'" :event="event"/>
         <template v-else>
           <v-card-title>
             {{ event.type }}
