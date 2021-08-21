@@ -9,6 +9,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -436,7 +437,7 @@ class SaleItemTests {
     }
 
     @Test
-    void findAllForBusiness_saleItemExistsForBusiness_saleItemIsFound() {
+    void findAll_saleItemExistsForBusiness_saleItemIsFound() {
         SaleItem saleItem = new SaleItem.Builder()
                 .withInventoryItem(inventoryItem)
                 .withCloses(LocalDate.now().plus(1, ChronoUnit.DAYS).toString())
@@ -445,8 +446,10 @@ class SaleItemTests {
                 .build();
         saleItem = saleItemRepository.save(saleItem);
 
+        PageRequest pageRequest = SearchHelper.getPageRequest(null, null, Sort.by("created"));
 
-        Page<SaleItem> foundItems = saleItemRepository.findAllForBusiness(testBusiness, templatePageRequest);
+        Specification<SaleItem> specification = SearchHelper.constructSpecificationFromSaleItemsFilter(testBusiness);
+        Page<SaleItem> foundItems = saleItemRepository.findAll(specification, pageRequest);
 
         assertEquals(1, foundItems.getTotalElements());
         SaleItem foundItem = foundItems.getContent().get(0);
@@ -458,7 +461,7 @@ class SaleItemTests {
     }
 
     @Test
-    void findAllForBusiness_multipleInventoryItems_allSaleItemsAreFoundNoDuplicates() throws Exception {
+    void findAll_multipleInventoryItems_allSaleItemsAreFoundNoDuplicates() throws Exception {
         LocalDate today = LocalDate.now();
 
         // Creates many sale items associated with different inventory items
@@ -487,8 +490,11 @@ class SaleItemTests {
             }
         }
 
-        // Make sure that the found items correspond 1 to 1 with the generated items
-        Page<SaleItem> foundItems = saleItemRepository.findAllForBusiness(testBusiness, templatePageRequest);
+        PageRequest pageRequest = SearchHelper.getPageRequest(null, null, Sort.by("created"));
+
+        Specification<SaleItem> specification = SearchHelper.constructSpecificationFromSaleItemsFilter(testBusiness);
+        Page<SaleItem> foundItems = saleItemRepository.findAll(specification, pageRequest);
+
         for (SaleItem foundItem : foundItems) {
             SaleItem matchingItem = saleItems.get(foundItem.getSaleId());
             assertNotNull(matchingItem);
@@ -498,7 +504,7 @@ class SaleItemTests {
     }
 
     @Test
-    void findAllForBusiness_multipleProducts_allSaleItemsAreFoundNoDuplicates() throws Exception {
+    void findAll_multipleProducts_allSaleItemsAreFoundNoDuplicates() throws Exception {
         LocalDate today = LocalDate.now();
 
         // Creates many sale items associated with different products
@@ -533,8 +539,11 @@ class SaleItemTests {
             }
         }
 
-        // Make sure that the found items correspond 1 to 1 with the generated items
-        Page<SaleItem> foundItems = saleItemRepository.findAllForBusiness(testBusiness, templatePageRequest);
+        PageRequest pageRequest = SearchHelper.getPageRequest(null, null, Sort.by("created"));
+
+        Specification<SaleItem> specification = SearchHelper.constructSpecificationFromSaleItemsFilter(testBusiness);
+        Page<SaleItem> foundItems = saleItemRepository.findAll(specification, pageRequest);
+        
         for (SaleItem foundItem : foundItems) {
             SaleItem matchingItem = saleItems.get(foundItem.getSaleId());
             assertNotNull(matchingItem);
