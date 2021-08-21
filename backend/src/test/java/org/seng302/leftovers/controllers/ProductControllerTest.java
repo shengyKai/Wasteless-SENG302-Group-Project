@@ -12,12 +12,15 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.runner.RunWith;
 import org.mockito.MockedConstruction;
+import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.seng302.leftovers.entities.*;
+import org.seng302.leftovers.exceptions.AccessTokenException;
 import org.seng302.leftovers.persistence.BusinessRepository;
 import org.seng302.leftovers.persistence.ImageRepository;
 import org.seng302.leftovers.persistence.ProductRepository;
 import org.seng302.leftovers.persistence.UserRepository;
+import org.seng302.leftovers.tools.AuthenticationTokenManager;
 import org.seng302.leftovers.tools.SearchHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -1286,20 +1289,12 @@ class ProductControllerTest {
             .andReturn();
 
         JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
-        Object response = parser.parse(result.getResponse().getContentAsString());
+        JSONObject response = (JSONObject) parser.parse(result.getResponse().getContentAsString());
+        JSONArray results = (JSONArray) response.get("results");
+        JSONObject product = (JSONObject) results.get(0);
 
-        JSONArray expected = new JSONArray();
-        Product product1 = new Product.Builder()
-                .withProductCode("NATHAN-APPLE-70")
-                .withName("The Nathan Apple")
-                .withDescription("Ever wonder why Nathan has an apple")
-                .withManufacturer("Apple1")
-                .withRecommendedRetailPrice("9000.03")
-                .withBusiness(testBusiness1)
-                .build();
-        expected.addAll(Collections.singletonList(product1.constructJSONObject()));
-
-        assertEquals(expected,response);
+        assertEquals("NATHAN-APPLE-70", product.getAsString("id"));
+        assertEquals(1, results.size());
     }
 
     @Test
@@ -1308,9 +1303,7 @@ class ProductControllerTest {
 
         mockMvc.perform(
                 get(String.format("/businesses/%d/products/search", testBusiness1.getId()))
-                        .param("searchQuery", "Apple")
-                        .sessionAttrs(sessionAuthToken)
-                        .cookie(authCookie))
+                        .param("searchQuery", "Apple"))
                 .andExpect(status().isUnauthorized());
     }
 
@@ -1332,11 +1325,8 @@ class ProductControllerTest {
         setCurrentUser(ownerUser.getUserID());
         addSeveralProductsToACatalogue();
 
-        ResponseStatusException noBusiness = new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, String.format("No business with ID %d.", testBusiness1.getId()));
-        when(businessRepository.getBusinessById(any())).thenThrow(noBusiness);
-
         mockMvc.perform(
-                get(String.format("/businesses/%d/products/search", testBusiness1.getId()))
+                get("/businesses/999/products/search")
                         .param("searchQuery", "Apple")
                         .sessionAttrs(sessionAuthToken)
                         .cookie(authCookie))
