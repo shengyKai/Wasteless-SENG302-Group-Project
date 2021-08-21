@@ -36,7 +36,11 @@ import java.lang.reflect.Field;
 import java.text.ParseException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -1251,5 +1255,91 @@ class ProductControllerTest {
                         .sessionAttrs(sessionAuthToken)
                         .cookie(authCookie))
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    void searchCatalogue_validSearch_200Response() throws Exception {
+        setCurrentUser(ownerUser.getUserID());
+        addSeveralProductsToACatalogue();
+
+        mockMvc.perform(
+                get(String.format("/businesses/%d/products/search", testBusiness1.getId()))
+                        .param("searchQuery", "Apple")
+                        .sessionAttrs(sessionAuthToken)
+                        .cookie(authCookie))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void searchCatalogue_fieldParametersProvided_responseFormattedToParams() throws Exception {
+        setCurrentUser(ownerUser.getUserID());
+        addSeveralProductsToACatalogue();
+
+        MvcResult result = mockMvc.perform(
+            get(String.format("/businesses/%d/products/search", testBusiness1.getId()))
+                    .param("searchQuery", "Apple")
+                    .param("searchBy", "name")
+                    .param("searchBy", "productCode")
+                    .sessionAttrs(sessionAuthToken)
+                    .cookie(authCookie))
+            .andExpect(status().isOk())
+            .andReturn();
+
+        JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
+        Object response = parser.parse(result.getResponse().getContentAsString());
+
+        JSONArray expected = new JSONArray();
+        Product product1 = new Product.Builder()
+                .withProductCode("NATHAN-APPLE-70")
+                .withName("The Nathan Apple")
+                .withDescription("Ever wonder why Nathan has an apple")
+                .withManufacturer("Apple1")
+                .withRecommendedRetailPrice("9000.03")
+                .withBusiness(testBusiness1)
+                .build();
+        expected.addAll(Collections.singletonList(product1.constructJSONObject()));
+
+        assertEquals(expected,response);
+    }
+
+    @Test
+    void searchCatalogue_unauthorised_401Response() throws Exception {
+        addSeveralProductsToACatalogue();
+
+        mockMvc.perform(
+                get(String.format("/businesses/%d/products/search", testBusiness1.getId()))
+                        .param("searchQuery", "Apple")
+                        .sessionAttrs(sessionAuthToken)
+                        .cookie(authCookie))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void searchCatalogue_notBusinessAdmin_403Response() throws Exception {
+        setCurrentUser(bystanderUser.getUserID());
+        addSeveralProductsToACatalogue();
+
+        mockMvc.perform(
+                get(String.format("/businesses/%d/products/search", testBusiness1.getId()))
+                        .param("searchQuery", "Apple")
+                        .sessionAttrs(sessionAuthToken)
+                        .cookie(authCookie))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void searchCatalogue_businessNotFound_406Response() throws Exception {
+        setCurrentUser(ownerUser.getUserID());
+        addSeveralProductsToACatalogue();
+
+        ResponseStatusException noBusiness = new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, String.format("No business with ID %d.", testBusiness1.getId()));
+        when(businessRepository.getBusinessById(any())).thenThrow(noBusiness);
+
+        mockMvc.perform(
+                get(String.format("/businesses/%d/products/search", testBusiness1.getId()))
+                        .param("searchQuery", "Apple")
+                        .sessionAttrs(sessionAuthToken)
+                        .cookie(authCookie))
+                .andExpect(status().isNotAcceptable());
     }
 }

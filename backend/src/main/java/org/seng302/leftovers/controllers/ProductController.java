@@ -16,6 +16,7 @@ import org.seng302.leftovers.persistence.ImageRepository;
 import org.seng302.leftovers.persistence.ProductRepository;
 import org.seng302.leftovers.service.ImageService;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
+import org.seng302.leftovers.tools.JsonTools;
 import org.seng302.leftovers.tools.SearchHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
@@ -53,7 +54,7 @@ public class ProductController {
     }
 
     private static final Set<String> VALID_ORDERINGS = Set.of("name", "description", "manufacturer","recommendedRetailPrice", "created", "productCode");
-    private static final Set<ProductFilterOption> VALID_SEARCHES = Set.of(ProductFilterOption.NAME, ProductFilterOption.DESCRIPTION, ProductFilterOption.MANUFACTURER, ProductFilterOption.PRODUCT_CODE);
+    private static final Set<ProductFilterOption> VALID_SEARCHES = Set.of(ProductFilterOption.values());
 
     /**
      * REST GET method to retrieve all the products with a business's catalogue.
@@ -73,21 +74,14 @@ public class ProductController {
         AuthenticationTokenManager.checkAuthenticationToken(request);
                             
         logger.info(() -> String.format("Retrieving catalogue from business with id %d.", id));
-        Optional<Business> business = businessRepository.findById(id);
+        Business business = businessRepository.getBusinessById(id);
 
         List<Sort.Order> sortOrder = getSortOrder(orderBy, reverse);
-    
-        if (business.isEmpty()) {
-            BusinessNotFoundException notFound = new BusinessNotFoundException();
-            logger.error(notFound.getMessage());
-            throw notFound;
-        } else {
-            business.get().checkSessionPermissions(request);
-            PageRequest pageablePage = SearchHelper.getPageRequest(page, resultsPerPage, Sort.by(sortOrder));
-            Page<Product> catalogue = productRepository.getAllByBusiness(business.get(), pageablePage);
 
-            return createProductResultJSON(catalogue);
-        }
+        business.checkSessionPermissions(request);
+        PageRequest pageablePage = SearchHelper.getPageRequest(page, resultsPerPage, Sort.by(sortOrder));
+        Page<Product> catalogue = productRepository.getAllByBusiness(business, pageablePage);
+        return JsonTools.constructPageJSON(catalogue.map(Product::constructJSONObject));
     }
 
     /**
@@ -116,7 +110,7 @@ public class ProductController {
         AuthenticationTokenManager.checkAuthenticationToken(request);
 
         logger.info(() -> String.format("Retrieving catalogue from business with id %d.", id));
-        Optional<Business> business = businessRepository.findById(id);
+        Business business = businessRepository.getBusinessById(id);
 
         // Convert searchBy into ProductFilterOption type and check valid
         searchBy = Optional.ofNullable(searchBy).orElse(Arrays.asList("name", "description", "manufacturer", "productCode"));
@@ -133,36 +127,13 @@ public class ProductController {
             }
         }
 
-        if (business.isEmpty()) {
-            BusinessNotFoundException notFound = new BusinessNotFoundException();
-            logger.error(notFound.getMessage());
-            throw notFound;
-        } else {
-            business.get().checkSessionPermissions(request);
-            List<Sort.Order> sortOrder = getSortOrder(orderBy, reverse);
-            PageRequest pageablePage = SearchHelper.getPageRequest(page, resultsPerPage, Sort.by(sortOrder));
-            Specification<Product> prodSpec = SearchHelper.constructSpecificationFromProductSearch(business.get(), searchQuery, searchSet);
+        business.checkSessionPermissions(request);
+        List<Sort.Order> sortOrder = getSortOrder(orderBy, reverse);
+        PageRequest pageablePage = SearchHelper.getPageRequest(page, resultsPerPage, Sort.by(sortOrder));
+        Specification<Product> prodSpec = SearchHelper.constructSpecificationFromProductSearch(business, searchQuery, searchSet);
 
-            Page<Product> catalogue = productRepository.findAll(prodSpec, pageablePage);
-
-            return createProductResultJSON(catalogue);
-        }
-    }
-
-    /**
-     * Creates a JSON of results from getting the products
-     * @param catalogue Page of found products to return
-     * @return JSON of products to pass to frontend
-     */
-    private JSONObject createProductResultJSON(Page<Product> catalogue) {
-        JSONArray responseBody = new JSONArray();
-        for (Product product: catalogue) {
-            responseBody.appendElement(product.constructJSONObject());
-        }
-        JSONObject json = new JSONObject();
-        json.put("count", catalogue.getTotalElements());
-        json.put("results", responseBody);
-        return json;
+        Page<Product> catalogue = productRepository.findAll(prodSpec, pageablePage);
+        return JsonTools.constructPageJSON(catalogue.map(Product::constructJSONObject));
     }
 
     /**
