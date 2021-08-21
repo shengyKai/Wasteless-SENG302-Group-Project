@@ -5,10 +5,7 @@ import lombok.Data;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.seng302.leftovers.dto.ProductFilterOption;
-import org.seng302.leftovers.entities.Business;
-import org.seng302.leftovers.entities.Keyword;
-import org.seng302.leftovers.entities.Product;
-import org.seng302.leftovers.entities.User;
+import org.seng302.leftovers.entities.*;
 import org.seng302.leftovers.exceptions.SearchFormatException;
 import org.seng302.leftovers.persistence.UserRepository;
 import org.seng302.leftovers.persistence.SpecificationsBuilder;
@@ -595,5 +592,25 @@ public class SearchHelper {
                 noDuplicatesList.add(user);
             }
         }
+    }
+
+    /**
+     * This method constructs a specification which will match only those sale items whose business matches the business
+     * provided by calling private methods.
+     * @param business Business of interest to match with
+     * @return A specification for sale items which matches the business
+     */
+    public static Specification<SaleItem> constructSpecificationFromSaleItemsFilter(Business business) {
+        return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("inventoryItem").get("product").get("business"), business);
+    }
+
+    /**
+     * This method constructs a specification which will match only those inventory items whose business matches the business
+     * provided by calling private methods.
+     * @param business Business of interest to match with
+     * @return A specification for inventory items which matches the business
+     */
+    public static Specification<InventoryItem> constructSpecificationFromInventoryItemsFilter(Business business) {
+        return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("product").get("business"), business);
     }
 }

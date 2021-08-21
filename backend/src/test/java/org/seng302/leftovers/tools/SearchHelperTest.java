@@ -7,6 +7,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mockito;
+import org.mockito.internal.matchers.apachecommons.ReflectionEquals;
 import org.seng302.leftovers.controllers.DGAAController;
 import org.seng302.leftovers.dto.ProductFilterOption;
 import org.seng302.leftovers.entities.*;
@@ -14,6 +15,8 @@ import org.seng302.leftovers.exceptions.SearchFormatException;
 import org.seng302.leftovers.persistence.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 
@@ -22,6 +25,8 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.text.ParseException;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -57,6 +62,11 @@ class SearchHelperTest {
     private KeywordRepository keywordRepository;
     @Autowired
     private ProductRepository productRepository;
+    @Autowired
+    private InventoryItemRepository inventoryItemRepository;
+    @Autowired
+    private SaleItemRepository saleItemRepository;
+
     /**
      * Speification for repository queries.
      */
@@ -90,6 +100,7 @@ class SearchHelperTest {
         for (User user : savedUserList) {
             userRepository.save(user);
         }
+
     }
 
     @AfterEach
@@ -1143,4 +1154,76 @@ class SearchHelperTest {
             assertEquals(combinedSpec, resultSpec);
         }
     }
+
+    /**
+     * Creates a product, inventory and sale item which are all related to each other, when provided with a business
+     * @param business to create the three type of items with
+     */
+    private void createProductInventorySaleItemWithBusiness(Business business) throws Exception {
+        LocalDate today = LocalDate.now();
+        var product1 = new Product.Builder()
+                .withBusiness(business)
+                .withProductCode("TEST-1")
+                .withName("test_product" + business.getPrimaryOwner().getFirstName())
+                .build();
+        product1 = productRepository.save(product1);
+        var inventoryItem = new InventoryItem.Builder()
+                .withProduct(product1)
+                .withQuantity(30)
+                .withPricePerItem("2.69")
+                .withManufactured("2021-03-11")
+                .withSellBy(today.plus(2, ChronoUnit.DAYS).toString())
+                .withBestBefore(today.plus(3, ChronoUnit.DAYS).toString())
+                .withExpires(today.plus(4, ChronoUnit.DAYS).toString())
+                .build();
+        inventoryItem = inventoryItemRepository.save(inventoryItem);
+        var saleItem = new SaleItem.Builder()
+                .withInventoryItem(inventoryItem)
+                .withQuantity(1)
+                .withPrice("10.00")
+                .withMoreInfo("blah")
+                .build();
+        saleItemRepository.save(saleItem);
+    }
+
+    @Test
+    void constructSpecificationFromInventoryItemsFilter_twoBusinessesCreated_inventoryItemsFromEachBusinessAreDistinct() throws Exception {
+        Business business1 = createBusiness();
+        Business business2 = createBusiness();
+        createProductInventorySaleItemWithBusiness(business1);
+        createProductInventorySaleItemWithBusiness(business2);
+
+        // the requestedPage, resultsPerPage and sortBy values are arbitrary
+        PageRequest pageRequest = SearchHelper.getPageRequest(1, 10, Sort.by("quantity"));
+
+        Specification<InventoryItem> specification1 = SearchHelper.constructSpecificationFromInventoryItemsFilter(business1);
+        Page<InventoryItem> resultInventoryItemsBusiness1 = inventoryItemRepository.findAll(specification1, pageRequest);
+
+        Specification<InventoryItem> specification2 = SearchHelper.constructSpecificationFromInventoryItemsFilter(business2);
+        Page<InventoryItem> resultInventoryItemsBusiness2 = inventoryItemRepository.findAll(specification2, pageRequest);
+
+        // Inventory items from each business should be distinct
+        assertFalse(new ReflectionEquals(resultInventoryItemsBusiness1).matches(resultInventoryItemsBusiness2));
+    }
+
+    @Test
+    void constructSpecificationFromSaleItemsFilter_twoBusinessesCreated_saleItemsFromEachBusinessAreDistinct() throws Exception {
+        Business business1 = createBusiness();
+        Business business2 = createBusiness();
+        createProductInventorySaleItemWithBusiness(business1);
+        createProductInventorySaleItemWithBusiness(business2);
+
+        // the requestedPage, resultsPerPage and sortBy values are arbitrary
+        PageRequest pageRequest = SearchHelper.getPageRequest(1, 10, Sort.by("created"));
+
+        Specification<SaleItem> specification1 = SearchHelper.constructSpecificationFromSaleItemsFilter(business1);
+        Page<SaleItem> resultSaleItemsBusiness1 = saleItemRepository.findAll(specification1, pageRequest);
+
+        Specification<SaleItem> specification2 = SearchHelper.constructSpecificationFromSaleItemsFilter(business2);
+        Page<SaleItem> resultSaleItemsBusiness2 = saleItemRepository.findAll(specification2, pageRequest);
+
+        // Sale items from each business should be distinct
+        assertFalse(new ReflectionEquals(resultSaleItemsBusiness1).matches(resultSaleItemsBusiness2));
+    }
+
 }
