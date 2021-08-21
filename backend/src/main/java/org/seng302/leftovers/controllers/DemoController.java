@@ -1,5 +1,7 @@
 package org.seng302.leftovers.controllers;
 
+import lombok.Getter;
+import lombok.ToString;
 import net.minidev.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -161,6 +163,30 @@ public class DemoController {
         return userList;
     }
 
+    /**
+     * DTO representing request body for generator options
+     */
+    @Getter
+    @ToString
+    public static class GeneratorRequestDTO {
+      private int userCount = 0;
+      private int businessCount = 0;
+      private int productCount = 0;
+      private int inventoryItemCount = 0;
+      private int cardCount = 0;
+      private int saleItemCount = 0;
+
+      private List<Long> userInitial = new ArrayList<>();
+      private List<Long> businessInitial = new ArrayList<>();
+      private List<Long> productInitial = new ArrayList<>();
+      private List<Long> inventoryItemInitial = new ArrayList<>();
+      private List<Long> saleItemInitial = new ArrayList<>();
+      private Boolean generateProductImages;
+      private Boolean generateBusinessImages;
+      private int businessImageMin = 0;
+      private int businessImageMax = 3;
+    }
+
 
     /**
      * Generates a set of demo data (Using the more advanced generators)
@@ -168,37 +194,15 @@ public class DemoController {
      * @return JSON including generated Users, Businesses and Products IDs
      */
     @PostMapping("/demo/generate")
-    public JSONObject generate(HttpServletRequest request, @RequestBody JSONObject options) {
+    public JSONObject generate(HttpServletRequest request, @RequestBody GeneratorRequestDTO options) {
         AuthenticationTokenManager.checkAuthenticationTokenDGAA(request);
 
-        int userCount     = Optional.ofNullable(options.getAsNumber("userCount")).map(Number::intValue).orElse(0);
-        int businessCount = Optional.ofNullable(options.getAsNumber("businessCount")).map(Number::intValue).orElse(0);
-        int productCount  = Optional.ofNullable(options.getAsNumber("productCount")).map(Number::intValue).orElse(0);
-        int invItemCount  = Optional.ofNullable(options.getAsNumber("inventoryItemCount")).map(Number::intValue).orElse(0);
-        int cardCount     = Optional.ofNullable(options.getAsNumber("cardCount")).map(Number::intValue).orElse(0);
-        int saleItemCount = Optional.ofNullable(options.getAsNumber("saleItemCount")).map(Number::intValue).orElse(0);
+        List<Long> allUsers = options.getUserInitial();
+        List<Long> allBusinesses = options.getBusinessInitial();
+        List<Long> allProducts = options.getProductInitial();
+        List<Long> allInventoryItems = options.getInventoryItemInitial();
+        List<Long> allSaleItems = options.getSaleItemInitial();
 
-        List<Long> allUsers = new ArrayList<>();
-        if (options.containsKey("userInitial"))
-            Arrays.stream(JsonTools.parseLongArrayFromJsonField(options, "userInitial")).boxed().forEach(allUsers::add);
-
-        List<Long> allBusinesses = new ArrayList<>();
-        if (options.containsKey("businessInitial"))
-            Arrays.stream(JsonTools.parseLongArrayFromJsonField(options, "businessInitial")).boxed().forEach(allBusinesses::add);
-
-        List<Long> allProducts = new ArrayList<>();
-        if (options.containsKey("productInitial"))
-            Arrays.stream(JsonTools.parseLongArrayFromJsonField(options, "productInitial")).boxed().forEach(allProducts::add);
-
-        List<Long> allInventoryItems = new ArrayList<>();
-        if (options.containsKey("inventoryItemInitial"))
-            Arrays.stream(JsonTools.parseLongArrayFromJsonField(options, "inventoryItemInitial")).boxed().forEach(allInventoryItems::add);
-
-        List<Long> allSaleItems = new ArrayList<>();
-        if (options.containsKey("saleItemInitial"))
-            Arrays.stream(JsonTools.parseLongArrayFromJsonField(options, "saleItemInitial")).boxed().forEach(allSaleItems::add);
-
-        boolean generateImages = Optional.ofNullable((Boolean)options.get("generateImages")).orElse(true);
 
         JSONObject json = new JSONObject();
         Session session = entityManager.unwrap(Session.class);
@@ -209,21 +213,27 @@ public class DemoController {
             var inventoryItemGenerator = new InventoryItemGenerator(connection);
             var saleItemGenerator = new SaleItemGenerator(connection);
             var cardGenerator = new MarketplaceCardGenerator(connection);
+            var businessImageGenerator = new BusinessImageGenerator(connection);
 
-            List<Long> userIds = userGenerator.generateUsers(userCount);
+            List<Long> userIds = userGenerator.generateUsers(options.userCount);
             allUsers.addAll(userIds);
 
-            List<Long> businessIds = businessGenerator.generateBusinesses(allUsers, businessCount);
+            List<Long> businessIds = businessGenerator.generateBusinesses(allUsers, options.getBusinessCount());
             allBusinesses.addAll(businessIds);
 
-            List<Long> productIds = productGenerator.generateProducts(allBusinesses, productCount, generateImages);
+            List<Long> productIds = productGenerator.generateProducts(allBusinesses, options.productCount, options.getGenerateProductImages());
             allProducts.addAll(productIds);
 
-            List<Long> inventoryIds = inventoryItemGenerator.generateInventoryItems(allProducts, invItemCount);
+            List<Long> inventoryIds = inventoryItemGenerator.generateInventoryItems(allProducts, options.getInventoryItemCount());
             allInventoryItems.addAll(inventoryIds);
 
-            List<Long> saleItemIds = saleItemGenerator.generateSaleItems(allInventoryItems, saleItemCount);
-            List<Long> cardIds = cardGenerator.generateCards(allUsers, cardCount);
+            List<Long> saleItemIds = saleItemGenerator.generateSaleItems(allInventoryItems, options.getSaleItemCount());
+
+            List<Long> cardIds = cardGenerator.generateCards(allUsers, options.getCardCount());
+
+            if (options.getGenerateBusinessImages()) {
+                businessImageGenerator.generateBusinessImages(allBusinesses, options.getBusinessImageMin(), options.getBusinessImageMax());
+            }
 
             json.appendField("generatedUsers", userIds);
             json.appendField("generatedBusinesses", businessIds);
