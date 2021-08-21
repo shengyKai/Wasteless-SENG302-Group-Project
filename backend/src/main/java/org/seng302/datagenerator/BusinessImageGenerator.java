@@ -74,7 +74,9 @@ public class BusinessImageGenerator {
      */
     private Resource findRandomImage() {
         var maxValue = demoImages.length;
-        return demoImages[random.nextInt(maxValue)];
+        Resource image;
+        do image = demoImages[random.nextInt(maxValue)]; while (image.getFilename().isEmpty());
+        return image;
     }
 
     /**
