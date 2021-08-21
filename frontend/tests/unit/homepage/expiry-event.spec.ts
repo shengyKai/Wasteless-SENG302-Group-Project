@@ -8,7 +8,7 @@ import * as api from '@/api/internal';
 
 import Vuex, { Store } from 'vuex';
 import { getStore, resetStoreForTesting, StoreData } from '@/store';
-import { castMock, makeTestUser } from './utils';
+import { castMock, makeTestUser } from '../utils';
 
 Vue.use(Vuetify);
 
