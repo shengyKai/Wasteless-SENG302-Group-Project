@@ -21,7 +21,7 @@
         <v-tooltip bottom>
           <template #activator="{ on, attrs }">
             <v-btn
-              v-if="isViewingOwnProfile===true || currentUserRole!=='user'"
+              v-if="showEditButton"
               ref="settingsButton"
               icon
               color="primary"
@@ -456,6 +456,13 @@ export default {
     },
     userRole() {
       return this.user.role;
+    },
+    /**
+     * If I am a regular user the edit button should only show on my own profile.
+     * If I am a GAA or DGAA the edit button should show on every profile except the DGAA profile.
+     */
+    showEditButton() {
+      return (this.isViewingOwnProfile===true || this.currentUserRole!=='user') && this.user.role !== 'defaultGlobalApplicationAdmin';
     }
   },
   components: {

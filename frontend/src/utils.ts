@@ -187,14 +187,14 @@ export function regxPostCode() {
  Returns a Regex that matches a valid phone number
  */
 export function regxPhoneNumber() {
-  return /(^[0-9]{4,12}$)/;
+  return /(^$|^[0-9]{4,12}$)/;
 }
 
 /**
  Returns a Regex that matches a country code
  */
 export function regxCountryCode() {
-  return /(^[0-9]{2,3}$)/;
+  return /(^$|^[0-9]{2,3}$)/;
 }
 /**
  Returns a Regex that matches a valid street address
