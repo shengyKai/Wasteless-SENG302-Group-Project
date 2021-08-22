@@ -11,7 +11,8 @@
           <!-- feed the productImages into the carousel child component -->
           <ImageCarousel
             :imagesList="product.images"
-            :showControls="true"
+            :showMakePrimary="true"
+            :showDelete="true"
             v-on:change-primary-image="setPrimaryImage"
             @delete-image="deleteImage"
           />

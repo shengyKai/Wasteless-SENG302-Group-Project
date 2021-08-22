@@ -163,8 +163,13 @@
                     </v-icon>
                     Upload new image
                   </v-btn>
-                  <BusinessImageUploader :business-id="business.id" v-model="showImageUploaderForm"/>
-                  <p class="error-text mt-2" v-if ="errorMessage !== undefined"> {{errorMessage}} </p>
+                  <BusinessImageUploader
+                    v-model="imageFile"
+                    v-if="showImageUploaderForm"
+                    @closeDialog="showImageUploaderForm=false"
+                    @uploadImage="addImage"/>
+                  <v-card-text v-if="allImageFiles.length > 0"> Images uploaded: {{ imageNames }} </v-card-text>
+                  <p class="error-text" v-if ="errorMessage !== undefined"> {{errorMessage}} </p>
                 </v-container>
               </v-card-text>
               <v-card-actions>
@@ -249,7 +254,7 @@ import {
   maxCharRules, postCodeRules, streetNumRules,
   USER_ROLES
 } from "@/utils";
-import { modifyBusiness } from '@/api/internal';
+import { modifyBusiness, uploadBusinessImage } from '@/api/internal';
 
 export default {
   name: 'ModifyBusiness',
@@ -292,6 +297,8 @@ export default {
       primaryAdminAlertMsg: "",
       primaryAdministratorId: this.business.primaryAdministratorId,
       newOwnerId : this.$store.state.user.id,
+      imageFile: undefined,
+      allImageFiles: [],
       maxCharRules: () => maxCharRules(100),
       maxCharDescriptionRules: ()=> maxCharRules(200),
       mandatoryRules: ()=> mandatoryRules,
@@ -316,6 +323,9 @@ export default {
      */
     isPrimaryOwner() {
       return this.$store.state.user.id === this.business.primaryAdministratorId;
+    },
+    imageNames() {
+      return this.allImageFiles.map((image) => image.name).join(", ");
     }
   },
   methods: {
@@ -366,6 +376,7 @@ export default {
         updateProductCountry: this.updateProductCountry
       };
       const result = await modifyBusiness(this.business.id, modifiedFields);
+
       /**
        * If the result is a string, means it is an error message, of which it will show up on the page.
        * As such, the modify page will still remain.
@@ -374,7 +385,13 @@ export default {
        */
       if (typeof result === 'string') {
         this.errorMessage = result;
-      } else {
+      }
+      for (let image of this.allImageFiles) {
+        if (this.errorMessage === undefined) {
+          await this.uploadImage(image);
+        }
+      }
+      if (this.errorMessage === undefined) {
         this.$emit("modifySuccess");
       }
     },
@@ -395,7 +412,18 @@ export default {
       }
       this.newOwnerId = admin.id;
     },
-  }
+    addImage() {
+      this.showImageUploaderForm = false;
+      this.allImageFiles.push(this.imageFile);
+      this.imageFile = undefined;
+    },
+    async uploadImage(image) {
+      const result = await uploadBusinessImage(this.business.id, image);
+      if (typeof result === 'string') {
+        this.errorMessage = result;
+      }
+    }
+  },
 };
 </script>
 

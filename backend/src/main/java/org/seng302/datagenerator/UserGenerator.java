@@ -42,7 +42,7 @@ public class UserGenerator {
      * @return the user's phone number
      */
     private String generatePhNum() {
-        return "027" + String.valueOf(random.nextInt(8999999) + 1000000);
+        return "027 " + String.valueOf(random.nextInt(8999999) + 1000000);
     }
 
     /**

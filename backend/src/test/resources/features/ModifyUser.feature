@@ -18,7 +18,7 @@ Feature: U10 - Modifying Users
       | middleName               | King              |
       | nickname                 | The King          |
       | bio                      | welcome to my page|
-      | phoneNumber              | 02080356158       |
+      | phoneNumber              | 02 080356158       |
       | dateOfBirth              | 2001-03-12        |
       | email                    | dave@jones.com    |
       | password                 | superSecret1      |
@@ -42,7 +42,7 @@ Feature: U10 - Modifying Users
         | middleName               | King              |
         | nickname                 | The King          |
         | bio                      | ~ welcome ~       |
-        | phoneNumber              | 02080356158       |
+        | phoneNumber              | 02 080356158       |
         | dateOfBirth              | 2001-03-12        |
         | email                    | dave@jones.com    |
         | password                 | superSecret1      |
@@ -64,7 +64,7 @@ Feature: U10 - Modifying Users
       | middleName               | King              |
       | nickname                 | The King          |
       | bio                      | ~ welcome ~       |
-      | phoneNumber              | 02080356158       |
+      | phoneNumber              | 02 080356158       |
       | dateOfBirth              | 2001-03-12        |
       | email                    | dave@jones.com    |
       | password                 | superSecret1      |

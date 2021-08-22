@@ -70,7 +70,7 @@ public class UserStepDefinition {
     private String userPassword = "B0bbbbbbb76#bb";
     private String userBio = "I am Bob";
     private String userDob = "1999-01-01";
-    private String userPhNum = "0270000000";
+    private String userPhNum = "02 70000000";
     private Location userAddress = Location.covertAddressStringToLocation("1,Bob Street,Bob,Bob,Bob,Bob,1010");
 
     private Long userID;
@@ -86,7 +86,7 @@ public class UserStepDefinition {
                 .withPassword("12345678abc")
                 .withBio("g")
                 .withDob("2001-03-11")
-                .withPhoneNumber("1234567890")
+                .withPhoneNumber("12 34567890")
                 .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
                         "Canterbury,8041"))
                 .build();
@@ -104,7 +104,7 @@ public class UserStepDefinition {
                 .withPassword("12345678abc")
                 .withBio("g")
                 .withDob("2001-03-11")
-                .withPhoneNumber("1234567890")
+                .withPhoneNumber("12 34567890")
                 .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
                         "Canterbury,8041"))
                 .build();
@@ -122,7 +122,7 @@ public class UserStepDefinition {
                 .withPassword(password)
                 .withBio("g")
                 .withDob("2001-03-11")
-                .withPhoneNumber("1234567890")
+                .withPhoneNumber("12 34567890")
                 .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
                         "Canterbury,8041"))
                 .build();
@@ -140,7 +140,7 @@ public class UserStepDefinition {
                 .withPassword("12345678abc")
                 .withBio("g")
                 .withDob("2001-03-11")
-                .withPhoneNumber("1234567890")
+                .withPhoneNumber("12 34567890")
                 .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
                         "Canterbury,8041"))
                 .build();
@@ -287,18 +287,18 @@ public class UserStepDefinition {
 
         userID = null;
         try {
-             MvcResult result = mockMvc.perform(post("/login")
-                    .content(requestBody.toString())
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .accept(MediaType.APPLICATION_JSON))
+            MvcResult result = mockMvc.perform(post("/login")
+                            .content(requestBody.toString())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .accept(MediaType.APPLICATION_JSON))
                     .andExpect(status().isOk())
                     .andReturn();
 
-             JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
-             JSONObject jsonObject = (JSONObject) parser.parse(result.getResponse().getContentAsString());
-             // Refuses to cast from integer to long. So used the below work around
-             Integer userId = (Integer) jsonObject.getAsNumber("userId");
-             userID = userId.longValue();
+            JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
+            JSONObject jsonObject = (JSONObject) parser.parse(result.getResponse().getContentAsString());
+            // Refuses to cast from integer to long. So used the below work around
+            Integer userId = (Integer) jsonObject.getAsNumber("userId");
+            userID = userId.longValue();
         } catch (Exception ignored) {}
     }
 
@@ -311,9 +311,9 @@ public class UserStepDefinition {
         userID = null;
         try {
             MvcResult result = mockMvc.perform(post("/login")
-                    .content(requestBody.toString())
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .accept(MediaType.APPLICATION_JSON))
+                            .content(requestBody.toString())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .accept(MediaType.APPLICATION_JSON))
                     .andExpect(status().isBadRequest())
                     .andReturn();
 

@@ -154,7 +154,7 @@ class ProductControllerTest {
                 .withPassword("1337-H%nt3r2")
                 .withBio("Likes long walks on the beach")
                 .withDob("2000-03-11")
-                .withPhoneNumber("6435550129")
+                .withPhoneNumber("64 3555012")
                 .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
                         "Canterbury,8041"))
                 .build();
@@ -171,7 +171,7 @@ class ProductControllerTest {
                 .withPassword("1337-H548*nt3r2")
                 .withBio("Likes long walks on the beach sometimes")
                 .withDob("2008-03-11")
-                .withPhoneNumber("6455650129")
+                .withPhoneNumber("64 55650129")
                 .withAddress(Location.covertAddressStringToLocation("5,Rountree Street,Ashburton,Christchurch,New Zealand," +
                         "Canterbury,8041"))
                 .build();
@@ -187,7 +187,7 @@ class ProductControllerTest {
                 .withPassword("hunter2")
                 .withBio("Likes long walks on the beach always")
                 .withDob("2000-03-11")
-                .withPhoneNumber("6455650125")
+                .withPhoneNumber("64 55650125")
                 .withAddress(Location.covertAddressStringToLocation("5,Rountree Street,Ashburton,Christchurch,New Zealand," +
                         "Canterbury,8041"))
                 .build();

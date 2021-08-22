@@ -1222,18 +1222,21 @@ export async function uploadBusinessImage(businessId: number, file: File): Promi
  * @param orderBy Specifies the method used to sort the results
  * @param reverse Specifies whether to reverse the search results (default order is descending for relevance and ascending for all other orders)
  */
-export async function searchCatalogue(businessId: number, query: string, pageIndex: number, resultsPerPage: number, searchBy: Array<ProductSearchBy>, orderBy: ProductOrderBy, reverse: boolean): Promise<MaybeError<SearchResults<Product>>> {
+export async function searchCatalogue(businessId: number, query: string, pageIndex: number, resultsPerPage: number, searchBy: ProductSearchBy[], orderBy: ProductOrderBy, reverse: boolean): Promise<MaybeError<SearchResults<Product>>> {
+  const params = new URLSearchParams();
+  for (let field of searchBy) {
+    params.append("searchBy", field);
+  }
+  params.append('searchQuery', query);
+  params.append('page', pageIndex.toString());
+  params.append('resultsPerPage', resultsPerPage.toString());
+  params.append('orderBy', orderBy);
+  params.append('reverse', reverse.toString());
+
   let response;
   try {
     response = await instance.get(`/businesses/${businessId}/products/search`, {
-      params: {
-        searchQuery: query,
-        page: pageIndex,
-        resultsPerPage: resultsPerPage,
-        searchBy: searchBy,
-        reverse: reverse.toString(),
-        orderBy: orderBy,
-      }
+      params
     });
   } catch (error) {
     let status: number | undefined = error.response?.status;
