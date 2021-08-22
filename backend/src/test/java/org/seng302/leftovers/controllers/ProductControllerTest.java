@@ -12,12 +12,15 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.runner.RunWith;
 import org.mockito.MockedConstruction;
+import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.seng302.leftovers.entities.*;
+import org.seng302.leftovers.exceptions.AccessTokenException;
 import org.seng302.leftovers.persistence.BusinessRepository;
 import org.seng302.leftovers.persistence.ImageRepository;
 import org.seng302.leftovers.persistence.ProductRepository;
 import org.seng302.leftovers.persistence.UserRepository;
+import org.seng302.leftovers.tools.AuthenticationTokenManager;
 import org.seng302.leftovers.tools.SearchHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -36,7 +39,11 @@ import java.lang.reflect.Field;
 import java.text.ParseException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -1251,5 +1258,78 @@ class ProductControllerTest {
                         .sessionAttrs(sessionAuthToken)
                         .cookie(authCookie))
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    void searchCatalogue_validSearch_200Response() throws Exception {
+        setCurrentUser(ownerUser.getUserID());
+        addSeveralProductsToACatalogue();
+
+        mockMvc.perform(
+                get(String.format("/businesses/%d/products/search", testBusiness1.getId()))
+                        .param("searchQuery", "Apple")
+                        .sessionAttrs(sessionAuthToken)
+                        .cookie(authCookie))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void searchCatalogue_fieldParametersProvided_responseFormattedToParams() throws Exception {
+        setCurrentUser(ownerUser.getUserID());
+        addSeveralProductsToACatalogue();
+
+        MvcResult result = mockMvc.perform(
+            get(String.format("/businesses/%d/products/search", testBusiness1.getId()))
+                    .param("searchQuery", "Apple")
+                    .param("searchBy", "name")
+                    .param("searchBy", "productCode")
+                    .sessionAttrs(sessionAuthToken)
+                    .cookie(authCookie))
+            .andExpect(status().isOk())
+            .andReturn();
+
+        JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
+        JSONObject response = (JSONObject) parser.parse(result.getResponse().getContentAsString());
+        JSONArray results = (JSONArray) response.get("results");
+        JSONObject product = (JSONObject) results.get(0);
+
+        assertEquals("NATHAN-APPLE-70", product.getAsString("id"));
+        assertEquals(1, results.size());
+    }
+
+    @Test
+    void searchCatalogue_unauthorised_401Response() throws Exception {
+        addSeveralProductsToACatalogue();
+
+        mockMvc.perform(
+                get(String.format("/businesses/%d/products/search", testBusiness1.getId()))
+                        .param("searchQuery", "Apple"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void searchCatalogue_notBusinessAdmin_403Response() throws Exception {
+        setCurrentUser(bystanderUser.getUserID());
+        addSeveralProductsToACatalogue();
+
+        mockMvc.perform(
+                get(String.format("/businesses/%d/products/search", testBusiness1.getId()))
+                        .param("searchQuery", "Apple")
+                        .sessionAttrs(sessionAuthToken)
+                        .cookie(authCookie))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void searchCatalogue_businessNotFound_406Response() throws Exception {
+        setCurrentUser(ownerUser.getUserID());
+        addSeveralProductsToACatalogue();
+
+        mockMvc.perform(
+                get("/businesses/999/products/search")
+                        .param("searchQuery", "Apple")
+                        .sessionAttrs(sessionAuthToken)
+                        .cookie(authCookie))
+                .andExpect(status().isNotAcceptable());
     }
 }
