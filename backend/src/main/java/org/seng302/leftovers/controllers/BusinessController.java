@@ -123,7 +123,7 @@ public class BusinessController {
             business.setAddress(body.getAddress().createLocation());
             business.setBusinessType(body.getBusinessType());
 
-            if (body.getUpdateProductCountry()) {
+            if (Boolean.TRUE.equals(body.getUpdateProductCountry())) {
                 List<Product> catalogue = business.getCatalogue();
                 String countryToChange = body.getAddress().getCountry();
                 // Iterate through each product in the catalogue and change their country to the specified country

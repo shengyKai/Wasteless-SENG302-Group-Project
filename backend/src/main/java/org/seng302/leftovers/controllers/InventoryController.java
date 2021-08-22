@@ -11,6 +11,7 @@ import org.seng302.leftovers.persistence.InventoryItemRepository;
 import org.seng302.leftovers.persistence.ProductRepository;
 import org.seng302.leftovers.tools.JsonTools;
 import org.seng302.leftovers.tools.SearchHelper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -34,7 +35,7 @@ public class InventoryController {
     private static final Set<String> VALID_ORDERINGS = Set.of("productCode", "name", "description", "manufacturer", "recommendedRetailPrice", "created", "quantity", "pricePerItem", "totalPrice", "manufactured", "sellBy", "bestBefore", "expires");
 
 
-    // @Autowired
+    @Autowired
     public InventoryController(BusinessRepository businessRepository, InventoryItemRepository inventoryItemRepository,
             ProductRepository productRepository) {
         this.businessRepository = businessRepository;
@@ -94,7 +95,7 @@ public class InventoryController {
     @PutMapping("/businesses/{businessId}/inventory/{invItemId}")
     public void modifyInvEntry(@PathVariable(name = "businessId") Long businessId,
                                @PathVariable(name = "invItemId") Long invItemId, HttpServletRequest request,
-                               @RequestBody JSONObject invItemInfo) throws Exception {
+                               @RequestBody JSONObject invItemInfo) {
         logger.info("Attempting to modify the inventory {} for the business {}", invItemId, businessId);
 
         Business business = businessRepository.getBusinessById(businessId);
@@ -145,6 +146,7 @@ public class InventoryController {
 
             inventoryItemRepository.save(invItem);
         } catch (ResponseStatusException exception) {
+            logger.warn(exception);
             throw exception;
         } catch (Exception exception) {
             logger.warn(exception);
