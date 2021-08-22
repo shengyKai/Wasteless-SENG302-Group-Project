@@ -15,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest
-public class LocationTests {
+class LocationTests {
 
   private Location testLocation = new Location();
   private Location.Builder locationBuilder;
@@ -409,10 +409,15 @@ public class LocationTests {
    */
   @Test
   void checkValidAllLocationParametersStreetNumberInvalid() {
-    assertThrows(ResponseStatusException.class, () -> {
-      Location location = new Location.Builder().atStreetNumber("1234567890").onStreet("Elizabeth Street").inCity("Christchurch")
-                      .inRegion("Canterbury").inCountry("New Zealand").withPostCode("8041").atDistrict("Ashburton").build();
-    });
+    var builder = new Location.Builder()
+            .atStreetNumber("1234567890")
+            .onStreet("Elizabeth Street")
+            .inCity("Christchurch")
+            .inRegion("Canterbury")
+            .inCountry("New Zealand")
+            .withPostCode("8041")
+            .atDistrict("Ashburton");
+    assertThrows(ResponseStatusException.class, builder::build);
   }
 
   /**
@@ -421,11 +426,16 @@ public class LocationTests {
    */
   @Test
   void checkValidAllLocationParametersStreetNameInvalid() {
-    assertThrows(ResponseStatusException.class, () -> {
-      Location location = new Location.Builder().atStreetNumber("1").onStreet("Eliz@beth Str33t").inCity("Christchurch")
-            .inRegion("Canterbury").inCountry("New Zealand").withPostCode("8041").atDistrict("Ashburton").atDistrict("Ashburton")
-            .build();
-    });
+    var builder = new Location.Builder()
+            .atStreetNumber("1")
+            .onStreet("Eliz@beth Str33t")
+            .inCity("Christchurch")
+            .inRegion("Canterbury")
+            .inCountry("New Zealand")
+            .withPostCode("8041")
+            .atDistrict("Ashburton")
+            .atDistrict("Ashburton");
+    assertThrows(ResponseStatusException.class, builder::build);
   }
 
   /**
@@ -434,10 +444,15 @@ public class LocationTests {
    */
   @Test
   void checkValidAllLocationParametersCityInvalid() {
-    assertThrows(ResponseStatusException.class, () -> {
-      Location location = new Location.Builder().atStreetNumber("1").onStreet("Elizabeth Street").inCity("Chr!$stchurch")
-              .inRegion("Canterbury").inCountry("New Zealand").withPostCode("8041").atDistrict("Ashburton").build();
-    });
+    var builder = new Location.Builder()
+            .atStreetNumber("1")
+            .onStreet("Elizabeth Street")
+            .inCity("Chr!$stchurch")
+            .inRegion("Canterbury")
+            .inCountry("New Zealand")
+            .withPostCode("8041")
+            .atDistrict("Ashburton");
+    assertThrows(ResponseStatusException.class, builder::build);
   }
 
   /**
@@ -446,10 +461,15 @@ public class LocationTests {
    */
   @Test
   void checkValidAllLocationParametersRegionInvalid() {
-    assertThrows(ResponseStatusException.class, () -> {
-      Location location = new Location.Builder().atStreetNumber("1").onStreet("Elizabeth Street").inCity("Christchurch")
-              .inRegion("C@nt3rbury").inCountry("New Zealand").withPostCode("8041").atDistrict("Ashburton").build();
-    });
+    var builder = new Location.Builder()
+            .atStreetNumber("1")
+            .onStreet("Elizabeth Street")
+            .inCity("Christchurch")
+            .inRegion("C@nt3rbury")
+            .inCountry("New Zealand")
+            .withPostCode("8041")
+            .atDistrict("Ashburton");
+    assertThrows(ResponseStatusException.class, builder::build);
   }
 
   /**
@@ -458,10 +478,15 @@ public class LocationTests {
    */
   @Test
   void checkValidAllLocationParametersCountryInvalid() {
-    assertThrows(ResponseStatusException.class, () -> {
-      Location location = new Location.Builder().atStreetNumber("1").onStreet("Elizabeth Street").inCity("Christchurch")
-              .inRegion("Canterbury").inCountry("N3w Z3@l@nd").withPostCode("8041").atDistrict("Ashburton").build();
-    });
+    var builder = new Location.Builder()
+            .atStreetNumber("1")
+            .onStreet("Elizabeth Street")
+            .inCity("Christchurch")
+            .inRegion("Canterbury")
+            .inCountry("N3w Z3@l@nd")
+            .withPostCode("8041")
+            .atDistrict("Ashburton");
+    assertThrows(ResponseStatusException.class, builder::build);
   }
 
   /**
@@ -470,11 +495,15 @@ public class LocationTests {
    */
   @Test
   void checkValidAllLocationParametersZipCodeInvalid() {
-    assertThrows(ResponseStatusException.class, () -> {
-      Location location = new Location.Builder().atStreetNumber("1").onStreet("Elizabeth Street").inCity("Christchurch")
-                      .inRegion("Canterbury").inCountry("New Zealand").withPostCode("80999999999999941").atDistrict("Ashburton")
-                      .build();
-    });
+    var builder = new Location.Builder()
+            .atStreetNumber("1")
+            .onStreet("Elizabeth Street")
+            .inCity("Christchurch")
+            .inRegion("Canterbury")
+            .inCountry("New Zealand")
+            .withPostCode("80999999999999941")
+            .atDistrict("Ashburton");
+    assertThrows(ResponseStatusException.class, builder::build);
   }
 
   /**
@@ -483,12 +512,15 @@ public class LocationTests {
    */
   @Test
   void checkValidAllLocationParametersDistrictInvalid() {
-    assertThrows(ResponseStatusException.class, () -> {
-      Location location = new Location.Builder().atStreetNumber("1").onStreet("Elizabeth Street").inCity("Christchurch")
-                      .inRegion("Canterbury").inCountry("New Zealand").withPostCode("8041")
-                      .atDistrict("this district string contains above one hundred characters from start to end inclusive of spacessssss")
-                      .build();
-    });
+    var builder = new Location.Builder()
+            .atStreetNumber("1")
+            .onStreet("Elizabeth Street")
+            .inCity("Christchurch")
+            .inRegion("Canterbury")
+            .inCountry("New Zealand")
+            .withPostCode("8041")
+            .atDistrict("this district string contains above one hundred characters from start to end inclusive of spacessssss");
+    assertThrows(ResponseStatusException.class, builder::build);
   }
 
   /**
