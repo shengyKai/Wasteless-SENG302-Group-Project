@@ -11,7 +11,7 @@
           :imagesList="businessImages"
           :showMakePrimary="permissionToActAsBusiness"
           :showDelete="false"
-          @change-primary-image="makeImagePrimary"
+          @change-primary-image="false"
           ref="businessImageCarousel"
         />
       </v-card>
@@ -95,7 +95,7 @@
 
 <script>
 import ModifyBusiness from '@/components/BusinessProfile/ModifyBusiness';
-import {getBusiness, makeBusinessImagePrimary} from '../../api/internal';
+import {getBusiness} from '../../api/internal';
 import convertAddressToReadableText from '@/components/utils/Methods/convertAddressToReadableText';
 import {
   alphabetExtendedMultilineRules,
@@ -223,20 +223,6 @@ export default {
      */
     changeUpdateCountries() {
       this.updateProductCountry = !this.updateProductCountry;
-    },
-    /**
-     * Sets the given image as primary image to be displayed
-     * @param imageId ID of the Image to set
-     */
-    async makeImagePrimary(imageId) {
-      this.errorMessage = undefined;
-      const result = await makeBusinessImagePrimary(this.business.id, imageId);
-      if (typeof result === 'string') {
-        this.errorMessage = result;
-        this.$refs.businessImageCarousel.forceClose();
-      } else {
-        this.updateBusiness();
-      }
     },
     /**
      * Updates the business profile page to show the updated details of the business.

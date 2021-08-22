@@ -31,8 +31,9 @@
                 v-on="{ ...tooltip }"
                 @click="makeImagePrimary(item.id)"
                 ref="makePrimaryImageButton"
+                x-large
               >
-                <v-icon>mdi-eye-plus</v-icon>
+                <v-icon class="shadow-icon">mdi-eye-plus</v-icon>
               </v-btn>
             </template>
             <span> Make Primary Image </span>
@@ -112,5 +113,9 @@ export default {
 
 .thingy {
   display: none;
+}
+
+.shadow-icon {
+  text-shadow: 0px 0px 14px #000000;
 }
 </style>

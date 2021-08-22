@@ -148,9 +148,19 @@
                       </v-alert>
                     </v-row>
                   </div>
-                  <v-card-title class="mt-n3">Images</v-card-title>
+                  <v-card-title class="mt-n3">Set Primary Image</v-card-title>
+                  <v-card v-if="businessImages && businessImages.length > 0">
+                    <ImageCarousel
+                      :imagesList="businessImages"
+                      :showMakePrimary="true"
+                      :showDelete="false"
+                      @change-primary-image="makeImagePrimary"
+                      ref="businessImageCarousel"
+                    />
+                  </v-card>
                   <!-- INPUT: Image Uploader -->
                   <v-btn
+                    class="upload-image"
                     color="primary"
                     outlined
                     @click="showImageUploaderForm=true"
@@ -254,13 +264,15 @@ import {
   maxCharRules, postCodeRules, streetNumRules,
   USER_ROLES
 } from "@/utils";
-import { modifyBusiness, uploadBusinessImage } from '@/api/internal';
+import { modifyBusiness, uploadBusinessImage, makeBusinessImagePrimary } from '@/api/internal';
+import ImageCarousel from "@/components/utils/ImageCarousel";
 
 export default {
   name: 'ModifyBusiness',
   components: {
     LocationAutocomplete,
     BusinessImageUploader,
+    ImageCarousel
   },
   props: {
     business: Object
@@ -326,6 +338,9 @@ export default {
     },
     imageNames() {
       return this.allImageFiles.map((image) => image.name).join(", ");
+    },
+    businessImages() {
+      return this.business.images;
     }
   },
   methods: {
@@ -344,6 +359,18 @@ export default {
      */
     discardButton() {
       this.$emit('discardModifyBusiness');
+    },
+    /**
+     * Sets the given image as primary image to be displayed
+     * @param imageId ID of the Image to set
+     */
+    async makeImagePrimary(imageId) {
+      this.errorMessage = undefined;
+      const result = await makeBusinessImagePrimary(this.business.id, imageId);
+      if (typeof result === 'string') {
+        this.errorMessage = result;
+        this.$refs.businessImageCarousel.forceClose();
+      }
     },
     /**
      * Action(s) of modifying a business
@@ -450,5 +477,9 @@ export default {
 
 .expand-icon {
   padding-right: 10px;
+}
+
+.upload-image {
+  margin-top: 15px;
 }
 </style>
