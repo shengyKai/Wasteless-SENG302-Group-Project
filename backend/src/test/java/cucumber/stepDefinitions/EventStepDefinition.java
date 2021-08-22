@@ -18,7 +18,6 @@ import org.springframework.http.MediaType;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 
 public class EventStepDefinition {

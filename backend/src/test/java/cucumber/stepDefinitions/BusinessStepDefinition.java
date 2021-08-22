@@ -12,6 +12,7 @@ import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
 import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.junit.Assert;
 import org.seng302.datagenerator.ExampleDataFileReader;
 import org.seng302.leftovers.entities.*;
@@ -22,20 +23,20 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MvcResult;
-import org.hibernate.SessionFactory;
 
 import javax.transaction.Transactional;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.text.ParseException;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 
 public class BusinessStepDefinition {
     @Value("${storage-directory}")

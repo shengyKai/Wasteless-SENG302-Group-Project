@@ -4,7 +4,6 @@ import cucumber.context.CardContext;
 import cucumber.context.EventContext;
 import cucumber.context.RequestContext;
 import cucumber.context.UserContext;
-import io.cucumber.gherkin.internal.com.eclipsesource.json.Json;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
@@ -15,15 +14,11 @@ import net.minidev.json.parser.JSONParser;
 import org.hibernate.SessionFactory;
 import org.junit.jupiter.api.Assertions;
 import org.seng302.leftovers.persistence.ConversationRepository;
-import org.seng302.leftovers.persistence.KeywordRepository;
-import org.seng302.leftovers.persistence.MarketplaceCardRepository;
 import org.seng302.leftovers.persistence.MessageRepository;
-import org.seng302.leftovers.service.CardService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MvcResult;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

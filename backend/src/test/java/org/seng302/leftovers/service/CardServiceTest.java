@@ -1,6 +1,5 @@
 package org.seng302.leftovers.service;
 
-import org.apache.catalina.filters.ExpiresFilter;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.junit.jupiter.api.AfterEach;

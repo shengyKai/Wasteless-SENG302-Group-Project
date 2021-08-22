@@ -1,14 +1,11 @@
 package org.seng302.datagenerator;
 
+import lombok.Data;
+
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-
-import lombok.Data;
-
-import java.io.BufferedReader;
-import java.io.FileReader;
 
 public class LocationGenerator {
 

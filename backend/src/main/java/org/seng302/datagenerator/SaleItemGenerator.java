@@ -2,9 +2,9 @@ package org.seng302.datagenerator;
 
 import java.sql.*;
 import java.time.LocalDate;
-import java.util.*;
-
-import net.minidev.json.JSONObject;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
 import static org.seng302.datagenerator.Main.*;
 

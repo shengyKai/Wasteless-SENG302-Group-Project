@@ -1,7 +1,6 @@
 package org.seng302.datagenerator;
 
 import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.InputStreamReader;
 import java.util.*;
 

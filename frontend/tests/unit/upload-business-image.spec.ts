@@ -118,7 +118,6 @@ describe('BusinessImageUploader.vue', () => {
     appWrapper.vm.file = testFile;
     await Vue.nextTick();
     await findUploadButton().trigger('click'); // Click upload button
-    console.log(wrapper.emitted());
     expect(wrapper.emitted().uploadImage).toBeTruthy();
   });
 

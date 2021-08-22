@@ -4,13 +4,13 @@
  import org.junit.jupiter.api.BeforeEach;
  import org.junit.jupiter.api.Test;
  import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
- import org.springframework.test.context.junit4.SpringRunner;
  import org.seng302.leftovers.Main;
-import org.seng302.leftovers.persistence.UserRepository;
+ import org.seng302.leftovers.persistence.UserRepository;
+ import org.springframework.beans.factory.annotation.Autowired;
+ import org.springframework.boot.test.context.SpringBootTest;
+ import org.springframework.test.context.junit4.SpringRunner;
 
-import java.sql.*;
+ import java.sql.*;
  import java.util.List;
  import java.util.Map;
 

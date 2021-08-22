@@ -6,19 +6,15 @@ import cucumber.context.UserContext;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
-import lombok.SneakyThrows;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
 import org.junit.jupiter.api.Assertions;
 import org.seng302.leftovers.entities.Keyword;
-import org.seng302.leftovers.entities.Location;
-import org.seng302.leftovers.entities.User;
 import org.seng302.leftovers.persistence.KeywordRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 
-import java.io.UnsupportedEncodingException;
 import java.util.List;
 import java.util.Map;
 

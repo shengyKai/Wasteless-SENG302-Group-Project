@@ -4,16 +4,12 @@ import io.cucumber.java.Before;
 import lombok.SneakyThrows;
 import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
-import net.minidev.json.parser.ParseException;
 import org.junit.jupiter.api.Assertions;
 import org.seng302.leftovers.entities.Event;
-import org.seng302.leftovers.entities.MarketplaceCard;
 import org.seng302.leftovers.persistence.EventRepository;
-import org.seng302.leftovers.persistence.MarketplaceCardRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mock.web.MockHttpServletResponse;
 
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;

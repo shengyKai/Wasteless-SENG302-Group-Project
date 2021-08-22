@@ -1,13 +1,12 @@
 package org.seng302.datagenerator;
 
-import org.apache.catalina.User;
 import org.seng302.leftovers.entities.Business;
-import org.seng302.leftovers.entities.Location;
 
 import java.sql.*;
 import java.time.Instant;
-import java.util.*;
-import java.util.concurrent.TimeUnit;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
 import static org.seng302.datagenerator.Main.*;
 

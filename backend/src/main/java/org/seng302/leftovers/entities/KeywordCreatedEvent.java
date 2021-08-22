@@ -1,8 +1,11 @@
 package org.seng302.leftovers.entities;
 
-import javax.persistence.*;
-
 import net.minidev.json.JSONObject;
+
+import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
 
 /**
  * Event which is sent to system administrators to notify them of the creation of a new keyword.

@@ -1,10 +1,6 @@
 package org.seng302.datagenerator;
 
-import org.seng302.leftovers.entities.Keyword;
-import org.seng302.leftovers.entities.MarketplaceCard;
-
 import java.sql.*;
-import java.time.Instant;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;

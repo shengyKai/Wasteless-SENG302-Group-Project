@@ -1,6 +1,8 @@
 package org.seng302.leftovers.persistence;
 
-import org.seng302.leftovers.entities.*;
+import org.seng302.leftovers.entities.Conversation;
+import org.seng302.leftovers.entities.MarketplaceCard;
+import org.seng302.leftovers.entities.User;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;

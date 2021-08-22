@@ -4,17 +4,15 @@ package org.seng302.datagenerator;
  * If you are running this function from gradle generate then it will not
  */
 
+import org.seng302.datagenerator.LocationGenerator.Location;
+
 import java.sql.*;
-import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
-import java.util.*;
-import java.io.File;
-import java.util.concurrent.TimeUnit;
-
-import lombok.Data;
-import org.seng302.datagenerator.LocationGenerator.Location;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
 import static org.seng302.datagenerator.Main.*;
 

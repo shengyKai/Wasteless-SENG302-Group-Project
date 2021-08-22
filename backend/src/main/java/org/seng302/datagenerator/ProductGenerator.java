@@ -1,9 +1,11 @@
 package org.seng302.datagenerator;
 
-import java.net.URISyntaxException;
 import java.sql.*;
 import java.time.Instant;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Random;
 
 import static org.seng302.datagenerator.Main.*;
 

@@ -9,9 +9,7 @@ import org.hibernate.Session;
 import org.seng302.datagenerator.*;
 import org.seng302.leftovers.entities.*;
 import org.seng302.leftovers.persistence.*;
-import org.seng302.leftovers.persistence.SaleItemRepository;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
-import org.seng302.leftovers.tools.JsonTools;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -24,7 +22,9 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.time.LocalDate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Class for API endpoints used for developing/demoing application. Remove from release.

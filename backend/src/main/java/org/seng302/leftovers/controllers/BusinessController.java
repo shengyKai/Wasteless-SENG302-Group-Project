@@ -5,7 +5,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.seng302.leftovers.dto.CreateBusinessDTO;
 import org.seng302.leftovers.dto.ModifyBusinessDTO;
-import org.seng302.leftovers.entities.*;
+import org.seng302.leftovers.entities.Business;
+import org.seng302.leftovers.entities.Image;
+import org.seng302.leftovers.entities.Product;
+import org.seng302.leftovers.entities.User;
 import org.seng302.leftovers.persistence.BusinessRepository;
 import org.seng302.leftovers.persistence.ImageRepository;
 import org.seng302.leftovers.persistence.UserRepository;
@@ -25,9 +28,10 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 @RestController
 public class BusinessController {

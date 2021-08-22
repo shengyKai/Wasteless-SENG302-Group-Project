@@ -1,6 +1,8 @@
 package org.seng302.datagenerator;
 
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.seng302.leftovers.entities.*;
 import org.springframework.boot.test.context.SpringBootTest;
 

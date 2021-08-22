@@ -1,7 +1,6 @@
 package cucumber.stepDefinitions;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import cucumber.context.RequestContext;
 import cucumber.context.UserContext;
 import cucumber.utils.CucumberUtils;
@@ -14,10 +13,8 @@ import net.minidev.json.parser.JSONParser;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.junit.Assert;
-import org.seng302.leftovers.entities.Business;
 import org.seng302.leftovers.entities.Location;
 import org.seng302.leftovers.entities.User;
-import org.seng302.leftovers.persistence.AccountRepository;
 import org.seng302.leftovers.persistence.UserRepository;
 import org.seng302.leftovers.tools.PasswordAuthenticator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +23,6 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.transaction.Transactional;

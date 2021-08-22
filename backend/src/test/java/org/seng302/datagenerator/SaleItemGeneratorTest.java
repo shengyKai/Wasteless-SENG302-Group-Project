@@ -1,25 +1,19 @@
 package org.seng302.datagenerator;
-import org.seng302.leftovers.Main;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
-import org.seng302.leftovers.persistence.BusinessRepository;
-import org.seng302.leftovers.persistence.InventoryItemRepository;
-import org.seng302.leftovers.persistence.ProductRepository;
-import org.seng302.leftovers.persistence.SaleItemRepository;
-import org.seng302.leftovers.persistence.UserRepository;
+import org.seng302.leftovers.Main;
+import org.seng302.leftovers.persistence.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-
 import java.sql.*;
 import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
 

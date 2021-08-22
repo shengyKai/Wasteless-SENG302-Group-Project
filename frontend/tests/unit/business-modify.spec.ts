@@ -531,7 +531,7 @@ describe('modifyBusiness.vue', () => {
       wrapper.vm.imageFile = testFile;
 
       wrapper.vm.addImage();
-      
+
       expect(wrapper.vm.allImageFiles.length).toBe(1);
       expect(wrapper.vm.allImageFiles[0]).toBe(testFile);
     });

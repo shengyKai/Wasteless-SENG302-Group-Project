@@ -1,6 +1,8 @@
 package org.seng302.datagenerator;
 
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.seng302.leftovers.Main;
 import org.seng302.leftovers.persistence.MarketplaceCardRepository;
