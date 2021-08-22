@@ -48,7 +48,7 @@
                 @click="deleteImage(item.id)"
                 ref="deleteImageButton"
               >
-                <v-icon>mdi-delete</v-icon>
+                <v-icon class="shadow-icon">mdi-delete</v-icon>
               </v-btn>
             </template>
             <span> Delete Image </span>
