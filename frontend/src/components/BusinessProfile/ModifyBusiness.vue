@@ -159,6 +159,7 @@
                     <v-btn
                       type="submit"
                       color="primary"
+                      :disabled="!valid"
                     >
                       Submit
                       <v-icon
