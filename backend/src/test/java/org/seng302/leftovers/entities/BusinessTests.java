@@ -212,18 +212,15 @@ class BusinessTests {
      */
     @Test
     void setBelowMinimumAge() {
-        Exception thrown = assertThrows(ResponseStatusException.class, () -> {
-            Business testBusiness2 = new Business.Builder()
-                    .withBusinessType("Accommodation and Food Services")
-                    .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
+        Business.Builder builder = new Business.Builder()
+                .withBusinessType("Accommodation and Food Services")
+                .withAddress(
+                        Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
                         "Canterbury,8041"))
-                    .withDescription("Some description")
-                    .withName("BusinessName")
-                    .withPrimaryOwner(testUser3)
-                    .build();
-            testBusiness2 = businessRepository.save(testBusiness2);
-        }, "Expected Business.builder() to throw, but it didn't");
-
+                .withDescription("Some description")
+                .withName("BusinessName")
+                .withPrimaryOwner(testUser3);
+        Exception thrown = assertThrows(ResponseStatusException.class, builder::build, "Expected Business.builder() to throw, but it didn't");
         assertTrue(thrown.getMessage().contains("User is not of minimum age required to create a business"));
     }
 
@@ -233,12 +230,8 @@ class BusinessTests {
      * @return An array of valid business names various lengths and character types
      */
     private String[] getTestNames() {
-        StringBuilder longBusinessNameBuilder = new StringBuilder();
-        for (int i = 0; i < 100; i++) {
-            longBusinessNameBuilder.append("a");
-        }
         return new String[]{"Joe's cake shop", "BNZ", "X", "cool business", "big-business", "$%@&.,:;", "BUSINESS123", "" +
-                "another_business", longBusinessNameBuilder.toString()};
+                "another_business", "a".repeat(100)};
     }
 
 
