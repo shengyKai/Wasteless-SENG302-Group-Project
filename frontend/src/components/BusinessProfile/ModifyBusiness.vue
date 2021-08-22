@@ -174,7 +174,7 @@
                     <v-btn
                       type="submit"
                       color="primary"
-                      @click.prevent="currencyConfirmDialog = true;"
+                      @click.prevent="currencyConfirmDialog = true"
                     >
                       Submit
                       <v-icon
@@ -216,14 +216,14 @@
                       <v-btn
                         color="primary"
                         text
-                        @click="proceedWithModifyBusiness();"
+                        @click="proceedWithModifyBusiness()"
                       >
                         Save Change
                       </v-btn>
                       <v-btn
                         color="primary"
                         text
-                        @click="currencyConfirmDialog = false;"
+                        @click="currencyConfirmDialog = false"
                       >
                         Cancel
                       </v-btn>
@@ -291,7 +291,7 @@ export default {
       showChangeAdminAlert: false,
       primaryAdminAlertMsg: "",
       primaryAdministratorId: this.business.primaryAdministratorId,
-      newOwnerId : '',
+      newOwnerId : this.$store.state.user.id,
       maxCharRules: () => maxCharRules(100),
       maxCharDescriptionRules: ()=> maxCharRules(200),
       mandatoryRules: ()=> mandatoryRules,
@@ -325,8 +325,8 @@ export default {
      * If other chip is selected, the chip will be displayed as primary owner with message prompted
      */
     adminIsPrimary(admin) {
-      if(admin.id === this.primaryAdministratorId && this.newOwnerId === '') return true;
-      else if(admin.id === this.newOwnerId) return true;
+      if(admin.id === this.primaryAdministratorId && this.newOwnerId === this.$store.state.user.id) return true;
+      if(admin.id === this.newOwnerId) return true;
       return false;
     },
     /**
@@ -349,7 +349,6 @@ export default {
       const streetNum = streetParts[0];
       const streetName = streetParts.slice(1, streetParts.length).join(" ");
 
-      if(this.newOwnerId === '') this.newOwnerId = this.$store.state.user.id;
       let modifiedFields = {
         primaryAdministratorId: this.newOwnerId,
         name: this.businessName,
