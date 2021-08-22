@@ -396,7 +396,6 @@ public class MarketplaceCard {
          * @return Newly created marketplace card
          */
         public MarketplaceCard build() {
-            Random random = new Random();
             var card = new MarketplaceCard();
 
             if (creator == null) {

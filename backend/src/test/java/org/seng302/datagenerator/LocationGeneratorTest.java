@@ -4,22 +4,21 @@
  import org.junit.jupiter.api.BeforeEach;
  import org.junit.jupiter.api.Test;
  import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
- import org.springframework.test.context.junit4.SpringRunner;
  import org.seng302.leftovers.Main;
-import org.seng302.leftovers.persistence.UserRepository;
+ import org.seng302.leftovers.persistence.UserRepository;
+ import org.springframework.beans.factory.annotation.Autowired;
+ import org.springframework.boot.test.context.SpringBootTest;
+ import org.springframework.test.context.junit4.SpringRunner;
 
-import java.sql.*;
+ import java.sql.*;
  import java.util.List;
  import java.util.Map;
 
- import static org.junit.jupiter.api.Assertions.assertTrue;
- import static org.junit.jupiter.api.Assertions.fail;
+ import static org.junit.jupiter.api.Assertions.*;
 
  @RunWith(SpringRunner.class)
  @SpringBootTest(classes={Main.class})
- public class LocationGeneratorTest {
+class LocationGeneratorTest {
 
    private static final String STREET_NAMES_FILE = "street-names.txt";
    private static final String CITIES_FILE = "cities.txt";
@@ -73,9 +72,7 @@ import java.sql.*;
        stmt.executeQuery();
        ResultSet results = stmt.getResultSet();
        results.next();
-       if (results.getLong(1) != 1) {
-           fail();
-       }
+       assertEquals(1, results.getLong(1));
    }
 
    /**
@@ -122,9 +119,7 @@ import java.sql.*;
    @Test
    void generateOneLocation_generateOneUser_oneLocationEntryGenerated() throws SQLException {
      List<Long> userIds = userGenerator.generateUsers(1);
-     if (userIds.size() != 1) {
-         fail();
-     }
+     assertEquals(1, userIds.size());
      long userId = userIds.get(0);
 
      checkRequiredFieldsNotNull(userId);
@@ -134,9 +129,7 @@ import java.sql.*;
    @Test
    void generateMultipleLocations_generateMultipleUsers_multipleLocationEntriesGenerated() throws SQLException {
        List<Long> userIds = userGenerator.generateUsers(10);
-       if (userIds.size() != 10) {
-           fail();
-       }
+       assertEquals(10, userIds.size());
 
        for (long userId: userIds) {
          checkRequiredFieldsNotNull(userId);
@@ -146,17 +139,13 @@ import java.sql.*;
    @Test
    void generateZeroLocations_generateZeroUsers_zeroLocationEntriesGenerated() throws SQLException {
        List<Long> userIds = userGenerator.generateUsers(0);
-       if (userIds.size() != 0) {
-           fail();
-       }
+       assertEquals(0, userIds.size());
    }
 
    @Test
    void generateNegativeLocations_generateNegativeUsers_noLocationEntriesGenerated() throws SQLException {
        List<Long> userIds = userGenerator.generateUsers(-1);
-       if (userIds.size() != 0) {
-           fail();
-       }
+       assertEquals(0, userIds.size());
    }
 
    @Test

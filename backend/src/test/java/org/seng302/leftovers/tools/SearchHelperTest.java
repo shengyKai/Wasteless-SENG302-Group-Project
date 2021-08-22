@@ -1,6 +1,5 @@
 package org.seng302.leftovers.tools;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -22,8 +21,8 @@ import org.springframework.data.jpa.domain.Specification;
 
 import javax.transaction.Transactional;
 import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.text.ParseException;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
@@ -92,8 +91,8 @@ class SearchHelperTest {
                 .with("nickname", ":", "andy", true);
         spec = builder.build();
 
-        pagingUserList = readUserFile("src/test/testFiles/UserSearchHelperTestData1.csv");
-        savedUserList = readUserFile("src/test/testFiles/UserSearchHelperTestData2.csv");
+        pagingUserList = readUserFile("UserSearchHelperTestData1.csv");
+        savedUserList = readUserFile("UserSearchHelperTestData2.csv");
 
         dgaaController.checkDGAA();
         userRepository.deleteAll();
@@ -111,10 +110,12 @@ class SearchHelperTest {
         userRepository.deleteAll();
     }
 
-    private List<User> readUserFile(String filepath) throws IOException {
+    private List<User> readUserFile(String resourceName) throws IOException {
         List<User> userList = new ArrayList<>();
         String row;
-        BufferedReader csvReader = new BufferedReader(new FileReader(filepath));
+        BufferedReader csvReader = new BufferedReader(new InputStreamReader(
+                Objects.requireNonNull(SearchHelperTest.class.getResourceAsStream("/testData/" + resourceName))
+        ));
         while ((row = csvReader.readLine()) != null) {
             try {
                 String[] userData = row.split("\\|");
@@ -411,95 +412,29 @@ class SearchHelperTest {
      * quotes as its argument, it returns a specification which does not match users in the repository whose name is
      * a partial match for that word.
      */
-    @Test
-    void constructUserSpecificationFromSearchQueryDoubleQuotesPartialMatchTest() {
-        Specification<User> specification = SearchHelper.constructUserSpecificationFromSearchQuery("\"Car\"");
+    @ParameterizedTest
+    @CsvSource({
+            "\"Car\",1",
+            "'etra',1",
+            "\"zzz\",0",
+            "'X',0",
+            "\"Carlos\",0",
+            "'PPPPetra',0",
+            "\"carl\",1",
+            "'PetRA',1",
+            "q,0",
+            "Andyyyyy,0",
+            "andy and \"Potato\",0",
+            "tomato and \"Potato\",0",
+            "tomato or \"Potato\",0",
+            "andy \"Potato\",0",
+            "tomato \"Potato\",0",
+            "andy   and        \"Potato\",0"
+    })
+    void constructUserSpecificationFromSearchQuery_variousQueries_expectedMatchesNumberFound(String searchQuery, int expectedMatches) {
+        Specification<User> specification = SearchHelper.constructUserSpecificationFromSearchQuery(searchQuery);
         List<User> matches = userRepository.findAll(specification);
-        assertEquals(1, matches.size());
-    }
-
-    /**
-     * Verify that when constructUserSpecificationFromSearchQuery is called with as single word in single
-     * quotes as its argument, it returns a specification which does not match users in the repository whose name is
-     * a partial match for that word.
-     */
-    @Test
-    void constructUserSpecificationFromSearchQuerySingleQuotesPartialMatchTest() {
-        Specification<User> specification = SearchHelper.constructUserSpecificationFromSearchQuery("'etra'");
-        List<User> matches = userRepository.findAll(specification);
-        assertEquals(1, matches.size());
-    }
-
-    /**
-     * Verify that when constructUserSpecificationFromSearchQuery is called with as single word in double
-     * quotes as its argument, it returns a specification which does not match users in the repository whose name does
-     * not fully or partially match that word.
-     */
-    @Test
-    void constructUserSpecificationFromSearchQueryDoubleQuotesNoMatchTest() {
-        Specification<User> specification = SearchHelper.constructUserSpecificationFromSearchQuery("\"zzz\"");
-        List<User> matches = userRepository.findAll(specification);
-        assertEquals(0, matches.size());
-    }
-
-    /**
-     * Verify that when constructUserSpecificationFromSearchQuery is called with as single word in single
-     * quotes as its argument, it returns a specification which does not match users in the repository whose name does
-     * not fully or partially match that word.
-     */
-    @Test
-    void constructUserSpecificationFromSearchQuerySingleQuotesNoMatchTest() {
-        Specification<User> specification = SearchHelper.constructUserSpecificationFromSearchQuery("'X'");
-        List<User> matches = userRepository.findAll(specification);
-        assertEquals(0, matches.size());
-    }
-
-    /**
-     * Verify that when constructUserSpecificationFromSearchQuery is called with as single word in double
-     * quotes as its argument, it returns a specification which does not match users in the repository whose name is a
-     * substring of the argument
-     */
-    @Test
-    void constructUserSpecificationFromSearchQueryDoubleQuotesNameSubstringTest() {
-        Specification<User> specification = SearchHelper.constructUserSpecificationFromSearchQuery("\"Carlos\"");
-        List<User> matches = userRepository.findAll(specification);
-        assertEquals(0, matches.size());
-    }
-
-    /**
-     * Verify that when constructUserSpecificationFromSearchQuery is called with as single word in single
-     * quotes as its argument, it returns a specification which does not match users in the repository whose name is a
-     * substring of the argument
-     */
-    @Test
-    void constructUserSpecificationFromSearchQuerySingleQuotesNameSubstringTest() {
-        Specification<User> specification = SearchHelper.constructUserSpecificationFromSearchQuery("'PPPPetra'");
-        List<User> matches = userRepository.findAll(specification);
-        assertEquals(0, matches.size());
-    }
-
-    /**
-     * Verify that when constructUserSpecificationFromSearchQuery is called with as single word in double
-     * quotes as its argument, it returns a specification does not match users in the repository who have an name which
-     * is the same as the argument but in a different case
-     */
-    @Test
-    void constructUserSpecificationFromSearchQueryDoubleQuotesDifferentCaseMatchTest() {
-        Specification<User> specification = SearchHelper.constructUserSpecificationFromSearchQuery("\"carl\"");
-        List<User> matches = userRepository.findAll(specification);
-        assertEquals(1, matches.size());
-    }
-
-    /**
-     * Verify that when constructUserSpecificationFromSearchQuery is called with as single word in single
-     * quotes as its argument, it returns a specification which does not match users in the repository who have a name
-     * which is the same argument but in a different case
-     */
-    @Test
-    void constructUserSpecificationFromSearchQuerySingleQuotesDifferentCaseMatchTest() {
-        Specification<User> specification = SearchHelper.constructUserSpecificationFromSearchQuery("'PetRA'");
-        List<User> matches = userRepository.findAll(specification);
-        assertEquals(1, matches.size());
+        assertEquals(expectedMatches, matches.size());
     }
 
     /**
@@ -538,30 +473,6 @@ class SearchHelperTest {
 
     /**
      * Verify that when constructUserSpecificationFromSearchQuery is called with as single word without
-     * quotes as its argument, it returns a specification which does not match users in the repository whose name does
-     * not fully or partially match that word.
-     */
-    @Test
-    void constructUserSpecificationFromSearchQueryNoQuotesNoMatchTest() {
-        Specification<User> specification = SearchHelper.constructUserSpecificationFromSearchQuery("q");
-        List<User> matches = userRepository.findAll(specification);
-        assertEquals(0, matches.size());
-    }
-
-    /**
-     * Verify that when constructUserSpecificationFromSearchQuery is called with as single word without
-     * quotes as its argument, it returns a specification which does not match users in the repository whose name is a
-     * substring of the argument
-     */
-    @Test
-    void constructUserSpecificationFromSearchQueryNoQuotesNameSubstringTest() {
-        Specification<User> specification = SearchHelper.constructUserSpecificationFromSearchQuery("Andyyyyy");
-        List<User> matches = userRepository.findAll(specification);
-        assertEquals(0, matches.size());
-    }
-
-    /**
-     * Verify that when constructUserSpecificationFromSearchQuery is called with as single word without
      * quotes as its argument, it returns a specification will match users in the repository who have an name which
      * is the same as the argument but in a different case
      */
@@ -589,57 +500,15 @@ class SearchHelperTest {
         });
     }
 
-    /**
-     * Verify that when constructUserSpecificationFromSearchQuery is called with two terms joined by an 'and' as its
-     * argument, it returns a specification which matches users which contain both those terms in their names.
-     */
-    @Test
-    void constructUserSpecificationFromSearchQueryLowerAndBothMatchTest() {
-        Specification<User> specification = SearchHelper.constructUserSpecificationFromSearchQuery("andy and \"Graham\"");
+    @ParameterizedTest
+    @ValueSource(strings={"andy and \"Graham\"", "andy AND \"Graham\"", "andy \"Graham\""})
+    void constructUserSpecificationFromSearchQuery_andConjunction_matchesUsingAnd(String searchQuery) {
+        Specification<User> specification = SearchHelper.constructUserSpecificationFromSearchQuery(searchQuery);
         List<User> matches = userRepository.findAll(specification);
         assertEquals(1, matches.size());
-        for (User user : matches) {
-            assertTrue(user.getFirstName().equalsIgnoreCase("andy") &&
-                    user.getLastName().equals("Graham"));
-        }
-    }
-
-    /**
-     * Verify that when constructUserSpecificationFromSearchQuery is called with two terms joined by an 'AND' as its
-     * argument, it returns a specification which matches users which contain both those terms in their names.
-     */
-    @Test
-    void constructUserSpecificationFromSearchQueryUpperAndBothMatchTest() {
-        Specification<User> specification = SearchHelper.constructUserSpecificationFromSearchQuery("andy AND \"Graham\"");
-        List<User> matches = userRepository.findAll(specification);
-        assertEquals(1, matches.size());
-        for (User user : matches) {
-            assertTrue(user.getFirstName().equalsIgnoreCase("andy") &&
-                    user.getLastName().equals("Graham"));
-        }
-    }
-
-
-    /**
-     * Verify that when constructUserSpecificationFromSearchQuery is called with two terms joined by an 'and' as its
-     * argument, it returns a specification which doesn't match users which contain only one of those terms in their names.
-     */
-    @Test
-    void constructUserSpecificationFromSearchQueryAndOneMatchTest() {
-        Specification<User> specification = SearchHelper.constructUserSpecificationFromSearchQuery("andy and \"Potato\"");
-        List<User> matches = userRepository.findAll(specification);
-        assertEquals(0, matches.size());
-    }
-
-    /**
-     * Verify that when constructUserSpecificationFromSearchQuery is called with two terms joined by an 'and' as its
-     * argument, it returns a specification which doesn't match users which contain neither of those terms in their names.
-     */
-    @Test
-    void constructUserSpecificationFromSearchQueryAndNoMatchTest() {
-        Specification<User> specification = SearchHelper.constructUserSpecificationFromSearchQuery("tomato and \"Potato\"");
-        List<User> matches = userRepository.findAll(specification);
-        assertEquals(0, matches.size());
+        User user = matches.get(0);
+        assertEquals("Andy", user.getFirstName());
+        assertEquals("Graham", user.getLastName());
     }
 
     /**
@@ -671,106 +540,18 @@ class SearchHelperTest {
      * Verify that when constructUserSpecificationFromSearchQuery is called with two terms joined by an 'or' as its
      * argument, it returns a specification which matches users which contain only one of those terms in their names.
      */
-    @Test
-    void constructUserSpecificationFromSearchQueryLowerOrOneMatchTest() {
-        Specification<User> specification = SearchHelper.constructUserSpecificationFromSearchQuery("peter or \"Potato\"");
+    @ParameterizedTest
+    @ValueSource(strings = {"peter or \"Potato\"", "peter Or \"Potato\"", "peter         or      \"Potato\""})
+    void constructUserSpecificationFromSearchQuery_orConjunction_matchesUsingOr(String searchQuery) {
+        Specification<User> specification = SearchHelper.constructUserSpecificationFromSearchQuery(searchQuery);
         List<User> matches = userRepository.findAll(specification);
         assertEquals(1, matches.size());
         User user = matches.get(0);
-        assertTrue(user.getMiddleName().equalsIgnoreCase("peter"));
-        assertFalse(user.getFirstName().equals("Potato") || user.getMiddleName().equals("Potato") ||
-                user.getLastName().equals("Potato") || user.getNickname().equals("Potato"));
-    }
-
-    /**
-     * Verify that when constructUserSpecificationFromSearchQuery is called with two terms joined by an 'Or' as its
-     * argument, it returns a specification which matches users which contain one of those terms in their names.
-     */
-    @Test
-    void constructUserSpecificationFromSearchQueryMixedCaseOneMatchTest() {
-        Specification<User> specification = SearchHelper.constructUserSpecificationFromSearchQuery("peter Or \"Potato\"");
-        List<User> matches = userRepository.findAll(specification);
-        assertEquals(1, matches.size());
-        User user = matches.get(0);
-        assertTrue(user.getMiddleName().equalsIgnoreCase("peter"));
-        assertFalse(user.getFirstName().equals("Potato") || user.getMiddleName().equals("Potato") ||
-                user.getLastName().equals("Potato") || user.getNickname().equals("Potato"));
-    }
-
-    /**
-     * Verify that when constructUserSpecificationFromSearchQuery is called with two terms joined by an 'or' as its
-     * argument, it returns a specification which doesn't match users which contain neither of those terms in their names.
-     */
-    @Test
-    void constructUserSpecificationFromSearchQueryOrNoMatchTest() {
-        Specification<User> specification = SearchHelper.constructUserSpecificationFromSearchQuery("tomato or \"Potato\"");
-        List<User> matches = userRepository.findAll(specification);
-        assertEquals(0, matches.size());
-    }
-
-    /**
-     * Verify that when constructUserSpecificationFromSearchQuery is called with two terms not joined by a predicate as its
-     * argument, it returns a specification which matches users which contain both those terms in their names.
-     */
-    @Test
-    void constructUserSpecificationFromSearchQueryNoPredicateBothMatchTest() {
-        Specification<User> specification = SearchHelper.constructUserSpecificationFromSearchQuery("andy \"Graham\"");
-        List<User> matches = userRepository.findAll(specification);
-        assertEquals(1, matches.size());
-        for (User user : matches) {
-            assertTrue(user.getFirstName().equalsIgnoreCase("andy") &&
-                    user.getLastName().equals("Graham"));
-        }
-    }
-
-    /**
-     * Verify that when constructUserSpecificationFromSearchQuery is called with two terms not joined by a predicate as its
-     * argument, it returns a specification which doesn't match users which contain only one of those terms in their names.
-     */
-    @Test
-    void constructUserSpecificationFromSearchQueryNoPredicateOneMatchTest() {
-        Specification<User> specification = SearchHelper.constructUserSpecificationFromSearchQuery("andy \"Potato\"");
-        List<User> matches = userRepository.findAll(specification);
-        assertEquals(0, matches.size());
-    }
-
-    /**
-     * Verify that when constructUserSpecificationFromSearchQuery is called with two terms not joined by a predicate as its
-     * argument, it returns a specification which doesn't match users which contain neither of those terms in their names.
-     */
-    @Test
-    void constructUserSpecificationFromSearchQueryNoPredicateNoMatchTest() {
-        Specification<User> specification = SearchHelper.constructUserSpecificationFromSearchQuery("tomato \"Potato\"");
-        List<User> matches = userRepository.findAll(specification);
-        assertEquals(0, matches.size());
-    }
-
-    /**
-     * Verify that when constructUserSpecificationFromSearchQuery is called with two terms joined by an 'or' as its
-     * argument, and there is additional whitespace between the words in the query, it still returns a specification which
-     * matches users which contain only one of those terms in their names.
-     */
-    @Test
-    void constructUserSpecificationFromSearchQueryOrExtraWhitespaceTest() {
-        Specification<User> specification = SearchHelper.constructUserSpecificationFromSearchQuery("peter         or      \"Potato\"");
-        List<User> matches = userRepository.findAll(specification);
-        assertEquals(1, matches.size());
-        User user = matches.get(0);
-        assertTrue(user.getMiddleName().equalsIgnoreCase("peter"));
-        assertFalse(user.getFirstName().equals("Potato") || user.getMiddleName().equals("Potato") ||
-                user.getLastName().equals("Potato") || user.getNickname().equals("Potato"));
-    }
-
-    /**
-     * Verify that when constructUserSpecificationFromSearchQuery is called with two terms joined by an 'and' as its
-     * argument, and there is additional whitespace between the words in the query, it returns a specification which
-     * doesn't match users which contain only one of those terms in their names.
-     */
-    @Test
-    void constructUserSpecificationFromSearchQueryAndExtraWhitespaceTest() {
-        Specification<User> specification = SearchHelper.constructUserSpecificationFromSearchQuery("andy   and        \"Potato\"");
-        List<User> matches = userRepository.findAll(specification);
-        assertEquals(0, matches.size());
+        assertEquals("Peter", user.getMiddleName());
+        assertNotEquals("Potato", user.getFirstName());
+        assertNotEquals("Potato", user.getMiddleName());
+        assertNotEquals("Potato", user.getLastName());
+        assertNotEquals("Potato", user.getNickname());
     }
 
     /**
@@ -952,24 +733,15 @@ class SearchHelperTest {
         keywordRepository.saveAll(Arrays.asList(keyword1, keyword2, keyword3, keyword4));
     }
 
-    @Test
-    void constructKeywordSpecificationFromSearchQuery_partialMatch() {
+    @ParameterizedTest
+    @ValueSource(strings = {"App", "Apples", "apples"})
+    void constructKeywordSpecificationFromSearchQuery_matchingQuery_keywordReturned(String searchQuery) {
         createKeywords();
-        Specification<Keyword> specification = SearchHelper.constructKeywordSpecificationFromSearchQuery("App");
+        Specification<Keyword> specification = SearchHelper.constructKeywordSpecificationFromSearchQuery(searchQuery);
         List<Keyword> result = keywordRepository.findAll(specification);
 
         assertEquals(1, result.size());
-        assertEquals("Apples",result.get(0).getName());
-    }
-
-    @Test
-    void constructKeywordSpecificationFromSearchQuery_fullMatch() {
-        createKeywords();
-        Specification<Keyword> specification = SearchHelper.constructKeywordSpecificationFromSearchQuery("Apples");
-        List<Keyword> result = keywordRepository.findAll(specification);
-
-        assertEquals(1, result.size());
-        assertEquals("Apples",result.get(0).getName());
+        assertEquals("Apples", result.get(0).getName());
     }
 
     @Test
@@ -979,15 +751,6 @@ class SearchHelperTest {
         List<Keyword> result = keywordRepository.findAll(specification);
 
         assertEquals(0, result.size());
-    }
-    @Test
-    void constructKeywordSpecificationFromSearchQuery_ignoresCase() {
-        createKeywords();
-        Specification<Keyword> specification = SearchHelper.constructKeywordSpecificationFromSearchQuery("apples");
-        List<Keyword> result = keywordRepository.findAll(specification);
-
-        assertEquals(1, result.size());
-        assertEquals("Apples",result.get(0).getName());
     }
 
     @Transactional

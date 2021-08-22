@@ -2,7 +2,10 @@ package org.seng302.leftovers.entities;
 
 import net.minidev.json.JSONObject;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 
 /**
  * This class is used for notifying users when their marketplace card has been deleted.

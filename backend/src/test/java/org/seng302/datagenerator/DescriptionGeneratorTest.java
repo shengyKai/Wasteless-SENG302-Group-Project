@@ -1,6 +1,8 @@
 package org.seng302.datagenerator;
 
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.seng302.leftovers.entities.*;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -8,10 +10,11 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest(classes=DescriptionGenerator.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class DescriptionGeneratorTest {
+class DescriptionGeneratorTest {
     DescriptionGenerator descGen = DescriptionGenerator.getInstance();
     String description;
 
@@ -64,7 +67,8 @@ public class DescriptionGeneratorTest {
     @Test
     void randomDescriptionTest() {
         description = descGen.randomDescription();
-        assert(description.length() < 200 && description.length() >= 10);
+        assertTrue(description.length() < 200);
+        assertTrue(description.length() >= 10);
     }
 
     @Test

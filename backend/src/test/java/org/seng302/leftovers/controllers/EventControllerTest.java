@@ -23,19 +23,17 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import static org.hamcrest.Matchers.nullValue;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-
 import java.text.ParseException;
 import java.util.List;
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.AdditionalMatchers.not;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -75,10 +73,10 @@ class EventControllerTest {
         when(mockEvent.getNotifiedUser()).thenReturn(mockUser);
 
         when(userRepository.findAll()).thenReturn(List.of(mockUser));
-        when(userRepository.findById(eq(7L))).thenReturn(Optional.of(mockUser));
+        when(userRepository.findById(7L)).thenReturn(Optional.of(mockUser));
         when(userRepository.findById(not(eq(7L)))).thenReturn(Optional.empty());
 
-        when(eventRepository.findById(eq(2L))).thenReturn(Optional.of(mockEvent));
+        when(eventRepository.findById(2L)).thenReturn(Optional.of(mockEvent));
         when(eventRepository.findById(not(eq(2L)))).thenReturn(Optional.empty());
 
 

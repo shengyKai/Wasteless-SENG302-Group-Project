@@ -1,7 +1,9 @@
 package org.seng302.datagenerator;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.InputStreamReader;
 import java.util.*;
 
@@ -23,6 +25,7 @@ public class PersonNameGenerator {
     private List<String> lastNames;
 
     private Random random;
+    private Logger logger = LogManager.getLogger(PersonNameGenerator.class.getName());
 
     /**
      * Private constructor. Sets up hashmap of potential nicknames and lists of potential first and last names.
@@ -53,7 +56,7 @@ public class PersonNameGenerator {
                 nicknameLookup.put(name, Arrays.asList(nicknames));
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error(e.getMessage());
         }
     }
 

@@ -7,6 +7,9 @@ import org.hibernate.SessionFactory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.seng302.leftovers.exceptions.AccessTokenException;
@@ -212,18 +215,15 @@ class BusinessTests {
      */
     @Test
     void setBelowMinimumAge() {
-        Exception thrown = assertThrows(ResponseStatusException.class, () -> {
-            Business testBusiness2 = new Business.Builder()
-                    .withBusinessType("Accommodation and Food Services")
-                    .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
+        Business.Builder builder = new Business.Builder()
+                .withBusinessType("Accommodation and Food Services")
+                .withAddress(
+                        Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
                         "Canterbury,8041"))
-                    .withDescription("Some description")
-                    .withName("BusinessName")
-                    .withPrimaryOwner(testUser3)
-                    .build();
-            testBusiness2 = businessRepository.save(testBusiness2);
-        }, "Expected Business.builder() to throw, but it didn't");
-
+                .withDescription("Some description")
+                .withName("BusinessName")
+                .withPrimaryOwner(testUser3);
+        Exception thrown = assertThrows(ResponseStatusException.class, builder::build, "Expected Business.builder() to throw, but it didn't");
         assertTrue(thrown.getMessage().contains("User is not of minimum age required to create a business"));
     }
 
@@ -233,12 +233,8 @@ class BusinessTests {
      * @return An array of valid business names various lengths and character types
      */
     private String[] getTestNames() {
-        StringBuilder longBusinessNameBuilder = new StringBuilder();
-        for (int i = 0; i < 100; i++) {
-            longBusinessNameBuilder.append("a");
-        }
         return new String[]{"Joe's cake shop", "BNZ", "X", "cool business", "big-business", "$%@&.,:;", "BUSINESS123", "" +
-                "another_business", longBusinessNameBuilder.toString()};
+                "another_business", "a".repeat(100)};
     }
 
 
@@ -265,7 +261,7 @@ class BusinessTests {
         for (String name : testNames) {
             testBusiness1.setName(name);
             businessRepository.save(testBusiness1);
-            testBusiness1 = businessRepository.findById(testBusiness1.getId()).get();
+            testBusiness1 = businessRepository.findById(testBusiness1.getId()).orElseThrow();
             assertEquals(name, testBusiness1.getName());
         }
     }
@@ -320,40 +316,12 @@ class BusinessTests {
      * Check that when setName is called with null as its argument, a response status expection will be thrown with
      * status code 400 and the business's name will not be changed.
      */
-    @Test
-    void setNameNullTest() {
+    @ParameterizedTest
+    @NullSource
+    @ValueSource(strings = {"", "   "})
+    void setNameToInvalidValue(String value) {
         String originalName = testBusiness1.getName();
-        ResponseStatusException e = assertThrows(ResponseStatusException.class, () -> {
-            testBusiness1.setName(null);
-        });
-        assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
-        assertEquals(originalName, testBusiness1.getName());
-    }
-
-    /**
-     * Check that when setName is called with the empty string as its argument, a response status expection will be thrown
-     * with status code 400 and the business's name will not be changed.
-     */
-    @Test
-    void setNameEmptyStringTest() {
-        String originalName = testBusiness1.getName();
-        ResponseStatusException e = assertThrows(ResponseStatusException.class, () -> {
-            testBusiness1.setName("");
-        });
-        assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
-        assertEquals(originalName, testBusiness1.getName());
-    }
-
-    /**
-     * Check that when setName is called with a blank string as its argument, a response status expection will be thrown
-     * with status code 400 and the business's name will not be changed.
-     */
-    @Test
-    void setNameBlankStringTest() {
-        String originalName = testBusiness1.getName();
-        ResponseStatusException e = assertThrows(ResponseStatusException.class, () -> {
-            testBusiness1.setName("      ");
-        });
+        ResponseStatusException e = assertThrows(ResponseStatusException.class, () -> testBusiness1.setName(value));
         assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
         assertEquals(originalName, testBusiness1.getName());
     }
@@ -400,7 +368,7 @@ class BusinessTests {
         for (String description : testDescriptions) {
             testBusiness1.setDescription(description);
             businessRepository.save(testBusiness1);
-            testBusiness1 = businessRepository.findById(testBusiness1.getId()).get();
+            testBusiness1 = businessRepository.findById(testBusiness1.getId()).orElseThrow();
             assertEquals(description, testBusiness1.getDescription());
         }
     }
@@ -466,10 +434,11 @@ class BusinessTests {
     @Test
     void primaryOwnerCantBeDeletedTest() {
         User primaryOwner = testBusiness1.getPrimaryOwner();
+        long userId = primaryOwner.getUserID();
         assertThrows(ResponseStatusException.class, () -> {
-            userRepository.deleteById(primaryOwner.getUserID());
+            userRepository.deleteById(userId);
         });
-        assertNotNull(userRepository.findById(primaryOwner.getUserID()).get());
+        assertTrue(userRepository.findById(primaryOwner.getUserID()).isPresent());
     }
 
     /**
@@ -524,7 +493,7 @@ class BusinessTests {
         userRepository.deleteById(testUser2.getUserID());
         assertFalse(userRepository.existsById(adminId));
         assertTrue(businessRepository.existsById(businessId));
-        testBusiness1 = businessRepository.findById(businessId).get();
+        testBusiness1 = businessRepository.findById(businessId).orElseThrow();
         assertEquals(0, testBusiness1.getAdministrators().size());
     }
 
@@ -559,7 +528,7 @@ class BusinessTests {
         });
         assertTrue(userRepository.existsById(adminId));
         assertTrue(businessRepository.existsById(businessId));
-        testBusiness1 = businessRepository.findById(businessId).get();
+        testBusiness1 = businessRepository.findById(businessId).orElseThrow();
         assertEquals(1, testBusiness1.getAdministrators().size());
         for (User user : testBusiness1.getAdministrators()) {
             assertEquals(adminId, user.getUserID());

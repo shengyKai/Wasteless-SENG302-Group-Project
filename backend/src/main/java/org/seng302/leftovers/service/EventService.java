@@ -4,8 +4,6 @@ import org.seng302.leftovers.entities.Event;
 import org.seng302.leftovers.entities.User;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
-import java.util.Set;
-
 /**
  * Service for linking event creation/updating and sending the events to users
  * Keeps track of all the currently logged in user's event streams

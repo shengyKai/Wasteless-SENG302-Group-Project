@@ -4,19 +4,19 @@ package org.seng302.datagenerator;
  * If you are running this function from gradle generate then it will not
  */
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.seng302.datagenerator.LocationGenerator.Location;
+
 import java.sql.*;
-import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
-import java.util.*;
-import java.io.File;
-import java.util.concurrent.TimeUnit;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
-import lombok.Data;
-import org.seng302.datagenerator.LocationGenerator.Location;
-
-import static org.seng302.datagenerator.Main.*;
+import static org.seng302.datagenerator.Main.randomDate;
 
 public class UserGenerator {
     private Random random = new Random();
@@ -24,25 +24,10 @@ public class UserGenerator {
     private LocationGenerator locationGenerator = LocationGenerator.getInstance();
     private PersonNameGenerator personNameGenerator = PersonNameGenerator.getInstance();
     private final DescriptionGenerator descriptionGenerator = DescriptionGenerator.getInstance();
+    private final Logger logger = LogManager.getLogger(UserGenerator.class.getName());
 
     public UserGenerator(Connection conn) {
         this.conn = conn;
-    }
-
-    /**
-     * Randomly generates the date of birth of the user
-     * @return the user's date of birth
-     */
-    private LocalDate generateDOB() {
-        return randomDate(LocalDate.of(1900, 1, 1), LocalDate.of(2006, 1, 1));
-    }
-
-    /**
-     * Randomly generates the phone number of the user
-     * @return the user's phone number
-     */
-    private String generatePhNum() {
-        return "027 " + String.valueOf(random.nextInt(8999999) + 1000000);
     }
 
     /**
@@ -67,17 +52,6 @@ public class UserGenerator {
     }
 
     /**
-     * Main program
-     * @param args no arguments should be provided
-     */
-    public static void main(String[] args) throws SQLException, InterruptedException {
-        Connection conn = connectToDatabase();
-        var generator = new UserGenerator(conn);
-        int userCount = getNumObjectsFromInput("users");
-        generator.generateUsers(userCount);
-    }
-
-    /**
      * Generates the users
      * @param userCount Number of users to generate
      * @return List of generated user ids
@@ -88,12 +62,12 @@ public class UserGenerator {
         for (int i = 0; i < userCount; i++) names.add(personNameGenerator.generateName());
 
         try {
-            System.out.println("Adding addresses");
+            logger.info("Adding addresses");
             List<Location> addresses = new ArrayList<>();
             for (int i = 0; i < userCount; i++) addresses.add(locationGenerator.generateAddress(random));
             List<Long> addressIds = locationGenerator.createInsertAddressSQL(addresses, conn);
 
-            System.out.println("Adding accounts");
+            logger.info("Adding accounts");
             AccountBatch accountBatch = new AccountBatch(conn);
             for (int i = 0; i<userCount; i++) {
                 String email = generateEmail(i, names.get(i));
@@ -103,18 +77,18 @@ public class UserGenerator {
             }
             List<Long> generatedUserIds = accountBatch.execute();
 
-            System.out.println("Adding users");
+            logger.info("Adding users");
             UserBatch userBatch = new UserBatch(conn);
             for (int i = 0; i<userCount; i++) userBatch.addUser(generatedUserIds.get(i), addressIds.get(i), names.get(i));
             userBatch.execute();
 
             Instant endTime = Instant.now();
 
-            System.out.println("Added " + userCount + " users in " + ChronoUnit.MILLIS.between(startTime, endTime) + "ms");
+            logger.info("Added {} users in {} ms", userCount, ChronoUnit.MILLIS.between(startTime, endTime));
 
             return generatedUserIds;
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error(e.getStackTrace());
             return List.of();
         }
     }
@@ -150,6 +124,22 @@ public class UserGenerator {
 
     public class UserBatch {
         private final PreparedStatement statement;
+
+        /**
+         * Randomly generates the date of birth of the user
+         * @return the user's date of birth
+         */
+        private LocalDate generateDOB() {
+            return randomDate(LocalDate.of(1900, 1, 1), LocalDate.of(2006, 1, 1));
+        }
+
+        /**
+         * Randomly generates the phone number of the user
+         * @return the user's phone number
+         */
+        private String generatePhNum() {
+            return "027 " + (random.nextInt(8999999) + 1000000);
+        }
 
         public UserBatch(Connection connection) throws SQLException {
             statement = connection.prepareStatement(

@@ -16,7 +16,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.yaml.snakeyaml.error.Mark;
 
 import java.lang.reflect.Field;
 import java.time.Duration;

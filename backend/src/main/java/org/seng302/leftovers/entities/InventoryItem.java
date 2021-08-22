@@ -1,12 +1,13 @@
 package org.seng302.leftovers.entities;
 
 import lombok.NoArgsConstructor;
+import net.minidev.json.JSONObject;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
-import net.minidev.json.JSONObject;
 import org.seng302.leftovers.tools.JsonTools;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
+
 import javax.persistence.*;
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -140,7 +141,7 @@ public class InventoryItem {
      * Sets the product
      * @param product in inventory
      */
-    public void setProduct(Product product) throws ResponseStatusException {
+    public void setProduct(Product product) {
         if (product != null) {
             this.product = product;
         } else {
@@ -151,7 +152,7 @@ public class InventoryItem {
      * Sets the quantity of items/products
      * @param quantity of item
      */
-    public void setQuantity(Integer quantity) throws ResponseStatusException {
+    public void setQuantity(Integer quantity) {
         if (this.quantity == null) {
             if (quantity > 0) {
                 this.quantity = quantity;
@@ -242,11 +243,9 @@ public class InventoryItem {
                             "The best before date must be before the expires date.");
                 }
                 //Case 3: best before is null and sell by is not null
-            } else if (bestBefore == null && sellBy != null) {
-                if (sellBy.compareTo(expires) > 0) {
+            } else if (sellBy != null && sellBy.compareTo(expires) > 0) {
                     throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                             "The sell by date must be before the expires date.");
-                }
             }
         }
         //Case 4: best before is null and sell by is null, no validation needed
@@ -308,11 +307,9 @@ public class InventoryItem {
         }
 
         //checks that the best before date is after the sell by date if it exists
-        if (this.sellBy != null) {
-            if (bestBefore.compareTo(this.sellBy) < 0) { //checks if best before is before sell by
+        if (this.sellBy != null && bestBefore.compareTo(this.sellBy) < 0) { //checks if best before is before sell by
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                         "The best before date cannot be before the sell by date.");
-            }
         }
         this.bestBefore = bestBefore;
     }
@@ -321,7 +318,7 @@ public class InventoryItem {
      * Sets the date of expires for the product
      * @param expires the date of expires for the product
      */
-    public void setExpires(LocalDate expires) throws ResponseStatusException {
+    public void setExpires(LocalDate expires) {
         if(expires == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No expiry date was provided");
         }
@@ -332,17 +329,13 @@ public class InventoryItem {
         }
 
         //checks that the best before date and sell by date are before the expire date if they exist
-        if (this.sellBy != null) {
-            if (expires.compareTo(this.sellBy) < 0) { //checks if expires is before sell by
+        if (this.sellBy != null && expires.compareTo(this.sellBy) < 0) { //checks if expires is before sell by
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                         "The expires date cannot be before the sell by date.");
-            }
         }
-        if (this.bestBefore != null) {
-            if (expires.compareTo(this.bestBefore) < 0) { //checks if expires is before best before
+        if (this.bestBefore != null && expires.compareTo(this.bestBefore) < 0) { //checks if expires is before best before
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                         "The expires date cannot be before the best before date.");
-            }
         }
         this.expires = expires;
     }
@@ -510,7 +503,7 @@ public class InventoryItem {
          * Builds the inventory item
          * @return the inventory item that has just been created
          */
-        public InventoryItem build() throws Exception {
+        public InventoryItem build() {
             InventoryItem inventoryItem = new InventoryItem();
             inventoryItem.setProduct(this.product);
             inventoryItem.setRemainingQuantity(this.quantity);

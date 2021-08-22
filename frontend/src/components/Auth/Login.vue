@@ -1,6 +1,5 @@
 <template>
   <v-container>
-    <!-- @submit.prevent="login"-->
     <v-form v-model="valid" lazy-validation>
       <h1>Sign in</h1>
       <v-text-field

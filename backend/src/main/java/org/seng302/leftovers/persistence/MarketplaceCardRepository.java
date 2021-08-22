@@ -1,6 +1,8 @@
 package org.seng302.leftovers.persistence;
 
-import org.seng302.leftovers.entities.*;
+import org.seng302.leftovers.entities.Keyword;
+import org.seng302.leftovers.entities.MarketplaceCard;
+import org.seng302.leftovers.entities.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
