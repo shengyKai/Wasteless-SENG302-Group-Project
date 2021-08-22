@@ -5,12 +5,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
-import org.seng302.leftovers.persistence.*;
+import org.seng302.leftovers.persistence.EventRepository;
+import org.seng302.leftovers.persistence.KeywordRepository;
+import org.seng302.leftovers.persistence.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest
 class KeywordCreatedEventTest {
@@ -23,6 +24,7 @@ class KeywordCreatedEventTest {
     EventRepository eventRepository;
     Keyword keyword;
     User user;
+    User adminUser;
 
     @BeforeEach
     void setUp() {
@@ -37,11 +39,26 @@ class KeywordCreatedEventTest {
                 .withPassword("12345678abc")
                 .withBio("g")
                 .withDob("2001-03-11")
-                .withPhoneNumber("123-456-7890")
+                .withPhoneNumber("12 34567890")
                 .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
                         "Canterbury,8041"))
                 .build();
         user = userRepository.save(user);
+
+        adminUser = new User.Builder()
+                .withFirstName("Dave")
+                .withMiddleName("David")
+                .withLastName("Davidson")
+                .withNickName("DDD")
+                .withEmail("david@davidson.com")
+                .withPassword("12345678abc")
+                .withBio("g")
+                .withDob("2001-03-11")
+                .withPhoneNumber("12 34567890")
+                .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
+                        "Canterbury,8041"))
+                .build();
+        adminUser = userRepository.save(adminUser);
     }
 
     @AfterEach
@@ -52,7 +69,7 @@ class KeywordCreatedEventTest {
 
     @Test
     void constructJSONObject_jsonHasExpectedFormat() throws JsonProcessingException {
-        KeywordCreatedEvent event = new KeywordCreatedEvent(keyword, user);
+        KeywordCreatedEvent event = new KeywordCreatedEvent(adminUser, user, keyword);
         event = eventRepository.save(event);
 
         String expectedJsonString = String.format(
@@ -60,6 +77,7 @@ class KeywordCreatedEventTest {
                         "\"created\":\"%s\"," +
                         "\"type\":\"KeywordCreatedEvent\"," +
                         "\"keyword\":%s," +
+                        "\"tag\":\"none\"," +
                         "\"creator\":%s}",
                 event.getId(),
                 event.getCreated(),

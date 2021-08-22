@@ -13,7 +13,20 @@ import java.util.Optional;
 @Repository
 public interface ImageRepository extends CrudRepository<Image, Long> {
 
+    /**
+     * Finds the image with the given filename
+     * @param filename Filename to find
+     * @return Relevant image entity
+     */
     Optional<Image> findByFilename(@Param("filename") String filename);
+
+    /**
+     * Finds the image with the given thumbnail filename
+     * @param filenameThumbnail Filename to find
+     * @return Relevant image entity
+     */
+    Optional<Image> findByFilenameThumbnail(@Param("filenameThumbnail") String filenameThumbnail);
+
     /**
      * Gets an image from the database that matches a given image Id. This method preforms a sanity check to ensure the
      * image does exist and if not throws a not accepted response status exception.
@@ -22,7 +35,7 @@ public interface ImageRepository extends CrudRepository<Image, Long> {
      */
     default Image getImageById(Long imageId) {
         Optional<Image> image = findById(imageId);
-        if (!image.isPresent()) {
+        if (image.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE,
                     "the given image does not exist");
         }
@@ -38,7 +51,7 @@ public interface ImageRepository extends CrudRepository<Image, Long> {
      */
     default Image getImageByProductAndId(Product product, Long imageId) {
         Optional<Image> image = this.findById(imageId);
-        if (!image.isPresent() || !product.getProductImages().contains(image.get())) {
+        if (image.isEmpty() || !product.getProductImages().contains(image.get())) {
             throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE,
                     "The given image does not exist");
         }

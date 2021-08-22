@@ -1,6 +1,5 @@
 package org.seng302.leftovers.controllers;
 
-import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -16,14 +15,13 @@ import org.seng302.leftovers.tools.SearchHelper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 
@@ -60,6 +58,8 @@ public class SaleController {
             orderBy = "inventoryItem.product.productCode";
         } else if (orderBy.equals("productName")) {
             orderBy = "inventoryItem.product.name";
+        } else if (orderBy.equals("closing")) {
+            orderBy = "closes";
         }
         return new Sort.Order(direction, orderBy).ignoreCase();
     }
@@ -140,11 +140,12 @@ public class SaleController {
             Business business = businessRepository.getBusinessById(id);
 
             Sort.Direction direction = SearchHelper.getSortDirection(reverse);
-            Sort.Order sortOrder = getSaleItemOrder(orderBy, direction);
+            List<Sort.Order> sortOrder = List.of(getSaleItemOrder(orderBy, direction));
 
             PageRequest pageRequest = SearchHelper.getPageRequest(page, resultsPerPage, Sort.by(sortOrder));
 
-            Page<SaleItem> result = saleItemRepository.findAllForBusiness(business, pageRequest);
+            Specification<SaleItem> specification = SearchHelper.constructSpecificationFromSaleItemsFilter(business);
+            Page<SaleItem> result = saleItemRepository.findAll(specification, pageRequest);
 
             return JsonTools.constructPageJSON(result.map(SaleItem::constructJSONObject));
 

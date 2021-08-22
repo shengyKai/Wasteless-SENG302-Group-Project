@@ -10,9 +10,16 @@ import { castMock, flushQueue } from './utils';
 
 jest.mock('@/api/internal', () => ({
   getProducts: jest.fn(),
+  searchCatalogue: jest.fn()
+}));
+
+// Debounce adds a delay on updates to search query that we need to get rid of
+jest.mock('@/utils', () => ({
+  debounce: (func: (() => void)) => func,
 }));
 
 const getProducts = castMock(api.getProducts);
+const searchCatalogue = castMock(api.searchCatalogue);
 
 Vue.use(Vuetify);
 
@@ -54,7 +61,7 @@ describe('ProductCatalogue.vue', () => {
    * Creates the wrapper for the ProductCatalogue component.
    * This must be called before using the ProductCatalogue wrapper.
    */
-  function createWrapper() {
+  function createGetProductWrapper() {
     wrapper = mount(ProductCatalogue, {
       stubs: ['router-link', 'router-view', 'ProductCatalogueItem'],
       mocks: {
@@ -70,12 +77,38 @@ describe('ProductCatalogue.vue', () => {
   }
 
   /**
+   * Creates the wrapper for the ProductCatalogue component.
+   * This must be called before using the ProductCatalogue wrapper.
+   */
+  function createSearchCatalogueWrapper() {
+    wrapper = mount(ProductCatalogue, {
+      stubs: ['router-link', 'router-view', 'ProductCatalogueItem'],
+      mocks: {
+        $route: {
+          params: {
+            id: '100',
+          }
+        },
+      },
+      data() {
+        return {
+          searchQuery: "something",
+          searchBy: ["productCode", "name"]
+        };
+      },
+      localVue,
+      vuetify: new Vuetify(),
+    });
+  }
+
+  /**
    * Sets the mock api results.
    *
    * @param products Products on the current page to use for the mock results
    */
   function setResults(products: api.SearchResults<Product>) {
     getProducts.mockResolvedValue(products);
+    searchCatalogue.mockResolvedValue(products);
   }
 
   /**
@@ -87,19 +120,23 @@ describe('ProductCatalogue.vue', () => {
     return wrapper.findComponent({name: 'v-alert'});
   }
 
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
   /**
    * Tests that when initially opened that the products are queried
    */
   it('The products from the business id are queried', () => {
     setResults(createTestProducts(5));
-    createWrapper();
+    createGetProductWrapper();
     expect(getProducts).toBeCalledWith(100, 1, RESULTS_PER_PAGE, 'productCode', false);
   });
 
   it('The search results should be displayed somewhere', async () => {
     let products = createTestProducts(5);
     setResults(products);
-    createWrapper();
+    createGetProductWrapper();
     // Flush queue is used instead of Vue.nextTick() since this will wait for everything to finish
     // instead of a single event.
     await flushQueue();
@@ -112,14 +149,14 @@ describe('ProductCatalogue.vue', () => {
 
   it('If there is an error then the error should be displayed', async () => {
     getProducts.mockResolvedValue('test_error');
-    createWrapper();
+    createGetProductWrapper();
     await flushQueue();
     expect(findErrorBox().text()).toEqual('test_error');
   });
 
   it('If the error is dismissed then the error should disappear', async () => {
     getProducts.mockResolvedValue('test_error');
-    createWrapper();
+    createGetProductWrapper();
     await flushQueue();
     // Finds dismiss button and clicks it
     findErrorBox().findComponent({name: 'v-btn' }).trigger('click');
@@ -132,7 +169,7 @@ describe('ProductCatalogue.vue', () => {
     testResult.count = 100;
     setResults(testResult);
 
-    createWrapper();
+    createGetProductWrapper();
     await flushQueue();
     let pagination = wrapper.findComponent({ name: 'v-pagination' });
     expect(pagination.props().length).toBe(Math.ceil(100 / RESULTS_PER_PAGE));
@@ -145,15 +182,89 @@ describe('ProductCatalogue.vue', () => {
     testResult.count = 100;
     setResults(testResult);
 
-    createWrapper();
+    createGetProductWrapper();
     await flushQueue();
     expect(wrapper.text()).toContain(`Displaying 1 - ${RESULTS_PER_PAGE} of 100 results`);
   });
 
   it('If there are no results then there should be a message informing the buisness admin of that', async () => {
     setResults(createTestProducts(0));
-    createWrapper();
+    createGetProductWrapper();
     await flushQueue();
     expect(wrapper.text()).toContain('There are no results to show');
+  });
+
+  it('If there is a change in the orderBy attribute, the product results will be updated', async () => {
+    setResults(createTestProducts(5));
+    createGetProductWrapper();
+    await wrapper.setData({
+      orderBy: "description"
+    });
+    await Vue.nextTick();
+    expect(getProducts).toHaveBeenCalledWith(100, 1, RESULTS_PER_PAGE, 'description', false);
+  });
+
+  it('If there is a change in the reverse attribute, the product results will be updated', async () => {
+    setResults(createTestProducts(5));
+    createGetProductWrapper();
+    await wrapper.setData({
+      reverse: true
+    });
+    await Vue.nextTick();
+    expect(getProducts).toHaveBeenCalledWith(100, 1, RESULTS_PER_PAGE, 'productCode', true);
+  });
+
+  it('If there is a change in the currentPage attribute, the product results will be updated', async () => {
+    setResults(createTestProducts(5));
+    createGetProductWrapper();
+    await wrapper.setData({
+      currentPage: 2
+    });
+    await Vue.nextTick();
+    expect(getProducts).toHaveBeenCalledWith(100, 2, RESULTS_PER_PAGE, 'productCode', false);
+  });
+
+  it('If there is a change in the resultsPerPage attribute, the product results will be updated', async () => {
+    setResults(createTestProducts(5));
+    createGetProductWrapper();
+    await wrapper.setData({
+      resultsPerPage: 5
+    });
+    await Vue.nextTick();
+    expect(getProducts).toHaveBeenCalledWith(100, 1, 5, 'productCode', false);
+  });
+
+  it("If the search query is empty, getProducts will be called", async() => {
+    setResults(createTestProducts(5));
+    createGetProductWrapper();
+    expect(getProducts).toHaveBeenCalled();
+    expect(searchCatalogue).not.toHaveBeenCalled();
+  });
+
+  it("If the search query is not empty, searchCatalogue will be called", async() => {
+    setResults(createTestProducts(5));
+    createSearchCatalogueWrapper();
+    expect(getProducts).not.toHaveBeenCalled();
+    expect(searchCatalogue).toHaveBeenCalled();
+  });
+
+  it("If going through a normal workflow, both getProduct and searchCatalogue will be called", async() => {
+    setResults(createTestProducts(5));
+    createGetProductWrapper();
+    await wrapper.setData({
+      searchQuery: "something"
+    });
+    await Vue.nextTick();
+    // getProducts will be called first upon the page's initialisation
+    expect(getProducts).toHaveBeenCalled();
+    // searchCatalogue will then be called afterwards when it realises that the searchQuery attribute
+    // is not empty
+    expect(searchCatalogue).toHaveBeenCalled();
+  });
+
+  it("If the user uses the searchQuery and searchBy, searchCatalogue will be called with the respective parameters", async() => {
+    setResults(createTestProducts(5));
+    createSearchCatalogueWrapper();
+    expect(searchCatalogue).toHaveBeenCalledWith(100, "something", 1, RESULTS_PER_PAGE, ["productCode", "name"], "productCode", false);
   });
 });

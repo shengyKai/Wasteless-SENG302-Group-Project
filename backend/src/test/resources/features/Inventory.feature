@@ -7,10 +7,11 @@ Feature: U19 - Create Inventory
       | product_id | name  |
       | FISH       | fish  |
       | APPLE      | apple |
+      | BANANA     | banana|
     And the business has the following items in its inventory:
       | product_id | quantity | expires    |
       | FISH       | 3        | 2021-12-04 |
-      | FISH       | 17       | 2022-01-19 |
+      | BANANA     | 17       | 2022-01-19 |
       | APPLE      | 1        | 2022-05-20 |
 
   Scenario: AC1 - When logged in as a business administrator I can see my inventory.

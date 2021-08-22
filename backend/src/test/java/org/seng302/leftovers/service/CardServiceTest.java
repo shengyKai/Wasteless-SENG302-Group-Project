@@ -1,6 +1,5 @@
 package org.seng302.leftovers.service;
 
-import org.apache.catalina.filters.ExpiresFilter;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.junit.jupiter.api.AfterEach;
@@ -130,7 +129,7 @@ class CardServiceTest {
         invokeInitiateCardCheckEvents();
 
         // Check that events were not sent
-        Mockito.verify(eventService, never()).addUserToEvent(any(), any());
+        Mockito.verify(eventService, never()).saveEvent(any());
     }
 
     @Test
@@ -143,10 +142,10 @@ class CardServiceTest {
         invokeInitiateCardCheckEvents();
 
         // Check that the method to create the events has been called
-        Mockito.verify(eventService, times(1)).addUserToEvent(userArgumentCaptor.capture(), expiryEventArgumentCaptor.capture());
+        Mockito.verify(eventService, times(1)).saveEvent(expiryEventArgumentCaptor.capture());
 
         // Check that the event was sent for the expected user and card
-        assertEquals(mockUser, userArgumentCaptor.getValue());
+        assertEquals(mockUser, expiryEventArgumentCaptor.getValue().getNotifiedUser());
         assertEquals(mockCard1, expiryEventArgumentCaptor.getValue().getExpiringCard());
     }
 
@@ -159,7 +158,7 @@ class CardServiceTest {
         invokeInitiateCardCheckEvents();
 
         // Check that the method to send the events has been called once for each card
-        Mockito.verify(eventService, times(3)).addUserToEvent(any(), any());
+        Mockito.verify(eventService, times(3)).saveEvent(any());
     }
 
     @Test

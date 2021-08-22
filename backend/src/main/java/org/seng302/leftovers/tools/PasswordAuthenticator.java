@@ -33,6 +33,9 @@ public class PasswordAuthenticator {
      */
     public static void verifyPassword(String password, String storedAuthenticationCode) {
         try {
+            if (password == null) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Password must be provided");
+            }
             String receivedAuthenticationCode = generateAuthenticationCode(password);
             if (!receivedAuthenticationCode.equals(storedAuthenticationCode)) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Password is incorrect");

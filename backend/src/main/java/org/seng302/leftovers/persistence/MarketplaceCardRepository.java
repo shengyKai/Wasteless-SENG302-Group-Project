@@ -1,6 +1,8 @@
 package org.seng302.leftovers.persistence;
 
-import org.seng302.leftovers.entities.*;
+import org.seng302.leftovers.entities.Keyword;
+import org.seng302.leftovers.entities.MarketplaceCard;
+import org.seng302.leftovers.entities.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -61,6 +63,17 @@ public interface MarketplaceCardRepository extends CrudRepository<MarketplaceCar
      */
     default MarketplaceCard getCard(Long id) {
         return findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No card exists with the given id"));
+    }
+
+    /**
+     * Fetches a marketplace card from the database for the given card id. This method will also check that
+     * the card exists and will throw a 404 response exception if no card exists with the given id.
+     * @param id Card id to filter by
+     * @param status The HttpStatus to throw if a card is not found
+     * @return Marketplace card with the given id
+     */
+    default MarketplaceCard getCard(Long id, HttpStatus status) {
+        return findById(id).orElseThrow(() -> new ResponseStatusException(status, "No card exists with the given id"));
     }
 
     /**

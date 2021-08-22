@@ -42,6 +42,10 @@ export const COOKIE = {
   USER: 'user'
 };
 
+export function imageSrcFromFilename(filename: string) {
+  return process.env.VUE_APP_SERVER_ADD + filename;
+}
+
 /**
  * Converts a date to a human readable string
  *
@@ -52,6 +56,12 @@ export function formatDate(date: Date | string) {
   if (typeof date === 'string') date = new Date(date);
   const parts = date.toDateString().split(' ');
   return `${parts[2]} ${parts[1]} ${parts[3]}`;
+}
+
+export function formatTime(date: Date | string) {
+  if (typeof date === 'string') date = new Date(date);
+  let fullTime = date.toTimeString().split(' ')[0];
+  return fullTime.split(':').splice(0, 2).join(':');
 }
 
 export function formatPrice(price : number) {
@@ -181,20 +191,20 @@ export function regxPostCode() {
  Returns a Regex that matches a valid phone number
  */
 export function regxPhoneNumber() {
-  return /(^\(?\d{1,3}\)?[\s.-]?\d{3,4}[\s.-]?\d{4,5}$)|(^$)/;
+  return /(^$|^[0-9]{4,12}$)/;
 }
 
 /**
  Returns a Regex that matches a country code
  */
 export function regxCountryCode() {
-  return /(^(\d{1,2}-)?\d{2}$)|(^$)/;
+  return /(^$|^[0-9]{2,3}$)/;
 }
 /**
  Returns a Regex that matches a valid street address
  */
 export function regxStreet() {
-  return /^(([0-9]+|[0-9]+\/[0-9]+)[\p{L}]?)(?=\s[\p{L}])([\p{L}0-9-.' ]+)$/u;
+  return /^(([0-9]+|[0-9]+\/[0-9]+)[\p{L}]?)\s([\p{L}0-9-.' ]+)$/u;
 }
 /**
  Returns a Regex that matches a valid product code
@@ -214,7 +224,7 @@ export const emailRules = [
 export const mandatoryRules = [
   //All fields with the class "required" will go through this ruleset to ensure the field is not empty.
   //if it does not follow the format, display error message
-  (field: string) => !!field || 'Field is required'
+  (field: string | null) => !!field || 'Field is required'
 ];
 
 export const passwordRules = [
@@ -232,15 +242,15 @@ export const nameRules = [
 
 export function maxCharRules(size: number) {
   return [
-    (field: string) => (field.length <= size) || `Reached max character limit: ${size}`
+    (field: string) => (field === null || field.length <= size) || `Reached max character limit: ${size}`
   ];
 }
 
 export const phoneNumberRules = [
-  (field: string) => regxPhoneNumber().test(field) || 'Must only contain 8-12 digits'
+  (field: string) => regxPhoneNumber().test(field) || 'Must only contain 4-12 digits'
 ];
 export const countryCodeRules = [
-  (field: string) => regxCountryCode().test(field) || 'Must only contain 2 digits.'
+  (field: string) => regxCountryCode().test(field) || 'Must only contain 2-3 digits.'
 ];
 export const alphabetRules = [
   (field: string) => (field.length === 0 || regxAlphabet().test(field)) || 'Naming must be valid'

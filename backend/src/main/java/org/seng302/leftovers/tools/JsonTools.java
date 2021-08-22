@@ -14,7 +14,6 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 
 public class JsonTools {
 
@@ -53,6 +52,21 @@ public class JsonTools {
             }
         } catch (NumberFormatException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, String.format("%s must be a number", fieldName));
+        }
+    }
+
+    /**
+     * Attempts to fetch the contents of the given field as a string.
+     * Throws a Bad Request if the field is not present
+     * @param json The JSON to parse
+     * @param fieldName The name of the field to return
+     * @return String containing value of given field
+     */
+    public static String parseStringFromJsonField(JSONObject json, String fieldName) {
+        if (json.containsKey(fieldName)) {
+            return json.getAsString(fieldName);
+        } else {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, String.format("%s is not present", fieldName));
         }
     }
 

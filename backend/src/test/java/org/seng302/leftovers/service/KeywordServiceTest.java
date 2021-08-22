@@ -3,6 +3,7 @@ package org.seng302.leftovers.service;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
+import org.seng302.leftovers.entities.Event;
 import org.seng302.leftovers.entities.Keyword;
 import org.seng302.leftovers.entities.KeywordCreatedEvent;
 import org.seng302.leftovers.entities.User;
@@ -11,9 +12,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest
@@ -32,8 +37,6 @@ class KeywordServiceTest {
 
     @Captor
     ArgumentCaptor<String> stringArgumentCaptor;
-    @Captor
-    ArgumentCaptor<Set<User>> adminArgumentCaptor;
     @Captor
     ArgumentCaptor<KeywordCreatedEvent> eventArgumentCaptor;
 
@@ -70,23 +73,21 @@ class KeywordServiceTest {
     @Test
     void sendNewKeywordsEvents_callEventServiceWithAdminReturnFromUserRepository() {
         keywordService.sendNewKeywordEvent(keyword, mockUser);
-        Mockito.verify(eventService, Mockito.times(1))
-                .addUsersToEvent(adminArgumentCaptor.capture(), eventArgumentCaptor.capture());
+        Mockito.verify(eventService, Mockito.times(2)).saveEvent(eventArgumentCaptor.capture());
 
-        Set<User> adminSet= adminArgumentCaptor.getValue();
-        assertTrue(adminSet.contains(mockDgaa));
-        assertTrue(adminSet.contains(mockGaa));
+        Set<User> notifiedUsers = eventArgumentCaptor.getAllValues().stream().map(Event::getNotifiedUser).collect(Collectors.toSet());
+        assertEquals(Set.of(mockDgaa, mockGaa), notifiedUsers);
     }
 
     @Test
     void sendNewKeywordsEvents_callEventServiceWithKeywordAndUserPassedIntoMethod() {
         keywordService.sendNewKeywordEvent(keyword, mockUser);
-        Mockito.verify(eventService, Mockito.times(1))
-                .addUsersToEvent(adminArgumentCaptor.capture(), eventArgumentCaptor.capture());
+        verify(eventService, Mockito.times(2)).saveEvent(eventArgumentCaptor.capture());
 
-        KeywordCreatedEvent keywordCreatedEvent = eventArgumentCaptor.getValue();
-        assertEquals(keyword, keywordCreatedEvent.getNewKeyword());
-        assertEquals(mockUser, keywordCreatedEvent.getCreator());
+        for (KeywordCreatedEvent keywordCreatedEvent : eventArgumentCaptor.getAllValues()) {
+            assertEquals(keyword, keywordCreatedEvent.getNewKeyword());
+            assertEquals(mockUser, keywordCreatedEvent.getCreator());
+        }
     }
 }
 

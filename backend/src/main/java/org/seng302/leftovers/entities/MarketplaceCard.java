@@ -46,6 +46,9 @@ public class MarketplaceCard {
     @JoinTable(name = "card_keywords")
     private List<Keyword> keywords = new ArrayList<>();
 
+    @OneToMany(mappedBy = "card", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
+    private List<Conversation> conversations = new ArrayList<>();
+
 
     /**
      * Gets the id (will be unique among marketplace cards)
@@ -393,7 +396,6 @@ public class MarketplaceCard {
          * @return Newly created marketplace card
          */
         public MarketplaceCard build() {
-            Random random = new Random();
             var card = new MarketplaceCard();
 
             if (creator == null) {

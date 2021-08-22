@@ -3,7 +3,8 @@ import VueRouter from "vue-router";
 
 import Auth from "../components/Auth/index.vue";
 import admin from "../components/admin/Admin.vue";
-import ProfilePage from "../components/UserProfile.vue";
+import ProfilePage from "../components/UserProfile/index.vue";
+import ModifyUserPage from "../components/UserProfile/ModifyUserPage.vue";
 import BusinessProfile from "../components/BusinessProfile/index.vue";
 import SearchBusinessResults from "../components/SearchBusinessPage.vue";
 import SearchResults from "../components/SearchResults.vue";
@@ -42,6 +43,11 @@ const routes = [
     meta: { title: 'Profile' }
   },
   {
+    path: "/profile/:id/modify",
+    component: ModifyUserPage,
+    meta: { title: 'Modify user' },
+  },
+  {
     path: "/profile/:id",
     component: ProfilePage,
     meta: { title: 'Profile' }
@@ -50,7 +56,7 @@ const routes = [
     path: "/business/:id",
     component: BusinessProfile,
     name: "businessProfile",
-    meta: { title: 'Business' }
+    meta: { title: 'Business' },
   },
   {
     path: "/admin",

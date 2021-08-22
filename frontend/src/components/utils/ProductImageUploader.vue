@@ -6,38 +6,7 @@
           Upload Product Image
         </v-card-title>
         <v-card-text>
-          <v-container>
-            <v-row justify="center">
-              <!-- The previewed image, if available -->
-              <div v-if="url" class="preview-container">
-                <img
-                  alt="Uploaded Image"
-                  :src="url"
-                  class="image-preview"
-                  @dragover="onDragOver"
-                  @dragleave="onDragLeave"
-                  @drop="onDrop">
-                <!-- Button for removing an image -->
-                <v-btn icon class="remove-image" @click="file=undefined" color="error">
-                  <v-icon>mdi-close</v-icon>
-                </v-btn>
-              </div>
-              <!-- The drag image / submit image prompt window -->
-              <v-card v-else
-                      :elevation="isDragging ? 4 : 2"
-                      @dragover="onDragOver"
-                      @dragleave="isDragging = false"
-                      @drop="onDrop"
-              >
-                <div class="preview-window">
-                  <v-icon x-large>mdi-upload</v-icon>
-                  <div>
-                    <v-btn small @click="openFileDialog">Select</v-btn> image or drag image here
-                  </div>
-                </div>
-              </v-card>
-            </v-row>
-          </v-container>
+          <ImageSelector v-model="file"/>
         </v-card-text>
         <v-card-actions>
           <v-spacer/>
@@ -66,8 +35,10 @@
 
 <script>
 import { uploadProductImage } from '@/api/internal';
+import ImageSelector from "@/components/utils/ImageSelector";
 export default {
   name: "ProductImageUploader",
+  components: {ImageSelector},
   props: {
     //we need these two values to update the product image accordingly
     businessId: Number,

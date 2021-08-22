@@ -1,13 +1,10 @@
 package org.seng302.leftovers.entities;
 
-import io.cucumber.java.eo.Se;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.junit.Ignore;
 import org.junit.jupiter.api.*;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.MockitoAnnotations;
 import org.mockito.internal.matchers.apachecommons.ReflectionEquals;
 import org.seng302.leftovers.exceptions.EmailInUseException;
@@ -15,12 +12,7 @@ import org.seng302.leftovers.persistence.BusinessRepository;
 import org.seng302.leftovers.persistence.UserRepository;
 import org.seng302.leftovers.tools.PasswordAuthenticator;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.security.NoSuchAlgorithmException;
@@ -66,7 +58,7 @@ class UserTests {
                 .withPassword("12345678abc")
                 .withBio("g")
                 .withDob("2001-03-11")
-                .withPhoneNumber("123-456-7890")
+                .withPhoneNumber("12 34567890")
                 .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
                         "Canterbury,8041"))
                 .build();
@@ -79,7 +71,7 @@ class UserTests {
                 .withPassword("1337-H%nt3r2")
                 .withBio("Likes long walks on the beach")
                 .withDob("2001-03-11")
-                .withPhoneNumber("+64 3 555 0129")
+                .withPhoneNumber("64 3555012")
                 .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
                         "Canterbury,8041"));
         MockitoAnnotations.openMocks(this);
@@ -159,29 +151,14 @@ class UserTests {
 
     @Test
     void phoneTest() {
-        List<String> goodPhones = new ArrayList<>();
-        String goodPhone1 = "123-456-7890";
-        String goodPhone2 = "(123) 456-7890";
-        String goodPhone3 = "123 456 7890";
-        String goodPhone4 = "123.456.7890";
-        String goodPhone5 = "+91 (123) 456-7890";
-        String goodPhone6 = "+64 3 555 0129";
-        goodPhones.add(goodPhone1);
-        goodPhones.add(goodPhone2);
-        goodPhones.add(goodPhone3);
-        goodPhones.add(goodPhone4);
-        goodPhones.add(goodPhone5);
-        goodPhones.add(goodPhone6);
-
-        for (String phone : goodPhones) {
-            testUser.setPhNum(phone);
-            assertEquals(testUser.getPhNum(), phone);
-        }
+        String goodPhone = "12 34567890";
+        testUser.setPhNum(goodPhone);
+        assertEquals(testUser.getPhNum(), goodPhone);
 
         List<String> badPhones = new ArrayList<>();
         String badPhone1 = "asdf";
         String badPhone2 = "67--123456";
-        String badPhone3 = " ";
+        String badPhone3 = "027-999-999";
         badPhones.add(badPhone1);
         badPhones.add(badPhone2);
         badPhones.add(badPhone3);
@@ -190,7 +167,7 @@ class UserTests {
             try {
                 testUser.setPhNum(phone);
             } catch (ResponseStatusException ignored) {}
-            assertEquals(goodPhone6, testUser.getPhNum()); // Bad wont change, so last good phone is current
+            assertEquals(goodPhone, testUser.getPhNum()); // Bad wont change, so last good phone is current
         }
     }
 
@@ -200,7 +177,7 @@ class UserTests {
      */
     @Test
     void checkPhNumEmptyStringTest() {
-        testUser.setPhNum("6494456719");
+        testUser.setPhNum("64 94456719");
         testUser.setPhNum("");
         assertNull(testUser.getPhNum());
         testUser.setPhNum(null);
@@ -867,22 +844,9 @@ class UserTests {
     @Test
     void constructPublicJsonBusinessesAdministeredTrueTest() {
         try (Session session = sessionFactory.openSession()) {
-        System.out.println("Before");
-        //try (Session session = sessionFactory.openSession()){
-            //var transaction = session.beginTransaction();
             addBusinessesAdministeredToTestUser();
-            //transaction.commit();
-        //}
-        System.out.println("After");
-
-
-
-            System.out.println("Wow" + testUser.getUserID());
 
             testUser = session.find(User.class, testUser.getUserID());
-
-            System.out.println(businessRepository.findAll());
-            System.out.println(testUser.getBusinessesAdministeredAndOwned());
 
             List<Business> testBusinesses = new ArrayList<>();
             testBusinesses.addAll(testUser.getBusinessesAdministeredAndOwned());
@@ -989,7 +953,7 @@ class UserTests {
                 .withPassword("1337-H%nt3r2")
                 .withBio("Likes long walks on the beach")
                 .withDob("2001-03-11")
-                .withPhoneNumber("+64 3 555 0129")
+                .withPhoneNumber("64 3555012")
                 .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
                         "Canterbury,8041"))
                 .build();
@@ -1136,7 +1100,7 @@ class UserTests {
                 .withPassword("1337-H%nt3r2")
                 .withBio("Likes long walks on the beach")
                 .withDob("2001-03-11")
-                .withPhoneNumber("+64 3 555 0129")
+                .withPhoneNumber("64 3555012")
                 .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
                         "Canterbury,8041"));
         User testUser = testBuilder.build();
@@ -1157,7 +1121,7 @@ class UserTests {
                 .withPassword("1337-H%nt3r2")
                 .withBio("Likes long walks on the beach")
                 .withDob("2001-03-11")
-                .withPhoneNumber("+64 3 555 0129")
+                .withPhoneNumber("64 3555012")
                 .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
                         "Canterbury,8041"));
         User testUser = testBuilder.build();
@@ -1177,7 +1141,7 @@ class UserTests {
                 .withEmail("johnsmith99@gmail.com")
                 .withPassword("1337-H%nt3r2")
                 .withDob("2001-03-11")
-                .withPhoneNumber("+64 3 555 0129")
+                .withPhoneNumber("64 3555012")
                 .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
                         "Canterbury,8041"));
         User testUser = testBuilder.build();
@@ -1293,7 +1257,7 @@ class UserTests {
     @Test
     void buildWithPhoneNumberTest() {
         User user = testBuilder.build();
-        assertEquals("+64 3 555 0129", user.getPhNum());
+        assertEquals("64 3555012", user.getPhNum());
     }
 
     /**

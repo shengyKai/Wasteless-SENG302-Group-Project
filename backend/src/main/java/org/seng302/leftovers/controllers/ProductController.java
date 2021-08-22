@@ -1,34 +1,38 @@
 package org.seng302.leftovers.controllers;
 
-// import net.bytebuddy.asm.Advice.OffsetMapping.Sort;
-import net.minidev.json.JSONArray;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import net.minidev.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.seng302.leftovers.dto.ProductFilterOption;
 import org.seng302.leftovers.entities.Business;
 import org.seng302.leftovers.entities.Image;
 import org.seng302.leftovers.entities.Product;
-import org.seng302.leftovers.exceptions.BusinessNotFoundException;
 import org.seng302.leftovers.persistence.BusinessRepository;
 import org.seng302.leftovers.persistence.ImageRepository;
 import org.seng302.leftovers.persistence.ProductRepository;
-import org.seng302.leftovers.service.StorageService;
+import org.seng302.leftovers.service.ImageService;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
+import org.seng302.leftovers.tools.JsonTools;
 import org.seng302.leftovers.tools.SearchHelper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.swing.SortOrder;
-
-import java.util.*;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 
 /**
  * This class handles requests for retrieving and saving products
@@ -38,14 +42,14 @@ public class ProductController {
 
     private final ProductRepository productRepository;
     private final BusinessRepository businessRepository;
-    private final StorageService storageService;
+    private final ImageService imageService;
     private final ImageRepository imageRepository;
     private static final Logger logger = LogManager.getLogger(ProductController.class.getName());
     @Autowired
-    public ProductController(ProductRepository productRepository, BusinessRepository businessRepository, StorageService storageService, ImageRepository imageRepository) {
+    public ProductController(ProductRepository productRepository, BusinessRepository businessRepository, ImageService imageService, ImageRepository imageRepository) {
         this.productRepository = productRepository;
         this.businessRepository = businessRepository;
-        this.storageService = storageService;
+        this.imageService = imageService;
         this.imageRepository = imageRepository;
     }
 
@@ -69,8 +73,71 @@ public class ProductController {
         AuthenticationTokenManager.checkAuthenticationToken(request);
                             
         logger.info(() -> String.format("Retrieving catalogue from business with id %d.", id));
-        Optional<Business> business = businessRepository.findById(id);
+        Business business = businessRepository.getBusinessById(id);
 
+        List<Sort.Order> sortOrder = getSortOrder(orderBy, reverse);
+
+        business.checkSessionPermissions(request);
+        PageRequest pageablePage = SearchHelper.getPageRequest(page, resultsPerPage, Sort.by(sortOrder));
+        Page<Product> catalogue = productRepository.getAllByBusiness(business, pageablePage);
+        return JsonTools.constructPageJSON(catalogue.map(Product::constructJSONObject));
+    }
+
+    /**
+     * GET endpoint to retrieve products from a business with searching
+     * @param id of business
+     * @param request HTTP request
+     * @param searchQuery to match searchBy field
+     * @param page of results to return
+     * @param resultsPerPage products per page and amount to return
+     * @param searchBy field of product to search
+     * @param reverse most or least relevant
+     * @param orderBy field to sort results by
+     * @return List of products
+     */
+    @GetMapping("/businesses/{id}/products/search")
+    public JSONObject retrieveCatalogueSearch(@PathVariable Long id,
+                                              HttpServletRequest request,
+                                              @RequestParam(required = false) String searchQuery,
+                                              @RequestParam(required = false) Integer page,
+                                              @RequestParam(required = false) Integer resultsPerPage,
+                                              @RequestParam(required = false) List<String> searchBy,
+                                              @RequestParam(required = false) Boolean reverse,
+                                              @RequestParam(required = false) String orderBy
+                                              ) {
+        logger.info("Get catalogue by business id.");
+        AuthenticationTokenManager.checkAuthenticationToken(request);
+
+        logger.info(() -> String.format("Retrieving catalogue from business with id %d.", id));
+        Business business = businessRepository.getBusinessById(id);
+
+        // Convert searchBy into ProductFilterOption type and check valid
+        searchBy = Optional.ofNullable(searchBy).orElse(List.of());
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        Set<ProductFilterOption> searchSet;
+        try {
+            searchSet = objectMapper.convertValue(searchBy, new TypeReference<>() {});
+        } catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid search option provided", e);
+        }
+
+        business.checkSessionPermissions(request);
+        List<Sort.Order> sortOrder = getSortOrder(orderBy, reverse);
+        PageRequest pageablePage = SearchHelper.getPageRequest(page, resultsPerPage, Sort.by(sortOrder));
+        Specification<Product> prodSpec = SearchHelper.constructSpecificationFromProductSearch(business, searchQuery, searchSet);
+
+        Page<Product> catalogue = productRepository.findAll(prodSpec, pageablePage);
+        return JsonTools.constructPageJSON(catalogue.map(Product::constructJSONObject));
+    }
+
+    /**
+     * How to sort your results
+     * @param orderBy Field to sort results by
+     * @param reverse Whether results should be forward or backward
+     * @return sortOrder
+     */
+    private List<Sort.Order> getSortOrder(String orderBy, Boolean reverse) {
         orderBy = Optional.ofNullable(orderBy).orElse("productCode");
         if (!VALID_ORDERINGS.contains(orderBy)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "OrderBy term " + orderBy + " is invalid");
@@ -79,29 +146,9 @@ public class ProductController {
         List<Sort.Order> sortOrder;
         Sort.Direction direction = SearchHelper.getSortDirection(reverse);
         sortOrder = List.of(new Sort.Order(direction, orderBy ).ignoreCase());
-
-    
-        if (business.isEmpty()) {
-            BusinessNotFoundException notFound = new BusinessNotFoundException();
-            logger.error(notFound.getMessage());
-            throw notFound;
-        } else {
-            business.get().checkSessionPermissions(request);
-            PageRequest pageablePage = SearchHelper.getPageRequest(page, resultsPerPage, Sort.by(sortOrder));
-            Page<Product> catalogue = productRepository.getAllByBusiness(business.get(), pageablePage);
-
-            JSONArray responseBody = new JSONArray();
-            for (Product product: catalogue) {
-                responseBody.appendElement(product.constructJSONObject());
-            }
-            JSONObject json = new JSONObject();
-            json.put("count", catalogue.getTotalElements());
-            json.put("results", responseBody);
-            return json;
-        }
+        return sortOrder;
     }
-
-
+    
     /**
      * POST endpoint for adding a product to a businesses catalogue.
      * This is only accessible to the DGAA, the business owner or a business admin.
@@ -204,13 +251,19 @@ public class ProductController {
         Product product = productRepository.getProduct(business, productId); // get the product + sanity checks
         Image image = imageRepository.getImageByProductAndId(product, imageId); // get the image + sanity checks
 
-        product.removeProductImage(image);
-        imageRepository.delete(image);
-        storageService.deleteOne(image.getFilename());
+        imageService.delete(image);
 
+        product.removeProductImage(image);
         productRepository.save(product);
     }
 
+    /**
+     * Adds a new image to the product's image list
+     * @param businessId Business of product
+     * @param productCode Unique within business product code
+     * @param file Uploaded image
+     * @return Empty response with 201 if successful
+     */
     @PostMapping("/businesses/{businessId}/products/{productCode}/images")
     public ResponseEntity<Void> uploadImage(@PathVariable Long businessId, @PathVariable String productCode, @RequestParam("file") MultipartFile file, HttpServletRequest request) {
         try {
@@ -224,23 +277,10 @@ public class ProductController {
             // Will throw 406 response status exception if product does not exist
             Product product = productRepository.getProduct(business, productCode);
 
-            validateImage(file);
+            Image image = imageService.create(file);
 
-            String filename = UUID.randomUUID().toString();
-            if ("image/jpeg".equals(file.getContentType())) {
-                filename += ".jpg";
-            } else if ("image/png".equals(file.getContentType())) {
-                filename += ".png";
-            } else {
-                assert false; // We've already validated the image type so this should not be possible.
-            }
-
-            Image image = new Image(null, null);
-            image.setFilename(filename);
-            image = imageRepository.save(image);
             product.addProductImage(image);
             productRepository.save(product);
-            storageService.store(file, filename);             //store the file using storageService
 
             return new ResponseEntity<>(HttpStatus.CREATED);
         } catch (Exception e) {
@@ -280,12 +320,5 @@ public class ProductController {
         product.setProductImages(images); // apply the changes
         productRepository.save(product);
         logger.info(() -> String.format("Set Image %d of product \"%s\" as the primary image", image.getID(), product.getName()));
-    }
-
-    public void validateImage(MultipartFile file) {
-        String contentType = file.getContentType();
-        if(contentType == null || !(contentType.equals("image/jpeg") || contentType.equals("image/png"))) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid image format. Must be jpeg or png");
-        }
     }
 }

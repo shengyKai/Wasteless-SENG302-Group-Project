@@ -2,17 +2,16 @@ package org.seng302.leftovers.service;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.seng302.leftovers.entities.DeleteEvent;
 import org.seng302.leftovers.entities.ExpiryEvent;
 import org.seng302.leftovers.entities.MarketplaceCard;
-import org.seng302.leftovers.persistence.MarketplaceCardRepository;
 import org.seng302.leftovers.persistence.ExpiryEventRepository;
+import org.seng302.leftovers.persistence.MarketplaceCardRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-import org.hibernate.Hibernate;
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -61,7 +60,7 @@ public class CardService {
             try (Session session = sessionFactory.openSession()) {
                 card = session.find(MarketplaceCard.class, card.getID());
                 ExpiryEvent event = new ExpiryEvent(card);
-                eventService.addUserToEvent(card.getCreator(), event);
+                eventService.saveEvent(event);
             }
             logger.info("Expiry notification event sent for card {}", card.getID());
         }
@@ -87,7 +86,7 @@ public class CardService {
             }
 
             DeleteEvent deleteEvent = new DeleteEvent(card);
-            eventService.addUserToEvent(card.getCreator(), deleteEvent);
+            eventService.saveEvent(deleteEvent);
 
             marketplaceCardRepository.delete(card);
             logger.info("Card {} deleted from marketplace repository", card.getID());

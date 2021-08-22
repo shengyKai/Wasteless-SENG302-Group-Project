@@ -1,57 +1,120 @@
 package org.seng302.leftovers.entities;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import net.minidev.json.JSONObject;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
+import javax.persistence.*;
+import java.time.Instant;
 
 /**
- * Event for a message sent by an administrator to a user
+ * Event which is sent to participants in a conversation when a new message is added to that conversation.
  */
 @Entity
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"conversation_id", "participant_type"}))
 public class MessageEvent extends Event {
-    @Column(nullable = false)
-    private String message;
 
-    protected MessageEvent() {}
+    @ManyToOne
+    @JoinColumn(name = "message_id", nullable = false)
+    private Message message;
+
+    @ManyToOne
+    @JoinColumn(name = "conversation_id", nullable = false)
+    private Conversation conversation;
+
+    @Column(name = "participant_type")
+    private ParticipantType participantType;
 
     /**
-     * Constructs a message event with the given initial message
-     * @param message Initial event message
+     * Represents the two types of participant in a conversation. The seller is the creator of the marketplace card,
+     * while the buyer is the user who has contacted the seller.
      */
-    public MessageEvent(String message) {
-        setMessage(message);
+    public enum ParticipantType {
+
+        @JsonProperty("buyer")
+        BUYER,
+        @JsonProperty("seller")
+        SELLER
     }
 
     /**
-     * Sets this event's message
-     * @param message Message to set
+     * Construct an event for notifying users of messages in a conversation. The notified user must be one of the
+     * participants in the conversation.
+     * @param notifiedUser User who will receive the notification.
+     * @param message The message to notify the users of.
      */
-    public void setMessage(String message) {
-        if (message == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Message cannot be null");
+    public MessageEvent(User notifiedUser, Message message) {
+        super(notifiedUser);
+        if (message.getConversation().getBuyer().getUserID().equals(notifiedUser.getUserID())) {
+            this.participantType = ParticipantType.BUYER;
+        } else if (message.getConversation().getCard().getCreator().getUserID().equals(notifiedUser.getUserID())) {
+            this.participantType = ParticipantType.SELLER;
+        } else {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Notification can only be sent to buyer " +
+                    "or seller of card");
         }
         this.message = message;
+        this.conversation = message.getConversation();
     }
 
     /**
-     * Gets the message for this event
-     * @return Event message
+     * No arguments constructor to appease JPA.
      */
-    public String getMessage() {
+    protected MessageEvent() {
+
+    }
+
+    /**
+     * @return The message associated with this event.
+     */
+    public Message getMessage() {
         return message;
     }
 
     /**
-     * Constructs a JSON representation of this event
-     * @return JSON object containing message event data
+     * @return The type of the conversation participant who is notified by this event.
+     */
+    public ParticipantType getParticipantType() {
+        return participantType;
+    }
+
+    /**
+     * @return The conversation associated with this event.
+     */
+    public Conversation getConversation() {
+        return conversation;
+    }
+
+    /**
+     * Update the message associated with this event. Also update the created time of this event to simulate replacing
+     * it with a new event.
+     * @param message A message which must be from the conversation associated with this event.
+     */
+    public void setMessage(Message message) {
+        if (this.conversation.getId().equals(message.getConversation().getId())) {
+            this.message = message;
+        } else {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "The message associated with a message" +
+                    " event can only be changed to a new message in the original conversation.");
+        }
+        setCreated(Instant.now());
+    }
+
+    /**
+     * Construct a JSON representation of this event. Contains the user, created date, id, tag, message and card
+     * associated with this event.
+     * @return A JSON representation of the event.
      */
     @Override
     public JSONObject constructJSONObject() {
-        JSONObject json = super.constructJSONObject();
-        json.put("message", message);
-        return json;
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        JSONObject jsonObject = super.constructJSONObject();
+        jsonObject.appendField("message", message.constructJSONObject());
+        jsonObject.appendField("conversation", conversation.constructJSONObject());
+        jsonObject.appendField("participantType", objectMapper.convertValue(participantType, String.class));
+        return jsonObject;
     }
 }

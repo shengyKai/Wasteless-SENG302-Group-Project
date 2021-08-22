@@ -310,7 +310,7 @@ export default {
       if (this.phone === '') {
         fullPhoneNum = '';
       } else {
-        fullPhoneNum = '+' + this.countryCode + ' ' + this.phone;
+        fullPhoneNum = this.countryCode + ' ' + this.phone;
       }
 
       let user = {

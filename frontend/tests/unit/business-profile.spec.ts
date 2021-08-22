@@ -1,16 +1,40 @@
 import Vue from 'vue';
 import Vuetify from 'vuetify';
+import Vuex, { Store } from 'vuex';
 import {createLocalVue, mount, Wrapper, RouterLinkStub} from '@vue/test-utils';
 import BusinessProfile from '@/components/BusinessProfile/index.vue';
 import VueRouter from "vue-router";
-import convertAddressToReadableText from '@/components/utils/Methods/convertJsonAddressToReadableText';
-
+import * as api from '@/api/internal';
 Vue.use(Vuetify);
+Vue.use(Vuex);
+import { getStore, resetStoreForTesting, StoreData } from '@/store';
+
+jest.mock('@/api/internal', () => ({
+  makeBusinessImagePrimary: jest.fn(),
+}));
 
 describe('index.vue', () => {
   let wrapper: Wrapper<any>;
   let vuetify: Vuetify;
   let date = new Date();
+  let store: Store<StoreData>;
+
+
+  const user = {
+    id: 1,
+    firstName: 'Joe',
+    lastName: 'Bloggs',
+    middleName: 'ahh',
+    nickname: 'Doe',
+    bio: 'Bio',
+    email: 'abc@123.com',
+    dateOfBirth: '02-02-1943',
+    phoneNumber: '',
+    homeAddress: {country:"Spain"},
+    created: undefined,
+    role: "globalApplicationAdmin",
+    businessesAdministered: [],
+  };
 
   /**
    * Set up to test the routing and whether the business profile page shows what is required
@@ -18,20 +42,27 @@ describe('index.vue', () => {
   beforeEach(() => {
     const localVue = createLocalVue();
     const router = new VueRouter();
+    resetStoreForTesting();
+    store = getStore();
+    store.state.activeRole = {id: 1, type: 'business'};
+    // @ts-ignore
+    store.state.user = user;
     localVue.use(VueRouter);
     vuetify = new Vuetify();
     wrapper = mount(BusinessProfile, {
       //creates a stand in(mocking) for the routerlink
       stubs: {
-        RouterLink: RouterLinkStub
+        RouterLink: RouterLinkStub,
       },
       router,
       localVue,
       vuetify,
+      store,
       //Sets up each test case with some values to ensure the business profile page works as intended
       data() {
         return {
           business: {
+            id: 1,
             name: "Some Business Name",
             address: {
               "country": "Some Country",
@@ -45,6 +76,7 @@ describe('index.vue', () => {
             businessType: "Some Business Type",
             description: "Some Description",
             created: date,
+            images: [{id:1,filename:'coolImage.jpg', thumbnailFilename:undefined}],
             administrators: [
               {
                 id: 1,
@@ -63,7 +95,6 @@ describe('index.vue', () => {
       },
     });
   });
-
   it("Must contain the business name", () => {
     expect(wrapper.text()).toContain('Some Business Name');
   });

@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+
 import javax.servlet.http.Cookie;
 import java.util.HashMap;
 import java.util.Map;
@@ -78,7 +79,7 @@ public class RequestContext {
      * cookie.
      * @return The ID number of the authenticated user
      */
-    public long getLoggedInId() {
+    public Long getLoggedInId() {
         return loggedInUser.getUserID();
     }
 

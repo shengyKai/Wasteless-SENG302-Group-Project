@@ -1,7 +1,7 @@
 <template>
   <v-list-item>
     <v-list-item-avatar>
-      <UserAvatar :user="user" size="medium" />
+      <Avatar :user="user" size="medium" />
     </v-list-item-avatar>
     <v-list-item-content>
       <v-list-item-title>
@@ -16,13 +16,13 @@
 </template>
 
 <script>
-import UserAvatar from '../utils/UserAvatar';
-import convertAddressToReadableText from '../utils/Methods/convertJsonAddressToReadableText';
+import Avatar from '../utils/Avatar';
+import convertAddressToReadableText from '../utils/Methods/convertAddressToReadableText';
 
 export default {
   props: ['user'],
   components: {
-    UserAvatar
+    Avatar
   },
   methods: {
     //take a look at UserProfile.vue to know more about this

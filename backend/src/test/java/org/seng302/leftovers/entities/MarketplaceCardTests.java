@@ -1,13 +1,13 @@
 package org.seng302.leftovers.entities;
 
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.seng302.leftovers.persistence.BusinessRepository;
-import org.seng302.leftovers.persistence.MarketplaceCardRepository;
-import org.seng302.leftovers.persistence.UserRepository;
+import org.seng302.leftovers.persistence.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
@@ -26,18 +26,29 @@ import static org.junit.jupiter.api.Assertions.*;
 class MarketplaceCardTests {
 
     @Autowired
-    MarketplaceCardRepository marketplaceCardRepository;
+    private MessageRepository messageRepository;
 
     @Autowired
-    BusinessRepository businessRepository;
+    private ConversationRepository conversationRepository;
 
     @Autowired
-    UserRepository userRepository;
+    private MarketplaceCardRepository marketplaceCardRepository;
 
-    User testUser;
+    @Autowired
+    private BusinessRepository businessRepository;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private SessionFactory sessionFactory;
+
+    private User testUser;
 
     @BeforeAll
     void initialise() {
+        messageRepository.deleteAll();
+        conversationRepository.deleteAll();
         businessRepository.deleteAll();
         marketplaceCardRepository.deleteAll();
         userRepository.deleteAll();
@@ -54,7 +65,7 @@ class MarketplaceCardTests {
                 .withPassword("1337-H%nt3r2")
                 .withBio("Likes long walks on the beach")
                 .withDob("2000-03-11")
-                .withPhoneNumber("+64 3 555 0129")
+                .withPhoneNumber("64 3555012")
                 .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
                         "Canterbury,8041"))
                 .build();
@@ -63,6 +74,8 @@ class MarketplaceCardTests {
 
     @AfterEach
     void tearDown() {
+        messageRepository.deleteAll();
+        conversationRepository.deleteAll();
         businessRepository.deleteAll();
         marketplaceCardRepository.deleteAll();
         userRepository.deleteAll();
@@ -488,5 +501,43 @@ class MarketplaceCardTests {
         assertEquals(card.getDescription(), foundCard.getDescription());
         assertEquals(0, ChronoUnit.SECONDS.between(card.getCreated(), foundCard.getCreated()));
         assertEquals(0, ChronoUnit.SECONDS.between(card.getCloses(), foundCard.getCloses()));
+    }
+
+    @Test
+    void marketplaceCardRepositoryDeleteCard_cardHasConversation_conversationDeleted() {
+        var card = new MarketplaceCard.Builder()
+                .withCreator(testUser)
+                .withSection(MarketplaceCard.Section.EXCHANGE)
+                .withTitle("test_title1")
+                .withDescription("test_description1")
+                .build();
+        card = marketplaceCardRepository.save(card);
+        var buyer = new User.Builder()
+                .withFirstName("Dave")
+                .withMiddleName("Joe")
+                .withLastName("Bloggs")
+                .withNickName("Dave")
+                .withEmail("dave@gmail.com")
+                .withPassword("1337-H%nt3r2")
+                .withBio("Likes long walks on the beach")
+                .withDob("2000-03-11")
+                .withPhoneNumber("64 3555012")
+                .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
+                        "Canterbury,8041"))
+                .build();
+        buyer = userRepository.save(buyer);
+
+        var conversation = conversationRepository.save(new Conversation(card, buyer));
+        var message = messageRepository.save(new Message(conversation, buyer, "Hey!"));
+
+        try (Session session = sessionFactory.openSession()) {
+            session.beginTransaction();
+            card = session.find(MarketplaceCard.class, card.getID());
+            session.delete(card);
+            session.getTransaction().commit();
+        }
+
+        assertFalse(conversationRepository.existsById(conversation.getId()));
+        assertFalse(messageRepository.existsById(message.getId()));
     }
 }

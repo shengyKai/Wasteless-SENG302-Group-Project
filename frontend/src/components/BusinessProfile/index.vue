@@ -1,82 +1,154 @@
 <template>
   <div>
-    <v-row v-if="fromSearch">
-      <v-col class="text-right mt-4 mb-n16">
+    <v-row v-if="fromSearch && !modifyBusiness" class="mb-n16 mt-6">
+      <v-col class="text-right mt-10 mb-n10">
         <v-btn @click="returnToSearch" color="primary">Return to search</v-btn>
       </v-col>
     </v-row>
-    <v-card class="body">
-      <div class="top-section">
-        <div>
-          <h1>
-            {{ business.name }}
-          </h1>
-          <p><b>Created:</b> {{ createdMsg }}</p>
-          <v-btn outlined color="primary" @click="goSalePage" :value="false">
+    <div v-if='!modifyBusiness' style="margin-top: 100px">
+      <v-card v-if="businessImages && businessImages.length > 0">
+        <ImageCarousel
+          :imagesList="businessImages"
+          :showMakePrimary="permissionToActAsBusiness"
+          :showDelete="false"
+          @change-primary-image="false"
+          ref="businessImageCarousel"
+        />
+      </v-card>
+      <v-card class="body">
+        <div class="d-flex flex-column" no-gutters>
+          <v-row>
+            <v-col cols="12">
+              <v-alert
+                class="ma-2 flex-grow-0"
+                v-if="errorMessage !== undefined"
+                type="error"
+                dismissible
+                @input="errorMessage = undefined"
+              >
+                {{ errorMessage }}
+              </v-alert>
+            </v-col>
+          </v-row>
+          <v-row>
+            <v-col cols="11">
+              <span><h1>{{ business.name }}</h1></span>
+            </v-col>
+            <v-col class="text-right" v-if='!modifyBusiness && permissionToActAsBusiness'>
+              <v-tooltip bottom>
+                <template #activator="{ on, attrs }">
+                  <v-btn
+                    ref="settingsButton"
+                    icon
+                    color="primary"
+                    v-bind="attrs"
+                    v-on="on"
+                    @click="modifyBusiness = true;"
+                  >
+                    <v-icon>mdi-cog</v-icon>
+                  </v-btn>
+                </template>
+                <span>Modify Business Profile</span>
+              </v-tooltip>
+            </v-col>
+          </v-row>
+          <p><strong>Created:</strong> {{ createdMsg }}</p>
+          <v-btn outlined color="primary" @click="goSalePage" :value="false" width="150">
             Sale listings
           </v-btn>
         </div>
-      </div>
+        <v-container fluid>
+          <v-row>
+            <v-col cols="12" sm="6">
+              <h4>Address</h4>
+              {{ readableAddress }}
+            </v-col>
+            <v-col cols="12" sm="6">
+              <h4>Category</h4>
+              {{ business.businessType }}
+            </v-col>
+            <v-col cols="12">
+              <h4>Description</h4>
+              {{ business.description }}
+            </v-col>
+            <v-col cols="12">
+              <h4>Administrators</h4>
+              <span v-for="admin in administrators" :key="admin.id">
+                <router-link :to="'/profile/' + admin.id">
+                  <v-chip class="link-chip link" :color="getAdminColour(admin)" text-color="white"> {{ admin.firstName }} {{ admin.lastName }} </v-chip>
+                </router-link>
+              </span>
+            </v-col>
+          </v-row>
+        </v-container>
+      </v-card>
+    </div>
 
-      <v-container fluid>
-        <v-row>
-          <v-col cols="12" sm="6">
-            <h4>Address</h4>
-            {{ readableAddress }}
-          </v-col>
-          <v-col cols="12" sm="6">
-            <h4>Category</h4>
-            {{ business.businessType }}
-          </v-col>
-
-          <v-col cols="12">
-            <h4>Description</h4>
-            {{ business.description }}
-          </v-col>
-          <v-col cols="12">
-            <h4>Administrators</h4>
-            <span v-for="admin in administrators" :key="admin.id">
-              <router-link :to="'/profile/' + admin.id">
-                <v-chip class="link-chip link" color="primary"> {{ admin.firstName }} {{ admin.lastName }} </v-chip>
-              </router-link>
-            </span>
-          </v-col>
-        </v-row>
-      </v-container>
-    </v-card>
+    <ModifyBusiness
+      :business="business"
+      v-if="modifyBusiness"
+      @discardModifyBusiness="modifyBusiness=false"
+      @modifySuccess="updateBusiness"
+    />
   </div>
 </template>
 
 <script>
-import { getBusiness } from '../../api/internal';
-import convertAddressToReadableText from '@/components/utils/Methods/convertJsonAddressToReadableText';
-
+import ModifyBusiness from '@/components/BusinessProfile/ModifyBusiness';
+import {getBusiness} from '../../api/internal';
+import convertAddressToReadableText from '@/components/utils/Methods/convertAddressToReadableText';
+import {
+  alphabetExtendedMultilineRules,
+  alphabetExtendedSingleLineRules, alphabetRules,
+  mandatoryRules,
+  maxCharRules, postCodeRules, streetNumRules
+} from "@/utils";
+import ImageCarousel from "@/components/utils/ImageCarousel";
 export default {
   name: 'BusinessProfile',
-
+  components: {
+    ImageCarousel,
+    ModifyBusiness
+  },
   data() {
     return {
-      /**
-       * The business that this profile is for.
-       */
-      business: {},
-      readableAddress: ""
+      modifyBusiness: false,
+      readableAddress: "",
+      errorMessage: undefined,
+      dialog: true,
+      business: '',
+      businessName: '',
+      description: '',
+      businessType: [],
+      streetAddress: '',
+      district: '',
+      city: '',
+      region: '',
+      country: '',
+      postcode: '',
+      businessTypes: [
+        'Accommodation and Food Services',
+        'Charitable organisation',
+        'Non-profit organisation',
+        'Retail Trade',
+      ],
+      showImageUploaderForm: false,
+      valid: false,
+      updateProductCountry: true,
+      maxCharRules: () => maxCharRules(100),
+      maxCharDescriptionRules: ()=> maxCharRules(200),
+      mandatoryRules: ()=> mandatoryRules,
+      alphabetExtendedSingleLineRules: ()=> alphabetExtendedSingleLineRules,
+      alphabetExtendedMultilineRules: ()=> alphabetExtendedMultilineRules,
+      alphabetRules: ()=> alphabetRules,
+      streetRules: ()=> streetNumRules,
+      postcodeRules: ()=> postCodeRules
     };
   },
   watch: {
     $route: {
       handler() {
-        const id = parseInt(this.$route.params.id);
-        if (isNaN(id)) return;
-
-        getBusiness(id).then((value) => {
-          if (typeof value === 'string') {
-            this.$store.commit('setError', value);
-          } else {
-            this.business = value;
-            this.readableAddress = convertAddressToReadableText(value.address, "full");
-          }
-        });
+        this.updateBusiness();
       },
       immediate: true,
     }
@@ -95,27 +167,81 @@ export default {
 
       return `${parts[2]} ${parts[1]} ${parts[3]} (${diffMonths} months ago)`;
     },
-
     administrators() {
       return this.business?.administrators || [];
     },
+    isActingAsCurrentBusiness() {
+      const isBusiness =  this.$store.state.activeRole?.type === 'business';
+      if (!isBusiness) return false;
+      const user = this.$store.state.user;
+      return user.businessesAdministered.map(business => business.id).includes(this.business.id);
+    },
+    permissionToActAsBusiness() {
+      const user = this.$store.state.user;
+      return this.isActingAsCurrentBusiness ||
+          user.role === 'defaultGlobalApplicationAdmin' ||
+          user.role === 'globalApplicationAdmin';
+    },
 
     fromSearch() {
-      console.log();
       return this.$route.query.businessType !== undefined
           || this.$route.query.orderBy !== undefined
           || this.$route.query.page !== undefined
           || this.$route.query.reverse !== undefined
           || this.$route.query.searchQuery !== undefined;
+    },
+    businessImages() {
+      return this.business.images;
     }
   },
 
   methods: {
+    /**
+     * Reroutes user to this business' sales page
+     */
     goSalePage() {
       this.$router.push(`/business/${this.business.id}/listings`);
     },
+    /**
+     * Returns to the search page, keeping the search parameters
+     */
     async returnToSearch() {
       await this.$router.push({path: '/search/business', query:{...this.$route.query}});
+    },
+    /**
+     * Returns the appropriate color of the admin for their chip
+     */
+    getAdminColour(admin) {
+      if (admin.id === this.business.primaryAdministratorId) {
+        return "red";
+      } else {
+        return "green";
+      }
+    },
+    /**
+     * Switches whether to update the products' country to the new country
+     */
+    changeUpdateCountries() {
+      this.updateProductCountry = !this.updateProductCountry;
+    },
+    /**
+     * Updates the business profile page to show the updated details of the business.
+     * This method is separated from the $route watcher as it is reused for the ModifyBusiness page on a successful
+     * api call, which will update the business profile page to the latest information.
+     */
+    updateBusiness() {
+      this.modifyBusiness = false;
+      const id = parseInt(this.$route.params.id);
+      if (isNaN(id)) return;
+
+      getBusiness(id).then((value) => {
+        if (typeof value === 'string') {
+          this.$store.commit('setError', value);
+        } else {
+          this.business = value;
+          this.readableAddress = convertAddressToReadableText(value.address, "full");
+        }
+      });
     }
   }
 };
@@ -124,18 +250,27 @@ export default {
 <style scoped>
 .body {
     padding: 16px;
-    width: 100%;
-    margin-top: 140px;
-    /* text-align: center; */
 }
 
 .top-section {
   display: flex;
   flex-wrap: wrap;
-  /* justify-content: center; */
 }
 
 .link-chip {
   margin-right: 4px;
+}
+
+.business-modify {
+  margin-top: 20px;
+}
+
+.modify-business-button {
+  display: block;
+  margin-right: 48%;
+}
+
+.expand-icon {
+  padding-right: 10px;
 }
 </style>

@@ -1,6 +1,9 @@
 package org.seng302.leftovers.entities;
 
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.seng302.leftovers.persistence.ImageRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -297,55 +300,6 @@ class ImageTests {
             assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
             assertEquals("An invalid image format was provided", e.getReason());
         } catch (Exception e) { fail(); }
-    }
-
-    /**
-     * Tests that an image object must have a underscore followed before thumbnail before defining the filename for the
-     * thumbnail.
-     */
-    @Test
-    void setFilenameThumbnail_changeFilenameThumbnailNotIncludeUnderscoreThumbnail_BadRequestException() {
-        try {
-            testImage.setFilenameThumbnail("helppppppppppp.png");
-            fail();
-        } catch (ResponseStatusException e) {
-            assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
-            assertEquals("The thumbnail filename does not contain an _thumbnail", e.getReason());
-        } catch (Exception e) { fail(); }
-    }
-
-    /**
-     * Tests that an image's filename must not include a newline, \t, two dots, a comma, etc.
-     */
-    @Test
-    void setFilename_changeFilenameIncludeIllegalCharacters_BadRequestException() {
-        for (String characters: illegalCharacters) {
-            try {
-                String filename = "connor/he" + characters + "lp.png";
-                testImage.setFilename(filename);
-                fail();
-            } catch (ResponseStatusException e) {
-                assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
-                assertEquals("An illegal character was in the filename", e.getReason());
-            } catch (Exception e) { fail(); }
-        }
-    }
-
-    /**
-     * Tests that an image's filename must not include a newline
-     */
-    @Test
-    void setFilenameThumbnail_changeFilenameThumbnailIncludeIllegalCharacters_BadRequestException() {
-        for (String characters: illegalCharacters) {
-            try {
-                String filenameThumbnail = "connor/he" + characters + "lp_thumbnail.png";
-                testImage.setFilenameThumbnail(filenameThumbnail);
-                fail();
-            } catch (ResponseStatusException e) {
-                assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
-                assertEquals("An illegal character was in the filename", e.getReason());
-            } catch (Exception e) { fail(); }
-        }
     }
 
     /**

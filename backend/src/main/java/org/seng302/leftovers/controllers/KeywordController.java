@@ -4,8 +4,8 @@ import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.seng302.leftovers.entities.KeywordCreatedEvent;
 import org.seng302.leftovers.entities.Keyword;
+import org.seng302.leftovers.entities.KeywordCreatedEvent;
 import org.seng302.leftovers.entities.User;
 import org.seng302.leftovers.persistence.CreateKeywordEventRepository;
 import org.seng302.leftovers.persistence.KeywordRepository;
@@ -21,7 +21,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.util.Optional;
-import java.util.Locale;
 
 @RestController
 public class KeywordController {
@@ -126,7 +125,10 @@ public class KeywordController {
             AuthenticationTokenManager.checkAuthenticationToken(request);
 
             // Formats keyword to have capitals at the start of each word
-            Keyword keyword = formatKeyword(name, keywordRepository);
+            Keyword keyword = new Keyword(name);
+            if (keywordRepository.findByName(keyword.getName()).isPresent()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Keyword with the given name already exists");
+            }
 
             User creator = findUserFromRequest(request);
             keyword = keywordRepository.save(keyword);
@@ -141,31 +143,6 @@ public class KeywordController {
             logger.error(e.getMessage());
             throw e;
         }
-    }
-
-    /**
-     * Formats and checks uniqueness of keyword
-     * @param name to be turned into keyword
-     * @param keywordRepository so method can be static
-     * @return created keyword or not unique error
-     */
-    public static Keyword formatKeyword(String name, KeywordRepository keywordRepository) throws ResponseStatusException {
-        String[] words = name.split(" ");
-        StringBuilder formattedName = new StringBuilder();
-        for (String word : words) {
-            if (word.length() > 1) { // 2+ characters, normal
-                formattedName.append(Character.toUpperCase(word.charAt(0))).append(word.substring(1).toLowerCase()).append(" ");
-            } else if (word.length() == 1) { // 1 character, likely a vowel that doesn't need capitalisation
-                formattedName.append(word).append(" ");
-            } // else space, ignore
-        }
-        Keyword keyword = new Keyword(formattedName.toString().strip());
-        for (Keyword keywords : keywordRepository.findAll()) {
-            if (keywords.getName().equals(keyword.getName())) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Keyword with the given name already exists");
-            }
-        }
-        return keyword;
     }
 
     /**

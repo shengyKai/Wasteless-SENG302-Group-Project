@@ -1,5 +1,5 @@
-import * as api from '@/api/internal';
-import axios, { AxiosError, AxiosInstance } from 'axios';
+import { getMarketplaceCardsBySection, MarketplaceCard, SearchResults } from '@/api/internal';
+import axios, {AxiosInstance } from 'axios';
 
 jest.mock('axios', () => ({
   create: jest.fn(function () {
@@ -20,7 +20,7 @@ const instance: Mocked<Pick<AxiosInstance, 'get'>> = axios.instance;
 
 describe("Test GET /cards endpoint", () => {
   it('When the api call is made with all valid parameters, a list of cards is returned ', async () => {
-    const responseData: api.SearchResults<api.MarketplaceCard> = {
+    const responseData: SearchResults<MarketplaceCard> = {
       results: [{
         id: 1,
         creator: {
@@ -49,7 +49,7 @@ describe("Test GET /cards endpoint", () => {
     instance.get.mockResolvedValueOnce({
       data: responseData
     });
-    const card = await api.getMarketplaceCardsBySection("ForSale", 0, 0, "created", true);
+    const card = await getMarketplaceCardsBySection("ForSale", 0, 0, "created", true);
     expect(card).toEqual(responseData);
   });
 
@@ -57,7 +57,7 @@ describe("Test GET /cards endpoint", () => {
     instance.get.mockRejectedValueOnce({
       response: {}
     });
-    const errorMessage = await api.getMarketplaceCardsBySection("ForSale", 0, 0, "created", true);
+    const errorMessage = await getMarketplaceCardsBySection("ForSale", 0, 0, "created", true);
     expect(errorMessage).toEqual('Failed to reach backend');
   });
 
@@ -65,7 +65,7 @@ describe("Test GET /cards endpoint", () => {
     instance.get.mockRejectedValueOnce({
       response: {status: 400}
     });
-    const errorMessage = await api.getMarketplaceCardsBySection("ForSale", 0, 0, "created", true);
+    const errorMessage = await getMarketplaceCardsBySection("ForSale", 0, 0, "created", true);
     expect(errorMessage).toEqual('The given section does not exist');
   });
 
@@ -73,7 +73,7 @@ describe("Test GET /cards endpoint", () => {
     instance.get.mockRejectedValueOnce({
       response: {status: 401}
     });
-    const errorMessage = await api.getMarketplaceCardsBySection("ForSale", 0, 0, "created", true);
+    const errorMessage = await getMarketplaceCardsBySection("ForSale", 0, 0, "created", true);
     expect(errorMessage).toEqual('You have been logged out. Please login again and retry');
   });
 
@@ -81,7 +81,7 @@ describe("Test GET /cards endpoint", () => {
     instance.get.mockRejectedValueOnce({
       response: {status: 500}
     });
-    const errorMessage = await api.getMarketplaceCardsBySection("ForSale", 0, 0, "created", true);
+    const errorMessage = await getMarketplaceCardsBySection("ForSale", 0, 0, "created", true);
     expect(errorMessage).toEqual('Request failed: 500');
   });
 
@@ -94,7 +94,7 @@ describe("Test GET /cards endpoint", () => {
     instance.get.mockResolvedValueOnce({
       data: responseData
     });
-    const errorMessage = await api.getMarketplaceCardsBySection("ForSale", 0, 0, "created", true);
+    const errorMessage = await getMarketplaceCardsBySection("ForSale", 0, 0, "created", true);
     expect(errorMessage).toEqual("Response is not card array");
   });
 });

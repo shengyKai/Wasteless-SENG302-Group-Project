@@ -43,6 +43,7 @@ function createTestBusinesses(count: number) {
       primaryAdministratorId: 3,
       businessType: "Accommodation and Food Services",
       address: { city: 'test_city' + i, country: 'test_country' + i },
+      images: [],
     });
   }
   return result;
@@ -97,6 +98,7 @@ describe('SearchBusinessPage.vue', () => {
     let users = createTestBusinesses(5);
     setResults(users);
     createWrapper();
+    await wrapper.setData({searchQuery: "apple"});
     // Flush queue is used instead of Vue.nextTick() since this will wait for everything to finish
     // instead of a single event.
     await flushQueue();
@@ -110,6 +112,7 @@ describe('SearchBusinessPage.vue', () => {
   it('If there is an error then the error should be displayed', async () => {
     searchBusinesses.mockResolvedValue('test_error');
     createWrapper();
+    await wrapper.setData({searchQuery: "apple"});
     await flushQueue();
     expect(findErrorBox().text()).toEqual('test_error');
   });
@@ -117,6 +120,7 @@ describe('SearchBusinessPage.vue', () => {
   it('If the error is dismissed then the error should disappear', async () => {
     searchBusinesses.mockResolvedValue('test_error');
     createWrapper();
+    await wrapper.setData({searchQuery: "apple"});
     await flushQueue();
     // Finds dismiss button and clicks it
     findErrorBox().findComponent({name: 'v-btn' }).trigger('click');
@@ -134,6 +138,7 @@ describe('SearchBusinessPage.vue', () => {
   it('If there are results then there should be a message informing the user how many', async () => {
     setResults(createTestBusinesses(RESULTS_PER_PAGE), 100);
     createWrapper();
+    await wrapper.setData({searchQuery: "apple"});
     await flushQueue();
     expect(wrapper.text()).toContain(`Displaying 1 - ${RESULTS_PER_PAGE} of 100 results`);
   });
@@ -146,7 +151,6 @@ describe('SearchBusinessPage.vue', () => {
     await wrapper.setData({
       searchQuery: 'new_test_query',
     });
-    console.log(wrapper.vm.searchQuery);
     await wrapper.vm.updateResults();
     expect(searchBusinesses).lastCalledWith('new_test_query', undefined, 1, RESULTS_PER_PAGE, 'name', false);
   });
@@ -154,6 +158,7 @@ describe('SearchBusinessPage.vue', () => {
   it('If there are many pages then there should be a pagination component with many pages', async () => {
     setResults(createTestBusinesses(RESULTS_PER_PAGE), 100);
     createWrapper();
+    await wrapper.setData({searchQuery: "apple"});
     await flushQueue();
     let pagination = wrapper.findComponent({ name: 'v-pagination' });
     expect(pagination.props().length).toBe(Math.ceil(100 / RESULTS_PER_PAGE));

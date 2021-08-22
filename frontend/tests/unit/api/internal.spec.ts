@@ -2,7 +2,7 @@ import axios, { AxiosError, AxiosInstance, AxiosRequestConfig } from 'axios';
 
 import * as api from '@/api/internal';
 import { AxiosResponse } from 'axios';
-import { CreateProduct, CreateUser, InventoryItem, MaybeError, Product, Sale, SearchResults } from '@/api/internal';
+import { CreateProduct, CreateUser, InventoryItem, MaybeError, Message, Product, Sale, SearchResults } from '@/api/internal';
 import { castMock } from '../utils';
 import { is, Reason } from 'typescript-is';
 
@@ -130,6 +130,13 @@ const testSaleItem: Sale = {
   created: '1-1-1900',
 };
 
+const testMessage: Message = {
+  id: 7,
+  created: '1-1-1900',
+  senderId: 100,
+  content: 'Hello world',
+};
+
 function searchResult<T>(list: T[]) : SearchResults<T> {
   return {
     count: list.length,
@@ -164,6 +171,7 @@ type ApiCalls = {[k in keyof ApiMethods]: {
   apiResult?: any,                                  // If the api returns a different value from the overall result then this should be used to specify that
   failedTypeCheckResponse?: string,                 // Error message string to return if the response is not the correct type
   extraStatusMessages: Record<number, string>,      // Mapping between statuses and their messages
+  usesServerMessage: boolean,                       // Whether the "message" attribute in the response is used for unspecialised error messages
 }};
 
 const apiCalls: Partial<ApiCalls> = {
@@ -182,6 +190,7 @@ const apiCalls: Partial<ApiCalls> = {
       400: 'Invalid parameters',
       409: 'Product code unavailable',
     },
+    usesServerMessage: false,
   },
   createUser: {
     parameters: [
@@ -192,9 +201,9 @@ const apiCalls: Partial<ApiCalls> = {
     body: testCreateUser,
     result: undefined,
     extraStatusMessages: {
-      400: 'Invalid create user request',
       409: 'Email in use',
     },
+    usesServerMessage: true,
   },
   login: {
     parameters: ['test_email', 'test_password'],
@@ -207,6 +216,7 @@ const apiCalls: Partial<ApiCalls> = {
     extraStatusMessages: {
       400: 'Invalid credentials',
     },
+    usesServerMessage: false,
   },
   uploadProductImage: {
     parameters: [100, 'TEST-PRODUCT', testFile],
@@ -224,6 +234,7 @@ const apiCalls: Partial<ApiCalls> = {
       406: 'Product/Business not found',
       413: 'Image too large',
     },
+    usesServerMessage: false,
   },
   getProducts: {
     parameters: [666, 3, 14, 'productCode', false],
@@ -244,6 +255,7 @@ const apiCalls: Partial<ApiCalls> = {
       403: 'Not an admin of the business',
       406: 'Business not found',
     },
+    usesServerMessage: false,
   },
   getBusinessSales: {
     parameters: [666, 3, 13, 'closing', false],
@@ -263,6 +275,7 @@ const apiCalls: Partial<ApiCalls> = {
       401: 'You have been logged out. Please login again and retry',
       406: 'The given business does not exist',
     },
+    usesServerMessage: false,
   },
   modifyProduct: {
     parameters: [888, 'FOO-BAR', testCreateProduct],
@@ -277,6 +290,29 @@ const apiCalls: Partial<ApiCalls> = {
       400: 'Invalid parameters',
       409: 'Product code unavailable',
     },
+    usesServerMessage: false,
+  },
+  getMessagesInConversation: {
+    parameters: [3, 5, 2, 10],
+    httpMethod: 'get',
+    url: '/cards/3/conversations/5',
+    body: {
+      params: {
+        page: 2,
+        resultsPerPage: 10,
+      },
+    },
+    result: {
+      count: 10,
+      results: [testMessage],
+    },
+    failedTypeCheckResponse: 'Response is not page of messages',
+    extraStatusMessages: {
+      401: 'You have been logged out. Please login again and retry',
+      403: 'You do not have permission to view this conversation',
+      406: 'Unable to get messages, conversation does not exist',
+    },
+    usesServerMessage: true,
   },
 };
 
@@ -315,14 +351,25 @@ describe('api', () => {
       });
     }
 
-    it('If an unknown status is returned then response should be "Request failed: ?"', async () => {
-      const statusCode = 875;
-      instance[fields.httpMethod].mockRejectedValueOnce(makeAxiosError(undefined, statusCode));
+    if (fields.usesServerMessage) {
+      it('If an unknown status is returned then response should be the backend message', async () => {
+        const statusCode = 875;
+        instance[fields.httpMethod].mockRejectedValueOnce(makeAxiosError({message: 'test backend message'}, statusCode));
 
-      let response = await doCall();
+        let response = await doCall();
 
-      expect(response).toBe('Request failed: ' + statusCode);
-    });
+        expect(response).toBe('test backend message');
+      });
+    } else {
+      it('If an unknown status is returned then response should be "Request failed: ?"', async () => {
+        const statusCode = 875;
+        instance[fields.httpMethod].mockRejectedValueOnce(makeAxiosError(undefined, statusCode));
+
+        let response = await doCall();
+
+        expect(response).toBe('Request failed: ' + statusCode);
+      });
+    }
 
     it('Method should be called with the expected url and body', async () => {
       instance[fields.httpMethod].mockResolvedValueOnce(makeAxiosResponse(fields.apiResult));

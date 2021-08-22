@@ -52,6 +52,11 @@ public class Business {
     )
     private Set<User> administrators = new HashSet<>();
 
+    @OrderColumn(name="image_order")
+    @OneToMany(fetch = FetchType.LAZY)
+    @JoinColumn(name="business_id")
+    private List<Image> images = new ArrayList<>();
+
     /**
      * Gets the id
      * @return Business Id
@@ -178,7 +183,7 @@ public class Business {
      * If the requested user is less than 16 years of age, a 403 forbidden status is thrown.
      * @param owner Owner of business
      */
-    private void setPrimaryOwner(User owner) {
+    public void setPrimaryOwner(User owner) {
         if (owner == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The business must have a primary owner");
         }
@@ -251,6 +256,21 @@ public class Business {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User does not have sufficient permissions to perform this action");
         }
     }
+    /**
+     * Check the account associated with the current session is either the primaryOener of the business
+     * Or a system administrator
+     * If the account does not have permission, 403 will be thrown
+     * @param request 
+     */
+    public void checkSessionPermissionsOwner(HttpServletRequest request) {
+        AuthenticationTokenManager.checkAuthenticationToken(request);
+        HttpSession session = request.getSession(false);
+        Long userId = (Long) session.getAttribute("accountId");
+
+        if (!AuthenticationTokenManager.sessionIsAdmin(request) && !this.getPrimaryOwner().getUserID().equals(userId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only Primary Owner and System administrator can perform this action");
+        }
+    }
 
     /**
      * This method retrieves all Users who are owners or admins of this business.
@@ -281,9 +301,50 @@ public class Business {
     /**
      * Removes the given product from the business's catalogue
      */
-    public void removeFromCatalogue(Product product) throws ResponseStatusException {
+    public void removeFromCatalogue(Product product) {
         if(!catalogue.remove(product)) {
             throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE,"The product did not match any within the business's catalogue");
+        }
+    }
+
+    /**
+     * Returns the business's product catalogue.
+     * @return product catalogue of the business.
+     */
+    public List<Product> getCatalogue() {
+        return this.catalogue;
+    }
+
+    /**
+     * Returns the images associated with this business.
+     * @return List of business images
+     */
+    public List<Image> getImages() { return this.images; }
+
+    /**
+     * Adds a single image to the Business`s list of images
+     * @param image An image entity to be linked to this business
+     */
+    public void addImage(Image image) {
+        images.add(image);
+    }
+
+    /**
+     * Adds a single image to the Business's list of images at given index
+     * @param index Index to insert the new image
+     * @param image An image entity to be linked to this business
+     */
+    public void addImage(int index, Image image) {
+        images.add(index, image);
+    }
+
+    /**
+     * Removes a given image from the list of business images
+     * @param image The image to remove
+     */
+    public void removeImage(Image image) {
+        if (!this.images.remove(image)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot remove image");
         }
     }
 
@@ -305,6 +366,11 @@ public class Business {
         if (fullAdminDetails) {
             object.put("administrators", constructAdminJsonArray());
         }
+        JSONArray jsonImages = new JSONArray();
+        for (Image image : images) {
+            jsonImages.add(image.constructJSONObject());
+        }
+        object.put("images", jsonImages);
         object.put("primaryAdministratorId", primaryOwner.getUserID());
         object.put("address", getAddress().constructFullJson());
         object.put("businessType", businessType);
@@ -331,7 +397,7 @@ public class Business {
         JSONArray adminJsons = new JSONArray();
         List<User> admins = new ArrayList<>();
         admins.addAll(getOwnerAndAdministrators());
-        Collections.sort(admins, (User user1, User user2) -> 
+        Collections.sort(admins, (User user1, User user2) ->
             user1.getUserID().compareTo(user2.getUserID()));
         for (User admin : admins) {
             adminJsons.add(admin.constructPublicJson());

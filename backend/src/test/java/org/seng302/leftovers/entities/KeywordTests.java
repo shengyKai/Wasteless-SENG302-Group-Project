@@ -1,9 +1,7 @@
 package org.seng302.leftovers.entities;
 
-import io.cucumber.java.eo.Se;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.junit.Assert;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -62,7 +60,7 @@ class KeywordTests {
                 .withPassword("1337-H%nt3r2")
                 .withBio("Likes long walks on the beach")
                 .withDob("2000-03-11")
-                .withPhoneNumber("+64 3 555 0129")
+                .withPhoneNumber("64 3555012")
                 .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
                         "Canterbury,8041"))
                 .build();
@@ -253,7 +251,7 @@ class KeywordTests {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"\n", "\t", ",", ".", "+", "\uD83D\uDE02", "\uFFFF"})
+    @ValueSource(strings = {",", ".", "+", "\uD83D\uDE02", "\uFFFF"})
     void keywordConstructor_invalidCharacters_throws400Exception(String name) {
         var exception = assertThrows(ResponseStatusException.class, () -> new Keyword(name));
         assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
@@ -261,7 +259,7 @@ class KeywordTests {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {" ", "a", "A", "é", "树"})
+    @ValueSource(strings = {"a", "A", "é", "树"})
     void keywordConstructor_validCharacters_createsSuccessfully(String name) {
         assertDoesNotThrow(() -> new Keyword(name));
     }
@@ -307,5 +305,23 @@ class KeywordTests {
         // Deleted keyword should have been removed from the card, but bystander keyword should stay
         assertEquals(1, card.getKeywords().size());
         assertEquals(bystander.getName(), card.getKeywords().get(0).getName());
+    }
+
+    @Test
+    void newKeyword_strangeFormatting_nameFormatted() {
+        Keyword formattedKeyword = new Keyword("dAnce iS   cOol");
+        assertEquals("Dance Is Cool", formattedKeyword.getName());
+    }
+
+    @Test
+    void newKeyword_spacesAround_spacesRemoved() {
+        Keyword formattedKeyword = new Keyword(" Cool  ");
+        assertEquals("Cool", formattedKeyword.getName());
+    }
+
+    @Test
+    void newKeyword_extraCapitalisation_capitalisationRemoved() {
+        Keyword formattedKeyword = new Keyword("THISthatOtheR");
+        assertEquals("Thisthatother", formattedKeyword.getName());
     }
 }

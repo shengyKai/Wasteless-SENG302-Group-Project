@@ -6,15 +6,16 @@ import cucumber.context.BusinessContext;
 import cucumber.context.RequestContext;
 import cucumber.context.UserContext;
 import io.cucumber.java.After;
-import io.cucumber.java.AfterStep;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import org.hibernate.Session;
-import org.seng302.leftovers.entities.*;
-import org.seng302.leftovers.persistence.BusinessRepository;
+import org.seng302.leftovers.entities.InventoryItem;
+import org.seng302.leftovers.entities.Location;
+import org.seng302.leftovers.entities.Product;
+import org.seng302.leftovers.entities.User;
 import org.seng302.leftovers.persistence.InventoryItemRepository;
 import org.seng302.leftovers.persistence.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,9 +26,7 @@ import org.springframework.web.context.WebApplicationContext;
 
 import javax.persistence.EntityManager;
 import java.io.UnsupportedEncodingException;
-import java.lang.reflect.Field;
 import java.math.BigDecimal;
-import java.math.MathContext;
 import java.math.RoundingMode;
 import java.sql.PreparedStatement;
 import java.text.ParseException;
@@ -151,21 +150,21 @@ public class InventoryStepDefinition  {
 
     @When("I try to access the inventory of the business")
     public void i_try_to_access_the_inventory_of_the_business() throws Exception {
-        mvcResult = mockMvc.perform(
-                requestContext.addAuthorisationToken(
-                        get(String.format("/businesses/%s/inventory", businessContext.getLast().getId()))
-                )
-        ).andReturn();
+        requestContext.performRequest(
+                get(String.format("/businesses/%s/inventory", businessContext.getLast().getId()))
+        );
+
     }
 
     @Then("the inventory of the business is returned to me")
-    public void the_inventory_of_the_business_is_returned_to_me() throws UnsupportedEncodingException, JsonProcessingException {
+    public void the_inventory_of_the_business_is_returned_to_me() throws UnsupportedEncodingException, JsonProcessingException, net.minidev.json.parser.ParseException {
+        mvcResult = requestContext.getLastResult();
         assertEquals(200, mvcResult.getResponse().getStatus());
 
         List<InventoryItem> inventory = inventoryItemRepository.findAllForBusiness(businessContext.getLast());
 
-        //because now the inventory sorts by product code on default, so it has to be sorted before comparing
-        Comparator<InventoryItem> sort = Comparator.comparing(inventoryItem -> inventoryItem.getProduct().getProductCode());
+        //order by quantity to make sure the ordering is constant
+        Comparator<InventoryItem> sort = Comparator.comparing(item->item.getProduct().getProductCode());
         inventory.sort(sort);
 
         JSONObject expectedPage = new JSONObject();
@@ -179,11 +178,13 @@ public class InventoryStepDefinition  {
         String expectedResponse = expectedPage.toJSONString();
 
         String responseBody = mvcResult.getResponse().getContentAsString();
+
         assertEquals(objectMapper.readTree(expectedResponse), objectMapper.readTree(responseBody));
     }
 
     @Then("I cannot view the inventory")
     public void i_cannot_view_the_inventory() throws UnsupportedEncodingException {
+        mvcResult = requestContext.getLastResult();
         assertEquals(403, mvcResult.getResponse().getStatus());
         assertEquals("", mvcResult.getResponse().getContentAsString());
     }
@@ -571,7 +572,6 @@ public class InventoryStepDefinition  {
     @Then("the best before date of the inventory item with the id {long} will be {string}")
     public void the_best_before_date_of_the_inventory_item_with_the_version_will_be(
             long invItemId, String bestBefore) {
-        System.out.println(mvcResult.getResponse().getErrorMessage());
         assertEquals(200, mvcResult.getResponse().getStatus());
         InventoryItem invItem = inventoryItemRepository.getInventoryItemByBusinessAndId(
                 businessContext.getLast(), invItemId);

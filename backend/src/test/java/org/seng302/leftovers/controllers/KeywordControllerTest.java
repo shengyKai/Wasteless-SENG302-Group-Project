@@ -8,8 +8,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mockito.*;
-import org.seng302.leftovers.entities.KeywordCreatedEvent;
 import org.seng302.leftovers.entities.Keyword;
+import org.seng302.leftovers.entities.KeywordCreatedEvent;
 import org.seng302.leftovers.entities.User;
 import org.seng302.leftovers.exceptions.AccessTokenException;
 import org.seng302.leftovers.persistence.CreateKeywordEventRepository;
@@ -29,7 +29,10 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.text.ParseException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -267,7 +270,7 @@ class KeywordControllerTest {
 
     @Test
     void addKeyword_keywordAlreadyExists_400Response() throws Exception {
-        when(keywordRepository.findAll()).thenReturn(Arrays.asList(new Keyword("Dance")));
+        when(keywordRepository.findByName("Dance")).thenReturn(Optional.of(new Keyword("Dance")));
 
         JSONObject json = new JSONObject();
         json.put("name", "Dance");
@@ -278,16 +281,8 @@ class KeywordControllerTest {
                 .andExpect(status().isBadRequest())
                 .andReturn();
 
-        verify(keywordRepository, times(1)).findAll();
+        verify(keywordRepository, times(1)).findByName("Dance");
         verify(keywordRepository, times(0)).save(any());
-    }
-
-    @Test
-    void addKeyword_strangeFormatting_NameValid() {
-        when(keywordRepository.save(any())).thenAnswer(keyword -> keyword.getArgument(0));
-
-        Keyword formattedKeyword = KeywordController.formatKeyword("dAnce iS   cOol", keywordRepository);
-        assertEquals("Dance Is Cool", formattedKeyword.getName());
     }
 
     @Test

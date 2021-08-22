@@ -1,23 +1,36 @@
 <template>
   <v-list-item>
-    <v-list-item-content>
-      <v-list-item-title>
-        <a style="color: black;" @click="viewBusinessProfile">
-          {{ business.name }}
-        </a>
-      </v-list-item-title>
-      <v-list-item-subtitle> {{ business.businessType }} </v-list-item-subtitle>
-      <v-list-item-subtitle> {{ insertAddress(business.address) }} </v-list-item-subtitle>
-    </v-list-item-content>
+    <v-row>
+      <v-col cols="auto" class="pl-0" align-self="center">
+        <Avatar :business="business" size="medium"/>
+      </v-col>
+      <v-col class="pl-0">
+        <v-list-item-content>
+          <v-list-item-title>
+
+            <a style="color: black;" @click="viewBusinessProfile">
+              {{ business.name }}
+            </a>
+
+          </v-list-item-title>
+          <v-list-item-subtitle> {{ business.businessType }} </v-list-item-subtitle>
+          <v-list-item-subtitle> {{ insertAddress(business.address) }} </v-list-item-subtitle>
+        </v-list-item-content>
+      </v-col>
+    </v-row>
   </v-list-item>
 </template>
 
 <script>
-import convertAddressToReadableText from '../utils/Methods/convertJsonAddressToReadableText';
+import Avatar from '../utils/Avatar.vue';
+import convertAddressToReadableText from '../utils/Methods/convertAddressToReadableText';
 
 export default {
   props: {
     business: Object,
+  },
+  components: {
+    Avatar,
   },
   methods: {
     insertAddress(address) {
@@ -25,7 +38,7 @@ export default {
     },
     viewBusinessProfile() {
       this.$emit("view-profile");
-    }
+    },
   },
 };
 </script>
