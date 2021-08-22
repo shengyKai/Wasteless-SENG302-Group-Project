@@ -432,7 +432,7 @@ export default {
         });
     },
     updatePhoneNumber() {
-      this.user.phoneNumber = this.countryCode + this.phoneDigits;
+      this.user.phoneNumber = this.countryCode + ' ' + this.phoneDigits;
       this.$refs.countryCode.validate();
     },
     /**
