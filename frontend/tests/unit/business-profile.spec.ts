@@ -7,16 +7,11 @@ import VueRouter from "vue-router";
 import * as api from '@/api/internal';
 Vue.use(Vuetify);
 Vue.use(Vuex);
-import { castMock } from './utils';
-import ImageCarousel from "@/components/utils/ImageCarousel.vue";
 import { getStore, resetStoreForTesting, StoreData } from '@/store';
-import {Business, Location} from "@/api/internal";
 
 jest.mock('@/api/internal', () => ({
   makeBusinessImagePrimary: jest.fn(),
 }));
-
-const makeBusinessImagePrimary = castMock(api.makeBusinessImagePrimary);
 
 describe('index.vue', () => {
   let wrapper: Wrapper<any>;
@@ -100,9 +95,6 @@ describe('index.vue', () => {
       },
     });
   });
-  function findImageCarousel() {
-    return wrapper.findComponent(ImageCarousel);
-  }
   it("Must contain the business name", () => {
     expect(wrapper.text()).toContain('Some Business Name');
   });
@@ -138,12 +130,5 @@ describe('index.vue', () => {
 
   it("Router link can have multiple endpoints with different admin id", () => {
     expect(wrapper.findAllComponents(RouterLinkStub).at(1).props().to).toBe('/profile/2');
-  });
-
-  it("Should call image endpoint to set image when carousel emits event", async () => {
-    const carousel = findImageCarousel();
-    carousel.vm.$emit("change-primary-image", 1);
-    await Vue.nextTick();
-    expect(makeBusinessImagePrimary).toBeCalledWith(1, 1);
   });
 });

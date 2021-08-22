@@ -16,7 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import static org.seng302.datagenerator.Main.*;
+import static org.seng302.datagenerator.Main.randomDate;
 
 public class UserGenerator {
     private Random random = new Random();
@@ -49,17 +49,6 @@ public class UserGenerator {
         String counterStr = String.valueOf(counter);
         String suffix = suffixes[random.nextInt(suffixes.length)];
         return emailStart + counterStr + suffix;
-    }
-
-    /**
-     * Main program
-     * @param args no arguments should be provided
-     */
-    public static void main(String[] args) throws SQLException {
-        Connection conn = connectToDatabase();
-        var generator = new UserGenerator(conn);
-        int userCount = getNumObjectsFromInput("users");
-        generator.generateUsers(userCount);
     }
 
     /**

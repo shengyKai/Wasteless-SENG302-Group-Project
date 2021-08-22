@@ -29,6 +29,8 @@ import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -171,10 +173,16 @@ public class BusinessController {
             Business business = getBusiness(businessId); // Get the business
             business.checkSessionPermissionsOwner(req);
             User user = getUser(userInfo); // Get the user to promote
-
-            business.addAdmin(user);
-            businessRepository.save(business);
-            logger.info(() -> String.format("Added user %d as admin of business %d", user.getUserID(), businessId));
+            LocalDate now = LocalDate.now();
+            LocalDate minDate = now.minusYears(16);
+            
+            if (user.getDob().compareTo(minDate) < 0) {
+                business.addAdmin(user);
+                businessRepository.save(business);
+                logger.info(() -> String.format("Added user %d as admin of business %d", user.getUserID(), businessId));
+            } else {
+                throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "The new business admin should be at least 16 years old");
+            }
         } catch (Exception err) {
             logger.error(err.getMessage());
             throw err;

@@ -10,8 +10,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import static org.seng302.datagenerator.Main.*;
-
 public class BusinessGenerator {
     private Random random = new Random();
     private Connection conn;
@@ -64,22 +62,6 @@ public class BusinessGenerator {
     }
 
     /**
-     * Main program
-     * @param args no arguments should be provided
-     */
-    public static void main(String[] args) throws SQLException {
-        Connection conn = connectToDatabase();
-        var userGenerator = new UserGenerator(conn);
-        var businessGenerator = new BusinessGenerator(conn);
-
-        int userCount = getNumObjectsFromInput("users");
-        List<Long> userIds = userGenerator.generateUsers(userCount);
-
-        int businessCount = getNumObjectsFromInput("businesses");
-        businessGenerator.generateBusinesses(userIds, businessCount);
-    }
-
-    /**
      * Generates the businesses
      * @param userIds Users to select owners and admins from
      * @param businessCount Number of businesses to generate
@@ -89,7 +71,6 @@ public class BusinessGenerator {
         List<Long> generatedBusinessIds = new ArrayList<>();
         try {
             for (int i=0; i < businessCount; i++) {
-                clear();
                 long ownerId = userIds.get(random.nextInt(userIds.size()));
 
                 LocationGenerator.Location businessLocation = locationGenerator.generateAddress(random);
