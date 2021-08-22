@@ -325,7 +325,6 @@ public class User extends Account {
      * field if this is set to true, otherwise the field will not be present.
      * @return JSONObject with attribute name as key and attribute value as value.
      */
-    // Todo: Replace email with profile picture once profile pictures added.
     public JSONObject constructPublicJson(boolean fullBusinessDetails) {
         var object = new JSONObject();
         object.put("id",          getUserID());

@@ -53,7 +53,7 @@ public class InventoryController {
      */
     @PostMapping("/businesses/{id}/inventory")
     public void addInventory(@PathVariable(name = "id") Long businessId, HttpServletRequest request,
-            @RequestBody JSONObject inventory) throws Exception {
+            @RequestBody JSONObject inventory) {
         String message = String.format("Attempting to add and inventory item for business=%d", businessId);
         logger.info(message);
         try {
