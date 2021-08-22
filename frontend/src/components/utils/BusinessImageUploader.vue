@@ -35,56 +35,37 @@
 
 <script>
 import ImageSelector from "@/components/utils/ImageSelector";
-import {uploadBusinessImage} from "@/api/internal";
 
 export default {
   name: "BusinessImageUploader",
   components: {ImageSelector},
   props: {
-    //we need these two values to update the product image accordingly
-    businessId: Number,
-    //the value here refers to the parent component in ProductCatalogueItem
-    value: Boolean
+    value: undefined,
   },
   data() {
     return {
-      file: undefined,
       isLoading: false,
       errorMessage: undefined,
+      showDialog: true
     };
   },
   methods: {
-    /**
-     * Handler for the "create" button
-     * This will trigger a call to the add product image endpoint and close the dialog if successful
+    /*
+     * Close the dialog and emit message to the parent to add file to uploaded images.
      */
-    async uploadImage() {
-      this.isLoading = true;
-      this.errorMessage = undefined;
-
-      let response = await uploadBusinessImage(this.businessId, this.file);
-
-      this.isLoading = false;
-      if (response !== undefined) {
-        this.errorMessage = response;
-        return;
-      }
-      this.showDialog = false;
-      this.file = undefined;
-      this.$emit('image-added');
+    uploadImage() {
+      this.$emit('uploadImage');
     },
     /**
      * Closes the dialog and clears any selected files
      */
     closeForm() {
-      this.showDialog = false;
       this.file = undefined;
+      this.$emit('closeDialog');
     },
   },
   computed: {
-    //need to use computed property in child component to track changes
-    showDialog: {
-      //gets the value of the showImageUploaderForm
+    file: {
       get() {
         return this.value;
       },

@@ -149,7 +149,12 @@
                     </v-icon>
                     Upload new image
                   </v-btn>
-                  <BusinessImageUploader :business-id="business.id" v-model="showImageUploaderForm"/>
+                  <BusinessImageUploader
+                    v-model="imageFile"
+                    v-if="showImageUploaderForm"
+                    @closeDialog="showImageUploaderForm=false"
+                    @uploadImage="addImage"/>
+                  <v-card-text v-if="allImageFiles.length > 0"> Images uploaded: {{ imageNames }} </v-card-text>
                   <p class="error-text" v-if ="errorMessage !== undefined"> {{errorMessage}} </p>
                 </v-container>
               </v-card-text>
@@ -159,6 +164,7 @@
                     <v-btn
                       type="submit"
                       color="primary"
+                      :loading="isLoading"
                     >
                       Submit
                       <v-icon
@@ -230,7 +236,7 @@ import {
   mandatoryRules,
   maxCharRules, postCodeRules, streetNumRules
 } from "@/utils";
-import { modifyBusiness } from '@/api/internal';
+import { modifyBusiness, uploadBusinessImage } from '@/api/internal';
 
 export default {
   name: 'ModifyBusiness',
@@ -272,6 +278,9 @@ export default {
       showChangeAdminAlert: false,
       primaryAdminAlertMsg: "",
       primaryAdministratorId: this.business.primaryAdministratorId,
+      imageFile: undefined,
+      allImageFiles: [],
+      isLoading: false,
       maxCharRules: () => maxCharRules(100),
       maxCharDescriptionRules: ()=> maxCharRules(200),
       mandatoryRules: ()=> mandatoryRules,
@@ -285,6 +294,9 @@ export default {
   computed: {
     userIsPrimaryAdmin() {
       return this.$store.state.user.id === this.business.primaryAdministratorId;
+    },
+    imageNames() {
+      return this.allImageFiles.map((image) => image.name).join(", ");
     }
   },
   methods: {
@@ -295,6 +307,7 @@ export default {
       this.$emit('discardModifyBusiness');
     },
     async proceedWithModifyBusiness() {
+      this.isLoading = true;
       this.errorMessage = undefined;
       /**
        * Get the street number and name from the street address field.
@@ -322,6 +335,7 @@ export default {
       };
 
       const result = await modifyBusiness(this.business.id, modifiedFields);
+
       /**
        * If the result is a string, means it is an error message, of which it will show up on the page.
        * As such, the modify page will still remain.
@@ -330,9 +344,16 @@ export default {
        */
       if (typeof result === 'string') {
         this.errorMessage = result;
-      } else {
+      }
+      for (let image of this.allImageFiles) {
+        if (this.errorMessage === undefined) {
+          await this.uploadImage(image);
+        }
+      }
+      if (this.errorMessage === undefined) {
         this.$emit("modifySuccess");
       }
+      this.isLoading = false;
     },
     /**
      * When the user clicks on an administrator a popup message will appear stating that they
@@ -352,7 +373,18 @@ export default {
       }
       this.primaryAdministratorId = admin.id;
     },
-  }
+    addImage() {
+      this.showImageUploaderForm = false;
+      this.allImageFiles.push(this.imageFile);
+      this.imageFile = undefined;
+    },
+    async uploadImage(image) {
+      const result = await uploadBusinessImage(this.business.id, image);
+      if (typeof result === 'string') {
+        this.errorMessage = result;
+      }
+    }
+  },
 };
 </script>
 

@@ -9,7 +9,8 @@
       <v-card v-if="businessImages && businessImages.length > 0">
         <ImageCarousel
           :imagesList="businessImages"
-          :showControls="permissionToActAsBusiness"
+          :showMakePrimary="permissionToActAsBusiness"
+          :showDelete="false"
           @change-primary-image="makeImagePrimary"
           ref="businessImageCarousel"
         />
@@ -17,10 +18,7 @@
       <v-card class="body">
         <div class="d-flex flex-column" no-gutters>
           <v-row>
-            <v-col cols="11">
-              <span><h1>{{ business.name }}</h1></span>
-            </v-col>
-            <!-- <v-col cols="4" >
+            <v-col cols="12">
               <v-alert
                 class="ma-2 flex-grow-0"
                 v-if="errorMessage !== undefined"
@@ -30,7 +28,12 @@
               >
                 {{ errorMessage }}
               </v-alert>
-            </v-col> -->
+            </v-col>
+          </v-row>
+          <v-row>
+            <v-col cols="11">
+              <span><h1>{{ business.name }}</h1></span>
+            </v-col>
             <v-col class="text-right" v-if='!modifyBusiness && permissionToActAsBusiness'>
               <v-tooltip bottom>
                 <template #activator="{ on, attrs }">
@@ -235,6 +238,8 @@ export default {
       if (typeof result === 'string') {
         this.errorMessage = result;
         this.$refs.businessImageCarousel.forceClose();
+      } else {
+        this.updateBusiness();
       }
     },
     /**

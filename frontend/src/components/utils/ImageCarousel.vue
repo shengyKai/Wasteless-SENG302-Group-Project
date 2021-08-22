@@ -26,7 +26,7 @@
             <template #activator="{ on: tooltip }">
               <v-btn
                 icon
-                v-if="i !== 0 && showControls"
+                v-if="i !== 0 && showMakePrimary"
                 color="primary"
                 v-on="{ ...tooltip }"
                 @click="makeImagePrimary(item.id)"
@@ -41,7 +41,7 @@
             <template #activator="{ on: tooltip }">
               <v-btn
                 icon
-                v-if="showControls"
+                v-if="showDelete"
                 color="error"
                 v-on="{ ...tooltip }"
                 @click="deleteImage(item.id)"
@@ -70,7 +70,8 @@ export default {
     /**
      * Whether to show the make primary and delete image
      */
-    showControls: Boolean,
+    showMakePrimary: Boolean,
+    showDelete: Boolean,
   },
   data() {
     return {
