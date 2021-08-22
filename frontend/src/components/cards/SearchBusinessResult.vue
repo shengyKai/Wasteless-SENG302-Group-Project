@@ -1,10 +1,8 @@
 <template>
   <v-list-item>
     <v-row>
-      <v-col cols="auto" class="px-0">
-        <v-list-item-avatar size="50">
-          <v-img :src="image" height="100%"/>
-        </v-list-item-avatar>
+      <v-col cols="auto" class="pl-0" align-self="center">
+        <Avatar :business="business" size="medium"/>
       </v-col>
       <v-col class="pl-0">
         <v-list-item-content>
@@ -24,12 +22,15 @@
 </template>
 
 <script>
+import Avatar from '../utils/Avatar.vue';
 import convertAddressToReadableText from '../utils/Methods/convertAddressToReadableText';
-import {imageSrcFromFilename} from "@/utils";
 
 export default {
   props: {
     business: Object,
+  },
+  components: {
+    Avatar,
   },
   methods: {
     insertAddress(address) {
@@ -37,18 +38,6 @@ export default {
     },
     viewBusinessProfile() {
       this.$emit("view-profile");
-    },
-  },
-  computed: {
-    image() {
-      let image = this.business.images[0];
-      if (image === undefined) return undefined;
-
-      let url = image.thumbnailFilename;
-      if (url === undefined) {
-        url = image.filename;
-      }
-      return imageSrcFromFilename(url);
     },
   },
 };

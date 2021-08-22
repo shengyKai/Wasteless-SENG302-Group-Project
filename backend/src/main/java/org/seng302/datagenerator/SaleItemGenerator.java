@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import static org.seng302.datagenerator.Main.*;
+import static org.seng302.datagenerator.Main.randomDate;
 
 public class SaleItemGenerator {
     private Random random = new Random();
@@ -132,30 +132,6 @@ public class SaleItemGenerator {
         }
     }
 
-    public static void main(String[] args) throws SQLException, InterruptedException {
-        Connection conn = connectToDatabase();
-        var userGenerator = new UserGenerator(conn);
-        var businessGenerator = new BusinessGenerator(conn);
-        var productGenerator = new ProductGenerator(conn);
-        var invItemGenerator = new InventoryItemGenerator(conn);
-        var saleItemGenerator = new SaleItemGenerator(conn);
-
-        int userCount = getNumObjectsFromInput("users");
-        List<Long> userIds = userGenerator.generateUsers(userCount);
-
-        int businessCount = getNumObjectsFromInput("businesses");
-        List<Long> businessIds = businessGenerator.generateBusinesses(userIds, businessCount);
-
-        int productCount = getNumObjectsFromInput("products");
-        List<Long> productIds = productGenerator.generateProducts(businessIds, productCount);
-
-        int invItemCount = getNumObjectsFromInput("inventory items");
-        List<Long> invItemIds = invItemGenerator.generateInventoryItems(productIds, invItemCount);
-
-        int saleItemCount = getNumObjectsFromInput("sale items");
-        saleItemGenerator.generateSaleItems(invItemIds, saleItemCount);
-    }
-
     /**
      * Generates the sale items
      * @param saleItemCount count of the number of sale items to be generated
@@ -165,7 +141,6 @@ public class SaleItemGenerator {
     public List<Long> generateSaleItems(List<Long> invItemIds, int saleItemCount) throws SQLException {
         List<Long> generatedSaleItemIds = new ArrayList<>();
         for (int i=0; i < saleItemCount; i++) {
-            clear();
             logger.info("Creating Sale Item {} / {}", i+1, saleItemCount);
             int progress = (int) (((float)(i+1) / (float)saleItemCount) * 100);
             logger.info("Progress: {}%", progress);

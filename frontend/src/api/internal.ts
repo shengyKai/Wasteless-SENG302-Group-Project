@@ -714,7 +714,7 @@ export async function removeBusinessAdmin(businessId: number, userId: number): P
     if (status === 400) return 'User doesn\'t exist or is not an admin';
     if (status === 401) return 'You have been logged out. Please login again and retry';
     if (status === 403) return 'Current user cannot perform this action';
-    if (status === 406) return 'Business not found';
+    if (status === 406) return 'The new business admin should be at least 16 years old';
 
     return 'Request failed: ' + status;
   }

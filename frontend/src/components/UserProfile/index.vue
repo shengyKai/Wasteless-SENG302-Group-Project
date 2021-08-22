@@ -2,7 +2,7 @@
   <v-card class="body" v-if="user">
     <div class="top-section">
       <div class="profile-img">
-        <UserAvatar :user="user" size="large" />
+        <Avatar :user="user" size="large" />
       </div>
 
       <div>
@@ -230,7 +230,7 @@
 
 <script>
 import { getUser, makeBusinessAdmin, removeBusinessAdmin, makeAdmin, revokeAdmin } from '../../api/internal';
-import UserAvatar from '@/components/utils/UserAvatar';
+import Avatar from '@/components/utils/Avatar';
 import convertAddressToReadableText from '@/components/utils/Methods/convertAddressToReadableText';
 
 export default {
@@ -454,7 +454,7 @@ export default {
     }
   },
   components: {
-    UserAvatar,
+    Avatar,
   }
 };
 </script>
