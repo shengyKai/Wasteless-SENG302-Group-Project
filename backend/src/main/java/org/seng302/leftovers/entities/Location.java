@@ -20,6 +20,7 @@ import java.util.Map;
 @Entity // declare this class as a JPA entity (that can be mapped to a SQL table)
 public class Location {
     private static final String NAME_REGEX = "[ \\p{L}-'.]+";
+    private static final String STREET_NAME_REGEX = "[ \\p{L}-'.\\d]+";
 
     @Id // this field (attribute) is the table primary key
     @GeneratedValue(strategy = GenerationType.IDENTITY) // autoincrement the ID
@@ -135,7 +136,7 @@ public class Location {
      * @return true if the street name is valid, false otherwise
      */
     public boolean checkValidStreetName(String streetName) {
-        if (streetName != null && streetName.length() <= 100 && streetName.length() > 0 && streetName.matches(NAME_REGEX)) {
+        if (streetName != null && streetName.length() <= 100 && streetName.length() > 0 && streetName.matches(STREET_NAME_REGEX)) {
             return true;
         } else {
             return false;

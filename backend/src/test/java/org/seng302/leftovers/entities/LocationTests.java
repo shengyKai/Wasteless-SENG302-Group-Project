@@ -95,13 +95,13 @@ public class LocationTests {
   }
 
   /**
-   * Checks several names with numbers in them fail when passed into the checkValidStreetName method
+   * Checks several names with numbers in them return true when passed into the checkValidStreetName method
    */
   @Test
   void checkValidStreetNameNumbers() {
     String[] streetNames = new String[]{ "Over 9000 Avenue", "69th Street", "0 Lane", "333 Road" };
     for (String streetName : streetNames) {
-      assertFalse(testLocation.checkValidStreetName(streetName));
+      assertTrue(testLocation.checkValidStreetName(streetName));
     }
   }
 
