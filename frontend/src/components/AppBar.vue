@@ -18,12 +18,10 @@
                 v-bind="attrs"
                 v-on="on"
               >
-                <UserAvatar v-if="isUser" :user="user" size="small" />
-                <v-list-item-avatar v-else v-list-item-avatar size="30">
-                  <v-img :src="actingBusiness.images[0]" height="100%"/>
-                </v-list-item-avatar>
+                <Avatar v-if="selectedRole.type === 'user'" :user="user" size="small" />
+                <Avatar v-else :business="actingBusiness" size="small"/>
                 <div class="name">
-                  {{ roles[selectedRole].displayText }}
+                  {{ roles[selectedRoleIndex].displayText }}
                 </div>
               </v-chip>
             </template>
@@ -35,7 +33,7 @@
                 Profiles
               </div>
               <v-list-item-group
-                v-model="selectedRole"
+                v-model="selectedRoleIndex"
                 color="primary"
               >
                 <template v-for="(role, index) in roles">
@@ -88,17 +86,17 @@
 </template>
 
 <script>
-import UserAvatar from "./utils/UserAvatar";
+import Avatar from "./utils/Avatar";
 import { USER_ROLES } from "../utils";
 
 export default {
   name: "AppBar",
   components: {
-    UserAvatar,
+    Avatar
   },
   data() {
     return {
-      selectedRole : 0,
+      selectedRoleIndex : 0,
     };
   },
   methods: {
@@ -165,12 +163,14 @@ export default {
       }
       return undefined;
     },
+    selectedRole() {
+      return this.roles[this.selectedRoleIndex];
+    },
   },
   watch : {
-    selectedRole() {
+    selectedRoleIndex() {
       // Set the role that the user is acting as to the role that has been selected from the list
-      const role = this.roles[this.selectedRole];
-      this.$store.commit('setRole', { type: role.type, id: role.id });
+      this.$store.commit('setRole', { type: this.selectedRole.type, id: this.selectedRole.id });
     },
 
     /**
@@ -180,7 +180,7 @@ export default {
     '$store.state.activeRole': {
       handler() {
         // This is a bit dubious I'd like to refactor it into something cleaner.
-        const currentRole = this.roles[this.selectedRole];
+        const currentRole = this.selectedRole;
         const actualRole = this.$store.state.activeRole;
 
         if (actualRole === null) return;
@@ -189,7 +189,7 @@ export default {
         let newSelection = 0;
         for (const role of this.roles) {
           if (role.type === actualRole.type && role.id === actualRole.id) {
-            this.selectedRole = newSelection;
+            this.selectedRoleIndex = newSelection;
           }
           newSelection++;
         }
