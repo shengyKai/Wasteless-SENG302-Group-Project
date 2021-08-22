@@ -179,7 +179,7 @@
                     <v-btn
                       type="submit"
                       color="primary"
-                      @click.prevent="currencyConfirmDialog = true"
+                      @click.prevent="openCurrencyDialog"
                     >
                       Submit
                       <v-icon
@@ -307,6 +307,7 @@ export default {
       alphabetRules: ()=> alphabetRules,
       streetRules: ()=> streetNumRules,
       postcodeRules: ()=> postCodeRules,
+      isLoading: false,
     };
   },
   computed: {
@@ -329,6 +330,16 @@ export default {
     }
   },
   methods: {
+    /**
+     * Opens the currency confirmation dialog if the updateProductCountry is checked
+     */
+    openCurrencyDialog() {
+      if (this.updateProductCountry === false) {
+        this.proceedWithModifyBusiness();
+      } else {
+        this.currencyConfirmDialog = true;
+      }
+    },
     /**
      * Loop through all admin to identify business primary owner
      * Return TRUE if the current looping chip is primary owner and no other chip is selected by user
