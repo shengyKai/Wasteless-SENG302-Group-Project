@@ -6,7 +6,7 @@
       <!--  v-bind="attrs" v-on="on" allows the v-dialog to use this link as the activator for the dialog box  height=100%-->
       <a v-bind="attrs" v-on="on">
         <!-- productImages[0] will be the primary image for the product. -->
-        <v-img height="200px" :src="serverUrl + imagesList[0].filename" />
+        <v-img height="200px" :src="imageUrl(imagesList[0].filename)" />
       </a>
     </template>
     <template>
@@ -20,7 +20,7 @@
         <v-carousel-item
           v-for="(item, i) in imagesList"
           :key="i"
-          :src="serverUrl + imagesList[i].filename"
+          :src="imageUrl(imagesList[i].filename)"
         >
           <v-tooltip bottom>
             <template #activator="{ on: tooltip }">
@@ -58,6 +58,8 @@
   </v-dialog>
 </template>
 <script>
+import {imageSrcFromFilename} from "@/utils";
+
 export default {
   name: "ImageCarousel",
   props: {
@@ -73,7 +75,6 @@ export default {
   data() {
     return {
       carouselItem: 0,
-      serverUrl: process.env.VUE_APP_SERVER_ADD,
       // if dialog is false, the popup does not appear.
       dialog: false,
     };
@@ -95,6 +96,9 @@ export default {
     },
     forceClose() {
       this.dialog = false;
+    },
+    imageUrl(filename) {
+      return imageSrcFromFilename(filename);
     }
   },
 };

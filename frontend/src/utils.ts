@@ -42,6 +42,10 @@ export const COOKIE = {
   USER: 'user'
 };
 
+export function imageSrcFromFilename(filename: string) {
+  return process.env.VUE_APP_SERVER_ADD + filename;
+}
+
 /**
  * Converts a date to a human readable string
  *
