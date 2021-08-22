@@ -24,7 +24,7 @@
 </template>
 
 <script>
-import convertAddressToReadableText from '../utils/Methods/convertJsonAddressToReadableText';
+import convertAddressToReadableText from '../utils/Methods/convertAddressToReadableText';
 import {imageSrcFromFilename} from "@/utils";
 
 export default {

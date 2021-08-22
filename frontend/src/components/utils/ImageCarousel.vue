@@ -3,7 +3,7 @@
   <v-dialog v-model="dialog" width="min(90vh, 100vw)">
     <template v-slot:activator="{ on, attrs }">
       <!-- put an image over a link, such that now the image will be clickable to activate the pop up dialog -->
-      <!--  v-bind="attrs" v-on="on" allows the v-dialog to use this link as the activator for the dialog box  height=100%-->
+      <!--  The v-bind to attrs allows the v-dialog to use this link as the activator for the dialog box -->
       <a v-bind="attrs" v-on="on">
         <!-- productImages[0] will be the primary image for the product. -->
         <v-img height="200px" :src="imageUrl(imagesList[0].filename)" />

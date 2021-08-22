@@ -52,7 +52,7 @@
               </v-tooltip>
             </v-col>
           </v-row>
-          <p><b>Created:</b> {{ createdMsg }}</p>
+          <p><strong>Created:</strong> {{ createdMsg }}</p>
           <v-btn outlined color="primary" @click="goSalePage" :value="false" width="150">
             Sale listings
           </v-btn>
@@ -96,7 +96,7 @@
 <script>
 import ModifyBusiness from '@/components/BusinessProfile/ModifyBusiness';
 import {getBusiness, makeBusinessImagePrimary} from '../../api/internal';
-import convertAddressToReadableText from '@/components/utils/Methods/convertJsonAddressToReadableText';
+import convertAddressToReadableText from '@/components/utils/Methods/convertAddressToReadableText';
 import {
   alphabetExtendedMultilineRules,
   alphabetExtendedSingleLineRules, alphabetRules,
@@ -208,10 +208,6 @@ export default {
     async returnToSearch() {
       await this.$router.push({path: '/search/business', query:{...this.$route.query}});
     },
-    showAlert() {
-      alert("I am the admin");
-    },
-
     /**
      * Returns the appropriate color of the admin for their chip
      */

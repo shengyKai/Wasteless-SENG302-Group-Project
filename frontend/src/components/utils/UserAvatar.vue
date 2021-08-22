@@ -6,10 +6,6 @@
     :style="`font-size: ${fontSize}px !important`"
   >
     {{ user.firstName[0].toUpperCase() }}{{ user.lastName[0].toUpperCase() }}
-    <template v-if="false">
-      <!--In future when we have image support for users we will put it in here-->
-      <img class="profile-image" src="https://edit.co.uk/uploads/2016/12/Image-1-Alternatives-to-stock-photography-Thinkstock.jpg">
-    </template>
   </v-avatar>
 </template>
 
