@@ -14,7 +14,7 @@ import javax.persistence.OneToOne;
 public class KeywordCreatedEvent extends Event {
 
     @OneToOne
-    @JoinColumn(name = "new_keyword", unique = true, nullable = false)
+    @JoinColumn(name = "new_keyword", nullable = false)
     private Keyword newKeyword;
 
     @ManyToOne

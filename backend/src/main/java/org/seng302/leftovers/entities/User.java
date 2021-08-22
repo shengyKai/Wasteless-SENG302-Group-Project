@@ -17,6 +17,8 @@ import java.util.regex.Pattern;
 @Entity
 public class User extends Account {
 
+    private static final String NAME_REGEX = "[ \\p{L}\\-'.]+";
+
     @Column(nullable = false)
     private String firstName;
 
@@ -76,7 +78,7 @@ public class User extends Account {
      * @param firstName users first name
      */
     public void setFirstName(String firstName) {
-        if (firstName != null && firstName.length() > 0 && firstName.length() <= 32 && firstName.matches("[ \\p{L}\\-'.]+")) {
+        if (firstName != null && firstName.length() > 0 && firstName.length() <= 32 && firstName.matches(NAME_REGEX)) {
             this.firstName = firstName;
         } else {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The first name must not be empty, be less then 16 characters, and only contain letters.");
@@ -95,7 +97,7 @@ public class User extends Account {
      * @param middleName
      */
     public void setMiddleName(String middleName) {
-        if (middleName == null || (middleName.length() > 0 && middleName.length() <= 32 && middleName.matches("[ \\p{L}\\-'.]+"))) {
+        if (middleName == null || (middleName.length() > 0 && middleName.length() <= 32 && middleName.matches(NAME_REGEX))) {
             this.middleName = middleName;
         } else if (middleName.equals("")) {
             this.middleName = null;
@@ -119,7 +121,7 @@ public class User extends Account {
      * @param lastName users surname
      */
     public void setLastName(String lastName) {
-        if (lastName != null && lastName.length() > 0 && lastName.length() <= 32 && lastName.matches("[ \\p{L}\\-'.]+")) {
+        if (lastName != null && lastName.length() > 0 && lastName.length() <= 32 && lastName.matches(NAME_REGEX)) {
             this.lastName = lastName;
         } else {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The last name must not be empty, be less then 16 characters, and only contain letters.");
@@ -286,8 +288,6 @@ public class User extends Account {
 
     public Set<Event> getEvents() { return this.events;}
 
-    private void setEvents(Set<Event> events) { this.events = events; }
-
     /**
      * Gets the set of businesses that the user is an admin of OR is the owner of
      * @return Businesses administered or owned
@@ -325,7 +325,6 @@ public class User extends Account {
      * field if this is set to true, otherwise the field will not be present.
      * @return JSONObject with attribute name as key and attribute value as value.
      */
-    // Todo: Replace email with profile picture once profile pictures added.
     public JSONObject constructPublicJson(boolean fullBusinessDetails) {
         var object = new JSONObject();
         object.put("id",          getUserID());

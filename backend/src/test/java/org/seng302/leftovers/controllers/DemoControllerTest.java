@@ -60,7 +60,7 @@ class DemoControllerTest {
     @BeforeEach
     public void setUp() throws ParseException {
         MockitoAnnotations.openMocks(this);
-        demoController = new DemoController(userRepository, businessRepository, productRepository, inventoryItemRepository, saleItemRepository, imageRepository, entityManager);
+        demoController = new DemoController(userRepository, businessRepository, productRepository, inventoryItemRepository, saleItemRepository, entityManager);
         testUser = new User.Builder()
                 .withFirstName("Andy")
                 .withMiddleName("Percy")

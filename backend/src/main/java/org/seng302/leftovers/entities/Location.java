@@ -119,11 +119,7 @@ public class Location {
      * @return true if the street number is valid, false otherwise
      */
     public boolean checkValidStreetNumber(String streetNumber) {
-        if (streetNumber != null && streetNumber.length() > 0 && streetNumber.length() <= 9 && streetNumber.matches("([0-9]+|[0-9]+\\/[0-9]+)[\\p{L}]?")) {
-            return true;
-        } else {
-            return false;
-        }
+        return streetNumber != null && streetNumber.length() > 0 && streetNumber.length() <= 9 && streetNumber.matches("([0-9]+|[0-9]+\\/[0-9]+)[\\p{L}]?");
     }
 
     /**
@@ -136,11 +132,7 @@ public class Location {
      * @return true if the street name is valid, false otherwise
      */
     public boolean checkValidStreetName(String streetName) {
-        if (streetName != null && streetName.length() <= 100 && streetName.length() > 0 && streetName.matches(STREET_NAME_REGEX)) {
-            return true;
-        } else {
-            return false;
-        }
+        return streetName != null && streetName.length() <= 100 && streetName.length() > 0 && streetName.matches(STREET_NAME_REGEX);
     }
 
     /**
@@ -152,11 +144,7 @@ public class Location {
      * @return true if the city name is valid, false otherwise
      */
     public boolean checkValidCity(String city) {
-        if (city != null && city.length() < 100 && city.length() > 0 && city.matches(NAME_REGEX)) {
-            return true;
-        } else {
-            return false;
-        }
+        return city != null && city.length() < 100 && city.length() > 0 && city.matches(NAME_REGEX);
     }
 
     /**
@@ -168,11 +156,7 @@ public class Location {
      * @return true if the region name is valid, false otherwise
      */
     public boolean checkValidRegion(String region) {
-        if (region != null && region.length() < 100 && region.length() > 0 && region.matches(NAME_REGEX)) {
-            return true;
-        } else {
-            return false;
-        }
+        return region != null && region.length() < 100 && region.length() > 0 && region.matches(NAME_REGEX);
     }
 
     /**
@@ -184,11 +168,7 @@ public class Location {
      * @return true if the country name is valid, false otherwise
      */
     public boolean checkValidCountry(String country) {
-        if (country != null && country.length() < 100 && country.length() > 0 && country.matches(NAME_REGEX)) {
-            return true;
-        } else {
-            return false;
-        }
+        return country != null && country.length() < 100 && country.length() > 0 && country.matches(NAME_REGEX);
     }
 
     /**
@@ -200,11 +180,7 @@ public class Location {
      * @return true if the post code number is valid, false otherwise
      */
     public boolean checkValidPostCode(String postCode) {
-        if (postCode != null && postCode.length() <= 16 && postCode.length() > 0 && postCode.matches("[\\p{L}0-9]+")) {
-            return true;
-        } else {
-            return false;
-        }
+        return postCode != null && postCode.length() <= 16 && postCode.length() > 0 && postCode.matches("[\\p{L}0-9]+");
     }
     
     /**
@@ -216,11 +192,7 @@ public class Location {
      * @return true if the district is valid, false otherwise
      */
     public boolean checkValidDistrict(String district) {
-        if (district == null || district.isEmpty() || (district.length() <= 100 && district.matches("[ \\p{L}0-9.'-]+"))) {
-            return true;
-        } else {
-            return false;
-        }
+        return district == null || district.isEmpty() || (district.length() <= 100 && district.matches("[ \\p{L}0-9.'-]+"));
     }
 
     public Long getId() {

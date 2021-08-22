@@ -88,7 +88,7 @@ public class ConversationController {
         var message = new Message(conversation, sender, content);
         message = messageRepository.save(message);
         messageService.notifyConversationParticipants(message, buyer, card.getCreator());
-        return new ResponseEntity(HttpStatus.CREATED);
+        return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
     /**

@@ -73,10 +73,10 @@ class EventControllerTest {
         when(mockEvent.getNotifiedUser()).thenReturn(mockUser);
 
         when(userRepository.findAll()).thenReturn(List.of(mockUser));
-        when(userRepository.findById(eq(7L))).thenReturn(Optional.of(mockUser));
+        when(userRepository.findById(7L)).thenReturn(Optional.of(mockUser));
         when(userRepository.findById(not(eq(7L)))).thenReturn(Optional.empty());
 
-        when(eventRepository.findById(eq(2L))).thenReturn(Optional.of(mockEvent));
+        when(eventRepository.findById(2L)).thenReturn(Optional.of(mockEvent));
         when(eventRepository.findById(not(eq(2L)))).thenReturn(Optional.empty());
 
 

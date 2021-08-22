@@ -88,7 +88,7 @@ public class UserGenerator {
 
             return generatedUserIds;
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error(e.getStackTrace());
             return List.of();
         }
     }

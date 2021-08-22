@@ -37,17 +37,15 @@ public class DemoController {
     private final ProductRepository productRepository;
     private final InventoryItemRepository inventoryItemRepository;
     private final SaleItemRepository saleItemRepository;
-    private final ImageRepository imageRepository;
     private final EntityManager entityManager;
     private static final Logger logger = LogManager.getLogger(DemoController.class.getName());
 
-    public DemoController(UserRepository userRepository, BusinessRepository businessRepository, ProductRepository productRepository, InventoryItemRepository inventoryItemRepository, SaleItemRepository saleItemRepository, ImageRepository imageRepository, EntityManager entityManager) {
+    public DemoController(UserRepository userRepository, BusinessRepository businessRepository, ProductRepository productRepository, InventoryItemRepository inventoryItemRepository, SaleItemRepository saleItemRepository, EntityManager entityManager) {
         this.userRepository = userRepository;
         this.businessRepository = businessRepository;
         this.productRepository = productRepository;
         this.inventoryItemRepository = inventoryItemRepository;
         this.saleItemRepository = saleItemRepository;
-        this.imageRepository = imageRepository;
         this.entityManager = entityManager;
     }
 
@@ -201,8 +199,6 @@ public class DemoController {
         List<Long> allBusinesses = options.getBusinessInitial();
         List<Long> allProducts = options.getProductInitial();
         List<Long> allInventoryItems = options.getInventoryItemInitial();
-        List<Long> allSaleItems = options.getSaleItemInitial();
-
 
         JSONObject json = new JSONObject();
         Session session = entityManager.unwrap(Session.class);

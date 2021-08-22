@@ -16,7 +16,7 @@ public class ProductGenerator {
     private final CommerceNameGenerator commerceNameGenerator = CommerceNameGenerator.getInstance();
     private final DescriptionGenerator descriptionGenerator = DescriptionGenerator.getInstance();
     private final ProductImageGenerator imageGenerator;
-    private final HashSet<String> productCodeHash = new HashSet<String>();
+    private final HashSet<String> productCodeHash = new HashSet<>();
     private final Logger logger = LogManager.getLogger(ProductGenerator.class.getName());
 
     public ProductGenerator(Connection conn) {
@@ -126,7 +126,7 @@ public class ProductGenerator {
                 generatedProductIds.add(productId);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error(e.getMessage());
         }
 
         return generatedProductIds;
