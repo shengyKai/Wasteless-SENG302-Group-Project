@@ -90,13 +90,12 @@ public class StorageServiceImpl implements StorageService {
         if (filename.isEmpty() || filename.isBlank()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Filename not given for deletion");
         }
-        Path file = root.resolve(filename);
+        Path path = root.resolve(filename);
 
-        if (!file.toFile().delete()) {
-            logger.warn(() -> "Failed to delete: \"" + filename + "\"");
+        try {
+            Files.delete(path);
+        } catch (IOException e) {
+            logger.warn("Failed to delete: \"{}\" due to {}", filename, e);
         }
     }
-
-
-
 }

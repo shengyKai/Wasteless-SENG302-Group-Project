@@ -27,8 +27,6 @@ public interface ProductRepository extends PagingAndSortingRepository<Product, L
         Optional<Product> findByBusinessAndProductCode(@Param("business") Business business,
                                                        @Param("productCode") String productCode);
 
-        // List<Product> getAllByBusiness(@Param("Business") Business business, Pageable pageable);
-
         /**
         * Find all then products in the repository which belong to the given business.
         * @param business The business which owns the products.
