@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import static org.seng302.datagenerator.Main.*;
+import static org.seng302.datagenerator.Main.randomDate;
 
 public class InventoryItemGenerator {
     private Random random = new Random();
@@ -105,26 +105,6 @@ public class InventoryItemGenerator {
         }
     }
 
-    public static void main(String[] args) throws SQLException, InterruptedException {
-        Connection conn = connectToDatabase();
-        var userGenerator = new UserGenerator(conn);
-        var businessGenerator = new BusinessGenerator(conn);
-        var productGenerator = new ProductGenerator(conn);
-        var invItemGenerator = new InventoryItemGenerator(conn);
-
-        int userCount = getNumObjectsFromInput("users");
-        List<Long> userIds = userGenerator.generateUsers(userCount);
-
-        int businessCount = getNumObjectsFromInput("businesses");
-        List<Long> businessIds = businessGenerator.generateBusinesses(userIds, businessCount);
-
-        int productCount = getNumObjectsFromInput("products");
-        List<Long> productIds = productGenerator.generateProducts(businessIds, productCount);
-
-        int invItemCount = getNumObjectsFromInput("inventory items");
-        invItemGenerator.generateInventoryItems(productIds, invItemCount);
-    }
-
     /**
      * Generates the inventory items
      * @param invItemCount
@@ -133,7 +113,6 @@ public class InventoryItemGenerator {
     public List<Long> generateInventoryItems(List<Long> productIds, int invItemCount) throws SQLException {
         List<Long> generatedInvItemIds = new ArrayList<>();
         for (int i=0; i < invItemCount; i++) {
-            clear();
             long productId = productIds.get(random.nextInt(productIds.size()));
 
             logger.info("Creating Inventory Item {} / {}", i+1, invItemCount);

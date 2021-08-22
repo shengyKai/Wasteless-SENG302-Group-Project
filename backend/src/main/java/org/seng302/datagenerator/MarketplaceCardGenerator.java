@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import static org.seng302.datagenerator.Main.*;
+import static org.seng302.datagenerator.Main.randomDate;
 
 public class MarketplaceCardGenerator {
     private final Random random = new Random();
@@ -105,8 +105,6 @@ public class MarketplaceCardGenerator {
         try {
             logger.info("Generating {} marketplace cards", cardCount);
             for (int i = 0; i < cardCount; i++) {
-                clear();
-
                 if (i % 10 == 0) {
                     int progress = (int) (((float) (i + 1) / (float) cardCount) * 100);
                     logger.info("Progress: {}%", progress);
@@ -129,21 +127,5 @@ public class MarketplaceCardGenerator {
             e.printStackTrace();
             return List.of();
         }
-    }
-
-    /**
-     * Main program
-     * @param args no arguments should be provided
-     */
-    public static void main(String[] args) throws SQLException, InterruptedException {
-        Connection conn = connectToDatabase();
-        var userGenerator = new UserGenerator(conn);
-        var marketplaceCardGenerator = new MarketplaceCardGenerator(conn);
-
-        int userCount = getNumObjectsFromInput("users");
-        List<Long> userIds = userGenerator.generateUsers(userCount);
-
-        int cardCount = getNumObjectsFromInput("marketplace cards");
-        marketplaceCardGenerator.generateCards(userIds, cardCount);
     }
 }

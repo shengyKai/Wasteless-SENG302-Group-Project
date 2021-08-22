@@ -10,8 +10,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 
-import static org.seng302.datagenerator.Main.*;
-
 public class ProductGenerator {
     private final Random random = new Random();
     private final Connection conn;
@@ -108,25 +106,6 @@ public class ProductGenerator {
     }
 
     /**
-     * The main program
-     */
-    public static void main(String[] args) throws InterruptedException, SQLException {
-        Connection conn = connectToDatabase();
-        var userGenerator = new UserGenerator(conn);
-        var businessGenerator = new BusinessGenerator(conn);
-        var productGenerator = new ProductGenerator(conn);
-
-        int userCount = getNumObjectsFromInput("users");
-        List<Long> userIds = userGenerator.generateUsers(userCount);
-
-        int businessCount = getNumObjectsFromInput("businesses");
-        List<Long> businessIds = businessGenerator.generateBusinesses(userIds, businessCount);
-
-        int productCount = getNumObjectsFromInput("products");
-        productGenerator.generateProducts(businessIds, productCount);
-    }
-
-    /**
      * Generates the products
      * @param productCount Number of products to generate
      * @param businessIds List of business IDs
@@ -137,7 +116,6 @@ public class ProductGenerator {
         List<Long> generatedProductIds = new ArrayList<>();
         try {
             for (int i=0; i < productCount; i++) {
-                clear();
                 long businessId = businessIds.get(random.nextInt(businessIds.size()));
 
                 logger.info("Creating Product {} / {}", i+1, productCount);
