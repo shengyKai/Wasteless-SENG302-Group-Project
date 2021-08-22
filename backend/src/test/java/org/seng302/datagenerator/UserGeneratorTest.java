@@ -3,6 +3,8 @@ package org.seng302.datagenerator;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.junit.runner.RunWith;
 import org.seng302.leftovers.Main;
 import org.seng302.leftovers.persistence.UserRepository;
@@ -14,11 +16,12 @@ import java.sql.*;
 import java.util.List;
 import java.util.Map;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes={Main.class})
-public class UserGeneratorTest {
+class UserGeneratorTest {
     private Connection conn;
     private UserGenerator userGenerator;
 
@@ -57,9 +60,7 @@ public class UserGeneratorTest {
         stmt.executeQuery();
         ResultSet results = stmt.getResultSet();
         results.next();
-        if (results.getLong(1) != 1) {
-            fail();
-        }
+        assertEquals(1, results.getLong(1));
     }
 
     /**
@@ -74,47 +75,13 @@ public class UserGeneratorTest {
         return results.getLong(1);
     }
 
-    @Test
-    void generateUsers_generateOneUserAndConsistentData_oneUserGenerated() throws SQLException {
-        List<Long> userIds = userGenerator.generateUsers(1);
-        if (userIds.size() != 1) {
-            fail();
-        }
-        long userId = userIds.get(0);
-        checkRequiredFieldsNotNull(userId);
-    }
-
-    @Test
-    void generateUsers_generateTwoUsersConsistentData_twoUsersGenerated() throws SQLException {
-        List<Long> userIds = userGenerator.generateUsers(2);
-        if (userIds.size() != 2) {
-            fail();
-        }
-        for (int i=0; i < userIds.size(); i++) {
-            checkRequiredFieldsNotNull(userIds.get(i));
-        }
-        //How to check if data is consistent?
-    }
-
-    @Test
-    void generateUsers_generateTenUsersConsistentData_tenUsersGenerated() throws SQLException {
-        List<Long> userIds = userGenerator.generateUsers(10);
-        if (userIds.size() != 10) {
-            fail();
-        }
-        for (int i=0; i < userIds.size(); i++) {
-            checkRequiredFieldsNotNull(userIds.get(i));
-        }
-    }
-
-    @Test
-    void generateUsers_generateHundredUsersConsistentData_hundredUsersGenerated() throws SQLException {
-        List<Long> userIds = userGenerator.generateUsers(100);
-        if (userIds.size() != 100) {
-            fail();
-        }
-        for (int i=0; i < userIds.size(); i++) {
-            checkRequiredFieldsNotNull(userIds.get(i));
+    @ParameterizedTest
+    @ValueSource(ints = {1, 2, 10, 100})
+    void generateUsers_generateSomeUsersConsistentData_validAndExpectedNumberOfUsersGenerated(int count) throws SQLException {
+        List<Long> userIds = userGenerator.generateUsers(count);
+        assertEquals(count, userIds.size());
+        for (Long userId : userIds) {
+            checkRequiredFieldsNotNull(userId);
         }
     }
 
@@ -123,9 +90,7 @@ public class UserGeneratorTest {
         long usersInDB = getNumUsersInDB();
         userGenerator.generateUsers(0);
         long usersInDBAfter = getNumUsersInDB();
-        if (usersInDB != usersInDBAfter) {
-            fail();
-        }
+        assertEquals(usersInDB, usersInDBAfter);
     }
 
     @Test
@@ -133,9 +98,7 @@ public class UserGeneratorTest {
         long usersInDB = getNumUsersInDB();
         userGenerator.generateUsers(-1);
         long usersInDBAfter = getNumUsersInDB();
-        if (usersInDB != usersInDBAfter) {
-            fail();
-        }
+        assertEquals(usersInDB, usersInDBAfter);
     }
 
     @Test
@@ -143,9 +106,7 @@ public class UserGeneratorTest {
         long usersInDB = getNumUsersInDB();
         userGenerator.generateUsers(-10);
         long usersInDBAfter = getNumUsersInDB();
-        if (usersInDB != usersInDBAfter) {
-            fail();
-        }
+        assertEquals(usersInDB, usersInDBAfter);
     }
 
 

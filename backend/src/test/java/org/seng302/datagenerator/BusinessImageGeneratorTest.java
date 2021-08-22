@@ -20,14 +20,14 @@ import java.sql.*;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 
 @RunWith(SpringRunner.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(classes={Main.class})
-public class BusinessImageGeneratorTest {
+class BusinessImageGeneratorTest {
     private Connection conn;
 
     private UserGenerator userGenerator;
@@ -96,9 +96,7 @@ public class BusinessImageGeneratorTest {
         stmt.executeQuery();
         ResultSet results = stmt.getResultSet();
         results.next();
-        if (results.getLong(1) != expectedCount) {
-            fail();
-        }
+        assertEquals(expectedCount, results.getLong(1));
     }
 
     /**
@@ -114,54 +112,54 @@ public class BusinessImageGeneratorTest {
     }
 
     @Test
-    void oneBusiness_GenerateOneImage_oneImageGenerated() throws SQLException {
+    void oneBusiness_generateOneImage_oneImageGenerated() throws SQLException {
         var businessIds = createTestBusinesses(1);
         var imageIds = businessImageGenerator.generateBusinessImages(businessIds, 1, 1);
-        Assertions.assertEquals(1, imageIds.size());
+        assertEquals(1, imageIds.size());
         checkRequiredFieldsNotNull(businessIds.get(0), 1);
-        Assertions.assertEquals(1, getNumImagesInDB());
+        assertEquals(1, getNumImagesInDB());
     }
 
     @ParameterizedTest
     @ValueSource(ints = {2, 7, 12})
-    void manyBusinesses_GenerateOneImageEach_manyImageGenerated(int count) throws SQLException {
+    void manyBusinesses_generateOneImageEach_manyImageGenerated(int count) throws SQLException {
         var businessIds = createTestBusinesses(count);
         var imageIds = businessImageGenerator.generateBusinessImages(businessIds, 1, 1);
-        Assertions.assertEquals(count, imageIds.size());
+        assertEquals(count, imageIds.size());
         for (var businessId : businessIds) {
             checkRequiredFieldsNotNull(businessId, 1);
         }
-        Assertions.assertEquals(count, getNumImagesInDB());
+        assertEquals(count, getNumImagesInDB());
     }
     @ParameterizedTest
     @ValueSource(ints = {0, 1, 5})
-    void oneBusiness_GenerateRangeImagesLowerBound_generatedMoreThanLower(int lowerBound) throws SQLException {
+    void oneBusiness_generateRangeImagesLowerBound_generatedMoreThanLower(int lowerBound) throws SQLException {
         int upperBound = lowerBound + 2;
         var businessIds = createTestBusinesses(1);
         var imageIds = businessImageGenerator.generateBusinessImages(businessIds, lowerBound, upperBound);
-        Assertions.assertTrue(imageIds.size() >= lowerBound);
-        Assertions.assertTrue(getNumImagesInDB() >= lowerBound);
+        assertTrue(imageIds.size() >= lowerBound);
+        assertTrue(getNumImagesInDB() >= lowerBound);
     }
     @ParameterizedTest
     @ValueSource(ints = {2, 5, 10})
-    void oneBusiness_GenerateRangeImagesUpperBound_generatedLessThanUpper(int upperBound) throws SQLException {
+    void oneBusiness_generateRangeImagesUpperBound_generatedLessThanUpper(int upperBound) throws SQLException {
         int lowerBound = upperBound - 2;
         var businessIds = createTestBusinesses(1);
         var imageIds = businessImageGenerator.generateBusinessImages(businessIds, lowerBound, upperBound);
-        Assertions.assertTrue(imageIds.size() <= upperBound);
-        Assertions.assertTrue(getNumImagesInDB() <= upperBound);
+        assertTrue(imageIds.size() <= upperBound);
+        assertTrue(getNumImagesInDB() <= upperBound);
     }
 
     @ParameterizedTest
     @ValueSource(ints = {2, 5, 10})
-    void manyBusiness_GenerateRangeImages_generatedWithinRange(int count) throws SQLException {
+    void manyBusiness_generateRangeImages_generatedWithinRange(int count) throws SQLException {
         var lowerBound = 2;
         var upperBound = 5;
         var businessIds = createTestBusinesses(count);
         var imageIds = businessImageGenerator.generateBusinessImages(businessIds, lowerBound, upperBound);
-        Assertions.assertTrue(imageIds.size() <= count * upperBound);
-        Assertions.assertTrue(imageIds.size() >= count * lowerBound);
-        Assertions.assertTrue(getNumImagesInDB() <= count * upperBound);
-        Assertions.assertTrue(getNumImagesInDB() >= count * lowerBound);
+        assertTrue(imageIds.size() <= count * upperBound);
+        assertTrue(imageIds.size() >= count * lowerBound);
+        assertTrue(getNumImagesInDB() <= (long)count * upperBound);
+        assertTrue(getNumImagesInDB() >= (long)count * lowerBound);
     }
 }

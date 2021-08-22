@@ -3,6 +3,8 @@ package org.seng302.datagenerator;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.junit.runner.RunWith;
 import org.seng302.leftovers.Main;
 import org.seng302.leftovers.entities.Business;
@@ -25,7 +27,7 @@ import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes={Main.class})
-public class ProductGeneratorTest {
+class ProductGeneratorTest {
     private Connection conn;
     private UserGenerator userGenerator;
     private BusinessGenerator businessGenerator;
@@ -75,7 +77,7 @@ public class ProductGeneratorTest {
         stmt.executeQuery();
         ResultSet results = stmt.getResultSet();
         results.next();
-        assertEquals(results.getLong(1), 1);
+        assertEquals(1, results.getLong(1));
     }
 
     /**
@@ -99,54 +101,17 @@ public class ProductGeneratorTest {
      */
     public List<Long> generateUserAndBusiness(int userCount, int businessCount) {
         List<Long> userIds = userGenerator.generateUsers(userCount);
-        List<Long> businessIds = businessGenerator.generateBusinesses(userIds, businessCount);
-        return businessIds;
+        return businessGenerator.generateBusinesses(userIds, businessCount);
     }
 
-    @Test
-    void generateProducts_generateOneProduct_oneProductGenerated() throws SQLException {
+    @ParameterizedTest
+    @ValueSource(ints = {1, 2, 10, 100})
+    void generateProducts_generateSomeProducts_correctNumberOfValidProductsGenerated(int count) throws SQLException {
         List<Long> businessIds = generateUserAndBusiness(1, 1);
-        List<Long> productIds = productGenerator.generateProducts(businessIds, 1);
-        if (productIds.size() != 1) {
-            fail();
-        }
-        long productId = productIds.get(0);
-        checkRequiredFieldsNotNull(productId);
-    }
-
-    @Test
-    void generateProducts_generateTwoProducts_twoProductsGenerated() throws SQLException {
-        List<Long> businessIds = generateUserAndBusiness(1, 1);
-        List<Long> productIds = productGenerator.generateProducts(businessIds, 2);
-        if (productIds.size() != 2) {
-            fail();
-        }
-        for (int i=0; i < productIds.size(); i++) {
-            checkRequiredFieldsNotNull(productIds.get(i));
-        }
-    }
-
-    @Test
-    void generateProducts_generateTenProducts_tenProductsGenerated() throws SQLException {
-        List<Long> businessIds = generateUserAndBusiness(1, 1);
-        List<Long> productIds = productGenerator.generateProducts(businessIds, 10);
-        if (productIds.size() != 10) {
-            fail();
-        }
-        for (int i=0; i < productIds.size(); i++) {
-            checkRequiredFieldsNotNull(productIds.get(i));
-        }
-    }
-
-    @Test
-    void generateProducts_generateHundredProducts_hundredProductsGenerated() throws SQLException {
-        List<Long> businessIds = generateUserAndBusiness(1, 1);
-        List<Long> productIds = productGenerator.generateProducts(businessIds, 100);
-        if (productIds.size() != 100) {
-            fail();
-        }
-        for (int i=0; i < productIds.size(); i++) {
-            checkRequiredFieldsNotNull(productIds.get(i));
+        List<Long> productIds = productGenerator.generateProducts(businessIds, count);
+        assertEquals(count, productIds.size());
+        for (Long productId : productIds) {
+            checkRequiredFieldsNotNull(productId);
         }
     }
 
@@ -154,7 +119,7 @@ public class ProductGeneratorTest {
     void generateProducts_generateZeroProducts_noProductGenerated() throws SQLException {
         long productsInDB = getNumProductsInDB();
         List<Long> businessIds = generateUserAndBusiness(1, 1);
-        List<Long> productIds = productGenerator.generateProducts(businessIds, 0);
+        productGenerator.generateProducts(businessIds, 0);
         long productsInDBAfter = getNumProductsInDB();
         assertEquals(productsInDB, productsInDBAfter);
     }
@@ -163,7 +128,7 @@ public class ProductGeneratorTest {
     void generateProducts_generateNegativeOneProducts_noProductGenerated() throws SQLException {
         long productsInDB = getNumProductsInDB();
         List<Long> businessIds = generateUserAndBusiness(1, 1);
-        List<Long> productIds = productGenerator.generateProducts(businessIds, -1);
+        productGenerator.generateProducts(businessIds, -1);
         long productsInDBAfter = getNumProductsInDB();
         assertEquals(productsInDB, productsInDBAfter);
     }
@@ -172,7 +137,7 @@ public class ProductGeneratorTest {
     void generateProducts_generateNegativeTenProducts_noProductGenerated() throws SQLException {
         long productsInDB = getNumProductsInDB();
         List<Long> businessIds = generateUserAndBusiness(1, 1);
-        List<Long> productIds = productGenerator.generateProducts(businessIds, -10);
+        productGenerator.generateProducts(businessIds, -10);
         long productsInDBAfter = getNumProductsInDB();
         assertEquals(productsInDB, productsInDBAfter);
     }
