@@ -86,7 +86,7 @@ public class UserStepDefinition {
                 .withPassword("12345678abc")
                 .withBio("g")
                 .withDob("2001-03-11")
-                .withPhoneNumber("1234567890")
+                .withPhoneNumber("12 34567890")
                 .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
                         "Canterbury,8041"))
                 .build();
@@ -104,7 +104,7 @@ public class UserStepDefinition {
                 .withPassword("12345678abc")
                 .withBio("g")
                 .withDob("2001-03-11")
-                .withPhoneNumber("1234567890")
+                .withPhoneNumber("12 34567890")
                 .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
                         "Canterbury,8041"))
                 .build();
@@ -122,7 +122,7 @@ public class UserStepDefinition {
                 .withPassword(password)
                 .withBio("g")
                 .withDob("2001-03-11")
-                .withPhoneNumber("1234567890")
+                .withPhoneNumber("12 34567890")
                 .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
                         "Canterbury,8041"))
                 .build();
@@ -140,7 +140,7 @@ public class UserStepDefinition {
                 .withPassword("12345678abc")
                 .withBio("g")
                 .withDob("2001-03-11")
-                .withPhoneNumber("1234567890")
+                .withPhoneNumber("12 34567890")
                 .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
                         "Canterbury,8041"))
                 .build();
