@@ -2075,7 +2075,7 @@ paths:
               - name
               - description
               - manufacturer
-              - product code
+              - productCode
         - name: reverse
           in: query
           description: Whether to flip default sort order (default is ascending)
