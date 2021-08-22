@@ -18,7 +18,10 @@
                 v-bind="attrs"
                 v-on="on"
               >
-                <UserAvatar :user="user" size="small" />
+                <UserAvatar v-if="isUser" :user="user" size="small" />
+                <v-list-item-avatar v-else v-list-item-avatar size="30">
+                  <v-img :src="actingBusiness.images[0]" height="100%"/>
+                </v-list-item-avatar>
                 <div class="name">
                   {{ roles[selectedRole].displayText }}
                 </div>
@@ -151,7 +154,17 @@ export default {
       }
 
       return result;
-    }
+    },
+    actingBusiness() {
+      if (this.selectedRole.type !== 'business') return undefined;
+
+      for (let business of this.user.businessesAdministered) {
+        if (business.id === this.selectedRole.id) {
+          return business;
+        }
+      }
+      return undefined;
+    },
   },
   watch : {
     selectedRole() {
