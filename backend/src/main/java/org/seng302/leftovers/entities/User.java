@@ -59,7 +59,7 @@ public class User extends Account {
     123.456.7890
     +91 (123) 456-7890
      */
-    private static final String PHONE_REGEX = "^[0-9]{4,15}$";
+    private static final String PHONE_REGEX = "(^[0-9]{2,3})[ ]([0-9]{4,12})$";
 
 
     protected User() {}
