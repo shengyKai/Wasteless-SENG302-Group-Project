@@ -1,6 +1,5 @@
 package org.seng302.leftovers.controllers;
 
-import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -10,26 +9,20 @@ import org.seng302.leftovers.entities.Product;
 import org.seng302.leftovers.persistence.BusinessRepository;
 import org.seng302.leftovers.persistence.InventoryItemRepository;
 import org.seng302.leftovers.persistence.ProductRepository;
-import org.seng302.leftovers.tools.AuthenticationTokenManager;
 import org.seng302.leftovers.tools.JsonTools;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import org.seng302.leftovers.tools.SearchHelper;
 
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 
 import javax.servlet.http.HttpServletRequest;
-import java.lang.annotation.Repeatable;
 import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.util.List;
 import java.util.Set;
-import java.util.Comparator;
 
 @RestController
 public class InventoryController {
@@ -210,7 +203,8 @@ public class InventoryController {
 
         PageRequest pageRequest = SearchHelper.getPageRequest(page, resultsPerPage, Sort.by(sortOrder));
 
-        Page<InventoryItem> result = inventoryItemRepository.findAllForBusiness(business, pageRequest);
+        Specification<InventoryItem> specification = SearchHelper.constructSpecificationFromInventoryItemsFilter(business);
+        Page<InventoryItem> result = inventoryItemRepository.findAll(specification, pageRequest);
         
         return JsonTools.constructPageJSON(result.map(InventoryItem::constructJSONObject));
 

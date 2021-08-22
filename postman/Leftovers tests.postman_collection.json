@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "f4730c60-4c54-4e44-b360-683e856bcae6",
+		"_postman_id": "7de4be31-2f69-44e4-8598-9d4e5a9844f4",
 		"name": "Leftovers tests",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -37,7 +37,6 @@
 				{
 					"listen": "test",
 					"script": {
-						"id": "740aa099-111b-4040-afee-b0b5760d364c",
 						"exec": [
 							"const authToken = pm.response.json().token;",
 							"if (typeof authToken !== \"undefined\") {",
@@ -82,7 +81,6 @@
 				{
 					"listen": "prerequest",
 					"script": {
-						"id": "f55452a0-18d2-4849-a8bd-4cfdaadf99a8",
 						"exec": [
 							""
 						],
@@ -92,7 +90,6 @@
 				{
 					"listen": "test",
 					"script": {
-						"id": "5bb6ae87-e722-43eb-a970-3abd05b3744c",
 						"exec": [
 							"pm.test(\"Status code is 201\", function () {",
 							"    pm.response.to.have.status(201);",
@@ -145,7 +142,6 @@
 				{
 					"listen": "prerequest",
 					"script": {
-						"id": "f55452a0-18d2-4849-a8bd-4cfdaadf99a8",
 						"exec": [
 							""
 						],
@@ -155,7 +151,6 @@
 				{
 					"listen": "test",
 					"script": {
-						"id": "5bb6ae87-e722-43eb-a970-3abd05b3744c",
 						"exec": [
 							"pm.test(\"Status code is 400\", function () {",
 							"    pm.response.to.have.status(400);",
@@ -203,7 +198,6 @@
 				{
 					"listen": "test",
 					"script": {
-						"id": "48ae95c5-e960-4df9-9947-af7d1590570b",
 						"exec": [
 							"pm.test(\"Status code is 201\", function () {",
 							"    pm.response.to.have.status(201);",
@@ -248,10 +242,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"title\": \"1982 Lada Samara\",\n    \"creatorId\": {{user_id}},\n    \"section\": \"Wanted\",\n    \"keywordIds\": [\n    ],\n    \"description\": \"Beige, suitable for a hen house. Fair condition. Some rust. As is, where is. Will swap for budgerigar.\"\n}",
-					"options": {
-						"raw": {}
-					}
+					"raw": "{\n    \"title\": \"1982 Lada Samara\",\n    \"creatorId\": {{user_id}},\n    \"section\": \"Wanted\",\n    \"keywordIds\": [\n    ],\n    \"description\": \"Beige, suitable for a hen house. Fair condition. Some rust. As is, where is. Will swap for budgerigar.\"\n}"
 				},
 				"url": {
 					"raw": "{{baseUrl}}/cards",
@@ -271,7 +262,6 @@
 				{
 					"listen": "test",
 					"script": {
-						"id": "09c4543d-3b49-46dd-9fac-9cf0a9ce2d89",
 						"exec": [
 							"pm.test(\"Status code is 201\", function () {",
 							"    pm.response.to.have.status(201);",
@@ -318,7 +308,6 @@
 				{
 					"listen": "test",
 					"script": {
-						"id": "09c4543d-3b49-46dd-9fac-9cf0a9ce2d89",
 						"exec": [
 							"pm.test(\"Status code is 200\", function () {",
 							"    pm.response.to.have.status(200);",
@@ -380,7 +369,6 @@
 				{
 					"listen": "test",
 					"script": {
-						"id": "dcece915-9ab9-4d65-9d5c-28d65f5f2c61",
 						"exec": [
 							"pm.test(\"Status code is 200\", function () {",
 							"    pm.response.to.have.status(200);",
@@ -434,7 +422,6 @@
 				{
 					"listen": "test",
 					"script": {
-						"id": "dcece915-9ab9-4d65-9d5c-28d65f5f2c61",
 						"exec": [
 							"pm.test(\"Status code is 400\", function () {",
 							"    pm.response.to.have.status(400);",
@@ -488,7 +475,6 @@
 				{
 					"listen": "test",
 					"script": {
-						"id": "abc450f3-b114-4f55-b4c8-71ad6da3b16d",
 						"exec": [
 							"const authToken = pm.response.json().token;",
 							"if (typeof authToken !== \"undefined\") {",
@@ -578,7 +564,6 @@
 				{
 					"listen": "test",
 					"script": {
-						"id": "470cf532-26f9-49e5-97e5-8a1f89f1ec81",
 						"exec": [
 							"pm.test(\"Status code is 406\", function () {",
 							"    pm.response.to.have.status(406);",
@@ -658,7 +643,6 @@
 				{
 					"listen": "test",
 					"script": {
-						"id": "0050520c-74fd-48db-a45c-b25765c295c7",
 						"exec": [
 							"pm.test(\"Status code is 201\", function () {",
 							"    pm.response.to.have.status(201);",
@@ -698,10 +682,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"senderId\": 1,\n    \"message\": \"hey dude!\"\n}",
-					"options": {
-						"raw": {}
-					}
+					"raw": "{\n    \"senderId\": 1,\n    \"message\": \"hey dude!\"\n}"
 				},
 				"url": {
 					"raw": "{{baseUrl}}/cards/:cardId/conversations/:buyerId",
@@ -734,7 +715,6 @@
 				{
 					"listen": "test",
 					"script": {
-						"id": "470cf532-26f9-49e5-97e5-8a1f89f1ec81",
 						"exec": [
 							"pm.test(\"Status code is 200\", function () {",
 							"    pm.response.to.have.status(200);",
@@ -826,7 +806,6 @@
 				{
 					"listen": "test",
 					"script": {
-						"id": "69b25559-d404-426c-8a89-5dd3b2662627",
 						"exec": [
 							"pm.test(\"Status code is 200\", function () {",
 							"    pm.response.to.have.status(200);",
@@ -880,7 +859,6 @@
 				{
 					"listen": "test",
 					"script": {
-						"id": "69b25559-d404-426c-8a89-5dd3b2662627",
 						"exec": [
 							"pm.test(\"Status code is 403\", function () {",
 							"    pm.response.to.have.status(403);",
@@ -927,7 +905,78 @@
 				}
 			},
 			"response": []
+		},
+		{
+			"name": "Create Product",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"name\": \"Watties Baked Beans - 420g can\",\r\n    \"id\": \"WATT-420-BEANS\",\r\n    \"description\": \"Baked Beans as they should be.\",\r\n    \"manufacturer\": \"Apple\",\r\n    \"recommendedRetailPrice\": 2.2\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/businesses/:businessId/products",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"businesses",
+						":businessId",
+						"products"
+					],
+					"variable": [
+						{
+							"key": "businessId",
+							"value": "{{business_id}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Search Products",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"searchQuery\": \"Beans\",\r\n    \"page\": 1,\r\n    \"resultsPerPage\": 10,\r\n    \"searchBy\": \"[name]\",\r\n    \"reverse\": false,\r\n    \"orderBy\": \"name\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/businesses/:businessId/products/search",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"businesses",
+						":businessId",
+						"products",
+						"search"
+					],
+					"variable": [
+						{
+							"key": "businessId",
+							"value": "{{business_id}}"
+						}
+					]
+				}
+			},
+			"response": []
 		}
-	],
-	"protocolProfileBehavior": {}
+	]
 }

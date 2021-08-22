@@ -1,10 +1,12 @@
 package org.seng302.leftovers.controllers;
 
 // import net.bytebuddy.asm.Advice.OffsetMapping.Sort;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.seng302.leftovers.dto.ProductFilterOption;
 import org.seng302.leftovers.entities.Business;
 import org.seng302.leftovers.entities.Image;
 import org.seng302.leftovers.entities.Product;
@@ -13,10 +15,11 @@ import org.seng302.leftovers.persistence.BusinessRepository;
 import org.seng302.leftovers.persistence.ImageRepository;
 import org.seng302.leftovers.persistence.ProductRepository;
 import org.seng302.leftovers.service.ImageService;
-import org.seng302.leftovers.service.StorageService;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
+import org.seng302.leftovers.tools.JsonTools;
 import org.seng302.leftovers.tools.SearchHelper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -29,6 +32,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * This class handles requests for retrieving and saving products
@@ -50,6 +54,7 @@ public class ProductController {
     }
 
     private static final Set<String> VALID_ORDERINGS = Set.of("name", "description", "manufacturer","recommendedRetailPrice", "created", "productCode");
+    private static final Set<ProductFilterOption> VALID_SEARCHES = Set.of(ProductFilterOption.values());
 
     /**
      * REST GET method to retrieve all the products with a business's catalogue.
@@ -69,8 +74,75 @@ public class ProductController {
         AuthenticationTokenManager.checkAuthenticationToken(request);
                             
         logger.info(() -> String.format("Retrieving catalogue from business with id %d.", id));
-        Optional<Business> business = businessRepository.findById(id);
+        Business business = businessRepository.getBusinessById(id);
 
+        List<Sort.Order> sortOrder = getSortOrder(orderBy, reverse);
+
+        business.checkSessionPermissions(request);
+        PageRequest pageablePage = SearchHelper.getPageRequest(page, resultsPerPage, Sort.by(sortOrder));
+        Page<Product> catalogue = productRepository.getAllByBusiness(business, pageablePage);
+        return JsonTools.constructPageJSON(catalogue.map(Product::constructJSONObject));
+    }
+
+    /**
+     * GET endpoint to retrieve products from a business with searching
+     * @param id of business
+     * @param request HTTP request
+     * @param searchQuery to match searchBy field
+     * @param page of results to return
+     * @param resultsPerPage products per page and amount to return
+     * @param searchBy field of product to search
+     * @param reverse most or least relevant
+     * @param orderBy field to sort results by
+     * @return List of products
+     */
+    @GetMapping("/businesses/{id}/products/search")
+    public JSONObject retrieveCatalogueSearch(@PathVariable Long id,
+                                              HttpServletRequest request,
+                                              @RequestParam(required = false) String searchQuery,
+                                              @RequestParam(required = false) Integer page,
+                                              @RequestParam(required = false) Integer resultsPerPage,
+                                              @RequestParam(required = false) List<String> searchBy,
+                                              @RequestParam(required = false) Boolean reverse,
+                                              @RequestParam(required = false) String orderBy
+                                              ) {
+        logger.info("Get catalogue by business id.");
+        AuthenticationTokenManager.checkAuthenticationToken(request);
+
+        logger.info(() -> String.format("Retrieving catalogue from business with id %d.", id));
+        Business business = businessRepository.getBusinessById(id);
+
+        // Convert searchBy into ProductFilterOption type and check valid
+        searchBy = Optional.ofNullable(searchBy).orElse(Arrays.asList("name", "description", "manufacturer", "productCode"));
+        Set<ProductFilterOption> searchSet = new HashSet<>();
+        ObjectMapper objectMapper = new ObjectMapper();
+        for (String col : searchBy) {
+            ProductFilterOption option = objectMapper.convertValue(col, ProductFilterOption.class);
+            searchSet.add(option);
+        }
+
+        for (ProductFilterOption field : searchSet) {
+            if (!VALID_SEARCHES.contains(field)) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "SearchBy term " + searchBy + " is invalid");
+            }
+        }
+
+        business.checkSessionPermissions(request);
+        List<Sort.Order> sortOrder = getSortOrder(orderBy, reverse);
+        PageRequest pageablePage = SearchHelper.getPageRequest(page, resultsPerPage, Sort.by(sortOrder));
+        Specification<Product> prodSpec = SearchHelper.constructSpecificationFromProductSearch(business, searchQuery, searchSet);
+
+        Page<Product> catalogue = productRepository.findAll(prodSpec, pageablePage);
+        return JsonTools.constructPageJSON(catalogue.map(Product::constructJSONObject));
+    }
+
+    /**
+     * How to sort your results
+     * @param orderBy Field to sort results by
+     * @param reverse Whether results should be forward or backward
+     * @return sortOrder
+     */
+    private List<Sort.Order> getSortOrder(String orderBy, Boolean reverse) {
         orderBy = Optional.ofNullable(orderBy).orElse("productCode");
         if (!VALID_ORDERINGS.contains(orderBy)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "OrderBy term " + orderBy + " is invalid");
@@ -79,29 +151,9 @@ public class ProductController {
         List<Sort.Order> sortOrder;
         Sort.Direction direction = SearchHelper.getSortDirection(reverse);
         sortOrder = List.of(new Sort.Order(direction, orderBy ).ignoreCase());
-
-    
-        if (business.isEmpty()) {
-            BusinessNotFoundException notFound = new BusinessNotFoundException();
-            logger.error(notFound.getMessage());
-            throw notFound;
-        } else {
-            business.get().checkSessionPermissions(request);
-            PageRequest pageablePage = SearchHelper.getPageRequest(page, resultsPerPage, Sort.by(sortOrder));
-            Page<Product> catalogue = productRepository.getAllByBusiness(business.get(), pageablePage);
-
-            JSONArray responseBody = new JSONArray();
-            for (Product product: catalogue) {
-                responseBody.appendElement(product.constructJSONObject());
-            }
-            JSONObject json = new JSONObject();
-            json.put("count", catalogue.getTotalElements());
-            json.put("results", responseBody);
-            return json;
-        }
+        return sortOrder;
     }
-
-
+    
     /**
      * POST endpoint for adding a product to a businesses catalogue.
      * This is only accessible to the DGAA, the business owner or a business admin.

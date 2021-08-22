@@ -25,6 +25,7 @@
 
 <script>
 import convertAddressToReadableText from '../utils/Methods/convertJsonAddressToReadableText';
+import {imageSrcFromFilename} from "@/utils";
 
 export default {
   props: {
@@ -47,7 +48,7 @@ export default {
       if (url === undefined) {
         url = image.filename;
       }
-      return new URL(url, process.env.VUE_APP_SERVER_ADD).href;
+      return imageSrcFromFilename(url);
     },
   },
 };

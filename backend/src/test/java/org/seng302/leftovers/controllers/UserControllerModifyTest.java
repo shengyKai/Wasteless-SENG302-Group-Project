@@ -46,6 +46,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class UserControllerModifyTest {
     private long mockUserId = 5L;
     private String validCurrentPassword = "HappyBoiGeorge69#";
+    private String takenNewEmail = "This@gmail.com";
     
     private MockMvc mockMvc;
 
@@ -181,6 +182,25 @@ public class UserControllerModifyTest {
         verify(userRepository, times(1)).save(mockUser);
         verify(mockUser, times(1)).setEmail(newEmail);
         verify(mockUser, times(1)).setAuthenticationCodeFromPassword(newPassword);
+    }
+
+    @Test
+    void modifyUser_newEmailAlreadyInUse_notModifiedUser400() throws Exception {
+        when(userRepository.findByEmail(takenNewEmail)).thenReturn(mockUser);
+
+        var jsonBody = createValidRequest();
+        jsonBody.put("email", takenNewEmail);
+        jsonBody.put("password", validCurrentPassword);
+
+        mockMvc.perform(MockMvcRequestBuilders
+                .put("/users/" + mockUserId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jsonBody.toString()))
+                .andExpect(status().isConflict())
+                .andReturn();
+
+        verify(userRepository, times(1)).getUser(mockUserId);
+        verify(userRepository, times(0)).save(mockUser);
     }
 
     @Test
