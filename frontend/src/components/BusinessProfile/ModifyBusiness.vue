@@ -148,7 +148,7 @@
                       </v-alert>
                     </v-row>
                   </div>
-                  <v-card-title class="mt-n3">Set Primary Image</v-card-title>
+                  <v-card-title class="mt-n3">Image</v-card-title>
                   <v-card v-if="businessImages && businessImages.length > 0">
                     <ImageCarousel
                       :imagesList="businessImages"
@@ -480,6 +480,6 @@ export default {
 }
 
 .upload-image {
-  margin-top: 15px;
+  margin-top: 25px;
 }
 </style>
