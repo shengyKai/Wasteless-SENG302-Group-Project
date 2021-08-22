@@ -136,7 +136,7 @@ class UserControllerTest {
         List<User> userList = new ArrayList<User>();
         String row;
         BufferedReader csvReader = new BufferedReader(new InputStreamReader(
-                    Objects.requireNonNull(UserControllerTest.class.getResourceAsStream(resourceName))
+                    Objects.requireNonNull(UserControllerTest.class.getResourceAsStream("/testData/" + resourceName))
                 ));
 
         csvReader.readLine(); // Skip header line
@@ -169,7 +169,7 @@ class UserControllerTest {
         List<JSONObject> jsonList = new ArrayList<>();
         String row;
         BufferedReader csvReader = new BufferedReader(new InputStreamReader(
-                Objects.requireNonNull(UserControllerTest.class.getResourceAsStream(resourceName))
+                Objects.requireNonNull(UserControllerTest.class.getResourceAsStream("/testData/" + resourceName))
         ));
         csvReader.readLine();
         while ((row = csvReader.readLine()) != null) {

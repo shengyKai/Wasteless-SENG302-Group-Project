@@ -23,6 +23,7 @@ import javax.transaction.Transactional;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.text.ParseException;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
@@ -91,8 +92,8 @@ class SearchHelperTest {
                 .with("nickname", ":", "andy", true);
         spec = builder.build();
 
-        pagingUserList = readUserFile("src/test/testFiles/UserSearchHelperTestData1.csv");
-        savedUserList = readUserFile("src/test/testFiles/UserSearchHelperTestData2.csv");
+        pagingUserList = readUserFile("UserSearchHelperTestData1.csv");
+        savedUserList = readUserFile("UserSearchHelperTestData2.csv");
 
         dgaaController.checkDGAA();
         userRepository.deleteAll();
@@ -110,10 +111,12 @@ class SearchHelperTest {
         userRepository.deleteAll();
     }
 
-    private List<User> readUserFile(String filepath) throws IOException {
+    private List<User> readUserFile(String resourceName) throws IOException {
         List<User> userList = new ArrayList<>();
         String row;
-        BufferedReader csvReader = new BufferedReader(new FileReader(filepath));
+        BufferedReader csvReader = new BufferedReader(new InputStreamReader(
+                Objects.requireNonNull(SearchHelperTest.class.getResourceAsStream("/testData/" + resourceName))
+        ));
         while ((row = csvReader.readLine()) != null) {
             try {
                 String[] userData = row.split("\\|");
