@@ -90,7 +90,7 @@ example:
     "generateImages"        : true
 }
 ```
-Entity can be commend out by doing `userCount`.
+Entity can be commend out by doing `_userCount`.
 
 ## User Manual
 https://eng-git.canterbury.ac.nz/seng302-2021/team-500/-/wikis/uploads/c4f9dcb745da516d7e9f9cd6deade23f/LEFT_OVERS_User_Manual.docx
