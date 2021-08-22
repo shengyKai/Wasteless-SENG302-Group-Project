@@ -268,6 +268,9 @@ export default {
     resultsPerPage() {
       this.updateResults();
     },
+    searchBy() {
+      this.updateResults();
+    },
   },
 };
 

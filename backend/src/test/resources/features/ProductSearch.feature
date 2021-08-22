@@ -19,9 +19,9 @@ Feature: U28 Product Search
     When I search the catalogue for "Example OR Sharp"
     Then 2 products are returned
 
-  Scenario: AC4 - No fields selected, searches all
+  Scenario: AC4 - No fields selected, searches by name
     And No product fields are selected
-    When I search the catalogue for "EXPL"
+    When I search the catalogue for "Product"
     Then 1 products are returned
 
   Scenario: AC4 - Only selected fields are searched single

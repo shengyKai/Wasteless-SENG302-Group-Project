@@ -1,6 +1,7 @@
 package org.seng302.leftovers.controllers;
 
 // import net.bytebuddy.asm.Advice.OffsetMapping.Sort;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
@@ -54,7 +55,6 @@ public class ProductController {
     }
 
     private static final Set<String> VALID_ORDERINGS = Set.of("name", "description", "manufacturer","recommendedRetailPrice", "created", "productCode");
-    private static final Set<ProductFilterOption> VALID_SEARCHES = Set.of(ProductFilterOption.values());
 
     /**
      * REST GET method to retrieve all the products with a business's catalogue.
@@ -113,18 +113,14 @@ public class ProductController {
         Business business = businessRepository.getBusinessById(id);
 
         // Convert searchBy into ProductFilterOption type and check valid
-        searchBy = Optional.ofNullable(searchBy).orElse(Arrays.asList("name", "description", "manufacturer", "productCode"));
-        Set<ProductFilterOption> searchSet = new HashSet<>();
-        ObjectMapper objectMapper = new ObjectMapper();
-        for (String col : searchBy) {
-            ProductFilterOption option = objectMapper.convertValue(col, ProductFilterOption.class);
-            searchSet.add(option);
-        }
+        searchBy = Optional.ofNullable(searchBy).orElse(List.of());
 
-        for (ProductFilterOption field : searchSet) {
-            if (!VALID_SEARCHES.contains(field)) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "SearchBy term " + searchBy + " is invalid");
-            }
+        ObjectMapper objectMapper = new ObjectMapper();
+        Set<ProductFilterOption> searchSet;
+        try {
+            searchSet = objectMapper.convertValue(searchBy, new TypeReference<>() {});
+        } catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid search option provided", e);
         }
 
         business.checkSessionPermissions(request);

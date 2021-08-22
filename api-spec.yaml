@@ -37,6 +37,7 @@ tags:
   - name: 'U22: List sale'
   - name: 'U23: Search for business'
   - name: 'U26: Example data'
+  - name: 'U28: Product Catalogue search'
   - name: 'U32: Managing my feed'
   - name: 'UCM1: Community marketplace'
     description: >-
@@ -2033,7 +2034,8 @@ paths:
     get:
       tags:
         - 'U28: Product Catalogue search'
-        - Product
+        - Business Accounts
+        - Catalogue / Products
       summary: Product search within a business's product catalogue
       security:
         - CookieAuth:
@@ -2073,7 +2075,7 @@ paths:
               - name
               - description
               - manufacturer
-              - product code
+              - productCode
         - name: reverse
           in: query
           description: Whether to flip default sort order (default is ascending)

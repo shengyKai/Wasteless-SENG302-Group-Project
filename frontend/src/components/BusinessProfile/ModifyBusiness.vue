@@ -165,6 +165,7 @@
                       type="submit"
                       color="primary"
                       :loading="isLoading"
+                      :disabled="!valid"
                     >
                       Submit
                       <v-icon
