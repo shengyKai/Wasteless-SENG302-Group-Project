@@ -68,7 +68,7 @@ function createOptions(): StoreOptions<StoreData> {
       createBusinessDialogShown: false,
       createInventoryDialog: undefined,
       createSaleItemDialog: undefined,
-      eventMap: [],
+      eventMap: {},
       eventForDeletionIds: [],
     },
     mutations: {
@@ -225,7 +225,7 @@ function createOptions(): StoreOptions<StoreData> {
        * @param context The store context
        */
       startUserFeed(context) {
-        context.state.eventMap = []; // Clear events
+        context.state.eventMap = {}; // Clear events
         initialiseEventSourceForUser(context.state.user!.id); // Make event handler
         addEventMessageHandler(event => context.commit('addEvent', event));
       },
