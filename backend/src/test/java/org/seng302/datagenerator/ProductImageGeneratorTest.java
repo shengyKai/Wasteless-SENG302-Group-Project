@@ -18,6 +18,7 @@ import java.sql.*;
 import java.util.List;
 import java.util.Map;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
 @RunWith(SpringRunner.class)
@@ -99,9 +100,7 @@ class ProductImageGeneratorTest {
         stmt.executeQuery();
         ResultSet results = stmt.getResultSet();
         results.next();
-        if (results.getLong(1) != expectedCount) {
-            fail();
-        }
+        assertEquals(expectedCount, results.getLong(1));
     }
 
     /**
@@ -121,9 +120,7 @@ class ProductImageGeneratorTest {
         var businessIds = createTestBusiness();
         var productIds = productGenerator.generateProducts(businessIds, 1, true);
 
-        if (productIds.size() != 1) {
-            fail();
-        }
+        assertEquals(1, productIds.size());
         long productId = productIds.get(0);
 
         checkRequiredFieldsNotNull(productId, 1);
@@ -135,9 +132,7 @@ class ProductImageGeneratorTest {
         var businessIds = createTestBusiness();
         var productIds = productGenerator.generateProducts(businessIds, 10, true);
 
-        if (productIds.size() != 10) {
-            fail();
-        }
+        assertEquals(10, productIds.size());
         for (var productId : productIds) {
             checkRequiredFieldsNotNull(productId, 1);
         }
@@ -149,9 +144,7 @@ class ProductImageGeneratorTest {
         var businessIds = createTestBusiness();
         var productIds = productGenerator.generateProducts(businessIds, 1, false);
 
-        if (productIds.size() != 1) {
-            fail();
-        }
+        assertEquals(1, productIds.size());
         for (var productId : productIds) {
             checkRequiredFieldsNotNull(productId, 0);
         }
@@ -163,9 +156,7 @@ class ProductImageGeneratorTest {
         var businessIds = createTestBusiness();
         var productIds = productGenerator.generateProducts(businessIds, 10, false);
 
-        if (productIds.size() != 10) {
-            fail();
-        }
+        assertEquals(10, productIds.size());
         for (var productId : productIds) {
             checkRequiredFieldsNotNull(productId, 0);
         }
