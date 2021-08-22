@@ -88,11 +88,11 @@ public class BusinessImageGenerator {
      * @return The ID of the generated image
      */
     private long createInsertImageSQL(Long businessId, String filename, int order) {
-        try {
-            PreparedStatement stmt = conn.prepareStatement("INSERT INTO image (filename, business_id, image_order, filename_thumbnail) " +
-                            "VALUES (?,?,?,?)",
+        try (PreparedStatement stmt = conn.prepareStatement(
+                "INSERT INTO image (filename, business_id, image_order, filename_thumbnail) " +
+                        "VALUES (?,?,?,?)",
                     Statement.RETURN_GENERATED_KEYS
-            );
+            )) {
             stmt.setObject(1, filename);
             stmt.setObject(2, businessId);
             stmt.setObject(3, order);
@@ -106,7 +106,6 @@ public class BusinessImageGenerator {
         } catch (SQLException e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
         }
-
     }
 
     /**

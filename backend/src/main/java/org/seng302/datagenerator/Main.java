@@ -14,6 +14,11 @@ public class Main {
     static Random random = new Random();
 
     /**
+     * Private constructor to hide implicit public constructor.
+     */
+    private Main() {}
+
+    /**
      * Connects to Marinadb production environment
      * @return the connection to the database
      */
@@ -37,7 +42,7 @@ public class Main {
      * @param objectName the name of the object
      * @return the number of objects to be generated
      */
-    public static int getNumObjectsFromInput(String objectName) throws InterruptedException {
+    public static int getNumObjectsFromInput(String objectName) {
         int numObjects = -1;
         int maxObjects = 2000000; //maximum objects 2 million
         while (numObjects < 0 || numObjects >= maxObjects) {

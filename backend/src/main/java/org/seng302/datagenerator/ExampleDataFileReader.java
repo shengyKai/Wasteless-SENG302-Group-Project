@@ -15,6 +15,11 @@ public class ExampleDataFileReader {
 
     private static final String EXAMPLE_DATA_FILE_PATH = "example-data/";
 
+    /**
+     * Private constructor to hide implicit public constructor.
+     */
+    private ExampleDataFileReader() {}
+
 
     public static Map<String, String> readPropertiesFile(String resourcePath) {
         Map<String, String> properties = new HashMap<>();
@@ -27,10 +32,9 @@ public class ExampleDataFileReader {
             String line;
             while ((line = bufferedReader.readLine()) != null) {
                 line = line.strip();
-                if (line.startsWith("#")) continue;
+                if (line.startsWith("#") || !line.contains("=")) continue;
 
                 int index = line.indexOf('=');
-                if (index == -1) continue;
 
                 String key = line.substring(0, index);
                 String value = line.substring(index+1);

@@ -1,5 +1,7 @@
 package org.seng302.datagenerator;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.seng302.leftovers.entities.Business;
 
 import java.sql.*;
@@ -16,6 +18,7 @@ public class BusinessGenerator {
     private final LocationGenerator locationGenerator = LocationGenerator.getInstance();
     private final DescriptionGenerator descriptionGenerator = DescriptionGenerator.getInstance();
     private final CommerceNameGenerator commerceNameGenerator = CommerceNameGenerator.getInstance();
+    private final Logger logger = LogManager.getLogger(BusinessGenerator.class.getName());
 
     public BusinessGenerator(Connection conn) { this.conn = conn; }
 
@@ -26,21 +29,22 @@ public class BusinessGenerator {
      * @return the if of the business that was generated
      */
     private long createInsertBusinessSQL(long addressId, long ownerId) throws SQLException {
-        PreparedStatement stmt = conn.prepareStatement(
-            "INSERT INTO business (business_type, created, description, name, address_id, owner_id)"
-                + "VALUES (?, ?, ?, ?, ?, ?)",
-                Statement.RETURN_GENERATED_KEYS
-        );
-        stmt.setObject(1, Business.getBusinessTypes().get(random.nextInt(Business.getBusinessTypes().size())));
-        stmt.setObject(2, Instant.now()); //date created
-        stmt.setObject(3, descriptionGenerator.randomDescription());
-        stmt.setObject(4, commerceNameGenerator.randomBusinessName());
-        stmt.setObject(5, addressId);
-        stmt.setObject(6, ownerId);
-        stmt.executeUpdate();
-        ResultSet keys = stmt.getGeneratedKeys();
-        keys.next();
-        return keys.getLong(1);
+        try (PreparedStatement stmt = conn.prepareStatement(
+                    "INSERT INTO business (business_type, created, description, name, address_id, owner_id)" +
+                            "VALUES (?, ?, ?, ?, ?, ?)",
+                    Statement.RETURN_GENERATED_KEYS
+            )) {
+            stmt.setObject(1, Business.getBusinessTypes().get(random.nextInt(Business.getBusinessTypes().size())));
+            stmt.setObject(2, Instant.now()); //date created
+            stmt.setObject(3, descriptionGenerator.randomDescription());
+            stmt.setObject(4, commerceNameGenerator.randomBusinessName());
+            stmt.setObject(5, addressId);
+            stmt.setObject(6, ownerId);
+            stmt.executeUpdate();
+            ResultSet keys = stmt.getGeneratedKeys();
+            keys.next();
+            return keys.getLong(1);
+        }
     }
 
     /**
@@ -49,13 +53,14 @@ public class BusinessGenerator {
      * @param adminId the id associated with the user who is an administrator of the business
      */
     private void addAdminToBusiness(long businessId, long adminId) throws SQLException {
-        PreparedStatement stmt = conn.prepareStatement(
-                "INSERT INTO business_admins (business_id, user_id)"
-                + "VALUES (?, ?)"
-        );
-        stmt.setObject(1, businessId);
-        stmt.setObject(2, adminId);
-        stmt.executeUpdate();
+        try (PreparedStatement stmt = conn.prepareStatement(
+                    "INSERT INTO business_admins (business_id, user_id)" +
+                            "VALUES (?, ?)"
+            )) {
+            stmt.setObject(1, businessId);
+            stmt.setObject(2, adminId);
+            stmt.executeUpdate();
+        }
     }
 
     /**
@@ -85,18 +90,15 @@ public class BusinessGenerator {
         try {
             for (int i=0; i < businessCount; i++) {
                 clear();
-                int usersGenerated = random.nextInt(2) + 1; // between 1 and 2 users will be generated
-                //if two users are generated, the second is a business admin
-
                 long ownerId = userIds.get(random.nextInt(userIds.size()));
 
                 LocationGenerator.Location businessLocation = locationGenerator.generateAddress(random);
                 long addressId = locationGenerator.createInsertAddressSQL(businessLocation, conn);
 
                 if (i % 10 == 0) {
-                    System.out.println(String.format("Creating Business %d / %d", i + 1, businessCount));
+                    logger.info("Creating Business {} / {}", i + 1, businessCount);
                     int progress = (int) (((float) (i + 1) / (float) businessCount) * 100);
-                    System.out.println(String.format("Progress: %d%%", progress));
+                    logger.info("Progress: {}%", progress);
                 }
                 long businessId = createInsertBusinessSQL(addressId, ownerId);
 

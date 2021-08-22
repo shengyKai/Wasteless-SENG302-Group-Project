@@ -1,5 +1,8 @@
 package org.seng302.datagenerator;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.sql.*;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
@@ -16,6 +19,7 @@ public class MarketplaceCardGenerator {
 
     private static final String CARD_TITLES_FILE = "card-titles.txt";
     private final List<String> cardTitles;
+    private final Logger logger = LogManager.getLogger(MarketplaceCardGenerator.class.getName());
 
     /**
      * Constructor for Marketplace Card Generator, establishes connection to db
@@ -37,22 +41,23 @@ public class MarketplaceCardGenerator {
         LocalDate today = LocalDate.now();
         LocalDate created = randomDate(today.minusDays(5), today);
 
-        PreparedStatement stmt = conn.prepareStatement(
+        try (PreparedStatement stmt = conn.prepareStatement(
                 "INSERT INTO marketplace_card (creator_id, section, title, description, created, closes, last_renewed) " +
                         "VALUES (?,?,?,?,?,?,?)",
                 Statement.RETURN_GENERATED_KEYS
-        );
-        stmt.setObject(1, userIds.get(random.nextInt(userIds.size())));
-        stmt.setObject(2, random.nextInt(3));
-        stmt.setObject(3, cardTitles.get(random.nextInt(cardTitles.size())));
-        stmt.setObject(4, descGen.randomDescription());
-        stmt.setObject(5, created);
-        stmt.setObject(6, created.plus(14, ChronoUnit.DAYS));
-        stmt.setObject(7, created);
-        stmt.executeUpdate();
-        ResultSet keys = stmt.getGeneratedKeys();
-        keys.next();
-        return keys.getLong(1);
+        )) {
+            stmt.setObject(1, userIds.get(random.nextInt(userIds.size())));
+            stmt.setObject(2, random.nextInt(3));
+            stmt.setObject(3, cardTitles.get(random.nextInt(cardTitles.size())));
+            stmt.setObject(4, descGen.randomDescription());
+            stmt.setObject(5, created);
+            stmt.setObject(6, created.plus(14, ChronoUnit.DAYS));
+            stmt.setObject(7, created);
+            stmt.executeUpdate();
+            ResultSet keys = stmt.getGeneratedKeys();
+            keys.next();
+            return keys.getLong(1);
+        }
     }
 
     /**
@@ -63,11 +68,12 @@ public class MarketplaceCardGenerator {
      */
     private void cardKeywordSQL(Long cardId, List<Long> keywords) throws SQLException {
         for (Long keyword : keywords) {
-            PreparedStatement stmt = conn.prepareStatement("INSERT INTO card_keywords (cards_id, keywords_id) " +
-                    "VALUES (?,?)");
-            stmt.setObject(1, cardId);
-            stmt.setObject(2, keyword);
-            stmt.executeUpdate();
+            try (PreparedStatement stmt = conn.prepareStatement("INSERT INTO card_keywords (cards_id, keywords_id) " +
+                    "VALUES (?,?)")) {
+                stmt.setObject(1, cardId);
+                stmt.setObject(2, keyword);
+                stmt.executeUpdate();
+            }
         }
     }
 
@@ -78,12 +84,13 @@ public class MarketplaceCardGenerator {
      */
     private List<Long> loadKeywords() throws SQLException {
         List<Long> keywords = new ArrayList<>();
-        PreparedStatement stmt = conn.prepareStatement("SELECT id FROM keyword");
-        ResultSet result = stmt.executeQuery();
-        while (result.next()) {
-            keywords.add(result.getLong(1));
+        try (PreparedStatement stmt = conn.prepareStatement("SELECT id FROM keyword")) {
+            ResultSet result = stmt.executeQuery();
+            while (result.next()) {
+                keywords.add(result.getLong(1));
+            }
+            return keywords;
         }
-        return keywords;
     }
 
     /**
@@ -96,13 +103,13 @@ public class MarketplaceCardGenerator {
         List<Long> generatedCardIds = new ArrayList<>();
         List<Long> keywordIds = loadKeywords();
         try {
-            System.out.printf("Generating %d marketplace cards\n", cardCount);
+            logger.info("Generating {} marketplace cards", cardCount);
             for (int i = 0; i < cardCount; i++) {
                 clear();
 
                 if (i % 10 == 0) {
                     int progress = (int) (((float) (i + 1) / (float) cardCount) * 100);
-                    System.out.printf("Progress: %d%%\n", progress);
+                    logger.info("Progress: {}%", progress);
                 }
 
                 long cardId = createInsertCardSQL(userIds);

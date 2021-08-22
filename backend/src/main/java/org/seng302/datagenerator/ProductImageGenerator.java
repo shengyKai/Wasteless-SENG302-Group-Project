@@ -81,26 +81,10 @@ public class ProductImageGenerator {
      * @throws IOException
      */
     private Optional<Resource> findImage(String noun) {
-        Optional<Resource> file = Arrays.stream(demoImages)
+        return Arrays.stream(demoImages)
                 .filter(res -> Objects.requireNonNull(res.getFilename())
                 .replaceFirst("[.][^.]+$", "").equals(noun.toLowerCase(Locale.ROOT)))
                 .findFirst();
-        return file;
-    }
-
-    /**
-     * Given an example image, copies the image into the images directory.
-     * @param resource The demo image to copy
-     * @param fileName The name of the file to save
-     * @return true if file successfully saved.
-     */
-    private boolean saveImageToSystem(Resource resource, String fileName) {
-        try {
-            store(resource.getInputStream(), fileName);
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
     }
 
     /**
@@ -126,19 +110,20 @@ public class ProductImageGenerator {
      * @throws SQLException
      */
     private long createInsertImageSQL(Long productId, String filename) throws SQLException {
-        PreparedStatement stmt = conn.prepareStatement("INSERT INTO image (filename, product_id, image_order, filename_thumbnail) " +
+        try (PreparedStatement stmt = conn.prepareStatement("INSERT INTO image (filename, product_id, image_order, filename_thumbnail) " +
                 "VALUES (?,?,?,?)",
                 Statement.RETURN_GENERATED_KEYS
-        );
-        stmt.setObject(1, filename);
-        stmt.setObject(2, productId);
-        stmt.setObject(3, 0);
-        stmt.setObject(4, filename);
+        )) {
+            stmt.setObject(1, filename);
+            stmt.setObject(2, productId);
+            stmt.setObject(3, 0);
+            stmt.setObject(4, filename);
 
-        stmt.executeUpdate();
+            stmt.executeUpdate();
 
-        ResultSet keys = stmt.getGeneratedKeys();
-        keys.next();
-        return keys.getLong(1);
+            ResultSet keys = stmt.getGeneratedKeys();
+            keys.next();
+            return keys.getLong(1);
+        }
     }
 }
