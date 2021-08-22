@@ -18,7 +18,7 @@ public class ProductGenerator {
     private final CommerceNameGenerator commerceNameGenerator = CommerceNameGenerator.getInstance();
     private final DescriptionGenerator descriptionGenerator = DescriptionGenerator.getInstance();
     private final ProductImageGenerator imageGenerator;
-    private final HashSet<String> productCodeHash = new HashSet<String>();
+    private final HashSet<String> productCodeHash = new HashSet<>();
     private final Logger logger = LogManager.getLogger(ProductGenerator.class.getName());
 
     public ProductGenerator(Connection conn) {
@@ -110,7 +110,7 @@ public class ProductGenerator {
     /**
      * The main program
      */
-    public static void main(String[] args) throws InterruptedException, SQLException {
+    public static void main(String[] args) throws SQLException {
         Connection conn = connectToDatabase();
         var userGenerator = new UserGenerator(conn);
         var businessGenerator = new BusinessGenerator(conn);

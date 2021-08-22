@@ -105,7 +105,7 @@ public class InventoryItemGenerator {
         }
     }
 
-    public static void main(String[] args) throws SQLException, InterruptedException {
+    public static void main(String[] args) throws SQLException {
         Connection conn = connectToDatabase();
         var userGenerator = new UserGenerator(conn);
         var businessGenerator = new BusinessGenerator(conn);

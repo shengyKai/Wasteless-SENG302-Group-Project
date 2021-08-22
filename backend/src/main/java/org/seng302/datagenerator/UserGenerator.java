@@ -55,7 +55,7 @@ public class UserGenerator {
      * Main program
      * @param args no arguments should be provided
      */
-    public static void main(String[] args) throws SQLException, InterruptedException {
+    public static void main(String[] args) throws SQLException {
         Connection conn = connectToDatabase();
         var generator = new UserGenerator(conn);
         int userCount = getNumObjectsFromInput("users");
