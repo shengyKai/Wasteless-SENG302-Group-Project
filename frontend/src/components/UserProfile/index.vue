@@ -10,9 +10,9 @@
           {{ user.firstName }} {{ user.lastName }}
         </h1>
         <h2>
-          <i>{{ user.nickname }}</i>
+          <em>{{ user.nickname }}</em>
         </h2>
-        <p><b>Member Since:</b> {{ createdMsg }}</p>
+        <p><strong>Member Since:</strong> {{ createdMsg }}</p>
       </div>
 
       <!-- List of available actions -->
@@ -132,13 +132,7 @@
             </v-card-actions>
           </v-card>
         </v-dialog>
-        <!--
-          "currentUserRole==='user'" is so that normal users cannot see the GAA/DGAA statuses of system admins.
-          "user.role==='globalApplicationAdmin' || user.role==='defaultGlobalApplicationAdmin'" is so that if the profile is
-          a GAA/DGAA, it will be obvious to the current user viewing the profile that this user is a system admininstrator.
-          Note: DGAAs wont be searchable by normal users in the first place so "user.role==='defaultGlobalApplicationAdmin'" is
-          just there to remind DGAAs that they are in the DGAA account.
-        -->
+        <!-- Normal users cannot see the GAA/DGAA statuses of system admins -->
         <v-tooltip
           v-if="currentUserRole!=='user' && (user.role==='globalApplicationAdmin' || user.role==='defaultGlobalApplicationAdmin')"
           bottom>
@@ -159,10 +153,7 @@
                 </v-chip>
               </template>
               <!-- put as a v-list item because if in the future we want to be able to add more actions between DGAA/GAA, its easy to add-->
-              <!--
-                "currentUserRole==='defaultGlobalApplicationAdmin'" is so that only DGAA can see the revoke button
-                "user.role!=='defaultGlobalApplicationAdmin'" is so that DGAA wont revoke themselves
-              -->
+              <!-- Only DGAA should be able to see the revoke button. They should not be able to revoke their own admin status -->
               <v-list
                 v-if="currentUserRole==='defaultGlobalApplicationAdmin' && user.role!=='defaultGlobalApplicationAdmin'">
                 <v-list-item
@@ -179,10 +170,7 @@
           <span v-if="user.role==='defaultGlobalApplicationAdmin'">Default System Administrator</span>
           <span v-else-if="user.role==='globalApplicationAdmin'">System Administrator</span>
         </v-tooltip>
-        <!--
-          "user.role==='user'" is so that the DGAA can only make users as a GAA, not current GAAs/DGAAs
-          "currentUserRole==='defaultGlobalApplicationAdmin'" is to ensure only DGAAs can make users admin
-        -->
+        <!-- DGAA can only make users into a GAA, not current GAAs/DGAA. Only the DGAA can make users into GAAs -->
         <v-btn
           ref="makeAdminButton"
           v-else-if="user.role==='user' && currentUserRole==='defaultGlobalApplicationAdmin'"
@@ -243,7 +231,7 @@
 <script>
 import { getUser, makeBusinessAdmin, removeBusinessAdmin, makeAdmin, revokeAdmin } from '../../api/internal';
 import UserAvatar from '@/components/utils/UserAvatar';
-import convertAddressToReadableText from '@/components/utils/Methods/convertJsonAddressToReadableText';
+import convertAddressToReadableText from '@/components/utils/Methods/convertAddressToReadableText';
 
 export default {
   name: 'UserProfile',

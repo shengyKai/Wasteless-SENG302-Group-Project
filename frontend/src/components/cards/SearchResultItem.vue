@@ -17,7 +17,7 @@
 
 <script>
 import UserAvatar from '../utils/UserAvatar';
-import convertAddressToReadableText from '../utils/Methods/convertJsonAddressToReadableText';
+import convertAddressToReadableText from '../utils/Methods/convertAddressToReadableText';
 
 export default {
   props: ['user'],

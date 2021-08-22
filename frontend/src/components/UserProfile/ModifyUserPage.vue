@@ -398,13 +398,13 @@ export default {
       } else {
         this.previousUser = await getUser(this.id);
       }
-      this.user.firstName = this.previousUser.firstName ?? '',
-      this.user.lastName = this.previousUser.lastName ?? '',
-      this.user.middleName = this.previousUser.middleName ?? '',
-      this.user.nickname = this.previousUser.nickname ?? '',
-      this.user.bio = this.previousUser.bio ?? '',
-      this.user.email = this.previousUser.email ?? '',
-      this.user.dateOfBirth = this.previousUser.dateOfBirth ?? '',
+      this.user.firstName = this.previousUser.firstName ?? '';
+      this.user.lastName = this.previousUser.lastName ?? '';
+      this.user.middleName = this.previousUser.middleName ?? '';
+      this.user.nickname = this.previousUser.nickname ?? '';
+      this.user.bio = this.previousUser.bio ?? '';
+      this.user.email = this.previousUser.email ?? '';
+      this.user.dateOfBirth = this.previousUser.dateOfBirth ?? '';
 
       this.user.homeAddress = this.previousUser.homeAddress;
       this.streetAddress = this.previousUser.homeAddress.streetNumber + ' ' + this.previousUser.homeAddress.streetName;
