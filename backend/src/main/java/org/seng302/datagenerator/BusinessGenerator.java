@@ -114,7 +114,7 @@ public class BusinessGenerator {
                 generatedBusinessIds.add(businessId);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error(e.getMessage());
         }
 
         return generatedBusinessIds;

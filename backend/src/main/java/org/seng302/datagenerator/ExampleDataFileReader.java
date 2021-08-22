@@ -1,5 +1,8 @@
 package org.seng302.datagenerator;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -14,6 +17,7 @@ import java.util.Map;
 public class ExampleDataFileReader {
 
     private static final String EXAMPLE_DATA_FILE_PATH = "example-data/";
+    private static final Logger logger = LogManager.getLogger(ExampleDataFileReader.class.getName());
 
     /**
      * Private constructor to hide implicit public constructor.
@@ -46,7 +50,7 @@ public class ExampleDataFileReader {
                 properties.put(key, value);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error(e.getMessage());
             return null;
         }
 
@@ -67,7 +71,7 @@ public class ExampleDataFileReader {
                 values.add(value);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error(e.getMessage());
         }
         return values;
     }

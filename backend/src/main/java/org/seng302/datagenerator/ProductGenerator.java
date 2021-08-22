@@ -148,7 +148,7 @@ public class ProductGenerator {
                 generatedProductIds.add(productId);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error(e.getMessage());
         }
 
         return generatedProductIds;
