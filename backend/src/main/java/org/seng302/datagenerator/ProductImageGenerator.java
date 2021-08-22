@@ -107,7 +107,6 @@ public class ProductImageGenerator {
             store(resource.getInputStream(), fileName);
             return true;
         } catch (Exception e) {
-            System.out.println(e.getMessage());
             return false;
         }
     }
@@ -135,13 +134,14 @@ public class ProductImageGenerator {
      * @throws SQLException
      */
     private long createInsertImageSQL(Long productId, String filename) throws SQLException {
-        PreparedStatement stmt = conn.prepareStatement("INSERT INTO image (filename, product_id, image_order) " +
-                "VALUES (?,?,?)",
+        PreparedStatement stmt = conn.prepareStatement("INSERT INTO image (filename, product_id, image_order, filename_thumbnail) " +
+                "VALUES (?,?,?,?)",
                 Statement.RETURN_GENERATED_KEYS
         );
         stmt.setObject(1, filename);
         stmt.setObject(2, productId);
         stmt.setObject(3, 0);
+        stmt.setObject(4, filename);
 
         stmt.executeUpdate();
 

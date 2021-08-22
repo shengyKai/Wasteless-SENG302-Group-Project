@@ -89,13 +89,14 @@ public class BusinessImageGenerator {
      */
     private long createInsertImageSQL(Long businessId, String filename, int order) {
         try {
-            PreparedStatement stmt = conn.prepareStatement("INSERT INTO image (filename, business_id, image_order) " +
-                            "VALUES (?,?,?)",
+            PreparedStatement stmt = conn.prepareStatement("INSERT INTO image (filename, business_id, image_order, filename_thumbnail) " +
+                            "VALUES (?,?,?,?)",
                     Statement.RETURN_GENERATED_KEYS
             );
             stmt.setObject(1, filename);
             stmt.setObject(2, businessId);
             stmt.setObject(3, order);
+            stmt.setObject(4, filename);
 
             stmt.executeUpdate();
 

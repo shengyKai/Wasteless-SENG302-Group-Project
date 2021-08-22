@@ -5,6 +5,7 @@ import org.seng302.leftovers.entities.MarketplaceCard;
 
 import java.sql.*;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
@@ -37,7 +38,9 @@ public class MarketplaceCardGenerator {
      * @throws SQLException
      */
     private long createInsertCardSQL(List<Long> userIds) throws SQLException {
-        Instant created = Instant.now();
+        LocalDate today = LocalDate.now();
+        LocalDate created = randomDate(today.minusDays(5), today);
+
         PreparedStatement stmt = conn.prepareStatement(
                 "INSERT INTO marketplace_card (creator_id, section, title, description, created, closes, last_renewed) " +
                         "VALUES (?,?,?,?,?,?,?)",
@@ -48,7 +51,7 @@ public class MarketplaceCardGenerator {
         stmt.setObject(3, cardTitles.get(random.nextInt(cardTitles.size())));
         stmt.setObject(4, descGen.randomDescription());
         stmt.setObject(5, created);
-        stmt.setObject(6, created.plus(4, ChronoUnit.DAYS));
+        stmt.setObject(6, created.plus(14, ChronoUnit.DAYS));
         stmt.setObject(7, created);
         stmt.executeUpdate();
         ResultSet keys = stmt.getGeneratedKeys();
