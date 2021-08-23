@@ -66,12 +66,12 @@ const routes = [
   {
     path: "/search",
     component: SearchResults,
-    meta: { title: 'Search' }
+    meta: { title: 'Search Users' }
   },
   {
     path: "/search/business",
     component: SearchBusinessResults,
-    meta: { title: 'SearchBusiness' }
+    meta: { title: 'Search Businesses' }
   },
   {
     path: "/business/:id/products",
