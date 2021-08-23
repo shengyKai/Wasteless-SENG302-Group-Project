@@ -159,17 +159,15 @@ describe('modifyBusiness.vue', () => {
   });
 
   /**
-   * Finds the update button in the Modify Business form
+   * Finds the associated button in the Modify Business form
    *
    * @returns A wrapper around the update button
    */
-  function findSubmitButton(component:string) {
+  function findButton(component:string) {
     const buttons = wrapper.findAllComponents({ name: 'v-btn' });
-    const submit = buttons.filter(button => button.text().includes('Submit'));
-    const confirm = buttons.filter(button => button.text().includes('Save Change'));
-    expect(submit.length).toBe(1);
-    if(component === "submit") return submit.at(0);
-    else return confirm.at(0);
+    const button = buttons.filter(button => button.text().includes(component));
+    expect(button.length).toBe(1);
+    return button.at(0);
   }
 
 
@@ -493,10 +491,8 @@ describe('modifyBusiness.vue', () => {
 
   it("If all fields are populated with the right restrictions and the submit button is clicked, the modifyBusiness endpoint is called", async () => {
     await populateRequiredFields();
-    const submitButton = findSubmitButton("submit");
+    const submitButton = findButton("Submit");
     await submitButton.trigger('click');
-    const confirmButton = findSubmitButton("save change");
-    await confirmButton.trigger('click');
     expect(modifyBusiness).toHaveBeenCalled();
   });
 

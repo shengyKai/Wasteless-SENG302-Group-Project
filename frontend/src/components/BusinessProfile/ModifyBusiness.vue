@@ -189,7 +189,7 @@
                     <v-btn
                       type="submit"
                       color="primary"
-                      @click.prevent="currencyConfirmDialog = true"
+                      @click.prevent="openCurrencyDialog"
                     >
                       Submit
                       <v-icon
@@ -308,7 +308,6 @@ export default {
       showChangeAdminAlert: false,
       primaryAdminAlertMsg: "",
       primaryAdministratorId: this.business.primaryAdministratorId,
-      newOwnerId : this.$store.state.user.id,
       imageFile: undefined,
       allImageFiles: [],
       maxCharRules: () => maxCharRules(100),
@@ -319,6 +318,7 @@ export default {
       alphabetRules: ()=> alphabetRules,
       streetRules: ()=> streetNumRules,
       postcodeRules: ()=> postCodeRules,
+      isLoading: false,
     };
   },
   computed: {
@@ -345,14 +345,22 @@ export default {
   },
   methods: {
     /**
+     * Opens the currency confirmation dialog if the updateProductCountry is checked
+     */
+    openCurrencyDialog() {
+      if (this.updateProductCountry === false) {
+        this.proceedWithModifyBusiness();
+      } else {
+        this.currencyConfirmDialog = true;
+      }
+    },
+    /**
      * Loop through all admin to identify business primary owner
      * Return TRUE if the current looping chip is primary owner and no other chip is selected by user
      * If other chip is selected, the chip will be displayed as primary owner with message prompted
      */
     adminIsPrimary(admin) {
-      if(admin.id === this.primaryAdministratorId && this.newOwnerId === this.$store.state.user.id) return true;
-      if(admin.id === this.newOwnerId) return true;
-      return false;
+      return admin.id === this.primaryAdministratorId;
     },
     /**
      * Execute the discard modify functionality and render business profile
@@ -387,7 +395,7 @@ export default {
       const streetName = streetParts.slice(1, streetParts.length).join(" ");
 
       let modifiedFields = {
-        primaryAdministratorId: this.newOwnerId,
+        primaryAdministratorId: this.primaryAdministratorId,
         name: this.businessName,
         description: this.description,
         address: {
@@ -437,7 +445,7 @@ export default {
         this.showChangeAdminAlert = false;
         this.primaryAdminAlertMsg = "";
       }
-      this.newOwnerId = admin.id;
+      this.primaryAdministratorId = admin.id;
     },
     addImage() {
       this.showImageUploaderForm = false;
