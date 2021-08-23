@@ -264,7 +264,7 @@ import {
   maxCharRules, postCodeRules, streetNumRules,
   USER_ROLES
 } from "@/utils";
-import { modifyBusiness, uploadBusinessImage, makeBusinessImagePrimary } from '@/api/internal';
+import { modifyBusiness, uploadBusinessImage, makeBusinessImagePrimary, getUser } from '@/api/internal';
 import ImageCarousel from "@/components/utils/ImageCarousel";
 
 export default {
@@ -426,6 +426,17 @@ export default {
           await this.uploadImage(image);
         }
       }
+
+      // Updates the $store.state.user.businessesAdministered property if we are administering this business
+      if (this.administrators.some(admin => admin.id === this.$store.state.user.id)) {
+        let user = await getUser(this.$store.state.user.id);
+        if (typeof user !== 'string') {
+          let initialRole = this.$store.state.activeRole;
+          this.$store.commit('setUser', user);
+          this.$store.commit('setRole', initialRole); // Make sure we don't get set to the default role
+        }
+      }
+
       if (this.errorMessage === undefined) {
         this.$emit("modifySuccess");
       }
