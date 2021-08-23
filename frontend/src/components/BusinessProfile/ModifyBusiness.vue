@@ -308,7 +308,6 @@ export default {
       showChangeAdminAlert: false,
       primaryAdminAlertMsg: "",
       primaryAdministratorId: this.business.primaryAdministratorId,
-      newOwnerId : this.$store.state.user.id,
       imageFile: undefined,
       allImageFiles: [],
       maxCharRules: () => maxCharRules(100),
@@ -361,9 +360,7 @@ export default {
      * If other chip is selected, the chip will be displayed as primary owner with message prompted
      */
     adminIsPrimary(admin) {
-      if(admin.id === this.primaryAdministratorId && this.newOwnerId === this.$store.state.user.id) return true;
-      if(admin.id === this.newOwnerId) return true;
-      return false;
+      return admin.id === this.primaryAdministratorId;
     },
     /**
      * Execute the discard modify functionality and render business profile
@@ -398,7 +395,7 @@ export default {
       const streetName = streetParts.slice(1, streetParts.length).join(" ");
 
       let modifiedFields = {
-        primaryAdministratorId: this.newOwnerId,
+        primaryAdministratorId: this.primaryAdministratorId,
         name: this.businessName,
         description: this.description,
         address: {
@@ -448,7 +445,7 @@ export default {
         this.showChangeAdminAlert = false;
         this.primaryAdminAlertMsg = "";
       }
-      this.newOwnerId = admin.id;
+      this.primaryAdministratorId = admin.id;
     },
     addImage() {
       this.showImageUploaderForm = false;
