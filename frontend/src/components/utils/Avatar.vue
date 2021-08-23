@@ -60,8 +60,6 @@ export default {
         return this.user.firstName[0].toUpperCase() + this.user.lastName[0].toUpperCase();
       } else if (this.business !== undefined) {
         let pieces = this.business.name.split(/\s/);
-        console.log(this.business.name);
-        console.log(pieces);
         if (pieces.length === 2) {
           return pieces[0][0].toUpperCase() + pieces[1][0].toUpperCase();
         }

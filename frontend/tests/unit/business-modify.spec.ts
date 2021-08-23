@@ -10,10 +10,12 @@ import {User, Location, Business} from "@/api/internal";
 import { getStore, resetStoreForTesting } from '@/store';
 
 jest.mock('@/api/internal', () => ({
+  getUser: jest.fn(),
   modifyBusiness: jest.fn(),
   uploadBusinessImage: jest.fn(),
 }));
 
+const getUser = castMock(api.getUser);
 const modifyBusiness = castMock(api.modifyBusiness);
 const uploadBusinessImage = castMock(api.uploadBusinessImage);
 Vue.use(Vuetify);
@@ -123,6 +125,7 @@ describe('modifyBusiness.vue', () => {
     resetStoreForTesting();
     let store = getStore();
     store.state.user = testUser;
+    getUser.mockResolvedValueOnce(testUser);
     const vuetify = new Vuetify();
     const App = localVue.component('App', {
       components: { ModifyBusiness },
