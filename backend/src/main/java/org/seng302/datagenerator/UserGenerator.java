@@ -35,7 +35,7 @@ public class UserGenerator {
      * @return
      */
     private String generatePassword() {
-        return "0".repeat(64);
+        return "ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f";
     }
 
     /**
@@ -134,6 +134,14 @@ public class UserGenerator {
         }
 
         /**
+         * Randomly generates an account creation date for the user.
+         * @return the account's creation date.
+         */
+        private LocalDate generateCreated() {
+            return randomDate(LocalDate.of(2021, 1, 1), LocalDate.now());
+        }
+
+        /**
          * Randomly generates the phone number of the user
          * @return the user's phone number
          */
@@ -156,7 +164,7 @@ public class UserGenerator {
             statement.setObject(5, generatePhNum()); //phone number
             statement.setObject(6, generateDOB()); //date of birth
             statement.setObject(7, descriptionGenerator.randomDescription()); //bio
-            statement.setObject(8, Instant.now()); //date created
+            statement.setObject(8, generateCreated()); //date created
             statement.setObject(9, userId);
             statement.setObject(10, addressId);
             statement.addBatch();
