@@ -1,6 +1,7 @@
-package org.seng302.leftovers.entities;
+package org.seng302.leftovers.entities.event;
 
 import net.minidev.json.JSONObject;
+import org.seng302.leftovers.entities.MarketplaceCard;
 
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;

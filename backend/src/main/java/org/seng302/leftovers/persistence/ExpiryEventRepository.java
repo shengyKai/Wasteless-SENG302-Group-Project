@@ -1,6 +1,6 @@
 package org.seng302.leftovers.persistence;
 
-import org.seng302.leftovers.entities.ExpiryEvent;
+import org.seng302.leftovers.entities.event.ExpiryEvent;
 import org.seng302.leftovers.entities.MarketplaceCard;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;

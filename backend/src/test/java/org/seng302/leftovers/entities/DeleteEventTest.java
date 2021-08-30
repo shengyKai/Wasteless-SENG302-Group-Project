@@ -5,6 +5,7 @@ import net.minidev.json.JSONObject;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.seng302.leftovers.entities.event.DeleteEvent;
 import org.seng302.leftovers.persistence.BusinessRepository;
 import org.seng302.leftovers.persistence.EventRepository;
 import org.seng302.leftovers.persistence.MarketplaceCardRepository;

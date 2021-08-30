@@ -1,6 +1,6 @@
 package org.seng302.leftovers.service;
 
-import org.seng302.leftovers.entities.Event;
+import org.seng302.leftovers.entities.event.Event;
 import org.seng302.leftovers.entities.User;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 

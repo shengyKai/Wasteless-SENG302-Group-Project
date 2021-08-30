@@ -4,6 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
 import org.seng302.leftovers.entities.*;
+import org.seng302.leftovers.entities.event.MessageEvent;
 import org.seng302.leftovers.persistence.MessageEventRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

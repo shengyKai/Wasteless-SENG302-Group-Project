@@ -1,6 +1,8 @@
-package org.seng302.leftovers.entities;
+package org.seng302.leftovers.entities.event;
 
 import net.minidev.json.JSONObject;
+import org.seng302.leftovers.entities.Keyword;
+import org.seng302.leftovers.entities.User;
 
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;

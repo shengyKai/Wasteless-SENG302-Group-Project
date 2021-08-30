@@ -1,6 +1,7 @@
-package org.seng302.leftovers.entities;
+package org.seng302.leftovers.entities.event;
 
 import net.minidev.json.JSONObject;
+import org.seng302.leftovers.entities.User;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 

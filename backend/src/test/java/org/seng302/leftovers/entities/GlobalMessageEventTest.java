@@ -2,6 +2,7 @@ package org.seng302.leftovers.entities;
 
 import net.minidev.json.JSONObject;
 import org.junit.jupiter.api.*;
+import org.seng302.leftovers.entities.event.GlobalMessageEvent;
 import org.seng302.leftovers.persistence.EventRepository;
 import org.seng302.leftovers.persistence.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;

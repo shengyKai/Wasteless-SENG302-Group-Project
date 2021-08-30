@@ -3,7 +3,7 @@ package org.seng302.leftovers.service;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.seng302.leftovers.entities.Message;
-import org.seng302.leftovers.entities.MessageEvent;
+import org.seng302.leftovers.entities.event.MessageEvent;
 import org.seng302.leftovers.entities.User;
 import org.seng302.leftovers.persistence.MessageEventRepository;
 import org.springframework.beans.factory.annotation.Autowired;

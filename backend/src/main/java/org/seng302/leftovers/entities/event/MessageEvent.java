@@ -1,8 +1,11 @@
-package org.seng302.leftovers.entities;
+package org.seng302.leftovers.entities.event;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.minidev.json.JSONObject;
+import org.seng302.leftovers.entities.Conversation;
+import org.seng302.leftovers.entities.Message;
+import org.seng302.leftovers.entities.User;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 

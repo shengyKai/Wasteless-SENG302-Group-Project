@@ -3,7 +3,7 @@ package org.seng302.leftovers.controllers;
 import net.minidev.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.seng302.leftovers.entities.ExpiryEvent;
+import org.seng302.leftovers.entities.event.ExpiryEvent;
 import org.seng302.leftovers.entities.Keyword;
 import org.seng302.leftovers.entities.MarketplaceCard;
 import org.seng302.leftovers.entities.User;
