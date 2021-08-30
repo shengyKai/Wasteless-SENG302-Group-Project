@@ -85,9 +85,6 @@ class ConversationControllerTest {
 
     @BeforeEach
     private void setup() {
-//        objectMapper.registerModule(new JavaTimeModule());
-//        objectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
-
         var tempUser1 = new User.Builder()
                 .withFirstName("Andy")
                 .withMiddleName("Percy")

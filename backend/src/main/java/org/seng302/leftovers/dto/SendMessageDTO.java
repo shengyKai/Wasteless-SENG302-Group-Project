@@ -19,6 +19,9 @@ public class SendMessageDTO {
     @NotNull
     private String message;
 
+    /** Required for DTO magic **/
+    protected SendMessageDTO() {}
+
     /**
      * Constructor for the message dto from a Message entity
      * Only used by the implementation of MessageDTO
