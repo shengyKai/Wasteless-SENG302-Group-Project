@@ -47,6 +47,10 @@ public class GlobalMessageEvent extends Event {
         return globalMessage;
     }
 
+    /**
+     * Converts this event into a DTO
+     * @return DTO for JSON serialisation
+     */
     @Override
     public GlobalMessageEventDTO asDTO() {
         return new GlobalMessageEventDTO(this);

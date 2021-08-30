@@ -93,8 +93,8 @@ public abstract class Event {
     }
 
     /**
-     * TODO
-     * @return
+     * Converts this event into a DTO
+     * @return DTO for JSON serialisation
      */
     public abstract EventDTO asDTO();
 }

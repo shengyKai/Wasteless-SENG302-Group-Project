@@ -56,6 +56,10 @@ public class KeywordCreatedEvent extends Event {
         return creator;
     }
 
+    /**
+     * Converts this event into a DTO
+     * @return DTO for JSON serialisation
+     */
     @Override
     public KeywordCreatedEventDTO asDTO() {
         return new KeywordCreatedEventDTO(this);

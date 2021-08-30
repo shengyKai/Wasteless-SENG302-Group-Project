@@ -104,6 +104,10 @@ public class MessageEvent extends Event {
         setCreated(Instant.now());
     }
 
+    /**
+     * Converts this event into a DTO
+     * @return DTO for JSON serialisation
+     */
     @Override
     public MessageEventDTO asDTO() {
         return new MessageEventDTO(this);

@@ -49,6 +49,10 @@ public class DeleteEvent extends Event {
         return title;
     }
 
+    /**
+     * Converts this event into a DTO
+     * @return DTO for JSON serialisation
+     */
     @Override
     public DeleteEventDTO asDTO() {
         return new DeleteEventDTO(this);

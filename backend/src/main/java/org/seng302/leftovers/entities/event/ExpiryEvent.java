@@ -36,6 +36,10 @@ public class ExpiryEvent extends Event {
         return expiringCard;
     }
 
+    /**
+     * Converts this event into a DTO
+     * @return DTO for JSON serialisation
+     */
     @Override
     public ExpiryEventDTO asDTO() {
         return new ExpiryEventDTO(this);
