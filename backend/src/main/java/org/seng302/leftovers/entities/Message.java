@@ -103,20 +103,6 @@ public class Message {
         this.content = content;
     }
 
-    /**
-     * Construct and return a JSON representation of this message. The JSON includes the id number of the message and of
-     * the conversation, the json representation of the sender, the date the message was created and the message content.
-     * @return JSON representation of this message.
-     */
-    public JSONObject constructJSONObject() {
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.appendField("id", id);
-        jsonObject.appendField("senderId", sender.getUserID());
-        jsonObject.appendField("created", created.toString());
-        jsonObject.appendField("content", content);
-        return jsonObject;
-    }
-
     @Override
     public String toString() {
         return "Message{" +

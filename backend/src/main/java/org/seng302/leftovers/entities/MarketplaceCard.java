@@ -1,5 +1,7 @@
 package org.seng302.leftovers.entities;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import org.seng302.leftovers.tools.JsonTools;
@@ -259,15 +261,16 @@ public class MarketplaceCard {
      * Valid marketplace card sections
      */
     public enum Section {
-        FOR_SALE("ForSale"),
-        WANTED("Wanted"),
-        EXCHANGE("Exchange");
+        @JsonProperty("ForSale")
+        FOR_SALE,
 
-        private final String name;
+        @JsonProperty("Wanted")
+        WANTED,
 
-        Section(String name) {
-            this.name = name;
-        }
+        @JsonProperty("Exchange")
+        EXCHANGE;
+
+        private static final ObjectMapper mapper = new ObjectMapper();
 
         /**
          * Gets the name of the section.
@@ -275,7 +278,7 @@ public class MarketplaceCard {
          * @return section name
          */
         public String getName() {
-            return this.name;
+            return mapper.convertValue(this, String.class);
         }
     }
 

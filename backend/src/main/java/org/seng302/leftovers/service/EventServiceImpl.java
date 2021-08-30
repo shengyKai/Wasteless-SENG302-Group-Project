@@ -1,5 +1,6 @@
 package org.seng302.leftovers.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.seng302.leftovers.entities.event.Event;
@@ -96,7 +97,7 @@ public class EventServiceImpl implements EventService {
         try {
             emitter.send(SseEmitter.event()
                     .name("newsfeed")
-                    .data(event.constructJSONObject(), MediaType.APPLICATION_JSON));
+                    .data(event.asDTO(), MediaType.APPLICATION_JSON));
         } catch (Exception e) {
             LOGGER.warn("Send failed: {}", e.getMessage());
             emitter.completeWithError(e);

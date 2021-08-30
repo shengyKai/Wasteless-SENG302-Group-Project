@@ -3,6 +3,7 @@ package org.seng302.leftovers.controllers;
 import net.minidev.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.seng302.leftovers.dto.MessageDTO;
 import org.seng302.leftovers.dto.ResultPageDTO;
 import org.seng302.leftovers.dto.SendMessageDTO;
 import org.seng302.leftovers.entities.Conversation;
@@ -102,7 +103,7 @@ public class ConversationController {
      * @return A page in the results displaying the requested number of messges.
      */
     @GetMapping("/cards/{cardId}/conversations/{buyerId}")
-    public ResultPageDTO<JSONObject> fetchMessagesInConversation(HttpServletRequest request,
+    public ResultPageDTO<MessageDTO> fetchMessagesInConversation(HttpServletRequest request,
                                                             @PathVariable Long cardId,
                                                             @PathVariable Long buyerId,
                                                             @RequestParam(required = false) Integer page,
@@ -123,7 +124,7 @@ public class ConversationController {
             var pageRequest = SearchHelper.getPageRequest(page, resultsPerPage, Sort.by("created").descending());
             var messages = messageRepository.findAllByConversation(conversation, pageRequest);
 
-            return new ResultPageDTO<>(messages.map(Message::constructJSONObject));
+            return new ResultPageDTO<>(messages.map(MessageDTO::new));
         } catch (ResponseStatusException e) {
             logger.error(e.getMessage());
             throw e;

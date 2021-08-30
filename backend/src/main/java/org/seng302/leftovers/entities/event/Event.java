@@ -2,7 +2,8 @@ package org.seng302.leftovers.entities.event;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.minidev.json.JSONObject;
-import org.seng302.leftovers.dto.Tag;
+import org.seng302.leftovers.dto.event.EventDTO;
+import org.seng302.leftovers.dto.event.Tag;
 import org.seng302.leftovers.entities.User;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
@@ -39,28 +40,6 @@ public abstract class Event {
      */
     protected Event(User notifiedUser) {
         this.notifiedUser = notifiedUser;
-    }
-
-    /**
-     * Constructs a JSON representation of this event.
-     * The fields provided by event are:
-     *   id      - Long id of the event
-     *   created - String creation time
-     *   tag     - Tag of the event
-     *   type    - Type name of the event (equal to class name)
-     * Subclasses are expected to override this method and add their own attributes.
-     * @return JSON object containing event data
-     */
-    public JSONObject constructJSONObject() {
-        ObjectMapper objectMapper = new ObjectMapper();
-
-        JSONObject json = new JSONObject();
-        json.appendField("id", this.getId());
-        json.appendField("created", this.getCreated().toString());
-        json.appendField("type", this.getClass().getSimpleName());
-        json.appendField("tag", objectMapper.convertValue(this.getTag(), String.class));
-
-        return json;
     }
 
     /**
@@ -114,4 +93,10 @@ public abstract class Event {
     public User getNotifiedUser() {
         return notifiedUser;
     }
+
+    /**
+     * TODO
+     * @return
+     */
+    public abstract EventDTO asDTO();
 }

@@ -8,7 +8,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.runner.RunWith;
 import org.mockito.*;
-import org.seng302.leftovers.dto.Tag;
+import org.seng302.leftovers.dto.event.Tag;
 import org.seng302.leftovers.entities.event.Event;
 import org.seng302.leftovers.entities.event.GlobalMessageEvent;
 import org.seng302.leftovers.entities.User;

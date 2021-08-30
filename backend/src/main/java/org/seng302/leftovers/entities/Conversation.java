@@ -82,19 +82,6 @@ public class Conversation {
         return messages;
     }
 
-    /**
-     * Construct a json representation of this conversation including its id number, card and buyer, but not the messages
-     * in the conversation.
-     * @return A json representation of the conversation.
-     */
-    public JSONObject constructJSONObject() {
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.appendField("id", id);
-        jsonObject.appendField("card", card.constructJSONObject());
-        jsonObject.appendField("buyer", buyer.constructPublicJson());
-        return jsonObject;
-    }
-
     @Override
     public String toString() {
         return "Conversation{" +

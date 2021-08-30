@@ -1,6 +1,7 @@
 package org.seng302.leftovers.entities.event;
 
-import net.minidev.json.JSONObject;
+import org.seng302.leftovers.dto.event.GlobalMessageEventDTO;
+import org.seng302.leftovers.dto.event.KeywordCreatedEventDTO;
 import org.seng302.leftovers.entities.User;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
@@ -47,14 +48,8 @@ public class GlobalMessageEvent extends Event {
         return globalMessage;
     }
 
-    /**
-     * Constructs a JSON representation of this event
-     * @return JSON object containing message event data
-     */
     @Override
-    public JSONObject constructJSONObject() {
-        JSONObject json = super.constructJSONObject();
-        json.put("message", globalMessage);
-        return json;
+    public GlobalMessageEventDTO asDTO() {
+        return new GlobalMessageEventDTO(this);
     }
 }

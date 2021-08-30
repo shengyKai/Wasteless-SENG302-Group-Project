@@ -3,7 +3,7 @@ package org.seng302.leftovers.controllers;
 import net.minidev.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.seng302.leftovers.dto.Tag;
+import org.seng302.leftovers.dto.event.Tag;
 import org.seng302.leftovers.dto.WrappedValueDTO;
 import org.seng302.leftovers.entities.event.Event;
 import org.seng302.leftovers.entities.event.GlobalMessageEvent;
