@@ -1,22 +1,25 @@
 package org.seng302.leftovers.dto.event;
 
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
 import org.seng302.leftovers.entities.MarketplaceCard;
 import org.seng302.leftovers.entities.event.DeleteEvent;
-import org.seng302.leftovers.entities.event.Event;
-
-import java.time.Instant;
 
 /**
  * A DTO representing a DeleteEvent
  */
 @Getter
 @ToString
+@EqualsAndHashCode
 public class DeleteEventDTO extends EventDTO {
     private String title;
     private MarketplaceCard.Section section;
 
+    /**
+     * Converts a DeleteEvent entity to its JSON form
+     * @param event DeleteEvent to serialise
+     */
     public DeleteEventDTO(DeleteEvent event) {
         super(event);
         this.title = event.getTitle();

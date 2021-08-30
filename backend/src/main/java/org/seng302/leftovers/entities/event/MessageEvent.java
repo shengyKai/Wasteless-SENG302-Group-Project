@@ -1,9 +1,6 @@
 package org.seng302.leftovers.entities.event;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import net.minidev.json.JSONObject;
-import org.seng302.leftovers.dto.event.DeleteEventDTO;
 import org.seng302.leftovers.dto.event.MessageEventDTO;
 import org.seng302.leftovers.entities.Conversation;
 import org.seng302.leftovers.entities.Message;

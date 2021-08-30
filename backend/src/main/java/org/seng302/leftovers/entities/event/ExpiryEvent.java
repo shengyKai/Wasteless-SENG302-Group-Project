@@ -1,7 +1,5 @@
 package org.seng302.leftovers.entities.event;
 
-import net.minidev.json.JSONObject;
-import org.seng302.leftovers.dto.event.DeleteEventDTO;
 import org.seng302.leftovers.dto.event.ExpiryEventDTO;
 import org.seng302.leftovers.entities.MarketplaceCard;
 

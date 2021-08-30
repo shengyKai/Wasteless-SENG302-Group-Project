@@ -2,23 +2,17 @@ package org.seng302.leftovers.entities.event;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.cucumber.gherkin.internal.com.eclipsesource.json.Json;
 import net.minidev.json.JSONObject;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
-import org.mockito.MockedConstruction;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.seng302.leftovers.dto.ConversationDTO;
 import org.seng302.leftovers.dto.MessageDTO;
-import org.seng302.leftovers.dto.event.MessageEventDTO;
 import org.seng302.leftovers.entities.Conversation;
 import org.seng302.leftovers.entities.MarketplaceCard;
 import org.seng302.leftovers.entities.Message;
 import org.seng302.leftovers.entities.User;
-import org.seng302.leftovers.entities.event.MessageEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
@@ -153,7 +147,7 @@ class MessageEventTest {
     }
 
     @Test
-    void messageEventDTO_jsonHasExpectedFormat() throws JsonProcessingException {
+    void asDTO_jsonHasExpectedFormat() throws JsonProcessingException {
         var messageEvent = new MessageEvent(buyer, firstMessage);
         var messageEventJson = mapper.convertValue(messageEvent.asDTO(), JSONObject.class);
 

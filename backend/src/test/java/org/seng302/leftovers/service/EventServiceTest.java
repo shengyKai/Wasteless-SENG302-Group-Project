@@ -1,6 +1,5 @@
 package org.seng302.leftovers.service;
 
-import net.minidev.json.JSONObject;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -10,9 +9,9 @@ import org.mockito.MockedConstruction;
 import org.mockito.MockedStatic;
 import org.mockito.MockitoAnnotations;
 import org.seng302.leftovers.dto.event.EventDTO;
+import org.seng302.leftovers.entities.User;
 import org.seng302.leftovers.entities.event.Event;
 import org.seng302.leftovers.entities.event.GlobalMessageEvent;
-import org.seng302.leftovers.entities.User;
 import org.seng302.leftovers.persistence.EventRepository;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;

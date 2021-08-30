@@ -5,7 +5,6 @@ import net.minidev.json.JSONObject;
 import org.junit.jupiter.api.*;
 import org.seng302.leftovers.entities.Location;
 import org.seng302.leftovers.entities.User;
-import org.seng302.leftovers.entities.event.GlobalMessageEvent;
 import org.seng302.leftovers.persistence.EventRepository;
 import org.seng302.leftovers.persistence.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -75,7 +74,7 @@ class GlobalMessageEventTest {
     }
 
     @Test
-    void globalMessageEventDTO_withMessage_correctJson() {
+    void asDTO_withMessage_correctJson() {
         GlobalMessageEvent event = new GlobalMessageEvent(user, "Foo");
         event = eventRepository.save(event); // Make sure to get an ID
 

@@ -5,11 +5,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.seng302.leftovers.dto.event.KeywordCreatedEventDTO;
 import org.seng302.leftovers.entities.Keyword;
 import org.seng302.leftovers.entities.Location;
 import org.seng302.leftovers.entities.User;
-import org.seng302.leftovers.entities.event.KeywordCreatedEvent;
 import org.seng302.leftovers.persistence.EventRepository;
 import org.seng302.leftovers.persistence.KeywordRepository;
 import org.seng302.leftovers.persistence.UserRepository;
@@ -76,7 +74,7 @@ class KeywordCreatedEventTest {
     }
 
     @Test
-    void keywordCreatedEventDTO_jsonHasExpectedFormat() throws JsonProcessingException {
+    void asDTO_jsonHasExpectedFormat() throws JsonProcessingException {
         KeywordCreatedEvent event = new KeywordCreatedEvent(adminUser, user, keyword);
         event = eventRepository.save(event);
 

@@ -1,7 +1,5 @@
 package org.seng302.leftovers.entities.event;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import net.minidev.json.JSONObject;
 import org.seng302.leftovers.dto.event.EventDTO;
 import org.seng302.leftovers.dto.event.Tag;
 import org.seng302.leftovers.entities.User;

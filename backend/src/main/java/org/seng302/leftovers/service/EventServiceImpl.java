@@ -1,10 +1,9 @@
 package org.seng302.leftovers.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.seng302.leftovers.entities.event.Event;
 import org.seng302.leftovers.entities.User;
+import org.seng302.leftovers.entities.event.Event;
 import org.seng302.leftovers.persistence.EventRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;

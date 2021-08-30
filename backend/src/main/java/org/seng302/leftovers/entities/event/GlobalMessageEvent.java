@@ -1,7 +1,6 @@
 package org.seng302.leftovers.entities.event;
 
 import org.seng302.leftovers.dto.event.GlobalMessageEventDTO;
-import org.seng302.leftovers.dto.event.KeywordCreatedEventDTO;
 import org.seng302.leftovers.entities.User;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;

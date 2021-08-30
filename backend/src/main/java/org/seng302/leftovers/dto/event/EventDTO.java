@@ -4,7 +4,6 @@ import lombok.Getter;
 import lombok.ToString;
 import org.seng302.leftovers.entities.event.Event;
 
-import javax.validation.constraints.NotNull;
 import java.time.Instant;
 
 /**
@@ -19,6 +18,11 @@ public abstract class EventDTO {
     private Instant created;
     private Tag tag;
 
+    /**
+     * Converts a Event entity to its JSON form
+     * Adds all the fields common to all Event entities
+     * @param event Event to serialise
+     */
     protected EventDTO(Event event) {
         this.id = event.getId();
         this.type = event.getClass().getSimpleName();

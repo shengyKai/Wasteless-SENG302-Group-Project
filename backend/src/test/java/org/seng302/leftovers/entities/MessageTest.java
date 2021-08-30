@@ -91,7 +91,7 @@ class MessageTest {
     }
 
     @Test
-    void messageDTO_jsonHasExpectedFormat() throws JsonProcessingException {
+    void asDTO_jsonHasExpectedFormat() throws JsonProcessingException {
         JSONObject userJson = new JSONObject();
         userJson.appendField("id", 967);
         when(conversation.getId()).thenReturn(44L);

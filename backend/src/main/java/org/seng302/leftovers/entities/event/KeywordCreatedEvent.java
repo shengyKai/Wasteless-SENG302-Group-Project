@@ -1,6 +1,5 @@
 package org.seng302.leftovers.entities.event;
 
-import org.seng302.leftovers.dto.event.GlobalMessageEventDTO;
 import org.seng302.leftovers.dto.event.KeywordCreatedEventDTO;
 import org.seng302.leftovers.entities.Keyword;
 import org.seng302.leftovers.entities.User;

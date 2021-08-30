@@ -1,8 +1,8 @@
 package org.seng302.leftovers.persistence;
 
 import org.seng302.leftovers.entities.Conversation;
-import org.seng302.leftovers.entities.event.MessageEvent;
 import org.seng302.leftovers.entities.User;
+import org.seng302.leftovers.entities.event.MessageEvent;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
