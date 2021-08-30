@@ -1,10 +1,14 @@
-package org.seng302.leftovers.entities;
+package org.seng302.leftovers.entities.event;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.seng302.leftovers.dto.event.KeywordCreatedEventDTO;
+import org.seng302.leftovers.entities.Keyword;
+import org.seng302.leftovers.entities.Location;
+import org.seng302.leftovers.entities.User;
 import org.seng302.leftovers.entities.event.KeywordCreatedEvent;
 import org.seng302.leftovers.persistence.EventRepository;
 import org.seng302.leftovers.persistence.KeywordRepository;
@@ -18,14 +22,17 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class KeywordCreatedEventTest {
 
     @Autowired
-    KeywordRepository keywordRepository;
+    private ObjectMapper mapper;
     @Autowired
-    UserRepository userRepository;
+    private KeywordRepository keywordRepository;
     @Autowired
-    EventRepository eventRepository;
-    Keyword keyword;
-    User user;
-    User adminUser;
+    private UserRepository userRepository;
+    @Autowired
+    private EventRepository eventRepository;
+
+    private Keyword keyword;
+    private User user;
+    private User adminUser;
 
     @BeforeEach
     void setUp() {
@@ -69,7 +76,7 @@ class KeywordCreatedEventTest {
     }
 
     @Test
-    void constructJSONObject_jsonHasExpectedFormat() throws JsonProcessingException {
+    void keywordCreatedEventDTO_jsonHasExpectedFormat() throws JsonProcessingException {
         KeywordCreatedEvent event = new KeywordCreatedEvent(adminUser, user, keyword);
         event = eventRepository.save(event);
 
@@ -84,8 +91,7 @@ class KeywordCreatedEventTest {
                 event.getCreated(),
                 keyword.constructJSONObject().toJSONString(),
                 user.constructPublicJson(false).toJSONString());
-        String actualJsonString = event.constructJSONObject().toJSONString();
-        ObjectMapper mapper = new ObjectMapper();
+        String actualJsonString = mapper.writeValueAsString(event.asDTO());
         assertEquals(mapper.readTree(expectedJsonString), mapper.readTree(actualJsonString));
     }
 

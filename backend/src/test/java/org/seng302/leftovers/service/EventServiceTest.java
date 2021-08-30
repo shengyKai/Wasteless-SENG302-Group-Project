@@ -9,6 +9,7 @@ import org.mockito.Mock;
 import org.mockito.MockedConstruction;
 import org.mockito.MockedStatic;
 import org.mockito.MockitoAnnotations;
+import org.seng302.leftovers.dto.event.EventDTO;
 import org.seng302.leftovers.entities.event.Event;
 import org.seng302.leftovers.entities.event.GlobalMessageEvent;
 import org.seng302.leftovers.entities.User;
@@ -76,7 +77,7 @@ class EventServiceTest {
     private void verifyEmitterHasSentEvent(SseEmitter emitter, Event event) {
         assertDoesNotThrow(() -> verify(emitter, times(1)).send(mockBuilder));
         verify(mockBuilder, times(1)).name("newsfeed");
-        verify(mockBuilder, times(1)).data(event.constructJSONObject(), MediaType.APPLICATION_JSON);
+        verify(mockBuilder, times(1)).data(event.asDTO(), MediaType.APPLICATION_JSON);
     }
 
     @Test
@@ -120,9 +121,8 @@ class EventServiceTest {
         when(event.getNotifiedUser()).thenReturn(mockUser);
 
         // Make sure that event is send-able
-        var mockEventJson = new JSONObject();
-        mockEventJson.put("foo", "bar");
-        when(event.constructJSONObject()).thenReturn(mockEventJson);
+        var mockEventDTO = mock(EventDTO.class);
+        when(event.asDTO()).thenReturn(mockEventDTO);
 
         when(eventRepository.save(event)).thenReturn(event);
 

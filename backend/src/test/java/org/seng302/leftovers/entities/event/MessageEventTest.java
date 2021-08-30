@@ -1,11 +1,25 @@
-package org.seng302.leftovers.entities;
+package org.seng302.leftovers.entities.event;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.cucumber.gherkin.internal.com.eclipsesource.json.Json;
 import net.minidev.json.JSONObject;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
+import org.mockito.MockedConstruction;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.seng302.leftovers.dto.ConversationDTO;
+import org.seng302.leftovers.dto.MessageDTO;
+import org.seng302.leftovers.dto.event.MessageEventDTO;
+import org.seng302.leftovers.entities.Conversation;
+import org.seng302.leftovers.entities.MarketplaceCard;
+import org.seng302.leftovers.entities.Message;
+import org.seng302.leftovers.entities.User;
 import org.seng302.leftovers.entities.event.MessageEvent;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
@@ -17,6 +31,8 @@ import static org.mockito.Mockito.when;
 
 @SpringBootTest
 class MessageEventTest {
+    @Autowired
+    private ObjectMapper mapper;
 
     @Mock
     User buyer;
@@ -47,23 +63,16 @@ class MessageEventTest {
         sellerJson.appendField("id", 38);
         when(seller.constructPublicJson()).thenReturn(sellerJson);
 
-        var messageJson = new JSONObject();
-        messageJson.appendField("id", 20);
-        when(firstMessage.constructJSONObject()).thenReturn(messageJson);
-
         var cardJson = new JSONObject();
         cardJson.appendField("id", 520);
         when(card.constructJSONObject()).thenReturn(cardJson);
-
-        var conversationJson = new JSONObject();
-        conversationJson.appendField("id", 13);
-        when(eventConversation.constructJSONObject()).thenReturn(conversationJson);
 
         when(buyer.getUserID()).thenReturn(92L);
         when(seller.getUserID()).thenReturn(38L);
         when(bystander.getUserID()).thenReturn(171L);
 
         when(firstMessage.getConversation()).thenReturn(eventConversation);
+        when(firstMessage.getSender()).thenReturn(seller);
 
         when(eventConversation.getCard()).thenReturn(card);
         when(eventConversation.getBuyer()).thenReturn(buyer);
@@ -144,15 +153,24 @@ class MessageEventTest {
     }
 
     @Test
-    void constructJSONObject_jsonHasExpectedFormat() {
+    void messageEventDTO_jsonHasExpectedFormat() throws JsonProcessingException {
         var messageEvent = new MessageEvent(buyer, firstMessage);
-        var messageEventJson = messageEvent.constructJSONObject();
+        var messageEventJson = mapper.convertValue(messageEvent.asDTO(), JSONObject.class);
+
         assertEquals("MessageEvent", messageEventJson.getAsString("type"));
         assertEquals(messageEvent.getCreated().toString(), messageEventJson.getAsString("created"));
         assertEquals("none", messageEventJson.getAsString("tag"));
         assertEquals(messageEvent.getId(), messageEventJson.getAsNumber("id"));
-        assertEquals(eventConversation.constructJSONObject().toJSONString(), messageEventJson.getAsString("conversation"));
-        assertEquals(firstMessage.constructJSONObject().toJSONString(), messageEventJson.getAsString("message"));
+
+        assertEquals(
+            mapper.readTree(mapper.writeValueAsString(new ConversationDTO(messageEvent.getConversation()))),
+            mapper.readTree(mapper.writeValueAsString(messageEventJson.get("conversation")))
+        );
+        assertEquals(
+            mapper.readTree(mapper.writeValueAsString(new MessageDTO(messageEvent.getMessage()))),
+            mapper.readTree(mapper.writeValueAsString(messageEventJson.get("message")))
+        );
+
         assertEquals("buyer", messageEventJson.getAsString("participantType"));
         assertEquals(7, messageEventJson.size());
     }
