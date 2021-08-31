@@ -14,8 +14,16 @@
     </v-card-text>
   </div>
   <div v-else>
-    <div class="delete">
-      <div class="float=right ma-1">
+    <v-row>
+      <v-col>
+        <v-card-title>
+          {{ title }}
+        </v-card-title>
+        <v-card-subtitle>
+          {{ date }}, {{ time }}
+        </v-card-subtitle>
+      </v-col>
+      <v-col class="float=right mt-2 mr-2">
         <v-icon class="deleteButton"
                 ref="deleteButton"
                 color="red"
@@ -23,80 +31,74 @@
         >
           mdi-trash-can
         </v-icon>
-      </div>
-      <v-card-title>
-        {{ title }}
-      </v-card-title>
-      <v-card-subtitle>
-        {{ date }}, {{ time }}
-      </v-card-subtitle>
-      <slot/>
-      <v-card-text class="justify-center py-0" v-if="errorMessage !== undefined">
-        <div class="error--text">{{ errorMessage }}</div>
-      </v-card-text>
-      <!-- For user to view their option about the available tag to choose from  -->
-      <v-row
-      >
-        <v-col>
-          <!-- The persistent chip that shows the tag for the message (default will be no colour) -->
-          <v-tooltip bottom>
-            <template v-slot:activator="{ on, attrs }">
+      </v-col>
+    </v-row>
+    <slot/>
+    <v-card-text class="justify-center py-0" v-if="errorMessage !== undefined">
+      <div class="error--text">{{ errorMessage }}</div>
+    </v-card-text>
+    <!-- For user to view their option about the available tag to choose from  -->
+    <v-row
+    >
+      <v-col>
+        <!-- The persistent chip that shows the tag for the message (default will be no colour) -->
+        <v-tooltip bottom>
+          <template v-slot:activator="{ on, attrs }">
+            <v-chip
+              class="ma-2 ml-4 mb-3"
+              :color="event.tag"
+              @click="expand = !expand"
+              label
+              text-color="white"
+              v-bind="attrs"
+              v-on="on"
+            >
+              <v-icon left>
+                mdi-label
+              </v-icon>
+              Tag
+            </v-chip>
+          </template>
+          <span>Click to view the available tags.</span>
+        </v-tooltip>
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col>
+        <v-expand-transition>
+          <v-card
+            v-show="expand"
+            max-width="1200"
+            class="mx-auto"
+          >
+            <div class="font-weight-medium">
+              <span class="ml-4">
+                Change your Tag:
+              </span>
+            </div>
+            <!--  Content that run through a loop of colours which at the same time set the colour of the chip
+              Make the code more maintainable as it will be easy to modify colour in future and get the index
+              Trigger a tagNotification when the chip is clicked (will take the colour as param)
+        -->
+            <div class="ml-3">
               <v-chip
-                class="ma-2 ml-4 mb-3"
-                :color="event.tag"
-                @click="expand = !expand"
+                class="ma-1"
+                v-for="colour in colours"
+                :key=colour
+                :color="colour"
                 label
                 text-color="white"
-                v-bind="attrs"
-                v-on="on"
+                @click="tagNotification(colour)"
               >
                 <v-icon left>
                   mdi-label
                 </v-icon>
-                Tag
               </v-chip>
-            </template>
-            <span>Click to view the available tags.</span>
-          </v-tooltip>
-        </v-col>
-      </v-row>
-      <v-row>
-        <v-col>
-          <v-expand-transition>
-            <v-card
-              v-show="expand"
-              max-width="1200"
-              class="mx-auto"
-            >
-              <div class="font-weight-medium">
-                <span class="ml-4">
-                  Change your Tag:
-                </span>
-              </div>
-              <!--  Content that run through a loop of colours which at the same time set the colour of the chip
-                Make the code more maintainable as it will be easy to modify colour in future and get the index
-                Trigger a tagNotification when the chip is clicked (will take the colour as param)
-          -->
-              <div class="ml-3">
-                <v-chip
-                  class="ma-1"
-                  v-for="colour in colours"
-                  :key=colour
-                  :color="colour"
-                  label
-                  text-color="white"
-                  @click="tagNotification(colour)"
-                >
-                  <v-icon left>
-                    mdi-label
-                  </v-icon>
-                </v-chip>
-              </div>
-            </v-card>
-          </v-expand-transition>
-        </v-col>
-      </v-row>
-    </div>
+            </div>
+          </v-card>
+        </v-expand-transition>
+      </v-col>
+    </v-row>
   </div>
 </template>
 
