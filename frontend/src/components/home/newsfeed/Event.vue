@@ -13,9 +13,9 @@
       <div class="error--text" v-if="errorMessage !== undefined">{{ errorMessage }}</div>
     </v-card-text>
   </div>
-  <div v-else>
+  <div v-else @click="isNotRead = false">
     <v-row>
-      <v-col>
+      <v-col cols="10">
         <v-card-title>
           {{ title }}
         </v-card-title>
@@ -23,13 +23,19 @@
           {{ date }}, {{ time }}
         </v-card-subtitle>
       </v-col>
-      <v-col class="float=right mt-2 mr-2">
+      <v-col cols="2" class="mt-2">
         <v-icon class="deleteButton"
                 ref="deleteButton"
                 color="red"
                 @click.stop="initiateDeletion"
         >
           mdi-trash-can
+        </v-icon>
+        <v-icon class="mt-1 ml-5" v-if="isNotRead">
+          mdi-email
+        </v-icon>
+        <v-icon class="mt-1 ml-5" v-else>
+          mdi-email-open
         </v-icon>
       </v-col>
     </v-row>
@@ -38,14 +44,13 @@
       <div class="error--text">{{ errorMessage }}</div>
     </v-card-text>
     <!-- For user to view their option about the available tag to choose from  -->
-    <v-row
-    >
+    <v-row>
       <v-col>
         <!-- The persistent chip that shows the tag for the message (default will be no colour) -->
         <v-tooltip bottom>
           <template v-slot:activator="{ on, attrs }">
             <v-chip
-              class="ma-2 ml-4 mb-3"
+              class="ml-4"
               :color="event.tag"
               @click="expand = !expand"
               label
@@ -127,7 +132,7 @@ export default {
       deletionTime: undefined,
       deleteCardDialog: false,
       editCardDialog: false,
-
+      isNotRead: true,
       expand: false,
       colours: ['none', 'red', 'orange', 'yellow', 'green', 'blue', 'purple'],
     };
