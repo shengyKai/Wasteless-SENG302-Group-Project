@@ -13,24 +13,25 @@
       <div class="error--text" v-if="errorMessage !== undefined">{{ errorMessage }}</div>
     </v-card-text>
   </div>
-  <div v-else @click="isNotRead = false">
+  <div v-else @click="markEventAsRead">
     <v-row>
-      <v-col cols="10">
-        <v-card-title>
-          {{ title }}
-          <v-icon class="ml-1" v-if="isNotRead">
-            mdi-email
-          </v-icon>
-          <v-icon class="ml-1" v-else>
-            mdi-email-open
-          </v-icon>
-        </v-card-title>
-        <v-card-subtitle>
-          {{ date }}, {{ time }}
-        </v-card-subtitle>
+      <v-col cols="11">
+        <v-badge
+          overlap
+          offset-y=35
+          :value="!isRead"
+          icon="mdi-email"
+        >
+          <v-card-title>
+            {{ title }}
+          </v-card-title>
+          <v-card-subtitle>
+            {{ date }}, {{ time }}
+          </v-card-subtitle>
+        </v-badge>
       </v-col>
-      <v-col cols="2" class="mt-2">
-        <v-icon class="deleteButton"
+      <v-col cols="1" class="mt-2">
+        <v-icon class="deleteButton mr-2"
                 ref="deleteButton"
                 color="red"
                 @click.stop="initiateDeletion"
@@ -132,9 +133,11 @@ export default {
       deletionTime: undefined,
       deleteCardDialog: false,
       editCardDialog: false,
-      isNotRead: true,
       expand: false,
       colours: ['none', 'red', 'orange', 'yellow', 'green', 'blue', 'purple'],
+      // This attribute should be retrieved from the event itself, but because its not implemented yet in the backend,
+      // this is hardcoded
+      isRead: false,
     };
   },
   computed: {
@@ -214,6 +217,12 @@ export default {
       this.deleted = false;
       this.$store.commit('unstageEventForDeletion', this.event.id);
     },
+    async markEventAsRead() {
+      if (!this.isRead) {
+        this.isRead = true;
+        console.log("called");
+      }
+    }
   },
   watch: {
     error: {
