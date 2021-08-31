@@ -18,6 +18,12 @@
       <v-col cols="10">
         <v-card-title>
           {{ title }}
+          <v-icon class="ml-1" v-if="isNotRead">
+            mdi-email
+          </v-icon>
+          <v-icon class="ml-1" v-else>
+            mdi-email-open
+          </v-icon>
         </v-card-title>
         <v-card-subtitle>
           {{ date }}, {{ time }}
@@ -30,12 +36,6 @@
                 @click.stop="initiateDeletion"
         >
           mdi-trash-can
-        </v-icon>
-        <v-icon class="mt-1 ml-5" v-if="isNotRead">
-          mdi-email
-        </v-icon>
-        <v-icon class="mt-1 ml-5" v-else>
-          mdi-email-open
         </v-icon>
       </v-col>
     </v-row>
