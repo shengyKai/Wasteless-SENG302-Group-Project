@@ -69,7 +69,7 @@
         </v-tooltip>
       </v-col>
     </v-row>
-    <v-row>
+    <v-row no-gutters>
       <v-col>
         <v-expand-transition>
           <v-card
