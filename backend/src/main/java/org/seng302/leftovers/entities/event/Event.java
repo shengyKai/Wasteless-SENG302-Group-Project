@@ -30,6 +30,9 @@ public abstract class Event {
     @JoinColumn(name = "event_user", nullable = false)
     private User notifiedUser;
 
+    @Column
+    private boolean isArchived = false;
+
     protected Event() {} // Required by JPA
 
     /**
@@ -97,4 +100,9 @@ public abstract class Event {
      * @return DTO for JSON serialisation
      */
     public abstract EventDTO asDTO();
+
+    public void archiveEvent() {
+        this.isArchived = true;
+        new ArchivedEvent(this);
+    }
 }
