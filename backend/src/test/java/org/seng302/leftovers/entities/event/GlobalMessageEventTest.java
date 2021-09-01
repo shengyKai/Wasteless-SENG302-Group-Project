@@ -82,6 +82,7 @@ class GlobalMessageEventTest {
         assertEquals("GlobalMessageEvent", json.get("type"));
         assertEquals("none", json.get("tag"));
         assertEquals("Foo", json.get("message"));
-        assertEquals(5, json.size());
+        assertEquals("normal", json.get("eventStatus"));
+        assertEquals(6, json.size());
     }
 }

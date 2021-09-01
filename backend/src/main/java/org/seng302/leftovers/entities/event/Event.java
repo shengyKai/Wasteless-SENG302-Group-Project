@@ -114,6 +114,15 @@ public abstract class Event {
     }
 
     /**
+     * Gets the isRead property of this event entity.
+     * For now, it is only used for testing.
+     * @return isRead boolean property
+     */
+    public boolean isRead() {
+        return isRead;
+    }
+
+    /**
      * Returns the eventStatus of this event
      * @return the eventStatus enum
      */
