@@ -7,6 +7,7 @@ import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.seng302.leftovers.dto.event.EventDTO;
+import org.seng302.leftovers.dto.event.EventStatus;
 import org.seng302.leftovers.dto.event.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -77,5 +78,33 @@ class EventTest {
         public EventDTO asDTO() {
             return new EventDTO(this) {};
         }
+    }
+
+    @Test
+    void eventRead_updatesIsRead_isReadUpdatedToTrue() {
+        Event event = new EventSubclass();
+        assertEquals(event.isRead(), false);
+        event.eventRead();
+        assertEquals(event.isRead(), true);
+    }
+
+    @Test
+    void updateEventStatus_getDefaultStatus_defaultStatusIsNormal() {
+        Event event = new EventSubclass();
+        assertEquals(event.getEventStatus(), EventStatus.NORMAL);
+    }
+
+    @Test
+    void updateEventStatus_updateStatusToArchived_eventStatusIsArchived() {
+        Event event = new EventSubclass();
+        event.updateEventStatus(EventStatus.ARCHIVED);
+        assertEquals(event.getEventStatus(), EventStatus.ARCHIVED);
+    }
+
+    @Test
+    void updateEventStatus_updateStatusToStarred_eventStatusIsStarred() {
+        Event event = new EventSubclass();
+        event.updateEventStatus(EventStatus.STARRED);
+        assertEquals(event.getEventStatus(), EventStatus.STARRED);
     }
 }
