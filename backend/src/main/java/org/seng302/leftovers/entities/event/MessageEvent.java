@@ -1,8 +1,10 @@
-package org.seng302.leftovers.entities;
+package org.seng302.leftovers.entities.event;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import net.minidev.json.JSONObject;
+import org.seng302.leftovers.dto.event.MessageEventDTO;
+import org.seng302.leftovers.entities.Conversation;
+import org.seng302.leftovers.entities.Message;
+import org.seng302.leftovers.entities.User;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -103,18 +105,11 @@ public class MessageEvent extends Event {
     }
 
     /**
-     * Construct a JSON representation of this event. Contains the user, created date, id, tag, message and card
-     * associated with this event.
-     * @return A JSON representation of the event.
+     * Converts this event into a DTO
+     * @return DTO for JSON serialisation
      */
     @Override
-    public JSONObject constructJSONObject() {
-        ObjectMapper objectMapper = new ObjectMapper();
-
-        JSONObject jsonObject = super.constructJSONObject();
-        jsonObject.appendField("message", message.constructJSONObject());
-        jsonObject.appendField("conversation", conversation.constructJSONObject());
-        jsonObject.appendField("participantType", objectMapper.convertValue(participantType, String.class));
-        return jsonObject;
+    public MessageEventDTO asDTO() {
+        return new MessageEventDTO(this);
     }
 }

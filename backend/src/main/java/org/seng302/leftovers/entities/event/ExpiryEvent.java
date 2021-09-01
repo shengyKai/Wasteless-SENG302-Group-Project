@@ -1,6 +1,7 @@
-package org.seng302.leftovers.entities;
+package org.seng302.leftovers.entities.event;
 
-import net.minidev.json.JSONObject;
+import org.seng302.leftovers.dto.event.ExpiryEventDTO;
+import org.seng302.leftovers.entities.MarketplaceCard;
 
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
@@ -36,16 +37,11 @@ public class ExpiryEvent extends Event {
     }
 
     /**
-     * Construct a JSON representation of the expiry event. Contains the event's id, created date and type, and the JSON
-     * representation of the marketplace card associated with this event.
-     * @return JSON representation of the expiry event.
+     * Converts this event into a DTO
+     * @return DTO for JSON serialisation
      */
     @Override
-    public JSONObject constructJSONObject() {
-        JSONObject jsonObject = super.constructJSONObject();
-        jsonObject.appendField("card", expiringCard.constructJSONObject());
-        return jsonObject;
+    public ExpiryEventDTO asDTO() {
+        return new ExpiryEventDTO(this);
     }
-
-
 }

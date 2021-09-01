@@ -1,10 +1,14 @@
-package org.seng302.leftovers.entities;
+package org.seng302.leftovers.entities.event;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import net.minidev.json.JSONObject;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
-import org.seng302.leftovers.dto.Tag;
+import org.seng302.leftovers.dto.event.EventDTO;
+import org.seng302.leftovers.dto.event.Tag;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
@@ -16,6 +20,8 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class EventTest {
+    @Autowired
+    private ObjectMapper mapper;
 
     @Test
     void createEvent_any_creationTimeCorrect() {
@@ -29,11 +35,11 @@ class EventTest {
 
     @ParameterizedTest
     @EnumSource(Tag.class)
-    void constructJSONObject_withProvidedTag_tagReturnedInJson(Tag tag) {
+    void eventDTO_withProvidedTag_tagReturnedInJson(Tag tag) {
         Event event = new EventSubclass();
         event.setTag(tag);
 
-        var json = event.constructJSONObject();
+        var json = mapper.convertValue(new EventDTO(event) {}, JSONObject.class);
         assertEquals(tag.toString().toLowerCase(), json.get("tag"));
     }
 
@@ -53,10 +59,10 @@ class EventTest {
     }
 
     @Test
-    void constructJSONObject_any_validFields() {
+    void eventDTO_any_validFields() {
         Event event = new EventSubclass();
 
-        var json = event.constructJSONObject();
+        var json = mapper.convertValue(event.asDTO(), JSONObject.class);
         assertNull(json.get("id"));
         assertEquals(event.getCreated().toString(), json.get("created"));
         assertEquals(event.getClass().getSimpleName(), json.get("type"));
@@ -65,5 +71,10 @@ class EventTest {
     }
 
     // Event is abstract so we need to subclass
-    static class EventSubclass extends Event {}
+    static class EventSubclass extends Event {
+        @Override
+        public EventDTO asDTO() {
+            return new EventDTO(this) {};
+        }
+    }
 }

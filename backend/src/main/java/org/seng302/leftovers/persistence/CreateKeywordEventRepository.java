@@ -1,7 +1,7 @@
 package org.seng302.leftovers.persistence;
 
 import org.seng302.leftovers.entities.Keyword;
-import org.seng302.leftovers.entities.KeywordCreatedEvent;
+import org.seng302.leftovers.entities.event.KeywordCreatedEvent;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 

@@ -1,7 +1,10 @@
-package org.seng302.leftovers.entities;
+package org.seng302.leftovers.entities.event;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import net.minidev.json.JSONObject;
 import org.junit.jupiter.api.*;
+import org.seng302.leftovers.entities.Location;
+import org.seng302.leftovers.entities.User;
 import org.seng302.leftovers.persistence.EventRepository;
 import org.seng302.leftovers.persistence.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +17,8 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class GlobalMessageEventTest {
+    @Autowired
+    private ObjectMapper mapper;
 
     @Autowired
     private EventRepository eventRepository;
@@ -67,11 +72,11 @@ class GlobalMessageEventTest {
     }
 
     @Test
-    void constructJSONObject_withMessage_correctJson() {
+    void asDTO_withMessage_correctJson() {
         GlobalMessageEvent event = new GlobalMessageEvent(user, "Foo");
         event = eventRepository.save(event); // Make sure to get an ID
 
-        JSONObject json = event.constructJSONObject();
+        var json = mapper.convertValue(event.asDTO(), JSONObject.class);
         assertEquals(event.getId(), json.get("id"));
         assertEquals(event.getCreated().toString(), json.get("created"));
         assertEquals("GlobalMessageEvent", json.get("type"));

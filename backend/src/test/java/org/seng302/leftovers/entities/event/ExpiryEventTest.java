@@ -1,10 +1,13 @@
-package org.seng302.leftovers.entities;
+package org.seng302.leftovers.entities.event;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.seng302.leftovers.entities.Location;
+import org.seng302.leftovers.entities.MarketplaceCard;
+import org.seng302.leftovers.entities.User;
 import org.seng302.leftovers.persistence.BusinessRepository;
 import org.seng302.leftovers.persistence.ExpiryEventRepository;
 import org.seng302.leftovers.persistence.MarketplaceCardRepository;
@@ -18,13 +21,16 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class ExpiryEventTest {
 
     @Autowired
-    UserRepository userRepository;
+    private ObjectMapper mapper;
     @Autowired
-    MarketplaceCardRepository marketplaceCardRepository;
+    private UserRepository userRepository;
     @Autowired
-    ExpiryEventRepository expiryEventRepository;
+    private MarketplaceCardRepository marketplaceCardRepository;
     @Autowired
-    BusinessRepository businessRepository;
+    private ExpiryEventRepository expiryEventRepository;
+    @Autowired
+    private BusinessRepository businessRepository;
+
     private MarketplaceCard testCard;
 
     @BeforeEach
@@ -72,8 +78,7 @@ class ExpiryEventTest {
                 testEvent.getId(),
                 testEvent.getCreated(),
                 testCard.constructJSONObject().toJSONString());
-        String actualJsonString = testEvent.constructJSONObject().toJSONString();
-        ObjectMapper mapper = new ObjectMapper();
+        String actualJsonString = mapper.writeValueAsString(testEvent.asDTO());
         assertEquals(mapper.readTree(expectedJsonString), mapper.readTree(actualJsonString));
     }
 

@@ -1,6 +1,7 @@
-package org.seng302.leftovers.entities;
+package org.seng302.leftovers.entities.event;
 
-import net.minidev.json.JSONObject;
+import org.seng302.leftovers.dto.event.DeleteEventDTO;
+import org.seng302.leftovers.entities.MarketplaceCard;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -49,15 +50,11 @@ public class DeleteEvent extends Event {
     }
 
     /**
-     * Construct a JSON representation of the delete event. Contains the event's id, created date and type, deleted card
-     * title and card section.
-     * @return JSON representation of the expiry event.
+     * Converts this event into a DTO
+     * @return DTO for JSON serialisation
      */
     @Override
-    public JSONObject constructJSONObject() {
-        JSONObject jsonObject = super.constructJSONObject();
-        jsonObject.appendField("title", title);
-        jsonObject.appendField("section", section.getName());
-        return jsonObject;
+    public DeleteEventDTO asDTO() {
+        return new DeleteEventDTO(this);
     }
 }

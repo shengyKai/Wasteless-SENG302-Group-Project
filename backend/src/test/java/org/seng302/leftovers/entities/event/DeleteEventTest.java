@@ -1,10 +1,13 @@
-package org.seng302.leftovers.entities;
+package org.seng302.leftovers.entities.event;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import net.minidev.json.JSONObject;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.seng302.leftovers.entities.Location;
+import org.seng302.leftovers.entities.MarketplaceCard;
+import org.seng302.leftovers.entities.User;
 import org.seng302.leftovers.persistence.BusinessRepository;
 import org.seng302.leftovers.persistence.EventRepository;
 import org.seng302.leftovers.persistence.MarketplaceCardRepository;
@@ -16,15 +19,18 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest
 class DeleteEventTest {
+    @Autowired
+    private ObjectMapper mapper;
 
     @Autowired
-    UserRepository userRepository;
+    private UserRepository userRepository;
     @Autowired
-    MarketplaceCardRepository marketplaceCardRepository;
+    private MarketplaceCardRepository marketplaceCardRepository;
     @Autowired
-    EventRepository eventRepository;
+    private EventRepository eventRepository;
     @Autowired
-    BusinessRepository businessRepository;
+    private BusinessRepository businessRepository;
+
     private MarketplaceCard testCard;
 
     @BeforeEach
@@ -60,11 +66,11 @@ class DeleteEventTest {
     }
 
     @Test
-    void constructJSONObject_jsonHasExpectedFormat() throws JsonProcessingException {
+    void asDTO_jsonHasExpectedFormat() {
         DeleteEvent event = new DeleteEvent(testCard);
         event = eventRepository.save(event);
 
-        JSONObject json = event.constructJSONObject();
+        var json = mapper.convertValue(event.asDTO(), JSONObject.class);
 
         assertEquals(event.getId(), json.get("id"));
         assertEquals(event.getCreated().toString(), json.get("created"));
