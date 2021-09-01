@@ -17,6 +17,7 @@ public abstract class EventDTO {
     private String type;
     private Instant created;
     private Tag tag;
+    private EventStatus eventStatus;
 
     /**
      * Converts a Event entity to its JSON form
@@ -28,5 +29,6 @@ public abstract class EventDTO {
         this.type = event.getClass().getSimpleName();
         this.created = event.getCreated();
         this.tag = event.getTag();
+        this.eventStatus = event.getEventStatus();
     }
 }

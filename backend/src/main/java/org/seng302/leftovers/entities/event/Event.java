@@ -114,6 +114,12 @@ public abstract class Event {
     }
 
     /**
+     * Returns the eventStatus of this event
+     * @return the eventStatus enum
+     */
+    public EventStatus getEventStatus() { return this.eventStatus; }
+
+    /**
      * Update the status of the event. Uses an enum for the different types
      * @param eventStatus Possible enum types are ARCHIVED, NORMAL, STARRED
      */
