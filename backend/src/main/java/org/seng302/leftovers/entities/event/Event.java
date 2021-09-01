@@ -1,6 +1,7 @@
 package org.seng302.leftovers.entities.event;
 
 import org.seng302.leftovers.dto.event.EventDTO;
+import org.seng302.leftovers.dto.event.EventStatus;
 import org.seng302.leftovers.dto.event.Tag;
 import org.seng302.leftovers.entities.User;
 import org.springframework.http.HttpStatus;
@@ -30,8 +31,12 @@ public abstract class Event {
     @JoinColumn(name = "event_user", nullable = false)
     private User notifiedUser;
 
-    @Column
-    private boolean isArchived = false;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private EventStatus eventStatus = EventStatus.NORMAL;
+
+    @Column(nullable = false)
+    private boolean isRead = false;
 
     protected Event() {} // Required by JPA
 
@@ -101,8 +106,18 @@ public abstract class Event {
      */
     public abstract EventDTO asDTO();
 
-    public void archiveEvent() {
-        this.isArchived = true;
-        new ArchivedEvent(this);
+    /**
+     * Updates the isRead status to true if the event has been read.
+     */
+    public void eventRead() {
+        this.isRead = true;
+    }
+
+    /**
+     * Update the status of the event. Uses an enum for the different types
+     * @param eventStatus Possible enum types are ARCHIVED, NORMAL, STARRED
+     */
+    public void updateEventStatus(EventStatus eventStatus) {
+        this.eventStatus = eventStatus;
     }
 }
