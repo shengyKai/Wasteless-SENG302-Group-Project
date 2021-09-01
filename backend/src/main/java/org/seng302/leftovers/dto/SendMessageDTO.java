@@ -18,17 +18,4 @@ public class SendMessageDTO {
     private Long senderId;
     @NotNull
     private String message;
-
-    /** Required for DTO magic **/
-    protected SendMessageDTO() {}
-
-    /**
-     * Constructor for the message dto from a Message entity
-     * Only used by the implementation of MessageDTO
-     * @param message Entity to construct DTO for
-     */
-    protected SendMessageDTO(Message message) {
-        this.senderId = message.getSender().getUserID();
-        this.message = message.getContent();
-    }
 }
