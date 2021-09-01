@@ -1,5 +1,6 @@
 package org.seng302.leftovers.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
@@ -8,7 +9,7 @@ import org.seng302.leftovers.entities.Message;
 import java.time.Instant;
 
 /**
- * A DTO representing a Message
+ * A DTO representing a Message entity
  */
 @Getter
 @ToString
@@ -16,6 +17,7 @@ import java.time.Instant;
 public class MessageDTO {
     private Long id;
     private Long senderId;
+    @JsonFormat(shape=JsonFormat.Shape.STRING)
     private Instant created;
     private String content;
 
