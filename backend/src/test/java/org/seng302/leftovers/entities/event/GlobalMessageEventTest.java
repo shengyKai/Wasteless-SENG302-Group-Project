@@ -30,8 +30,6 @@ class GlobalMessageEventTest {
 
     @BeforeAll
     void init() {
-        System.out.println(mapper);
-
         eventRepository.deleteAll();
         userRepository.deleteAll();
     }
