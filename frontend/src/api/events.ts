@@ -90,16 +90,16 @@ export function addEventMessageHandler(handler: (event: AnyEvent) => void): void
 /**
  * Updates an event as read. No body is needed in this case as the backend would only have to change
  * a boolean value, and subsequently, the event emitters will retrieve the events with the updated field.
- * @param eventId Event id
+ * @param eventId Event id of the event to mark as read
  */
 export async function updateEventAsRead(eventId: number): Promise<MaybeError<undefined>> {
   try {
-    await instance.put(`/users/${eventId}`);
+    await instance.put(`/feed/${eventId}/read`);
   } catch (error) {
     let status: number | undefined = error.response?.status;
     if (status === undefined) return 'Failed to reach backend';
     if (status === 401) return 'You have been logged out. Please login again and retry';
-    if (status === 403) return 'Cannot update event as read: ' + error.response?.data.message;
+    if (status === 403) return 'Cannot mark event as read: ' + error.response?.data.message;
     if (status === 406) return 'Event does not exist';
     return 'Request failed: ' + error.response?.data.message;
   }
