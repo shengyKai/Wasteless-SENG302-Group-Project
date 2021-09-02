@@ -154,7 +154,6 @@ class MessageEventTest {
         assertEquals("MessageEvent", messageEventJson.getAsString("type"));
         assertEquals(messageEvent.getCreated().toString(), messageEventJson.getAsString("created"));
         assertEquals("none", messageEventJson.getAsString("tag"));
-        assertEquals("normal", messageEventJson.getAsString("eventStatus"));
         assertEquals(messageEvent.getId(), messageEventJson.getAsNumber("id"));
 
         assertEquals(
@@ -167,7 +166,9 @@ class MessageEventTest {
         );
 
         assertEquals("buyer", messageEventJson.getAsString("participantType"));
-        assertEquals(8, messageEventJson.size());
+        assertEquals(messageEvent.getEventStatus().toString().toLowerCase(), messageEventJson.get("eventStatus"));
+        assertEquals(messageEvent.isRead(), messageEventJson.get("read"));
+        assertEquals(9, messageEventJson.size());
     }
 
 }

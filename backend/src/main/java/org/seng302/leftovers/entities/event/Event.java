@@ -118,9 +118,7 @@ public abstract class Event {
      * For now, it is only used for testing.
      * @return isRead boolean property
      */
-    public boolean isRead() {
-        return isRead;
-    }
+    public boolean isRead() { return this.isRead; }
 
     /**
      * Returns the eventStatus of this event

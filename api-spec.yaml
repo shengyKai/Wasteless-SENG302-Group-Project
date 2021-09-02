@@ -2717,6 +2717,7 @@ components:
         - created
         - tag
         - eventStatus
+        - isRead
       properties:
         id:
           type: integer
@@ -2733,6 +2734,9 @@ components:
           $ref: '#/components/schemas/Tag'
         eventStatus:
           $ref: '#/components/schemas/EventStatus'
+        isRead:
+          type: boolean
+          description: Checks if the event has been read
     Tag:
       type: string
       description: Name of the tag (colour name) for the event
