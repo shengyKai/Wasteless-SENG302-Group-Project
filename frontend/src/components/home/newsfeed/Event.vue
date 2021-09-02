@@ -112,6 +112,7 @@
 import synchronizedTime from '@/components/utils/Methods/synchronizedTime';
 import { formatDate, formatTime } from '@/utils';
 import { setEventTag } from "@/api/internal";
+import {updateEventAsRead} from "@/api/events";
 
 export default {
   name: 'Event',
@@ -135,9 +136,6 @@ export default {
       editCardDialog: false,
       expand: false,
       colours: ['none', 'red', 'orange', 'yellow', 'green', 'blue', 'purple'],
-      // This attribute should be retrieved from the event itself, but because its not implemented yet in the backend,
-      // this is hardcoded
-      isRead: false,
     };
   },
   computed: {
@@ -145,7 +143,8 @@ export default {
      * Change the badge icon based on whether the event has been read
      */
     readBadgeIcon() {
-      if (!this.isRead) {
+      console.log(this.event.isRead);
+      if (!this.event.isRead) {
         return "mdi-email";
       } else {
         return "mdi-email-open";
@@ -155,7 +154,7 @@ export default {
      * Changes the badge colour based on whether the event has been read
      */
     readColour() {
-      if (!this.isRead) {
+      if (!this.event.isRead) {
         return "primary";
       } else {
         return "secondary";
@@ -238,9 +237,13 @@ export default {
       this.$store.commit('unstageEventForDeletion', this.event.id);
     },
     async markEventAsRead() {
-      if (!this.isRead) {
-        this.isRead = true;
-        console.log("called");
+      if (!this.event.isRead) {
+        const result = updateEventAsRead(this.event.id);
+        if (typeof result === 'string') {
+          this.errorMessage = result;
+        } else {
+          this.errorMessage = undefined;
+        }
       }
     }
   },

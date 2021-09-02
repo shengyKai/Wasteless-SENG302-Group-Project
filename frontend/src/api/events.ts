@@ -23,9 +23,7 @@ type BaseEvent<T extends string> = {
   created: string,
   tag: Tag,
   type: T,
-  // After implementation on the backend, the bottom line should be uncommented to add the bottom attribute.
-  // May not be the exact same name, but can be changed
-  // isRead: boolean
+  isRead: boolean
 }
 
 export type GlobalMessageEvent = BaseEvent<'GlobalMessageEvent'> & {
