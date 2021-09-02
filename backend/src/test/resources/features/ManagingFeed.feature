@@ -23,7 +23,7 @@ Feature: U32 - Managing my feed
   Scenario: AC2 - New event items are initially unread and I can mark an event item as read
     Given I am logged into my account
     And The default read status is false
-    When I mark an event as read
+    When I try to mark an event from my feed as read
     Then The event will be updated as read
 
   Scenario: Unauthorised users cannot mark items from my feed as read
