@@ -145,7 +145,7 @@ public class EventController {
      * @param eventId The event to be marked as read
      */
     @PutMapping("/feed/{eventId}/read")
-    public void markEventAsRead(@PathVariable long eventId, HttpServletRequest request) {
+    public void updateEventAsRead(@PathVariable long eventId, HttpServletRequest request) {
         LOGGER.info("Requested update of event to be marked as read (eventId={})", eventId);
 
         AuthenticationTokenManager.checkAuthenticationToken(request);
@@ -157,7 +157,7 @@ public class EventController {
                 throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Current user does not have permission to mark this event as read");
             }
 
-            event.eventRead();
+            event.markEventAsRead();
             eventService.saveEvent(event);
         } catch (Exception e) {
             LOGGER.error(e.getMessage());

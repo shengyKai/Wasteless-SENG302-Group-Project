@@ -325,4 +325,13 @@ class EventControllerTest {
                 .andExpect(status().isUnauthorized());
         verify(eventRepository, times(0)).delete(any());
     }
+
+    @Test
+    void updateEventAsRead_eventExists_eventMarkedAsRead() throws Exception {
+        assertEquals(false, mockEvent.isRead());
+        mockMvc.perform(put("/feed/2/read"))
+                .andExpect(status().isOk())
+                .andReturn();
+        assertEquals(true, mockEvent.isRead());
+    }
 }
