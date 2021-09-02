@@ -333,12 +333,4 @@ class EventControllerTest {
                 .andReturn();
         verify(mockEvent, times(1)).markEventAsRead();
     }
-
-    @Test
-    void updateEventAsRead_eventAlreadyMarkedAsRead_eventRemainsMarkedAsRead() throws Exception {
-        mockMvc.perform(put("/feed/2/read"))
-                .andExpect(status().isOk())
-                .andReturn();
-        verify(mockEvent, times(1)).markEventAsRead();
-    }
 }
