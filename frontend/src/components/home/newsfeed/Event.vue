@@ -19,8 +19,8 @@
         <v-badge
           overlap
           offset-y=35
-          :value="!isRead"
-          icon="mdi-email"
+          :icon="readBadgeIcon"
+          :color="readColour"
         >
           <v-card-title>
             {{ title }}
@@ -141,6 +141,26 @@ export default {
     };
   },
   computed: {
+    /**
+     * Change the badge icon based on whether the event has been read
+     */
+    readBadgeIcon() {
+      if (!this.isRead) {
+        return "mdi-email";
+      } else {
+        return "mdi-email-open";
+      }
+    },
+    /**
+     * Changes the badge colour based on whether the event has been read
+     */
+    readColour() {
+      if (!this.isRead) {
+        return "primary";
+      } else {
+        return "secondary";
+      }
+    },
     /**
      * The time the event was created in a displayable format (hh:mm).
      */
