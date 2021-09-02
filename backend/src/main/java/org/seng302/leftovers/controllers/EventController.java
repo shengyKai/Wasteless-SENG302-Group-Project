@@ -139,4 +139,29 @@ public class EventController {
             throw e;
         }
     }
+
+    /**
+     * PUT endpoint for marking the event as read
+     * @param eventId The event to be marked as read
+     */
+    @PutMapping("/feed/{eventId}/read")
+    public void markEventAsRead(@PathVariable long eventId, HttpServletRequest request) {
+        LOGGER.info("Requested update of event to be marked as read (eventId={})", eventId);
+
+        AuthenticationTokenManager.checkAuthenticationToken(request);
+        try {
+            Event event = eventRepository.findById(eventId)
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "Event not found"));
+
+            if (!AuthenticationTokenManager.sessionCanSeePrivate(request, event.getNotifiedUser().getUserID())) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Current user does not have permission to mark this event as read");
+            }
+
+            event.eventRead();
+            eventService.saveEvent(event);
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            throw e;
+        }
+    }
 }
