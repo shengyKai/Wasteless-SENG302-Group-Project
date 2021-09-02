@@ -1,5 +1,6 @@
 package org.seng302.leftovers.dto;
 
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
 import org.springframework.data.domain.Page;
@@ -13,12 +14,17 @@ import java.util.List;
  */
 @Getter
 @ToString
+@EqualsAndHashCode
 public class ResultPageDTO<T> {
     @NotNull
     private Long count;
     @NotNull
     private List<T> results;
 
+    /**
+     * Convert a Page of DTOs into a DTO
+     * @param resultPage Page of DTOs
+     */
     public ResultPageDTO(Page<T> resultPage) {
         count = resultPage.getTotalElements();
         results = resultPage.getContent();

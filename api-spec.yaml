@@ -2197,6 +2197,38 @@ paths:
         '406':
            description: >-
              Not Acceptable: Returned when a feed with an ID does not exist.
+  /feed/{id}/read:
+    put:
+      tags:
+        - 'U32: Managing my feed'
+        - Feed
+      summary: Marking an event as read in the user feed
+      security:
+        - CookieAuth:
+            - user
+            - business
+            - globalApplicationAdmin
+            - defaultGlobalApplicationAdmin
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: ID of the item to mark as read (item refers to event entity)
+          example: 10
+      responses:
+        '200':
+          description: Item successfully marked as read in the feed
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: >-
+            Forbidden: Returned when a user or business does not have
+            the permission to mark the item on the feed as read.
+        '406':
+           description: >-
+             Not Acceptable: Returned when a feed with an ID does not exist.
 components:
   securitySchemes:
     CookieAuth:
@@ -2684,6 +2716,7 @@ components:
         - id
         - created
         - tag
+        - eventStatus
       properties:
         id:
           type: integer
@@ -2698,6 +2731,8 @@ components:
           description: Date and time when the event was created
         tag:
           $ref: '#/components/schemas/Tag'
+        eventStatus:
+          $ref: '#/components/schemas/EventStatus'
     Tag:
       type: string
       description: Name of the tag (colour name) for the event
@@ -2736,3 +2771,10 @@ components:
           type: string
           example: So how about them apples?
           description: User supplied content of the message
+    EventStatus:
+      type: string
+      description: Name of the event status
+      enum:
+        - archived
+        - normal
+        - starred

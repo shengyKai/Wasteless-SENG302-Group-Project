@@ -3,11 +3,11 @@ package org.seng302.leftovers.controllers;
 import net.minidev.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.seng302.leftovers.dto.Tag;
 import org.seng302.leftovers.dto.WrappedValueDTO;
-import org.seng302.leftovers.entities.Event;
-import org.seng302.leftovers.entities.GlobalMessageEvent;
+import org.seng302.leftovers.dto.event.Tag;
 import org.seng302.leftovers.entities.User;
+import org.seng302.leftovers.entities.event.Event;
+import org.seng302.leftovers.entities.event.GlobalMessageEvent;
 import org.seng302.leftovers.persistence.EventRepository;
 import org.seng302.leftovers.persistence.UserRepository;
 import org.seng302.leftovers.service.EventService;
@@ -134,6 +134,31 @@ public class EventController {
             }
 
             eventRepository.delete(event);
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            throw e;
+        }
+    }
+
+    /**
+     * PUT endpoint for marking the event as read
+     * @param eventId The event to be marked as read
+     */
+    @PutMapping("/feed/{eventId}/read")
+    public void updateEventAsRead(@PathVariable long eventId, HttpServletRequest request) {
+        LOGGER.info("Requested update of event to be marked as read (eventId={})", eventId);
+
+        AuthenticationTokenManager.checkAuthenticationToken(request);
+        try {
+            Event event = eventRepository.findById(eventId)
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "Event not found"));
+
+            if (!AuthenticationTokenManager.sessionCanSeePrivate(request, event.getNotifiedUser().getUserID())) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Current user does not have permission to mark this event as read");
+            }
+
+            event.markEventAsRead();
+            eventService.saveEvent(event);
         } catch (Exception e) {
             LOGGER.error(e.getMessage());
             throw e;

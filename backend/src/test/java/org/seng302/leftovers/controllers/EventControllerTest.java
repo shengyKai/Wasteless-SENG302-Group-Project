@@ -8,10 +8,10 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.runner.RunWith;
 import org.mockito.*;
-import org.seng302.leftovers.dto.Tag;
-import org.seng302.leftovers.entities.Event;
-import org.seng302.leftovers.entities.GlobalMessageEvent;
+import org.seng302.leftovers.dto.event.Tag;
 import org.seng302.leftovers.entities.User;
+import org.seng302.leftovers.entities.event.Event;
+import org.seng302.leftovers.entities.event.GlobalMessageEvent;
 import org.seng302.leftovers.exceptions.AccessTokenException;
 import org.seng302.leftovers.persistence.EventRepository;
 import org.seng302.leftovers.persistence.UserRepository;
@@ -324,5 +324,13 @@ class EventControllerTest {
                 delete("/feed/10"))
                 .andExpect(status().isUnauthorized());
         verify(eventRepository, times(0)).delete(any());
+    }
+
+    @Test
+    void updateEventAsRead_eventExists_eventMarkedAsRead() throws Exception {
+        mockMvc.perform(put("/feed/2/read"))
+                .andExpect(status().isOk())
+                .andReturn();
+        verify(mockEvent, times(1)).markEventAsRead();
     }
 }

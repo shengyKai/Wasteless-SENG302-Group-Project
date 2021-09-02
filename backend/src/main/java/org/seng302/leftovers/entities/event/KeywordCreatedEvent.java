@@ -1,6 +1,8 @@
-package org.seng302.leftovers.entities;
+package org.seng302.leftovers.entities.event;
 
-import net.minidev.json.JSONObject;
+import org.seng302.leftovers.dto.event.KeywordCreatedEventDTO;
+import org.seng302.leftovers.entities.Keyword;
+import org.seng302.leftovers.entities.User;
 
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
@@ -54,18 +56,12 @@ public class KeywordCreatedEvent extends Event {
         return creator;
     }
 
-
     /**
-     * Construct a JSON representation of the create keyword event. Contains the event's id, created date and type, and
-     * the JSON representation of the keyword associated with this event.
-     * @return JSON representation of the create keyword event.
+     * Converts this event into a DTO
+     * @return DTO for JSON serialisation
      */
     @Override
-    public JSONObject constructJSONObject() {
-        JSONObject jsonObject = super.constructJSONObject();
-        jsonObject.appendField("keyword", newKeyword.constructJSONObject());
-        jsonObject.appendField("creator", creator.constructPublicJson(false));
-        return jsonObject;
+    public KeywordCreatedEventDTO asDTO() {
+        return new KeywordCreatedEventDTO(this);
     }
-
 }

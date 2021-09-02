@@ -1,5 +1,6 @@
 package cucumber.stepDefinitions;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import cucumber.context.EventContext;
 import cucumber.context.RequestContext;
 import cucumber.context.UserContext;
@@ -9,15 +10,19 @@ import io.cucumber.java.en.When;
 import net.minidev.json.JSONObject;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
-import org.seng302.leftovers.entities.Event;
-import org.seng302.leftovers.entities.GlobalMessageEvent;
+import org.seng302.leftovers.dto.event.Tag;
+import org.seng302.leftovers.entities.event.Event;
+import org.seng302.leftovers.entities.event.GlobalMessageEvent;
 import org.seng302.leftovers.persistence.EventRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 
 import java.util.List;
+import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 
 public class EventStepDefinition {
@@ -33,6 +38,9 @@ public class EventStepDefinition {
 
     @Autowired
     private RequestContext requestContext;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @AfterEach
     public void cleanUp() {
@@ -77,7 +85,9 @@ public class EventStepDefinition {
     @Then("The event has the tag {string}")
     public void the_event_has_the_tag(String tagName) {
         Event event = eventRepository.findById(eventContext.getLast().getId()).orElseThrow();
-        assertEquals(tagName, event.constructJSONObject().get("tag"));
+
+        var tag = objectMapper.convertValue(tagName, Tag.class);
+        assertEquals(tag, event.getTag());
     }
 
     @When("I try to delete an event from my feed")
@@ -95,5 +105,32 @@ public class EventStepDefinition {
     public void the_event_is_not_deleted_from_my_feed() {
         Long eventId = eventContext.getLast().getId();
         Assertions.assertTrue(eventRepository.existsById(eventId));
+    }
+
+    @Given("The default read status is false")
+    public void the_default_read_status_is_false() {
+        Event event = eventContext.getLast();
+        assertFalse(event.isRead());
+    }
+
+    @When("I try to mark an event from my feed as read")
+    public void i_try_to_mark_an_event_from_my_feed_as_read() {
+        requestContext.performRequest(put("/feed/" + eventContext.getLast().getId() + "/read"));
+    }
+
+    @Then("The event will be updated as read")
+    public void the_event_will_be_updated_as_read() {
+        Long eventId = eventContext.getLast().getId();
+        Optional<Event> event = eventRepository.findById(eventId);
+        assertTrue(event.isPresent());
+        assertTrue(event.get().isRead());
+    }
+
+    @Then("The event is not marked as read")
+    public void the_event_is_not_marked_as_read() {
+        Long eventId = eventContext.getLast().getId();
+        Optional<Event> event = eventRepository.findById(eventId);
+        assertTrue(event.isPresent());
+        assertFalse(event.get().isRead());
     }
 }

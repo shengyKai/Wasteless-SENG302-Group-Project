@@ -1,12 +1,15 @@
-package org.seng302.leftovers.entities;
+package org.seng302.leftovers.entities.event;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import net.minidev.json.JSONObject;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.seng302.leftovers.entities.Location;
+import org.seng302.leftovers.entities.MarketplaceCard;
+import org.seng302.leftovers.entities.User;
 import org.seng302.leftovers.persistence.BusinessRepository;
-import org.seng302.leftovers.persistence.EventRepository;
+import org.seng302.leftovers.persistence.ExpiryEventRepository;
 import org.seng302.leftovers.persistence.MarketplaceCardRepository;
 import org.seng302.leftovers.persistence.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,16 +18,19 @@ import org.springframework.boot.test.context.SpringBootTest;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest
-class DeleteEventTest {
+class ExpiryEventTest {
 
     @Autowired
-    UserRepository userRepository;
+    private ObjectMapper mapper;
     @Autowired
-    MarketplaceCardRepository marketplaceCardRepository;
+    private UserRepository userRepository;
     @Autowired
-    EventRepository eventRepository;
+    private MarketplaceCardRepository marketplaceCardRepository;
     @Autowired
-    BusinessRepository businessRepository;
+    private ExpiryEventRepository expiryEventRepository;
+    @Autowired
+    private BusinessRepository businessRepository;
+
     private MarketplaceCard testCard;
 
     @BeforeEach
@@ -34,7 +40,7 @@ class DeleteEventTest {
 
     @AfterEach
     void tearDown() {
-        eventRepository.deleteAll();
+        expiryEventRepository.deleteAll();
         marketplaceCardRepository.deleteAll();
         userRepository.deleteAll();
     }
@@ -57,22 +63,24 @@ class DeleteEventTest {
                 .withCreator(testUser)
                 .withSection(MarketplaceCard.Section.FOR_SALE)
                 .build();
+        testCard = marketplaceCardRepository.save(testCard);
     }
 
     @Test
     void constructJSONObject_jsonHasExpectedFormat() throws JsonProcessingException {
-        DeleteEvent event = new DeleteEvent(testCard);
-        event = eventRepository.save(event);
-
-        JSONObject json = event.constructJSONObject();
-
-        assertEquals(event.getId(), json.get("id"));
-        assertEquals(event.getCreated().toString(), json.get("created"));
-        assertEquals("DeleteEvent", json.get("type"));
-        assertEquals("none", json.get("tag"));
-        assertEquals(testCard.getTitle(), json.get("title"));
-        assertEquals(testCard.getSection().getName(), json.get("section"));
-        assertEquals(6, json.size());
+        ExpiryEvent testEvent = new ExpiryEvent(testCard);
+        expiryEventRepository.save(testEvent);
+        String expectedJsonString = String.format("{\"id\":%d," +
+                "\"created\":\"%s\"," +
+                "\"tag\":\"none\"," +
+                "\"type\":\"ExpiryEvent\"," +
+                "\"eventStatus\":\"normal\"," +
+                "\"card\":%s}",
+                testEvent.getId(),
+                testEvent.getCreated(),
+                testCard.constructJSONObject().toJSONString());
+        String actualJsonString = mapper.writeValueAsString(testEvent.asDTO());
+        assertEquals(mapper.readTree(expectedJsonString), mapper.readTree(actualJsonString));
     }
 
 }

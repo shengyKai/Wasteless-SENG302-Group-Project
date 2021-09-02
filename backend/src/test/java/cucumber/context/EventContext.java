@@ -5,7 +5,7 @@ import lombok.SneakyThrows;
 import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
 import org.junit.jupiter.api.Assertions;
-import org.seng302.leftovers.entities.Event;
+import org.seng302.leftovers.entities.event.Event;
 import org.seng302.leftovers.persistence.EventRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mock.web.MockHttpServletResponse;
