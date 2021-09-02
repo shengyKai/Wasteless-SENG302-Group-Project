@@ -84,7 +84,7 @@ class EventTest {
     void eventRead_updatesIsRead_isReadUpdatedToTrue() {
         Event event = new EventSubclass();
         assertEquals(event.isRead(), false);
-        event.eventRead();
+        event.markEventAsRead();
         assertEquals(event.isRead(), true);
     }
 

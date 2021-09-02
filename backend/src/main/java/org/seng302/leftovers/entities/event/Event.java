@@ -109,7 +109,7 @@ public abstract class Event {
     /**
      * Updates the isRead status to true if the event has been read.
      */
-    public void eventRead() {
+    public void markEventAsRead() {
         this.isRead = true;
     }
 
