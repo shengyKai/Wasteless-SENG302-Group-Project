@@ -23,7 +23,7 @@ type BaseEvent<T extends string> = {
   created: string,
   tag: Tag,
   type: T,
-  isRead: boolean
+  read: boolean
 }
 
 export type GlobalMessageEvent = BaseEvent<'GlobalMessageEvent'> & {

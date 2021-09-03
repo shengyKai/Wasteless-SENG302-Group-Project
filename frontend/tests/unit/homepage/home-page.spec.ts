@@ -75,7 +75,7 @@ describe('HomePage.vue', () => {
       tag: 'none',
       created: new Date().toString(),
       message: 'Hello world',
-      isRead: false
+      read: false
     };
     store.commit('addEvent', event);
     await Vue.nextTick();
@@ -92,7 +92,7 @@ describe('HomePage.vue', () => {
       tag: 'none',
       created: new Date().toString(),
       card: testMarketPlaceCard,
-      isRead: false
+      read: false
     };
     store.commit('addEvent', event);
     await Vue.nextTick();
@@ -110,7 +110,7 @@ describe('HomePage.vue', () => {
       created: new Date().toString(),
       title: "test_title",
       section: "ForSale",
-      isRead: false
+      read: false
     };
     store.commit('addEvent', event);
     await Vue.nextTick();
@@ -132,7 +132,7 @@ describe('HomePage.vue', () => {
         created: "2012/01/01"
       },
       creator: testUser,
-      isRead: false
+      read: false
     };
     store.commit('addEvent', event);
     await Vue.nextTick();
@@ -160,7 +160,7 @@ describe('HomePage.vue', () => {
         id: 3,
       },
       participantType: 'seller',
-      isRead: false
+      read: false
     };
     store.commit('addEvent', event);
     await Vue.nextTick();
@@ -177,7 +177,7 @@ describe('HomePage.vue', () => {
       tag: 'none',
       created: new Date().toString(),
       message: 'Hello world',
-      isRead: false
+      read: false
     };
     store.commit('addEvent', event);
     await Vue.nextTick();
@@ -197,7 +197,7 @@ describe('HomePage.vue', () => {
           tag: 'none',
           created: new Date().toString(),
           message: 'None event',
-          isRead: false
+          read: false
         };
         store.commit('addEvent', event);
         await Vue.nextTick();
@@ -209,7 +209,7 @@ describe('HomePage.vue', () => {
           tag: 'red',
           created: new Date().toString(),
           message: 'Red event',
-          isRead: false
+          read: false
         };
         store.commit('addEvent', event);
         await Vue.nextTick();
