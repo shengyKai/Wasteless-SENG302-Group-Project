@@ -5,7 +5,6 @@ import org.seng302.leftovers.entities.Product;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
-import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
@@ -27,8 +26,6 @@ public interface ProductRepository extends PagingAndSortingRepository<Product, L
          */
         Optional<Product> findByBusinessAndProductCode(@Param("business") Business business,
                                                        @Param("productCode") String productCode);
-
-        // List<Product> getAllByBusiness(@Param("Business") Business business, Pageable pageable);
 
         /**
         * Find all then products in the repository which belong to the given business.

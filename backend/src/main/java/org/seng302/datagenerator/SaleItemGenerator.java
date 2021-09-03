@@ -1,16 +1,20 @@
 package org.seng302.datagenerator;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.sql.*;
 import java.time.LocalDate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
-import net.minidev.json.JSONObject;
-
-import static org.seng302.datagenerator.Main.*;
+import static org.seng302.datagenerator.Main.randomDate;
 
 public class SaleItemGenerator {
     private Random random = new Random();
     private Connection conn;
+    private final Logger logger = LogManager.getLogger(SaleItemGenerator.class.getName());
 
     public SaleItemGenerator(Connection conn) { this.conn = conn; }
 
@@ -22,14 +26,15 @@ public class SaleItemGenerator {
      * @throws SQLException
      */
     private String[] extractInvItemInfo(long invItemId) throws SQLException {
-        PreparedStatement stmt = conn.prepareStatement(
-            "SELECT expires, creation_date, remaining_quantity FROM inventory_item WHERE id = ?"
-        );
-        stmt.setObject(1, invItemId);
-        stmt.executeQuery();
-        ResultSet results = stmt.getResultSet();
-        results.next();
-        return new String[] {results.getString("expires"), results.getString("creation_date"), results.getString("remaining_quantity")};
+        try (PreparedStatement stmt = conn.prepareStatement(
+                "SELECT expires, creation_date, remaining_quantity FROM inventory_item WHERE id = ?"
+        )) {
+            stmt.setObject(1, invItemId);
+            stmt.executeQuery();
+            ResultSet results = stmt.getResultSet();
+            results.next();
+            return new String[]{results.getString("expires"), results.getString("creation_date"), results.getString("remaining_quantity")};
+        }
     }
 
     /**
@@ -77,14 +82,15 @@ public class SaleItemGenerator {
      * @throws SQLException
      */
     private void updateInventoryItemQuantity(int remainingQuantity, long invItemId) throws SQLException {
-        System.out.println(String.format("Updating inventory item remaining quantity of id %d", invItemId));
-        PreparedStatement stmt = conn.prepareStatement(
+        logger.info("Updating inventory item remaining quantity of id {}", invItemId);
+        try (PreparedStatement stmt = conn.prepareStatement(
                 "UPDATE inventory_item SET remaining_quantity = ? WHERE id = ?",
                 Statement.RETURN_GENERATED_KEYS
-        );
-        stmt.setObject(1, remainingQuantity);
-        stmt.setObject(2, invItemId);
-        stmt.executeUpdate();
+        )) {
+            stmt.setObject(1, remainingQuantity);
+            stmt.setObject(2, invItemId);
+            stmt.executeUpdate();
+        }
     }
 
     /**
@@ -107,46 +113,23 @@ public class SaleItemGenerator {
         int quantity = quantities[0];
         int remainingQuantity = quantities[1];
 
-        PreparedStatement stmt = conn.prepareStatement(
+        try (PreparedStatement stmt = conn.prepareStatement(
             "INSERT INTO sale_item(closes, created, more_info, price, quantity, inventory_item_id)"
                 + "VALUES (?, ?, ?, ?, ?, ?)",
                 Statement.RETURN_GENERATED_KEYS
-        );
-        stmt.setObject(1, closes); 
-        stmt.setObject(2, created);
-        stmt.setObject(3, moreInfo);
-        stmt.setObject(4, price);
-        stmt.setObject(5, quantity);
-        stmt.setObject(6, invItemId);
-        stmt.executeUpdate();
-        ResultSet keys = stmt.getGeneratedKeys();
-        keys.next();
-        updateInventoryItemQuantity(remainingQuantity, invItemId);
-        return keys.getLong(1);
-    }
-
-    public static void main(String[] args) throws SQLException, InterruptedException {
-        Connection conn = connectToDatabase();
-        var userGenerator = new UserGenerator(conn);
-        var businessGenerator = new BusinessGenerator(conn);
-        var productGenerator = new ProductGenerator(conn);
-        var invItemGenerator = new InventoryItemGenerator(conn);
-        var saleItemGenerator = new SaleItemGenerator(conn);
-
-        int userCount = getNumObjectsFromInput("users");
-        List<Long> userIds = userGenerator.generateUsers(userCount);
-
-        int businessCount = getNumObjectsFromInput("businesses");
-        List<Long> businessIds = businessGenerator.generateBusinesses(userIds, businessCount);
-
-        int productCount = getNumObjectsFromInput("products");
-        List<Long> productIds = productGenerator.generateProducts(businessIds, productCount);
-
-        int invItemCount = getNumObjectsFromInput("inventory items");
-        List<Long> invItemIds = invItemGenerator.generateInventoryItems(productIds, invItemCount);
-
-        int saleItemCount = getNumObjectsFromInput("sale items");
-        List<Long> saleItemIds = saleItemGenerator.generateSaleItems(invItemIds, saleItemCount);
+        )) {
+            stmt.setObject(1, closes);
+            stmt.setObject(2, created);
+            stmt.setObject(3, moreInfo);
+            stmt.setObject(4, price);
+            stmt.setObject(5, quantity);
+            stmt.setObject(6, invItemId);
+            stmt.executeUpdate();
+            ResultSet keys = stmt.getGeneratedKeys();
+            keys.next();
+            updateInventoryItemQuantity(remainingQuantity, invItemId);
+            return keys.getLong(1);
+        }
     }
 
     /**
@@ -158,10 +141,9 @@ public class SaleItemGenerator {
     public List<Long> generateSaleItems(List<Long> invItemIds, int saleItemCount) throws SQLException {
         List<Long> generatedSaleItemIds = new ArrayList<>();
         for (int i=0; i < saleItemCount; i++) {
-            clear();
-            System.out.println(String.format("Creating Sale Item %d / %d", i+1, saleItemCount));
+            logger.info("Creating Sale Item {} / {}", i+1, saleItemCount);
             int progress = (int) (((float)(i+1) / (float)saleItemCount) * 100);
-            System.out.println(String.format("Progress: %d%%", progress));
+            logger.info("Progress: {}%", progress);
 
             //Inventory items can have multiple sales, as such, if we randomize the which inventory item is chosen
             //we can allow some sale items to exist for the same inventory item.

@@ -4,7 +4,6 @@ import com.jayway.jsonpath.JsonPath;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
-import org.junit.Ignore;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -24,13 +23,14 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import javax.servlet.http.Cookie;
 import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -76,9 +76,7 @@ class UserControllerTest {
      * This method creates an authentication code for sessions and cookies.
      */
     private void setUpAuthCode() {
-        StringBuilder authCodeBuilder = new StringBuilder();
-        authCodeBuilder.append("0".repeat(64));
-        String authCode = authCodeBuilder.toString();
+        String authCode = "0".repeat(64);
         sessionAuthToken.put("AUTHTOKEN", authCode);
         authCookie = new Cookie("AUTHTOKEN", authCode);
     }
@@ -116,7 +114,7 @@ class UserControllerTest {
                 .withPassword("1337-H%nt3r2")
                 .withBio("Likes long walks on the beach")
                 .withDob("2001-03-11")
-                .withPhoneNumber("6435550129")
+                .withPhoneNumber("64 3555012")
                 .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
                         "Canterbury,8041"))
                 .build();
@@ -128,48 +126,70 @@ class UserControllerTest {
     /**
      * This method returns a list of users read from the file with the given name.
      *
-     * @param filename
+     * @param resourceName Name of resource to parse
      * @return
      * @throws IOException
      */
-    private List<User> readUsersFromTestFile(String filename) throws IOException {
+    private List<User> readUsersFromTestFile(String resourceName) throws IOException {
         List<User> userList = new ArrayList<User>();
         String row;
-        BufferedReader csvReader = new BufferedReader(new FileReader(filename));
+        BufferedReader csvReader = new BufferedReader(new InputStreamReader(
+                    Objects.requireNonNull(UserControllerTest.class.getResourceAsStream("/testData/" + resourceName))
+                ));
+
+        csvReader.readLine(); // Skip header line
+
         while ((row = csvReader.readLine()) != null) {
             try {
                 String[] userData = row.split("\\|");
-                User user = new User.Builder().withFirstName(userData[0]).withMiddleName(userData[1]).withLastName(userData[2]).withNickName(userData[3])
-                        .withEmail(userData[4]).withPassword(userData[5]).withAddress(Location.covertAddressStringToLocation(userData[6])).withDob(userData[7]).build();
+                System.out.println(userData[6]);
+                User user = new User.Builder()
+                        .withFirstName(userData[0])
+                        .withMiddleName(userData[1])
+                        .withLastName(userData[2])
+                        .withNickName(userData[3])
+                        .withEmail(userData[4])
+                        .withPassword(userData[5])
+                        .withAddress(Location.covertAddressStringToLocation(userData[6]))
+                        .withDob(userData[7])
+                        .withBio(userData[8])
+                        .build();
                 userList.add(user);
             } catch (Exception e) {
+                fail(e);
             }
         }
         csvReader.close();
         return userList;
     }
 
-    private List<JSONObject> readJSONFromTestFile(String filename) throws IOException {
+    private List<JSONObject> readJSONFromTestFile(String resourceName) throws IOException {
         List<JSONObject> jsonList = new ArrayList<>();
         String row;
-        BufferedReader csvReader = new BufferedReader(new FileReader(filename));
+        BufferedReader csvReader = new BufferedReader(new InputStreamReader(
+                Objects.requireNonNull(UserControllerTest.class.getResourceAsStream("/testData/" + resourceName))
+        ));
         csvReader.readLine();
         while ((row = csvReader.readLine()) != null) {
             try {
-                String[] userData = row.split(",");
-                HashMap<String, String> jsonMap = new HashMap<>();
-                jsonMap.put("firstName", userData[0]);
-                jsonMap.put("middleName", userData[1]);
-                jsonMap.put("lastName", userData[2]);
-                jsonMap.put("nickname", userData[3]);
-                jsonMap.put("email", userData[4]);
-                jsonMap.put("password", userData[5]);
-                jsonMap.put("homeAddress", userData[6]);
-                jsonMap.put("dateOfBirth", userData[7]);
-                JSONObject jsonObject = new JSONObject(jsonMap);
+                String[] userData = row.split("\\|");
+                JSONObject jsonObject = new JSONObject();
+                jsonObject.put("firstName", userData[0]);
+                jsonObject.put("middleName", userData[1]);
+                jsonObject.put("lastName", userData[2]);
+                jsonObject.put("nickname", userData[3]);
+                jsonObject.put("email", userData[4]);
+                jsonObject.put("password", userData[5]);
+                if (userData[6].isBlank()) {
+                    jsonObject.put("homeAddress", new JSONObject());
+                } else {
+                    jsonObject.put("homeAddress", Location.covertAddressStringToLocation(userData[6]).constructFullJson());
+                }
+                jsonObject.put("dateOfBirth", userData[7]);
+                jsonObject.put("bio", userData[8]);
                 jsonList.add(jsonObject);
             } catch (Exception e) {
-
+                fail(e);
             }
         }
         csvReader.close();
@@ -249,7 +269,7 @@ class UserControllerTest {
      */
     @Test
     void getUserSearchOrderByFirstNameReverseTrueTest() throws Exception {
-        List<User> userList = readUsersFromTestFile("src/test/testFiles/UsersControllerTestData.csv");
+        List<User> userList = readUsersFromTestFile("UsersControllerTestData.csv");
         userRepository.deleteAll();
         for (User user : userList) {
             userRepository.save(user);
@@ -285,7 +305,7 @@ class UserControllerTest {
      */
     @Test
     void getUserSearchOrderByEmailReverseFalseTest() throws Exception {
-        List<User> userList = readUsersFromTestFile("src/test/testFiles/UsersControllerTestData.csv");
+        List<User> userList = readUsersFromTestFile("UsersControllerTestData.csv");
         userRepository.deleteAll();
         for (User user : userList) {
             userRepository.save(user);
@@ -320,7 +340,7 @@ class UserControllerTest {
      */
     @Test
     void getUserSearchOrderByRelevanceTest() throws Exception {
-        List<User> userList = readUsersFromTestFile("src/test/testFiles/UsersControllerTestData.csv");
+        List<User> userList = readUsersFromTestFile("UsersControllerTestData.csv");
         userRepository.deleteAll();
         for (User user : userList) {
             userRepository.save(user);
@@ -354,7 +374,7 @@ class UserControllerTest {
      */
     @Test
     void getUserSearchPageTwoTest() throws Exception {
-        List<User> userList = readUsersFromTestFile("src/test/testFiles/UsersControllerTestData.csv");
+        List<User> userList = readUsersFromTestFile("UsersControllerTestData.csv");
         userRepository.deleteAll();
         for (User user : userList) {
             userRepository.save(user);
@@ -385,7 +405,7 @@ class UserControllerTest {
      */
     @Test
     void getUserSearchFiveResultsPerPageTest() throws Exception {
-        List<User> userList = readUsersFromTestFile("src/test/testFiles/UsersControllerTestData.csv");
+        List<User> userList = readUsersFromTestFile("UsersControllerTestData.csv");
         userRepository.deleteAll();
         for (User user : userList) {
             userRepository.save(user);
@@ -408,7 +428,7 @@ class UserControllerTest {
 
     @Test
     void getUserSearchCountTest() throws Exception {
-        List<User> userList = readUsersFromTestFile("src//test//testFiles//UsersControllerTestData.csv");
+        List<User> userList = readUsersFromTestFile("UsersControllerTestData.csv");
         userRepository.deleteAll();
         userRepository.saveAll(userList);
 
@@ -431,11 +451,11 @@ class UserControllerTest {
      * @throws Exception
      */
     //Getting a strange error where a date is being created after the for loop has concluded?
-    @Test @Ignore
+    @Test
     void registerAccountWithValidRequest() throws Exception {
         userRepository.deleteAll();
-        List<User> userList = readUsersFromTestFile("src/test/testFiles/UsersControllerTestData.csv");
-        List<JSONObject> jsonObjectList = readJSONFromTestFile("src/test/testFiles/UsersControllerTestData.csv");
+        List<User> userList = readUsersFromTestFile("UsersControllerTestData.csv");
+        List<JSONObject> jsonObjectList = readJSONFromTestFile("UsersControllerTestData.csv");
         for (int i = 0; i < jsonObjectList.size(); i++) {
             JSONObject userJSON = jsonObjectList.get(i);
             User user = userList.get(i);
@@ -454,21 +474,19 @@ class UserControllerTest {
      * Tests if a user registering with an existing email with send back a 409 conflict error response code.
      * @throws Exception
      */
-    @Test @Ignore
+    @Test
     void testConflictErrorOnRegisterWithSameEmail() throws Exception {
         userRepository.deleteAll();
-        List<User> userList = readUsersFromTestFile("src/test/testFiles/UsersControllerTestData.csv");
-        List<JSONObject> jsonObjectList = readJSONFromTestFile("src/test/testFiles/UsersControllerTestData.csv");
-        for (int i = 0; i < jsonObjectList.size(); i++) {
-            JSONObject userJSON = jsonObjectList.get(i);
-            User user = userList.get(i);
-            mockMvc.perform( MockMvcRequestBuilders
+        List<User> userList = readUsersFromTestFile("UsersControllerTestData.csv");
+        List<JSONObject> jsonObjectList = readJSONFromTestFile("UsersControllerTestData.csv");
+        for (JSONObject userJSON : jsonObjectList) {
+            mockMvc.perform(MockMvcRequestBuilders
                     .post("/users")
                     .content(userJSON.toString())
                     .contentType(MediaType.APPLICATION_JSON)
                     .accept(MediaType.APPLICATION_JSON))
                     .andExpect(status().isCreated());
-            mockMvc.perform( MockMvcRequestBuilders
+            mockMvc.perform(MockMvcRequestBuilders
                     .post("/users")
                     .content(userJSON.toString())
                     .contentType(MediaType.APPLICATION_JSON)
@@ -485,14 +503,12 @@ class UserControllerTest {
     @Test
     void testRegisteringUserWithInvalidFirstName() throws Exception {
         userRepository.deleteAll();
-        List<User> userList = readUsersFromTestFile("src/test/testFiles/UsersControllerTestDataInvalidFirstName" +
-                ".csv");
+        List<JSONObject> userList = readJSONFromTestFile("UsersControllerTestDataInvalidFirstName.csv");
 
-        for (User user : userList) {
-            JSONObject userJSON = convertUserToJSONObject(user);
+        for (JSONObject user : userList) {
             mockMvc.perform( MockMvcRequestBuilders
                     .post("/users")
-                    .content(userJSON.toString())
+                    .content(user.toString())
                     .contentType(MediaType.APPLICATION_JSON)
                     .accept(MediaType.APPLICATION_JSON))
                     .andExpect(status().isBadRequest())
@@ -508,11 +524,9 @@ class UserControllerTest {
     @Test
     void testRegisteringUserWithInvalidMiddleName() throws Exception {
         userRepository.deleteAll();
-        List<User> userList = readUsersFromTestFile("src/test/testFiles/UsersControllerTestDataInvalidMiddleName" +
-                ".csv");
+        List<JSONObject> userList = readJSONFromTestFile("UsersControllerTestDataInvalidMiddleName.csv");
 
-        for (User user : userList) {
-            JSONObject userJSON = convertUserToJSONObject(user);
+        for (JSONObject userJSON : userList) {
             mockMvc.perform( MockMvcRequestBuilders
                     .post("/users")
                     .content(userJSON.toString())
@@ -532,11 +546,9 @@ class UserControllerTest {
     @Test
     void testRegisteringUserWithInvalidLastName() throws Exception {
         userRepository.deleteAll();
-        List<User> userList = readUsersFromTestFile("src/test/testFiles/UsersControllerTestDataInvalidLastName" +
-                ".csv");
+        List<JSONObject> userList = readJSONFromTestFile("UsersControllerTestDataInvalidLastName.csv");
 
-        for (User user : userList) {
-            JSONObject userJSON = convertUserToJSONObject(user);
+        for (JSONObject userJSON : userList) {
             mockMvc.perform( MockMvcRequestBuilders
                     .post("/users")
                     .content(userJSON.toString())
@@ -556,11 +568,9 @@ class UserControllerTest {
     @Test
     void testRegisteringUserWithInvalidNickname() throws Exception {
         userRepository.deleteAll();
-        List<User> userList = readUsersFromTestFile("src/test/testFiles/UsersControllerTestDataInvalidNickname" +
-                ".csv");
+        List<JSONObject> userList = readJSONFromTestFile("UsersControllerTestDataInvalidNickname.csv");
 
-        for (User user : userList) {
-            JSONObject userJSON = convertUserToJSONObject(user);
+        for (JSONObject userJSON : userList) {
             mockMvc.perform( MockMvcRequestBuilders
                     .post("/users")
                     .content(userJSON.toString())
@@ -580,19 +590,18 @@ class UserControllerTest {
     @Test
     void testRegisteringUserWithInvalidBio() throws Exception {
         userRepository.deleteAll();
-        List<User> userList = readUsersFromTestFile("src/test/testFiles/UsersControllerTestDataInvalidBio" +
-                ".csv");
+        List<JSONObject> userList = readJSONFromTestFile("UsersControllerTestDataInvalidBio.csv");
 
-        for (User user : userList) {
-            JSONObject userJSON = convertUserToJSONObject(user);
+        System.out.println(userList);
+
+        for (JSONObject userJSON : userList) {
             mockMvc.perform( MockMvcRequestBuilders
                     .post("/users")
                     .content(userJSON.toString())
                     .contentType(MediaType.APPLICATION_JSON)
                     .accept(MediaType.APPLICATION_JSON))
                     .andExpect(status().isBadRequest())
-                    .andExpect(status().reason("The bio must be less than 255 characters long, and only contain " +
-                            "letters."));
+                    .andExpect(status().reason("The bio must be less than 200 characters long,and only contain letters, numbers, and valid special characters"));
         }
     }
 
@@ -604,18 +613,15 @@ class UserControllerTest {
     @Test
     void testRegisteringUserWithInvalidDOB() throws Exception {
         userRepository.deleteAll();
-        List<User> userList = readUsersFromTestFile("src/test/testFiles/UsersControllerTestDataInvalidDOB" +
-                ".csv");
+        List<JSONObject> userList = readJSONFromTestFile("UsersControllerTestDataInvalidDOB.csv");
 
-        for (User user : userList) {
-            JSONObject userJSON = convertUserToJSONObject(user);
+        for (JSONObject userJSON : userList) {
             mockMvc.perform( MockMvcRequestBuilders
                     .post("/users")
                     .content(userJSON.toString())
                     .contentType(MediaType.APPLICATION_JSON)
                     .accept(MediaType.APPLICATION_JSON))
-                    .andExpect(status().isBadRequest())
-                    .andExpect(status().reason("Your date of birth has been entered incorrectly"));
+                    .andExpect(status().isBadRequest());
         }
     }
 
@@ -627,11 +633,10 @@ class UserControllerTest {
     @Test
     void testRegisteringUserWithInvalidPhNum() throws Exception {
         userRepository.deleteAll();
-        List<User> userList = readUsersFromTestFile("src/test/testFiles/UsersControllerTestDataInvalidPhoneNumber" +
-                ".csv");
+        List<JSONObject> userList = readJSONFromTestFile("UsersControllerTestDataInvalidPhoneNumber.csv");
 
-        for (User user : userList) {
-            JSONObject userJSON = convertUserToJSONObject(user);
+        for (JSONObject userJSON : userList) {
+            userJSON.put("phoneNumber", "seven");
             mockMvc.perform( MockMvcRequestBuilders
                     .post("/users")
                     .content(userJSON.toString())
@@ -650,18 +655,15 @@ class UserControllerTest {
     @Test
     void testRegisteringUserWithInvalidAddress() throws Exception {
         userRepository.deleteAll();
-        List<User> userList = readUsersFromTestFile("src/test/testFiles/UsersControllerTestDataInvalidAddress" +
-                ".csv");
+        List<JSONObject> userList = readJSONFromTestFile("UsersControllerTestDataInvalidAddress.csv");
 
-        for (User user : userList) {
-            JSONObject userJSON = convertUserToJSONObject(user);
+        for (JSONObject userJSON : userList) {
             mockMvc.perform(MockMvcRequestBuilders
                     .post("/users")
                     .content(userJSON.toString())
                     .contentType(MediaType.APPLICATION_JSON)
                     .accept(MediaType.APPLICATION_JSON))
-                    .andExpect(status().isBadRequest())
-                    .andExpect(status().reason("Your address has been entered incorrectly"));
+                    .andExpect(status().isBadRequest());
         }
     }
 

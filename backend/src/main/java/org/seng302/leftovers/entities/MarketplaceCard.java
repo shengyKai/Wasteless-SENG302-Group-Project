@@ -1,5 +1,7 @@
 package org.seng302.leftovers.entities;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import org.seng302.leftovers.tools.JsonTools;
@@ -10,7 +12,10 @@ import javax.persistence.*;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Objects;
 
 @Entity
 public class MarketplaceCard {
@@ -259,15 +264,16 @@ public class MarketplaceCard {
      * Valid marketplace card sections
      */
     public enum Section {
-        FOR_SALE("ForSale"),
-        WANTED("Wanted"),
-        EXCHANGE("Exchange");
+        @JsonProperty("ForSale")
+        FOR_SALE,
 
-        private final String name;
+        @JsonProperty("Wanted")
+        WANTED,
 
-        Section(String name) {
-            this.name = name;
-        }
+        @JsonProperty("Exchange")
+        EXCHANGE;
+
+        private static final ObjectMapper mapper = new ObjectMapper();
 
         /**
          * Gets the name of the section.
@@ -275,7 +281,7 @@ public class MarketplaceCard {
          * @return section name
          */
         public String getName() {
-            return this.name;
+            return mapper.convertValue(this, String.class);
         }
     }
 
@@ -396,7 +402,6 @@ public class MarketplaceCard {
          * @return Newly created marketplace card
          */
         public MarketplaceCard build() {
-            Random random = new Random();
             var card = new MarketplaceCard();
 
             if (creator == null) {

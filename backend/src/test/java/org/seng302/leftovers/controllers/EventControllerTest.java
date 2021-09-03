@@ -8,10 +8,10 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.runner.RunWith;
 import org.mockito.*;
-import org.seng302.leftovers.dto.Tag;
-import org.seng302.leftovers.entities.Event;
-import org.seng302.leftovers.entities.GlobalMessageEvent;
+import org.seng302.leftovers.dto.event.EventTag;
 import org.seng302.leftovers.entities.User;
+import org.seng302.leftovers.entities.event.Event;
+import org.seng302.leftovers.entities.event.GlobalMessageEvent;
 import org.seng302.leftovers.exceptions.AccessTokenException;
 import org.seng302.leftovers.persistence.EventRepository;
 import org.seng302.leftovers.persistence.UserRepository;
@@ -23,19 +23,17 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import static org.hamcrest.Matchers.nullValue;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-
 import java.text.ParseException;
 import java.util.List;
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.AdditionalMatchers.not;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -75,10 +73,10 @@ class EventControllerTest {
         when(mockEvent.getNotifiedUser()).thenReturn(mockUser);
 
         when(userRepository.findAll()).thenReturn(List.of(mockUser));
-        when(userRepository.findById(eq(7L))).thenReturn(Optional.of(mockUser));
+        when(userRepository.findById(7L)).thenReturn(Optional.of(mockUser));
         when(userRepository.findById(not(eq(7L)))).thenReturn(Optional.empty());
 
-        when(eventRepository.findById(eq(2L))).thenReturn(Optional.of(mockEvent));
+        when(eventRepository.findById(2L)).thenReturn(Optional.of(mockEvent));
         when(eventRepository.findById(not(eq(2L)))).thenReturn(Optional.empty());
 
 
@@ -170,10 +168,10 @@ class EventControllerTest {
     }
 
     @ParameterizedTest
-    @EnumSource(Tag.class)
-    void setEventTag_validTag_200ResponseAndTagUpdated(Tag tag) throws Exception {
+    @EnumSource(EventTag.class)
+    void setEventTag_validTag_200ResponseAndTagUpdated(EventTag eventTag) throws Exception {
         var json = new JSONObject();
-        json.put("value", tag.toString().toLowerCase());
+        json.put("value", eventTag.toString().toLowerCase());
         mockMvc.perform(
                 put("/feed/2/tag")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -181,7 +179,7 @@ class EventControllerTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        verify(mockEvent, times(1)).setTag(tag);
+        verify(mockEvent, times(1)).setTag(eventTag);
         verify(eventService, times(1)).saveEvent(mockEvent);
     }
 

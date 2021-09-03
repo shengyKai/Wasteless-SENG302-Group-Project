@@ -4,9 +4,9 @@ import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.seng302.leftovers.entities.KeywordCreatedEvent;
 import org.seng302.leftovers.entities.Keyword;
 import org.seng302.leftovers.entities.User;
+import org.seng302.leftovers.entities.event.KeywordCreatedEvent;
 import org.seng302.leftovers.persistence.CreateKeywordEventRepository;
 import org.seng302.leftovers.persistence.KeywordRepository;
 import org.seng302.leftovers.persistence.UserRepository;
@@ -21,7 +21,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.util.Optional;
-import java.util.Locale;
 
 @RestController
 public class KeywordController {

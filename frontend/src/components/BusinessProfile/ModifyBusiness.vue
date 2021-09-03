@@ -9,7 +9,8 @@
               <v-card-text>
                 <v-container>
                   <v-row no-gutters>
-                    <v-col cols="6">
+                    <v-col cols="12" sm="6">
+                      <!-- INPUT: Business Name -->
                       <v-text-field
                         dense
                         class="mr-1 required"
@@ -19,7 +20,8 @@
                         outlined
                       />
                     </v-col>
-                    <v-col cols="6">
+                    <v-col cols="12" sm="6">
+                      <!-- INPUT: Business Type -->
                       <v-select
                         dense
                         class="ml-1 required"
@@ -30,7 +32,8 @@
                         outlined
                       />
                     </v-col>
-                    <v-col cols="12">
+                    <v-col cols="12" sm="12">
+                      <!-- INPUT: Description -->
                       <v-textarea
                         dense
                         v-model="description"
@@ -40,10 +43,11 @@
                         outlined
                       />
                     </v-col>
-                    <v-col cols="12">
-                      <v-card-title class="primary-text">Address</v-card-title>
+                    <v-col cols="12" sm="12">
+                      <v-card-title class="primary-text mt-n7">Address</v-card-title>
                     </v-col>
-                    <v-col cols="16">
+                    <v-col cols="12" sm="6">
+                      <!-- INPUT: Street Address -->
                       <v-text-field
                         class="mr-1 required"
                         v-model="streetAddress"
@@ -51,7 +55,8 @@
                         :rules="mandatoryRules().concat(streetRules())"
                         outlined/>
                     </v-col>
-                    <v-col cols="6">
+                    <v-col cols="12" sm="6">
+                      <!-- INPUT: District -->
                       <LocationAutocomplete
                         type="district"
                         class="ml-1"
@@ -59,7 +64,8 @@
                         :rules="maxCharRules().concat(alphabetRules())"
                       />
                     </v-col>
-                    <v-col cols="6">
+                    <v-col cols="12" sm="6">
+                      <!-- INPUT: City -->
                       <LocationAutocomplete
                         type="city"
                         class="mr-1 required"
@@ -67,7 +73,8 @@
                         :rules="mandatoryRules().concat(maxCharRules()).concat(alphabetRules())"
                       />
                     </v-col>
-                    <v-col cols="6">
+                    <v-col cols="12" sm="6">
+                      <!-- INPUT: Region -->
                       <LocationAutocomplete
                         type="region"
                         class="ml-1 required"
@@ -75,7 +82,8 @@
                         :rules="mandatoryRules().concat(maxCharRules()).concat(alphabetRules())"
                       />
                     </v-col>
-                    <v-col cols="6">
+                    <v-col cols="12" sm="6">
+                      <!-- INPUT: Country -->
                       <LocationAutocomplete
                         type="country"
                         class="mr-1 required"
@@ -83,7 +91,8 @@
                         :rules="mandatoryRules().concat(maxCharRules()).concat(alphabetRules())"
                       />
                     </v-col>
-                    <v-col cols="6">
+                    <v-col cols="12" sm="6">
+                      <!-- INPUT: Postcode -->
                       <v-text-field
                         class="ml-1 required"
                         v-model="postcode"
@@ -93,27 +102,29 @@
                       />
                     </v-col>
                     <v-col
+                      class="text-right"
                       cols="12"
-                      sm="4"
-                      md="4"
+                      sm="12"
                     >
+                      <!-- INPUT: Update Currency -->
                       <v-checkbox
                         v-model="updateProductCountry"
+                        class="mt-n5"
                         label="Update catalogue's currency"
                         color="primary"
                         hide-details
-                        @click.stop="currencyConfirmDialog = true"
                       />
                     </v-col>
                   </v-row>
-                  <div v-if="userIsPrimaryAdmin" class="mt-5">
+                  <div v-if="isPrimaryOwner | isSystemAdmin" class="mt-1">
                     <v-card-title>Change Primary Administrator</v-card-title>
-                    <v-col>
-                      <v-row>
+                    <v-row>
+                      <v-col>
+                        <!-- INPUT: Admin -->
                         <span v-for="admin in administrators" :key="admin.id">
                           <v-chip
                             v-if="adminIsPrimary(admin)"
-                            class="admin-chip"
+                            class="ma-1 ml-0"
                             color="red"
                             text-color="white"
                           >
@@ -121,22 +132,35 @@
                           </v-chip>
                           <v-chip
                             v-else
-                            class="admin-chip"
+                            class="ma-1 ml-0"
                             color="green"
                             text-color="white"
-                            @click="changePrimaryAdmin(admin)"
+                            @click="changePrimaryOwner(admin)"
                           >
                             {{ admin.firstName }} {{ admin.lastName }}
                           </v-chip>
                         </span>
-                        <v-alert v-if="showChangeAdminAlert" color="red" type="error" dense text>
-                          {{ primaryAdminAlertMsg }}
-                        </v-alert>
-                      </v-row>
-                    </v-col>
+                      </v-col>
+                    </v-row>
+                    <v-row>
+                      <v-alert v-if="showChangeAdminAlert" color="red" type="error" dense text>
+                        {{ primaryAdminAlertMsg }}
+                      </v-alert>
+                    </v-row>
                   </div>
-                  <v-card-title>Images</v-card-title>
+                  <v-card-title class="mt-n3">Image</v-card-title>
+                  <v-card v-if="businessImages && businessImages.length > 0">
+                    <ImageCarousel
+                      :imagesList="businessImages"
+                      :showMakePrimary="true"
+                      :showDelete="false"
+                      @change-primary-image="makeImagePrimary"
+                      ref="businessImageCarousel"
+                    />
+                  </v-card>
+                  <!-- INPUT: Image Uploader -->
                   <v-btn
+                    class="upload-image"
                     color="primary"
                     outlined
                     @click="showImageUploaderForm=true"
@@ -149,17 +173,23 @@
                     </v-icon>
                     Upload new image
                   </v-btn>
-                  <BusinessImageUploader :business-id="business.id" v-model="showImageUploaderForm"/>
+                  <BusinessImageUploader
+                    v-model="imageFile"
+                    v-if="showImageUploaderForm"
+                    @closeDialog="showImageUploaderForm=false"
+                    @uploadImage="addImage"/>
+                  <v-card-text v-if="allImageFiles.length > 0"> Images uploaded: {{ imageNames }} </v-card-text>
                   <p class="error-text" v-if ="errorMessage !== undefined"> {{errorMessage}} </p>
                 </v-container>
               </v-card-text>
               <v-card-actions>
                 <v-row>
                   <v-col class="text-right">
+                    <!-- INPUT: Submit -->
                     <v-btn
                       type="submit"
                       color="primary"
-                      :disabled="!valid"
+                      @click.prevent="openCurrencyDialog"
                     >
                       Submit
                       <v-icon
@@ -169,6 +199,7 @@
                         mdi-file-upload-outline
                       </v-icon>
                     </v-btn>
+                    <!-- INPUT: Discard -->
                     <v-btn
                       color="secondary"
                       class="ml-2"
@@ -187,6 +218,7 @@
                   v-model="currencyConfirmDialog"
                   max-width="300px"
                 >
+                  <!-- INPUT: Confirm Dialog -->
                   <v-card>
                     <v-card-title>
                       Are you sure?
@@ -199,14 +231,14 @@
                       <v-btn
                         color="primary"
                         text
-                        @click="currencyConfirmDialog = false; updateProductCountry = true;"
+                        @click="proceedWithModifyBusiness()"
                       >
                         Save Change
                       </v-btn>
                       <v-btn
                         color="primary"
                         text
-                        @click="currencyConfirmDialog = false; updateProductCountry = false;"
+                        @click="currencyConfirmDialog = false"
                       >
                         Cancel
                       </v-btn>
@@ -229,15 +261,18 @@ import {
   alphabetExtendedMultilineRules,
   alphabetExtendedSingleLineRules, alphabetRules,
   mandatoryRules,
-  maxCharRules, postCodeRules, streetNumRules
+  maxCharRules, postCodeRules, streetNumRules,
+  USER_ROLES
 } from "@/utils";
-import { modifyBusiness } from '@/api/internal';
+import { modifyBusiness, uploadBusinessImage, makeBusinessImagePrimary, getUser } from '@/api/internal';
+import ImageCarousel from "@/components/utils/ImageCarousel";
 
 export default {
   name: 'ModifyBusiness',
   components: {
     LocationAutocomplete,
     BusinessImageUploader,
+    ImageCarousel
   },
   props: {
     business: Object
@@ -273,6 +308,8 @@ export default {
       showChangeAdminAlert: false,
       primaryAdminAlertMsg: "",
       primaryAdministratorId: this.business.primaryAdministratorId,
+      imageFile: undefined,
+      allImageFiles: [],
       maxCharRules: () => maxCharRules(100),
       maxCharDescriptionRules: ()=> maxCharRules(200),
       mandatoryRules: ()=> mandatoryRules,
@@ -281,30 +318,82 @@ export default {
       alphabetRules: ()=> alphabetRules,
       streetRules: ()=> streetNumRules,
       postcodeRules: ()=> postCodeRules,
+      isLoading: false,
     };
   },
   computed: {
-    userIsPrimaryAdmin() {
+    /**
+     * Check if the current user is the admin of the system
+     */
+    isSystemAdmin() {
+      return [USER_ROLES.DGAA, USER_ROLES.GAA].includes(
+        this.$store.getters.role
+      );
+    },
+    /**
+     * Check if the current user is the primary owner of the business
+     */
+    isPrimaryOwner() {
       return this.$store.state.user.id === this.business.primaryAdministratorId;
+    },
+    imageNames() {
+      return this.allImageFiles.map((image) => image.name).join(", ");
+    },
+    businessImages() {
+      return this.business.images;
     }
   },
   methods: {
+    /**
+     * Opens the currency confirmation dialog if the updateProductCountry is checked
+     */
+    openCurrencyDialog() {
+      if (this.updateProductCountry === false) {
+        this.proceedWithModifyBusiness();
+      } else {
+        this.currencyConfirmDialog = true;
+      }
+    },
+    /**
+     * Loop through all admin to identify business primary owner
+     * Return TRUE if the current looping chip is primary owner and no other chip is selected by user
+     * If other chip is selected, the chip will be displayed as primary owner with message prompted
+     */
     adminIsPrimary(admin) {
       return admin.id === this.primaryAdministratorId;
     },
+    /**
+     * Execute the discard modify functionality and render business profile
+     */
     discardButton() {
       this.$emit('discardModifyBusiness');
     },
+    /**
+     * Sets the given image as primary image to be displayed
+     * @param imageId ID of the Image to set
+     */
+    async makeImagePrimary(imageId) {
+      this.errorMessage = undefined;
+      const result = await makeBusinessImagePrimary(this.business.id, imageId);
+      if (typeof result === 'string') {
+        this.errorMessage = result;
+        this.$refs.businessImageCarousel.forceClose();
+      }
+    },
+    /**
+     * Action(s) of modifying a business
+     * Get the street number and name from the street address field.
+     * Check existence of new selected primary owner, update to new owner or remain unchange
+     * Set up the modified fields
+     * Calling API
+     */
     async proceedWithModifyBusiness() {
       this.errorMessage = undefined;
-      /**
-       * Get the street number and name from the street address field.
-       */
+
       const streetParts = this.streetAddress.split(" ");
       const streetNum = streetParts[0];
       const streetName = streetParts.slice(1, streetParts.length).join(" ");
 
-      // Set up the modified fields
       let modifiedFields = {
         primaryAdministratorId: this.primaryAdministratorId,
         name: this.businessName,
@@ -321,8 +410,8 @@ export default {
         businessType: this.businessType,
         updateProductCountry: this.updateProductCountry
       };
-
       const result = await modifyBusiness(this.business.id, modifiedFields);
+
       /**
        * If the result is a string, means it is an error message, of which it will show up on the page.
        * As such, the modify page will still remain.
@@ -331,7 +420,24 @@ export default {
        */
       if (typeof result === 'string') {
         this.errorMessage = result;
-      } else {
+      }
+      for (let image of this.allImageFiles) {
+        if (this.errorMessage === undefined) {
+          await this.uploadImage(image);
+        }
+      }
+
+      // Updates the $store.state.user.businessesAdministered property if we are administering this business
+      if (this.administrators.some(admin => admin.id === this.$store.state.user.id)) {
+        let user = await getUser(this.$store.state.user.id);
+        if (typeof user !== 'string') {
+          let initialRole = this.$store.state.activeRole;
+          this.$store.commit('setUser', user);
+          this.$store.commit('setRole', initialRole); // Make sure we don't get set to the default role
+        }
+      }
+
+      if (this.errorMessage === undefined) {
         this.$emit("modifySuccess");
       }
     },
@@ -339,21 +445,31 @@ export default {
      * When the user clicks on an administrator a popup message will appear stating that they
      * have changed that user to the primary administrator of the business. Additionally, the
      * colour of said user will change to red, whilst the existing primary administrator will
-     * change to green. Futhermore, if the original primary administrator is clicked this
+     * change to green. Futhermore, if the original primary owner is clicked this
      * message will not appear.
      */
-    changePrimaryAdmin(admin) {
-      this.showChangeAdminAlert = true;
+    changePrimaryOwner(admin) {
       if (admin.id !== this.business.primaryAdministratorId) {
-        this.showChangeAdminAlert = true;
         this.primaryAdminAlertMsg = `Primary admin will be changed to ${admin.firstName} ${admin.lastName}`;
+        this.showChangeAdminAlert = true;
       } else {
         this.showChangeAdminAlert = false;
         this.primaryAdminAlertMsg = "";
       }
       this.primaryAdministratorId = admin.id;
     },
-  }
+    addImage() {
+      this.showImageUploaderForm = false;
+      this.allImageFiles.push(this.imageFile);
+      this.imageFile = undefined;
+    },
+    async uploadImage(image) {
+      const result = await uploadBusinessImage(this.business.id, image);
+      if (typeof result === 'string') {
+        this.errorMessage = result;
+      }
+    }
+  },
 };
 </script>
 
@@ -369,10 +485,6 @@ export default {
   flex-wrap: wrap;
 }
 
-.admin-chip {
-  margin-right: 4px;
-}
-
 .business-modify {
   margin-top: 20px;
 }
@@ -384,5 +496,9 @@ export default {
 
 .expand-icon {
   padding-right: 10px;
+}
+
+.upload-image {
+  margin-top: 25px;
 }
 </style>

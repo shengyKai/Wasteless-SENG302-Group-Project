@@ -1,12 +1,10 @@
 package org.seng302.leftovers.entities;
 
 
-import net.minidev.json.JSONObject;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.persistence.*;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -81,19 +79,6 @@ public class Conversation {
      */
     public List<Message> getMessages() {
         return messages;
-    }
-
-    /**
-     * Construct a json representation of this conversation including its id number, card and buyer, but not the messages
-     * in the conversation.
-     * @return A json representation of the conversation.
-     */
-    public JSONObject constructJSONObject() {
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.appendField("id", id);
-        jsonObject.appendField("card", card.constructJSONObject());
-        jsonObject.appendField("buyer", buyer.constructPublicJson());
-        return jsonObject;
     }
 
     @Override

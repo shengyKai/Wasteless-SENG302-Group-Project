@@ -10,7 +10,7 @@ Feature: User
         And their password is "gottaGetGoodGrad3$"
         And their bio is "Your average fourth year software engineer"
         And their date of birth is "1999-07-17"
-        And their phone number is "0271234567"
+        And their phone number is "02 71234567"
         And their address is "69,Riccarton Road,Ashburton,Christchurch,New Zealand,Canterbury,8041"
         And the user is created
         Then a user with the email "connor@gmail.com" exists
@@ -23,7 +23,7 @@ Feature: User
         Then the user has the password "gottaGetGoodGrad3$"
         Then the user has the bio "Your average fourth year software engineer"
         Then the user has the date of birth "1999-07-17"
-        Then the user has the phone number "0271234567"
+        Then the user has the phone number "02 71234567"
         Then the user has the address "69,Riccarton Road,Ashburton,Christchurch,New Zealand,Canterbury,8041"
 
     Scenario: Register a second user account
@@ -36,7 +36,7 @@ Feature: User
         And their password is "prettyRoseSweetP3@ch"
         And their bio is "My friends say I am as sweet as a peach with the looks of a rose"
         And their date of birth is "1998-03-01"
-        And their phone number is "0279876543"
+        And their phone number is "02 79876543"
         And their address is "100,Ocean View Crescent,Ashburton,Auckland,New Zealand,Rakino Island,1010"
         And the user is created
         Then a user with the email "roseyrose@gmail.com" exists
@@ -48,7 +48,7 @@ Feature: User
         Then the user has the password "prettyRoseSweetP3@ch"
         Then the user has the bio "My friends say I am as sweet as a peach with the looks of a rose"
         Then the user has the date of birth "1998-03-01"
-        Then the user has the phone number "0279876543"
+        Then the user has the phone number "02 79876543"
         Then the user has the address "100,Ocean View Crescent,Ashburton,Auckland,New Zealand,Rakino Island,1010"
 
     Scenario: Login a user account
@@ -82,7 +82,7 @@ Feature: User
         And their password is "prettyRoseSweetP3@ch"
         And their bio is "My friends say I am as sweet as a peach with the looks of a rose"
         And their date of birth is "1998-03-01"
-        And their phone number is "0279876543"
+        And their phone number is "02 79876543"
         And their address is "100,Ocean View Crescent,Ashburton,Auckland,New Zealand,Rakino Island,1010"
         And the user is created
         Then a user with the email "roseyrose@gmail.com" does not exist
@@ -112,7 +112,7 @@ Feature: User
         And their password is "prettyRoseSweetP3@ch"
         And their bio is "Mwhahaha your spot in the database is mine!"
         And their date of birth is "1998-03-01"
-        And their phone number is "0279876543"
+        And their phone number is "02 79876543"
         And their address is "100,Ocean View Crescent,Ashburton,Auckland,New Zealand,Rakino Island,1010"
         And the user is created
         Then only the first account with "james@hotmail.com" remains with bio "Hey don't replace me!"

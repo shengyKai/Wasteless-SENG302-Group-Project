@@ -3,7 +3,7 @@
   <v-dialog v-model="dialog" width="min(90vh, 100vw)">
     <template v-slot:activator="{ on, attrs }">
       <!-- put an image over a link, such that now the image will be clickable to activate the pop up dialog -->
-      <!--  v-bind="attrs" v-on="on" allows the v-dialog to use this link as the activator for the dialog box  height=100%-->
+      <!--  The v-bind to attrs allows the v-dialog to use this link as the activator for the dialog box -->
       <a v-bind="attrs" v-on="on">
         <!-- productImages[0] will be the primary image for the product. -->
         <v-img height="200px" :src="imageUrl(imagesList[0].filename)" />
@@ -26,13 +26,14 @@
             <template #activator="{ on: tooltip }">
               <v-btn
                 icon
-                v-if="i !== 0 && showControls"
+                v-if="i !== 0 && showMakePrimary"
                 color="primary"
                 v-on="{ ...tooltip }"
                 @click="makeImagePrimary(item.id)"
                 ref="makePrimaryImageButton"
+                x-large
               >
-                <v-icon>mdi-eye-plus</v-icon>
+                <v-icon class="shadow-icon">mdi-eye-plus</v-icon>
               </v-btn>
             </template>
             <span> Make Primary Image </span>
@@ -41,13 +42,13 @@
             <template #activator="{ on: tooltip }">
               <v-btn
                 icon
-                v-if="showControls"
+                v-if="showDelete"
                 color="error"
                 v-on="{ ...tooltip }"
                 @click="deleteImage(item.id)"
                 ref="deleteImageButton"
               >
-                <v-icon>mdi-delete</v-icon>
+                <v-icon class="shadow-icon">mdi-delete</v-icon>
               </v-btn>
             </template>
             <span> Delete Image </span>
@@ -70,7 +71,8 @@ export default {
     /**
      * Whether to show the make primary and delete image
      */
-    showControls: Boolean,
+    showMakePrimary: Boolean,
+    showDelete: Boolean,
   },
   data() {
     return {
@@ -111,5 +113,9 @@ export default {
 
 .thingy {
   display: none;
+}
+
+.shadow-icon {
+  text-shadow: 0px 0px 14px #000000;
 }
 </style>

@@ -1,24 +1,24 @@
 /* Subtype of Account for individual users */
 package org.seng302.leftovers.entities;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
+import org.seng302.leftovers.entities.event.Event;
 import org.seng302.leftovers.tools.JsonTools;
 import org.springframework.data.annotation.ReadOnlyProperty;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.persistence.*;
-import java.time.DateTimeException;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.regex.Pattern;
 
 @Entity
 public class User extends Account {
+
+    private static final String NAME_REGEX = "[ \\p{L}\\-'.]+";
 
     @Column(nullable = false)
     private String firstName;
@@ -59,7 +59,7 @@ public class User extends Account {
     123.456.7890
     +91 (123) 456-7890
      */
-    private static final String PHONE_REGEX = "^[0-9]{4,15}$";
+    private static final String PHONE_REGEX = "(^[0-9]{2,3})[ ]([0-9]{4,12})$";
 
 
     protected User() {}
@@ -79,7 +79,7 @@ public class User extends Account {
      * @param firstName users first name
      */
     public void setFirstName(String firstName) {
-        if (firstName != null && firstName.length() > 0 && firstName.length() <= 32 && firstName.matches("[ \\p{L}\\-'.]+")) {
+        if (firstName != null && firstName.length() > 0 && firstName.length() <= 32 && firstName.matches(NAME_REGEX)) {
             this.firstName = firstName;
         } else {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The first name must not be empty, be less then 16 characters, and only contain letters.");
@@ -98,7 +98,7 @@ public class User extends Account {
      * @param middleName
      */
     public void setMiddleName(String middleName) {
-        if (middleName == null || (middleName.length() > 0 && middleName.length() <= 32 && middleName.matches("[ \\p{L}\\-'.]+"))) {
+        if (middleName == null || (middleName.length() > 0 && middleName.length() <= 32 && middleName.matches(NAME_REGEX))) {
             this.middleName = middleName;
         } else if (middleName.equals("")) {
             this.middleName = null;
@@ -122,7 +122,7 @@ public class User extends Account {
      * @param lastName users surname
      */
     public void setLastName(String lastName) {
-        if (lastName != null && lastName.length() > 0 && lastName.length() <= 32 && lastName.matches("[ \\p{L}\\-'.]+")) {
+        if (lastName != null && lastName.length() > 0 && lastName.length() <= 32 && lastName.matches(NAME_REGEX)) {
             this.lastName = lastName;
         } else {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The last name must not be empty, be less then 16 characters, and only contain letters.");
@@ -289,8 +289,6 @@ public class User extends Account {
 
     public Set<Event> getEvents() { return this.events;}
 
-    private void setEvents(Set<Event> events) { this.events = events; }
-
     /**
      * Gets the set of businesses that the user is an admin of OR is the owner of
      * @return Businesses administered or owned
@@ -328,7 +326,6 @@ public class User extends Account {
      * field if this is set to true, otherwise the field will not be present.
      * @return JSONObject with attribute name as key and attribute value as value.
      */
-    // Todo: Replace email with profile picture once profile pictures added.
     public JSONObject constructPublicJson(boolean fullBusinessDetails) {
         var object = new JSONObject();
         object.put("id",          getUserID());

@@ -2,10 +2,11 @@ package org.seng302.leftovers.controllers;
 
 import lombok.SneakyThrows;
 import net.minidev.json.JSONObject;
-import org.apache.tomcat.jni.Address;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
@@ -18,10 +19,8 @@ import org.seng302.leftovers.exceptions.InsufficientPermissionException;
 import org.seng302.leftovers.persistence.UserRepository;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
 import org.seng302.leftovers.tools.PasswordAuthenticator;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -30,11 +29,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.server.ResponseStatusException;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
-
 import java.time.LocalDate;
-import java.util.Date;
 import java.util.Optional;
 
 import static org.mockito.Mockito.*;
@@ -43,7 +38,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @AutoConfigureMockMvc
-public class UserControllerModifyTest {
+class UserControllerModifyTest {
     private long mockUserId = 5L;
     private String validCurrentPassword = "HappyBoiGeorge69#";
     private String takenNewEmail = "This@gmail.com";
@@ -423,36 +418,17 @@ public class UserControllerModifyTest {
         verify(mockUser, times(1)).setPhNum(any());
     }
 
-    @Test
-    void modifyUser_modifyInvalidStreetAddress_userNotModified400() throws Exception {
-        var jsonBody = createValidRequest();
-        Location address = new Location.Builder()
-                .inCountry("Spain")
-                .inCity("Christchurch")
-                .inRegion("Region")
-                .atStreetNumber("24")
-                .onStreet("Cool street")
-                .withPostCode("1238")
-                .atDistrict("DistrictArea")
-                .build();
-        JSONObject jsonAddress = address.constructFullJson();
-        jsonAddress.put("streetName", "ÉÄ○b)");
-        jsonBody.put("homeAddress", jsonAddress);
-
-        mockMvc.perform(MockMvcRequestBuilders
-                .put("/users/" + mockUserId)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(jsonBody.toString()))
-                .andExpect(status().isBadRequest())
-                .andReturn();
-
-        verify(userRepository, times(0)).save(mockUser);
-        verify(mockUser, times(0)).setAddress(any());
-
-    }
-
-    @Test
-    void modifyUser_modifyInvalidDistrict_userNotModified400() throws Exception {
+    @ParameterizedTest
+    @ValueSource(strings={
+            "streetNumber",
+            "streetName",
+            "district",
+            "city",
+            "region",
+            "country",
+            "postcode"
+    })
+    void modifyUser_modifyInvalidDistrict_userNotModified400(String field) throws Exception {
         var jsonBody = createValidRequest();
 
         Location address = new Location.Builder()
@@ -465,118 +441,7 @@ public class UserControllerModifyTest {
                 .atDistrict("DistrictArea")
                 .build();
         JSONObject jsonAddress = address.constructFullJson();
-        jsonAddress.put("district", "ÉÄ○b)");
-        jsonBody.put("homeAddress", jsonAddress);
-
-        mockMvc.perform(MockMvcRequestBuilders
-                        .put("/users/" + mockUserId)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(jsonBody.toString()))
-                .andExpect(status().isBadRequest())
-                .andReturn();
-
-        verify(userRepository, times(0)).save(mockUser);
-        verify(mockUser, times(0)).setAddress(any());
-    }
-
-    @Test
-    void modifyUser_modifyInvalidCity_userNotModified400() throws Exception {
-        var jsonBody = createValidRequest();
-        Location address = new Location.Builder()
-                .inCountry("Spain")
-                .inCity("Christchurch")
-                .inRegion("Region")
-                .atStreetNumber("24")
-                .onStreet("Cool street")
-                .withPostCode("1238")
-                .atDistrict("DistrictArea")
-                .build();
-        JSONObject jsonAddress = address.constructFullJson();
-        jsonAddress.put("city", "ÉÄ○b)");
-        jsonBody.put("homeAddress", jsonAddress);
-
-        mockMvc.perform(MockMvcRequestBuilders
-                        .put("/users/" + mockUserId)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(jsonBody.toString()))
-                .andExpect(status().isBadRequest())
-                .andReturn();
-
-        verify(userRepository, times(0)).save(mockUser);
-        verify(mockUser, times(0)).setAddress(any());
-    }
-
-    @Test
-    void modifyUser_modifyInvalidRegion_userNotModified400() throws Exception {
-        var jsonBody = createValidRequest();
-
-        Location address = new Location.Builder()
-                .inCountry("Spain")
-                .inCity("Christchurch")
-                .inRegion("Region")
-                .atStreetNumber("24")
-                .onStreet("Cool street")
-                .withPostCode("1238")
-                .atDistrict("DistrictArea")
-                .build();
-        JSONObject jsonAddress = address.constructFullJson();
-        jsonAddress.put("region", "ÉÄ○b)");
-        jsonBody.put("homeAddress", jsonAddress);
-
-        mockMvc.perform(MockMvcRequestBuilders
-                        .put("/users/" + mockUserId)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(jsonBody.toString()))
-                .andExpect(status().isBadRequest())
-                .andReturn();
-
-        verify(userRepository, times(0)).save(mockUser);
-        verify(mockUser, times(0)).setAddress(any());
-    }
-
-    @Test
-    void modifyUser_modifyInvalidCountry_userNotModified400() throws Exception {
-        var jsonBody = createValidRequest();
-
-        Location address = new Location.Builder()
-                .inCountry("Spain")
-                .inCity("Christchurch")
-                .inRegion("Region")
-                .atStreetNumber("24")
-                .onStreet("Cool street")
-                .withPostCode("1238")
-                .atDistrict("DistrictArea")
-                .build();
-        JSONObject jsonAddress = address.constructFullJson();
-        jsonAddress.put("country", "ÉÄ○b)");
-        jsonBody.put("homeAddress", jsonAddress);
-
-        mockMvc.perform(MockMvcRequestBuilders
-                        .put("/users/" + mockUserId)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(jsonBody.toString()))
-                .andExpect(status().isBadRequest())
-                .andReturn();
-
-        verify(userRepository, times(0)).save(mockUser);
-        verify(mockUser, times(0)).setAddress(any());
-    }
-
-    @Test
-    void modifyUser_modifyInvalidPostcode_userNotModified400() throws Exception {
-        var jsonBody = createValidRequest();
-
-        Location address = new Location.Builder()
-                .inCountry("Spain")
-                .inCity("Christchurch")
-                .inRegion("Region")
-                .atStreetNumber("24")
-                .onStreet("Cool street")
-                .withPostCode("1238")
-                .atDistrict("DistrictArea")
-                .build();
-        JSONObject jsonAddress = address.constructFullJson();
-        jsonAddress.put("postcode", "");
+        jsonAddress.put(field, "ÉÄ○b");
         jsonBody.put("homeAddress", jsonAddress);
 
         mockMvc.perform(MockMvcRequestBuilders

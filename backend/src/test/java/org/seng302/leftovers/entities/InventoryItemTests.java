@@ -6,6 +6,8 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.seng302.leftovers.persistence.BusinessRepository;
 import org.seng302.leftovers.persistence.InventoryItemRepository;
 import org.seng302.leftovers.persistence.ProductRepository;
@@ -17,7 +19,6 @@ import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
-import java.text.ParseException;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
@@ -54,7 +55,7 @@ class InventoryItemTests {
                 .withPassword("1337-H%nt3r2")
                 .withBio("Likes long walks on the beach")
                 .withDob("2000-03-11")
-                .withPhoneNumber("6435550129")
+                .withPhoneNumber("64 3555012")
                 .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
                         "Canterbury,8041"))
                 .build();
@@ -118,7 +119,7 @@ class InventoryItemTests {
                 .withExpires(today.plus(4, ChronoUnit.DAYS).toString())
                 .build();
         inventoryItemRepository.save(invItem);
-        InventoryItem testInvItem = inventoryItemRepository.findById(invItem.getId()).get();
+        InventoryItem testInvItem = inventoryItemRepository.findById(invItem.getId()).orElseThrow();
         assertEquals(invItem, testInvItem);
     }
     @Test
@@ -129,7 +130,7 @@ class InventoryItemTests {
                 .withExpires(LocalDate.now().plus(50, ChronoUnit.DAYS).toString())
                 .build();
         inventoryItemRepository.save(invItem);
-        InventoryItem testInvItem = inventoryItemRepository.findById(invItem.getId()).get();
+        InventoryItem testInvItem = inventoryItemRepository.findById(invItem.getId()).orElseThrow();
         assertEquals(invItem, testInvItem);
     }
     /**
@@ -205,7 +206,7 @@ class InventoryItemTests {
                 .withPricePerItem(null)
                 .build();
         inventoryItemRepository.save(invItem);
-        InventoryItem testInvItem = inventoryItemRepository.findById(invItem.getId()).get();
+        InventoryItem testInvItem = inventoryItemRepository.findById(invItem.getId()).orElseThrow();
         assertEquals(invItem, testInvItem);
     }
     @Test
@@ -218,7 +219,7 @@ class InventoryItemTests {
                 .withTotalPrice(null)
                 .build();
         inventoryItemRepository.save(invItem);
-        InventoryItem testInvItem = inventoryItemRepository.findById(invItem.getId()).get();
+        InventoryItem testInvItem = inventoryItemRepository.findById(invItem.getId()).orElseThrow();
         assertEquals(invItem, testInvItem);
     }
     @Test
@@ -230,7 +231,7 @@ class InventoryItemTests {
                 .withTotalPrice(null)
                 .build();
         inventoryItemRepository.save(invItem);
-        InventoryItem testInvItem = inventoryItemRepository.findById(invItem.getId()).get();
+        InventoryItem testInvItem = inventoryItemRepository.findById(invItem.getId()).orElseThrow();
         assertEquals(invItem, testInvItem);
     }
     @Test
@@ -242,7 +243,7 @@ class InventoryItemTests {
                 .withPricePerItem("2.69")
                 .build();
         inventoryItemRepository.save(invItem);
-        InventoryItem testInvItem = inventoryItemRepository.findById(invItem.getId()).get();
+        InventoryItem testInvItem = inventoryItemRepository.findById(invItem.getId()).orElseThrow();
         assertEquals(invItem, testInvItem);
     }
     @Test
@@ -254,7 +255,7 @@ class InventoryItemTests {
                 .withTotalPrice("21.69")
                 .build();
         inventoryItemRepository.save(invItem);
-        InventoryItem testInvItem = inventoryItemRepository.findById(invItem.getId()).get();
+        InventoryItem testInvItem = inventoryItemRepository.findById(invItem.getId()).orElseThrow();
         assertEquals(invItem, testInvItem);
     }
     @Test
@@ -277,70 +278,28 @@ class InventoryItemTests {
             builder.withTotalPrice("xx0.1");
         });
     }
-    @Test
-    void createInventoryItem_withNegativePricePerItem_objectNotCreated() throws Exception {
+    @ParameterizedTest
+    @ValueSource(strings = {"-1", "10001", "10000"})
+    void createInventoryItem_withNegativePricePerItem_objectNotCreated(BigDecimal value) throws Exception {
         InventoryItem invItem = new InventoryItem.Builder()
-        .withProduct(testProduct)
-        .withQuantity(2)
-        .withExpires(LocalDate.now().plus(50, ChronoUnit.DAYS).toString())
-        .build();
+            .withProduct(testProduct)
+            .withQuantity(2)
+            .withExpires(LocalDate.now().plus(50, ChronoUnit.DAYS).toString())
+            .build();
         assertThrows(ResponseStatusException.class, () -> {
-            invItem.setPricePerItem(new BigDecimal ("-1"));
+            invItem.setPricePerItem(value);
         });
     }
-    @Test
-    void createInventoryItem_withNegativeTotalPrice_objectNotCreated() throws Exception {
+    @ParameterizedTest
+    @ValueSource(strings = {"-2", "1000001"})
+    void createInventoryItem_withNegativeTotalPrice_objectNotCreated(BigDecimal value) throws Exception {
         InventoryItem invItem = new InventoryItem.Builder()
         .withProduct(testProduct)
         .withQuantity(2)
         .withExpires(LocalDate.now().plus(50, ChronoUnit.DAYS).toString())
         .build();
         assertThrows(ResponseStatusException.class, () -> {
-            invItem.setTotalPrice(new BigDecimal ("-2"));
-        });
-    }
-    @Test
-    void createInventoryItem_withHigherPricePerItem_objectNotCreated() throws Exception {
-        InventoryItem invItem = new InventoryItem.Builder()
-        .withProduct(testProduct)
-        .withQuantity(2)
-        .withExpires(LocalDate.now().plus(50, ChronoUnit.DAYS).toString())
-        .build();
-        assertThrows(ResponseStatusException.class, () -> {
-            invItem.setPricePerItem(new BigDecimal ("10001"));
-        });
-    }
-    @Test
-    void createInventoryItem_withHigherTotalPrice_objectNotCreated() throws Exception {
-        InventoryItem invItem = new InventoryItem.Builder()
-        .withProduct(testProduct)
-        .withQuantity(2)
-        .withExpires(LocalDate.now().plus(50, ChronoUnit.DAYS).toString())
-        .build();
-        assertThrows(ResponseStatusException.class, () -> {
-            invItem.setTotalPrice(new BigDecimal ("1000001"));
-        });
-    }
-    @Test
-    void createInventoryItem_withHighestPricePerItem_objectNotCreated() throws Exception {
-        InventoryItem invItem = new InventoryItem.Builder()
-        .withProduct(testProduct)
-        .withQuantity(2)
-        .withExpires(LocalDate.now().plus(50, ChronoUnit.DAYS).toString())
-        .build();
-        assertThrows(ResponseStatusException.class, () -> {
-            invItem.setPricePerItem(new BigDecimal("10000"));
-        });
-    }
-    @Test
-    void createInventoryItem_withHighestTotalPrice_objectNotCreated() throws Exception {
-        InventoryItem invItem = new InventoryItem.Builder()
-        .withProduct(testProduct)
-        .withQuantity(2)
-        .withExpires(LocalDate.now().plus(50, ChronoUnit.DAYS).toString())
-        .build();
-        assertThrows(ResponseStatusException.class, () -> {
-            invItem.setTotalPrice(new BigDecimal ("1000001"));
+            invItem.setTotalPrice(value);
         });
     }
     @Test
@@ -352,7 +311,7 @@ class InventoryItemTests {
                 .withManufactured(null)
                 .build();
         inventoryItemRepository.save(invItem);
-        InventoryItem testInvItem = inventoryItemRepository.findById(invItem.getId()).get();
+        InventoryItem testInvItem = inventoryItemRepository.findById(invItem.getId()).orElseThrow();
         assertEquals(invItem, testInvItem);
     }
     @Test
@@ -368,22 +327,20 @@ class InventoryItemTests {
         assertNotNull(invItem);
     }
     @Test
-    void createInventoryItem_withDateInFutureForManufactured_objectNotCreated() throws Exception {
+    void createInventoryItem_withDateInFutureForManufactured_objectNotCreated() {
         InventoryItem.Builder builder = new InventoryItem.Builder()
                 .withProduct(testProduct)
                 .withQuantity(2)
-                .withExpires(LocalDate.now().plus(50, ChronoUnit.DAYS).toString());
-        assertThrows(ResponseStatusException.class, () -> {
-            builder.withManufactured("2022-03-03")
-            .build();
-        });
+                .withExpires(LocalDate.now().plus(50, ChronoUnit.DAYS).toString())
+                .withManufactured("2022-03-03");
+        assertThrows(ResponseStatusException.class, builder::build);
     }
     @Test
-    void createInventoryItem_withInvalidManufacturedFormat_objectNotCreated() throws Exception {
+    void createInventoryItem_withInvalidManufacturedFormat_objectNotCreated() {
         InventoryItem.Builder builder = new InventoryItem.Builder()
-        .withProduct(testProduct)
-        .withQuantity(2)
-        .withExpires(LocalDate.now().plus(50, ChronoUnit.DAYS).toString());
+            .withProduct(testProduct)
+            .withQuantity(2)
+            .withExpires(LocalDate.now().plus(50, ChronoUnit.DAYS).toString());
 
         assertThrows(DateTimeParseException.class, () -> {
             builder.withManufactured("201x-09-09");
@@ -398,19 +355,17 @@ class InventoryItemTests {
                 .withSellBy(null)
                 .build();
         inventoryItemRepository.save(invItem);
-        InventoryItem testInvItem = inventoryItemRepository.findById(invItem.getId()).get();
+        InventoryItem testInvItem = inventoryItemRepository.findById(invItem.getId()).orElseThrow();
         assertEquals(invItem, testInvItem);
     }
     @Test
-    void createInventoryItem_withDateInPastForSellBy_objectNotCreated() throws Exception {
+    void createInventoryItem_withDateInPastForSellBy_objectNotCreated() {
         InventoryItem.Builder builder = new InventoryItem.Builder()
                 .withProduct(testProduct)
                 .withQuantity(2)
-                .withExpires(LocalDate.now().plus(50, ChronoUnit.DAYS).toString());
-        assertThrows(ResponseStatusException.class, () -> {
-            builder.withSellBy("2000-03-03")
-            .build();
-        });
+                .withExpires(LocalDate.now().plus(50, ChronoUnit.DAYS).toString())
+                .withSellBy("2000-03-03");
+        assertThrows(ResponseStatusException.class, builder::build);
     }
     @Test
     void createInventoryItem_withDateInFutureForSellBy_objectCreated() throws Exception {
@@ -427,9 +382,9 @@ class InventoryItemTests {
     @Test
     void createInventoryItem_withInvalidSellByFormat_objectNotCreated() throws Exception {
         InventoryItem.Builder builder = new InventoryItem.Builder()
-        .withProduct(testProduct)
-        .withQuantity(2)
-        .withExpires(LocalDate.now().plus(50, ChronoUnit.DAYS).toString());
+            .withProduct(testProduct)
+            .withQuantity(2)
+            .withExpires(LocalDate.now().plus(50, ChronoUnit.DAYS).toString());
 
         assertThrows(DateTimeParseException.class, () -> {
             builder.withSellBy("20x-01-01");
@@ -444,7 +399,7 @@ class InventoryItemTests {
                 .withBestBefore(null)
                 .build();
         inventoryItemRepository.save(invItem);
-        InventoryItem testInvItem = inventoryItemRepository.findById(invItem.getId()).get();
+        InventoryItem testInvItem = inventoryItemRepository.findById(invItem.getId()).orElseThrow();
         assertEquals(invItem, testInvItem);
     }
     @Test
@@ -452,11 +407,9 @@ class InventoryItemTests {
         InventoryItem.Builder builder = new InventoryItem.Builder()
                 .withProduct(testProduct)
                 .withQuantity(2)
-                .withExpires(LocalDate.now().plus(50, ChronoUnit.DAYS).toString());
-        assertThrows(ResponseStatusException.class, () -> {
-            builder.withBestBefore("2000-03-03")
-            .build();
-        });
+                .withExpires(LocalDate.now().plus(50, ChronoUnit.DAYS).toString())
+                .withBestBefore("2000-03-03");
+        assertThrows(ResponseStatusException.class, builder::build);
     }
     @Test
     void createInventoryItem_withDateInFutureForBestBefore_objectCreated() throws Exception {
@@ -503,9 +456,9 @@ class InventoryItemTests {
         inventoryItemRepository.save(invItem1);
         inventoryItemRepository.save(invItem2);
         inventoryItemRepository.save(invItem3);
-        InventoryItem testInvItem1 = inventoryItemRepository.findById(invItem1.getId()).get();
-        InventoryItem testInvItem2 = inventoryItemRepository.findById(invItem2.getId()).get();
-        InventoryItem testInvItem3 = inventoryItemRepository.findById(invItem3.getId()).get();
+        InventoryItem testInvItem1 = inventoryItemRepository.findById(invItem1.getId()).orElseThrow();
+        InventoryItem testInvItem2 = inventoryItemRepository.findById(invItem2.getId()).orElseThrow();
+        InventoryItem testInvItem3 = inventoryItemRepository.findById(invItem3.getId()).orElseThrow();
         assertEquals(invItem1, testInvItem1);
         assertEquals(invItem2, testInvItem2);
         assertEquals(invItem3, testInvItem3);
@@ -633,10 +586,10 @@ class InventoryItemTests {
         invItem.setDates(null, dates.get(1), dates.get(2), dates.get(3));
         inventoryItemRepository.save(invItem);
         InventoryItem invItemRepo = inventoryItemRepository.getInventoryItemByBusinessAndId(testBusiness, invItem.getId());
-        assertEquals(invItemRepo.getManufactured(), null);
-        assertEquals(invItemRepo.getSellBy().toString(), dates.get(1));
-        assertEquals(invItemRepo.getBestBefore().toString(), dates.get(2));
-        assertEquals(invItemRepo.getExpires().toString(), dates.get(3));
+        assertNull(invItemRepo.getManufactured());
+        assertEquals(dates.get(1), invItemRepo.getSellBy().toString());
+        assertEquals(dates.get(2), invItemRepo.getBestBefore().toString());
+        assertEquals(dates.get(3), invItemRepo.getExpires().toString());
     }
 
     @Test
@@ -646,10 +599,10 @@ class InventoryItemTests {
         invItem.setDates(dates.get(0), null, dates.get(2), dates.get(3));
         inventoryItemRepository.save(invItem);
         InventoryItem invItemRepo = inventoryItemRepository.getInventoryItemByBusinessAndId(testBusiness, invItem.getId());
-        assertEquals(invItemRepo.getManufactured().toString(), dates.get(0));
-        assertEquals(invItemRepo.getSellBy(), null);
-        assertEquals(invItemRepo.getBestBefore().toString(), dates.get(2));
-        assertEquals(invItemRepo.getExpires().toString(), dates.get(3));
+        assertEquals(dates.get(0), invItemRepo.getManufactured().toString());
+        assertNull(invItemRepo.getSellBy());
+        assertEquals(dates.get(2), invItemRepo.getBestBefore().toString());
+        assertEquals(dates.get(3), invItemRepo.getExpires().toString());
     }
 
     @Test
@@ -659,10 +612,10 @@ class InventoryItemTests {
         invItem.setDates(dates.get(0), dates.get(1), null, dates.get(3));
         inventoryItemRepository.save(invItem);
         InventoryItem invItemRepo = inventoryItemRepository.getInventoryItemByBusinessAndId(testBusiness, invItem.getId());
-        assertEquals(invItemRepo.getManufactured().toString(), dates.get(0));
-        assertEquals(invItemRepo.getSellBy().toString(), dates.get(1));
-        assertEquals(invItemRepo.getBestBefore(), null);
-        assertEquals(invItemRepo.getExpires().toString(), dates.get(3));
+        assertEquals(dates.get(0), invItemRepo.getManufactured().toString());
+        assertEquals(dates.get(1), invItemRepo.getSellBy().toString());
+        assertNull(invItemRepo.getBestBefore());
+        assertEquals(dates.get(3), invItemRepo.getExpires().toString());
     }
 
     @Test
@@ -673,15 +626,18 @@ class InventoryItemTests {
         LocalDate originalSellBy = invItem.getSellBy();
         LocalDate originalBestBefore = invItem.getBestBefore();
         LocalDate originalExpires = invItem.getExpires();
-        assertThrows(ResponseStatusException.class, () -> {
-            invItem.setDates(dates.get(0), dates.get(1), dates.get(2), null);
-        });
+
+        var manufactured = dates.get(0);
+        var sellBy = dates.get(1);
+        var bestBefore = dates.get(2);
+
+        assertThrows(ResponseStatusException.class, () -> invItem.setDates(manufactured, sellBy, bestBefore, null));
         inventoryItemRepository.save(invItem);
         InventoryItem invItemRepo = inventoryItemRepository.getInventoryItemByBusinessAndId(testBusiness, invItem.getId());
-        assertEquals(invItemRepo.getManufactured(), originalManufactured);
-        assertEquals(invItemRepo.getSellBy(), originalSellBy);
-        assertEquals(invItemRepo.getBestBefore(), originalBestBefore);
-        assertEquals(invItemRepo.getExpires(), originalExpires);
+        assertEquals(originalManufactured, invItemRepo.getManufactured());
+        assertEquals(originalSellBy, invItemRepo.getSellBy());
+        assertEquals(originalBestBefore, invItemRepo.getBestBefore());
+        assertEquals(originalExpires, invItemRepo.getExpires());
     }
 
     @Test
@@ -691,10 +647,10 @@ class InventoryItemTests {
         invItem.setDates(null, null, null, dates.get(3));
         inventoryItemRepository.save(invItem);
         InventoryItem invItemRepo = inventoryItemRepository.getInventoryItemByBusinessAndId(testBusiness, invItem.getId());
-        assertEquals(invItemRepo.getManufactured(), null);
-        assertEquals(invItemRepo.getSellBy(), null);
-        assertEquals(invItemRepo.getBestBefore(), null);
-        assertEquals(invItemRepo.getExpires().toString(), dates.get(3));
+        assertNull(invItemRepo.getManufactured());
+        assertNull(invItemRepo.getSellBy());
+        assertNull(invItemRepo.getBestBefore());
+        assertEquals(dates.get(3), invItemRepo.getExpires().toString());
     }
 
     @Test
@@ -721,10 +677,11 @@ class InventoryItemTests {
         List<String> dates = generateValidDates();
         InventoryItem invItem = inventoryItemRepository.getInventoryItemByBusinessAndId(testBusiness, testInvItem.getId());
         LocalDate originalManufactured = invItem.getManufactured();
-        String manufacturedAfterToday = LocalDate.now().plusDays(1).toString();
-        assertThrows(ResponseStatusException.class, () -> {
-            invItem.setDates(manufacturedAfterToday, dates.get(1), dates.get(2), dates.get(3));
-        });
+        var manufacturedAfterToday = LocalDate.now().plusDays(1).toString();
+        var sellBy = dates.get(1);
+        var bestBefore = dates.get(2);
+        var expires = dates.get(3);
+        assertThrows(ResponseStatusException.class, () -> invItem.setDates(manufacturedAfterToday, sellBy, bestBefore, expires));
         InventoryItem inventoryItemRepo = inventoryItemRepository.getInventoryItemByBusinessAndId(testBusiness, invItem.getId());
         assertEquals(inventoryItemRepo.getManufactured(), originalManufactured);
     }
@@ -734,10 +691,11 @@ class InventoryItemTests {
         List<String> dates = generateValidDates();
         InventoryItem invItem = inventoryItemRepository.getInventoryItemByBusinessAndId(testBusiness, testInvItem.getId());
         LocalDate originalManufactured = invItem.getManufactured();
-        String manufacturedAfterToday = LocalDate.now().plusYears(10).toString();
-        assertThrows(ResponseStatusException.class, () -> {
-            invItem.setDates(manufacturedAfterToday, dates.get(1), dates.get(2), dates.get(3));
-        });
+        var manufacturedAfterToday = LocalDate.now().plusYears(10).toString();
+        var sellBy = dates.get(1);
+        var bestBefore = dates.get(2);
+        var expires = dates.get(3);
+        assertThrows(ResponseStatusException.class, () -> invItem.setDates(manufacturedAfterToday, sellBy, bestBefore, expires));
         InventoryItem inventoryItemRepo = inventoryItemRepository.getInventoryItemByBusinessAndId(testBusiness, invItem.getId());
         assertEquals(inventoryItemRepo.getManufactured(), originalManufactured);
     }
@@ -747,10 +705,11 @@ class InventoryItemTests {
         List<String> dates = generateValidDates();
         InventoryItem invItem = inventoryItemRepository.getInventoryItemByBusinessAndId(testBusiness, testInvItem.getId());
         LocalDate originalSellBy = invItem.getSellBy();
-        String sellByBeforeToday = LocalDate.now().minusDays(1).toString();
-        assertThrows(ResponseStatusException.class, () -> {
-            invItem.setDates(dates.get(0), sellByBeforeToday, dates.get(2), dates.get(3));
-        });
+        var sellByBeforeToday = LocalDate.now().minusDays(1).toString();
+        var manufactured = dates.get(0);
+        var bestBefore = dates.get(2);
+        var expires = dates.get(3);
+        assertThrows(ResponseStatusException.class, () -> invItem.setDates(manufactured, sellByBeforeToday, bestBefore, expires));
         InventoryItem inventoryItemRepo = inventoryItemRepository.getInventoryItemByBusinessAndId(testBusiness, invItem.getId());
         assertEquals(inventoryItemRepo.getSellBy(), originalSellBy);
     }
@@ -760,10 +719,11 @@ class InventoryItemTests {
         List<String> dates = generateValidDates();
         InventoryItem invItem = inventoryItemRepository.getInventoryItemByBusinessAndId(testBusiness, testInvItem.getId());
         LocalDate originalSellBy = invItem.getSellBy();
-        String sellByBeforeToday = LocalDate.now().minusYears(10).toString();
-        assertThrows(ResponseStatusException.class, () -> {
-            invItem.setDates(dates.get(0), sellByBeforeToday, dates.get(2), dates.get(3));
-        });
+        var sellByBeforeToday = LocalDate.now().minusYears(10).toString();
+        var manufactured = dates.get(0);
+        var bestBefore = dates.get(2);
+        var expires = dates.get(3);
+        assertThrows(ResponseStatusException.class, () -> invItem.setDates(manufactured, sellByBeforeToday, bestBefore, expires));
         InventoryItem inventoryItemRepo = inventoryItemRepository.getInventoryItemByBusinessAndId(testBusiness, invItem.getId());
         assertEquals(inventoryItemRepo.getSellBy(), originalSellBy);
     }
@@ -773,10 +733,11 @@ class InventoryItemTests {
         List<String> dates = generateValidDates();
         InventoryItem invItem = inventoryItemRepository.getInventoryItemByBusinessAndId(testBusiness, testInvItem.getId());
         LocalDate originalBestBefore = invItem.getBestBefore();
-        String bestBeforeBeforeToday = LocalDate.now().minusDays(1).toString();
-        assertThrows(ResponseStatusException.class, () -> {
-            invItem.setDates(dates.get(0), dates.get(1), bestBeforeBeforeToday, dates.get(3));
-        });
+        var bestBeforeBeforeToday = LocalDate.now().minusDays(1).toString();
+        var manufactured = dates.get(0);
+        var sellBy = dates.get(1);
+        var expires = dates.get(3);
+        assertThrows(ResponseStatusException.class, () -> invItem.setDates(manufactured, sellBy, bestBeforeBeforeToday, expires));
         InventoryItem inventoryItemRepo = inventoryItemRepository.getInventoryItemByBusinessAndId(testBusiness, invItem.getId());
         assertEquals(inventoryItemRepo.getBestBefore(), originalBestBefore);
     }
@@ -786,10 +747,11 @@ class InventoryItemTests {
         List<String> dates = generateValidDates();
         InventoryItem invItem = inventoryItemRepository.getInventoryItemByBusinessAndId(testBusiness, testInvItem.getId());
         LocalDate originalBestBefore = invItem.getBestBefore();
-        String bestBeforeBeforeToday = LocalDate.now().minusYears(10).toString();
-        assertThrows(ResponseStatusException.class, () -> {
-            invItem.setDates(dates.get(0), dates.get(1), bestBeforeBeforeToday, dates.get(3));
-        });
+        var bestBeforeBeforeToday = LocalDate.now().minusYears(10).toString();
+        var manufactured = dates.get(0);
+        var sellBy = dates.get(1);
+        var expires = dates.get(3);
+        assertThrows(ResponseStatusException.class, () -> invItem.setDates(manufactured, sellBy, bestBeforeBeforeToday, expires));
         InventoryItem inventoryItemRepo = inventoryItemRepository.getInventoryItemByBusinessAndId(testBusiness, invItem.getId());
         assertEquals(inventoryItemRepo.getBestBefore(), originalBestBefore);
     }
@@ -799,9 +761,12 @@ class InventoryItemTests {
         List<String> dates = generateValidDates();
         InventoryItem invItem = inventoryItemRepository.getInventoryItemByBusinessAndId(testBusiness, testInvItem.getId());
         LocalDate originalExpires = invItem.getExpires();
-        String expiresBeforeToday = LocalDate.now().minusDays(1).toString();
+        var expiresBeforeToday = LocalDate.now().minusDays(1).toString();
+        var manufactured = dates.get(0);
+        var sellBy = dates.get(1);
+        var bestBefore = dates.get(2);
         assertThrows(ResponseStatusException.class, () -> {
-            invItem.setDates(dates.get(0), dates.get(1), dates.get(2), expiresBeforeToday);
+            invItem.setDates(manufactured, sellBy, bestBefore, expiresBeforeToday);
         });
         InventoryItem inventoryItemRepo = inventoryItemRepository.getInventoryItemByBusinessAndId(testBusiness, invItem.getId());
         assertEquals(inventoryItemRepo.getExpires(), originalExpires);
@@ -812,10 +777,11 @@ class InventoryItemTests {
         List<String> dates = generateValidDates();
         InventoryItem invItem = inventoryItemRepository.getInventoryItemByBusinessAndId(testBusiness, testInvItem.getId());
         LocalDate originalExpires = invItem.getExpires();
-        String expiresBeforeToday = LocalDate.now().minusYears(10).toString();
-        assertThrows(ResponseStatusException.class, () -> {
-            invItem.setDates(dates.get(0), dates.get(1), dates.get(2), expiresBeforeToday);
-        });
+        var expiresBeforeToday = LocalDate.now().minusYears(10).toString();
+        var manufactured = dates.get(0);
+        var sellBy = dates.get(1);
+        var bestBefore = dates.get(2);
+        assertThrows(ResponseStatusException.class, () -> invItem.setDates(manufactured, sellBy, bestBefore, expiresBeforeToday));
         InventoryItem inventoryItemRepo = inventoryItemRepository.getInventoryItemByBusinessAndId(testBusiness, invItem.getId());
         assertEquals(inventoryItemRepo.getExpires(), originalExpires);
     }
@@ -827,11 +793,11 @@ class InventoryItemTests {
         InventoryItem invItem = inventoryItemRepository.getInventoryItemByBusinessAndId(testBusiness, testInvItem.getId());
         LocalDate originalSellBy = invItem.getSellBy();
         LocalDate originalBestBefore = invItem.getBestBefore();
-        String newSellBy = LocalDate.now().plusDays(12).toString();
-        String newBestBefore = LocalDate.now().plusDays(11).toString();
-        assertThrows(ResponseStatusException.class, () -> {
-            invItem.setDates(dates.get(0), newSellBy, newBestBefore, dates.get(3));
-        });
+        var newSellBy = LocalDate.now().plusDays(12).toString();
+        var newBestBefore = LocalDate.now().plusDays(11).toString();
+        var manufactured = dates.get(0);
+        var expires = dates.get(3);
+        assertThrows(ResponseStatusException.class, () -> invItem.setDates(manufactured, newSellBy, newBestBefore, expires));
         InventoryItem inventoryItemRepo = inventoryItemRepository.getInventoryItemByBusinessAndId(testBusiness, invItem.getId());
         assertEquals(inventoryItemRepo.getSellBy(), originalSellBy);
         assertEquals(inventoryItemRepo.getBestBefore(), originalBestBefore);
@@ -843,10 +809,12 @@ class InventoryItemTests {
         InventoryItem invItem = inventoryItemRepository.getInventoryItemByBusinessAndId(testBusiness, testInvItem.getId());
         LocalDate originalBestBefore = invItem.getBestBefore();
         LocalDate originalExpires = invItem.getExpires();
-        String newBestBefore = LocalDate.now().plusDays(12).toString();
-        String newExpires = LocalDate.now().plusDays(11).toString();
+        var newBestBefore = LocalDate.now().plusDays(12).toString();
+        var newExpires = LocalDate.now().plusDays(11).toString();
+        var manufactured = dates.get(0);
+        var sellBy = dates.get(1);
         assertThrows(ResponseStatusException.class, () -> {
-            invItem.setDates(dates.get(0), dates.get(1), newBestBefore, newExpires);
+            invItem.setDates(manufactured, sellBy, newBestBefore, newExpires);
         });
         InventoryItem inventoryItemRepo = inventoryItemRepository.getInventoryItemByBusinessAndId(testBusiness, invItem.getId());
         assertEquals(inventoryItemRepo.getBestBefore(), originalBestBefore);
@@ -859,11 +827,11 @@ class InventoryItemTests {
         InventoryItem invItem = inventoryItemRepository.getInventoryItemByBusinessAndId(testBusiness, testInvItem.getId());
         LocalDate originalSellBy = invItem.getSellBy();
         LocalDate originalExpires = invItem.getExpires();
-        String newSellBy = LocalDate.now().plusDays(12).toString();
-        String newExpires = LocalDate.now().plusDays(11).toString();
-        assertThrows(ResponseStatusException.class, () -> {
-            invItem.setDates(dates.get(0), newSellBy, dates.get(2), newExpires);
-        });
+        var newSellBy = LocalDate.now().plusDays(12).toString();
+        var newExpires = LocalDate.now().plusDays(11).toString();
+        var manufactured = dates.get(0);
+        var bestBefore = dates.get(2);
+        assertThrows(ResponseStatusException.class, () -> invItem.setDates(manufactured, newSellBy, bestBefore, newExpires));
         InventoryItem inventoryItemRepo = inventoryItemRepository.getInventoryItemByBusinessAndId(testBusiness, invItem.getId());
         assertEquals(inventoryItemRepo.getSellBy(), originalSellBy);
         assertEquals(inventoryItemRepo.getExpires(), originalExpires);

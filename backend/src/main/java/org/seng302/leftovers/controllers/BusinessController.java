@@ -5,7 +5,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.seng302.leftovers.dto.CreateBusinessDTO;
 import org.seng302.leftovers.dto.ModifyBusinessDTO;
-import org.seng302.leftovers.entities.*;
+import org.seng302.leftovers.entities.Business;
+import org.seng302.leftovers.entities.Image;
+import org.seng302.leftovers.entities.Product;
+import org.seng302.leftovers.entities.User;
 import org.seng302.leftovers.persistence.BusinessRepository;
 import org.seng302.leftovers.persistence.ImageRepository;
 import org.seng302.leftovers.persistence.UserRepository;
@@ -25,9 +28,11 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
-import java.util.*;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 @RestController
 public class BusinessController {
@@ -100,21 +105,26 @@ public class BusinessController {
         try {
             Business business = businessRepository.findById(id)
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "Business not found"));
+            business.checkSessionPermissions(request);
+            Long newAdminID = body.getPrimaryAdministratorId();
+            if(!business.getPrimaryOwner().getUserID().equals(newAdminID)) {
+                business.checkSessionPermissionsOwner(request);
 
-            loggedInUserHasPermissions(request, business);
-            if (!AuthenticationTokenManager.sessionCanSeePrivate(request, body.getPrimaryAdministratorId())) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User does not have permission to change the owner to this user");
+                User newOwner = userRepository.findById(newAdminID)  
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Updated primary administrator does not exist"));
+                User previousOwner = userRepository.findById(business.getPrimaryOwner().getUserID())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Previous business owner account does not exist"));
+
+                business.removeAdmin(newOwner);
+                business.setPrimaryOwner(newOwner);    
+                business.addAdmin(previousOwner);      
             }
-            User newOwner = userRepository.findById(body.getPrimaryAdministratorId())
-                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Updated primary administrator does not exist"));
-
-            business.setPrimaryOwner(newOwner);
             business.setName(body.getName());
             business.setDescription(body.getDescription());
             business.setAddress(body.getAddress().createLocation());
             business.setBusinessType(body.getBusinessType());
 
-            if (body.getUpdateProductCountry()) {
+            if (Boolean.TRUE.equals(body.getUpdateProductCountry())) {
                 List<Product> catalogue = business.getCatalogue();
                 String countryToChange = body.getAddress().getCountry();
                 // Iterate through each product in the catalogue and change their country to the specified country
@@ -151,7 +161,7 @@ public class BusinessController {
 
     /**
      * PUT endpoint for making an individual an administrator of a business
-     * Only the business primary owner can do this
+     * The business primary owner and system administrator can do this
      * @param userInfo The info containing the UserId for the User to make an administrator
      * @param businessId The Id of the business
      */
@@ -160,12 +170,18 @@ public class BusinessController {
         try {
             AuthenticationTokenManager.checkAuthenticationToken(req); // Ensure a user is logged in
             Business business = getBusiness(businessId); // Get the business
-            loggedInUserHasPermissions(req, business);
+            business.checkSessionPermissionsOwner(req);
             User user = getUser(userInfo); // Get the user to promote
-
-            business.addAdmin(user);
-            businessRepository.save(business);
-            logger.info(() -> String.format("Added user %d as admin of business %d", user.getUserID(), businessId));
+            LocalDate now = LocalDate.now();
+            LocalDate minDate = now.minusYears(16);
+            
+            if (user.getDob().compareTo(minDate) < 0) {
+                business.addAdmin(user);
+                businessRepository.save(business);
+                logger.info(() -> String.format("Added user %d as admin of business %d", user.getUserID(), businessId));
+            } else {
+                throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "The new business admin should be at least 16 years old");
+            }
         } catch (Exception err) {
             logger.error(err.getMessage());
             throw err;
@@ -174,7 +190,7 @@ public class BusinessController {
 
     /**
      * PUT endpoint for removing the administrator status of a user from a business
-     * Only the business primary owner can do this
+     * The business primary owner and system administrator can do this
      * @param userInfo The info containing the UserId for the User to remove from the list of administrators
      * @param businessId The Id of the business
      */
@@ -183,7 +199,7 @@ public class BusinessController {
         try {
             AuthenticationTokenManager.checkAuthenticationToken(req); // Ensure a user is logged in
             Business business = getBusiness(businessId); // Get the business
-            loggedInUserHasPermissions(req, business);
+            business.checkSessionPermissionsOwner(req);
             User user = getUser(userInfo); // Get the user to demote
 
             business.removeAdmin(user);
@@ -239,33 +255,6 @@ public class BusinessController {
         }
         return business.get();
     }
-
-    /**
-     * Determines if the currently logged in user is the Primary Owner of the given business
-     * @param req The httpRequest
-     * @param business The business to compare
-     * @return User is Primary owner
-     */
-    private boolean loggedInUserIsOwner(HttpServletRequest req, Business business) {
-        HttpSession session = req.getSession();
-        Long userId = (Long) session.getAttribute("accountId");
-        return userId != null && userId.equals(business.getPrimaryOwner().getUserID());
-    }
-
-    /**
-     * Determines if the currently logged in user is Primary Owner OR an application admin
-     * Throws a ResponseStatusException if they are neither Primary Owner OR an application admin
-     * @param req The httpRequest
-     * @param business The business to compare
-     */
-    private void loggedInUserHasPermissions(HttpServletRequest req, Business business) {
-        // check user is owner
-        if (!(loggedInUserIsOwner(req, business) || AuthenticationTokenManager.sessionCanSeePrivate(req, null))) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-                    "You do not have permission to perform this action");
-        }
-    }
-
 
     /**
      * Searches for businesses matching a search query and/or business type. Results are paginated

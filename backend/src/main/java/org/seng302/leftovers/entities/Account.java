@@ -1,8 +1,6 @@
 /* Parent class for all kinds of accounts */
 package org.seng302.leftovers.entities;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import org.seng302.leftovers.exceptions.EmailInUseException;
 import org.seng302.leftovers.persistence.UserRepository;
 import org.seng302.leftovers.tools.PasswordAuthenticator;

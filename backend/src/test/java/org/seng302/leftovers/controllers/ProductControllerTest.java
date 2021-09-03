@@ -1,6 +1,5 @@
 package org.seng302.leftovers.controllers;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
@@ -12,15 +11,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.runner.RunWith;
 import org.mockito.MockedConstruction;
-import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.seng302.leftovers.entities.*;
-import org.seng302.leftovers.exceptions.AccessTokenException;
 import org.seng302.leftovers.persistence.BusinessRepository;
 import org.seng302.leftovers.persistence.ImageRepository;
 import org.seng302.leftovers.persistence.ProductRepository;
 import org.seng302.leftovers.persistence.UserRepository;
-import org.seng302.leftovers.tools.AuthenticationTokenManager;
 import org.seng302.leftovers.tools.SearchHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -39,11 +35,7 @@ import java.lang.reflect.Field;
 import java.text.ParseException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -154,7 +146,7 @@ class ProductControllerTest {
                 .withPassword("1337-H%nt3r2")
                 .withBio("Likes long walks on the beach")
                 .withDob("2000-03-11")
-                .withPhoneNumber("6435550129")
+                .withPhoneNumber("64 3555012")
                 .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
                         "Canterbury,8041"))
                 .build();
@@ -171,7 +163,7 @@ class ProductControllerTest {
                 .withPassword("1337-H548*nt3r2")
                 .withBio("Likes long walks on the beach sometimes")
                 .withDob("2008-03-11")
-                .withPhoneNumber("6455650129")
+                .withPhoneNumber("64 55650129")
                 .withAddress(Location.covertAddressStringToLocation("5,Rountree Street,Ashburton,Christchurch,New Zealand," +
                         "Canterbury,8041"))
                 .build();
@@ -187,7 +179,7 @@ class ProductControllerTest {
                 .withPassword("hunter2")
                 .withBio("Likes long walks on the beach always")
                 .withDob("2000-03-11")
-                .withPhoneNumber("6455650125")
+                .withPhoneNumber("64 55650125")
                 .withAddress(Location.covertAddressStringToLocation("5,Rountree Street,Ashburton,Christchurch,New Zealand," +
                         "Canterbury,8041"))
                 .build();
@@ -634,7 +626,6 @@ class ProductControllerTest {
         )) {
             setCurrentUser(ownerUser.getUserID());
             var productInfo = generateProductCreationInfo();
-            System.out.println(String.format("/businesses/%d/products", testBusiness1.getId()));
             assertDoesNotThrow(() -> mockMvc.perform(post(String.format("/businesses/%d/products", testBusiness1.getId()))
                     .content(productInfo.toString())
                     .sessionAttrs(sessionAuthToken)
@@ -735,8 +726,6 @@ class ProductControllerTest {
         JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
         JSONObject response = (JSONObject) parser.parse(result.getResponse().getContentAsString());
         JSONArray results = (JSONArray) response.get("results");
-
-        System.out.println(results.toString());
 
         JSONObject firstProduct = (JSONObject) results.get(0);
         JSONObject lastProduct = (JSONObject) results.get(3);
@@ -1224,12 +1213,6 @@ class ProductControllerTest {
     void makeImagePrimary_isBusinessAdminForWrongCatalogue_403Response() throws Exception{
         setCurrentUser(bystanderUser.getUserID());
         addSeveralProductsToACatalogue();
-
-//        var foo = productRepository.getAllByBusiness(testBusiness1, templateRequest);
-//        System.out.println(foo);
-
-        var bar = productRepository.findAllByBusiness(testBusiness1);
-        System.out.println(bar);
 
         Product product = productRepository.getAllByBusiness(testBusiness1, templateRequest).getContent().get(0); // get product 1
         product = addImagesToProduct(product);

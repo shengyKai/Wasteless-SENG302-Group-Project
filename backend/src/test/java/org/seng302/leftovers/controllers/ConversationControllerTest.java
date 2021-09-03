@@ -10,10 +10,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mockito.*;
-import org.mockito.Mock;
-import org.mockito.MockedStatic;
-import org.mockito.Mockito;
-import org.mockito.stubbing.Answer;
 import org.seng302.leftovers.entities.*;
 import org.seng302.leftovers.persistence.ConversationRepository;
 import org.seng302.leftovers.persistence.MarketplaceCardRepository;
@@ -33,12 +29,10 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.server.ResponseStatusException;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -48,7 +42,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @AutoConfigureMockMvc
-public class ConversationControllerTest {
+class ConversationControllerTest {
     @Autowired
     private MockMvc mockMvc;
     @Mock
@@ -81,8 +75,6 @@ public class ConversationControllerTest {
     private Message existingMessage3;
 
     private MockedStatic<AuthenticationTokenManager> authenticationTokenManager;
-
-    private ConversationController conversationController;
 
     private User buyer; // ID = 1
     private User owner; // ID = 2
@@ -157,7 +149,7 @@ public class ConversationControllerTest {
         messagePage = new PageImpl<>(List.of(existingMessage1), Pageable.unpaged(), 1L);
         Mockito.when(messageRepository.findAllByConversation(any(), any())).thenReturn(messagePage);
 
-        conversationController = new ConversationController(marketplaceCardRepository, conversationRepository, userRepository,
+        ConversationController conversationController = new ConversationController(marketplaceCardRepository, conversationRepository, userRepository,
                 messageRepository, messageService);
         mockMvc = MockMvcBuilders.standaloneSetup(conversationController).build();
     }
@@ -383,19 +375,6 @@ public class ConversationControllerTest {
     void fetchMessagesInConversation_loggedInAsCardResponder_canFetchMessages() {
         authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), eq(1L))).thenReturn(true);
         authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), eq(2L))).thenReturn(false);
-
-        mockMvc.perform(get("/cards/1/conversations/1"))
-                .andExpect(status().isOk());
-
-        Mockito.verify(messageRepository, times(1))
-                .findAllByConversation(any(), any());
-    }
-
-    @Test
-    @SneakyThrows
-    void fetchMessagesInConversation_loggedInAsAdmin_canFetchMessages() {
-        authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), eq(1L))).thenReturn(true);
-        authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), eq(2L))).thenReturn(true);
 
         mockMvc.perform(get("/cards/1/conversations/1"))
                 .andExpect(status().isOk());

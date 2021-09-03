@@ -3,11 +3,11 @@ package org.seng302.leftovers.controllers;
 import net.minidev.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.seng302.leftovers.entities.GlobalMessageEvent;
 import org.seng302.leftovers.dto.WrappedValueDTO;
-import org.seng302.leftovers.entities.Event;
-import org.seng302.leftovers.dto.Tag;
+import org.seng302.leftovers.dto.event.EventTag;
 import org.seng302.leftovers.entities.User;
+import org.seng302.leftovers.entities.event.Event;
+import org.seng302.leftovers.entities.event.GlobalMessageEvent;
 import org.seng302.leftovers.persistence.EventRepository;
 import org.seng302.leftovers.persistence.UserRepository;
 import org.seng302.leftovers.service.EventService;
@@ -49,7 +49,7 @@ public class EventController {
      * @param body The request body
      */
     @PutMapping("/feed/{eventId}/tag")
-    public void setEventTag(@PathVariable long eventId, @Valid @RequestBody WrappedValueDTO<Tag> body, HttpServletRequest request) {
+    public void setEventTag(@PathVariable long eventId, @Valid @RequestBody WrappedValueDTO<EventTag> body, HttpServletRequest request) {
         LOGGER.info("Requested update of event tag (eventId={}, tag={})", eventId, body.getValue());
 
         AuthenticationTokenManager.checkAuthenticationToken(request);

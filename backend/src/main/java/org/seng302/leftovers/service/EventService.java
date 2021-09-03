@@ -1,10 +1,8 @@
 package org.seng302.leftovers.service;
 
-import org.seng302.leftovers.entities.Event;
 import org.seng302.leftovers.entities.User;
+import org.seng302.leftovers.entities.event.Event;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
-
-import java.util.Set;
 
 /**
  * Service for linking event creation/updating and sending the events to users

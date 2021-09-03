@@ -4,6 +4,8 @@ import net.minidev.json.JSONObject;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -19,24 +21,20 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @AutoConfigureMockMvc
-public class InventoryControllerModifyInvEntriesTest {
+class InventoryControllerModifyInvEntriesTest {
     @Autowired
     private MockMvc mockMvc;
 
@@ -205,7 +203,6 @@ public class InventoryControllerModifyInvEntriesTest {
     @Test
     void modifyInvEntries_modifyId_modifiedInvEntry200() throws Exception {
         JSONObject invBody = generateInvJSONBody();
-        invBody.remove("productId");
         invBody.put("productId", "NATHANAPPLE95");
 
         mockMvc.perform(MockMvcRequestBuilders
@@ -220,9 +217,8 @@ public class InventoryControllerModifyInvEntriesTest {
         int[] productIds = {-1, -2, 0};
         JSONObject invBody = generateInvJSONBody();
 
-        for (int i=0; i < productIds.length; i++) {
-            invBody.remove("productId");
-            invBody.put("productId", productIds[i]);
+        for (int productId : productIds) {
+            invBody.put("productId", productId);
 
             mockMvc.perform(MockMvcRequestBuilders
                     .put("/businesses/1/inventory/1")
@@ -233,25 +229,11 @@ public class InventoryControllerModifyInvEntriesTest {
     }
 
     @Test
-    void modifyInvEntries_modifyIdNull_cannotModify400() throws Exception {
-        JSONObject invBody = generateInvJSONBody();
-        invBody.remove("productId");
-        invBody.put("productId", null);
-
-        mockMvc.perform(MockMvcRequestBuilders
-                .put("/businesses/1/inventory/1")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(invBody.toString()))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
     void modifyInvEntries_modifyQuantity_modifiedInvEntry200() throws Exception {
         JSONObject invBody = generateInvJSONBody();
 
         //tests a wide range of integers
         for (int quantity=1; quantity < 100; quantity++) {
-            invBody.remove("quantity");
             invBody.put("quantity", quantity);
 
             mockMvc.perform(MockMvcRequestBuilders
@@ -268,7 +250,6 @@ public class InventoryControllerModifyInvEntriesTest {
         JSONObject invBody = generateInvJSONBody();
 
         for (int i=0; i < quantities.length; i++) {
-            invBody.remove("quantity");
             invBody.put("quantity", quantities[i]);
 
             mockMvc.perform(MockMvcRequestBuilders
@@ -280,26 +261,12 @@ public class InventoryControllerModifyInvEntriesTest {
     }
 
     @Test
-    void modifyInvEntries_modifyQuantityNull_cannotModify400() throws Exception {
-        JSONObject invBody = generateInvJSONBody();
-        invBody.remove("quantity");
-        invBody.put("quantity", null);
-
-        mockMvc.perform(MockMvcRequestBuilders
-                .put("/businesses/1/inventory/1")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(invBody.toString()))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
     void modifyInvEntries_modifyPricePerItem_modifiedInvEntry200() throws Exception {
         JSONObject invBody = generateInvJSONBody();
 
         //tests a wide range of floats
         for (int price=1; price < 99; price++) {
             float pricePerItem = price + (((float)price) / 100);
-            invBody.remove("pricePerItem");
             invBody.put("pricePerItem", pricePerItem);
 
             mockMvc.perform(MockMvcRequestBuilders
@@ -315,9 +282,8 @@ public class InventoryControllerModifyInvEntriesTest {
         String[] prices = {"-1.01", "-0.01", "-2000", "-1000.99", "#", "$", "a", "b", "Z" };
         JSONObject invBody = generateInvJSONBody();
 
-        for (int i=0; i < prices.length; i++) {
-            invBody.remove("pricePerItem");
-            invBody.put("pricePerItem", prices[i]);
+        for (String price : prices) {
+            invBody.put("pricePerItem", price);
 
             mockMvc.perform(MockMvcRequestBuilders
                     .put("/businesses/1/inventory/1")
@@ -327,17 +293,30 @@ public class InventoryControllerModifyInvEntriesTest {
         }
     }
 
-    @Test
-    void modifyInvEntries_modifyPricePerItemNull_modifiedEntry200() throws Exception {
+    @ParameterizedTest
+    @ValueSource(strings = {"pricePerItem", "totalPrice", "manufactured", "sellBy", "bestBefore"})
+    void modifyInvEntries_modifyOptionalFieldNull_modifiedEntry200(String field) throws Exception {
         JSONObject invBody = generateInvJSONBody();
-        invBody.remove("pricePerItem");
-        invBody.put("pricePerItem", null);
+        invBody.remove(field);
 
         mockMvc.perform(MockMvcRequestBuilders
                 .put("/businesses/1/inventory/1")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(invBody.toString()))
                 .andExpect(status().isOk());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"productId", "quantity", "expires"})
+    void modifyInvEntries_requiredFieldNull_cannotModify400(String field) throws Exception {
+        JSONObject invBody = generateInvJSONBody();
+        invBody.remove(field);
+
+        mockMvc.perform(MockMvcRequestBuilders
+                .put("/businesses/1/inventory/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(invBody.toString()))
+                .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -347,7 +326,6 @@ public class InventoryControllerModifyInvEntriesTest {
         //tests a wide range of floats
         for (int price=1; price < 99; price++) {
             float totalPrice = price + (((float)price) / 100);
-            invBody.remove("totalPrice");
             invBody.put("totalPrice", totalPrice);
 
             mockMvc.perform(MockMvcRequestBuilders
@@ -363,9 +341,8 @@ public class InventoryControllerModifyInvEntriesTest {
         String[] prices = {"-21.01", "-0.01", "-9000", "-3000.99", "#", "$", "a", "b", "Z" };
         JSONObject invBody = generateInvJSONBody();
 
-        for (int i=0; i < prices.length; i++) {
-            invBody.remove("totalPrice");
-            invBody.put("totalPrice", prices[i]);
+        for (String price : prices) {
+            invBody.put("totalPrice", price);
 
             mockMvc.perform(MockMvcRequestBuilders
                     .put("/businesses/1/inventory/1")
@@ -376,22 +353,8 @@ public class InventoryControllerModifyInvEntriesTest {
     }
 
     @Test
-    void modifyInvEntries_modifyTotalPriceNull_cannotModify400() throws Exception {
-        JSONObject invBody = generateInvJSONBody();
-        invBody.remove("totalPrice");
-        invBody.put("totalPrice", null);
-
-        mockMvc.perform(MockMvcRequestBuilders
-                .put("/businesses/1/inventory/1")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(invBody.toString()))
-                .andExpect(status().isOk());
-    }
-
-    @Test
     void modifyInvEntries_modifyManufacturedDate_modifiedEntry200() throws Exception {
         JSONObject invBody = generateInvJSONBody();
-        invBody.remove("manufactured");
         invBody.put("manufactured", LocalDate.now().minusYears(1).toString());
 
         mockMvc.perform(MockMvcRequestBuilders
@@ -406,9 +369,8 @@ public class InventoryControllerModifyInvEntriesTest {
         String[] manufacturedDates = {"10-10", "10/10/1999", "999999", "#", "$", "a", "b", "Z" };
         JSONObject invBody = generateInvJSONBody();
 
-        for (int i=0; i < manufacturedDates.length; i++) {
-            invBody.remove("manufactured");
-            invBody.put("manufactured", manufacturedDates[i]);
+        for (String manufacturedDate : manufacturedDates) {
+            invBody.put("manufactured", manufacturedDate);
 
             mockMvc.perform(MockMvcRequestBuilders
                     .put("/businesses/1/inventory/1")
@@ -419,22 +381,8 @@ public class InventoryControllerModifyInvEntriesTest {
     }
 
     @Test
-    void modifyInvEntries_modifyManufacturedDateNull_modifiedEntry200() throws Exception {
-        JSONObject invBody = generateInvJSONBody();
-        invBody.remove("manufactured");
-        invBody.put("manufactured", null);
-
-        mockMvc.perform(MockMvcRequestBuilders
-                .put("/businesses/1/inventory/1")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(invBody.toString()))
-                .andExpect(status().isOk());
-    }
-
-    @Test
     void modifyInvEntries_modifyManufacturedDateAfterToday_cannotModify400() throws Exception {
         JSONObject invBody = generateInvJSONBody();
-        invBody.remove("manufactured");
         invBody.put("manufactured", LocalDate.now().plusYears(100).toString());
 
         mockMvc.perform(MockMvcRequestBuilders
@@ -447,7 +395,6 @@ public class InventoryControllerModifyInvEntriesTest {
     @Test
     void modifyInvEntries_modifySelByDate_modifiedEntry200() throws Exception {
         JSONObject invBody = generateInvJSONBody();
-        invBody.remove("sellBy");
         invBody.put("sellBy", LocalDate.now().plusYears(100).toString());
 
         mockMvc.perform(MockMvcRequestBuilders
@@ -462,9 +409,8 @@ public class InventoryControllerModifyInvEntriesTest {
         String[] sellByDates = {"10-10", "10/10/1999", "999999", "#", "$", "a", "b", "Z" };
         JSONObject invBody = generateInvJSONBody();
 
-        for (int i=0; i < sellByDates.length; i++) {
-            invBody.remove("sellBy");
-            invBody.put("sellBy", sellByDates[i]);
+        for (String sellByDate : sellByDates) {
+            invBody.put("sellBy", sellByDate);
 
             mockMvc.perform(MockMvcRequestBuilders
                     .put("/businesses/1/inventory/1")
@@ -475,22 +421,8 @@ public class InventoryControllerModifyInvEntriesTest {
     }
 
     @Test
-    void modifyInvEntries_modifySellByDateNull_modifiedEntry200() throws Exception {
-        JSONObject invBody = generateInvJSONBody();
-        invBody.remove("sellBy");
-        invBody.put("sellBy", null);
-
-        mockMvc.perform(MockMvcRequestBuilders
-                .put("/businesses/1/inventory/1")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(invBody.toString()))
-                .andExpect(status().isOk());
-    }
-
-    @Test
     void modifyInvEntries_modifySellByDateBeforeToday_cannotModify400() throws Exception {
         JSONObject invBody = generateInvJSONBody();
-        invBody.remove("sellBy");
         invBody.put("sellBy", LocalDate.now().minusYears(100).toString());
 
         mockMvc.perform(MockMvcRequestBuilders
@@ -503,7 +435,6 @@ public class InventoryControllerModifyInvEntriesTest {
     @Test
     void modifyInvEntries_modifyBestBeforeDate_modifiedEntry200() throws Exception {
         JSONObject invBody = generateInvJSONBody();
-        invBody.remove("bestBefore");
         invBody.put("bestBefore", LocalDate.now().plusYears(100).toString());
 
         mockMvc.perform(MockMvcRequestBuilders
@@ -518,9 +449,8 @@ public class InventoryControllerModifyInvEntriesTest {
         String[] bestBeforeDates = {"10-10", "10/10/1999", "999999", "#", "$", "a", "b", "Z" };
         JSONObject invBody = generateInvJSONBody();
 
-        for (int i=0; i < bestBeforeDates.length; i++) {
-            invBody.remove("bestBefore");
-            invBody.put("bestBefore", bestBeforeDates[i]);
+        for (String bestBeforeDate : bestBeforeDates) {
+            invBody.put("bestBefore", bestBeforeDate);
 
             mockMvc.perform(MockMvcRequestBuilders
                     .put("/businesses/1/inventory/1")
@@ -531,22 +461,8 @@ public class InventoryControllerModifyInvEntriesTest {
     }
 
     @Test
-    void modifyInvEntries_modifyBestBeforeDateNull_modifiedEntry200() throws Exception {
-        JSONObject invBody = generateInvJSONBody();
-        invBody.remove("bestBefore");
-        invBody.put("bestBefore", null);
-
-        mockMvc.perform(MockMvcRequestBuilders
-                .put("/businesses/1/inventory/1")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(invBody.toString()))
-                .andExpect(status().isOk());
-    }
-
-    @Test
     void modifyInvEntries_modifyBestBeforeDateBeforeToday_cannotModify400() throws Exception {
         JSONObject invBody = generateInvJSONBody();
-        invBody.remove("bestBefore");
         invBody.put("bestBefore", LocalDate.now().minusYears(1).toString());
 
         mockMvc.perform(MockMvcRequestBuilders
@@ -559,7 +475,6 @@ public class InventoryControllerModifyInvEntriesTest {
     @Test
     void modifyInvEntries_modifyExpiresDate_modifiedEntry200() throws Exception {
         JSONObject invBody = generateInvJSONBody();
-        invBody.remove("expires");
         invBody.put("expires", LocalDate.now().plusYears(400).toString());
 
         mockMvc.perform(MockMvcRequestBuilders
@@ -574,9 +489,8 @@ public class InventoryControllerModifyInvEntriesTest {
         String[] expiresDates = {"10-10", "10/10/1999", "999999", "#", "$", "a", "b", "Z" };
         JSONObject invBody = generateInvJSONBody();
 
-        for (int i=0; i < expiresDates.length; i++) {
-            invBody.remove("expires");
-            invBody.put("expires", expiresDates[i]);
+        for (String expiresDate : expiresDates) {
+            invBody.put("expires", expiresDate);
 
             mockMvc.perform(MockMvcRequestBuilders
                     .put("/businesses/1/inventory/1")
@@ -587,22 +501,8 @@ public class InventoryControllerModifyInvEntriesTest {
     }
 
     @Test
-    void modifyInvEntries_modifyExpiresDateNull_cannotModify400() throws Exception {
-        JSONObject invBody = generateInvJSONBody();
-        invBody.remove("expires");
-        invBody.put("expires", null);
-
-        mockMvc.perform(MockMvcRequestBuilders
-                .put("/businesses/1/inventory/1")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(invBody.toString()))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
     void modifyInvEntries_modifyExpiresDateBeforeToday_cannotModify400() throws Exception {
         JSONObject invBody = generateInvJSONBody();
-        invBody.remove("expires");
         invBody.put("expires", LocalDate.now().minusYears(1).toString());
 
         mockMvc.perform(MockMvcRequestBuilders
@@ -615,8 +515,6 @@ public class InventoryControllerModifyInvEntriesTest {
     @Test
     void modifyInvEntries_modifyManufacturedBeforeSellBy_ModifiedEntry200() throws Exception {
         JSONObject invBody = generateInvJSONBody();
-        invBody.remove("manufactured");
-        invBody.remove("sellBy");
         invBody.put("manufactured", LocalDate.now().minusYears(1).toString());
         invBody.put("sellBy", LocalDate.now().plusYears(100).toString());
 
@@ -630,8 +528,6 @@ public class InventoryControllerModifyInvEntriesTest {
     @Test
     void modifyInvEntries_modifyManufacturedAfterSellBy_cannotModify400() throws Exception {
         JSONObject invBody = generateInvJSONBody();
-        invBody.remove("manufactured");
-        invBody.remove("sellBy");
         invBody.put("manufactured", LocalDate.now().plusYears(100).toString());
         invBody.put("sellBy", LocalDate.now().minusYears(100).toString());
 
@@ -645,8 +541,6 @@ public class InventoryControllerModifyInvEntriesTest {
     @Test
     void modifyInvEntries_modifyManufacturedBeforeBestBefore_modifiedEntry200() throws Exception {
         JSONObject invBody = generateInvJSONBody();
-        invBody.remove("manufactured");
-        invBody.remove("bestBefore");
         invBody.put("manufactured", LocalDate.now().minusYears(100).toString());
         invBody.put("bestBefore", LocalDate.now().plusYears(100).toString());
 
@@ -660,8 +554,6 @@ public class InventoryControllerModifyInvEntriesTest {
     @Test
     void modifyInvEntries_modifyManufacturedAfterBestBefore_cannotModify400() throws Exception {
         JSONObject invBody = generateInvJSONBody();
-        invBody.remove("manufactured");
-        invBody.remove("bestBefore");
         invBody.put("manufactured", LocalDate.now().plusYears(100).toString());
         invBody.put("bestBefore", LocalDate.now().minusYears(100).toString());
 
@@ -675,8 +567,6 @@ public class InventoryControllerModifyInvEntriesTest {
     @Test
     void modifyInvEntries_modifyManufacturedBeforeExpires_modifiedEntry200() throws Exception {
         JSONObject invBody = generateInvJSONBody();
-        invBody.remove("manufactured");
-        invBody.remove("expires");
         invBody.put("manufactured", LocalDate.now().minusYears(900).toString());
         invBody.put("expires", LocalDate.now().plusYears(400).toString());
 
@@ -690,8 +580,6 @@ public class InventoryControllerModifyInvEntriesTest {
     @Test
     void modifyInvEntries_modifyManufacturedAfterExpires_cannotModify400() throws Exception {
         JSONObject invBody = generateInvJSONBody();
-        invBody.remove("manufactured");
-        invBody.remove("expires");
         invBody.put("manufactured", LocalDate.now().plusYears(100).toString());
         invBody.put("expires", LocalDate.now().minusYears(300).toString());
 
@@ -705,8 +593,6 @@ public class InventoryControllerModifyInvEntriesTest {
     @Test
     void modifyInvEntries_modifySellByBeforeBestBefore_modifiedEntry200() throws Exception {
         JSONObject invBody = generateInvJSONBody();
-        invBody.remove("sellBy");
-        invBody.remove("bestBefore");
         invBody.put("sellBy", LocalDate.now().plusYears(100).toString());
         invBody.put("bestBefore", LocalDate.now().plusYears(200).toString());
 
@@ -719,9 +605,7 @@ public class InventoryControllerModifyInvEntriesTest {
 
     @Test
     void modifyInvEntries_modifySellByAfterBestBefore_cannotModify400() throws Exception {
-        JSONObject invBody = new JSONObject();
-        invBody.remove("sellBy");
-        invBody.remove("bestBefore");
+        JSONObject invBody = generateInvJSONBody();
         invBody.put("sellBy", LocalDate.now().plusYears(200).toString());
         invBody.put("bestBefore", LocalDate.now().plusYears(100).toString());
 
@@ -735,8 +619,6 @@ public class InventoryControllerModifyInvEntriesTest {
     @Test
     void modifyInvEntries_modifySellByBeforeExpires_modifiedEntry200() throws Exception {
         JSONObject invBody = generateInvJSONBody();
-        invBody.remove("sellBy");
-        invBody.remove("expires");
         invBody.put("sellBy", LocalDate.now().plusYears(200).toString());
         invBody.put("expires", LocalDate.now().plusYears(300).toString());
 
@@ -750,8 +632,6 @@ public class InventoryControllerModifyInvEntriesTest {
     @Test
     void modifyInvEntries_modifySellByAfterExpires_cannotModify400() throws Exception {
         JSONObject invBody = generateInvJSONBody();
-        invBody.remove("sellBy");
-        invBody.remove("expires");
         invBody.put("sellBy", LocalDate.now().plusYears(200).toString());
         invBody.put("expires", LocalDate.now().plusYears(100).toString());
 
@@ -765,8 +645,6 @@ public class InventoryControllerModifyInvEntriesTest {
     @Test
     void modifyInvEntries_modifyBestBeforeBeforeExpires_modifiedEntry200() throws Exception {
         JSONObject invBody = generateInvJSONBody();
-        invBody.remove("bestBefore");
-        invBody.remove("expires");
         invBody.put("bestBefore", LocalDate.now().plusYears(100).toString());
         invBody.put("expires", LocalDate.now().plusYears(200).toString());
 
@@ -780,8 +658,6 @@ public class InventoryControllerModifyInvEntriesTest {
     @Test
     void modifyInvEntries_modifyBestBeforeAfterExpires_cannotModify400() throws Exception {
         JSONObject invBody = generateInvJSONBody();
-        invBody.remove("bestBefore");
-        invBody.remove("expires");
         invBody.put("bestBefore", LocalDate.now().plusYears(200).toString());
         invBody.put("expires", LocalDate.now().plusYears(100).toString());
 

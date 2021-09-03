@@ -9,18 +9,16 @@
       <v-card v-if="businessImages && businessImages.length > 0">
         <ImageCarousel
           :imagesList="businessImages"
-          :showControls="permissionToActAsBusiness"
-          @change-primary-image="makeImagePrimary"
+          :showMakePrimary="permissionToActAsBusiness"
+          :showDelete="false"
+          @change-primary-image="false"
           ref="businessImageCarousel"
         />
       </v-card>
       <v-card class="body">
         <div class="d-flex flex-column" no-gutters>
           <v-row>
-            <v-col cols="11">
-              <span><h1>{{ business.name }}</h1></span>
-            </v-col>
-            <!-- <v-col cols="4" >
+            <v-col cols="12">
               <v-alert
                 class="ma-2 flex-grow-0"
                 v-if="errorMessage !== undefined"
@@ -30,7 +28,12 @@
               >
                 {{ errorMessage }}
               </v-alert>
-            </v-col> -->
+            </v-col>
+          </v-row>
+          <v-row>
+            <v-col cols="11">
+              <span><h1>{{ business.name }}</h1></span>
+            </v-col>
             <v-col class="text-right" v-if='!modifyBusiness && permissionToActAsBusiness'>
               <v-tooltip bottom>
                 <template #activator="{ on, attrs }">
@@ -49,7 +52,7 @@
               </v-tooltip>
             </v-col>
           </v-row>
-          <p><b>Created:</b> {{ createdMsg }}</p>
+          <p><strong>Created:</strong> {{ createdMsg }}</p>
           <v-btn outlined color="primary" @click="goSalePage" :value="false" width="150">
             Sale listings
           </v-btn>
@@ -92,8 +95,8 @@
 
 <script>
 import ModifyBusiness from '@/components/BusinessProfile/ModifyBusiness';
-import {getBusiness, makeBusinessImagePrimary} from '../../api/internal';
-import convertAddressToReadableText from '@/components/utils/Methods/convertJsonAddressToReadableText';
+import {getBusiness} from '../../api/internal';
+import convertAddressToReadableText from '@/components/utils/Methods/convertAddressToReadableText';
 import {
   alphabetExtendedMultilineRules,
   alphabetExtendedSingleLineRules, alphabetRules,
@@ -205,10 +208,6 @@ export default {
     async returnToSearch() {
       await this.$router.push({path: '/search/business', query:{...this.$route.query}});
     },
-    showAlert() {
-      alert("I am the admin");
-    },
-
     /**
      * Returns the appropriate color of the admin for their chip
      */
@@ -224,18 +223,6 @@ export default {
      */
     changeUpdateCountries() {
       this.updateProductCountry = !this.updateProductCountry;
-    },
-    /**
-     * Sets the given image as primary image to be displayed
-     * @param imageId ID of the Image to set
-     */
-    async makeImagePrimary(imageId) {
-      this.errorMessage = undefined;
-      const result = await makeBusinessImagePrimary(this.business.id, imageId);
-      if (typeof result === 'string') {
-        this.errorMessage = result;
-        this.$refs.businessImageCarousel.forceClose();
-      }
     },
     /**
      * Updates the business profile page to show the updated details of the business.

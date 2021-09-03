@@ -256,6 +256,21 @@ public class Business {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User does not have sufficient permissions to perform this action");
         }
     }
+    /**
+     * Check the account associated with the current session is either the primaryOener of the business
+     * Or a system administrator
+     * If the account does not have permission, 403 will be thrown
+     * @param request 
+     */
+    public void checkSessionPermissionsOwner(HttpServletRequest request) {
+        AuthenticationTokenManager.checkAuthenticationToken(request);
+        HttpSession session = request.getSession(false);
+        Long userId = (Long) session.getAttribute("accountId");
+
+        if (!AuthenticationTokenManager.sessionIsAdmin(request) && !this.getPrimaryOwner().getUserID().equals(userId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only Primary Owner and System administrator can perform this action");
+        }
+    }
 
     /**
      * This method retrieves all Users who are owners or admins of this business.
@@ -286,7 +301,7 @@ public class Business {
     /**
      * Removes the given product from the business's catalogue
      */
-    public void removeFromCatalogue(Product product) throws ResponseStatusException {
+    public void removeFromCatalogue(Product product) {
         if(!catalogue.remove(product)) {
             throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE,"The product did not match any within the business's catalogue");
         }

@@ -32,7 +32,7 @@ describe('ImageCarousel.vue', () => {
       template: `
         <div data-app>
         <ImageCarousel :imagesList="[{id: 7, filename:'test_filename'}, {id: 11, filename: 'test_filename2'}]"
-                              :showControls="showControls"/>
+                              :showMakePrimary="showMakePrimary" :showDelete="showDelete"/>
         </div>`,
     });
 
@@ -45,9 +45,10 @@ describe('ImageCarousel.vue', () => {
       localVue,
       vuetify,
       attachTo: elem,
-      props: ['showControls'],
+      props: ['showMakePrimary', 'showDelete'],
       propsData: {
-        showControls: true,
+        showDelete: true,
+        showMakePrimary: true,
       }
     });
 
@@ -91,21 +92,21 @@ describe('ImageCarousel.vue', () => {
     expect(wrapper.emitted()['change-primary-image']).toEqual([[11]]);
   });
 
-  it('Expect delete image control not to exist if "showControls" is false', async () => {
+  it('Expect delete image control not to exist if "showDelete" is false', async () => {
     await appWrapper.setProps({
-      showControls: false,
+      showDelete: false,
     });
     const button = wrapper.findAllComponents({ref: 'deleteImageButton'});
     expect(button.length).toBe(0);
   });
 
-  it('Expect make primary image control not to exist if "showControls" is false', async () => {
+  it('Expect make primary image control not to exist if "showMakePrimary" is false', async () => {
     await wrapper.setData({
       carouselItem: 1,
     });
     await Vue.nextTick();
     await appWrapper.setProps({
-      showControls: false,
+      showMakePrimary: false,
     });
     const button = wrapper.findAllComponents({ref: 'makePrimaryImageButton'});
     expect(button.length).toBe(0);

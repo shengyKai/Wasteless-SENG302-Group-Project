@@ -1,15 +1,20 @@
 package org.seng302.datagenerator;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.sql.*;
 import java.time.LocalDate;
-import java.util.*;
-import java.util.concurrent.TimeUnit;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
-import static org.seng302.datagenerator.Main.*;
+import static org.seng302.datagenerator.Main.randomDate;
 
 public class InventoryItemGenerator {
     private Random random = new Random();
     private Connection conn;
+    private final Logger logger = LogManager.getLogger(InventoryItemGenerator.class.getName());
 
     public InventoryItemGenerator(Connection conn) { this.conn = conn; }
 
@@ -76,47 +81,28 @@ public class InventoryItemGenerator {
 
         float pricePerItem = generatePricePerItem();
 
-        PreparedStatement stmt = conn.prepareStatement(
+        try (PreparedStatement stmt = conn.prepareStatement(
             "INSERT INTO inventory_item(best_before, creation_date, expires, manufactured, price_per_item, quantity, " +
                     "remaining_quantity, sell_by, total_price, version, product_id)"
                 + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 Statement.RETURN_GENERATED_KEYS
-        );
-        stmt.setObject(1, bestBefore); //best before date
-        stmt.setObject(2, creationDate); //creation date
-        stmt.setObject(3, expires); //expiration date
-        stmt.setObject(4, manufactured); //manufactured date
-        stmt.setObject(5, pricePerItem); //price per item
-        stmt.setObject(6, quantity); //quantity
-        stmt.setObject(7, remainingQuantity); //remaining quantity
-        stmt.setObject(8, sellBy); //sell by date
-        stmt.setObject(9, remainingQuantity * pricePerItem); //total price
-        stmt.setObject(10, generateVersion()); //version of product
-        stmt.setObject(11, productId); //product id
-        stmt.executeUpdate();
-        ResultSet keys = stmt.getGeneratedKeys();
-        keys.next();
-        return keys.getLong(1);
-    }
-
-    public static void main(String[] args) throws SQLException, InterruptedException {
-        Connection conn = connectToDatabase();
-        var userGenerator = new UserGenerator(conn);
-        var businessGenerator = new BusinessGenerator(conn);
-        var productGenerator = new ProductGenerator(conn);
-        var invItemGenerator = new InventoryItemGenerator(conn);
-
-        int userCount = getNumObjectsFromInput("users");
-        List<Long> userIds = userGenerator.generateUsers(userCount);
-
-        int businessCount = getNumObjectsFromInput("businesses");
-        List<Long> businessIds = businessGenerator.generateBusinesses(userIds, businessCount);
-
-        int productCount = getNumObjectsFromInput("products");
-        List<Long> productIds = productGenerator.generateProducts(businessIds, productCount);
-
-        int invItemCount = getNumObjectsFromInput("inventory items");
-        List<Long> invItemIds = invItemGenerator.generateInventoryItems(productIds, invItemCount);
+        )) {
+            stmt.setObject(1, bestBefore); //best before date
+            stmt.setObject(2, creationDate); //creation date
+            stmt.setObject(3, expires); //expiration date
+            stmt.setObject(4, manufactured); //manufactured date
+            stmt.setObject(5, pricePerItem); //price per item
+            stmt.setObject(6, quantity); //quantity
+            stmt.setObject(7, remainingQuantity); //remaining quantity
+            stmt.setObject(8, sellBy); //sell by date
+            stmt.setObject(9, remainingQuantity * pricePerItem); //total price
+            stmt.setObject(10, generateVersion()); //version of product
+            stmt.setObject(11, productId); //product id
+            stmt.executeUpdate();
+            ResultSet keys = stmt.getGeneratedKeys();
+            keys.next();
+            return keys.getLong(1);
+        }
     }
 
     /**
@@ -127,12 +113,11 @@ public class InventoryItemGenerator {
     public List<Long> generateInventoryItems(List<Long> productIds, int invItemCount) throws SQLException {
         List<Long> generatedInvItemIds = new ArrayList<>();
         for (int i=0; i < invItemCount; i++) {
-            clear();
             long productId = productIds.get(random.nextInt(productIds.size()));
 
-            System.out.println(String.format("Creating Inventory Item %d / %d", i+1, invItemCount));
+            logger.info("Creating Inventory Item {} / {}", i+1, invItemCount);
             int progress = (int) (((float)(i+1) / (float)invItemCount) * 100);
-            System.out.println(String.format("Progress: %d%%", progress));
+            logger.info("Progress: {}%", progress);
             long invItemId = createInsertInventoryItemSQL(productId);
 
             generatedInvItemIds.add(invItemId);

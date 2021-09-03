@@ -1,5 +1,6 @@
 package cucumber.stepDefinitions;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import cucumber.context.EventContext;
 import cucumber.context.RequestContext;
 import cucumber.context.UserContext;
@@ -9,8 +10,9 @@ import io.cucumber.java.en.When;
 import net.minidev.json.JSONObject;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
-import org.seng302.leftovers.entities.Event;
-import org.seng302.leftovers.entities.GlobalMessageEvent;
+import org.seng302.leftovers.dto.event.EventTag;
+import org.seng302.leftovers.entities.event.Event;
+import org.seng302.leftovers.entities.event.GlobalMessageEvent;
 import org.seng302.leftovers.persistence.EventRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -18,7 +20,6 @@ import org.springframework.http.MediaType;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 
 public class EventStepDefinition {
@@ -34,6 +35,9 @@ public class EventStepDefinition {
 
     @Autowired
     private RequestContext requestContext;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @AfterEach
     public void cleanUp() {
@@ -78,7 +82,9 @@ public class EventStepDefinition {
     @Then("The event has the tag {string}")
     public void the_event_has_the_tag(String tagName) {
         Event event = eventRepository.findById(eventContext.getLast().getId()).orElseThrow();
-        assertEquals(tagName, event.constructJSONObject().get("tag"));
+
+        var tag = objectMapper.convertValue(tagName, EventTag.class);
+        assertEquals(tag, event.getTag());
     }
 
     @When("I try to delete an event from my feed")

@@ -14,7 +14,6 @@ import Inventory from "../components/Inventory.vue";
 import SalePage from "../components/SalePage.vue";
 import Marketplace from "../components/marketplace/Marketplace.vue";
 import UserCards from "../components/marketplace/UserCards.vue";
-import ConversationReply from "../components/cards/ConversationReply.vue";
 
 Vue.use(VueRouter);
 
@@ -67,12 +66,12 @@ const routes = [
   {
     path: "/search",
     component: SearchResults,
-    meta: { title: 'Search' }
+    meta: { title: 'Search Users' }
   },
   {
     path: "/search/business",
     component: SearchBusinessResults,
-    meta: { title: 'SearchBusiness' }
+    meta: { title: 'Search Businesses' }
   },
   {
     path: "/business/:id/products",

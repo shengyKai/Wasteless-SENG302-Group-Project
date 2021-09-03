@@ -51,7 +51,7 @@ export type User = {
   nickname?: string,
   bio?: string,
   email: string,
-  dateOfBirth?: string, // TODO This should actually be a required field (according to the spec)
+  dateOfBirth?: string,
   phoneNumber?: string,
   homeAddress: Location,
   created?: string,
@@ -714,7 +714,7 @@ export async function removeBusinessAdmin(businessId: number, userId: number): P
     if (status === 400) return 'User doesn\'t exist or is not an admin';
     if (status === 401) return 'You have been logged out. Please login again and retry';
     if (status === 403) return 'Current user cannot perform this action';
-    if (status === 406) return 'Business not found';
+    if (status === 406) return 'The new business admin should be at least 16 years old';
 
     return 'Request failed: ' + status;
   }
@@ -844,7 +844,7 @@ export async function createInventoryItem(businessId: number, inventoryItem: Cre
  * @param marketplaceCard The attributes to use when creating the marketplace card
  * @return id of card if card is successfully created, an error string otherwise
  */
-export async function createMarketplaceCard(marketplaceCard: CreateMarketplaceCard) : Promise<MaybeError<Number>> {
+export async function createMarketplaceCard(marketplaceCard: CreateMarketplaceCard) : Promise<MaybeError<number>> {
   let response;
   try {
     response = await instance.post('/cards', marketplaceCard);

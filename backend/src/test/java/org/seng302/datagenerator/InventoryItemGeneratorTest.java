@@ -1,10 +1,12 @@
 package org.seng302.datagenerator;
-import org.seng302.leftovers.Main;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.junit.runner.RunWith;
+import org.seng302.leftovers.Main;
 import org.seng302.leftovers.persistence.BusinessRepository;
 import org.seng302.leftovers.persistence.InventoryItemRepository;
 import org.seng302.leftovers.persistence.ProductRepository;
@@ -17,11 +19,12 @@ import java.sql.*;
 import java.util.List;
 import java.util.Map;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes={Main.class})
-public class InventoryItemGeneratorTest {
+class InventoryItemGeneratorTest {
     private Connection conn;
     private UserGenerator userGenerator;
     private BusinessGenerator businessGenerator;
@@ -79,9 +82,7 @@ public class InventoryItemGeneratorTest {
         stmt.executeQuery();
         ResultSet results = stmt.getResultSet();
         results.next();
-        if (results.getLong(1) != 1) {
-            fail();
-        }
+        assertEquals(1, results.getLong(1));
     }
 
     /**
@@ -107,52 +108,15 @@ public class InventoryItemGeneratorTest {
     public List<Long> generateUserBusinessAndProduct(int userCount, int businessCount, int productCount) {
         List<Long> userIds = userGenerator.generateUsers(userCount);
         List<Long> businessIds = businessGenerator.generateBusinesses(userIds, businessCount);
-        List<Long> productIds = productGenerator.generateProducts(businessIds, productCount);
-        return productIds;
+        return productGenerator.generateProducts(businessIds, productCount);
     }
 
-    @Test
-    void generateInvItems_generateOneInvItemAndConsistentData_oneInvItemGenerated() throws SQLException {
+    @ParameterizedTest
+    @ValueSource(ints = {1, 2, 10, 100})
+    void generateInvItems_generateHundredInvItemsAndConsistentData_hundredInvItemsGenerated(int count) throws SQLException {
         List<Long> productIds = generateUserBusinessAndProduct(1, 1, 1);
-        List<Long> invItemIds = invItemGenerator.generateInventoryItems(productIds, 1);
-        if (invItemIds.size() != 1) {
-            fail();
-        }
-        long invItemId = invItemIds.get(0);
-        checkRequiredFieldsNotNull(invItemId);
-    }
-
-    @Test
-    void generateInvItems_generateTwoInvItemsAndConsistentData_twoInvItemsGenerated() throws SQLException {
-        List<Long> productIds = generateUserBusinessAndProduct(1, 1, 1);
-        List<Long> invItemIds = invItemGenerator.generateInventoryItems(productIds, 2);
-        if (invItemIds.size() != 2) {
-            fail();
-        }
-        for (long invItemId: invItemIds) {
-            checkRequiredFieldsNotNull(invItemId);
-        }
-    }
-
-    @Test
-    void generateInvItems_generateTenInvItemsAndConsistentData_tenInvItemsGenerated() throws SQLException {
-        List<Long> productIds = generateUserBusinessAndProduct(1, 1, 1);
-        List<Long> invItemIds = invItemGenerator.generateInventoryItems(productIds, 10);
-        if (invItemIds.size() != 10) {
-            fail();
-        }
-        for (long invItemId: invItemIds) {
-            checkRequiredFieldsNotNull(invItemId);
-        }
-    }
-
-    @Test
-    void generateInvItems_generateHundredInvItemsAndConsistentData_hundredInvItemsGenerated() throws SQLException {
-        List<Long> productIds = generateUserBusinessAndProduct(1, 1, 1);
-        List<Long> invItemIds = invItemGenerator.generateInventoryItems(productIds, 100);
-        if (invItemIds.size() != 100) {
-            fail();
-        }
+        List<Long> invItemIds = invItemGenerator.generateInventoryItems(productIds, count);
+        assertEquals(count, invItemIds.size());
         for (long invItemId: invItemIds) {
             checkRequiredFieldsNotNull(invItemId);
         }
@@ -162,32 +126,26 @@ public class InventoryItemGeneratorTest {
     void generateInvItems_generateZeroInvItemsAndConsistentData_NoInvItemGenerated() throws SQLException {
         long invItemsInDB = getNumInvItemsInDB();
         List<Long> productIds = generateUserBusinessAndProduct(1, 1, 1);
-        List<Long> invItemIds = invItemGenerator.generateInventoryItems(productIds, 0);
+        invItemGenerator.generateInventoryItems(productIds, 0);
         long invItemsInDBAfter = getNumInvItemsInDB();
-        if (invItemsInDB != invItemsInDBAfter) {
-            fail();
-        }
+        assertEquals(invItemsInDB, invItemsInDBAfter);
     }
 
     @Test
     void generateInvItems_generateNegativeOneInvItemsAndConsistentData_NoInvItemGenerated() throws SQLException {
         long invItemsInDB = getNumInvItemsInDB();
         List<Long> productIds = generateUserBusinessAndProduct(1, 1, 1);
-        List<Long> invItemIds = invItemGenerator.generateInventoryItems(productIds, -1);
+        invItemGenerator.generateInventoryItems(productIds, -1);
         long invItemsInDBAfter = getNumInvItemsInDB();
-        if (invItemsInDB != invItemsInDBAfter) {
-            fail();
-        }
+        assertEquals(invItemsInDB, invItemsInDBAfter);
     }
 
     @Test
     void generateInvItems_generateNegativeTenInvItemsAndConsistentData_NoInvItemGenerated() throws SQLException {
         long invItemsInDB = getNumInvItemsInDB();
         List<Long> productIds = generateUserBusinessAndProduct(1, 1, 1);
-        List<Long> invItemIds = invItemGenerator.generateInventoryItems(productIds, -10);
+        invItemGenerator.generateInventoryItems(productIds, -10);
         long invItemsInDBAfter = getNumInvItemsInDB();
-        if (invItemsInDB != invItemsInDBAfter) {
-            fail();
-        }
+        assertEquals(invItemsInDB, invItemsInDBAfter);
     }
 }

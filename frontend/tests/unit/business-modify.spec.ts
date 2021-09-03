@@ -10,10 +10,14 @@ import {User, Location, Business} from "@/api/internal";
 import { getStore, resetStoreForTesting } from '@/store';
 
 jest.mock('@/api/internal', () => ({
-  modifyBusiness: jest.fn()
+  getUser: jest.fn(),
+  modifyBusiness: jest.fn(),
+  uploadBusinessImage: jest.fn(),
 }));
 
+const getUser = castMock(api.getUser);
 const modifyBusiness = castMock(api.modifyBusiness);
+const uploadBusinessImage = castMock(api.uploadBusinessImage);
 Vue.use(Vuetify);
 const localVue = createLocalVue();
 
@@ -121,6 +125,7 @@ describe('modifyBusiness.vue', () => {
     resetStoreForTesting();
     let store = getStore();
     store.state.user = testUser;
+    getUser.mockResolvedValueOnce(testUser);
     const vuetify = new Vuetify();
     const App = localVue.component('App', {
       components: { ModifyBusiness },
@@ -157,16 +162,17 @@ describe('modifyBusiness.vue', () => {
   });
 
   /**
-   * Finds the update button in the Modify Business form
+   * Finds the associated button in the Modify Business form
    *
    * @returns A wrapper around the update button
    */
-  function findUpdateButton() {
+  function findButton(component:string) {
     const buttons = wrapper.findAllComponents({ name: 'v-btn' });
-    const filtered = buttons.filter(button => button.text().includes('Submit'));
-    expect(filtered.length).toBe(1);
-    return filtered.at(0);
+    const button = buttons.filter(button => button.text().includes(component));
+    expect(button.length).toBe(1);
+    return button.at(0);
   }
+
 
   /**
    * Adds all the fields that are required for the create business form to be valid
@@ -488,7 +494,7 @@ describe('modifyBusiness.vue', () => {
 
   it("If all fields are populated with the right restrictions and the submit button is clicked, the modifyBusiness endpoint is called", async () => {
     await populateRequiredFields();
-    const submitButton = findUpdateButton();
+    const submitButton = findButton("Submit");
     await submitButton.trigger('click');
     expect(modifyBusiness).toHaveBeenCalled();
   });
@@ -499,18 +505,73 @@ describe('modifyBusiness.vue', () => {
       const newPrimaryAdmin = testAdmins[1];
       expect(wrapper.vm.adminIsPrimary(newPrimaryAdmin)).toBeFalsy();
       expect(wrapper.vm.adminIsPrimary(currentPrimaryAdmin)).toBeTruthy();
-      wrapper.vm.changePrimaryAdmin(newPrimaryAdmin);
-      expect(wrapper.vm.adminIsPrimary(newPrimaryAdmin)).toBeTruthy();
-      expect(wrapper.vm.adminIsPrimary(currentPrimaryAdmin)).toBeFalsy();
+      wrapper.vm.changePrimaryOwner(newPrimaryAdmin);
       expect(wrapper.vm.primaryAdminAlertMsg).toEqual(`Primary admin will be changed to ${newPrimaryAdmin.firstName} ${newPrimaryAdmin.lastName}`);
     });
 
     it('Primary admin stays the same and alert message is not shown when primary admin is selected', async() => {
       const primaryAdmin = testAdmins[0];
       expect(wrapper.vm.adminIsPrimary(primaryAdmin)).toBeTruthy();
-      wrapper.vm.changePrimaryAdmin(primaryAdmin);
+      wrapper.vm.changePrimaryOwner(primaryAdmin);
       expect(wrapper.vm.adminIsPrimary(primaryAdmin)).toBeTruthy();
       expect(wrapper.vm.primaryAdminAlertMsg).toEqual('');
     });
+  });
+
+  describe('Uploading images', () => {
+    beforeEach(() => {
+      uploadBusinessImage.mock.calls = [];
+      uploadBusinessImage.mockResolvedValue(undefined);
+    });
+
+    it('When image file added, it is appended to the list of image files', () => {
+      expect(wrapper.vm.allImageFiles.length).toBe(0);
+      const testFile = new File([], 'test_file');
+      wrapper.vm.imageFile = testFile;
+
+      wrapper.vm.addImage();
+
+      expect(wrapper.vm.allImageFiles.length).toBe(1);
+      expect(wrapper.vm.allImageFiles[0]).toBe(testFile);
+    });
+
+    it('When form is submitted and no images are added, no API call to upload images is made', async () => {
+      expect(wrapper.vm.allImageFiles.length).toBe(0);
+      await wrapper.vm.proceedWithModifyBusiness();
+      expect(uploadBusinessImage.mock.calls.length).toBe(0);
+    });
+
+    it('When form is submitted and one image is added, one API call to upload images is made', async () => {
+      const testFile1 = new File([], 'test_file_1');
+      wrapper.vm.allImageFiles = [testFile1];
+      expect(wrapper.vm.allImageFiles.length).toBe(1);
+      await wrapper.vm.proceedWithModifyBusiness();
+      expect(uploadBusinessImage.mock.calls.length).toBe(1);
+      expect(uploadBusinessImage.mock.calls[0][0]).toBe(44);
+      expect(uploadBusinessImage.mock.calls[0][1]).toBe(testFile1);
+    });
+
+    it('When form is submitted and multiple images are added, one API call to upload images is made for each image', async () => {
+      wrapper.vm.allImageFiles = [new File([], 'test_file_1'), new File([], 'test_file_2'), new File([], 'test_file_3')];
+      expect(wrapper.vm.allImageFiles.length).toBe(3);
+      await wrapper.vm.proceedWithModifyBusiness();
+      expect(uploadBusinessImage.mock.calls.length).toBe(3);
+    });
+
+    it('When upload image request is successful, no error message is displayed', async () => {
+      expect(wrapper.vm.errorMessage).toBe(undefined);
+      wrapper.vm.allImageFiles = [new File([], 'test_file_1')];
+      await wrapper.vm.proceedWithModifyBusiness();
+      expect(wrapper.vm.errorMessage).toBe(undefined);
+    });
+
+    it('When upload image request is unsuccessful, received error message is displayed', async () => {
+      expect(wrapper.vm.errorMessage).toBe(undefined);
+      uploadBusinessImage.mockResolvedValueOnce("This is an error");
+      wrapper.vm.allImageFiles = [new File([], 'test_file_1')];
+      await wrapper.vm.proceedWithModifyBusiness();
+      expect(wrapper.vm.errorMessage).toBe("This is an error");
+    });
+
   });
 });

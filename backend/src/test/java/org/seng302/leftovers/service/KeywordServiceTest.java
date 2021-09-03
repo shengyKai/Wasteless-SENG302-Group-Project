@@ -3,19 +3,21 @@ package org.seng302.leftovers.service;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
-import org.seng302.leftovers.entities.Event;
 import org.seng302.leftovers.entities.Keyword;
-import org.seng302.leftovers.entities.KeywordCreatedEvent;
 import org.seng302.leftovers.entities.User;
+import org.seng302.leftovers.entities.event.Event;
+import org.seng302.leftovers.entities.event.KeywordCreatedEvent;
 import org.seng302.leftovers.persistence.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 

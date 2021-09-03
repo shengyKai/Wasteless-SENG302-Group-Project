@@ -1,7 +1,9 @@
 package org.seng302.leftovers.dto;
 
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
+
 import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
 
@@ -11,6 +13,7 @@ import java.time.LocalDate;
  */
 @Getter
 @ToString
+@EqualsAndHashCode
 public class UserDTO {
     @NotNull
     private String email;
