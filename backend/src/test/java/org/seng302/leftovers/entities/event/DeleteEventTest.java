@@ -78,7 +78,7 @@ class DeleteEventTest {
         assertEquals("none", json.get("tag"));
         assertEquals(testCard.getTitle(), json.get("title"));
         assertEquals(testCard.getSection().getName(), json.get("section"));
-        assertEquals(event.getEventStatus().toString().toLowerCase(), json.get("eventStatus"));
+        assertEquals(event.getStatus().toString().toLowerCase(), json.get("status"));
         assertEquals(event.isRead(), json.get("read"));
         assertEquals(8, json.size());
     }

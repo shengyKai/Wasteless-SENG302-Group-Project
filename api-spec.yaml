@@ -2716,7 +2716,7 @@ components:
         - id
         - created
         - tag
-        - eventStatus
+        - status
         - isRead
       properties:
         id:
@@ -2732,7 +2732,7 @@ components:
           description: Date and time when the event was created
         tag:
           $ref: '#/components/schemas/Tag'
-        eventStatus:
+        status:
           $ref: '#/components/schemas/EventStatus'
         isRead:
           type: boolean

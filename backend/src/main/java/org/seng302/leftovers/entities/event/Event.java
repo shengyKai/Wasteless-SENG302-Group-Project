@@ -2,7 +2,7 @@ package org.seng302.leftovers.entities.event;
 
 import org.seng302.leftovers.dto.event.EventDTO;
 import org.seng302.leftovers.dto.event.EventStatus;
-import org.seng302.leftovers.dto.event.Tag;
+import org.seng302.leftovers.dto.event.EventTag;
 import org.seng302.leftovers.entities.User;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
@@ -25,7 +25,7 @@ public abstract class Event {
 
     @Enumerated(EnumType.ORDINAL)
     @Column(nullable = false)
-    private Tag tag = Tag.NONE;
+    private EventTag eventTag = EventTag.NONE;
 
     @ManyToOne
     @JoinColumn(name = "event_user", nullable = false)
@@ -68,19 +68,19 @@ public abstract class Event {
      * Gets the tag for this event
      * @return Tag colour of the event
      */
-    public Tag getTag() {
-        return tag;
+    public EventTag getTag() {
+        return eventTag;
     }
 
     /**
      * Changes the tag for the event
-     * @param tag New event tag
+     * @param eventTag New event tag
      */
-    public void setTag(Tag tag) {
-        if (tag == null) {
+    public void setTag(EventTag eventTag) {
+        if (eventTag == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tag cannot be null");
         }
-        this.tag = tag;
+        this.eventTag = eventTag;
     }
 
     /**
@@ -109,7 +109,7 @@ public abstract class Event {
     /**
      * Updates the isRead status to true if the event has been read.
      */
-    public void markEventAsRead() {
+    public void markAsRead() {
         this.isRead = true;
     }
 
@@ -124,7 +124,7 @@ public abstract class Event {
      * Returns the eventStatus of this event
      * @return the eventStatus enum
      */
-    public EventStatus getEventStatus() { return this.eventStatus; }
+    public EventStatus getStatus() { return this.eventStatus; }
 
     /**
      * Update the status of the event. Uses an enum for the different types
