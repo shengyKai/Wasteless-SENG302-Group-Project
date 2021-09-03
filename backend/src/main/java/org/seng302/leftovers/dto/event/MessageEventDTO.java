@@ -12,7 +12,7 @@ import org.seng302.leftovers.entities.event.MessageEvent;
  */
 @Getter
 @ToString
-@EqualsAndHashCode
+@EqualsAndHashCode(callSuper = false)
 public class MessageEventDTO extends EventDTO {
     private MessageDTO message;
     private ConversationDTO conversation;

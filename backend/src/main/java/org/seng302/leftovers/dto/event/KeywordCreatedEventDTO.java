@@ -11,7 +11,7 @@ import org.seng302.leftovers.entities.event.KeywordCreatedEvent;
  */
 @Getter
 @ToString
-@EqualsAndHashCode
+@EqualsAndHashCode(callSuper = false)
 public class KeywordCreatedEventDTO extends EventDTO {
     private JSONObject keyword;
     private JSONObject creator;

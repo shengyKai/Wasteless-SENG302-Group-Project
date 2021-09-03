@@ -11,7 +11,7 @@ import javax.validation.constraints.NotNull;
  */
 @ToString
 @Getter
-@EqualsAndHashCode
+@EqualsAndHashCode(callSuper = false)
 public class ModifyBusinessDTO extends CreateBusinessDTO {
     @NotNull
     private Boolean updateProductCountry;
