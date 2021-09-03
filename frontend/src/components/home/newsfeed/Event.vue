@@ -143,8 +143,7 @@ export default {
      * Change the badge icon based on whether the event has been read
      */
     readBadgeIcon() {
-      console.log(this.event.isRead);
-      if (!this.event.isRead) {
+      if (!this.event.read) {
         return "mdi-email";
       } else {
         return "mdi-email-open";
@@ -154,7 +153,7 @@ export default {
      * Changes the badge colour based on whether the event has been read
      */
     readColour() {
-      if (!this.event.isRead) {
+      if (!this.event.read) {
         return "primary";
       } else {
         return "secondary";
@@ -236,8 +235,11 @@ export default {
       this.deleted = false;
       this.$store.commit('unstageEventForDeletion', this.event.id);
     },
+    /**
+     * Sends a request to the backend if the event is unread and marks it as read.
+     */
     async markEventAsRead() {
-      if (!this.event.isRead) {
+      if (!this.event.read) {
         const result = updateEventAsRead(this.event.id);
         if (typeof result === 'string') {
           this.errorMessage = result;
