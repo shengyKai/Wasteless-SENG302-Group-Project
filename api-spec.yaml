@@ -1221,6 +1221,132 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Listing'
+  /businesses/listings/search:
+    get:
+      tags:
+        - 'U29: Search Sale Listing'
+        - Business Accounts
+        - Listings / sales
+      summary: Get sale items for business that meet search criteria passed
+      security:
+        - CookieAuth:
+            - user
+            - globalApplicationAdmin
+            - defaultGlobalApplicationAdmin
+      parameters:
+        - name: searchQuery
+          in: query
+          description: string to match against chosen search fields
+          schema:
+            type: string
+            example: "ham"
+        - name: page
+          in: query
+          description: The page number to retrieve (1 indexed)
+          schema:
+            type: integer
+            example: 1
+        - name: resultsPerPage
+          in: query
+          description: The number of results to show per page
+          schema:
+            type: integer
+            example: 10
+        - name: orderBy
+          in: query
+          description: Sale property to order results by
+          schema:
+            type: string
+            example: created
+            enum:
+              - name
+              - price
+              - businessName
+              - businessLocation
+              - expiry
+              - closes
+              - created
+              - quantity
+        - name: reverse
+          in: query
+          description: Whether to flip default sort order (default is ascending)
+          schema:
+            type: boolean
+            example: false
+        - name: searchBy
+          in: query
+          description: Fields to match searchQuery to
+          schema:
+            type: string
+            enum:
+              - name
+              - description
+              - businessName
+              - businessLocation
+        - name: businessType
+          in: query
+          description: Business types to filter results by
+          schema:
+            type: array
+            items:
+              - type: string
+                example: Retail Trade
+                enum:
+                  - Accommodation and Food Services
+                  - Retail Trade
+                  - Charitable organisation
+                  - Non-profit organisation
+        - name: priceLower
+          in: query
+          description: Results must be above this price inclusive
+          schema:
+            type: number
+            format: double
+            example: 13.99
+        - name: priceUpper
+          in: query
+          description: Results must be below this price inclusive
+          schema:
+            type: number
+            format: double
+            example: 15.50
+        - name: closeLower
+          in: query
+          description: Results must close after this date
+          schema:
+            type: string
+            format: date-time
+            example: '2021-07-21T23:59:00Z'
+        - name: closeUpper
+          in: query
+          description: Results must close before this date
+          schema:
+            type: string
+            format: date-time
+            example: '2021-07-21T23:59:00Z'
+      responses:
+        '200':
+          description: 'Request successful, a (possibly empty) list of sale items is returned'
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Page'
+                  - type: object
+                    required:
+                      - results
+                    properties:
+                      results:
+                        type: array
+                        items:
+                          allOf:
+                            - $ref: '#/components/schemas/Listing'
+                            - $ref: '#/components/schemas/ListedBusiness'
+        '400':
+          description: >-
+            Invalid search term provided
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
   '/businesses/search':
     get:
       tags:
@@ -2565,6 +2691,24 @@ components:
           description: List of images for this business, with the first image being the primary image.
           items:
             $ref: '#/components/schemas/Image'
+    ListedBusiness:
+      type: object
+      description: Subset of business to return along with searched sales
+      required:
+        - id
+        - name
+        - location
+      properties:
+        id:
+          type: integer
+          example: 100
+          readOnly: true
+          description: id of the business to allow for accessing via listed sale items
+        name:
+          type: string
+          example: Lumbridge General Store
+        location:
+          $ref: '#/components/schemas/Address'
     Address:
       type: object
       description: Entity representing some physical address
