@@ -97,7 +97,7 @@ export async function updateEventAsRead(eventId: number): Promise<MaybeError<und
     let status: number | undefined = error.response?.status;
     if (status === undefined) return 'Failed to reach backend';
     if (status === 401) return 'You have been logged out. Please login again and retry';
-    if (status === 403) return 'Cannot mark event as read: ' + error.response?.data.message;
+    if (status === 403) return "Invalid authorization for marking this event";
     if (status === 406) return 'Event does not exist';
     return 'Request failed: ' + error.response?.data.message;
   }
