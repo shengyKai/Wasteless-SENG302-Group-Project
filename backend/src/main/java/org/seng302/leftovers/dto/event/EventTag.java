@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 /**
  * DTO representing the tag assigned to an Event entity
  */
-public enum Tag {
+public enum EventTag {
     @JsonProperty("none")
     NONE,
 

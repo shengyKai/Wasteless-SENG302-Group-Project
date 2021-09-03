@@ -16,8 +16,8 @@ public abstract class EventDTO {
     private Long id;
     private String type;
     private Instant created;
-    private Tag tag;
-    private EventStatus eventStatus;
+    private EventTag tag;
+    private EventStatus status;
     private boolean isRead;
 
     /**
@@ -30,7 +30,7 @@ public abstract class EventDTO {
         this.type = event.getClass().getSimpleName();
         this.created = event.getCreated();
         this.tag = event.getTag();
-        this.eventStatus = event.getEventStatus();
+        this.status = event.getStatus();
         // Lombok seems to have converted the "isRead" attribute to "read", not sure how to bypass this but it should
         // be fine with that naming either way
         this.isRead = event.isRead();

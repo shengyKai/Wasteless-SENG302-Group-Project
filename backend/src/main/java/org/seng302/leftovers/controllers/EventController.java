@@ -4,7 +4,7 @@ import net.minidev.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.seng302.leftovers.dto.WrappedValueDTO;
-import org.seng302.leftovers.dto.event.Tag;
+import org.seng302.leftovers.dto.event.EventTag;
 import org.seng302.leftovers.entities.User;
 import org.seng302.leftovers.entities.event.Event;
 import org.seng302.leftovers.entities.event.GlobalMessageEvent;
@@ -49,7 +49,7 @@ public class EventController {
      * @param body The request body
      */
     @PutMapping("/feed/{eventId}/tag")
-    public void setEventTag(@PathVariable long eventId, @Valid @RequestBody WrappedValueDTO<Tag> body, HttpServletRequest request) {
+    public void setEventTag(@PathVariable long eventId, @Valid @RequestBody WrappedValueDTO<EventTag> body, HttpServletRequest request) {
         LOGGER.info("Requested update of event tag (eventId={}, tag={})", eventId, body.getValue());
 
         AuthenticationTokenManager.checkAuthenticationToken(request);
@@ -157,7 +157,7 @@ public class EventController {
                 throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Current user does not have permission to mark this event as read");
             }
 
-            event.markEventAsRead();
+            event.markAsRead();
             eventService.saveEvent(event);
         } catch (Exception e) {
             LOGGER.error(e.getMessage());

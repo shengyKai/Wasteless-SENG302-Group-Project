@@ -10,7 +10,7 @@ import io.cucumber.java.en.When;
 import net.minidev.json.JSONObject;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
-import org.seng302.leftovers.dto.event.Tag;
+import org.seng302.leftovers.dto.event.EventTag;
 import org.seng302.leftovers.entities.event.Event;
 import org.seng302.leftovers.entities.event.GlobalMessageEvent;
 import org.seng302.leftovers.persistence.EventRepository;
@@ -86,7 +86,7 @@ public class EventStepDefinition {
     public void the_event_has_the_tag(String tagName) {
         Event event = eventRepository.findById(eventContext.getLast().getId()).orElseThrow();
 
-        var tag = objectMapper.convertValue(tagName, Tag.class);
+        var tag = objectMapper.convertValue(tagName, EventTag.class);
         assertEquals(tag, event.getTag());
     }
 
