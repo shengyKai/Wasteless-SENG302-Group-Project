@@ -414,7 +414,7 @@ public class MarketplaceCard {
             card.created = Instant.now();
             card.lastRenewed = card.created;
             if (closes == null) {
-                card.setCloses(card.created.plus(Duration.ofSeconds(20)));
+                card.setCloses(card.created.plus(DISPLAY_PERIOD));
             } else {
                 card.setCloses(closes);
             }
