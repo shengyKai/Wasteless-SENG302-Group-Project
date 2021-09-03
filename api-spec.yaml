@@ -2684,7 +2684,7 @@ components:
         - id
         - created
         - tag
-        - eventStatus
+        - status
       properties:
         id:
           type: integer
@@ -2699,7 +2699,7 @@ components:
           description: Date and time when the event was created
         tag:
           $ref: '#/components/schemas/Tag'
-        eventStatus:
+        status:
           $ref: '#/components/schemas/EventStatus'
     Tag:
       type: string

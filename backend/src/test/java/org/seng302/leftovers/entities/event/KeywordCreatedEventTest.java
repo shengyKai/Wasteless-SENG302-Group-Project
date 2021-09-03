@@ -84,7 +84,7 @@ class KeywordCreatedEventTest {
                         "\"type\":\"KeywordCreatedEvent\"," +
                         "\"keyword\":%s," +
                         "\"tag\":\"none\"," +
-                        "\"eventStatus\":\"normal\"," +
+                        "\"status\":\"normal\"," +
                         "\"creator\":%s}",
                 event.getId(),
                 event.getCreated(),

@@ -74,7 +74,7 @@ class ExpiryEventTest {
                 "\"created\":\"%s\"," +
                 "\"tag\":\"none\"," +
                 "\"type\":\"ExpiryEvent\"," +
-                "\"eventStatus\":\"normal\"," +
+                "\"status\":\"normal\"," +
                 "\"card\":%s}",
                 testEvent.getId(),
                 testEvent.getCreated(),

@@ -8,7 +8,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.runner.RunWith;
 import org.mockito.*;
-import org.seng302.leftovers.dto.event.Tag;
+import org.seng302.leftovers.dto.event.EventTag;
 import org.seng302.leftovers.entities.User;
 import org.seng302.leftovers.entities.event.Event;
 import org.seng302.leftovers.entities.event.GlobalMessageEvent;
@@ -168,10 +168,10 @@ class EventControllerTest {
     }
 
     @ParameterizedTest
-    @EnumSource(Tag.class)
-    void setEventTag_validTag_200ResponseAndTagUpdated(Tag tag) throws Exception {
+    @EnumSource(EventTag.class)
+    void setEventTag_validTag_200ResponseAndTagUpdated(EventTag eventTag) throws Exception {
         var json = new JSONObject();
-        json.put("value", tag.toString().toLowerCase());
+        json.put("value", eventTag.toString().toLowerCase());
         mockMvc.perform(
                 put("/feed/2/tag")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -179,7 +179,7 @@ class EventControllerTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        verify(mockEvent, times(1)).setTag(tag);
+        verify(mockEvent, times(1)).setTag(eventTag);
         verify(eventService, times(1)).saveEvent(mockEvent);
     }
 

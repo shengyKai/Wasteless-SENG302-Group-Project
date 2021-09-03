@@ -8,7 +8,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.seng302.leftovers.dto.event.EventDTO;
 import org.seng302.leftovers.dto.event.EventStatus;
-import org.seng302.leftovers.dto.event.Tag;
+import org.seng302.leftovers.dto.event.EventTag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
@@ -35,13 +35,13 @@ class EventTest {
     }
 
     @ParameterizedTest
-    @EnumSource(Tag.class)
-    void eventDTO_withProvidedTag_tagReturnedInJson(Tag tag) {
+    @EnumSource(EventTag.class)
+    void eventDTO_withProvidedTag_tagReturnedInJson(EventTag eventTag) {
         Event event = new EventSubclass();
-        event.setTag(tag);
+        event.setTag(eventTag);
 
         var json = mapper.convertValue(new EventDTO(event) {}, JSONObject.class);
-        assertEquals(tag.toString().toLowerCase(), json.get("tag"));
+        assertEquals(eventTag.toString().toLowerCase(), json.get("tag"));
     }
 
     @Test
@@ -56,7 +56,7 @@ class EventTest {
     @Test
     void eventCreated_noTagProvided_tagIsNone() {
         Event event = new EventSubclass();
-        assertEquals(Tag.NONE, event.getTag());
+        assertEquals(EventTag.NONE, event.getTag());
     }
 
     @Test
@@ -68,7 +68,7 @@ class EventTest {
         assertEquals(event.getCreated().toString(), json.get("created"));
         assertEquals(event.getClass().getSimpleName(), json.get("type"));
         assertEquals("none", json.get("tag"));
-        assertEquals("normal", json.get("eventStatus"));
+        assertEquals("normal", json.get("status"));
         assertEquals(5, json.size());
     }
 
@@ -83,28 +83,28 @@ class EventTest {
     @Test
     void eventRead_updatesIsRead_isReadUpdatedToTrue() {
         Event event = new EventSubclass();
-        assertEquals(event.isRead(), false);
-        event.markEventAsRead();
-        assertEquals(event.isRead(), true);
+        assertEquals(false, event.isRead());
+        event.markAsRead();
+        assertEquals(true, event.isRead());
     }
 
     @Test
     void updateEventStatus_getDefaultStatus_defaultStatusIsNormal() {
         Event event = new EventSubclass();
-        assertEquals(event.getEventStatus(), EventStatus.NORMAL);
+        assertEquals(EventStatus.NORMAL, event.getStatus());
     }
 
     @Test
     void updateEventStatus_updateStatusToArchived_eventStatusIsArchived() {
         Event event = new EventSubclass();
         event.updateEventStatus(EventStatus.ARCHIVED);
-        assertEquals(event.getEventStatus(), EventStatus.ARCHIVED);
+        assertEquals(EventStatus.ARCHIVED, event.getStatus());
     }
 
     @Test
     void updateEventStatus_updateStatusToStarred_eventStatusIsStarred() {
         Event event = new EventSubclass();
         event.updateEventStatus(EventStatus.STARRED);
-        assertEquals(event.getEventStatus(), EventStatus.STARRED);
+        assertEquals(EventStatus.STARRED, event.getStatus());
     }
 }
