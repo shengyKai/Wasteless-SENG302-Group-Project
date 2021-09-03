@@ -2684,6 +2684,7 @@ components:
         - id
         - created
         - tag
+        - status
       properties:
         id:
           type: integer
@@ -2698,6 +2699,8 @@ components:
           description: Date and time when the event was created
         tag:
           $ref: '#/components/schemas/Tag'
+        status:
+          $ref: '#/components/schemas/EventStatus'
     Tag:
       type: string
       description: Name of the tag (colour name) for the event
@@ -2736,3 +2739,10 @@ components:
           type: string
           example: So how about them apples?
           description: User supplied content of the message
+    EventStatus:
+      type: string
+      description: Name of the event status
+      enum:
+        - archived
+        - normal
+        - starred
