@@ -11,7 +11,7 @@ import org.seng302.leftovers.entities.event.DeleteEvent;
  */
 @Getter
 @ToString
-@EqualsAndHashCode
+@EqualsAndHashCode(callSuper = false)
 public class DeleteEventDTO extends EventDTO {
     private String title;
     private MarketplaceCard.Section section;

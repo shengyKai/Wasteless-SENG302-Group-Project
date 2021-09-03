@@ -9,7 +9,7 @@ import lombok.ToString;
  */
 @ToString
 @Getter
-@EqualsAndHashCode
+@EqualsAndHashCode(callSuper = false)
 public class ModifyUserDTO extends UserDTO {
     private String password;
     private String newPassword;

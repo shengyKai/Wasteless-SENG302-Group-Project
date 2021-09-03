@@ -11,7 +11,7 @@ import org.seng302.leftovers.entities.event.ExpiryEvent;
  */
 @Getter
 @ToString
-@EqualsAndHashCode
+@EqualsAndHashCode(callSuper = false)
 public class ExpiryEventDTO extends EventDTO {
     private JSONObject card;
 

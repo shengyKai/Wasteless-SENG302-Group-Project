@@ -10,7 +10,7 @@ import org.seng302.leftovers.entities.event.GlobalMessageEvent;
  */
 @Getter
 @ToString
-@EqualsAndHashCode
+@EqualsAndHashCode(callSuper = false)
 public class GlobalMessageEventDTO extends EventDTO {
     private String message;
 
