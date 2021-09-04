@@ -5,65 +5,41 @@
     </template>
     <template v-else>
       <div class="notfooter">
-        <div v-if="loggedIn">
-          <div v-if="$store.state.createBusinessDialogShown">
-            <CreateBusiness @closeDialog="$store.commit('hideCreateBusiness')" />
-          </div>
-          <div v-if="$store.state.createSaleItemDialog !== undefined">
-            <CreateSaleItem @closeDialog="$store.commit('hideCreateSaleItem')"/>
-          </div>
-
-          <AppBar />
-
-          <!-- Global error message -->
-          <v-alert
-            v-if="$store.state.globalError !== null"
-            type="error"
-            dismissible
-            @input="$store.commit('clearError')"
-          >
-            {{ $store.state.globalError }}
-          </v-alert>
-
-          <v-main>
-            <div class="container-outer">
-              <div class="container-inner">
-                <!-- All content (except AppBar & Footer) should be a child of 'v-main'. -->
-                <router-view />
-              </div>
-            </div>
-          </v-main>
+        <div v-if="$store.state.createBusinessDialogShown">
+          <CreateBusiness @closeDialog="$store.commit('hideCreateBusiness')" />
+        </div>
+        <div v-if="$store.state.createSaleItemDialog !== undefined">
+          <CreateSaleItem @closeDialog="$store.commit('hideCreateSaleItem')"/>
         </div>
 
-        <div v-else>
-          <v-main>
-            <!-- Global error message -->
-            <v-alert
-              v-if="$store.state.globalError !== null"
-              type="error"
-              dismissible
-              @input="$store.commit('clearError')"
-            >
-              {{ $store.state.globalError }}
-            </v-alert>
+        <AppBar v-if="$store.getters.isLoggedIn"/>
 
-            <div class="container-outer">
-              <div class="container-inner">
-                <!-- All content (except AppBar & Footer) should be a child of 'v-main'. -->
-                <Auth />
-              </div>
+        <!-- Global error message -->
+        <v-alert
+          v-if="$store.state.globalError !== null"
+          type="error"
+          dismissible
+          @input="$store.commit('clearError')"
+        >
+          {{ $store.state.globalError }}
+        </v-alert>
+
+        <v-main>
+          <div class="container-outer">
+            <div class="container-inner">
+              <!-- All content (except AppBar & Footer) should be a child of 'v-main'. -->
+              <router-view />
             </div>
-          </v-main>
-        </div>
-        <div class="clear"/>
+          </div>
+        </v-main>
       </div>
+      <div class="clear"/>
       <AppFooter class="foot"/>
     </template>
   </v-app>
 </template>
 
 <script>
-import Auth from "./components/Auth";
 import AppBar from "./components/AppBar";
 import AppFooter from "./components/AppFooter";
 import CreateBusiness from "./components/BusinessProfile/CreateBusiness";
@@ -84,7 +60,6 @@ export default {
   components: {
     // list your components here to register them (located under 'components' folder)
     // https://vuejs.org/v2/guide/components-registration.html
-    Auth,
     AppBar,
     AppFooter,
     CreateBusiness,
@@ -94,11 +69,11 @@ export default {
     const cookie = getCookie(COOKIE.USER);
     if (cookie) {
       await this.$store.dispatch('autoLogin', cookie.split('=')[1]);
-      if (this.$route.path === '/login') this.$router.push('/profile');
+      if (this.$route.path === '/auth') this.$router.push('/home');
       this.loading = false;
     } else {
       this.loading = false;
-      if (this.$route.path !== '/login') this.$router.push('/login');
+      if (this.$route.path !== '/auth') this.$router.push('/auth');
     }
     this.$router.afterEach(() => {
       // After changing pages clear the global error message
@@ -112,11 +87,6 @@ export default {
       loading: true
     };
   },
-  computed: {
-    loggedIn() {
-      return this.$store.getters.isLoggedIn;
-    }
-  }
 };
 </script>
 

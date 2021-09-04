@@ -25,12 +25,12 @@ const NotFound = {
 const routes = [
   {
     path: "/",
-    redirect: "/login"
+    redirect: "/auth"
   },
   {
-    path: "/login",
+    path: "/auth",
     component: Auth,
-    meta: { title: 'Login' }
+    meta: { title: 'Authenticate' }
   },
   {
     path: "/home",
