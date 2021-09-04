@@ -30,7 +30,7 @@
  */
 import axios from 'axios';
 import { is } from 'typescript-is';
-import { Tag } from './events';
+import { EventTag } from './events';
 
 const SERVER_URL = process.env.VUE_APP_SERVER_ADD;
 
@@ -1109,7 +1109,7 @@ export async function deleteNotification(eventId: number) : Promise<MaybeError<u
  * @param eventid The ID of the event
  * @param colour  The colour of the tag user wan to set
  */
-export async function setEventTag(eventId: number, colour: Tag) : Promise<MaybeError<undefined>> {
+export async function setEventTag(eventId: number, colour: EventTag) : Promise<MaybeError<undefined>> {
   try {
     await instance.put(`/feed/${eventId}/tag`, {
       value: colour
