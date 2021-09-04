@@ -2197,6 +2197,38 @@ paths:
         '406':
            description: >-
              Not Acceptable: Returned when a feed with an ID does not exist.
+  /feed/{id}/read:
+    put:
+      tags:
+        - 'U32: Managing my feed'
+        - Feed
+      summary: Marking an event as read in the user feed
+      security:
+        - CookieAuth:
+            - user
+            - business
+            - globalApplicationAdmin
+            - defaultGlobalApplicationAdmin
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: ID of the item to mark as read (item refers to event entity)
+          example: 10
+      responses:
+        '200':
+          description: Item successfully marked as read in the feed
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: >-
+            Forbidden: Returned when a user or business does not have
+            the permission to mark the item on the feed as read.
+        '406':
+           description: >-
+             Not Acceptable: Returned when a feed with an ID does not exist.
 components:
   securitySchemes:
     CookieAuth:
@@ -2685,6 +2717,7 @@ components:
         - created
         - tag
         - status
+        - isRead
       properties:
         id:
           type: integer
@@ -2701,6 +2734,9 @@ components:
           $ref: '#/components/schemas/Tag'
         status:
           $ref: '#/components/schemas/EventStatus'
+        isRead:
+          type: boolean
+          description: Checks if the event has been read
     Tag:
       type: string
       description: Name of the tag (colour name) for the event

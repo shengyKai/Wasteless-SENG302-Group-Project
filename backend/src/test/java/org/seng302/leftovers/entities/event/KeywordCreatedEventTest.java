@@ -84,11 +84,14 @@ class KeywordCreatedEventTest {
                         "\"type\":\"KeywordCreatedEvent\"," +
                         "\"keyword\":%s," +
                         "\"tag\":\"none\"," +
-                        "\"status\":\"normal\"," +
+                        "\"status\":\"%s\"," +
+                        "\"read\": %b," +
                         "\"creator\":%s}",
                 event.getId(),
                 event.getCreated(),
                 keyword.constructJSONObject().toJSONString(),
+                event.getStatus().toString().toLowerCase(),
+                event.isRead(),
                 user.constructPublicJson(false).toJSONString());
         String actualJsonString = mapper.writeValueAsString(event.asDTO());
         assertEquals(mapper.readTree(expectedJsonString), mapper.readTree(actualJsonString));

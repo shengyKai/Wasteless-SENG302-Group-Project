@@ -18,8 +18,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 
 import java.util.List;
+import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 
 public class EventStepDefinition {
@@ -102,5 +105,37 @@ public class EventStepDefinition {
     public void the_event_is_not_deleted_from_my_feed() {
         Long eventId = eventContext.getLast().getId();
         Assertions.assertTrue(eventRepository.existsById(eventId));
+    }
+
+    @Given("The default read status is false")
+    public void the_default_read_status_is_false() {
+        Event event = eventContext.getLast();
+        assertFalse(event.isRead());
+    }
+
+    @When("I try to mark an event from my feed as read")
+    public void i_try_to_mark_an_event_from_my_feed_as_read() {
+        requestContext.performRequest(put("/feed/" + eventContext.getLast().getId() + "/read"));
+    }
+
+    @When("I try to mark an event that does not exist from my feed as read")
+    public void i_try_to_mark_an_event_that_does_not_exist_from_my_feed_as_read() {
+        requestContext.performRequest(put("/feed/" + 999 + "/read"));
+    }
+
+    @Then("The event will be updated as read")
+    public void the_event_will_be_updated_as_read() {
+        Long eventId = eventContext.getLast().getId();
+        Optional<Event> event = eventRepository.findById(eventId);
+        assertTrue(event.isPresent());
+        assertTrue(event.get().isRead());
+    }
+
+    @Then("The event is not marked as read")
+    public void the_event_is_not_marked_as_read() {
+        Long eventId = eventContext.getLast().getId();
+        Optional<Event> event = eventRepository.findById(eventId);
+        assertTrue(event.isPresent());
+        assertFalse(event.get().isRead());
     }
 }
