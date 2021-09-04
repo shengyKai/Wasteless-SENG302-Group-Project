@@ -38,6 +38,11 @@ Feature: U32 - Managing my feed
     Then The request fails due to forbidden
     And The event is not marked as read
 
+  Scenario: I cannot mark an item as read if it does not exist in my feed
+    Given I am logged into my account
+    When I try to mark an event that does not exist from my feed as read
+    Then The request fails due to not acceptable
+
   Scenario: AC6 - I can add a tag to a item
     Given I am logged into my account
     When I try to change the event tag to "blue"

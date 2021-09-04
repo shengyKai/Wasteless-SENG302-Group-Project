@@ -118,6 +118,11 @@ public class EventStepDefinition {
         requestContext.performRequest(put("/feed/" + eventContext.getLast().getId() + "/read"));
     }
 
+    @When("I try to mark an event that does not exist from my feed as read")
+    public void i_try_to_mark_an_event_that_does_not_exist_from_my_feed_as_read() {
+        requestContext.performRequest(put("/feed/" + 999 + "/read"));
+    }
+
     @Then("The event will be updated as read")
     public void the_event_will_be_updated_as_read() {
         Long eventId = eventContext.getLast().getId();
