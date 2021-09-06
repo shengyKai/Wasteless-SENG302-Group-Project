@@ -64,8 +64,8 @@ describe('HomePage.vue', () => {
     expect(newsfeedItem.exists()).toBeFalsy();
   });
 
-  it('If no events are posted then the message "No items in your feed" should be shown', () => {
-    expect(wrapper.text()).toContain('No items in your feed');
+  it('If no events are posted then the message "No items in this feed" should be shown', () => {
+    expect(wrapper.text()).toContain('No items in this feed');
   });
 
   it('If an global message event is posted to the store then it should be displayed in the newsfeed', async () => {
