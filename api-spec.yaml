@@ -2254,9 +2254,9 @@ paths:
             schema:
               type: object
               required:
-                - status
+                - value
               properties:
-                status:
+                value:
                   $ref: '#/components/schemas/EventStatus'
 
       responses:
