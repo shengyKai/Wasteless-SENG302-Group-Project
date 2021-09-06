@@ -32,17 +32,8 @@ import Vue from 'vue';
 
 // Import Plugins
 import vuetify from './plugins/vuetify';
-import router from './plugins/vue-router';
 import './plugins/vuex';
 import { getStore } from './store';
-
-// Set Page Title
-router.afterEach((to, from) => {
-  Vue.nextTick(() => {
-    const title = to.meta.title;
-    document.title = title ? `${title} - LEFT_OVERS` : 'LEFT_OVERS';
-  });
-});
 
 // Import App
 import App from './App.vue';
@@ -68,7 +59,6 @@ new Vue({
   el: '#app',
   components: { App },
   vuetify,
-  router,
   template: '<App/>',
   /**
    * Before the window closes, check if any events have been staged for detetion and

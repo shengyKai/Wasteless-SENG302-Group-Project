@@ -29,31 +29,43 @@
         </template>
       </v-select>
       <!-- Newsfeed -->
-      <!-- Tab selection -->
-      <v-tabs
-        v-model="tab">
-        <v-tabs-slider/>
-        <v-tab href="#all-events-tab">
-          <v-icon>mdi-home</v-icon>
-          All
-        </v-tab>
-        <v-tab href="#archived-events-tab">
-          <v-icon>mdi-archive</v-icon>
-          Archived
-        </v-tab>
-      </v-tabs>
-      <!-- Tab content -->
-      <v-tabs-items v-model="tab">
-        <v-tab-item value="all-events-tab">
-          <EventList :events="eventsPage"/>
-        </v-tab-item>
-        <v-tab-item value="archived-events-tab">
-          <EventList :events="archivedEventsPage"/>
-        </v-tab-item>
-      </v-tabs-items>
+      <!-- Example message - move inside for loop once message is an event type -->
+      <template v-for="event in eventsPageWithSpacers">
+        <div
+          v-if="typeof event === 'string'"
+          :key="event"
+          class="full-width"
+          style="position: relative; height: 20px"
+        >
+          <v-divider
+            class="full-width center-vertical"
+          />
+          <div
+            class="font-weight-medium center-horisontal secondary--text white"
+          >
+            {{ event }}
+          </div>
+        </div>
+        <v-card
+          v-else
+          :key="event.id"
+          outlined
+          rounded="lg"
+          class="newsfeed-item"
+        >
+          <GlobalMessage v-if="event.type === 'GlobalMessageEvent'" :event="event"/>
+          <ExpiryEvent v-else-if="event.type === 'ExpiryEvent'" :event="event"/>
+          <DeleteEvent v-else-if="event.type === 'DeleteEvent'" :event="event"/>
+          <KeywordCreated v-else-if="event.type === 'KeywordCreatedEvent'" :event="event"/>
+          <MessageEvent v-else-if="event.type === 'MessageEvent'" :event="event"/>
+          <Event v-else :title="event.type">
+            <pre>{{ event }}</pre>
+          </Event>
+        </v-card>
+      </template>
       <!--paginate results-->
       <v-pagination
-        v-if="storeEvents.length !== 0 || !isBusiness"
+        v-if="mainEvents.length !== 0 || !isBusiness"
         v-model="currentPage"
         :total-visible="10"
         :length="totalPages"
@@ -70,13 +82,23 @@
 <script>
 import BusinessActionPanel from "./BusinessActionPanel";
 import UserActionPanel from "./UserActionPanel";
-import EventList from "@/components/home/newsfeed/EventList";
+import GlobalMessage from "./newsfeed/GlobalMessage.vue";
+import ExpiryEvent from './newsfeed/ExpiryEvent.vue';
+import DeleteEvent from './newsfeed/DeleteEvent.vue';
+import KeywordCreated from './newsfeed/KeywordCreated.vue';
+import MessageEvent from './newsfeed/MessageEvent.vue';
+import Event from './newsfeed/Event.vue';
 
 export default {
   components: {
-    EventList,
     BusinessActionPanel,
-    UserActionPanel
+    UserActionPanel,
+    GlobalMessage,
+    ExpiryEvent,
+    DeleteEvent,
+    KeywordCreated,
+    MessageEvent,
+    Event,
   },
   data() {
     return {
@@ -97,11 +119,7 @@ export default {
        */
       colours: [{text: "None", value: 'none'}, {text: "Red", value: 'red'}, {text: "Orange", value: 'orange'},
         {text: "Yellow", value: 'yellow'}, {text: "Green", value: 'green'}, {text: "Blue", value: 'blue'},
-        {text: "Purple", value: 'purple'}],
-      /**
-       * The index of the current tab
-       */
-      tab: 0,
+        {text: "Purple", value: 'purple'}]
     };
   },
   computed: {
@@ -110,6 +128,64 @@ export default {
      */
     storeEvents() {
       return this.$store.getters.events;
+    },
+    /**
+     * The events list which is filtered after retrieving from the store
+     */
+    filteredEvents() {
+      if (this.filterBy.length === 0) return this.storeEvents;
+      return this.storeEvents.filter(event => {
+        return this.filterBy.includes(event.tag);
+      });
+    },
+    /**
+     * Events categorised by type (normal, starred, archived) and ordered by creation date
+     */
+    categorisedEvents() {
+      let events = {normal: [], starred: [], archived: []};
+      for (let event of this.filteredEvents) {
+        events[event.status].push(event);
+      }
+      return events;
+    },
+    /**
+     * Events that should be shown in the main flow of events
+     * All events that are not archived with the starred events first
+     */
+    mainEvents() {
+      return [...this.categorisedEvents.starred, ...this.categorisedEvents.normal];
+    },
+    /**
+     * The events list after pagination for each page
+     */
+    eventsPage() {
+      const pageStartIndex = (this.currentPage - 1) * this.resultsPerPage;
+      return this.mainEvents.slice(pageStartIndex, (pageStartIndex + this.resultsPerPage));
+    },
+    /**
+     * Page of events with additional string elements between transitions in event status
+     */
+    eventsPageWithSpacers() {
+      let prevEvent = undefined;
+      let events = [];
+      for (let event of this.eventsPage) {
+        if (prevEvent?.status !== event.status) {
+          if (event.status === 'normal') {
+            events.push('Unstarred');
+          } else if (event.status === 'starred') {
+            events.push('Starred');
+          }
+        }
+        events.push(event);
+        prevEvent = event;
+      }
+      return events;
+    },
+    /**
+     * An attribute to check if the events list is a filtered events list or not
+     */
+    isFiltered() {
+      return this.filterBy.length !== 0;
     },
     /**
      * Current active user role
@@ -124,23 +200,11 @@ export default {
       return this.role?.type === "business";
     },
     /**
-     * List of inventory items to be shown
-     */
-    inventoryItems() {
-      if (!this.isBusiness) return undefined;
-      return [...Array(10).keys()].map(i => `Item ${i}`);
-    },
-    /**
      * Total number of results from the store
      */
     totalResults() {
-      if (this.events.length === undefined) return 0;
-      switch (this.tab) {
-      case "archived-events-tab":
-        return this.archivedEvents.length;
-      default:
-        return this.events.length;
-      }
+      if (this.mainEvents.length === undefined) return 0;
+      return this.mainEvents.length;
     },
     /**
      * The total number of pages required to show all the events
@@ -154,12 +218,7 @@ export default {
      */
     resultsMessage() {
       if (this.totalResults === 0 && !this.isFiltered) {
-        switch (this.tab) {
-        case "archived-events-tab":
-          return "No archived events in your feed";
-        default:
-          return 'No items in your feed';
-        }
+        return 'No items in your feed';
       } else if (this.totalResults === 0 && this.isFiltered) {
         return 'No items matches the filter';
       }
@@ -170,51 +229,6 @@ export default {
       }
       return `Displaying ${pageStartIndex + 1} - ${pageEndIndex} of ${this.totalResults} results`;
     },
-    /**
-     * The events list which is filtered after retrieving from the store.
-     * Archived events are filtered out.
-     */
-    events() {
-      if (this.filterBy.length === 0) return this.storeEvents.filter(event => {
-        return event.status !== 'archived';
-      });
-      return this.storeEvents.filter(event => {
-        return this.filterBy.includes(event.tag)
-            && event.status !== 'archived';
-      });
-    },
-    /**
-     * The list of events which are archived. Event filter still applies
-     */
-    archivedEvents() {
-      if (this.filterBy.length === 0) return this.storeEvents.filter(event => {
-        return event.status === 'archived';
-      });
-      return this.events.filter(event => {
-        return this.filterBy.includes(event.tag)
-            && event.status === 'archived';
-      });
-    },
-    /**
-     * The events list after pagination for each page
-     */
-    eventsPage() {
-      const pageStartIndex = (this.currentPage - 1) * this.resultsPerPage;
-      return this.events.slice(pageStartIndex, (pageStartIndex + this.resultsPerPage));
-    },
-    /**
-     * The archived events list after pagination for each page
-     */
-    archivedEventsPage() {
-      const pageStartIndex = (this.currentPage - 1) * this.resultsPerPage;
-      return this.archivedEvents.slice(pageStartIndex, (pageStartIndex + this.resultsPerPage));
-    },
-    /**
-     * An attribute to check if the events list is a filtered events list or not
-     */
-    isFiltered() {
-      return this.filterBy.length !== 0;
-    }
   },
   watch: {
     /**
@@ -229,12 +243,6 @@ export default {
      */
     totalPages: function() {
       this.currentPage = Math.max(Math.min(this.currentPage, this.totalPages), 1);
-    },
-    /**
-     * Watch changes in the current selected tab so that the current page can be reset
-     */
-    tab: function() {
-      this.currentPage = 1;
     }
   }
 };
@@ -282,6 +290,10 @@ pre {
   margin: 5px;
 }
 
+.newsfeed-item {
+  margin-bottom: 10px;
+}
+
 .action-pane {
   margin-right: 10px;
   max-height: 400px;
@@ -297,6 +309,23 @@ pre {
 .action-button {
   display: block;
   margin: 10px;
+}
+
+.full-width {
+  left: 0%;
+  right: 0%;
+}
+
+.center-horisontal {
+  position: absolute;
+  left: 50%;
+  transform: translate(-50%, 0);
+}
+
+.center-vertical {
+  position: absolute;
+  top: 50%;
+  transform: translate(0, -50%);
 }
 
 </style>
