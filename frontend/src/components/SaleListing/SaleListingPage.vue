@@ -6,6 +6,20 @@
       <h2 class="saleTitle">{{ product.name }}</h2>
       <label class="saleTitleJoin"> | </label>
       <a class="businessLink" @click="placeholder">Nathan Apple LTD</a>
+      <v-card-actions class="action-btn-container">
+        <v-btn class="action-btn">
+          <v-icon>mdi-currency-usd</v-icon>
+          Buy
+        </v-btn>
+        <v-btn class="action-btn">
+          <v-icon>mdi-thumb-up</v-icon>
+          Like
+        </v-btn>
+        <v-btn class="action-btn">
+          <v-icon>mdi-arrow-left</v-icon>
+          Go Back
+        </v-btn>
+      </v-card-actions>
       <v-row no-gutters>
         <v-col class="column" cols="6" sm="2">
           <label class="leadingLabel">Total Price:</label>
@@ -50,25 +64,6 @@
           <v-btn color=normal>Orange Apple</v-btn>
         </v-col>
       </v-row>
-      <div class="space"/>
-      <v-card-action>
-        <v-btn class="action-btn">
-          <v-icon>mdi-currency-usd</v-icon>
-          Buy
-        </v-btn>
-      </v-card-action>
-      <v-card-action>
-        <v-btn class="action-btn">
-          <v-icon>mdi-thumb-up</v-icon>
-          Like
-        </v-btn>
-      </v-card-action>
-      <v-card-action>
-        <v-btn class="action-btn">
-          <v-icon>mdi-arrow-left</v-icon>
-          Go Back
-        </v-btn>
-      </v-card-action>
     </v-card>
   </div>
 </template>
@@ -184,12 +179,12 @@ export default {
   color: grey;
 }
 
-.action-btn {
-  margin-right: 15px;
+.action-btn-container {
+  float: right;
 }
 
-.gap {
-  margin-top: 10px;
+.action-btn {
+  margin-left: 15px;
 }
 
 .space {
