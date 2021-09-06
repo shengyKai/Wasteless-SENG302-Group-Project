@@ -1,69 +1,73 @@
 <template>
   <div>
     <v-card class="body">
-      <ImageCarousel :imagesList="product.images" :productId="product.id"/>
-      <div class="gap"/>
-      <h2 class="saleTitle">{{ product.name }}</h2>
-      <label class="saleTitleJoin"> | </label>
-      <a class="businessLink" @click="placeholder">Nathan Apple LTD</a>
-      <v-card-actions class="action-btn-container">
-        <v-btn class="action-btn">
-          <v-icon>mdi-currency-usd</v-icon>
-          Buy
-        </v-btn>
-        <v-btn class="action-btn">
-          <v-icon>mdi-thumb-up</v-icon>
-          Like
-        </v-btn>
-        <v-btn class="action-btn">
-          <v-icon>mdi-arrow-left</v-icon>
-          Go Back
-        </v-btn>
-      </v-card-actions>
-      <v-row no-gutters>
-        <v-col class="column" cols="6" sm="2">
-          <label class="leadingLabel">Total Price:</label>
-        </v-col>
-        <v-col class="column" cols="6" sm="4">
-          <label class="followingLabel">$120.40</label>
-        </v-col>
-        <v-col class="column" cols="6" sm="2">
-          <label class="leadingLabel">Date Created:</label>
-        </v-col>
-        <v-col class="column" cols="6" sm="4">
-          <label class="followingLabel">6 Jan 2021</label>
-        </v-col>
-        <v-col class="column" cols="6" sm="2">
-          <label class="leadingLabel">Quantity:</label>
-        </v-col>
-        <v-col class="column" cols="6" sm="4">
-          <label class="followingLabel">7</label>
-        </v-col>
-        <v-col class="column" cols="6" sm="2">
-          <label class="leadingLabel">Expiry Date:</label>
-        </v-col>
-        <v-col class="column" cols="6" sm="4">
-          <label class="followingLabel">5 Sep 2021</label>
-        </v-col>
-        <v-col class="column" cols="6" sm="2">
-          <label class="leadingLabel">More Info:</label>
-        </v-col>
-        <v-col class="column" cols="6" sm="4">
-          <label class="followingLabel">Tradable for 2kgs of lemons</label>
-        </v-col>
-        <v-col class="column" cols="6" sm="2">
-          <label class="leadingLabel">Closing Date:</label>
-        </v-col>
-        <v-col class="column" cols="6" sm="4">
-          <label class="followingLabel">9 Oct 2021</label>
-        </v-col>
-        <v-col class="column" cols="6" sm="2">
-          <label class="leadingLabel">Product:</label>
-        </v-col>
-        <v-col class="column" cols="6" sm="4">
-          <v-btn color=normal>Orange Apple</v-btn>
-        </v-col>
-      </v-row>
+      <div style="flex: 1;">
+        <ImageCarousel :imagesList="product.images" :productId="product.id"/>
+        <v-card-actions class="action-btn-container">
+          <v-btn class="action-btn">
+            <v-icon>mdi-currency-usd</v-icon>
+            Buy
+          </v-btn>
+          <v-btn class="action-btn">
+            <v-icon>mdi-thumb-up</v-icon>
+            Like
+          </v-btn>
+          <v-btn class="action-btn">
+            <v-icon>mdi-arrow-left</v-icon>
+            Go Back
+          </v-btn>
+        </v-card-actions>
+        <div class="gap"/>
+        <h2 class="saleTitle">{{ product.name }}</h2>
+        <label class="saleTitleJoin"> From </label>
+        <a class="businessLink" @click="placeholder">Nathan Apple LTD</a>
+      </div>
+      <div style="flex: 1;">
+        <v-row no-gutters>
+          <v-col class="column" cols="6" sm="2">
+            <label class="leadingLabel">Total Price:</label>
+          </v-col>
+          <v-col class="column" cols="6" sm="4">
+            <label class="followingLabel">$120.40</label>
+          </v-col>
+          <v-col class="column" cols="6" sm="2">
+            <label class="leadingLabel">Date Created:</label>
+          </v-col>
+          <v-col class="column" cols="6" sm="4">
+            <label class="followingLabel">6 Jan 2021</label>
+          </v-col>
+          <v-col class="column" cols="6" sm="2">
+            <label class="leadingLabel">Quantity:</label>
+          </v-col>
+          <v-col class="column" cols="6" sm="4">
+            <label class="followingLabel">7</label>
+          </v-col>
+          <v-col class="column" cols="6" sm="2">
+            <label class="leadingLabel">Expiry Date:</label>
+          </v-col>
+          <v-col class="column" cols="6" sm="4">
+            <label class="followingLabel">5 Sep 2021</label>
+          </v-col>
+          <v-col class="column" cols="6" sm="2">
+            <label class="leadingLabel">More Info:</label>
+          </v-col>
+          <v-col class="column" cols="6" sm="4">
+            <label class="followingLabel">Tradable for 2kgs of lemons</label>
+          </v-col>
+          <v-col class="column" cols="6" sm="2">
+            <label class="leadingLabel">Closing Date:</label>
+          </v-col>
+          <v-col class="column" cols="6" sm="4">
+            <label class="followingLabel">9 Oct 2021</label>
+          </v-col>
+          <v-col class="column" cols="6" sm="2">
+            <label class="leadingLabel">Product:</label>
+          </v-col>
+          <v-col class="column" cols="6" sm="4">
+            <v-btn color=normal>Orange Apple</v-btn>
+          </v-col>
+        </v-row>
+      </div>
     </v-card>
   </div>
 </template>
