@@ -30,10 +30,21 @@
       </v-select>
       <!-- Newsfeed -->
       <!-- Example message - move inside for loop once message is an event type -->
-      <template v-for="(event, index) in eventsPageWithSpacers">
-        <div v-if="typeof event === 'string'" :key="event">
-          <v-divider class="py-1" v-if="index !== 0"/>
-          <div class="text--secondary subtitle-1">{{ event }}</div>
+      <template v-for="event in eventsPageWithSpacers">
+        <div
+          v-if="typeof event === 'string'"
+          :key="event"
+          class="full-width"
+          style="position: relative; height: 20px"
+        >
+          <v-divider
+            class="full-width center-vertical"
+          />
+          <div
+            class="font-weight-medium center-horisontal secondary--text white"
+          >
+            {{ event }}
+          </div>
         </div>
         <v-card
           v-else
@@ -298,6 +309,23 @@ pre {
 .action-button {
   display: block;
   margin: 10px;
+}
+
+.full-width {
+  left: 0%;
+  right: 0%;
+}
+
+.center-horisontal {
+  position: absolute;
+  left: 50%;
+  transform: translate(-50%, 0);
+}
+
+.center-vertical {
+  position: absolute;
+  top: 50%;
+  transform: translate(0, -50%);
 }
 
 </style>
