@@ -4,15 +4,15 @@
       <div style="flex: 1;">
         <ImageCarousel :imagesList="product.images" :productId="product.id"/>
         <v-card-actions class="action-btn-container">
-          <v-btn class="action-btn">
+          <v-btn class="action-btn white-text" color="primary">
             <v-icon>mdi-currency-usd</v-icon>
             Buy
           </v-btn>
-          <v-btn class="action-btn">
+          <v-btn class="action-btn white--text" color="green">
             <v-icon>mdi-thumb-up</v-icon>
-            Like
+            Like 69
           </v-btn>
-          <v-btn class="action-btn">
+          <v-btn class="action-btn white--text" color="purple">
             <v-icon>mdi-arrow-left</v-icon>
             Go Back
           </v-btn>
@@ -64,7 +64,7 @@
             <label class="leadingLabel">Product:</label>
           </v-col>
           <v-col class="column" cols="6" sm="4">
-            <v-btn color=normal>Orange Apple</v-btn>
+            <v-btn color=orange outlined>Orange Apple</v-btn>
           </v-col>
         </v-row>
       </div>
