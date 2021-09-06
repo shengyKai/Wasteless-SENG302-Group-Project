@@ -1,8 +1,8 @@
 <template>
   <div>
     <v-card class="body">
-      <h2>{{ product.name }}</h2>
-      <p>Image Carousel Placeholder</p>
+      <h2 class="saleTitle">{{ product.name }}</h2>
+      <ImageCarousel class="ccc" :imagesList="product.images" :productId="product.id" />
       <v-row no-gutters>
         <v-col class="column" cols="6" sm="2">
           <label class="leadingLabel">Total Price:</label>
@@ -77,7 +77,7 @@
 </template>
 
 <script>
-//import ImageCarousel from "@/components/utils/ImageCarousel";
+import ImageCarousel from "@/components/utils/ImageCarousel";
 //import FullProductDescription from "@/components/utils/FullProductDescription";
 //import { currencyFromCountry } from "@/api/currency";
 import { formatDate, formatPrice } from '@/utils';
@@ -85,7 +85,7 @@ import { formatDate, formatPrice } from '@/utils';
 export default {
   name: "SaleListingPage",
   components: {
-    //FullProductDescription, ImageCarousel
+    ImageCarousel //FullProductDescription
   },
   data() {
     return {
@@ -158,11 +158,11 @@ export default {
 .body {
   padding: 16px;
   margin-top: 15px;
-  width: 1200px;
+  width: auto;
 }
 
 .column {
-  padding-bottom: 10px;
+  padding-top: 10px;
 }
 
 .leadingLabel {
@@ -174,11 +174,15 @@ export default {
   font-size: 20px;
 }
 
+.saleTitle {
+  margin-bottom: 10px;
+}
+
 .action-btn {
   margin-right: 15px;
 }
 
 .space {
-  margin-top: 20px;
+  margin-top: 25px;
 }
 </style>
