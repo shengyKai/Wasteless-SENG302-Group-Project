@@ -1,8 +1,77 @@
 <template>
   <div>
     <v-card class="body">
-      <v-card-title>{{ product.name }}</v-card-title>
-      <v-card-title>Temp Product Name</v-card-title>
+      <h2>{{ product.name }}</h2>
+      <p>Image Carousel Placeholder</p>
+      <v-row no-gutters>
+        <v-col class="column" cols="6" sm="2">
+          <label class="leadingLabel">Total Price:</label>
+        </v-col>
+        <v-col class="column" cols="6" sm="4">
+          <label class="followingLabel">$120.40</label>
+        </v-col>
+        <v-col class="column" cols="6" sm="2">
+          <label class="leadingLabel">Date Created:</label>
+        </v-col>
+        <v-col class="column" cols="6" sm="4">
+          <label class="followingLabel">6 Jan 2021</label>
+        </v-col>
+        <v-col class="column" cols="6" sm="2">
+          <label class="leadingLabel">Quantity:</label>
+        </v-col>
+        <v-col class="column" cols="6" sm="4">
+          <label class="followingLabel">7</label>
+        </v-col>
+        <v-col class="column" cols="6" sm="2">
+          <label class="leadingLabel">Expiry Date:</label>
+        </v-col>
+        <v-col class="column" cols="6" sm="4">
+          <label class="followingLabel">5 Sep 2021</label>
+        </v-col>
+        <v-col class="column" cols="6" sm="2">
+          <label class="leadingLabel">More Info:</label>
+        </v-col>
+        <v-col class="column" cols="6" sm="4">
+          <label class="followingLabel">Tradable for 2kgs of lemons</label>
+        </v-col>
+        <v-col class="column" cols="6" sm="2">
+          <label class="leadingLabel">Closing Date:</label>
+        </v-col>
+        <v-col class="column" cols="6" sm="4">
+          <label class="followingLabel">9 Oct 2021</label>
+        </v-col>
+        <v-col class="column" cols="6" sm="2">
+          <label class="leadingLabel">Business:</label>
+        </v-col>
+        <v-col class="column" cols="6" sm="4">
+          <v-btn color=normal>Nathan Apple LTD</v-btn>
+        </v-col>
+        <v-col class="column" cols="6" sm="2">
+          <label class="leadingLabel">Product:</label>
+        </v-col>
+        <v-col class="column" cols="6" sm="4">
+          <v-btn color=normal>Orange Apple</v-btn>
+        </v-col>
+      </v-row>
+      <div class="space"/>
+      <v-card-action>
+        <v-btn class="action-btn">
+          <v-icon>mdi-currency-usd</v-icon>
+          Buy
+        </v-btn>
+      </v-card-action>
+      <v-card-action>
+        <v-btn class="action-btn">
+          <v-icon>mdi-thumb-up</v-icon>
+          Like
+        </v-btn>
+      </v-card-action>
+      <v-card-action>
+        <v-btn class="action-btn">
+          <v-icon>mdi-arrow-left</v-icon>
+          Go Back
+        </v-btn>
+      </v-card-action>
     </v-card>
   </div>
 </template>
@@ -31,11 +100,15 @@ export default {
     businessId: Number
   },
   computed: {
+    hmm() {
+      console.log(this.saleItem);
+      return null;
+    },
     /**
      * Easy access to the product information of the sale item
      */
     product() {
-      return this.saleItem.InventoryItem.product;
+      return this.saleItem.inventoryItem.product;
     },
     /**
      * Easy access to the inventory item information of the sale item
@@ -85,5 +158,27 @@ export default {
 .body {
   padding: 16px;
   margin-top: 15px;
+  width: 1200px;
+}
+
+.column {
+  padding-bottom: 10px;
+}
+
+.leadingLabel {
+  font-weight: bold;
+  font-size: 20px;
+}
+
+.followingLabel {
+  font-size: 20px;
+}
+
+.action-btn {
+  margin-right: 15px;
+}
+
+.space {
+  margin-top: 20px;
 }
 </style>
