@@ -60,6 +60,7 @@
           </v-timeline-item>
         </v-timeline>
         <v-card-actions>
+          <v-btn ref="expandButton" style="position: absolute; bottom: 10px; right: 125px" color="normal" @click="goToSaleItem">Expand</v-btn>
           <v-btn ref="viewMoreButton" style="position: absolute; bottom: 10px; right: 10px" color="secondary" @click="moreInfo=!moreInfo">View {{moreInfo? 'Less' : 'More'}}</v-btn>
         </v-card-actions>
       </v-col>
@@ -140,12 +141,17 @@ export default {
     },
     productDescription() {
       return this.product.description || "Not set";
-    }
+    },
   },
   async created() {
     // When the Sale item is created, the currency will be set to the currency of the country the product is being
     // sold in. It will have blank fields if no currency can be found from the country.
     this.currency = await currencyFromCountry(this.product.countryOfSale);
+  },
+  methods: {
+    goToSaleItem() {
+      this.$router.push("/business/" + this.$store.state.activeRole.id + "/listings/" + this.saleItem.id);
+    }
   }
 };
 </script>

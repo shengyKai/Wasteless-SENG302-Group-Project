@@ -15,7 +15,6 @@ import SalePage from "../components/SalePage.vue";
 import SaleListingPage from "../components/SaleListing/SaleListingPage.vue";
 import Marketplace from "../components/marketplace/Marketplace.vue";
 import UserCards from "../components/marketplace/UserCards.vue";
-import { component } from "vue/types/umd";
 
 Vue.use(VueRouter);
 

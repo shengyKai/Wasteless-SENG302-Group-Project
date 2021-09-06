@@ -1,6 +1,9 @@
 <template>
   <div>
-    <h1>Temp Sale Listing Page Title</h1>
+    <v-card class="body">
+      <v-card-title>{{ product.name }}</v-card-title>
+      <v-card-title>Temp Product Name</v-card-title>
+    </v-card>
   </div>
 </template>
 
@@ -77,3 +80,10 @@ export default {
   }
 };
 </script>
+
+<style scoped>
+.body {
+  padding: 16px;
+  margin-top: 15px;
+}
+</style>
