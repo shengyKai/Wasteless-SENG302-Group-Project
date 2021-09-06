@@ -44,9 +44,6 @@
           <label class="followingLabel">9 Oct 2021</label>
         </v-col>
         <v-col class="column" cols="6" sm="2">
-          <label class="leadingLabel">Business:</label>
-        </v-col>
-        <v-col class="column" cols="6" sm="2">
           <label class="leadingLabel">Product:</label>
         </v-col>
         <v-col class="column" cols="6" sm="4">
