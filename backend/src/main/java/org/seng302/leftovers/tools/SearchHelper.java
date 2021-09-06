@@ -14,7 +14,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.math.BigDecimal;
-import java.time.Instant;
+import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -616,12 +616,11 @@ public class SearchHelper {
         return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("product").get("business"), business);
     }
 
-    public static Specification<User> constructSaleListingSpecificationFromSearchFilter(List<BigDecimal> priceBounds, List<Instant> dateBounds, String businessType) {
-        List<String> searchTokens = splitSearchStringIntoTerms(searchQuery);
+    public static Specification<SaleItem> constructSaleListingSpecificationFromPrice(BigDecimal lowerBound, BigDecimal upperBound) {
+        return (root, query, criteriaBuilder) -> criteriaBuilder.between(root.get("price"), lowerBound, upperBound);
+    }
 
-        var fieldNames = Arrays.asList("firstName", "lastName", "nickname", "middleName");
-        SearchQuery<User> parsedQuery = parseSearchTokens(searchTokens, fieldNames);
-        return buildCompoundSpecification(parsedQuery)
-                .and(isNotDGAASpec());
+    public static Specification<SaleItem> constructSaleListingSpecificationFromClosingDate(LocalDate lowerBound, LocalDate upperBound) {
+        return (root, query, criteriaBuilder) -> criteriaBuilder.between(root.get("closes"), lowerBound, upperBound);
     }
 }
