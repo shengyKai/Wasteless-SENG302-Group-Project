@@ -29,28 +29,27 @@
         </template>
       </v-select>
       <!-- Newsfeed -->
-      <!-- Example message - move inside for loop once message is an event type -->
-      <v-card
-        v-for="event in eventsPage"
-        :key="event.id"
-        outlined
-        rounded="lg"
-        class="newsfeed-item"
-      >
-        <GlobalMessage v-if="event.type === 'GlobalMessageEvent'" :event="event"/>
-        <ExpiryEvent v-else-if="event.type === 'ExpiryEvent'" :event="event"/>
-        <DeleteEvent v-else-if="event.type === 'DeleteEvent'" :event="event"/>
-        <KeywordCreated v-else-if="event.type === 'KeywordCreatedEvent'" :event="event"/>
-        <MessageEvent v-else-if="event.type === 'MessageEvent'" :event="event"/>
-        <template v-else>
-          <v-card-title>
-            {{ event.type }}
-          </v-card-title>
-          <v-card-text>
-            <pre>{{ event }}</pre>
-          </v-card-text>
-        </template>
-      </v-card>
+      <v-tabs
+        v-model="tab"
+        icons-and-text>
+        <v-tabs-slider/>
+        <v-tab href="#all-events-tab">
+          All
+          <v-icon>mdi-home</v-icon>
+        </v-tab>
+        <v-tab href="#archived-events-tab">
+          Archived
+          <v-icon>mdi-archive</v-icon>
+        </v-tab>
+      </v-tabs>
+      <v-tabs-items v-model="tab">
+        <v-tab-item value="all-events-tab">
+          <EventList :events="eventsPage"/>
+        </v-tab-item>
+        <v-tab-item value="archived-events-tab">
+          <EventList :events="archivedEvents"/>
+        </v-tab-item>
+      </v-tabs-items>
       <!--paginate results-->
       <v-pagination
         v-if="storeEvents.length !== 0 || !isBusiness"
@@ -70,21 +69,13 @@
 <script>
 import BusinessActionPanel from "./BusinessActionPanel";
 import UserActionPanel from "./UserActionPanel";
-import GlobalMessage from "./newsfeed/GlobalMessage.vue";
-import ExpiryEvent from './newsfeed/ExpiryEvent.vue';
-import DeleteEvent from './newsfeed/DeleteEvent.vue';
-import KeywordCreated from './newsfeed/KeywordCreated.vue';
-import MessageEvent from './newsfeed/MessageEvent.vue';
+import EventList from "@/components/home/EventList";
 
 export default {
   components: {
+    EventList,
     BusinessActionPanel,
-    UserActionPanel,
-    GlobalMessage,
-    ExpiryEvent,
-    DeleteEvent,
-    KeywordCreated,
-    MessageEvent
+    UserActionPanel
   },
   data() {
     return {
@@ -105,7 +96,11 @@ export default {
        */
       colours: [{text: "None", value: 'none'}, {text: "Red", value: 'red'}, {text: "Orange", value: 'orange'},
         {text: "Yellow", value: 'yellow'}, {text: "Green", value: 'green'}, {text: "Blue", value: 'blue'},
-        {text: "Purple", value: 'purple'}]
+        {text: "Purple", value: 'purple'}],
+      /**
+       * The index of the current tab
+       */
+      tab: 0,
     };
   },
   computed: {
@@ -171,6 +166,14 @@ export default {
       if (this.filterBy.length === 0) return this.storeEvents;
       return this.storeEvents.filter(event => {
         return this.filterBy.includes(event.tag);
+      });
+    },
+    /**
+     * The list of events which are archived. Event filter still applies
+     */
+    archivedEvents() {
+      return this.events.filter(event => {
+        return event.status === 'archived';
       });
     },
     /**
@@ -245,10 +248,6 @@ pre {
 .inventory-item {
   max-width: 100px;
   margin: 5px;
-}
-
-.newsfeed-item {
-  margin-bottom: 10px;
 }
 
 .action-pane {
