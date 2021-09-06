@@ -1,8 +1,11 @@
 <template>
   <div>
     <v-card class="body">
+      <ImageCarousel :imagesList="product.images" :productId="product.id"/>
+      <div class="gap"/>
       <h2 class="saleTitle">{{ product.name }}</h2>
-      <ImageCarousel class="ccc" :imagesList="product.images" :productId="product.id" />
+      <label class="saleTitleJoin"> | </label>
+      <a class="businessLink" @click="placeholder">Nathan Apple LTD</a>
       <v-row no-gutters>
         <v-col class="column" cols="6" sm="2">
           <label class="leadingLabel">Total Price:</label>
@@ -42,9 +45,6 @@
         </v-col>
         <v-col class="column" cols="6" sm="2">
           <label class="leadingLabel">Business:</label>
-        </v-col>
-        <v-col class="column" cols="6" sm="4">
-          <v-btn color=normal>Nathan Apple LTD</v-btn>
         </v-col>
         <v-col class="column" cols="6" sm="2">
           <label class="leadingLabel">Product:</label>
@@ -100,10 +100,6 @@ export default {
     businessId: Number
   },
   computed: {
-    hmm() {
-      console.log(this.saleItem);
-      return null;
-    },
     /**
      * Easy access to the product information of the sale item
      */
@@ -175,11 +171,28 @@ export default {
 }
 
 .saleTitle {
-  margin-bottom: 10px;
+  display: inline;
+}
+
+.saleTitleJoin {
+  display: inline;
+  margin-left: 10px;
+  font-size: 23px;
+}
+
+.businessLink {
+  display: inline;
+  font-size: 23px;
+  text-decoration: underline;
+  color: grey;
 }
 
 .action-btn {
   margin-right: 15px;
+}
+
+.gap {
+  margin-top: 10px;
 }
 
 .space {
