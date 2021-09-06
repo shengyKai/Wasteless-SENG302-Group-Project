@@ -183,6 +183,10 @@ public class EventController {
                 throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Current user does not have permission to modify this event");
             }
 
+            if (event.getStatus().equals(EventStatus.ARCHIVED)) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The status of an archived event cannot be changed");
+            }
+
             event.updateEventStatus(body.getValue());
             eventService.saveEvent(event);
         } catch (Exception e) {

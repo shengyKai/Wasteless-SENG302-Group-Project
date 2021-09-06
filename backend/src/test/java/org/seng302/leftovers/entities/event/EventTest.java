@@ -112,13 +112,12 @@ class EventTest {
 
     @ParameterizedTest
     @EnumSource(EventStatus.class)
-    void updateEventStatus_initialStatusArchived_exceptionThrown(EventStatus newStatus) {
+    void updateEventStatus_initialStatusArchived_eventStatusUnchanged(EventStatus newStatus) {
         Event event = new EventSubclass();
         event.updateEventStatus(EventStatus.ARCHIVED);
         assertEquals(EventStatus.ARCHIVED, event.getStatus());
 
-        var exception = assertThrows(ResponseStatusException.class, () -> event.updateEventStatus(newStatus));
-        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
-        assertEquals("The status of an archived event cannot be changed", exception.getReason());
+        event.updateEventStatus(newStatus);
+        assertEquals(EventStatus.ARCHIVED, event.getStatus());
     }
 }

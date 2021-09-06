@@ -132,7 +132,7 @@ public abstract class Event {
      */
     public void updateEventStatus(EventStatus eventStatus) {
         if (this.eventStatus.equals(EventStatus.ARCHIVED)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The status of an archived event cannot be changed");
+            return;
         }
         this.eventStatus = eventStatus;
     }
