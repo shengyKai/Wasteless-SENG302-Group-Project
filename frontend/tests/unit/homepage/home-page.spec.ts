@@ -76,6 +76,7 @@ describe('HomePage.vue', () => {
       tag: 'none',
       created: new Date().toString(),
       message: 'Hello world',
+      read: false
     };
     store.commit('addEvent', event);
     await Vue.nextTick();
@@ -93,6 +94,7 @@ describe('HomePage.vue', () => {
       tag: 'none',
       created: new Date().toString(),
       card: testMarketPlaceCard,
+      read: false
     };
     store.commit('addEvent', event);
     await Vue.nextTick();
@@ -110,7 +112,8 @@ describe('HomePage.vue', () => {
       tag: 'none',
       created: new Date().toString(),
       title: "test_title",
-      section: "ForSale"
+      section: "ForSale",
+      read: false
     };
     store.commit('addEvent', event);
     await Vue.nextTick();
@@ -132,7 +135,8 @@ describe('HomePage.vue', () => {
         name: "EDWARD",
         created: "2012/01/01"
       },
-      creator: testUser
+      creator: testUser,
+      read: false
     };
     store.commit('addEvent', event);
     await Vue.nextTick();
@@ -161,6 +165,7 @@ describe('HomePage.vue', () => {
         id: 3,
       },
       participantType: 'seller',
+      read: false
     };
     store.commit('addEvent', event);
     await Vue.nextTick();
@@ -178,6 +183,7 @@ describe('HomePage.vue', () => {
       tag: 'none',
       created: new Date().toString(),
       message: 'Hello world',
+      read: false
     };
     store.commit('addEvent', event);
     await Vue.nextTick();
@@ -192,6 +198,7 @@ describe('HomePage.vue', () => {
         status: 'starred',
         id: 7,
         tag: 'none',
+        read: false,
         created: new Date().toString(),
         message: 'Hello world',
       };
@@ -209,6 +216,7 @@ describe('HomePage.vue', () => {
         status: 'archived',
         id: 7,
         tag: 'none',
+        read: false,
         created: new Date().toString(),
         message: 'Hello world',
       };
@@ -226,6 +234,7 @@ describe('HomePage.vue', () => {
         status: 'starred',
         id: 7,
         tag: 'none',
+        read: false,
         created: new Date().toString(),
         message: 'Hello world',
       };
@@ -235,6 +244,7 @@ describe('HomePage.vue', () => {
         status: 'starred',
         id: 8,
         tag: 'none',
+        read: false,
         created: new Date().toString(),
         message: 'Hello world',
       };
@@ -255,6 +265,7 @@ describe('HomePage.vue', () => {
         status: 'normal',
         id: 7,
         tag: 'none',
+        read: false,
         created: new Date().toString(),
         message: 'Hello world',
       };
@@ -264,6 +275,7 @@ describe('HomePage.vue', () => {
         status: 'normal',
         id: 8,
         tag: 'none',
+        read: false,
         created: new Date().toString(),
         message: 'Hello world',
       };
@@ -284,6 +296,7 @@ describe('HomePage.vue', () => {
         status: 'normal',
         id: 7,
         tag: 'none',
+        read: false,
         created: new Date().toString(),
         message: 'Hello world',
       };
@@ -293,6 +306,7 @@ describe('HomePage.vue', () => {
         status: 'starred',
         id: 8,
         tag: 'none',
+        read: false,
         created: new Date().toString(),
         message: 'Hello world',
       };
@@ -322,6 +336,7 @@ describe('HomePage.vue', () => {
           tag: 'none',
           created: new Date().toString(),
           message: 'None event',
+          read: false
         };
         store.commit('addEvent', event);
         await Vue.nextTick();
@@ -334,6 +349,7 @@ describe('HomePage.vue', () => {
           tag: 'red',
           created: new Date().toString(),
           message: 'Red event',
+          read: false
         };
         store.commit('addEvent', event);
         await Vue.nextTick();

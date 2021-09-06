@@ -4,6 +4,7 @@ import Vuetify from 'vuetify';
 import { createLocalVue, mount, Wrapper } from '@vue/test-utils';
 import Event from '@/components/home/newsfeed/Event.vue';
 import * as api from '@/api/internal';
+import * as eventsApi from '@/api/events';
 
 import Vuex, { Store } from 'vuex';
 import { getStore, resetStoreForTesting, StoreData } from '@/store';
@@ -16,11 +17,16 @@ jest.mock('@/api/internal', () => ({
   deleteNotification: jest.fn(),
 }));
 
+jest.mock('@/api/events', () => ({
+  updateEventAsRead: jest.fn(),
+}));
+
 jest.mock('@/components/utils/Methods/synchronizedTime', () => ({
   now : new Date("2021-01-02T11:00:00Z")
 }));
 
 const deleteNotification = castMock(api.deleteNotification);
+const updateEventAsRead = castMock(eventsApi.updateEventAsRead);
 
 describe('Event.vue', () => {
   let wrapper: Wrapper<any>;
@@ -28,15 +34,17 @@ describe('Event.vue', () => {
   // The global store to be used
   let store: Store<StoreData>;
 
-  beforeEach(async () => {
-    const localVue = createLocalVue();
-    vuetify = new Vuetify();
+  const localVue = createLocalVue();
 
+  function generateWrapper() {
+
+    vuetify = new Vuetify();
+  
     localVue.use(Vuex);
     resetStoreForTesting();
     store = getStore();
     store.state.user = makeTestUser(1);
-
+  
     wrapper = mount(Event, {
       localVue,
       vuetify,
@@ -44,12 +52,17 @@ describe('Event.vue', () => {
       propsData: {
         event: {
           id: 44,
-          created: "2021-01-01T12:00:00Z",
+          created: "2021-01-01T12:00:00Z"
         },
         title: "Test event",
       }
     });
+  }
+
+  beforeEach(async () => {
+    generateWrapper();
   });
+
 
   describe('Event is not been set to be deleted', () => {
 
@@ -126,4 +139,31 @@ describe('Event.vue', () => {
 
   });
 
+  describe('Event is marked as read', () => {
+    beforeEach(() => {
+      generateWrapper();
+      updateEventAsRead.mockClear();
+    });
+
+    afterEach(() => {
+      wrapper.destroy();
+    })
+
+    it("On click of the event component, the api endpoint to update the read status is called", async () => {
+      wrapper.trigger("click");
+      await Vue.nextTick();
+      expect(updateEventAsRead).toHaveBeenCalled();
+    });
+
+    it("If the event is already marked as read, the api endpoint to update the read status will not be called", async () => {
+      await wrapper.setData({
+        event: {
+          read: true
+        }
+      });
+      wrapper.trigger("click");
+      await Vue.nextTick();
+      expect(updateEventAsRead).not.toHaveBeenCalled();
+    });
+  });
 });
