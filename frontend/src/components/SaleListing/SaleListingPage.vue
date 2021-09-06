@@ -65,40 +65,42 @@
           <v-col class="column" cols="6" sm="4">
             <label class="followingLabel">{{ createdFormatted }}</label>
           </v-col>
-          <v-btn class="product-btn" color=orange outlined>Orange Apple</v-btn>
+          <v-btn class="product-btn" color=orange outlined @click="toggleExtraDetails">Orange Apple</v-btn>
         </v-row>
-        <v-row no-gutters>
-          <v-col class="column" cols="6" sm="2">
-            <label class="leadingLabel">Best Before Date:</label>
-          </v-col>
-          <v-col class="column" cols="6" sm="4">
-            <label class="followingLabel">{{ bestBeforeFormatted }}</label>
-          </v-col>
-          <v-col class="column" cols="6" sm="2">
-            <label class="leadingLabel">Sell By Date:</label>
-          </v-col>
-          <v-col class="column" cols="6" sm="4">
-            <label class="followingLabel">{{ sellByFormatted }}</label>
-          </v-col>
-          <v-col class="column" cols="6" sm="2">
-            <label class="leadingLabel">Country:</label>
-          </v-col>
-          <v-col class="column" cols="6" sm="4">
-            <label class="followingLabel">{{ product.countryOfSale }}</label>
-          </v-col>
-          <v-col class="column" cols="6" sm="2">
-            <label class="leadingLabel">Manufacturer:</label>
-          </v-col>
-          <v-col class="column" cols="6" sm="4">
-            <label class="followingLabel">{{ product.manufacturer }}</label>
-          </v-col>
-          <v-col class="column" cols="6" sm="2">
-            <label class="leadingLabel">Original Name:</label>
-          </v-col>
-          <v-col class="column" cols="6" sm="4">
-            <label class="followingLabel">{{ product.name }}</label>
-          </v-col>
-        </v-row>
+        <div v-if="extraDetails">
+          <v-row no-gutters>
+            <v-col class="column" cols="6" sm="2">
+              <label class="leadingLabel">Best Before Date:</label>
+            </v-col>
+            <v-col class="column" cols="6" sm="4">
+              <label class="followingLabel">{{ bestBeforeFormatted }}</label>
+            </v-col>
+            <v-col class="column" cols="6" sm="2">
+              <label class="leadingLabel">Sell By Date:</label>
+            </v-col>
+            <v-col class="column" cols="6" sm="4">
+              <label class="followingLabel">{{ sellByFormatted }}</label>
+            </v-col>
+            <v-col class="column" cols="6" sm="2">
+              <label class="leadingLabel">Country:</label>
+            </v-col>
+            <v-col class="column" cols="6" sm="4">
+              <label class="followingLabel">{{ product.countryOfSale }}</label>
+            </v-col>
+            <v-col class="column" cols="6" sm="2">
+              <label class="leadingLabel">Manufacturer:</label>
+            </v-col>
+            <v-col class="column" cols="6" sm="4">
+              <label class="followingLabel">{{ product.manufacturer }}</label>
+            </v-col>
+            <v-col class="column" cols="6" sm="2">
+              <label class="leadingLabel">Original Name:</label>
+            </v-col>
+            <v-col class="column" cols="6" sm="4">
+              <label class="followingLabel">{{ product.name }}</label>
+            </v-col>
+          </v-row>
+        </div>
       </div>
     </v-card>
   </div>
@@ -119,7 +121,8 @@ export default {
       currency: {
         code: "",
         symbol: ""
-      }
+      },
+      extraDetails: false
     };
   },
   props: {
@@ -194,10 +197,8 @@ export default {
     },
   },
   methods: {
-    placeholder() {
-      console.log(this.saleItem);
-      console.log(this.saleItem.inventoryItem);
-      console.log(this.saleItem.inventoryItem.product);
+    toggleExtraDetails() {
+      this.extraDetails = !this.extraDetails;
     }
   }
 };
