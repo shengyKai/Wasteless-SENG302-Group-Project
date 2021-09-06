@@ -15,23 +15,24 @@
   </div>
   <div v-else @click="markEventAsRead">
     <v-row>
-      <v-col cols="11">
-        <v-badge
-          overlap
-          offset-y=35
-          :icon="readBadgeIcon"
-          :color="readColour"
-        >
-          <v-card-title>
+      <v-col>
+        <v-card-title>
+          <v-badge
+            overlap
+            offset-y=8
+            offset-x=-2
+            :icon="readBadgeIcon"
+            :color="readColour"
+          >
             {{ title }}
-          </v-card-title>
-          <v-card-subtitle>
-            {{ date }}, {{ time }}
-          </v-card-subtitle>
-        </v-badge>
+          </v-badge>
+        </v-card-title>
+        <v-card-subtitle>
+          {{ date }}, {{ time }}
+        </v-card-subtitle>
       </v-col>
-      <v-col cols="1" class="mt-2">
-        <v-icon class="deleteButton mr-2"
+      <v-col cols="auto" class="mt-2">
+        <v-icon class="mr-2"
                 ref="deleteButton"
                 color="red"
                 @click.stop="initiateDeletion"
@@ -261,10 +262,6 @@ export default {
 </script>
 
 <style>
-.deleteButton {
-  float: right;
-  margin: 0.25em;
-}
 .deletion-error {
   color: red;
 }
