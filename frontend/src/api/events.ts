@@ -16,14 +16,16 @@ let lastErrorTime = Number.MIN_VALUE;
 
 export type AnyEvent = GlobalMessageEvent | ExpiryEvent | DeleteEvent | KeywordCreatedEvent | MessageEvent;
 
-export type Tag = 'none' | 'red' | 'orange' | 'yellow' | 'green' | 'blue' | 'purple'
+export type EventTag = 'none' | 'red' | 'orange' | 'yellow' | 'green' | 'blue' | 'purple'
+export type EventStatus = 'normal' | 'starred' | 'archived'
 
 type BaseEvent<T extends string> = {
   id: number,
   created: string,
-  tag: Tag,
   type: T,
-  read: boolean
+  tag: EventTag,
+  status: EventStatus,
+  read: boolean,
 }
 
 export type GlobalMessageEvent = BaseEvent<'GlobalMessageEvent'> & {

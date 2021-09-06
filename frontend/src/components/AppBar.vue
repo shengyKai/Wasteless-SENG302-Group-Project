@@ -121,7 +121,7 @@ export default {
     },
     logout() {
       this.$store.commit("logoutUser");
-      this.$router.push("/login");
+      this.$router.push("/auth");
     },
     viewAdmin() {
       this.$router.push("/admin");
