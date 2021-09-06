@@ -616,11 +616,35 @@ public class SearchHelper {
         return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("product").get("business"), business);
     }
 
+    /**
+     * Constructs a specification with regards to the "price" field of the SaleItem and matches SaleItems which are between
+     * the lower bound and upper bound of prices inclusive.
+     * @param lowerBound of the price of the SaleItems
+     * @param upperBound of the price of the SaleItems
+     * @return A specification for SaleItems which matches the price range
+     */
     public static Specification<SaleItem> constructSaleListingSpecificationFromPrice(BigDecimal lowerBound, BigDecimal upperBound) {
         return (root, query, criteriaBuilder) -> criteriaBuilder.between(root.get("price"), lowerBound, upperBound);
     }
 
+    /**
+     * Constructs a specification with regards to the "closes" field of the SaleItem and matches SaleItems which are between
+     * the lower bound and upper bound of closing dates inclusive.
+     * @param lowerBound of the closing date of the SaleItems
+     * @param upperBound of the closing date of the SaleItems
+     * @return A specification for SaleItems which matches the closing date range
+     */
     public static Specification<SaleItem> constructSaleListingSpecificationFromClosingDate(LocalDate lowerBound, LocalDate upperBound) {
         return (root, query, criteriaBuilder) -> criteriaBuilder.between(root.get("closes"), lowerBound, upperBound);
+    }
+
+    /**
+     * Constructs a specification with regards to the "businessType" field of the business that owns the SaleItems
+     * and matches SaleItems which are owned by businesses of that type.
+     * @param businessType string containing the business type of the business
+     * @return A specification for Sale items which matches the business's business type
+     */
+    public static Specification<SaleItem> constructSaleListingSpecificationFromBusinessType(String businessType) {
+        return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("inventoryItem").get("product").get("business").get("businessType"), businessType);
     }
 }
