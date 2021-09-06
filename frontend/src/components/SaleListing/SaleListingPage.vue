@@ -28,37 +28,37 @@
             <label class="leadingLabel">Total Price:</label>
           </v-col>
           <v-col class="column" cols="6" sm="4">
-            <label class="followingLabel">$120.40</label>
+            <label class="followingLabel">${{ saleItem.price }}</label>
           </v-col>
           <v-col class="column" cols="6" sm="2">
             <label class="leadingLabel">Date Created:</label>
           </v-col>
           <v-col class="column" cols="6" sm="4">
-            <label class="followingLabel">6 Jan 2021</label>
+            <label class="followingLabel">{{ createdFormatted }}</label>
           </v-col>
           <v-col class="column" cols="6" sm="2">
             <label class="leadingLabel">Quantity:</label>
           </v-col>
           <v-col class="column" cols="6" sm="4">
-            <label class="followingLabel">7</label>
+            <label class="followingLabel">{{ saleItem.quantity }}</label>
           </v-col>
           <v-col class="column" cols="6" sm="2">
             <label class="leadingLabel">Expiry Date:</label>
           </v-col>
           <v-col class="column" cols="6" sm="4">
-            <label class="followingLabel">5 Sep 2021</label>
+            <label class="followingLabel">{{ expiresFormatted }}</label>
           </v-col>
           <v-col class="column" cols="6" sm="2">
             <label class="leadingLabel">More Info:</label>
           </v-col>
           <v-col class="column" cols="6" sm="4">
-            <label class="followingLabel">Tradable for 2kgs of lemons</label>
+            <label class="followingLabel">{{ saleItem.moreInfo }}</label>
           </v-col>
           <v-col class="column" cols="6" sm="2">
             <label class="leadingLabel">Closing Date:</label>
           </v-col>
           <v-col class="column" cols="6" sm="4">
-            <label class="followingLabel">9 Oct 2021</label>
+            <label class="followingLabel">{{ createdFormatted }}</label>
           </v-col>
           <v-col class="column" cols="6" sm="2">
             <label class="leadingLabel">Product:</label>
@@ -142,6 +142,13 @@ export default {
       }
       return this.currency.symbol + formatPrice(this.saleItem.price) + " " + this.currency.code;
     },
+  },
+  methods: {
+    placeholder() {
+      console.log(this.saleItem);
+      console.log(this.saleItem.inventoryItem);
+      console.log(this.saleItem.inventoryItem.product);
+    }
   }
 };
 </script>
