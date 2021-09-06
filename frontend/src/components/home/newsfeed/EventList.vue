@@ -24,18 +24,16 @@
   </div>
 </template>
 <script>
-import DeleteEvent from './newsfeed/DeleteEvent.vue';
-import ExpiryEvent from './newsfeed/ExpiryEvent.vue';
-import GlobalMessage from "./newsfeed/GlobalMessage.vue";
-import KeywordCreated from './newsfeed/KeywordCreated.vue';
-import MessageEvent from './newsfeed/MessageEvent.vue';
+import DeleteEvent from './DeleteEvent.vue';
+import ExpiryEvent from './ExpiryEvent.vue';
+import GlobalMessage from "./GlobalMessage.vue";
+import KeywordCreated from './KeywordCreated.vue';
+import MessageEvent from './MessageEvent.vue';
 
 export default {
   name: 'EventList',
   components: {DeleteEvent, ExpiryEvent, GlobalMessage, KeywordCreated, MessageEvent},
-  props: {
-    events: []
-  }
+  props: ['events']
 };
 </script>
 <style scoped>

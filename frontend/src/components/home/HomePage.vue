@@ -31,16 +31,15 @@
       <!-- Newsfeed -->
       <!-- Tab selection -->
       <v-tabs
-        v-model="tab"
-        icons-and-text>
+        v-model="tab">
         <v-tabs-slider/>
         <v-tab href="#all-events-tab">
-          All
           <v-icon>mdi-home</v-icon>
+          All
         </v-tab>
         <v-tab href="#archived-events-tab">
-          Archived
           <v-icon>mdi-archive</v-icon>
+          Archived
         </v-tab>
       </v-tabs>
       <!-- Tab content -->
@@ -49,7 +48,7 @@
           <EventList :events="eventsPage"/>
         </v-tab-item>
         <v-tab-item value="archived-events-tab">
-          <EventList :events="archivedEvents"/>
+          <EventList :events="archivedEventsPage"/>
         </v-tab-item>
       </v-tabs-items>
       <!--paginate results-->
@@ -71,7 +70,7 @@
 <script>
 import BusinessActionPanel from "./BusinessActionPanel";
 import UserActionPanel from "./UserActionPanel";
-import EventList from "@/components/home/EventList";
+import EventList from "@/components/home/newsfeed/EventList";
 
 export default {
   components: {
@@ -172,20 +171,28 @@ export default {
       return `Displaying ${pageStartIndex + 1} - ${pageEndIndex} of ${this.totalResults} results`;
     },
     /**
-     * The events list which is filtered after retrieving from the store
+     * The events list which is filtered after retrieving from the store.
+     * Archived events are filtered out.
      */
     events() {
-      if (this.filterBy.length === 0) return this.storeEvents;
+      if (this.filterBy.length === 0) return this.storeEvents.filter(event => {
+        return event.status !== 'archived';
+      });
       return this.storeEvents.filter(event => {
-        return this.filterBy.includes(event.tag);
+        return this.filterBy.includes(event.tag)
+            && event.status !== 'archived';
       });
     },
     /**
      * The list of events which are archived. Event filter still applies
      */
     archivedEvents() {
-      return this.events.filter(event => {
+      if (this.filterBy.length === 0) return this.storeEvents.filter(event => {
         return event.status === 'archived';
+      });
+      return this.events.filter(event => {
+        return this.filterBy.includes(event.tag)
+            && event.status === 'archived';
       });
     },
     /**
@@ -194,6 +201,13 @@ export default {
     eventsPage() {
       const pageStartIndex = (this.currentPage - 1) * this.resultsPerPage;
       return this.events.slice(pageStartIndex, (pageStartIndex + this.resultsPerPage));
+    },
+    /**
+     * The archived events list after pagination for each page
+     */
+    archivedEventsPage() {
+      const pageStartIndex = (this.currentPage - 1) * this.resultsPerPage;
+      return this.archivedEvents.slice(pageStartIndex, (pageStartIndex + this.resultsPerPage));
     },
     /**
      * An attribute to check if the events list is a filtered events list or not
