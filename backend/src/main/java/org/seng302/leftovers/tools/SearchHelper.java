@@ -13,6 +13,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 
+import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -612,5 +614,14 @@ public class SearchHelper {
      */
     public static Specification<InventoryItem> constructSpecificationFromInventoryItemsFilter(Business business) {
         return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("product").get("business"), business);
+    }
+
+    public static Specification<User> constructSaleListingSpecificationFromSearchFilter(List<BigDecimal> priceBounds, List<Instant> dateBounds, String businessType) {
+        List<String> searchTokens = splitSearchStringIntoTerms(searchQuery);
+
+        var fieldNames = Arrays.asList("firstName", "lastName", "nickname", "middleName");
+        SearchQuery<User> parsedQuery = parseSearchTokens(searchTokens, fieldNames);
+        return buildCompoundSpecification(parsedQuery)
+                .and(isNotDGAASpec());
     }
 }
