@@ -29,6 +29,7 @@
         </template>
       </v-select>
       <!-- Newsfeed -->
+      <!-- Tab selection -->
       <v-tabs
         v-model="tab"
         icons-and-text>
@@ -42,6 +43,7 @@
           <v-icon>mdi-archive</v-icon>
         </v-tab>
       </v-tabs>
+      <!-- Tab content -->
       <v-tabs-items v-model="tab">
         <v-tab-item value="all-events-tab">
           <EventList :events="eventsPage"/>
@@ -134,7 +136,12 @@ export default {
      */
     totalResults() {
       if (this.events.length === undefined) return 0;
-      return this.events.length;
+      switch (this.tab) {
+      case "archived-events-tab":
+        return this.archivedEvents.length;
+      default:
+        return this.events.length;
+      }
     },
     /**
      * The total number of pages required to show all the events
@@ -148,7 +155,12 @@ export default {
      */
     resultsMessage() {
       if (this.totalResults === 0 && !this.isFiltered) {
-        return 'No items in your feed';
+        switch (this.tab) {
+        case "archived-events-tab":
+          return "No archived events in your feed";
+        default:
+          return 'No items in your feed';
+        }
       } else if (this.totalResults === 0 && this.isFiltered) {
         return 'No items matches the filter';
       }
@@ -203,6 +215,12 @@ export default {
      */
     totalPages: function() {
       this.currentPage = Math.max(Math.min(this.currentPage, this.totalPages), 1);
+    },
+    /**
+     * Watch changes in the current selected tab so that the current page can be reset
+     */
+    tab: function() {
+      this.currentPage = 1;
     }
   }
 };
