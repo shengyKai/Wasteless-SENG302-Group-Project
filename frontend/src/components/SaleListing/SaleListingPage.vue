@@ -1,7 +1,7 @@
 <template>
   <div>
     <v-card class="body">
-      <div style="flex: 1;">
+      <div>
         <ImageCarousel :imagesList="product.images" :productId="product.id"/>
         <v-card-actions class="action-btn-container">
           <v-btn class="action-btn white-text" color="primary">
@@ -22,7 +22,10 @@
         <label class="saleTitleJoin"> From </label>
         <a class="businessLink" @click="placeholder">Nathan Apple LTD</a>
       </div>
-      <div style="flex: 1;">
+      <div>
+        <label class="description"> {{ productDescription }} </label>
+      </div>
+      <div>
         <v-row no-gutters>
           <v-col class="column" cols="6" sm="2">
             <label class="leadingLabel">Total Price:</label>
@@ -52,7 +55,9 @@
             <label class="leadingLabel">More Info:</label>
           </v-col>
           <v-col class="column" cols="6" sm="4">
-            <label class="followingLabel">{{ saleItem.moreInfo }}</label>
+            <label class="followingLabel">
+              {{ saleItem.moreInfo }}
+            </label>
           </v-col>
           <v-col class="column" cols="6" sm="2">
             <label class="leadingLabel">Closing Date:</label>
@@ -60,11 +65,38 @@
           <v-col class="column" cols="6" sm="4">
             <label class="followingLabel">{{ createdFormatted }}</label>
           </v-col>
+          <v-btn class="product-btn" color=orange outlined>Orange Apple</v-btn>
+        </v-row>
+        <v-row no-gutters>
           <v-col class="column" cols="6" sm="2">
-            <label class="leadingLabel">Product:</label>
+            <label class="leadingLabel">Best Before Date:</label>
           </v-col>
           <v-col class="column" cols="6" sm="4">
-            <v-btn color=orange outlined>Orange Apple</v-btn>
+            <label class="followingLabel">{{ bestBeforeFormatted }}</label>
+          </v-col>
+          <v-col class="column" cols="6" sm="2">
+            <label class="leadingLabel">Sell By Date:</label>
+          </v-col>
+          <v-col class="column" cols="6" sm="4">
+            <label class="followingLabel">{{ sellByFormatted }}</label>
+          </v-col>
+          <v-col class="column" cols="6" sm="2">
+            <label class="leadingLabel">Country:</label>
+          </v-col>
+          <v-col class="column" cols="6" sm="4">
+            <label class="followingLabel">{{ product.countryOfSale }}</label>
+          </v-col>
+          <v-col class="column" cols="6" sm="2">
+            <label class="leadingLabel">Manufacturer:</label>
+          </v-col>
+          <v-col class="column" cols="6" sm="4">
+            <label class="followingLabel">{{ product.manufacturer }}</label>
+          </v-col>
+          <v-col class="column" cols="6" sm="2">
+            <label class="leadingLabel">Original Name:</label>
+          </v-col>
+          <v-col class="column" cols="6" sm="4">
+            <label class="followingLabel">{{ product.name }}</label>
           </v-col>
         </v-row>
       </div>
@@ -74,14 +106,13 @@
 
 <script>
 import ImageCarousel from "@/components/utils/ImageCarousel";
-//import FullProductDescription from "@/components/utils/FullProductDescription";
 //import { currencyFromCountry } from "@/api/currency";
 import { formatDate, formatPrice } from '@/utils';
 
 export default {
   name: "SaleListingPage",
   components: {
-    ImageCarousel //FullProductDescription
+    ImageCarousel
   },
   data() {
     return {
@@ -133,6 +164,22 @@ export default {
       return formatDate(date);
     },
     /**
+     * Creates a nicely formatted readable string for the inventory item's best before date
+     * @returns {string} BestBeforeDate
+     */
+    bestBeforeFormatted() {
+      let date = new Date(this.inventoryItem.bestBefore);
+      return formatDate(date);
+    },
+    /**
+     * Creates a nicely formatted readable string for the inventory item's sell by date
+     * @returns {string} SellByDate
+     */
+    sellByFormatted() {
+      let date = new Date(this.inventoryItem.sellBy);
+      return formatDate(date);
+    },
+    /**
      * Creates a nicely formatted retail price, including the currency
      * @returns {string} RetailPrice
      */
@@ -141,6 +188,9 @@ export default {
         return "Not set";
       }
       return this.currency.symbol + formatPrice(this.saleItem.price) + " " + this.currency.code;
+    },
+    productDescription() {
+      return this.product.description || "Not set";
     },
   },
   methods: {
@@ -190,6 +240,10 @@ export default {
   color: grey;
 }
 
+.product-btn {
+  margin-top: 10px;
+}
+
 .action-btn-container {
   float: right;
 }
@@ -200,5 +254,9 @@ export default {
 
 .space {
   margin-top: 25px;
+}
+
+.description {
+  font-size: 20px;
 }
 </style>
