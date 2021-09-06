@@ -3,12 +3,15 @@
 exports[`MessageEvent.vue Matches snapshot 1`] = `
 <div>
   <div class="row">
-    <div class="col col-11"><span class="v-badge v-badge--icon v-badge--overlap theme--light"><div class="v-card__title">
+    <div class="col">
+      <div class="v-card__title"><span class="v-badge v-badge--icon v-badge--overlap theme--light">
           Conversation with test_firstname100
-        </div> <div class="v-card__subtitle">
-          03 Jan 2021, 00:00
-        </div><span class="v-badge__wrapper"><transition-stub name="scale-rotate-transition"><span aria-atomic="true" aria-label="Badge" aria-live="polite" role="status" class="v-badge__badge primary" style="bottom: calc(100% - 35px); left: calc(100% - 12px);"><i aria-hidden="true" class="v-icon notranslate mdi mdi-email theme--light"></i></span></transition-stub></span></span></div>
-    <div class="mt-2 col col-1"><button type="button" class="v-icon notranslate deleteButton mr-2 v-icon--link mdi mdi-trash-can theme--light red--text"></button></div>
+        <span class="v-badge__wrapper"><transition-stub name="scale-rotate-transition"><span aria-atomic="true" aria-label="Badge" aria-live="polite" role="status" class="v-badge__badge primary" style="bottom: calc(100% - 8px); left: calc(100% - -2px);"><i aria-hidden="true" class="v-icon notranslate mdi mdi-email theme--light"></i></span></transition-stub></span></span></div>
+      <div class="v-card__subtitle">
+        03 Jan 2021, 00:00
+      </div>
+    </div>
+    <div class="mt-2 col col-auto"><button type="button" class="v-icon notranslate mr-2 v-icon--link mdi mdi-trash-can theme--light red--text"></button></div>
   </div>
   <div class="v-card__text pb-1"><strong>
       Regarding: test_title
