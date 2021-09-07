@@ -303,18 +303,25 @@ public class SearchHelper {
     public static Specification<SaleItem> constructSaleItemSpecificationFromSearchQueries
             (String searchQuery, String productName, String businessName, String businessLocation) {
 
-        List<String> searchTokens = splitSearchStringIntoTerms(searchQuery);
-
         // build a match for all fields
-        Specification<SaleItem> generalSpec =
-                constructSaleItemSpecificationFromBusinessLocation(searchQuery)
-                .or(constructSaleItemSpecificationFromBusinessName(searchQuery))
-                .or(constructSaleItemSpecificationFromProductName(searchQuery));
+
+        Specification<SaleItem> generalSpec = Specification.where(null);
+        if (!searchQuery.isBlank()) {
+            generalSpec = generalSpec.or(constructSaleItemSpecificationFromBusinessLocation(searchQuery))
+                    .or(constructSaleItemSpecificationFromBusinessName(searchQuery))
+                    .or(constructSaleItemSpecificationFromProductName(searchQuery));
+        }
         // build a match for specific fields
-        Specification<SaleItem> advancedSpec =
-                constructSaleItemSpecificationFromBusinessName(businessName)
-                .and(constructSaleItemSpecificationFromProductName(productName))
-                .and(constructSaleItemSpecificationFromBusinessLocation(businessLocation));
+        Specification<SaleItem> advancedSpec = Specification.where(null);
+        if (!businessName.isBlank()){
+            advancedSpec = advancedSpec.and(constructSaleItemSpecificationFromBusinessName(businessName));
+        }
+        if (!productName.isBlank()) {
+            advancedSpec = advancedSpec.and(constructSaleItemSpecificationFromProductName(productName));
+        }
+        if (!businessLocation.isBlank()) {
+            advancedSpec = advancedSpec.and(constructSaleItemSpecificationFromBusinessLocation(businessLocation));
+        }
 
         return generalSpec.and(advancedSpec);
     }
