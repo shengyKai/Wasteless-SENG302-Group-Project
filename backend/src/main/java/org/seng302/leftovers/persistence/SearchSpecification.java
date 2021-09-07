@@ -3,10 +3,8 @@ package org.seng302.leftovers.persistence;
 import org.springframework.data.jpa.domain.Specification;
 
 import javax.persistence.Transient;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
+import javax.persistence.criteria.*;
+import java.util.Arrays;
 
 /**
  * Defines a specification for type User
@@ -36,28 +34,44 @@ public class SearchSpecification<T> implements Specification<T> {
     @Override
     public Predicate toPredicate
             (Root<T> root, CriteriaQuery<?> query, CriteriaBuilder builder) {
-
-        if (criteria.getOperation().equalsIgnoreCase(">")) {
+        if (criteria == null) {
+            return builder.conjunction();
+        }
+        else if (criteria.getOperation().equalsIgnoreCase(">")) {
             return builder.greaterThanOrEqualTo(
-                    root.<String> get(criteria.getKey()), criteria.getValue().toString());
+                    getPath(root, criteria.getKey()), criteria.getValue().toString());
         }
         else if (criteria.getOperation().equalsIgnoreCase("<")) {
             return builder.lessThanOrEqualTo(
-                    root.<String> get(criteria.getKey()), criteria.getValue().toString());
+                    getPath(root, criteria.getKey()), criteria.getValue().toString());
         }
         else if (criteria.getOperation().equalsIgnoreCase(":")) {
-            if (root.get(criteria.getKey()).getJavaType() == String.class) {
+            if (getPath(root, criteria.getKey()).getJavaType() == String.class) {
                 return builder.like(
-                        builder.lower(root.<String>get(criteria.getKey())), "%" + criteria.getValue().toString().toLowerCase() + "%");
+                        builder.lower(getPath(root, criteria.getKey())), "%" + criteria.getValue().toString().toLowerCase() + "%");
             }
         }
         else if (criteria.getOperation().equalsIgnoreCase("=") &&
-                 root.get(criteria.getKey()).getJavaType() == String.class) {
+                getPath(root, criteria.getKey()).getJavaType() == String.class) {
             return builder.like(
-                    root.<String>get(criteria.getKey()), criteria.getValue().toString());
-
+                    getPath(root, criteria.getKey()), criteria.getValue().toString());
         }
         return null;
+    }
+
+    /**
+     * Given a predicate root, and input path separated by periods, returns the path of the last attribute
+     * @param root The root
+     * @param input Path of period separated attributes
+     * @return Path of last attribute of input
+     */
+    private <T,Y> Path<Y> getPath(Root<T> root, String input) {
+        var items = input.split("\\.");
+        Path<Y> path = root.get(items[0]);
+        for (int i = 1; i < items.length; i++) {
+            path = path.get(items[i]);
+        }
+        return path;
     }
 }
 
