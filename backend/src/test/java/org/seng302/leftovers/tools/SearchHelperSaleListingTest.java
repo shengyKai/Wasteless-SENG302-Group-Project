@@ -6,7 +6,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.seng302.leftovers.controllers.DGAAController;
 import org.seng302.leftovers.entities.*;
 import org.seng302.leftovers.persistence.*;
@@ -29,6 +31,7 @@ public class SearchHelperSaleListingTest {
     private InventoryItem testInventoryItem;
     private SaleItem testSaleItem;
     private Location testBusinessLocation;
+
     /**
      * Repository storing user entities.
      */
@@ -114,7 +117,7 @@ public class SearchHelperSaleListingTest {
                 .withCloses(LocalDate.now().plusYears(1).toString())
                 .withQuantity(1)
                 .withPrice("5")
-                .withMoreInfo("yummu plz buy my pies").build();
+                .withMoreInfo("yummy plz buy my pies").build();
         testSaleItem = saleItemRepository.save(testSaleItem);
     }
 
@@ -283,4 +286,25 @@ public class SearchHelperSaleListingTest {
         //TODO
     }
 
+    @ParameterizedTest
+    @ValueSource(strings={"Gregs pies", "Simple Pie", "Canberra", "NSW", "Australia",
+                        "\"Gregs pies\" AND \"Simple Pie\"", "\"Canberra\" and \"NSW\" AND \"Australia\"",
+                        "\"Davids pies\" OR \"Gregs pies\"", "\"Taiwan\" or \"Australia\""})
+    void constructSaleItemSpecificationUsingOnlySearchQuery_fullMatchSearchQuery_saleItemReturned(String query) {
+        //TODO compare against test sale item
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings={"Gregs", "pies", "Simple", "Pie", "Pi", "Can", "berra", "NS", "W", "Austra", "lia",
+                        "\"Gregs\" AND \"pie\"", "\"Can\" AND \"Austra\"", "\"W\" AND \"pie\"",
+                        "\"Davids\" or \"Gregs\"", "\"Austral\" or \"Greenland\""})
+    void constructSaleItemSpecificationUsingOnlySearchQuery_partialMatchSearchQuery_saleItemReturned(String query) {
+        //TODO compare against test sale item
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings={"Austra,lia", "Gre.g", "Greenland", "Davids pies", "North America", "#$%"})
+    void constructSaleItemSpecificationUsingOnlySearchQuery_doesNotMatchSearchQuery_saleItemNotReturned(String query) {
+        //TODO compare against test sale item
+    }
 }
