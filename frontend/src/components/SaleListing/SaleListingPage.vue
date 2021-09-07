@@ -108,7 +108,7 @@
 
 <script>
 import ImageCarousel from "@/components/utils/ImageCarousel";
-//import { currencyFromCountry } from "@/api/currency";
+import { currencyFromCountry } from "@/api/currency";
 import { formatDate, formatPrice } from '@/utils';
 
 export default {
@@ -118,10 +118,7 @@ export default {
   },
   data() {
     return {
-      currency: {
-        code: "",
-        symbol: ""
-      },
+      currency: currencyFromCountry(this.product.countryOfSale),
       extraDetails: false
     };
   },
@@ -194,7 +191,7 @@ export default {
     },
     productDescription() {
       return this.product.description || "Not set";
-    },
+    }
   }
 };
 </script>
