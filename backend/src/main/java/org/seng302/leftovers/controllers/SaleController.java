@@ -112,7 +112,7 @@ public class SaleController {
 
             response.setStatus(201);
             var object = new JSONObject();
-            object.put("listingId", saleItem.getSaleId());
+            object.put("listingId", saleItem.getId());
             return object;
         } catch (Exception error) {
             logger.error(error.getMessage());

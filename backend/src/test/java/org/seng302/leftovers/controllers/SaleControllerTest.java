@@ -273,7 +273,7 @@ class SaleControllerTest {
     @Test
     void addSaleItemToBusiness_validInput_ReturnsId() throws Exception {
         SaleItem mockItem = mock(SaleItem.class);
-        when(mockItem.getSaleId()).thenReturn(400L);
+        when(mockItem.getId()).thenReturn(400L);
         when(saleItemRepository.save(any(SaleItem.class))).thenReturn(mockItem);
 
         var object = generateSalesItemInfo();
@@ -367,7 +367,7 @@ class SaleControllerTest {
         List<SaleItem> mockItems = new ArrayList<>();
         for (long i = 0; i<6; i++) {
             SaleItem saleItem = mock(SaleItem.class);
-            when(saleItem.getSaleId()).thenReturn(i);
+            when(saleItem.getId()).thenReturn(i);
             var json = new JSONObject();
             json.put("id", i);
             when(saleItem.constructJSONObject()).thenReturn(json);

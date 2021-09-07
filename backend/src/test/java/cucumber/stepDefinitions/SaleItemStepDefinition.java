@@ -179,7 +179,7 @@ public class SaleItemStepDefinition {
 
             long id = ((Number)json.get("id")).longValue();
 
-            Optional<SaleItem> foundItem = addedSaleItems.stream().filter(x -> x.getSaleId().equals(id)).findFirst();
+            Optional<SaleItem> foundItem = addedSaleItems.stream().filter(x -> x.getId().equals(id)).findFirst();
             assertTrue(foundItem.isPresent());
 
             assertEquals(foundItem.get().getQuantity(), json.get("quantity"));
