@@ -5,10 +5,11 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.seng302.leftovers.controllers.DGAAController;
-import org.seng302.leftovers.entities.Location;
-import org.seng302.leftovers.entities.User;
+import org.seng302.leftovers.entities.*;
 import org.seng302.leftovers.persistence.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -17,23 +18,25 @@ import org.springframework.data.jpa.domain.Specification;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Stream;
+
+import static org.junit.jupiter.params.provider.Arguments.arguments;
+
 
 @SpringBootTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class SearchHelperSaleListingTest {
-    /**
-     * List of users to be used in testing of getPageInResults.
-     */
-    private List<User> pagingUserList;
 
-    /**
-     * List of users to be saved to the repository and used for testing of getSort.
-     */
-    private List<User> savedUserList;
-
+    private User testUser;
+    private Business testBusiness;
+    private Product testProduct;
+    private InventoryItem testInventoryItem;
+    private SaleItem testSaleItem;
+    private Location testBusinessLocation;
     /**
      * Repository storing user entities.
      */
@@ -59,12 +62,68 @@ public class SearchHelperSaleListingTest {
     }
 
     @BeforeEach
-    void setUp() throws IOException {
-        dgaaController.checkDGAA();
+    void setUp() {
+        saleItemRepository.deleteAll();
+        inventoryItemRepository.deleteAll();
+        productRepository.deleteAll();
+        businessRepository.deleteAll();
         userRepository.deleteAll();
-        for (User user : savedUserList) {
-            userRepository.save(user);
-        }
+
+        Location userLocation = new Location.Builder()
+                .atDistrict("District")
+                .atStreetNumber("45")
+                .onStreet("Street place")
+                .inCountry("Australia")
+                .inRegion("NSW")
+                .atDistrict("someplace")
+                .inCity("Canberra")
+                .withPostCode("5011").build();
+        testBusinessLocation = new Location.Builder()
+                .atDistrict("District")
+                .atStreetNumber("45")
+                .onStreet("Street place")
+                .inCountry("Australia")
+                .inRegion("NSW")
+                .atDistrict("someplace")
+                .inCity("Canberra")
+                .withPostCode("5011").build();
+        testUser = new User.Builder()
+                .withAddress(userLocation)
+                .withDob("2000-01-01")
+                .withEmail("pog32@gmail.com")
+                .withFirstName("Greg")
+                .withLastName("Jones")
+                .withPassword("password123").build();
+        testUser = userRepository.save(testUser);
+        testBusiness = new Business.Builder()
+                .withBusinessType("Accommodation and Food Services")
+                .withAddress(testBusinessLocation)
+                .withName("Gregs pies")
+                .withDescription("We enjoy pies")
+                .withPrimaryOwner(testUser).build();
+        testBusiness = businessRepository.save(testBusiness);
+        testProduct = new Product.Builder()
+                .withName("Simple Pie")
+                .withProductCode("GFD432")
+                .withDescription("Yummy")
+                .withBusiness(testBusiness)
+                .withManufacturer("Good pies")
+                .withRecommendedRetailPrice("54").build();
+        testProduct = productRepository.save(testProduct);
+        testInventoryItem = new InventoryItem.Builder()
+                .withPricePerItem("12")
+                .withQuantity(3)
+                .withTotalPrice("24")
+                .withProduct(testProduct)
+                .withExpires(LocalDate.now().plusYears(1).toString()).build();
+        testInventoryItem = inventoryItemRepository.save(testInventoryItem);
+        testSaleItem = new SaleItem.Builder()
+                .withInventoryItem(testInventoryItem)
+                .withCloses(LocalDate.now().plusYears(1).toString())
+                .withQuantity(1)
+                .withPrice("5")
+                .withMoreInfo("yummu plz buy my pies").build();
+        testSaleItem = saleItemRepository.save(testSaleItem);
     }
 
     @AfterEach
@@ -76,133 +135,159 @@ public class SearchHelperSaleListingTest {
         userRepository.deleteAll();
     }
 
+    private static Stream<Arguments> productNameFull() {
+        return Stream.of(
+                arguments("The Nathan Apple", "The Nathan Apple"),
+                arguments("Orange Apple", "Orange Apple"),
+                arguments("Sweet Lime","Sweet Lime"),
+                arguments("Tangerine", "Tangerine"),
+                arguments("Juicy Fruit", "Juicy Fruit"),
+                arguments("\"Juicy Apple\"", "Juicy Apple")
+        );
+    }
     @ParameterizedTest
-    @CsvSource({
-            "The Nathan Apple",
-            "Orange Apple",
-            "Sweet Lime",
-            "Tangerine",
-            "Juicy Fruit",
-            "\"Juicy Apple\""
-    })
-    void constructSaleItemSpecificationOnlyIncludingProductName_matchesFullProductName_saleItemReturned() {
+    @MethodSource("productNameFull")
+    void constructSaleItemSpecificationOnlyIncludingProductName_matchesFullProductName_saleItemReturned(String query, String name) {
+        testProduct.setName(name);
+
+    }
+    private static Stream<Arguments> productNamePartial() {
+        return Stream.of(
+                arguments("Natha", "The Nathan Apple"),
+                arguments("athan", "The Nathan Apple"),
+                arguments("Apple", "The Nathan Apple"),
+                arguments("The", "The Nathan Apple"),
+                arguments("Oran", "Orange Apple"),
+                arguments("A", "Juicy Apple")
+        );
+    }
+    @ParameterizedTest
+    @MethodSource("productNamePartial")
+    void constructSaleItemSpecificationOnlyIncludingProductName_matchesPartialProductName_saleItemReturned(String query, String name) {
         //TODO
     }
 
+    private static Stream<Arguments> productNameInvalid() {
+        return Stream.of(
+                arguments("wow,much,pog", "The Nathan Apple"),
+                arguments("\"Juicy Apple\", apple", "Orange Apple"),
+                arguments("yes.yes","Sweet Lime")
+        );
+    }
     @ParameterizedTest
-    @CsvSource({
-            "Natha",
-            "athan",
-            "Apple",
-            "The",
-            "Oran",
-            "A"
-    })
-    void constructSaleItemSpecificationOnlyIncludingProductName_matchesPartialProductName_saleItemReturned() {
+    @MethodSource("productNameInvalid")
+    void constructSaleItemSpecificationOnlyIncludingProductName_doesNotMatchProductName_saleItemNotReturned(String query, String name) {
         //TODO
     }
 
+    private static Stream<Arguments> businessNameFull() {
+        return Stream.of(
+                arguments("Nathans pies", "Nathans pies"),
+                arguments("Ellas pies", "Ellas pies"),
+                arguments("Dons pies", "Dons pies"),
+                arguments("Joey Aluminium", "Joey Aluminium"),
+                arguments("Doug Digs", "Doug Digs"),
+                arguments("Wonsons Wontons", "Wonsons Wontons"),
+                arguments("Wonsons Wontons", "Wonsons wontons")
+        );
+    }
     @ParameterizedTest
-    @CsvSource({
-            "wow,much,pog",
-            "\"Juicy Apple\", apple",
-            "yes.yes"
-    })
-    void constructSaleItemSpecificationOnlyIncludingProductName_doesNotMatchProductName_saleItemNotReturned() {
+    @MethodSource("businessNameFull")
+    void constructSaleItemSpecificationOnlyIncludingSellersName_matchesSellersName_saleItemReturned(String query, String name) {
+        //TODO
+    }
+    private static Stream<Arguments> businessNamePartial() {
+        return Stream.of(
+                arguments("Nathan", "Nathans pies"),
+                arguments("Ella", "Ellas pies"),
+                arguments("pies", "Dons pies"),
+                arguments("Alum", "Joey Aluminium"),
+                arguments("Doug D", "Doug Digs"),
+                arguments("Wontons", "Wonsons Wontons"),
+                arguments("Wonsons", "Wonsons wontons")
+        );
+    }
+    @ParameterizedTest
+    @MethodSource("businessNamePartial")
+    void constructSaleItemSpecificationOnlyIncludingSellersName_matchesPartialSellersName_saleItemReturned(String query, String name) {
         //TODO
     }
 
+    private static Stream<Arguments> businessNameInvalid() {
+        return Stream.of(
+                arguments("Ella", "Nathans pies"),
+                arguments("Nathans pies", "Ellas pies"),
+                arguments("Got.Him", "Dons pies"),
+                arguments("$lla", "Ellas pies")
+
+        );
+    }
     @ParameterizedTest
-    @CsvSource({
-            "Nathan Dugle",
-            "Ella Wonson",
-            "Ella",
-            "Nathan",
-            "Dugle",
-            "Wonson",
-    })
-    void constructSaleItemSpecificationOnlyIncludingSellersName_matchesSellersName_saleItemReturned() {
+    @MethodSource("businessNameInvalid")
+    void constructSaleItemSpecificationOnlyIncludingSellersName_doesNotMatchSellersName_saleItemNotReturned(String query, String name) {
         //TODO
     }
 
+    private static Stream<Arguments> locationFull() {
+        return Stream.of(
+                arguments("Christchurch", "Christchurch", "Otago", "New Zealand"),
+                arguments("Dunedin", "Dunedin", "Otago", "New Zealand"),
+                arguments("Wellington", "Wellington", "Otago", "New Zealand"),
+                arguments("Auckland", "Auckland", "Otago", "New Zealand"),
+                arguments("Gore", "Gore", "Otago", "New Zealand"),
+                arguments("Melbourne", "Melbourne", "Otago", "New Zealand"),
+                arguments("London", "London", "Otago", "New Zealand"),
+                arguments("Canterbury", "Christchurch", "Canterbury", "New Zealand"),
+                arguments("Otago", "Christchurch", "Otago", "New Zealand"),
+                arguments("Tasman", "Christchurch", "Tasman", "New Zealand"),
+                arguments("Marlborough", "Christchurch", "Marlborough", "New Zealand"),
+                arguments("New Zealand", "Christchurch", "Otago", "New Zealand"),
+                arguments("Australia", "Christchurch", "Otago", "Australia"),
+                arguments("Luxembourg", "Christchurch", "Otago", "Luxembourg"),
+                arguments("England", "Christchurch", "Otago", "England"),
+                arguments("Great Britain", "Christchurch", "Otago", "Great Britain")
+        );
+    }
     @ParameterizedTest
-    @CsvSource({
-            "Nat",
-            "han",
-            "Du",
-            "gle",
-            "E",
-            "Won"
-    })
-    void constructSaleItemSpecificationOnlyIncludingSellersName_matchesPartialSellersName_saleItemReturned() {
+    @MethodSource("locationFull")
+    void constructSaleItemSpecificationOnlyIncludingSellersLocation_matchesLocation_saleItemReturned(String query, String city, String region, String country) {
         //TODO
     }
 
+    private static Stream<Arguments> locationPartial() {
+        return Stream.of(
+                arguments("Christ", "Christchurch", "Otago", "New Zealand"),
+                arguments("din", "Dunedin", "Otago", "New Zealand"),
+                arguments("ton", "Wellington", "Otago", "New Zealand"),
+                arguments("Auck", "Auckland", "Otago", "New Zealand"),
+                arguments("e", "Gore", "Otago", "New Zealand"),
+                arguments("Mel", "Melbourne", "Otago", "New Zealand"),
+                arguments("don", "London", "Otago", "New Zealand"),
+                arguments("Can", "Christchurch", "Canterbury", "New Zealand"),
+                arguments("go", "Christchurch", "Otago", "New Zealand"),
+                arguments("man", "Christchurch", "Tasman", "New Zealand"),
+                arguments("borough", "Christchurch", "Marlborough", "New Zealand"),
+                arguments("New", "Christchurch", "Otago", "New Zealand")
+        );
+    }
     @ParameterizedTest
-    @CsvSource({
-            "\"Ella Wonson\"",
-            "Ella, Wonson",
-            "Nathan,Dugle",
-            "Got.Him",
-            "$lla"
-    })
-    void constructSaleItemSpecificationOnlyIncludingSellersName_doesNotMatchSellersName_saleItemNotReturned() {
+    @MethodSource("locationPartial")
+    void constructSaleItemSpecificationOnlyIncludingSellersLocation_matchesPartialLocation_saleItemReturned(String query, String city, String region, String country) {
         //TODO
     }
 
-    @ParameterizedTest
-    @CsvSource({
-            "Christchurch",
-            "Dunedin",
-            "Wellington",
-            "Auckland",
-            "Gore",
-            "Melbourne",
-            "London",
-            "Canterbury",
-            "Otago",
-            "Tasman",
-            "Marlborough",
-            "New Zealand",
-            "Australia",
-            "Luxembourg",
-            "England",
-            "Great Britain",
-    })
-    void constructSaleItemSpecificationOnlyIncludingSellersLocation_matchesLocation_saleItemReturned() {
-        //TODO
+    private static Stream<Arguments> locationInvalid() {
+        return Stream.of(
+                arguments("Christ,church", "Christchurch", "Otago", "New Zealand"),
+                arguments("Dun,edin", "Dunedin", "Otago", "New Zealand"),
+                arguments("A....uckland", "Auckland", "Otago", "New Zealand"),
+                arguments("Gor$", "Gore", "Otago", "New Zealand"),
+                arguments("Gr#at Br!ti@n", "Christchurch", "Otago", "Great Britain")
+                );
     }
-
     @ParameterizedTest
-    @CsvSource({
-            "Christ",
-            "church",
-            "land",
-            "ore",
-            "don",
-            "bury",
-            "man",
-            "e",
-            "bourg",
-            "tain"
-    })
-    void constructSaleItemSpecificationOnlyIncludingSellersLocation_matchesPartialLocation_saleItemReturned() {
-        //TODO
-    }
-
-    @ParameterizedTest
-    @CsvSource({
-            "Christ,church",
-            "Dun,edin",
-            "A....uckland",
-            "Gor$",
-            "Ot@go",
-            "T@sman",
-            "N*ls0n",
-            "Gr#at Br!ti@n",
-            "Austr,lia"
-    })
-    void constructSaleItemSpecificationOnlyIncludingSellersLocation_doesNotMatchLocation_saleItemNotReturned() {
+    @MethodSource("locationInvalid")
+    void constructSaleItemSpecificationOnlyIncludingSellersLocation_doesNotMatchLocation_saleItemNotReturned(String query, String city, String region, String country) {
         //TODO
     }
 
