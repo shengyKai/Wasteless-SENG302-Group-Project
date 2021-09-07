@@ -1234,12 +1234,24 @@ paths:
             - globalApplicationAdmin
             - defaultGlobalApplicationAdmin
       parameters:
-        - name: searchQuery
+        - name: productSearchQuery
           in: query
-          description: string to match against chosen search fields
+          description: string to match against name or description of sale items
           schema:
             type: string
-            example: "ham"
+            example: "Ham"
+        - name: businessSearchQuery
+          in: query
+          description: string to match against business names
+          schema:
+            type: string
+            example: "John's Butcher"
+        - name: locationSearchQuery
+          in: query
+          description: string to match against business addresses
+          schema:
+            type: string
+            example: "23 Here St"
         - name: page
           in: query
           description: The page number to retrieve (1 indexed)
@@ -1273,16 +1285,6 @@ paths:
           schema:
             type: boolean
             example: false
-        - name: searchBy
-          in: query
-          description: Fields to match searchQuery to
-          schema:
-            type: string
-            enum:
-              - name
-              - description
-              - businessName
-              - businessLocation
         - name: businessType
           in: query
           description: Business types to filter results by
