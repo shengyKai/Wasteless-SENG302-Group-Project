@@ -2,6 +2,7 @@ package org.seng302.leftovers.persistence;
 
 import io.cucumber.java.bs.A;
 import lombok.SneakyThrows;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.seng302.leftovers.dto.event.EventStatus;
@@ -48,6 +49,12 @@ class EventRepositoryTest {
 
         event = new GlobalMessageEvent(user, "Test message");
         event = eventRepository.save(event);
+    }
+
+    @AfterEach
+    void tearDown() {
+        eventRepository.deleteAll();
+        userRepository.deleteAll();
     }
 
     @Test
