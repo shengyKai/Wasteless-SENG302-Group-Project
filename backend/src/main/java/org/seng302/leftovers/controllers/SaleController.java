@@ -169,21 +169,26 @@ public class SaleController {
         AuthenticationTokenManager.checkAuthenticationToken(request);
         logger.info("Updating the interest for the sales item (listingId={},userId={},interested={}).", id, body.getUserId(), body.getInterested());
 
-        if (!AuthenticationTokenManager.sessionCanSeePrivate(request, body.getUserId())) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User cannot change listing interest of another user");
+        try {
+            if (!AuthenticationTokenManager.sessionCanSeePrivate(request, body.getUserId())) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User cannot change listing interest of another user");
+            }
+
+            var user = userRepository.findById(body.getUserId())
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "User does not exist"));
+
+            var saleItem = saleItemRepository.findById(id)
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "Listing not found"));
+
+            if (Boolean.TRUE.equals(body.getInterested())) {
+                saleItem.addInterestedUser(user);
+            } else {
+                saleItem.removeInterestedUser(user);
+            }
+            saleItemRepository.save(saleItem);
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            throw e;
         }
-
-        var user = userRepository.findById(body.getUserId())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "User does not exist"));
-
-        var saleItem = saleItemRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "Listing not found"));
-
-        if (Boolean.TRUE.equals(body.getInterested())) {
-            saleItem.addInterestedUser(user);
-        } else {
-            saleItem.removeInterestedUser(user);
-        }
-        saleItemRepository.save(saleItem);
     }
 }
