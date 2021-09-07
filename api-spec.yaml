@@ -188,7 +188,7 @@ paths:
                   properties:
                     newPassword:
                       type: string
-                      description: >- 
+                      description: >-
                         The new password for the account
         description: >-
           Values containing the updated user account data. <br>If email edited or new password provided, field "password" must be provided
@@ -1172,7 +1172,7 @@ paths:
                         type: array
                         items:
                           $ref: '#/components/schemas/Listing'
-              
+
         '401':
           $ref: '#/components/responses/UnauthorizedError'
         '406':
@@ -1898,7 +1898,7 @@ paths:
                 userInitial:
                   type: array
                   description: >-
-                      IDs for additional users to add cards and businesses to
+                    IDs for additional users to add cards and businesses to
                   items:
                     type: integer
                   example:
@@ -1911,7 +1911,7 @@ paths:
                 businessInitial:
                   type: array
                   description: >-
-                      IDs for additional businesses to add products to
+                    IDs for additional businesses to add products to
                   items:
                     type: integer
                   example:
@@ -1924,7 +1924,7 @@ paths:
                 productInitial:
                   type: array
                   description: >-
-                      IDs for additional products to add inventory items to
+                    IDs for additional products to add inventory items to
                   items:
                     type: integer
                   example:
@@ -1937,7 +1937,7 @@ paths:
                 inventoryItemInitial:
                   type: array
                   description: >-
-                      IDs for additional inventory items to add sale items to
+                    IDs for additional inventory items to add sale items to
                   items:
                     type: integer
                   example:
@@ -1950,7 +1950,7 @@ paths:
                 saleItemInitial:
                   type: array
                   description: >-
-                      IDs for additional sale items
+                    IDs for additional sale items
                   items:
                     type: integer
                   example:
@@ -2119,7 +2119,7 @@ paths:
             Forbidden: Returned when the user making the request is not an
             administrator of the business AND is not a global
             application admin.
-        '406': 
+        '406':
           $ref: '#/components/responses/NotAcceptableError'
   /feed/{id}/tag:
     put:
@@ -2148,9 +2148,9 @@ paths:
               required:
                 - value
               properties:
-                value: 
+                value:
                   $ref: '#/components/schemas/Tag'
-                  
+
       responses:
         '200':
           description: Item successfully deleted from the feed
@@ -2195,8 +2195,8 @@ paths:
             Forbidden: Returned when a user or business does not have
             the permission to delete the item on the feed.
         '406':
-           description: >-
-             Not Acceptable: Returned when a feed with an ID does not exist.
+          description: >-
+            Not Acceptable: Returned when a feed with an ID does not exist.
   /feed/{id}/read:
     put:
       tags:
@@ -2227,8 +2227,54 @@ paths:
             Forbidden: Returned when a user or business does not have
             the permission to mark the item on the feed as read.
         '406':
-           description: >-
-             Not Acceptable: Returned when a feed with an ID does not exist.
+          description: >-
+            Not Acceptable: Returned when a feed with an ID does not exist.
+  /users/{id}/feed:
+    get:
+      tags:
+        - 'U32: Managing my feed'
+        - Feed
+      summary: Get all the newsfeed events associated with the user whose ID is given
+      security:
+        - CookieAuth:
+            - user
+            - business
+            - globalApplicationAdmin
+            - defaultGlobalApplicationAdmin
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: ID of the user to retrieve the newsfeed events for
+          example: 10
+        - name: modifiedSince
+          in: query
+          description: The datetime used to filter events. If this parameter is present, only events modified after this datetime will be returned. If this parameter is not present, all events associated with the user will be returned.
+          schema:
+            type: string
+            format: date-time
+            example: '2021-09-04T14:32:00Z'
+      responses:
+        '200':
+          description: Newsfeed events successfully retrieved
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Event'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: >-
+            Forbidden: Returned when a user who is not a GAA/DGAA tries to retrieve the newsfeed events assocaited with another user.
+        '406':
+          description: >-
+            Not Acceptable: Returned when the user with the given ID does not exist.
 components:
   securitySchemes:
     CookieAuth:
@@ -2712,7 +2758,7 @@ components:
     Event:
       type: object
       description: Event entity
-      required: 
+      required:
         - id
         - created
         - tag
