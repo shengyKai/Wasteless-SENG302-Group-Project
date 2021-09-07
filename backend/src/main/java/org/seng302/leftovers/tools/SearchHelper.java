@@ -5,6 +5,7 @@ import lombok.Data;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.seng302.leftovers.dto.ProductFilterOption;
+import org.seng302.leftovers.dto.SaleListingSearchDTO;
 import org.seng302.leftovers.entities.*;
 import org.seng302.leftovers.exceptions.SearchFormatException;
 import org.seng302.leftovers.persistence.SpecificationsBuilder;
@@ -646,5 +647,9 @@ public class SearchHelper {
      */
     public static Specification<SaleItem> constructSaleListingSpecificationFromBusinessType(String businessType) {
         return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("inventoryItem").get("product").get("business").get("businessType"), businessType);
+    }
+
+    public static constructSaleListingSpecificationForSearch(SaleListingSearchDTO saleListingSearchDTO) {
+
     }
 }
