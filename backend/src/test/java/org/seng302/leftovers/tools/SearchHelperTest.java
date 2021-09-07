@@ -23,6 +23,7 @@ import javax.transaction.Transactional;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.math.BigDecimal;
 import java.text.ParseException;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
@@ -108,6 +109,7 @@ class SearchHelperTest {
         productRepository.deleteAll();
         businessRepository.deleteAll();
         userRepository.deleteAll();
+        saleItemRepository.deleteAll();
     }
 
     private List<User> readUserFile(String resourceName) throws IOException {
@@ -987,6 +989,70 @@ class SearchHelperTest {
 
         // Sale items from each business should be distinct
         assertFalse(new ReflectionEquals(resultSaleItemsBusiness1).matches(resultSaleItemsBusiness2));
+    }
+
+    private void setUpSaleItemsWithDifferentPrices() {
+        var business = createBusiness();
+        LocalDate today = LocalDate.now();
+        var product = new Product.Builder()
+                .withBusiness(business)
+                .withProductCode("PRODUCT-CODE")
+                .withName("This is the product name")
+                .withDescription("Wow description")
+                .withManufacturer("Some guy")
+                .build();
+        productRepository.save(product);
+        var inventoryItem = new InventoryItem.Builder()
+                .withProduct(product)
+                .withQuantity(30)
+                .withPricePerItem("2.69")
+                .withManufactured("2021-03-11")
+                .withSellBy(today.plus(2, ChronoUnit.DAYS).toString())
+                .withBestBefore(today.plus(3, ChronoUnit.DAYS).toString())
+                .withExpires(today.plus(4, ChronoUnit.DAYS).toString())
+                .build();
+        inventoryItem = inventoryItemRepository.save(inventoryItem);
+        var saleItem1 = new SaleItem.Builder()
+                .withInventoryItem(inventoryItem)
+                .withQuantity(1)
+                .withPrice("1.0")
+                .withMoreInfo("blah")
+                .build();
+        saleItemRepository.save(saleItem1);
+        var saleItem2 = new SaleItem.Builder()
+                .withInventoryItem(inventoryItem)
+                .withQuantity(1)
+                .withPrice("6.0")
+                .withMoreInfo("blah")
+                .build();
+        saleItemRepository.save(saleItem2);
+        var saleItem3 = new SaleItem.Builder()
+                .withInventoryItem(inventoryItem)
+                .withQuantity(1)
+                .withPrice("15.0")
+                .withMoreInfo("blah")
+                .build();
+        saleItemRepository.save(saleItem3);
+    }
+
+    @ParameterizedTest
+    @CsvSource({"0.0,5.0", "6.0,10.0", "10.0,15.0", "0.0,15.0"})
+    void constructSaleListingSpecificationFromPrice_threeSaleItemsCreatedWithDifferentPrices_saleItemsReturnedAreWithinRange(String priceLowerBound, String priceUpperBound) throws Exception{
+        setUpSaleItemsWithDifferentPrices();
+
+        PageRequest pageRequest = SearchHelper.getPageRequest(1, 10, Sort.by("created"));
+
+        BigDecimal lowerBound = new BigDecimal(priceLowerBound);
+        BigDecimal upperBound = new BigDecimal(priceUpperBound);
+        Specification<SaleItem> specification = SearchHelper.constructSaleListingSpecificationFromPrice(lowerBound, upperBound);
+        Page<SaleItem> resultSaleItemsBusiness = saleItemRepository.findAll(specification, pageRequest);
+
+        for (SaleItem saleItem : resultSaleItemsBusiness) {
+            // This would mean the saleItem price is being compared to the lowerBound such that its equal or more than the lowerBound
+            assertTrue(saleItem.getPrice().compareTo(lowerBound) == 0 || saleItem.getPrice().compareTo(lowerBound) == 1);
+            // This would mean the saleItem price is being compared to the lowerBound such that its equal or lesser than the upperBound
+            assertTrue(saleItem.getPrice().compareTo(upperBound) == 0 || saleItem.getPrice().compareTo(upperBound) == -1);
+        }
     }
 
 }

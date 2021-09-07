@@ -16,6 +16,7 @@ public class SaleListingSearchDTO {
     private LocalDate closingDateLowerBound;
     private LocalDate closingDateUpperBound;
     private String businessType;
+    // TODO add the business name and other search requirements as stated in the ACs for story U29
 
     public SaleListingSearchDTO(BigDecimal priceLowerBound, BigDecimal priceUpperBound,
                                 LocalDate closingDateLowerBound, LocalDate closingDateUpperBound, String businessType) {
