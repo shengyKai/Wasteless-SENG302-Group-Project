@@ -118,7 +118,10 @@ export default {
   },
   data() {
     return {
-      currency: currencyFromCountry(this.product.countryOfSale),
+      currency: {
+        code: "",
+        symbol: ""
+      },
       extraDetails: false
     };
   },
@@ -192,6 +195,17 @@ export default {
     productDescription() {
       return this.product.description || "Not set";
     }
+  },
+  methods: {
+    /**
+     * Computes the currency
+     */
+    computeCurrency() {
+      this.currency = currencyFromCountry(this.product.countryOfSale);
+    }
+  },
+  beforeMount() {
+    this.computeCurrency();
   }
 };
 </script>
