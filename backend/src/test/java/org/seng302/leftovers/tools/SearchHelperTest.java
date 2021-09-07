@@ -1,14 +1,12 @@
 package org.seng302.leftovers.tools;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.hibernate.SessionFactory;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.internal.matchers.apachecommons.ReflectionEquals;
 import org.seng302.leftovers.controllers.DGAAController;
@@ -23,7 +21,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 
-import javax.servlet.http.HttpSession;
 import javax.transaction.Transactional;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -72,10 +69,6 @@ class SearchHelperTest {
     private InventoryItemRepository inventoryItemRepository;
     @Autowired
     private SaleItemRepository saleItemRepository;
-    @Mock
-    HttpSession session;
-    @Autowired
-    SessionFactory sessionFactory;
 
     /**
      * Speification for repository queries.
@@ -1094,6 +1087,10 @@ class SearchHelperTest {
         }
     }
 
+    /**
+     * This method is for setting up sale items with businesses of different business types when given a business type
+     * @param businessType to set up the business with
+     */
     @Transactional
     protected void setUpSaleItemsWithDifferentBusinessTypes(String businessType) {
         var testUser = userRepository.findAll().iterator().next();
@@ -1135,6 +1132,11 @@ class SearchHelperTest {
         saleItemRepository.save(saleItem);
     }
 
+    /**
+     * This method is solely for generating the arguments for the test:
+     * constructSaleListingSpecificationFromBusinessType_severalBusinessesCreatedWithDifferentBusinessTypes_saleItemsReturnedAreFromThatBusinessType
+     * @return a stream containing the arguments for the test method
+     */
     private Stream<Arguments> generateData() {
         return Stream.of(
                 Arguments.of(Arrays.asList("Accommodation and Food Services"), 1),
@@ -1144,6 +1146,7 @@ class SearchHelperTest {
         );
     }
 
+    @Transactional
     @ParameterizedTest
     @MethodSource("generateData")
     void constructSaleListingSpecificationFromBusinessType_severalBusinessesCreatedWithDifferentBusinessTypes_saleItemsReturnedAreFromThatBusinessType(List<String> expectedBusinessTypes, int expectedSize) throws Exception {
