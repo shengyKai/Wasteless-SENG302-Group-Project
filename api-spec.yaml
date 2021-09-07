@@ -188,7 +188,7 @@ paths:
                   properties:
                     newPassword:
                       type: string
-                      description: >- 
+                      description: >-
                         The new password for the account
         description: >-
           Values containing the updated user account data. <br>If email edited or new password provided, field "password" must be provided
@@ -1172,7 +1172,7 @@ paths:
                         type: array
                         items:
                           $ref: '#/components/schemas/Listing'
-              
+
         '401':
           $ref: '#/components/responses/UnauthorizedError'
         '406':
@@ -1543,7 +1543,7 @@ paths:
       responses:
         '201':
           description: >-
-            New message is added to the conversation. If the conversation did 
+            New message is added to the conversation. If the conversation did
             not already exist then a new conversation is created.
         '400':
           $ref: '#/components/responses/BadRequestError'
@@ -1898,7 +1898,7 @@ paths:
                 userInitial:
                   type: array
                   description: >-
-                      IDs for additional users to add cards and businesses to
+                    IDs for additional users to add cards and businesses to
                   items:
                     type: integer
                   example:
@@ -1911,7 +1911,7 @@ paths:
                 businessInitial:
                   type: array
                   description: >-
-                      IDs for additional businesses to add products to
+                    IDs for additional businesses to add products to
                   items:
                     type: integer
                   example:
@@ -1924,7 +1924,7 @@ paths:
                 productInitial:
                   type: array
                   description: >-
-                      IDs for additional products to add inventory items to
+                    IDs for additional products to add inventory items to
                   items:
                     type: integer
                   example:
@@ -1937,7 +1937,7 @@ paths:
                 inventoryItemInitial:
                   type: array
                   description: >-
-                      IDs for additional inventory items to add sale items to
+                    IDs for additional inventory items to add sale items to
                   items:
                     type: integer
                   example:
@@ -1950,7 +1950,7 @@ paths:
                 saleItemInitial:
                   type: array
                   description: >-
-                      IDs for additional sale items
+                    IDs for additional sale items
                   items:
                     type: integer
                   example:
@@ -2055,7 +2055,7 @@ paths:
           schema:
             type: string
           description: >-
-            Criteria to search products for, e.g: product’s full name 
+            Criteria to search products for, e.g: product’s full name
         - name: page
           in: query
           description: The page number to retrieve (1 indexed)
@@ -2119,7 +2119,7 @@ paths:
             Forbidden: Returned when the user making the request is not an
             administrator of the business AND is not a global
             application admin.
-        '406': 
+        '406':
           $ref: '#/components/responses/NotAcceptableError'
   /feed/{id}/tag:
     put:
@@ -2148,9 +2148,9 @@ paths:
               required:
                 - value
               properties:
-                value: 
+                value:
                   $ref: '#/components/schemas/Tag'
-                  
+
       responses:
         '200':
           description: Item successfully deleted from the feed
@@ -2195,8 +2195,8 @@ paths:
             Forbidden: Returned when a user or business does not have
             the permission to delete the item on the feed.
         '406':
-           description: >-
-             Not Acceptable: Returned when a feed with an ID does not exist.
+          description: >-
+            Not Acceptable: Returned when a feed with an ID does not exist.
   /feed/{id}/read:
     put:
       tags:
@@ -2227,8 +2227,52 @@ paths:
             Forbidden: Returned when a user or business does not have
             the permission to mark the item on the feed as read.
         '406':
-           description: >-
-             Not Acceptable: Returned when a feed with an ID does not exist.
+          description: >-
+            Not Acceptable: Returned when a feed with an ID does not exist.
+  /feed/{id}/status:
+    put:
+      tags:
+        - 'U32: Managing my feed'
+        - Feed
+      summary: Change the status of an item on your feed to starred, archived or normal
+      security:
+        - CookieAuth:
+            - user
+            - business
+            - globalApplicationAdmin
+            - defaultGlobalApplicationAdmin
+      parameters:
+        - name: id
+          in: path
+          description: Item on feed
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - value
+              properties:
+                value:
+                  $ref: '#/components/schemas/EventStatus'
+
+      responses:
+        '200':
+          description: Item status successfully updated
+        '400':
+          description: 'Bad Request: invalid status provided'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: >-
+            Forbidden: Returned when a user who does not have this item on their
+            feed and is not a GAA/DGAA tries to change the status of this item
+        '406':
+          description: >-
+            Not Acceptable: There is no newsfeed item with this ID
 components:
   securitySchemes:
     CookieAuth:
@@ -2712,12 +2756,12 @@ components:
     Event:
       type: object
       description: Event entity
-      required: 
+      required:
         - id
         - created
         - tag
         - status
-        - isRead
+        - read
       properties:
         id:
           type: integer
@@ -2734,7 +2778,7 @@ components:
           $ref: '#/components/schemas/Tag'
         status:
           $ref: '#/components/schemas/EventStatus'
-        isRead:
+        read:
           type: boolean
           description: Checks if the event has been read
     Tag:

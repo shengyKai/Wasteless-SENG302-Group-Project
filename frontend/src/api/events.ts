@@ -1,4 +1,13 @@
-import { Keyword, MarketplaceCard, MarketplaceCardSection, Message, User } from "./internal";
+import { Keyword, MarketplaceCard, MarketplaceCardSection, MaybeError, Message, User } from "./internal";
+import axios from 'axios';
+
+const SERVER_URL = process.env.VUE_APP_SERVER_ADD;
+
+const instance = axios.create({
+  baseURL: SERVER_URL,
+  timeout: 5 * 1000,
+  withCredentials: true,
+});
 
 const EMITTER_URL = process.env.VUE_APP_SERVER_ADD + '/events/emitter';
 
@@ -7,13 +16,16 @@ let lastErrorTime = Number.MIN_VALUE;
 
 export type AnyEvent = GlobalMessageEvent | ExpiryEvent | DeleteEvent | KeywordCreatedEvent | MessageEvent;
 
-export type Tag = 'none' | 'red' | 'orange' | 'yellow' | 'green' | 'blue' | 'purple'
+export type EventTag = 'none' | 'red' | 'orange' | 'yellow' | 'green' | 'blue' | 'purple'
+export type EventStatus = 'normal' | 'starred' | 'archived'
 
 type BaseEvent<T extends string> = {
   id: number,
   created: string,
-  tag: Tag,
   type: T,
+  tag: EventTag,
+  status: EventStatus,
+  read: boolean,
 }
 
 export type GlobalMessageEvent = BaseEvent<'GlobalMessageEvent'> & {
@@ -73,4 +85,23 @@ export function initialiseEventSourceForUser(userId: number): void {
  */
 export function addEventMessageHandler(handler: (event: AnyEvent) => void): void {
   eventSource.addEventListener('newsfeed' as any, (event) => handler(JSON.parse(event.data)));
+}
+
+/**
+ * Updates an event as read. No body is needed in this case as the backend would only have to change
+ * a boolean value, and subsequently, the event emitters will retrieve the events with the updated field.
+ * @param eventId Event id of the event to mark as read
+ */
+export async function updateEventAsRead(eventId: number): Promise<MaybeError<undefined>> {
+  try {
+    await instance.put(`/feed/${eventId}/read`);
+  } catch (error) {
+    let status: number | undefined = error.response?.status;
+    if (status === undefined) return 'Failed to reach backend';
+    if (status === 401) return 'You have been logged out. Please login again and retry';
+    if (status === 403) return "Invalid authorization for marking this event";
+    if (status === 406) return 'Event does not exist';
+    return 'Request failed: ' + error.response?.data.message;
+  }
+  return undefined;
 }

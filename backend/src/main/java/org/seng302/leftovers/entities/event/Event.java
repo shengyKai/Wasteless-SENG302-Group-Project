@@ -131,6 +131,9 @@ public abstract class Event {
      * @param eventStatus Possible enum types are ARCHIVED, NORMAL, STARRED
      */
     public void updateEventStatus(EventStatus eventStatus) {
+        if (this.eventStatus.equals(EventStatus.ARCHIVED)) {
+            return;
+        }
         this.eventStatus = eventStatus;
     }
 }
