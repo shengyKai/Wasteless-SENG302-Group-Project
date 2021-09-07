@@ -649,7 +649,18 @@ public class SearchHelper {
         return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("inventoryItem").get("product").get("business").get("businessType"), businessType);
     }
 
-    public static constructSaleListingSpecificationForSearch(SaleListingSearchDTO saleListingSearchDTO) {
-
+    /**
+     * Constructs a composite specification with three other samller specifications containing the price, closing date and
+     * business type of sale items.
+     * @param saleListingSearchDTO containing the price, closing date and business type of the search specification
+     * @return A specification for Sale items which matches the business's price, closing date and business type
+     */
+    public static Specification<SaleItem> constructSaleListingSpecificationForSearch(SaleListingSearchDTO saleListingSearchDTO) {
+        return Specification.where(constructSaleListingSpecificationFromPrice(
+                        saleListingSearchDTO.getPriceLowerBound(), saleListingSearchDTO.getPriceUpperBound())).
+                and(constructSaleListingSpecificationFromClosingDate(
+                        saleListingSearchDTO.getClosingDateLowerBound(), saleListingSearchDTO.getClosingDateUpperBound())).
+                and(constructSaleListingSpecificationFromBusinessType(
+                        saleListingSearchDTO.getBusinessType()));
     }
 }

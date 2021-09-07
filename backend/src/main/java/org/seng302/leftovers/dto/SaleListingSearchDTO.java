@@ -1,8 +1,15 @@
 package org.seng302.leftovers.dto;
 
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.ToString;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
+@Getter
+@ToString
+@EqualsAndHashCode
 public class SaleListingSearchDTO {
     private BigDecimal priceLowerBound;
     private BigDecimal priceUpperBound;
