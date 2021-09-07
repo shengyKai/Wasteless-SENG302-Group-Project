@@ -40,6 +40,14 @@
                 <v-list-item-title>Search Businesses</v-list-item-title>
               </v-list-item-content>
             </v-list-item>
+            <v-list-item @click="viewSaleItemSearch">
+              <v-list-item-icon>
+                <v-icon>mdi-cart</v-icon>
+              </v-list-item-icon>
+              <v-list-item-content>
+                <v-list-item-title>Search Sale Items</v-list-item-title>
+              </v-list-item-content>
+            </v-list-item>
             <v-list-item @click="viewMarketplace">
               <v-list-item-icon>
                 <v-icon>mdi-store</v-icon>
@@ -82,6 +90,9 @@
       </v-btn>
       <v-btn icon @click="viewBusinessSearch" class="action-button">
         <v-icon large>mdi-briefcase-search</v-icon>
+      </v-btn>
+      <v-btn icon @click="viewSaleItemSearch" class="action-button">
+        <v-icon large>mdi-cart</v-icon>
       </v-btn>
       <v-btn icon @click="viewMarketplace" class="action-button">
         <v-icon large>mdi-store</v-icon>
@@ -132,6 +143,12 @@ export default {
      */
     viewBusinessSearch() {
       this.$router.push("/search/business");
+    },
+    /**
+     * Redirect to the Sale Item search page
+     */
+    viewSaleItemSearch() {
+      this.$router.push("/search/sales");
     },
     /**
      * Redirect to marketplace page
