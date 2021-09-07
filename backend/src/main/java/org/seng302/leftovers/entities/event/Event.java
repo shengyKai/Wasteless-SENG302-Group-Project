@@ -1,5 +1,6 @@
 package org.seng302.leftovers.entities.event;
 
+import org.hibernate.annotations.UpdateTimestamp;
 import org.seng302.leftovers.dto.event.EventDTO;
 import org.seng302.leftovers.dto.event.EventStatus;
 import org.seng302.leftovers.dto.event.EventTag;
@@ -9,6 +10,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import javax.persistence.*;
 import java.time.Instant;
+import java.time.LocalDateTime;
 
 /**
  * Abstract event entity for some component that will appear on a user's newsfeed
@@ -22,6 +24,9 @@ public abstract class Event {
 
     @Column(nullable = false)
     private Instant created = Instant.now();
+
+    @Column(nullable = false)
+    private Instant lastModified = Instant.now();
 
     @Enumerated(EnumType.ORDINAL)
     @Column(nullable = false)
@@ -132,5 +137,21 @@ public abstract class Event {
      */
     public void updateEventStatus(EventStatus eventStatus) {
         this.eventStatus = eventStatus;
+    }
+
+    /**
+     * Returns the last time at which changes were made to this event.
+     * @return the instant at which the event was last updated.
+     */
+    public Instant getLastModified() {
+        return lastModified;
+    }
+
+    /**
+     * Update the last modified date of the event every time it is updated.
+     */
+    @PreUpdate
+    protected void onUpdate() {
+        lastModified = Instant.now();
     }
 }
