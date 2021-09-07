@@ -59,6 +59,7 @@ public class SaleItem {
             joinColumns = {@JoinColumn(name="sale_item_id")},
             inverseJoinColumns = {@JoinColumn(name="user_id")}
     )
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Set<User> interestedUsers = new HashSet<>();
 
     @Formula("(SELECT count(*) FROM likes l WHERE l.sale_item_id = id)")
