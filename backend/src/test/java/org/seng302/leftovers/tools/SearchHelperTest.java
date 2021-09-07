@@ -1,10 +1,14 @@
 package org.seng302.leftovers.tools;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.hibernate.SessionFactory;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.internal.matchers.apachecommons.ReflectionEquals;
 import org.seng302.leftovers.controllers.DGAAController;
@@ -19,6 +23,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 
+import javax.servlet.http.HttpSession;
 import javax.transaction.Transactional;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -29,6 +34,7 @@ import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -66,6 +72,10 @@ class SearchHelperTest {
     private InventoryItemRepository inventoryItemRepository;
     @Autowired
     private SaleItemRepository saleItemRepository;
+    @Mock
+    HttpSession session;
+    @Autowired
+    SessionFactory sessionFactory;
 
     /**
      * Speification for repository queries.
@@ -1084,87 +1094,73 @@ class SearchHelperTest {
         }
     }
 
-//    private void setUpSaleItemsWithDifferentBusinessTypes() {
-//        var testUser = userRepository.findAll().iterator().next();
-//        var testBusiness1 = new Business.Builder()
-//                .withPrimaryOwner(testUser)
-//                .withBusinessType("Accommodation and Food Services")
-//                .withDescription("DESCRIPTION")
-//                .withName("BUSINESS_NAME")
-//                .withAddress(Location.covertAddressStringToLocation("108,Albert Road,Ashburton,Christchurch,New Zealand,Canterbury,8041"))
-//                .build();
-//        businessRepository.save(testBusiness1);
-//        var testBusiness2 = new Business.Builder()
-//                .withPrimaryOwner(testUser)
-//                .withBusinessType("Charitable organisation")
-//                .withDescription("DESCRIPTION")
-//                .withName("BUSINESS_NAME")
-//                .withAddress(Location.covertAddressStringToLocation("108,Albert Road,Ashburton,Christchurch,New Zealand,Canterbury,8041"))
-//                .build();
-//        businessRepository.save(testBusiness2);
-//        var testBusiness3 = new Business.Builder()
-//                .withPrimaryOwner(testUser)
-//                .withBusinessType("Non-profit organisation")
-//                .withDescription("DESCRIPTION")
-//                .withName("BUSINESS_NAME")
-//                .withAddress(Location.covertAddressStringToLocation("108,Albert Road,Ashburton,Christchurch,New Zealand,Canterbury,8041"))
-//                .build();
-//        businessRepository.save(testBusiness3);
-//        var testBusiness4 = new Business.Builder()
-//                .withPrimaryOwner(testUser)
-//                .withBusinessType("Retail Trade")
-//                .withDescription("DESCRIPTION")
-//                .withName("BUSINESS_NAME")
-//                .withAddress(Location.covertAddressStringToLocation("108,Albert Road,Ashburton,Christchurch,New Zealand,Canterbury,8041"))
-//                .build();
-//        businessRepository.save(testBusiness4);
-//
-//        LocalDate today = LocalDate.now();
-//        var product = new Product.Builder()
-//                .withBusiness(business)
-//                .withProductCode("PRODUCT-CODE")
-//                .withName("This is the product name")
-//                .withDescription("Wow description")
-//                .withManufacturer("Some guy")
-//                .build();
-//        productRepository.save(product);
-//        var inventoryItem = new InventoryItem.Builder()
-//                .withProduct(product)
-//                .withQuantity(30)
-//                .withPricePerItem("2.69")
-//                .withManufactured("2021-03-11")
-//                .withSellBy(today.plus(2, ChronoUnit.DAYS).toString())
-//                .withBestBefore(today.plus(3, ChronoUnit.DAYS).toString())
-//                .withExpires(today.plus(4, ChronoUnit.DAYS).toString())
-//                .build();
-//        inventoryItem = inventoryItemRepository.save(inventoryItem);
-//        var saleItem = new SaleItem.Builder()
-//                .withInventoryItem(inventoryItem)
-//                .withQuantity(1)
-//                .withPrice("1.0")
-//                .withMoreInfo("blah")
-//                .withCloses(today.plus(1, ChronoUnit.DAYS).toString())
-//                .build();
-//        saleItemRepository.save(saleItem);
-//    }
-//
-//    @ParameterizedTest
-//    @CsvSource({"Accomodation and Food Services", "Charitable organisation", "Non-profit organisation", "Retail Trade"})
-//    void constructSaleListingSpecificationFromBusinessType_severalBusinessesCreatedWithDifferentBusinessTypes_saleItemsReturnedAreFromThatBusinessType(String businessType) throws Exception {
-//        setUpSaleItemsWithDifferentBusinessTypes();
-//
-//        PageRequest pageRequest = SearchHelper.getPageRequest(1, 10, Sort.by("created"));
-//
-//        LocalDate lowerBound = LocalDate.now().plus(Integer.parseInt(dateLowerBoundToAdd), ChronoUnit.DAYS);
-//        LocalDate upperBound = LocalDate.now().plus(Integer.parseInt(dateUpperBoundToAdd), ChronoUnit.DAYS);
-//        Specification<SaleItem> specification = SearchHelper.constructSaleListingSpecificationFromClosingDate(lowerBound, upperBound);
-//        Page<SaleItem> resultSaleItemsBusiness = saleItemRepository.findAll(specification, pageRequest);
-//
-//        for (SaleItem saleItem : resultSaleItemsBusiness) {
-//            // This would mean the saleItem closing date is being compared to the lowerBound such that its equal or more than the lowerBound
-//            assertTrue(saleItem.getCloses().compareTo(lowerBound) >= 0);
-//            // This would mean the saleItem closing date is being compared to the lowerBound such that its equal or lesser than the upperBound
-//            assertTrue(saleItem.getCloses().compareTo(upperBound) <= 0);
-//        }
-//    }
+    @Transactional
+    protected void setUpSaleItemsWithDifferentBusinessTypes(String businessType) {
+        var testUser = userRepository.findAll().iterator().next();
+        var testBusiness = new Business.Builder()
+                .withPrimaryOwner(testUser)
+                .withBusinessType(businessType)
+                .withDescription("DESCRIPTION")
+                .withName("BUSINESS_NAME")
+                .withAddress(Location.covertAddressStringToLocation("108,Albert Road,Ashburton,Christchurch,New Zealand,Canterbury,8041"))
+                .build();
+        businessRepository.save(testBusiness);
+
+        LocalDate today = LocalDate.now();
+        var product = new Product.Builder()
+                .withBusiness(testBusiness)
+                .withProductCode("PRODUCT-CODE")
+                .withName("This is the product name")
+                .withDescription("Wow description")
+                .withManufacturer("Some guy")
+                .build();
+        productRepository.save(product);
+        var inventoryItem = new InventoryItem.Builder()
+                .withProduct(product)
+                .withQuantity(30)
+                .withPricePerItem("2.69")
+                .withManufactured("2021-03-11")
+                .withSellBy(today.plus(2, ChronoUnit.DAYS).toString())
+                .withBestBefore(today.plus(3, ChronoUnit.DAYS).toString())
+                .withExpires(today.plus(4, ChronoUnit.DAYS).toString())
+                .build();
+        inventoryItem = inventoryItemRepository.save(inventoryItem);
+        var saleItem = new SaleItem.Builder()
+                .withInventoryItem(inventoryItem)
+                .withQuantity(1)
+                .withPrice("1.0")
+                .withMoreInfo("blah")
+                .withCloses(today.plus(1, ChronoUnit.DAYS).toString())
+                .build();
+        saleItemRepository.save(saleItem);
+    }
+
+    private Stream<Arguments> generateData() {
+        return Stream.of(
+                Arguments.of(Arrays.asList("Accommodation and Food Services"), 1),
+                Arguments.of(Arrays.asList("Accommodation and Food Services", "Charitable organisation"), 2),
+                Arguments.of(Arrays.asList("Accommodation and Food Services", "Charitable organisation", "Non-profit organisation"), 3),
+                Arguments.of(Arrays.asList("Accommodation and Food Services", "Charitable organisation", "Non-profit organisation", "Retail Trade"), 4)
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("generateData")
+    void constructSaleListingSpecificationFromBusinessType_severalBusinessesCreatedWithDifferentBusinessTypes_saleItemsReturnedAreFromThatBusinessType(List<String> expectedBusinessTypes, int expectedSize) throws Exception {
+        List<String> businessTypes = Arrays.asList("Accommodation and Food Services", "Charitable organisation", "Non-profit organisation", "Retail Trade");
+        for (String businessType : businessTypes) {
+            setUpSaleItemsWithDifferentBusinessTypes(businessType);
+        }
+
+        PageRequest pageRequest = SearchHelper.getPageRequest(1, 10, Sort.by("created"));
+
+        Specification<SaleItem> specification = SearchHelper.constructSaleListingSpecificationFromBusinessType(expectedBusinessTypes);
+        Page<SaleItem> resultSaleItemsBusiness = saleItemRepository.findAll(specification, pageRequest);
+
+        assertEquals(expectedSize, resultSaleItemsBusiness.getTotalElements());
+
+        for (SaleItem saleItem : resultSaleItemsBusiness) {
+            assertTrue(expectedBusinessTypes.contains(saleItem.getInventoryItem().getBusiness().getBusinessType()));
+        }
+    }
 }

@@ -642,11 +642,11 @@ public class SearchHelper {
     /**
      * Constructs a specification with regards to the "businessType" field of the business that owns the SaleItems
      * and matches SaleItems which are owned by businesses of that type.
-     * @param businessType string containing the business type of the business
+     * @param businessTypes a list of strings containing the business types of the business
      * @return A specification for Sale items which matches the business's business type
      */
-    public static Specification<SaleItem> constructSaleListingSpecificationFromBusinessType(String businessType) {
-        return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("inventoryItem").get("product").get("business").get("businessType"), businessType);
+    public static Specification<SaleItem> constructSaleListingSpecificationFromBusinessType(List<String> businessTypes) {
+        return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("inventoryItem").get("product").get("business").get("businessType"), businessTypes);
     }
 
     /**
@@ -661,6 +661,6 @@ public class SearchHelper {
                 and(constructSaleListingSpecificationFromClosingDate(
                         saleListingSearchDTO.getClosingDateLowerBound(), saleListingSearchDTO.getClosingDateUpperBound())).
                 and(constructSaleListingSpecificationFromBusinessType(
-                        saleListingSearchDTO.getBusinessType()));
+                        saleListingSearchDTO.getBusinessTypes()));
     }
 }

@@ -6,6 +6,7 @@ import lombok.ToString;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 
 @Getter
 @ToString
@@ -15,15 +16,15 @@ public class SaleListingSearchDTO {
     private BigDecimal priceUpperBound;
     private LocalDate closingDateLowerBound;
     private LocalDate closingDateUpperBound;
-    private String businessType;
+    private List<String> businessTypes;
     // TODO add the business name and other search requirements as stated in the ACs for story U29
 
     public SaleListingSearchDTO(BigDecimal priceLowerBound, BigDecimal priceUpperBound,
-                                LocalDate closingDateLowerBound, LocalDate closingDateUpperBound, String businessType) {
+                                LocalDate closingDateLowerBound, LocalDate closingDateUpperBound, List<String> businessTypes) {
         this.priceLowerBound = priceLowerBound;
         this.priceUpperBound = priceUpperBound;
         this.closingDateLowerBound = closingDateLowerBound;
         this.closingDateUpperBound = closingDateUpperBound;
-        this.businessType = businessType;
+        this.businessTypes = businessTypes;
     }
 }
