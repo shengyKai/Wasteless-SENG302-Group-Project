@@ -55,13 +55,13 @@ public class SaleItem {
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
-            name="bookmarks",
+            name="likes",
             joinColumns = {@JoinColumn(name="sale_item_id")},
             inverseJoinColumns = {@JoinColumn(name="user_id")}
     )
     private Set<User> interestedUsers = new HashSet<>();
 
-    @Formula("(SELECT count(*) FROM bookmarks b WHERE b.sale_item_id = id)")
+    @Formula("(SELECT count(*) FROM likes l WHERE l.sale_item_id = id)")
     private int likeCount;
 
     // Getters and Setters

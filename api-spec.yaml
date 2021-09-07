@@ -38,6 +38,7 @@ tags:
   - name: 'U23: Search for business'
   - name: 'U26: Example data'
   - name: 'U28: Product Catalogue search'
+  - name: 'U30: Individual full sale listing'
   - name: 'U32: Managing my feed'
   - name: 'UCM1: Community marketplace'
     description: >-
@@ -1221,6 +1222,50 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Listing'
+  '/listings/{id}/interest':
+    put:
+      tags:
+        - 'U30: Individual full sale listing'
+        - Listings / sales
+      summary: Sets the interest state (liked/unliked) for the given user and listing
+      security:
+      - CookieAuth:
+          - user
+          - globalApplicationAdmin
+          - defaultGlobalApplicationAdmin
+      parameters:
+        - name: id
+          in: path
+          description: ID of listing to update the interest state
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - userId
+                - interested
+              properties:
+                userId:
+                  type: integer
+                  example: 6
+                  description: ID of user to update the interest state
+                interested:
+                  type: boolean
+                  example: false
+                  description: New interest state for the provided user/listing combination
+      responses:
+        '200':
+          description: Request successful and interest state is updated
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '406':
+          $ref: '#/components/responses/NotAcceptableError'
   '/businesses/search':
     get:
       tags:
