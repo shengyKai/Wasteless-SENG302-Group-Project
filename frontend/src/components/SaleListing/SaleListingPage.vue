@@ -20,7 +20,7 @@
         <div class="gap"/>
         <h2 class="saleTitle">{{ product.name }}</h2>
         <label class="saleTitleJoin"> From </label>
-        <a class="businessLink" @click="placeholder">Nathan Apple LTD</a>
+        <a class="businessLink">Nathan Apple LTD</a>
       </div>
       <div>
         <label class="description"> {{ productDescription }} </label>
@@ -65,7 +65,7 @@
           <v-col class="column" cols="6" sm="4">
             <label class="followingLabel">{{ createdFormatted }}</label>
           </v-col>
-          <v-btn class="product-btn" color=orange outlined @click="toggleExtraDetails">Orange Apple</v-btn>
+          <v-btn class="product-btn" color=orange outlined @click="extraDetails = !extraDetails;">Extra Details</v-btn>
         </v-row>
         <div v-if="extraDetails">
           <v-row no-gutters>
@@ -195,11 +195,6 @@ export default {
     productDescription() {
       return this.product.description || "Not set";
     },
-  },
-  methods: {
-    toggleExtraDetails() {
-      this.extraDetails = !this.extraDetails;
-    }
   }
 };
 </script>
