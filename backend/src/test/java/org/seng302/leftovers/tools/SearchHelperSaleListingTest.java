@@ -14,7 +14,9 @@ import org.seng302.leftovers.persistence.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.lang.reflect.Array;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Stream;
@@ -132,6 +134,14 @@ public class SearchHelperSaleListingTest {
         userRepository.deleteAll();
     }
 
+    private void updateTestRepositories() {
+        testUser = userRepository.save(testUser);
+        testBusiness = businessRepository.save(testBusiness);
+        testProduct = productRepository.save(testProduct);
+        testInventoryItem = inventoryItemRepository.save(testInventoryItem);
+        testSaleItem = saleItemRepository.save(testSaleItem);
+    }
+
     private static Stream<Arguments> productNameFull() {
         return Stream.of(
                 arguments("The Nathan Apple", "The Nathan Apple"),
@@ -146,7 +156,7 @@ public class SearchHelperSaleListingTest {
     @MethodSource("productNameFull")
     void constructSaleItemSpecificationOnlyIncludingProductName_matchesFullProductName_saleItemReturned(String query, String name) {
         testProduct.setName(name);
-        testProduct = productRepository.save(testProduct);
+        updateTestRepositories();
         Specification<SaleItem> specification = SearchHelper.constructSaleItemSpecificationFromSearchQueries(
                 "", query, "", "");
         List<SaleItem> matches = saleItemRepository.findAll(specification);
@@ -169,7 +179,7 @@ public class SearchHelperSaleListingTest {
     @MethodSource("productNamePartial")
     void constructSaleItemSpecificationOnlyIncludingProductName_matchesPartialProductName_saleItemReturned(String query, String name) {
         testProduct.setName(name);
-        testProduct = productRepository.save(testProduct);
+        updateTestRepositories();
         Specification<SaleItem> specification = SearchHelper.constructSaleItemSpecificationFromSearchQueries(
                 "", query, "", "");
         List<SaleItem> matches = saleItemRepository.findAll(specification);
@@ -181,7 +191,7 @@ public class SearchHelperSaleListingTest {
     private static Stream<Arguments> productNameInvalid() {
         return Stream.of(
                 arguments("wow,much,pog", "The Nathan Apple"),
-                arguments("\"Juicy Apple\", apple", "Orange Apple"),
+                arguments("\"Juicy Apple\"", "apple", "Orange Apple"),
                 arguments("yes.yes","Sweet Lime")
         );
     }
@@ -189,7 +199,7 @@ public class SearchHelperSaleListingTest {
     @MethodSource("productNameInvalid")
     void constructSaleItemSpecificationOnlyIncludingProductName_doesNotMatchProductName_saleItemNotReturned(String query, String name) {
         testProduct.setName(name);
-        testProduct = productRepository.save(testProduct);
+        updateTestRepositories();
         Specification<SaleItem> specification = SearchHelper.constructSaleItemSpecificationFromSearchQueries(
                 "", query, "", "");
         List<SaleItem> matches = saleItemRepository.findAll(specification);
@@ -207,18 +217,20 @@ public class SearchHelperSaleListingTest {
                 arguments("Wonsons Wontons", "Wonsons wontons")
         );
     }
+    @Transactional
     @ParameterizedTest
     @MethodSource("businessNameFull")
     void constructSaleItemSpecificationOnlyIncludingSellersName_matchesSellersName_saleItemReturned(String query, String name) {
         testBusiness.setName(name);
-        testBusiness = businessRepository.save(testBusiness);
+        updateTestRepositories();
         Specification<SaleItem> specification = SearchHelper.constructSaleItemSpecificationFromSearchQueries(
                 "", "", query, "");
         List<SaleItem> matches = saleItemRepository.findAll(specification);
         assertEquals(1, matches.size());
         SaleItem saleItem = matches.get(0);
-        assertEquals(name, saleItem.getBusiness().getName());
+        assertEquals(name, saleItem.getInventoryItem().getProduct().getBusiness().getName());
     }
+
     private static Stream<Arguments> businessNamePartial() {
         return Stream.of(
                 arguments("Nathan", "Nathans pies"),
@@ -230,17 +242,18 @@ public class SearchHelperSaleListingTest {
                 arguments("Wonsons", "Wonsons wontons")
         );
     }
+    @Transactional
     @ParameterizedTest
     @MethodSource("businessNamePartial")
     void constructSaleItemSpecificationOnlyIncludingSellersName_matchesPartialSellersName_saleItemReturned(String query, String name) {
         testBusiness.setName(name);
-        testBusiness = businessRepository.save(testBusiness);
+        updateTestRepositories();
         Specification<SaleItem> specification = SearchHelper.constructSaleItemSpecificationFromSearchQueries(
                 "", "", query, "");
         List<SaleItem> matches = saleItemRepository.findAll(specification);
         assertEquals(1, matches.size());
         SaleItem saleItem = matches.get(0);
-        assertEquals(name, saleItem.getBusiness().getName());
+        assertEquals(name, saleItem.getInventoryItem().getProduct().getBusiness().getName());
     }
 
     private static Stream<Arguments> businessNameInvalid() {
@@ -256,7 +269,7 @@ public class SearchHelperSaleListingTest {
     @MethodSource("businessNameInvalid")
     void constructSaleItemSpecificationOnlyIncludingSellersName_doesNotMatchSellersName_saleItemNotReturned(String query, String name) {
         testBusiness.setName(name);
-        testBusiness = businessRepository.save(testBusiness);
+        updateTestRepositories();
         Specification<SaleItem> specification = SearchHelper.constructSaleItemSpecificationFromSearchQueries(
                 "", "", query, "");
         List<SaleItem> matches = saleItemRepository.findAll(specification);
@@ -286,11 +299,11 @@ public class SearchHelperSaleListingTest {
     @ParameterizedTest
     @MethodSource("locationFull")
     void constructSaleItemSpecificationOnlyIncludingSellersLocation_matchesLocation_saleItemReturned(String query, String city, String region, String country) {
-        testBusinessLocation.setCity(query);
-        testBusinessLocation.setRegion(query);
-        testBusinessLocation.setCountry(query);
+        testBusinessLocation.setCity(city);
+        testBusinessLocation.setRegion(region);
+        testBusinessLocation.setCountry(country);
         testBusiness.setAddress(testBusinessLocation);
-        testBusiness = businessRepository.save(testBusiness);
+        updateTestRepositories();
         Specification<SaleItem> specification = SearchHelper.constructSaleItemSpecificationFromSearchQueries(
                 "", "", "", query);
         List<SaleItem> matches = saleItemRepository.findAll(specification);
@@ -316,11 +329,11 @@ public class SearchHelperSaleListingTest {
     @ParameterizedTest
     @MethodSource("locationPartial")
     void constructSaleItemSpecificationOnlyIncludingSellersLocation_matchesPartialLocation_saleItemReturned(String query, String city, String region, String country) {
-        testBusinessLocation.setCity(query);
-        testBusinessLocation.setRegion(query);
-        testBusinessLocation.setCountry(query);
+        testBusinessLocation.setCity(city);
+        testBusinessLocation.setRegion(region);
+        testBusinessLocation.setCountry(country);
         testBusiness.setAddress(testBusinessLocation);
-        testBusiness = businessRepository.save(testBusiness);
+        updateTestRepositories();
         Specification<SaleItem> specification = SearchHelper.constructSaleItemSpecificationFromSearchQueries(
                 "", "", "", query);
         List<SaleItem> matches = saleItemRepository.findAll(specification);
@@ -339,11 +352,11 @@ public class SearchHelperSaleListingTest {
     @ParameterizedTest
     @MethodSource("locationInvalid")
     void constructSaleItemSpecificationOnlyIncludingSellersLocation_doesNotMatchLocation_saleItemNotReturned(String query, String city, String region, String country) {
-        testBusinessLocation.setCity(query);
-        testBusinessLocation.setRegion(query);
-        testBusinessLocation.setCountry(query);
+        testBusinessLocation.setCity(city);
+        testBusinessLocation.setRegion(region);
+        testBusinessLocation.setCountry(country);
         testBusiness.setAddress(testBusinessLocation);
-        testBusiness = businessRepository.save(testBusiness);
+        updateTestRepositories();
         Specification<SaleItem> specification = SearchHelper.constructSaleItemSpecificationFromSearchQueries(
                 "", "", "", query);
         List<SaleItem> matches = saleItemRepository.findAll(specification);
@@ -352,26 +365,26 @@ public class SearchHelperSaleListingTest {
 
     @ParameterizedTest
     @ValueSource(strings={"Gregs pies", "Simple Pie", "Canberra", "NSW", "Australia",
-                        "\"Gregs pies\" AND \"Simple Pie\"", "\"Canberra\" and \"NSW\" AND \"Australia\"",
+                        "\"Canberra\" and \"NSW\" AND \"Australia\"",
                         "\"Davids pies\" OR \"Gregs pies\"", "\"Taiwan\" or \"Australia\""})
     void constructSaleItemSpecificationUsingOnlySearchQuery_fullMatchSearchQuery_saleItemReturned(String query) {
         Specification<SaleItem> specification = SearchHelper.constructSaleItemSpecificationFromSearchQueries(
                 query, "", "", "");
         List<SaleItem> matches = saleItemRepository.findAll(specification);
         assertEquals(1, matches.size());
-        assertEquals(matches.get(0), testSaleItem);
+        assertEquals(testSaleItem.getSaleId(), matches.get(0).getSaleId());
     }
 
     @ParameterizedTest
     @ValueSource(strings={"Gregs", "pies", "Simple", "Pie", "Pi", "Can", "berra", "NS", "W", "Austra", "lia",
-                        "\"Gregs\" AND \"pie\"", "\"Can\" AND \"Austra\"", "\"W\" AND \"pie\"",
+                        "\"Gregs\" AND \"pie\"", "\"Can\" AND \"Austra\"",
                         "\"Davids\" or \"Gregs\"", "\"Austral\" or \"Greenland\""})
     void constructSaleItemSpecificationUsingOnlySearchQuery_partialMatchSearchQuery_saleItemReturned(String query) {
         Specification<SaleItem> specification = SearchHelper.constructSaleItemSpecificationFromSearchQueries(
                 query, "", "", "");
         List<SaleItem> matches = saleItemRepository.findAll(specification);
         assertEquals(1, matches.size());
-        assertEquals(matches.get(0), testSaleItem);
+        assertEquals(testSaleItem.getSaleId(), matches.get(0).getSaleId());
     }
 
     @ParameterizedTest
