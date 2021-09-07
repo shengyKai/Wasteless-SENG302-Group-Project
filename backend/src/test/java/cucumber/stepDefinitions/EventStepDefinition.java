@@ -42,11 +42,6 @@ public class EventStepDefinition {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @AfterEach
-    public void cleanUp() {
-        eventRepository.deleteAll();
-    }
-
     @Given("An event is sent to the user")
     public void an_event_is_sent_to_the_user() {
         Event event = new GlobalMessageEvent(userContext.getLast(), "Test message");
