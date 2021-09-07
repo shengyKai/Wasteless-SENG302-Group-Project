@@ -80,6 +80,7 @@ class SearchHelperTest {
 
     /**
      * Read user info from file UserSearchHelperTestData1.csv, use this information to construct User objects and add them to userList
+     *
      * @throws ParseException
      * @throws IOException
      */
@@ -221,7 +222,7 @@ class SearchHelperTest {
      * a query of UserRepository causes the results to be ordered by the user's id number.
      */
     @Test
-    void getSortOrderByNullTest()  {
+    void getSortOrderByNullTest() {
         Sort userSort = SearchHelper.getSort(null, null);
         List<User> queryResults = userRepository.findAll(spec, userSort);
         User firstUser = queryResults.get(0);
@@ -450,9 +451,9 @@ class SearchHelperTest {
         assertEquals(7, matches.size());
         for (User user : matches) {
             assertTrue(user.getFirstName().equals("Andy") ||
-                        user.getMiddleName().equals("Andy") ||
-                        user.getLastName().equals("Andy") ||
-                        user.getNickname().equals("Andy"));
+                    user.getMiddleName().equals("Andy") ||
+                    user.getLastName().equals("Andy") ||
+                    user.getNickname().equals("Andy"));
         }
     }
 
@@ -503,7 +504,7 @@ class SearchHelperTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings={"andy and \"Graham\"", "andy AND \"Graham\"", "andy \"Graham\""})
+    @ValueSource(strings = {"andy and \"Graham\"", "andy AND \"Graham\"", "andy \"Graham\""})
     void constructUserSpecificationFromSearchQuery_andConjunction_matchesUsingAnd(String searchQuery) {
         Specification<User> specification = SearchHelper.constructUserSpecificationFromSearchQuery(searchQuery);
         List<User> matches = userRepository.findAll(specification);
@@ -922,6 +923,7 @@ class SearchHelperTest {
 
     /**
      * Creates a product, inventory and sale item which are all related to each other, when provided with a business
+     *
      * @param business to create the three type of items with
      */
     private void createProductInventorySaleItemWithBusiness(Business business) throws Exception {
@@ -991,7 +993,7 @@ class SearchHelperTest {
         assertFalse(new ReflectionEquals(resultSaleItemsBusiness1).matches(resultSaleItemsBusiness2));
     }
 
-    private void setUpSaleItemsWithDifferentPrices() {
+    private void setUpSaleItemsWithDifferentPricesClosingDates() {
         var business = createBusiness();
         LocalDate today = LocalDate.now();
         var product = new Product.Builder()
@@ -1017,6 +1019,7 @@ class SearchHelperTest {
                 .withQuantity(1)
                 .withPrice("1.0")
                 .withMoreInfo("blah")
+                .withCloses(today.plus(1, ChronoUnit.DAYS).toString())
                 .build();
         saleItemRepository.save(saleItem1);
         var saleItem2 = new SaleItem.Builder()
@@ -1024,6 +1027,7 @@ class SearchHelperTest {
                 .withQuantity(1)
                 .withPrice("6.0")
                 .withMoreInfo("blah")
+                .withCloses(today.plus(6, ChronoUnit.DAYS).toString())
                 .build();
         saleItemRepository.save(saleItem2);
         var saleItem3 = new SaleItem.Builder()
@@ -1031,14 +1035,15 @@ class SearchHelperTest {
                 .withQuantity(1)
                 .withPrice("15.0")
                 .withMoreInfo("blah")
+                .withCloses(today.plus(15, ChronoUnit.DAYS).toString())
                 .build();
         saleItemRepository.save(saleItem3);
     }
 
     @ParameterizedTest
-    @CsvSource({"0.0,5.0", "6.0,10.0", "10.0,15.0", "0.0,15.0"})
-    void constructSaleListingSpecificationFromPrice_threeSaleItemsCreatedWithDifferentPrices_saleItemsReturnedAreWithinRange(String priceLowerBound, String priceUpperBound) throws Exception{
-        setUpSaleItemsWithDifferentPrices();
+    @CsvSource({"0.0,5.0,1", "6.0,10.0,1", "10.0,15.0,1", "0.0,15.0,3"})
+    void constructSaleListingSpecificationFromPrice_threeSaleItemsCreatedWithDifferentPrices_saleItemsReturnedAreWithinRange(String priceLowerBound, String priceUpperBound, String expectedSize) throws Exception {
+        setUpSaleItemsWithDifferentPricesClosingDates();
 
         PageRequest pageRequest = SearchHelper.getPageRequest(1, 10, Sort.by("created"));
 
@@ -1047,12 +1052,119 @@ class SearchHelperTest {
         Specification<SaleItem> specification = SearchHelper.constructSaleListingSpecificationFromPrice(lowerBound, upperBound);
         Page<SaleItem> resultSaleItemsBusiness = saleItemRepository.findAll(specification, pageRequest);
 
+        assertEquals(Integer.parseInt(expectedSize), resultSaleItemsBusiness.getTotalElements());
+
         for (SaleItem saleItem : resultSaleItemsBusiness) {
             // This would mean the saleItem price is being compared to the lowerBound such that its equal or more than the lowerBound
-            assertTrue(saleItem.getPrice().compareTo(lowerBound) == 0 || saleItem.getPrice().compareTo(lowerBound) == 1);
+            assertTrue(saleItem.getPrice().compareTo(lowerBound) >= 0);
             // This would mean the saleItem price is being compared to the lowerBound such that its equal or lesser than the upperBound
-            assertTrue(saleItem.getPrice().compareTo(upperBound) == 0 || saleItem.getPrice().compareTo(upperBound) == -1);
+            assertTrue(saleItem.getPrice().compareTo(upperBound) <= 0);
         }
     }
 
+    @ParameterizedTest
+    @CsvSource({"0,5,1", "6,10,1", "10,15,1", "0,15,3"})
+    void constructSaleListingSpecificationFromClosingDate_threeSaleItemsCreatedWithDifferentClosingDates_saleItemsReturnedAreWithinRange(String dateLowerBoundToAdd, String dateUpperBoundToAdd, String expectedSize) throws Exception {
+        setUpSaleItemsWithDifferentPricesClosingDates();
+
+        PageRequest pageRequest = SearchHelper.getPageRequest(1, 10, Sort.by("created"));
+
+        LocalDate lowerBound = LocalDate.now().plus(Integer.parseInt(dateLowerBoundToAdd), ChronoUnit.DAYS);
+        LocalDate upperBound = LocalDate.now().plus(Integer.parseInt(dateUpperBoundToAdd), ChronoUnit.DAYS);
+        Specification<SaleItem> specification = SearchHelper.constructSaleListingSpecificationFromClosingDate(lowerBound, upperBound);
+        Page<SaleItem> resultSaleItemsBusiness = saleItemRepository.findAll(specification, pageRequest);
+
+        assertEquals(Integer.parseInt(expectedSize), resultSaleItemsBusiness.getTotalElements());
+
+        for (SaleItem saleItem : resultSaleItemsBusiness) {
+            // This would mean the saleItem closing date is being compared to the lowerBound such that its equal or more than the lowerBound
+            assertTrue(saleItem.getCloses().compareTo(lowerBound) >= 0);
+            // This would mean the saleItem closing date is being compared to the lowerBound such that its equal or lesser than the upperBound
+            assertTrue(saleItem.getCloses().compareTo(upperBound) <= 0);
+        }
+    }
+
+//    private void setUpSaleItemsWithDifferentBusinessTypes() {
+//        var testUser = userRepository.findAll().iterator().next();
+//        var testBusiness1 = new Business.Builder()
+//                .withPrimaryOwner(testUser)
+//                .withBusinessType("Accommodation and Food Services")
+//                .withDescription("DESCRIPTION")
+//                .withName("BUSINESS_NAME")
+//                .withAddress(Location.covertAddressStringToLocation("108,Albert Road,Ashburton,Christchurch,New Zealand,Canterbury,8041"))
+//                .build();
+//        businessRepository.save(testBusiness1);
+//        var testBusiness2 = new Business.Builder()
+//                .withPrimaryOwner(testUser)
+//                .withBusinessType("Charitable organisation")
+//                .withDescription("DESCRIPTION")
+//                .withName("BUSINESS_NAME")
+//                .withAddress(Location.covertAddressStringToLocation("108,Albert Road,Ashburton,Christchurch,New Zealand,Canterbury,8041"))
+//                .build();
+//        businessRepository.save(testBusiness2);
+//        var testBusiness3 = new Business.Builder()
+//                .withPrimaryOwner(testUser)
+//                .withBusinessType("Non-profit organisation")
+//                .withDescription("DESCRIPTION")
+//                .withName("BUSINESS_NAME")
+//                .withAddress(Location.covertAddressStringToLocation("108,Albert Road,Ashburton,Christchurch,New Zealand,Canterbury,8041"))
+//                .build();
+//        businessRepository.save(testBusiness3);
+//        var testBusiness4 = new Business.Builder()
+//                .withPrimaryOwner(testUser)
+//                .withBusinessType("Retail Trade")
+//                .withDescription("DESCRIPTION")
+//                .withName("BUSINESS_NAME")
+//                .withAddress(Location.covertAddressStringToLocation("108,Albert Road,Ashburton,Christchurch,New Zealand,Canterbury,8041"))
+//                .build();
+//        businessRepository.save(testBusiness4);
+//
+//        LocalDate today = LocalDate.now();
+//        var product = new Product.Builder()
+//                .withBusiness(business)
+//                .withProductCode("PRODUCT-CODE")
+//                .withName("This is the product name")
+//                .withDescription("Wow description")
+//                .withManufacturer("Some guy")
+//                .build();
+//        productRepository.save(product);
+//        var inventoryItem = new InventoryItem.Builder()
+//                .withProduct(product)
+//                .withQuantity(30)
+//                .withPricePerItem("2.69")
+//                .withManufactured("2021-03-11")
+//                .withSellBy(today.plus(2, ChronoUnit.DAYS).toString())
+//                .withBestBefore(today.plus(3, ChronoUnit.DAYS).toString())
+//                .withExpires(today.plus(4, ChronoUnit.DAYS).toString())
+//                .build();
+//        inventoryItem = inventoryItemRepository.save(inventoryItem);
+//        var saleItem = new SaleItem.Builder()
+//                .withInventoryItem(inventoryItem)
+//                .withQuantity(1)
+//                .withPrice("1.0")
+//                .withMoreInfo("blah")
+//                .withCloses(today.plus(1, ChronoUnit.DAYS).toString())
+//                .build();
+//        saleItemRepository.save(saleItem);
+//    }
+//
+//    @ParameterizedTest
+//    @CsvSource({"Accomodation and Food Services", "Charitable organisation", "Non-profit organisation", "Retail Trade"})
+//    void constructSaleListingSpecificationFromBusinessType_severalBusinessesCreatedWithDifferentBusinessTypes_saleItemsReturnedAreFromThatBusinessType(String businessType) throws Exception {
+//        setUpSaleItemsWithDifferentBusinessTypes();
+//
+//        PageRequest pageRequest = SearchHelper.getPageRequest(1, 10, Sort.by("created"));
+//
+//        LocalDate lowerBound = LocalDate.now().plus(Integer.parseInt(dateLowerBoundToAdd), ChronoUnit.DAYS);
+//        LocalDate upperBound = LocalDate.now().plus(Integer.parseInt(dateUpperBoundToAdd), ChronoUnit.DAYS);
+//        Specification<SaleItem> specification = SearchHelper.constructSaleListingSpecificationFromClosingDate(lowerBound, upperBound);
+//        Page<SaleItem> resultSaleItemsBusiness = saleItemRepository.findAll(specification, pageRequest);
+//
+//        for (SaleItem saleItem : resultSaleItemsBusiness) {
+//            // This would mean the saleItem closing date is being compared to the lowerBound such that its equal or more than the lowerBound
+//            assertTrue(saleItem.getCloses().compareTo(lowerBound) >= 0);
+//            // This would mean the saleItem closing date is being compared to the lowerBound such that its equal or lesser than the upperBound
+//            assertTrue(saleItem.getCloses().compareTo(upperBound) <= 0);
+//        }
+//    }
 }
