@@ -1,6 +1,6 @@
 <template>
   <div v-if=!expandSaleListing>
-    <v-card width="600px" style="margin: 1em">
+    <v-card width="600px" class="sale-card">
       <v-row>
         <v-col cols="8">
           <v-expand-transition>
@@ -40,29 +40,29 @@
           </v-expand-transition>
         </v-col>
         <v-col cols="4">
-          <v-timeline dense style="height: 100%; margin-left: -40%; margin-bottom: 10px">
+          <v-timeline dense class="timeline">
             <v-timeline-item color="grey" small>
-              <div style="margin-left: -25px">
+              <div class="date-label">
                 <strong>Created</strong>
                 {{createdFormatted}}
               </div>
             </v-timeline-item>
             <v-timeline-item color="orange" small>
-              <div style="margin-left: -25px">
+              <div class="date-label">
                 <strong>Expires</strong>
                 {{expiresFormatted}}
               </div>
             </v-timeline-item>
             <v-timeline-item color="red" small>
-              <div style="margin-left: -25px">
+              <div class="date-label">
                 <strong>Closes</strong>
                 {{closesFormatted}}
               </div>
             </v-timeline-item>
           </v-timeline>
           <v-card-actions>
-            <v-btn ref="expandButton" style="position: absolute; bottom: 10px; right: 125px" color="normal" @click="expandSaleListing=true">Expand</v-btn>
-            <v-btn ref="viewMoreButton" style="position: absolute; bottom: 10px; right: 10px" color="secondary" @click="moreInfo=!moreInfo">View {{moreInfo? 'Less' : 'More'}}</v-btn>
+            <v-btn ref="expandButton" class="expand-button" color="normal" @click="expandSaleListing=true">Expand</v-btn>
+            <v-btn ref="viewMoreButton" class="view-more-button" color="secondary" @click="moreInfo=!moreInfo">View {{moreInfo? 'Less' : 'More'}}</v-btn>
           </v-card-actions>
         </v-col>
       </v-row>
@@ -159,11 +159,34 @@ export default {
     // When the Sale item is created, the currency will be set to the currency of the country the product is being
     // sold in. It will have blank fields if no currency can be found from the country.
     this.currency = await currencyFromCountry(this.product.countryOfSale);
-  },
-  methods: {
-    goToSaleItem() {
-      this.$router.push("/business/" + this.$store.state.activeRole.id + "/listings/" + this.saleItem.id);
-    }
   }
 };
 </script>
+
+<style scoped>
+.timeline {
+  height: 100%;
+  margin-left: -40%;
+  margin-bottom: 10px;
+}
+
+.sale-card {
+  margin: 1em;
+}
+
+.date-label {
+  margin-left: -25px;
+}
+
+.expand-button {
+  position: absolute;
+  bottom: 10px;
+  right: 125px;
+}
+
+.view-more-button {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+}
+</style>
