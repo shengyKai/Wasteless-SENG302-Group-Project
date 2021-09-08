@@ -32,6 +32,7 @@ export default {
   data() {
     return {
       currentPage: 1,
+      totalPages: 1,
       error: undefined,
       resultsPerPage: 10,
       results: undefined
