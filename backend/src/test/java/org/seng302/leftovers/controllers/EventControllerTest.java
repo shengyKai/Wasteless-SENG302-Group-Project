@@ -15,7 +15,6 @@ import org.seng302.leftovers.entities.event.GlobalMessageEvent;
 import org.seng302.leftovers.exceptions.AccessTokenException;
 import org.seng302.leftovers.persistence.EventRepository;
 import org.seng302.leftovers.persistence.UserRepository;
-import org.seng302.leftovers.service.EventService;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
@@ -39,9 +38,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 class EventControllerTest {
     private MockMvc mockMvc;
-
-    @Mock
-    private EventService eventService;
 
     @Mock
     private UserRepository userRepository;
@@ -80,7 +76,7 @@ class EventControllerTest {
         when(eventRepository.findById(not(eq(2L)))).thenReturn(Optional.empty());
 
 
-        EventController eventController = new EventController(userRepository, eventService, eventRepository);
+        EventController eventController = new EventController(userRepository, eventRepository);
         mockMvc = MockMvcBuilders.standaloneSetup(eventController).build();
     }
 
@@ -151,7 +147,7 @@ class EventControllerTest {
                         .content(json.toString()))
                 .andExpect(status().isBadRequest())
                 .andReturn();
-        verify(eventService, times(0)).saveEvent(any());
+        verify(eventRepository, times(0)).save(any());
     }
 
     @Test
@@ -164,7 +160,7 @@ class EventControllerTest {
                         .content(json.toString()))
                 .andExpect(status().isBadRequest())
                 .andReturn();
-        verify(eventService, times(0)).saveEvent(any());
+        verify(eventRepository, times(0)).save(any());
     }
 
     @ParameterizedTest
@@ -180,7 +176,7 @@ class EventControllerTest {
                 .andReturn();
 
         verify(mockEvent, times(1)).setTag(eventTag);
-        verify(eventService, times(1)).saveEvent(mockEvent);
+        verify(eventRepository, times(1)).save(mockEvent);
     }
 
     @Test
@@ -236,21 +232,20 @@ class EventControllerTest {
 
         ArgumentCaptor<GlobalMessageEvent> eventCaptor = ArgumentCaptor.forClass(GlobalMessageEvent.class);
 
-        verify(eventService).saveEvent(eventCaptor.capture());
+        verify(eventRepository).save(eventCaptor.capture());
 
         assertEquals("this that", eventCaptor.getValue().getGlobalMessage());
         assertEquals(mockUser, eventCaptor.getValue().getNotifiedUser());
     }
 
     @Test
-    void eventEmitter_noAuthToken_401Response() throws Exception {
+    void getEvents_noAuthToken_401Response() throws Exception {
         // Mock the AuthenticationTokenManager to respond as it would when the authentication token is missing or invalid
         authenticationTokenManager.when(() -> AuthenticationTokenManager.checkAuthenticationToken(any()))
                 .thenThrow(new AccessTokenException());
 
-        mockMvc.perform(get("/events/emitter").queryParam("userId", "7"))
-                .andExpect(status().isUnauthorized())
-                .andReturn();
+        mockMvc.perform(get("/users/7/feed"))
+                .andExpect(status().isUnauthorized());
 
         // Check that the authentication token manager was called
         authenticationTokenManager.verify(() -> AuthenticationTokenManager.checkAuthenticationToken(any()));
@@ -260,9 +255,8 @@ class EventControllerTest {
     void eventEmitter_differentUser_403Response() throws Exception {
         authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), any())).thenReturn(false);
 
-        mockMvc.perform(get("/events/emitter").queryParam("userId", "7"))
-                .andExpect(status().isForbidden())
-                .andReturn();
+        mockMvc.perform(get("/users/7/feed"))
+                .andExpect(status().isForbidden());
 
         // Check that the authentication token manager was called
         authenticationTokenManager.verify(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), eq(7L)));
@@ -273,9 +267,8 @@ class EventControllerTest {
         // 406 Should only be possible if user is admin
         authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), eq(999L))).thenReturn(true);
 
-        mockMvc.perform(get("/events/emitter").queryParam("userId", "999"))
-                .andExpect(status().isNotAcceptable())
-                .andReturn();
+        mockMvc.perform(get("/users/999/feed"))
+                .andExpect(status().isNotAcceptable());
 
         verify(userRepository).findById(999L);
     }
@@ -284,11 +277,10 @@ class EventControllerTest {
     void eventEmitter_validRequest_emitterGenerated() throws Exception {
         authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), eq(7L))).thenReturn(true);
 
-        mockMvc.perform(get("/events/emitter").queryParam("userId", "7"))
-                .andExpect(status().isOk())
-                .andReturn();
+        mockMvc.perform(get("/users/7/feed"))
+                .andExpect(status().isOk());
 
-        verify(eventService).createEmitterForUser(mockUser);
+        verify(eventRepository).findEventsForUser(mockUser);
     }
 
     @Test

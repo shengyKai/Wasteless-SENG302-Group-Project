@@ -1,6 +1,5 @@
 package org.seng302.leftovers.controllers;
 
-import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -12,14 +11,11 @@ import org.seng302.leftovers.entities.event.Event;
 import org.seng302.leftovers.entities.event.GlobalMessageEvent;
 import org.seng302.leftovers.persistence.EventRepository;
 import org.seng302.leftovers.persistence.UserRepository;
-import org.seng302.leftovers.service.EventService;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
-import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -39,14 +35,11 @@ public class EventController {
 
     private final UserRepository userRepository;
 
-    private final EventService eventService;
-
     private final EventRepository eventRepository;
 
     @Autowired
-    public EventController(UserRepository userRepository, EventService eventService, EventRepository eventRepository) {
+    public EventController(UserRepository userRepository, EventRepository eventRepository) {
         this.userRepository = userRepository;
-        this.eventService = eventService;
         this.eventRepository = eventRepository;
     }
 
@@ -69,7 +62,7 @@ public class EventController {
             }
 
             event.setTag(body.getValue());
-            eventService.saveEvent(event);
+            eventRepository.save(event);
         } catch (Exception e) {
             LOGGER.error(e.getMessage());
             throw e;
@@ -83,7 +76,7 @@ public class EventController {
      * @param userId User to get newsfeed events for.
      */
     @GetMapping("/users/{userId}/feed")
-    public List<EventDTO> eventEmitter(@PathVariable long userId, @RequestParam(required = false) String modifiedSince, HttpServletRequest request, HttpServletResponse response) {
+    public List<EventDTO> getEvents(@PathVariable long userId, @RequestParam(required = false) String modifiedSince, HttpServletRequest request, HttpServletResponse response) {
         try {
             LOGGER.info("Retrieving newsfeed events for user (id={})", userId);
             AuthenticationTokenManager.checkAuthenticationToken(request);
@@ -139,7 +132,7 @@ public class EventController {
             }
 
             String message = messageInfo.getAsString("message");
-            userRepository.findAll().forEach(user -> eventService.saveEvent(new GlobalMessageEvent(user, message)));
+            userRepository.findAll().forEach(user -> eventRepository.save(new GlobalMessageEvent(user, message)));
 
             response.setStatus(201);
         } catch (Exception e) {
@@ -190,7 +183,7 @@ public class EventController {
             }
 
             event.markAsRead();
-            eventService.saveEvent(event);
+            eventRepository.save(event);
         } catch (Exception e) {
             LOGGER.error(e.getMessage());
             throw e;
