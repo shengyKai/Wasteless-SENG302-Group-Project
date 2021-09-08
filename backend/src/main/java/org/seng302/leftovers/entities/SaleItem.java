@@ -244,6 +244,14 @@ public class SaleItem {
     }
 
     /**
+     * Calculates the number of bookmarks the sale listing has
+     * @return the number of bookmarks the sale listing has
+     */
+    public int getNumberOfBookmarks() {
+        return this.bookmarks.size();
+    }
+
+    /**
      * Construct a JSON representation of the sale item. Attributes which are null will be omitted from the
      * returned JSON.
      * @return JSON representation of the sale item.
