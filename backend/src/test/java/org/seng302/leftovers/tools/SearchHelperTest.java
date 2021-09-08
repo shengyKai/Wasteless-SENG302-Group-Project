@@ -996,6 +996,9 @@ class SearchHelperTest {
         assertFalse(new ReflectionEquals(resultSaleItemsBusiness1).matches(resultSaleItemsBusiness2));
     }
 
+    /**
+     * This method is for setting up sale items with sale items of different prices and closing dates
+     */
     private void setUpSaleItemsWithDifferentPricesClosingDates() {
         var business = createBusiness();
         LocalDate today = LocalDate.now();
@@ -1045,7 +1048,7 @@ class SearchHelperTest {
 
     @ParameterizedTest
     @CsvSource({"0.0,5.0,1", "6.0,10.0,1", "10.0,15.0,1", "0.0,15.0,3"})
-    void constructSaleListingSpecificationFromPrice_threeSaleItemsCreatedWithDifferentPrices_saleItemsReturnedAreWithinRange(String priceLowerBound, String priceUpperBound, String expectedSize) throws Exception {
+    void constructSaleListingSpecificationFromPrice_saleItemsCreatedWithDifferentPrices_saleItemsReturnedAreWithinRange(String priceLowerBound, String priceUpperBound, String expectedSize) throws Exception {
         setUpSaleItemsWithDifferentPricesClosingDates();
 
         PageRequest pageRequest = SearchHelper.getPageRequest(1, 10, Sort.by("created"));
@@ -1067,7 +1070,7 @@ class SearchHelperTest {
 
     @ParameterizedTest
     @CsvSource({"0,5,1", "6,10,1", "10,15,1", "0,15,3"})
-    void constructSaleListingSpecificationFromClosingDate_threeSaleItemsCreatedWithDifferentClosingDates_saleItemsReturnedAreWithinRange(String dateLowerBoundToAdd, String dateUpperBoundToAdd, String expectedSize) throws Exception {
+    void constructSaleListingSpecificationFromClosingDate_saleItemsCreatedWithDifferentClosingDates_saleItemsReturnedAreWithinRange(String dateLowerBoundToAdd, String dateUpperBoundToAdd, String expectedSize) throws Exception {
         setUpSaleItemsWithDifferentPricesClosingDates();
 
         PageRequest pageRequest = SearchHelper.getPageRequest(1, 10, Sort.by("created"));
@@ -1134,11 +1137,12 @@ class SearchHelperTest {
 
     /**
      * This method is solely for generating the arguments for the test:
-     * constructSaleListingSpecificationFromBusinessType_severalBusinessesCreatedWithDifferentBusinessTypes_saleItemsReturnedAreFromThatBusinessType
+     * constructSaleListingSpecificationFromBusinessType_businessesCreatedWithDifferentBusinessTypes_saleItemsReturnedAreFromThatBusinessType
      * @return a stream containing the arguments for the test method
      */
-    private Stream<Arguments> generateData() {
+    private Stream<Arguments> generateDataForConstructSaleListingSpecificationFromBusinessType() {
         return Stream.of(
+                Arguments.of(Arrays.asList(), 4),
                 Arguments.of(Arrays.asList("Accommodation and Food Services"), 1),
                 Arguments.of(Arrays.asList("Accommodation and Food Services", "Charitable organisation"), 2),
                 Arguments.of(Arrays.asList("Accommodation and Food Services", "Charitable organisation", "Non-profit organisation"), 3),
@@ -1148,8 +1152,8 @@ class SearchHelperTest {
 
     @Transactional
     @ParameterizedTest
-    @MethodSource("generateData")
-    void constructSaleListingSpecificationFromBusinessType_severalBusinessesCreatedWithDifferentBusinessTypes_saleItemsReturnedAreFromThatBusinessType(List<String> expectedBusinessTypes, int expectedSize) throws Exception {
+    @MethodSource("generateDataForConstructSaleListingSpecificationFromBusinessType")
+    void constructSaleListingSpecificationFromBusinessType_businessesCreatedWithDifferentBusinessTypes_saleItemsReturnedAreFromThatBusinessType(List<String> expectedBusinessTypes, int expectedSize) throws Exception {
         List<String> businessTypes = Arrays.asList("Accommodation and Food Services", "Charitable organisation", "Non-profit organisation", "Retail Trade");
         for (String businessType : businessTypes) {
             setUpSaleItemsWithDifferentBusinessTypes(businessType);
@@ -1162,8 +1166,31 @@ class SearchHelperTest {
 
         assertEquals(expectedSize, resultSaleItemsBusiness.getTotalElements());
 
-        for (SaleItem saleItem : resultSaleItemsBusiness) {
-            assertTrue(expectedBusinessTypes.contains(saleItem.getInventoryItem().getBusiness().getBusinessType()));
+        if (expectedBusinessTypes.size() > 0) {
+            for (SaleItem saleItem : resultSaleItemsBusiness) {
+                assertTrue(expectedBusinessTypes.contains(saleItem.getInventoryItem().getBusiness().getBusinessType()));
+            }
         }
+    }
+
+    /**
+     * This method is solely for generating the arguments for the test:
+     * constructSaleListingSpecificationForSearch_differentPricesClosingDatesBusinessTypes_saleItemsReturnedAreOfTheSpecification
+     * @return a stream containing the arguments for the test method
+     */
+    private Stream<Arguments> generateDataForconstructSaleListingSpecificationForSearch() {
+        return Stream.of(
+                Arguments.of(Arrays.asList("Accommodation and Food Services"), 1),
+                Arguments.of(Arrays.asList("Accommodation and Food Services", "Charitable organisation"), 2),
+                Arguments.of(Arrays.asList("Accommodation and Food Services", "Charitable organisation", "Non-profit organisation"), 3),
+                Arguments.of(Arrays.asList("Accommodation and Food Services", "Charitable organisation", "Non-profit organisation", "Retail Trade"), 4)
+        );
+    }
+
+    @Transactional
+    @ParameterizedTest
+    @MethodSource("generateDataForconstructSaleListingSpecificationForSearch")
+    void constructSaleListingSpecificationForSearch_differentPricesClosingDatesBusinessTypes_saleItemsReturnedAreOfTheSpecification() {
+
     }
 }

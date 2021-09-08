@@ -646,7 +646,12 @@ public class SearchHelper {
      * @return A specification for Sale items which matches the business's business type
      */
     public static Specification<SaleItem> constructSaleListingSpecificationFromBusinessType(List<String> businessTypes) {
-        return (root, query, criteriaBuilder) -> root.get("inventoryItem").get("product").get("business").get("businessType").in(businessTypes);
+        if  (businessTypes.size() > 0) {
+            return (root, query, criteriaBuilder) -> root.get("inventoryItem").get("product").get("business").get("businessType").in(businessTypes);
+        } else {
+            return (root, query, criteriaBuilder) -> root.get("inventoryItem").get("product").get("business").get("businessType").in(Business.getBusinessTypes());
+        }
+
     }
 
     /**
