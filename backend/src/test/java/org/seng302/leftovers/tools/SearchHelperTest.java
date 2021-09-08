@@ -44,7 +44,7 @@ import static org.mockito.Mockito.when;
 class SearchHelperTest {
 
     /**
-     * List of users to be used in testsing of getPageInResults.
+     * List of users to be used in testing of getPageInResults.
      */
     private List<User> pagingUserList;
 

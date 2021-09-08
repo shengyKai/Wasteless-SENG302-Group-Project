@@ -1,7 +1,8 @@
 <template>
   <v-app-bar max-height="64px">
     <div class="container-outer flex-center">
-      <h1 class="link" @click="showHome">LEFT_OVERS</h1>
+      <h1 v-if="homeEndpoint" class="link" @click="showHome">LEFT_OVERS</h1>
+      <h1 v-else class="link" @click="showHome">&lt; LEFT_OVERS</h1>
 
       <!-- Space between the app name and the controls -->
       <div class="spacer"/>
@@ -128,6 +129,9 @@ export default {
     }
   },
   computed: {
+    homeEndpoint() {
+      return this.$route.path === '/home';
+    },
     isAdmin() {
       return [USER_ROLES.DGAA, USER_ROLES.GAA].includes(
         this.$store.getters.role
