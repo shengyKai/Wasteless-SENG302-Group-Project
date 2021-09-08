@@ -452,7 +452,7 @@ class EventControllerTest {
                         .content(json.toString()))
                 .andExpect(status().isBadRequest())
                 .andReturn();
-        verify(eventService, times(0)).saveEvent(any());
+        verify(eventRepository, times(0)).save(any());
     }
 
     @Test
@@ -465,7 +465,7 @@ class EventControllerTest {
                         .content(json.toString()))
                 .andExpect(status().isBadRequest())
                 .andReturn();
-        verify(eventService, times(0)).saveEvent(any());
+        verify(eventRepository, times(0)).save(any());
     }
 
     @ParameterizedTest
@@ -473,15 +473,15 @@ class EventControllerTest {
     void updateEventStatus_cannotChangeStatus_400Response(EventStatus newStatus) throws Exception {
         var json = new JSONObject();
         json.put("value", newStatus.toString().toLowerCase());
-        when(mockEvent.getStatus()).thenReturn(EventStatus.ARCHIVED);
+        when(mockEvent1.getStatus()).thenReturn(EventStatus.ARCHIVED);
         mockMvc.perform(
                 put("/feed/2/status")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json.toString()))
                 .andExpect(status().isBadRequest())
                 .andReturn();
-        verify(mockEvent, times(0)).updateEventStatus(newStatus);
-        verify(eventService, times(0)).saveEvent(any());
+        verify(mockEvent1, times(0)).updateEventStatus(newStatus);
+        verify(eventRepository, times(0)).save(any());
     }
 
 
@@ -490,7 +490,7 @@ class EventControllerTest {
     void updateEventStatus_canChangeStatusAndValidNewStatus_200ResponseAndStatusUpdated(EventStatus newStatus) throws Exception {
         var json = new JSONObject();
         json.put("value", newStatus.toString().toLowerCase());
-        when(mockEvent.getStatus()).thenReturn(EventStatus.NORMAL);
+        when(mockEvent1.getStatus()).thenReturn(EventStatus.NORMAL);
         mockMvc.perform(
                 put("/feed/2/status")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -498,7 +498,7 @@ class EventControllerTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        verify(mockEvent, times(1)).updateEventStatus(newStatus);
-        verify(eventService, times(1)).saveEvent(mockEvent);
+        verify(mockEvent1, times(1)).updateEventStatus(newStatus);
+        verify(eventRepository, times(1)).save(mockEvent1);
     }
 }

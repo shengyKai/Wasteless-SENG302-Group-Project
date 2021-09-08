@@ -213,7 +213,7 @@ public class EventController {
             }
 
             event.updateEventStatus(body.getValue());
-            eventService.saveEvent(event);
+            eventRepository.save(event);
         } catch (Exception e) {
             LOGGER.error(e.getMessage());
             throw e;
