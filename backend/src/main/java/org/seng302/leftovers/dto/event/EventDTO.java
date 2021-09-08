@@ -19,6 +19,7 @@ public abstract class EventDTO {
     private EventTag tag;
     private EventStatus status;
     private boolean isRead;
+    private Instant lastModified;
 
     /**
      * Converts a Event entity to its JSON form
@@ -34,5 +35,6 @@ public abstract class EventDTO {
         // Lombok seems to have converted the "isRead" attribute to "read", not sure how to bypass this but it should
         // be fine with that naming either way
         this.isRead = event.isRead();
+        this.lastModified = event.getLastModified();
     }
 }

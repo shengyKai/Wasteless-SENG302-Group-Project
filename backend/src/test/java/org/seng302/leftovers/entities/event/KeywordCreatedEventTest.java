@@ -86,13 +86,16 @@ class KeywordCreatedEventTest {
                         "\"tag\":\"none\"," +
                         "\"status\":\"%s\"," +
                         "\"read\": %b," +
-                        "\"creator\":%s}",
+                        "\"creator\":%s," +
+                        "\"lastModified\":\"%s\"}",
                 event.getId(),
                 event.getCreated(),
                 keyword.constructJSONObject().toJSONString(),
                 event.getStatus().toString().toLowerCase(),
                 event.isRead(),
-                user.constructPublicJson(false).toJSONString());
+                user.constructPublicJson(false).toJSONString(),
+                event.getLastModified().toString());
+        System.out.println(expectedJsonString);
         String actualJsonString = mapper.writeValueAsString(event.asDTO());
         assertEquals(mapper.readTree(expectedJsonString), mapper.readTree(actualJsonString));
     }

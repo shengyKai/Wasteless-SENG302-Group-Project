@@ -73,7 +73,8 @@ class EventTest {
         assertEquals("none", json.get("tag"));
         assertEquals(event.getStatus().toString().toLowerCase(), json.get("status"));
         assertEquals(event.isRead(), json.get("read"));
-        assertEquals(6, json.size());
+        assertEquals(event.getLastModified().toString(), json.get("lastModified"));
+        assertEquals(7, json.size());
     }
 
     // Event is abstract so we need to subclass
