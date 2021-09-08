@@ -116,30 +116,6 @@ class ProductImageGeneratorTest {
     }
 
     @Test
-    void generateOneProduct_generateImage_oneImageEntryGenerated() throws SQLException {
-        var businessIds = createTestBusiness();
-        var productIds = productGenerator.generateProducts(businessIds, 1, true);
-
-        assertEquals(1, productIds.size());
-        long productId = productIds.get(0);
-
-        checkRequiredFieldsNotNull(productId, 1);
-        Assertions.assertEquals(1, getNumImagesInDB());
-    }
-
-    @Test
-    void generateMultipleProduct_generateImage_multipleImageEntryGenerated() throws SQLException {
-        var businessIds = createTestBusiness();
-        var productIds = productGenerator.generateProducts(businessIds, 10, true);
-
-        assertEquals(10, productIds.size());
-        for (var productId : productIds) {
-            checkRequiredFieldsNotNull(productId, 1);
-        }
-        Assertions.assertEquals(10, getNumImagesInDB());
-    }
-
-    @Test
     void generateOneProduct_notGenerateImage_noImageEntryGenerated() throws SQLException {
         var businessIds = createTestBusiness();
         var productIds = productGenerator.generateProducts(businessIds, 1, false);

@@ -34,27 +34,28 @@ public class SearchSpecification<T> implements Specification<T> {
     @Override
     public Predicate toPredicate
             (Root<T> root, CriteriaQuery<?> query, CriteriaBuilder builder) {
+        Path<String> key = getPath(root, criteria.getKey());
         if (criteria == null) {
             return builder.conjunction();
         }
         else if (criteria.getOperation().equalsIgnoreCase(">")) {
             return builder.greaterThanOrEqualTo(
-                    getPath(root, criteria.getKey()), criteria.getValue().toString());
+                    key, criteria.getValue().toString());
         }
         else if (criteria.getOperation().equalsIgnoreCase("<")) {
             return builder.lessThanOrEqualTo(
-                    getPath(root, criteria.getKey()), criteria.getValue().toString());
+                    key, criteria.getValue().toString());
         }
         else if (criteria.getOperation().equalsIgnoreCase(":")) {
-            if (getPath(root, criteria.getKey()).getJavaType() == String.class) {
+            if (key.getJavaType() == String.class) {
                 return builder.like(
-                        builder.lower(getPath(root, criteria.getKey())), "%" + criteria.getValue().toString().toLowerCase() + "%");
+                        builder.lower(key), "%" + criteria.getValue().toString().toLowerCase() + "%");
             }
         }
         else if (criteria.getOperation().equalsIgnoreCase("=") &&
-                getPath(root, criteria.getKey()).getJavaType() == String.class) {
+                key.getJavaType() == String.class) {
             return builder.like(
-                    getPath(root, criteria.getKey()), criteria.getValue().toString());
+                    key, criteria.getValue().toString());
         }
         return null;
     }
@@ -65,7 +66,7 @@ public class SearchSpecification<T> implements Specification<T> {
      * @param input Path of period separated attributes
      * @return Path of last attribute of input
      */
-    private <T,Y> Path<Y> getPath(Root<T> root, String input) {
+    private <Y> Path<Y> getPath(Root<T> root, String input) {
         var items = input.split("\\.");
         Path<Y> path = root.get(items[0]);
         for (int i = 1; i < items.length; i++) {

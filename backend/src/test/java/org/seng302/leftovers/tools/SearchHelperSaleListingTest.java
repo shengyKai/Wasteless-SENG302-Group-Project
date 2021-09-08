@@ -1,11 +1,9 @@
 package org.seng302.leftovers.tools;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.seng302.leftovers.controllers.DGAAController;
@@ -142,18 +140,15 @@ public class SearchHelperSaleListingTest {
         testSaleItem = saleItemRepository.save(testSaleItem);
     }
 
-    private static Stream<Arguments> productNameFull() {
-        return Stream.of(
-                arguments("The Nathan Apple", "The Nathan Apple"),
-                arguments("Orange Apple", "Orange Apple"),
-                arguments("Sweet Lime","Sweet Lime"),
-                arguments("Tangerine", "Tangerine"),
-                arguments("Juicy Fruit", "Juicy Fruit"),
-                arguments("\"Juicy Apple\"", "Juicy Apple")
-        );
-    }
     @ParameterizedTest
-    @MethodSource("productNameFull")
+    @CsvSource(value = {
+            "The Nathan Apple:The Nathan Apple",
+            "Orange Apple:Orange Apple",
+            "Sweet Lime:Sweet Lime",
+            "Tangerine:Tangerine",
+            "Juicy Fruit:Juicy Fruit",
+            "\"Juicy Apple\":Juicy Apple"
+    }, delimiter = ':')
     void constructSaleItemSpecificationOnlyIncludingProductName_matchesFullProductName_saleItemReturned(String query, String name) {
         testProduct.setName(name);
         updateTestRepositories();
@@ -164,19 +159,16 @@ public class SearchHelperSaleListingTest {
         SaleItem saleItem = matches.get(0);
         assertEquals(name, saleItem.getProduct().getName());
     }
-
-    private static Stream<Arguments> productNamePartial() {
-        return Stream.of(
-                arguments("Natha", "The Nathan Apple"),
-                arguments("athan", "The Nathan Apple"),
-                arguments("Apple", "The Nathan Apple"),
-                arguments("The", "The Nathan Apple"),
-                arguments("Oran", "Orange Apple"),
-                arguments("A", "Juicy Apple")
-        );
-    }
+    
     @ParameterizedTest
-    @MethodSource("productNamePartial")
+    @CsvSource(value = {
+            "Natha:The Nathan Apple",
+            "athan:The Nathan Apple",
+            "Apple:The Nathan Apple",
+            "The:The Nathan Apple",
+            "Oran:Orange Apple",
+            "A:Juicy Apple"
+    }, delimiter = ':')
     void constructSaleItemSpecificationOnlyIncludingProductName_matchesPartialProductName_saleItemReturned(String query, String name) {
         testProduct.setName(name);
         updateTestRepositories();
@@ -187,16 +179,13 @@ public class SearchHelperSaleListingTest {
         SaleItem saleItem = matches.get(0);
         assertEquals(name, saleItem.getProduct().getName());
     }
-
-    private static Stream<Arguments> productNameInvalid() {
-        return Stream.of(
-                arguments("wow,much,pog", "The Nathan Apple"),
-                arguments("\"Juicy Apple\"", "apple", "Orange Apple"),
-                arguments("yes.yes","Sweet Lime")
-        );
-    }
+    
     @ParameterizedTest
-    @MethodSource("productNameInvalid")
+    @CsvSource(value = {
+            "wow,much,pog:The Nathan Apple",
+            "\"Juicy Apple\":apple", "Orange Apple",
+            "yes.yes:Sweet Lime"
+    }, delimiter = ':')
     void constructSaleItemSpecificationOnlyIncludingProductName_doesNotMatchProductName_saleItemNotReturned(String query, String name) {
         testProduct.setName(name);
         updateTestRepositories();
@@ -205,21 +194,18 @@ public class SearchHelperSaleListingTest {
         List<SaleItem> matches = saleItemRepository.findAll(specification);
         assertEquals(0, matches.size());
     }
-
-    private static Stream<Arguments> businessNameFull() {
-        return Stream.of(
-                arguments("Nathans pies", "Nathans pies"),
-                arguments("Ellas pies", "Ellas pies"),
-                arguments("Dons pies", "Dons pies"),
-                arguments("Joey Aluminium", "Joey Aluminium"),
-                arguments("Doug Digs", "Doug Digs"),
-                arguments("Wonsons Wontons", "Wonsons Wontons"),
-                arguments("Wonsons Wontons", "Wonsons wontons")
-        );
-    }
+    
     @Transactional
     @ParameterizedTest
-    @MethodSource("businessNameFull")
+    @CsvSource(value = {
+            "Nathans pies:Nathans pies",
+            "Ellas pies:Ellas pies",
+            "Dons pies:Dons pies",
+            "Joey Aluminium:Joey Aluminium",
+            "Doug Digs:Doug Digs",
+            "Wonsons Wontons:Wonsons Wontons",
+            "Wonsons Wontons:Wonsons wontons"
+    }, delimiter = ':')
     void constructSaleItemSpecificationOnlyIncludingSellersName_matchesSellersName_saleItemReturned(String query, String name) {
         testBusiness.setName(name);
         updateTestRepositories();
@@ -230,21 +216,18 @@ public class SearchHelperSaleListingTest {
         SaleItem saleItem = matches.get(0);
         assertEquals(name, saleItem.getInventoryItem().getProduct().getBusiness().getName());
     }
-
-    private static Stream<Arguments> businessNamePartial() {
-        return Stream.of(
-                arguments("Nathan", "Nathans pies"),
-                arguments("Ella", "Ellas pies"),
-                arguments("pies", "Dons pies"),
-                arguments("Alum", "Joey Aluminium"),
-                arguments("Doug D", "Doug Digs"),
-                arguments("Wontons", "Wonsons Wontons"),
-                arguments("Wonsons", "Wonsons wontons")
-        );
-    }
+    
     @Transactional
     @ParameterizedTest
-    @MethodSource("businessNamePartial")
+    @CsvSource(value = {
+            "Nathan:Nathans pies",
+            "Ella:Ellas pies",
+            "pies:Dons pies",
+            "Alum:Joey Aluminium",
+            "Doug D:Doug Digs",
+            "Wontons:Wonsons Wontons",
+            "Wonsons:Wonsons wontons"
+    }, delimiter = ':')
     void constructSaleItemSpecificationOnlyIncludingSellersName_matchesPartialSellersName_saleItemReturned(String query, String name) {
         testBusiness.setName(name);
         updateTestRepositories();
@@ -256,17 +239,14 @@ public class SearchHelperSaleListingTest {
         assertEquals(name, saleItem.getInventoryItem().getProduct().getBusiness().getName());
     }
 
-    private static Stream<Arguments> businessNameInvalid() {
-        return Stream.of(
-                arguments("Ella", "Nathans pies"),
-                arguments("Nathans pies", "Ellas pies"),
-                arguments("Got.Him", "Dons pies"),
-                arguments("$lla", "Ellas pies")
 
-        );
-    }
     @ParameterizedTest
-    @MethodSource("businessNameInvalid")
+    @CsvSource(value = {
+            "Ella:Nathans pies",
+            "Nathans pies:Ellas pies",
+            "Got.Him:Dons pies",
+            "$lla:Ellas pies",
+    }, delimiter = ':')
     void constructSaleItemSpecificationOnlyIncludingSellersName_doesNotMatchSellersName_saleItemNotReturned(String query, String name) {
         testBusiness.setName(name);
         updateTestRepositories();
@@ -275,29 +255,27 @@ public class SearchHelperSaleListingTest {
         List<SaleItem> matches = saleItemRepository.findAll(specification);
         assertEquals(0, matches.size());
     }
-
-    private static Stream<Arguments> locationFull() {
-        return Stream.of(
-                arguments("Christchurch", "Christchurch", "Otago", "New Zealand"),
-                arguments("Dunedin", "Dunedin", "Otago", "New Zealand"),
-                arguments("Wellington", "Wellington", "Otago", "New Zealand"),
-                arguments("Auckland", "Auckland", "Otago", "New Zealand"),
-                arguments("Gore", "Gore", "Otago", "New Zealand"),
-                arguments("Melbourne", "Melbourne", "Otago", "New Zealand"),
-                arguments("London", "London", "Otago", "New Zealand"),
-                arguments("Canterbury", "Christchurch", "Canterbury", "New Zealand"),
-                arguments("Otago", "Christchurch", "Otago", "New Zealand"),
-                arguments("Tasman", "Christchurch", "Tasman", "New Zealand"),
-                arguments("Marlborough", "Christchurch", "Marlborough", "New Zealand"),
-                arguments("New Zealand", "Christchurch", "Otago", "New Zealand"),
-                arguments("Australia", "Christchurch", "Otago", "Australia"),
-                arguments("Luxembourg", "Christchurch", "Otago", "Luxembourg"),
-                arguments("England", "Christchurch", "Otago", "England"),
-                arguments("Great Britain", "Christchurch", "Otago", "Great Britain")
-        );
-    }
+    
     @ParameterizedTest
-    @MethodSource("locationFull")
+    @CsvSource(value = {
+            "Christchurch:Christchurch:Otago:New Zealand",
+            "Dunedin:Dunedin:Otago:New Zealand",
+            "Wellington:Wellington:Otago:New Zealand",
+            "Auckland:Auckland:Otago:New Zealand",
+            "Gore:Gore:Otago:New Zealand",
+            "Melbourne:Melbourne:Otago:New Zealand",
+            "London:London:Otago:New Zealand",
+            "Canterbury:Christchurch:Canterbury:New Zealand",
+            "Otago:Christchurch:Otago:New Zealand",
+            "Otago:Christchurch:Otago:New Zealand",
+            "Tasman:Christchurch:Tasman:New Zealand",
+            "Marlborough:Christchurch:Marlborough:New Zealand",
+            "New Zealand:Christchurch:Otago:New Zealand",
+            "Australia:Christchurch:Otago:Australia",
+            "Luxembourg:Christchurch:Otago:Luxembourg",
+            "England:Christchurch:Otago:England",
+            "Great Britain:Christchurch:Otago:Great Britain"
+    }, delimiter = ':')
     void constructSaleItemSpecificationOnlyIncludingSellersLocation_matchesLocation_saleItemReturned(String query, String city, String region, String country) {
         testBusinessLocation.setCity(city);
         testBusinessLocation.setRegion(region);
@@ -309,25 +287,22 @@ public class SearchHelperSaleListingTest {
         List<SaleItem> matches = saleItemRepository.findAll(specification);
         assertEquals(1, matches.size());
     }
-
-    private static Stream<Arguments> locationPartial() {
-        return Stream.of(
-                arguments("Christ", "Christchurch", "Otago", "New Zealand"),
-                arguments("din", "Dunedin", "Otago", "New Zealand"),
-                arguments("ton", "Wellington", "Otago", "New Zealand"),
-                arguments("Auck", "Auckland", "Otago", "New Zealand"),
-                arguments("e", "Gore", "Otago", "New Zealand"),
-                arguments("Mel", "Melbourne", "Otago", "New Zealand"),
-                arguments("don", "London", "Otago", "New Zealand"),
-                arguments("Can", "Christchurch", "Canterbury", "New Zealand"),
-                arguments("go", "Christchurch", "Otago", "New Zealand"),
-                arguments("man", "Christchurch", "Tasman", "New Zealand"),
-                arguments("borough", "Christchurch", "Marlborough", "New Zealand"),
-                arguments("New", "Christchurch", "Otago", "New Zealand")
-        );
-    }
+    
     @ParameterizedTest
-    @MethodSource("locationPartial")
+    @CsvSource(value = {
+            "Christ:Christchurch:Otago:New Zealand",
+            "din:Dunedin:Otago:New Zealand",
+            "ton:Wellington:Otago:New Zealand",
+            "Auck:Auckland:Otago:New Zealand",
+            "e:Gore:Otago:New Zealand",
+            "Mel:Melbourne:Otago:New Zealand",
+            "don:London:Otago:New Zealand",
+            "Can:Christchurch:Canterbury:New Zealand",
+            "go:Christchurch:Otago:New Zealand",
+            "man:Christchurch:Tasman:New Zealand",
+            "borough:Christchurch:Marlborough:New Zealand",
+            "New:Christchurch:Otago:New Zealand"
+    }, delimiter = ':')
     void constructSaleItemSpecificationOnlyIncludingSellersLocation_matchesPartialLocation_saleItemReturned(String query, String city, String region, String country) {
         testBusinessLocation.setCity(city);
         testBusinessLocation.setRegion(region);
@@ -340,17 +315,15 @@ public class SearchHelperSaleListingTest {
         assertEquals(1, matches.size());
     }
 
-    private static Stream<Arguments> locationInvalid() {
-        return Stream.of(
-                arguments("Christ,church", "Christchurch", "Otago", "New Zealand"),
-                arguments("Dun,edin", "Dunedin", "Otago", "New Zealand"),
-                arguments("A....uckland", "Auckland", "Otago", "New Zealand"),
-                arguments("Gor$", "Gore", "Otago", "New Zealand"),
-                arguments("Gr#at Br!ti@n", "Christchurch", "Otago", "Great Britain")
-                );
-    }
+
     @ParameterizedTest
-    @MethodSource("locationInvalid")
+    @CsvSource(value = {
+            "Christ,church:Christchurch:Otago:New Zealand",
+            "Dun,edin:Dunedin:Otago:New Zealand",
+            "A....uckland:Auckland:Otago:New Zealand",
+            "Gor$:Gore:Otago:New Zealand",
+            "Gr#at Br!ti@n:Christchurch:Otago:Great Britain"
+    }, delimiter = ':')
     void constructSaleItemSpecificationOnlyIncludingSellersLocation_doesNotMatchLocation_saleItemNotReturned(String query, String city, String region, String country) {
         testBusinessLocation.setCity(city);
         testBusinessLocation.setRegion(region);
@@ -394,5 +367,16 @@ public class SearchHelperSaleListingTest {
                 query, "", "", "");
         List<SaleItem> matches = saleItemRepository.findAll(specification);
         assertEquals(0, matches.size());
+    }
+    @Test
+    void yeet() {
+        Specification<SaleItem> specification = SearchHelper.constructSaleItemSpecificationFromSearchQueries(
+                "Apple AND Carrot", "", "", "");
+        testBusiness.setName("Carrot Inc.");
+        testProduct.setName("Apple");
+        updateTestRepositories();
+
+        List<SaleItem> matches = saleItemRepository.findAll(specification);
+        assertEquals(1, matches.size());
     }
 }

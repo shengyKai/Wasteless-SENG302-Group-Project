@@ -291,7 +291,8 @@ public class SearchHelper {
 
     /**
      * Construct a specification to match against Sale items
-     * Specification will match when searchQuery matches ANY field,
+     * Specification will match when searchQuery matches ANY field of
+     * [product name, business name, business address, product manufacturer, product description]
      * AND productName, businessName, businessLocation match their respective fields.
      * When a field is left blank, it is ignored.
      * @param searchQuery Term to match against all fields
@@ -303,13 +304,22 @@ public class SearchHelper {
     public static Specification<SaleItem> constructSaleItemSpecificationFromSearchQueries
             (String searchQuery, String productName, String businessName, String businessLocation) {
 
-        // build a match for all fields
 
+        var allFieldNames = List.of(
+                "inventoryItem.product.name",
+                "inventoryItem.product.business.name",
+                "inventoryItem.product.business.address.country",
+                "inventoryItem.product.business.address.city",
+                "inventoryItem.product.business.address.region",
+                "inventoryItem.product.manufacturer",
+                "inventoryItem.product.description",
+                "moreInfo");
+        // build a match for all fields
         Specification<SaleItem> generalSpec = Specification.where(null);
         if (!searchQuery.isBlank()) {
-            generalSpec = generalSpec.or(constructSaleItemSpecificationFromBusinessLocation(searchQuery))
-                    .or(constructSaleItemSpecificationFromBusinessName(searchQuery))
-                    .or(constructSaleItemSpecificationFromProductName(searchQuery));
+            var searchTokens = splitSearchStringIntoTerms(searchQuery);
+            SearchQuery<SaleItem> searchSpecs = parseSearchTokens(searchTokens, allFieldNames);
+            generalSpec = generalSpec.or(buildCompoundSpecification(searchSpecs));
         }
         // build a match for specific fields
         Specification<SaleItem> advancedSpec = Specification.where(null);
