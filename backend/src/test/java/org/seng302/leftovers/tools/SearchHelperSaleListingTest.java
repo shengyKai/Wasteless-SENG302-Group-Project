@@ -183,7 +183,7 @@ public class SearchHelperSaleListingTest {
     @ParameterizedTest
     @CsvSource(value = {
             "wow,much,pog:The Nathan Apple",
-            "\"Juicy Apple\":apple", "Orange Apple",
+            "Massive orange:apple",
             "yes.yes:Sweet Lime"
     }, delimiter = ':')
     void constructSaleItemSpecificationOnlyIncludingProductName_doesNotMatchProductName_saleItemNotReturned(String query, String name) {
@@ -367,16 +367,5 @@ public class SearchHelperSaleListingTest {
                 query, "", "", "");
         List<SaleItem> matches = saleItemRepository.findAll(specification);
         assertEquals(0, matches.size());
-    }
-    @Test
-    void yeet() {
-        Specification<SaleItem> specification = SearchHelper.constructSaleItemSpecificationFromSearchQueries(
-                "Apple AND Carrot", "", "", "");
-        testBusiness.setName("Carrot Inc.");
-        testProduct.setName("Apple");
-        updateTestRepositories();
-
-        List<SaleItem> matches = saleItemRepository.findAll(specification);
-        assertEquals(1, matches.size());
     }
 }
