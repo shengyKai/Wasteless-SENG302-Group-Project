@@ -11,6 +11,7 @@ import net.minidev.json.JSONObject;
 import net.minidev.json.parser.ParseException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
+import org.seng302.leftovers.dto.event.EventStatus;
 import org.seng302.leftovers.dto.event.EventTag;
 import org.seng302.leftovers.entities.event.Event;
 import org.seng302.leftovers.entities.event.GlobalMessageEvent;
@@ -140,4 +141,31 @@ public class EventStepDefinition {
         assertTrue(event.isPresent());
         assertFalse(event.get().isRead());
     }
+
+    @Given("the event status has been set to {string}")
+    public void the_event_status_has_been_set_to(String status) {
+        Long eventId = eventContext.getLast().getId();
+        Optional<Event> event = eventRepository.findById(eventId);
+        assertTrue(event.isPresent());
+        event.get().updateEventStatus(EventStatus.valueOf(status.toUpperCase()));
+        assertEquals(EventStatus.valueOf(status.toUpperCase()), event.get().getStatus());
+    }
+
+    @Then("the event has status {string}")
+    public void the_event_has_status(String status) {
+        Long eventId = eventContext.getLast().getId();
+        Optional<Event> event = eventRepository.findById(eventId);
+        assertTrue(event.isPresent());
+        assertEquals(EventStatus.valueOf(status.toUpperCase()), event.get().getStatus());
+    }
+
+    @When("I try to change the status of the event to {string}")
+    public void i_try_to_change_the_status_of_the_event_to(String newStatus) {
+        JSONObject json = new JSONObject();
+        json.put("value", newStatus);
+        requestContext.performRequest(put("/feed/" + eventContext.getLast().getId() + "/status")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json.toJSONString()));
+    }
+
 }

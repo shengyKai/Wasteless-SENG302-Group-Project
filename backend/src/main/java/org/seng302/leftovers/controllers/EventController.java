@@ -5,6 +5,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.seng302.leftovers.dto.WrappedValueDTO;
 import org.seng302.leftovers.dto.event.EventDTO;
+import org.seng302.leftovers.dto.event.EventStatus;
 import org.seng302.leftovers.dto.event.EventTag;
 import org.seng302.leftovers.entities.User;
 import org.seng302.leftovers.entities.event.Event;
@@ -184,6 +185,35 @@ public class EventController {
 
             event.markAsRead();
             eventRepository.save(event);
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            throw e;
+        }
+    }
+
+    /**
+     * PUT endpoint for changing the status of an event to starred, archived or normal.
+     * @param eventId The ID number of the event to change the status of.
+     */
+    @PutMapping("/feed/{eventId}/status")
+    public void updateEventStatus(@PathVariable long eventId, @Valid @RequestBody WrappedValueDTO<EventStatus> body, HttpServletRequest request) {
+        LOGGER.info("Requested update of event status (eventId={}, status={})", eventId, body.getValue());
+
+        AuthenticationTokenManager.checkAuthenticationToken(request);
+        try {
+            Event event = eventRepository.findById(eventId)
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "Event not found"));
+
+            if (!AuthenticationTokenManager.sessionCanSeePrivate(request, event.getNotifiedUser().getUserID())) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Current user does not have permission to modify this event");
+            }
+
+            if (event.getStatus().equals(EventStatus.ARCHIVED)) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The status of an archived event cannot be changed");
+            }
+
+            event.updateEventStatus(body.getValue());
+            eventService.saveEvent(event);
         } catch (Exception e) {
             LOGGER.error(e.getMessage());
             throw e;

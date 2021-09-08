@@ -9,6 +9,7 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.runner.RunWith;
 import org.mockito.*;
 import org.seng302.leftovers.dto.event.EventDTO;
+import org.seng302.leftovers.dto.event.EventStatus;
 import org.seng302.leftovers.dto.event.EventTag;
 import org.seng302.leftovers.entities.User;
 import org.seng302.leftovers.entities.event.Event;
@@ -18,10 +19,12 @@ import org.seng302.leftovers.persistence.EventRepository;
 import org.seng302.leftovers.persistence.UserRepository;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -386,5 +389,116 @@ class EventControllerTest {
                 .andExpect(status().isOk())
                 .andReturn();
         verify(mockEvent1, times(1)).markAsRead();
+    }
+
+    @Test
+    void updateEventStatus_noAuthToken_401Response() throws Exception {
+        // Mock the AuthenticationTokenManager to respond as it would when the authentication token is missing or invalid
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.checkAuthenticationToken(any()))
+                .thenThrow(new AccessTokenException());
+
+        var json = new JSONObject();
+        json.put("value", "normal");
+        mockMvc.perform(
+                put("/feed/1/status")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json.toString()))
+                .andExpect(status().isUnauthorized())
+                .andReturn();
+
+        // Check that the authentication token manager was called
+        authenticationTokenManager.verify(() -> AuthenticationTokenManager.checkAuthenticationToken(any()));
+    }
+
+    @Test
+    void updateEventStatus_eventDoesNotExist_406Response() throws Exception {
+        var json = new JSONObject();
+        json.put("value", "normal");
+        mockMvc.perform(
+                put("/feed/9999/status")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json.toString()))
+                .andExpect(status().isNotAcceptable())
+                .andReturn();
+
+        // Check that the event repository was queried
+        verify(eventRepository, times(1)).findById(9999L);
+    }
+
+    @Test
+    void updateEventStatus_notAuthorised_403Response() throws Exception {
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), eq(7L))).thenReturn(false);
+
+        var json = new JSONObject();
+        json.put("value", "normal");
+        mockMvc.perform(
+                put("/feed/2/status")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json.toString()))
+                .andExpect(status().isForbidden())
+                .andReturn();
+
+        // Check that the authentication token managed was called
+        authenticationTokenManager.verify(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), eq(7L)));
+    }
+
+    @Test
+    void updateEventStatus_noStatusProvided_400Response() throws Exception {
+        var json = new JSONObject();
+        json.put("other", "foo");
+        mockMvc.perform(
+                put("/feed/2/status")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json.toString()))
+                .andExpect(status().isBadRequest())
+                .andReturn();
+        verify(eventService, times(0)).saveEvent(any());
+    }
+
+    @Test
+    void updateEventStatus_invalidStatus_400Response() throws Exception {
+        var json = new JSONObject();
+        json.put("value", "invalid");
+        mockMvc.perform(
+                put("/feed/2/status")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json.toString()))
+                .andExpect(status().isBadRequest())
+                .andReturn();
+        verify(eventService, times(0)).saveEvent(any());
+    }
+
+    @ParameterizedTest
+    @EnumSource(EventStatus.class)
+    void updateEventStatus_cannotChangeStatus_400Response(EventStatus newStatus) throws Exception {
+        var json = new JSONObject();
+        json.put("value", newStatus.toString().toLowerCase());
+        when(mockEvent.getStatus()).thenReturn(EventStatus.ARCHIVED);
+        mockMvc.perform(
+                put("/feed/2/status")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json.toString()))
+                .andExpect(status().isBadRequest())
+                .andReturn();
+        verify(mockEvent, times(0)).updateEventStatus(newStatus);
+        verify(eventService, times(0)).saveEvent(any());
+    }
+
+
+    @ParameterizedTest
+    @EnumSource(EventStatus.class)
+    void updateEventStatus_canChangeStatusAndValidNewStatus_200ResponseAndStatusUpdated(EventStatus newStatus) throws Exception {
+        var json = new JSONObject();
+        json.put("value", newStatus.toString().toLowerCase());
+        when(mockEvent.getStatus()).thenReturn(EventStatus.NORMAL);
+        mockMvc.perform(
+                put("/feed/2/status")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json.toString()))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        verify(mockEvent, times(1)).updateEventStatus(newStatus);
+        verify(eventService, times(1)).saveEvent(mockEvent);
     }
 }

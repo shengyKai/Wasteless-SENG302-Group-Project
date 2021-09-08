@@ -280,12 +280,104 @@ public class SearchHelper {
         return buildExactMatchSpec(businessType, Collections.singletonList("businessType"));
     }
      
-    /* Returns a specification for Keywords which is used to filter keywords using a search term.
+    /**
+     * Returns a specification for Keywords which is used to filter keywords using a search term.
      * @param searchQuery The term to search for
      * @return Specification of type Keyword
      */
     public static Specification<Keyword> constructKeywordSpecificationFromSearchQuery(String searchQuery) {
         return buildPartialMatchSpec(searchQuery, Collections.singletonList("name"));
+    }
+
+    /**
+     * Construct a specification to match against Sale items
+     * Specification will match when searchQuery matches ANY field of
+     * [product name, business name, business address, product manufacturer, product description]
+     * AND productName, businessName, businessLocation match their respective fields.
+     * When a field is left blank, it is ignored.
+     * @param searchQuery Term to match against all fields
+     * @param productName Term to match against productName
+     * @param businessName Term to match against Business name
+     * @param businessLocation Term to match against Business location
+     * @return A specification for Sale Items
+     */
+    public static Specification<SaleItem> constructSaleItemSpecificationFromSearchQueries
+            (String searchQuery, String productName, String businessName, String businessLocation) {
+
+
+        var allFieldNames = List.of(
+                "inventoryItem.product.name",
+                "inventoryItem.product.business.name",
+                "inventoryItem.product.business.address.country",
+                "inventoryItem.product.business.address.city",
+                "inventoryItem.product.business.address.region",
+                "inventoryItem.product.manufacturer",
+                "inventoryItem.product.description",
+                "moreInfo");
+        // build a match for all fields
+        Specification<SaleItem> generalSpec = Specification.where(null);
+        if (!searchQuery.isBlank()) {
+            var searchTokens = splitSearchStringIntoTerms(searchQuery);
+            SearchQuery<SaleItem> searchSpecs = parseSearchTokens(searchTokens, allFieldNames);
+            generalSpec = generalSpec.or(buildCompoundSpecification(searchSpecs));
+        }
+        // build a match for specific fields
+        Specification<SaleItem> advancedSpec = Specification.where(null);
+        if (!businessName.isBlank()){
+            advancedSpec = advancedSpec.and(constructSaleItemSpecificationFromBusinessName(businessName));
+        }
+        if (!productName.isBlank()) {
+            advancedSpec = advancedSpec.and(constructSaleItemSpecificationFromProductName(productName));
+        }
+        if (!businessLocation.isBlank()) {
+            advancedSpec = advancedSpec.and(constructSaleItemSpecificationFromBusinessLocation(businessLocation));
+        }
+
+        return generalSpec.and(advancedSpec);
+    }
+
+    /**
+     * Returns a specifications which matches sale items with a given product name
+     * @param productName The product name to search for
+     * @return Specification for SaleItem
+     */
+    private static Specification<SaleItem> constructSaleItemSpecificationFromProductName(String productName) {
+        List<String> fieldNames = Arrays.asList("inventoryItem.product.name");
+        List<String> searchTokens = splitSearchStringIntoTerms(productName);
+
+        SearchQuery<SaleItem> searchSpecs = parseSearchTokens(searchTokens, fieldNames);
+        return buildCompoundSpecification(searchSpecs);
+    }
+
+    /**
+     * Returns a specifications which matches against the name of the business which owns the sale item
+     * @param businessName The query to search against business name
+     * @return Specification for SaleItem
+     */
+    private static Specification<SaleItem> constructSaleItemSpecificationFromBusinessName(String businessName) {
+        List<String> fieldNames = Arrays.asList(
+                "inventoryItem.product.business.name");
+        List<String> searchTokens = splitSearchStringIntoTerms(businessName);
+
+        SearchQuery<SaleItem> searchSpecs = parseSearchTokens(searchTokens, fieldNames);
+        return buildCompoundSpecification(searchSpecs);
+    }
+
+    /**
+     * Returns a specifications which matches against the location of the business which owns the sale item
+     * The query will match against country, city and region
+     * @param location The query to search against location
+     * @return Specification for SaleItem
+     */
+    private static Specification<SaleItem> constructSaleItemSpecificationFromBusinessLocation(String location) {
+        List<String> fieldNames = Arrays.asList(
+                "inventoryItem.product.business.address.country",
+                "inventoryItem.product.business.address.city",
+                "inventoryItem.product.business.address.region");
+        List<String> searchTokens = splitSearchStringIntoTerms(location);
+
+        SearchQuery<SaleItem> searchSpecs = parseSearchTokens(searchTokens, fieldNames);
+        return buildCompoundSpecification(searchSpecs);
     }
 
     /**

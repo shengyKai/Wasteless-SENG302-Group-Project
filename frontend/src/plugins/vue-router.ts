@@ -8,6 +8,7 @@ import ProfilePage from "../components/UserProfile/index.vue";
 import ModifyUserPage from "../components/UserProfile/ModifyUserPage.vue";
 import BusinessProfile from "../components/BusinessProfile/index.vue";
 import SearchBusinessResults from "../components/SearchBusinessPage.vue";
+import SearchSaleItems from "../components/SearchSaleItems.vue";
 import SearchResults from "../components/SearchResults.vue";
 import HomePage from "../components/home/HomePage.vue";
 import ProductCatalogue from "../components/ProductCatalogue.vue";
@@ -70,6 +71,11 @@ const routes = [
     path: "/search/business",
     component: SearchBusinessResults,
     meta: { title: 'Search Businesses' }
+  },
+  {
+    path: "/search/sales",
+    component: SearchSaleItems,
+    meta: { title: 'Search Sale Items' }
   },
   {
     path: "/business/:id/products",
