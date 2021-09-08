@@ -58,7 +58,7 @@ public class EventServiceImpl implements EventService {
 
         LOGGER.info("Adding event emitter for user (id={}) total for user {}", user.getUserID(), userConnections.size());
 
-        for (Event event : eventRepository.getAllByNotifiedUserOrderByCreated(user)) {
+        for (Event event : eventRepository.findEventsForUser(user)) {
             emitEvent(emitter, event);
         }
 

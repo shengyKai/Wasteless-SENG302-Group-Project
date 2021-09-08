@@ -1,9 +1,11 @@
 package org.seng302.leftovers.controllers;
 
+import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.seng302.leftovers.dto.WrappedValueDTO;
+import org.seng302.leftovers.dto.event.EventDTO;
 import org.seng302.leftovers.dto.event.EventTag;
 import org.seng302.leftovers.entities.User;
 import org.seng302.leftovers.entities.event.Event;
@@ -13,6 +15,7 @@ import org.seng302.leftovers.persistence.UserRepository;
 import org.seng302.leftovers.service.EventService;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
@@ -21,6 +24,10 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+import java.time.Instant;
+import java.time.format.DateTimeParseException;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Controller for the /events/* endpoints.
@@ -70,24 +77,49 @@ public class EventController {
     }
 
     /**
-     * Gets the event stream for the given user id.
+     * Gets the events associated with a user. If a modifiedSince parameter is provided, will return only the events
+     * which have been modified after that datetime. Otherwise, returns all the events associated with the given user.
      * For a successful response the client must first be authenticated as the user or as an admin.
-     * @param userId User to get event stream of
+     * @param userId User to get newsfeed events for.
      */
-    @GetMapping("/events/emitter")
-    public synchronized SseEmitter eventEmitter(@RequestParam long userId, HttpServletRequest request, HttpServletResponse response) {
+    @GetMapping("/users/{userId}/feed")
+    public List<EventDTO> eventEmitter(@PathVariable long userId, @RequestParam(required = false) String modifiedSince, HttpServletRequest request, HttpServletResponse response) {
         try {
+            LOGGER.info("Retrieving newsfeed events for user (id={})", userId);
             AuthenticationTokenManager.checkAuthenticationToken(request);
             if (!AuthenticationTokenManager.sessionCanSeePrivate(request, userId)) {
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Cannot subscribe to other user's event stream");
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Cannot retrieve events associated with another user");
             }
 
             User user = userRepository.findById(userId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "User not found"));
-            response.setHeader("X-Accel-Buffering", "no"); // Fix for Nginx sse issues
-            return eventService.createEmitterForUser(user);
+
+            List<Event> events;
+            if (modifiedSince != null) {
+                Instant filterDate = convertModifiedSinceStringToInstant(modifiedSince);
+                events = eventRepository.findEventsForUser(user, filterDate);
+            } else {
+                events = eventRepository.findEventsForUser(user);
+            }
+
+            return events.stream().map(Event::asDTO).collect(Collectors.toList());
         } catch (Exception e) {
             LOGGER.error(e.getMessage());
             throw e;
+        }
+    }
+
+    /**
+     * Convert the string representation of the modifiedSince date to filter events by to an instant if it is in a valid
+     * format. Throw a response status exception if it is not in a valid format.
+     * @param modifiedSince A string to be converted to an instant.
+     * @return An instant derived from the modifiedSince string.
+     */
+    private Instant convertModifiedSinceStringToInstant(String modifiedSince) {
+        try {
+            return Instant.parse(modifiedSince);
+        } catch (DateTimeParseException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The modified since parameter must be in a valid " +
+                    "datetime format which includes the date, time and timezone");
         }
     }
 

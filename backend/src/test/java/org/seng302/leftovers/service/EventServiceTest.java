@@ -81,7 +81,7 @@ class EventServiceTest {
 
     @Test
     void createEmitterForUser_userWithNoEvents_noEventsEmitted() throws IOException {
-        when(eventRepository.getAllByNotifiedUserOrderByCreated(mockUser)).thenReturn(List.of());
+        when(eventRepository.findEventsForUser(mockUser)).thenReturn(List.of());
 
         SseEmitter emitter = eventService.createEmitterForUser(mockUser);
 
@@ -90,7 +90,7 @@ class EventServiceTest {
 
     @Test
     void createEmitterForUser_userWithNoEvents_hasAssignedEmitterCallbacks() {
-        when(eventRepository.getAllByNotifiedUserOrderByCreated(mockUser)).thenReturn(List.of());
+        when(eventRepository.findEventsForUser(mockUser)).thenReturn(List.of());
 
         SseEmitter emitter = eventService.createEmitterForUser(mockUser);
 
@@ -102,7 +102,7 @@ class EventServiceTest {
     void createEmitterForUser_userWithOneEvent_emitsEventWithSettings() throws IOException {
         Event event = new GlobalMessageEvent(mockUser,"foo");
 
-        when(eventRepository.getAllByNotifiedUserOrderByCreated(mockUser)).thenReturn(List.of(event)); // Add initial event
+        when(eventRepository.findEventsForUser(mockUser)).thenReturn(List.of(event)); // Add initial event
 
         SseEmitter emitter = eventService.createEmitterForUser(mockUser);
 
