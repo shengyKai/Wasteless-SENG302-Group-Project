@@ -68,7 +68,7 @@ export default {
       /**
        * Number of results per a result page
        */
-      resultsPerPage: 3,
+      resultsPerPage: 10,
     };
   },
   computed: {

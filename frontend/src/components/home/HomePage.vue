@@ -45,10 +45,10 @@
       <!-- Tab content -->
       <v-tabs-items v-model="tab">
         <v-tab-item value="all-events-tab" :eager="true">
-          <EventList :events="mainEvents" :is-filtered="isFiltered"/>
+          <EventList :events="mainEvents" :is-filtered="isFiltered" ref="mainEvents"/>
         </v-tab-item>
         <v-tab-item value="archived-events-tab" :eager="true">
-          <EventList :events="archivedEvents" :is-filtered="isFiltered"/>
+          <EventList :events="archivedEvents" :is-filtered="isFiltered" ref="archivedEvents"/>
         </v-tab-item>
       </v-tabs-items>
     </div>
