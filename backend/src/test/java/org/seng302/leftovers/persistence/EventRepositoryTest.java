@@ -68,7 +68,7 @@ class EventRepositoryTest {
         testUser = userRepository.save(testUser);
         otherUser = userRepository.save(otherUser);
 
-        beforeCreation = Instant.now().minus(Duration.ofNanos(1));
+        beforeCreation = Instant.now().minus(Duration.ofSeconds(1));
         testUserEvent1 = eventRepository.save(new GlobalMessageEvent(testUser, "Test user event 1"));
         sleep(0, 1); // Sleep for one nanosecond between creating events to ensure that they have different creation dates
         testUserEvent2 = eventRepository.save(new GlobalMessageEvent(testUser, "Test user event 2"));
