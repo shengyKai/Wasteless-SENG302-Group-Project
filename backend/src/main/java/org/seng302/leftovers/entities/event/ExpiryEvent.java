@@ -1,5 +1,6 @@
 package org.seng302.leftovers.entities.event;
 
+import lombok.EqualsAndHashCode;
 import org.seng302.leftovers.dto.event.ExpiryEventDTO;
 import org.seng302.leftovers.entities.MarketplaceCard;
 
@@ -11,6 +12,7 @@ import javax.persistence.OneToOne;
  * This class is used for notifying users when their marketplace card is about to expire.
  */
 @Entity
+@EqualsAndHashCode(callSuper = false)
 public class ExpiryEvent extends Event {
 
     @OneToOne
