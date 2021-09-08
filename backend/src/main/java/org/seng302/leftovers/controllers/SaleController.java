@@ -22,8 +22,11 @@ import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 @RestController
 public class SaleController {
@@ -40,6 +43,8 @@ public class SaleController {
     }
 
     private static final Set<String> VALID_ORDERINGS = Set.of("created", "closing", "productCode", "productName", "quantity", "price");
+    private static final Set<String> VALID_SEARCH_ORDERINGS = Set.of("created", "closing", "productName", "quantity", "price", "businessName", "businessLocation");
+    private static final Set<String> VALID_BUSINESS_TYPES = Set.of("Any", "Accommodation and Food Services", "Retail Trade", "Charitable organisation", "Non-profit organisation");
 
     /**
      * Returns the ordering term for the Sort object for sorting Sale Items
@@ -147,6 +152,81 @@ public class SaleController {
             Specification<SaleItem> specification = SearchHelper.constructSpecificationFromSaleItemsFilter(business);
             Page<SaleItem> result = saleItemRepository.findAll(specification, pageRequest);
 
+            return JsonTools.constructPageJSON(result.map(SaleItem::constructJSONObject));
+
+        } catch (Exception error) {
+            logger.error(error.getMessage());
+            throw error;
+        }
+    }
+
+    /**
+     * REST GET method to return sale items that match search criteria
+     * @param basicSearchQuery string to match any field in basic search
+     * @param productSearchQuery string to match to product name or description
+     * @param businessSearchQuery string to match to business name
+     * @param locationSearchQuery string to match to business location
+     * @param page page to return
+     * @param resultsPerPage amount of results to put on each page
+     * @param reverse highest to lowest or lowest to highest
+     * @param orderBy field to order results by
+     * @param businessType type of business to restrict results to
+     * @param priceLower all products must be above this price
+     * @param priceUpper all products must be below this price
+     * @param closeLower all products must close after this date
+     * @param closeUpper all products must close before this date
+     * @return JSON page of sale items
+     */
+    @GetMapping("/businesses/listings/search")
+    public JSONObject searchSaleItems(HttpServletRequest request,
+                                      @RequestParam(required = false) String basicSearchQuery,
+                                      @RequestParam(required = false) String productSearchQuery,
+                                      @RequestParam(required = false) String businessSearchQuery,
+                                      @RequestParam(required = false) String locationSearchQuery,
+                                      @RequestParam(required = false) Integer page,
+                                      @RequestParam(required = false) Integer resultsPerPage,
+                                      @RequestParam(required = false) Boolean reverse,
+                                      @RequestParam(required = false) String orderBy,
+                                      @RequestParam(required = false) String businessType,
+                                      @RequestParam(required = false) String priceLower,
+                                      @RequestParam(required = false) String priceUpper,
+                                      @RequestParam(required = false) String closeLower,
+                                      @RequestParam(required = false) String closeUpper) {
+        try {
+            // Check auth
+            logger.info("Get sale items to match parameters.");
+            AuthenticationTokenManager.checkAuthenticationToken(request);
+
+            // Check sort ordering
+            orderBy = Optional.ofNullable(orderBy).orElse("productName");
+            if (!VALID_SEARCH_ORDERINGS.contains(orderBy)) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "OrderBy term " + orderBy + " is invalid");
+            }
+            List<Sort.Order> sortOrder;
+            Sort.Direction direction = SearchHelper.getSortDirection(reverse);
+            sortOrder = List.of(new Sort.Order(direction, orderBy ).ignoreCase());
+
+            // Check filter options
+            businessType = Optional.ofNullable(businessType).orElse("All");
+            if (!VALID_BUSINESS_TYPES.contains(businessType)) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "BusinessType term " + businessType + " is invalid");
+            }
+            String decimalPattern = "([0-9]*)\\.([0-9]{2})";
+            BigDecimal minPrice;
+            BigDecimal maxPrice;
+            if (Pattern.matches(decimalPattern, priceLower) && Pattern.matches(decimalPattern, priceUpper)) {
+                minPrice = new BigDecimal(priceLower);
+                maxPrice = new BigDecimal(priceUpper);
+            } else {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Price parameters were invalid");
+            }
+
+            // Create page
+            PageRequest pageablePage = SearchHelper.getPageRequest(page, resultsPerPage, Sort.by(sortOrder));
+            Specification<SaleItem> specification = SearchHelper.constructSaleItemSpecificationFromSearchQueries(basicSearchQuery, productSearchQuery, businessSearchQuery, locationSearchQuery);
+            Page<SaleItem> result = saleItemRepository.findAll(specification, pageablePage);
+
+            // TODO integrate filtering options to restrict returned sale items
             return JsonTools.constructPageJSON(result.map(SaleItem::constructJSONObject));
 
         } catch (Exception error) {

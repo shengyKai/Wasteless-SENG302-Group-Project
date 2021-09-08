@@ -1234,6 +1234,12 @@ paths:
             - globalApplicationAdmin
             - defaultGlobalApplicationAdmin
       parameters:
+        - name: basicSearchQuery
+            in: query
+            description: string to match against any field of sale items
+            schema:
+              type: string
+              example: "Cheese"
         - name: productSearchQuery
           in: query
           description: string to match against name or description of sale items
@@ -1275,7 +1281,6 @@ paths:
               - price
               - businessName
               - businessLocation
-              - expiry
               - closes
               - created
               - quantity
