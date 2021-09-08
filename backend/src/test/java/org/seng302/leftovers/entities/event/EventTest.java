@@ -89,23 +89,35 @@ class EventTest {
         assertEquals(true, event.isRead());
     }
 
-    @Test
-    void updateEventStatus_getDefaultStatus_defaultStatusIsNormal() {
+    @ParameterizedTest
+    @EnumSource(EventStatus.class)
+    void updateEventStatus_initialStatusNormal_eventStatusUpdated(EventStatus newStatus) {
         Event event = new EventSubclass();
         assertEquals(EventStatus.NORMAL, event.getStatus());
+
+        event.updateEventStatus(newStatus);
+        assertEquals(newStatus, event.getStatus());
     }
 
-    @Test
-    void updateEventStatus_updateStatusToArchived_eventStatusIsArchived() {
-        Event event = new EventSubclass();
-        event.updateEventStatus(EventStatus.ARCHIVED);
-        assertEquals(EventStatus.ARCHIVED, event.getStatus());
-    }
-
-    @Test
-    void updateEventStatus_updateStatusToStarred_eventStatusIsStarred() {
+    @ParameterizedTest
+    @EnumSource(EventStatus.class)
+    void updateEventStatus_initialStatusStarred_eventStatusUpdated(EventStatus newStatus) {
         Event event = new EventSubclass();
         event.updateEventStatus(EventStatus.STARRED);
         assertEquals(EventStatus.STARRED, event.getStatus());
+
+        event.updateEventStatus(newStatus);
+        assertEquals(newStatus, event.getStatus());
+    }
+
+    @ParameterizedTest
+    @EnumSource(EventStatus.class)
+    void updateEventStatus_initialStatusArchived_eventStatusUnchanged(EventStatus newStatus) {
+        Event event = new EventSubclass();
+        event.updateEventStatus(EventStatus.ARCHIVED);
+        assertEquals(EventStatus.ARCHIVED, event.getStatus());
+
+        event.updateEventStatus(newStatus);
+        assertEquals(EventStatus.ARCHIVED, event.getStatus());
     }
 }
