@@ -31,7 +31,7 @@ export default {
   name: "SearchSaleItems",
   data() {
     return {
-      currentPage: this.$route.query.page ? parseInt(this.$route.query.page) : 1,
+      currentPage: 1,
       error: undefined,
       resultsPerPage: 10,
       results: undefined
