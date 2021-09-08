@@ -13,7 +13,6 @@ import HomePage from "../components/home/HomePage.vue";
 import ProductCatalogue from "../components/ProductCatalogue.vue";
 import Inventory from "../components/Inventory.vue";
 import SalePage from "../components/SalePage.vue";
-import SaleListingPage from "../components/SaleListing/SaleListingPage.vue";
 import Marketplace from "../components/marketplace/Marketplace.vue";
 import UserCards from "../components/marketplace/UserCards.vue";
 import { COOKIE, getCookie } from "@/utils";
@@ -81,11 +80,6 @@ const routes = [
     path: "/business/:id/listings",
     component: SalePage,
     meta: {title: 'Sales'}
-  },
-  {
-    path: "/business/:id/listings/:saleid",
-    component: SaleListingPage,
-    meta: {title: 'Sale Listing Page'}
   },
   { // Router for inventory page (Inventory page frontend dev please use this and remove this line afterward)
     path: "/business/:id/inventory",

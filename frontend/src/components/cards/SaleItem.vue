@@ -79,7 +79,7 @@
 <script>
 import ImageCarousel from "@/components/utils/ImageCarousel";
 import FullProductDescription from "@/components/utils/FullProductDescription";
-import SaleListingPage from "@/components/SaleListing/SaleListingPage.vue";
+import SaleListingPage from "@/components/SaleListing/FullSaleListing.vue";
 import { currencyFromCountry } from "@/api/currency";
 import { formatDate, formatPrice } from '@/utils';
 
