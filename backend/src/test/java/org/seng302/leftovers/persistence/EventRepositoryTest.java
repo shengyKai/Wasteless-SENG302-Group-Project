@@ -136,7 +136,6 @@ class EventRepositoryTest {
 
         List<Event> queryResult = eventRepository.findEventsForUser(testUser, modifiedDate);
 
-
         assertTrue(queryResult.contains(testUserEvent1));
         assertTrue(queryResult.contains(testUserEvent2));
         assertTrue(queryResult.contains(testUserEvent3));
@@ -154,7 +153,6 @@ class EventRepositoryTest {
 
         List<Event> queryResult = eventRepository.findEventsForUser(testUser, modifiedDate);
 
-
         assertTrue(queryResult.contains(testUserEvent1));
         assertTrue(queryResult.contains(testUserEvent2));
         assertFalse(queryResult.contains(testUserEvent3));
@@ -166,7 +164,6 @@ class EventRepositoryTest {
         sleep(0, 1);
 
         List<Event> queryResult = eventRepository.findEventsForUser(testUser, modifiedDate);
-
 
         assertFalse(queryResult.contains(testUserEvent1));
         assertFalse(queryResult.contains(testUserEvent2));

@@ -8,6 +8,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.runner.RunWith;
 import org.mockito.*;
+import org.seng302.leftovers.dto.event.EventDTO;
 import org.seng302.leftovers.dto.event.EventTag;
 import org.seng302.leftovers.entities.User;
 import org.seng302.leftovers.entities.event.Event;
@@ -22,7 +23,10 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.text.ParseException;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
@@ -49,9 +53,21 @@ class EventControllerTest {
     private User mockUser;
 
     @Mock
-    private Event mockEvent;
+    private Event mockEvent1;
+    @Mock
+    private Event mockEvent2;
+    @Mock
+    private EventDTO mockEventDTO1;
+    @Mock
+    private EventDTO mockEventDTO2;
+    @Mock
+    private HttpServletRequest mockRequest;
+    @Mock
+    private HttpServletResponse mockResponse;
 
     private MockedStatic<AuthenticationTokenManager> authenticationTokenManager;
+
+    private EventController eventController;
 
     @BeforeEach
     void setUp() throws ParseException {
@@ -66,17 +82,21 @@ class EventControllerTest {
 
         when(mockUser.getUserID()).thenReturn(7L);
 
-        when(mockEvent.getNotifiedUser()).thenReturn(mockUser);
+        when(mockEvent1.getNotifiedUser()).thenReturn(mockUser);
 
         when(userRepository.findAll()).thenReturn(List.of(mockUser));
         when(userRepository.findById(7L)).thenReturn(Optional.of(mockUser));
         when(userRepository.findById(not(eq(7L)))).thenReturn(Optional.empty());
 
-        when(eventRepository.findById(2L)).thenReturn(Optional.of(mockEvent));
+        when(eventRepository.findById(2L)).thenReturn(Optional.of(mockEvent1));
         when(eventRepository.findById(not(eq(2L)))).thenReturn(Optional.empty());
+        when(eventRepository.findEventsForUser(mockUser)).thenReturn(List.of(mockEvent1, mockEvent2));
+        when(eventRepository.findEventsForUser(eq(mockUser), any())).thenReturn(List.of(mockEvent1, mockEvent2));
 
+        when(mockEvent1.asDTO()).thenReturn(mockEventDTO1);
+        when(mockEvent2.asDTO()).thenReturn(mockEventDTO2);
 
-        EventController eventController = new EventController(userRepository, eventRepository);
+        eventController = new EventController(userRepository, eventRepository);
         mockMvc = MockMvcBuilders.standaloneSetup(eventController).build();
     }
 
@@ -175,8 +195,8 @@ class EventControllerTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        verify(mockEvent, times(1)).setTag(eventTag);
-        verify(eventRepository, times(1)).save(mockEvent);
+        verify(mockEvent1, times(1)).setTag(eventTag);
+        verify(eventRepository, times(1)).save(mockEvent1);
     }
 
     @Test
@@ -252,7 +272,7 @@ class EventControllerTest {
     }
 
     @Test
-    void eventEmitter_differentUser_403Response() throws Exception {
+    void getEvents_differentUser_403Response() throws Exception {
         authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), any())).thenReturn(false);
 
         mockMvc.perform(get("/users/7/feed"))
@@ -263,7 +283,7 @@ class EventControllerTest {
     }
 
     @Test
-    void eventEmitter_userNotFound_406Response() throws Exception {
+    void getEvents_userNotFound_406Response() throws Exception {
         // 406 Should only be possible if user is admin
         authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), eq(999L))).thenReturn(true);
 
@@ -274,13 +294,55 @@ class EventControllerTest {
     }
 
     @Test
-    void eventEmitter_validRequest_emitterGenerated() throws Exception {
+    void getEvents_invalidModifySinceParam_404Response() throws Exception {
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), eq(7L))).thenReturn(true);
+
+        mockMvc.perform(get("/users/7/feed").param("modifiedSince", "INVALID"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void getEvents_validRequestAndNoModifiedSinceParam_200Response() throws Exception {
+        when(eventRepository.findEventsForUser(mockUser)).thenReturn(List.of());
         authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), eq(7L))).thenReturn(true);
 
         mockMvc.perform(get("/users/7/feed"))
                 .andExpect(status().isOk());
 
         verify(eventRepository).findEventsForUser(mockUser);
+    }
+
+    @Test
+    void getEvents_validRequestAndNoModifiedSinceParam_allEventsReturned() {
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), eq(7L))).thenReturn(true);
+
+        // Method has to be called directly instead of using mockMvc to allow mocking of events and DTOs
+        var result = eventController.getEvents(7L, null, mockRequest, mockResponse);
+
+        verify(eventRepository).findEventsForUser(mockUser);
+        assertEquals(result, List.of(mockEventDTO1, mockEventDTO2));
+    }
+
+    @Test
+    void getEvents_validRequestAndValidModifiedSinceParam_200Response() throws Exception {
+        when(eventRepository.findEventsForUser(mockUser, Instant.parse("2021-09-08T08:47:59.018528Z"))).thenReturn(List.of());
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), eq(7L))).thenReturn(true);
+
+        mockMvc.perform(get("/users/7/feed").param("modifiedSince", "2021-09-08T08:47:59.018528Z"))
+                .andExpect(status().isOk());
+
+        verify(eventRepository).findEventsForUser(mockUser, Instant.parse("2021-09-08T08:47:59.018528Z"));
+    }
+
+    @Test
+    void getEvents_validRequestAndValidModifiedSinceParam_allEventsReturned() {
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), eq(7L))).thenReturn(true);
+
+        // Method has to be called directly instead of using mockMvc to allow mocking of events and DTOs
+        var result = eventController.getEvents(7L, "2021-09-08T08:47:59.018528Z", mockRequest, mockResponse);
+
+        verify(eventRepository).findEventsForUser(mockUser, Instant.parse("2021-09-08T08:47:59.018528Z"));
+        assertEquals(result, List.of(mockEventDTO1, mockEventDTO2));
     }
 
     @Test
@@ -323,6 +385,6 @@ class EventControllerTest {
         mockMvc.perform(put("/feed/2/read"))
                 .andExpect(status().isOk())
                 .andReturn();
-        verify(mockEvent, times(1)).markAsRead();
+        verify(mockEvent1, times(1)).markAsRead();
     }
 }
