@@ -13,6 +13,8 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 
 import static java.time.temporal.ChronoUnit.DAYS;
 
@@ -44,6 +46,10 @@ public class SaleItem {
     @Column(name = "closes")
     private LocalDate closes;  // Defaults to expiry date of product being sold
 
+    @ManyToMany
+    @JoinColumn(name = "user_id", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private List<User> bookmarks = new ArrayList<User>(); // A list of users who have bookmarked this sale listing
 
     // Getters and Setters
 
@@ -209,6 +215,32 @@ public class SaleItem {
      */
     public Business getBusiness() {
         return this.inventoryItem.getBusiness();
+    }
+
+    public List<User> getBookmarks() { return this.bookmarks; }
+
+    /**
+     * Adds a user to the list of bookmarks
+     * @param bookmarkedUser the user to be added to the list of bookmarks
+     */
+    public void addBookmark(User bookmarkedUser) {
+        if (this.bookmarks.contains(bookmarkedUser)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The user already has this sale listing bookmarked!");
+        } else {
+            this.bookmarks.add(bookmarkedUser);
+        }
+    }
+
+    /**
+     * Remove a user from the list of bookmarks
+     * @param bookmarkedUser the user to be removed from the list of bookmarks
+     */
+    public void removeBookmark(User bookmarkedUser) {
+        if (this.bookmarks.contains(bookmarkedUser)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The user does not have this sale listing bookmarked!");
+        } else {
+            this.bookmarks.remove(bookmarkedUser);
+        }
     }
 
     /**
