@@ -339,7 +339,7 @@ public class SearchHelperSaleListingTest {
     @ParameterizedTest
     @ValueSource(strings={"Gregs pies", "Simple Pie", "Canberra", "NSW", "Australia",
                         "\"Canberra\" and \"NSW\" AND \"Australia\"",
-                        "\"Davids pies\" OR \"Gregs pies\"", "\"Taiwan\" or \"Australia\""})
+                        "\"Davids pies\" OR \"Gregs pies\"", "\"Taiwan\" or \"Australia\"", "good pies", "Yummy"})
     void constructSaleItemSpecificationUsingOnlySearchQuery_fullMatchSearchQuery_saleItemReturned(String query) {
         Specification<SaleItem> specification = SearchHelper.constructSaleItemSpecificationFromSearchQueries(
                 query, "", "", "");
@@ -351,7 +351,7 @@ public class SearchHelperSaleListingTest {
     @ParameterizedTest
     @ValueSource(strings={"Gregs", "pies", "Simple", "Pie", "Pi", "Can", "berra", "NS", "W", "Austra", "lia",
                         "\"Gregs\" AND \"pie\"", "\"Can\" AND \"Austra\"",
-                        "\"Davids\" or \"Gregs\"", "\"Austral\" or \"Greenland\""})
+                        "\"Davids\" or \"Gregs\"", "\"Austral\" or \"Greenland\"", "good", "yum"})
     void constructSaleItemSpecificationUsingOnlySearchQuery_partialMatchSearchQuery_saleItemReturned(String query) {
         Specification<SaleItem> specification = SearchHelper.constructSaleItemSpecificationFromSearchQueries(
                 query, "", "", "");
