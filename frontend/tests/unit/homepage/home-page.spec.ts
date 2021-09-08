@@ -7,7 +7,7 @@ import {User, MarketplaceCard, Keyword } from '@/api/internal';
 import HomePage from '@/components/home/HomePage.vue';
 import { getStore, resetStoreForTesting, StoreData } from '@/store';
 
-import { AnyEvent, DeleteEvent, ExpiryEvent, KeywordCreatedEvent, MessageEvent } from '@/api/events';
+import { AnyEvent, DeleteEvent, ExpiryEvent, GlobalMessageEvent, KeywordCreatedEvent, MessageEvent } from '@/api/events';
 
 Vue.use(Vuetify);
 const localVue = createLocalVue();
@@ -71,10 +71,12 @@ describe('HomePage.vue', () => {
   it('If an global message event is posted to the store then it should be displayed in the newsfeed', async () => {
     const event: AnyEvent = {
       type: 'GlobalMessageEvent',
+      status: 'normal',
       id: 7,
       tag: 'none',
       created: new Date().toString(),
       message: 'Hello world',
+      read: false
     };
     store.commit('addEvent', event);
     await Vue.nextTick();
@@ -87,10 +89,12 @@ describe('HomePage.vue', () => {
   it('If an expiry event is posted to the store then it should be displayed in the newsfeed', async () => {
     const event: ExpiryEvent = {
       type: 'ExpiryEvent',
+      status: 'normal',
       id: 2,
       tag: 'none',
       created: new Date().toString(),
       card: testMarketPlaceCard,
+      read: false
     };
     store.commit('addEvent', event);
     await Vue.nextTick();
@@ -103,11 +107,13 @@ describe('HomePage.vue', () => {
   it('If delete event is posted to the store then it should be displayed in the newsfeed', async () => {
     const event: DeleteEvent = {
       type: 'DeleteEvent',
+      status: 'normal',
       id: 7,
       tag: 'none',
       created: new Date().toString(),
       title: "test_title",
-      section: "ForSale"
+      section: "ForSale",
+      read: false
     };
     store.commit('addEvent', event);
     await Vue.nextTick();
@@ -120,6 +126,7 @@ describe('HomePage.vue', () => {
   it('If an keyword created event is posted to the store then it should be displayed in the newsfeed', async () => {
     const event: KeywordCreatedEvent = {
       type: 'KeywordCreatedEvent',
+      status: 'normal',
       id: 7,
       tag: 'none',
       created: new Date().toString(),
@@ -128,7 +135,8 @@ describe('HomePage.vue', () => {
         name: "EDWARD",
         created: "2012/01/01"
       },
-      creator: testUser
+      creator: testUser,
+      read: false
     };
     store.commit('addEvent', event);
     await Vue.nextTick();
@@ -141,6 +149,7 @@ describe('HomePage.vue', () => {
   it('If an message event is posted to the store then it should be displayed in the newsfeed', async () => {
     const event: MessageEvent = {
       type: 'MessageEvent',
+      status: 'normal',
       id: 7,
       tag: 'none',
       created: new Date().toString(),
@@ -156,6 +165,7 @@ describe('HomePage.vue', () => {
         id: 3,
       },
       participantType: 'seller',
+      read: false
     };
     store.commit('addEvent', event);
     await Vue.nextTick();
@@ -168,15 +178,149 @@ describe('HomePage.vue', () => {
   it('If an event is posted to the store then the message "No items in your feed" should not be shown', async () => {
     const event: AnyEvent = {
       type: 'GlobalMessageEvent',
+      status: 'normal',
       id: 7,
       tag: 'none',
       created: new Date().toString(),
       message: 'Hello world',
+      read: false
     };
     store.commit('addEvent', event);
     await Vue.nextTick();
 
     expect(wrapper.text()).not.toContain('No items in your feed');
+  });
+
+  describe('Event statuses', () => {
+    it('Starred messages are shown in the main newsfeed', async () => {
+      const event: GlobalMessageEvent = {
+        type: 'GlobalMessageEvent',
+        status: 'starred',
+        id: 7,
+        tag: 'none',
+        read: false,
+        created: new Date().toString(),
+        message: 'Hello world',
+      };
+      store.commit('addEvent', event);
+      await Vue.nextTick();
+
+      let newsfeedItem = wrapper.findComponent({name: 'GlobalMessage'});
+      expect(newsfeedItem.exists()).toBeTruthy();
+      expect(wrapper.text()).not.toContain('No items in your feed');
+    });
+
+    it('Archived messages are not shown in the main newsfeed', async () => {
+      const event: GlobalMessageEvent = {
+        type: 'GlobalMessageEvent',
+        status: 'archived',
+        id: 7,
+        tag: 'none',
+        read: false,
+        created: new Date().toString(),
+        message: 'Hello world',
+      };
+      store.commit('addEvent', event);
+      await Vue.nextTick();
+
+      let newsfeedItem = wrapper.findComponent({name: 'GlobalMessage'});
+      expect(newsfeedItem.exists()).toBeFalsy();
+      expect(wrapper.text()).toContain('No items in your feed');
+    });
+
+    it('If starred messages are shown then there should be a marker for it', async () => {
+      const event1: GlobalMessageEvent = {
+        type: 'GlobalMessageEvent',
+        status: 'starred',
+        id: 7,
+        tag: 'none',
+        read: false,
+        created: new Date().toString(),
+        message: 'Hello world',
+      };
+      store.commit('addEvent', event1);
+      const event2: GlobalMessageEvent = {
+        type: 'GlobalMessageEvent',
+        status: 'starred',
+        id: 8,
+        tag: 'none',
+        read: false,
+        created: new Date().toString(),
+        message: 'Hello world',
+      };
+      store.commit('addEvent', event2);
+      await Vue.nextTick();
+
+      expect(wrapper.text()).toContain('Starred');
+      expect(wrapper.text()).not.toContain('Unstarred');
+
+      let events: (AnyEvent | string)[] = wrapper.vm.eventsPageWithSpacers;
+      expect(events[0]).toBe('Starred'); // The marker should be first
+      expect(events.filter(event => typeof event === 'string')).toStrictEqual(['Starred']); // There should only be one marker
+    });
+
+    it('If unstarred messages are shown then there should be a marker for it', async () => {
+      const event1: GlobalMessageEvent = {
+        type: 'GlobalMessageEvent',
+        status: 'normal',
+        id: 7,
+        tag: 'none',
+        read: false,
+        created: new Date().toString(),
+        message: 'Hello world',
+      };
+      store.commit('addEvent', event1);
+      const event2: GlobalMessageEvent = {
+        type: 'GlobalMessageEvent',
+        status: 'normal',
+        id: 8,
+        tag: 'none',
+        read: false,
+        created: new Date().toString(),
+        message: 'Hello world',
+      };
+      store.commit('addEvent', event2);
+      await Vue.nextTick();
+
+      expect(wrapper.text()).toContain('Unstarred');
+      expect(wrapper.text()).not.toContain('Starred');
+
+      let events: (AnyEvent | string)[] = wrapper.vm.eventsPageWithSpacers;
+      expect(events[0]).toBe('Unstarred'); // The marker should be first
+      expect(events.filter(event => typeof event === 'string')).toStrictEqual(['Unstarred']); // There should only be one marker
+    });
+
+    it('If unstarred and starred messages are shown then there should be markers for both', async () => {
+      const event1: GlobalMessageEvent = {
+        type: 'GlobalMessageEvent',
+        status: 'normal',
+        id: 7,
+        tag: 'none',
+        read: false,
+        created: new Date().toString(),
+        message: 'Hello world',
+      };
+      store.commit('addEvent', event1);
+      const event2: GlobalMessageEvent = {
+        type: 'GlobalMessageEvent',
+        status: 'starred',
+        id: 8,
+        tag: 'none',
+        read: false,
+        created: new Date().toString(),
+        message: 'Hello world',
+      };
+      store.commit('addEvent', event2);
+      await Vue.nextTick();
+
+      expect(wrapper.text()).toContain('Unstarred');
+      expect(wrapper.text()).toContain('Starred');
+
+      let events: (AnyEvent | string)[] = wrapper.vm.eventsPageWithSpacers;
+      expect(events[0]).toBe('Starred'); // The starred marker should be first
+      expect(events[2]).toBe('Unstarred'); // The unstared marker should be after the starred marker and starred event
+      expect(events.filter(event => typeof event === 'string')).toStrictEqual(['Starred', 'Unstarred']); // There should only be 2 markers
+    });
   });
 
   describe("Pagination and filtering of the homefeed", () => {
@@ -187,10 +331,12 @@ describe('HomePage.vue', () => {
       for (let i=0; i < 4; i++) {
         let event: AnyEvent = {
           type: 'GlobalMessageEvent',
+          status: 'normal',
           id: i,
           tag: 'none',
           created: new Date().toString(),
           message: 'None event',
+          read: false
         };
         store.commit('addEvent', event);
         await Vue.nextTick();
@@ -198,10 +344,12 @@ describe('HomePage.vue', () => {
       for (let i=4; i < 12; i++) {
         let event: AnyEvent = {
           type: 'GlobalMessageEvent',
+          status: 'normal',
           id: i,
           tag: 'red',
           created: new Date().toString(),
           message: 'Red event',
+          read: false
         };
         store.commit('addEvent', event);
         await Vue.nextTick();

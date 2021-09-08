@@ -68,3 +68,30 @@ Feature: U32 - Managing my feed
     When I try to change the event tag to "blue"
     Then The request fails due to forbidden
     And The event has the tag "none"
+
+  Scenario: AC4 - I can archive an item from my feed
+    Given I am logged into my account
+    And the event status has been set to "normal"
+    When I try to change the status of the event to "archived"
+    Then The request succeeds
+    And the event has status "archived"
+
+  Scenario: AC5 - I can delete an archived item
+    Given I am logged into my account
+    And the event status has been set to "archived"
+    When I try to delete an event from my feed
+    Then The event is deleted
+
+  Scenario: AC3 - I can star an item from my feed
+    Given I am logged into my account
+    And the event status has been set to "normal"
+    When I try to change the status of the event to "starred"
+    Then The request succeeds
+    And the event has status "starred"
+
+  Scenario: AC3 - I can un-star an item from my feed
+    Given I am logged into my account
+    And the event status has been set to "starred"
+    When I try to change the status of the event to "normal"
+    Then The request succeeds
+    And the event has status "normal"
