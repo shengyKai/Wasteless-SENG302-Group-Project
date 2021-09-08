@@ -11,6 +11,7 @@ import org.mockito.Mockito;
 import org.mockito.internal.matchers.apachecommons.ReflectionEquals;
 import org.seng302.leftovers.controllers.DGAAController;
 import org.seng302.leftovers.dto.ProductFilterOption;
+import org.seng302.leftovers.dto.SaleListingSearchDTO;
 import org.seng302.leftovers.entities.*;
 import org.seng302.leftovers.exceptions.SearchFormatException;
 import org.seng302.leftovers.persistence.*;
@@ -1047,7 +1048,7 @@ class SearchHelperTest {
     }
 
     @ParameterizedTest
-    @CsvSource({"0.0,5.0,1", "6.0,10.0,1", "10.0,15.0,1", "0.0,15.0,3"})
+    @CsvSource({"-1.0,0,0", "0.0,5.0,1", "6.0,10.0,1", "10.0,15.0,1", "0.0,15.0,3"})
     void constructSaleListingSpecificationFromPrice_saleItemsCreatedWithDifferentPrices_saleItemsReturnedAreWithinRange(String priceLowerBound, String priceUpperBound, String expectedSize) throws Exception {
         setUpSaleItemsWithDifferentPricesClosingDates();
 
@@ -1069,7 +1070,7 @@ class SearchHelperTest {
     }
 
     @ParameterizedTest
-    @CsvSource({"0,5,1", "6,10,1", "10,15,1", "0,15,3"})
+    @CsvSource({"-1,0,0", "0,5,1", "6,10,1", "10,15,1", "0,15,3"})
     void constructSaleListingSpecificationFromClosingDate_saleItemsCreatedWithDifferentClosingDates_saleItemsReturnedAreWithinRange(String dateLowerBoundToAdd, String dateUpperBoundToAdd, String expectedSize) throws Exception {
         setUpSaleItemsWithDifferentPricesClosingDates();
 
@@ -1128,9 +1129,9 @@ class SearchHelperTest {
         var saleItem = new SaleItem.Builder()
                 .withInventoryItem(inventoryItem)
                 .withQuantity(1)
-                .withPrice("1.0")
+                .withPrice("3.0")
                 .withMoreInfo("blah")
-                .withCloses(today.plus(1, ChronoUnit.DAYS).toString())
+                .withCloses(today.plus(11, ChronoUnit.DAYS).toString())
                 .build();
         saleItemRepository.save(saleItem);
     }
@@ -1154,8 +1155,7 @@ class SearchHelperTest {
     @ParameterizedTest
     @MethodSource("generateDataForConstructSaleListingSpecificationFromBusinessType")
     void constructSaleListingSpecificationFromBusinessType_businessesCreatedWithDifferentBusinessTypes_saleItemsReturnedAreFromThatBusinessType(List<String> expectedBusinessTypes, int expectedSize) throws Exception {
-        List<String> businessTypes = Arrays.asList("Accommodation and Food Services", "Charitable organisation", "Non-profit organisation", "Retail Trade");
-        for (String businessType : businessTypes) {
+        for (String businessType : Business.getBusinessTypes()) {
             setUpSaleItemsWithDifferentBusinessTypes(businessType);
         }
 
@@ -1179,18 +1179,53 @@ class SearchHelperTest {
      * @return a stream containing the arguments for the test method
      */
     private Stream<Arguments> generateDataForconstructSaleListingSpecificationForSearch() {
+        LocalDate today = LocalDate.now();
         return Stream.of(
-                Arguments.of(Arrays.asList("Accommodation and Food Services"), 1),
-                Arguments.of(Arrays.asList("Accommodation and Food Services", "Charitable organisation"), 2),
-                Arguments.of(Arrays.asList("Accommodation and Food Services", "Charitable organisation", "Non-profit organisation"), 3),
-                Arguments.of(Arrays.asList("Accommodation and Food Services", "Charitable organisation", "Non-profit organisation", "Retail Trade"), 4)
-        );
+                Arguments.of(new SaleListingSearchDTO(new BigDecimal("0.0"), new BigDecimal("0.0"),
+                        today.plus(Integer.parseInt("0"), ChronoUnit.DAYS),
+                        today.plus(Integer.parseInt("0"), ChronoUnit.DAYS),
+                        Arrays.asList()), 0),
+                Arguments.of(new SaleListingSearchDTO(new BigDecimal("0.0"), new BigDecimal("5.0"),
+                        today.plus(Integer.parseInt("0"), ChronoUnit.DAYS),
+                        today.plus(Integer.parseInt("5"), ChronoUnit.DAYS),
+                        Arrays.asList("Accommodation and Food Services")), 1),
+                Arguments.of(new SaleListingSearchDTO(new BigDecimal("6.0"), new BigDecimal("10.0"),
+                        today.plus(Integer.parseInt("6"), ChronoUnit.DAYS),
+                        today.plus(Integer.parseInt("10"), ChronoUnit.DAYS),
+                        Arrays.asList("Accommodation and Food Services", "Charitable organisation")), 1),
+                Arguments.of(new SaleListingSearchDTO(new BigDecimal("11.0"), new BigDecimal("15.0"),
+                        today.plus(Integer.parseInt("11"), ChronoUnit.DAYS),
+                        today.plus(Integer.parseInt("15"), ChronoUnit.DAYS),
+                        Arrays.asList("Accommodation and Food Services", "Charitable organisation", "Non-profit organisation")), 1),
+                Arguments.of(new SaleListingSearchDTO(new BigDecimal("0.0"), new BigDecimal("15.0"),
+                        today.plus(Integer.parseInt("0"), ChronoUnit.DAYS),
+                        today.plus(Integer.parseInt("15"), ChronoUnit.DAYS),
+                        Arrays.asList("Accommodation and Food Services", "Charitable organisation", "Non-profit organisation", "Retail Trade")), 7),
+                Arguments.of(new SaleListingSearchDTO(new BigDecimal("0.0"), new BigDecimal("14.0"),
+                        today.plus(Integer.parseInt("2"), ChronoUnit.DAYS),
+                        today.plus(Integer.parseInt("15"), ChronoUnit.DAYS),
+                        Arrays.asList("Accommodation and Food Services", "Charitable organisation")), 3),
+                Arguments.of(new SaleListingSearchDTO(new BigDecimal("2.0"), new BigDecimal("14.0"),
+                        today.plus(Integer.parseInt("3"), ChronoUnit.DAYS),
+                        today.plus(Integer.parseInt("12"), ChronoUnit.DAYS),
+                        Arrays.asList()), 5)
+                );
     }
 
-    @Transactional
     @ParameterizedTest
     @MethodSource("generateDataForconstructSaleListingSpecificationForSearch")
-    void constructSaleListingSpecificationForSearch_differentPricesClosingDatesBusinessTypes_saleItemsReturnedAreOfTheSpecification() {
+    void constructSaleListingSpecificationForSearch_differentPricesClosingDatesBusinessTypes_saleItemsReturnedAreOfTheSpecification(SaleListingSearchDTO saleListingSearchDTO, int expectedSize) {
+        // Make use of the two methods for generating sale items and use them as test cases
+        for (String businessType : Business.getBusinessTypes()) {
+            setUpSaleItemsWithDifferentBusinessTypes(businessType);
+        }
+        setUpSaleItemsWithDifferentPricesClosingDates();
 
+        PageRequest pageRequest = SearchHelper.getPageRequest(1, 10, Sort.by("created"));
+
+        Specification<SaleItem> specification = SearchHelper.constructSaleListingSpecificationForSearch(saleListingSearchDTO);
+        Page<SaleItem> resultSaleItemsBusiness = saleItemRepository.findAll(specification, pageRequest);
+
+        assertEquals(expectedSize, resultSaleItemsBusiness.getTotalElements());
     }
 }
