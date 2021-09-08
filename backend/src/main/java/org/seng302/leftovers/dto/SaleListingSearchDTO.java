@@ -8,6 +8,9 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
+/**
+ * A DTO representing a sale listing search specification
+ */
 @Getter
 @ToString
 @EqualsAndHashCode
