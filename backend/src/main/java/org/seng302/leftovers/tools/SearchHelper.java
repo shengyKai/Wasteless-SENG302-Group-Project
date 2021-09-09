@@ -717,8 +717,9 @@ public class SearchHelper {
      * @return A specification for SaleItems which matches the price range
      */
     public static Specification<SaleItem> constructSaleListingSpecificationFromPrice(BigDecimal lowerBound, BigDecimal upperBound) {
+        // If both bounds are null, return an specification with no limitations
         if (lowerBound == null && upperBound == null) {
-            return Specification.where()
+            return (root, query, criteriaBuilder) -> criteriaBuilder.conjunction();
         }
         else if (lowerBound == null) {
             return (root, query, criteriaBuilder) -> criteriaBuilder.lessThanOrEqualTo(root.get("price"), upperBound);
@@ -726,6 +727,7 @@ public class SearchHelper {
         else if (upperBound == null) {
             return (root, query, criteriaBuilder) -> criteriaBuilder.greaterThanOrEqualTo(root.get("price"), lowerBound);
         }
+        // If both bounds are present, return a specification between both bounds
         return (root, query, criteriaBuilder) -> criteriaBuilder.between(root.get("price"), lowerBound, upperBound);
     }
 
@@ -737,15 +739,18 @@ public class SearchHelper {
      * @return A specification for SaleItems which matches the closing date range
      */
     public static Specification<SaleItem> constructSaleListingSpecificationFromClosingDate(LocalDate lowerBound, LocalDate upperBound) {
-        if (lowerBound == null) {
-            lowerBound = LocalDate.MIN;
+        // If both bounds are null, return an specification with no limitations
+        if (lowerBound == null && upperBound == null) {
+            return (root, query, criteriaBuilder) -> criteriaBuilder.conjunction();
         }
-        if (upperBound == null) {
-            upperBound = LocalDate.MAX;
+        else if (lowerBound == null) {
+            return (root, query, criteriaBuilder) -> criteriaBuilder.lessThanOrEqualTo(root.get("closes"), upperBound);
         }
-        LocalDate finalLowerBound = lowerBound;
-        LocalDate finalUpperBound = upperBound;
-        return (root, query, criteriaBuilder) -> criteriaBuilder.between(root.get("closes"), finalLowerBound, finalUpperBound);
+        else if (upperBound == null) {
+            return (root, query, criteriaBuilder) -> criteriaBuilder.greaterThanOrEqualTo(root.get("closes"), lowerBound);
+        }
+        // If both bounds are present, return a specification between both bounds
+        return (root, query, criteriaBuilder) -> criteriaBuilder.between(root.get("closes"), lowerBound, upperBound);
     }
 
     /**
@@ -760,7 +765,6 @@ public class SearchHelper {
         } else {
             return (root, query, criteriaBuilder) -> root.get("inventoryItem").get("product").get("business").get("businessType").in(Business.getBusinessTypes());
         }
-
     }
 
     /**

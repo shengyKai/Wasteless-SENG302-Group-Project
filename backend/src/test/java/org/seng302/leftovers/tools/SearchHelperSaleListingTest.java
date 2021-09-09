@@ -392,6 +392,8 @@ public class SearchHelperSaleListingTest {
      * This method is for setting up sale items with sale items of different prices and closing dates
      */
     private void setUpSaleItemsWithDifferentPricesClosingDates() {
+        // This line is required because the set up above is affecting the results of the test cases below
+        saleItemRepository.deleteAll();
         var business = createBusiness();
         LocalDate today = LocalDate.now();
         var product = new Product.Builder()
@@ -439,14 +441,20 @@ public class SearchHelperSaleListingTest {
     }
 
     @ParameterizedTest
-    @CsvSource({"-1.0,0,0", "0.0,5.0,1", "6.0,10.0,1", "10.0,15.0,1", "0.0,15.0,3"})
+    @CsvSource({"-1.0,0,0", "0.0,5.0,1", "6.0,10.0,1", "10.0,15.0,1", "0.0,15.0,3", "0.0,,3", ",15.0,3", "3.0,,2", ",12.0,2", ",,3"})
     void constructSaleListingSpecificationFromPrice_saleItemsCreatedWithDifferentPrices_saleItemsReturnedAreWithinRange(String priceLowerBound, String priceUpperBound, String expectedSize) throws Exception {
         setUpSaleItemsWithDifferentPricesClosingDates();
 
         PageRequest pageRequest = SearchHelper.getPageRequest(1, 10, Sort.by("created"));
 
-        BigDecimal lowerBound = new BigDecimal(priceLowerBound);
-        BigDecimal upperBound = new BigDecimal(priceUpperBound);
+        BigDecimal lowerBound = null;
+        BigDecimal upperBound = null;
+        if (priceLowerBound != null) {
+            lowerBound = new BigDecimal(priceLowerBound);
+        }
+        if (priceUpperBound != null) {
+            upperBound = new BigDecimal(priceUpperBound);
+        }
         Specification<SaleItem> specification = SearchHelper.constructSaleListingSpecificationFromPrice(lowerBound, upperBound);
         Page<SaleItem> resultSaleItemsBusiness = saleItemRepository.findAll(specification, pageRequest);
 
@@ -454,21 +462,32 @@ public class SearchHelperSaleListingTest {
 
         for (SaleItem saleItem : resultSaleItemsBusiness) {
             // This would mean the saleItem price is being compared to the lowerBound such that its equal or more than the lowerBound
-            assertTrue(saleItem.getPrice().compareTo(lowerBound) >= 0);
+            if (lowerBound != null) {
+                assertTrue(saleItem.getPrice().compareTo(lowerBound) >= 0);
+            }
             // This would mean the saleItem price is being compared to the lowerBound such that its equal or lesser than the upperBound
-            assertTrue(saleItem.getPrice().compareTo(upperBound) <= 0);
+            if (upperBound != null) {
+                assertTrue(saleItem.getPrice().compareTo(upperBound) <= 0);
+            }
+
         }
     }
 
     @ParameterizedTest
-    @CsvSource({"-1,0,0", "0,5,1", "6,10,1", "10,15,1", "0,15,3"})
+    @CsvSource({"-1,0,0", "0,5,1", "6,10,1", "10,15,1", "0,15,3", ",15,3", "0,,3", ",12,2", "3,,2", ",,3"})
     void constructSaleListingSpecificationFromClosingDate_saleItemsCreatedWithDifferentClosingDates_saleItemsReturnedAreWithinRange(String dateLowerBoundToAdd, String dateUpperBoundToAdd, String expectedSize) throws Exception {
         setUpSaleItemsWithDifferentPricesClosingDates();
 
         PageRequest pageRequest = SearchHelper.getPageRequest(1, 10, Sort.by("created"));
 
-        LocalDate lowerBound = LocalDate.now().plus(Integer.parseInt(dateLowerBoundToAdd), ChronoUnit.DAYS);
-        LocalDate upperBound = LocalDate.now().plus(Integer.parseInt(dateUpperBoundToAdd), ChronoUnit.DAYS);
+        LocalDate lowerBound = null;
+        if (dateLowerBoundToAdd != null) {
+            lowerBound = LocalDate.now().plus(Integer.parseInt(dateLowerBoundToAdd), ChronoUnit.DAYS);
+        }
+        LocalDate upperBound = null;
+        if (dateUpperBoundToAdd != null) {
+            upperBound = LocalDate.now().plus(Integer.parseInt(dateUpperBoundToAdd), ChronoUnit.DAYS);
+        }
         Specification<SaleItem> specification = SearchHelper.constructSaleListingSpecificationFromClosingDate(lowerBound, upperBound);
         Page<SaleItem> resultSaleItemsBusiness = saleItemRepository.findAll(specification, pageRequest);
 
@@ -476,9 +495,14 @@ public class SearchHelperSaleListingTest {
 
         for (SaleItem saleItem : resultSaleItemsBusiness) {
             // This would mean the saleItem closing date is being compared to the lowerBound such that its equal or more than the lowerBound
-            assertTrue(saleItem.getCloses().compareTo(lowerBound) >= 0);
+            if (dateLowerBoundToAdd != null) {
+                assertTrue(saleItem.getCloses().compareTo(lowerBound) >= 0);
+            }
             // This would mean the saleItem closing date is being compared to the lowerBound such that its equal or lesser than the upperBound
-            assertTrue(saleItem.getCloses().compareTo(upperBound) <= 0);
+            if (dateUpperBoundToAdd != null) {
+                assertTrue(saleItem.getCloses().compareTo(upperBound) <= 0);
+            }
+
         }
     }
 
@@ -486,8 +510,10 @@ public class SearchHelperSaleListingTest {
      * This method is for setting up sale items with businesses of different business types when given a business type
      * @param businessType to set up the business with
      */
-    @javax.transaction.Transactional
+    @Transactional
     protected void setUpSaleItemsWithDifferentBusinessTypes(String businessType) {
+        // This line is required because the set up above is affecting the results of the test cases below
+        saleItemRepository.deleteAll();
         var testUser = userRepository.findAll().iterator().next();
         var testBusiness = new Business.Builder()
                 .withPrimaryOwner(testUser)
@@ -542,7 +568,7 @@ public class SearchHelperSaleListingTest {
         );
     }
 
-    @javax.transaction.Transactional
+    @Transactional
     @ParameterizedTest
     @MethodSource("generateDataForConstructSaleListingSpecificationFromBusinessType")
     void constructSaleListingSpecificationFromBusinessType_businessesCreatedWithDifferentBusinessTypes_saleItemsReturnedAreFromThatBusinessType(List<String> expectedBusinessTypes, int expectedSize) throws Exception {
@@ -616,6 +642,11 @@ public class SearchHelperSaleListingTest {
 
         Specification<SaleItem> specification = SearchHelper.constructSaleListingSpecificationForSearch(saleListingSearchDTO);
         Page<SaleItem> resultSaleItemsBusiness = saleItemRepository.findAll(specification, pageRequest);
+
+        for (SaleItem saleItem : resultSaleItemsBusiness) {
+            System.out.println(saleItem.getPrice());
+            System.out.println(saleItem.getCloses());
+        }
 
         assertEquals(expectedSize, resultSaleItemsBusiness.getTotalElements());
     }
