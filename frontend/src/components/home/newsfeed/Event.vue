@@ -32,6 +32,38 @@
         </v-card-subtitle>
       </v-col>
       <v-col cols="auto" class="mt-2">
+        <!-- Star icon will be 'filled' not outline, if the event is starred,
+              change status to normal when clicked -->
+        <v-icon v-if="event.status === 'starred'"
+                class="mr-2"
+                ref="starButton"
+                color="yellow"
+                @click.stop="changeEventStatus('normal')"
+        >
+          mdi-star
+        </v-icon>
+        <!-- Render a star-outline icon to visually show a difference between starred and normal event
+              change status to starred when clicked -->
+        <v-icon v-if="event.status === 'normal'"
+                class="mr-2"
+                ref="starButton"
+                color="yellow"
+                @click.stop="changeEventStatus('starred')"
+        >
+          mdi-star-outline
+        </v-icon>
+        <!-- Archive icon to allow user archiving an event
+              change status to archived when clicked -->
+        <v-icon v-if="!(event.status === 'archived')"
+                class="mr-2"
+                ref="archiveButton"
+                color="blue"
+                @click.stop="changeEventStatus('archived')"
+        >
+          mdi-archive-outline
+        </v-icon>
+        <!-- Trash Bin icon, allowing user to delete an event
+              have a 10s undo-time before the event actually got deleted -->
         <v-icon class="mr-2"
                 ref="deleteButton"
                 color="red"
@@ -114,6 +146,7 @@ import synchronizedTime from '@/components/utils/Methods/synchronizedTime';
 import { formatDate, formatTime } from '@/utils';
 import { setEventTag } from "@/api/internal";
 import {updateEventAsRead} from "@/api/events";
+import { updateEventStatus } from '../../../api/events';
 
 export default {
   name: 'Event',
@@ -137,6 +170,7 @@ export default {
       editCardDialog: false,
       expand: false,
       colours: ['none', 'red', 'orange', 'yellow', 'green', 'blue', 'purple'],
+      eventStatus: ['normal, starred, archived'],
     };
   },
   computed: {
@@ -248,7 +282,21 @@ export default {
           this.errorMessage = undefined;
         }
       }
-    }
+    },
+    /**
+     *
+     */
+    async changeEventStatus(status) {
+      console.log(status);
+      console.log('before ' + this.event.status);
+      const result = updateEventStatus(this.event.id, status);
+      console.log('after ' + this.event.status);
+      if (typeof result === 'string') {
+        this.errorMessage = result;
+      } else {
+        this.errorMessage = undefined;
+      }
+    },
   },
   watch: {
     error: {
