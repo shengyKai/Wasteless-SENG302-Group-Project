@@ -30,7 +30,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class SearchHelperSaleListingTest {
+class SearchHelperSaleListingTest {
 
     private User testUser;
     private Business testBusiness;
@@ -476,6 +476,8 @@ public class SearchHelperSaleListingTest {
     @ParameterizedTest
     @CsvSource({"-1,0,0", "0,5,1", "6,10,1", "10,15,1", "0,15,3", ",15,3", "0,,3", ",12,2", "3,,2", ",,3"})
     void constructSaleListingSpecificationFromClosingDate_saleItemsCreatedWithDifferentClosingDates_saleItemsReturnedAreWithinRange(String dateLowerBoundToAdd, String dateUpperBoundToAdd, String expectedSize) throws Exception {
+        // This line is required because the set up above is affecting the results of the test cases below
+        saleItemRepository.deleteAll();
         setUpSaleItemsWithDifferentPricesClosingDates();
 
         PageRequest pageRequest = SearchHelper.getPageRequest(1, 10, Sort.by("created"));
