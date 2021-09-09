@@ -4,6 +4,7 @@ import {createLocalVue, mount, Wrapper} from "@vue/test-utils";
 import EventList from "@/components/home/newsfeed/EventList.vue";
 import Vuex from "vuex";
 import {AnyEvent, GlobalMessageEvent} from "@/api/events";
+import { version } from "vue/types/umd";
 
 Vue.use(Vuetify);
 const localVue = createLocalVue();
@@ -42,9 +43,10 @@ describe("EventList.vue", ()=> {
       tag: 'none',
       created: new Date().toString(),
       message: 'Hello world',
-      read: false
+      read: false,
+      lastModified: new Date().toString(),
     };
-    wrapper.setData({
+    wrapper.setProps({
       events: [event]
     });
     await Vue.nextTick();
@@ -62,9 +64,10 @@ describe("EventList.vue", ()=> {
       tag: 'none',
       created: new Date().toString(),
       message: 'Hello world',
-      read: false
+      read: false,
+      lastModified: new Date().toString()
     };
-    wrapper.setData({
+    wrapper.setProps({
       events: [event]
     });
     await Vue.nextTick();
@@ -81,6 +84,7 @@ describe("EventList.vue", ()=> {
       read: false,
       created: new Date().toString(),
       message: 'Hello world',
+      lastModified: new Date().toString(),
     };
     const event2: GlobalMessageEvent = {
       type: 'GlobalMessageEvent',
@@ -90,8 +94,9 @@ describe("EventList.vue", ()=> {
       read: false,
       created: new Date().toString(),
       message: 'Hello world',
+      lastModified: new Date().toString(),
     };
-    wrapper.setData({
+    wrapper.setProps({
       events: [event1, event2]
     });
     await Vue.nextTick();
@@ -113,6 +118,7 @@ describe("EventList.vue", ()=> {
       read: false,
       created: new Date().toString(),
       message: 'Hello world',
+      lastModified: new Date().toString(),
     };
     const event2: GlobalMessageEvent = {
       type: 'GlobalMessageEvent',
@@ -122,8 +128,9 @@ describe("EventList.vue", ()=> {
       read: false,
       created: new Date().toString(),
       message: 'Hello world',
+      lastModified: new Date().toString(),
     };
-    wrapper.setData({
+    wrapper.setProps({
       events: [event1, event2]
     });
     await Vue.nextTick();
@@ -144,6 +151,7 @@ describe("EventList.vue", ()=> {
       read: false,
       created: new Date().toString(),
       message: 'Hello world',
+      lastModified: new Date().toString(),
     };
     const event2: GlobalMessageEvent = {
       type: 'GlobalMessageEvent',
@@ -153,8 +161,9 @@ describe("EventList.vue", ()=> {
       read: false,
       created: new Date().toString(),
       message: 'Hello world',
+      lastModified: new Date().toString()
     };
-    wrapper.setData({
+    wrapper.setProps({
       events: [event2, event1]
     });
     await Vue.nextTick();
@@ -182,7 +191,8 @@ describe("EventList.vue", ()=> {
           tag: 'none',
           created: new Date().toString(),
           message: 'None event',
-          read: false
+          read: false,
+          lastModified: new Date().toString()
         };
         untagged.push(event);
       }
@@ -195,11 +205,12 @@ describe("EventList.vue", ()=> {
           tag: 'red',
           created: new Date().toString(),
           message: 'Red event',
-          read: false
+          read: false,
+          lastModified: new Date().toString()
         };
         tagged.push(event);
       }
-      wrapper.setData({
+      wrapper.setProps({
         events: [...untagged, ...tagged]
       });
       await Vue.nextTick();
@@ -224,6 +235,7 @@ describe("EventList.vue", ()=> {
       await wrapper.setData({
         currentPage: 2
       });
+      await Vue.nextTick();
       events = wrapper.findAllComponents({ name: "GlobalMessage" });
       // Since there are 12 events total, the second page should only have 2 events
       expect(events.length).toEqual(2);

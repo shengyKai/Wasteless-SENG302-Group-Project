@@ -1,5 +1,6 @@
 import { Keyword, MarketplaceCard, MarketplaceCardSection, MaybeError, Message, User } from "./internal";
 import axios from 'axios';
+import { is } from 'typescript-is';
 
 const SERVER_URL = process.env.VUE_APP_SERVER_ADD;
 
@@ -26,6 +27,7 @@ type BaseEvent<T extends string> = {
   tag: EventTag,
   status: EventStatus,
   read: boolean,
+  lastModified: string
 }
 
 export type GlobalMessageEvent = BaseEvent<'GlobalMessageEvent'> & {
@@ -104,4 +106,37 @@ export async function updateEventAsRead(eventId: number): Promise<MaybeError<und
     return 'Request failed: ' + error.response?.data.message;
   }
   return undefined;
+}
+
+/**
+ * Retrieve events for the newsfeed of the user with the given id. If a modifedSince timestamp is provided,
+ * only events that have been after this timestamp will be retrieved. If no timestamp is provided, all events
+ * associated with the user will be retrieved.
+ * @param userId The ID number of the user to retrieve newsfeed events for.
+ * @param modifiedSince A datetime string in UTC format. If this string is provided, only events modified after
+ * this timestamp will be retrieved.
+ * @returns An array of events to be displayed in the user's newsfeed.
+ */
+export async function getEvents(userId: number, modifiedSince: string | undefined): Promise<MaybeError<AnyEvent[]>> {
+  const params = new URLSearchParams();
+  if (modifiedSince) {
+    params.append("modifiedSince", modifiedSince)
+  }
+  try {
+    const response = await instance.get(`/users/${userId}/feed`, {
+      params: params
+    });
+    if (!is<AnyEvent[]>(response.data)) {
+      return 'Response is not an event array';
+    }
+    return response.data;
+  } catch (error) {
+    let status: number | undefined = error.response?.status;
+    if (status === undefined) return 'Failed to reach backend';
+    if (status === 400) return 'Invalid \'modified since\' date';
+    if (status === 401) return 'You have been logged out. Please login again and retry';
+    if (status === 403) return `Invalid authorisation for getting events associated with user ${userId}`;
+    if (status === 406) return 'User does not exist';
+    return 'Request failed: ' + error.response?.data.message;
+  }
 }
