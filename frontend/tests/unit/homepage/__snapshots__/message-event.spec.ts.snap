@@ -11,7 +11,10 @@ exports[`MessageEvent.vue Matches snapshot 1`] = `
         03 Jan 2021, 00:00
       </div>
     </div>
-    <div class="mt-2 col col-auto"><button type="button" class="v-icon notranslate mr-2 v-icon--link mdi mdi-trash-can theme--light red--text"></button></div>
+    <div class="mt-2 col col-auto">
+      <!---->
+      <!----> <button type="button" class="v-icon notranslate mr-2 v-icon--link mdi mdi-archive-outline theme--light blue--text"></button> <button type="button" class="v-icon notranslate mr-2 v-icon--link mdi mdi-trash-can theme--light red--text"></button>
+    </div>
   </div>
   <div class="v-card__text pb-1"><strong>
       Regarding: test_title
@@ -37,7 +40,7 @@ exports[`MessageEvent.vue Matches snapshot 1`] = `
               <fieldset aria-hidden="true">
                 <legend style="width: 0px;"><span>​</span></legend>
               </fieldset>
-              <div class="v-text-field__slot"><label for="input-410" class="v-label theme--light" style="left: 0px; position: absolute;">Enter Message</label><textarea id="input-410" rows="1"></textarea></div>
+              <div class="v-text-field__slot"><label for="input-422" class="v-label theme--light" style="left: 0px; position: absolute;">Enter Message</label><textarea id="input-422" rows="1"></textarea></div>
             </div>
             <div class="v-text-field__details">
               <div class="v-messages theme--light">

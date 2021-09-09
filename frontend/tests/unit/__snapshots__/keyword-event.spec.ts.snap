@@ -11,7 +11,10 @@ exports[`KeywordCreated.vue Must match snapshot 1`] = `
         02 Jan 2021, 01:00
       </div>
     </div>
-    <div class="mt-2 col col-auto"><button type="button" class="v-icon notranslate mr-2 v-icon--link mdi mdi-trash-can theme--light red--text"></button></div>
+    <div class="mt-2 col col-auto">
+      <!---->
+      <!----> <button type="button" class="v-icon notranslate mr-2 v-icon--link mdi mdi-archive-outline theme--light blue--text"></button> <button type="button" class="v-icon notranslate mr-2 v-icon--link mdi mdi-trash-can theme--light red--text"></button>
+    </div>
   </div>
   <div class="v-card__text">
     John Smith has added "TestKeywordName"
