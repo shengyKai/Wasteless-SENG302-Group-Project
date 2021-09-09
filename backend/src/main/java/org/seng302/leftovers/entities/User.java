@@ -52,6 +52,9 @@ public class User extends Account {
     @OneToMany(mappedBy = "notifiedUser", fetch = FetchType.LAZY)
     private Set<Event> events = new HashSet<>();
 
+    @ManyToMany(mappedBy = "interestedUsers", fetch = FetchType.LAZY)
+    private Set<SaleItem> likedSaleItems = new HashSet<>();
+
     /* Matches:
     123-456-7890
     (123) 456-7890
