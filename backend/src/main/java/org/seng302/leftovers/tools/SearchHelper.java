@@ -717,6 +717,15 @@ public class SearchHelper {
      * @return A specification for SaleItems which matches the price range
      */
     public static Specification<SaleItem> constructSaleListingSpecificationFromPrice(BigDecimal lowerBound, BigDecimal upperBound) {
+        if (lowerBound == null && upperBound == null) {
+            return Specification.where()
+        }
+        else if (lowerBound == null) {
+            return (root, query, criteriaBuilder) -> criteriaBuilder.lessThanOrEqualTo(root.get("price"), upperBound);
+        }
+        else if (upperBound == null) {
+            return (root, query, criteriaBuilder) -> criteriaBuilder.greaterThanOrEqualTo(root.get("price"), lowerBound);
+        }
         return (root, query, criteriaBuilder) -> criteriaBuilder.between(root.get("price"), lowerBound, upperBound);
     }
 
@@ -728,7 +737,15 @@ public class SearchHelper {
      * @return A specification for SaleItems which matches the closing date range
      */
     public static Specification<SaleItem> constructSaleListingSpecificationFromClosingDate(LocalDate lowerBound, LocalDate upperBound) {
-        return (root, query, criteriaBuilder) -> criteriaBuilder.between(root.get("closes"), lowerBound, upperBound);
+        if (lowerBound == null) {
+            lowerBound = LocalDate.MIN;
+        }
+        if (upperBound == null) {
+            upperBound = LocalDate.MAX;
+        }
+        LocalDate finalLowerBound = lowerBound;
+        LocalDate finalUpperBound = upperBound;
+        return (root, query, criteriaBuilder) -> criteriaBuilder.between(root.get("closes"), finalLowerBound, finalUpperBound);
     }
 
     /**
@@ -747,7 +764,7 @@ public class SearchHelper {
     }
 
     /**
-     * Constructs a composite specification with three other samller specifications containing the price, closing date and
+     * Constructs a composite specification with three other smaller specifications containing the price, closing date and
      * business type of sale items.
      * @param saleListingSearchDTO containing the price, closing date and business type of the search specification
      * @return A specification for Sale items which matches the business's price, closing date and business type
