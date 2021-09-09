@@ -392,8 +392,6 @@ public class SearchHelperSaleListingTest {
      * This method is for setting up sale items with sale items of different prices and closing dates
      */
     private void setUpSaleItemsWithDifferentPricesClosingDates() {
-        // This line is required because the set up above is affecting the results of the test cases below
-        saleItemRepository.deleteAll();
         var business = createBusiness();
         LocalDate today = LocalDate.now();
         var product = new Product.Builder()
@@ -443,6 +441,8 @@ public class SearchHelperSaleListingTest {
     @ParameterizedTest
     @CsvSource({"-1.0,0,0", "0.0,5.0,1", "6.0,10.0,1", "10.0,15.0,1", "0.0,15.0,3", "0.0,,3", ",15.0,3", "3.0,,2", ",12.0,2", ",,3"})
     void constructSaleListingSpecificationFromPrice_saleItemsCreatedWithDifferentPrices_saleItemsReturnedAreWithinRange(String priceLowerBound, String priceUpperBound, String expectedSize) throws Exception {
+        // This line is required because the set up above is affecting the results of the test cases below
+        saleItemRepository.deleteAll();
         setUpSaleItemsWithDifferentPricesClosingDates();
 
         PageRequest pageRequest = SearchHelper.getPageRequest(1, 10, Sort.by("created"));
@@ -512,8 +512,6 @@ public class SearchHelperSaleListingTest {
      */
     @Transactional
     protected void setUpSaleItemsWithDifferentBusinessTypes(String businessType) {
-        // This line is required because the set up above is affecting the results of the test cases below
-        saleItemRepository.deleteAll();
         var testUser = userRepository.findAll().iterator().next();
         var testBusiness = new Business.Builder()
                 .withPrimaryOwner(testUser)
@@ -572,6 +570,8 @@ public class SearchHelperSaleListingTest {
     @ParameterizedTest
     @MethodSource("generateDataForConstructSaleListingSpecificationFromBusinessType")
     void constructSaleListingSpecificationFromBusinessType_businessesCreatedWithDifferentBusinessTypes_saleItemsReturnedAreFromThatBusinessType(List<String> expectedBusinessTypes, int expectedSize) throws Exception {
+        // This line is required because the set up above is affecting the results of the test cases below
+        saleItemRepository.deleteAll();
         for (String businessType : Business.getBusinessTypes()) {
             setUpSaleItemsWithDifferentBusinessTypes(businessType);
         }
@@ -625,13 +625,26 @@ public class SearchHelperSaleListingTest {
                 Arguments.of(new SaleListingSearchDTO(new BigDecimal("2.0"), new BigDecimal("14.0"),
                         today.plus(Integer.parseInt("3"), ChronoUnit.DAYS),
                         today.plus(Integer.parseInt("12"), ChronoUnit.DAYS),
-                        Arrays.asList()), 5)
+                        Arrays.asList()), 5),
+                Arguments.of(new SaleListingSearchDTO(new BigDecimal("2.0"), null,
+                        today.plus(Integer.parseInt("3"), ChronoUnit.DAYS),
+                        null,
+                        Arrays.asList()), 6),
+                Arguments.of(new SaleListingSearchDTO(null, new BigDecimal("14.0"),
+                        null, today.plus(Integer.parseInt("12"), ChronoUnit.DAYS),
+                        Arrays.asList()), 6),
+                Arguments.of(new SaleListingSearchDTO(null, null,
+                        null, null,
+                        Arrays.asList()), 7)
         );
     }
 
+    @Transactional
     @ParameterizedTest
     @MethodSource("generateDataForconstructSaleListingSpecificationForSearch")
     void constructSaleListingSpecificationForSearch_differentPricesClosingDatesBusinessTypes_saleItemsReturnedAreOfTheSpecification(SaleListingSearchDTO saleListingSearchDTO, int expectedSize) {
+        // This line is required because the set up above is affecting the results of the test cases below
+        saleItemRepository.deleteAll();
         // Make use of the two methods for generating sale items and use them as test cases
         for (String businessType : Business.getBusinessTypes()) {
             setUpSaleItemsWithDifferentBusinessTypes(businessType);
@@ -642,11 +655,6 @@ public class SearchHelperSaleListingTest {
 
         Specification<SaleItem> specification = SearchHelper.constructSaleListingSpecificationForSearch(saleListingSearchDTO);
         Page<SaleItem> resultSaleItemsBusiness = saleItemRepository.findAll(specification, pageRequest);
-
-        for (SaleItem saleItem : resultSaleItemsBusiness) {
-            System.out.println(saleItem.getPrice());
-            System.out.println(saleItem.getCloses());
-        }
 
         assertEquals(expectedSize, resultSaleItemsBusiness.getTotalElements());
     }

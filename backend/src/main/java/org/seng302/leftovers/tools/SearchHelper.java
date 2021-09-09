@@ -761,9 +761,9 @@ public class SearchHelper {
      */
     public static Specification<SaleItem> constructSaleListingSpecificationFromBusinessType(List<String> businessTypes) {
         if  (businessTypes.isEmpty()) {
-            return (root, query, criteriaBuilder) -> root.get("inventoryItem").get("product").get("business").get("businessType").in(businessTypes);
-        } else {
             return (root, query, criteriaBuilder) -> root.get("inventoryItem").get("product").get("business").get("businessType").in(Business.getBusinessTypes());
+        } else {
+            return (root, query, criteriaBuilder) -> root.get("inventoryItem").get("product").get("business").get("businessType").in(businessTypes);
         }
     }
 
