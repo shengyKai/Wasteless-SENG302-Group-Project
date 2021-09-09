@@ -120,7 +120,7 @@ export async function updateEventAsRead(eventId: number): Promise<MaybeError<und
 export async function getEvents(userId: number, modifiedSince: string | undefined): Promise<MaybeError<AnyEvent[]>> {
   const params = new URLSearchParams();
   if (modifiedSince) {
-    params.append("modifiedSince", modifiedSince)
+    params.append("modifiedSince", modifiedSince);
   }
   try {
     const response = await instance.get(`/users/${userId}/feed`, {

@@ -39,12 +39,12 @@ describe('Event.vue', () => {
   function generateWrapper() {
 
     vuetify = new Vuetify();
-  
+
     localVue.use(Vuex);
     resetStoreForTesting();
     store = getStore();
     store.state.user = makeTestUser(1);
-  
+
     wrapper = mount(Event, {
       localVue,
       vuetify,
@@ -147,7 +147,7 @@ describe('Event.vue', () => {
 
     afterEach(() => {
       wrapper.destroy();
-    })
+    });
 
     it("On click of the event component, the api endpoint to update the read status is called", async () => {
       wrapper.trigger("click");

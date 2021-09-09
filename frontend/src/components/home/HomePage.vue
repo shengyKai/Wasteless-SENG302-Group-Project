@@ -59,6 +59,7 @@
 import BusinessActionPanel from "./BusinessActionPanel";
 import UserActionPanel from "./UserActionPanel";
 import EventList from "@/components/home/newsfeed/EventList";
+import { getEvents } from "@/api/events";
 
 export default {
   components: {
@@ -78,7 +79,9 @@ export default {
       colours: [{text: "None", value: 'none'}, {text: "Red", value: 'red'}, {text: "Orange", value: 'orange'},
         {text: "Yellow", value: 'yellow'}, {text: "Green", value: 'green'}, {text: "Blue", value: 'blue'},
         {text: "Purple", value: 'purple'}],
-      tab: "all-events-tab"
+      tab: "all-events-tab",
+      polling: undefined,
+      events: [],
     };
   },
   computed: {
@@ -92,8 +95,8 @@ export default {
      * The events list which is filtered after retrieving from the store
      */
     filteredEvents() {
-      if (!this.isFiltered) return this.storeEvents;
-      return this.storeEvents.filter(event => {
+      if (!this.isFiltered) return this.events;
+      return this.events.filter(event => {
         return this.filterBy.includes(event.tag);
       });
     },
@@ -138,6 +141,44 @@ export default {
     isBusiness() {
       return this.role?.type === "business";
     },
+    userId() {
+      return this.$store.state.user.id;
+    }
+  },
+  methods: {
+    startPolling() {
+      this.polling = setInterval(this.pollEvents, 3000);
+    },
+    pollEvents() {
+      if (!this.userId) return;
+      if (this.events.length === 0) {
+        this.getInitialEvents();
+      } else {
+        this.refreshEvents();
+      }
+    },
+    async getInitialEvents() {
+      const response = await getEvents(this.userId, undefined);
+      if (typeof response === 'string') {
+        console.error(response);
+      } else {
+        this.events = response;
+      }
+    },
+    async refreshEvents() {
+      let mostRecentModified = this.events[0].lastModified;
+      for (let event of this.events) {
+        if (new Date(event.lastModified) > new Date(mostRecentModified)) {
+          mostRecentModified = event.lastModified;
+        }
+      }
+      const response = await getEvents(this.userId, mostRecentModified);
+      if (typeof response === 'string') {
+        console.error(response);
+      } else {
+        this.events = this.events.concat(response);
+      }
+    }
   },
   watch: {
     /**
@@ -153,6 +194,12 @@ export default {
     totalPages: function() {
       this.currentPage = Math.max(Math.min(this.currentPage, this.totalPages), 1);
     }
+  },
+  created() {
+    this.startPolling();
+  },
+  beforeDestroy () {
+    clearInterval(this.polling);
   }
 };
 </script>
