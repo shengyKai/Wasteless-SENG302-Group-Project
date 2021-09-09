@@ -1,5 +1,5 @@
 import axios, { AxiosInstance } from 'axios';
-import {updateEventAsRead} from '@/api/events';
+import {updateEventAsRead, updateEventStatus} from '@/api/events';
 
 jest.mock('axios', () => ({
   create: jest.fn(function () {
@@ -81,4 +81,47 @@ describe('Test PUT /feed/{eventId}/read endpoint', () => {
     const response = await updateEventAsRead(1);
     expect(response).toEqual('Request failed: some error');
   });
+});
+
+describe("Test PUT /feed/{eventid}/status endpoint", () => {
+  it("Event status had been updated and there is no error from the respond", async () => {
+    instance.put.mockResolvedValueOnce({
+      response: {
+        status: 200
+      }
+    });
+    const response = await updateEventStatus(1, 'archived');
+    expect(response).toEqual(undefined);
+  });
+
+  it("Missing Auth token, Inform user and the Event's status will not be updated", async () => {
+    instance.put.mockRejectedValueOnce({
+      response: {
+        status: 401
+      }
+    });
+    const response = await updateEventStatus(1, 'normal');
+    expect(response).toEqual("You have been logged out. Please login again and retry");
+  });
+
+  it("Invalid authorization for modifying event status, Inform the user and the Event's status will not be updated ", async () => {
+    instance.put.mockRejectedValueOnce({
+      response: {
+        status: 403
+      }
+    });
+    const response = await updateEventStatus(1, 'starred');
+    expect(response).toEqual('Invalid authorization for modifying event status');
+  });
+
+  it("Event ID is invalid, Inform the user and the Event's status will not be updated ", async () => {
+    instance.put.mockRejectedValueOnce({
+      response: {
+        status: 406
+      }
+    });
+    const response = await updateEventStatus(1, 'archived');
+    expect(response).toEqual('Event does not exist');
+  });
+
 });
