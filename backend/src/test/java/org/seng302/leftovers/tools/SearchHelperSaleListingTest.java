@@ -7,25 +7,30 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.seng302.leftovers.controllers.DGAAController;
+import org.seng302.leftovers.dto.SaleListingSearchDTO;
 import org.seng302.leftovers.entities.*;
 import org.seng302.leftovers.persistence.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.lang.reflect.Array;
+import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.junit.jupiter.api.Assertions.*;
 
 
 @SpringBootTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class SearchHelperSaleListingTest {
+class SearchHelperSaleListingTest {
 
     private User testUser;
     private Business testBusiness;
@@ -367,5 +372,292 @@ public class SearchHelperSaleListingTest {
                 query, "", "", "");
         List<SaleItem> matches = saleItemRepository.findAll(specification);
         assertEquals(0, matches.size());
+    }
+
+    @Transactional
+    protected Business createBusiness() {
+        var testUser = userRepository.findAll().iterator().next();
+        var testBusiness = new Business.Builder()
+                .withPrimaryOwner(testUser)
+                .withBusinessType("Accommodation and Food Services")
+                .withDescription("DESCRIPTION")
+                .withName("BUSINESS_NAME")
+                .withAddress(Location.covertAddressStringToLocation("108,Albert Road,Ashburton,Christchurch,New Zealand,Canterbury,8041"))
+                .build();
+
+        return businessRepository.save(testBusiness);
+    }
+
+    /**
+     * This method is for setting up sale items with sale items of different prices and closing dates
+     */
+    private void setUpSaleItemsWithDifferentPricesClosingDates() {
+        var business = createBusiness();
+        LocalDate today = LocalDate.now();
+        var product = new Product.Builder()
+                .withBusiness(business)
+                .withProductCode("PRODUCT-CODE")
+                .withName("This is the product name")
+                .withDescription("Wow description")
+                .withManufacturer("Some guy")
+                .build();
+        productRepository.save(product);
+        var inventoryItem = new InventoryItem.Builder()
+                .withProduct(product)
+                .withQuantity(30)
+                .withPricePerItem("2.69")
+                .withManufactured("2021-03-11")
+                .withSellBy(today.plus(2, ChronoUnit.DAYS).toString())
+                .withBestBefore(today.plus(3, ChronoUnit.DAYS).toString())
+                .withExpires(today.plus(4, ChronoUnit.DAYS).toString())
+                .build();
+        inventoryItem = inventoryItemRepository.save(inventoryItem);
+        var saleItem1 = new SaleItem.Builder()
+                .withInventoryItem(inventoryItem)
+                .withQuantity(1)
+                .withPrice("1.0")
+                .withMoreInfo("blah")
+                .withCloses(today.plus(1, ChronoUnit.DAYS).toString())
+                .build();
+        saleItemRepository.save(saleItem1);
+        var saleItem2 = new SaleItem.Builder()
+                .withInventoryItem(inventoryItem)
+                .withQuantity(1)
+                .withPrice("6.0")
+                .withMoreInfo("blah")
+                .withCloses(today.plus(6, ChronoUnit.DAYS).toString())
+                .build();
+        saleItemRepository.save(saleItem2);
+        var saleItem3 = new SaleItem.Builder()
+                .withInventoryItem(inventoryItem)
+                .withQuantity(1)
+                .withPrice("15.0")
+                .withMoreInfo("blah")
+                .withCloses(today.plus(15, ChronoUnit.DAYS).toString())
+                .build();
+        saleItemRepository.save(saleItem3);
+    }
+
+    @ParameterizedTest
+    @CsvSource({"-1.0,0,0", "0.0,5.0,1", "6.0,10.0,1", "10.0,15.0,1", "0.0,15.0,3", "0.0,,3", ",15.0,3", "3.0,,2", ",12.0,2", ",,3"})
+    void constructSaleListingSpecificationFromPrice_saleItemsCreatedWithDifferentPrices_saleItemsReturnedAreWithinRange(String priceLowerBound, String priceUpperBound, String expectedSize) throws Exception {
+        // This line is required because the set up above is affecting the results of the test cases below
+        saleItemRepository.deleteAll();
+        setUpSaleItemsWithDifferentPricesClosingDates();
+
+        PageRequest pageRequest = SearchHelper.getPageRequest(1, 10, Sort.by("created"));
+
+        BigDecimal lowerBound = null;
+        BigDecimal upperBound = null;
+        if (priceLowerBound != null) {
+            lowerBound = new BigDecimal(priceLowerBound);
+        }
+        if (priceUpperBound != null) {
+            upperBound = new BigDecimal(priceUpperBound);
+        }
+        Specification<SaleItem> specification = SearchHelper.constructSaleListingSpecificationFromPrice(lowerBound, upperBound);
+        Page<SaleItem> resultSaleItemsBusiness = saleItemRepository.findAll(specification, pageRequest);
+
+        assertEquals(Integer.parseInt(expectedSize), resultSaleItemsBusiness.getTotalElements());
+
+        for (SaleItem saleItem : resultSaleItemsBusiness) {
+            // This would mean the saleItem price is being compared to the lowerBound such that its equal or more than the lowerBound
+            if (lowerBound != null) {
+                assertTrue(saleItem.getPrice().compareTo(lowerBound) >= 0);
+            }
+            // This would mean the saleItem price is being compared to the lowerBound such that its equal or lesser than the upperBound
+            if (upperBound != null) {
+                assertTrue(saleItem.getPrice().compareTo(upperBound) <= 0);
+            }
+
+        }
+    }
+
+    @ParameterizedTest
+    @CsvSource({"-1,0,0", "0,5,1", "6,10,1", "10,15,1", "0,15,3", ",15,3", "0,,3", ",12,2", "3,,2", ",,3"})
+    void constructSaleListingSpecificationFromClosingDate_saleItemsCreatedWithDifferentClosingDates_saleItemsReturnedAreWithinRange(String dateLowerBoundToAdd, String dateUpperBoundToAdd, String expectedSize) throws Exception {
+        // This line is required because the set up above is affecting the results of the test cases below
+        saleItemRepository.deleteAll();
+        setUpSaleItemsWithDifferentPricesClosingDates();
+
+        PageRequest pageRequest = SearchHelper.getPageRequest(1, 10, Sort.by("created"));
+
+        LocalDate lowerBound = null;
+        if (dateLowerBoundToAdd != null) {
+            lowerBound = LocalDate.now().plus(Integer.parseInt(dateLowerBoundToAdd), ChronoUnit.DAYS);
+        }
+        LocalDate upperBound = null;
+        if (dateUpperBoundToAdd != null) {
+            upperBound = LocalDate.now().plus(Integer.parseInt(dateUpperBoundToAdd), ChronoUnit.DAYS);
+        }
+        Specification<SaleItem> specification = SearchHelper.constructSaleListingSpecificationFromClosingDate(lowerBound, upperBound);
+        Page<SaleItem> resultSaleItemsBusiness = saleItemRepository.findAll(specification, pageRequest);
+
+        assertEquals(Integer.parseInt(expectedSize), resultSaleItemsBusiness.getTotalElements());
+
+        for (SaleItem saleItem : resultSaleItemsBusiness) {
+            // This would mean the saleItem closing date is being compared to the lowerBound such that its equal or more than the lowerBound
+            if (dateLowerBoundToAdd != null) {
+                assertTrue(saleItem.getCloses().compareTo(lowerBound) >= 0);
+            }
+            // This would mean the saleItem closing date is being compared to the lowerBound such that its equal or lesser than the upperBound
+            if (dateUpperBoundToAdd != null) {
+                assertTrue(saleItem.getCloses().compareTo(upperBound) <= 0);
+            }
+
+        }
+    }
+
+    /**
+     * This method is for setting up sale items with businesses of different business types when given a business type
+     * @param businessType to set up the business with
+     */
+    @Transactional
+    protected void setUpSaleItemsWithDifferentBusinessTypes(String businessType) {
+        var testUser = userRepository.findAll().iterator().next();
+        var testBusiness = new Business.Builder()
+                .withPrimaryOwner(testUser)
+                .withBusinessType(businessType)
+                .withDescription("DESCRIPTION")
+                .withName("BUSINESS_NAME")
+                .withAddress(Location.covertAddressStringToLocation("108,Albert Road,Ashburton,Christchurch,New Zealand,Canterbury,8041"))
+                .build();
+        businessRepository.save(testBusiness);
+
+        LocalDate today = LocalDate.now();
+        var product = new Product.Builder()
+                .withBusiness(testBusiness)
+                .withProductCode("PRODUCT-CODE")
+                .withName("This is the product name")
+                .withDescription("Wow description")
+                .withManufacturer("Some guy")
+                .build();
+        productRepository.save(product);
+        var inventoryItem = new InventoryItem.Builder()
+                .withProduct(product)
+                .withQuantity(30)
+                .withPricePerItem("2.69")
+                .withManufactured("2021-03-11")
+                .withSellBy(today.plus(2, ChronoUnit.DAYS).toString())
+                .withBestBefore(today.plus(3, ChronoUnit.DAYS).toString())
+                .withExpires(today.plus(4, ChronoUnit.DAYS).toString())
+                .build();
+        inventoryItem = inventoryItemRepository.save(inventoryItem);
+        var saleItem = new SaleItem.Builder()
+                .withInventoryItem(inventoryItem)
+                .withQuantity(1)
+                .withPrice("3.0")
+                .withMoreInfo("blah")
+                .withCloses(today.plus(11, ChronoUnit.DAYS).toString())
+                .build();
+        saleItemRepository.save(saleItem);
+    }
+
+    /**
+     * This method is solely for generating the arguments for the test:
+     * constructSaleListingSpecificationFromBusinessType_businessesCreatedWithDifferentBusinessTypes_saleItemsReturnedAreFromThatBusinessType
+     * @return a stream containing the arguments for the test method
+     */
+    private Stream<Arguments> generateDataForConstructSaleListingSpecificationFromBusinessType() {
+        return Stream.of(
+                Arguments.of(Arrays.asList(), 4),
+                Arguments.of(Arrays.asList("Accommodation and Food Services"), 1),
+                Arguments.of(Arrays.asList("Accommodation and Food Services", "Charitable organisation"), 2),
+                Arguments.of(Arrays.asList("Accommodation and Food Services", "Charitable organisation", "Non-profit organisation"), 3),
+                Arguments.of(Arrays.asList("Accommodation and Food Services", "Charitable organisation", "Non-profit organisation", "Retail Trade"), 4)
+        );
+    }
+
+    @Transactional
+    @ParameterizedTest
+    @MethodSource("generateDataForConstructSaleListingSpecificationFromBusinessType")
+    void constructSaleListingSpecificationFromBusinessType_businessesCreatedWithDifferentBusinessTypes_saleItemsReturnedAreFromThatBusinessType(List<String> expectedBusinessTypes, int expectedSize) throws Exception {
+        // This line is required because the set up above is affecting the results of the test cases below
+        saleItemRepository.deleteAll();
+        for (String businessType : Business.getBusinessTypes()) {
+            setUpSaleItemsWithDifferentBusinessTypes(businessType);
+        }
+
+        PageRequest pageRequest = SearchHelper.getPageRequest(1, 10, Sort.by("created"));
+
+        Specification<SaleItem> specification = SearchHelper.constructSaleListingSpecificationFromBusinessType(expectedBusinessTypes);
+        Page<SaleItem> resultSaleItemsBusiness = saleItemRepository.findAll(specification, pageRequest);
+
+        assertEquals(expectedSize, resultSaleItemsBusiness.getTotalElements());
+
+        if (expectedBusinessTypes.size() > 0) {
+            for (SaleItem saleItem : resultSaleItemsBusiness) {
+                assertTrue(expectedBusinessTypes.contains(saleItem.getInventoryItem().getBusiness().getBusinessType()));
+            }
+        }
+    }
+
+    /**
+     * This method is solely for generating the arguments for the test:
+     * constructSaleListingSpecificationForSearch_differentPricesClosingDatesBusinessTypes_saleItemsReturnedAreOfTheSpecification
+     * @return a stream containing the arguments for the test method
+     */
+    private Stream<Arguments> generateDataForconstructSaleListingSpecificationForSearch() {
+        LocalDate today = LocalDate.now();
+        return Stream.of(
+                Arguments.of(new SaleListingSearchDTO(new BigDecimal("0.0"), new BigDecimal("0.0"),
+                        today.plus(Integer.parseInt("0"), ChronoUnit.DAYS),
+                        today.plus(Integer.parseInt("0"), ChronoUnit.DAYS),
+                        Arrays.asList()), 0),
+                Arguments.of(new SaleListingSearchDTO(new BigDecimal("0.0"), new BigDecimal("5.0"),
+                        today.plus(Integer.parseInt("0"), ChronoUnit.DAYS),
+                        today.plus(Integer.parseInt("5"), ChronoUnit.DAYS),
+                        Arrays.asList("Accommodation and Food Services")), 1),
+                Arguments.of(new SaleListingSearchDTO(new BigDecimal("6.0"), new BigDecimal("10.0"),
+                        today.plus(Integer.parseInt("6"), ChronoUnit.DAYS),
+                        today.plus(Integer.parseInt("10"), ChronoUnit.DAYS),
+                        Arrays.asList("Accommodation and Food Services", "Charitable organisation")), 1),
+                Arguments.of(new SaleListingSearchDTO(new BigDecimal("11.0"), new BigDecimal("15.0"),
+                        today.plus(Integer.parseInt("11"), ChronoUnit.DAYS),
+                        today.plus(Integer.parseInt("15"), ChronoUnit.DAYS),
+                        Arrays.asList("Accommodation and Food Services", "Charitable organisation", "Non-profit organisation")), 1),
+                Arguments.of(new SaleListingSearchDTO(new BigDecimal("0.0"), new BigDecimal("15.0"),
+                        today.plus(Integer.parseInt("0"), ChronoUnit.DAYS),
+                        today.plus(Integer.parseInt("15"), ChronoUnit.DAYS),
+                        Arrays.asList("Accommodation and Food Services", "Charitable organisation", "Non-profit organisation", "Retail Trade")), 7),
+                Arguments.of(new SaleListingSearchDTO(new BigDecimal("0.0"), new BigDecimal("14.0"),
+                        today.plus(Integer.parseInt("2"), ChronoUnit.DAYS),
+                        today.plus(Integer.parseInt("15"), ChronoUnit.DAYS),
+                        Arrays.asList("Accommodation and Food Services", "Charitable organisation")), 3),
+                Arguments.of(new SaleListingSearchDTO(new BigDecimal("2.0"), new BigDecimal("14.0"),
+                        today.plus(Integer.parseInt("3"), ChronoUnit.DAYS),
+                        today.plus(Integer.parseInt("12"), ChronoUnit.DAYS),
+                        Arrays.asList()), 5),
+                Arguments.of(new SaleListingSearchDTO(new BigDecimal("2.0"), null,
+                        today.plus(Integer.parseInt("3"), ChronoUnit.DAYS),
+                        null,
+                        Arrays.asList()), 6),
+                Arguments.of(new SaleListingSearchDTO(null, new BigDecimal("14.0"),
+                        null, today.plus(Integer.parseInt("12"), ChronoUnit.DAYS),
+                        Arrays.asList()), 6),
+                Arguments.of(new SaleListingSearchDTO(null, null,
+                        null, null,
+                        Arrays.asList()), 7)
+        );
+    }
+
+    @Transactional
+    @ParameterizedTest
+    @MethodSource("generateDataForconstructSaleListingSpecificationForSearch")
+    void constructSaleListingSpecificationForSearch_differentPricesClosingDatesBusinessTypes_saleItemsReturnedAreOfTheSpecification(SaleListingSearchDTO saleListingSearchDTO, int expectedSize) {
+        // This line is required because the set up above is affecting the results of the test cases below
+        saleItemRepository.deleteAll();
+        // Make use of the two methods for generating sale items and use them as test cases
+        for (String businessType : Business.getBusinessTypes()) {
+            setUpSaleItemsWithDifferentBusinessTypes(businessType);
+        }
+        setUpSaleItemsWithDifferentPricesClosingDates();
+
+        PageRequest pageRequest = SearchHelper.getPageRequest(1, 10, Sort.by("created"));
+
+        Specification<SaleItem> specification = SearchHelper.constructSaleListingSpecificationForSearch(saleListingSearchDTO);
+        Page<SaleItem> resultSaleItemsBusiness = saleItemRepository.findAll(specification, pageRequest);
+
+        assertEquals(expectedSize, resultSaleItemsBusiness.getTotalElements());
     }
 }
