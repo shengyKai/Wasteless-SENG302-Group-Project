@@ -220,6 +220,9 @@ export default {
         return "mdi-email-open";
       }
     },
+    /**
+     * Change the tooltip message base on the event isRead status
+     */
     envelopToolTip() {
       if (!this.event.read) {
         return "Unread";
