@@ -314,6 +314,21 @@ const apiCalls: Partial<ApiCalls> = {
     },
     usesServerMessage: true,
   },
+  setListingInterest: {
+    parameters: [7, 3, false],
+    httpMethod: 'put',
+    url: '/listings/7/interest',
+    body: {
+      userId: 3,
+      interested: false,
+    },
+    result: undefined,
+    extraStatusMessages: {
+      401: 'You have been logged out. Please login again and retry',
+      406: 'Listing does not exist',
+    },
+    usesServerMessage: true,
+  }
 };
 
 describe('api', () => {
