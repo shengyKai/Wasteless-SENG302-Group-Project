@@ -1,5 +1,5 @@
 import { User, Business, getUser, login, InventoryItem, deleteNotification } from './api/internal';
-import { AnyEvent, initialiseEventSourceForUser, addEventMessageHandler } from './api/events';
+import { AnyEvent, getEvents } from './api/events';
 import Vuex, { Store, StoreOptions } from 'vuex';
 import { COOKIE, deleteCookie, getCookie, isTesting, setCookie } from './utils';
 import Vue from 'vue';
@@ -49,7 +49,6 @@ export type StoreData = {
   createSaleItemDialog: SaleItemInfo | undefined,
   /**
    * Map from event ids to events.
-   * This is a sparse array
    */
   eventMap: Record<number, AnyEvent>,
   /**
@@ -68,8 +67,8 @@ function createOptions(): StoreOptions<StoreData> {
       createBusinessDialogShown: false,
       createInventoryDialog: undefined,
       createSaleItemDialog: undefined,
-      eventMap: {},
       eventForDeletionIds: [],
+      eventMap: {},
     },
     mutations: {
       setUser(state, payload: User) {
@@ -90,7 +89,6 @@ function createOptions(): StoreOptions<StoreData> {
       },
       /**
        * Adds or replaces a event in the event list
-       * This method is only expected to be called from the event message handler
        * @param state Current state
        * @param payload New event
        */
@@ -220,16 +218,6 @@ function createOptions(): StoreOptions<StoreData> {
     },
     actions: {
       /**
-       * Starts listening to notification events which are placed in state.eventMap
-       * This is expected to be called just after logging in
-       * @param context The store context
-       */
-      startUserFeed(context) {
-        context.state.eventMap = {}; // Clear events
-        initialiseEventSourceForUser(context.state.user!.id); // Make event handler
-        addEventMessageHandler(event => context.commit('addEvent', event));
-      },
-      /**
        * Attempts to automatically log in the provided user id with the current authentication cookies.
        * Will also set the current role to the previously selected role.
        *
@@ -239,11 +227,9 @@ function createOptions(): StoreOptions<StoreData> {
       async autoLogin(context, userId: number) {
         const response = await getUser(userId);
         if (typeof response === 'string') {
-          //context.commit('setError', response);
           return;
         }
         context.commit('setUser', response);
-        context.dispatch('startUserFeed');
 
         let rawRole = getCookie('role');
         if (rawRole !== null) {
@@ -293,7 +279,6 @@ function createOptions(): StoreOptions<StoreData> {
           return user;
         }
         context.commit('setUser', user);
-        context.dispatch('startUserFeed');
 
         return undefined;
       },
@@ -314,11 +299,42 @@ function createOptions(): StoreOptions<StoreData> {
           if (typeof response === 'string') {
             return response;
           } else {
+            context.commit('removeEvent', eventId);
             return undefined;
           }
         }
         return 'Notification not staged for deletion';
       },
+      /**
+       *
+       * @param context
+       * @param userId
+       */
+      async refreshEventFeed(context) {
+        const userId = context.state.user?.id;
+        if (!userId) return;
+        const eventIds = Object.keys(context.state.eventMap).map(key => parseInt(key, 10));
+        let response;
+        if (eventIds.length === 0) {
+          response = await getEvents(userId, undefined);
+        } else {
+          let mostRecentModified = context.state.eventMap[eventIds[0]].lastModified;
+          for (let id of eventIds) {
+            let event = context.state.eventMap[id];
+            if (new Date(event.lastModified) > new Date(mostRecentModified)) {
+              mostRecentModified = event.lastModified;
+            }
+          }
+          response = await getEvents(userId, mostRecentModified);
+        }
+        if (typeof response === 'string') {
+          console.error(response);
+        } else {
+          for (let event of response) {
+            context.commit('addEvent', event);
+          }
+        }
+      }
     }
   };
 }

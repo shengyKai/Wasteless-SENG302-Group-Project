@@ -59,7 +59,6 @@
 import BusinessActionPanel from "./BusinessActionPanel";
 import UserActionPanel from "./UserActionPanel";
 import EventList from "@/components/home/newsfeed/EventList";
-import { getEvents } from "@/api/events";
 
 export default {
   components: {
@@ -95,8 +94,8 @@ export default {
      * The events list which is filtered after retrieving from the store
      */
     filteredEvents() {
-      if (!this.isFiltered) return this.events;
-      return this.events.filter(event => {
+      if (!this.isFiltered) return this.storeEvents;
+      return this.storeEvents.filter(event => {
         return this.filterBy.includes(event.tag);
       });
     },
@@ -147,38 +146,10 @@ export default {
   },
   methods: {
     startPolling() {
-      this.polling = setInterval(this.pollEvents, 3000);
+      this.polling = setInterval(() => {
+        this.$store.dispatch('refreshEventFeed');
+      }, 3000);
     },
-    pollEvents() {
-      if (!this.userId) return;
-      if (this.events.length === 0) {
-        this.getInitialEvents();
-      } else {
-        this.refreshEvents();
-      }
-    },
-    async getInitialEvents() {
-      const response = await getEvents(this.userId, undefined);
-      if (typeof response === 'string') {
-        console.error(response);
-      } else {
-        this.events = response;
-      }
-    },
-    async refreshEvents() {
-      let mostRecentModified = this.events[0].lastModified;
-      for (let event of this.events) {
-        if (new Date(event.lastModified) > new Date(mostRecentModified)) {
-          mostRecentModified = event.lastModified;
-        }
-      }
-      const response = await getEvents(this.userId, mostRecentModified);
-      if (typeof response === 'string') {
-        console.error(response);
-      } else {
-        this.events = this.events.concat(response);
-      }
-    }
   },
   watch: {
     /**

@@ -207,8 +207,6 @@ export default {
             if (typeof content === 'string') {
               this.errorMessage = content;
               this.deleted = false;
-            } else {
-              this.$store.commit('removeEvent', this.event.id);
             }
           });
       }
@@ -227,6 +225,7 @@ export default {
       } else {
         this.errorMessage = undefined;
         this.expand = false;
+        this.$store.dispatch('refreshEventFeed');
       }
     },
     /**
@@ -246,6 +245,7 @@ export default {
           this.errorMessage = result;
         } else {
           this.errorMessage = undefined;
+          this.$store.dispatch('refreshEventFeed');
         }
       }
     }
