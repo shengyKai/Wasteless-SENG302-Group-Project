@@ -16,14 +16,6 @@
                 <v-list-item-title>Profile</v-list-item-title>
               </v-list-item-content>
             </v-list-item>
-            <v-list-item @click="viewCreateProduct">
-              <v-list-item-icon>
-                <v-icon>mdi-tooltip-plus</v-icon>
-              </v-list-item-icon>
-              <v-list-item-content>
-                <v-list-item-title>Add Product</v-list-item-title>
-              </v-list-item-content>
-            </v-list-item>
             <v-list-item @click="goToCataloguePage">
               <v-list-item-icon>
                 <v-icon>mdi-view-list</v-icon>
@@ -70,21 +62,13 @@
         <v-icon large>mdi-view-list</v-icon>
       </v-btn>
     </v-card>
-
-    <template v-if="showingCreateProduct">
-      <ProductForm :businessId="this.$store.state.activeRole.id" @closeDialog="showingCreateProduct=false"/>
-    </template>
   </div>
 </template>
 
 <script>
-import ProductForm from '@/components/BusinessProfile/ProductForm.vue';
 
 export default {
   name: "BusinessActionPanel",
-  components: {
-    ProductForm,
-  },
   data() {
     return {
       showingCreateProduct: false,
@@ -96,12 +80,6 @@ export default {
      */
     viewProfile() {
       this.$router.push("/business/" + this.$store.state.activeRole.id);
-    },
-    /**
-     * Shows the create product dialog
-     */
-    viewCreateProduct() {
-      this.showingCreateProduct = true;
     },
 
     /**
