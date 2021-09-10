@@ -287,10 +287,7 @@ export default {
      *
      */
     async changeEventStatus(status) {
-      console.log(status);
-      console.log('before ' + this.event.status);
       const result = updateEventStatus(this.event.id, status);
-      console.log('after ' + this.event.status);
       if (typeof result === 'string') {
         this.errorMessage = result;
       } else {

@@ -10,7 +10,6 @@ import Vuex, { Store } from 'vuex';
 import { getStore, resetStoreForTesting, StoreData } from '@/store';
 import { castMock, makeTestUser } from '../utils';
 import synchronizedTime from '@/components/utils/Methods/synchronizedTime';
-import { Icons } from 'vuetify/types/services/icons';
 
 Vue.use(Vuetify);
 
@@ -73,8 +72,9 @@ describe('Event.vue', () => {
    */
      function findIcon(component:string) {
       const icons = wrapper.findAllComponents({ name: 'v-icon' });
-      const icon = icons.filter(icon => icon.text().includes(component));
+      const icon = icons.filter(icon => icon.attributes().class.includes(component));
       expect(icon.length).toBe(1);
+      console.log(icon.at(0).attributes());
       return icon.at(0);
     }
 
@@ -182,7 +182,7 @@ describe('Event.vue', () => {
     });
   });
 
-  describe('Event is marked as starred', () => {
+  describe('Event is marked as archived', () => {
     beforeEach(() => {
       generateWrapper();
       updateEventAsRead.mockClear();
@@ -192,25 +192,12 @@ describe('Event.vue', () => {
       wrapper.destroy();
     })
 
-    it.only("On click of the notification's star icon, the api endpoint to update status is called, status become starred", async () => {
-      // const starIcon = findIcon("archiveButton");
-      // await starIcon.trigger('click');
-      const button = wrapper.findAllComponents({ ref: 'starButton'})
-      expect(button.exists()).toBe(true)
-
+    it.only("On click of the notification's archive icon, the api endpoint to update status is called, status become archived", async () => {
+      const archiveButton = findIcon("archive");
+      await archiveButton.trigger('click');
+      
       await Vue.nextTick();
       expect(updateEventStatus).toHaveBeenCalled();
-    });
-
-    it("If the event is already marked as read, the api endpoint to update the read status will not be called", async () => {
-      await wrapper.setData({
-        event: {
-          read: true
-        }
-      });
-      wrapper.trigger("click");
-      await Vue.nextTick();
-      expect(updateEventAsRead).not.toHaveBeenCalled();
     });
   });
 });
