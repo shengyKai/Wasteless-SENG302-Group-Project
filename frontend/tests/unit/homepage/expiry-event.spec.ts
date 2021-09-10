@@ -5,6 +5,7 @@ import { createLocalVue, mount, Wrapper } from '@vue/test-utils';
 import ExpiryEvent from '@/components/home/newsfeed/ExpiryEvent.vue';
 import MarketplaceCard from "@/components/cards/MarketplaceCard.vue";
 import * as api from '@/api/internal';
+import * as events from '@/api/events';
 
 import Vuex, { Store } from 'vuex';
 import { getStore, resetStoreForTesting, StoreData } from '@/store';
@@ -16,11 +17,17 @@ jest.mock('@/api/internal', () => ({
   extendMarketplaceCardExpiry: jest.fn(),
 }));
 
+jest.mock('@/api/events', () => ({
+  getEvents: jest.fn(),
+  updateEventAsRead: jest.fn(),
+}));
+
 jest.mock('@/components/utils/Methods/synchronizedTime', () => ({
   now : new Date("2021-01-02T11:00:00Z")
 }));
 
 const extendMarketplaceCardExpiry = castMock(api.extendMarketplaceCardExpiry);
+const getEvents = castMock(events.getEvents);
 
 describe('ExpiryEvent.vue', () => {
   let wrapper: Wrapper<any>;
@@ -63,6 +70,8 @@ describe('ExpiryEvent.vue', () => {
         },
       }
     });
+
+    getEvents.mockResolvedValue([]);
   });
 
   /**
