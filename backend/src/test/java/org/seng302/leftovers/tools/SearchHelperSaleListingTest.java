@@ -345,7 +345,7 @@ public class SearchHelperSaleListingTest {
                 query, "", "", "");
         List<SaleItem> matches = saleItemRepository.findAll(specification);
         assertEquals(1, matches.size());
-        assertEquals(testSaleItem.getSaleId(), matches.get(0).getSaleId());
+        assertEquals(testSaleItem.getId(), matches.get(0).getId());
     }
 
     @ParameterizedTest
@@ -357,7 +357,7 @@ public class SearchHelperSaleListingTest {
                 query, "", "", "");
         List<SaleItem> matches = saleItemRepository.findAll(specification);
         assertEquals(1, matches.size());
-        assertEquals(testSaleItem.getSaleId(), matches.get(0).getSaleId());
+        assertEquals(testSaleItem.getId(), matches.get(0).getId());
     }
 
     @ParameterizedTest

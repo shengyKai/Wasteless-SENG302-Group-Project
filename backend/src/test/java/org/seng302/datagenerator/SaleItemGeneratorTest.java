@@ -75,7 +75,7 @@ class SaleItemGeneratorTest {
      */
     public void checkRequiredFieldsNotNull(long saleItemId) throws SQLException {
       PreparedStatement stmt = conn.prepareStatement(
-              "SELECT COUNT(*) FROM sale_item WHERE sale_id = ? AND " +
+              "SELECT COUNT(*) FROM sale_item WHERE id = ? AND " +
                       "price IS NOT NULL AND quantity IS NOT NULL AND inventory_item_id IS NOT NULL"
       );
       stmt.setObject(1, saleItemId);
