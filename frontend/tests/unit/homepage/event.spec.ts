@@ -41,12 +41,12 @@ describe('Event.vue', () => {
   function generateWrapper() {
 
     vuetify = new Vuetify();
-  
+
     localVue.use(Vuex);
     resetStoreForTesting();
     store = getStore();
     store.state.user = makeTestUser(1);
-  
+
     wrapper = mount(Event, {
       localVue,
       vuetify,
@@ -66,17 +66,17 @@ describe('Event.vue', () => {
     generateWrapper();
   });
 
-    /**
+  /**
    * Finds the associated icon in the event/notification
    *
    * @returns A wrapper around the update icon
    */
-     function findIcon(component:string) {
-      const icons = wrapper.findAllComponents({ name: 'v-icon' });
-      const icon = icons.filter(icon => icon.attributes().class.includes(component));
-      expect(icon.length).toBe(1);
-      return icon.at(0);
-    }
+  function findIcon(component:string) {
+    const icons = wrapper.findAllComponents({ name: 'v-icon' });
+    const icon = icons.filter(icon => icon.attributes().class.includes(component));
+    expect(icon.length).toBe(1);
+    return icon.at(0);
+  }
 
 
   describe('Event is not been set to be deleted', () => {
@@ -162,7 +162,7 @@ describe('Event.vue', () => {
 
     afterEach(() => {
       wrapper.destroy();
-    })
+    });
 
     it("On click of the event component, the api endpoint to update the read status is called", async () => {
       wrapper.trigger("click");
@@ -195,7 +195,7 @@ describe('Event.vue', () => {
 
     afterEach(() => {
       wrapper.destroy();
-    })
+    });
 
     it("Archive icon is rendered, api endpoint was called upon clicking", async () => {
       const archiveButton = findIcon("archive");
@@ -235,7 +235,7 @@ describe('Event.vue', () => {
 
     afterEach(() => {
       wrapper.destroy();
-    })
+    });
 
     it("Archive icon is rendered, api endpoint was called upon clicking", async () => {
       const archiveButton = findIcon("archive");
@@ -275,7 +275,7 @@ describe('Event.vue', () => {
 
     afterEach(() => {
       wrapper.destroy();
-    })
+    });
 
     it("Archive icon is not rendered, api endpoint was not called", async () => {
       const icons = wrapper.findAllComponents({ name: 'v-icon' });

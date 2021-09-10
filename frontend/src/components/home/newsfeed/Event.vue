@@ -16,17 +16,24 @@
   <div v-else @click="markEventAsRead">
     <v-row>
       <v-col>
-        <v-card-title>
-          <v-badge
-            overlap
-            offset-y=8
-            offset-x=-2
-            :icon="readBadgeIcon"
-            :color="readColour"
-          >
-            {{ title }}
-          </v-badge>
-        </v-card-title>
+        <v-tooltip bottom>
+          <template v-slot:activator="{ on, attrs }">
+            <v-card-title
+              v-bind="attrs"
+              v-on="on">
+              <v-badge
+                overlap
+                offset-y=8
+                offset-x=-2
+                :icon="readBadgeIcon"
+                :color="readColour"
+              >
+                {{ title }}
+              </v-badge>
+            </v-card-title>
+          </template>
+          <span>{{envelopToolTip}}</span>
+        </v-tooltip>
         <v-card-subtitle>
           {{ date }}, {{ time }}
         </v-card-subtitle>
@@ -34,43 +41,72 @@
       <v-col cols="auto" class="mt-2">
         <!-- Star icon will be 'filled' not outline, if the event is starred,
               change status to normal when clicked -->
-        <v-icon v-if="event.status === 'starred'"
-                class="mr-2"
-                ref="filledStarButton"
-                color="yellow"
-                @click.stop="changeEventStatus('normal')"
-        >
-          mdi-star-check
-        </v-icon>
+        <v-tooltip top>
+          <template v-slot:activator="{ on, attrs }">
+            <v-icon v-if="event.status === 'starred'"
+                    class="mr-2"
+                    ref="filledStarButton"
+                    color="yellow"
+                    v-bind="attrs"
+                    v-on="on"
+                    @click.stop="changeEventStatus('normal')"
+            >
+              mdi-star
+            </v-icon>
+          </template>
+          <span>Unstar notification</span>
+        </v-tooltip>
+
         <!-- Render a star-outline icon to visually show a difference between starred and normal event
               change status to starred when clicked -->
-        <v-icon v-if="event.status === 'normal'"
-                class="mr-2"
-                ref="starButton"
-                color="yellow"
-                @click.stop="changeEventStatus('starred')"
-        >
-          mdi-star-outline
-        </v-icon>
+        <v-tooltip top>
+          <template v-slot:activator="{ on, attrs }">
+            <v-icon v-if="event.status === 'normal'"
+                    class="mr-2"
+                    ref="starButton"
+                    color="yellow"
+                    v-bind="attrs"
+                    v-on="on"
+                    @click.stop="changeEventStatus('starred')"
+            >
+              mdi-star-outline
+            </v-icon>
+          </template>
+          <span>Star notification</span>
+        </v-tooltip>
         <!-- Archive icon to allow user archiving an event
               change status to archived when clicked -->
-        <v-icon v-if="!(event.status === 'archived')"
-                class="mr-2"
-                ref="archiveButton"
-                color="blue"
-                @click.stop="changeEventStatus('archived')"
-        >
-          mdi-archive-outline
-        </v-icon>
+        <v-tooltip top>
+          <template v-slot:activator="{ on, attrs }">
+            <v-icon v-if="!(event.status === 'archived')"
+                    class="mr-2"
+                    ref="archiveButton"
+                    color="blue"
+                    v-bind="attrs"
+                    v-on="on"
+                    @click.stop="changeEventStatus('archived')"
+            >
+              mdi-archive-outline
+            </v-icon>
+          </template>
+          <span>Archive notification</span>
+        </v-tooltip>
         <!-- Trash Bin icon, allowing user to delete an event
               have a 10s undo-time before the event actually got deleted -->
-        <v-icon class="mr-2"
-                ref="deleteButton"
-                color="red"
-                @click.stop="initiateDeletion"
-        >
-          mdi-trash-can
-        </v-icon>
+        <v-tooltip top>
+          <template v-slot:activator="{ on, attrs }">
+            <v-icon class="mr-2"
+                    ref="deleteButton"
+                    color="red"
+                    v-bind="attrs"
+                    v-on="on"
+                    @click.stop="initiateDeletion"
+            >
+              mdi-trash-can
+            </v-icon>
+          </template>
+          <span>Delete notification</span>
+        </v-tooltip>
       </v-col>
     </v-row>
     <slot/>
@@ -182,6 +218,13 @@ export default {
         return "mdi-email";
       } else {
         return "mdi-email-open";
+      }
+    },
+    envelopToolTip() {
+      if (!this.event.read) {
+        return "Unread";
+      } else {
+        return "Read";
       }
     },
     /**
