@@ -110,7 +110,7 @@
 
     <ProductForm
       v-if="showingCreateProduct"
-      :businessId="this.$store.state.activeRole.id"
+      :businessId="businessId"
       @closeDialog="showingCreateProduct=false"
     />
   </div>
