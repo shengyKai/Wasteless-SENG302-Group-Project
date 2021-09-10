@@ -3,6 +3,7 @@ package org.seng302.leftovers.controllers;
 import net.minidev.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.seng302.leftovers.dto.SaleListingSearchDTO;
 import org.seng302.leftovers.dto.SetSaleItemInterestDTO;
 import org.seng302.leftovers.entities.Business;
 import org.seng302.leftovers.entities.InventoryItem;
@@ -26,6 +27,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.math.BigDecimal;
 import javax.validation.Valid;
+import java.text.ParseException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -64,12 +69,16 @@ public class SaleController {
             logger.error("Invalid sale item ordering given: {}", orderBy);
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The provided ordering is invalid");
         }
-        if (orderBy.equals("productCode")) {
-            orderBy = "inventoryItem.product.productCode";
-        } else if (orderBy.equals("productName")) {
-            orderBy = "inventoryItem.product.name";
-        } else if (orderBy.equals("closing")) {
-            orderBy = "closes";
+        switch (orderBy) {
+            case "productCode":
+                orderBy = "inventoryItem.product.productCode";
+                break;
+            case "productName":
+                orderBy = "inventoryItem.product.name";
+                break;
+            case "closing":
+                orderBy = "closes";
+                break;
         }
         return new Sort.Order(direction, orderBy).ignoreCase();
     }
@@ -175,7 +184,7 @@ public class SaleController {
      * @param resultsPerPage amount of results to put on each page
      * @param reverse highest to lowest or lowest to highest
      * @param orderBy field to order results by
-     * @param businessType type of business to restrict results to
+     * @param businessTypes list of types of business to restrict results to
      * @param priceLower all products must be above this price
      * @param priceUpper all products must be below this price
      * @param closeLower all products must close after this date
@@ -192,7 +201,7 @@ public class SaleController {
                                       @RequestParam(required = false) Integer resultsPerPage,
                                       @RequestParam(required = false) Boolean reverse,
                                       @RequestParam(required = false) String orderBy,
-                                      @RequestParam(required = false) String businessType,
+                                      @RequestParam(required = false) List<String> businessTypes,
                                       @RequestParam(required = false) String priceLower,
                                       @RequestParam(required = false) String priceUpper,
                                       @RequestParam(required = false) String closeLower,
@@ -212,28 +221,35 @@ public class SaleController {
             sortOrder = List.of(new Sort.Order(direction, orderBy ).ignoreCase());
 
             // Check filter options
-            businessType = Optional.ofNullable(businessType).orElse("All");
-            if (!VALID_BUSINESS_TYPES.contains(businessType)) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "BusinessType term " + businessType + " is invalid");
+            for (String businessType : businessTypes) {
+                if (!VALID_BUSINESS_TYPES.contains(businessType)) {
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "BusinessType term " + businessType + " is invalid");
+                }
             }
-            String decimalPattern = "([0-9]*)\\.([0-9]{2})";
-            BigDecimal minPrice;
-            BigDecimal maxPrice;
-            if (Pattern.matches(decimalPattern, priceLower) && Pattern.matches(decimalPattern, priceUpper)) {
-                minPrice = new BigDecimal(priceLower);
-                maxPrice = new BigDecimal(priceUpper);
-            } else {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Price parameters were invalid");
-            }
+            BigDecimal minPrice = null;
+            BigDecimal maxPrice = null;
+            if (priceLower != null) minPrice = new BigDecimal(priceLower);
+            if (priceUpper != null) maxPrice = new BigDecimal(priceUpper);
+
+            LocalDate minDate = null;
+            LocalDate maxDate = null;
+            DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE;
+            if (closeLower != null) minDate = LocalDate.parse(closeLower, formatter);
+            if (closeUpper != null) maxDate = LocalDate.parse(closeUpper, formatter);
 
             // Create page
             PageRequest pageablePage = SearchHelper.getPageRequest(page, resultsPerPage, Sort.by(sortOrder));
-            Specification<SaleItem> specification = SearchHelper.constructSaleItemSpecificationFromSearchQueries(basicSearchQuery, productSearchQuery, businessSearchQuery, locationSearchQuery);
+            Specification<SaleItem> specification = Specification.where(
+                    SearchHelper.constructSaleItemSpecificationFromSearchQueries(basicSearchQuery, productSearchQuery, businessSearchQuery, locationSearchQuery))
+                    .and(SearchHelper.constructSaleListingSpecificationForSearch(new SaleListingSearchDTO(minPrice, maxPrice, minDate, maxDate, businessTypes)));
             Page<SaleItem> result = saleItemRepository.findAll(specification, pageablePage);
 
-            // TODO integrate filtering options to restrict returned sale items
             return JsonTools.constructPageJSON(result.map(SaleItem::constructJSONObject));
 
+        } catch (DateTimeParseException badDate) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Close date parameters were not in date format");
+        } catch (NumberFormatException badPrice) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Price parameters were not valid numbers");
         } catch (Exception error) {
             logger.error(error.getMessage());
             throw error;
