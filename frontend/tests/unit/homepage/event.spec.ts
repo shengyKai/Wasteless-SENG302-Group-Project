@@ -10,6 +10,7 @@ import Vuex, { Store } from 'vuex';
 import { getStore, resetStoreForTesting, StoreData } from '@/store';
 import { castMock, makeTestUser } from '../utils';
 import synchronizedTime from '@/components/utils/Methods/synchronizedTime';
+import { Icons } from 'vuetify/types/services/icons';
 
 Vue.use(Vuetify);
 
@@ -19,6 +20,7 @@ jest.mock('@/api/internal', () => ({
 
 jest.mock('@/api/events', () => ({
   updateEventAsRead: jest.fn(),
+  updateEventStatus: jest.fn(),
 }));
 
 jest.mock('@/components/utils/Methods/synchronizedTime', () => ({
@@ -27,6 +29,7 @@ jest.mock('@/components/utils/Methods/synchronizedTime', () => ({
 
 const deleteNotification = castMock(api.deleteNotification);
 const updateEventAsRead = castMock(eventsApi.updateEventAsRead);
+const updateEventStatus = castMock(eventsApi.updateEventStatus);
 
 describe('Event.vue', () => {
   let wrapper: Wrapper<any>;
@@ -62,6 +65,18 @@ describe('Event.vue', () => {
   beforeEach(async () => {
     generateWrapper();
   });
+
+    /**
+   * Finds the associated icon in the event/notification
+   *
+   * @returns A wrapper around the update icon
+   */
+     function findIcon(component:string) {
+      const icons = wrapper.findAllComponents({ name: 'v-icon' });
+      const icon = icons.filter(icon => icon.text().includes(component));
+      expect(icon.length).toBe(1);
+      return icon.at(0);
+    }
 
 
   describe('Event is not been set to be deleted', () => {
@@ -153,6 +168,38 @@ describe('Event.vue', () => {
       wrapper.trigger("click");
       await Vue.nextTick();
       expect(updateEventAsRead).toHaveBeenCalled();
+    });
+
+    it("If the event is already marked as read, the api endpoint to update the read status will not be called", async () => {
+      await wrapper.setData({
+        event: {
+          read: true
+        }
+      });
+      wrapper.trigger("click");
+      await Vue.nextTick();
+      expect(updateEventAsRead).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('Event is marked as starred', () => {
+    beforeEach(() => {
+      generateWrapper();
+      updateEventAsRead.mockClear();
+    });
+
+    afterEach(() => {
+      wrapper.destroy();
+    })
+
+    it.only("On click of the notification's star icon, the api endpoint to update status is called, status become starred", async () => {
+      // const starIcon = findIcon("archiveButton");
+      // await starIcon.trigger('click');
+      const button = wrapper.findAllComponents({ ref: 'starButton'})
+      expect(button.exists()).toBe(true)
+
+      await Vue.nextTick();
+      expect(updateEventStatus).toHaveBeenCalled();
     });
 
     it("If the event is already marked as read, the api endpoint to update the read status will not be called", async () => {

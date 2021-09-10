@@ -36,7 +36,7 @@
               change status to normal when clicked -->
         <v-icon v-if="event.status === 'starred'"
                 class="mr-2"
-                ref="starButton"
+                ref="filledStarButton"
                 color="yellow"
                 @click.stop="changeEventStatus('normal')"
         >
