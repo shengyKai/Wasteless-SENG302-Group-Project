@@ -79,6 +79,7 @@ class SearchHelperTest {
 
     /**
      * Read user info from file UserSearchHelperTestData1.csv, use this information to construct User objects and add them to userList
+     *
      * @throws ParseException
      * @throws IOException
      */
@@ -108,6 +109,7 @@ class SearchHelperTest {
         productRepository.deleteAll();
         businessRepository.deleteAll();
         userRepository.deleteAll();
+        saleItemRepository.deleteAll();
     }
 
     private List<User> readUserFile(String resourceName) throws IOException {
@@ -219,7 +221,7 @@ class SearchHelperTest {
      * a query of UserRepository causes the results to be ordered by the user's id number.
      */
     @Test
-    void getSortOrderByNullTest()  {
+    void getSortOrderByNullTest() {
         Sort userSort = SearchHelper.getSort(null, null);
         List<User> queryResults = userRepository.findAll(spec, userSort);
         User firstUser = queryResults.get(0);
@@ -448,9 +450,9 @@ class SearchHelperTest {
         assertEquals(7, matches.size());
         for (User user : matches) {
             assertTrue(user.getFirstName().equals("Andy") ||
-                        user.getMiddleName().equals("Andy") ||
-                        user.getLastName().equals("Andy") ||
-                        user.getNickname().equals("Andy"));
+                    user.getMiddleName().equals("Andy") ||
+                    user.getLastName().equals("Andy") ||
+                    user.getNickname().equals("Andy"));
         }
     }
 
@@ -501,7 +503,7 @@ class SearchHelperTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings={"andy and \"Graham\"", "andy AND \"Graham\"", "andy \"Graham\""})
+    @ValueSource(strings = {"andy and \"Graham\"", "andy AND \"Graham\"", "andy \"Graham\""})
     void constructUserSpecificationFromSearchQuery_andConjunction_matchesUsingAnd(String searchQuery) {
         Specification<User> specification = SearchHelper.constructUserSpecificationFromSearchQuery(searchQuery);
         List<User> matches = userRepository.findAll(specification);
@@ -920,6 +922,7 @@ class SearchHelperTest {
 
     /**
      * Creates a product, inventory and sale item which are all related to each other, when provided with a business
+     *
      * @param business to create the three type of items with
      */
     private void createProductInventorySaleItemWithBusiness(Business business) throws Exception {
@@ -988,5 +991,4 @@ class SearchHelperTest {
         // Sale items from each business should be distinct
         assertFalse(new ReflectionEquals(resultSaleItemsBusiness1).matches(resultSaleItemsBusiness2));
     }
-
 }

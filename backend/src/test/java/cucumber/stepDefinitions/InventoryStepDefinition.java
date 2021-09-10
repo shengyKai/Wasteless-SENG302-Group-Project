@@ -65,12 +65,6 @@ public class InventoryStepDefinition  {
     private String productCode;
     private Integer quantity;
 
-    @After
-    public void cleanUp() {
-        productRepository.deleteAll();
-        inventoryItemRepository.deleteAll();
-    }
-
     @Given("the business has the following products in its catalogue:")
     public void the_business_has_the_following_products_in_its_catalogue(io.cucumber.datatable.DataTable dataTable) {
         var business = businessContext.getLast();
