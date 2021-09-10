@@ -3,7 +3,7 @@ import Vuex from "vuex";
 import Vuetify from "vuetify";
 import { createLocalVue, Wrapper, mount } from "@vue/test-utils";
 import InventoryItemForm from "@/components/BusinessProfile/InventoryItemForm.vue";
-import { castMock, flushQueue, todayPlusYears } from "./utils";
+import { castMock, findButtonWithText, flushQueue, todayPlusYears } from "./utils";
 import { getStore, resetStoreForTesting } from "@/store";
 import * as api from '@/api/internal';
 import { assertEquals } from "typescript-is";
@@ -182,48 +182,20 @@ describe("InventoryItemForm.vue", () => {
       bestBefore: "2030-05-17",
     });
   }
-  // `findClose and findCreate` function will only be used when api is implemented
-  /**
-     * Finds the close button in the CreateProduct form
-     *
-     * @returns A Wrapper around the close button
-     */
-  function findCloseButton() {
-    const buttons = wrapper.findAllComponents({ name: "v-btn" });
-    const filtered = buttons.filter((button) =>
-      button.text().includes("Close")
-    );
-    expect(filtered.length).toBe(1);
-    return filtered.at(0);
-  }
 
   /**
      * Finds the create button in the inventory item form
      *
      * @returns A Wrapper around the create button
      */
-  function findCreateButton() {
-    const buttons = wrapper.findAllComponents({ name: "v-btn" });
-    const filtered = buttons.filter((button) =>
-      button.text().includes("Create")
-    );
-    expect(filtered.length).toBe(1);
-    return filtered.at(0);
-  }
+  const findCreateButton = () => findButtonWithText(wrapper, 'Create');
 
   /**
      * Finds the save button in the inventory item form
      *
      * @returns A Wrapper around the save button
      */
-  function findSaveButton() {
-    const buttons = wrapper.findAllComponents({ name: "v-btn" });
-    const filtered = buttons.filter((button) =>
-      button.text().includes("Save")
-    );
-    expect(filtered.length).toBe(1);
-    return filtered.at(0);
-  }
+  const findSaveButton = () => findButtonWithText(wrapper, 'Save');
 
   /**
    * Finds the product select dropdown

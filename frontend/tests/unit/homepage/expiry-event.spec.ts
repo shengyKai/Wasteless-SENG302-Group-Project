@@ -8,7 +8,7 @@ import * as api from '@/api/internal';
 
 import Vuex, { Store } from 'vuex';
 import { getStore, resetStoreForTesting, StoreData } from '@/store';
-import { castMock, makeTestUser } from '../utils';
+import { castMock, findButtonWithText, makeTestUser } from '../utils';
 
 Vue.use(Vuetify);
 
@@ -70,24 +70,14 @@ describe('ExpiryEvent.vue', () => {
      *
      * @returns A Wrapper around the delay expiry.
      */
-  function findDelayButton() {
-    const buttons = wrapper.findAllComponents({ name: 'v-btn' });
-    const filtered = buttons.filter(button => button.text().includes('Delay expiry'));
-    expect(filtered.length).toBe(1);
-    return filtered.at(0);
-  }
+  const findDelayButton = () => findButtonWithText(wrapper, 'Delay expiry');
 
   /**
      * Finds the button which controls whether the component showing the card is expanded or hidden.
      *
      * @returns A Wrapper around the expand button.
      */
-  function findExpandButton() {
-    const buttons = wrapper.findAllComponents({ name: 'v-btn' });
-    const filtered = buttons.filter(button => button.text().includes('card'));
-    expect(filtered.length).toBe(1);
-    return filtered.at(0);
-  }
+  const findExpandButton = () => findButtonWithText(wrapper, 'card');
 
   /**
      * Finds the marketplace card displayed on the event.

@@ -4,7 +4,7 @@ import Vuetify from 'vuetify';
 import { createLocalVue, Wrapper, mount } from '@vue/test-utils';
 
 import CreateBusiness from '@/components/BusinessProfile/CreateBusiness.vue';
-import {castMock, makeTestUser} from "./utils";
+import {castMock, findButtonWithText, makeTestUser} from "./utils";
 import * as api from '@/api/internal';
 import { getStore, resetStoreForTesting } from '@/store';
 import {User} from "@/api/internal";
@@ -123,24 +123,14 @@ describe('CreateBusiness.vue', () => {
    *
    * @returns A Wrapper around the close button
    */
-  function findCloseButton() {
-    const buttons = wrapper.findAllComponents({ name: 'v-btn' });
-    const filtered = buttons.filter(button => button.text().includes('Close'));
-    expect(filtered.length).toBe(1);
-    return filtered.at(0);
-  }
+  const findCloseButton = () => findButtonWithText(wrapper, 'Close');
 
   /**
    * Finds the create button in the ProductForm form
    *
    * @returns A Wrapper around the create button
    */
-  function findCreateButton() {
-    const buttons = wrapper.findAllComponents({ name: 'v-btn' });
-    const filtered = buttons.filter(button => button.text().includes('Create'));
-    expect(filtered.length).toBe(1);
-    return filtered.at(0);
-  }
+  const findCreateButton = () => findButtonWithText(wrapper, 'Create');
 
   it('Valid if all required fields are provided', async () => {
     await populateRequiredFields();

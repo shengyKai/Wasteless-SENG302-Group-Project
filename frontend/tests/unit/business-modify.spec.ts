@@ -4,7 +4,7 @@ import Vuetify from 'vuetify';
 import { createLocalVue, Wrapper, mount } from '@vue/test-utils';
 
 import ModifyBusiness from '@/components/BusinessProfile/ModifyBusiness.vue';
-import {castMock} from "./utils";
+import {castMock, findButtonWithText} from "./utils";
 import * as api from '@/api/internal';
 import {User, Location, Business} from "@/api/internal";
 import { getStore, resetStoreForTesting } from '@/store';
@@ -167,10 +167,7 @@ describe('modifyBusiness.vue', () => {
    * @returns A wrapper around the update button
    */
   function findButton(component:string) {
-    const buttons = wrapper.findAllComponents({ name: 'v-btn' });
-    const button = buttons.filter(button => button.text().includes(component));
-    expect(button.length).toBe(1);
-    return button.at(0);
+    return findButtonWithText(wrapper, component);
   }
 
 

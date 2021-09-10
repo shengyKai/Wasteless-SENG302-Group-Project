@@ -6,7 +6,7 @@ import ProductCatalogue from '@/components/ProductCatalogue.vue';
 import ProductCatalogueItem from '@/components/cards/ProductCatalogueItem.vue';
 import { Product } from '@/api/internal';
 import * as api from '@/api/internal';
-import { castMock, flushQueue } from './utils';
+import { castMock, findButtonWithText, flushQueue } from './utils';
 
 jest.mock('@/api/internal', () => ({
   getProducts: jest.fn(),
@@ -82,7 +82,7 @@ describe('ProductCatalogue.vue', () => {
    */
   function createSearchCatalogueWrapper() {
     wrapper = mount(ProductCatalogue, {
-      stubs: ['router-link', 'router-view', 'ProductCatalogueItem'],
+      stubs: ['router-link', 'router-view', 'ProductCatalogueItem', 'ProductForm'],
       mocks: {
         $route: {
           params: {
