@@ -2,6 +2,11 @@ import { Business, User, UserRole } from "@/api/internal";
 import { Wrapper } from "@vue/test-utils";
 
 /**
+ * Random list of diacritic characters of various types
+ */
+export const TEST_DIACRITICS = ['Ù', 'À', 'à', 'ì', 'Ó', 'Í', 'ó', 'é', 'Î', 'ú', 'â', 'Ô', 'ô', 'Õ', 'õ', 'ñ', 'Ÿ', 'ä', 'ö', 'ÿ'];
+
+/**
  * Returns a promise to a point where all the previous messages in the JavaScript message queue have
  * been processed.
  *

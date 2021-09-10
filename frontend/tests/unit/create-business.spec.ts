@@ -4,7 +4,7 @@ import Vuetify from 'vuetify';
 import { createLocalVue, Wrapper, mount } from '@vue/test-utils';
 
 import CreateBusiness from '@/components/BusinessProfile/CreateBusiness.vue';
-import {castMock, findButtonWithText, makeTestUser} from "./utils";
+import {castMock, findButtonWithText, makeTestUser, TEST_DIACRITICS} from "./utils";
 import * as api from '@/api/internal';
 import { getStore, resetStoreForTesting } from '@/store';
 import {User} from "@/api/internal";
@@ -42,8 +42,6 @@ describe('CreateBusiness.vue', () => {
       } as any;
     };
   });
-
-  const diacritics = ['À','È','Ì','Ò','Ù','à','è','ì','ò','ù','Á','É','Í','Ó','Ú','Ý','á','é','í','ó','ú','ý','Â','Ê','Î','Ô','Û','â','ê','î','ô','û','Ã','Ñ','Õ','ã','ñ','õ','Ä','Ë','Ï','Ö','Ü','Ÿ','ä','ë','ï','ö','ü','ÿ'];
 
   /**
    * Sets up the test CreateBusiness instance
@@ -184,7 +182,7 @@ describe('CreateBusiness.vue', () => {
     expect(wrapper.vm.valid).toBeFalsy();
   });
 
-  it.each(diacritics)('Valid when street contains the character "%s"', async (char) => {
+  it.each(TEST_DIACRITICS)('Valid when street contains the character "%s"', async (char) => {
     await populateRequiredFields();
     await wrapper.setData({
       streetAddress: '5 ' + char + ' Street',
