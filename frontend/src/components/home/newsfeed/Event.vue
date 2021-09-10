@@ -40,7 +40,7 @@
                 color="yellow"
                 @click.stop="changeEventStatus('normal')"
         >
-          mdi-star
+          mdi-star-check
         </v-icon>
         <!-- Render a star-outline icon to visually show a difference between starred and normal event
               change status to starred when clicked -->

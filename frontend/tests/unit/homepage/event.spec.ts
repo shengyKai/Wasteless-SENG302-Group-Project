@@ -53,6 +53,7 @@ describe('Event.vue', () => {
       store,
       propsData: {
         event: {
+          status: "normal",
           id: 44,
           created: "2021-01-01T12:00:00Z"
         },
@@ -74,7 +75,6 @@ describe('Event.vue', () => {
       const icons = wrapper.findAllComponents({ name: 'v-icon' });
       const icon = icons.filter(icon => icon.attributes().class.includes(component));
       expect(icon.length).toBe(1);
-      console.log(icon.at(0).attributes());
       return icon.at(0);
     }
 
@@ -182,22 +182,132 @@ describe('Event.vue', () => {
     });
   });
 
-  describe('Event is marked as archived', () => {
-    beforeEach(() => {
+  describe('Icons that rendered on notification when status is normal', () => {
+    beforeEach(async () => {
       generateWrapper();
-      updateEventAsRead.mockClear();
+      await wrapper.setData({
+        event: {
+          status: 'normal'
+        }
+      });
+      updateEventStatus.mockClear();
     });
 
     afterEach(() => {
       wrapper.destroy();
     })
 
-    it.only("On click of the notification's archive icon, the api endpoint to update status is called, status become archived", async () => {
+    it("Archive icon is rendered, api endpoint was called upon clicking", async () => {
       const archiveButton = findIcon("archive");
+      expect(archiveButton.exists).toBeTruthy;
       await archiveButton.trigger('click');
-      
+      await Vue.nextTick();
+      expect(updateEventStatus).toHaveBeenCalled();
+    });
+
+    it("Outlined-Star icon is rendered, api endpoint was called upon clicking", async () => {
+      const outLinedStarButton = findIcon("star-outline");
+      expect(outLinedStarButton.exists).toBeTruthy;
+      await outLinedStarButton.trigger('click');
+      await Vue.nextTick();
+      expect(updateEventStatus).toHaveBeenCalled();
+    });
+
+    it("Star icon was not rendered, api endpoint was not called", async () => {
+      const icons = wrapper.findAllComponents({ name: 'v-icon' });
+      const icon = icons.filter(icon => icon.attributes().class.includes('star'));
+      expect(icon.exists).toBeFalsy;
+      await Vue.nextTick();
+      expect(updateEventStatus).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('Icons that rendered on notification when status is starred', () => {
+    beforeEach(async () => {
+      generateWrapper();
+      await wrapper.setData({
+        event: {
+          status: 'starred'
+        }
+      });
+      updateEventStatus.mockClear();
+    });
+
+    afterEach(() => {
+      wrapper.destroy();
+    })
+
+    it("Archive icon is rendered, api endpoint was called upon clicking", async () => {
+      const archiveButton = findIcon("archive");
+      expect(archiveButton.exists).toBeTruthy;
+      await archiveButton.trigger('click');
+      await Vue.nextTick();
+      expect(updateEventStatus).toHaveBeenCalled();
+    });
+
+    it("Outlined-Star icon was not rendered, api endpoint was not called", async () => {
+      const icons = wrapper.findAllComponents({ name: 'v-icon' });
+      const icon = icons.filter(icon => icon.attributes().class.includes('star-outline'));
+      expect(icon.exists).toBeFalsy;
+      await Vue.nextTick();
+      expect(updateEventStatus).not.toHaveBeenCalled();
+    });
+
+    it("Star icon is rendered, api endpoint was called upon clicking", async () => {
+      const archiveButton = findIcon("star");
+      expect(archiveButton.exists).toBeTruthy;
+      await archiveButton.trigger('click');
       await Vue.nextTick();
       expect(updateEventStatus).toHaveBeenCalled();
     });
   });
+
+  describe('Icons that rendered on notification when status is archived', () => {
+    beforeEach(async () => {
+      generateWrapper();
+      await wrapper.setData({
+        event: {
+          status: 'archived'
+        }
+      });
+      updateEventStatus.mockClear();
+    });
+
+    afterEach(() => {
+      wrapper.destroy();
+    })
+
+    it("Archive icon is not rendered, api endpoint was not called", async () => {
+      const icons = wrapper.findAllComponents({ name: 'v-icon' });
+      const icon = icons.filter(icon => icon.attributes().class.includes('archive-outline'));
+      expect(icon.exists).toBeFalsy;
+      await Vue.nextTick();
+      expect(updateEventStatus).not.toHaveBeenCalled();
+    });
+
+    it("Outlined-Star icon was not rendered, api endpoint was not called", async () => {
+      const icons = wrapper.findAllComponents({ name: 'v-icon' });
+      const icon = icons.filter(icon => icon.attributes().class.includes('star-outline'));
+      expect(icon.exists).toBeFalsy;
+      await Vue.nextTick();
+      expect(updateEventStatus).not.toHaveBeenCalled();
+    });
+
+    it("Star icon was not rendered, api endpoint was not called", async () => {
+      const icons = wrapper.findAllComponents({ name: 'v-icon' });
+      const icon = icons.filter(icon => icon.attributes().class.includes('star'));
+      expect(icon.exists).toBeFalsy;
+      await Vue.nextTick();
+      expect(updateEventStatus).not.toHaveBeenCalled();
+    });
+
+    it("Trash can icon is rendered, initiateDeletion() was called upon clicking", async () => {
+      const deleteButton = findIcon("trash-can");
+      expect(deleteButton.exists).toBeTruthy;
+      await deleteButton.trigger('click');
+      await Vue.nextTick();
+      expect(wrapper.vm.deleted).toBeTruthy();
+    });
+  });
+
 });
