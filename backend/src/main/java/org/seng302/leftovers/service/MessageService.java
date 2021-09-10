@@ -5,7 +5,7 @@ import org.apache.logging.log4j.Logger;
 import org.seng302.leftovers.entities.Message;
 import org.seng302.leftovers.entities.User;
 import org.seng302.leftovers.entities.event.MessageEvent;
-import org.seng302.leftovers.persistence.MessageEventRepository;
+import org.seng302.leftovers.persistence.event.MessageEventRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;

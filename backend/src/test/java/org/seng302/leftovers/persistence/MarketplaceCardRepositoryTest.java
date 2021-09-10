@@ -9,6 +9,7 @@ import org.seng302.leftovers.entities.Location;
 import org.seng302.leftovers.entities.MarketplaceCard;
 import org.seng302.leftovers.entities.User;
 import org.seng302.leftovers.entities.event.ExpiryEvent;
+import org.seng302.leftovers.persistence.event.ExpiryEventRepository;
 import org.seng302.leftovers.service.EventService;
 import org.seng302.leftovers.tools.SearchHelper;
 import org.springframework.beans.factory.annotation.Autowired;
