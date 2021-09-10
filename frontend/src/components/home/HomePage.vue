@@ -79,8 +79,11 @@ export default {
         {text: "Yellow", value: 'yellow'}, {text: "Green", value: 'green'}, {text: "Blue", value: 'blue'},
         {text: "Purple", value: 'purple'}],
       tab: "all-events-tab",
+      /**
+       * This attribute is used to set the polling interval when the component is created and stop it when the
+       * page is destroyed.
+       */
       polling: undefined,
-      events: [],
     };
   },
   computed: {
@@ -140,12 +143,13 @@ export default {
     isBusiness() {
       return this.role?.type === "business";
     },
-    userId() {
-      return this.$store.state.user.id;
-    }
   },
   methods: {
+    /**
+     * Refresh the events for the user's newsfeed every 3 seconds.
+     */
     startPolling() {
+      this.$store.dispatch('refreshEventFeed');
       this.polling = setInterval(() => {
         this.$store.dispatch('refreshEventFeed');
       }, 3000);
@@ -166,9 +170,15 @@ export default {
       this.currentPage = Math.max(Math.min(this.currentPage, this.totalPages), 1);
     }
   },
+  /**
+   * Initiate polling for the newsfeed events.
+   */
   created() {
     this.startPolling();
   },
+  /**
+   * Stop polling for the newsfeed events.
+   */
   beforeDestroy () {
     clearInterval(this.polling);
   }

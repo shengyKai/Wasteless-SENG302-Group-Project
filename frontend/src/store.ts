@@ -120,6 +120,7 @@ function createOptions(): StoreOptions<StoreData> {
       logoutUser(state) {
         state.user = null;
         deleteCookie(COOKIE.USER);
+        state.eventMap = {};
       },
 
       /**
@@ -306,9 +307,10 @@ function createOptions(): StoreOptions<StoreData> {
         return 'Notification not staged for deletion';
       },
       /**
-       *
-       * @param context
-       * @param userId
+       * Sends a request to get all the events which should be present in the user's newsfeed and adds
+       * them to the eventMap. If the are already events in the eventMap, only requests events which
+       * have been modified after the most recently modified event.
+       * @param context The store context.
        */
       async refreshEventFeed(context) {
         const userId = context.state.user?.id;
