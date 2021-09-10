@@ -1,4 +1,4 @@
-import { Keyword, MarketplaceCard, MarketplaceCardSection, MaybeError, Message, User } from "./internal";
+import { Keyword, MarketplaceCard, MarketplaceCardSection, MaybeError, Message, Sale, User } from "./internal";
 import axios from 'axios';
 
 const SERVER_URL = process.env.VUE_APP_SERVER_ADD;
@@ -14,7 +14,7 @@ const EMITTER_URL = process.env.VUE_APP_SERVER_ADD + '/events/emitter';
 let eventSource: EventSource;
 let lastErrorTime = Number.MIN_VALUE;
 
-export type AnyEvent = GlobalMessageEvent | ExpiryEvent | DeleteEvent | KeywordCreatedEvent | MessageEvent;
+export type AnyEvent = GlobalMessageEvent | ExpiryEvent | DeleteEvent | KeywordCreatedEvent | MessageEvent | InterestEvent;
 
 export type EventTag = 'none' | 'red' | 'orange' | 'yellow' | 'green' | 'blue' | 'purple'
 export type EventStatus = 'normal' | 'starred' | 'archived'
@@ -53,6 +53,10 @@ export type MessageEvent = BaseEvent<'MessageEvent'> & {
     card: MarketplaceCard,
     id: number,
   },
+}
+export type InterestEvent = BaseEvent<'InterestEvent'> & {
+  saleItem: Sale,
+  interested: boolean,
 }
 
 /**
