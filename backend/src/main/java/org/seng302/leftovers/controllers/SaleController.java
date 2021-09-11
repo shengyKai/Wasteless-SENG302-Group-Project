@@ -52,7 +52,6 @@ public class SaleController {
         this.inventoryItemRepository = inventoryItemRepository;
     }
 
-    private static final Set<String> VALID_ORDERINGS = Set.of("created", "closing", "productCode", "productName", "quantity", "price");
     private static final Set<String> VALID_SEARCH_ORDERINGS = Set.of("created", "closing", "productName", "quantity", "price", "businessName", "businessLocation");
     private static final Set<String> VALID_BUSINESS_TYPES = Set.of("Any", "Accommodation and Food Services", "Retail Trade", "Charitable organisation", "Non-profit organisation");
 
@@ -65,11 +64,9 @@ public class SaleController {
      */
     private Sort.Order getSaleItemOrder(String orderBy, Sort.Direction direction) {
         if (orderBy == null) orderBy = "created";
-        else if (!VALID_ORDERINGS.contains(orderBy)) {
-            logger.error("Invalid sale item ordering given: {}", orderBy);
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The provided ordering is invalid");
-        }
         switch (orderBy) {
+            case "created": case "quantity": case "price":
+                break;
             case "productCode":
                 orderBy = "inventoryItem.product.productCode";
                 break;
@@ -79,6 +76,9 @@ public class SaleController {
             case "closing":
                 orderBy = "closes";
                 break;
+            default:
+                logger.error("Invalid sale item ordering given: {}", orderBy);
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The provided ordering is invalid");
         }
         return new Sort.Order(direction, orderBy).ignoreCase();
     }

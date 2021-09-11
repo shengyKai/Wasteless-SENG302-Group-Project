@@ -1,4 +1,4 @@
-package org.seng302.leftovers.tools;
+package org.seng302.leftovers.service;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -21,7 +21,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
-class SearchHelperBusinessTest {
+class SearchServiceBusinessTest {
 
     @Autowired
     private BusinessRepository businessRepository;

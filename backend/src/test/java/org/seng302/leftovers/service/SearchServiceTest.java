@@ -1,4 +1,4 @@
-package org.seng302.leftovers.tools;
+package org.seng302.leftovers.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.*;
@@ -39,7 +39,7 @@ import static org.mockito.Mockito.when;
 
 @SpringBootTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class SearchHelperTest {
+class SearchServiceTest {
 
     /**
      * List of users to be used in testing of getPageInResults.
@@ -118,7 +118,7 @@ class SearchHelperTest {
         List<User> userList = new ArrayList<>();
         String row;
         BufferedReader csvReader = new BufferedReader(new InputStreamReader(
-                Objects.requireNonNull(SearchHelperTest.class.getResourceAsStream("/testData/" + resourceName))
+                Objects.requireNonNull(SearchServiceTest.class.getResourceAsStream("/testData/" + resourceName))
         ));
         while ((row = csvReader.readLine()) != null) {
             try {

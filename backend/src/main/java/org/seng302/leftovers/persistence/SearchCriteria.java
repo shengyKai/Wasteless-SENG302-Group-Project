@@ -5,9 +5,16 @@ package org.seng302.leftovers.persistence;
  */
 public class SearchCriteria {
 
+    public enum Pred {
+        GREATER_THAN,
+        LESS_THAN,
+        COLON,
+        EQUAL
+    }
+
     private String column;
 
-    private String operation;
+    private Pred operation;
 
     private Object value;
 
@@ -17,7 +24,6 @@ public class SearchCriteria {
         setKey(column);
         setOperation(operation);
         setValue(value);
-
     }
 
     /**
@@ -44,10 +50,20 @@ public class SearchCriteria {
     }
 
     public void setOperation(String operation) {
-        this.operation = operation;
+        if (">".equals(operation)) {
+            this.operation = Pred.GREATER_THAN;
+        } else if ("<".equals(operation)) {
+            this.operation = Pred.LESS_THAN;
+        } else if (":".equals(operation)) {
+            this.operation = Pred.COLON;
+        } else if ("=".equals(operation)) {
+            this.operation = Pred.EQUAL;
+        } else {
+            this.operation = null;
+        }
     }
 
-    public String getOperation() {
+    public Pred getOperation() {
         return this.operation;
     }
 

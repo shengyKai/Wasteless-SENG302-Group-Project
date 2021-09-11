@@ -1,16 +1,19 @@
 import axios, { AxiosError, AxiosInstance } from 'axios';
 
-import * as api from '@/api/internal';
 import { AxiosResponse } from 'axios';
 import {SearchResults} from '@/api/internal';
 import { castMock } from '../utils';
 import { is, Reason } from 'typescript-is';
-import {CreateUser} from "@/api/internal-user";
-import {CreateProduct, Product} from "@/api/internal-product";
+import {CreateUser, login, createUser} from "@/api/internal-user";
+import {CreateProduct, Product, createProduct, uploadProductImage, getProducts, modifyProduct} from "@/api/internal-product";
 import {InventoryItem} from "@/api/internal-inventory";
-import {Sale} from "@/api/internal-sale";
-import {Message} from "@/api/internal-event";
+import {Sale, getBusinessSales} from "@/api/internal-sale";
+import {Message, getMessagesInConversation} from "@/api/internal-event";
 
+const api = {
+  login, createUser, createProduct, uploadProductImage, getProducts, modifyProduct,
+  getBusinessSales, getMessagesInConversation
+};
 
 jest.mock('axios', () => ({
   create: jest.fn(function() {

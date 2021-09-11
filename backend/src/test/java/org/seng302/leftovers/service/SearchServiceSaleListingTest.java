@@ -1,4 +1,4 @@
-package org.seng302.leftovers.tools;
+package org.seng302.leftovers.service;
 
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -32,7 +32,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class SearchHelperSaleListingTest {
+class SearchServiceSaleListingTest {
 
     private User testUser;
     private Business testBusiness;
