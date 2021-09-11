@@ -67,7 +67,7 @@ class ExpiryEventTest {
     }
 
     @Test
-    void constructJSONObject_jsonHasExpectedFormat() throws JsonProcessingException {
+    void asDTO_jsonHasExpectedFormat() throws JsonProcessingException {
         ExpiryEvent testEvent = new ExpiryEvent(testCard);
         expiryEventRepository.save(testEvent);
         String expectedJsonString = String.format("{\"id\":%d," +

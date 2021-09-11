@@ -19,6 +19,7 @@ import org.seng302.leftovers.persistence.BusinessRepository;
 import org.seng302.leftovers.persistence.InventoryItemRepository;
 import org.seng302.leftovers.persistence.SaleItemRepository;
 import org.seng302.leftovers.persistence.UserRepository;
+import org.seng302.leftovers.persistence.event.InterestEventRepository;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
 import org.seng302.leftovers.tools.SearchHelper;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -62,6 +63,8 @@ class SaleControllerTest {
     private SaleItemRepository saleItemRepository;
     @Mock
     private InventoryItemRepository inventoryItemRepository;
+    @Mock
+    private InterestEventRepository interestEventRepository;
     @Mock
     private Business business;
     @Mock
@@ -109,7 +112,7 @@ class SaleControllerTest {
         when(userRepository.findById(4L)).thenReturn(Optional.of(user));
         when(userRepository.findById(not(eq(4L)))).thenReturn(Optional.empty());
 
-        saleController = spy(new SaleController(userRepository, businessRepository, saleItemRepository, inventoryItemRepository));
+        saleController = spy(new SaleController(userRepository, businessRepository, saleItemRepository, inventoryItemRepository, interestEventRepository));
         mockMvc = MockMvcBuilders.standaloneSetup(saleController).build();
     }
 
