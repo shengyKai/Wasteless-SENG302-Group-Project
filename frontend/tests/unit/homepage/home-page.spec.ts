@@ -59,6 +59,7 @@ describe('HomePage.vue', () => {
     store.state.user = testUser;
 
     jest.useFakeTimers();
+    getEvents.mockResolvedValue([]);
 
     wrapper = mount(HomePage, {
       stubs: ['BusinessActionPanel', 'UserActionPanel', 'GlobalMessage' , 'ExpiryEvent', 'DeleteEvent', 'KeywordCreated'],
@@ -66,8 +67,6 @@ describe('HomePage.vue', () => {
       vuetify,
       store,
     });
-
-    getEvents.mockResolvedValue([]);
   });
 
   it('If an global message event is posted to the store then it should be contained in mainEvents', async () => {
