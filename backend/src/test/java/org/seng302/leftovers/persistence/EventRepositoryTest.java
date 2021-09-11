@@ -1,9 +1,11 @@
 package org.seng302.leftovers.persistence;
 
 import lombok.SneakyThrows;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import org.seng302.leftovers.dto.event.EventStatus;
 import org.seng302.leftovers.entities.Location;
@@ -13,12 +15,13 @@ import org.seng302.leftovers.entities.event.GlobalMessageEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import javax.annotation.Resource;
+import javax.transaction.Transactional;
 import java.lang.reflect.Field;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 
-import static java.lang.Thread.sleep;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
@@ -28,6 +31,8 @@ class EventRepositoryTest {
     EventRepository eventRepository;
     @Autowired
     UserRepository userRepository;
+    @Resource
+    SessionFactory sessionFactory;
 
     User testUser;
     User otherUser;
@@ -36,6 +41,7 @@ class EventRepositoryTest {
     Event testUserEvent3;
     Event otherUserEvent1;
     Instant beforeCreation;
+    Instant lastCreation;
 
     @BeforeEach
     void setUp() throws InterruptedException {
@@ -68,14 +74,58 @@ class EventRepositoryTest {
         testUser = userRepository.save(testUser);
         otherUser = userRepository.save(otherUser);
 
-        beforeCreation = Instant.now().minus(Duration.ofSeconds(1));
         testUserEvent1 = eventRepository.save(new GlobalMessageEvent(testUser, "Test user event 1"));
-        sleep(0, 1); // Sleep for one nanosecond between creating events to ensure that they have different creation dates
         testUserEvent2 = eventRepository.save(new GlobalMessageEvent(testUser, "Test user event 2"));
-        sleep(0, 1);
         testUserEvent3 = eventRepository.save(new GlobalMessageEvent(testUser, "Test user event 3"));
-        sleep(0, 1);
         otherUserEvent1 = eventRepository.save(new GlobalMessageEvent(otherUser, "Other user event 1"));
+        
+        // Give all events a different creation and lastModified date so sorting an filtering can be tested
+        List<Event> events = List.of(testUserEvent1, testUserEvent2, testUserEvent3, otherUserEvent1);
+        beforeCreation = Instant.parse("2021-09-10T12:00:00Z");
+        for (int i = 0; i < events.size(); i++) {
+            setCreatedForEventInDatabase(events.get(i), beforeCreation.plus(Duration.ofSeconds(i+1)));
+            setLastModifiedForEventInDatabase(events.get(i), beforeCreation.plus(Duration.ofSeconds(i+1)));
+        }
+    }
+
+    /**
+     * This method sets the lastModified date of an event in the database using an SQL statement.
+     * Setting the lastModified date directly in the database rather than through the event object
+     * prevents the automatic onUpdate method of Event from being triggered.
+     * @param event The event to be updated.
+     * @param modifiedDate The date to set the event's lastModified date to.
+     */
+    private void setLastModifiedForEventInDatabase(Event event, Instant modifiedDate) {
+        try (Session session = sessionFactory.openSession()) {
+            Transaction transaction = session.beginTransaction();
+
+            session.createNativeQuery("UPDATE event SET last_modified = :lastModified WHERE id = :id")
+                    .setParameter("lastModified", modifiedDate)
+                    .setParameter("id", event.getId())
+                    .executeUpdate();
+
+            transaction.commit();
+        }
+    }
+
+    /**
+     * This method sets the created date of an event in the database using an SQL statement.
+     * Setting the created date directly in the database rather than through the event object
+     * prevents the automatic onUpdate method of Event from being triggered.
+     * @param event The event to be updated.
+     * @param created The date to set the event's created date to.
+     */
+    private void setCreatedForEventInDatabase(Event event, Instant created) {
+        try (Session session = sessionFactory.openSession()) {
+            Transaction transaction = session.beginTransaction();
+
+            session.createNativeQuery("UPDATE event SET created = :created WHERE id = :id")
+                    .setParameter("created", created)
+                    .setParameter("id", event.getId())
+                    .executeUpdate();
+
+            transaction.commit();
+        }
     }
 
     @AfterEach
@@ -123,18 +173,13 @@ class EventRepositoryTest {
     }
 
     @Test
-    void findEventsForUser_allModifiedAfterSinceModified_allReturned() throws InterruptedException {
-        Instant modifiedDate = Instant.now();
-        sleep(0, 1);
+    void findEventsForUser_allModifiedAfterSinceModified_allReturned() {
+        Instant modifiedSinceDate = Instant.parse("2021-09-11T12:00:00Z");
+        setLastModifiedForEventInDatabase(testUserEvent1, modifiedSinceDate.plus(Duration.ofSeconds(1)));
+        setLastModifiedForEventInDatabase(testUserEvent2, modifiedSinceDate.plus(Duration.ofSeconds(1)));
+        setLastModifiedForEventInDatabase(testUserEvent3, modifiedSinceDate.plus(Duration.ofSeconds(1)));
 
-        testUserEvent1.markAsRead();
-        testUserEvent1 = eventRepository.save(testUserEvent1);
-        testUserEvent2.markAsRead();
-        testUserEvent2 = eventRepository.save(testUserEvent2);
-        testUserEvent3.markAsRead();
-        testUserEvent3 = eventRepository.save(testUserEvent3);
-
-        List<Event> queryResult = eventRepository.findEventsForUser(testUser, modifiedDate);
+        List<Event> queryResult = eventRepository.findEventsForUser(testUser, modifiedSinceDate);
 
         assertTrue(queryResult.contains(testUserEvent1));
         assertTrue(queryResult.contains(testUserEvent2));
@@ -142,16 +187,18 @@ class EventRepositoryTest {
     }
 
     @Test
-    void findEventsForUser_someModifiedAfterSinceModified_modifiedEventsReturned() throws InterruptedException {
-        Instant modifiedDate = Instant.now();
-        sleep(0, 1);
+    void findEventsForUser_someModifiedAfterSinceModified_modifiedEventsReturned() {
+        Instant modifiedSinceDate = Instant.parse("2021-09-11T12:00:00Z");
+        setLastModifiedForEventInDatabase(testUserEvent1, modifiedSinceDate.plus(Duration.ofSeconds(1)));
+        setLastModifiedForEventInDatabase(testUserEvent2, modifiedSinceDate.plus(Duration.ofSeconds(1)));
+        setLastModifiedForEventInDatabase(testUserEvent3, modifiedSinceDate.minus(Duration.ofSeconds(1)));
 
-        testUserEvent1.markAsRead();
-        testUserEvent1 = eventRepository.save(testUserEvent1);
-        testUserEvent2.markAsRead();
-        testUserEvent2 = eventRepository.save(testUserEvent2);
+        List<Event> allEvents = eventRepository.findEventsForUser(testUser);
+        System.out.println(allEvents.get(0).getLastModified());
+        System.out.println(allEvents.get(1).getLastModified());
+        System.out.println(allEvents.get(2).getLastModified());
 
-        List<Event> queryResult = eventRepository.findEventsForUser(testUser, modifiedDate);
+        List<Event> queryResult = eventRepository.findEventsForUser(testUser, modifiedSinceDate);
 
         assertTrue(queryResult.contains(testUserEvent1));
         assertTrue(queryResult.contains(testUserEvent2));
@@ -159,11 +206,18 @@ class EventRepositoryTest {
     }
 
     @Test
-    void findEventsForUser_noneModifiedAfterSinceModified_noneReturned() throws InterruptedException {
-        Instant modifiedDate = Instant.now();
-        sleep(0, 1);
+    void findEventsForUser_noneModifiedAfterSinceModified_noneReturned() {
+        Instant modifiedSinceDate = Instant.parse("2021-09-11T12:00:00Z");
+        setLastModifiedForEventInDatabase(testUserEvent1, modifiedSinceDate.minus(Duration.ofSeconds(1)));
+        setLastModifiedForEventInDatabase(testUserEvent2, modifiedSinceDate.minus(Duration.ofSeconds(1)));
+        setLastModifiedForEventInDatabase(testUserEvent3, modifiedSinceDate.minus(Duration.ofSeconds(1)));
 
-        List<Event> queryResult = eventRepository.findEventsForUser(testUser, modifiedDate);
+        List<Event> allEvents = eventRepository.findEventsForUser(testUser);
+        System.out.println(allEvents.get(0).getLastModified());
+        System.out.println(allEvents.get(1).getLastModified());
+        System.out.println(allEvents.get(2).getLastModified());
+
+        List<Event> queryResult = eventRepository.findEventsForUser(testUser, modifiedSinceDate);
 
         assertFalse(queryResult.contains(testUserEvent1));
         assertFalse(queryResult.contains(testUserEvent2));
