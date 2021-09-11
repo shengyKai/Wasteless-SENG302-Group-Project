@@ -14,6 +14,7 @@ import org.seng302.leftovers.entities.Business;
 import org.seng302.leftovers.entities.InventoryItem;
 import org.seng302.leftovers.entities.SaleItem;
 import org.seng302.leftovers.entities.User;
+import org.seng302.leftovers.entities.event.InterestEvent;
 import org.seng302.leftovers.exceptions.AccessTokenException;
 import org.seng302.leftovers.persistence.BusinessRepository;
 import org.seng302.leftovers.persistence.InventoryItemRepository;
@@ -71,6 +72,8 @@ class SaleControllerTest {
     private User user;
     @Mock
     private InventoryItem inventoryItem;
+    @Mock
+    private SaleItem saleItem;
 
     private MockedStatic<AuthenticationTokenManager> authenticationTokenManager;
 
@@ -80,6 +83,7 @@ class SaleControllerTest {
     ArgumentCaptor<Specification<SaleItem>> specificationArgumentCaptor;
     @Captor
     ArgumentCaptor<PageRequest> pageRequestArgumentCaptor;
+
 
     @BeforeEach
     public void setUp() throws ParseException {
@@ -105,7 +109,10 @@ class SaleControllerTest {
 
         // Setup mock sale item repository
         when(saleItemRepository.save(any(SaleItem.class))).thenAnswer(x -> x.getArgument(0));
-        when(saleItemRepository.findById(any())).thenReturn(Optional.empty());
+        when(saleItemRepository.findById(not(eq(3L)))).thenReturn(Optional.empty());
+        when(saleItemRepository.findById(3L)).thenReturn(Optional.of(saleItem));
+
+        when(saleItem.getId()).thenReturn(3L);
 
         // Setup mock user
         when(user.getUserID()).thenReturn(4L);
@@ -578,12 +585,8 @@ class SaleControllerTest {
     void setSaleItemInterest_setInterested_200ResponseAndUserAdded() throws Exception {
         authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), any())).thenReturn(true);
 
-        var saleItem = mock(SaleItem.class);
-
-        when(saleItemRepository.findById(3L)).thenReturn(Optional.of(saleItem));
-
         // Verify that a 401 response is received in response to the PUT request
-        mockMvc.perform(put("/listings/3/interest")
+        mockMvc.perform(put(String.format("/listings/%s/interest", saleItem.getId()))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(createUpdateInterestRequest(4, true).toString()))
                 .andExpect(status().isOk())
@@ -591,7 +594,7 @@ class SaleControllerTest {
 
         verify(saleItem, times(1)).addInterestedUser(user);
 
-        verify(saleItemRepository, times(1)).findById(3L);
+        verify(saleItemRepository, times(1)).findById(saleItem.getId());
         verify(saleItemRepository, times(1)).save(saleItem);
     }
 
@@ -599,12 +602,8 @@ class SaleControllerTest {
     void setSaleItemInterest_setUnInterested_200ResponseAndUserRemoved() throws Exception {
         authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), any())).thenReturn(true);
 
-        var saleItem = mock(SaleItem.class);
-
-        when(saleItemRepository.findById(3L)).thenReturn(Optional.of(saleItem));
-
         // Verify that a 401 response is received in response to the PUT request
-        mockMvc.perform(put("/listings/3/interest")
+        mockMvc.perform(put(String.format("/listings/%s/interest", saleItem.getId()))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(createUpdateInterestRequest(4, false).toString()))
                 .andExpect(status().isOk())
@@ -614,5 +613,66 @@ class SaleControllerTest {
 
         verify(saleItemRepository, times(1)).findById(3L);
         verify(saleItemRepository, times(1)).save(saleItem);
+    }
+
+    @Test
+    void setSaleItemInterest_noInterestEventExists_newInterestEventCreated() throws Exception {
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), any())).thenReturn(true);
+
+        // Verify that a 401 response is received in response to the PUT request
+        mockMvc.perform(put(String.format("/listings/%s/interest", saleItem.getId()))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(createUpdateInterestRequest(4, true).toString()))
+                .andExpect(status().isOk());
+
+        verify(interestEventRepository, times(1)).findInterestEventByNotifiedUserAndSaleItem(user, saleItem);
+
+        var captor = ArgumentCaptor.forClass(InterestEvent.class);
+
+        verify(interestEventRepository, times(1)).save(captor.capture());
+        var interestEvent = captor.getValue();
+        assertTrue(interestEvent.getInterested());
+        assertEquals(user, interestEvent.getNotifiedUser());
+        assertEquals(saleItem, interestEvent.getSaleItem());
+    }
+
+    @Test
+    void setSaleItemInterest_likeAndInterestEventExists_interestEventUpdated() throws Exception {
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), any())).thenReturn(true);
+
+        var interestEvent = mock(InterestEvent.class);
+        when(interestEventRepository.findInterestEventByNotifiedUserAndSaleItem(user, saleItem)).thenReturn(Optional.of(interestEvent));
+
+        // Verify that a 401 response is received in response to the PUT request
+        mockMvc.perform(put(String.format("/listings/%s/interest", saleItem.getId()))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(createUpdateInterestRequest(4, true).toString()))
+                .andExpect(status().isOk());
+
+        verify(interestEventRepository, times(1)).findInterestEventByNotifiedUserAndSaleItem(user, saleItem);
+
+        verify(interestEvent, times(1)).setInterested(true);
+
+        verify(interestEventRepository, times(1)).save(interestEvent);
+    }
+
+    @Test
+    void setSaleItemInterest_unlikeAndInterestEventExists_interestEventUpdated() throws Exception {
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), any())).thenReturn(true);
+
+        var interestEvent = mock(InterestEvent.class);
+        when(interestEventRepository.findInterestEventByNotifiedUserAndSaleItem(user, saleItem)).thenReturn(Optional.of(interestEvent));
+
+        // Verify that a 401 response is received in response to the PUT request
+        mockMvc.perform(put(String.format("/listings/%s/interest", saleItem.getId()))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(createUpdateInterestRequest(4, false).toString()))
+                .andExpect(status().isOk());
+
+        verify(interestEventRepository, times(1)).findInterestEventByNotifiedUserAndSaleItem(user, saleItem);
+
+        verify(interestEvent, times(1)).setInterested(false);
+
+        verify(interestEventRepository, times(1)).save(interestEvent);
     }
 }

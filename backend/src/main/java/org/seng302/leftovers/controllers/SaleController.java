@@ -185,21 +185,17 @@ public class SaleController {
             var saleItem = saleItemRepository.findById(id)
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "Listing not found"));
 
-            var interestEvent = interestEventRepository.findInterestEventByNotifiedUserAndSaleItem(user, saleItem);
-
+            var interestEvent = interestEventRepository.findInterestEventByNotifiedUserAndSaleItem(user, saleItem)
+                    .orElseGet(() -> new InterestEvent(user, saleItem));
             if (Boolean.TRUE.equals(body.getInterested())) {
-                if (interestEvent.isEmpty()) { // Create an interest event if one does not exist
-                    interestEvent = Optional.of(new InterestEvent(user, saleItem));
-                }
                 saleItem.addInterestedUser(user);
             } else {
                 saleItem.removeInterestedUser(user);
             }
 
-            interestEvent.ifPresent(e -> { // If the interest event exists then update the status
-                e.setInterested(body.getInterested());
-                interestEventRepository.save(e);
-            });
+            interestEvent.setInterested(body.getInterested());
+            interestEventRepository.save(interestEvent);
+
             saleItemRepository.save(saleItem);
         } catch (Exception e) {
             logger.error(e.getMessage());
