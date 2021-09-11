@@ -2985,6 +2985,7 @@ components:
         - tag
         - status
         - read
+        - lastModified
       properties:
         id:
           type: integer
@@ -3004,6 +3005,12 @@ components:
         read:
           type: boolean
           description: Checks if the event has been read
+        lastModified:
+          type: string
+          format: date-time
+          example: '2020-07-14T14:32:00Z'
+          readOnly: true
+          description: Date and time when the event was last modified
     Tag:
       type: string
       description: Name of the tag (colour name) for the event
