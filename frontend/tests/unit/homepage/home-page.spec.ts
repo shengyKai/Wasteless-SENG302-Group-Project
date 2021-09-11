@@ -7,10 +7,17 @@ import {User, MarketplaceCard, Keyword } from '@/api/internal';
 import HomePage from '@/components/home/HomePage.vue';
 import { getStore, resetStoreForTesting, StoreData } from '@/store';
 
-import { AnyEvent, DeleteEvent, ExpiryEvent, GlobalMessageEvent, KeywordCreatedEvent, MessageEvent } from '@/api/events';
+import * as events from '@/api/events';
+import { castMock } from '../utils';
 
 Vue.use(Vuetify);
 const localVue = createLocalVue();
+
+jest.mock('@/api/events', () => ({
+  getEvents: jest.fn(),
+}));
+
+const getEvents = castMock(events.getEvents);
 
 const testUser: User = {
   id: 2,
@@ -59,10 +66,12 @@ describe('HomePage.vue', () => {
       vuetify,
       store,
     });
+
+    getEvents.mockResolvedValue([]);
   });
 
   it('If an global message event is posted to the store then it should be contained in mainEvents', async () => {
-    const event: AnyEvent = {
+    const event: events.AnyEvent = {
       type: 'GlobalMessageEvent',
       status: 'normal',
       id: 7,
@@ -81,7 +90,7 @@ describe('HomePage.vue', () => {
   });
 
   it('If an expiry event is posted to the store then it should be displayed in the mainEvents tab', async () => {
-    const event: ExpiryEvent = {
+    const event: events.ExpiryEvent = {
       type: 'ExpiryEvent',
       status: 'normal',
       id: 2,
@@ -100,7 +109,7 @@ describe('HomePage.vue', () => {
   });
 
   it('If delete event is posted to the store then it should be displayed in the mainEvents tab', async () => {
-    const event: DeleteEvent = {
+    const event: events.DeleteEvent = {
       type: 'DeleteEvent',
       status: 'normal',
       id: 7,
@@ -120,7 +129,7 @@ describe('HomePage.vue', () => {
   });
 
   it('If an keyword created event is posted to the store then it should be displayed in the mainEvents tab', async () => {
-    const event: KeywordCreatedEvent = {
+    const event: events.KeywordCreatedEvent = {
       type: 'KeywordCreatedEvent',
       status: 'normal',
       id: 7,
@@ -144,7 +153,7 @@ describe('HomePage.vue', () => {
   });
 
   it('If an message event is posted to the store then it should be displayed in the mainEvents tab', async () => {
-    const event: MessageEvent = {
+    const event: events.MessageEvent = {
       type: 'MessageEvent',
       status: 'normal',
       id: 7,
@@ -175,7 +184,7 @@ describe('HomePage.vue', () => {
 
   describe('Event statuses', () => {
     it('Starred messages are shown in the main newsfeed', async () => {
-      const event: GlobalMessageEvent = {
+      const event: events.GlobalMessageEvent = {
         type: 'GlobalMessageEvent',
         status: 'starred',
         id: 7,
@@ -194,7 +203,7 @@ describe('HomePage.vue', () => {
     });
 
     it('Archived messages are not shown in the main newsfeed and are shown in archived tab', async () => {
-      const event: GlobalMessageEvent = {
+      const event: events.GlobalMessageEvent = {
         type: 'GlobalMessageEvent',
         status: 'archived',
         id: 7,
@@ -223,7 +232,7 @@ describe('HomePage.vue', () => {
      */
     async function addMultipleEvents() {
       for (let i=0; i < 4; i++) {
-        let event: AnyEvent = {
+        let event: events.AnyEvent = {
           type: 'GlobalMessageEvent',
           status: 'normal',
           id: i,
@@ -237,7 +246,7 @@ describe('HomePage.vue', () => {
         await Vue.nextTick();
       }
       for (let i=4; i < 12; i++) {
-        let event: AnyEvent = {
+        let event: events.AnyEvent = {
           type: 'GlobalMessageEvent',
           status: 'normal',
           id: i,
