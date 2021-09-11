@@ -27,4 +27,9 @@ public class InterestEventDTO extends EventDTO {
         this.saleItem = event.getSaleItem().constructJSONObject();
         this.interested = event.getInterested();
     }
+
+    /**
+     * Constructor for helping with building this object from a string
+     */
+    protected InterestEventDTO() {}
 }
