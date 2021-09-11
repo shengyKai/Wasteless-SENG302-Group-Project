@@ -240,7 +240,7 @@ export default {
      */
     async markEventAsRead() {
       if (!this.event.read) {
-        const result = updateEventAsRead(this.event.id);
+        const result = await updateEventAsRead(this.event.id);
         if (typeof result === 'string') {
           this.errorMessage = result;
         } else {

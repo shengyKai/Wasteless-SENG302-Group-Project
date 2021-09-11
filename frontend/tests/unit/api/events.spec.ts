@@ -19,6 +19,10 @@ type Mocked<T extends { [k: string]: (...args: any[]) => any }> = { [k in keyof 
 // @ts-ignore - We've added an instance attribute in the mock declaration that mimics a AxiosInstance
 const instance: Mocked<Pick<AxiosInstance, 'get' | 'put' >> = axios.instance;
 
+beforeEach(() => {
+  jest.clearAllMocks();
+});
+
 describe('Test PUT /feed/{eventId}/read endpoint', () => {
   it('When API request is successfully resolved, it returns undefined', async () => {
     instance.put.mockResolvedValueOnce({
@@ -87,21 +91,17 @@ describe('Test PUT /feed/{eventId}/read endpoint', () => {
 describe('Test GET /users/:id/feed endpoint', () => {
 
   it('When getEvents is called with undefined modifiedSince date, GET /users/:id/feed endpoint is called with given user ID and no query parameters', async () => {
-    instance.get.mock.calls = [];
     await getEvents(3, undefined);
-    expect(instance.get.mock.calls.length).toBe(1);
-    expect(instance.get.mock.calls[0][0]).toBe('/users/3/feed');
-    expect(instance.get.mock.calls[0][1]).toStrictEqual({params: new URLSearchParams()});
+    expect(instance.get).toBeCalledTimes(1);
+    expect(instance.get).toBeCalledWith('/users/3/feed', {params: new URLSearchParams()});
   });
 
   it('When getEvents is called with a modifiedSince date, GET /users/:id/feed endpoint is called with given user ID and the given date as a query parameters', async () => {
-    instance.get.mock.calls = [];
     const expectedParams = new URLSearchParams();
     expectedParams.append("modifiedSince", "2021-09-09 12:30:25.902Z");
     await getEvents(3, "2021-09-09 12:30:25.902Z");
-    expect(instance.get.mock.calls.length).toBe(1);
-    expect(instance.get.mock.calls[0][0]).toBe('/users/3/feed');
-    expect(instance.get.mock.calls[0][1]).toStrictEqual({params: expectedParams});
+    expect(instance.get).toBeCalledTimes(1);
+    expect(instance.get).toBeCalledWith('/users/3/feed', {params: expectedParams});
   });
 
   it('When response has 200 status and is a valid event array, getEvents returns the event array', async () => {

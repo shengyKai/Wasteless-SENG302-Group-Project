@@ -91,7 +91,7 @@ describe('store.ts', () => {
   describe('refreshEventFeed', () => {
 
     beforeEach(() => {
-      getEvents.mock.calls = [];
+      getEvents.mockClear();
       getEvents.mockResolvedValue([]);
       store.state.user = {
         id: 6,
@@ -112,9 +112,8 @@ describe('store.ts', () => {
 
       it('Calls getEvents method with id of current user and undefined for date parameter if there are no events in eventMap', async() => {
         await store.dispatch('refreshEventFeed');
-        expect(getEvents.mock.calls.length).toBe(1);
-        expect(getEvents.mock.calls[0][0]).toBe(6);
-        expect(getEvents.mock.calls[0][1]).toBe(undefined);
+        expect(getEvents).toBeCalledTimes(1);
+        expect(getEvents).toBeCalledWith(6, undefined);
       });
 
     });
@@ -164,9 +163,8 @@ describe('store.ts', () => {
 
       it('Calls getEvents method with id of current user and latest lastModified date from events if there are events in eventMap', async() => {
         await store.dispatch('refreshEventFeed');
-        expect(getEvents.mock.calls.length).toBe(1);
-        expect(getEvents.mock.calls[0][0]).toBe(6);
-        expect(getEvents.mock.calls[0][1]).toBe('2021-11-15T05:10:00Z');
+        expect(getEvents).toBeCalledTimes(1);
+        expect(getEvents).toBeCalledWith(6, '2021-11-15T05:10:00Z');
       });
   
       it('Adds returned events to eventMap if response from getEvents is a list of events', async () => {

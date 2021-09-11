@@ -152,7 +152,7 @@ export default {
       this.$store.dispatch('refreshEventFeed');
       this.polling = setInterval(() => {
         this.$store.dispatch('refreshEventFeed');
-      }, 3000);
+      }, 7500);
     },
   },
   watch: {

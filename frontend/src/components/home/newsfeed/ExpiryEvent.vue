@@ -1,5 +1,5 @@
 <template>
-  <Event :event="event" :title="title" v-if="visible">
+  <Event :event="event" :title="title">
     <v-card-text>
       {{ text }}
     </v-card-text>
@@ -43,7 +43,6 @@ export default {
       viewCard: false,
       errorMessage: undefined,
       delayed: false,
-      visible: true,
     };
   },
   computed: {
@@ -114,7 +113,7 @@ export default {
     remainingSeconds: {
       handler () {
         if (this.remainingSeconds < 0) {
-          this.visible = false;
+          this.$store.commit('removeEvent', this.event.id);
         }
       },
       immediate: true

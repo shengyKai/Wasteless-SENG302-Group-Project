@@ -4,7 +4,6 @@ import {createLocalVue, mount, Wrapper} from "@vue/test-utils";
 import EventList from "@/components/home/newsfeed/EventList.vue";
 import Vuex from "vuex";
 import {AnyEvent, GlobalMessageEvent} from "@/api/events";
-import { version } from "vue/types/umd";
 
 Vue.use(Vuetify);
 const localVue = createLocalVue();

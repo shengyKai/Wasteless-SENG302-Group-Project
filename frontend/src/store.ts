@@ -315,20 +315,13 @@ function createOptions(): StoreOptions<StoreData> {
       async refreshEventFeed(context) {
         const userId = context.state.user?.id;
         if (!userId) return;
-        const eventIds = Object.keys(context.state.eventMap).map(key => parseInt(key, 10));
-        let response;
-        if (eventIds.length === 0) {
-          response = await getEvents(userId, undefined);
-        } else {
-          let mostRecentModified = context.state.eventMap[eventIds[0]].lastModified;
-          for (let id of eventIds) {
-            let event = context.state.eventMap[id];
-            if (new Date(event.lastModified) > new Date(mostRecentModified)) {
-              mostRecentModified = event.lastModified;
-            }
+        let mostRecentModified = undefined;
+        for (let event of Object.values(context.state.eventMap)) {
+          if (mostRecentModified === undefined || new Date(event.lastModified) > new Date(mostRecentModified)) {
+            mostRecentModified = event.lastModified;
           }
-          response = await getEvents(userId, mostRecentModified);
         }
+        let response = await getEvents(userId, mostRecentModified);
         if (typeof response === 'string') {
           console.error(response);
         } else {

@@ -51,6 +51,8 @@ describe('HomePage.vue', () => {
     store = getStore();
     store.state.user = testUser;
 
+    jest.useFakeTimers();
+
     wrapper = mount(HomePage, {
       stubs: ['BusinessActionPanel', 'UserActionPanel', 'GlobalMessage' , 'ExpiryEvent', 'DeleteEvent', 'KeywordCreated'],
       localVue,
