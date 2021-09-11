@@ -5,6 +5,7 @@ import org.apache.logging.log4j.Logger;
 import org.seng302.leftovers.entities.Keyword;
 import org.seng302.leftovers.entities.User;
 import org.seng302.leftovers.entities.event.KeywordCreatedEvent;
+import org.seng302.leftovers.persistence.EventRepository;
 import org.seng302.leftovers.persistence.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,12 +21,12 @@ import java.util.Set;
 public class KeywordService {
 
     private static final Logger logger = LogManager.getLogger(KeywordService.class);
-    private final EventService eventService;
     private final UserRepository userRepository;
+    private final EventRepository eventRepository;
 
     @Autowired
-    public KeywordService(EventService eventService, UserRepository userRepository) {
-        this.eventService = eventService;
+    public KeywordService(EventRepository eventRepository, UserRepository userRepository) {
+        this.eventRepository = eventRepository;
         this.userRepository = userRepository;
     }
 
@@ -42,7 +43,7 @@ public class KeywordService {
                 keyword.getName());
         for (User admin : adminSet) {
             KeywordCreatedEvent newKeywordEvent = new KeywordCreatedEvent(admin, creator, keyword);
-            eventService.saveEvent(newKeywordEvent);
+            eventRepository.save(newKeywordEvent);
         }
     }
 }

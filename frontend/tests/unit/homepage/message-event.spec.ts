@@ -4,6 +4,7 @@ import Vuetify from 'vuetify';
 import { createLocalVue, mount, Wrapper } from '@vue/test-utils';
 import MessageEvent from '@/components/home/newsfeed/MessageEvent.vue';
 import * as api from '@/api/internal';
+import * as events from '@/api/events';
 
 import Vuex, { Store } from 'vuex';
 import { getStore, resetStoreForTesting, StoreData } from '@/store';
@@ -16,8 +17,14 @@ jest.mock('@/api/internal', () => ({
   getMessagesInConversation: jest.fn(),
 }));
 
+jest.mock('@/api/events', () => ({
+  getEvents: jest.fn(),
+  updateEventAsRead: jest.fn(),
+}));
+
 const messageConversation = castMock(api.messageConversation);
 const getMessagesInConversation = castMock(api.getMessagesInConversation);
+const getEvents = castMock(events.getEvents);
 
 const sellerUser = makeTestUser(100);
 const buyerUser = makeTestUser(50);
@@ -76,6 +83,7 @@ describe('MessageEvent.vue', () => {
       }
     });
     eventWrapper = wrapper.findComponent({name: 'Event'});
+    getEvents.mockResolvedValue([]);
   });
 
   /**

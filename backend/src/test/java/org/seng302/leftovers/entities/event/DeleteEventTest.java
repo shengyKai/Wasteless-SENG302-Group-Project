@@ -80,7 +80,8 @@ class DeleteEventTest {
         assertEquals(testCard.getSection().getName(), json.get("section"));
         assertEquals(event.getStatus().toString().toLowerCase(), json.get("status"));
         assertEquals(event.isRead(), json.get("read"));
-        assertEquals(8, json.size());
+        assertEquals(event.getLastModified().toString(), json.get("lastModified"));
+        assertEquals(9, json.size());
     }
 
 }

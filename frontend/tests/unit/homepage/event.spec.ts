@@ -18,6 +18,7 @@ jest.mock('@/api/internal', () => ({
 }));
 
 jest.mock('@/api/events', () => ({
+  getEvents: jest.fn(),
   updateEventAsRead: jest.fn(),
 }));
 
@@ -27,6 +28,7 @@ jest.mock('@/components/utils/Methods/synchronizedTime', () => ({
 
 const deleteNotification = castMock(api.deleteNotification);
 const updateEventAsRead = castMock(eventsApi.updateEventAsRead);
+const getEvents = castMock(eventsApi.getEvents);
 
 describe('Event.vue', () => {
   let wrapper: Wrapper<any>;
@@ -39,12 +41,12 @@ describe('Event.vue', () => {
   function generateWrapper() {
 
     vuetify = new Vuetify();
-  
+
     localVue.use(Vuex);
     resetStoreForTesting();
     store = getStore();
     store.state.user = makeTestUser(1);
-  
+
     wrapper = mount(Event, {
       localVue,
       vuetify,
@@ -57,6 +59,8 @@ describe('Event.vue', () => {
         title: "Test event",
       }
     });
+
+    getEvents.mockResolvedValue([]);
   }
 
   beforeEach(async () => {
@@ -147,7 +151,7 @@ describe('Event.vue', () => {
 
     afterEach(() => {
       wrapper.destroy();
-    })
+    });
 
     it("On click of the event component, the api endpoint to update the read status is called", async () => {
       wrapper.trigger("click");
