@@ -79,8 +79,8 @@
 
 <script>
 import SearchBusinessResult from './cards/SearchBusinessResult';
-import { searchBusinesses, BUSINESS_TYPES } from '../api/internal';
-import { debounce } from '../utils';
+import { debounce } from '@/utils';
+import {BUSINESS_TYPES, searchBusinesses} from "@/api/internal-business";
 
 export default {
   name: 'SearchBusinessPage',

@@ -1,5 +1,6 @@
-import { getMarketplaceCardsBySection, MarketplaceCard, SearchResults } from '@/api/internal';
+import {SearchResults} from '@/api/internal';
 import axios, {AxiosInstance } from 'axios';
+import {getMarketplaceCardsBySection, MarketplaceCard} from "@/api/internal-marketplace";
 
 jest.mock('axios', () => ({
   create: jest.fn(function () {

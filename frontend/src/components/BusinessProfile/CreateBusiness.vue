@@ -117,13 +117,13 @@
 
 <script>
 import LocationAutocomplete from '@/components/utils/LocationAutocomplete';
-import {createBusiness} from '@/api/internal';
 import {
   alphabetExtendedMultilineRules,
   alphabetExtendedSingleLineRules, alphabetRules,
   mandatoryRules,
   maxCharRules, postCodeRules, streetNumRules
 } from "@/utils";
+import {createBusiness} from "@/api/internal-business";
 
 export default {
   name: 'CreateBusiness',

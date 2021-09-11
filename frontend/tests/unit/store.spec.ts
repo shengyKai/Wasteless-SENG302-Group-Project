@@ -1,14 +1,14 @@
-import Vuex, { Store } from 'vuex';
-import { createLocalVue } from '@vue/test-utils';
-import { getStore, resetStoreForTesting, StoreData } from '@/store';
-import * as api from '@/api/internal';
-import { castMock } from './utils';
+import Vuex, {Store} from 'vuex';
+import {createLocalVue} from '@vue/test-utils';
+import {getStore, resetStoreForTesting, StoreData} from '@/store';
+import {castMock} from './utils';
+import {deleteNotification as deleteNotification1} from "@/api/internal-event";
 
 jest.mock('@/api/internal', () => ({
   deleteNotification: jest.fn(),
 }));
 
-const deleteNotification = castMock(api.deleteNotification);
+const deleteNotification = castMock(deleteNotification1);
 
 describe('store.ts', () => {
 

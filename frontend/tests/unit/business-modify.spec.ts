@@ -1,13 +1,14 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
 import Vuetify from 'vuetify';
-import { createLocalVue, Wrapper, mount } from '@vue/test-utils';
+import {createLocalVue, mount, Wrapper} from '@vue/test-utils';
 
 import ModifyBusiness from '@/components/BusinessProfile/ModifyBusiness.vue';
 import {castMock} from "./utils";
-import * as api from '@/api/internal';
-import {User, Location, Business} from "@/api/internal";
-import { getStore, resetStoreForTesting } from '@/store';
+import {Business, Location, User} from '@/api/internal';
+import {getStore, resetStoreForTesting} from '@/store';
+import {getUser as getUser1} from "@/api/internal-user";
+import {modifyBusiness as modifyBusiness1, uploadBusinessImage as uploadBusinessImage1} from "@/api/internal-business";
 
 jest.mock('@/api/internal', () => ({
   getUser: jest.fn(),
@@ -15,9 +16,9 @@ jest.mock('@/api/internal', () => ({
   uploadBusinessImage: jest.fn(),
 }));
 
-const getUser = castMock(api.getUser);
-const modifyBusiness = castMock(api.modifyBusiness);
-const uploadBusinessImage = castMock(api.uploadBusinessImage);
+const getUser = castMock(getUser1);
+const modifyBusiness = castMock(modifyBusiness1);
+const uploadBusinessImage = castMock(uploadBusinessImage1);
 Vue.use(Vuetify);
 const localVue = createLocalVue();
 

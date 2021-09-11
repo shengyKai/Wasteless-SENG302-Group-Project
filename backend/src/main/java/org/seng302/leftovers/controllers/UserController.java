@@ -13,7 +13,9 @@ import org.seng302.leftovers.exceptions.UserNotFoundException;
 import org.seng302.leftovers.persistence.UserRepository;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
 import org.seng302.leftovers.tools.PasswordAuthenticator;
-import org.seng302.leftovers.tools.SearchHelper;
+import org.seng302.leftovers.service.searchservice.SearchPageConstructor;
+import org.seng302.leftovers.service.searchservice.SearchQueryParser;
+import org.seng302.leftovers.service.searchservice.SearchSpecConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
@@ -172,13 +174,13 @@ public class UserController {
         List<User> queryResults;
         long count;
         if (orderBy == null || orderBy.equals("relevance")) {
-            queryResults = SearchHelper.getSearchResultsOrderedByRelevance(searchQuery, userRepository, reverse);
+            queryResults = SearchQueryParser.getSearchResultsOrderedByRelevance(searchQuery, userRepository, reverse);
             count = queryResults.size();
-            queryResults = SearchHelper.getPageInResults(queryResults, page, resultsPerPage);
+            queryResults = SearchPageConstructor.getPageInResults(queryResults, page, resultsPerPage);
         } else {
-            Specification<User> spec = SearchHelper.constructUserSpecificationFromSearchQuery(searchQuery);
-            Sort userSort = SearchHelper.getSort(orderBy, reverse);
-            Page<User> results = userRepository.findAll(spec, SearchHelper.getPageRequest(page, resultsPerPage, userSort));
+            Specification<User> spec = SearchSpecConstructor.constructUserSpecificationFromSearchQuery(searchQuery);
+            Sort userSort = SearchQueryParser.getSort(orderBy, reverse);
+            Page<User> results = userRepository.findAll(spec, SearchPageConstructor.getPageRequest(page, resultsPerPage, userSort));
             count = results.getTotalElements();
             queryResults = results.toList();
         }

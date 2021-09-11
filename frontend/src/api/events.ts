@@ -1,5 +1,9 @@
-import { Keyword, MarketplaceCard, MarketplaceCardSection, MaybeError, Message, User } from "./internal";
+import { MaybeError} from "./internal";
 import axios from 'axios';
+import {User} from "@/api/internal-user";
+import {MarketplaceCard, MarketplaceCardSection} from "@/api/internal-marketplace";
+import {Keyword} from "@/api/internal-keyword";
+import {Message} from "@/api/internal-event";
 
 const SERVER_URL = process.env.VUE_APP_SERVER_ADD;
 

@@ -10,7 +10,7 @@ import org.seng302.leftovers.entities.MarketplaceCard;
 import org.seng302.leftovers.entities.User;
 import org.seng302.leftovers.entities.event.ExpiryEvent;
 import org.seng302.leftovers.service.EventService;
-import org.seng302.leftovers.tools.SearchHelper;
+import org.seng302.leftovers.service.searchservice.SearchPageConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
@@ -199,7 +199,7 @@ class MarketplaceCardRepositoryTest {
         card3 = marketplaceCardRepository.save(card3);
 
         // Same page request as in GET /users/:id/cards
-        var pageRequest = SearchHelper.getPageRequest(null, null, Sort.by(new Sort.Order(Sort.Direction.DESC, "created")));
+        var pageRequest = SearchPageConstructor.getPageRequest(null, null, Sort.by(new Sort.Order(Sort.Direction.DESC, "created")));
         Page<MarketplaceCard> result = marketplaceCardRepository.getAllByCreator(user, pageRequest);
 
         List<MarketplaceCard> expectedOrder = List.of(card1, card3, card2);

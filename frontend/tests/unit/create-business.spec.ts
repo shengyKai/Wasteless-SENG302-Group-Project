@@ -1,20 +1,19 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
 import Vuetify from 'vuetify';
-import { createLocalVue, Wrapper, mount } from '@vue/test-utils';
+import {createLocalVue, mount, Wrapper} from '@vue/test-utils';
 
 import CreateBusiness from '@/components/BusinessProfile/CreateBusiness.vue';
 import {castMock, makeTestUser} from "./utils";
-import * as api from '@/api/internal';
-import { getStore, resetStoreForTesting } from '@/store';
-import {User} from "@/api/internal";
+import {getStore, resetStoreForTesting} from '@/store';
+import {createBusiness as createBusiness1} from "@/api/internal-business";
 
 
 jest.mock('@/api/internal', () => ({
   createBusiness: jest.fn(),
 }));
 
-const createBusiness = castMock(api.createBusiness);
+const createBusiness = castMock(createBusiness1);
 Vue.use(Vuetify);
 const localVue = createLocalVue();
 

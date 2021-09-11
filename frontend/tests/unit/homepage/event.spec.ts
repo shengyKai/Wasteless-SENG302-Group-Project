@@ -1,15 +1,14 @@
-
 import Vue from 'vue';
 import Vuetify from 'vuetify';
-import { createLocalVue, mount, Wrapper } from '@vue/test-utils';
+import {createLocalVue, mount, Wrapper} from '@vue/test-utils';
 import Event from '@/components/home/newsfeed/Event.vue';
-import * as api from '@/api/internal';
 import * as eventsApi from '@/api/events';
 
-import Vuex, { Store } from 'vuex';
-import { getStore, resetStoreForTesting, StoreData } from '@/store';
-import { castMock, makeTestUser } from '../utils';
+import Vuex, {Store} from 'vuex';
+import {getStore, resetStoreForTesting, StoreData} from '@/store';
+import {castMock, makeTestUser} from '../utils';
 import synchronizedTime from '@/components/utils/Methods/synchronizedTime';
+import {deleteNotification as deleteNotification1} from "@/api/internal-event";
 
 Vue.use(Vuetify);
 
@@ -25,7 +24,7 @@ jest.mock('@/components/utils/Methods/synchronizedTime', () => ({
   now : new Date("2021-01-02T11:00:00Z")
 }));
 
-const deleteNotification = castMock(api.deleteNotification);
+const deleteNotification = castMock(deleteNotification1);
 const updateEventAsRead = castMock(eventsApi.updateEventAsRead);
 
 describe('Event.vue', () => {
@@ -39,12 +38,12 @@ describe('Event.vue', () => {
   function generateWrapper() {
 
     vuetify = new Vuetify();
-  
+
     localVue.use(Vuex);
     resetStoreForTesting();
     store = getStore();
     store.state.user = makeTestUser(1);
-  
+
     wrapper = mount(Event, {
       localVue,
       vuetify,
@@ -147,7 +146,7 @@ describe('Event.vue', () => {
 
     afterEach(() => {
       wrapper.destroy();
-    })
+    });
 
     it("On click of the event component, the api endpoint to update the read status is called", async () => {
       wrapper.trigger("click");

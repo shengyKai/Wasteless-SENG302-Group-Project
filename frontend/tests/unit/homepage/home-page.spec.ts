@@ -3,11 +3,13 @@ import Vuex, { Store } from 'vuex';
 import Vuetify from 'vuetify';
 import {createLocalVue, mount, Wrapper} from '@vue/test-utils';
 
-import {User, MarketplaceCard, Keyword } from '@/api/internal';
 import HomePage from '@/components/home/HomePage.vue';
 import { getStore, resetStoreForTesting, StoreData } from '@/store';
 
 import { AnyEvent, DeleteEvent, ExpiryEvent, GlobalMessageEvent, KeywordCreatedEvent, MessageEvent } from '@/api/events';
+import {User} from "@/api/internal-user";
+import {MarketplaceCard} from "@/api/internal-marketplace";
+import {Keyword} from "@/api/internal-keyword";
 
 Vue.use(Vuetify);
 const localVue = createLocalVue();

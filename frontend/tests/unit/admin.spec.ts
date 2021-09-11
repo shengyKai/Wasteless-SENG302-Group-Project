@@ -1,12 +1,11 @@
 import Vue from 'vue';
 import Vuetify from 'vuetify';
-import { createLocalVue, mount, Wrapper } from '@vue/test-utils';
+import {createLocalVue, mount, Wrapper} from '@vue/test-utils';
 import Admin from "@/components/admin/Admin.vue";
-
-import * as api from "@/api/internal";
-import { castMock, flushQueue } from './utils';
-import Vuex, { Store } from 'vuex';
-import { getStore, resetStoreForTesting, StoreData } from '@/store';
+import {castMock} from './utils';
+import Vuex, {Store} from 'vuex';
+import {StoreData} from '@/store';
+import {Keyword, searchKeywords as searchKeywords1} from "@/api/internal-keyword";
 
 Vue.use(Vuetify);
 
@@ -14,7 +13,7 @@ jest.mock('@/api/internal', () => ({
   searchKeywords: jest.fn(),
 }));
 
-const searchKeywords = castMock(api.searchKeywords);
+const searchKeywords = castMock(searchKeywords1);
 
 describe("Admin.vue", () => {
 
@@ -22,7 +21,7 @@ describe("Admin.vue", () => {
   let vuetify: Vuetify;
   let store: Store<StoreData>;
 
-  const keywordResponse : api.Keyword[] = [{
+  const keywordResponse : Keyword[] = [{
     id: 12,
     name: "Dance",
     created: "2021-01-01",

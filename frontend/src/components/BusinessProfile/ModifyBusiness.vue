@@ -1,5 +1,5 @@
 <template>
-  <div  class="d-flex flex-column" no-gutters>
+  <div class="d-flex flex-column" no-gutters>
     <v-row justify="center">
       <v-col cols="10">
         <v-card max-width=1800px>
@@ -264,8 +264,9 @@ import {
   maxCharRules, postCodeRules, streetNumRules,
   USER_ROLES
 } from "@/utils";
-import { modifyBusiness, uploadBusinessImage, makeBusinessImagePrimary, getUser } from '@/api/internal';
 import ImageCarousel from "@/components/utils/ImageCarousel";
+import {getUser} from "@/api/internal-user";
+import {makeBusinessImagePrimary, modifyBusiness, uploadBusinessImage} from "@/api/internal-business";
 
 export default {
   name: 'ModifyBusiness',
@@ -474,26 +475,6 @@ export default {
 </script>
 
 <style scoped>
-.body {
-    padding: 16px;
-    width: 100%;
-    margin-top: 140px;
-}
-
-.top-section {
-  display: flex;
-  flex-wrap: wrap;
-}
-
-.business-modify {
-  margin-top: 20px;
-}
-
-.modify-business-button {
-  display: block;
-  margin-right: 48%;
-}
-
 .expand-icon {
   padding-right: 10px;
 }

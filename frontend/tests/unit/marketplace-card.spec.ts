@@ -5,9 +5,11 @@ import Vuex from 'vuex';
 import { createLocalVue, mount, Wrapper } from '@vue/test-utils';
 import MarketplaceCard from '@/components/cards/MarketplaceCard.vue';
 
-import { deleteMarketplaceCard, messageConversation, MarketplaceCardSection, User } from '@/api/internal';
 import { flushQueue } from './utils';
 import { SECTION_NAMES } from '@/utils';
+import {User} from "@/api/internal-user";
+import {deleteMarketplaceCard, MarketplaceCardSection} from "@/api/internal-marketplace";
+import {messageConversation} from "@/api/internal-event";
 
 jest.mock('@/api/internal', () => ({
   deleteMarketplaceCard: jest.fn(),

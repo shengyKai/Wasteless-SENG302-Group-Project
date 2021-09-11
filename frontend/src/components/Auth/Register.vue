@@ -226,7 +226,6 @@
 
 <script>
 import LocationAutocomplete from '@/components/utils/LocationAutocomplete';
-import {createUser} from '../../api/internal';
 import {
   alphabetExtendedMultilineRules,
   alphabetRules,
@@ -238,6 +237,7 @@ import {
   postCodeRules,
   streetNumRules,
 } from "@/utils";
+import {createUser} from "@/api/internal-user";
 
 export default {
   name: 'Register',

@@ -10,7 +10,8 @@ import org.seng302.leftovers.entities.event.ExpiryEvent;
 import org.seng302.leftovers.persistence.*;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
 import org.seng302.leftovers.tools.JsonTools;
-import org.seng302.leftovers.tools.SearchHelper;
+import org.seng302.leftovers.service.searchservice.SearchPageConstructor;
+import org.seng302.leftovers.service.searchservice.SearchQueryParser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -146,9 +147,7 @@ public class CardController {
             }
 
             Optional<ExpiryEvent> expiryEvent = expiryEventRepository.getByExpiringCard(card);
-            if (expiryEvent.isPresent()) {
-                expiryEventRepository.delete(expiryEvent.get());
-            }
+            expiryEvent.ifPresent(expiryEventRepository::delete);
             marketplaceCardRepository.delete(card);
 
         } catch (Exception e) {
@@ -230,9 +229,7 @@ public class CardController {
             }
 
             Optional<ExpiryEvent> expiryEvent = expiryEventRepository.getByExpiringCard(card);
-            if (expiryEvent.isPresent()) {
-                expiryEventRepository.delete(expiryEvent.get());
-            }
+            expiryEvent.ifPresent(expiryEventRepository::delete);
             card.delayCloses();
             marketplaceCardRepository.save(card);
         } catch (Exception e) {
@@ -251,7 +248,7 @@ public class CardController {
      * @return Page request that contains ordering and pagination information
      */
     private PageRequest generatePageRequest(String orderBy, Integer page, Integer resultsPerPage, Boolean reverse) {
-        Sort.Direction direction = SearchHelper.getSortDirection(reverse);
+        Sort.Direction direction = SearchQueryParser.getSortDirection(reverse);
         if (orderBy == null) {
             orderBy = DEFAULT_ORDERING;
         }
@@ -269,7 +266,7 @@ public class CardController {
             sortOrder = List.of(new Sort.Order(direction, orderBy).ignoreCase());
         }
 
-        return SearchHelper.getPageRequest(page, resultsPerPage, Sort.by(sortOrder));
+        return SearchPageConstructor.getPageRequest(page, resultsPerPage, Sort.by(sortOrder));
     }
 
     /**
@@ -367,7 +364,7 @@ public class CardController {
 
         User user = userRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "User not found"));
 
-        PageRequest pageRequest = SearchHelper.getPageRequest(page, resultsPerPage, Sort.by(Sort.Direction.DESC, DEFAULT_ORDERING));
+        PageRequest pageRequest = SearchPageConstructor.getPageRequest(page, resultsPerPage, Sort.by(Sort.Direction.DESC, DEFAULT_ORDERING));
         var results = marketplaceCardRepository.getAllByCreator(user, pageRequest);
 
         return JsonTools.constructPageJSON(results.map(MarketplaceCard::constructJSONObject));

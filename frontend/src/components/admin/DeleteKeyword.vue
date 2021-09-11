@@ -23,7 +23,7 @@
 </template>
 
 <script>
-import { deleteKeyword } from '@/api/internal';
+import {deleteKeyword} from "@/api/internal-keyword";
 
 export default {
   props: {

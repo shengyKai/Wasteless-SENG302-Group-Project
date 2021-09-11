@@ -112,8 +112,8 @@
 <script>
 import synchronizedTime from '@/components/utils/Methods/synchronizedTime';
 import { formatDate, formatTime } from '@/utils';
-import { setEventTag } from "@/api/internal";
 import {updateEventAsRead} from "@/api/events";
+import {setEventTag} from "@/api/internal-event";
 
 export default {
   name: 'Event',
@@ -217,7 +217,7 @@ export default {
     /**
      * Call the setEventTag endpoint when user click on the tag changing button
      * Will render errorMessage message if the response returned with one
-     * @param this.event.id To pass the endpoint for the event user wan to update
+     * this.event.id To pass the endpoint for the event user wan to update
      * @param colour        Take the colour that user wan to change the tag into
      */
     async tagNotification(colour) {

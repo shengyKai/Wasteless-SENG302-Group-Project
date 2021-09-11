@@ -1,4 +1,4 @@
-import { MarketplaceCardSection } from "./api/internal";
+import {MarketplaceCardSection} from "@/api/internal-marketplace";
 
 /**
  * Sets a cookie. Will expire in one year.
@@ -177,7 +177,7 @@ export function regxPassword() {
  * Returns a Regex that matches a valid email address
  */
 export function regxEmail() {
-  return /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+  return /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 }
 
 /**

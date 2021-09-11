@@ -10,7 +10,9 @@ import org.seng302.leftovers.persistence.BusinessRepository;
 import org.seng302.leftovers.persistence.InventoryItemRepository;
 import org.seng302.leftovers.persistence.ProductRepository;
 import org.seng302.leftovers.tools.JsonTools;
-import org.seng302.leftovers.tools.SearchHelper;
+import org.seng302.leftovers.service.searchservice.SearchPageConstructor;
+import org.seng302.leftovers.service.searchservice.SearchQueryParser;
+import org.seng302.leftovers.service.searchservice.SearchSpecConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -199,12 +201,12 @@ public class InventoryController {
         Business business = businessRepository.getBusinessById(businessId);
         business.checkSessionPermissions(request);
 
-        Sort.Direction direction = SearchHelper.getSortDirection(reverse);
+        Sort.Direction direction = SearchQueryParser.getSortDirection(reverse);
         Sort.Order sortOrder = getInventoryItemOrder(orderBy, direction);
 
-        PageRequest pageRequest = SearchHelper.getPageRequest(page, resultsPerPage, Sort.by(sortOrder));
+        PageRequest pageRequest = SearchPageConstructor.getPageRequest(page, resultsPerPage, Sort.by(sortOrder));
 
-        Specification<InventoryItem> specification = SearchHelper.constructSpecificationFromInventoryItemsFilter(business);
+        Specification<InventoryItem> specification = SearchSpecConstructor.constructSpecificationFromInventoryItemsFilter(business);
         Page<InventoryItem> result = inventoryItemRepository.findAll(specification, pageRequest);
         
         return JsonTools.constructPageJSON(result.map(InventoryItem::constructJSONObject));
@@ -226,7 +228,7 @@ public class InventoryController {
         if (orderBy.equals("productCode")) {
             orderBy = "product.productCode";
         }
-        if (orderBy.equals("name")) {
+        else if (orderBy.equals("name")) {
             orderBy = "product.name";
         }
         else if (orderBy.equals("description")) {

@@ -1,14 +1,25 @@
 import Vue from 'vue';
 import Vuetify from 'vuetify';
-import Vuex, { Store } from 'vuex';
-import {createLocalVue, Wrapper, mount, createWrapper} from '@vue/test-utils';
+import Vuex, {Store} from 'vuex';
+import {createLocalVue, mount, Wrapper} from '@vue/test-utils';
 
-import { getStore, resetStoreForTesting, StoreData } from '@/store';
+import {getStore, resetStoreForTesting, StoreData} from '@/store';
 import UserProfile from '@/components/UserProfile/index.vue';
 
-import * as api from '@/api/internal';
-import { castMock, flushQueue } from './utils';
-import { User, Business } from '@/api/internal';
+import {castMock, flushQueue} from './utils';
+import {
+  getUser as getUser1,
+  makeAdmin as makeAdmin1,
+  revokeAdmin as revokeAdmin1,
+  UserRole,
+  User
+} from "@/api/internal-user";
+import {
+  getBusiness as getBusiness1,
+  makeBusinessAdmin as makeBusinessAdmin1,
+  removeBusinessAdmin as removeBusinessAdmin1,
+  Business
+} from "@/api/internal-business";
 
 Vue.use(Vuetify);
 
@@ -21,14 +32,14 @@ jest.mock('@/api/internal', () => ({
   revokeAdmin: jest.fn(),
 }));
 
-const makeBusinessAdmin = castMock(api.makeBusinessAdmin);
-const removeBusinessAdmin = castMock(api.removeBusinessAdmin);
+const makeBusinessAdmin = castMock(makeBusinessAdmin1);
+const removeBusinessAdmin = castMock(removeBusinessAdmin1);
 
-const getBusiness = castMock(api.getBusiness);
-const getUser = castMock(api.getUser);
+const getBusiness = castMock(getBusiness1);
+const getUser = castMock(getUser1);
 
-const makeAdmin = castMock(api.makeAdmin);
-const revokeAdmin = castMock(api.revokeAdmin);
+const makeAdmin = castMock(makeAdmin1);
+const revokeAdmin = castMock(revokeAdmin1);
 
 const localVue = createLocalVue();
 
@@ -61,10 +72,10 @@ function makeTestBusiness(businessId: number, administrators?: number[]) {
  *
  * @param userId The user id to use
  * @param businesses The businesses for this user to administer
- * @param applicationAdmin True if you want the user to be an system administrator
+ * @param role Role of the user
  * @returns The generated user
  */
-function makeTestUser(userId: number, businesses?: number[], role?: api.UserRole) {
+function makeTestUser(userId: number, businesses?: number[], role?: UserRole) {
   let user: User = {
     id:  userId,
     firstName: 'test_firstname' + userId,

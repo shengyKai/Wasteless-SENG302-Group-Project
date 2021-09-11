@@ -296,7 +296,6 @@
 <script>
 import LocationAutocomplete from '@/components/utils/LocationAutocomplete';
 
-import { getUser, modifyUser } from '@/api/internal';
 import {
   alphabetExtendedMultilineRules,
   alphabetRules,
@@ -308,6 +307,7 @@ import {
   postCodeRules,
   streetNumRules,
 } from "@/utils";
+import {getUser, modifyUser} from "@/api/internal-user";
 
 export default {
   name: 'ModifyUserPage',

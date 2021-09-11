@@ -1,12 +1,11 @@
 import Vue from 'vue';
 import Vuetify from 'vuetify';
-import Vuex, { Store } from 'vuex';
-import { createLocalVue, Wrapper, mount } from '@vue/test-utils';
+import Vuex from 'vuex';
+import {createLocalVue, mount, Wrapper} from '@vue/test-utils';
 import SearchResults from '@/components/SearchResults.vue';
 import SearchResultItem from '@/components/cards/SearchResultItem.vue';
-import { User } from '@/api/internal';
-import * as api from '@/api/internal';
-import { castMock, flushQueue } from './utils';
+import {castMock, flushQueue} from './utils';
+import {userSearch as search1, User} from "@/api/internal-user";
 
 jest.mock('@/api/internal', () => ({
   search: jest.fn(),
@@ -18,7 +17,7 @@ jest.mock('@/utils', () => ({
   debounce: (func: (() => void)) => func,
 }));
 
-const search = castMock(api.search);
+const search = castMock(search1);
 
 Vue.use(Vuetify);
 
@@ -76,7 +75,7 @@ describe('SearchResults.vue', () => {
    * Sets the mock api results.
    *
    * @param users Users on the current page to use for the mock results
-   * @param testCount The mock number of total users for this search
+   * @param totalCount The mock number of total users for this search
    */
   function setResults(users: User[], totalCount?: number) {
     search.mockResolvedValue({

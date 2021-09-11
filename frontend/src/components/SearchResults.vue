@@ -72,8 +72,8 @@
 
 <script>
 import SearchResultItem from './cards/SearchResultItem';
-import { search } from '../api/internal';
-import { debounce } from '../utils';
+import { debounce } from '@/utils';
+import {userSearch} from "@/api/internal-user";
 
 export default {
   name: 'SearchResults',
@@ -170,7 +170,7 @@ export default {
 
       this.searchedQuery = this.searchQuery;
 
-      const value = await search (
+      const value = await userSearch (
         this.searchedQuery,
         this.currentPage,
         this.resultsPerPage,

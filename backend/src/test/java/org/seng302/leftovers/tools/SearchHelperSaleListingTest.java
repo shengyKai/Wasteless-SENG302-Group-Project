@@ -10,6 +10,8 @@ import org.seng302.leftovers.controllers.DGAAController;
 import org.seng302.leftovers.dto.SaleListingSearchDTO;
 import org.seng302.leftovers.entities.*;
 import org.seng302.leftovers.persistence.*;
+import org.seng302.leftovers.service.searchservice.SearchPageConstructor;
+import org.seng302.leftovers.service.searchservice.SearchSpecConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
@@ -157,7 +159,7 @@ class SearchHelperSaleListingTest {
     void constructSaleItemSpecificationOnlyIncludingProductName_matchesFullProductName_saleItemReturned(String query, String name) {
         testProduct.setName(name);
         updateTestRepositories();
-        Specification<SaleItem> specification = SearchHelper.constructSaleItemSpecificationFromSearchQueries(
+        Specification<SaleItem> specification = SearchSpecConstructor.constructSaleItemSpecificationFromSearchQueries(
                 "", query, "", "");
         List<SaleItem> matches = saleItemRepository.findAll(specification);
         assertEquals(1, matches.size());
@@ -177,7 +179,7 @@ class SearchHelperSaleListingTest {
     void constructSaleItemSpecificationOnlyIncludingProductName_matchesPartialProductName_saleItemReturned(String query, String name) {
         testProduct.setName(name);
         updateTestRepositories();
-        Specification<SaleItem> specification = SearchHelper.constructSaleItemSpecificationFromSearchQueries(
+        Specification<SaleItem> specification = SearchSpecConstructor.constructSaleItemSpecificationFromSearchQueries(
                 "", query, "", "");
         List<SaleItem> matches = saleItemRepository.findAll(specification);
         assertEquals(1, matches.size());
@@ -194,7 +196,7 @@ class SearchHelperSaleListingTest {
     void constructSaleItemSpecificationOnlyIncludingProductName_doesNotMatchProductName_saleItemNotReturned(String query, String name) {
         testProduct.setName(name);
         updateTestRepositories();
-        Specification<SaleItem> specification = SearchHelper.constructSaleItemSpecificationFromSearchQueries(
+        Specification<SaleItem> specification = SearchSpecConstructor.constructSaleItemSpecificationFromSearchQueries(
                 "", query, "", "");
         List<SaleItem> matches = saleItemRepository.findAll(specification);
         assertEquals(0, matches.size());
@@ -214,7 +216,7 @@ class SearchHelperSaleListingTest {
     void constructSaleItemSpecificationOnlyIncludingSellersName_matchesSellersName_saleItemReturned(String query, String name) {
         testBusiness.setName(name);
         updateTestRepositories();
-        Specification<SaleItem> specification = SearchHelper.constructSaleItemSpecificationFromSearchQueries(
+        Specification<SaleItem> specification = SearchSpecConstructor.constructSaleItemSpecificationFromSearchQueries(
                 "", "", query, "");
         List<SaleItem> matches = saleItemRepository.findAll(specification);
         assertEquals(1, matches.size());
@@ -236,7 +238,7 @@ class SearchHelperSaleListingTest {
     void constructSaleItemSpecificationOnlyIncludingSellersName_matchesPartialSellersName_saleItemReturned(String query, String name) {
         testBusiness.setName(name);
         updateTestRepositories();
-        Specification<SaleItem> specification = SearchHelper.constructSaleItemSpecificationFromSearchQueries(
+        Specification<SaleItem> specification = SearchSpecConstructor.constructSaleItemSpecificationFromSearchQueries(
                 "", "", query, "");
         List<SaleItem> matches = saleItemRepository.findAll(specification);
         assertEquals(1, matches.size());
@@ -255,7 +257,7 @@ class SearchHelperSaleListingTest {
     void constructSaleItemSpecificationOnlyIncludingSellersName_doesNotMatchSellersName_saleItemNotReturned(String query, String name) {
         testBusiness.setName(name);
         updateTestRepositories();
-        Specification<SaleItem> specification = SearchHelper.constructSaleItemSpecificationFromSearchQueries(
+        Specification<SaleItem> specification = SearchSpecConstructor.constructSaleItemSpecificationFromSearchQueries(
                 "", "", query, "");
         List<SaleItem> matches = saleItemRepository.findAll(specification);
         assertEquals(0, matches.size());
@@ -287,7 +289,7 @@ class SearchHelperSaleListingTest {
         testBusinessLocation.setCountry(country);
         testBusiness.setAddress(testBusinessLocation);
         updateTestRepositories();
-        Specification<SaleItem> specification = SearchHelper.constructSaleItemSpecificationFromSearchQueries(
+        Specification<SaleItem> specification = SearchSpecConstructor.constructSaleItemSpecificationFromSearchQueries(
                 "", "", "", query);
         List<SaleItem> matches = saleItemRepository.findAll(specification);
         assertEquals(1, matches.size());
@@ -314,7 +316,7 @@ class SearchHelperSaleListingTest {
         testBusinessLocation.setCountry(country);
         testBusiness.setAddress(testBusinessLocation);
         updateTestRepositories();
-        Specification<SaleItem> specification = SearchHelper.constructSaleItemSpecificationFromSearchQueries(
+        Specification<SaleItem> specification = SearchSpecConstructor.constructSaleItemSpecificationFromSearchQueries(
                 "", "", "", query);
         List<SaleItem> matches = saleItemRepository.findAll(specification);
         assertEquals(1, matches.size());
@@ -335,7 +337,7 @@ class SearchHelperSaleListingTest {
         testBusinessLocation.setCountry(country);
         testBusiness.setAddress(testBusinessLocation);
         updateTestRepositories();
-        Specification<SaleItem> specification = SearchHelper.constructSaleItemSpecificationFromSearchQueries(
+        Specification<SaleItem> specification = SearchSpecConstructor.constructSaleItemSpecificationFromSearchQueries(
                 "", "", "", query);
         List<SaleItem> matches = saleItemRepository.findAll(specification);
         assertEquals(0, matches.size());
@@ -346,7 +348,7 @@ class SearchHelperSaleListingTest {
                         "\"Canberra\" and \"NSW\" AND \"Australia\"",
                         "\"Davids pies\" OR \"Gregs pies\"", "\"Taiwan\" or \"Australia\"", "good pies", "Yummy"})
     void constructSaleItemSpecificationUsingOnlySearchQuery_fullMatchSearchQuery_saleItemReturned(String query) {
-        Specification<SaleItem> specification = SearchHelper.constructSaleItemSpecificationFromSearchQueries(
+        Specification<SaleItem> specification = SearchSpecConstructor.constructSaleItemSpecificationFromSearchQueries(
                 query, "", "", "");
         List<SaleItem> matches = saleItemRepository.findAll(specification);
         assertEquals(1, matches.size());
@@ -358,7 +360,7 @@ class SearchHelperSaleListingTest {
                         "\"Gregs\" AND \"pie\"", "\"Can\" AND \"Austra\"",
                         "\"Davids\" or \"Gregs\"", "\"Austral\" or \"Greenland\"", "good", "yum"})
     void constructSaleItemSpecificationUsingOnlySearchQuery_partialMatchSearchQuery_saleItemReturned(String query) {
-        Specification<SaleItem> specification = SearchHelper.constructSaleItemSpecificationFromSearchQueries(
+        Specification<SaleItem> specification = SearchSpecConstructor.constructSaleItemSpecificationFromSearchQueries(
                 query, "", "", "");
         List<SaleItem> matches = saleItemRepository.findAll(specification);
         assertEquals(1, matches.size());
@@ -368,7 +370,7 @@ class SearchHelperSaleListingTest {
     @ParameterizedTest
     @ValueSource(strings={"Austra,lia", "Gre.g", "Greenland", "Davids pies", "North America", "#$%"})
     void constructSaleItemSpecificationUsingOnlySearchQuery_doesNotMatchSearchQuery_saleItemNotReturned(String query) {
-        Specification<SaleItem> specification = SearchHelper.constructSaleItemSpecificationFromSearchQueries(
+        Specification<SaleItem> specification = SearchSpecConstructor.constructSaleItemSpecificationFromSearchQueries(
                 query, "", "", "");
         List<SaleItem> matches = saleItemRepository.findAll(specification);
         assertEquals(0, matches.size());
@@ -445,7 +447,7 @@ class SearchHelperSaleListingTest {
         saleItemRepository.deleteAll();
         setUpSaleItemsWithDifferentPricesClosingDates();
 
-        PageRequest pageRequest = SearchHelper.getPageRequest(1, 10, Sort.by("created"));
+        PageRequest pageRequest = SearchPageConstructor.getPageRequest(1, 10, Sort.by("created"));
 
         BigDecimal lowerBound = null;
         BigDecimal upperBound = null;
@@ -455,7 +457,7 @@ class SearchHelperSaleListingTest {
         if (priceUpperBound != null) {
             upperBound = new BigDecimal(priceUpperBound);
         }
-        Specification<SaleItem> specification = SearchHelper.constructSaleListingSpecificationFromPrice(lowerBound, upperBound);
+        Specification<SaleItem> specification = SearchSpecConstructor.constructSaleListingSpecificationFromPrice(lowerBound, upperBound);
         Page<SaleItem> resultSaleItemsBusiness = saleItemRepository.findAll(specification, pageRequest);
 
         assertEquals(Integer.parseInt(expectedSize), resultSaleItemsBusiness.getTotalElements());
@@ -480,7 +482,7 @@ class SearchHelperSaleListingTest {
         saleItemRepository.deleteAll();
         setUpSaleItemsWithDifferentPricesClosingDates();
 
-        PageRequest pageRequest = SearchHelper.getPageRequest(1, 10, Sort.by("created"));
+        PageRequest pageRequest = SearchPageConstructor.getPageRequest(1, 10, Sort.by("created"));
 
         LocalDate lowerBound = null;
         if (dateLowerBoundToAdd != null) {
@@ -490,7 +492,7 @@ class SearchHelperSaleListingTest {
         if (dateUpperBoundToAdd != null) {
             upperBound = LocalDate.now().plus(Integer.parseInt(dateUpperBoundToAdd), ChronoUnit.DAYS);
         }
-        Specification<SaleItem> specification = SearchHelper.constructSaleListingSpecificationFromClosingDate(lowerBound, upperBound);
+        Specification<SaleItem> specification = SearchSpecConstructor.constructSaleListingSpecificationFromClosingDate(lowerBound, upperBound);
         Page<SaleItem> resultSaleItemsBusiness = saleItemRepository.findAll(specification, pageRequest);
 
         assertEquals(Integer.parseInt(expectedSize), resultSaleItemsBusiness.getTotalElements());
@@ -578,9 +580,9 @@ class SearchHelperSaleListingTest {
             setUpSaleItemsWithDifferentBusinessTypes(businessType);
         }
 
-        PageRequest pageRequest = SearchHelper.getPageRequest(1, 10, Sort.by("created"));
+        PageRequest pageRequest = SearchPageConstructor.getPageRequest(1, 10, Sort.by("created"));
 
-        Specification<SaleItem> specification = SearchHelper.constructSaleListingSpecificationFromBusinessType(expectedBusinessTypes);
+        Specification<SaleItem> specification = SearchSpecConstructor.constructSaleListingSpecificationFromBusinessType(expectedBusinessTypes);
         Page<SaleItem> resultSaleItemsBusiness = saleItemRepository.findAll(specification, pageRequest);
 
         assertEquals(expectedSize, resultSaleItemsBusiness.getTotalElements());
@@ -653,9 +655,9 @@ class SearchHelperSaleListingTest {
         }
         setUpSaleItemsWithDifferentPricesClosingDates();
 
-        PageRequest pageRequest = SearchHelper.getPageRequest(1, 10, Sort.by("created"));
+        PageRequest pageRequest = SearchPageConstructor.getPageRequest(1, 10, Sort.by("created"));
 
-        Specification<SaleItem> specification = SearchHelper.constructSaleListingSpecificationForSearch(saleListingSearchDTO);
+        Specification<SaleItem> specification = SearchSpecConstructor.constructSaleListingSpecificationForSearch(saleListingSearchDTO);
         Page<SaleItem> resultSaleItemsBusiness = saleItemRepository.findAll(specification, pageRequest);
 
         assertEquals(expectedSize, resultSaleItemsBusiness.getTotalElements());

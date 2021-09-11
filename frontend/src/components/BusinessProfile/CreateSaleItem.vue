@@ -87,7 +87,6 @@
 </template>
 
 <script>
-import { createSaleItem } from "@/api/internal";
 import { currencyFromCountry } from "@/api/currency";
 import {
   alphabetExtendedMultilineRules,
@@ -96,6 +95,7 @@ import {
   quantityRules,
   smallPriceRules
 } from "@/utils";
+import {createSaleItem} from "@/api/internal-sale";
 
 export default {
   name: "CreateSaleItem",

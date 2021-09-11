@@ -1,12 +1,11 @@
 import Vue from 'vue';
 import Vuetify from 'vuetify';
-import Vuex, { Store } from 'vuex';
-import { createLocalVue, Wrapper, mount } from '@vue/test-utils';
+import Vuex from 'vuex';
+import {createLocalVue, mount, Wrapper} from '@vue/test-utils';
 import SearchBusinessPage from '@/components/SearchBusinessPage.vue';
 import SearchBusinessResult from '@/components/cards/SearchBusinessResult.vue';
-import { Business } from '@/api/internal';
-import * as api from '@/api/internal';
-import { castMock, flushQueue } from './utils';
+import {castMock, flushQueue} from './utils';
+import {searchBusinesses as searchBusinesses1, Business} from "@/api/internal-business";
 
 jest.mock('@/api/internal', () => ({
   searchBusinesses: jest.fn(),
@@ -18,7 +17,7 @@ jest.mock('@/utils', () => ({
   debounce: (func: (() => void)) => func,
 }));
 
-const searchBusinesses = castMock(api.searchBusinesses);
+const searchBusinesses = castMock(searchBusinesses1);
 
 Vue.use(Vuetify);
 
@@ -75,8 +74,8 @@ describe('SearchBusinessPage.vue', () => {
   /**
    * Sets the mock api results.
    *
-   * @param businesses Businesses on the current page to use for the mock results
-   * @param testCount The mock number of total users for this search
+   * @param users Businesses on the current page to use for the mock results
+   * @param totalCount The mock number of total users for this search
    */
   function setResults(users: Business[], totalCount?: number) {
     searchBusinesses.mockResolvedValue({

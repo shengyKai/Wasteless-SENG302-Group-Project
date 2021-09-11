@@ -111,9 +111,9 @@
 </template>
 
 <script>
-import { getProducts, searchCatalogue } from '../api/internal';
 import ProductCatalogueItem from './cards/ProductCatalogueItem.vue';
-import { debounce } from '../utils';
+import { debounce } from '@/utils';
+import {getProducts, searchCatalogue} from "@/api/internal-product";
 
 export default {
   name: "ProductCatalogue",

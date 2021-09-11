@@ -14,7 +14,9 @@ import org.seng302.leftovers.persistence.SaleItemRepository;
 import org.seng302.leftovers.persistence.UserRepository;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
 import org.seng302.leftovers.tools.JsonTools;
-import org.seng302.leftovers.tools.SearchHelper;
+import org.seng302.leftovers.service.searchservice.SearchPageConstructor;
+import org.seng302.leftovers.service.searchservice.SearchQueryParser;
+import org.seng302.leftovers.service.searchservice.SearchSpecConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -27,14 +29,12 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.math.BigDecimal;
 import javax.validation.Valid;
-import java.text.ParseException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.regex.Pattern;
 
 @RestController
 public class SaleController {
@@ -158,12 +158,12 @@ public class SaleController {
             logger.info("Getting sales item for business (businessId={}).", id);
             Business business = businessRepository.getBusinessById(id);
 
-            Sort.Direction direction = SearchHelper.getSortDirection(reverse);
+            Sort.Direction direction = SearchQueryParser.getSortDirection(reverse);
             List<Sort.Order> sortOrder = List.of(getSaleItemOrder(orderBy, direction));
 
-            PageRequest pageRequest = SearchHelper.getPageRequest(page, resultsPerPage, Sort.by(sortOrder));
+            PageRequest pageRequest = SearchPageConstructor.getPageRequest(page, resultsPerPage, Sort.by(sortOrder));
 
-            Specification<SaleItem> specification = SearchHelper.constructSpecificationFromSaleItemsFilter(business);
+            Specification<SaleItem> specification = SearchSpecConstructor.constructSpecificationFromSaleItemsFilter(business);
             Page<SaleItem> result = saleItemRepository.findAll(specification, pageRequest);
 
             return JsonTools.constructPageJSON(result.map(SaleItem::constructJSONObject));
@@ -217,7 +217,7 @@ public class SaleController {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "OrderBy term " + orderBy + " is invalid");
             }
             List<Sort.Order> sortOrder;
-            Sort.Direction direction = SearchHelper.getSortDirection(reverse);
+            Sort.Direction direction = SearchQueryParser.getSortDirection(reverse);
             sortOrder = List.of(new Sort.Order(direction, orderBy ).ignoreCase());
 
             // Check filter options
@@ -238,10 +238,10 @@ public class SaleController {
             if (closeUpper != null) maxDate = LocalDate.parse(closeUpper, formatter);
 
             // Create page
-            PageRequest pageablePage = SearchHelper.getPageRequest(page, resultsPerPage, Sort.by(sortOrder));
+            PageRequest pageablePage = SearchPageConstructor.getPageRequest(page, resultsPerPage, Sort.by(sortOrder));
             Specification<SaleItem> specification = Specification.where(
-                    SearchHelper.constructSaleItemSpecificationFromSearchQueries(basicSearchQuery, productSearchQuery, businessSearchQuery, locationSearchQuery))
-                    .and(SearchHelper.constructSaleListingSpecificationForSearch(new SaleListingSearchDTO(minPrice, maxPrice, minDate, maxDate, businessTypes)));
+                    SearchSpecConstructor.constructSaleItemSpecificationFromSearchQueries(basicSearchQuery, productSearchQuery, businessSearchQuery, locationSearchQuery))
+                    .and(SearchSpecConstructor.constructSaleListingSpecificationForSearch(new SaleListingSearchDTO(minPrice, maxPrice, minDate, maxDate, businessTypes)));
             Page<SaleItem> result = saleItemRepository.findAll(specification, pageablePage);
 
             return JsonTools.constructPageJSON(result.map(SaleItem::constructJSONObject));

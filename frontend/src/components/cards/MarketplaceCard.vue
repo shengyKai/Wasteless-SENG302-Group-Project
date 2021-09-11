@@ -158,8 +158,9 @@
 
 <script>
 import {formatDate, maxCharRules, mandatoryRules, SECTION_NAMES} from '@/utils';
-import {deleteMarketplaceCard, messageConversation} from '../../api/internal.ts';
 import MarketplaceCardForm from '../marketplace/MarketplaceCardForm.vue';
+import {deleteMarketplaceCard} from "@/api/internal-marketplace";
+import {messageConversation} from "@/api/internal-event";
 
 export default {
   name: "MarketplaceCard",

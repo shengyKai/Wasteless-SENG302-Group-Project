@@ -1,5 +1,5 @@
-import { createNewKeyword, deleteKeyword, searchKeywords } from '@/api/internal';
 import axios, {AxiosInstance } from 'axios';
+import {createNewKeyword, deleteKeyword, searchKeywords} from "@/api/internal-keyword";
 
 jest.mock('axios', () => ({
   create: jest.fn(function () {

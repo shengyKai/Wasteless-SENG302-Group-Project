@@ -20,7 +20,8 @@ import org.seng302.leftovers.persistence.InventoryItemRepository;
 import org.seng302.leftovers.persistence.SaleItemRepository;
 import org.seng302.leftovers.persistence.UserRepository;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
-import org.seng302.leftovers.tools.SearchHelper;
+import org.seng302.leftovers.service.searchservice.SearchPageConstructor;
+import org.seng302.leftovers.service.searchservice.SearchSpecConstructor;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -348,8 +349,8 @@ class SaleControllerTest {
         mockMvc.perform(get("/businesses/1/listings")
                 .param("orderBy", "price"))
                 .andReturn();
-        Specification<SaleItem> expectedSpecification = SearchHelper.constructSpecificationFromSaleItemsFilter(business);
-        PageRequest expectedPageRequest = SearchHelper.getPageRequest(null, null, Sort.by(new Sort.Order(Sort.Direction.ASC, "price").ignoreCase()));
+        Specification<SaleItem> expectedSpecification = SearchSpecConstructor.constructSpecificationFromSaleItemsFilter(business);
+        PageRequest expectedPageRequest = SearchPageConstructor.getPageRequest(null, null, Sort.by(new Sort.Order(Sort.Direction.ASC, "price").ignoreCase()));
 
         verify(saleItemRepository, times(1)).findAll(specificationArgumentCaptor.capture(), pageRequestArgumentCaptor.capture());
         assertTrue(new ReflectionEquals(expectedSpecification).matches(specificationArgumentCaptor.getValue()));
@@ -362,8 +363,8 @@ class SaleControllerTest {
         mockMvc.perform(get("/businesses/1/listings"))
                 .andReturn();
 
-        Specification<SaleItem> expectedSpecification = SearchHelper.constructSpecificationFromSaleItemsFilter(business);
-        PageRequest expectedPageRequest = SearchHelper.getPageRequest(null, null, Sort.by(new Sort.Order(Sort.Direction.ASC, "created").ignoreCase()));
+        Specification<SaleItem> expectedSpecification = SearchSpecConstructor.constructSpecificationFromSaleItemsFilter(business);
+        PageRequest expectedPageRequest = SearchPageConstructor.getPageRequest(null, null, Sort.by(new Sort.Order(Sort.Direction.ASC, "created").ignoreCase()));
 
         verify(saleItemRepository, times(1)).findAll(specificationArgumentCaptor.capture(), pageRequestArgumentCaptor.capture());
         assertTrue(new ReflectionEquals(expectedSpecification).matches(specificationArgumentCaptor.getValue()));
@@ -392,13 +393,13 @@ class SaleControllerTest {
     @Test
     void getSaleItemsForBusiness_noReverse_itemsAscending() throws Exception {
         var items = generateMockSaleItems();
-        when(saleItemRepository.findAll(any(), any(PageRequest.class))).thenReturn(new PageImpl<SaleItem>(items));
+        when(saleItemRepository.findAll(any(), any(PageRequest.class))).thenReturn(new PageImpl<>(items));
         MvcResult result = mockMvc.perform(get("/businesses/1/listings"))
                 .andExpect(status().isOk())
                 .andReturn();
 
-        Specification<SaleItem> expectedSpecification = SearchHelper.constructSpecificationFromSaleItemsFilter(business);
-        PageRequest expectedPageRequest = SearchHelper.getPageRequest(null, null, Sort.by(new Sort.Order(Sort.Direction.ASC, "created").ignoreCase()));
+        Specification<SaleItem> expectedSpecification = SearchSpecConstructor.constructSpecificationFromSaleItemsFilter(business);
+        PageRequest expectedPageRequest = SearchPageConstructor.getPageRequest(null, null, Sort.by(new Sort.Order(Sort.Direction.ASC, "created").ignoreCase()));
 
         verify(saleItemRepository, times(1)).findAll(specificationArgumentCaptor.capture(), pageRequestArgumentCaptor.capture());
         assertTrue(new ReflectionEquals(expectedSpecification).matches(specificationArgumentCaptor.getValue()));
@@ -408,7 +409,7 @@ class SaleControllerTest {
     @Test
     void getSaleItemsForBusiness_reverseFalse_itemsAscending() throws Exception {
         var items = generateMockSaleItems();
-        when(saleItemRepository.findAll(any(), any(PageRequest.class))).thenReturn(new PageImpl<SaleItem>(items));
+        when(saleItemRepository.findAll(any(), any(PageRequest.class))).thenReturn(new PageImpl<>(items));
         saleItemRepository.saveAll(items);
 
         MvcResult result = mockMvc.perform(get("/businesses/1/listings")
@@ -416,8 +417,8 @@ class SaleControllerTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        Specification<SaleItem> expectedSpecification = SearchHelper.constructSpecificationFromSaleItemsFilter(business);
-        PageRequest expectedPageRequest = SearchHelper.getPageRequest(null, null, Sort.by(new Sort.Order(Sort.Direction.ASC, "created").ignoreCase()));
+        Specification<SaleItem> expectedSpecification = SearchSpecConstructor.constructSpecificationFromSaleItemsFilter(business);
+        PageRequest expectedPageRequest = SearchPageConstructor.getPageRequest(null, null, Sort.by(new Sort.Order(Sort.Direction.ASC, "created").ignoreCase()));
 
         verify(saleItemRepository, times(1)).findAll(specificationArgumentCaptor.capture(), pageRequestArgumentCaptor.capture());
         assertTrue(new ReflectionEquals(expectedSpecification).matches(specificationArgumentCaptor.getValue()));
@@ -427,7 +428,7 @@ class SaleControllerTest {
     @Test
     void getSaleItemsForBusiness_reverseTrue_itemsDescending() throws Exception {
         var items = generateMockSaleItems();
-        when(saleItemRepository.findAll(any(), any(PageRequest.class))).thenReturn(new PageImpl<SaleItem>(items));
+        when(saleItemRepository.findAll(any(), any(PageRequest.class))).thenReturn(new PageImpl<>(items));
         saleItemRepository.saveAll(items);
 
 
@@ -436,8 +437,8 @@ class SaleControllerTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        Specification<SaleItem> expectedSpecification = SearchHelper.constructSpecificationFromSaleItemsFilter(business);
-        PageRequest expectedPageRequest = SearchHelper.getPageRequest(null, null, Sort.by(new Sort.Order(Sort.Direction.DESC, "created").ignoreCase()));
+        Specification<SaleItem> expectedSpecification = SearchSpecConstructor.constructSpecificationFromSaleItemsFilter(business);
+        PageRequest expectedPageRequest = SearchPageConstructor.getPageRequest(null, null, Sort.by(new Sort.Order(Sort.Direction.DESC, "created").ignoreCase()));
 
         verify(saleItemRepository, times(1)).findAll(specificationArgumentCaptor.capture(), pageRequestArgumentCaptor.capture());
         assertTrue(new ReflectionEquals(expectedSpecification).matches(specificationArgumentCaptor.getValue()));
@@ -447,15 +448,15 @@ class SaleControllerTest {
     @Test
     void getSaleItemsForBusiness_resultsPerPageSet_firstPageReturned() throws Exception {
         var items = generateMockSaleItems();
-        when(saleItemRepository.findAll(any(), any(PageRequest.class))).thenReturn(new PageImpl<SaleItem>(items));
+        when(saleItemRepository.findAll(any(), any(PageRequest.class))).thenReturn(new PageImpl<>(items));
 
         MvcResult result = mockMvc.perform(get("/businesses/1/listings")
                 .param("resultsPerPage", "4"))
                 .andExpect(status().isOk())
                 .andReturn();
 
-        Specification<SaleItem> expectedSpecification = SearchHelper.constructSpecificationFromSaleItemsFilter(business);
-        PageRequest expectedPageRequest = SearchHelper.getPageRequest(null, 4, Sort.by(new Sort.Order(Sort.Direction.ASC, "created").ignoreCase()));
+        Specification<SaleItem> expectedSpecification = SearchSpecConstructor.constructSpecificationFromSaleItemsFilter(business);
+        PageRequest expectedPageRequest = SearchPageConstructor.getPageRequest(null, 4, Sort.by(new Sort.Order(Sort.Direction.ASC, "created").ignoreCase()));
 
         verify(saleItemRepository, times(1)).findAll(specificationArgumentCaptor.capture(), pageRequestArgumentCaptor.capture());
         assertTrue(new ReflectionEquals(expectedSpecification).matches(specificationArgumentCaptor.getValue()));
@@ -465,7 +466,7 @@ class SaleControllerTest {
     @Test
     void getSaleItemsForBusiness_secondPageRequested_secondPageReturned() throws Exception {
         var items = generateMockSaleItems();
-        when(saleItemRepository.findAll(any(), any(PageRequest.class))).thenReturn(new PageImpl<SaleItem>(items));
+        when(saleItemRepository.findAll(any(), any(PageRequest.class))).thenReturn(new PageImpl<>(items));
         saleItemRepository.saveAll(items);
 
 
@@ -475,8 +476,8 @@ class SaleControllerTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        Specification<SaleItem> expectedSpecification = SearchHelper.constructSpecificationFromSaleItemsFilter(business);
-        PageRequest expectedPageRequest = SearchHelper.getPageRequest(2, 4, Sort.by(new Sort.Order(Sort.Direction.ASC, "created").ignoreCase()));
+        Specification<SaleItem> expectedSpecification = SearchSpecConstructor.constructSpecificationFromSaleItemsFilter(business);
+        PageRequest expectedPageRequest = SearchPageConstructor.getPageRequest(2, 4, Sort.by(new Sort.Order(Sort.Direction.ASC, "created").ignoreCase()));
 
         verify(saleItemRepository, times(1)).findAll(specificationArgumentCaptor.capture(), pageRequestArgumentCaptor.capture());
         assertTrue(new ReflectionEquals(expectedSpecification).matches(specificationArgumentCaptor.getValue()));

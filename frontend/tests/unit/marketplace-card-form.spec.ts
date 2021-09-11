@@ -1,22 +1,20 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
 import Vuetify from 'vuetify';
-import { createLocalVue, Wrapper, mount } from '@vue/test-utils';
+import {createLocalVue, mount, Wrapper} from '@vue/test-utils';
 
 import MarketplaceCardForm from '@/components/marketplace/MarketplaceCardForm.vue';
 import {castMock, makeTestUser} from "./utils";
-import * as api from '@/api/internal';
-import { getStore, resetStoreForTesting } from '@/store';
-import {User} from "@/api/internal";
-import { ThisTypedComponentOptionsWithArrayProps } from 'vue/types/options';
+import {createMarketplaceCard as createMarketplaceCard1, MarketplaceCard} from "@/api/internal-marketplace";
+import {searchKeywords as searchKeywords1} from "@/api/internal-keyword";
 
 jest.mock('@/api/internal', () => ({
   searchKeywords: jest.fn(),
   createMarketplaceCard: jest.fn(),
 }));
 
-const searchKeywords = castMock(api.searchKeywords);
-const createMarketplaceCard = castMock(api.createMarketplaceCard);
+const searchKeywords = castMock(searchKeywords1);
+const createMarketplaceCard = castMock(createMarketplaceCard1);
 Vue.use(Vuetify);
 const localVue = createLocalVue();
 
@@ -256,7 +254,7 @@ describe('MarketplaceCardFrom.vue', () => {
 
   describe('Form is being used to modify a marketplace card', () => {
 
-    const previousCard: api.MarketplaceCard = {
+    const previousCard: MarketplaceCard = {
       id: 1,
       creator: makeTestUser(1),
       section: "ForSale",

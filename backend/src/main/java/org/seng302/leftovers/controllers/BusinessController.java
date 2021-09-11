@@ -15,7 +15,9 @@ import org.seng302.leftovers.persistence.UserRepository;
 import org.seng302.leftovers.service.ImageService;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
 import org.seng302.leftovers.tools.JsonTools;
-import org.seng302.leftovers.tools.SearchHelper;
+import org.seng302.leftovers.service.searchservice.SearchPageConstructor;
+import org.seng302.leftovers.service.searchservice.SearchQueryParser;
+import org.seng302.leftovers.service.searchservice.SearchSpecConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -232,7 +234,7 @@ public class BusinessController {
         }
         // check the requested user exists
         Optional<User> user = userRepository.findById(userId);
-        if (!user.isPresent()) {
+        if (user.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "The given user does not exist");
         }
@@ -249,7 +251,7 @@ public class BusinessController {
     private Business getBusiness(Long businessId) {
         // check business exists
         Optional<Business> business = businessRepository.findById(businessId);
-        if (!business.isPresent()) {
+        if (business.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE,
                     "The given business does not exist");
         }
@@ -282,7 +284,7 @@ public class BusinessController {
 
         logger.info(() -> String.format("Performing Business search for query \"%s\" and type \"%s\"", searchQuery, businessType));
 
-        Sort.Direction direction = SearchHelper.getSortDirection(reverse);
+        Sort.Direction direction = SearchQueryParser.getSortDirection(reverse);
         if (orderBy == null) {
             orderBy = "created";
         }
@@ -298,8 +300,8 @@ public class BusinessController {
             sortOrder = List.of(new Sort.Order(direction, orderBy).ignoreCase());
         }
 
-        PageRequest pageRequest = SearchHelper.getPageRequest(page, resultsPerPage, Sort.by(sortOrder));
-        Specification<Business> specification = SearchHelper.constructSpecificationFromBusinessSearch(searchQuery, businessType);
+        PageRequest pageRequest = SearchPageConstructor.getPageRequest(page, resultsPerPage, Sort.by(sortOrder));
+        Specification<Business> specification = SearchSpecConstructor.constructSpecificationFromBusinessSearch(searchQuery, businessType);
 
         Page<Business> results = businessRepository.findAll(specification, pageRequest);
         return JsonTools.constructPageJSON(results.map(Business::constructJson));

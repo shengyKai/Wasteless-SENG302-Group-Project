@@ -1,5 +1,5 @@
-import * as api from '@/api/internal';
-import axios, { AxiosError, AxiosInstance } from 'axios';
+import axios, {AxiosInstance} from 'axios';
+import {messageConversation} from "@/api/internal-event";
 
 jest.mock('axios', () => ({
   create: jest.fn(function () {
@@ -25,7 +25,7 @@ describe("Test POST /cards/{cardId}/conversations/{buyerId} endpoint", () => {
         status: 201
       }
     });
-    const response = await api.messageConversation(1, 1, 1, "");
+    const response = await messageConversation(1, 1, 1, "");
     expect(response).toEqual(undefined);
   });
 
@@ -35,7 +35,7 @@ describe("Test POST /cards/{cardId}/conversations/{buyerId} endpoint", () => {
         status: 401
       }
     });
-    const response = await api.messageConversation(1, 1, 1, "");
+    const response = await messageConversation(1, 1, 1, "");
     expect(response).toEqual("You have been logged out. Please login again and retry");
   });
 
@@ -46,7 +46,7 @@ describe("Test POST /cards/{cardId}/conversations/{buyerId} endpoint", () => {
         status: 403
       }
     });
-    const response = await api.messageConversation(1, 1, 1, "");
+    const response = await messageConversation(1, 1, 1, "");
     expect(response).toEqual('You do not have permission to edit this conversation');
   });
 
@@ -56,7 +56,7 @@ describe("Test POST /cards/{cardId}/conversations/{buyerId} endpoint", () => {
         status: 406
       }
     });
-    const response = await api.messageConversation(1, 1, 1, "");
+    const response = await messageConversation(1, 1, 1, "");
     expect(response).toEqual("Unable to post message, the card does not exist");
   });
 
@@ -66,13 +66,13 @@ describe("Test POST /cards/{cardId}/conversations/{buyerId} endpoint", () => {
         status: 406
       }
     });
-    const response = await api.messageConversation(1, 1, 1, "");
+    const response = await messageConversation(1, 1, 1, "");
     expect(response).toEqual("Unable to post message, the card does not exist");
   });
 
   it('The response is undefined, backend not reached error', async () =>{
     instance.post.mockRejectedValue({});
-    const response = await api.messageConversation(1, 1, 1, "");
+    const response = await messageConversation(1, 1, 1, "");
     expect(response).toEqual("Failed to reach backend");
   });
 
@@ -85,7 +85,7 @@ describe("Test POST /cards/{cardId}/conversations/{buyerId} endpoint", () => {
         }
       }
     });
-    const response = await api.messageConversation(1, 1, 1, "");
+    const response = await messageConversation(1, 1, 1, "");
     expect(response).toEqual("Request failed: too many characters dude");
   });
 });
