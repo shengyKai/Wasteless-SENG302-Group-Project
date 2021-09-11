@@ -56,6 +56,6 @@ class InterestEventTest {
         assertEquals(event.isRead(), json.get("read"));
         assertEquals(event.getInterested(), json.get("interested"));
         assertEquals(event.getSaleItem().constructJSONObject(), json.get("saleItem"));
-        assertEquals(8, json.size());
+        assertEquals(9, json.size());
     }
 }

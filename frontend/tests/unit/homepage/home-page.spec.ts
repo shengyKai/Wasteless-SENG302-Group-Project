@@ -51,6 +51,8 @@ describe('HomePage.vue', () => {
     store = getStore();
     store.state.user = testUser;
 
+    jest.useFakeTimers();
+
     wrapper = mount(HomePage, {
       stubs: ['BusinessActionPanel', 'UserActionPanel', 'GlobalMessage' , 'ExpiryEvent', 'DeleteEvent', 'KeywordCreated'],
       localVue,
@@ -67,7 +69,8 @@ describe('HomePage.vue', () => {
       tag: 'none',
       created: new Date().toString(),
       message: 'Hello world',
-      read: false
+      read: false,
+      lastModified: new Date().toString()
     };
     store.commit('addEvent', event);
     await Vue.nextTick();
@@ -85,7 +88,8 @@ describe('HomePage.vue', () => {
       tag: 'none',
       created: new Date().toString(),
       card: testMarketPlaceCard,
-      read: false
+      read: false,
+      lastModified: new Date().toString()
     };
     store.commit('addEvent', event);
     await Vue.nextTick();
@@ -104,7 +108,8 @@ describe('HomePage.vue', () => {
       created: new Date().toString(),
       title: "test_title",
       section: "ForSale",
-      read: false
+      read: false,
+      lastModified: new Date().toString()
     };
     store.commit('addEvent', event);
     await Vue.nextTick();
@@ -127,7 +132,8 @@ describe('HomePage.vue', () => {
         created: "2012/01/01"
       },
       creator: testUser,
-      read: false
+      read: false,
+      lastModified: new Date().toString()
     };
     store.commit('addEvent', event);
     await Vue.nextTick();
@@ -156,7 +162,8 @@ describe('HomePage.vue', () => {
         id: 3,
       },
       participantType: 'seller',
-      read: false
+      read: false,
+      lastModified: new Date().toString()
     };
     store.commit('addEvent', event);
     await Vue.nextTick();
@@ -176,6 +183,7 @@ describe('HomePage.vue', () => {
         read: false,
         created: new Date().toString(),
         message: 'Hello world',
+        lastModified: new Date().toString(),
       };
       store.commit('addEvent', event);
       await Vue.nextTick();
@@ -194,6 +202,7 @@ describe('HomePage.vue', () => {
         read: false,
         created: new Date().toString(),
         message: 'Hello world',
+        lastModified: new Date().toString(),
       };
       store.commit('addEvent', event);
       await Vue.nextTick();
@@ -221,7 +230,8 @@ describe('HomePage.vue', () => {
           tag: 'none',
           created: new Date().toString(),
           message: 'None event',
-          read: false
+          read: false,
+          lastModified: new Date().toString()
         };
         store.commit('addEvent', event);
         await Vue.nextTick();
@@ -234,7 +244,8 @@ describe('HomePage.vue', () => {
           tag: 'red',
           created: new Date().toString(),
           message: 'Red event',
-          read: false
+          read: false,
+          lastModified: new Date().toString()
         };
         store.commit('addEvent', event);
         await Vue.nextTick();

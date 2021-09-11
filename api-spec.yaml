@@ -2394,6 +2394,52 @@ paths:
         '406':
           description: >-
             Not Acceptable: Returned when a feed with an ID does not exist.
+  /users/{id}/feed:
+    get:
+      tags:
+        - 'U32: Managing my feed'
+        - Feed
+      summary: Get all the newsfeed events associated with the user whose ID is given
+      security:
+        - CookieAuth:
+            - user
+            - business
+            - globalApplicationAdmin
+            - defaultGlobalApplicationAdmin
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: ID of the user to retrieve the newsfeed events for
+          example: 10
+        - name: modifiedSince
+          in: query
+          description: The datetime used to filter events. If this parameter is present, only events modified after this datetime will be returned. If this parameter is not present, all events associated with the user will be returned.
+          schema:
+            type: string
+            format: date-time
+            example: '2021-09-04T14:32:00Z'
+      responses:
+        '200':
+          description: Newsfeed events successfully retrieved
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Event'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: >-
+            Forbidden: Returned when a user who is not a GAA/DGAA tries to retrieve the newsfeed events assocaited with another user.
+        '406':
+          description: >-
+            Not Acceptable: Returned when the user with the given ID does not exist.
   /feed/{id}/status:
     put:
       tags:
@@ -2939,6 +2985,7 @@ components:
         - tag
         - status
         - read
+        - lastModified
       properties:
         id:
           type: integer
@@ -2958,6 +3005,12 @@ components:
         read:
           type: boolean
           description: Checks if the event has been read
+        lastModified:
+          type: string
+          format: date-time
+          example: '2020-07-14T14:32:00Z'
+          readOnly: true
+          description: Date and time when the event was last modified
     Tag:
       type: string
       description: Name of the tag (colour name) for the event

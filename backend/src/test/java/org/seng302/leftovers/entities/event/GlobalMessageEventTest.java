@@ -84,6 +84,7 @@ class GlobalMessageEventTest {
         assertEquals("Foo", json.get("message"));
         assertEquals(event.getStatus().toString().toLowerCase(), json.get("status"));
         assertEquals(event.isRead(), json.get("read"));
-        assertEquals(7, json.size());
+        assertEquals(event.getLastModified().toString(), json.get("lastModified"));
+        assertEquals(8, json.size());
     }
 }

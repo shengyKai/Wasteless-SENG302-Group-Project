@@ -168,7 +168,8 @@ class MessageEventTest {
 
         assertEquals("buyer", messageEventJson.getAsString("participantType"));
         assertEquals(messageEvent.isRead(), messageEventJson.get("read"));
-        assertEquals(9, messageEventJson.size());
+        assertEquals(messageEvent.getLastModified().toString(), messageEventJson.get("lastModified"));
+        assertEquals(10, messageEventJson.size());
     }
 
 }
