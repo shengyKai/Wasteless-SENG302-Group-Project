@@ -28,6 +28,7 @@
         <DeleteEvent v-else-if="event.type === 'DeleteEvent'" :event="event"/>
         <KeywordCreated v-else-if="event.type === 'KeywordCreatedEvent'" :event="event"/>
         <MessageEvent v-else-if="event.type === 'MessageEvent'" :event="event"/>
+        <InterestEvent v-else-if="event.type === 'InterestEvent'" :event="event"/>
         <Event v-else :title="event.type">
           <pre>{{ event }}</pre>
         </Event>
@@ -54,10 +55,11 @@ import ExpiryEvent from './ExpiryEvent.vue';
 import GlobalMessage from "./GlobalMessage.vue";
 import KeywordCreated from './KeywordCreated.vue';
 import MessageEvent from './MessageEvent.vue';
+import InterestEvent from "@/components/home/newsfeed/InterestEvent";
 
 export default {
   name: 'EventList',
-  components: {DeleteEvent, ExpiryEvent, GlobalMessage, KeywordCreated, MessageEvent},
+  components: {InterestEvent, DeleteEvent, ExpiryEvent, GlobalMessage, KeywordCreated, MessageEvent},
   props: ['events', 'isFiltered'],
   data() {
     return {
