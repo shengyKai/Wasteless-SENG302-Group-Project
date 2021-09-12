@@ -18,6 +18,7 @@ jest.mock('@/api/internal', () => ({
 }));
 
 jest.mock('@/api/events', () => ({
+  getEvents: jest.fn(),
   updateEventAsRead: jest.fn(),
   updateEventStatus: jest.fn(),
 }));
@@ -29,6 +30,7 @@ jest.mock('@/components/utils/Methods/synchronizedTime', () => ({
 const deleteNotification = castMock(api.deleteNotification);
 const updateEventAsRead = castMock(eventsApi.updateEventAsRead);
 const updateEventStatus = castMock(eventsApi.updateEventStatus);
+const getEvents = castMock(eventsApi.getEvents);
 
 describe('Event.vue', () => {
   let wrapper: Wrapper<any>;
@@ -60,6 +62,8 @@ describe('Event.vue', () => {
         title: "Test event",
       }
     });
+
+    getEvents.mockResolvedValue([]);
   }
 
   beforeEach(async () => {

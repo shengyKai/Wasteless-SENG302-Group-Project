@@ -1,5 +1,6 @@
 package org.seng302.leftovers.entities.event;
 
+import lombok.EqualsAndHashCode;
 import org.seng302.leftovers.dto.event.GlobalMessageEventDTO;
 import org.seng302.leftovers.entities.User;
 import org.springframework.http.HttpStatus;
@@ -12,6 +13,7 @@ import javax.persistence.Entity;
  * Event for a message sent by an administrator to a user
  */
 @Entity
+@EqualsAndHashCode(callSuper = false)
 public class GlobalMessageEvent extends Event {
     @Column(nullable = false, name="global_message")
     private String globalMessage;
