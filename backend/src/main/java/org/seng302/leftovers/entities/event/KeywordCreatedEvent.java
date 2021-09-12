@@ -1,5 +1,6 @@
 package org.seng302.leftovers.entities.event;
 
+import lombok.EqualsAndHashCode;
 import org.seng302.leftovers.dto.event.KeywordCreatedEventDTO;
 import org.seng302.leftovers.entities.Keyword;
 import org.seng302.leftovers.entities.User;
@@ -13,6 +14,7 @@ import javax.persistence.OneToOne;
  * Event which is sent to system administrators to notify them of the creation of a new keyword.
  */
 @Entity
+@EqualsAndHashCode(callSuper = false)
 public class KeywordCreatedEvent extends Event {
 
     @OneToOne

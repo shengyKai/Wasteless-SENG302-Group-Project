@@ -1,4 +1,4 @@
-<template v-if="showEvent">
+<template>
   <Event :event="event" :title="title">
     <v-card-text>
       {{ creator.firstName }} {{ creator.lastName }} has added "{{ keyword.name }}"
@@ -7,7 +7,7 @@
       <v-btn color="error" @click="showDeleteDialog=true">Remove</v-btn>
     </v-card-actions>
     <template v-if="showDeleteDialog">
-      <DeleteKeyword :keyword="keyword" @closeDialog="showDeleteDialog=false" @keywordDeleted="showEvent=false"/>
+      <DeleteKeyword :keyword="keyword" @closeDialog="showDeleteDialog=false" @keywordDeleted="removeEvent"/>
     </template>
   </Event>
 </template>
@@ -21,7 +21,6 @@ export default {
   data() {
     return {
       showDeleteDialog: false,
-      showEvent: true,
     };
   },
   props: {
@@ -44,5 +43,10 @@ export default {
       return `Keyword "${this.keyword.name}" has been created`;
     },
   },
+  methods: {
+    removeEvent() {
+      this.$store.commit('removeEvent', this.event.id);
+    }
+  }
 };
 </script>

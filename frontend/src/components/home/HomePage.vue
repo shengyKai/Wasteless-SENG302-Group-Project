@@ -78,7 +78,12 @@ export default {
       colours: [{text: "None", value: 'none'}, {text: "Red", value: 'red'}, {text: "Orange", value: 'orange'},
         {text: "Yellow", value: 'yellow'}, {text: "Green", value: 'green'}, {text: "Blue", value: 'blue'},
         {text: "Purple", value: 'purple'}],
-      tab: "all-events-tab"
+      tab: "all-events-tab",
+      /**
+       * This attribute is used to set the polling interval when the component is created and stop it when the
+       * page is destroyed.
+       */
+      polling: undefined,
     };
   },
   computed: {
@@ -139,6 +144,17 @@ export default {
       return this.role?.type === "business";
     },
   },
+  methods: {
+    /**
+     * Refresh the events for the user's newsfeed every 3 seconds.
+     */
+    startPolling() {
+      this.$store.dispatch('refreshEventFeed');
+      this.polling = setInterval(() => {
+        this.$store.dispatch('refreshEventFeed');
+      }, 7500);
+    },
+  },
   watch: {
     /**
      * Watch the changes in filterBy because if the user is in the second page while the page is filtered, the currentPage will
@@ -153,6 +169,18 @@ export default {
     totalPages: function() {
       this.currentPage = Math.max(Math.min(this.currentPage, this.totalPages), 1);
     }
+  },
+  /**
+   * Initiate polling for the newsfeed events.
+   */
+  created() {
+    this.startPolling();
+  },
+  /**
+   * Stop polling for the newsfeed events.
+   */
+  beforeDestroy () {
+    clearInterval(this.polling);
   }
 };
 </script>

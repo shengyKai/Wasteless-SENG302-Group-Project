@@ -1,6 +1,7 @@
 package org.seng302.leftovers.entities.event;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.EqualsAndHashCode;
 import org.seng302.leftovers.dto.event.MessageEventDTO;
 import org.seng302.leftovers.entities.Conversation;
 import org.seng302.leftovers.entities.Message;
@@ -16,6 +17,7 @@ import java.time.Instant;
  */
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"conversation_id", "participant_type"}))
+@EqualsAndHashCode(callSuper = false)
 public class MessageEvent extends Event {
 
     @ManyToOne

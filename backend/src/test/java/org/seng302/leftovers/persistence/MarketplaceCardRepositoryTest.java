@@ -9,7 +9,6 @@ import org.seng302.leftovers.entities.Location;
 import org.seng302.leftovers.entities.MarketplaceCard;
 import org.seng302.leftovers.entities.User;
 import org.seng302.leftovers.entities.event.ExpiryEvent;
-import org.seng302.leftovers.service.EventService;
 import org.seng302.leftovers.tools.SearchHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -36,8 +35,6 @@ class MarketplaceCardRepositoryTest {
     private UserRepository userRepository;
     @Autowired
     private ExpiryEventRepository expiryEventRepository;
-    @Autowired
-    private EventService eventService;
     private MarketplaceCard card;
     private User user;
 
@@ -154,7 +151,7 @@ class MarketplaceCardRepositoryTest {
         card = marketplaceCardRepository.save(card);
 
         ExpiryEvent event = new ExpiryEvent(card);
-        eventService.saveEvent(event);
+        expiryEventRepository.save(event);
         Assertions.assertTrue(expiryEventRepository.getByExpiringCard(card).isPresent());
 
         List<MarketplaceCard> results = marketplaceCardRepository.getAllExpiringBeforeWithoutEvent(cutoff);

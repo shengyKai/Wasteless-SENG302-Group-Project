@@ -6,13 +6,20 @@ import { createLocalVue, Wrapper, mount } from '@vue/test-utils';
 import App from '@/App.vue';
 import { getStore, resetStoreForTesting, StoreData } from '@/store';
 import router from "@/plugins/vue-router";
-import { makeTestUser } from './utils';
+import { castMock, makeTestUser } from './utils';
+import * as events from '@/api/events';
 
 Vue.use(Vuetify);
 
 const localVue = createLocalVue();
 
 localVue.use(VueRouter);
+
+jest.mock('@/api/events', () => ({
+  getEvents: jest.fn(),
+}));
+
+const getEvents = castMock(events.getEvents);
 
 describe('App.vue', () => {
   // Container for the App under test
@@ -26,6 +33,7 @@ describe('App.vue', () => {
     localVue.use(Vuex);
     resetStoreForTesting();
     store = getStore();
+    getEvents.mockResolvedValue([]);
   });
 
   /**
