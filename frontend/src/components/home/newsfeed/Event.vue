@@ -43,7 +43,7 @@
               change status to normal when clicked -->
         <v-tooltip top>
           <template v-slot:activator="{ on, attrs }">
-            <v-icon v-if="event.status === 'starred'"
+            <v-icon v-if="(event.status === 'starred')"
                     class="mr-2"
                     ref="filledStarButton"
                     color="yellow"
@@ -61,7 +61,7 @@
               change status to starred when clicked -->
         <v-tooltip top>
           <template v-slot:activator="{ on, attrs }">
-            <v-icon v-if="event.status === 'normal'"
+            <v-icon v-if="(event.status === 'normal')"
                     class="mr-2"
                     ref="starButton"
                     color="yellow"
@@ -334,13 +334,18 @@ export default {
      */
     async changeEventStatus(status) {
       const result = await updateEventStatus(this.event.id, status);
+      console.log(this.event.status);
+      // this.event.status = "starred";
+      this.store.commit('addEvent', this.event);
       if (typeof result === 'string') {
         this.errorMessage = result;
       } else {
         this.errorMessage = undefined;
-        console.log(this.event.status);
-        this.$store.dispatch('refreshEventFeed');
-        console.log(this.event.status);
+        // let newEvent = this.event;
+        // newEvent.status = status;
+        // this.store.commit('addEvent', newEvent);
+        await this.$store.dispatch('refreshEventFeed');
+
       }
     },
   },
