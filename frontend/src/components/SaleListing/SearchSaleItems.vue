@@ -2,7 +2,7 @@
   <v-container>
     <v-card color="secondary" dark class="mb-1 search-bar" v-show="!showAdvancedSearch">
       <v-row>
-        <v-col cols=4>
+        <v-col cols=4 md="4" sm="6" xs="8">
           <v-text-field
             clearable
             flat
@@ -12,11 +12,13 @@
             label="Search"
             color="secondary"
             class="search-field"
+            v-model="simpleQuery"
           />
         </v-col>
-        <v-col cols="2">
+        <v-spacer/>
+        <v-col cols="2" md="2" sm="4">
           <v-card-actions>
-            <v-btn outlined @click="showAdvancedSearch=true">Advanced search</v-btn>
+            <v-btn outlined @click="showAdvancedSearch=true">Advanced</v-btn>
           </v-card-actions>
         </v-col>
       </v-row>
@@ -32,12 +34,13 @@
             hide-details
             label="Product"
             class="search-field"
+            v-model="productQuery"
           />
         </v-col>
         <v-spacer/>
-        <v-col cols="2">
+        <v-col cols="2" md="2" sm="4">
           <v-card-actions>
-            <v-btn outlined @click="showAdvancedSearch=false">Simple search</v-btn>
+            <v-btn outlined @click="showAdvancedSearch=false">Simple</v-btn>
           </v-card-actions>
         </v-col>
       </v-row>
@@ -51,6 +54,7 @@
             hide-details
             label="Business"
             class="search-field"
+            v-model="businessQuery"
           />
         </v-col>
       </v-row>
@@ -64,13 +68,14 @@
             hide-details
             label="Location"
             class="search-field"
+            v-model="locationQuery"
           />
         </v-col>
         <v-spacer/>
-        <v-col cols="2">
+        <v-col cols="2" md="2" sm="4">
           <v-card-actions>
-            <v-btn color="white" class="secondary--text">
-              Search listings
+            <v-btn color="white" class="secondary--text" @click="searchListings">
+              Search
               <v-icon
                 right
                 dark
@@ -115,10 +120,17 @@ export default {
       error: undefined,
       resultsPerPage: 10,
       results: undefined,
-      showAdvancedSearch: false
+      showAdvancedSearch: false,
+      simpleQuery: undefined,
+      productQuery: undefined,
+      businessQuery: undefined,
+      locationQuery: undefined
     };
   },
   computed: {
+    /**
+     * The total number of results matching the search, or 0 if there is no search or an error has occured with the search
+     */
     totalResults() {
       if (this.results === undefined) return 0;
       return this.results.count;
@@ -126,6 +138,11 @@ export default {
     resultsMessage() {
       // TODO implement computing results message based on number of results when linking to endpoint
       return "There are no results to show";
+    }
+  },
+  methods: {
+    searchListings() {
+      //TODO implement when linked to endpoint
     }
   }
 };
