@@ -1,7 +1,7 @@
 Feature: U29 Sale Item Search
   Background:
     Given A user exists
-    And the business "Biz" with the type "Charitable organisation" and location "23 Here St" exists
+    And the business "Biz" with the type "Charitable organisation" and location "23, Here St, Bob, Bob, Bob, Bob, 1234" exists
     And the business has the following products in its catalogue:
       | product_id | name  |
       | FISH       | fish  |
@@ -14,7 +14,7 @@ Feature: U29 Sale Item Search
       | product_id | quantity | price | closes     |
       | FISH       | 12       | 20    | 2022-01-18 |
       | APPLE      | 1        | 1     | 2022-05-19 |
-    And the business "BizTwo" with the type "Retail Trade" and location "42 There Place" exists
+    And the business "BizTwo" with the type "Retail Trade" and location "42, There Place, Steve, Steve, Steve, Steve, 2345" exists
     And the business has the following products in its catalogue:
       | product_id | name   |
       | CRAB       | crab   |
@@ -29,62 +29,90 @@ Feature: U29 Sale Item Search
       | ORANGE     | 2        | 3     | 2022-07-13 |
 
   Scenario: AC2 - No filtering options then all sale items returned
-    When no filters are passed
+    Given I am logged into my account
+    When I search for sale items
     Then 4 sale items are returned
 
   Scenario: AC4 - Sale listings may be ordered in various ways, order by product name
+    Given I am logged into my account
     When orderBy is "name"
+    When I search for sale items
     Then products are in alphabetical order
 
   Scenario: AC4 - Order by business name
+    Given I am logged into my account
     When orderBy is "businessName"
+    When I search for sale items
     Then products are in business order
 
   Scenario: AC4 - Order by business location
+    Given I am logged into my account
     When orderBy is "location"
+    When I search for sale items
     Then products are in location order
 
   Scenario: AC4 - Order by quantity
+    Given I am logged into my account
     When orderBy is "quantity"
+    When I search for sale items
     Then products are in quantity order
 
   Scenario: AC4 - Order by price
+    Given I am logged into my account
     When orderBy is "price"
+    When I search for sale items
     Then products are in price order
 
   Scenario: AC4 - Order by created
+    Given I am logged into my account
     When orderBy is "created"
+    When I search for sale items
     Then products are in created date order
 
   Scenario: AC4 - Order by closes
+    Given I am logged into my account
     When orderBy is "closes"
+    When I search for sale items
     Then products are in close date order
 
   Scenario: AC5 - Limit results to particular business type
+    Given I am logged into my account
     When businessType is "Retail Trade"
+    When I search for sale items
     Then 2 sale items are returned
 
   Scenario: AC6 - Search by product name
+    Given I am logged into my account
     When search sale name is "Fish"
+    When I search for sale items
     Then 1 sale items are returned
 
   Scenario: AC7 - Limit results to within price range
+    Given I am logged into my account
     When search sale price is between 1 and 5
+    When I search for sale items
     Then 2 sale items are returned
 
   Scenario: AC8 - Search by business name
+    Given I am logged into my account
     When search sale business is "BizTwo"
+    When I search for sale items
     Then 2 sale items are returned
 
   Scenario: AC9 - Search by business location
+    Given I am logged into my account
     When search sale location is "There"
+    When I search for sale items
     Then 2 sale items are returned
 
   Scenario: AC10 - Limit results to within closing date range
+    Given I am logged into my account
     When search sale date is between "2022-05-01" and "2022-08-01"
+    When I search for sale items
     Then 2 sale items are returned
 
   Scenario: All three search types and three filtering options must work together
+    Given I am logged into my account
     When search sale name is "Fi"
     And search sale business is "Biz"
     And search sale location is "here"
@@ -92,4 +120,14 @@ Feature: U29 Sale Item Search
     And search sale date is between "2022-01-01" and "2022-02-01"
     And businessType is "Charitable organisation"
     And orderBy is "name"
+    When I search for sale items
     Then 1 sale items are returned
+
+  Scenario: Basic search
+    Given I am logged into my account
+    When I search sale basic "Biz"
+    Then 4 sale items are returned
+
+  Scenario: Not logged in - Unauthorised error
+    When I search for sale items
+    Then The request fails due to not authorised
