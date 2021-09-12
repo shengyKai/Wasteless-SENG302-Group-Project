@@ -24,7 +24,10 @@
             :icon="readBadgeIcon"
             :color="readColour"
           >
-            {{ title }}
+            <template  v-if="title !== undefined">
+              {{ title }}
+            </template>
+            <slot v-else name="title"/>
           </v-badge>
         </v-card-title>
         <v-card-subtitle>

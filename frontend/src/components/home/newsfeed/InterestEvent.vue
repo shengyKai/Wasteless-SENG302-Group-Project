@@ -1,24 +1,34 @@
 <template>
-  <Event :event="event" :title="eventTitle">
-    <v-card-text>
-      <h1 class="title">{{ event.saleItem.inventoryItem.product.name }}</h1>
-      <label class=""> From </label>
-      <router-link :to="businessRoute">Nathan Apple LTD</router-link>
+  <Event :event="event">
+    <template v-slot:title>
+      <div>
+        {{ event.saleItem.inventoryItem.product.name }}
+        <label class="text-subtitle-1"> From </label>
+        <router-link
+          :to="businessRoute"
+          class="text-subtitle-1 grey--text text--darken-2"
+        >
+          Nathan Apple LTD
+        </router-link>
+      </div>
+    </template>
+    <v-card-text class="subtitle-1">
+      {{ eventTitle }}
     </v-card-text>
-    <v-card-actions class="action-btn-container">
+    <v-card-actions class="justify-center">
       <v-btn class="action-btn white-text" color="primary darken-1">
         <v-icon>mdi-currency-usd</v-icon>
         Buy
       </v-btn>
-      <v-btn v-if="event.interested" class="action-btn white--text" color="green">
+      <v-btn v-if="event.interested" class="white--text" color="green">
         <v-icon>mdi-thumb-up</v-icon>
         Like 69
       </v-btn>
-      <v-btn v-else class="action-btn white--text" color="secondary">
-        <v-icon>mdi-thumb-down</v-icon>
+      <v-btn v-else class="white--text" color="secondary">
+        <v-icon class="mr-1">mdi-thumb-down</v-icon>
         Unlike 69
       </v-btn>
-      <v-btn class="action-btn white--text" color="purple">
+      <v-btn class="white--text" color="orange darken-1">
         <v-icon>mdi-arrow-top-right-thick</v-icon>
         View Sale
       </v-btn>
@@ -39,8 +49,10 @@ export default {
   },
   computed: {
     eventTitle() {
-      return "You " + (this.event.interested? "liked" : "unliked") +
-          ` a listing which closes in ${this.daysUntilClose} days`;
+      return `You have ${this.interestString} this listing which closes in ${this.daysUntilClose} days`;
+    },
+    interestString() {
+      return this.event.interested? "liked" : "unliked";
     },
     daysUntilClose() {
       const millisecondsPerDay = 24 * 60 * 60 * 1000;
@@ -58,5 +70,8 @@ export default {
 </script>
 
 <style scoped>
-
+.dirty-centre {
+  left: 50%;
+  transform: translate(-50%, 0%);
+}
 </style>
