@@ -28,24 +28,36 @@
         <v-icon class="mr-1">mdi-thumb-down</v-icon>
         Unlike 69
       </v-btn>
-      <v-btn class="white--text" color="orange darken-1">
+      <v-btn class="white--text" color="orange darken-1" @click="fullSaleOpen = true">
         <v-icon>mdi-arrow-top-right-thick</v-icon>
         View Sale
       </v-btn>
     </v-card-actions>
+    <v-dialog v-model="fullSaleOpen" max-width="1200" class="white">
+      <FullSaleListing :saleItem="event.saleItem"/>
+    </v-dialog>
   </Event>
 </template>
 
 <script>
 import Event from "@/components/home/newsfeed/Event";
+import FullSaleListing from "@/components/SaleListing/FullSaleListing.vue";
 export default {
   name: "InterestEvent",
-  components: {Event},
+  components: {
+    Event,
+    FullSaleListing,
+  },
   props: {
     event: {
       type: Object,
       required: true
     }
+  },
+  data() {
+    return {
+      fullSaleOpen: false,
+    };
   },
   computed: {
     eventTitle() {
