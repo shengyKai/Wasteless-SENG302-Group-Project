@@ -333,11 +333,14 @@ export default {
      *
      */
     async changeEventStatus(status) {
-      const result = updateEventStatus(this.event.id, status);
+      const result = await updateEventStatus(this.event.id, status);
       if (typeof result === 'string') {
         this.errorMessage = result;
       } else {
         this.errorMessage = undefined;
+        console.log(this.event.status);
+        this.$store.dispatch('refreshEventFeed');
+        console.log(this.event.status);
       }
     },
   },
