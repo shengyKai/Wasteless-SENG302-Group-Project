@@ -49,9 +49,6 @@
       <v-btn icon @click="viewProfile" class="action-button">
         <v-icon large>mdi-account-circle</v-icon>
       </v-btn>
-      <v-btn icon @click="viewCreateProduct" class="action-button">
-        <v-icon large>mdi-tooltip-plus</v-icon>
-      </v-btn>
       <v-btn icon @click="goToCataloguePage" class="action-button">
         <v-icon large>mdi-view-list</v-icon>
       </v-btn>
