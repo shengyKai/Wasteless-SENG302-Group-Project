@@ -20,7 +20,7 @@ public class SearchCriteria {
 
     private boolean isOrPredicate = true;
 
-    public SearchCriteria(String column, String operation, Object value) {
+    public SearchCriteria(String column, Pred operation, Object value) {
         setKey(column);
         setOperation(operation);
         setValue(value);
@@ -33,7 +33,7 @@ public class SearchCriteria {
      * @param value The value to compare against
      * @param isOrPredicate Determines if predicate will be AND / OR
      */
-    public SearchCriteria(String column, String operation, Object value, boolean isOrPredicate) {
+    public SearchCriteria(String column, Pred operation, Object value, boolean isOrPredicate) {
         setKey(column);
         setOperation(operation);
         setValue(value);
@@ -49,19 +49,7 @@ public class SearchCriteria {
         return this.column;
     }
 
-    public void setOperation(String operation) {
-        if (">".equals(operation)) {
-            this.operation = Pred.GREATER_THAN;
-        } else if ("<".equals(operation)) {
-            this.operation = Pred.LESS_THAN;
-        } else if (":".equals(operation)) {
-            this.operation = Pred.COLON;
-        } else if ("=".equals(operation)) {
-            this.operation = Pred.EQUAL;
-        } else {
-            this.operation = null;
-        }
-    }
+    public void setOperation(Pred operation) { this.operation = operation; }
 
     public Pred getOperation() {
         return this.operation;

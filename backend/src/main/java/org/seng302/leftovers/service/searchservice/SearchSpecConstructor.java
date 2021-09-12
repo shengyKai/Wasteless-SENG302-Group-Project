@@ -6,6 +6,7 @@ import org.seng302.leftovers.dto.SaleListingSearchDTO;
 import org.seng302.leftovers.entities.*;
 import org.seng302.leftovers.exceptions.SearchFormatException;
 import org.seng302.leftovers.persistence.SpecificationsBuilder;
+import org.seng302.leftovers.persistence.SearchCriteria.Pred;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.math.BigDecimal;
@@ -284,7 +285,7 @@ public class SearchSpecConstructor {
     private static <T> Specification<T> buildExactMatchSpec(String searchTerm, List<String> fieldNames) {
         SpecificationsBuilder<T> builder = new SpecificationsBuilder<>();
         for (var field : fieldNames) {
-            builder.with(field, "=", searchTerm, true);
+            builder.with(field, Pred.EQUAL, searchTerm, true);
         }
         return builder.build();
     }
@@ -300,7 +301,7 @@ public class SearchSpecConstructor {
     public static <T> Specification<T> buildPartialMatchSpec(String searchTerm, List<String> fieldNames) {
         SpecificationsBuilder<T> builder = new SpecificationsBuilder<>();
         for (var field : fieldNames) {
-            builder.with(field, ":", searchTerm, true);
+            builder.with(field, Pred.COLON, searchTerm, true);
         }
         return builder.build();
     }

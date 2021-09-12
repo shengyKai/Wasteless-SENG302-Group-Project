@@ -88,10 +88,10 @@ class SearchServiceTest {
     @BeforeEach
     void setUp() throws IOException {
         SpecificationsBuilder<User> builder = new SpecificationsBuilder<User>()
-                .with("firstName", ":", "andy", true)
-                .with("middleName", ":", "andy", true)
-                .with("lastName", ":", "andy", true)
-                .with("nickname", ":", "andy", true);
+                .with("firstName", SearchCriteria.Pred.COLON, "andy", true)
+                .with("middleName", SearchCriteria.Pred.COLON, "andy", true)
+                .with("lastName", SearchCriteria.Pred.COLON, "andy", true)
+                .with("nickname", SearchCriteria.Pred.COLON, "andy", true);
         spec = builder.build();
 
         pagingUserList = readUserFile("UserSearchHelperTestData1.csv");
