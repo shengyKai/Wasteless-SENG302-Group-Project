@@ -2,7 +2,7 @@
   <v-container>
     <v-card color="secondary" dark class="mb-1 search-bar" v-show="!showAdvancedSearch">
       <v-row>
-        <v-col>
+        <v-col cols=4>
           <v-text-field
             clearable
             flat
@@ -14,7 +14,6 @@
             class="search-field"
           />
         </v-col>
-        <v-spacer/>
         <v-col cols="2">
           <v-card-actions>
             <v-btn outlined @click="showAdvancedSearch=true">Advanced search</v-btn>
@@ -28,11 +27,10 @@
           <v-text-field
             clearable
             flat
-            solo-inverted
+            outlined
+            filled
             hide-details
-            prepend-inner-icon="mdi-magnify"
             label="Product"
-            color="secondary"
             class="search-field"
           />
         </v-col>
@@ -48,11 +46,10 @@
           <v-text-field
             clearable
             flat
-            solo-inverted
+            outlined
+            filled
             hide-details
-            prepend-inner-icon="mdi-magnify"
             label="Business"
-            color="secondary"
             class="search-field"
           />
         </v-col>
@@ -62,13 +59,26 @@
           <v-text-field
             clearable
             flat
-            solo-inverted
+            outlined
+            filled
             hide-details
-            prepend-inner-icon="mdi-magnify"
             label="Location"
-            color="secondary"
             class="search-field"
           />
+        </v-col>
+        <v-spacer/>
+        <v-col cols="2">
+          <v-card-actions>
+            <v-btn color="white" class="secondary--text">
+              Search listings
+              <v-icon
+                right
+                dark
+              >
+                mdi-magnify
+              </v-icon>
+            </v-btn>
+          </v-card-actions>
         </v-col>
       </v-row>
     </v-card>
