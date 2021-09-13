@@ -3,30 +3,38 @@
     <v-card class="body">
       <div>
         <ImageCarousel :imagesList="product.images" :productId="product.id"/>
-        <v-card-actions class="float-right">
-          <!-- Buy feature will not be implemented yet -->
-          <v-btn class="ml-2 pl-3" color="primary darken-1">
-            Buy
-            <v-icon>mdi-currency-usd</v-icon>
-          </v-btn>
-          <!-- Thumb up/down button to show and allow user the like & unlike feature -->
-          <v-btn class="ml-2 pl-3" color="grey lighten-2" @click="changeineterest">
-            Like
-            <v-icon class="ml-1" :color="interestColour">mdi-thumb-up</v-icon>
-          </v-btn>
-          <!-- A return button for user to go back to business profile-->
-          <v-btn class="ml-2 pl-3" color="secondary" @click="viewProfile">
-            Go Back
-            <v-icon class="ml-1">mdi-arrow-left</v-icon>
-          </v-btn>
-        </v-card-actions>
-        <div class="gap"/>
-        <h2 class="d-inline-block">{{ product.name }}</h2>
-        <label class="saleTitleJoin"> From </label>
-        <a class="businessLink">Nathan Apple LTD</a>
-      </div>
-      <div>
-        <label class="fontSize"> {{ productDescription }} </label>
+        <div/>
+        <v-row>
+          <v-col cols='12' sm ="8">
+            <h2 class="d-inline-block">{{ product.name }}</h2>
+            <label class="saleTitleJoin"> From </label>
+            <a class="businessLink">Nathan Apple LTD</a>
+            <div>
+              <label class="fontSize"> {{ productDescription }} </label>
+            </div>
+          </v-col>
+          <v-col cols="12" sm="4" class="text-right mt-3">
+            <!-- Buy feature will not be implemented yet -->
+            <v-btn class="pl-3" color="primary darken-1">
+              Buy
+              <v-icon>mdi-currency-usd</v-icon>
+            </v-btn>
+            <!-- Thumb up/down button to show and allow user the like & unlike feature -->
+            <v-btn v-if="!interest" class="ml-2 blue--text" color="grey lighten-2" @click="changeInterest">
+              Like
+              <v-icon class="ml-1">mdi-thumb-up</v-icon>
+            </v-btn>
+            <v-btn v-else color="ml-2 grey lighten-2" @click="changeInterest">
+              Unlike
+              <v-icon class="ml-1">mdi-thumb-down</v-icon>
+            </v-btn>
+            <!-- A return button for user to go back to business profile-->
+            <v-btn class="ml-2 pl-3" color="secondary" @click="viewProfile">
+              Go Back
+              <v-icon class="ml-1">mdi-arrow-left</v-icon>
+            </v-btn>
+          </v-col>
+        </v-row>
       </div>
       <div>
         <v-row no-gutters>
@@ -126,8 +134,8 @@ export default {
       currency: {
         code: "",
         symbol: "",
-        interest: false,
       },
+      interest: false,
       extraDetails: false
     };
   },
@@ -140,14 +148,6 @@ export default {
     console.log(this.inventoryItem);
   },
   computed: {
-    interestColour() {
-      // if (!this.inventoryItem.interest) {
-      if(this.interest) {
-        return "blue";
-      } else {
-        return "grey darken-1";
-      }
-    },
     /**
      * Easy access to the product information of the sale item
      */
@@ -211,7 +211,7 @@ export default {
       return this.currency.symbol + formatPrice(this.saleItem.price) + " " + this.currency.code;
     },
     productDescription() {
-      return this.product.fontSize || "Not set";
+      return this.product.description || "Not set";
     }
   },
   methods: {
@@ -222,11 +222,9 @@ export default {
       this.$router.push("/business/" + this.$store.state.activeRole.id);
     },
     /** Shows user the like and unlike button according to the listing's interest */
-    changeineterest() {
+    changeInterest() {
       console.log("changing");
-      console.log(this.interest);
       this.interest = !this.interest;
-      console.log(this.interest);
     },
     /**
      * Computes the currency
