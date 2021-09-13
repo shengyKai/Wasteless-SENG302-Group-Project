@@ -89,8 +89,12 @@ public class SaleItem {
         interestedUsers.remove(user);
     }
 
+    /**
+     * Get the list of users that have liked this sale item
+     * @return List of users that like this sale item
+     */
     public Set<User> getInterestedUsers() {
-        return this.interestedUsers;
+        return interestedUsers;
     }
 
     /**

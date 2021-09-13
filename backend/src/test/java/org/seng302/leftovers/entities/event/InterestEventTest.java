@@ -7,10 +7,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.seng302.leftovers.dto.SaleItemDTO;
-import org.seng302.leftovers.entities.InventoryItem;
-import org.seng302.leftovers.entities.Location;
-import org.seng302.leftovers.entities.SaleItem;
-import org.seng302.leftovers.entities.User;
+import org.seng302.leftovers.entities.*;
 import org.seng302.leftovers.persistence.*;
 import org.seng302.leftovers.persistence.event.EventRepository;
 import org.seng302.leftovers.persistence.event.InterestEventRepository;
@@ -32,6 +29,8 @@ class InterestEventTest {
 
     @Mock
     private SaleItem saleItem;
+    @Mock
+    private Product product;
 
     @Mock
     private InventoryItem inventoryItem;
@@ -40,7 +39,8 @@ class InterestEventTest {
     void setup() {
         MockitoAnnotations.openMocks(this);
         when(saleItem.getInventoryItem()).thenReturn(inventoryItem);
-        when(inventoryItem.constructJSONObject()).thenReturn(null); // TODO
+        when(inventoryItem.getProduct()).thenReturn(product);
+        when(product.constructJSONObject()).thenReturn(null);
     }
 
     @Test

@@ -22,7 +22,7 @@ import java.time.LocalDate;
 @EqualsAndHashCode(callSuper = false)
 public class SaleItemDTO {
     private long id;
-    private JSONObject inventoryItem;
+    private InventoryItemDTO inventoryItem;
     private int quantity;
     private BigDecimal price;
     private String moreInfo;
@@ -41,7 +41,7 @@ public class SaleItemDTO {
      */
     public SaleItemDTO(SaleItem saleItem) {
         this.id = saleItem.getId();
-        this.inventoryItem = saleItem.getInventoryItem().constructJSONObject(); // TODO
+        this.inventoryItem = new InventoryItemDTO(saleItem.getInventoryItem());
         this.quantity = saleItem.getQuantity();
         this.price = saleItem.getPrice();
         this.moreInfo = saleItem.getMoreInfo();

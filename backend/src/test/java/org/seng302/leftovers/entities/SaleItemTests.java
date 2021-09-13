@@ -1,10 +1,12 @@
 package org.seng302.leftovers.entities;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.minidev.json.JSONObject;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.junit.jupiter.api.*;
+import org.seng302.leftovers.dto.InventoryItemDTO;
 import org.seng302.leftovers.dto.SaleItemDTO;
 import org.seng302.leftovers.persistence.*;
 import org.seng302.leftovers.tools.SearchHelper;
@@ -405,7 +407,7 @@ class SaleItemTests {
     }
 
     @Test
-    void saleItemDTO_hasAllProperties_expectPropertiesPresent() {
+    void saleItemDTO_hasAllProperties_expectPropertiesPresent() throws JsonProcessingException {
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
         String today = formatter.format(new Date());
         SaleItem saleItem = new SaleItem.Builder()
@@ -420,7 +422,10 @@ class SaleItemTests {
         var object = objectMapper.convertValue(new SaleItemDTO(saleItem), JSONObject.class);
 
         assertEquals(saleItem.getId(), object.get("id"));
-        assertEquals(saleItem.getInventoryItem().constructJSONObject(), object.get("inventoryItem"));
+        assertEquals(
+                objectMapper.readTree(objectMapper.writeValueAsString(new InventoryItemDTO(saleItem.getInventoryItem()))),
+                objectMapper.readTree(objectMapper.writeValueAsString(object.get("inventoryItem")))
+        );
         assertEquals(saleItem.getQuantity(), object.get("quantity"));
         assertEquals(saleItem.getPrice(), object.get("price"));
         assertEquals(saleItem.getMoreInfo(), object.get("moreInfo"));

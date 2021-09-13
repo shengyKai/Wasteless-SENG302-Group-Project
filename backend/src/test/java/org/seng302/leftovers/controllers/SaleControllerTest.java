@@ -11,10 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mockito.*;
 import org.mockito.internal.matchers.apachecommons.ReflectionEquals;
-import org.seng302.leftovers.entities.Business;
-import org.seng302.leftovers.entities.InventoryItem;
-import org.seng302.leftovers.entities.SaleItem;
-import org.seng302.leftovers.entities.User;
+import org.seng302.leftovers.entities.*;
 import org.seng302.leftovers.entities.event.InterestEvent;
 import org.seng302.leftovers.exceptions.AccessTokenException;
 import org.seng302.leftovers.persistence.BusinessRepository;
@@ -393,10 +390,11 @@ class SaleControllerTest {
         List<SaleItem> mockItems = new ArrayList<>();
         for (long i = 0; i<6; i++) {
             var saleItem = mock(SaleItem.class);
+            var product = mock(Product.class);
             when(saleItem.getId()).thenReturn(i);
             var inventoryItem = mock(InventoryItem.class);
             when(saleItem.getInventoryItem()).thenReturn(inventoryItem);
-            when(inventoryItem.constructJSONObject()).thenReturn(null); //TODO
+            when(inventoryItem.getProduct()).thenReturn(product);
             mockItems.add(saleItem);
         }
         // Ensure determinism
