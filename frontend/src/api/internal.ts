@@ -1294,3 +1294,26 @@ export async function modifyBusiness(businessId: number, business: ModifyBusines
   }
   return undefined;
 }
+
+/**
+ * Sets the interest state (liked/unliked) for the given user and listing combination
+ * @param listingId Listing to update the interest state for
+ * @param userId User that the new interest state is applied for
+ * @param interested New interest state for the listing (true=like, false=unlike)
+ */
+export async function setListingInterest(listingId: number, userId: number, interested: boolean): Promise<MaybeError<undefined>> {
+  try {
+    await instance.put(`/listings/${listingId}/interest`, {
+      userId,
+      interested,
+    });
+  } catch (error) {
+    let status: number | undefined = error.response?.status;
+    if (status === undefined) return 'Failed to reach backend';
+    if (status === 401) return 'You have been logged out. Please login again and retry';
+    if (status === 406) return 'Listing does not exist';
+
+    return error.response?.data.message;
+  }
+  return undefined;
+}
