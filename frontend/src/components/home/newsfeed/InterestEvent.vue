@@ -8,7 +8,7 @@
           :to="businessRoute"
           class="text-subtitle-1 grey--text text--darken-2"
         >
-          Nathan Apple LTD
+          {{ business.name }}
         </router-link>
       </div>
     </template>
@@ -20,7 +20,7 @@
         <v-icon>mdi-currency-usd</v-icon>
         Buy
       </v-btn>
-      <v-btn v-if="event.interested" class="white--text" color="green">
+      <v-btn v-if="!event.interested" class="white--text" color="green">
         <v-icon>mdi-thumb-up</v-icon>
         Like 69
       </v-btn>
@@ -60,21 +60,45 @@ export default {
     };
   },
   computed: {
+    /**
+     * Returns the computed title for the notification
+     * Title consists of Product name and Business name
+     * @returns {string} Title for notification
+     */
     eventTitle() {
       return `You have ${this.interestString} this listing which closes in ${this.daysUntilClose} days`;
     },
+    business() {
+      return this.event.saleItem.inventoryItem.product.business;
+    },
+    /**
+     * String representation of the user's interest in the sale listing
+     * @returns {string} Liked or Unliked
+     */
     interestString() {
       return this.event.interested? "liked" : "unliked";
     },
+    /**
+     * The rounded number of days until the sale listing closes
+     * @returns {number} Days until sale listing close date
+     */
     daysUntilClose() {
       const millisecondsPerDay = 24 * 60 * 60 * 1000;
       const today = new Date();
       const closes = new Date(this.event.saleItem.closes);
       return Math.round(Math.abs((closes-today) / millisecondsPerDay));
     },
+    /**
+     * Returns the location descriptor object for routing to the business's profile
+     * @returns {object} Location descriptor for business profile
+     */
     businessRoute() {
-      //todo
-      return "/business/1";
+      return {
+        name: "businessProfile",
+        params: {
+          id: this.business.id
+        }
+      };
     }
   },
 
