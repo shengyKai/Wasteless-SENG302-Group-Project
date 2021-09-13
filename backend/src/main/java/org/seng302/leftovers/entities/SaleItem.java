@@ -51,15 +51,6 @@ public class SaleItem {
     @Column(name = "closes")
     private LocalDate closes;  // Defaults to expiry date of product being sold
 
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(
-            name="likes",
-            joinColumns = {@JoinColumn(name="sale_item_id")},
-            inverseJoinColumns = {@JoinColumn(name="user_id")}
-    )
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    private Set<User> interestedUsers = new HashSet<>();
-
     @Formula("(SELECT count(*) FROM likes l WHERE l.sale_item_id = id)")
     private int likeCount;
 
@@ -71,30 +62,6 @@ public class SaleItem {
      */
     public int getLikeCount() {
         return likeCount;
-    }
-
-    /**
-     * Add a user to the list of users that like this sale item
-     * @param user User to add
-     */
-    public void addInterestedUser(User user) {
-        interestedUsers.add(user);
-    }
-
-    /**
-     * Remove a user from the list of users that like this sale item
-     * @param user User to remove
-     */
-    public void removeInterestedUser(User user) {
-        interestedUsers.remove(user);
-    }
-
-    /**
-     * Get the list of users that have liked this sale item
-     * @return List of users that like this sale item
-     */
-    public Set<User> getInterestedUsers() {
-        return interestedUsers;
     }
 
     /**
