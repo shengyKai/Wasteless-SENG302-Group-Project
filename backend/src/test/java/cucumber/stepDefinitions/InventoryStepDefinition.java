@@ -6,16 +6,16 @@ import cucumber.context.BusinessContext;
 import cucumber.context.RequestContext;
 import cucumber.context.UserContext;
 import io.cucumber.java.After;
-import io.cucumber.java.AfterStep;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
-import net.minidev.json.parser.JSONParser;
 import org.hibernate.Session;
-import org.seng302.leftovers.entities.*;
-import org.seng302.leftovers.persistence.BusinessRepository;
+import org.seng302.leftovers.entities.InventoryItem;
+import org.seng302.leftovers.entities.Location;
+import org.seng302.leftovers.entities.Product;
+import org.seng302.leftovers.entities.User;
 import org.seng302.leftovers.persistence.InventoryItemRepository;
 import org.seng302.leftovers.persistence.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,9 +26,7 @@ import org.springframework.web.context.WebApplicationContext;
 
 import javax.persistence.EntityManager;
 import java.io.UnsupportedEncodingException;
-import java.lang.reflect.Field;
 import java.math.BigDecimal;
-import java.math.MathContext;
 import java.math.RoundingMode;
 import java.sql.PreparedStatement;
 import java.text.ParseException;
@@ -66,12 +64,6 @@ public class InventoryStepDefinition  {
     private MvcResult mvcResult;
     private String productCode;
     private Integer quantity;
-
-    @After
-    public void cleanUp() {
-        productRepository.deleteAll();
-        inventoryItemRepository.deleteAll();
-    }
 
     @Given("the business has the following products in its catalogue:")
     public void the_business_has_the_following_products_in_its_catalogue(io.cucumber.datatable.DataTable dataTable) {
@@ -574,7 +566,6 @@ public class InventoryStepDefinition  {
     @Then("the best before date of the inventory item with the id {long} will be {string}")
     public void the_best_before_date_of_the_inventory_item_with_the_version_will_be(
             long invItemId, String bestBefore) {
-        System.out.println(mvcResult.getResponse().getErrorMessage());
         assertEquals(200, mvcResult.getResponse().getStatus());
         InventoryItem invItem = inventoryItemRepository.getInventoryItemByBusinessAndId(
                 businessContext.getLast(), invItemId);

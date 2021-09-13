@@ -1,7 +1,8 @@
 <template>
   <v-app-bar max-height="64px">
     <div class="container-outer flex-center">
-      <h1 class="link" @click="showHome">LEFT_OVERS</h1>
+      <h1 v-if="homeEndpoint" class="link" @click="showHome">LEFT_OVERS</h1>
+      <h1 v-else class="link" @click="showHome">&lt; LEFT_OVERS</h1>
 
       <!-- Space between the app name and the controls -->
       <div class="spacer"/>
@@ -18,9 +19,10 @@
                 v-bind="attrs"
                 v-on="on"
               >
-                <UserAvatar :user="user" size="small" />
+                <Avatar v-if="selectedRole.type === 'user'" :user="user" size="small" />
+                <Avatar v-else :business="actingBusiness" size="small"/>
                 <div class="name">
-                  {{ roles[selectedRole].displayText }}
+                  {{ roles[selectedRoleIndex].displayText }}
                 </div>
               </v-chip>
             </template>
@@ -32,7 +34,7 @@
                 Profiles
               </div>
               <v-list-item-group
-                v-model="selectedRole"
+                v-model="selectedRoleIndex"
                 color="primary"
               >
                 <template v-for="(role, index) in roles">
@@ -85,17 +87,17 @@
 </template>
 
 <script>
-import UserAvatar from "./utils/UserAvatar";
+import Avatar from "./utils/Avatar";
 import { USER_ROLES } from "../utils";
 
 export default {
   name: "AppBar",
   components: {
-    UserAvatar,
+    Avatar
   },
   data() {
     return {
-      selectedRole : 0,
+      selectedRoleIndex : 0,
     };
   },
   methods: {
@@ -120,13 +122,16 @@ export default {
     },
     logout() {
       this.$store.commit("logoutUser");
-      this.$router.push("/login");
+      this.$router.push("/auth");
     },
     viewAdmin() {
       this.$router.push("/admin");
     }
   },
   computed: {
+    homeEndpoint() {
+      return this.$route.path === '/home';
+    },
     isAdmin() {
       return [USER_ROLES.DGAA, USER_ROLES.GAA].includes(
         this.$store.getters.role
@@ -151,13 +156,25 @@ export default {
       }
 
       return result;
-    }
+    },
+    actingBusiness() {
+      if (this.selectedRole.type !== 'business') return undefined;
+
+      for (let business of this.user.businessesAdministered) {
+        if (business.id === this.selectedRole.id) {
+          return business;
+        }
+      }
+      return undefined;
+    },
+    selectedRole() {
+      return this.roles[this.selectedRoleIndex];
+    },
   },
   watch : {
-    selectedRole() {
+    selectedRoleIndex() {
       // Set the role that the user is acting as to the role that has been selected from the list
-      const role = this.roles[this.selectedRole];
-      this.$store.commit('setRole', { type: role.type, id: role.id });
+      this.$store.commit('setRole', { type: this.selectedRole.type, id: this.selectedRole.id });
     },
 
     /**
@@ -167,7 +184,7 @@ export default {
     '$store.state.activeRole': {
       handler() {
         // This is a bit dubious I'd like to refactor it into something cleaner.
-        const currentRole = this.roles[this.selectedRole];
+        const currentRole = this.selectedRole;
         const actualRole = this.$store.state.activeRole;
 
         if (actualRole === null) return;
@@ -176,7 +193,7 @@ export default {
         let newSelection = 0;
         for (const role of this.roles) {
           if (role.type === actualRole.type && role.id === actualRole.id) {
-            this.selectedRole = newSelection;
+            this.selectedRoleIndex = newSelection;
           }
           newSelection++;
         }

@@ -11,7 +11,7 @@ import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.seng302.leftovers.persistence.MessageRepository;
+import org.seng302.leftovers.dto.MessageDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
@@ -26,6 +26,8 @@ import static org.mockito.Mockito.when;
 @SpringBootTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class MessageTest {
+    @Autowired
+    private ObjectMapper mapper;
 
     @Mock
     private User user;
@@ -89,13 +91,15 @@ class MessageTest {
     }
 
     @Test
-    void constructJSONObject_jsonHasExpectedFormat() throws JsonProcessingException {
+    void asDTO_jsonHasExpectedFormat() throws JsonProcessingException {
         JSONObject userJson = new JSONObject();
         userJson.appendField("id", 967);
         when(conversation.getId()).thenReturn(44L);
         when(user.constructPublicJson()).thenReturn(userJson);
         Message message = new Message(conversation, user, "Hello world!");
-        JSONObject json = message.constructJSONObject();
+
+
+        var json = mapper.convertValue(new MessageDTO(message), JSONObject.class);
         assertEquals(message.getId(), json.getAsNumber("id"));
         assertEquals(message.getSender().getUserID(), (Long) json.getAsNumber("senderId"));
         assertEquals(message.getCreated().toString(), json.getAsString("created"));

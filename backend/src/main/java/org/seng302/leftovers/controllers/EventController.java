@@ -3,24 +3,28 @@ package org.seng302.leftovers.controllers;
 import net.minidev.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.seng302.leftovers.entities.GlobalMessageEvent;
 import org.seng302.leftovers.dto.WrappedValueDTO;
-import org.seng302.leftovers.entities.Event;
-import org.seng302.leftovers.entities.Tag;
+import org.seng302.leftovers.dto.event.EventDTO;
+import org.seng302.leftovers.dto.event.EventStatus;
+import org.seng302.leftovers.dto.event.EventTag;
 import org.seng302.leftovers.entities.User;
-import org.seng302.leftovers.persistence.EventRepository;
+import org.seng302.leftovers.entities.event.Event;
+import org.seng302.leftovers.entities.event.GlobalMessageEvent;
+import org.seng302.leftovers.persistence.event.EventRepository;
 import org.seng302.leftovers.persistence.UserRepository;
-import org.seng302.leftovers.service.EventService;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
-import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+import java.time.Instant;
+import java.time.format.DateTimeParseException;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Controller for the /events/* endpoints.
@@ -32,14 +36,11 @@ public class EventController {
 
     private final UserRepository userRepository;
 
-    private final EventService eventService;
-
     private final EventRepository eventRepository;
 
     @Autowired
-    public EventController(UserRepository userRepository, EventService eventService, EventRepository eventRepository) {
+    public EventController(UserRepository userRepository, EventRepository eventRepository) {
         this.userRepository = userRepository;
-        this.eventService = eventService;
         this.eventRepository = eventRepository;
     }
 
@@ -49,7 +50,7 @@ public class EventController {
      * @param body The request body
      */
     @PutMapping("/feed/{eventId}/tag")
-    public void setEventTag(@PathVariable long eventId, @Valid @RequestBody WrappedValueDTO<Tag> body, HttpServletRequest request) {
+    public void setEventTag(@PathVariable long eventId, @Valid @RequestBody WrappedValueDTO<EventTag> body, HttpServletRequest request) {
         LOGGER.info("Requested update of event tag (eventId={}, tag={})", eventId, body.getValue());
 
         AuthenticationTokenManager.checkAuthenticationToken(request);
@@ -62,7 +63,7 @@ public class EventController {
             }
 
             event.setTag(body.getValue());
-            eventService.saveEvent(event);
+            eventRepository.save(event);
         } catch (Exception e) {
             LOGGER.error(e.getMessage());
             throw e;
@@ -70,24 +71,49 @@ public class EventController {
     }
 
     /**
-     * Gets the event stream for the given user id.
+     * Gets the events associated with a user. If a modifiedSince parameter is provided, will return only the events
+     * which have been modified after that datetime. Otherwise, returns all the events associated with the given user.
      * For a successful response the client must first be authenticated as the user or as an admin.
-     * @param userId User to get event stream of
+     * @param userId User to get newsfeed events for.
      */
-    @GetMapping("/events/emitter")
-    public synchronized SseEmitter eventEmitter(@RequestParam long userId, HttpServletRequest request, HttpServletResponse response) {
+    @GetMapping("/users/{userId}/feed")
+    public List<EventDTO> getEvents(@PathVariable long userId, @RequestParam(required = false) String modifiedSince, HttpServletRequest request, HttpServletResponse response) {
         try {
+            LOGGER.info("Retrieving newsfeed events for user (id={})", userId);
             AuthenticationTokenManager.checkAuthenticationToken(request);
             if (!AuthenticationTokenManager.sessionCanSeePrivate(request, userId)) {
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Cannot subscribe to other user's event stream");
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Cannot retrieve events associated with another user");
             }
 
             User user = userRepository.findById(userId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "User not found"));
-            response.setHeader("X-Accel-Buffering", "no"); // Fix for Nginx sse issues
-            return eventService.createEmitterForUser(user);
+
+            List<Event> events;
+            if (modifiedSince != null) {
+                Instant filterDate = convertModifiedSinceStringToInstant(modifiedSince);
+                events = eventRepository.findEventsForUser(user, filterDate);
+            } else {
+                events = eventRepository.findEventsForUser(user);
+            }
+
+            return events.stream().map(Event::asDTO).collect(Collectors.toList());
         } catch (Exception e) {
             LOGGER.error(e.getMessage());
             throw e;
+        }
+    }
+
+    /**
+     * Convert the string representation of the modifiedSince date to filter events by to an instant if it is in a valid
+     * format. Throw a response status exception if it is not in a valid format.
+     * @param modifiedSince A string to be converted to an instant.
+     * @return An instant derived from the modifiedSince string.
+     */
+    private Instant convertModifiedSinceStringToInstant(String modifiedSince) {
+        try {
+            return Instant.parse(modifiedSince);
+        } catch (DateTimeParseException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The modified since parameter must be in a valid " +
+                    "datetime format which includes the date, time and timezone");
         }
     }
 
@@ -107,7 +133,7 @@ public class EventController {
             }
 
             String message = messageInfo.getAsString("message");
-            userRepository.findAll().forEach(user -> eventService.saveEvent(new GlobalMessageEvent(user, message)));
+            userRepository.findAll().forEach(user -> eventRepository.save(new GlobalMessageEvent(user, message)));
 
             response.setStatus(201);
         } catch (Exception e) {
@@ -134,6 +160,60 @@ public class EventController {
             }
 
             eventRepository.delete(event);
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            throw e;
+        }
+    }
+
+    /**
+     * PUT endpoint for marking the event as read
+     * @param eventId The event to be marked as read
+     */
+    @PutMapping("/feed/{eventId}/read")
+    public void updateEventAsRead(@PathVariable long eventId, HttpServletRequest request) {
+        LOGGER.info("Requested update of event to be marked as read (eventId={})", eventId);
+
+        AuthenticationTokenManager.checkAuthenticationToken(request);
+        try {
+            Event event = eventRepository.findById(eventId)
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "Event not found"));
+
+            if (!AuthenticationTokenManager.sessionCanSeePrivate(request, event.getNotifiedUser().getUserID())) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Current user does not have permission to mark this event as read");
+            }
+
+            event.markAsRead();
+            eventRepository.save(event);
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            throw e;
+        }
+    }
+
+    /**
+     * PUT endpoint for changing the status of an event to starred, archived or normal.
+     * @param eventId The ID number of the event to change the status of.
+     */
+    @PutMapping("/feed/{eventId}/status")
+    public void updateEventStatus(@PathVariable long eventId, @Valid @RequestBody WrappedValueDTO<EventStatus> body, HttpServletRequest request) {
+        LOGGER.info("Requested update of event status (eventId={}, status={})", eventId, body.getValue());
+
+        AuthenticationTokenManager.checkAuthenticationToken(request);
+        try {
+            Event event = eventRepository.findById(eventId)
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "Event not found"));
+
+            if (!AuthenticationTokenManager.sessionCanSeePrivate(request, event.getNotifiedUser().getUserID())) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Current user does not have permission to modify this event");
+            }
+
+            if (event.getStatus().equals(EventStatus.ARCHIVED)) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The status of an archived event cannot be changed");
+            }
+
+            event.updateEventStatus(body.getValue());
+            eventRepository.save(event);
         } catch (Exception e) {
             LOGGER.error(e.getMessage());
             throw e;

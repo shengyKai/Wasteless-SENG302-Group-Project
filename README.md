@@ -3,15 +3,20 @@
 
 An application for buying and selling products which are close to their expiration date.
 
-## Deployed application
+## Deployed Application
 
-The application is running in the staging environment at https://csse-s302g5.canterbury.ac.nz/prod.
+The application is running at https://csse-s302g5.canterbury.ac.nz/prod.
 
-You can create and account or login to the example account with the following credentials:
-Username: example@seng302.com
+You can create and account or login to the example account with the following credentials: \
+Username: example@seng302.com \
 Password: password123
 
 You can also find the DGAA credentials on the git repository https://eng-git.canterbury.ac.nz/seng302-2021/team-500 by navigating to Settings -> CI/CD -> Variables. You must have maintainer access to the repository to do this.
+
+## Database Setup
+
+The application uses a Maria DB database. The database can be accessed by navigating to https://dbadmin.csse.canterbury.ac.nz/ and logging in with the username seng302-team500 and the server db2.csse.canterbury.ac.nz. Contact SENG302 Team 500 via s302team500@cosc.canterbury.ac.nz for the password. The database seng302-2021-team500-prod is used for the deployed application, while the database seng302-2021-team500-test is used for testing.
+
 
 ## Basic Project Structure
 
@@ -48,8 +53,8 @@ Running on: http://localhost:9500/ by default
 
 ### Backend / server
 
-    cd backend
-    ./gradlew bootRun
+    $ cd backend
+    $ ./gradlew bootRun
 
 Running on: http://localhost:9499/ by default
 
@@ -64,7 +69,7 @@ Running on: http://localhost:9499/ by default
     - Nathan Smithies
     - Sheng-He Phua
   
-## Sources for example data
+## Sources for Example Data
  
 first-names-female.txt, first-names-male.txt, last-names.txt \
 Derived from data published by the US Census Bureau https://www.census.gov/topics/population/genealogy/data/1990_census/1990_census_namefiles.html \
@@ -74,23 +79,28 @@ nicknames.csv \
 Derived from this dataset https://github.com/carltonnorthern/nickname-and-diminutive-names-lookup \
 Used under the Apache-2.0 License https://github.com/carltonnorthern/nickname-and-diminutive-names-lookup/blob/master/License.txt
 
-## Generating example data
+card-titles.txt \
+Derived in part from "Jabberwocky" by Lewis Carroll, which is in the public domain.
 
-Generate data by calling the generator endpoint `demo/generate`. Modify the body to decide how many of each entity to create.
+## Generating Example Data
+
+Generate data by sending a post request to the API endpoint `https://csse-s302g5.canterbury.ac.nz/prod/api/demo/generate`. Modify the body to decide how many of each entity to create.
 
 example:
 ```
 {
     "userCount"             : 10000,
-    "businessCount"         : 10000,
+    "businessCount"         : 1000,
     "productCount"          : 10000,
     "inventoryItemCount"    : 10000,
     "saleItemCount"         : 10000,
     "cardCount"             : 10000,
     "generateImages"        : true
+    "generateBusinessImages": true,
+    "businessImageMin": 1,
+    "businessImageMax": 2
 }
 ```
-Entity can be commend out by doing `userCount`.
 
 ## User Manual
 https://eng-git.canterbury.ac.nz/seng302-2021/team-500/-/wikis/uploads/c4f9dcb745da516d7e9f9cd6deade23f/LEFT_OVERS_User_Manual.docx

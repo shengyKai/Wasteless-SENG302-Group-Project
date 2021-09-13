@@ -1,12 +1,14 @@
 package cucumber.context;
 
 import io.cucumber.java.Before;
+import lombok.SneakyThrows;
 import org.junit.jupiter.api.Assertions;
 import org.seng302.leftovers.entities.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+
 import javax.servlet.http.Cookie;
 import java.util.HashMap;
 import java.util.Map;
@@ -88,5 +90,14 @@ public class RequestContext {
      */
     public MvcResult getLastResult() {
         return lastResult;
+    }
+
+    /**
+     * Gets the last result from perform request as a string
+     * @return String result of last performed request
+     */
+    @SneakyThrows
+    public String getLastResultAsString() {
+        return getLastResult().getResponse().getContentAsString();
     }
 }

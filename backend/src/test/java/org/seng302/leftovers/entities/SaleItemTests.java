@@ -1,6 +1,8 @@
 package org.seng302.leftovers.entities;
 
 import net.minidev.json.JSONObject;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.junit.jupiter.api.*;
 import org.seng302.leftovers.persistence.*;
 import org.seng302.leftovers.tools.SearchHelper;
@@ -9,6 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -17,6 +20,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -25,24 +29,27 @@ import static org.junit.jupiter.api.Assertions.*;
 class SaleItemTests {
 
     @Autowired
-    UserRepository userRepository;
+    private UserRepository userRepository;
     @Autowired
-    BusinessRepository businessRepository;
+    private BusinessRepository businessRepository;
     @Autowired
-    ProductRepository productRepository;
+    private ProductRepository productRepository;
     @Autowired
-    InventoryItemRepository inventoryItemRepository;
+    private InventoryItemRepository inventoryItemRepository;
     @Autowired
-    SaleItemRepository saleItemRepository;
+    private SaleItemRepository saleItemRepository;
+    @Autowired
+    private SessionFactory sessionFactory;
 
-    Business testBusiness;
-    Product testProduct;
-    InventoryItem inventoryItem;
-    PageRequest templatePageRequest;
+    private Business testBusiness;
+    private Product testProduct;
+    private InventoryItem inventoryItem;
+    private PageRequest templatePageRequest;
+    private User testUser;
 
 
     void createTestObjects() throws Exception {
-        User testUser = new User.Builder()
+        testUser = new User.Builder()
                 .withFirstName("John")
                 .withMiddleName("Hector")
                 .withLastName("Smith")
@@ -51,7 +58,7 @@ class SaleItemTests {
                 .withPassword("1337-H%nt3r2")
                 .withBio("Likes long walks on the beach")
                 .withDob("2000-03-11")
-                .withPhoneNumber("+64 3 555 0129")
+                .withPhoneNumber("64 3555012")
                 .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
                         "Canterbury,8041"))
                 .build();
@@ -129,7 +136,7 @@ class SaleItemTests {
                 .withQuantity(2)
                 .build();
         saleItemRepository.save(saleItem);
-        Assertions.assertNotNull(saleItemRepository.findById(saleItem.getSaleId()));
+        Assertions.assertNotNull(saleItemRepository.findById(saleItem.getId()));
     }
 
     @Test
@@ -140,7 +147,7 @@ class SaleItemTests {
                 .withPrice("200.34")
                 .build();
         saleItemRepository.save(saleItem);
-        Assertions.assertNotNull(saleItemRepository.findById(saleItem.getSaleId()));
+        Assertions.assertNotNull(saleItemRepository.findById(saleItem.getId()));
     }
 
     @Test
@@ -155,7 +162,7 @@ class SaleItemTests {
                 .withQuantity(2)
                 .build();
         saleItemRepository.save(saleItem);
-        Assertions.assertNotNull(saleItemRepository.findById(saleItem.getSaleId()));
+        Assertions.assertNotNull(saleItemRepository.findById(saleItem.getId()));
     }
 
     private Date yesterday() {
@@ -288,8 +295,8 @@ class SaleItemTests {
                 .withPrice("3.57")
                 .build();
         saleItemRepository.save(saleItem2);
-        Assertions.assertNotNull(saleItemRepository.findById(saleItem.getSaleId()));
-        Assertions.assertNotNull(saleItemRepository.findById(saleItem2.getSaleId()));
+        Assertions.assertNotNull(saleItemRepository.findById(saleItem.getId()));
+        Assertions.assertNotNull(saleItemRepository.findById(saleItem2.getId()));
     }
 
     @Test
@@ -304,7 +311,7 @@ class SaleItemTests {
                 .withPrice("3.57")
                 .build();
         saleItemRepository.save(saleItem);
-        Assertions.assertNotNull(saleItemRepository.findById(saleItem.getSaleId()));
+        Assertions.assertNotNull(saleItemRepository.findById(saleItem.getId()));
         SaleItem.Builder saleItem2 = new SaleItem.Builder()
                 .withInventoryItem(inventoryItem)
                 .withCloses(LocalDate.now().plus(1000, ChronoUnit.DAYS).toString())
@@ -326,7 +333,7 @@ class SaleItemTests {
         saleItemRepository.save(saleItem);
 
         inventoryItemRepository.deleteAll();
-        Optional<SaleItem> foundItem = saleItemRepository.findById(saleItem.getSaleId());
+        Optional<SaleItem> foundItem = saleItemRepository.findById(saleItem.getId());
         if (foundItem.isPresent()) { Assertions.fail(); }
     }
 
@@ -408,7 +415,7 @@ class SaleItemTests {
 
         JSONObject object = saleItem.constructJSONObject();
 
-        assertEquals(saleItem.getSaleId(), object.get("id"));
+        assertEquals(saleItem.getId(), object.get("id"));
         assertEquals(saleItem.getInventoryItem().constructJSONObject(), object.get("inventoryItem"));
         assertEquals(saleItem.getQuantity(), object.get("quantity"));
         assertEquals(saleItem.getPrice(), object.get("price"));
@@ -436,7 +443,7 @@ class SaleItemTests {
     }
 
     @Test
-    void findAllForBusiness_saleItemExistsForBusiness_saleItemIsFound() {
+    void findAll_saleItemExistsForBusiness_saleItemIsFound() {
         SaleItem saleItem = new SaleItem.Builder()
                 .withInventoryItem(inventoryItem)
                 .withCloses(LocalDate.now().plus(1, ChronoUnit.DAYS).toString())
@@ -445,20 +452,22 @@ class SaleItemTests {
                 .build();
         saleItem = saleItemRepository.save(saleItem);
 
+        PageRequest pageRequest = SearchHelper.getPageRequest(null, null, Sort.by("created"));
 
-        Page<SaleItem> foundItems = saleItemRepository.findAllForBusiness(testBusiness, templatePageRequest);
+        Specification<SaleItem> specification = SearchHelper.constructSpecificationFromSaleItemsFilter(testBusiness);
+        Page<SaleItem> foundItems = saleItemRepository.findAll(specification, pageRequest);
 
         assertEquals(1, foundItems.getTotalElements());
         SaleItem foundItem = foundItems.getContent().get(0);
 
-        assertEquals(saleItem.getSaleId(), foundItem.getSaleId());
+        assertEquals(saleItem.getId(), foundItem.getId());
         assertEquals(saleItem.getInventoryItem().getId(), foundItem.getInventoryItem().getId());
         assertEquals(saleItem.getCloses(), foundItem.getCloses());
         assertEquals(saleItem.getQuantity(), foundItem.getQuantity());
     }
 
     @Test
-    void findAllForBusiness_multipleInventoryItems_allSaleItemsAreFoundNoDuplicates() throws Exception {
+    void findAll_multipleInventoryItems_allSaleItemsAreFoundNoDuplicates() throws Exception {
         LocalDate today = LocalDate.now();
 
         // Creates many sale items associated with different inventory items
@@ -483,14 +492,17 @@ class SaleItemTests {
                         .withMoreInfo("more_info_" + i + "_" + j)
                         .build();
                 saleItem = saleItemRepository.save(saleItem);
-                saleItems.put(saleItem.getSaleId(), saleItem);
+                saleItems.put(saleItem.getId(), saleItem);
             }
         }
 
-        // Make sure that the found items correspond 1 to 1 with the generated items
-        Page<SaleItem> foundItems = saleItemRepository.findAllForBusiness(testBusiness, templatePageRequest);
+        PageRequest pageRequest = SearchHelper.getPageRequest(null, null, Sort.by("created"));
+
+        Specification<SaleItem> specification = SearchHelper.constructSpecificationFromSaleItemsFilter(testBusiness);
+        Page<SaleItem> foundItems = saleItemRepository.findAll(specification, pageRequest);
+
         for (SaleItem foundItem : foundItems) {
-            SaleItem matchingItem = saleItems.get(foundItem.getSaleId());
+            SaleItem matchingItem = saleItems.get(foundItem.getId());
             assertNotNull(matchingItem);
             assertEquals(matchingItem.getMoreInfo(), foundItem.getMoreInfo());
         }
@@ -498,7 +510,7 @@ class SaleItemTests {
     }
 
     @Test
-    void findAllForBusiness_multipleProducts_allSaleItemsAreFoundNoDuplicates() throws Exception {
+    void findAll_multipleProducts_allSaleItemsAreFoundNoDuplicates() throws Exception {
         LocalDate today = LocalDate.now();
 
         // Creates many sale items associated with different products
@@ -529,17 +541,178 @@ class SaleItemTests {
                         .withMoreInfo("more_info_" + i + "_" + j)
                         .build();
                 saleItem = saleItemRepository.save(saleItem);
-                saleItems.put(saleItem.getSaleId(), saleItem);
+                saleItems.put(saleItem.getId(), saleItem);
             }
         }
 
-        // Make sure that the found items correspond 1 to 1 with the generated items
-        Page<SaleItem> foundItems = saleItemRepository.findAllForBusiness(testBusiness, templatePageRequest);
+        PageRequest pageRequest = SearchHelper.getPageRequest(null, null, Sort.by("created"));
+
+        Specification<SaleItem> specification = SearchHelper.constructSpecificationFromSaleItemsFilter(testBusiness);
+        Page<SaleItem> foundItems = saleItemRepository.findAll(specification, pageRequest);
+        
         for (SaleItem foundItem : foundItems) {
-            SaleItem matchingItem = saleItems.get(foundItem.getSaleId());
+            SaleItem matchingItem = saleItems.get(foundItem.getId());
             assertNotNull(matchingItem);
             assertEquals(matchingItem.getMoreInfo(), foundItem.getMoreInfo());
         }
         assertEquals(saleItems.size(), foundItems.getTotalElements());
+    }
+
+    @Test
+    void addInterestedUser_addSingleUser_userAddedToInterestedUsersAndLikeCountIsOne() {
+        SaleItem saleItem = new SaleItem.Builder()
+                .withInventoryItem(inventoryItem)
+                .withCloses(LocalDate.now().plus(1000, ChronoUnit.DAYS).toString())
+                .withMoreInfo("This doesn't expire for a long time")
+                .withPrice("200.34")
+                .withQuantity(2)
+                .build();
+        saleItem = saleItemRepository.save(saleItem);
+        saleItem.addInterestedUser(testUser);
+        saleItemRepository.save(saleItem);
+
+        try (Session session = sessionFactory.openSession()) {
+            saleItem = session.get(SaleItem.class, saleItem.getId());
+
+            Set<Long> actualIds = saleItem
+                    .getInterestedUsers().stream()
+                    .map(User::getUserID)
+                    .collect(Collectors.toSet());
+            assertEquals(Set.of(testUser.getUserID()), actualIds);
+            assertEquals(1, saleItem.getLikeCount());
+        }
+    }
+
+    @Test
+    void addInterestedUser_sameUserTwice_userAddedToInterestedUsersAndLikeCountIsOne() {
+        SaleItem saleItem = new SaleItem.Builder()
+                .withInventoryItem(inventoryItem)
+                .withCloses(LocalDate.now().plus(1000, ChronoUnit.DAYS).toString())
+                .withMoreInfo("This doesn't expire for a long time")
+                .withPrice("200.34")
+                .withQuantity(2)
+                .build();
+        saleItem = saleItemRepository.save(saleItem);
+
+        saleItem.addInterestedUser(testUser);
+        saleItem.addInterestedUser(testUser);
+
+        saleItemRepository.save(saleItem);
+
+        try (Session session = sessionFactory.openSession()) {
+            saleItem = session.get(SaleItem.class, saleItem.getId());
+
+            Set<Long> actualIds = saleItem
+                    .getInterestedUsers().stream()
+                    .map(User::getUserID)
+                    .collect(Collectors.toSet());
+            assertEquals(Set.of(testUser.getUserID()), actualIds);
+            assertEquals(1, saleItem.getLikeCount());
+        }
+    }
+
+    @Test
+    void addInterestedUser_addTwoUsers_userAddedToInterestedUsersAndLikeCountIsTwo() {
+        User testUser2 = new User.Builder()
+                .withFirstName("John")
+                .withMiddleName("Hector")
+                .withLastName("Smith")
+                .withNickName("Jonny")
+                .withEmail("johnsmith96@gmail.com")
+                .withPassword("1337-H%nt3r2")
+                .withBio("Likes long walks on the beach")
+                .withDob("2000-03-11")
+                .withPhoneNumber("64 3555012")
+                .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
+                        "Canterbury,8041"))
+                .build();
+        testUser2 = userRepository.save(testUser2);
+
+        SaleItem saleItem = new SaleItem.Builder()
+                .withInventoryItem(inventoryItem)
+                .withCloses(LocalDate.now().plus(1000, ChronoUnit.DAYS).toString())
+                .withMoreInfo("This doesn't expire for a long time")
+                .withPrice("200.34")
+                .withQuantity(2)
+                .build();
+        saleItem = saleItemRepository.save(saleItem);
+
+        saleItem.addInterestedUser(testUser);
+        saleItem.addInterestedUser(testUser2);
+
+        saleItemRepository.save(saleItem);
+
+        try (Session session = sessionFactory.openSession()) {
+            saleItem = session.get(SaleItem.class, saleItem.getId());
+
+            Set<Long> actualIds = saleItem
+                    .getInterestedUsers().stream()
+                    .map(User::getUserID)
+                    .collect(Collectors.toSet());
+            assertEquals(Set.of(testUser.getUserID(), testUser2.getUserID()), actualIds);
+            assertEquals(2, saleItem.getLikeCount());
+        }
+    }
+
+    @Test
+    void removeInterestedUser_removeNonInterestedUser_interestedUsersUnchanged() {
+        SaleItem saleItem = new SaleItem.Builder()
+                .withInventoryItem(inventoryItem)
+                .withCloses(LocalDate.now().plus(1000, ChronoUnit.DAYS).toString())
+                .withMoreInfo("This doesn't expire for a long time")
+                .withPrice("200.34")
+                .withQuantity(2)
+                .build();
+
+        User testUser2 = new User.Builder()
+                .withFirstName("John")
+                .withMiddleName("Hector")
+                .withLastName("Smith")
+                .withNickName("Jonny")
+                .withEmail("johnsmith96@gmail.com")
+                .withPassword("1337-H%nt3r2")
+                .withBio("Likes long walks on the beach")
+                .withDob("2000-03-11")
+                .withPhoneNumber("64 3555012")
+                .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
+                        "Canterbury,8041"))
+                .build();
+        testUser2 = userRepository.save(testUser2);
+
+        saleItem.addInterestedUser(testUser);
+        saleItem.removeInterestedUser(testUser2);
+
+        assertEquals(Set.of(testUser), saleItem.getInterestedUsers());
+    }
+
+    @Test
+    void removeInterestedUser_removeInterestedUser_userRemoved() {
+        SaleItem saleItem = new SaleItem.Builder()
+                .withInventoryItem(inventoryItem)
+                .withCloses(LocalDate.now().plus(1000, ChronoUnit.DAYS).toString())
+                .withMoreInfo("This doesn't expire for a long time")
+                .withPrice("200.34")
+                .withQuantity(2)
+                .build();
+        saleItem = saleItemRepository.save(saleItem);
+
+        saleItem.addInterestedUser(testUser);
+        saleItemRepository.save(saleItem);
+
+        try (Session session = sessionFactory.openSession()) {
+            session.beginTransaction();
+
+            saleItem = session.get(SaleItem.class, saleItem.getId());
+            saleItem.removeInterestedUser(saleItem.getInterestedUsers().stream().findFirst().orElseThrow());
+            session.save(saleItem);
+            session.getTransaction().commit();
+        }
+
+        try (Session session = sessionFactory.openSession()) {
+            saleItem = session.get(SaleItem.class, saleItem.getId());
+
+            assertEquals(Set.of(), saleItem.getInterestedUsers());
+            assertEquals(0, saleItem.getLikeCount());
+        }
     }
 }

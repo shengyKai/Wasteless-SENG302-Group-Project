@@ -8,17 +8,14 @@ import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.util.FileSystemUtils;
-import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.stream.Stream;
 
 @Service
@@ -41,10 +38,10 @@ public class StorageServiceImpl implements StorageService {
     }
 
     @Override
-    public void store(MultipartFile file, String filename) {
+    public void store(InputStream file, String filename) {
         logger.info(() -> String.format("Storing image with filename=%s", filename));
         try {
-            Files.copy(file.getInputStream(), this.root.resolve(filename));
+            Files.copy(file, this.root.resolve(filename));
             
         } catch (Exception e) {
             logger.error(e);
@@ -93,13 +90,12 @@ public class StorageServiceImpl implements StorageService {
         if (filename.isEmpty() || filename.isBlank()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Filename not given for deletion");
         }
-        Path file = root.resolve(filename);
+        Path path = root.resolve(filename);
 
-        if (!file.toFile().delete()) {
-            logger.warn(() -> "Failed to delete: \"" + filename + "\"");
+        try {
+            Files.delete(path);
+        } catch (IOException e) {
+            logger.warn("Failed to delete: \"{}\" due to {}", filename, e);
         }
     }
-
-
-
 }

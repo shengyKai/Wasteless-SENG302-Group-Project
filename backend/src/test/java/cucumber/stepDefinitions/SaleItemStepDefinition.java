@@ -1,14 +1,18 @@
 package cucumber.stepDefinitions;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import cucumber.context.BusinessContext;
 import cucumber.context.RequestContext;
+import cucumber.context.UserContext;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+import lombok.SneakyThrows;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
+import org.seng302.leftovers.dto.event.InterestEventDTO;
 import org.seng302.leftovers.entities.InventoryItem;
 import org.seng302.leftovers.entities.Product;
 import org.seng302.leftovers.entities.SaleItem;
@@ -17,26 +21,24 @@ import org.seng302.leftovers.persistence.ProductRepository;
 import org.seng302.leftovers.persistence.SaleItemRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 
+import javax.transaction.Transactional;
 import java.util.*;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 
 public class SaleItemStepDefinition {
     @Autowired
-    private ObjectMapper objectMapper;
+    private UserContext userContext;
     @Autowired
     private BusinessContext businessContext;
     @Autowired
     private RequestContext requestContext;
-
     @Autowired
-    private MockMvc mockMvc;
+    private ObjectMapper objectMapper;
+
     @Autowired
     private ProductRepository productRepository;
     @Autowired
@@ -47,7 +49,6 @@ public class SaleItemStepDefinition {
     private Integer quantity;
     private Long inventoryItemId;
     private Double price;
-    private MvcResult mvcResult;
     private String closing;
     private String moreInfo;
 
@@ -88,12 +89,10 @@ public class SaleItemStepDefinition {
         object.put("quantity", quantity);
         object.put("price", price);
 
-        mvcResult = mockMvc.perform(
-                requestContext.addAuthorisationToken(
-                    post(String.format("/businesses/%d/listings", businessContext.getLast().getId()))
-                ).content(object.toString())
-                .contentType(MediaType.APPLICATION_JSON)
-        ).andReturn();
+        requestContext.performRequest(
+                post(String.format("/businesses/%d/listings", businessContext.getLast().getId()))
+                .content(object.toString())
+                .contentType(MediaType.APPLICATION_JSON));
     }
 
     @When("I create a sale item for product code {string}, quantity {int}, price {double}, more info {string}, closing {string}")
@@ -113,16 +112,17 @@ public class SaleItemStepDefinition {
         object.put("moreInfo", moreInfo);
         object.put("closes", closing);
 
-        mvcResult = mockMvc.perform(
-                requestContext.addAuthorisationToken(
-                        post(String.format("/businesses/%d/listings", businessContext.getLast().getId()))
-                ).content(object.toString())
-                        .contentType(MediaType.APPLICATION_JSON)
-        ).andReturn();
+        requestContext.performRequest(
+                post(String.format("/businesses/%d/listings", businessContext.getLast().getId()))
+                .content(object.toString())
+                .contentType(MediaType.APPLICATION_JSON)
+        );
     }
 
     @Then("I expect the sale item to be created")
     public void i_expect_the_sale_item_to_be_created() throws Exception {
+        var mvcResult = requestContext.getLastResult();
+
         assertEquals(201, mvcResult.getResponse().getStatus());
         JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
         JSONObject response = (JSONObject) parser.parse(mvcResult.getResponse().getContentAsString());
@@ -143,31 +143,27 @@ public class SaleItemStepDefinition {
 
     @Then("I expect the sale item not to be created, due to being forbidden")
     public void i_expect_the_sale_item_not_to_be_created_forbidden() {
+        var mvcResult = requestContext.getLastResult();
         assertEquals(403, mvcResult.getResponse().getStatus());
         assertEquals(0, saleItemRepository.count());
     }
 
     @Then("I expect the sale item not to be created, due to being a bad request")
     public void i_expect_the_sale_item_not_to_be_created_bad_request() {
+        var mvcResult = requestContext.getLastResult();
         assertEquals(400, mvcResult.getResponse().getStatus());
         assertEquals(0, saleItemRepository.count());
     }
 
     @When("I look a the business sale listings")
     public void i_look_a_the_business_sale_listings() throws Exception {
-        mvcResult = mockMvc.perform(
-                requestContext.addAuthorisationToken(
-                        get(String.format("/businesses/%d/listings", businessContext.getLast().getId()))
-                )).andReturn();
-    }
-
-    @Then("I expect to be unauthorised")
-    public void i_expect_to_be_unauthorised() {
-        assertEquals(401, mvcResult.getResponse().getStatus());
+        requestContext.performRequest(get(String.format("/businesses/%d/listings", businessContext.getLast().getId())));
     }
 
     @Then("I expect to be see the sales listings")
     public void i_expect_to_be_see_the_sales_listings() throws Exception {
+        var mvcResult = requestContext.getLastResult();
+
         assertEquals(200, mvcResult.getResponse().getStatus());
         JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
         JSONObject response = (JSONObject) parser.parse(mvcResult.getResponse().getContentAsString());
@@ -179,7 +175,7 @@ public class SaleItemStepDefinition {
 
             long id = ((Number)json.get("id")).longValue();
 
-            Optional<SaleItem> foundItem = addedSaleItems.stream().filter(x -> x.getSaleId().equals(id)).findFirst();
+            Optional<SaleItem> foundItem = addedSaleItems.stream().filter(x -> x.getId().equals(id)).findFirst();
             assertTrue(foundItem.isPresent());
 
             assertEquals(foundItem.get().getQuantity(), json.get("quantity"));
@@ -188,5 +184,72 @@ public class SaleItemStepDefinition {
         }
 
         assertEquals(addedSaleItems.size(), response.getAsNumber("count").intValue());
+    }
+
+    @When("I like the sale item")
+    public void i_like_the_sale_item() {
+        assertEquals(1, addedSaleItems.size());
+        SaleItem saleItem = addedSaleItems.stream().findFirst().orElseThrow();
+
+        var json = new JSONObject();
+        json.put("userId", userContext.getLast().getUserID());
+        json.put("interested", true);
+
+        requestContext.performRequest(
+            put(String.format("/listings/%d/interest", saleItem.getId()))
+                .content(json.toString())
+                .contentType(MediaType.APPLICATION_JSON)
+        );
+    }
+
+    @When("I unlike the sale item")
+    public void i_unlike_the_sale_item() {
+        assertEquals(1, addedSaleItems.size());
+        SaleItem saleItem = addedSaleItems.stream().findFirst().orElseThrow();
+
+        var json = new JSONObject();
+        json.put("userId", userContext.getLast().getUserID());
+        json.put("interested", false);
+
+        requestContext.performRequest(
+                put(String.format("/listings/%d/interest", saleItem.getId()))
+                        .content(json.toString())
+                        .contentType(MediaType.APPLICATION_JSON)
+        );
+    }
+
+    @Transactional
+    @Then("The like count of the sale item is {int}")
+    public void the_like_count_of_the_sale_item_is(int count) {
+        assertEquals(1, addedSaleItems.size());
+        SaleItem saleItem = addedSaleItems.stream().findFirst().orElseThrow();
+
+        saleItem = saleItemRepository.findById(saleItem.getId()).orElseThrow();
+
+        assertEquals(count, saleItem.getLikeCount());
+    }
+
+    @SneakyThrows
+    private void notificationExistsWithInterest(boolean interested) {
+        assertEquals(1, addedSaleItems.size());
+        SaleItem saleItem = addedSaleItems.stream().findFirst().orElseThrow();
+
+        List<InterestEventDTO> eventList = objectMapper.readValue(requestContext.getLastResultAsString(), new TypeReference<>() {});
+        var event = eventList.get(0);
+
+        // TODO Refactor this test to directly compare the sale item DTOs when they are implemented, Connor.
+        assertEquals(saleItem.getId().longValue(), event.getSaleItem().getAsNumber("id").longValue());
+        assertEquals(event.isInterested(), interested);
+
+    }
+
+    @Then("The notification is for liking the sale item")
+    public void the_notification_is_for_liking_the_sale_item() {
+        notificationExistsWithInterest(true);
+    }
+
+    @Then("The notification is for unliking the sale item")
+    public void the_notification_is_for_unliking_the_sale_item() {
+        notificationExistsWithInterest(false);
     }
 }

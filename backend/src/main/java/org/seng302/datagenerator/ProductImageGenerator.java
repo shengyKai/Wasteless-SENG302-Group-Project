@@ -1,25 +1,17 @@
 package org.seng302.datagenerator;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URISyntaxException;
-import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.*;
 import java.util.*;
-import java.util.stream.Collector;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class ProductImageGenerator {
 
@@ -63,10 +55,11 @@ public class ProductImageGenerator {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Could not locate file type for:" + image.get().toString());
         }
 
-        if (saveImageToSystem(image.get(), filename)) {
+        try {
+            store(image.get().getInputStream(), filename);
             createInsertImageSQL(productId, filename);
-        } else {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Could save image to disk for: " + image.get().toString());
+        } catch (IOException e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Unable to get input stream from image: " + image.get().getFilename());
         }
     }
 
@@ -88,27 +81,10 @@ public class ProductImageGenerator {
      * @throws IOException
      */
     private Optional<Resource> findImage(String noun) {
-        Optional<Resource> file = Arrays.stream(demoImages)
+        return Arrays.stream(demoImages)
                 .filter(res -> Objects.requireNonNull(res.getFilename())
                 .replaceFirst("[.][^.]+$", "").equals(noun.toLowerCase(Locale.ROOT)))
                 .findFirst();
-        return file;
-    }
-
-    /**
-     * Given an example image, copies the image into the images directory.
-     * @param demoImage The demo image to copy
-     * @param fileName The name of the file to save
-     * @return true if file successfully saved.
-     */
-    private boolean saveImageToSystem(Resource resource, String fileName) {
-        try {
-            store(resource.getInputStream(), fileName);
-            return true;
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-            return false;
-        }
     }
 
     /**
@@ -134,18 +110,20 @@ public class ProductImageGenerator {
      * @throws SQLException
      */
     private long createInsertImageSQL(Long productId, String filename) throws SQLException {
-        PreparedStatement stmt = conn.prepareStatement("INSERT INTO image (filename, product_id, image_order) " +
-                "VALUES (?,?,?)",
+        try (PreparedStatement stmt = conn.prepareStatement("INSERT INTO image (filename, product_id, image_order, filename_thumbnail) " +
+                "VALUES (?,?,?,?)",
                 Statement.RETURN_GENERATED_KEYS
-        );
-        stmt.setObject(1, filename);
-        stmt.setObject(2, productId);
-        stmt.setObject(3, 0);
+        )) {
+            stmt.setObject(1, filename);
+            stmt.setObject(2, productId);
+            stmt.setObject(3, 0);
+            stmt.setObject(4, filename);
 
-        stmt.executeUpdate();
+            stmt.executeUpdate();
 
-        ResultSet keys = stmt.getGeneratedKeys();
-        keys.next();
-        return keys.getLong(1);
+            ResultSet keys = stmt.getGeneratedKeys();
+            keys.next();
+            return keys.getLong(1);
+        }
     }
 }

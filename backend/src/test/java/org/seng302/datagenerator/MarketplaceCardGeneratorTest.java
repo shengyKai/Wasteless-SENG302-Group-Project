@@ -1,6 +1,8 @@
 package org.seng302.datagenerator;
 
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.seng302.leftovers.Main;
 import org.seng302.leftovers.persistence.MarketplaceCardRepository;
@@ -13,17 +15,14 @@ import java.sql.*;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.*;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes={Main.class})
-public class MarketplaceCardGeneratorTest {
+class MarketplaceCardGeneratorTest {
     private Connection conn;
     private MarketplaceCardGenerator marketplaceCardGenerator;
     private List<Long> userIds;
-
-    private static final List<String> DEFAULT_KEYWORD_NAMES = List.of("Free", "Home Baking", "With Love", "Inspired", "Bulk", "Gluten Free", "Vegan", "Vegetarian", "Fun", "Keto", "Plant Based", "Fat Free", "Italian", "French", "Local Produce", "Fresh", "Eco", "Sustainable", "Asian", "Curry", "Dairy", "Perishable", "Non Perishable", "Free Range", "Natural", "Organic", "Connor", "Kosher", "Paleo", "Home Grown");
 
     @Autowired
     private UserRepository userRepository;
@@ -86,7 +85,7 @@ public class MarketplaceCardGeneratorTest {
     @Test
     void generateCards_SingleCard_OneCardGenerated() throws SQLException {
         List<Long> cardIds = marketplaceCardGenerator.generateCards(userIds,1);
-        if (cardIds.size() != 1) fail();
+        assertEquals(1, cardIds.size());
         assertTrue(checkFields(cardIds.get(0)));
         assertTrue(checkKeywords(cardIds.get(0)));
     }
@@ -94,7 +93,8 @@ public class MarketplaceCardGeneratorTest {
     @Test
     void generateCards_ManyCard_ManyCardsGenerated() throws SQLException {
         List<Long> cardIds = marketplaceCardGenerator.generateCards(userIds,100);
-        if (cardIds.size() != 100) fail();
+
+        assertEquals(100, cardIds.size());
         for (Long cardId : cardIds) {
             assertTrue(checkFields(cardId));
             assertTrue(checkKeywords(cardId));
@@ -104,12 +104,12 @@ public class MarketplaceCardGeneratorTest {
     @Test
     void generateCards_ZeroCard_NoCardsGenerated() throws SQLException {
         List<Long> cardIds = marketplaceCardGenerator.generateCards(userIds,0);
-        if (cardIds.size() != 0) fail();
+        assertEquals(0, cardIds.size());
     }
 
     @Test
     void generateCards_NegativeCard_NoCardsGenerated() throws SQLException {
         List<Long> cardIds = marketplaceCardGenerator.generateCards(userIds,-10);
-        if (cardIds.size() != 0) fail();
+        assertEquals(0, cardIds.size());
     }
 }

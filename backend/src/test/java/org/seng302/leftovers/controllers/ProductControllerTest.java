@@ -1,6 +1,5 @@
 package org.seng302.leftovers.controllers;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
@@ -147,7 +146,7 @@ class ProductControllerTest {
                 .withPassword("1337-H%nt3r2")
                 .withBio("Likes long walks on the beach")
                 .withDob("2000-03-11")
-                .withPhoneNumber("+64 3 555 0129")
+                .withPhoneNumber("64 3555012")
                 .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
                         "Canterbury,8041"))
                 .build();
@@ -164,7 +163,7 @@ class ProductControllerTest {
                 .withPassword("1337-H548*nt3r2")
                 .withBio("Likes long walks on the beach sometimes")
                 .withDob("2008-03-11")
-                .withPhoneNumber("+64 5 565 0129")
+                .withPhoneNumber("64 55650129")
                 .withAddress(Location.covertAddressStringToLocation("5,Rountree Street,Ashburton,Christchurch,New Zealand," +
                         "Canterbury,8041"))
                 .build();
@@ -180,7 +179,7 @@ class ProductControllerTest {
                 .withPassword("hunter2")
                 .withBio("Likes long walks on the beach always")
                 .withDob("2000-03-11")
-                .withPhoneNumber("+64 5 565 0125")
+                .withPhoneNumber("64 55650125")
                 .withAddress(Location.covertAddressStringToLocation("5,Rountree Street,Ashburton,Christchurch,New Zealand," +
                         "Canterbury,8041"))
                 .build();
@@ -252,10 +251,6 @@ class ProductControllerTest {
             session.save(product2);
             session.save(product3);
             session.save(product4);
-//            productRepository.save(product4);
-//            productRepository.save(product1);
-//            productRepository.save(product2);
-//            productRepository.save(product3);
             session.getTransaction().commit();
         } catch (IllegalAccessException e) {
             fail();
@@ -631,7 +626,6 @@ class ProductControllerTest {
         )) {
             setCurrentUser(ownerUser.getUserID());
             var productInfo = generateProductCreationInfo();
-            System.out.println(String.format("/businesses/%d/products", testBusiness1.getId()));
             assertDoesNotThrow(() -> mockMvc.perform(post(String.format("/businesses/%d/products", testBusiness1.getId()))
                     .content(productInfo.toString())
                     .sessionAttrs(sessionAuthToken)
@@ -732,8 +726,6 @@ class ProductControllerTest {
         JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
         JSONObject response = (JSONObject) parser.parse(result.getResponse().getContentAsString());
         JSONArray results = (JSONArray) response.get("results");
-
-        System.out.println(results.toString());
 
         JSONObject firstProduct = (JSONObject) results.get(0);
         JSONObject lastProduct = (JSONObject) results.get(3);
@@ -1134,15 +1126,27 @@ class ProductControllerTest {
                 .andReturn();
     }
 
-    /**
-     * Tests that uploading an image with a valid content type returns a created response.
-     */
+
     @Test
-    void uploadingImageToProductSucceedsWithValidImage() throws Exception {
+    void uploadProductImage_invalidImageData_400Response() throws Exception {
         setCurrentUser(ownerUser.getUserID());
         addSeveralProductsToACatalogue();
 
         MockMultipartFile file = new MockMultipartFile("file", "filename.txt", "image/jpeg", new byte[100]);
+        mockMvc.perform(multipart(String.format("/businesses/%d/products/NATHAN-APPLE-70/images", testBusiness1.getId()))
+                .file(file)
+                .sessionAttrs(sessionAuthToken)
+                .cookie(authCookie))
+                .andExpect(status().isBadRequest())
+                .andReturn();
+    }
+
+    @Test
+    void uploadProductImage_validImageData_201Response() throws Exception {
+        setCurrentUser(ownerUser.getUserID());
+        addSeveralProductsToACatalogue();
+
+        MockMultipartFile file = new MockMultipartFile("file", "filename.txt", "image/png", ProductControllerTest.class.getResourceAsStream("/point.png"));
         mockMvc.perform(multipart(String.format("/businesses/%d/products/NATHAN-APPLE-70/images", testBusiness1.getId()))
                 .file(file)
                 .sessionAttrs(sessionAuthToken)
@@ -1210,12 +1214,6 @@ class ProductControllerTest {
         setCurrentUser(bystanderUser.getUserID());
         addSeveralProductsToACatalogue();
 
-//        var foo = productRepository.getAllByBusiness(testBusiness1, templateRequest);
-//        System.out.println(foo);
-
-        var bar = productRepository.findAllByBusiness(testBusiness1);
-        System.out.println(bar);
-
         Product product = productRepository.getAllByBusiness(testBusiness1, templateRequest).getContent().get(0); // get product 1
         product = addImagesToProduct(product);
         Image image2 = product.getProductImages().get(1);
@@ -1243,5 +1241,78 @@ class ProductControllerTest {
                         .sessionAttrs(sessionAuthToken)
                         .cookie(authCookie))
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    void searchCatalogue_validSearch_200Response() throws Exception {
+        setCurrentUser(ownerUser.getUserID());
+        addSeveralProductsToACatalogue();
+
+        mockMvc.perform(
+                get(String.format("/businesses/%d/products/search", testBusiness1.getId()))
+                        .param("searchQuery", "Apple")
+                        .sessionAttrs(sessionAuthToken)
+                        .cookie(authCookie))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void searchCatalogue_fieldParametersProvided_responseFormattedToParams() throws Exception {
+        setCurrentUser(ownerUser.getUserID());
+        addSeveralProductsToACatalogue();
+
+        MvcResult result = mockMvc.perform(
+            get(String.format("/businesses/%d/products/search", testBusiness1.getId()))
+                    .param("searchQuery", "Apple")
+                    .param("searchBy", "name")
+                    .param("searchBy", "productCode")
+                    .sessionAttrs(sessionAuthToken)
+                    .cookie(authCookie))
+            .andExpect(status().isOk())
+            .andReturn();
+
+        JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
+        JSONObject response = (JSONObject) parser.parse(result.getResponse().getContentAsString());
+        JSONArray results = (JSONArray) response.get("results");
+        JSONObject product = (JSONObject) results.get(0);
+
+        assertEquals("NATHAN-APPLE-70", product.getAsString("id"));
+        assertEquals(1, results.size());
+    }
+
+    @Test
+    void searchCatalogue_unauthorised_401Response() throws Exception {
+        addSeveralProductsToACatalogue();
+
+        mockMvc.perform(
+                get(String.format("/businesses/%d/products/search", testBusiness1.getId()))
+                        .param("searchQuery", "Apple"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void searchCatalogue_notBusinessAdmin_403Response() throws Exception {
+        setCurrentUser(bystanderUser.getUserID());
+        addSeveralProductsToACatalogue();
+
+        mockMvc.perform(
+                get(String.format("/businesses/%d/products/search", testBusiness1.getId()))
+                        .param("searchQuery", "Apple")
+                        .sessionAttrs(sessionAuthToken)
+                        .cookie(authCookie))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void searchCatalogue_businessNotFound_406Response() throws Exception {
+        setCurrentUser(ownerUser.getUserID());
+        addSeveralProductsToACatalogue();
+
+        mockMvc.perform(
+                get("/businesses/999/products/search")
+                        .param("searchQuery", "Apple")
+                        .sessionAttrs(sessionAuthToken)
+                        .cookie(authCookie))
+                .andExpect(status().isNotAcceptable());
     }
 }

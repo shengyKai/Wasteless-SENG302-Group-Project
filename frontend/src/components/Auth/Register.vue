@@ -310,7 +310,7 @@ export default {
       if (this.phone === '') {
         fullPhoneNum = '';
       } else {
-        fullPhoneNum = '+' + this.countryCode + ' ' + this.phone;
+        fullPhoneNum = this.countryCode + ' ' + this.phone;
       }
 
       let user = {
@@ -335,11 +335,16 @@ export default {
       };
 
       let response = await createUser(user);
-      if (response === undefined ) {
-        this.$emit('showLogin');
+      if (response !== undefined ) {
+        this.errorMessage = response;
         return;
       }
-      this.errorMessage = response;
+      response = await this.$store.dispatch("login", { email : this.email, password : this.password });
+      if (response !== undefined) {
+        this.errorMessage = response;
+        return;
+      }
+      await this.$router.push("/home");
     },
     // Close the date picker modal
     closeDatePicker () {

@@ -1,6 +1,5 @@
 <template>
   <v-container>
-    <!-- @submit.prevent="login"-->
     <v-form v-model="valid" lazy-validation>
       <h1>Sign in</h1>
       <v-text-field
@@ -68,7 +67,7 @@ export default {
     async login() {
       this.errorMessage = undefined;
       this.errorMessage = await this.$store.dispatch("login", { email : this.email, password : this.password });
-      if(this.errorMessage !== "Invalid credentials") {
+      if (this.errorMessage === undefined) {
         await this.$router.push("/home");
       }
     },

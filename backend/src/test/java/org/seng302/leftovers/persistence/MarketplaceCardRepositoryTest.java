@@ -5,18 +5,17 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.runner.RunWith;
-import org.seng302.leftovers.entities.ExpiryEvent;
 import org.seng302.leftovers.entities.Location;
 import org.seng302.leftovers.entities.MarketplaceCard;
 import org.seng302.leftovers.entities.User;
-import org.seng302.leftovers.service.EventService;
+import org.seng302.leftovers.entities.event.ExpiryEvent;
+import org.seng302.leftovers.persistence.event.ExpiryEventRepository;
 import org.seng302.leftovers.tools.SearchHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.yaml.snakeyaml.error.Mark;
 
 import java.lang.reflect.Field;
 import java.time.Duration;
@@ -37,8 +36,6 @@ class MarketplaceCardRepositoryTest {
     private UserRepository userRepository;
     @Autowired
     private ExpiryEventRepository expiryEventRepository;
-    @Autowired
-    private EventService eventService;
     private MarketplaceCard card;
     private User user;
 
@@ -110,8 +107,6 @@ class MarketplaceCardRepositoryTest {
         card = marketplaceCardRepository.save(card);
 
         List<MarketplaceCard> cards = marketplaceCardRepository.getAllBySection(section);
-        System.out.println(cards);
-        System.out.println(card);
         Assertions.assertTrue(cards.contains(card));
 
     }
@@ -157,7 +152,7 @@ class MarketplaceCardRepositoryTest {
         card = marketplaceCardRepository.save(card);
 
         ExpiryEvent event = new ExpiryEvent(card);
-        eventService.saveEvent(event);
+        expiryEventRepository.save(event);
         Assertions.assertTrue(expiryEventRepository.getByExpiringCard(card).isPresent());
 
         List<MarketplaceCard> results = marketplaceCardRepository.getAllExpiringBeforeWithoutEvent(cutoff);

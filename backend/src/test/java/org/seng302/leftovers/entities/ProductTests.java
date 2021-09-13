@@ -16,7 +16,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
-import java.text.ParseException;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
@@ -87,7 +86,7 @@ class ProductTests {
                 .withPassword("1337-H%nt3r2")
                 .withBio("Likes long walks on the beach")
                 .withDob("2000-03-11")
-                .withPhoneNumber("+64 3 555 0129")
+                .withPhoneNumber("64 3555012")
                 .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
                         "Canterbury,8041"))
                 .build();

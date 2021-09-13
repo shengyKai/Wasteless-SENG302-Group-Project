@@ -16,6 +16,7 @@
               { text: 'Date Added', value: 'created'},
               { text: 'Closing Date', value: 'closing'},
               { text: 'Product Name', value: 'productName'},
+              { text: 'Product Code', value: 'productCode'},
               { text: 'Sale Quantity', value: 'quantity'},
               { text: 'Sale Price', value: 'price'},
             ]"
@@ -118,6 +119,3 @@ export default {
   }
 };
 </script>
-<style scoped>
-
-</style>

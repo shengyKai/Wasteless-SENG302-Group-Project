@@ -1,27 +1,24 @@
 <template>
   <div>
-    <v-row v-if="fromSearch" class="mb-n16 mt-6">
-      <v-col class="text-right mt-16 mb-n16">
+    <v-row v-if="fromSearch && !modifyBusiness" class="mb-n16 mt-6">
+      <v-col class="text-right mt-10 mb-n10">
         <v-btn @click="returnToSearch" color="primary">Return to search</v-btn>
       </v-col>
     </v-row>
     <div v-if='!modifyBusiness' style="margin-top: 100px">
-      <v-card>
+      <v-card v-if="businessImages && businessImages.length > 0">
         <ImageCarousel
-          v-if="businessImages"
           :imagesList="businessImages"
-          :showControls="permissionToActAsBusiness"
-          @change-primary-image="makeImagePrimary"
+          :showMakePrimary="permissionToActAsBusiness"
+          :showDelete="false"
+          @change-primary-image="false"
           ref="businessImageCarousel"
         />
       </v-card>
       <v-card class="body">
-        <div class="d-flex flex-column">
+        <div class="d-flex flex-column" no-gutters>
           <v-row>
-            <v-col cols="6">
-              <span><h1>{{ business.name }}</h1></span>
-            </v-col>
-            <v-col cols="6" class="d-flex justify-end">
+            <v-col cols="12">
               <v-alert
                 class="ma-2 flex-grow-0"
                 v-if="errorMessage !== undefined"
@@ -33,7 +30,29 @@
               </v-alert>
             </v-col>
           </v-row>
-          <p><b>Created:</b> {{ createdMsg }}</p>
+          <v-row>
+            <v-col cols="11">
+              <span><h1>{{ business.name }}</h1></span>
+            </v-col>
+            <v-col class="text-right" v-if='!modifyBusiness && permissionToActAsBusiness'>
+              <v-tooltip bottom>
+                <template #activator="{ on, attrs }">
+                  <v-btn
+                    ref="settingsButton"
+                    icon
+                    color="primary"
+                    v-bind="attrs"
+                    v-on="on"
+                    @click="modifyBusiness = true;"
+                  >
+                    <v-icon>mdi-cog</v-icon>
+                  </v-btn>
+                </template>
+                <span>Modify Business Profile</span>
+              </v-tooltip>
+            </v-col>
+          </v-row>
+          <p><strong>Created:</strong> {{ createdMsg }}</p>
           <v-btn outlined color="primary" @click="goSalePage" :value="false" width="150">
             Sale listings
           </v-btn>
@@ -61,24 +80,6 @@
               </span>
             </v-col>
           </v-row>
-          <div v-if='!modifyBusiness'>
-            <v-row justify="end">
-              <v-col cols="2">
-                <v-btn
-                  class="white--text"
-                  color="secondary"
-                  @click="modifyBusiness = true;"
-                >
-                  <v-icon
-                    class="expand-icon"
-                    color="white"
-                  >
-                    mdi-file-document-edit-outline
-                  </v-icon>Modify Business
-                </v-btn>
-              </v-col>
-            </v-row>
-          </div>
         </v-container>
       </v-card>
     </div>
@@ -94,8 +95,8 @@
 
 <script>
 import ModifyBusiness from '@/components/BusinessProfile/ModifyBusiness';
-import {getBusiness, makeBusinessImagePrimary} from '../../api/internal';
-import convertAddressToReadableText from '@/components/utils/Methods/convertJsonAddressToReadableText';
+import {getBusiness} from '../../api/internal';
+import convertAddressToReadableText from '@/components/utils/Methods/convertAddressToReadableText';
 import {
   alphabetExtendedMultilineRules,
   alphabetExtendedSingleLineRules, alphabetRules,
@@ -166,7 +167,6 @@ export default {
 
       return `${parts[2]} ${parts[1]} ${parts[3]} (${diffMonths} months ago)`;
     },
-
     administrators() {
       return this.business?.administrators || [];
     },
@@ -208,10 +208,6 @@ export default {
     async returnToSearch() {
       await this.$router.push({path: '/search/business', query:{...this.$route.query}});
     },
-    showAlert() {
-      alert("I am the admin");
-    },
-
     /**
      * Returns the appropriate color of the admin for their chip
      */
@@ -227,18 +223,6 @@ export default {
      */
     changeUpdateCountries() {
       this.updateProductCountry = !this.updateProductCountry;
-    },
-    /**
-     * Sets the given image as primary image to be displayed
-     * @param imageId ID of the Image to set
-     */
-    async makeImagePrimary(imageId) {
-      this.errorMessage = undefined;
-      const result = await makeBusinessImagePrimary(this.business.id, imageId);
-      if (typeof result === 'string') {
-        this.errorMessage = result;
-        this.$refs.businessImageCarousel.forceClose();
-      }
     },
     /**
      * Updates the business profile page to show the updated details of the business.

@@ -9,10 +9,8 @@ import org.seng302.leftovers.persistence.MessageRepository;
 import org.seng302.leftovers.persistence.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 import javax.transaction.Transactional;
-
 import java.lang.reflect.Field;
 import java.time.Duration;
 import java.time.Instant;
@@ -21,7 +19,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.mock;
 
 @SpringBootTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -67,7 +64,7 @@ class ConversationTest {
                 .withPassword("1337-H%nt3r2")
                 .withBio("Likes long walks on the beach")
                 .withDob("2000-03-11")
-                .withPhoneNumber("+64 3 555 0129")
+                .withPhoneNumber("64 3555012")
                 .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
                         "Canterbury,8041"))
                 .build();
@@ -94,7 +91,7 @@ class ConversationTest {
                 .withPassword("1337-H%nt3r2")
                 .withBio("Likes long walks on the beach")
                 .withDob("2000-03-11")
-                .withPhoneNumber("+64 3 555 0129")
+                .withPhoneNumber("64 3555012")
                 .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
                         "Canterbury,8041"))
                 .build();
@@ -109,7 +106,7 @@ class ConversationTest {
                 .withPassword("1440-H%nt3r2")
                 .withBio("Likes slow walks on the beach")
                 .withDob("2000-03-11")
-                .withPhoneNumber("+64 3 555 0129")
+                .withPhoneNumber("64 3555012")
                 .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
                         "Canterbury,8041"))
                 .build();

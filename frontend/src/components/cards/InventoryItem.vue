@@ -10,7 +10,7 @@
         </v-col>
         <v-col cols="auto" md="3" sm="12" v-else>
           <!-- feed the productImages into the carousel child component -->
-          <ImageCarousel :imagesList="product.images" :showControls="false"/>
+          <ImageCarousel :imagesList="product.images" :showMakePrimary="false" :showDelete="false"/>
         </v-col>
 
         <!-- Info column -->

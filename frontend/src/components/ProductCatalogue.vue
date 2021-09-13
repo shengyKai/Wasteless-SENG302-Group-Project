@@ -1,81 +1,81 @@
 <template>
   <div>
     <v-toolbar dark color="primary">
-      <v-row>
-        <v-col cols="4">
-          <v-text-field
-            clearable
-            flat
-            solo-inverted
-            hide-details
-            v-model="searchQuery"
-            prepend-inner-icon="mdi-magnify"
-            label="Search"
-            autofocus
-          />
-        </v-col>
-        <v-col cols="4">
-          <v-select
-            v-model="searchBy"
-            flat
-            solo-inverted
-            hide-details
-            :items="[
-              { text: 'Product Code',               value: 'productCode'},
-              { text: 'Product Name',               value: 'name'},
-              { text: 'Description',                value: 'description'},
-              { text: 'Manufacturer',               value: 'manufacturer'}
-            ]"
-            prepend-inner-icon="mdi-shopping-search"
-            label="Search by"
-            multiple
-          >
-            <template v-slot:selection="{ item, index }">
-              <span v-if="index < maxDisplay">{{ item.text }}, &nbsp;</span>
-              <span
-                v-if="index === maxDisplay"
-                class="white--text caption"
-              >(+{{ searchBy.length - maxDisplay }} search)</span>
-            </template>
-          </v-select>
-        </v-col>
-        <!-- The reason why the v-select for orderBy and the reversed buttons are bunched together in the same column is because
-        if they were given their own columns directly, the sizes of the components does not fit the aesthetic nicely. So by putting
-        them in the same column, I can reassign more spaces to them that is cols = 8 and cols = 4 respectively as compared to
-        cols = 3, cols = 1 if they were in separate columns. -->
-        <v-col cols="4" class="text-right">
-          <v-row>
-            <v-col cols="8">
-              <v-select
-                v-model="orderBy"
-                flat
-                solo-inverted
-                hide-details
-                :items="[
-                  { text: 'Product Code',               value: 'productCode'},
-                  { text: 'Product Name',               value: 'name'},
-                  { text: 'Description',                value: 'description'},
-                  { text: 'Manufacturer',               value: 'manufacturer'},
-                  { text: 'Recommended Retail Price',   value: 'recommendedRetailPrice'},
-                  { text: 'Date Added',                 value: 'created'},
-                ]"
-                prepend-inner-icon="mdi-sort-variant"
-                label="Sort by"
-              />
-            </v-col>
-            <v-col cols="4">
-              <v-btn-toggle class="toggle" v-model="reverse" mandatory>
-                <v-btn depressed color="primary" :value="false">
-                  <v-icon>mdi-arrow-up</v-icon>
-                </v-btn>
-                <v-btn depressed color="primary" :value="true">
-                  <v-icon>mdi-arrow-down</v-icon>
-                </v-btn>
-              </v-btn-toggle>
-            </v-col>
-          </v-row>
-        </v-col>
-      </v-row>
+      <v-col style="min-width: 200px">
+        <v-text-field
+          flat
+          clearable
+          solo-inverted
+          hide-details
+          v-model="searchQuery"
+          prepend-inner-icon="mdi-magnify"
+          label="Search"
+          autofocus
+        />
+      </v-col>
+      <v-col style="min-width: 200px">
+
+        <v-select
+          v-model="searchBy"
+          flat
+          solo-inverted
+          hide-details
+          prepend-inner-icon="mdi-shopping-search"
+          label="Search by"
+          :items="[
+            { text: 'Product Code',               value: 'productCode'},
+            { text: 'Product Name',               value: 'name'},
+            { text: 'Description',                value: 'description'},
+            { text: 'Manufacturer',               value: 'manufacturer'}
+          ]"
+
+          multiple
+        >
+          <template v-slot:selection="{ item, index }">
+            <span v-if="index < maxDisplay">{{ item.text }}{{ index != searchBy.length - 1 ? ',' : '' }} &nbsp;</span>
+            <span
+              v-if="index === maxDisplay"
+              class="white--text caption"
+            >(+{{ searchBy.length - maxDisplay }} search)</span>
+          </template>
+        </v-select>
+      </v-col>
+
+      <v-col cols="auto">
+        <v-btn outlined  @click="showingCreateProduct=true">
+          Add Product
+        </v-btn>
+      </v-col>
+
+      <v-col cols="auto">
+        <v-select
+          style="max-width: 300px"
+          v-model="orderBy"
+          flat
+          solo-inverted
+          hide-details
+          :items="[
+            { text: 'Product Code',               value: 'productCode'},
+            { text: 'Product Name',               value: 'name'},
+            { text: 'Description',                value: 'description'},
+            { text: 'Manufacturer',               value: 'manufacturer'},
+            { text: 'Recommended Retail Price',   value: 'recommendedRetailPrice'},
+            { text: 'Date Added',                 value: 'created'},
+          ]"
+          prepend-inner-icon="mdi-sort-variant"
+          label="Sort by"
+        />
+      </v-col>
+      <v-col cols="auto">
+        <v-btn-toggle class="toggle" v-model="reverse" mandatory>
+          <v-btn depressed color="primary" :value="false">
+            <v-icon>mdi-arrow-up</v-icon>
+          </v-btn>
+          <v-btn depressed color="primary" :value="true">
+            <v-icon>mdi-arrow-down</v-icon>
+          </v-btn>
+        </v-btn-toggle>
+      </v-col>
     </v-toolbar>
 
     <v-alert
@@ -107,22 +107,33 @@
     <v-row justify="center" no-gutters>
       {{ resultsMessage }}
     </v-row>
+
+    <ProductForm
+      v-if="showingCreateProduct"
+      :businessId="businessId"
+      @closeDialog="showingCreateProduct=false"
+    />
   </div>
 </template>
 
 <script>
-import { getProducts, searchCatalogue } from '../api/internal';
 import ProductCatalogueItem from './cards/ProductCatalogueItem.vue';
+import ProductForm from '@/components/BusinessProfile/ProductForm.vue';
+import { getProducts, searchCatalogue } from '../api/internal';
 import { debounce } from '../utils';
 
 export default {
   name: "ProductCatalogue",
 
   components: {
-    ProductCatalogueItem
+    ProductCatalogueItem,
+    ProductForm,
   },
   data() {
     return {
+      /**
+       * List of products in the business’s catalogue
+       */
       products: [],
       /**
        * Current error message string.
@@ -170,6 +181,10 @@ export default {
        * This function is rate limited to avoid too many queries to the backend.
        */
       debouncedUpdateQuery: debounce(this.updateSearchQuery, 500),
+      /**
+       * Whether create product form is being shown
+       */
+      showingCreateProduct: false,
     };
   },
   computed: {
@@ -268,13 +283,15 @@ export default {
     resultsPerPage() {
       this.updateResults();
     },
+    searchBy() {
+      this.updateResults();
+    },
+    showingCreateProduct() {
+      if (!this.showingCreateProduct) {
+        this.updateResults();
+      }
+    },
   },
 };
 
 </script>
-
-<style scoped>
-.product-fields {
-  padding-top: 0;
-}
-</style>

@@ -1,5 +1,6 @@
 package org.seng302.leftovers.dto;
 
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
 import org.seng302.leftovers.entities.Location;
@@ -9,6 +10,7 @@ import org.seng302.leftovers.entities.Location;
  */
 @Getter
 @ToString
+@EqualsAndHashCode
 public class LocationDTO {
     private String country;
     private String city;
@@ -18,6 +20,10 @@ public class LocationDTO {
     private String postcode;
     private String district;
 
+    /**
+     * Generate a location from this JSON representation
+     * @return Detached Location entity
+     */
     public Location createLocation() {
         return new Location.Builder()
                 .inCountry(country)

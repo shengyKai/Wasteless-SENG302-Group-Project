@@ -1,16 +1,16 @@
 package org.seng302.leftovers.service;
 
-import org.apache.catalina.filters.ExpiresFilter;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
-import org.seng302.leftovers.entities.ExpiryEvent;
 import org.seng302.leftovers.entities.MarketplaceCard;
 import org.seng302.leftovers.entities.User;
-import org.seng302.leftovers.persistence.ExpiryEventRepository;
+import org.seng302.leftovers.entities.event.ExpiryEvent;
+import org.seng302.leftovers.persistence.event.EventRepository;
+import org.seng302.leftovers.persistence.event.ExpiryEventRepository;
 import org.seng302.leftovers.persistence.MarketplaceCardRepository;
 
 import java.lang.reflect.InvocationTargetException;
@@ -34,7 +34,7 @@ class CardServiceTest {
     @Mock
     MarketplaceCardRepository marketplaceCardRepository;
     @Mock
-    EventService eventService;
+    EventRepository eventRepository;
     @Mock
     ExpiryEventRepository expiryEventRepository;
     @Mock
@@ -68,7 +68,7 @@ class CardServiceTest {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        cardService = new CardService(marketplaceCardRepository, eventService, expiryEventRepository, sessionFactory);
+        cardService = new CardService(marketplaceCardRepository, eventRepository, expiryEventRepository, sessionFactory);
         setUpCards();
         mockCurrentTime();
         when(sessionFactory.openSession()).thenReturn(mockSession);
@@ -130,7 +130,7 @@ class CardServiceTest {
         invokeInitiateCardCheckEvents();
 
         // Check that events were not sent
-        Mockito.verify(eventService, never()).saveEvent(any());
+        Mockito.verify(eventRepository, never()).save(any());
     }
 
     @Test
@@ -143,7 +143,7 @@ class CardServiceTest {
         invokeInitiateCardCheckEvents();
 
         // Check that the method to create the events has been called
-        Mockito.verify(eventService, times(1)).saveEvent(expiryEventArgumentCaptor.capture());
+        Mockito.verify(eventRepository, times(1)).save(expiryEventArgumentCaptor.capture());
 
         // Check that the event was sent for the expected user and card
         assertEquals(mockUser, expiryEventArgumentCaptor.getValue().getNotifiedUser());
@@ -159,7 +159,7 @@ class CardServiceTest {
         invokeInitiateCardCheckEvents();
 
         // Check that the method to send the events has been called once for each card
-        Mockito.verify(eventService, times(3)).saveEvent(any());
+        Mockito.verify(eventRepository, times(3)).save(any());
     }
 
     @Test

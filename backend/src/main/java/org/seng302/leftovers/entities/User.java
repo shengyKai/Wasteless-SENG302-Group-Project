@@ -1,9 +1,9 @@
 /* Subtype of Account for individual users */
 package org.seng302.leftovers.entities;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
+import org.seng302.leftovers.entities.event.Event;
 import org.seng302.leftovers.tools.JsonTools;
 import org.springframework.data.annotation.ReadOnlyProperty;
 import org.springframework.http.HttpStatus;
@@ -12,12 +12,13 @@ import org.springframework.web.server.ResponseStatusException;
 import javax.persistence.*;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.regex.Pattern;
 
 @Entity
 public class User extends Account {
+
+    private static final String NAME_REGEX = "[ \\p{L}\\-'.]+";
 
     @Column(nullable = false)
     private String firstName;
@@ -51,6 +52,9 @@ public class User extends Account {
     @OneToMany(mappedBy = "notifiedUser", fetch = FetchType.LAZY)
     private Set<Event> events = new HashSet<>();
 
+    @ManyToMany(mappedBy = "interestedUsers", fetch = FetchType.LAZY)
+    private Set<SaleItem> likedSaleItems = new HashSet<>();
+
     /* Matches:
     123-456-7890
     (123) 456-7890
@@ -58,7 +62,7 @@ public class User extends Account {
     123.456.7890
     +91 (123) 456-7890
      */
-    private static final String PHONE_REGEX = "^(\\+\\d{1,2}\\s)?\\(?\\d{1,3}\\)?[\\s.-]?\\d{3,4}[\\s.-]?\\d{4,5}";
+    private static final String PHONE_REGEX = "(^[0-9]{2,3})[ ]([0-9]{4,12})$";
 
 
     protected User() {}
@@ -78,7 +82,7 @@ public class User extends Account {
      * @param firstName users first name
      */
     public void setFirstName(String firstName) {
-        if (firstName != null && firstName.length() > 0 && firstName.length() <= 32 && firstName.matches("[ \\p{L}\\-'.]+")) {
+        if (firstName != null && firstName.length() > 0 && firstName.length() <= 32 && firstName.matches(NAME_REGEX)) {
             this.firstName = firstName;
         } else {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The first name must not be empty, be less then 16 characters, and only contain letters.");
@@ -97,7 +101,7 @@ public class User extends Account {
      * @param middleName
      */
     public void setMiddleName(String middleName) {
-        if (middleName == null || (middleName.length() > 0 && middleName.length() <= 32 && middleName.matches("[ \\p{L}\\-'.]+"))) {
+        if (middleName == null || (middleName.length() > 0 && middleName.length() <= 32 && middleName.matches(NAME_REGEX))) {
             this.middleName = middleName;
         } else if (middleName.equals("")) {
             this.middleName = null;
@@ -121,7 +125,7 @@ public class User extends Account {
      * @param lastName users surname
      */
     public void setLastName(String lastName) {
-        if (lastName != null && lastName.length() > 0 && lastName.length() <= 32 && lastName.matches("[ \\p{L}\\-'.]+")) {
+        if (lastName != null && lastName.length() > 0 && lastName.length() <= 32 && lastName.matches(NAME_REGEX)) {
             this.lastName = lastName;
         } else {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The last name must not be empty, be less then 16 characters, and only contain letters.");
@@ -288,8 +292,6 @@ public class User extends Account {
 
     public Set<Event> getEvents() { return this.events;}
 
-    private void setEvents(Set<Event> events) { this.events = events; }
-
     /**
      * Gets the set of businesses that the user is an admin of OR is the owner of
      * @return Businesses administered or owned
@@ -327,7 +329,6 @@ public class User extends Account {
      * field if this is set to true, otherwise the field will not be present.
      * @return JSONObject with attribute name as key and attribute value as value.
      */
-    // Todo: Replace email with profile picture once profile pictures added.
     public JSONObject constructPublicJson(boolean fullBusinessDetails) {
         var object = new JSONObject();
         object.put("id",          getUserID());
@@ -491,12 +492,20 @@ public class User extends Account {
 
         /**
          * Set the builder's date of birth. This field is required.
-         * @param dobString a string representing the user's date of birth in format yyyy-MM-dd.
+         * @param dob a LocalDate representing the user's date of birth.
+         * @return Builder with date of birth set.
+         */
+        public Builder withDob(LocalDate dob) {
+            this.dob = dob;
+            return this;
+        }
+        /**
+         * Set the builder's date of birth. This field is required.
+         * @param dobString a String representing the user's date of birth.
          * @return Builder with date of birth set.
          */
         public Builder withDob(String dobString) {
-            DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE;
-            this.dob = LocalDate.parse(dobString, dateTimeFormatter);
+            this.dob = LocalDate.parse(dobString);
             return this;
         }
 

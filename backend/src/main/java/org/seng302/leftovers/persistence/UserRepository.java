@@ -1,8 +1,7 @@
 package org.seng302.leftovers.persistence;
 
-import lombok.Builder;
-import org.seng302.leftovers.entities.Event;
 import org.seng302.leftovers.entities.User;
+import org.seng302.leftovers.entities.event.Event;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;

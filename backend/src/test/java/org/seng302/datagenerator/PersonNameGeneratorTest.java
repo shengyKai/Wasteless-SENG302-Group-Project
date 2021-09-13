@@ -59,10 +59,8 @@ class PersonNameGeneratorTest {
 
         fullName = personNameGenerator.generateName();
         builder.withFirstName(fullName.getFirstName());
-        assertDoesNotThrow(() -> {
-            User user = builder.build();
-            assertEquals(fullName.getFirstName(), user.getFirstName());
-        });
+        User user = assertDoesNotThrow(builder::build);
+        assertEquals(fullName.getFirstName(), user.getFirstName());
     }
 
     @ParameterizedTest
@@ -72,10 +70,8 @@ class PersonNameGeneratorTest {
 
         fullName = personNameGenerator.generateName();
         builder.withMiddleName(fullName.getMiddleName());
-        assertDoesNotThrow(() -> {
-            User user = builder.build();
-            assertEquals(fullName.getMiddleName(), user.getMiddleName());
-        });
+        User user = assertDoesNotThrow(builder::build);
+        assertEquals(fullName.getMiddleName(), user.getMiddleName());
     }
 
     @ParameterizedTest
@@ -85,10 +81,8 @@ class PersonNameGeneratorTest {
 
         fullName = personNameGenerator.generateName();
         builder.withLastName(fullName.getLastName());
-        assertDoesNotThrow(() -> {
-            User user = builder.build();
-            assertEquals(fullName.getLastName(), user.getLastName());
-        });
+        User user = assertDoesNotThrow(builder::build);
+        assertEquals(fullName.getLastName(), user.getLastName());
     }
 
     @ParameterizedTest
@@ -98,10 +92,8 @@ class PersonNameGeneratorTest {
 
         fullName = personNameGenerator.generateName();
         builder.withNickName(fullName.getNickname());
-        assertDoesNotThrow(() -> {
-            User user = builder.build();
-            assertEquals(fullName.getNickname(), user.getNickname());
-        });
+        User user = assertDoesNotThrow(builder::build);
+        assertEquals(fullName.getNickname(), user.getNickname());
     }
 
     @ParameterizedTest
@@ -111,9 +103,7 @@ class PersonNameGeneratorTest {
 
         String lastName = personNameGenerator.randomLastName();
         builder.withLastName(lastName);
-        assertDoesNotThrow(() -> {
-            User user = builder.build();
-            assertEquals(lastName, user.getLastName());
-        });
+        User user = assertDoesNotThrow(builder::build);
+        assertEquals(lastName, user.getLastName());
     }
 }

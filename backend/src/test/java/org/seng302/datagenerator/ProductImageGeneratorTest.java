@@ -18,6 +18,7 @@ import java.sql.*;
 import java.util.List;
 import java.util.Map;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
 @RunWith(SpringRunner.class)
@@ -43,9 +44,6 @@ class ProductImageGeneratorTest {
     private ProductRepository productRepository;
     @Autowired
     private ImageRepository imageRepository;
-
-    private List<String> productNouns = ExampleDataFileReader.readExampleDataFile(PRODUCT_NOUNS_FILE);
-    private List<String> productAdjectives = ExampleDataFileReader.readExampleDataFile(PRODUCT_ADJECTIVES_FILE);
 
 
     @BeforeEach
@@ -102,9 +100,7 @@ class ProductImageGeneratorTest {
         stmt.executeQuery();
         ResultSet results = stmt.getResultSet();
         results.next();
-        if (results.getLong(1) != expectedCount) {
-            fail();
-        }
+        assertEquals(expectedCount, results.getLong(1));
     }
 
     /**
@@ -120,41 +116,11 @@ class ProductImageGeneratorTest {
     }
 
     @Test
-    void generateOneProduct_generateImage_oneImageEntryGenerated() throws SQLException {
-        var businessIds = createTestBusiness();
-        var productIds = productGenerator.generateProducts(businessIds, 1, true);
-
-        if (productIds.size() != 1) {
-            fail();
-        }
-        long productId = productIds.get(0);
-
-        checkRequiredFieldsNotNull(productId, 1);
-        Assertions.assertEquals(1, getNumImagesInDB());
-    }
-
-    @Test
-    void generateMultipleProduct_generateImage_multipleImageEntryGenerated() throws SQLException {
-        var businessIds = createTestBusiness();
-        var productIds = productGenerator.generateProducts(businessIds, 10, true);
-
-        if (productIds.size() != 10) {
-            fail();
-        }
-        for (var productId : productIds) {
-            checkRequiredFieldsNotNull(productId, 1);
-        }
-        Assertions.assertEquals(10, getNumImagesInDB());
-    }
-
-    @Test
     void generateOneProduct_notGenerateImage_noImageEntryGenerated() throws SQLException {
         var businessIds = createTestBusiness();
         var productIds = productGenerator.generateProducts(businessIds, 1, false);
 
-        if (productIds.size() != 1) {
-            fail();
-        }
+        assertEquals(1, productIds.size());
         for (var productId : productIds) {
             checkRequiredFieldsNotNull(productId, 0);
         }
@@ -166,9 +132,7 @@ class ProductImageGeneratorTest {
         var businessIds = createTestBusiness();
         var productIds = productGenerator.generateProducts(businessIds, 10, false);
 
-        if (productIds.size() != 10) {
-            fail();
-        }
+        assertEquals(10, productIds.size());
         for (var productId : productIds) {
             checkRequiredFieldsNotNull(productId, 0);
         }

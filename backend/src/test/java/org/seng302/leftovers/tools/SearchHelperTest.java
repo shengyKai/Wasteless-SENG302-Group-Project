@@ -1,39 +1,45 @@
 package org.seng302.leftovers.tools;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.*;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.Mockito;
+import org.mockito.internal.matchers.apachecommons.ReflectionEquals;
 import org.seng302.leftovers.controllers.DGAAController;
-import org.seng302.leftovers.entities.Business;
-import org.seng302.leftovers.entities.Keyword;
-import org.seng302.leftovers.entities.Location;
-import org.seng302.leftovers.entities.User;
+import org.seng302.leftovers.dto.ProductFilterOption;
+import org.seng302.leftovers.entities.*;
 import org.seng302.leftovers.exceptions.SearchFormatException;
-import org.seng302.leftovers.persistence.BusinessRepository;
-import org.seng302.leftovers.persistence.KeywordRepository;
-import org.seng302.leftovers.persistence.UserRepository;
-import org.seng302.leftovers.persistence.SpecificationsBuilder;
+import org.seng302.leftovers.persistence.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 
+import javax.transaction.Transactional;
 import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @SpringBootTest
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class SearchHelperTest {
 
     /**
-     * List of users to be used in testsing of getPageInResults.
+     * List of users to be used in testing of getPageInResults.
      */
     private List<User> pagingUserList;
 
@@ -48,48 +54,70 @@ class SearchHelperTest {
     @Autowired
     private UserRepository userRepository;
     @Autowired
+    private BusinessRepository businessRepository;
+    @Autowired
     private DGAAController dgaaController;
     @Autowired
     private KeywordRepository keywordRepository;
+    @Autowired
+    private ProductRepository productRepository;
+    @Autowired
+    private InventoryItemRepository inventoryItemRepository;
+    @Autowired
+    private SaleItemRepository saleItemRepository;
+
     /**
      * Speification for repository queries.
      */
     private Specification<User> spec;
 
+    @BeforeAll
+    void init() {
+        productRepository.deleteAll();
+        businessRepository.deleteAll();
+    }
+
     /**
      * Read user info from file UserSearchHelperTestData1.csv, use this information to construct User objects and add them to userList
+     *
      * @throws ParseException
      * @throws IOException
      */
     @BeforeEach
-    void setUp() throws ParseException, IOException {
-        SpecificationsBuilder builder = new SpecificationsBuilder()
+    void setUp() throws IOException {
+        SpecificationsBuilder<User> builder = new SpecificationsBuilder<User>()
                 .with("firstName", ":", "andy", true)
                 .with("middleName", ":", "andy", true)
                 .with("lastName", ":", "andy", true)
                 .with("nickname", ":", "andy", true);
         spec = builder.build();
 
-        pagingUserList = readUserFile("src/test/testFiles/UserSearchHelperTestData1.csv");
-        savedUserList = readUserFile("src/test/testFiles/UserSearchHelperTestData2.csv");
+        pagingUserList = readUserFile("UserSearchHelperTestData1.csv");
+        savedUserList = readUserFile("UserSearchHelperTestData2.csv");
 
         dgaaController.checkDGAA();
         userRepository.deleteAll();
         for (User user : savedUserList) {
             userRepository.save(user);
         }
+
     }
 
     @AfterEach
     void tearDown() {
-        userRepository.deleteAll();
         keywordRepository.deleteAll();
+        productRepository.deleteAll();
+        businessRepository.deleteAll();
+        userRepository.deleteAll();
+        saleItemRepository.deleteAll();
     }
 
-    private List<User> readUserFile(String filepath) throws IOException {
+    private List<User> readUserFile(String resourceName) throws IOException {
         List<User> userList = new ArrayList<>();
         String row;
-        BufferedReader csvReader = new BufferedReader(new FileReader(filepath));
+        BufferedReader csvReader = new BufferedReader(new InputStreamReader(
+                Objects.requireNonNull(SearchHelperTest.class.getResourceAsStream("/testData/" + resourceName))
+        ));
         while ((row = csvReader.readLine()) != null) {
             try {
                 String[] userData = row.split("\\|");
@@ -193,7 +221,7 @@ class SearchHelperTest {
      * a query of UserRepository causes the results to be ordered by the user's id number.
      */
     @Test
-    void getSortOrderByNullTest()  {
+    void getSortOrderByNullTest() {
         Sort userSort = SearchHelper.getSort(null, null);
         List<User> queryResults = userRepository.findAll(spec, userSort);
         User firstUser = queryResults.get(0);
@@ -386,95 +414,29 @@ class SearchHelperTest {
      * quotes as its argument, it returns a specification which does not match users in the repository whose name is
      * a partial match for that word.
      */
-    @Test
-    void constructUserSpecificationFromSearchQueryDoubleQuotesPartialMatchTest() {
-        Specification<User> specification = SearchHelper.constructUserSpecificationFromSearchQuery("\"Car\"");
+    @ParameterizedTest
+    @CsvSource({
+            "\"Car\",1",
+            "'etra',1",
+            "\"zzz\",0",
+            "'X',0",
+            "\"Carlos\",0",
+            "'PPPPetra',0",
+            "\"carl\",1",
+            "'PetRA',1",
+            "q,0",
+            "Andyyyyy,0",
+            "andy and \"Potato\",0",
+            "tomato and \"Potato\",0",
+            "tomato or \"Potato\",0",
+            "andy \"Potato\",0",
+            "tomato \"Potato\",0",
+            "andy   and        \"Potato\",0"
+    })
+    void constructUserSpecificationFromSearchQuery_variousQueries_expectedMatchesNumberFound(String searchQuery, int expectedMatches) {
+        Specification<User> specification = SearchHelper.constructUserSpecificationFromSearchQuery(searchQuery);
         List<User> matches = userRepository.findAll(specification);
-        assertEquals(1, matches.size());
-    }
-
-    /**
-     * Verify that when constructUserSpecificationFromSearchQuery is called with as single word in single
-     * quotes as its argument, it returns a specification which does not match users in the repository whose name is
-     * a partial match for that word.
-     */
-    @Test
-    void constructUserSpecificationFromSearchQuerySingleQuotesPartialMatchTest() {
-        Specification<User> specification = SearchHelper.constructUserSpecificationFromSearchQuery("'etra'");
-        List<User> matches = userRepository.findAll(specification);
-        assertEquals(1, matches.size());
-    }
-
-    /**
-     * Verify that when constructUserSpecificationFromSearchQuery is called with as single word in double
-     * quotes as its argument, it returns a specification which does not match users in the repository whose name does
-     * not fully or partially match that word.
-     */
-    @Test
-    void constructUserSpecificationFromSearchQueryDoubleQuotesNoMatchTest() {
-        Specification<User> specification = SearchHelper.constructUserSpecificationFromSearchQuery("\"zzz\"");
-        List<User> matches = userRepository.findAll(specification);
-        assertEquals(0, matches.size());
-    }
-
-    /**
-     * Verify that when constructUserSpecificationFromSearchQuery is called with as single word in single
-     * quotes as its argument, it returns a specification which does not match users in the repository whose name does
-     * not fully or partially match that word.
-     */
-    @Test
-    void constructUserSpecificationFromSearchQuerySingleQuotesNoMatchTest() {
-        Specification<User> specification = SearchHelper.constructUserSpecificationFromSearchQuery("'X'");
-        List<User> matches = userRepository.findAll(specification);
-        assertEquals(0, matches.size());
-    }
-
-    /**
-     * Verify that when constructUserSpecificationFromSearchQuery is called with as single word in double
-     * quotes as its argument, it returns a specification which does not match users in the repository whose name is a
-     * substring of the argument
-     */
-    @Test
-    void constructUserSpecificationFromSearchQueryDoubleQuotesNameSubstringTest() {
-        Specification<User> specification = SearchHelper.constructUserSpecificationFromSearchQuery("\"Carlos\"");
-        List<User> matches = userRepository.findAll(specification);
-        assertEquals(0, matches.size());
-    }
-
-    /**
-     * Verify that when constructUserSpecificationFromSearchQuery is called with as single word in single
-     * quotes as its argument, it returns a specification which does not match users in the repository whose name is a
-     * substring of the argument
-     */
-    @Test
-    void constructUserSpecificationFromSearchQuerySingleQuotesNameSubstringTest() {
-        Specification<User> specification = SearchHelper.constructUserSpecificationFromSearchQuery("'PPPPetra'");
-        List<User> matches = userRepository.findAll(specification);
-        assertEquals(0, matches.size());
-    }
-
-    /**
-     * Verify that when constructUserSpecificationFromSearchQuery is called with as single word in double
-     * quotes as its argument, it returns a specification does not match users in the repository who have an name which
-     * is the same as the argument but in a different case
-     */
-    @Test
-    void constructUserSpecificationFromSearchQueryDoubleQuotesDifferentCaseMatchTest() {
-        Specification<User> specification = SearchHelper.constructUserSpecificationFromSearchQuery("\"carl\"");
-        List<User> matches = userRepository.findAll(specification);
-        assertEquals(1, matches.size());
-    }
-
-    /**
-     * Verify that when constructUserSpecificationFromSearchQuery is called with as single word in single
-     * quotes as its argument, it returns a specification which does not match users in the repository who have a name
-     * which is the same argument but in a different case
-     */
-    @Test
-    void constructUserSpecificationFromSearchQuerySingleQuotesDifferentCaseMatchTest() {
-        Specification<User> specification = SearchHelper.constructUserSpecificationFromSearchQuery("'PetRA'");
-        List<User> matches = userRepository.findAll(specification);
-        assertEquals(1, matches.size());
+        assertEquals(expectedMatches, matches.size());
     }
 
     /**
@@ -488,9 +450,9 @@ class SearchHelperTest {
         assertEquals(7, matches.size());
         for (User user : matches) {
             assertTrue(user.getFirstName().equals("Andy") ||
-                        user.getMiddleName().equals("Andy") ||
-                        user.getLastName().equals("Andy") ||
-                        user.getNickname().equals("Andy"));
+                    user.getMiddleName().equals("Andy") ||
+                    user.getLastName().equals("Andy") ||
+                    user.getNickname().equals("Andy"));
         }
     }
 
@@ -509,30 +471,6 @@ class SearchHelperTest {
                     user.getLastName().contains("ndy") ||
                     user.getNickname().contains("ndy"));
         }
-    }
-
-    /**
-     * Verify that when constructUserSpecificationFromSearchQuery is called with as single word without
-     * quotes as its argument, it returns a specification which does not match users in the repository whose name does
-     * not fully or partially match that word.
-     */
-    @Test
-    void constructUserSpecificationFromSearchQueryNoQuotesNoMatchTest() {
-        Specification<User> specification = SearchHelper.constructUserSpecificationFromSearchQuery("q");
-        List<User> matches = userRepository.findAll(specification);
-        assertEquals(0, matches.size());
-    }
-
-    /**
-     * Verify that when constructUserSpecificationFromSearchQuery is called with as single word without
-     * quotes as its argument, it returns a specification which does not match users in the repository whose name is a
-     * substring of the argument
-     */
-    @Test
-    void constructUserSpecificationFromSearchQueryNoQuotesNameSubstringTest() {
-        Specification<User> specification = SearchHelper.constructUserSpecificationFromSearchQuery("Andyyyyy");
-        List<User> matches = userRepository.findAll(specification);
-        assertEquals(0, matches.size());
     }
 
     /**
@@ -564,57 +502,15 @@ class SearchHelperTest {
         });
     }
 
-    /**
-     * Verify that when constructUserSpecificationFromSearchQuery is called with two terms joined by an 'and' as its
-     * argument, it returns a specification which matches users which contain both those terms in their names.
-     */
-    @Test
-    void constructUserSpecificationFromSearchQueryLowerAndBothMatchTest() {
-        Specification<User> specification = SearchHelper.constructUserSpecificationFromSearchQuery("andy and \"Graham\"");
+    @ParameterizedTest
+    @ValueSource(strings = {"andy and \"Graham\"", "andy AND \"Graham\"", "andy \"Graham\""})
+    void constructUserSpecificationFromSearchQuery_andConjunction_matchesUsingAnd(String searchQuery) {
+        Specification<User> specification = SearchHelper.constructUserSpecificationFromSearchQuery(searchQuery);
         List<User> matches = userRepository.findAll(specification);
         assertEquals(1, matches.size());
-        for (User user : matches) {
-            assertTrue(user.getFirstName().equalsIgnoreCase("andy") &&
-                    user.getLastName().equals("Graham"));
-        }
-    }
-
-    /**
-     * Verify that when constructUserSpecificationFromSearchQuery is called with two terms joined by an 'AND' as its
-     * argument, it returns a specification which matches users which contain both those terms in their names.
-     */
-    @Test
-    void constructUserSpecificationFromSearchQueryUpperAndBothMatchTest() {
-        Specification<User> specification = SearchHelper.constructUserSpecificationFromSearchQuery("andy AND \"Graham\"");
-        List<User> matches = userRepository.findAll(specification);
-        assertEquals(1, matches.size());
-        for (User user : matches) {
-            assertTrue(user.getFirstName().equalsIgnoreCase("andy") &&
-                    user.getLastName().equals("Graham"));
-        }
-    }
-
-
-    /**
-     * Verify that when constructUserSpecificationFromSearchQuery is called with two terms joined by an 'and' as its
-     * argument, it returns a specification which doesn't match users which contain only one of those terms in their names.
-     */
-    @Test
-    void constructUserSpecificationFromSearchQueryAndOneMatchTest() {
-        Specification<User> specification = SearchHelper.constructUserSpecificationFromSearchQuery("andy and \"Potato\"");
-        List<User> matches = userRepository.findAll(specification);
-        assertEquals(0, matches.size());
-    }
-
-    /**
-     * Verify that when constructUserSpecificationFromSearchQuery is called with two terms joined by an 'and' as its
-     * argument, it returns a specification which doesn't match users which contain neither of those terms in their names.
-     */
-    @Test
-    void constructUserSpecificationFromSearchQueryAndNoMatchTest() {
-        Specification<User> specification = SearchHelper.constructUserSpecificationFromSearchQuery("tomato and \"Potato\"");
-        List<User> matches = userRepository.findAll(specification);
-        assertEquals(0, matches.size());
+        User user = matches.get(0);
+        assertEquals("Andy", user.getFirstName());
+        assertEquals("Graham", user.getLastName());
     }
 
     /**
@@ -646,106 +542,18 @@ class SearchHelperTest {
      * Verify that when constructUserSpecificationFromSearchQuery is called with two terms joined by an 'or' as its
      * argument, it returns a specification which matches users which contain only one of those terms in their names.
      */
-    @Test
-    void constructUserSpecificationFromSearchQueryLowerOrOneMatchTest() {
-        Specification<User> specification = SearchHelper.constructUserSpecificationFromSearchQuery("peter or \"Potato\"");
+    @ParameterizedTest
+    @ValueSource(strings = {"peter or \"Potato\"", "peter Or \"Potato\"", "peter         or      \"Potato\""})
+    void constructUserSpecificationFromSearchQuery_orConjunction_matchesUsingOr(String searchQuery) {
+        Specification<User> specification = SearchHelper.constructUserSpecificationFromSearchQuery(searchQuery);
         List<User> matches = userRepository.findAll(specification);
         assertEquals(1, matches.size());
         User user = matches.get(0);
-        assertTrue(user.getMiddleName().equalsIgnoreCase("peter"));
-        assertFalse(user.getFirstName().equals("Potato") || user.getMiddleName().equals("Potato") ||
-                user.getLastName().equals("Potato") || user.getNickname().equals("Potato"));
-    }
-
-    /**
-     * Verify that when constructUserSpecificationFromSearchQuery is called with two terms joined by an 'Or' as its
-     * argument, it returns a specification which matches users which contain one of those terms in their names.
-     */
-    @Test
-    void constructUserSpecificationFromSearchQueryMixedCaseOneMatchTest() {
-        Specification<User> specification = SearchHelper.constructUserSpecificationFromSearchQuery("peter Or \"Potato\"");
-        List<User> matches = userRepository.findAll(specification);
-        assertEquals(1, matches.size());
-        User user = matches.get(0);
-        assertTrue(user.getMiddleName().equalsIgnoreCase("peter"));
-        assertFalse(user.getFirstName().equals("Potato") || user.getMiddleName().equals("Potato") ||
-                user.getLastName().equals("Potato") || user.getNickname().equals("Potato"));
-    }
-
-    /**
-     * Verify that when constructUserSpecificationFromSearchQuery is called with two terms joined by an 'or' as its
-     * argument, it returns a specification which doesn't match users which contain neither of those terms in their names.
-     */
-    @Test
-    void constructUserSpecificationFromSearchQueryOrNoMatchTest() {
-        Specification<User> specification = SearchHelper.constructUserSpecificationFromSearchQuery("tomato or \"Potato\"");
-        List<User> matches = userRepository.findAll(specification);
-        assertEquals(0, matches.size());
-    }
-
-    /**
-     * Verify that when constructUserSpecificationFromSearchQuery is called with two terms not joined by a predicate as its
-     * argument, it returns a specification which matches users which contain both those terms in their names.
-     */
-    @Test
-    void constructUserSpecificationFromSearchQueryNoPredicateBothMatchTest() {
-        Specification<User> specification = SearchHelper.constructUserSpecificationFromSearchQuery("andy \"Graham\"");
-        List<User> matches = userRepository.findAll(specification);
-        assertEquals(1, matches.size());
-        for (User user : matches) {
-            assertTrue(user.getFirstName().equalsIgnoreCase("andy") &&
-                    user.getLastName().equals("Graham"));
-        }
-    }
-
-    /**
-     * Verify that when constructUserSpecificationFromSearchQuery is called with two terms not joined by a predicate as its
-     * argument, it returns a specification which doesn't match users which contain only one of those terms in their names.
-     */
-    @Test
-    void constructUserSpecificationFromSearchQueryNoPredicateOneMatchTest() {
-        Specification<User> specification = SearchHelper.constructUserSpecificationFromSearchQuery("andy \"Potato\"");
-        List<User> matches = userRepository.findAll(specification);
-        assertEquals(0, matches.size());
-    }
-
-    /**
-     * Verify that when constructUserSpecificationFromSearchQuery is called with two terms not joined by a predicate as its
-     * argument, it returns a specification which doesn't match users which contain neither of those terms in their names.
-     */
-    @Test
-    void constructUserSpecificationFromSearchQueryNoPredicateNoMatchTest() {
-        Specification<User> specification = SearchHelper.constructUserSpecificationFromSearchQuery("tomato \"Potato\"");
-        List<User> matches = userRepository.findAll(specification);
-        assertEquals(0, matches.size());
-    }
-
-    /**
-     * Verify that when constructUserSpecificationFromSearchQuery is called with two terms joined by an 'or' as its
-     * argument, and there is additional whitespace between the words in the query, it still returns a specification which
-     * matches users which contain only one of those terms in their names.
-     */
-    @Test
-    void constructUserSpecificationFromSearchQueryOrExtraWhitespaceTest() {
-        Specification<User> specification = SearchHelper.constructUserSpecificationFromSearchQuery("peter         or      \"Potato\"");
-        List<User> matches = userRepository.findAll(specification);
-        assertEquals(1, matches.size());
-        User user = matches.get(0);
-        assertTrue(user.getMiddleName().equalsIgnoreCase("peter"));
-        assertFalse(user.getFirstName().equals("Potato") || user.getMiddleName().equals("Potato") ||
-                user.getLastName().equals("Potato") || user.getNickname().equals("Potato"));
-    }
-
-    /**
-     * Verify that when constructUserSpecificationFromSearchQuery is called with two terms joined by an 'and' as its
-     * argument, and there is additional whitespace between the words in the query, it returns a specification which
-     * doesn't match users which contain only one of those terms in their names.
-     */
-    @Test
-    void constructUserSpecificationFromSearchQueryAndExtraWhitespaceTest() {
-        Specification<User> specification = SearchHelper.constructUserSpecificationFromSearchQuery("andy   and        \"Potato\"");
-        List<User> matches = userRepository.findAll(specification);
-        assertEquals(0, matches.size());
+        assertEquals("Peter", user.getMiddleName());
+        assertNotEquals("Potato", user.getFirstName());
+        assertNotEquals("Potato", user.getMiddleName());
+        assertNotEquals("Potato", user.getLastName());
+        assertNotEquals("Potato", user.getNickname());
     }
 
     /**
@@ -865,9 +673,6 @@ class SearchHelperTest {
         userRepository.save(donaldSmith);
         List<User> result = SearchHelper.getSearchResultsOrderedByRelevance("Donald or Duck", userRepository, true);
 
-        System.out.println(result);
-        System.out.println(result.get(0));
-        System.out.println(result.get(1));
         assertEquals("Donald", result.get(0).getFirstName());
         assertEquals("Smith", result.get(0).getLastName());
         assertEquals("Lucy", result.get(1).getFirstName());
@@ -921,42 +726,6 @@ class SearchHelperTest {
         assertEquals(0, matchesSingle.size());
     }
 
-    /**
-     * Tests that the DGAA filter does not remove regular users
-     */
-    @Test
-    void removingDGAAAcountsDoesNotRemoveNormalAccounts() {
-        List<User> listCopy = new ArrayList<>(savedUserList);
-        List<User> filteredUserList = SearchHelper.removeDGAAAccountFromResults(listCopy);
-        assertEquals(savedUserList, filteredUserList);
-    }
-
-    /**
-     * Tests that the DGAA filter does not remove regular users
-     */
-    @Test
-    void removingDGAAAcountsDoesNotRemovesDGAA() throws ParseException {
-        List<User> listCopy = new ArrayList<>(savedUserList);
-
-        User dgaa = new User.Builder()
-                .withFirstName("Caroline")
-                .withMiddleName("Jane")
-                .withLastName("Smith")
-                .withNickName("Carrie")
-                .withEmail("carriesmith@hotmail.com")
-                .withPassword("h375dj82")
-                .withDob("2001-03-11")
-                .withPhoneNumber("+64 3 748 7562")
-                .withAddress(Location.covertAddressStringToLocation("24,Albert Road,Ashburton,Auckland,Auckland,New KZealand,0624"))
-                .build();
-        dgaa.setRole("defaultGlobalApplicationAdmin");
-
-        listCopy.add(3, dgaa);
-
-        List<User> filteredUserList = SearchHelper.removeDGAAAccountFromResults(listCopy);
-        assertEquals(savedUserList, filteredUserList);
-    }
-
     private void createKeywords() {
         Keyword keyword1 = new Keyword("Apples");
         Keyword keyword2 = new Keyword("Bananas");
@@ -966,24 +735,15 @@ class SearchHelperTest {
         keywordRepository.saveAll(Arrays.asList(keyword1, keyword2, keyword3, keyword4));
     }
 
-    @Test
-    void constructKeywordSpecificationFromSearchQuery_partialMatch() {
+    @ParameterizedTest
+    @ValueSource(strings = {"App", "Apples", "apples"})
+    void constructKeywordSpecificationFromSearchQuery_matchingQuery_keywordReturned(String searchQuery) {
         createKeywords();
-        Specification<Keyword> specification = SearchHelper.constructKeywordSpecificationFromSearchQuery("App");
+        Specification<Keyword> specification = SearchHelper.constructKeywordSpecificationFromSearchQuery(searchQuery);
         List<Keyword> result = keywordRepository.findAll(specification);
 
         assertEquals(1, result.size());
-        assertEquals("Apples",result.get(0).getName());
-    }
-
-    @Test
-    void constructKeywordSpecificationFromSearchQuery_fullMatch() {
-        createKeywords();
-        Specification<Keyword> specification = SearchHelper.constructKeywordSpecificationFromSearchQuery("Apples");
-        List<Keyword> result = keywordRepository.findAll(specification);
-
-        assertEquals(1, result.size());
-        assertEquals("Apples",result.get(0).getName());
+        assertEquals("Apples", result.get(0).getName());
     }
 
     @Test
@@ -994,13 +754,241 @@ class SearchHelperTest {
 
         assertEquals(0, result.size());
     }
-    @Test
-    void constructKeywordSpecificationFromSearchQuery_ignoresCase() {
-        createKeywords();
-        Specification<Keyword> specification = SearchHelper.constructKeywordSpecificationFromSearchQuery("apples");
-        List<Keyword> result = keywordRepository.findAll(specification);
 
-        assertEquals(1, result.size());
-        assertEquals("Apples",result.get(0).getName());
+    @Transactional
+    protected Business createBusiness() {
+        var testUser = userRepository.findAll().iterator().next();
+        var testBusiness = new Business.Builder()
+                .withPrimaryOwner(testUser)
+                .withBusinessType("Accommodation and Food Services")
+                .withDescription("DESCRIPTION")
+                .withName("BUSINESS_NAME")
+                .withAddress(Location.covertAddressStringToLocation("108,Albert Road,Ashburton,Christchurch,New Zealand,Canterbury,8041"))
+                .build();
+
+        return businessRepository.save(testBusiness);
+    }
+
+    @Test
+    void productBusinessSpecification_noProductsForBusiness_noProductsReturned() {
+        Business business = createBusiness();
+        productRepository.save(new Product.Builder()
+                .withProductCode("FOO")
+                .withName("Foo")
+                .withBusiness(business)
+                .build());
+        productRepository.save(new Product.Builder()
+                .withProductCode("BAR")
+                .withName("Bar")
+                .withBusiness(business)
+                .build());
+
+        Business business2 = createBusiness();
+        var products = productRepository.findAll(SearchHelper.productBusinessSpecification(business2));
+        assertEquals(0, products.size());
+    }
+
+    @Test
+    void productBusinessSpecification_productsExist_productsReturned() {
+        Business business = createBusiness();
+        productRepository.save(new Product.Builder()
+                .withBusiness(business)
+                .withProductCode("NOT-RETURNED")
+                .withName("Not Returned")
+                .build());
+
+        Business business2 = createBusiness();
+        productRepository.save(new Product.Builder()
+                .withBusiness(business2)
+                .withProductCode("A")
+                .withName("A")
+                .build());
+        productRepository.save(new Product.Builder()
+                .withBusiness(business2)
+                .withProductCode("B")
+                .withName("B")
+                .build());
+
+        var products = productRepository.findAll(SearchHelper.productBusinessSpecification(business2));
+        var productCodes = products.stream().map(Product::getProductCode).collect(Collectors.toSet());
+        assertEquals(Set.of("A", "B"), productCodes);
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            "code,productCode",
+            "product code,productCode",
+            "product AND name,name",
+            "\"This is the\",name",
+            "wow,description",
+            "guy,manufacturer"
+    })
+    void constructBusinessSpecificationFromSearchQuery_matchingQuery_productReturned(String search, String column) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        var business = createBusiness();
+        productRepository.save(new Product.Builder()
+                .withBusiness(business)
+                .withProductCode("PRODUCT-CODE")
+                .withName("This is the product name")
+                .withDescription("Wow description")
+                .withManufacturer("Some guy")
+                .build());
+
+        ProductFilterOption option = objectMapper.convertValue(column, ProductFilterOption.class);
+        var products = productRepository.findAll(SearchHelper.productFilterSpecification(search, Set.of(option)));
+        assertEquals(1, products.size());
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            "code,name",
+            "code,description",
+            "code,manufacturer",
+            "product AND name,description",
+            "\"the is\",name",
+            "wow,manufacturer",
+            "guy,productCode",
+            "product AND wow,productCode"
+    })
+    void constructBusinessSpecificationFromSearchQuery_doesNotMatchQuery_noProductReturned(String search, String column) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        var business = createBusiness();
+        productRepository.save(new Product.Builder()
+                .withBusiness(business)
+                .withProductCode("PRODUCT-CODE")
+                .withName("This is the product name")
+                .withDescription("Wow description")
+                .withManufacturer("Some guy")
+                .build());
+
+        var option = objectMapper.convertValue(column, ProductFilterOption.class);
+        var products = productRepository.findAll(SearchHelper.productFilterSpecification(search, Set.of(option)));
+        assertEquals(0, products.size());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"\"is the\"", "product OR code", "this"})
+    void constructBusinessSpecificationFromSearchQuery_emptyColumnSet_productNameSearched(String search) {
+        var business = createBusiness();
+        productRepository.save(new Product.Builder()
+                .withBusiness(business)
+                .withProductCode("PRODUCT-CODE")
+                .withName("This is the product name")
+                .withDescription("Wow description")
+                .withManufacturer("Some guy")
+                .build());
+
+        var products = productRepository.findAll(SearchHelper.productFilterSpecification(search, Set.of()));
+        assertEquals(1, products.size());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"product AND wow", "product OR code", "this"})
+    void constructBusinessSpecificationFromSearchQuery_fullColumnSet_allColumnsSearched(String search) {
+        var business = createBusiness();
+        productRepository.save(new Product.Builder()
+                .withBusiness(business)
+                .withProductCode("PRODUCT-CODE")
+                .withName("This is the product name")
+                .withDescription("Wow description")
+                .withManufacturer("Some guy")
+                .build());
+
+        var options = Set.of(ProductFilterOption.values());
+        var products = productRepository.findAll(SearchHelper.productFilterSpecification(search, options));
+        assertEquals(1, products.size());
+    }
+
+    @Test
+    void constructSpecificationFromProductSearch_searchMade_specificationsCombined() {
+        var business = mock(Business.class);
+        Specification<Product> businesSpec = mock(Specification.class);
+        Specification<Product> filterSpec = mock(Specification.class);
+        Specification<Product> combinedSpec = mock(Specification.class);
+
+        when(businesSpec.and(filterSpec)).thenReturn(combinedSpec);
+        when(filterSpec.and(businesSpec)).thenReturn(combinedSpec);
+
+        try (var searchHelper = Mockito.mockStatic(SearchHelper.class)) {
+            searchHelper.when(() -> SearchHelper.productBusinessSpecification(business)).thenReturn(businesSpec);
+            searchHelper.when(() -> SearchHelper.productFilterSpecification("hello", Set.of(ProductFilterOption.PRODUCT_CODE))).thenReturn(filterSpec);
+
+            searchHelper.when(() -> SearchHelper.constructSpecificationFromProductSearch(any(), any(), any())).thenCallRealMethod();
+
+            var resultSpec = SearchHelper.constructSpecificationFromProductSearch(business, "hello", Set.of(ProductFilterOption.PRODUCT_CODE));
+            assertEquals(combinedSpec, resultSpec);
+        }
+    }
+
+    /**
+     * Creates a product, inventory and sale item which are all related to each other, when provided with a business
+     *
+     * @param business to create the three type of items with
+     */
+    private void createProductInventorySaleItemWithBusiness(Business business) throws Exception {
+        LocalDate today = LocalDate.now();
+        var product1 = new Product.Builder()
+                .withBusiness(business)
+                .withProductCode("TEST-1")
+                .withName("test_product" + business.getPrimaryOwner().getFirstName())
+                .build();
+        product1 = productRepository.save(product1);
+        var inventoryItem = new InventoryItem.Builder()
+                .withProduct(product1)
+                .withQuantity(30)
+                .withPricePerItem("2.69")
+                .withManufactured("2021-03-11")
+                .withSellBy(today.plus(2, ChronoUnit.DAYS).toString())
+                .withBestBefore(today.plus(3, ChronoUnit.DAYS).toString())
+                .withExpires(today.plus(4, ChronoUnit.DAYS).toString())
+                .build();
+        inventoryItem = inventoryItemRepository.save(inventoryItem);
+        var saleItem = new SaleItem.Builder()
+                .withInventoryItem(inventoryItem)
+                .withQuantity(1)
+                .withPrice("10.00")
+                .withMoreInfo("blah")
+                .build();
+        saleItemRepository.save(saleItem);
+    }
+
+    @Test
+    void constructSpecificationFromInventoryItemsFilter_twoBusinessesCreated_inventoryItemsFromEachBusinessAreDistinct() throws Exception {
+        Business business1 = createBusiness();
+        Business business2 = createBusiness();
+        createProductInventorySaleItemWithBusiness(business1);
+        createProductInventorySaleItemWithBusiness(business2);
+
+        // the requestedPage, resultsPerPage and sortBy values are arbitrary
+        PageRequest pageRequest = SearchHelper.getPageRequest(1, 10, Sort.by("quantity"));
+
+        Specification<InventoryItem> specification1 = SearchHelper.constructSpecificationFromInventoryItemsFilter(business1);
+        Page<InventoryItem> resultInventoryItemsBusiness1 = inventoryItemRepository.findAll(specification1, pageRequest);
+
+        Specification<InventoryItem> specification2 = SearchHelper.constructSpecificationFromInventoryItemsFilter(business2);
+        Page<InventoryItem> resultInventoryItemsBusiness2 = inventoryItemRepository.findAll(specification2, pageRequest);
+
+        // Inventory items from each business should be distinct
+        assertFalse(new ReflectionEquals(resultInventoryItemsBusiness1).matches(resultInventoryItemsBusiness2));
+    }
+
+    @Test
+    void constructSpecificationFromSaleItemsFilter_twoBusinessesCreated_saleItemsFromEachBusinessAreDistinct() throws Exception {
+        Business business1 = createBusiness();
+        Business business2 = createBusiness();
+        createProductInventorySaleItemWithBusiness(business1);
+        createProductInventorySaleItemWithBusiness(business2);
+
+        // the requestedPage, resultsPerPage and sortBy values are arbitrary
+        PageRequest pageRequest = SearchHelper.getPageRequest(1, 10, Sort.by("created"));
+
+        Specification<SaleItem> specification1 = SearchHelper.constructSpecificationFromSaleItemsFilter(business1);
+        Page<SaleItem> resultSaleItemsBusiness1 = saleItemRepository.findAll(specification1, pageRequest);
+
+        Specification<SaleItem> specification2 = SearchHelper.constructSpecificationFromSaleItemsFilter(business2);
+        Page<SaleItem> resultSaleItemsBusiness2 = saleItemRepository.findAll(specification2, pageRequest);
+
+        // Sale items from each business should be distinct
+        assertFalse(new ReflectionEquals(resultSaleItemsBusiness1).matches(resultSaleItemsBusiness2));
     }
 }

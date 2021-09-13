@@ -1,12 +1,14 @@
 import Vue from "vue";
 import VueRouter from "vue-router";
 
+import NotFound from "../components/NotFound.vue";
 import Auth from "../components/Auth/index.vue";
 import admin from "../components/admin/Admin.vue";
 import ProfilePage from "../components/UserProfile/index.vue";
 import ModifyUserPage from "../components/UserProfile/ModifyUserPage.vue";
 import BusinessProfile from "../components/BusinessProfile/index.vue";
 import SearchBusinessResults from "../components/SearchBusinessPage.vue";
+import SearchSaleItems from "../components/SearchSaleItems.vue";
 import SearchResults from "../components/SearchResults.vue";
 import HomePage from "../components/home/HomePage.vue";
 import ProductCatalogue from "../components/ProductCatalogue.vue";
@@ -14,24 +16,20 @@ import Inventory from "../components/Inventory.vue";
 import SalePage from "../components/SalePage.vue";
 import Marketplace from "../components/marketplace/Marketplace.vue";
 import UserCards from "../components/marketplace/UserCards.vue";
-import ConversationReply from "../components/cards/ConversationReply.vue";
+import { COOKIE, getCookie } from "@/utils";
+import { getStore } from "@/store";
 
 Vue.use(VueRouter);
-
-// Doesn't actually send status code 404
-const NotFound = {
-  template: "<h2>404 Not Found - {{ $route.path }}</h2>"
-};
 
 const routes = [
   {
     path: "/",
-    redirect: "/login"
+    redirect: "/auth"
   },
   {
-    path: "/login",
+    path: "/auth",
     component: Auth,
-    meta: { title: 'Login' }
+    meta: { title: 'Authenticate' }
   },
   {
     path: "/home",
@@ -67,12 +65,17 @@ const routes = [
   {
     path: "/search",
     component: SearchResults,
-    meta: { title: 'Search' }
+    meta: { title: 'Search Users' }
   },
   {
     path: "/search/business",
     component: SearchBusinessResults,
-    meta: { title: 'SearchBusiness' }
+    meta: { title: 'Search Businesses' }
+  },
+  {
+    path: "/search/sales",
+    component: SearchSaleItems,
+    meta: { title: 'Search Sale Items' }
   },
   {
     path: "/business/:id/products",
@@ -107,8 +110,46 @@ const routes = [
 ];
 
 
-export default new VueRouter({
+const router = new VueRouter({
   mode: "history",
   base: process.env.VUE_APP_BASE_URL,
   routes,
 });
+
+// Set Page Title
+router.afterEach(to => {
+  Vue.nextTick(() => {
+    const title = to.meta.title;
+    document.title = title ? `${title} - LEFT_OVERS` : 'LEFT_OVERS';
+  });
+});
+
+
+// Prevent navigation away from /auth if not logged in and prevent nagivation to /auth if already logged in
+router.beforeEach(async (to, from, next) => {
+  const store = getStore();
+  // Handle initial navigation
+  if (from === VueRouter.START_LOCATION) {
+    const cookie = getCookie(COOKIE.USER);
+    if (cookie) {
+      await store.dispatch('autoLogin', cookie.split('=')[1]);
+    }
+  }
+
+  if (to.path === '/auth' && store.getters.isLoggedIn) {
+    next('/home');
+  } else if (to.path !== '/auth' && !store.getters.isLoggedIn) {
+    next('/auth');
+  } else {
+    next();
+  }
+});
+
+// Clear global error on navigation
+router.afterEach(() => {
+  // After changing pages clear the global error message
+  getStore().commit('clearError');
+});
+
+
+export default router;

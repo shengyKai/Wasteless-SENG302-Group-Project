@@ -10,7 +10,7 @@ import org.seng302.leftovers.controllers.CardController;
 import org.seng302.leftovers.entities.Keyword;
 import org.seng302.leftovers.entities.MarketplaceCard;
 import org.seng302.leftovers.entities.User;
-import org.seng302.leftovers.persistence.ExpiryEventRepository;
+import org.seng302.leftovers.persistence.event.ExpiryEventRepository;
 import org.seng302.leftovers.persistence.KeywordRepository;
 import org.seng302.leftovers.persistence.MarketplaceCardRepository;
 import org.seng302.leftovers.persistence.UserRepository;
@@ -20,11 +20,11 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.time.temporal.ChronoUnit;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
 public class CardCreationStepDefinition {
@@ -126,7 +126,6 @@ public class CardCreationStepDefinition {
          try {
              createdCard = createCardFromMap(cardProperties);
          } catch (Exception e) {
-             System.out.println(e);
              // The card will not always be created as some scenarios use invalid data
              createdCard = null;
          }

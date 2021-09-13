@@ -1,7 +1,6 @@
 package cucumber.stepDefinitions;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import cucumber.context.CardContext;
 import cucumber.context.EventContext;
@@ -16,12 +15,9 @@ import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
 import net.minidev.json.parser.ParseException;
-import org.hibernate.Hibernate;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.junit.jupiter.api.Assertions;
-import org.mockito.MockedStatic;
-import org.mockito.invocation.InvocationOnMock;
 import org.seng302.leftovers.entities.Keyword;
 import org.seng302.leftovers.entities.MarketplaceCard;
 import org.seng302.leftovers.entities.User;
@@ -31,35 +27,21 @@ import org.seng302.leftovers.service.CardService;
 import org.seng302.leftovers.tools.JsonTools;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.yaml.snakeyaml.error.Mark;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.net.http.HttpResponse;
-import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
-import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
-import java.util.List;
-import java.util.Map;
 import java.util.function.Function;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-import static java.time.Instant.ofEpochMilli;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 
 
@@ -214,7 +196,7 @@ public class CardStepDefinition {
     public void i_have_received_a_message_telling_me_the_card_is_about_to_expire()
             throws JsonProcessingException, UnsupportedEncodingException, ParseException {
 
-        List<JSONObject> events = eventContext.lastReceivedEvents("newsfeed");
+        List<JSONObject> events = eventContext.mvcResultToJsonObjectList(requestContext.getLastResult());
 
         Assertions.assertEquals(1, events.size());
         JSONObject event = events.get(0);
@@ -233,7 +215,7 @@ public class CardStepDefinition {
 
     @Then("I have received a message telling me the card has expired")
     public void i_have_received_a_message_telling_me_the_card_has_expired() throws UnsupportedEncodingException, ParseException {
-        List<JSONObject> events = eventContext.lastReceivedEvents("newsfeed");
+        List<JSONObject> events = eventContext.mvcResultToJsonObjectList(requestContext.getLastResult());
 
         Assertions.assertEquals(1, events.size());
         JSONObject event = events.get(0);

@@ -1,9 +1,9 @@
 package cucumber.stepDefinitions;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import cucumber.context.RequestContext;
 import cucumber.context.UserContext;
+import cucumber.utils.CucumberUtils;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
@@ -15,7 +15,6 @@ import org.hibernate.SessionFactory;
 import org.junit.Assert;
 import org.seng302.leftovers.entities.Location;
 import org.seng302.leftovers.entities.User;
-import org.seng302.leftovers.persistence.AccountRepository;
 import org.seng302.leftovers.persistence.UserRepository;
 import org.seng302.leftovers.tools.PasswordAuthenticator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,17 +23,22 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.server.ResponseStatusException;
 
+import javax.transaction.Transactional;
 import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @AutoConfigureMockMvc
@@ -51,6 +55,8 @@ public class UserStepDefinition {
     @Autowired
     private SessionFactory sessionFactory;
 
+    private JSONObject modifyParameters;
+
     private User theUser;
     private String userFirstName = "Bob";
     private String userMiddleName = "Bob";
@@ -60,7 +66,7 @@ public class UserStepDefinition {
     private String userPassword = "B0bbbbbbb76#bb";
     private String userBio = "I am Bob";
     private String userDob = "1999-01-01";
-    private String userPhNum = "0270000000";
+    private String userPhNum = "02 70000000";
     private Location userAddress = Location.covertAddressStringToLocation("1,Bob Street,Bob,Bob,Bob,Bob,1010");
 
     private Long userID;
@@ -76,7 +82,7 @@ public class UserStepDefinition {
                 .withPassword("12345678abc")
                 .withBio("g")
                 .withDob("2001-03-11")
-                .withPhoneNumber("123-456-7890")
+                .withPhoneNumber("12 34567890")
                 .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
                         "Canterbury,8041"))
                 .build();
@@ -94,7 +100,25 @@ public class UserStepDefinition {
                 .withPassword("12345678abc")
                 .withBio("g")
                 .withDob("2001-03-11")
-                .withPhoneNumber("123-456-7890")
+                .withPhoneNumber("12 34567890")
+                .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
+                        "Canterbury,8041"))
+                .build();
+        userContext.save(user);
+    }
+
+    @Given("A user exists with name {string} and password {string}")
+    public void a_user_exists_with_name(String name, String password) throws ParseException {
+        var user = new User.Builder()
+                .withFirstName(name)
+                .withMiddleName("Hector")
+                .withLastName("Smith")
+                .withNickName("nick")
+                .withEmail(name + "@testing")
+                .withPassword(password)
+                .withBio("g")
+                .withDob("2001-03-11")
+                .withPhoneNumber("12 34567890")
                 .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
                         "Canterbury,8041"))
                 .build();
@@ -112,7 +136,7 @@ public class UserStepDefinition {
                 .withPassword("12345678abc")
                 .withBio("g")
                 .withDob("2001-03-11")
-                .withPhoneNumber("123-456-7890")
+                .withPhoneNumber("12 34567890")
                 .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
                         "Canterbury,8041"))
                 .build();
@@ -259,18 +283,18 @@ public class UserStepDefinition {
 
         userID = null;
         try {
-             MvcResult result = mockMvc.perform(post("/login")
-                    .content(requestBody.toString())
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .accept(MediaType.APPLICATION_JSON))
+            MvcResult result = mockMvc.perform(post("/login")
+                            .content(requestBody.toString())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .accept(MediaType.APPLICATION_JSON))
                     .andExpect(status().isOk())
                     .andReturn();
 
-             JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
-             JSONObject jsonObject = (JSONObject) parser.parse(result.getResponse().getContentAsString());
-             // Refuses to cast from integer to long. So used the below work around
-             Integer userId = (Integer) jsonObject.getAsNumber("userId");
-             userID = userId.longValue();
+            JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
+            JSONObject jsonObject = (JSONObject) parser.parse(result.getResponse().getContentAsString());
+            // Refuses to cast from integer to long. So used the below work around
+            Integer userId = (Integer) jsonObject.getAsNumber("userId");
+            userID = userId.longValue();
         } catch (Exception ignored) {}
     }
 
@@ -283,9 +307,9 @@ public class UserStepDefinition {
         userID = null;
         try {
             MvcResult result = mockMvc.perform(post("/login")
-                    .content(requestBody.toString())
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .accept(MediaType.APPLICATION_JSON))
+                            .content(requestBody.toString())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .accept(MediaType.APPLICATION_JSON))
                     .andExpect(status().isBadRequest())
                     .andReturn();
 
@@ -343,4 +367,62 @@ public class UserStepDefinition {
     public void i_am_logged_into_account(String name) {
         requestContext.setLoggedInAccount(userContext.getByName(name));
     }
+
+    @When("I try to update the fields of the user {string} to:")
+    public void i_try_to_updated_the_fields_of_the_user_to(String name, Map<String, Object> dataTable) {
+        modifyParameters = new JSONObject();
+        for (var entry : dataTable.entrySet()) {
+            List<String> path = Arrays.asList(entry.getKey().split("\\."));
+            CucumberUtils.setValueAtPath(modifyParameters, path, entry.getValue());
+        }
+
+        User user = userContext.getByName(name);
+        requestContext.performRequest(put("/users/" + user.getUserID())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(this.modifyParameters.toJSONString()));
+    }
+
+
+    @Transactional
+    @Then("The user is updated")
+    public void the_user_is_updated() {
+        User user = userRepository.getUser(userContext.getLast().getUserID());
+        assertEquals(modifyParameters.get("firstName"), user.getFirstName());
+        assertEquals(modifyParameters.get("lastName"), user.getLastName());
+        assertEquals(modifyParameters.get("middleName"), user.getMiddleName());
+        assertEquals(modifyParameters.get("nickname"), user.getNickname());
+        assertEquals(modifyParameters.get("bio"), user.getBio());
+        assertEquals(modifyParameters.get("phoneNumber"), user.getPhNum());
+        assertEquals(modifyParameters.get("dateOfBirth"), user.getDob().toString());
+        assertEquals(modifyParameters.get("email"), user.getEmail());
+
+        Map<String, Object> addressParams = (Map<String, Object>)modifyParameters.get("homeAddress");
+        Location address = user.getAddress();
+        assertEquals(addressParams.get("streetNumber"), address.getStreetNumber());
+        assertEquals(addressParams.get("streetName"), address.getStreetName());
+        assertEquals(addressParams.get("district"), address.getDistrict());
+        assertEquals(addressParams.get("city"), address.getCity());
+        assertEquals(addressParams.get("region"), address.getRegion());
+        assertEquals(addressParams.get("country"), address.getCountry());
+        assertEquals(addressParams.get("postcode"), address.getPostCode());
+    }
+
+    @Transactional
+    @Then("The user is not updated")
+    public void the_user_is_not_updated() {
+        User oldUser = userContext.getLast();
+        User newUser = userRepository.getUser(oldUser.getUserID());
+
+        assertEquals(oldUser.getFirstName(), newUser.getFirstName());
+        assertEquals(oldUser.getMiddleName(), newUser.getMiddleName());
+        assertEquals(oldUser.getLastName(), newUser.getLastName());
+        assertEquals(oldUser.getNickname(), newUser.getNickname());
+        assertEquals(oldUser.getBio(), newUser.getBio());
+        assertEquals(oldUser.getEmail(), newUser.getEmail());
+        assertEquals(oldUser.getAddress(), newUser.getAddress());
+        assertEquals(oldUser.getPhNum(), newUser.getPhNum());
+        assertEquals(oldUser.getDob(), newUser.getDob());
+        assertEquals(oldUser.getAuthenticationCode(), newUser.getAuthenticationCode());
+    }
+
 }

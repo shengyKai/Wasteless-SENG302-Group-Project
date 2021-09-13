@@ -2,17 +2,18 @@ package org.seng302.leftovers.service;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.seng302.leftovers.entities.DeleteEvent;
-import org.seng302.leftovers.entities.ExpiryEvent;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.seng302.leftovers.entities.MarketplaceCard;
+import org.seng302.leftovers.entities.event.DeleteEvent;
+import org.seng302.leftovers.entities.event.ExpiryEvent;
+import org.seng302.leftovers.persistence.event.ExpiryEventRepository;
+import org.seng302.leftovers.persistence.event.EventRepository;
+import org.seng302.leftovers.persistence.event.ExpiryEventRepository;
 import org.seng302.leftovers.persistence.MarketplaceCardRepository;
-import org.seng302.leftovers.persistence.ExpiryEventRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-import org.hibernate.Hibernate;
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -26,14 +27,14 @@ public class CardService {
 
     private MarketplaceCardRepository marketplaceCardRepository;
     private ExpiryEventRepository expiryEventRepository;
-    private EventService eventService;
     private Logger logger = LogManager.getLogger(CardService.class);
+    private EventRepository eventRepository;
     private SessionFactory sessionFactory;
 
     @Autowired
-    public CardService(MarketplaceCardRepository marketplaceCardRepository, EventService eventService, ExpiryEventRepository expiryEventRepository, SessionFactory sessionFactory) {
+    public CardService(MarketplaceCardRepository marketplaceCardRepository, EventRepository eventRepository, ExpiryEventRepository expiryEventRepository, SessionFactory sessionFactory) {
         this.marketplaceCardRepository = marketplaceCardRepository;
-        this.eventService = eventService;
+        this.eventRepository = eventRepository;
         this.expiryEventRepository = expiryEventRepository;
         this.sessionFactory = sessionFactory;
     }
@@ -61,7 +62,7 @@ public class CardService {
             try (Session session = sessionFactory.openSession()) {
                 card = session.find(MarketplaceCard.class, card.getID());
                 ExpiryEvent event = new ExpiryEvent(card);
-                eventService.saveEvent(event);
+                eventRepository.save(event);
             }
             logger.info("Expiry notification event sent for card {}", card.getID());
         }
@@ -87,7 +88,7 @@ public class CardService {
             }
 
             DeleteEvent deleteEvent = new DeleteEvent(card);
-            eventService.saveEvent(deleteEvent);
+            eventRepository.save(deleteEvent);
 
             marketplaceCardRepository.delete(card);
             logger.info("Card {} deleted from marketplace repository", card.getID());

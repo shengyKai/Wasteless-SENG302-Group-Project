@@ -1,8 +1,6 @@
 /* Parent class for all kinds of accounts */
 package org.seng302.leftovers.entities;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import org.seng302.leftovers.exceptions.EmailInUseException;
 import org.seng302.leftovers.persistence.UserRepository;
 import org.seng302.leftovers.tools.PasswordAuthenticator;
@@ -51,7 +49,7 @@ public abstract class Account {
         if (validEmail && !email.trim().isEmpty() && email.length() <= 100) {
             this.email = email;
         } else {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Email must not be empty and must consist of an email prefix, a @ symbol and a domain, and less than 100 char");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email must not be empty and must consist of an email prefix, a @ symbol and a domain, and less than 100 char");
         }
     }
 

@@ -10,10 +10,8 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
-
 @Repository
-public interface SaleItemRepository extends CrudRepository<SaleItem, Long> {
+public interface SaleItemRepository extends CrudRepository<SaleItem, Long>, JpaSpecificationExecutor<SaleItem> {
 
     /**
      * Finds all the sale items for a given business

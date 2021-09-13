@@ -1,15 +1,15 @@
 package org.seng302.leftovers.service;
 
-import org.junit.Before;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
 import org.seng302.leftovers.entities.Conversation;
 import org.seng302.leftovers.entities.MarketplaceCard;
 import org.seng302.leftovers.entities.Message;
-import org.seng302.leftovers.entities.MessageEvent;
 import org.seng302.leftovers.entities.User;
-import org.seng302.leftovers.persistence.MessageEventRepository;
+import org.seng302.leftovers.entities.event.MessageEvent;
+import org.seng302.leftovers.persistence.event.EventRepository;
+import org.seng302.leftovers.persistence.event.MessageEventRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -19,8 +19,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 
@@ -30,7 +30,7 @@ class MessageServiceTest {
     @Autowired
     MessageService messageService;
     @MockBean
-    EventService eventService;
+    EventRepository eventRepository;
     @MockBean
     MessageEventRepository messageEventRepository;
     @Captor
@@ -85,7 +85,7 @@ class MessageServiceTest {
 
         messageService.notifyConversationParticipants(firstMessage, buyer, seller);
 
-        Mockito.verify(eventService, times(2)).saveEvent(messageEventArgumentCaptor.capture());
+        Mockito.verify(eventRepository, times(2)).save(messageEventArgumentCaptor.capture());
 
         List<MessageEvent> capturedEvents = messageEventArgumentCaptor.getAllValues();
         Set<User> notifiedUsers = capturedEvents.stream().map(MessageEvent::getNotifiedUser).collect(Collectors.toSet());
@@ -100,7 +100,7 @@ class MessageServiceTest {
 
         messageService.notifyConversationParticipants(secondMessage, buyer, seller);
 
-        Mockito.verify(eventService, times(2)).saveEvent(messageEventArgumentCaptor.capture());
+        Mockito.verify(eventRepository, times(2)).save(messageEventArgumentCaptor.capture());
 
         List<MessageEvent> capturedEvents = messageEventArgumentCaptor.getAllValues();
         Set<User> notifiedUsers = capturedEvents.stream().map(MessageEvent::getNotifiedUser).collect(Collectors.toSet());
@@ -115,7 +115,7 @@ class MessageServiceTest {
 
         messageService.notifyConversationParticipants(firstMessage, bystander, seller);
 
-        Mockito.verify(eventService, times(1)).saveEvent(messageEventArgumentCaptor.capture());
+        Mockito.verify(eventRepository, times(1)).save(messageEventArgumentCaptor.capture());
 
         List<MessageEvent> capturedEvents = messageEventArgumentCaptor.getAllValues();
         Set<User> notifiedUsers = capturedEvents.stream().map(MessageEvent::getNotifiedUser).collect(Collectors.toSet());

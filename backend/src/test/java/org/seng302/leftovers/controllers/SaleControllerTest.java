@@ -4,18 +4,31 @@ import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
 import org.hamcrest.Matchers;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mockito.*;
-import org.seng302.leftovers.entities.*;
+import org.mockito.internal.matchers.apachecommons.ReflectionEquals;
+import org.seng302.leftovers.entities.Business;
+import org.seng302.leftovers.entities.InventoryItem;
+import org.seng302.leftovers.entities.SaleItem;
+import org.seng302.leftovers.entities.User;
+import org.seng302.leftovers.entities.event.InterestEvent;
 import org.seng302.leftovers.exceptions.AccessTokenException;
 import org.seng302.leftovers.persistence.BusinessRepository;
 import org.seng302.leftovers.persistence.InventoryItemRepository;
 import org.seng302.leftovers.persistence.SaleItemRepository;
+import org.seng302.leftovers.persistence.UserRepository;
+import org.seng302.leftovers.persistence.event.InterestEventRepository;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
 import org.seng302.leftovers.tools.SearchHelper;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -24,14 +37,11 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.server.ResponseStatusException;
 
-import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
 import java.text.ParseException;
-import java.time.Instant;
 import java.time.LocalDate;
-import java.util.*;
 import java.time.temporal.ChronoUnit;
-import java.util.Optional;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.AdditionalMatchers.not;
@@ -47,19 +57,33 @@ class SaleControllerTest {
     private MockMvc mockMvc;
 
     @Mock
+    private UserRepository userRepository;
+    @Mock
     private BusinessRepository businessRepository;
     @Mock
     private SaleItemRepository saleItemRepository;
     @Mock
     private InventoryItemRepository inventoryItemRepository;
     @Mock
+    private InterestEventRepository interestEventRepository;
+    @Mock
     private Business business;
     @Mock
+    private User user;
+    @Mock
     private InventoryItem inventoryItem;
+    @Mock
+    private SaleItem saleItem;
 
     private MockedStatic<AuthenticationTokenManager> authenticationTokenManager;
 
     private SaleController saleController;
+
+    @Captor
+    ArgumentCaptor<Specification<SaleItem>> specificationArgumentCaptor;
+    @Captor
+    ArgumentCaptor<PageRequest> pageRequestArgumentCaptor;
+
 
     @BeforeEach
     public void setUp() throws ParseException {
@@ -85,8 +109,17 @@ class SaleControllerTest {
 
         // Setup mock sale item repository
         when(saleItemRepository.save(any(SaleItem.class))).thenAnswer(x -> x.getArgument(0));
+        when(saleItemRepository.findById(not(eq(3L)))).thenReturn(Optional.empty());
+        when(saleItemRepository.findById(3L)).thenReturn(Optional.of(saleItem));
 
-        saleController = spy(new SaleController(businessRepository, saleItemRepository, inventoryItemRepository));
+        when(saleItem.getId()).thenReturn(3L);
+
+        // Setup mock user
+        when(user.getUserID()).thenReturn(4L);
+        when(userRepository.findById(4L)).thenReturn(Optional.of(user));
+        when(userRepository.findById(not(eq(4L)))).thenReturn(Optional.empty());
+
+        saleController = spy(new SaleController(userRepository, businessRepository, saleItemRepository, inventoryItemRepository, interestEventRepository));
         mockMvc = MockMvcBuilders.standaloneSetup(saleController).build();
     }
 
@@ -261,7 +294,7 @@ class SaleControllerTest {
     @Test
     void addSaleItemToBusiness_validInput_ReturnsId() throws Exception {
         SaleItem mockItem = mock(SaleItem.class);
-        when(mockItem.getSaleId()).thenReturn(400L);
+        when(mockItem.getId()).thenReturn(400L);
         when(saleItemRepository.save(any(SaleItem.class))).thenReturn(mockItem);
 
         var object = generateSalesItemInfo();
@@ -304,7 +337,7 @@ class SaleControllerTest {
 
     @Test
     void getSaleItemsForBusiness_validBusinessNoSalesItem_returnsEmptyList() throws Exception {
-        when(saleItemRepository.findAllForBusiness(any(), any())).thenReturn(Page.empty());
+        when(saleItemRepository.findAll(any(), any(PageRequest.class))).thenReturn(Page.empty());
         MvcResult result = mockMvc.perform(get("/businesses/1/listings"))
                 .andExpect(status().isOk())
                 .andReturn();
@@ -321,23 +354,30 @@ class SaleControllerTest {
 
     @Test
     void getSaleItemsForBusiness_withSortOrder_usesSortOrder() throws Exception {
-        when(saleItemRepository.findAllForBusiness(any(), any())).thenReturn(Page.empty());
+        when(saleItemRepository.findAll(any(), any(PageRequest.class))).thenReturn(Page.empty());
         mockMvc.perform(get("/businesses/1/listings")
                 .param("orderBy", "price"))
                 .andReturn();
-        Sort.Order expectedOrder = new Sort.Order(Sort.Direction.ASC, "price").ignoreCase();
-        PageRequest expectedRequest = SearchHelper.getPageRequest(null,null, Sort.by(expectedOrder));
-        verify(saleItemRepository).findAllForBusiness(any(), eq(expectedRequest));
+        Specification<SaleItem> expectedSpecification = SearchHelper.constructSpecificationFromSaleItemsFilter(business);
+        PageRequest expectedPageRequest = SearchHelper.getPageRequest(null, null, Sort.by(new Sort.Order(Sort.Direction.ASC, "price").ignoreCase()));
+
+        verify(saleItemRepository, times(1)).findAll(specificationArgumentCaptor.capture(), pageRequestArgumentCaptor.capture());
+        assertTrue(new ReflectionEquals(expectedSpecification).matches(specificationArgumentCaptor.getValue()));
+        assertTrue(new ReflectionEquals(expectedPageRequest).matches(pageRequestArgumentCaptor.getValue()));
     }
 
     @Test
     void getSaleItemsForBusiness_noSortOrder_usesCreatedSortOrder() throws Exception {
-        when(saleItemRepository.findAllForBusiness(any(), any())).thenReturn(Page.empty());
+        when(saleItemRepository.findAll(any(), any(PageRequest.class))).thenReturn(Page.empty());
         mockMvc.perform(get("/businesses/1/listings"))
                 .andReturn();
-        Sort.Order expectedOrder = new Sort.Order(Sort.Direction.ASC, "created").ignoreCase();
-        PageRequest expectedRequest = SearchHelper.getPageRequest(null,null, Sort.by(expectedOrder));
-        verify(saleItemRepository).findAllForBusiness(any(), eq(expectedRequest));
+
+        Specification<SaleItem> expectedSpecification = SearchHelper.constructSpecificationFromSaleItemsFilter(business);
+        PageRequest expectedPageRequest = SearchHelper.getPageRequest(null, null, Sort.by(new Sort.Order(Sort.Direction.ASC, "created").ignoreCase()));
+
+        verify(saleItemRepository, times(1)).findAll(specificationArgumentCaptor.capture(), pageRequestArgumentCaptor.capture());
+        assertTrue(new ReflectionEquals(expectedSpecification).matches(specificationArgumentCaptor.getValue()));
+        assertTrue(new ReflectionEquals(expectedPageRequest).matches(pageRequestArgumentCaptor.getValue()));
     }
 
     /**
@@ -348,7 +388,7 @@ class SaleControllerTest {
         List<SaleItem> mockItems = new ArrayList<>();
         for (long i = 0; i<6; i++) {
             SaleItem saleItem = mock(SaleItem.class);
-            when(saleItem.getSaleId()).thenReturn(i);
+            when(saleItem.getId()).thenReturn(i);
             var json = new JSONObject();
             json.put("id", i);
             when(saleItem.constructJSONObject()).thenReturn(json);
@@ -362,20 +402,23 @@ class SaleControllerTest {
     @Test
     void getSaleItemsForBusiness_noReverse_itemsAscending() throws Exception {
         var items = generateMockSaleItems();
-        when(saleItemRepository.findAllForBusiness(any(Business.class), any())).thenReturn(new PageImpl<SaleItem>(items));
+        when(saleItemRepository.findAll(any(), any(PageRequest.class))).thenReturn(new PageImpl<SaleItem>(items));
         MvcResult result = mockMvc.perform(get("/businesses/1/listings"))
                 .andExpect(status().isOk())
                 .andReturn();
-        Sort.Order expectedOrder = new Sort.Order(Sort.Direction.ASC, "created").ignoreCase();
-        PageRequest expectedRequest = SearchHelper.getPageRequest(null,null, Sort.by(expectedOrder));
-        verify(saleItemRepository).findAllForBusiness(any(), eq(expectedRequest));
+
+        Specification<SaleItem> expectedSpecification = SearchHelper.constructSpecificationFromSaleItemsFilter(business);
+        PageRequest expectedPageRequest = SearchHelper.getPageRequest(null, null, Sort.by(new Sort.Order(Sort.Direction.ASC, "created").ignoreCase()));
+
+        verify(saleItemRepository, times(1)).findAll(specificationArgumentCaptor.capture(), pageRequestArgumentCaptor.capture());
+        assertTrue(new ReflectionEquals(expectedSpecification).matches(specificationArgumentCaptor.getValue()));
+        assertTrue(new ReflectionEquals(expectedPageRequest).matches(pageRequestArgumentCaptor.getValue()));
     }
 
     @Test
     void getSaleItemsForBusiness_reverseFalse_itemsAscending() throws Exception {
-
         var items = generateMockSaleItems();
-        when(saleItemRepository.findAllForBusiness(any(Business.class), any())).thenReturn(new PageImpl<SaleItem>(items));
+        when(saleItemRepository.findAll(any(), any(PageRequest.class))).thenReturn(new PageImpl<SaleItem>(items));
         saleItemRepository.saveAll(items);
 
         MvcResult result = mockMvc.perform(get("/businesses/1/listings")
@@ -383,15 +426,18 @@ class SaleControllerTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        Sort.Order expectedOrder = new Sort.Order(Sort.Direction.ASC, "created").ignoreCase();
-        PageRequest expectedRequest = SearchHelper.getPageRequest(null,null, Sort.by(expectedOrder));
-        verify(saleItemRepository).findAllForBusiness(any(), eq(expectedRequest));
+        Specification<SaleItem> expectedSpecification = SearchHelper.constructSpecificationFromSaleItemsFilter(business);
+        PageRequest expectedPageRequest = SearchHelper.getPageRequest(null, null, Sort.by(new Sort.Order(Sort.Direction.ASC, "created").ignoreCase()));
+
+        verify(saleItemRepository, times(1)).findAll(specificationArgumentCaptor.capture(), pageRequestArgumentCaptor.capture());
+        assertTrue(new ReflectionEquals(expectedSpecification).matches(specificationArgumentCaptor.getValue()));
+        assertTrue(new ReflectionEquals(expectedPageRequest).matches(pageRequestArgumentCaptor.getValue()));
     }
 
     @Test
     void getSaleItemsForBusiness_reverseTrue_itemsDescending() throws Exception {
         var items = generateMockSaleItems();
-        when(saleItemRepository.findAllForBusiness(any(Business.class), any())).thenReturn(new PageImpl<SaleItem>(items));
+        when(saleItemRepository.findAll(any(), any(PageRequest.class))).thenReturn(new PageImpl<SaleItem>(items));
         saleItemRepository.saveAll(items);
 
 
@@ -400,32 +446,36 @@ class SaleControllerTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        Sort.Order expectedOrder = new Sort.Order(Sort.Direction.DESC, "created").ignoreCase();
-        PageRequest expectedRequest = SearchHelper.getPageRequest(null,null, Sort.by(expectedOrder));
-        verify(saleItemRepository).findAllForBusiness(any(), eq(expectedRequest));
+        Specification<SaleItem> expectedSpecification = SearchHelper.constructSpecificationFromSaleItemsFilter(business);
+        PageRequest expectedPageRequest = SearchHelper.getPageRequest(null, null, Sort.by(new Sort.Order(Sort.Direction.DESC, "created").ignoreCase()));
+
+        verify(saleItemRepository, times(1)).findAll(specificationArgumentCaptor.capture(), pageRequestArgumentCaptor.capture());
+        assertTrue(new ReflectionEquals(expectedSpecification).matches(specificationArgumentCaptor.getValue()));
+        assertTrue(new ReflectionEquals(expectedPageRequest).matches(pageRequestArgumentCaptor.getValue()));
     }
 
     @Test
     void getSaleItemsForBusiness_resultsPerPageSet_firstPageReturned() throws Exception {
         var items = generateMockSaleItems();
-        when(saleItemRepository.findAllForBusiness(any(), any())).thenReturn(new PageImpl<>(items));
-
+        when(saleItemRepository.findAll(any(), any(PageRequest.class))).thenReturn(new PageImpl<SaleItem>(items));
 
         MvcResult result = mockMvc.perform(get("/businesses/1/listings")
                 .param("resultsPerPage", "4"))
                 .andExpect(status().isOk())
                 .andReturn();
 
-        Sort.Order expectedOrder = new Sort.Order(Sort.Direction.ASC, "created").ignoreCase();
-        PageRequest expectedRequest = SearchHelper.getPageRequest(null,4, Sort.by(expectedOrder));
+        Specification<SaleItem> expectedSpecification = SearchHelper.constructSpecificationFromSaleItemsFilter(business);
+        PageRequest expectedPageRequest = SearchHelper.getPageRequest(null, 4, Sort.by(new Sort.Order(Sort.Direction.ASC, "created").ignoreCase()));
 
-        verify(saleItemRepository).findAllForBusiness(any(), eq(expectedRequest));
+        verify(saleItemRepository, times(1)).findAll(specificationArgumentCaptor.capture(), pageRequestArgumentCaptor.capture());
+        assertTrue(new ReflectionEquals(expectedSpecification).matches(specificationArgumentCaptor.getValue()));
+        assertTrue(new ReflectionEquals(expectedPageRequest).matches(pageRequestArgumentCaptor.getValue()));
     }
 
     @Test
     void getSaleItemsForBusiness_secondPageRequested_secondPageReturned() throws Exception {
         var items = generateMockSaleItems();
-        when(saleItemRepository.findAllForBusiness(any(Business.class), any())).thenReturn(new PageImpl<>(items));
+        when(saleItemRepository.findAll(any(), any(PageRequest.class))).thenReturn(new PageImpl<SaleItem>(items));
         saleItemRepository.saveAll(items);
 
 
@@ -435,9 +485,188 @@ class SaleControllerTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        Sort.Order expectedOrder = new Sort.Order(Sort.Direction.ASC, "created").ignoreCase();
-        PageRequest expectedRequest = SearchHelper.getPageRequest(2,4, Sort.by(expectedOrder));
+        Specification<SaleItem> expectedSpecification = SearchHelper.constructSpecificationFromSaleItemsFilter(business);
+        PageRequest expectedPageRequest = SearchHelper.getPageRequest(2, 4, Sort.by(new Sort.Order(Sort.Direction.ASC, "created").ignoreCase()));
 
-        verify(saleItemRepository).findAllForBusiness(any(), eq(expectedRequest));
+        verify(saleItemRepository, times(1)).findAll(specificationArgumentCaptor.capture(), pageRequestArgumentCaptor.capture());
+        assertTrue(new ReflectionEquals(expectedSpecification).matches(specificationArgumentCaptor.getValue()));
+        assertTrue(new ReflectionEquals(expectedPageRequest).matches(pageRequestArgumentCaptor.getValue()));
+    }
+
+    private JSONObject createUpdateInterestRequest(long userId, boolean interested) {
+        var json = new JSONObject();
+        json.put("userId", userId);
+        json.put("interested", interested);
+        return json;
+    }
+
+    @Test
+    void setSaleItemInterest_notLoggedIn_401Response() throws Exception {
+        // Mock the AuthenticationTokenManager to respond as it would when the authentication token is missing or invalid
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.checkAuthenticationToken(any()))
+                .thenThrow(new AccessTokenException());
+
+        // Verify that a 401 response is received in response to the PUT request
+        mockMvc.perform(put("/listings/1/interest")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(createUpdateInterestRequest(4, true).toString()))
+                .andExpect(status().isUnauthorized());
+
+        // Check that the authentication token manager was called
+        authenticationTokenManager.verify(() -> AuthenticationTokenManager.checkAuthenticationToken(any()));
+        verify(saleItemRepository, times(0)).save(any());
+    }
+
+    @Test
+    void setSaleItemInterest_cannotUpdateUser_403Response() throws Exception {
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), any())).thenReturn(false);
+
+        // Verify that a 403 response is received in response to the PUT request
+        mockMvc.perform(put("/listings/1/interest")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(createUpdateInterestRequest(4, true).toString()))
+                .andExpect(status().isForbidden());
+
+        authenticationTokenManager.verify(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), eq(4L)));
+        verify(saleItemRepository, times(0)).save(any());
+    }
+
+    @Test
+    void setSaleItemInterest_invalidRequest_400Response() throws Exception {
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), any())).thenReturn(true);
+
+        var request = createUpdateInterestRequest(4, true);
+        request.remove("userId");
+
+        // Verify that a 400 response is received in response to the PUT request
+        mockMvc.perform(put("/listings/1/interest")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(request.toString()))
+                .andExpect(status().isBadRequest());
+
+        verify(saleItemRepository, times(0)).save(any());
+    }
+
+    @Test
+    void setSaleItemInterest_userDoesNotExist_400Response() throws Exception {
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), any())).thenReturn(true);
+
+
+        // Verify that a 401 response is received in response to the PUT request
+        mockMvc.perform(put("/listings/1/interest")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(createUpdateInterestRequest(9999, true).toString()))
+                .andExpect(status().isBadRequest());
+
+        verify(userRepository, times(1)).findById(9999L);
+        verify(saleItemRepository, times(0)).save(any());
+    }
+
+    @Test
+    void setSaleItemInterest_listingDoesNotExist_406Response() throws Exception {
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), any())).thenReturn(true);
+
+
+        // Verify that a 406 response is received in response to the PUT request
+        mockMvc.perform(put("/listings/9999/interest")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(createUpdateInterestRequest(4, true).toString()))
+                .andExpect(status().isNotAcceptable());
+
+        verify(saleItemRepository, times(1)).findById(9999L);
+        verify(saleItemRepository, times(0)).save(any());
+    }
+
+    @Test
+    void setSaleItemInterest_setInterested_200ResponseAndUserAdded() throws Exception {
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), any())).thenReturn(true);
+
+        // Verify that a 200 response is received in response to the PUT request
+        mockMvc.perform(put(String.format("/listings/%s/interest", saleItem.getId()))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(createUpdateInterestRequest(4, true).toString()))
+                .andExpect(status().isOk());
+
+        verify(saleItem, times(1)).addInterestedUser(user);
+
+        verify(saleItemRepository, times(1)).findById(saleItem.getId());
+        verify(saleItemRepository, times(1)).save(saleItem);
+    }
+
+    @Test
+    void setSaleItemInterest_setUnInterested_200ResponseAndUserRemoved() throws Exception {
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), any())).thenReturn(true);
+
+        // Verify that a 401 response is received in response to the PUT request
+        mockMvc.perform(put(String.format("/listings/%s/interest", saleItem.getId()))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(createUpdateInterestRequest(4, false).toString()))
+                .andExpect(status().isOk());
+
+        verify(saleItem, times(1)).removeInterestedUser(user);
+
+        verify(saleItemRepository, times(1)).findById(3L);
+        verify(saleItemRepository, times(1)).save(saleItem);
+    }
+
+    @Test
+    void setSaleItemInterest_noInterestEventExists_newInterestEventCreated() throws Exception {
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), any())).thenReturn(true);
+
+        // Verify that a 200 response is received in response to the PUT request
+        mockMvc.perform(put(String.format("/listings/%s/interest", saleItem.getId()))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(createUpdateInterestRequest(4, true).toString()))
+                .andExpect(status().isOk());
+
+        verify(interestEventRepository, times(1)).findInterestEventByNotifiedUserAndSaleItem(user, saleItem);
+
+        var captor = ArgumentCaptor.forClass(InterestEvent.class);
+
+        verify(interestEventRepository, times(1)).save(captor.capture());
+        var interestEvent = captor.getValue();
+        assertTrue(interestEvent.getInterested());
+        assertEquals(user, interestEvent.getNotifiedUser());
+        assertEquals(saleItem, interestEvent.getSaleItem());
+    }
+
+    @Test
+    void setSaleItemInterest_likeAndInterestEventExists_interestEventUpdated() throws Exception {
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), any())).thenReturn(true);
+
+        var interestEvent = mock(InterestEvent.class);
+        when(interestEventRepository.findInterestEventByNotifiedUserAndSaleItem(user, saleItem)).thenReturn(Optional.of(interestEvent));
+
+        // Verify that a 200 response is received in response to the PUT request
+        mockMvc.perform(put(String.format("/listings/%s/interest", saleItem.getId()))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(createUpdateInterestRequest(4, true).toString()))
+                .andExpect(status().isOk());
+
+        verify(interestEventRepository, times(1)).findInterestEventByNotifiedUserAndSaleItem(user, saleItem);
+
+        verify(interestEvent, times(1)).setInterested(true);
+
+        verify(interestEventRepository, times(1)).save(interestEvent);
+    }
+
+    @Test
+    void setSaleItemInterest_unlikeAndInterestEventExists_interestEventUpdated() throws Exception {
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), any())).thenReturn(true);
+
+        var interestEvent = mock(InterestEvent.class);
+        when(interestEventRepository.findInterestEventByNotifiedUserAndSaleItem(user, saleItem)).thenReturn(Optional.of(interestEvent));
+
+        // Verify that a 200 response is received in response to the PUT request
+        mockMvc.perform(put(String.format("/listings/%s/interest", saleItem.getId()))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(createUpdateInterestRequest(4, false).toString()))
+                .andExpect(status().isOk());
+
+        verify(interestEventRepository, times(1)).findInterestEventByNotifiedUserAndSaleItem(user, saleItem);
+
+        verify(interestEvent, times(1)).setInterested(false);
+
+        verify(interestEventRepository, times(1)).save(interestEvent);
     }
 }

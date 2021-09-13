@@ -1,7 +1,9 @@
 package org.seng302.leftovers.dto;
 
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
+import org.seng302.leftovers.entities.Message;
 
 import javax.validation.constraints.NotNull;
 
@@ -10,6 +12,7 @@ import javax.validation.constraints.NotNull;
  */
 @Getter
 @ToString
+@EqualsAndHashCode
 public class SendMessageDTO {
     @NotNull
     private Long senderId;

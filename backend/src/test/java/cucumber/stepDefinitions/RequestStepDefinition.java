@@ -38,4 +38,9 @@ public class RequestStepDefinition {
     public void the_request_succeeds() {
         Assertions.assertEquals(200, requestContext.getLastResult().getResponse().getStatus());
     }
+
+    @Then("The request fails due to not acceptable")
+    public void the_request_fails_due_to_not_acceptable() {
+        Assertions.assertEquals(406, requestContext.getLastResult().getResponse().getStatus());
+    }
 }

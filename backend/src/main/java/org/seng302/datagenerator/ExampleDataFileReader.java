@@ -1,7 +1,9 @@
 package org.seng302.datagenerator;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -15,6 +17,12 @@ import java.util.Map;
 public class ExampleDataFileReader {
 
     private static final String EXAMPLE_DATA_FILE_PATH = "example-data/";
+    private static final Logger logger = LogManager.getLogger(ExampleDataFileReader.class.getName());
+
+    /**
+     * Private constructor to hide implicit public constructor.
+     */
+    private ExampleDataFileReader() {}
 
 
     public static Map<String, String> readPropertiesFile(String resourcePath) {
@@ -28,10 +36,9 @@ public class ExampleDataFileReader {
             String line;
             while ((line = bufferedReader.readLine()) != null) {
                 line = line.strip();
-                if (line.startsWith("#")) continue;
+                if (line.startsWith("#") || !line.contains("=")) continue;
 
                 int index = line.indexOf('=');
-                if (index == -1) continue;
 
                 String key = line.substring(0, index);
                 String value = line.substring(index+1);
@@ -43,7 +50,7 @@ public class ExampleDataFileReader {
                 properties.put(key, value);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error(e.getMessage());
             return null;
         }
 
@@ -64,7 +71,7 @@ public class ExampleDataFileReader {
                 values.add(value);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error(e.getMessage());
         }
         return values;
     }

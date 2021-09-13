@@ -3,7 +3,7 @@ import Vuetify from 'vuetify';
 import { createLocalVue, Wrapper, mount } from '@vue/test-utils';
 
 import BusinessImageUploader from "@/components/utils/BusinessImageUploader.vue";
-import { castMock, flushQueue } from './utils';
+import { castMock, findButtonWithText, flushQueue } from './utils';
 import * as api from '@/api/internal';
 
 jest.mock('@/api/internal', () => ({
@@ -52,7 +52,7 @@ describe('BusinessImageUploader.vue', () => {
       components: { BusinessImageUploader },
       template: `
       <div data-app>
-        <BusinessImageUploader v-model="showImageUploaderForm" :businessId="100"/>
+        <BusinessImageUploader v-model="file"/>
       </div>`,
     });
 
@@ -67,7 +67,7 @@ describe('BusinessImageUploader.vue', () => {
       attachTo: elem,
       data() {
         return {
-          showImageUploaderForm: true
+          file: undefined,
         };
       }
     });
@@ -89,65 +89,38 @@ describe('BusinessImageUploader.vue', () => {
    *
    * @returns A Wrapper around the close button
    */
-  function findCloseButton() {
-    const buttons = wrapper.findAllComponents({ name: 'v-btn' });
-    const filtered = buttons.filter(button => button.text().includes('Close'));
-    expect(filtered.length).toBe(1);
-    return filtered.at(0);
-  }
+  const findCloseButton = () => findButtonWithText(wrapper, 'Close');
 
   /**
    * Finds the create button in the BusinessImageUploader form
    *
    * @returns A Wrapper around the create button
    */
-  function findCreateButton() {
-    const buttons = wrapper.findAllComponents({ name: 'v-btn' });
-    const filtered = buttons.filter(button => button.text().includes('Upload'));
-    expect(filtered.length).toBe(1);
-    return filtered.at(0);
-  }
+  const findUploadButton = () => findButtonWithText(wrapper, 'Upload');
 
-  it('When the close button is pressed then the "showImageUploaderForm" boolean should be false', async () => {
+  it('When the close button is pressed then the dialog should be closed', async () => {
     await findCloseButton().trigger('click'); // Click close button
-    expect(appWrapper.vm.showImageUploaderForm).toBeFalsy();
+    expect(wrapper.emitted().closeDialog).toBeTruthy();
   });
 
-  it('When there is no image selected then the create button should be disabled', async () => {
-    await Vue.nextTick();
-    expect(findCreateButton().props().disabled).toBeTruthy();
-  });
-
-  it('When there is an image selected then the create button should be enabled', async () => {
+  it('When the upload button is pressed then an image should be uploaded', async () => {
     const testFile = new File([], 'test_file');
-    wrapper.vm.file = testFile;
+    appWrapper.vm.file = testFile;
     await Vue.nextTick();
-    expect(findCreateButton().props().disabled).toBeFalsy();
+    await findUploadButton().trigger('click'); // Click upload button
+    expect(wrapper.emitted().uploadImage).toBeTruthy();
   });
 
-  it('When the create button is pressed then an api call should be made and is successful', async () => {
-    const testFile = new File([], 'test_file');
-    wrapper.vm.file = testFile;
-    uploadBusinessImage.mockResolvedValue(undefined); // Ensure that the operation is successful
+  it('When there is no image selected then the upload button should be disabled', async () => {
     await Vue.nextTick();
-    await findCreateButton().trigger('click'); // Click create button
-    await Vue.nextTick();
-    expect(uploadBusinessImage).toBeCalledWith(
-      100,
-      testFile
-    );
-    expect(appWrapper.vm.showImageUploaderForm).toBeFalsy();
+    expect(findUploadButton().props().disabled).toBeTruthy();
   });
 
-  it('When the create button is pressed and the api returns an error then the error should be shown', async () => {
+  it('When there is an image selected then the upload button should be enabled', async () => {
     const testFile = new File([], 'test_file');
-    wrapper.vm.file = testFile;
-    uploadBusinessImage.mockResolvedValue('test_error_message'); // Ensure that the operation fails
+    appWrapper.vm.file = testFile;
     await Vue.nextTick();
-    await findCreateButton().trigger('click'); // Click create button
-    await flushQueue();
-    // The appWrapper is tested for the text, because the dialog content is not in the dialog
-    // element.
-    expect(appWrapper.text()).toContain('test_error_message');
+    expect(findUploadButton().props().disabled).toBeFalsy();
   });
+
 });

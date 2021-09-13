@@ -1,10 +1,12 @@
 package org.seng302.datagenerator;
-import org.seng302.leftovers.Main;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.junit.runner.RunWith;
+import org.seng302.leftovers.Main;
 import org.seng302.leftovers.persistence.BusinessRepository;
 import org.seng302.leftovers.persistence.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,11 +17,12 @@ import java.sql.*;
 import java.util.List;
 import java.util.Map;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes={Main.class})
-public class BusinessGeneratorTest {
+class BusinessGeneratorTest {
     private Connection conn;
     private UserGenerator userGenerator;
     private BusinessGenerator businessGenerator;
@@ -63,9 +66,7 @@ public class BusinessGeneratorTest {
         stmt.executeQuery();
         ResultSet results = stmt.getResultSet();
         results.next();
-        if (results.getLong(1) != 1) {
-            fail();
-        }
+        assertEquals(1, results.getLong(1));
     }
 
     /**
@@ -80,50 +81,14 @@ public class BusinessGeneratorTest {
         return results.getLong(1);
     }
 
-    @Test
-    void generateBusinesses_generateOneBusinessAndConsistentData_oneBusinessGenerated() throws SQLException {
-        List<Long> userIds = userGenerator.generateUsers(1);
-        List<Long> businessIds = businessGenerator.generateBusinesses(userIds, 1);
-        if (businessIds.size() != 1) {
-            fail();
-        }
-        long businessId = businessIds.get(0);
-        checkRequiredFieldsNotNull(businessId);
-    }
-
-    @Test
-    void generateBusinesses_generateTwoBusinessesAndConsistentData_twoBusinessesGenerated() throws SQLException {
+    @ParameterizedTest
+    @ValueSource(ints={1, 2, 10, 100})
+    void generateBusinesses_generateSomeBusinessesAndConsistentData_correctNumberOfBusinessesGenerated(int count) throws SQLException {
         List<Long> userIds = userGenerator.generateUsers(2);
-        List<Long> businessIds = businessGenerator.generateBusinesses(userIds, 2);
-        if (businessIds.size() != 2) {
-            fail();
-        }
-        for (int i=0; i < businessIds.size(); i++) {
-            checkRequiredFieldsNotNull(businessIds.get(i));
-        }
-    }
-
-    @Test
-    void generateBusinesses_generateTenBusinessesAndConsistentData_tenBusinessesGenerated() throws SQLException {
-        List<Long> userIds = userGenerator.generateUsers(10);
-        List<Long> businessIds = businessGenerator.generateBusinesses(userIds, 10);
-        if (businessIds.size() != 10) {
-            fail();
-        }
-        for (int i=0; i < businessIds.size(); i++) {
-            checkRequiredFieldsNotNull(businessIds.get(i));
-        }
-    }
-
-    @Test
-    void generateBusinesses_generateHundredBusinessesAndConsistentData_hundredBusinessesGenerated() throws SQLException {
-        List<Long> userIds = userGenerator.generateUsers(100);
-        List<Long> businessIds = businessGenerator.generateBusinesses(userIds, 100);
-        if (businessIds.size() != 100) {
-            fail();
-        }
-        for (int i=0; i < businessIds.size(); i++) {
-            checkRequiredFieldsNotNull(businessIds.get(i));
+        List<Long> businessIds = businessGenerator.generateBusinesses(userIds, count);
+        assertEquals(count, businessIds.size());
+        for (Long businessId : businessIds) {
+            checkRequiredFieldsNotNull(businessId);
         }
     }
 
@@ -131,32 +96,26 @@ public class BusinessGeneratorTest {
     void generateBusinesses_generateZeroBusinesses_noBusinessesGenerated() throws SQLException {
         List<Long> userIds = userGenerator.generateUsers(1);
         long businessesInDB = getNumBusinessesInDB();
-        List<Long> businessIds = businessGenerator.generateBusinesses(userIds, 0);
+        businessGenerator.generateBusinesses(userIds, 0);
         long businessesInDBAfter = getNumBusinessesInDB();
-        if (businessesInDB != businessesInDBAfter) {
-            fail();
-        }
+        assertEquals(businessesInDB, businessesInDBAfter);
     }
 
     @Test
     void generateBusinesses_generateNegativeOneBusinesses_noBusinessesGenerated() throws SQLException {
         List<Long> userIds = userGenerator.generateUsers(1);
         long businessesInDB = getNumBusinessesInDB();
-        List<Long> businessIds = businessGenerator.generateBusinesses(userIds, -1);
+        businessGenerator.generateBusinesses(userIds, -1);
         long businessesInDBAfter = getNumBusinessesInDB();
-        if (businessesInDB != businessesInDBAfter) {
-            fail();
-        }
+        assertEquals(businessesInDB, businessesInDBAfter);
     }
 
     @Test
     void generateBusinesses_generateNegativeTenBusinesses_noBusinessesGenerated() throws SQLException {
         List<Long> userIds = userGenerator.generateUsers(1);
         long businessesInDB = getNumBusinessesInDB();
-        List<Long> businessIds = businessGenerator.generateBusinesses(userIds, -10);
+        businessGenerator.generateBusinesses(userIds, -10);
         long businessesInDBAfter = getNumBusinessesInDB();
-        if (businessesInDB != businessesInDBAfter) {
-            fail();
-        }
+        assertEquals(businessesInDB, businessesInDBAfter);
     }
 }

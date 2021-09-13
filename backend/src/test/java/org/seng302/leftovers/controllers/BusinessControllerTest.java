@@ -14,14 +14,11 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import org.mockito.MockedStatic;
-import org.mockito.Mockito;
 import org.seng302.leftovers.entities.Business;
 import org.seng302.leftovers.entities.Location;
 import org.seng302.leftovers.entities.User;
 import org.seng302.leftovers.persistence.BusinessRepository;
 import org.seng302.leftovers.persistence.UserRepository;
-import org.seng302.leftovers.tools.SearchHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -39,7 +36,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -208,15 +204,15 @@ class BusinessControllerTest {
                 .withPassword("1337-H%nt3r2")
                 .withBio("Likes long walks on the beach")
                 .withDob("2000-03-11")
-                .withPhoneNumber("+64 3 555 0129")
+                .withPhoneNumber("64 3555012")
                 .withAddress(userAddress)
                 .build();
         admin = new User.Builder().withFirstName("Caroline").withMiddleName("Jane").withLastName("Smith")
                 .withNickName("Carrie").withEmail("carriesmith@hotmail.com").withPassword("h375dj82")
-                .withDob("2001-03-11").withPhoneNumber("+64 3 748 7562").withAddress(Location.covertAddressStringToLocation("24,Albert Road,Ashburton,Auckland,Auckland,New KZealand,0624")).build();
+                .withDob("2001-03-11").withPhoneNumber("64 37487562").withAddress(Location.covertAddressStringToLocation("24,Albert Road,Ashburton,Auckland,Auckland,New KZealand,0624")).build();
         otherUser = new User.Builder().withFirstName("William").withLastName("Pomeroy").withNickName("Will")
                 .withEmail("pomeroy.will@outlook.com").withPassword("569277hghrud").withDob("1981-03-11")
-                .withPhoneNumber("+64 21 099 5786").withAddress(Location.covertAddressStringToLocation("99,Riccarton Road,Ashburton,Christchurch,Canterbury,New Zealand,4041")).build();
+                .withPhoneNumber("64 210995786").withAddress(Location.covertAddressStringToLocation("99,Riccarton Road,Ashburton,Christchurch,Canterbury,New Zealand,4041")).build();
         owner = userRepository.save(owner);
         admin = userRepository.save(admin);
         otherUser = userRepository.save(otherUser);
@@ -572,7 +568,7 @@ class BusinessControllerTest {
                 .withPassword("1337-H%nt3r2")
                 .withBio("buids things")
                 .withDob("2000-03-11")
-                .withPhoneNumber("+64 3 555 0129")
+                .withPhoneNumber("64 3555012")
                 .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
                         "Canterbury,8041"))
                 .build();
@@ -607,7 +603,7 @@ class BusinessControllerTest {
                 .withPassword("1337-H%nt3r2")
                 .withBio("buids things")
                 .withDob("2000-03-11")
-                .withPhoneNumber("+64 3 555 0129")
+                .withPhoneNumber("64 3555012")
                 .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
                         "Canterbury,8041"))
                 .build();
@@ -643,7 +639,7 @@ class BusinessControllerTest {
                 .withPassword("1337-H%nt3r2")
                 .withBio("buids things")
                 .withDob("2000-03-11")
-                .withPhoneNumber("+64 3 555 0129")
+                .withPhoneNumber("64 3555012")
                 .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
                         "Canterbury,8041"))
                 .build();
@@ -681,7 +677,7 @@ class BusinessControllerTest {
                 .withPassword("1337-H%nt3r2")
                 .withBio("buids things")
                 .withDob("2000-03-11")
-                .withPhoneNumber("+64 3 555 0129")
+                .withPhoneNumber("64 3555012")
                 .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
                         "Canterbury,8041"))
                 .build();
@@ -715,7 +711,7 @@ class BusinessControllerTest {
                 .withPassword("1337-H%nt3r2")
                 .withBio("buids things")
                 .withDob("2000-03-11")
-                .withPhoneNumber("+64 3 555 0129")
+                .withPhoneNumber("64 3555012")
                 .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
                         "Canterbury,8041"))
                 .build();
@@ -765,7 +761,7 @@ class BusinessControllerTest {
                 .withPassword("1337-H%nt3r2")
                 .withBio("buids things")
                 .withDob("2000-03-11")
-                .withPhoneNumber("+64 3 555 0129")
+                .withPhoneNumber("64 3555012")
                 .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
                         "Canterbury,8041"))
                 .build();
@@ -799,7 +795,7 @@ class BusinessControllerTest {
                 .withPassword("1337-H%nt3r2")
                 .withBio("buids things")
                 .withDob("2000-03-11")
-                .withPhoneNumber("+64 3 555 0129")
+                .withPhoneNumber("64 3555012")
                 .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
                         "Canterbury,8041"))
                 .build();
@@ -836,7 +832,7 @@ class BusinessControllerTest {
                 .withPassword("1337-H%nt3r2")
                 .withBio("buids things")
                 .withDob("2000-03-11")
-                .withPhoneNumber("+64 3 555 0129")
+                .withPhoneNumber("64 3555012")
                 .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
                         "Canterbury,8041"))
                 .build();
@@ -876,7 +872,7 @@ class BusinessControllerTest {
                 .withPassword("1337-H%nt3r2")
                 .withBio("buids things")
                 .withDob("2000-03-11")
-                .withPhoneNumber("+64 3 555 0129")
+                .withPhoneNumber("64 3555012")
                 .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
                         "Canterbury,8041"))
                 .build();
@@ -928,7 +924,7 @@ class BusinessControllerTest {
                 .withPassword("1337-H%nt3r2")
                 .withBio("buids things")
                 .withDob("2000-03-11")
-                .withPhoneNumber("+64 3 555 0129")
+                .withPhoneNumber("64 3555012")
                 .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
                         "Canterbury,8041"))
                 .build();
@@ -968,7 +964,7 @@ class BusinessControllerTest {
                 .withPassword("1337-H%nt3r2")
                 .withBio("buids things")
                 .withDob("2000-03-11")
-                .withPhoneNumber("+64 3 555 0129")
+                .withPhoneNumber("64 3555012")
                 .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
                         "Canterbury,8041"))
                 .build();

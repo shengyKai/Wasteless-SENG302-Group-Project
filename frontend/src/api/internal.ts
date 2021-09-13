@@ -30,7 +30,7 @@
  */
 import axios from 'axios';
 import { is } from 'typescript-is';
-import { Tag } from './events';
+import { EventTag } from './events';
 
 const SERVER_URL = process.env.VUE_APP_SERVER_ADD;
 
@@ -51,7 +51,7 @@ export type User = {
   nickname?: string,
   bio?: string,
   email: string,
-  dateOfBirth?: string, // TODO This should actually be a required field (according to the spec)
+  dateOfBirth?: string,
   phoneNumber?: string,
   homeAddress: Location,
   created?: string,
@@ -69,7 +69,7 @@ export type Location = {
   postcode?: string
 };
 
-export type CreateUser = {
+export type BaseUser = {
   firstName: string,
   lastName: string,
   middleName?: string,
@@ -79,8 +79,16 @@ export type CreateUser = {
   dateOfBirth: string,
   phoneNumber?: string,
   homeAddress: Location,
+};
+
+export type CreateUser = BaseUser & {
   password: string,
 };
+
+export type ModifyUser = BaseUser & {
+  password?: string,
+  newPassword?: string
+}
 
 export type BusinessType = 'Accommodation and Food Services' | 'Retail Trade' | 'Charitable organisation' | 'Non-profit organisation';
 
@@ -95,6 +103,7 @@ export type Business = {
   address: Location,
   businessType: BusinessType,
   created?: string,
+  images?: Image[],
 };
 
 export type CreateBusiness = {
@@ -208,6 +217,13 @@ export type MarketplaceCard = {
   keywords: Keyword[]
 }
 
+export type Message = {
+  id: number,
+  created: string,
+  senderId: number,
+  content: string,
+}
+
 export type CreateProduct = Omit<Product, 'created' | 'images'>;
 
 type UserOrderBy = 'userId' | 'relevance' | 'firstName' | 'middleName' | 'lastName' | 'nickname' | 'email';
@@ -318,11 +334,32 @@ export async function createUser(user: CreateUser): Promise<MaybeError<undefined
     let status: number | undefined = error.response?.status;
 
     if (status === undefined) return 'Failed to reach backend';
-    if (status === 400) return 'Invalid create user request';
     if (status === 409) return 'Email in use';
-    return 'Request failed: ' + status;
+    return error.response.data?.message;
   }
 
+  return undefined;
+}
+
+/**
+ * Update the parameters of a user by sending a request with the new parameters to the backend.
+ * Will return undefined if the request is successful, or a string error message explaining why
+ * the request failed if it is unsuccessful.
+ * @param userId The id number of the user to be updated.
+ * @returns Undefined if request succeeds or a string error message if it does not.
+ */
+export async function modifyUser(userId: number, user: ModifyUser): Promise<MaybeError<undefined>> {
+  try {
+    await instance.put(`/users/${userId}`, user);
+  } catch (error) {
+    let status: number | undefined = error.response?.status;
+    if (status === undefined) return 'Failed to reach backend';
+    if (status === 400) return 'Invalid details entered: ' + error.response?.data.message;
+    if (status === 401) return 'You have been logged out. Please login again and retry';
+    if (status === 403) return 'Cannot update user: ' + error.response?.data.message;
+    if (status === 406) return 'User does not exist';
+    return 'Request failed: ' + error.response?.data.message;
+  }
   return undefined;
 }
 
@@ -677,7 +714,7 @@ export async function removeBusinessAdmin(businessId: number, userId: number): P
     if (status === 400) return 'User doesn\'t exist or is not an admin';
     if (status === 401) return 'You have been logged out. Please login again and retry';
     if (status === 403) return 'Current user cannot perform this action';
-    if (status === 406) return 'Business not found';
+    if (status === 406) return 'The new business admin should be at least 16 years old';
 
     return 'Request failed: ' + status;
   }
@@ -807,7 +844,7 @@ export async function createInventoryItem(businessId: number, inventoryItem: Cre
  * @param marketplaceCard The attributes to use when creating the marketplace card
  * @return id of card if card is successfully created, an error string otherwise
  */
-export async function createMarketplaceCard(marketplaceCard: CreateMarketplaceCard) : Promise<MaybeError<Number>> {
+export async function createMarketplaceCard(marketplaceCard: CreateMarketplaceCard) : Promise<MaybeError<number>> {
   let response;
   try {
     response = await instance.post('/cards', marketplaceCard);
@@ -1072,7 +1109,7 @@ export async function deleteNotification(eventId: number) : Promise<MaybeError<u
  * @param eventid The ID of the event
  * @param colour  The colour of the tag user wan to set
  */
-export async function setEventTag(eventId: number, colour: Tag) : Promise<MaybeError<undefined>> {
+export async function setEventTag(eventId: number, colour: EventTag) : Promise<MaybeError<undefined>> {
   try {
     await instance.put(`/feed/${eventId}/tag`, {
       value: colour
@@ -1111,6 +1148,39 @@ export async function messageConversation(cardId: number, senderId: number, buye
     return 'Request failed: ' + error.response?.data.message;
   }
   return undefined;
+}
+
+
+/**
+ * Gets a page of messages in a convesation about a marketplace card.
+ * @param cardId The ID of the card
+ * @param buyerId The ID of the prospective buyer in the conversation
+ * @param pageIndex Index of page to start the results from (1 = first page)
+ * @param resultsPerPage Number of results to return per page
+ * @returns Page of messages within the convesation or else a string error
+ */
+export async function getMessagesInConversation(cardId: number, buyerId: number, pageIndex: number, resultsPerPage: number): Promise<MaybeError<SearchResults<Message>>> {
+  let response;
+  try {
+    response = await instance.get(`/cards/${cardId}/conversations/${buyerId}`, {
+      params: {
+        page: pageIndex,
+        resultsPerPage,
+      }
+    });
+  } catch (error) {
+    let status: number | undefined = error.response?.status;
+    if (status === undefined) return 'Failed to reach backend';
+    if (status === 401) return 'You have been logged out. Please login again and retry';
+    if (status === 403) return 'You do not have permission to view this conversation';
+    if (status === 406) return 'Unable to get messages, conversation does not exist';
+    return error.response?.data.message;
+  }
+
+  if (!is<SearchResults<Message>>(response.data)) {
+    return "Response is not page of messages";
+  }
+  return response.data;
 }
 
 /**
@@ -1152,18 +1222,21 @@ export async function uploadBusinessImage(businessId: number, file: File): Promi
  * @param orderBy Specifies the method used to sort the results
  * @param reverse Specifies whether to reverse the search results (default order is descending for relevance and ascending for all other orders)
  */
-export async function searchCatalogue(businessId: number, query: string, pageIndex: number, resultsPerPage: number, searchBy: Array<ProductSearchBy>, orderBy: ProductOrderBy, reverse: boolean): Promise<MaybeError<SearchResults<Product>>> {
+export async function searchCatalogue(businessId: number, query: string, pageIndex: number, resultsPerPage: number, searchBy: ProductSearchBy[], orderBy: ProductOrderBy, reverse: boolean): Promise<MaybeError<SearchResults<Product>>> {
+  const params = new URLSearchParams();
+  for (let field of searchBy) {
+    params.append("searchBy", field);
+  }
+  params.append('searchQuery', query);
+  params.append('page', pageIndex.toString());
+  params.append('resultsPerPage', resultsPerPage.toString());
+  params.append('orderBy', orderBy);
+  params.append('reverse', reverse.toString());
+
   let response;
   try {
     response = await instance.get(`/businesses/${businessId}/products/search`, {
-      params: {
-        searchQuery: query,
-        page: pageIndex,
-        resultsPerPage: resultsPerPage,
-        searchBy: searchBy,
-        reverse: reverse.toString(),
-        orderBy: orderBy,
-      }
+      params
     });
   } catch (error) {
     let status: number | undefined = error.response?.status;
@@ -1212,10 +1285,35 @@ export async function modifyBusiness(businessId: number, business: ModifyBusines
   } catch (error) {
     let status: number | undefined = error.response?.status;
     if (status === undefined) return 'Failed to reach backend';
+    if (status === 400) return 'Invalid details entered: ' + error.response?.data.message;
     if (status === 401) return 'You have been logged out. Please login again and retry';
     if (status === 403) return 'Invalid authorization for modifying this business';
+    if (status === 406) return 'Business does not exist';
 
     return 'Request failed: ' + error.response?.data.message;
+  }
+  return undefined;
+}
+
+/**
+ * Sets the interest state (liked/unliked) for the given user and listing combination
+ * @param listingId Listing to update the interest state for
+ * @param userId User that the new interest state is applied for
+ * @param interested New interest state for the listing (true=like, false=unlike)
+ */
+export async function setListingInterest(listingId: number, userId: number, interested: boolean): Promise<MaybeError<undefined>> {
+  try {
+    await instance.put(`/listings/${listingId}/interest`, {
+      userId,
+      interested,
+    });
+  } catch (error) {
+    let status: number | undefined = error.response?.status;
+    if (status === undefined) return 'Failed to reach backend';
+    if (status === 401) return 'You have been logged out. Please login again and retry';
+    if (status === 406) return 'Listing does not exist';
+
+    return error.response?.data.message;
   }
   return undefined;
 }

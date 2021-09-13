@@ -3,7 +3,7 @@
   <v-dialog v-model="dialog">
     <template v-slot:activator="{ on, attrs }">
       <!-- using the "Read more..." link to activate the pop up dialog -->
-      <!--  v-bind="attrs" v-on="on" allows the v-dialog to use this link as the activator for the dialog box -->
+      <!--  The v-bind to attrs allows the v-dialog to use this link as the activator for the dialog box -->
       <a
         v-bind="attrs"
         v-on="on"

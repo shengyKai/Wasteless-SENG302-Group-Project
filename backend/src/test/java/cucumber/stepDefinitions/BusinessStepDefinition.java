@@ -4,6 +4,7 @@ import cucumber.context.BusinessContext;
 import cucumber.context.ImageContext;
 import cucumber.context.RequestContext;
 import cucumber.context.UserContext;
+import cucumber.utils.CucumberUtils;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
@@ -11,6 +12,7 @@ import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
 import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.junit.Assert;
 import org.seng302.datagenerator.ExampleDataFileReader;
 import org.seng302.leftovers.entities.*;
@@ -21,20 +23,20 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MvcResult;
-import org.hibernate.SessionFactory;
 
 import javax.transaction.Transactional;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.text.ParseException;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 
 public class BusinessStepDefinition {
     @Value("${storage-directory}")
@@ -161,32 +163,14 @@ public class BusinessStepDefinition {
                 .param("businessType", businessType));
     }
 
-    /**
-     * Sets a value through a multi layered mapping.
-     * E.g. Calling with a path of "a","b","c" will do mapping.get("a").get("b").put("c", value) and will create any
-     * required intermediate maps
-     * @param mapping Multi-layered map
-     * @param path List of keys/subkeys
-     * @param value Value to place at the end of the path
-     */
-    private void setValueAtPath(Map<String, Object> mapping, List<String> path, Object value) {
-        String head = path.get(0);
-        if (path.size() == 1) {
-            mapping.put(head, value);
-        } else {
-            if (!mapping.containsKey(head)) {
-                mapping.put(head, new HashMap<>());
-            }
-            setValueAtPath((Map<String, Object>)mapping.get(head), path.subList(1, path.size()), value);
-        }
-    }
+
 
     @When("I try to updated the fields of the business to:")
     public void i_try_to_updated_the_fields_of_the_business_to(Map<String, Object> dataTable) {
         modifyParameters = new JSONObject();
         for (var entry : dataTable.entrySet()) {
             List<String> path = Arrays.asList(entry.getKey().split("\\."));
-            setValueAtPath(modifyParameters, path, entry.getValue());
+            CucumberUtils.setValueAtPath(modifyParameters, path, entry.getValue());
         }
 
         String adminName = (String)modifyParameters.remove("primaryAdministrator");
@@ -285,16 +269,20 @@ public class BusinessStepDefinition {
         Business business = businessRepository.getBusinessById(businessContext.getLast().getId());
         assertEquals(1, business.getImages().size());
         Image image = business.getImages().get(0);
-        assertNotNull(image.getFilename());
 
+        assertNotNull(image.getFilename());
         Path imagePath = root.resolve(image.getFilename());
         assertTrue(imagePath.toFile().exists());
+
+        assertNotNull(image.getFilenameThumbnail());
+        Path thumbnailPath = root.resolve(image.getFilenameThumbnail());
+        assertTrue(thumbnailPath.toFile().exists());
     }
 
     @Given("The business {string} has primary image {string}")
     public void the_business_has_primary_image_with_name(String businessName, String imageName) {
         Business business = businessContext.getByName(businessName);
-        Image image = new Image(imageName, imageName + "_thumbnail");
+        Image image = new Image(imageName, imageName + "_thumbnail.png");
         image = imageContext.save(image);
         business.addImage(0, image);
         business = businessContext.save(business);
@@ -307,7 +295,7 @@ public class BusinessStepDefinition {
     @Given("The business {string} has image {string}")
     public void the_business_has_image_with_name(String businessName, String imageName) {
         Business business = businessContext.getByName(businessName);
-        Image image = new Image(imageName, imageName + "_thumbnail");
+        Image image = new Image(imageName, imageName + "_thumbnail.png");
         image = imageContext.save(image);
         business.addImage(image);
         business = businessContext.save(business);
