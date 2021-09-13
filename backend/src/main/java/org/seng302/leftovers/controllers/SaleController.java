@@ -221,9 +221,11 @@ public class SaleController {
             sortOrder = List.of(new Sort.Order(direction, orderBy ).ignoreCase());
 
             // Check filter options
-            for (String businessType : businessTypes) {
-                if (!VALID_BUSINESS_TYPES.contains(businessType)) {
-                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "BusinessType term " + businessType + " is invalid");
+            if (businessTypes != null) {
+                for (String businessType : businessTypes) {
+                    if (!VALID_BUSINESS_TYPES.contains(businessType)) {
+                        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "BusinessType term " + businessType + " is invalid");
+                    }
                 }
             }
             BigDecimal minPrice = null;

@@ -9,7 +9,9 @@ import io.cucumber.java.en.When;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
+import net.minidev.json.parser.ParseException;
 import org.seng302.leftovers.entities.*;
+import org.seng302.leftovers.persistence.BusinessRepository;
 import org.seng302.leftovers.persistence.InventoryItemRepository;
 import org.seng302.leftovers.persistence.ProductRepository;
 import org.seng302.leftovers.persistence.SaleItemRepository;
@@ -22,6 +24,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.*;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
 public class SaleSearchStepDefinition {
@@ -29,6 +32,8 @@ public class SaleSearchStepDefinition {
     private UserContext userContext;
     @Autowired
     private BusinessContext businessContext;
+    @Autowired
+    private BusinessRepository businessRepository;
     @Autowired
     private ProductRepository productRepository;
     @Autowired
@@ -43,19 +48,16 @@ public class SaleSearchStepDefinition {
 
     private MvcResult mvcResult;
     
-    private String basicSearch;
-    private String productSearch;
-    private String businessSearch;
-    private String locationSearch;
-    private final Integer page = 1;
-    private final Integer resultsPerPage = 10;
-    private final boolean reverse = false;
-    private String orderBy;
-    private String businessTypes;
-    private String priceLower;
-    private String priceUpper;
-    private String closeLower;
-    private String closeUpper;
+    private String basicSearch = "";
+    private String productSearch = "";
+    private String businessSearch = "";
+    private String locationSearch = "";
+    private String orderBy = "";
+    private String businessTypes = "";
+    private String priceLower = "";
+    private String priceUpper = "";
+    private String closeLower = "";
+    private String closeUpper = "";
 
     @And("the business {string} with the type {string} and location {string} exists")
     public void theBusinessWithTheTypeAndLocationExists(String name, String type, String location) {
@@ -90,7 +92,7 @@ public class SaleSearchStepDefinition {
     }
 
     @Then("{int} sale items are returned")
-    public void saleItemsAreReturned(int count) throws Exception {
+    public void saleItemsAreReturned(int count) throws UnsupportedEncodingException, ParseException {
         mvcResult = requestContext.getLastResult();
         assertEquals(200, mvcResult.getResponse().getStatus());
         JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
@@ -102,68 +104,39 @@ public class SaleSearchStepDefinition {
     @When("orderBy is {string}")
     public void orderbyIs(String orderBy) { this.orderBy = orderBy; }
 
-    @Then("products are in alphabetical order")
-    public void productsAreInAlphabeticalOrder() throws Exception {
+    @Then("first product is {string}")
+    public void productsAreInAlphabeticalOrder(String firstId) throws UnsupportedEncodingException, ParseException {
         mvcResult = requestContext.getLastResult();
         JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
         JSONObject response = (JSONObject) parser.parse(mvcResult.getResponse().getContentAsString());
         JSONArray sales = (JSONArray) response.get("results");
 
+        assertTrue(sales.size() > 0);
+        assertTrue(sales.get(0).get("listingId") instanceof Number);
+        Number saleItemId = (Number) sales.get(0).get("listingId");
+        SaleItem saleItem = saleItemRepository.findById(saleItemId.longValue()).orElseThrow();
+        assertEquals(firstId, saleItem.getInventoryItem().getProduct().getProductCode());
     }
 
-    @Then("products are in business order")
-    public void productsAreInBusinessOrder() throws Exception {
+    @Then("first product is from {string}")
+    public void productsAreInBusinessOrder(String businessName) throws UnsupportedEncodingException, ParseException {
         mvcResult = requestContext.getLastResult();
         JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
         JSONObject response = (JSONObject) parser.parse(mvcResult.getResponse().getContentAsString());
         JSONArray sales = (JSONArray) response.get("results");
-    }
 
-    @Then("products are in location order")
-    public void productsAreInLocationOrder() throws Exception {
-        mvcResult = requestContext.getLastResult();
-        JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
-        JSONObject response = (JSONObject) parser.parse(mvcResult.getResponse().getContentAsString());
-        JSONArray sales = (JSONArray) response.get("results");
-    }
-
-    @Then("products are in quantity order")
-    public void productsAreInQuantityOrder() throws Exception {
-        mvcResult = requestContext.getLastResult();
-        JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
-        JSONObject response = (JSONObject) parser.parse(mvcResult.getResponse().getContentAsString());
-        JSONArray sales = (JSONArray) response.get("results");
-    }
-
-    @Then("products are in price order")
-    public void productsAreInPriceOrder() throws Exception {
-        mvcResult = requestContext.getLastResult();
-        JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
-        JSONObject response = (JSONObject) parser.parse(mvcResult.getResponse().getContentAsString());
-        JSONArray sales = (JSONArray) response.get("results");
-    }
-
-    @Then("products are in created date order")
-    public void productsAreInCreatedDateOrder() throws Exception {
-        mvcResult = requestContext.getLastResult();
-        JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
-        JSONObject response = (JSONObject) parser.parse(mvcResult.getResponse().getContentAsString());
-        JSONArray sales = (JSONArray) response.get("results");
-    }
-
-    @Then("products are in close date order")
-    public void productsAreInCloseDateOrder() throws Exception {
-        mvcResult = requestContext.getLastResult();
-        JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
-        JSONObject response = (JSONObject) parser.parse(mvcResult.getResponse().getContentAsString());
-        JSONArray sales = (JSONArray) response.get("results");
+        assertTrue(sales.size() > 0);
+        assertTrue(sales.get(0).get("businessId") instanceof Number);
+        Number businessId = (Number) sales.get(0).get("businessId");
+        Business business = businessRepository.findById(businessId.longValue()).orElseThrow();
+        assertEqual(businessName, business.getName())
     }
 
     @When("businessType is {string}")
-    public void businesstypeIs(String type) { this.businessTypes = type }
+    public void businesstypeIs(String type) { this.businessTypes = type; }
 
     @When("search sale name is {string}")
-    public void searchSaleNameIs(String name) { this.productSearch = name }
+    public void searchSaleNameIs(String name) { this.productSearch = name; }
 
     @When("search sale price is between {int} and {int}")
     public void searchSalePriceIsBetweenAnd(int priceLower, int priceUpper) {
@@ -190,14 +163,26 @@ public class SaleSearchStepDefinition {
                 .param("productSearchQuery", this.productSearch)
                 .param("businessSearchQuery", this.businessSearch)
                 .param("locationSearchQuery", this.locationSearch)
-                .param("page", this.page)
-                .param("resultsPerPage", this.resultsPerPage)
+                .param("orderBy", this.orderBy)
                 .param("businessTypes", this.businessTypes)
                 .param("priceLower", this.priceLower)
                 .param("priceUpper", this.priceUpper)
                 .param("closeLower", this.closeLower)
                 .param("closeUpper", this.closeUpper);
         requestContext.performRequest(requestBuilder);
+        reset();
+    }
+
+    private void reset() {
+        this.basicSearch = "";
+        this.productSearch = "";
+        this.businessSearch = "";
+        this.locationSearch = "";
+        this.businessTypes = "";
+        this.priceLower = "";
+        this.priceUpper = "";
+        this.closeLower = "";
+        this.closeUpper = "";
     }
 
     @When("I search sale basic {string}")

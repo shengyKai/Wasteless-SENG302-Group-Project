@@ -5,10 +5,10 @@ import {createLocalVue, mount, Wrapper} from '@vue/test-utils';
 
 import ModifyBusiness from '@/components/BusinessProfile/ModifyBusiness.vue';
 import {castMock} from "./utils";
-import {Business, Location, User} from '@/api/internal';
+import {Location} from '@/api/internal';
 import {getStore, resetStoreForTesting} from '@/store';
-import {getUser as getUser1} from "@/api/internal-user";
-import {modifyBusiness as modifyBusiness1, uploadBusinessImage as uploadBusinessImage1} from "@/api/internal-business";
+import {getUser as getUser1, User} from "@/api/internal-user";
+import {modifyBusiness as modifyBusiness1, uploadBusinessImage as uploadBusinessImage1, Business} from "@/api/internal-business";
 
 jest.mock('@/api/internal', () => ({
   getUser: jest.fn(),

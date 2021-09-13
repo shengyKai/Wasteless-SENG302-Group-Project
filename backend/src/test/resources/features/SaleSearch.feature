@@ -37,43 +37,43 @@ Feature: U29 Sale Item Search
     Given I am logged into my account
     When orderBy is "name"
     When I search for sale items
-    Then products are in alphabetical order
+    Then first product is "APPLE"
 
   Scenario: AC4 - Order by business name
     Given I am logged into my account
     When orderBy is "businessName"
     When I search for sale items
-    Then products are in business order
+    Then first product is from "Biz"
 
   Scenario: AC4 - Order by business location
     Given I am logged into my account
     When orderBy is "location"
     When I search for sale items
-    Then products are in location order
+    Then first product is from "Biz"
 
   Scenario: AC4 - Order by quantity
     Given I am logged into my account
     When orderBy is "quantity"
     When I search for sale items
-    Then products are in quantity order
+    Then first product is "FISH"
 
   Scenario: AC4 - Order by price
     Given I am logged into my account
     When orderBy is "price"
     When I search for sale items
-    Then products are in price order
+    Then first product is "FISH"
 
   Scenario: AC4 - Order by created
     Given I am logged into my account
     When orderBy is "created"
     When I search for sale items
-    Then products are in created date order
+    Then first product is "FISH"
 
   Scenario: AC4 - Order by closes
     Given I am logged into my account
     When orderBy is "closes"
     When I search for sale items
-    Then products are in close date order
+    Then first product is "FISH"
 
   Scenario: AC5 - Limit results to particular business type
     Given I am logged into my account

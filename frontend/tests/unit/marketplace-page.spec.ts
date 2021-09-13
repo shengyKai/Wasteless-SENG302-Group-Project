@@ -3,11 +3,10 @@ import Vuetify from 'vuetify';
 import Vuex from 'vuex';
 import {createLocalVue, mount, Wrapper} from '@vue/test-utils';
 import Marketplace from '@/components/marketplace/Marketplace.vue';
-import {MarketplaceCard} from '@/api/internal';
 import {castMock, flushQueue} from './utils';
 import {getStore, resetStoreForTesting} from '@/store';
 import {User} from "@/api/internal-user";
-import {getMarketplaceCardsBySection as getMarketplaceCardsBySection1} from "@/api/internal-marketplace";
+import {getMarketplaceCardsBySection as getMarketplaceCardsBySection1, MarketplaceCard} from "@/api/internal-marketplace";
 import {searchKeywords} from "@/api/internal-keyword";
 
 jest.mock('@/api/internal', () => ({

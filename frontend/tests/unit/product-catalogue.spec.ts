@@ -4,9 +4,9 @@ import Vuex from 'vuex';
 import {createLocalVue, mount, Wrapper} from '@vue/test-utils';
 import ProductCatalogue from '@/components/ProductCatalogue.vue';
 import ProductCatalogueItem from '@/components/cards/ProductCatalogueItem.vue';
-import {Product, SearchResults} from '@/api/internal';
+import {SearchResults} from '@/api/internal';
 import {castMock, flushQueue} from './utils';
-import {getProducts as getProducts1, searchCatalogue as searchCatalogue1} from "@/api/internal-product";
+import {getProducts as getProducts1, searchCatalogue as searchCatalogue1, Product} from "@/api/internal-product";
 
 jest.mock('@/api/internal', () => ({
   getProducts: jest.fn(),
