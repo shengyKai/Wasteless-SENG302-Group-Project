@@ -43,37 +43,24 @@
               change status to normal when clicked -->
         <v-tooltip top>
           <template v-slot:activator="{ on, attrs }">
-            <v-icon v-if="(event.status === 'starred')"
-                    class="mr-2"
-                    ref="filledStarButton"
-                    color="yellow"
-                    v-bind="attrs"
-                    v-on="on"
-                    @click.stop="changeEventStatus('normal')"
+            <v-icon
+              v-if="(event.status !== 'archived')"
+              class="mr-2"
+              ref="filledStarButton"
+              color="yellow"
+              v-bind="attrs"
+              v-on="on"
+              @click="toggleStarStatus()"
             >
-              mdi-star
+              {{starIcon}}
             </v-icon>
           </template>
-          <span>Unstar notification</span>
+          <span>{{starTooltip}}</span>
         </v-tooltip>
 
         <!-- Render a star-outline icon to visually show a difference between starred and normal event
               change status to starred when clicked -->
-        <v-tooltip top>
-          <template v-slot:activator="{ on, attrs }">
-            <v-icon v-if="(event.status === 'normal')"
-                    class="mr-2"
-                    ref="starButton"
-                    color="yellow"
-                    v-bind="attrs"
-                    v-on="on"
-                    @click.stop="changeEventStatus('starred')"
-            >
-              mdi-star-outline
-            </v-icon>
-          </template>
-          <span>Star notification</span>
-        </v-tooltip>
+
         <!-- Archive icon to allow user archiving an event
               change status to archived when clicked -->
         <v-tooltip top>
@@ -210,6 +197,14 @@ export default {
     };
   },
   computed: {
+    starTooltip() {
+      if(this.event.status === "starred") return 'Unstar notification';
+      else return 'Star notification';
+    },
+    starIcon() {
+      if(this.event.status === "starred") return 'mdi-star';
+      else return 'mdi-star-outline';
+    },
     /**
      * Change the badge icon based on whether the event has been read
      */
@@ -329,23 +324,25 @@ export default {
         }
       }
     },
+    toggleStarStatus() {
+      if(this.event.status === 'normal') {
+        this.changeEventStatus('starred');
+      } else {
+        this.changeEventStatus('normal');
+      }
+    },
     /**
      *
      */
     async changeEventStatus(status) {
       const result = await updateEventStatus(this.event.id, status);
-      console.log(this.event.status);
-      // this.event.status = "starred";
-      this.store.commit('addEvent', this.event);
       if (typeof result === 'string') {
         this.errorMessage = result;
       } else {
         this.errorMessage = undefined;
-        // let newEvent = this.event;
-        // newEvent.status = status;
-        // this.store.commit('addEvent', newEvent);
-        await this.$store.dispatch('refreshEventFeed');
-
+        let newEvent = this.event;
+        newEvent.status = status;
+        this.$store.commit('addEvent', newEvent);
       }
     },
   },
