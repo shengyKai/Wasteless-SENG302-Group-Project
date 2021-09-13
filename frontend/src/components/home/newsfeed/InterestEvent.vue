@@ -16,21 +16,23 @@
       {{ eventTitle }}
     </v-card-text>
     <v-card-actions class="justify-center">
-      <v-btn class="action-btn white-text" color="primary darken-1">
-        <v-icon>mdi-currency-usd</v-icon>
+      <v-btn class="pl-3" color="primary darken-1">
         Buy
+        <v-icon>mdi-currency-usd</v-icon>
       </v-btn>
-      <v-btn v-if="!event.interested" class="white--text" color="green">
-        <v-icon>mdi-thumb-up</v-icon>
-        Like 69
+      <!-- Thumb up/down button to show and allow user the like & unlike feature -->
+      <v-btn v-if="!event.interested" class="ml-2 blue--text" color="grey lighten-2" @click="changeInterest">
+        Like
+        <v-icon class="ml-1">mdi-thumb-up</v-icon>
       </v-btn>
-      <v-btn v-else class="white--text" color="secondary">
-        <v-icon class="mr-1">mdi-thumb-down</v-icon>
-        Unlike 69
+      <v-btn v-else color="ml-2 grey lighten-2" @click="todo">
+        Unlike
+        <v-icon class="ml-1">mdi-thumb-down</v-icon>
       </v-btn>
-      <v-btn class="white--text" color="orange darken-1" @click="fullSaleOpen = true">
-        <v-icon>mdi-arrow-top-right-thick</v-icon>
-        View Sale
+      <!-- A return button for user to go back to business profile-->
+      <v-btn class="ml-2 pl-3" color="secondary" @click="fullSaleOpen=true">
+        View
+        <v-icon class="ml-1">mdi-arrow-top-right-thick</v-icon>
       </v-btn>
     </v-card-actions>
     <v-dialog v-model="fullSaleOpen" max-width="1200" class="white">
