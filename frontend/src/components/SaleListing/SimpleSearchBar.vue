@@ -1,7 +1,7 @@
 <template>
   <v-card color="secondary" dark class="mb-1 search-bar">
     <v-row>
-      <v-col cols="4" md="4" sm="6" xs="8">
+      <v-col cols="12" md="4">
         <v-text-field
           clearable
           flat
@@ -15,7 +15,7 @@
         />
       </v-col>
       <v-spacer />
-      <v-col cols="2">
+      <v-col cols="6" md="4" lg="2">
         <v-select
           v-model="searchParams.orderBy"
           flat
@@ -27,7 +27,7 @@
           label="Order By"
         />
       </v-col>
-      <v-col cols="1">
+      <v-col cols="3" md="2" lg="1">
         <v-btn-toggle class="toggle" v-model="reverse" mandatory>
           <v-btn depressed color="secondary" :value="false">
             <v-icon>mdi-arrow-up</v-icon>
@@ -37,7 +37,7 @@
           </v-btn>
         </v-btn-toggle>
       </v-col>
-      <v-col cols="2" md="2" sm="4">
+      <v-col cols="3" md="4" lg="2">
         <v-card-actions>
           <v-btn outlined @click="showAdvancedSearch">Advanced</v-btn>
         </v-card-actions>

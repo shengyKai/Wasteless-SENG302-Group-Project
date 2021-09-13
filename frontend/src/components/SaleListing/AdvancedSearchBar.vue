@@ -5,7 +5,7 @@
     class="mb-1 search-bar"
   >
     <v-row>
-      <v-col cols="3">
+      <v-col cols="12" md="3">
         <v-text-field
           clearable
           flat
@@ -17,7 +17,7 @@
           v-model="searchParams.productQuery"
         />
       </v-col>
-      <v-col cols="4">
+      <v-col cols="12" md="4">
         <v-select
           v-model="searchParams.businessType"
           flat
@@ -29,7 +29,7 @@
           label="Business type"
         />
       </v-col>
-      <v-col cols="2">
+      <v-col cols="6" md="2" sm="4">
         <v-select
           style="max-width: 300px"
           v-model="searchParams.orderBy"
@@ -42,7 +42,7 @@
           label="Order By"
         />
       </v-col>
-      <v-col cols="1">
+      <v-col cols="3" md="1" sm="2">
         <v-btn-toggle class="toggle" v-model="reverse" mandatory>
           <v-btn depressed color="secondary" :value="false">
             <v-icon>mdi-arrow-up</v-icon>
@@ -52,14 +52,14 @@
           </v-btn>
         </v-btn-toggle>
       </v-col>
-      <v-col cols="2">
+      <v-col cols="3" md="2" sm="4">
         <v-card-actions>
           <v-btn outlined @click="hideAdvancedSearch()">Simple</v-btn>
         </v-card-actions>
       </v-col>
     </v-row>
     <v-row>
-      <v-col cols="3">
+      <v-col cols="12" md="3">
         <v-text-field
           clearable
           flat
@@ -71,7 +71,7 @@
           v-model="searchParams.businessQuery"
         />
       </v-col>
-      <v-col cols="2">
+      <v-col cols="12" md="2" sm="6">
         <v-text-field
           clearable
           flat
@@ -82,7 +82,7 @@
           v-model="searchParams.lowestPrice"
         />
       </v-col>
-      <v-col cols="2">
+      <v-col cols="12" md="2" sm="6">
         <v-text-field
           clearable
           flat
@@ -95,7 +95,7 @@
       </v-col>
     </v-row>
     <v-row>
-      <v-col cols="3">
+      <v-col cols="12" md="3">
         <v-text-field
           clearable
           flat
@@ -107,14 +107,14 @@
           v-model="searchParams.locationQuery"
         />
       </v-col>
-      <v-col cols="2">
+      <v-col cols="12" md="2" sm="6">
         <DatePickerDialog :label="closesBeforeLabel" v-model="searchParams.closesBefore"/>
       </v-col>
-      <v-col cols="2">
+      <v-col cols="12" md="2" sm="6">
         <DatePickerDialog :label="closesAfterLabel" v-model="searchParams.closesAfter"/>
       </v-col>
       <v-spacer/>
-      <v-col cols="2" md="2" sm="4">
+      <v-col cols="12" md="2" sm="4">
         <v-card-actions>
           <v-btn
             color="white"
