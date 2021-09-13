@@ -14,7 +14,7 @@ import java.time.LocalDate;
 
 
 /**
- * TODO
+ * A InventoryItemDTO for representing a InventoryItem object
  */
 @Getter
 @ToString
@@ -38,8 +38,8 @@ public class InventoryItemDTO {
     protected InventoryItemDTO() {}
 
     /**
-     * TODO
-     * @param invItem
+     * The InventoryItemDTO
+     * @param invItem the InventoryItem object
      */
     public InventoryItemDTO(InventoryItem invItem) {
         this.id = invItem.getId();

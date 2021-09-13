@@ -14,7 +14,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 
 /**
- * TODO
+ * A SaleItemDTO for representing a SaleItem object
  */
 @Getter
 @ToString
@@ -36,8 +36,8 @@ public class SaleItemDTO {
     protected SaleItemDTO() {}
 
     /**
-     * TODO
-     * @param saleItem
+     * The SaleItemDTO constructor
+     * @param saleItem the SaleItem object
      */
     public SaleItemDTO(SaleItem saleItem) {
         this.id = saleItem.getId();
