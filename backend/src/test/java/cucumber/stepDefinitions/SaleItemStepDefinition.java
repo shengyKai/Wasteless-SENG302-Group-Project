@@ -1,5 +1,6 @@
 package cucumber.stepDefinitions;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import cucumber.context.BusinessContext;
 import cucumber.context.RequestContext;
@@ -7,9 +8,11 @@ import cucumber.context.UserContext;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+import lombok.SneakyThrows;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
+import org.seng302.leftovers.dto.event.InterestEventDTO;
 import org.seng302.leftovers.entities.InventoryItem;
 import org.seng302.leftovers.entities.Product;
 import org.seng302.leftovers.entities.SaleItem;
@@ -18,8 +21,6 @@ import org.seng302.leftovers.persistence.ProductRepository;
 import org.seng302.leftovers.persistence.SaleItemRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 
 import javax.transaction.Transactional;
 import java.util.*;
@@ -35,6 +36,8 @@ public class SaleItemStepDefinition {
     private BusinessContext businessContext;
     @Autowired
     private RequestContext requestContext;
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @Autowired
     private ProductRepository productRepository;
@@ -224,5 +227,29 @@ public class SaleItemStepDefinition {
         saleItem = saleItemRepository.findById(saleItem.getId()).orElseThrow();
 
         assertEquals(count, saleItem.getLikeCount());
+    }
+
+    @SneakyThrows
+    private void notificationExistsWithInterest(boolean interested) {
+        assertEquals(1, addedSaleItems.size());
+        SaleItem saleItem = addedSaleItems.stream().findFirst().orElseThrow();
+
+        List<InterestEventDTO> eventList = objectMapper.readValue(requestContext.getLastResultAsString(), new TypeReference<>() {});
+        var event = eventList.get(0);
+
+        // TODO Refactor this test to directly compare the sale item DTOs when they are implemented, Connor.
+        assertEquals(saleItem.getId().longValue(), event.getSaleItem().getAsNumber("id").longValue());
+        assertEquals(event.isInterested(), interested);
+
+    }
+
+    @Then("The notification is for liking the sale item")
+    public void the_notification_is_for_liking_the_sale_item() {
+        notificationExistsWithInterest(true);
+    }
+
+    @Then("The notification is for unliking the sale item")
+    public void the_notification_is_for_unliking_the_sale_item() {
+        notificationExistsWithInterest(false);
     }
 }
