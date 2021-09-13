@@ -4,7 +4,7 @@ import Vuetify from 'vuetify';
 import { createLocalVue, Wrapper, mount } from '@vue/test-utils';
 
 import MarketplaceCardForm from '@/components/marketplace/MarketplaceCardForm.vue';
-import {castMock, makeTestUser} from "./utils";
+import {castMock, findButtonWithText, makeTestUser} from "./utils";
 import * as api from '@/api/internal';
 import { getStore, resetStoreForTesting } from '@/store';
 import {User} from "@/api/internal";
@@ -106,12 +106,7 @@ describe('MarketplaceCardFrom.vue', () => {
    *
    * @returns A Wrapper around the create button
    */
-    function findButton(text: string) {
-      const buttons = wrapper.findAllComponents({ name: 'v-btn' });
-      const filtered = buttons.filter(button => button.text().includes(text));
-      expect(filtered.length).toBe(1);
-      return filtered.at(0);
-    }
+    const findButton = (text: string) => findButtonWithText(wrapper, text);
 
     it('Valid if all required fields are provided', async () => {
       await wrapper.setData({

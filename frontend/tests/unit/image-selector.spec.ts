@@ -2,6 +2,7 @@ import Vue from 'vue';
 import Vuetify from 'vuetify';
 import { createLocalVue, Wrapper, mount } from '@vue/test-utils';
 import ImageSelector from "@/components/utils/ImageSelector.vue";
+import { findButtonWithText } from './utils';
 
 Vue.use(Vuetify);
 
@@ -75,12 +76,7 @@ describe('ProductImageUploader.vue', () => {
    *
    * @returns A Wrapper around the select button
    */
-  function findSelectButton() {
-    const buttons = wrapper.findAllComponents({ name: 'v-btn' });
-    const filtered = buttons.filter(button => button.text().includes('Select'));
-    expect(filtered.length).toBe(1);
-    return filtered.at(0);
-  }
+  const findSelectButton = () => findButtonWithText(wrapper, 'Select');
 
   /**
    * Finds the discard selected image button in the ImageSelector component if it exists
