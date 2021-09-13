@@ -10,9 +10,9 @@
             <v-icon>mdi-currency-usd</v-icon>
           </v-btn>
           <!-- Thumb up/down button to show and allow user the like & unlike feature -->
-          <v-btn class="ml-2 pl-3" color="primary darken-2">
-            Like 69
-            <v-icon class="ml-1">mdi-thumb-up</v-icon>
+          <v-btn class="ml-2 pl-3" color="grey lighten-2" @click="changeineterest">
+            Like
+            <v-icon class="ml-1" :color="interestColour">mdi-thumb-up</v-icon>
           </v-btn>
           <!-- A return button for user to go back to business profile-->
           <v-btn class="ml-2 pl-3" color="secondary" @click="viewProfile">
@@ -125,7 +125,8 @@ export default {
     return {
       currency: {
         code: "",
-        symbol: ""
+        symbol: "",
+        interest: false,
       },
       extraDetails: false
     };
@@ -134,7 +135,19 @@ export default {
     saleItem: Object,
     businessId: Number
   },
+  mounted() {
+    console.log(this.product);
+    console.log(this.inventoryItem);
+  },
   computed: {
+    interestColour() {
+      // if (!this.inventoryItem.interest) {
+      if(this.interest) {
+        return "blue";
+      } else {
+        return "grey darken-1";
+      }
+    },
     /**
      * Easy access to the product information of the sale item
      */
@@ -207,6 +220,13 @@ export default {
      */
     viewProfile() {
       this.$router.push("/business/" + this.$store.state.activeRole.id);
+    },
+    /** Shows user the like and unlike button according to the listing's interest */
+    changeineterest() {
+      console.log("changing");
+      console.log(this.interest);
+      this.interest = !this.interest;
+      console.log(this.interest);
     },
     /**
      * Computes the currency
