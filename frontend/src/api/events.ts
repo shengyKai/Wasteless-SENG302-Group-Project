@@ -71,6 +71,12 @@ export async function updateEventAsRead(eventId: number): Promise<MaybeError<und
   return undefined;
 }
 
+/**
+ * Updates an event to a selected status with overwriting strategy. Overwriting the event's status
+ * Archive is a one way action, no UI component available for overwriting archived event
+ * @param eventId Event id of the event to be overwriting
+ * @param status  The desire status to be updated for the event
+ */
 export async function updateEventStatus(eventId: number, status: EventStatus): Promise<MaybeError<undefined>> {
   try {
     await instance.put(`/feed/${eventId}/status`, {

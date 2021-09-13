@@ -16,7 +16,7 @@
   <div v-else @click="markEventAsRead">
     <v-row>
       <v-col>
-        <v-tooltip bottom>
+        <v-tooltip top>
           <template v-slot:activator="{ on, attrs }">
             <v-card-title
               v-bind="attrs"
@@ -39,8 +39,8 @@
         </v-card-subtitle>
       </v-col>
       <v-col cols="auto" class="mt-2">
-        <!-- Star icon will be 'filled' not outline, if the event is starred,
-              change status to normal when clicked -->
+        <!-- Star icon will be 'filled' when user starred the notification else it will be outlined,
+              toggle status when clicked (normal | starred)-->
         <v-tooltip top>
           <template v-slot:activator="{ on, attrs }">
             <v-icon
@@ -197,10 +197,16 @@ export default {
     };
   },
   computed: {
+    /**
+     * Change tooltip message according to the event status/interest
+     */
     starTooltip() {
       if(this.event.status === "starred") return 'Unstar notification';
       else return 'Star notification';
     },
+    /**
+     * Change the star icon according to the event status/interest
+     */
     starIcon() {
       if(this.event.status === "starred") return 'mdi-star';
       else return 'mdi-star-outline';
@@ -324,6 +330,9 @@ export default {
         }
       }
     },
+    /**
+     * Call changeEventStatus method according to the event status
+     */
     toggleStarStatus() {
       if(this.event.status === 'normal') {
         this.changeEventStatus('starred');
@@ -332,7 +341,7 @@ export default {
       }
     },
     /**
-     *
+     * @param Status the status to be updated for the selected event/notification
      */
     async changeEventStatus(status) {
       const result = await updateEventStatus(this.event.id, status);
