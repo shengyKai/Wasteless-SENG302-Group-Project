@@ -6,6 +6,8 @@ import org.junit.jupiter.api.*;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.seng302.leftovers.dto.SaleItemDTO;
+import org.seng302.leftovers.entities.InventoryItem;
 import org.seng302.leftovers.entities.Location;
 import org.seng302.leftovers.entities.SaleItem;
 import org.seng302.leftovers.entities.User;
@@ -31,13 +33,14 @@ class InterestEventTest {
     @Mock
     private SaleItem saleItem;
 
+    @Mock
+    private InventoryItem inventoryItem;
+
     @BeforeEach
     void setup() {
         MockitoAnnotations.openMocks(this);
-
-        var json = new JSONObject();
-        json.put("this", "that");
-        when(saleItem.constructJSONObject()).thenReturn(json);
+        when(saleItem.getInventoryItem()).thenReturn(inventoryItem);
+        when(inventoryItem.constructJSONObject()).thenReturn(null); // TODO
     }
 
     @Test
@@ -55,7 +58,9 @@ class InterestEventTest {
         assertEquals(event.getStatus().toString().toLowerCase(), json.get("status"));
         assertEquals(event.isRead(), json.get("read"));
         assertEquals(event.getInterested(), json.get("interested"));
-        assertEquals(event.getSaleItem().constructJSONObject(), json.get("saleItem"));
+
+        var actualSaleItem = mapper.convertValue(json.get("saleItem"), SaleItemDTO.class);
+        assertEquals(event.getSaleItem().getId(), actualSaleItem.getId());
         assertEquals(event.getLastModified().toString(), json.getAsString("lastModified"));
         assertEquals(9, json.size());
     }

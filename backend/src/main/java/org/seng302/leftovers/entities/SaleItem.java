@@ -51,6 +51,15 @@ public class SaleItem {
     @Column(name = "closes")
     private LocalDate closes;  // Defaults to expiry date of product being sold
 
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name="likes",
+            joinColumns = {@JoinColumn(name="sale_item_id")},
+            inverseJoinColumns = {@JoinColumn(name="user_id")}
+    )
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private Set<User> interestedUsers = new HashSet<>();
+
     @Formula("(SELECT count(*) FROM likes l WHERE l.sale_item_id = id)")
     private int likeCount;
 
@@ -62,6 +71,26 @@ public class SaleItem {
      */
     public int getLikeCount() {
         return likeCount;
+    }
+
+    /**
+     * Add a user to the list of users that like this sale item
+     * @param user User to add
+     */
+    public void addInterestedUser(User user) {
+        interestedUsers.add(user);
+    }
+
+    /**
+     * Remove a user from the list of users that like this sale item
+     * @param user User to remove
+     */
+    public void removeInterestedUser(User user) {
+        interestedUsers.remove(user);
+    }
+
+    public Set<User> getInterestedUsers() {
+        return this.interestedUsers;
     }
 
     /**
@@ -220,24 +249,6 @@ public class SaleItem {
      */
     public Business getBusiness() {
         return this.inventoryItem.getBusiness();
-    }
-
-    /**
-     * Construct a JSON representation of the sale item. Attributes which are null will be omitted from the
-     * returned JSON.
-     * @return JSON representation of the sale item.
-     */
-    public JSONObject constructJSONObject() {
-        var object = new JSONObject();
-        object.put("id", getId());
-        object.put("inventoryItem", getInventoryItem().constructJSONObject());
-        object.put("quantity", getQuantity());
-        object.put("price", getPrice());
-        object.put("moreInfo", getMoreInfo());
-        object.put("created", getCreated().toString());
-        object.put("closes", getCloses().toString());
-        JsonTools.removeNullsFromJson(object);
-        return object;
     }
 
     /**

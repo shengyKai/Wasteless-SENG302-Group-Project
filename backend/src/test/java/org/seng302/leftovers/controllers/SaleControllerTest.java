@@ -1,5 +1,6 @@
 package org.seng302.leftovers.controllers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
@@ -23,6 +24,7 @@ import org.seng302.leftovers.persistence.UserRepository;
 import org.seng302.leftovers.persistence.event.InterestEventRepository;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
 import org.seng302.leftovers.tools.SearchHelper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -78,6 +80,9 @@ class SaleControllerTest {
     private MockedStatic<AuthenticationTokenManager> authenticationTokenManager;
 
     private SaleController saleController;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @Captor
     ArgumentCaptor<Specification<SaleItem>> specificationArgumentCaptor;
@@ -387,11 +392,11 @@ class SaleControllerTest {
     List<SaleItem> generateMockSaleItems() {
         List<SaleItem> mockItems = new ArrayList<>();
         for (long i = 0; i<6; i++) {
-            SaleItem saleItem = mock(SaleItem.class);
+            var saleItem = mock(SaleItem.class);
             when(saleItem.getId()).thenReturn(i);
-            var json = new JSONObject();
-            json.put("id", i);
-            when(saleItem.constructJSONObject()).thenReturn(json);
+            var inventoryItem = mock(InventoryItem.class);
+            when(saleItem.getInventoryItem()).thenReturn(inventoryItem);
+            when(inventoryItem.constructJSONObject()).thenReturn(null); //TODO
             mockItems.add(saleItem);
         }
         // Ensure determinism
