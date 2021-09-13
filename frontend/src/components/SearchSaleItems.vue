@@ -12,6 +12,31 @@
       {{ error }}
     </v-alert>
     <!-- PUT RESULTS HERE -->
+    <div class="results">
+      <!-- Three cards per row -->
+      <v-row>
+        <v-col>
+          <SaleResult/>
+        </v-col>
+        <v-col>
+          <SaleResult/>
+        </v-col>
+        <v-col>
+          <SaleResult/>
+        </v-col>
+      </v-row>
+      <v-row>
+        <v-col>
+          <SaleResult/>
+        </v-col>
+        <v-col>
+          <SaleResult/>
+        </v-col>
+        <v-col>
+          <SaleResult/>
+        </v-col>
+      </v-row>
+    </div>
     <!--paginate results-->
     <v-pagination
       v-model="currentPage"
@@ -27,8 +52,13 @@
 </template>
 
 <script>
+import SaleResult from "@/components/SaleListing/SaleResult";
+
 export default {
   name: "SearchSaleItems",
+  components: {
+    SaleResult
+  },
   data() {
     return {
       currentPage: 1,
