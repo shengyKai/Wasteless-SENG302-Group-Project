@@ -3,101 +3,106 @@
     <v-card class="body">
       <div>
         <ImageCarousel :imagesList="product.images" :productId="product.id"/>
-        <v-card-actions class="action-btn-container">
-          <v-btn class="action-btn white-text" color="primary">
-            <v-icon>mdi-currency-usd</v-icon>
+        <v-card-actions class="float-right">
+          <!-- Buy feature will not be implemented yet -->
+          <v-btn class="ml-2 pl-3" color="primary darken-1">
             Buy
+            <v-icon>mdi-currency-usd</v-icon>
           </v-btn>
-          <v-btn class="action-btn white--text" color="green">
-            <v-icon>mdi-thumb-up</v-icon>
+          <!-- Thumb up/down button to show and allow user the like & unlike feature -->
+          <v-btn class="ml-2 pl-3" color="primary darken-2">
             Like 69
+            <v-icon class="ml-1">mdi-thumb-up</v-icon>
           </v-btn>
-          <v-btn class="action-btn white--text" color="purple">
-            <v-icon>mdi-arrow-left</v-icon>
+          <!-- A return button for user to go back to business profile-->
+          <v-btn class="ml-2 pl-3" color="secondary" @click="viewProfile">
             Go Back
+            <v-icon class="ml-1">mdi-arrow-left</v-icon>
           </v-btn>
         </v-card-actions>
         <div class="gap"/>
-        <h2 class="saleTitle">{{ product.name }}</h2>
+        <h2 class="d-inline-block">{{ product.name }}</h2>
         <label class="saleTitleJoin"> From </label>
         <a class="businessLink">Nathan Apple LTD</a>
       </div>
       <div>
-        <label class="description"> {{ productDescription }} </label>
+        <label class="fontSize"> {{ productDescription }} </label>
       </div>
       <div>
         <v-row no-gutters>
-          <v-col class="column" cols="6" sm="2">
-            <label class="leadingLabel">Total Price:</label>
+          <v-col class="mt-2" cols="6" sm="2">
+            <label class="fontSize">Total Price:</label>
           </v-col>
-          <v-col class="column" cols="6" sm="4">
-            <label class="followingLabel">${{ saleItem.price }}</label>
+          <v-col class="mt-2" cols="6" sm="4">
+            <label class="fontSize">${{ saleItem.price }}</label>
           </v-col>
-          <v-col class="column" cols="6" sm="2">
+          <v-col class="mt-2" cols="6" sm="2">
             <label class="leadingLabel">Date Created:</label>
           </v-col>
-          <v-col class="column" cols="6" sm="4">
-            <label class="followingLabel">{{ createdFormatted }}</label>
+          <v-col class="mt-2" cols="6" sm="4">
+            <label class="fontSize">{{ createdFormatted }}</label>
           </v-col>
-          <v-col class="column" cols="6" sm="2">
+          <v-col class="mt-2" cols="6" sm="2">
             <label class="leadingLabel">Quantity:</label>
           </v-col>
-          <v-col class="column" cols="6" sm="4">
-            <label class="followingLabel">{{ saleItem.quantity }}</label>
+          <v-col class="mt-2" cols="6" sm="4">
+            <label class="fontSize">{{ saleItem.quantity }}</label>
           </v-col>
-          <v-col class="column" cols="6" sm="2">
+          <v-col class="mt-2" cols="6" sm="2">
             <label class="leadingLabel">Expiry Date:</label>
           </v-col>
-          <v-col class="column" cols="6" sm="4">
-            <label class="followingLabel">{{ expiresFormatted }}</label>
+          <v-col class="mt-2" cols="6" sm="4">
+            <label class="fontSize">{{ expiresFormatted }}</label>
           </v-col>
-          <v-col class="column" cols="6" sm="2">
+          <v-col class="mt-2" cols="6" sm="2">
             <label class="leadingLabel">More Info:</label>
           </v-col>
-          <v-col class="column" cols="6" sm="4">
-            <label class="followingLabel">
+          <v-col class="mt-2" cols="6" sm="4">
+            <label class="fontSize">
               {{ saleItem.moreInfo }}
             </label>
           </v-col>
-          <v-col class="column" cols="6" sm="2">
+          <v-col class="mt-2" cols="6" sm="2">
             <label class="leadingLabel">Closing Date:</label>
           </v-col>
-          <v-col class="column" cols="6" sm="4">
-            <label class="followingLabel">{{ createdFormatted }}</label>
+          <v-col class="mt-2" cols="6" sm="4">
+            <label class="fontSize">{{ createdFormatted }}</label>
           </v-col>
-          <v-btn class="product-btn" color=orange outlined @click="extraDetails = !extraDetails;">Extra Details</v-btn>
+          <v-col align=right>
+            <v-btn class="mt-2 right" color=orange outlined @click="extraDetails = !extraDetails;">Extra Details</v-btn>
+          </v-col>
         </v-row>
         <div v-if="extraDetails">
           <v-row no-gutters>
-            <v-col class="column" cols="6" sm="2">
+            <v-col class="mt-2" cols="6" sm="2">
               <label class="leadingLabel">Best Before Date:</label>
             </v-col>
-            <v-col class="column" cols="6" sm="4">
-              <label class="followingLabel">{{ bestBeforeFormatted }}</label>
+            <v-col class="mt-2" cols="6" sm="4">
+              <label class="fontSize">{{ bestBeforeFormatted }}</label>
             </v-col>
-            <v-col class="column" cols="6" sm="2">
+            <v-col class="mt-2" cols="6" sm="2">
               <label class="leadingLabel">Sell By Date:</label>
             </v-col>
-            <v-col class="column" cols="6" sm="4">
-              <label class="followingLabel">{{ sellByFormatted }}</label>
+            <v-col class="mt-2" cols="6" sm="4">
+              <label class="fontSize">{{ sellByFormatted }}</label>
             </v-col>
-            <v-col class="column" cols="6" sm="2">
+            <v-col class="mt-2" cols="6" sm="2">
               <label class="leadingLabel">Country:</label>
             </v-col>
-            <v-col class="column" cols="6" sm="4">
-              <label class="followingLabel">{{ product.countryOfSale }}</label>
+            <v-col class="mt-2" cols="6" sm="4">
+              <label class="fontSize">{{ product.countryOfSale }}</label>
             </v-col>
-            <v-col class="column" cols="6" sm="2">
+            <v-col class="mt-2" cols="6" sm="2">
               <label class="leadingLabel">Manufacturer:</label>
             </v-col>
-            <v-col class="column" cols="6" sm="4">
-              <label class="followingLabel">{{ product.manufacturer }}</label>
+            <v-col class="mt-2" cols="6" sm="4">
+              <label class="fontSize">{{ product.manufacturer }}</label>
             </v-col>
-            <v-col class="column" cols="6" sm="2">
+            <v-col class="mt-2" cols="6" sm="2">
               <label class="leadingLabel">Original Name:</label>
             </v-col>
-            <v-col class="column" cols="6" sm="4">
-              <label class="followingLabel">{{ product.name }}</label>
+            <v-col class="mt-2" cols="6" sm="4">
+              <label class="fontSize">{{ product.name }}</label>
             </v-col>
           </v-row>
         </div>
@@ -193,10 +198,16 @@ export default {
       return this.currency.symbol + formatPrice(this.saleItem.price) + " " + this.currency.code;
     },
     productDescription() {
-      return this.product.description || "Not set";
+      return this.product.fontSize || "Not set";
     }
   },
   methods: {
+    /**
+     * Shows the business profile page
+     */
+    viewProfile() {
+      this.$router.push("/business/" + this.$store.state.activeRole.id);
+    },
     /**
      * Computes the currency
      */
@@ -217,21 +228,9 @@ export default {
   width: auto;
 }
 
-.column {
-  padding-top: 10px;
-}
-
 .leadingLabel {
   font-weight: bold;
   font-size: 20px;
-}
-
-.followingLabel {
-  font-size: 20px;
-}
-
-.saleTitle {
-  display: inline;
 }
 
 .saleTitleJoin {
@@ -247,23 +246,7 @@ export default {
   color: grey;
 }
 
-.product-btn {
-  margin-top: 10px;
-}
-
-.action-btn-container {
-  float: right;
-}
-
-.action-btn {
-  margin-left: 15px;
-}
-
-.space {
-  margin-top: 25px;
-}
-
-.description {
+.fontSize {
   font-size: 20px;
 }
 </style>
