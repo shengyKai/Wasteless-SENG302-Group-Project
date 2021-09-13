@@ -38,6 +38,8 @@ tags:
   - name: 'U23: Search for business'
   - name: 'U26: Example data'
   - name: 'U28: Product Catalogue search'
+  - name: 'U29: Search Sale Listing'
+  - name: 'U30: Individual full sale listing'
   - name: 'U32: Managing my feed'
   - name: 'UCM1: Community marketplace'
     description: >-
@@ -1221,6 +1223,175 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Listing'
+  '/listings/{id}/interest':
+    put:
+      tags:
+        - 'U30: Individual full sale listing'
+        - Listings / sales
+      summary: Sets the interest state (liked/unliked) for the given user and listing
+      security:
+      - CookieAuth:
+          - user
+          - globalApplicationAdmin
+          - defaultGlobalApplicationAdmin
+      parameters:
+        - name: id
+          in: path
+          description: ID of listing to update the interest state
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - userId
+                - interested
+              properties:
+                userId:
+                  type: integer
+                  example: 6
+                  description: ID of user to update the interest state
+                interested:
+                  type: boolean
+                  example: false
+                  description: New interest state for the provided user/listing combination
+      responses:
+        '200':
+          description: Request successful and interest state is updated
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '406':
+          $ref: '#/components/responses/NotAcceptableError'
+  /businesses/listings/search:
+    get:
+      tags:
+        - 'U29: Search Sale Listing'
+        - Business Accounts
+        - Listings / sales
+      summary: Get sale items for business that meet search criteria passed
+      security:
+        - CookieAuth:
+            - user
+            - globalApplicationAdmin
+            - defaultGlobalApplicationAdmin
+      parameters:
+        - name: productSearchQuery
+          in: query
+          description: string to match against name or description of sale items
+          schema:
+            type: string
+            example: "Ham"
+        - name: businessSearchQuery
+          in: query
+          description: string to match against business names
+          schema:
+            type: string
+            example: "John's Butcher"
+        - name: locationSearchQuery
+          in: query
+          description: string to match against business addresses
+          schema:
+            type: string
+            example: "23 Here St"
+        - name: page
+          in: query
+          description: The page number to retrieve (1 indexed)
+          schema:
+            type: integer
+            example: 1
+        - name: resultsPerPage
+          in: query
+          description: The number of results to show per page
+          schema:
+            type: integer
+            example: 10
+        - name: orderBy
+          in: query
+          description: Sale property to order results by
+          schema:
+            type: string
+            example: created
+            enum:
+              - name
+              - price
+              - businessName
+              - businessLocation
+              - expiry
+              - closes
+              - created
+              - quantity
+        - name: reverse
+          in: query
+          description: Whether to flip default sort order (default is ascending)
+          schema:
+            type: boolean
+            example: false
+        - name: businessType
+          in: query
+          description: Business types to filter results by
+          schema:
+            $ref: '#/components/schemas/BusinessTypes'
+        - name: priceLower
+          in: query
+          description: Results must be above this price inclusive
+          schema:
+            type: number
+            format: double
+            example: 13.99
+        - name: priceUpper
+          in: query
+          description: Results must be below this price inclusive
+          schema:
+            type: number
+            format: double
+            example: 15.50
+        - name: closeLower
+          in: query
+          description: Results must close after this date
+          schema:
+            type: string
+            format: date-time
+            example: '2021-07-21T23:59:00Z'
+        - name: closeUpper
+          in: query
+          description: Results must close before this date
+          schema:
+            type: string
+            format: date-time
+            example: '2021-07-21T23:59:00Z'
+      responses:
+        '200':
+          description: 'Request successful, a (possibly empty) list of sale items is returned'
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Page'
+                  - type: object
+                    required:
+                      - results
+                    properties:
+                      results:
+                        type: array
+                        items:
+                          allOf:
+                            - $ref: '#/components/schemas/Listing'
+                            - type: object
+                              required:
+                                - business
+                              properties:
+                                business:
+                                  $ref: '#/components/schemas/Business'
+        '400':
+          description: >-
+            Invalid search term provided
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
   '/businesses/search':
     get:
       tags:
@@ -1272,13 +1443,7 @@ paths:
           in: query
           description: Business type to filter results by
           schema:
-            type: string
-            example: Retail Trade
-            enum:
-              - Accommodation and Food Services
-              - Retail Trade
-              - Charitable organisation
-              - Non-profit organisation
+            $ref: '#/components/schemas/BusinessType'
       responses:
         '200':
           description: Request successful, a (possibly empty) list of businesses is returned along with total count
@@ -2229,6 +2394,52 @@ paths:
         '406':
           description: >-
             Not Acceptable: Returned when a feed with an ID does not exist.
+  /users/{id}/feed:
+    get:
+      tags:
+        - 'U32: Managing my feed'
+        - Feed
+      summary: Get all the newsfeed events associated with the user whose ID is given
+      security:
+        - CookieAuth:
+            - user
+            - business
+            - globalApplicationAdmin
+            - defaultGlobalApplicationAdmin
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: ID of the user to retrieve the newsfeed events for
+          example: 10
+        - name: modifiedSince
+          in: query
+          description: The datetime used to filter events. If this parameter is present, only events modified after this datetime will be returned. If this parameter is not present, all events associated with the user will be returned.
+          schema:
+            type: string
+            format: date-time
+            example: '2021-09-04T14:32:00Z'
+      responses:
+        '200':
+          description: Newsfeed events successfully retrieved
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Event'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: >-
+            Forbidden: Returned when a user who is not a GAA/DGAA tries to retrieve the newsfeed events assocaited with another user.
+        '406':
+          description: >-
+            Not Acceptable: Returned when the user with the given ID does not exist.
   /feed/{id}/status:
     put:
       tags:
@@ -2417,7 +2628,7 @@ components:
           example: 57
           readOnly: true
           description: >-
-            A unique (within the business) identifer for this listing -
+            A unique (within the business) identifier for this listing -
             autogenerated by the system
         inventoryItem:
           readOnly: true
@@ -2623,12 +2834,7 @@ components:
         address:
           $ref: '#/components/schemas/Address'
         businessType:
-          type: string
-          enum:
-            - Accommodation and Food Services
-            - Retail Trade
-            - Charitable organisation
-            - Non-profit organisation
+          $ref: '#/components/schemas/BusinessType'
         created:
           type: string
           format: date-time
@@ -2641,6 +2847,23 @@ components:
           description: List of images for this business, with the first image being the primary image.
           items:
             $ref: '#/components/schemas/Image'
+    BusinessType:
+      type: string
+      example: Retail Trade
+      enum:
+        - Accommodation and Food Services
+        - Retail Trade
+        - Charitable organisation
+        - Non-profit organisation
+    BusinessTypes:
+      type: object
+      required:
+        - values
+      properties:
+        values:
+          type: array
+          items:
+            $ref: '#/components/schemas/BusinessType'
     Address:
       type: object
       description: Entity representing some physical address
@@ -2762,6 +2985,7 @@ components:
         - tag
         - status
         - read
+        - lastModified
       properties:
         id:
           type: integer
@@ -2781,6 +3005,12 @@ components:
         read:
           type: boolean
           description: Checks if the event has been read
+        lastModified:
+          type: string
+          format: date-time
+          example: '2020-07-14T14:32:00Z'
+          readOnly: true
+          description: Date and time when the event was last modified
     Tag:
       type: string
       description: Name of the tag (colour name) for the event

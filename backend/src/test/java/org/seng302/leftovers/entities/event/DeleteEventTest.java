@@ -9,7 +9,7 @@ import org.seng302.leftovers.entities.Location;
 import org.seng302.leftovers.entities.MarketplaceCard;
 import org.seng302.leftovers.entities.User;
 import org.seng302.leftovers.persistence.BusinessRepository;
-import org.seng302.leftovers.persistence.EventRepository;
+import org.seng302.leftovers.persistence.event.EventRepository;
 import org.seng302.leftovers.persistence.MarketplaceCardRepository;
 import org.seng302.leftovers.persistence.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -80,7 +80,8 @@ class DeleteEventTest {
         assertEquals(testCard.getSection().getName(), json.get("section"));
         assertEquals(event.getStatus().toString().toLowerCase(), json.get("status"));
         assertEquals(event.isRead(), json.get("read"));
-        assertEquals(8, json.size());
+        assertEquals(event.getLastModified().toString(), json.get("lastModified"));
+        assertEquals(9, json.size());
     }
 
 }

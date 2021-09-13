@@ -4,10 +4,11 @@ import Vuetify from 'vuetify';
 import { createLocalVue, mount, Wrapper } from '@vue/test-utils';
 import MessageEvent from '@/components/home/newsfeed/MessageEvent.vue';
 import * as api from '@/api/internal';
+import * as events from '@/api/events';
 
 import Vuex, { Store } from 'vuex';
 import { getStore, resetStoreForTesting, StoreData } from '@/store';
-import { castMock, makeTestUser } from '../utils';
+import { castMock, findButtonWithText, makeTestUser } from '../utils';
 
 Vue.use(Vuetify);
 
@@ -16,8 +17,14 @@ jest.mock('@/api/internal', () => ({
   getMessagesInConversation: jest.fn(),
 }));
 
+jest.mock('@/api/events', () => ({
+  getEvents: jest.fn(),
+  updateEventAsRead: jest.fn(),
+}));
+
 const messageConversation = castMock(api.messageConversation);
 const getMessagesInConversation = castMock(api.getMessagesInConversation);
+const getEvents = castMock(events.getEvents);
 
 const sellerUser = makeTestUser(100);
 const buyerUser = makeTestUser(50);
@@ -76,29 +83,20 @@ describe('MessageEvent.vue', () => {
       }
     });
     eventWrapper = wrapper.findComponent({name: 'Event'});
+    getEvents.mockResolvedValue([]);
   });
 
   /**
    * Finds the button that controls sending a new message
    * @returns A wrapper around the send button
    */
-  function findSendButton() {
-    const buttons = wrapper.findAllComponents({ name: 'v-btn' });
-    const filtered = buttons.filter(button => button.text().includes('Send'));
-    expect(filtered.length).toBe(1);
-    return filtered.at(0);
-  }
+  const findSendButton = () => findButtonWithText(wrapper, 'Send');
 
   /**
    * Finds the button that controls loading more messages
    * @returns A wrapper around the load more button
    */
-  function findLoadMoreButton() {
-    const buttons = wrapper.findAllComponents({ name: 'v-btn' });
-    const filtered = buttons.filter(button => button.text().includes('Load more'));
-    expect(filtered.length).toBe(1);
-    return filtered.at(0);
-  }
+  const findLoadMoreButton = () => findButtonWithText(wrapper, 'Load more');
 
   it('If new message is from other participant then title should be "New message from..."', () => {
     expect(eventWrapper.vm.title).toBe('Conversation with ' + sellerUser.firstName);
@@ -229,9 +227,7 @@ describe('MessageEvent.vue', () => {
     await findLoadMoreButton().trigger('click');
     await Vue.nextTick();
 
-    const buttons = wrapper.findAllComponents({ name: 'v-btn' });
-    const filtered = buttons.filter(button => button.text().includes('Load more'));
-    expect(filtered.length).toBe(0);
+    expect(findLoadMoreButton().exists()).toBeFalsy();
   });
 
   it('Matches snapshot', () => {

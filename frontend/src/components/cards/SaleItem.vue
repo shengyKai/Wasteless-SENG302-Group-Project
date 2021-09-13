@@ -1,84 +1,97 @@
 <template>
-  <v-card width="600px" style="margin: 1em">
-    <v-row>
-      <v-col cols="8">
-        <v-expand-transition>
-          <div v-show="!moreInfo">
-            <ImageCarousel :imagesList="product.images" :productId="product.id" />
-            <v-card-title>{{ saleItem.quantity + " × " + product.name }}</v-card-title>
-            <v-card-subtitle>{{ retailPrice }}</v-card-subtitle>
+  <div v-if=!expandSaleListing>
+    <v-card width="600px" class="sale-card">
+      <v-row>
+        <v-col cols="8">
+          <v-expand-transition>
+            <div v-show="!moreInfo">
+              <ImageCarousel :imagesList="product.images" :productId="product.id" />
+              <v-card-title>{{ saleItem.quantity + " × " + product.name }}</v-card-title>
+              <v-card-subtitle>{{ retailPrice }}</v-card-subtitle>
 
-          </div>
-        </v-expand-transition>
-        <v-expand-transition>
-          <div v-show="moreInfo">
-            <v-divider/>
-            <v-card-subtitle>
-              Product Description
-            </v-card-subtitle>
-            <v-card-text v-if="productDescription.length >= 50">
-              {{productDescription.slice(0, 50) + "..."}}
-              <FullProductDescription ref="fullProductDescription" :product-description="productDescription"/>
-            </v-card-text>
-            <v-card-text v-else>
-              {{productDescription}}
-            </v-card-text>
-            <div ref="sellerInfo" v-if="saleItem.moreInfo !== undefined && saleItem.moreInfo.length > 0">
+            </div>
+          </v-expand-transition>
+          <v-expand-transition>
+            <div v-show="moreInfo">
+              <v-divider/>
               <v-card-subtitle>
-                Additional Sale Info
+                Product Description
               </v-card-subtitle>
-              <v-card-text v-if="saleItem.moreInfo.length >= 50">
-                {{saleItem.moreInfo.slice(0,50)}}
-                <FullProductDescription ref="fullMoreInfo" :product-description="saleItem.moreInfo"/>
+              <v-card-text v-if="productDescription.length >= 50">
+                {{productDescription.slice(0, 50) + "..."}}
+                <FullProductDescription ref="fullProductDescription" :product-description="productDescription"/>
               </v-card-text>
               <v-card-text v-else>
-                {{saleItem.moreInfo}}
+                {{productDescription}}
               </v-card-text>
+              <div ref="sellerInfo" v-if="saleItem.moreInfo !== undefined && saleItem.moreInfo.length > 0">
+                <v-card-subtitle>
+                  Additional Sale Info
+                </v-card-subtitle>
+                <v-card-text v-if="saleItem.moreInfo.length >= 50">
+                  {{saleItem.moreInfo.slice(0,50)}}
+                  <FullProductDescription ref="fullMoreInfo" :product-description="saleItem.moreInfo"/>
+                </v-card-text>
+                <v-card-text v-else>
+                  {{saleItem.moreInfo}}
+                </v-card-text>
+              </div>
             </div>
-          </div>
-        </v-expand-transition>
-      </v-col>
-      <v-col cols="4">
-        <v-timeline dense style="height: 100%; margin-left: -40%; margin-bottom: 10px">
-          <v-timeline-item color="grey" small>
-            <div style="margin-left: -25px">
-              <strong>Created</strong>
-              {{createdFormatted}}
-            </div>
-          </v-timeline-item>
-          <v-timeline-item color="orange" small>
-            <div style="margin-left: -25px">
-              <strong>Expires</strong>
-              {{expiresFormatted}}
-            </div>
-          </v-timeline-item>
-          <v-timeline-item color="red" small>
-            <div style="margin-left: -25px">
-              <strong>Closes</strong>
-              {{closesFormatted}}
-            </div>
-          </v-timeline-item>
-        </v-timeline>
-        <v-card-actions>
-          <v-btn ref="viewMoreButton" style="position: absolute; bottom: 10px; right: 10px" color="secondary" @click="moreInfo=!moreInfo">View {{moreInfo? 'Less' : 'More'}}</v-btn>
-        </v-card-actions>
-      </v-col>
-    </v-row>
-  </v-card>
+          </v-expand-transition>
+        </v-col>
+        <v-col cols="4">
+          <v-timeline dense class="timeline">
+            <v-timeline-item color="grey" small>
+              <div class="date-label">
+                <strong>Created</strong>
+                {{createdFormatted}}
+              </div>
+            </v-timeline-item>
+            <v-timeline-item color="orange" small>
+              <div class="date-label">
+                <strong>Expires</strong>
+                {{expiresFormatted}}
+              </div>
+            </v-timeline-item>
+            <v-timeline-item color="red" small>
+              <div class="date-label">
+                <strong>Closes</strong>
+                {{closesFormatted}}
+              </div>
+            </v-timeline-item>
+          </v-timeline>
+          <v-card-actions>
+            <v-btn ref="expandButton" class="expand-button" color="normal" @click="expandSaleListing=true">Expand</v-btn>
+            <v-btn ref="viewMoreButton" class="view-more-button" color="secondary" @click="moreInfo=!moreInfo">View {{moreInfo? 'Less' : 'More'}}</v-btn>
+          </v-card-actions>
+        </v-col>
+      </v-row>
+    </v-card>
+  </div>
+  <div v-else>
+    <SaleListingPage
+      :saleItem="saleItem"
+      :businessId="businessId"
+    />
+  </div>
 </template>
 
 <script>
 import ImageCarousel from "@/components/utils/ImageCarousel";
 import FullProductDescription from "@/components/utils/FullProductDescription";
+import SaleListingPage from "@/components/SaleListing/FullSaleListing.vue";
 import { currencyFromCountry } from "@/api/currency";
 import { formatDate, formatPrice } from '@/utils';
 
 export default {
   name: "SaleItem",
-  components: {FullProductDescription, ImageCarousel},
+  components: {
+    FullProductDescription, ImageCarousel, SaleListingPage
+  },
   data() {
     return {
       moreInfo: false,
+      expandSaleListing: false,
       currency: {
         code: "",
         symbol: ""
@@ -140,7 +153,7 @@ export default {
     },
     productDescription() {
       return this.product.description || "Not set";
-    }
+    },
   },
   async created() {
     // When the Sale item is created, the currency will be set to the currency of the country the product is being
@@ -149,3 +162,31 @@ export default {
   }
 };
 </script>
+
+<style scoped>
+.timeline {
+  height: 100%;
+  margin-left: -40%;
+  margin-bottom: 10px;
+}
+
+.sale-card {
+  margin: 1em;
+}
+
+.date-label {
+  margin-left: -25px;
+}
+
+.expand-button {
+  position: absolute;
+  bottom: 10px;
+  right: 125px;
+}
+
+.view-more-button {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+}
+</style>

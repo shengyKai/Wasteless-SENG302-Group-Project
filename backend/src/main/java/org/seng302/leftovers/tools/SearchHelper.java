@@ -5,6 +5,7 @@ import lombok.Data;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.seng302.leftovers.dto.ProductFilterOption;
+import org.seng302.leftovers.dto.SaleListingSearchDTO;
 import org.seng302.leftovers.entities.*;
 import org.seng302.leftovers.exceptions.SearchFormatException;
 import org.seng302.leftovers.persistence.SpecificationsBuilder;
@@ -13,6 +14,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -280,12 +283,104 @@ public class SearchHelper {
         return buildExactMatchSpec(businessType, Collections.singletonList("businessType"));
     }
      
-    /* Returns a specification for Keywords which is used to filter keywords using a search term.
+    /**
+     * Returns a specification for Keywords which is used to filter keywords using a search term.
      * @param searchQuery The term to search for
      * @return Specification of type Keyword
      */
     public static Specification<Keyword> constructKeywordSpecificationFromSearchQuery(String searchQuery) {
         return buildPartialMatchSpec(searchQuery, Collections.singletonList("name"));
+    }
+
+    /**
+     * Construct a specification to match against Sale items
+     * Specification will match when searchQuery matches ANY field of
+     * [product name, business name, business address, product manufacturer, product description]
+     * AND productName, businessName, businessLocation match their respective fields.
+     * When a field is left blank, it is ignored.
+     * @param searchQuery Term to match against all fields
+     * @param productName Term to match against productName
+     * @param businessName Term to match against Business name
+     * @param businessLocation Term to match against Business location
+     * @return A specification for Sale Items
+     */
+    public static Specification<SaleItem> constructSaleItemSpecificationFromSearchQueries
+            (String searchQuery, String productName, String businessName, String businessLocation) {
+
+
+        var allFieldNames = List.of(
+                "inventoryItem.product.name",
+                "inventoryItem.product.business.name",
+                "inventoryItem.product.business.address.country",
+                "inventoryItem.product.business.address.city",
+                "inventoryItem.product.business.address.region",
+                "inventoryItem.product.manufacturer",
+                "inventoryItem.product.description",
+                "moreInfo");
+        // build a match for all fields
+        Specification<SaleItem> generalSpec = Specification.where(null);
+        if (!searchQuery.isBlank()) {
+            var searchTokens = splitSearchStringIntoTerms(searchQuery);
+            SearchQuery<SaleItem> searchSpecs = parseSearchTokens(searchTokens, allFieldNames);
+            generalSpec = generalSpec.or(buildCompoundSpecification(searchSpecs));
+        }
+        // build a match for specific fields
+        Specification<SaleItem> advancedSpec = Specification.where(null);
+        if (!businessName.isBlank()){
+            advancedSpec = advancedSpec.and(constructSaleItemSpecificationFromBusinessName(businessName));
+        }
+        if (!productName.isBlank()) {
+            advancedSpec = advancedSpec.and(constructSaleItemSpecificationFromProductName(productName));
+        }
+        if (!businessLocation.isBlank()) {
+            advancedSpec = advancedSpec.and(constructSaleItemSpecificationFromBusinessLocation(businessLocation));
+        }
+
+        return generalSpec.and(advancedSpec);
+    }
+
+    /**
+     * Returns a specifications which matches sale items with a given product name
+     * @param productName The product name to search for
+     * @return Specification for SaleItem
+     */
+    private static Specification<SaleItem> constructSaleItemSpecificationFromProductName(String productName) {
+        List<String> fieldNames = Arrays.asList("inventoryItem.product.name");
+        List<String> searchTokens = splitSearchStringIntoTerms(productName);
+
+        SearchQuery<SaleItem> searchSpecs = parseSearchTokens(searchTokens, fieldNames);
+        return buildCompoundSpecification(searchSpecs);
+    }
+
+    /**
+     * Returns a specifications which matches against the name of the business which owns the sale item
+     * @param businessName The query to search against business name
+     * @return Specification for SaleItem
+     */
+    private static Specification<SaleItem> constructSaleItemSpecificationFromBusinessName(String businessName) {
+        List<String> fieldNames = Arrays.asList(
+                "inventoryItem.product.business.name");
+        List<String> searchTokens = splitSearchStringIntoTerms(businessName);
+
+        SearchQuery<SaleItem> searchSpecs = parseSearchTokens(searchTokens, fieldNames);
+        return buildCompoundSpecification(searchSpecs);
+    }
+
+    /**
+     * Returns a specifications which matches against the location of the business which owns the sale item
+     * The query will match against country, city and region
+     * @param location The query to search against location
+     * @return Specification for SaleItem
+     */
+    private static Specification<SaleItem> constructSaleItemSpecificationFromBusinessLocation(String location) {
+        List<String> fieldNames = Arrays.asList(
+                "inventoryItem.product.business.address.country",
+                "inventoryItem.product.business.address.city",
+                "inventoryItem.product.business.address.region");
+        List<String> searchTokens = splitSearchStringIntoTerms(location);
+
+        SearchQuery<SaleItem> searchSpecs = parseSearchTokens(searchTokens, fieldNames);
+        return buildCompoundSpecification(searchSpecs);
     }
 
     /**
@@ -612,5 +707,78 @@ public class SearchHelper {
      */
     public static Specification<InventoryItem> constructSpecificationFromInventoryItemsFilter(Business business) {
         return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("product").get("business"), business);
+    }
+
+    /**
+     * Constructs a specification with regards to the "price" field of the SaleItem and matches SaleItems which are between
+     * the lower bound and upper bound of prices inclusive.
+     * @param lowerBound of the price of the SaleItems
+     * @param upperBound of the price of the SaleItems
+     * @return A specification for SaleItems which matches the price range
+     */
+    public static Specification<SaleItem> constructSaleListingSpecificationFromPrice(BigDecimal lowerBound, BigDecimal upperBound) {
+        // If both bounds are null, return an specification with no limitations
+        if (lowerBound == null && upperBound == null) {
+            return (root, query, criteriaBuilder) -> criteriaBuilder.conjunction();
+        }
+        else if (lowerBound == null) {
+            return (root, query, criteriaBuilder) -> criteriaBuilder.lessThanOrEqualTo(root.get("price"), upperBound);
+        }
+        else if (upperBound == null) {
+            return (root, query, criteriaBuilder) -> criteriaBuilder.greaterThanOrEqualTo(root.get("price"), lowerBound);
+        }
+        // If both bounds are present, return a specification between both bounds
+        return (root, query, criteriaBuilder) -> criteriaBuilder.between(root.get("price"), lowerBound, upperBound);
+    }
+
+    /**
+     * Constructs a specification with regards to the "closes" field of the SaleItem and matches SaleItems which are between
+     * the lower bound and upper bound of closing dates inclusive.
+     * @param lowerBound of the closing date of the SaleItems
+     * @param upperBound of the closing date of the SaleItems
+     * @return A specification for SaleItems which matches the closing date range
+     */
+    public static Specification<SaleItem> constructSaleListingSpecificationFromClosingDate(LocalDate lowerBound, LocalDate upperBound) {
+        // If both bounds are null, return an specification with no limitations
+        if (lowerBound == null && upperBound == null) {
+            return (root, query, criteriaBuilder) -> criteriaBuilder.conjunction();
+        }
+        else if (lowerBound == null) {
+            return (root, query, criteriaBuilder) -> criteriaBuilder.lessThanOrEqualTo(root.get("closes"), upperBound);
+        }
+        else if (upperBound == null) {
+            return (root, query, criteriaBuilder) -> criteriaBuilder.greaterThanOrEqualTo(root.get("closes"), lowerBound);
+        }
+        // If both bounds are present, return a specification between both bounds
+        return (root, query, criteriaBuilder) -> criteriaBuilder.between(root.get("closes"), lowerBound, upperBound);
+    }
+
+    /**
+     * Constructs a specification with regards to the "businessType" field of the business that owns the SaleItems
+     * and matches SaleItems which are owned by businesses of that type.
+     * @param businessTypes a list of strings containing the business types of the business
+     * @return A specification for Sale items which matches the business's business type
+     */
+    public static Specification<SaleItem> constructSaleListingSpecificationFromBusinessType(List<String> businessTypes) {
+        if  (businessTypes.isEmpty()) {
+            return (root, query, criteriaBuilder) -> root.get("inventoryItem").get("product").get("business").get("businessType").in(Business.getBusinessTypes());
+        } else {
+            return (root, query, criteriaBuilder) -> root.get("inventoryItem").get("product").get("business").get("businessType").in(businessTypes);
+        }
+    }
+
+    /**
+     * Constructs a composite specification with three other smaller specifications containing the price, closing date and
+     * business type of sale items.
+     * @param saleListingSearchDTO containing the price, closing date and business type of the search specification
+     * @return A specification for Sale items which matches the business's price, closing date and business type
+     */
+    public static Specification<SaleItem> constructSaleListingSpecificationForSearch(SaleListingSearchDTO saleListingSearchDTO) {
+        return Specification.where(constructSaleListingSpecificationFromPrice(
+                        saleListingSearchDTO.getPriceLowerBound(), saleListingSearchDTO.getPriceUpperBound())).
+                and(constructSaleListingSpecificationFromClosingDate(
+                        saleListingSearchDTO.getClosingDateLowerBound(), saleListingSearchDTO.getClosingDateUpperBound())).
+                and(constructSaleListingSpecificationFromBusinessType(
+                        saleListingSearchDTO.getBusinessTypes()));
     }
 }

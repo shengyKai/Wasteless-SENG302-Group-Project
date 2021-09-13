@@ -1,5 +1,6 @@
-import { Keyword, MarketplaceCard, MarketplaceCardSection, MaybeError, Message, User } from "./internal";
+import { Keyword, MarketplaceCard, MarketplaceCardSection, MaybeError, Message, Sale, User } from "./internal";
 import axios from 'axios';
+import { is } from 'typescript-is';
 
 const SERVER_URL = process.env.VUE_APP_SERVER_ADD;
 
@@ -9,12 +10,7 @@ const instance = axios.create({
   withCredentials: true,
 });
 
-const EMITTER_URL = process.env.VUE_APP_SERVER_ADD + '/events/emitter';
-
-let eventSource: EventSource;
-let lastErrorTime = Number.MIN_VALUE;
-
-export type AnyEvent = GlobalMessageEvent | ExpiryEvent | DeleteEvent | KeywordCreatedEvent | MessageEvent;
+export type AnyEvent = GlobalMessageEvent | ExpiryEvent | DeleteEvent | KeywordCreatedEvent | MessageEvent | InterestEvent;
 
 export type EventTag = 'none' | 'red' | 'orange' | 'yellow' | 'green' | 'blue' | 'purple'
 export type EventStatus = 'normal' | 'starred' | 'archived'
@@ -26,6 +22,7 @@ type BaseEvent<T extends string> = {
   tag: EventTag,
   status: EventStatus,
   read: boolean,
+  lastModified: string
 }
 
 export type GlobalMessageEvent = BaseEvent<'GlobalMessageEvent'> & {
@@ -54,37 +51,9 @@ export type MessageEvent = BaseEvent<'MessageEvent'> & {
     id: number,
   },
 }
-
-/**
- * Starts the global event listener.
- * This method is expected to be called immediately after the user is logged in, so that they can receive their newsfeed items
- * @param userId user to try listening events from
- */
-export function initialiseEventSourceForUser(userId: number): void {
-  eventSource?.close();
-
-  eventSource = new EventSource(EMITTER_URL + "?userId=" + encodeURIComponent(userId), {
-    withCredentials: true,
-  });
-  eventSource.addEventListener("error", (event) => {
-    if (eventSource.readyState === EventSource.CLOSED) {
-      return;
-    }
-
-    let errorTime = Date.now();
-    if (lastErrorTime + 10 > errorTime) { // Been less than 10s since last error
-      console.error("Error occured", event);
-      eventSource.close(); // Give up
-    }
-  });
-}
-
-/**
- * Add a handler for whenever a newsfeed event arrives
- * @param handler Event handler
- */
-export function addEventMessageHandler(handler: (event: AnyEvent) => void): void {
-  eventSource.addEventListener('newsfeed' as any, (event) => handler(JSON.parse(event.data)));
+export type InterestEvent = BaseEvent<'InterestEvent'> & {
+  saleItem: Sale,
+  interested: boolean,
 }
 
 /**
@@ -104,4 +73,37 @@ export async function updateEventAsRead(eventId: number): Promise<MaybeError<und
     return 'Request failed: ' + error.response?.data.message;
   }
   return undefined;
+}
+
+/**
+ * Retrieve events for the newsfeed of the user with the given id. If a modifedSince timestamp is provided,
+ * only events that have been after this timestamp will be retrieved. If no timestamp is provided, all events
+ * associated with the user will be retrieved.
+ * @param userId The ID number of the user to retrieve newsfeed events for.
+ * @param modifiedSince A datetime string in UTC format. If this string is provided, only events modified after
+ * this timestamp will be retrieved.
+ * @returns An array of events to be displayed in the user's newsfeed.
+ */
+export async function getEvents(userId: number, modifiedSince: string | undefined): Promise<MaybeError<AnyEvent[]>> {
+  const params = new URLSearchParams();
+  if (modifiedSince) {
+    params.append("modifiedSince", modifiedSince);
+  }
+  try {
+    const response = await instance.get(`/users/${userId}/feed`, {
+      params: params
+    });
+    if (!is<AnyEvent[]>(response.data)) {
+      return 'Response is not an event array';
+    }
+    return response.data;
+  } catch (error) {
+    let status: number | undefined = error.response?.status;
+    if (status === undefined) return 'Failed to reach backend';
+    if (status === 400) return 'Invalid \'modified since\' date';
+    if (status === 401) return 'You have been logged out. Please login again and retry';
+    if (status === 403) return `Invalid authorisation for getting events associated with user ${userId}`;
+    if (status === 406) return 'User does not exist';
+    return 'Request failed: ' + error.response?.data.message;
+  }
 }

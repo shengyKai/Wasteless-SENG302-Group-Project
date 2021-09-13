@@ -1,5 +1,6 @@
 package org.seng302.leftovers.entities.event;
 
+import lombok.EqualsAndHashCode;
 import org.seng302.leftovers.dto.event.DeleteEventDTO;
 import org.seng302.leftovers.entities.MarketplaceCard;
 
@@ -12,6 +13,7 @@ import javax.persistence.Enumerated;
  * This class is used for notifying users when their marketplace card has been deleted.
  */
 @Entity
+@EqualsAndHashCode(callSuper = false)
 public class DeleteEvent extends Event {
 
     @Enumerated(EnumType.ORDINAL)

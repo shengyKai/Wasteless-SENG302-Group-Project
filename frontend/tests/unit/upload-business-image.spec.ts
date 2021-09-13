@@ -3,7 +3,7 @@ import Vuetify from 'vuetify';
 import { createLocalVue, Wrapper, mount } from '@vue/test-utils';
 
 import BusinessImageUploader from "@/components/utils/BusinessImageUploader.vue";
-import { castMock, flushQueue } from './utils';
+import { castMock, findButtonWithText, flushQueue } from './utils';
 import * as api from '@/api/internal';
 
 jest.mock('@/api/internal', () => ({
@@ -89,24 +89,14 @@ describe('BusinessImageUploader.vue', () => {
    *
    * @returns A Wrapper around the close button
    */
-  function findCloseButton() {
-    const buttons = wrapper.findAllComponents({ name: 'v-btn' });
-    const filtered = buttons.filter(button => button.text().includes('Close'));
-    expect(filtered.length).toBe(1);
-    return filtered.at(0);
-  }
+  const findCloseButton = () => findButtonWithText(wrapper, 'Close');
 
   /**
    * Finds the create button in the BusinessImageUploader form
    *
    * @returns A Wrapper around the create button
    */
-  function findUploadButton() {
-    const buttons = wrapper.findAllComponents({ name: 'v-btn' });
-    const filtered = buttons.filter(button => button.text().includes('Upload'));
-    expect(filtered.length).toBe(1);
-    return filtered.at(0);
-  }
+  const findUploadButton = () => findButtonWithText(wrapper, 'Upload');
 
   it('When the close button is pressed then the dialog should be closed', async () => {
     await findCloseButton().trigger('click'); // Click close button

@@ -5,10 +5,11 @@ import { createLocalVue, mount, Wrapper } from '@vue/test-utils';
 import ExpiryEvent from '@/components/home/newsfeed/ExpiryEvent.vue';
 import MarketplaceCard from "@/components/cards/MarketplaceCard.vue";
 import * as api from '@/api/internal';
+import * as events from '@/api/events';
 
 import Vuex, { Store } from 'vuex';
 import { getStore, resetStoreForTesting, StoreData } from '@/store';
-import { castMock, makeTestUser } from '../utils';
+import { castMock, findButtonWithText, makeTestUser } from '../utils';
 
 Vue.use(Vuetify);
 
@@ -16,11 +17,17 @@ jest.mock('@/api/internal', () => ({
   extendMarketplaceCardExpiry: jest.fn(),
 }));
 
+jest.mock('@/api/events', () => ({
+  getEvents: jest.fn(),
+  updateEventAsRead: jest.fn(),
+}));
+
 jest.mock('@/components/utils/Methods/synchronizedTime', () => ({
   now : new Date("2021-01-02T11:00:00Z")
 }));
 
 const extendMarketplaceCardExpiry = castMock(api.extendMarketplaceCardExpiry);
+const getEvents = castMock(events.getEvents);
 
 describe('ExpiryEvent.vue', () => {
   let wrapper: Wrapper<any>;
@@ -63,6 +70,8 @@ describe('ExpiryEvent.vue', () => {
         },
       }
     });
+
+    getEvents.mockResolvedValue([]);
   });
 
   /**
@@ -70,24 +79,14 @@ describe('ExpiryEvent.vue', () => {
      *
      * @returns A Wrapper around the delay expiry.
      */
-  function findDelayButton() {
-    const buttons = wrapper.findAllComponents({ name: 'v-btn' });
-    const filtered = buttons.filter(button => button.text().includes('Delay expiry'));
-    expect(filtered.length).toBe(1);
-    return filtered.at(0);
-  }
+  const findDelayButton = () => findButtonWithText(wrapper, 'Delay expiry');
 
   /**
      * Finds the button which controls whether the component showing the card is expanded or hidden.
      *
      * @returns A Wrapper around the expand button.
      */
-  function findExpandButton() {
-    const buttons = wrapper.findAllComponents({ name: 'v-btn' });
-    const filtered = buttons.filter(button => button.text().includes('card'));
-    expect(filtered.length).toBe(1);
-    return filtered.at(0);
-  }
+  const findExpandButton = () => findButtonWithText(wrapper, 'card');
 
   /**
      * Finds the marketplace card displayed on the event.

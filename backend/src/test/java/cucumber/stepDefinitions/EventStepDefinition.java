@@ -8,21 +8,22 @@ import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import net.minidev.json.JSONObject;
+import net.minidev.json.parser.ParseException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.seng302.leftovers.dto.event.EventStatus;
 import org.seng302.leftovers.dto.event.EventTag;
 import org.seng302.leftovers.entities.event.Event;
 import org.seng302.leftovers.entities.event.GlobalMessageEvent;
-import org.seng302.leftovers.persistence.EventRepository;
+import org.seng302.leftovers.persistence.event.EventRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 
+import java.io.UnsupportedEncodingException;
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 
@@ -43,11 +44,6 @@ public class EventStepDefinition {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @AfterEach
-    public void cleanUp() {
-        eventRepository.deleteAll();
-    }
-
     @Given("An event is sent to the user")
     public void an_event_is_sent_to_the_user() {
         Event event = new GlobalMessageEvent(userContext.getLast(), "Test message");
@@ -55,23 +51,23 @@ public class EventStepDefinition {
     }
 
     @Then("I have not received a notification")
-    public void i_have_not_received_a_notification() {
-        List<JSONObject> events = eventContext.lastReceivedEvents("newsfeed");
+    public void i_have_not_received_a_notification() throws UnsupportedEncodingException, ParseException {
+        List<JSONObject> events = eventContext.mvcResultToJsonObjectList(requestContext.getLastResult());
 
         assertEquals(0, events.size());
     }
 
     @Then("I receive a notification")
-    public void i_receive_a_notification() {
-        List<JSONObject> events = eventContext.lastReceivedEvents("newsfeed");
+    public void i_receive_a_notification() throws UnsupportedEncodingException, ParseException {
+        List<JSONObject> events = eventContext.mvcResultToJsonObjectList(requestContext.getLastResult());
 
         assertEquals(1, events.size());
     }
 
     @When("I check my notification feed")
     public void i_check_my_notification_feed() {
-        requestContext.performRequest(get("/events/emitter")
-                .param("userId", requestContext.getLoggedInId().toString()));
+        var userId = requestContext.getLoggedInId();
+        requestContext.performRequest(get(String.format("/users/%d/feed", userId)));
     }
 
     @When("I try to change the event tag to {string}")

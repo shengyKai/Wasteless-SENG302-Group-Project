@@ -1,4 +1,4 @@
-package org.seng302.leftovers.persistence;
+package org.seng302.leftovers.persistence.event;
 
 import org.seng302.leftovers.entities.Conversation;
 import org.seng302.leftovers.entities.User;
