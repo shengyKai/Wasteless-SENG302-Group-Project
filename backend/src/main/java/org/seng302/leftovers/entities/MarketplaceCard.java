@@ -286,20 +286,6 @@ public class MarketplaceCard {
     }
 
     /**
-     * Given a string, returns the matching section Enum
-     * @param sectionName The section name to get
-     * @return Matching section or ResponseStatusException if none
-     */
-    public static Section sectionFromString(String sectionName) {
-        for (Section possibleSection : Section.values()) {
-            if (possibleSection.getName().equals(sectionName)) {
-                return possibleSection;
-            }
-        }
-        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid section name");
-    }
-
-    /**
      * This class uses the builder pattern to construct an instance of the MarketplaceCard class
      */
     public static class Builder {
