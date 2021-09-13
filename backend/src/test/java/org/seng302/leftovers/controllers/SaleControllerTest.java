@@ -510,8 +510,7 @@ class SaleControllerTest {
         mockMvc.perform(put("/listings/1/interest")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(createUpdateInterestRequest(4, true).toString()))
-                .andExpect(status().isUnauthorized())
-                .andReturn();
+                .andExpect(status().isUnauthorized());
 
         // Check that the authentication token manager was called
         authenticationTokenManager.verify(() -> AuthenticationTokenManager.checkAuthenticationToken(any()));
@@ -522,12 +521,11 @@ class SaleControllerTest {
     void setSaleItemInterest_cannotUpdateUser_403Response() throws Exception {
         authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), any())).thenReturn(false);
 
-        // Verify that a 401 response is received in response to the PUT request
+        // Verify that a 403 response is received in response to the PUT request
         mockMvc.perform(put("/listings/1/interest")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(createUpdateInterestRequest(4, true).toString()))
-                .andExpect(status().isForbidden())
-                .andReturn();
+                .andExpect(status().isForbidden());
 
         authenticationTokenManager.verify(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), eq(4L)));
         verify(saleItemRepository, times(0)).save(any());
@@ -540,12 +538,12 @@ class SaleControllerTest {
         var request = createUpdateInterestRequest(4, true);
         request.remove("userId");
 
-        // Verify that a 401 response is received in response to the PUT request
+        // Verify that a 400 response is received in response to the PUT request
         mockMvc.perform(put("/listings/1/interest")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(request.toString()))
-                .andExpect(status().isBadRequest())
-                .andReturn();
+                .andExpect(status().isBadRequest());
+
         verify(saleItemRepository, times(0)).save(any());
     }
 
@@ -558,8 +556,7 @@ class SaleControllerTest {
         mockMvc.perform(put("/listings/1/interest")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(createUpdateInterestRequest(9999, true).toString()))
-                .andExpect(status().isBadRequest())
-                .andReturn();
+                .andExpect(status().isBadRequest());
 
         verify(userRepository, times(1)).findById(9999L);
         verify(saleItemRepository, times(0)).save(any());
@@ -570,12 +567,11 @@ class SaleControllerTest {
         authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), any())).thenReturn(true);
 
 
-        // Verify that a 401 response is received in response to the PUT request
+        // Verify that a 406 response is received in response to the PUT request
         mockMvc.perform(put("/listings/9999/interest")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(createUpdateInterestRequest(4, true).toString()))
-                .andExpect(status().isNotAcceptable())
-                .andReturn();
+                .andExpect(status().isNotAcceptable());
 
         verify(saleItemRepository, times(1)).findById(9999L);
         verify(saleItemRepository, times(0)).save(any());
@@ -585,12 +581,11 @@ class SaleControllerTest {
     void setSaleItemInterest_setInterested_200ResponseAndUserAdded() throws Exception {
         authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), any())).thenReturn(true);
 
-        // Verify that a 401 response is received in response to the PUT request
+        // Verify that a 200 response is received in response to the PUT request
         mockMvc.perform(put(String.format("/listings/%s/interest", saleItem.getId()))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(createUpdateInterestRequest(4, true).toString()))
-                .andExpect(status().isOk())
-                .andReturn();
+                .andExpect(status().isOk());
 
         verify(saleItem, times(1)).addInterestedUser(user);
 
@@ -606,8 +601,7 @@ class SaleControllerTest {
         mockMvc.perform(put(String.format("/listings/%s/interest", saleItem.getId()))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(createUpdateInterestRequest(4, false).toString()))
-                .andExpect(status().isOk())
-                .andReturn();
+                .andExpect(status().isOk());
 
         verify(saleItem, times(1)).removeInterestedUser(user);
 
@@ -619,7 +613,7 @@ class SaleControllerTest {
     void setSaleItemInterest_noInterestEventExists_newInterestEventCreated() throws Exception {
         authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), any())).thenReturn(true);
 
-        // Verify that a 401 response is received in response to the PUT request
+        // Verify that a 200 response is received in response to the PUT request
         mockMvc.perform(put(String.format("/listings/%s/interest", saleItem.getId()))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(createUpdateInterestRequest(4, true).toString()))
@@ -643,7 +637,7 @@ class SaleControllerTest {
         var interestEvent = mock(InterestEvent.class);
         when(interestEventRepository.findInterestEventByNotifiedUserAndSaleItem(user, saleItem)).thenReturn(Optional.of(interestEvent));
 
-        // Verify that a 401 response is received in response to the PUT request
+        // Verify that a 200 response is received in response to the PUT request
         mockMvc.perform(put(String.format("/listings/%s/interest", saleItem.getId()))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(createUpdateInterestRequest(4, true).toString()))
@@ -663,7 +657,7 @@ class SaleControllerTest {
         var interestEvent = mock(InterestEvent.class);
         when(interestEventRepository.findInterestEventByNotifiedUserAndSaleItem(user, saleItem)).thenReturn(Optional.of(interestEvent));
 
-        // Verify that a 401 response is received in response to the PUT request
+        // Verify that a 200 response is received in response to the PUT request
         mockMvc.perform(put(String.format("/listings/%s/interest", saleItem.getId()))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(createUpdateInterestRequest(4, false).toString()))
