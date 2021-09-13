@@ -47,7 +47,7 @@
               v-if="(event.status !== 'archived')"
               class="mr-2"
               ref="filledStarButton"
-              color="yellow"
+              color="orange"
               v-bind="attrs"
               v-on="on"
               @click="toggleStarStatus()"
