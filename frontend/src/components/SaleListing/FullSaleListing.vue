@@ -25,14 +25,14 @@
               <v-icon>mdi-currency-usd</v-icon>
             </v-btn>
             <!-- Thumb up/down button to show and allow user the like & unlike feature -->
-            <v-btn v-if="!interest" class=" pl-2 pr-2 ml-2 blue--text" color="grey lighten-2" @click="changeInterest">
+            <!-- <v-btn v-if="!interest" class=" pl-2 pr-2 ml-2 blue--text" color="grey lighten-2" @click="changeInterest">
               Like
               <v-icon class="ml-1">mdi-thumb-up</v-icon>
             </v-btn>
             <v-btn v-else color="pl-2 pr-2 ml-2 grey lighten-2" @click="changeInterest">
               Unlike
               <v-icon class="ml-1">mdi-thumb-down</v-icon>
-            </v-btn>
+            </v-btn> -->
             <!-- A return button for user to go back to business profile-->
             <v-btn class="ml-2 mr-1 pl-2 pr-1" color="secondary" @click="viewProfile">
               Go Back
@@ -151,6 +151,9 @@ export default {
     businessId: Number
   },
   async mounted() {
+    console.log(this.product);
+    console.log(this.inventoryItem);
+    console.log(this.saleItem);
     this.business = await getBusiness(this.listingBusinessId);
   },
   computed: {
@@ -233,7 +236,6 @@ export default {
     /** Shows user the like and unlike button according to the listing's interest */
     changeInterest() {
       console.log("changing");
-      this.interest = !this.interest;
     },
     /**
      * Computes the currency
