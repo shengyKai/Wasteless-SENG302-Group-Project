@@ -2,126 +2,124 @@
   <v-card
     color="secondary"
     dark
-    class="mb-1 search-bar pa-2"
+    class="mb-1 search-bar pa-2 pt-0"
   >
-    <v-form>
-      <v-row>
-        <v-col cols="12" md="3">
-          <v-text-field
-            clearable
-            flat
-            outlined
-            filled
-            label="Product name"
-            class="search-field"
-            v-model="searchParams.productQuery"
-          />
-        </v-col>
-        <v-col cols="12" md="4">
-          <v-select
-            v-model="searchParams.businessType"
-            flat
-            solo-inverted
-            :items="businessTypeOptions"
-            prepend-inner-icon="mdi-sort-variant"
-            color="secondary"
-            label="Business type"
-          />
-        </v-col>
-        <v-col cols="6" md="2" sm="4">
-          <v-select
-            style="max-width: 300px"
-            v-model="searchParams.orderBy"
-            flat
-            solo-inverted
-            :items="orderByOptions"
-            prepend-inner-icon="mdi-sort-variant"
-            color="secondary"
-            label="Order By"
-          />
-        </v-col>
-        <v-col cols="3" md="1" sm="2">
-          <v-btn-toggle class="toggle" v-model="reverse" mandatory>
-            <v-btn depressed color="secondary" :value="false">
-              <v-icon>mdi-arrow-up</v-icon>
-            </v-btn>
-            <v-btn depressed color="secondary" :value="true">
-              <v-icon>mdi-arrow-down</v-icon>
-            </v-btn>
-          </v-btn-toggle>
-        </v-col>
-        <v-col cols="3" md="2" sm="4">
-          <v-card-actions>
-            <v-btn outlined @click="hideAdvancedSearch()">Simple</v-btn>
-          </v-card-actions>
-        </v-col>
-      </v-row>
-      <v-row>
-        <v-col cols="12" md="3">
-          <v-text-field
-            clearable
-            flat
-            outlined
-            filled
-            label="Business name"
-            class="search-field"
-            v-model="searchParams.businessQuery"
-          />
-        </v-col>
-        <v-col cols="12" md="2" sm="6">
-          <v-text-field ref="lowestPriceField"
-                        flat
-                        outlined
-                        filled
-                        label="Lowest price"
-                        v-model="searchParams.lowestPrice"
-                        :rules="lowestPriceRules"
-          />
-        </v-col>
-        <v-col cols="12" md="2" sm="6">
-          <v-text-field ref="highestPriceField"
-                        flat
-                        outlined
-                        filled
-                        label="Highest price"
-                        v-model="searchParams.highestPrice"
-                        :rules="highestPriceRules"
-          />
-        </v-col>
-      </v-row>
-      <v-row>
-        <v-col cols="12" md="3">
-          <v-text-field
-            clearable
-            flat
-            outlined
-            filled
-            label="Location"
-            class="search-field"
-            v-model="searchParams.locationQuery"
-          />
-        </v-col>
-        <v-col cols="12" md="2" sm="6">
-          <DatePickerDialog :label="closesAfterLabel" v-model="searchParams.closesAfter" :maxDate="searchParams.closesBefore"/>
-        </v-col>
-        <v-col cols="12" md="2" sm="6">
-          <DatePickerDialog :label="closesBeforeLabel" v-model="searchParams.closesBefore" :minDate="searchParams.closesAfter"/>
-        </v-col>
-        <v-spacer/>
-        <v-col cols="12" md="2" sm="4">
-          <v-card-actions>
-            <v-btn
-              color="white"
-              class="secondary--text"
-              @click="searchListings"
-            >
-              Search
-              <v-icon right dark> mdi-magnify </v-icon>
-            </v-btn>
-          </v-card-actions>
-        </v-col>
-      </v-row>
-    </v-form>
+    <v-row>
+      <v-col cols="12" md="3">
+        <v-text-field
+          clearable
+          flat
+          outlined
+          filled
+          label="Product name"
+          class="search-field"
+          v-model="searchParams.productQuery"
+        />
+      </v-col>
+      <v-col cols="12" md="4">
+        <v-select
+          v-model="searchParams.businessType"
+          flat
+          solo-inverted
+          :items="businessTypeOptions"
+          prepend-inner-icon="mdi-sort-variant"
+          color="secondary"
+          label="Business type"
+        />
+      </v-col>
+      <v-col cols="6" md="2" sm="4">
+        <v-select
+          style="max-width: 300px"
+          v-model="searchParams.orderBy"
+          flat
+          solo-inverted
+          :items="orderByOptions"
+          prepend-inner-icon="mdi-sort-variant"
+          color="secondary"
+          label="Order By"
+        />
+      </v-col>
+      <v-col cols="3" md="1" sm="2">
+        <v-btn-toggle class="toggle" v-model="reverse" mandatory>
+          <v-btn depressed color="secondary" :value="false">
+            <v-icon>mdi-arrow-up</v-icon>
+          </v-btn>
+          <v-btn depressed color="secondary" :value="true">
+            <v-icon>mdi-arrow-down</v-icon>
+          </v-btn>
+        </v-btn-toggle>
+      </v-col>
+      <v-col cols="3" md="2" sm="4">
+        <v-card-actions>
+          <v-btn outlined @click="hideAdvancedSearch()">Simple</v-btn>
+        </v-card-actions>
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col cols="12" md="3">
+        <v-text-field
+          clearable
+          flat
+          outlined
+          filled
+          label="Business name"
+          class="search-field"
+          v-model="searchParams.businessQuery"
+        />
+      </v-col>
+      <v-col cols="12" md="2" sm="6">
+        <v-text-field ref="lowestPriceField"
+                      flat
+                      outlined
+                      filled
+                      label="Lowest price"
+                      v-model="searchParams.lowestPrice"
+                      :rules="lowestPriceRules"
+        />
+      </v-col>
+      <v-col cols="12" md="2" sm="6">
+        <v-text-field ref="highestPriceField"
+                      flat
+                      outlined
+                      filled
+                      label="Highest price"
+                      v-model="searchParams.highestPrice"
+                      :rules="highestPriceRules"
+        />
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col cols="12" md="3">
+        <v-text-field
+          clearable
+          flat
+          outlined
+          filled
+          label="Location"
+          class="search-field"
+          v-model="searchParams.locationQuery"
+        />
+      </v-col>
+      <v-col cols="12" md="2" sm="6">
+        <DatePickerDialog :label="closesAfterLabel" v-model="searchParams.closesAfter" :maxDate="searchParams.closesBefore"/>
+      </v-col>
+      <v-col cols="12" md="2" sm="6">
+        <DatePickerDialog :label="closesBeforeLabel" v-model="searchParams.closesBefore" :minDate="searchParams.closesAfter"/>
+      </v-col>
+      <v-spacer/>
+      <v-col cols="12" md="2" sm="4">
+        <v-card-actions>
+          <v-btn
+            color="white"
+            class="secondary--text"
+            @click="searchListings"
+          >
+            Search
+            <v-icon right dark> mdi-magnify </v-icon>
+          </v-btn>
+        </v-card-actions>
+      </v-col>
+    </v-row>
   </v-card>
 </template>
 
@@ -226,3 +224,6 @@ export default {
   }
 };
 </script>
+
+<style scoped>
+</style>
