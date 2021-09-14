@@ -14,7 +14,11 @@ public class BoughtSaleItem {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "buyer", nullable = false)
+    private User buyer;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id", nullable = false)
     private Product product;
 
@@ -35,9 +39,12 @@ public class BoughtSaleItem {
 
     /**
      * Constructor for a BoughtSaleItem from a sale item that is being sold
+     * and a user that has bought the sale item
      * @param saleItem Sale item to copy values from
+     * @param buyer Buyer of the sale item
      */
-    public BoughtSaleItem(SaleItem saleItem) {
+    public BoughtSaleItem(SaleItem saleItem, User buyer) {
+        this.buyer = buyer;
         this.product = saleItem.getProduct();
         this.likeCount = saleItem.getLikeCount();
         this.price = saleItem.getPrice();
@@ -57,6 +64,14 @@ public class BoughtSaleItem {
      */
     public Long getId() {
         return id;
+    }
+
+    /**
+     * Gets the user that bought the sale item
+     * @return Sale item buyer
+     */
+    public User getBuyer() {
+        return buyer;
     }
 
     /**
