@@ -210,8 +210,6 @@ public class InventoryController {
         Specification<InventoryItem> specification = SearchHelper.constructSpecificationFromInventoryItemsFilter(business);
         Page<InventoryItem> result = inventoryItemRepository.findAll(specification, pageRequest);
 
-        System.out.println(result.stream().collect(Collectors.toList()));
-
         return new ResultPageDTO<>(result.map(InventoryItemDTO::new));
 
     } catch (Exception error) {
