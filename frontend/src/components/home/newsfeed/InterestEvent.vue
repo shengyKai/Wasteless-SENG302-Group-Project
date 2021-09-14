@@ -13,7 +13,7 @@
       </div>
     </template>
     <v-card-text class="subtitle-1">
-      {{ eventTitle }}
+      {{ eventText }}
     </v-card-text>
     <v-card-actions class="justify-center">
       <v-btn class="pl-3" color="primary darken-1">
@@ -21,11 +21,11 @@
         <v-icon>mdi-currency-usd</v-icon>
       </v-btn>
       <!-- Thumb up/down button to show and allow user the like & unlike feature -->
-      <v-btn v-if="!event.interested" class="ml-2 blue--text" color="grey lighten-2" @click="changeInterest">
+      <v-btn v-if="!event.interested" class="ml-2 blue--text" color="grey lighten-2">
         Like
         <v-icon class="ml-1">mdi-thumb-up</v-icon>
       </v-btn>
-      <v-btn v-else color="ml-2 grey lighten-2" @click="todo">
+      <v-btn v-else color="ml-2 grey lighten-2">
         Unlike
         <v-icon class="ml-1">mdi-thumb-down</v-icon>
       </v-btn>
@@ -63,13 +63,16 @@ export default {
   },
   computed: {
     /**
-     * Returns the computed title for the notification
-     * Title consists of Product name and Business name
-     * @returns {string} Title for notification
+     * Returns the computed text for the notification
+     * Text contains like status and number of days until sale closes
+     * @returns {string} Body text for notification
      */
-    eventTitle() {
+    eventText() {
       return `You have ${this.interestString} this listing which closes in ${this.daysUntilClose} days`;
     },
+    /**
+     * Returns the business associated with the sale item
+     */
     business() {
       return this.event.saleItem.inventoryItem.product.business;
     },
@@ -103,7 +106,6 @@ export default {
       };
     }
   },
-
 };
 </script>
 

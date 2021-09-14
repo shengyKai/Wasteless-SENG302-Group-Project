@@ -123,7 +123,7 @@ export default {
   props: {
     title: {
       type: String,
-      required: true,
+      required: false,
     },
     event: {
       type: Object,
