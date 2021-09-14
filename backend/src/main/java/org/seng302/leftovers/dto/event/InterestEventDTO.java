@@ -4,6 +4,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
 import net.minidev.json.JSONObject;
+import org.seng302.leftovers.dto.SaleItemDTO;
 import org.seng302.leftovers.entities.event.InterestEvent;
 
 /**
@@ -13,7 +14,7 @@ import org.seng302.leftovers.entities.event.InterestEvent;
 @ToString
 @EqualsAndHashCode(callSuper = false)
 public class InterestEventDTO extends EventDTO {
-    private JSONObject saleItem;
+    private SaleItemDTO saleItem;
     private boolean interested;
 
     /**
@@ -23,8 +24,7 @@ public class InterestEventDTO extends EventDTO {
      */
     public InterestEventDTO(InterestEvent event) {
         super(event);
-        // TODO When SaleItem DTO is done this needs updating
-        this.saleItem = event.getSaleItem().constructJSONObject();
+        this.saleItem = new SaleItemDTO(event.getSaleItem());
         this.interested = event.getInterested();
     }
 

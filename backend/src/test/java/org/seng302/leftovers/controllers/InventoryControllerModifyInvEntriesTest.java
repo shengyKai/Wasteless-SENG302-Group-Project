@@ -244,20 +244,17 @@ class InventoryControllerModifyInvEntriesTest {
         }
     }
 
-    @Test
-    void modifyInvEntries_modifyQuantityInvalid_cannotModify400() throws Exception {
-        String[] quantities = {"-1", "-2", "-10", "#", "$", "a", "b", "Z" };
+    @ParameterizedTest
+    @ValueSource(strings = {"-1", "-2", "-10", "#", "$", "a", "b", "Z" })
+    void modifyInvEntries_modifyQuantityInvalid_cannotModify400(String quantity) throws Exception {
         JSONObject invBody = generateInvJSONBody();
 
-        for (int i=0; i < quantities.length; i++) {
-            invBody.put("quantity", quantities[i]);
-
-            mockMvc.perform(MockMvcRequestBuilders
-                    .put("/businesses/1/inventory/1")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(invBody.toString()))
-                    .andExpect(status().isBadRequest());
-        }
+        invBody.put("quantity", quantity);
+        mockMvc.perform(MockMvcRequestBuilders
+                .put("/businesses/1/inventory/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(invBody.toString()))
+                .andExpect(status().isBadRequest());
     }
 
     @Test
