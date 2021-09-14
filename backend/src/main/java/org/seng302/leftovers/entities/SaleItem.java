@@ -14,9 +14,7 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import static java.time.temporal.ChronoUnit.DAYS;
@@ -255,24 +253,6 @@ public class SaleItem {
      */
     public Business getBusiness() {
         return this.inventoryItem.getBusiness();
-    }
-
-    /**
-     * Construct a JSON representation of the sale item. Attributes which are null will be omitted from the
-     * returned JSON.
-     * @return JSON representation of the sale item.
-     */
-    public JSONObject constructJSONObject() {
-        var object = new JSONObject();
-        object.put("id", getId());
-        object.put("inventoryItem", getInventoryItem().constructJSONObject());
-        object.put("quantity", getQuantity());
-        object.put("price", getPrice());
-        object.put("moreInfo", getMoreInfo());
-        object.put("created", getCreated().toString());
-        object.put("closes", getCloses().toString());
-        JsonTools.removeNullsFromJson(object);
-        return object;
     }
 
     /**

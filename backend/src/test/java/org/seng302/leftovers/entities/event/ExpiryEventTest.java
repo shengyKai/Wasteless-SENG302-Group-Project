@@ -9,7 +9,7 @@ import org.seng302.leftovers.entities.Location;
 import org.seng302.leftovers.entities.MarketplaceCard;
 import org.seng302.leftovers.entities.User;
 import org.seng302.leftovers.persistence.BusinessRepository;
-import org.seng302.leftovers.persistence.ExpiryEventRepository;
+import org.seng302.leftovers.persistence.event.ExpiryEventRepository;
 import org.seng302.leftovers.persistence.MarketplaceCardRepository;
 import org.seng302.leftovers.persistence.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,7 +67,7 @@ class ExpiryEventTest {
     }
 
     @Test
-    void constructJSONObject_jsonHasExpectedFormat() throws JsonProcessingException {
+    void asDTO_jsonHasExpectedFormat() throws JsonProcessingException {
         ExpiryEvent testEvent = new ExpiryEvent(testCard);
         expiryEventRepository.save(testEvent);
         String expectedJsonString = String.format("{\"id\":%d," +

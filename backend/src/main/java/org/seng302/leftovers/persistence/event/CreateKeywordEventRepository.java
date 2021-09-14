@@ -1,4 +1,4 @@
-package org.seng302.leftovers.persistence;
+package org.seng302.leftovers.persistence.event;
 
 import org.seng302.leftovers.entities.Keyword;
 import org.seng302.leftovers.entities.event.KeywordCreatedEvent;
