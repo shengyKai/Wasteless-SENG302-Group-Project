@@ -5,14 +5,26 @@
         <ImageCarousel :imagesList="product.images" :productId="product.id"/>
         <div/>
         <v-row>
-          <v-col cols='12' sm ="8">
+          <!-- <v-col cols='12' sm ="8">
             <h2 class="d-inline-block">{{ product.name }}</h2>
             <label class="saleTitleJoin"> From </label>
             <a class="businessLink">Nathan Apple LTD</a>
             <div>
               <label class="fontSize"> {{ productDescription }} </label>
             </div>
-          </v-col>
+          </v-col> -->
+          <v-card
+          >
+            <v-card-text >
+              <p class="text-h4 text--primary d-inline-block">
+                {{ product.name }}
+              </p>
+              <p class="ml-2 text-h5 text--secondary d-inline-block">From Nathan Apple LTD</p>
+              <div class="text--primary  text-left">
+                {{ productDescription }}
+              </div>
+            </v-card-text>
+          </v-card>
           <v-col cols="12" sm="4" class="text-right mt-3">
             <!-- Buy feature will not be implemented yet -->
             <v-btn class="pl-3" color="primary darken-1">
