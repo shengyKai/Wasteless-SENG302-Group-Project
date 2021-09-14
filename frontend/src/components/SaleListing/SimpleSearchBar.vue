@@ -37,7 +37,7 @@
         </v-btn-toggle>
       </v-col>
       <v-col cols="3" md="4" lg="2">
-        <v-card-actions>
+        <v-card-actions class="justify-end">
           <v-btn outlined @click="showAdvancedSearch">Advanced</v-btn>
         </v-card-actions>
       </v-col>

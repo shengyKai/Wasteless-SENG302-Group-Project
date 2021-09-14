@@ -78,14 +78,3 @@ export default {
   }
 };
 </script>
-
-<style scoped>
-.search-bar {
-  border-radius: 0px;
-  padding-bottom: 10px;
-}
-
-.search-field {
-  padding-left: 10px;
-}
-</style>
