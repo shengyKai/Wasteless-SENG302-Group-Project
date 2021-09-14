@@ -5,6 +5,7 @@ import org.junit.jupiter.api.*;
 import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -24,6 +25,7 @@ class BoughtSaleItemTest {
     void setup() {
         when(saleItem.getId()).thenReturn(3L);
         when(saleItem.getProduct()).thenReturn(product);
+        when(saleItem.getPrice()).thenReturn(new BigDecimal("100"));
         when(saleItem.getQuantity()).thenReturn(6);
         when(saleItem.getCreated()).thenReturn(Instant.parse("2021-09-14T03:07:30.713Z"));
         when(saleItem.getLikeCount()).thenReturn(5);
