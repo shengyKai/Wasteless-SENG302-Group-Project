@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.seng302.leftovers.dto.KeywordDTO;
 import org.seng302.leftovers.entities.Keyword;
 import org.seng302.leftovers.entities.Location;
 import org.seng302.leftovers.entities.User;
@@ -90,7 +91,7 @@ class KeywordCreatedEventTest {
                         "\"lastModified\":\"%s\"}",
                 event.getId(),
                 event.getCreated(),
-                keyword.constructJSONObject().toJSONString(),
+                new KeywordDTO(keyword).toString(),
                 event.getStatus().toString().toLowerCase(),
                 event.isRead(),
                 user.constructPublicJson(false).toJSONString(),

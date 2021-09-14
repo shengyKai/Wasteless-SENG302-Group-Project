@@ -57,9 +57,7 @@ class MessageEventTest {
         sellerJson.appendField("id", 38);
         when(seller.constructPublicJson()).thenReturn(sellerJson);
 
-        var cardJson = new JSONObject();
-        cardJson.appendField("id", 520);
-        when(card.constructJSONObject()).thenReturn(cardJson);
+        when(card.getID()).thenReturn(520L);
 
         when(buyer.getUserID()).thenReturn(92L);
         when(seller.getUserID()).thenReturn(38L);

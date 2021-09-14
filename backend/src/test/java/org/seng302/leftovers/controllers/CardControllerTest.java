@@ -11,6 +11,7 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.junit.runner.RunWith;
 import org.mockito.*;
+import org.seng302.leftovers.dto.MarketplaceCardDTO;
 import org.seng302.leftovers.entities.Keyword;
 import org.seng302.leftovers.entities.Location;
 import org.seng302.leftovers.entities.MarketplaceCard;
@@ -469,7 +470,6 @@ class CardControllerTest {
                 .andExpect(status().isBadRequest())
                 .andReturn();
 
-        assertEquals("keywordIds must be an array of numbers", result.getResponse().getErrorMessage());
         verify(marketplaceCardRepository, times(0)).save(any(MarketplaceCard.class));
     }
 
@@ -681,7 +681,7 @@ class CardControllerTest {
         assertEquals(30, responseBody.get("count"));
 
         var expectedResults = new JSONArray();
-        expectedResults.add(mockCard.constructJSONObject());
+        expectedResults.add(new MarketplaceCardDTO(mockCard));
         assertEquals(expectedResults, responseBody.get("results"));
 
         assertEquals(2, responseBody.size());
@@ -707,7 +707,7 @@ class CardControllerTest {
         assertEquals(30, responseBody.get("count"));
 
         var expectedResults = new JSONArray();
-        expectedResults.add(mockCard.constructJSONObject());
+        expectedResults.add(new MarketplaceCardDTO(mockCard));
         assertEquals(expectedResults, responseBody.get("results"));
 
         assertEquals(2, responseBody.size());
@@ -812,7 +812,7 @@ class CardControllerTest {
         assertEquals(30, responseBody.get("count"));
 
         var expectedResults = new JSONArray();
-        expectedResults.add(mockCard.constructJSONObject());
+        expectedResults.add(new MarketplaceCardDTO(mockCard));
         assertEquals(expectedResults, responseBody.get("results"));
 
         assertEquals(2, responseBody.size());
@@ -846,7 +846,7 @@ class CardControllerTest {
         assertEquals(30, responseBody.get("count"));
 
         var expectedResults = new JSONArray();
-        expectedResults.add(mockCard.constructJSONObject());
+        expectedResults.add(new MarketplaceCardDTO(mockCard));
         assertEquals(expectedResults, responseBody.get("results"));
 
         assertEquals(2, responseBody.size());
@@ -977,7 +977,7 @@ class CardControllerTest {
         assertEquals(30, responseBody.get("count"));
 
         var expectedResults = new JSONArray();
-        expectedResults.add(mockCard.constructJSONObject());
+        expectedResults.add(new MarketplaceCardDTO(mockCard));
         assertEquals(expectedResults, responseBody.get("results"));
 
         assertEquals(2, responseBody.size());
@@ -1005,9 +1005,9 @@ class CardControllerTest {
         assertEquals(3, responseBody.get("count"));
 
         var expectedResults = new JSONArray();
-        expectedResults.add(testCard1.constructJSONObject());
-        expectedResults.add(testCard2.constructJSONObject());
-        expectedResults.add(testCard3.constructJSONObject());
+        expectedResults.add(new MarketplaceCardDTO(testCard1));
+        expectedResults.add(new MarketplaceCardDTO(testCard2));
+        expectedResults.add(new MarketplaceCardDTO(testCard3));
 
         assertEquals(expectedResults, responseBody.get("results"));
     }

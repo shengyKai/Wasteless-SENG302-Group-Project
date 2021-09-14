@@ -167,13 +167,13 @@ public class CardController {
      * @param keywordIds list of keyword ids
      * @return List of keywords from "keywordIds"
      */
-    private List<Keyword> getCardKeywordsFromKeywordIds(long[] keywordIds) {
-        if (keywordIds.length == 0) {
+    private List<Keyword> getCardKeywordsFromKeywordIds(List<Long> keywordIds) {
+        if (keywordIds.isEmpty()) {
             return List.of();
         }
 
         List<Keyword> keywords = Streamable.of(
-                keywordRepository.findAllById(Arrays.stream(keywordIds).boxed().collect(Collectors.toList()))
+                keywordRepository.findAllById(keywordIds)
         ).toList();
 
         if (keywords.isEmpty()) { // findAllById will return an empty iterable if any keyword id is invalid

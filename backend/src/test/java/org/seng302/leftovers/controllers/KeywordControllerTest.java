@@ -8,6 +8,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mockito.*;
+import org.seng302.leftovers.dto.KeywordDTO;
 import org.seng302.leftovers.entities.Keyword;
 import org.seng302.leftovers.entities.User;
 import org.seng302.leftovers.entities.event.KeywordCreatedEvent;
@@ -29,6 +30,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.text.ParseException;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -114,10 +116,9 @@ class KeywordControllerTest {
         for (String keywordName : List.of("Keyword One", "Keyword Two", "Keyword Three")) {
             Keyword mockKeyword = mock(Keyword.class);
 
-            JSONObject mockResponse = new JSONObject();
-            mockResponse.put("name", keywordName);
-            when(mockKeyword.constructJSONObject()).thenReturn(mockResponse);
-
+            when(mockKeyword.getID()).thenReturn(1L);
+            when(mockKeyword.getCreated()).thenReturn(Instant.now());
+            when(mockKeyword.getName()).thenReturn(keywordName);
             keywords.add(mockKeyword);
         }
 
@@ -134,7 +135,7 @@ class KeywordControllerTest {
 
         JSONArray expected = new JSONArray();
 
-        expected.addAll(keywords.stream().map(Keyword::constructJSONObject).collect(Collectors.toList()));
+        expected.addAll(keywords.stream().map(keyword -> new KeywordDTO(keyword).toString()).collect(Collectors.toList()));
 
         assertEquals(expected, response);
     }
@@ -145,10 +146,9 @@ class KeywordControllerTest {
         for (String keywordName : List.of("Keyword One", "Keyword Two", "Keyword Three")) {
             Keyword mockKeyword = mock(Keyword.class);
 
-            JSONObject mockResponse = new JSONObject();
-            mockResponse.put("name", keywordName);
-            when(mockKeyword.constructJSONObject()).thenReturn(mockResponse);
-
+            when(mockKeyword.getID()).thenReturn(1L);
+            when(mockKeyword.getCreated()).thenReturn(Instant.now());
+            when(mockKeyword.getName()).thenReturn(keywordName);
             keywords.add(mockKeyword);
         }
 
@@ -166,7 +166,7 @@ class KeywordControllerTest {
 
         JSONArray expected = new JSONArray();
 
-        expected.addAll(keywords.stream().map(Keyword::constructJSONObject).collect(Collectors.toList()));
+        expected.addAll(keywords.stream().map(keyword -> new KeywordDTO(keyword).toString()).collect(Collectors.toList()));
 
         assertEquals(expected, response);
     }
