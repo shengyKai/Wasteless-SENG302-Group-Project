@@ -5,26 +5,19 @@
         <ImageCarousel :imagesList="product.images" :productId="product.id"/>
         <div/>
         <v-row>
-          <!-- <v-col cols='12' sm ="8">
-            <h2 class="d-inline-block">{{ product.name }}</h2>
-            <label class="saleTitleJoin"> From </label>
-            <a class="businessLink">Nathan Apple LTD</a>
-            <div>
-              <label class="fontSize"> {{ productDescription }} </label>
-            </div>
-          </v-col> -->
-          <v-card
-          >
-            <v-card-text >
-              <p class="text-h4 text--primary d-inline-block">
-                {{ product.name }}
-              </p>
-              <p class="ml-2 text-h5 text--secondary d-inline-block">From Nathan Apple LTD</p>
-              <div class="text--primary  text-left">
-                {{ productDescription }}
-              </div>
-            </v-card-text>
-          </v-card>
+          <v-col cols="12" sm="8">
+            <v-card flat>
+              <v-card-text>
+                <p class="text-h4 text--primary d-inline-block">
+                  {{ product.name }}
+                </p>
+                <p class="ml-2 text-h5 text--secondary d-inline-block text-decoration-underline">FROM {{this.business.name}}</p>
+                <div class="text--primary  text-left">
+                  {{ productDescription }}
+                </div>
+              </v-card-text>
+            </v-card>
+          </v-col>
           <v-col cols="12" sm="4" class="text-right mt-3">
             <!-- Buy feature will not be implemented yet -->
             <v-btn class="pl-3" color="primary darken-1">
@@ -134,6 +127,7 @@
 <script>
 import ImageCarousel from "@/components/utils/ImageCarousel";
 import { currencyFromCountry } from "@/api/currency";
+import {getBusiness} from '../../api/internal';
 import { formatDate, formatPrice } from '@/utils';
 
 export default {
@@ -148,18 +142,21 @@ export default {
         symbol: "",
       },
       interest: false,
-      extraDetails: false
+      extraDetails: false,
+      business: "",
     };
   },
   props: {
     saleItem: Object,
     businessId: Number
   },
-  mounted() {
-    console.log(this.product);
-    console.log(this.inventoryItem);
+  async mounted() {
+    this.business = await getBusiness(this.listingBusinessId);
   },
   computed: {
+    listingBusinessId() {
+      return this.$route.params.id;
+    },
     /**
      * Easy access to the product information of the sale item
      */
