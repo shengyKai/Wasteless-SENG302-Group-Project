@@ -44,42 +44,42 @@
       <div>
         <v-row no-gutters>
           <v-col class="mt-2" cols="6" sm="2">
-            <label class="fontSize">Total Price:</label>
+            <label class="text-h6 font-weight-bold">Total Price:</label>
           </v-col>
           <v-col class="mt-2" cols="6" sm="4">
-            <label class="fontSize">${{ saleItem.price }}</label>
+            <label class="text-h6 font-weight-regular">${{ saleItem.price }}</label>
           </v-col>
           <v-col class="mt-2" cols="6" sm="2">
-            <label class="leadingLabel">Date Created:</label>
+            <label class="text-h6 font-weight-bold">Date Created:</label>
           </v-col>
           <v-col class="mt-2" cols="6" sm="4">
-            <label class="fontSize">{{ createdFormatted }}</label>
+            <label class="text-h6 font-weight-regular">{{ createdFormatted }}</label>
           </v-col>
           <v-col class="mt-2" cols="6" sm="2">
-            <label class="leadingLabel">Quantity:</label>
+            <label class="text-h6 font-weight-bold">Quantity:</label>
           </v-col>
           <v-col class="mt-2" cols="6" sm="4">
-            <label class="fontSize">{{ saleItem.quantity }}</label>
+            <label class="text-h6 font-weight-regular">{{ saleItem.quantity }}</label>
           </v-col>
           <v-col class="mt-2" cols="6" sm="2">
-            <label class="leadingLabel">Expiry Date:</label>
+            <label class="text-h6 font-weight-bold">Expiry Date:</label>
           </v-col>
           <v-col class="mt-2" cols="6" sm="4">
-            <label class="fontSize">{{ expiresFormatted }}</label>
+            <label class="text-h6 font-weight-regular">{{ expiresFormatted }}</label>
           </v-col>
           <v-col class="mt-2" cols="6" sm="2">
-            <label class="leadingLabel">More Info:</label>
+            <label class="text-h6 font-weight-bold">More Info:</label>
           </v-col>
           <v-col class="mt-2" cols="6" sm="4">
-            <label class="fontSize">
+            <label class="text-h6 font-weight-regular">
               {{ saleItem.moreInfo }}
             </label>
           </v-col>
           <v-col class="mt-2" cols="6" sm="2">
-            <label class="leadingLabel">Closing Date:</label>
+            <label class="text-h6 font-weight-bold">Closing Date:</label>
           </v-col>
           <v-col class="mt-2" cols="6" sm="4">
-            <label class="fontSize">{{ createdFormatted }}</label>
+            <label class="text-h6 font-weight-regular">{{ createdFormatted }}</label>
           </v-col>
           <v-col align=right>
             <v-btn class="mt-2 right" color=orange outlined @click="extraDetails = !extraDetails;">Extra Details</v-btn>
@@ -88,34 +88,34 @@
         <div v-if="extraDetails">
           <v-row no-gutters>
             <v-col class="mt-2" cols="6" sm="2">
-              <label class="leadingLabel">Best Before Date:</label>
+              <label class="text-h6 font-weight-bold">Best Before Date:</label>
             </v-col>
             <v-col class="mt-2" cols="6" sm="4">
-              <label class="fontSize">{{ bestBeforeFormatted }}</label>
+              <label class="text-h6 font-weight-regular">{{ bestBeforeFormatted }}</label>
             </v-col>
             <v-col class="mt-2" cols="6" sm="2">
-              <label class="leadingLabel">Sell By Date:</label>
+              <label class="text-h6 font-weight-bold">Sell By Date:</label>
             </v-col>
             <v-col class="mt-2" cols="6" sm="4">
-              <label class="fontSize">{{ sellByFormatted }}</label>
+              <label class="text-h6 font-weight-regular">{{ sellByFormatted }}</label>
             </v-col>
             <v-col class="mt-2" cols="6" sm="2">
-              <label class="leadingLabel">Country:</label>
+              <label class="text-h6 font-weight-bold">Country:</label>
             </v-col>
             <v-col class="mt-2" cols="6" sm="4">
-              <label class="fontSize">{{ product.countryOfSale }}</label>
+              <label class="text-h6 font-weight-regular">{{ product.countryOfSale }}</label>
             </v-col>
             <v-col class="mt-2" cols="6" sm="2">
-              <label class="leadingLabel">Manufacturer:</label>
+              <label class="text-h6 font-weight-bold">Manufacturer:</label>
             </v-col>
             <v-col class="mt-2" cols="6" sm="4">
-              <label class="fontSize">{{ product.manufacturer }}</label>
+              <label class="text-h6 font-weight-regular">{{ product.manufacturer }}</label>
             </v-col>
             <v-col class="mt-2" cols="6" sm="2">
-              <label class="leadingLabel">Original Name:</label>
+              <label class="text-h6 font-weight-bold">Original Name:</label>
             </v-col>
             <v-col class="mt-2" cols="6" sm="4">
-              <label class="fontSize">{{ product.name }}</label>
+              <label class="text-h6 font-weight-regular">{{ product.name }}</label>
             </v-col>
           </v-row>
         </div>
@@ -271,9 +271,5 @@ export default {
   font-size: 23px;
   text-decoration: underline;
   color: grey;
-}
-
-.fontSize {
-  font-size: 20px;
 }
 </style>
