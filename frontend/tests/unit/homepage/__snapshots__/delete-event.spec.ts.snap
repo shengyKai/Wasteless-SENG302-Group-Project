@@ -11,7 +11,7 @@ exports[`DeleteEvent.vue Card has been deleted from the database Must match snap
         02 Jan 2021, 01:00
       </div>
     </div>
-    <div class="mt-2 col col-auto"><button type="button" aria-haspopup="true" aria-expanded="false" class="v-icon notranslate mr-2 v-icon--link mdi mdi-star-outline theme--light yellow--text"></button><span class="v-tooltip v-tooltip--top"><!----></span> <span class="v-tooltip v-tooltip--top"><!----></span><button type="button" aria-haspopup="true" aria-expanded="false" class="v-icon notranslate mr-2 v-icon--link mdi mdi-archive-outline theme--light blue--text"></button> <span class="v-tooltip v-tooltip--top"><!----></span><button type="button" aria-haspopup="true" aria-expanded="false" class="v-icon notranslate mr-2 v-icon--link mdi mdi-trash-can theme--light red--text"></button></div>
+    <div class="mt-2 col col-auto"><button type="button" aria-haspopup="true" aria-expanded="false" class="v-icon notranslate mr-2 v-icon--link mdi mdi-star-outline theme--light orange--text"></button><span class="v-tooltip v-tooltip--top"><!----></span> <span class="v-tooltip v-tooltip--top"><!----></span><button type="button" aria-haspopup="true" aria-expanded="false" class="v-icon notranslate mr-2 v-icon--link mdi mdi-archive-outline theme--light blue--text"></button> <span class="v-tooltip v-tooltip--top"><!----></span><button type="button" aria-haspopup="true" aria-expanded="false" class="v-icon notranslate mr-2 v-icon--link mdi mdi-trash-can theme--light red--text"></button></div>
   </div>
   <div class="v-card__text">
     Your marketplace card "Card title" in the For Sale section has been removed from the marketplace
