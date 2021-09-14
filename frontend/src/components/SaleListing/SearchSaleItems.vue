@@ -42,6 +42,7 @@ export default {
       simpleSearchParams: {
         query: undefined,
         orderBy: undefined,
+        reverse: false
       },
       advancedSearchParams: {
         productQuery: undefined,
@@ -50,7 +51,8 @@ export default {
         closesBefore: undefined,
         closesAfter: undefined,
         orderBy: undefined,
-        businessType: undefined
+        businessType: undefined,
+        reverse: false
       },
     };
   },
@@ -68,9 +70,23 @@ export default {
     },
   },
   methods: {
+    simpleSearch() {
+      //TODO implement when linked to endpoint
+    },
     advancedSearch() {
       //TODO implement when linked to endpoint
     },
+  },
+  watch: {
+    /**
+     * Whenever the search query, order by parameter or reverse parameter for the simple search changes, update the search results
+     */
+    simpleSearchParams: {
+      deep: true,
+      handler() {
+        this.simpleSearch();
+      }
+    }
   },
   components: {
     AdvancedSearchBar,

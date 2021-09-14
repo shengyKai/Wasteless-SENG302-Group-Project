@@ -27,7 +27,7 @@
         />
       </v-col>
       <v-col cols="3" md="2" lg="1">
-        <v-btn-toggle class="toggle" v-model="reverse" mandatory>
+        <v-btn-toggle class="toggle" v-model="searchParams.reverse" mandatory>
           <v-btn depressed color="secondary" :value="false">
             <v-icon>mdi-arrow-up</v-icon>
           </v-btn>
@@ -60,7 +60,6 @@ export default {
         { text: "Created date", value: "created" },
         { text: "Quantity", value: "quantity" },
       ],
-      reverse: false,
     };
   },
   props: {
