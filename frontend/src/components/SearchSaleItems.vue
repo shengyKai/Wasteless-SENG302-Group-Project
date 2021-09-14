@@ -14,28 +14,11 @@
     <!-- PUT RESULTS HERE -->
     <div class="results">
       <!-- Three cards per row -->
-      <v-row>
-        <v-col>
-          <SaleResult/>
-        </v-col>
-        <v-col>
-          <SaleResult/>
-        </v-col>
-        <v-col>
-          <SaleResult/>
-        </v-col>
-      </v-row>
-      <v-row>
-        <v-col>
-          <SaleResult/>
-        </v-col>
-        <v-col>
-          <SaleResult/>
-        </v-col>
-        <v-col>
-          <SaleResult/>
-        </v-col>
-      </v-row>
+      <SaleResult class="sale-result"/>
+      <SaleResult class="sale-result"/>
+      <SaleResult class="sale-result"/>
+      <SaleResult class="sale-result"/>
+      <SaleResult class="sale-result"/>
     </div>
     <!--paginate results-->
     <v-pagination
@@ -78,5 +61,7 @@ export default {
 </script>
 
 <style scoped>
-
+.sale-result {
+  margin-top: 10px;
+}
 </style>
