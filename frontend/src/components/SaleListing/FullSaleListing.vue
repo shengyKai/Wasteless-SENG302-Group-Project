@@ -1,6 +1,6 @@
 <template>
   <div>
-    <v-card class="body">
+    <v-card class="pa-2">
       <div>
         <ImageCarousel :imagesList="product.images" :productId="product.id"/>
         <div/>
@@ -20,21 +20,21 @@
           </v-col>
           <v-col cols="12" sm="4" class="text-right mt-3">
             <!-- Buy feature will not be implemented yet -->
-            <v-btn class="pl-3" color="primary darken-1">
+            <v-btn class="pl-2 pr-2" color="primary darken-1">
               Buy
               <v-icon>mdi-currency-usd</v-icon>
             </v-btn>
             <!-- Thumb up/down button to show and allow user the like & unlike feature -->
-            <v-btn v-if="!interest" class="ml-2 blue--text" color="grey lighten-2" @click="changeInterest">
+            <v-btn v-if="!interest" class=" pl-2 pr-2 ml-2 blue--text" color="grey lighten-2" @click="changeInterest">
               Like
               <v-icon class="ml-1">mdi-thumb-up</v-icon>
             </v-btn>
-            <v-btn v-else color="ml-2 grey lighten-2" @click="changeInterest">
+            <v-btn v-else color="pl-2 pr-2 ml-2 grey lighten-2" @click="changeInterest">
               Unlike
               <v-icon class="ml-1">mdi-thumb-down</v-icon>
             </v-btn>
             <!-- A return button for user to go back to business profile-->
-            <v-btn class="ml-2 pl-3" color="secondary" @click="viewProfile">
+            <v-btn class="ml-2 mr-1 pl-2 pr-1" color="secondary" @click="viewProfile">
               Go Back
               <v-icon class="ml-1">mdi-arrow-left</v-icon>
             </v-btn>
@@ -247,29 +247,3 @@ export default {
   }
 };
 </script>
-
-<style scoped>
-.body {
-  padding: 16px;
-  margin-top: 15px;
-  width: auto;
-}
-
-.leadingLabel {
-  font-weight: bold;
-  font-size: 20px;
-}
-
-.saleTitleJoin {
-  display: inline;
-  margin-left: 10px;
-  font-size: 23px;
-}
-
-.businessLink {
-  display: inline;
-  font-size: 23px;
-  text-decoration: underline;
-  color: grey;
-}
-</style>
