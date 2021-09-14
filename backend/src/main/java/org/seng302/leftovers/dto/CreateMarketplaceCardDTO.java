@@ -9,6 +9,9 @@ import javax.validation.constraints.NotNull;
 import java.time.Instant;
 import java.util.List;
 
+/**
+ * A DTO for creating a marketplace card
+ */
 @Getter
 @ToString
 @EqualsAndHashCode(callSuper = false)

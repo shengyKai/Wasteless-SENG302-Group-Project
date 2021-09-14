@@ -14,7 +14,6 @@ import org.seng302.leftovers.entities.event.ExpiryEvent;
 import org.seng302.leftovers.persistence.*;
 import org.seng302.leftovers.persistence.event.ExpiryEventRepository;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
-import org.seng302.leftovers.tools.JsonTools;
 import org.seng302.leftovers.tools.SearchHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -119,7 +118,7 @@ public class CardController {
             card.setSection(cardProperties.getSection());
             card.setTitle(cardProperties.getTitle());
             card.setDescription(cardProperties.getDescription());
-            card.setKeywords(getCardKeywordsFromProperties(cardProperties.getKeywordIds()));
+            card.setKeywords(getCardKeywordsFromKeywordIds(cardProperties.getKeywordIds()));
 
             // Save result
             marketplaceCardRepository.save(card);
@@ -168,7 +167,7 @@ public class CardController {
      * @param keywordIds list of keyword ids
      * @return List of keywords from "keywordIds"
      */
-    private List<Keyword> getCardKeywordsFromProperties(long[] keywordIds) {
+    private List<Keyword> getCardKeywordsFromKeywordIds(long[] keywordIds) {
         if (keywordIds.length == 0) {
             return List.of();
         }
@@ -209,7 +208,7 @@ public class CardController {
                 .build();
 
         // Adds keywords
-        card.setKeywords(getCardKeywordsFromProperties(cardProperties.getKeywordIds()));
+        card.setKeywords(getCardKeywordsFromKeywordIds(cardProperties.getKeywordIds()));
 
         return card;
     }
@@ -299,10 +298,9 @@ public class CardController {
             AuthenticationTokenManager.checkAuthenticationToken(request);
 
             PageRequest pageRequest = generatePageRequest(orderBy, page, resultsPerPage, reverse);
-            Page<MarketplaceCardDTO> results = marketplaceCardRepository.getAllBySection(section, pageRequest).map(MarketplaceCardDTO::new);
+            Page<MarketplaceCard> results = marketplaceCardRepository.getAllBySection(section, pageRequest);
 
-            //return JSON Object
-            return new ResultPageDTO(results);
+            return new ResultPageDTO<>(results.map(MarketplaceCardDTO::new));
         } catch (Exception exception) {
             logger.error(exception.getMessage());
             throw exception;
@@ -346,9 +344,9 @@ public class CardController {
                     SearchMarketplaceCardHelper.cardHasKeywords(keywords, union)
                     .and(SearchMarketplaceCardHelper.cardIsInSection(section));
 
-            Page<MarketplaceCardDTO> results = marketplaceCardRepository.findAll(spec, pageRequest).map(MarketplaceCardDTO::new);
+            Page<MarketplaceCard> results = marketplaceCardRepository.findAll(spec, pageRequest);
 
-            return new ResultPageDTO(results);
+            return new ResultPageDTO<>(results.map(MarketplaceCardDTO::new));
         } catch (Exception exception) {
             logger.error(exception.getMessage());
             throw exception;
@@ -373,8 +371,8 @@ public class CardController {
         User user = userRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "User not found"));
 
         PageRequest pageRequest = SearchHelper.getPageRequest(page, resultsPerPage, Sort.by(Sort.Direction.DESC, DEFAULT_ORDERING));
-        var results = marketplaceCardRepository.getAllByCreator(user, pageRequest).map(MarketplaceCardDTO::new);
+        var results = marketplaceCardRepository.getAllByCreator(user, pageRequest);
 
-        return new ResultPageDTO<>(results);
+        return new ResultPageDTO<>(results.map(MarketplaceCardDTO::new));
     }
 }

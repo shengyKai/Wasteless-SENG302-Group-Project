@@ -15,7 +15,7 @@ import org.seng302.leftovers.entities.Conversation;
 @EqualsAndHashCode
 public class ConversationDTO {
     private Long id;
-    private JSONObject card;
+    private MarketplaceCardDTO card;
     private JSONObject buyer;
 
     /**
@@ -24,8 +24,7 @@ public class ConversationDTO {
      */
     public ConversationDTO(Conversation conversation) {
         this.id = conversation.getId();
-        // TODO When MarketplaceCard DTO is done this needs updating
-        this.card = conversation.getCard().constructJSONObject();
+        this.card = new MarketplaceCardDTO(conversation.getCard());
         // TODO When User DTO is done this needs updating
         this.buyer = conversation.getBuyer().constructPublicJson();
     }

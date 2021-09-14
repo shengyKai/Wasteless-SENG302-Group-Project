@@ -7,6 +7,9 @@ import org.seng302.leftovers.entities.MarketplaceCard;
 
 import javax.validation.constraints.NotNull;
 
+/**
+ * A DTO for modifying a marketplace card
+ */
 @Getter
 @ToString
 @EqualsAndHashCode(callSuper = false)

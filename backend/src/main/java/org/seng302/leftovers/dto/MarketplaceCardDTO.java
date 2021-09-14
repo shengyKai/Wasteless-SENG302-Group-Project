@@ -7,6 +7,8 @@ import org.seng302.leftovers.entities.MarketplaceCard;
 import org.seng302.leftovers.entities.User;
 
 import java.time.Instant;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Getter
 @ToString
@@ -20,6 +22,7 @@ public class MarketplaceCardDTO {
     private Instant displayPeriodEnd;
     private String title;
     private String description;
+    private List<KeywordDTO> keywords;
 
     public MarketplaceCardDTO(MarketplaceCard card) {
         this.id = card.getID();
@@ -30,5 +33,6 @@ public class MarketplaceCardDTO {
         this.displayPeriodEnd = card.getCloses();
         this.title = card.getTitle();
         this.description = card.getDescription();
+        this.keywords = card.getKeywords().stream().map(KeywordDTO::new).collect(Collectors.toList());
     }
 }

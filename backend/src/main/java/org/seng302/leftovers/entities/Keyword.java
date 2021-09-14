@@ -64,18 +64,6 @@ public class Keyword {
     }
 
     /**
-     * Constructs a JSON representation of the keyword
-     * @return JSON object containing keyword data
-     */
-    public JSONObject constructJSONObject() {
-        JSONObject json = new JSONObject();
-        json.appendField("id", this.getID());
-        json.appendField("name", this.getName());
-        json.appendField("created", this.getCreated().toString());
-        return json;
-    }
-
-    /**
      * Formats keyword
      * @param name to be turned into keyword
      * @return formatted keyword name

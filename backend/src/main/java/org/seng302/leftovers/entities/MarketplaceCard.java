@@ -218,32 +218,6 @@ public class MarketplaceCard {
     }
 
     /**
-     * Constructs the JSON representation of this card
-     * @return A JSONObject containing this cards data
-     */
-    public JSONObject constructJSONObject() {
-        JSONObject json = new JSONObject();
-
-        json.appendField("id", this.getID());
-        json.appendField("creator", this.creator.constructPublicJson());
-        json.appendField("section", this.section.getName());
-        json.appendField("created", this.created.toString());
-        json.appendField("lastRenewed", this.lastRenewed.toString());
-        json.appendField("displayPeriodEnd", this.closes.toString());
-        json.appendField("title", this.title);
-        json.appendField("description", this.description);
-
-        JSONArray keywordArray = new JSONArray();
-        // jsonify the keywords
-        for (Keyword keyword : this.getKeywords()) {
-            keywordArray.appendElement(keyword.constructJSONObject());
-        }
-        json.appendField("keywords", keywordArray);
-        JsonTools.removeNullsFromJson(json);
-        return json;
-    }
-
-    /**
      * Creates a string representation of the marketplace card
      * @return string representation
      */
@@ -285,6 +259,19 @@ public class MarketplaceCard {
         }
     }
 
+    /**
+     * Given a string, returns the matching section Enum
+     * @param sectionName The section name to get
+     * @return Matching section or ResponseStatusException if none
+     */
+    public static Section sectionFromString(String sectionName) {
+        for (Section possibleSection : Section.values()) {
+            if (possibleSection.getName().equals(sectionName)) {
+                return possibleSection;
+            }
+        }
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid section name");
+    }
     /**
      * This class uses the builder pattern to construct an instance of the MarketplaceCard class
      */
