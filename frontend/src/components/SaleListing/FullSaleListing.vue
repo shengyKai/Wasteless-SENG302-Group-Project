@@ -25,14 +25,10 @@
               <v-icon>mdi-currency-usd</v-icon>
             </v-btn>
             <!-- Thumb up/down button to show and allow user the like & unlike feature -->
-            <!-- <v-btn v-if="!interest" class=" pl-2 pr-2 ml-2 blue--text" color="grey lighten-2" @click="changeInterest">
-              Like
-              <v-icon class="ml-1">mdi-thumb-up</v-icon>
+            <v-btn class=" pl-2 pr-2 ml-2" color="grey lighten-2" @click="changeInterest">
+              {{thumbMessage}}
+              <v-icon class="ml-1">{{thumbIcon}}</v-icon>
             </v-btn>
-            <v-btn v-else color="pl-2 pr-2 ml-2 grey lighten-2" @click="changeInterest">
-              Unlike
-              <v-icon class="ml-1">mdi-thumb-down</v-icon>
-            </v-btn> -->
             <!-- A return button for user to go back to business profile-->
             <v-btn class="ml-2 mr-1 pl-2 pr-1" color="secondary" @click="viewProfile">
               Go Back
@@ -150,13 +146,26 @@ export default {
     saleItem: Object,
     businessId: Number
   },
-  async mounted() {
+  mounted() {
     console.log(this.product);
     console.log(this.inventoryItem);
     console.log(this.saleItem);
-    this.business = await getBusiness(this.listingBusinessId);
   },
   computed: {
+    thumbIcon() {
+      if (this.interest) {
+        return "mdi-thumb-up";
+      } else {
+        return "mdi-thumb-down";
+      }
+    },
+    thumbMessage() {
+      if (this.interest) {
+        return "Like";
+      } else {
+        return "Unlike";
+      }
+    },
     listingBusinessId() {
       return this.$route.params.id;
     },
@@ -236,16 +245,21 @@ export default {
     /** Shows user the like and unlike button according to the listing's interest */
     changeInterest() {
       console.log("changing");
+      this.interest = !this.interest;
     },
     /**
      * Computes the currency
      */
     computeCurrency() {
       this.currency = currencyFromCountry(this.product.countryOfSale);
+    },
+    async getBusiness() {
+      this.business = await getBusiness(this.listingBusinessId);
     }
   },
   beforeMount() {
     this.computeCurrency();
+    this.getBusiness();
   }
 };
 </script>
