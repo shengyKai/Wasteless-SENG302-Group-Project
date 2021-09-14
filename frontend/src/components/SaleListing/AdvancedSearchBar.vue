@@ -41,7 +41,7 @@
           label="Order By"
         />
       </v-col>
-      <v-col cols="3" md="1" sm="2" class="mb-n2">
+      <v-col cols="6" md="2" sm="3" class="mb-n2">
         <v-btn-toggle class="toggle" v-model="searchParams.reverse" mandatory>
           <v-btn depressed color="secondary" :value="false">
             <v-icon>mdi-arrow-up</v-icon>
@@ -51,7 +51,7 @@
           </v-btn>
         </v-btn-toggle>
       </v-col>
-      <v-col cols="3" md="2" sm="4" class="mb-n2">
+      <v-col cols="12" md="1" sm="4" class="mb-n2">
         <v-card-actions class="justify-end">
           <v-btn outlined @click="hideAdvancedSearch()">Simple</v-btn>
         </v-card-actions>
@@ -111,12 +111,13 @@
         <DatePickerDialog :label="closesBeforeLabel" v-model="searchParams.closesBefore" :minDate="searchParams.closesAfter"/>
       </v-col>
       <v-spacer/>
-      <v-col cols="12" md="2" sm="4" class="mb-n2">
+      <v-col cols="12" md="2" class="mb-n2">
         <v-card-actions class="justify-end">
           <v-btn
             color="white"
             class="secondary--text"
             @click="searchListings"
+            :disabled="searchButtonDisabled"
           >
             Search
             <v-icon right dark> mdi-magnify </v-icon>
@@ -236,6 +237,12 @@ export default {
      */
     highestPriceValid() {
       return this.highestPriceRules.every(rule => rule(this.searchParams.highestPrice) === true);
+    },
+    /**
+     * The search button should be disabled if either lowest or highest price is invalid.
+     */
+    searchButtonDisabled() {
+      return !(this.lowestPriceValid && this.highestPriceValid);
     }
   },
   watch: {

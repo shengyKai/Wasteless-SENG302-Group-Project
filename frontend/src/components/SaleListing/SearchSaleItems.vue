@@ -52,6 +52,8 @@ export default {
         closesAfter: undefined,
         orderBy: undefined,
         businessType: undefined,
+        lowestPrice: undefined,
+        highestPrice: undefined,
         reverse: false
       },
     };
