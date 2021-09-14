@@ -1,92 +1,7 @@
 <template>
   <v-container>
-    <v-card color="secondary" dark class="mb-1 search-bar" v-show="!showAdvancedSearch">
-      <v-row>
-        <v-col cols=4 md="4" sm="6" xs="8">
-          <v-text-field
-            clearable
-            flat
-            solo-inverted
-            hide-details
-            prepend-inner-icon="mdi-magnify"
-            label="Search"
-            color="secondary"
-            class="search-field"
-            v-model="simpleQuery"
-          />
-        </v-col>
-        <v-spacer/>
-        <v-col cols="2" md="2" sm="4">
-          <v-card-actions>
-            <v-btn outlined @click="showAdvancedSearch=true">Advanced</v-btn>
-          </v-card-actions>
-        </v-col>
-      </v-row>
-    </v-card>
-    <v-card color="secondary" dark class="mb-1 search-bar" v-show="showAdvancedSearch">
-      <v-row>
-        <v-col cols="4">
-          <v-text-field
-            clearable
-            flat
-            outlined
-            filled
-            hide-details
-            label="Product"
-            class="search-field"
-            v-model="productQuery"
-          />
-        </v-col>
-        <v-spacer/>
-        <v-col cols="2" md="2" sm="4">
-          <v-card-actions>
-            <v-btn outlined @click="showAdvancedSearch=false">Simple</v-btn>
-          </v-card-actions>
-        </v-col>
-      </v-row>
-      <v-row>
-        <v-col cols="4">
-          <v-text-field
-            clearable
-            flat
-            outlined
-            filled
-            hide-details
-            label="Business"
-            class="search-field"
-            v-model="businessQuery"
-          />
-        </v-col>
-      </v-row>
-      <v-row>
-        <v-col cols="4">
-          <v-text-field
-            clearable
-            flat
-            outlined
-            filled
-            hide-details
-            label="Location"
-            class="search-field"
-            v-model="locationQuery"
-          />
-        </v-col>
-        <v-spacer/>
-        <v-col cols="2" md="2" sm="4">
-          <v-card-actions>
-            <v-btn color="white" class="secondary--text" @click="searchListings">
-              Search
-              <v-icon
-                right
-                dark
-              >
-                mdi-magnify
-              </v-icon>
-            </v-btn>
-          </v-card-actions>
-        </v-col>
-      </v-row>
-    </v-card>
+    <SimpleSearchBar v-model="simpleSearchParams" v-show="!showAdvancedSearch" @showAdvancedSearch="showAdvancedSearch=true"/>
+    <AdvancedSearchBar v-model="advancedSearchParams" v-show="showAdvancedSearch" @hideAdvancedSearch="showAdvancedSearch=false" @searchListings="advancedSearch()"/>
     <v-alert
       v-if="error !== undefined"
       type="error"
@@ -111,6 +26,9 @@
 </template>
 
 <script>
+import AdvancedSearchBar from './AdvancedSearchBar.vue';
+import SimpleSearchBar from './SimpleSearchBar.vue';
+
 export default {
   name: "SearchSaleItems",
   data() {
@@ -121,10 +39,23 @@ export default {
       resultsPerPage: 10,
       results: undefined,
       showAdvancedSearch: false,
-      simpleQuery: undefined,
-      productQuery: undefined,
-      businessQuery: undefined,
-      locationQuery: undefined
+      simpleSearchParams: {
+        query: undefined,
+        orderBy: undefined,
+        reverse: false
+      },
+      advancedSearchParams: {
+        productQuery: undefined,
+        businessQuery: undefined,
+        locationQuery: undefined,
+        closesBefore: undefined,
+        closesAfter: undefined,
+        orderBy: undefined,
+        businessTypes: [],
+        lowestPrice: undefined,
+        highestPrice: undefined,
+        reverse: false
+      },
     };
   },
   computed: {
@@ -138,25 +69,30 @@ export default {
     resultsMessage() {
       // TODO implement computing results message based on number of results when linking to endpoint
       return "There are no results to show";
-    }
+    },
   },
   methods: {
-    searchListings() {
+    simpleSearch() {
       //TODO implement when linked to endpoint
+    },
+    advancedSearch() {
+      //TODO implement when linked to endpoint
+    },
+  },
+  watch: {
+    /**
+     * Whenever the search query, order by parameter or reverse parameter for the simple search changes, update the search results
+     */
+    simpleSearchParams: {
+      deep: true,
+      handler() {
+        this.simpleSearch();
+      }
     }
+  },
+  components: {
+    AdvancedSearchBar,
+    SimpleSearchBar
   }
 };
 </script>
-
-<style scoped>
-
-.search-bar{
-  border-radius:0px;
-  padding-bottom:10px;
-}
-
-.search-field{
-  padding-left:10px;
-}
-
-</style>
