@@ -18,7 +18,7 @@
       </v-col>
       <v-col cols="12" md="4" class="mb-n2">
         <v-select
-          v-model="searchParams.businessType"
+          v-model="searchParams.businessTypes"
           flat
           solo-inverted
           hide-details
@@ -26,7 +26,20 @@
           prepend-inner-icon="mdi-sort-variant"
           color="secondary"
           label="Business type"
-        />
+          multiple
+        >
+          <template v-slot:selection="{ item, index }">
+            <v-chip v-if="index === 0" color="white" class="secondary--text">
+              <span>{{ item.text }}</span>
+            </v-chip>
+            <span
+              v-if="index === 1"
+              class="white--text text-caption"
+            >
+              (+{{ searchParams.businessTypes.length - 1 }} more)
+            </span>
+          </template>
+        </v-select>
       </v-col>
       <v-col cols="6" md="2" sm="4" class="mb-n2">
         <v-select
@@ -191,12 +204,7 @@ export default {
      * Return a list of text-value pairs for the business types
      */
     businessTypeOptions() {
-      const tempBusinessTypes = [];
-      tempBusinessTypes.push({text: "Any", value: undefined});
-      for (let businessType of BUSINESS_TYPES) {
-        tempBusinessTypes.push({text: businessType, value: businessType});
-      }
-      return tempBusinessTypes;
+      return BUSINESS_TYPES.map(type => {return {text: type, value: type};});
     },
     /**
      * Rule to check that the price entered by the user conforms to the expected format for a price,
@@ -243,7 +251,7 @@ export default {
      */
     searchButtonDisabled() {
       return !(this.lowestPriceValid && this.highestPriceValid);
-    }
+    },
   },
   watch: {
     /**

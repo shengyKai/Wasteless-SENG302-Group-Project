@@ -51,7 +51,7 @@ export default {
         closesBefore: undefined,
         closesAfter: undefined,
         orderBy: undefined,
-        businessType: undefined,
+        businessTypes: [],
         lowestPrice: undefined,
         highestPrice: undefined,
         reverse: false

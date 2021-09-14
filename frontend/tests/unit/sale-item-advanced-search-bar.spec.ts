@@ -19,8 +19,8 @@ describe('AdvancedSearchBar.vue', () => {
 
   let modelData : any = {};
 
-  const validPrices = [undefined,"1","999","123765","23546.00","888888.12"];
-  const invalidPrices = ["ABC", "-3", "!", "1.2", " ", "1000001", "3.1415", "4A"];
+  const validPrices = [undefined,"33","23546.12",];
+  const invalidPrices = ["ABC", "-3", "!", "1.2", " ", "1000001"];
 
   beforeEach(() => {
     const vuetify = new Vuetify();
@@ -58,9 +58,8 @@ describe('AdvancedSearchBar.vue', () => {
     expect(wrapper.emitted().searchListings).toBeTruthy();
   });
 
-  it("businessTypeOptions generates a list of text-value pairs for all business types plus an 'Any' option", () => {
+  it("businessTypeOptions generates a list of text-value pairs for all business types", () => {
     const expectedOptions = [
-      {text: "Any", value: undefined},
       {text: "Type 1", value: "Type 1"},
       {text: "Type 2", value: "Type 2"},
       {text: "Type 3", value: "Type 3"},
