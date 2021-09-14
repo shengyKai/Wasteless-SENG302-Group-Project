@@ -16,7 +16,9 @@
   <div v-else @click="markEventAsRead">
     <v-row>
       <v-col>
-        <v-tooltip top>
+        <v-tooltip top
+                   nudge-bottom="10"
+                   nudge-left="70">
           <template v-slot:activator="{ on, attrs }">
             <v-card-title
               v-bind="attrs"
