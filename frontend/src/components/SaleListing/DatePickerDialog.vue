@@ -17,7 +17,7 @@
         v-model="date"
       />
     </template>
-    <v-date-picker scrollable v-model="date">
+    <v-date-picker scrollable v-model="date" :min="minDate" :max="maxDate">
       <v-spacer />
       <v-btn text color="primary" @click="showDatePicker=false">
         Cancel
@@ -44,7 +44,9 @@ export default {
   },
   props: {
     value: undefined,
-    label: String
+    label: String,
+    minDate: String,
+    maxDate: String
   },
   computed: {
     date: {

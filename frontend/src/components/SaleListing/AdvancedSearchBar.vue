@@ -102,10 +102,10 @@
           />
         </v-col>
         <v-col cols="12" md="2" sm="6">
-          <DatePickerDialog :label="closesBeforeLabel" v-model="searchParams.closesBefore"/>
+          <DatePickerDialog :label="closesAfterLabel" v-model="searchParams.closesAfter" :maxDate="searchParams.closesBefore"/>
         </v-col>
         <v-col cols="12" md="2" sm="6">
-          <DatePickerDialog :label="closesAfterLabel" v-model="searchParams.closesAfter"/>
+          <DatePickerDialog :label="closesBeforeLabel" v-model="searchParams.closesBefore" :minDate="searchParams.closesAfter"/>
         </v-col>
         <v-spacer/>
         <v-col cols="12" md="2" sm="4">
