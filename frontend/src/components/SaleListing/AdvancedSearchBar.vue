@@ -2,7 +2,7 @@
   <v-card
     color="secondary"
     dark
-    class="mb-1 search-bar pa-2 pt-0"
+    class="mb-1 pa-2 pt-0"
   >
     <v-row>
       <v-col cols="12" md="3">
@@ -11,8 +11,8 @@
           flat
           outlined
           filled
+          hide-details
           label="Product name"
-          class="search-field"
           v-model="searchParams.productQuery"
         />
       </v-col>
@@ -21,6 +21,7 @@
           v-model="searchParams.businessType"
           flat
           solo-inverted
+          hide-details
           :items="businessTypeOptions"
           prepend-inner-icon="mdi-sort-variant"
           color="secondary"
@@ -33,6 +34,7 @@
           v-model="searchParams.orderBy"
           flat
           solo-inverted
+          hide-details
           :items="orderByOptions"
           prepend-inner-icon="mdi-sort-variant"
           color="secondary"
@@ -62,8 +64,8 @@
           flat
           outlined
           filled
+          hide-details
           label="Business name"
-          class="search-field"
           v-model="searchParams.businessQuery"
         />
       </v-col>
@@ -72,6 +74,7 @@
                       flat
                       outlined
                       filled
+                      :hide-details="lowestPriceValid"
                       label="Lowest price"
                       v-model="searchParams.lowestPrice"
                       :rules="lowestPriceRules"
@@ -82,6 +85,7 @@
                       flat
                       outlined
                       filled
+                      :hide-details="highestPriceValid"
                       label="Highest price"
                       v-model="searchParams.highestPrice"
                       :rules="highestPriceRules"
@@ -95,8 +99,8 @@
           flat
           outlined
           filled
+          hide-details
           label="Location"
-          class="search-field"
           v-model="searchParams.locationQuery"
         />
       </v-col>
@@ -151,18 +155,30 @@ export default {
     value: Object,
   },
   methods: {
+    /**
+     * Emit a message to the parent component so it will stop showing the advanced search view.
+     */
     hideAdvancedSearch() {
       this.$emit("hideAdvancedSearch");
     },
+    /**
+     * Emit a message to the parent component so it will perform the search with the parameters given by the value prop.
+     */
     searchListings() {
       this.$emit("searchListings");
     },
+    /**
+     * Perform validation on both price fields.
+     */
     validatePrices() {
       this.$refs.lowestPriceField.validate();
       this.$refs.highestPriceField.validate();
     },
   },
   computed: {
+    /**
+     * Allow searchParams to update the value prop passed in through v-model.
+     */
     searchParams: {
       get() {
         return this.value;
@@ -210,11 +226,29 @@ export default {
         }
       ]);
     },
+    /**
+     * Return true if the value in the lowest price field is valid, false otherwise.
+     */
+    lowestPriceValid() {
+      return this.lowestPriceRules.every(rule => rule(this.searchParams.lowestPrice) === true);
+    },
+    /**
+     * Return true if the value in the highest prcie field is valid, false otherwise.
+     */
+    highestPriceValid() {
+      return this.highestPriceRules.every(rule => rule(this.searchParams.highestPrice) === true);
+    }
   },
   watch: {
+    /**
+     * Update the validation on both price fields if the lowest price changes.
+     */
     "searchParams.lowestPrice"() {
       this.validatePrices();
     },
+    /**
+     * Update the validatoin on both price fields if the highest price changes.
+     */
     "searchParams.highestPrice"() {
       this.validatePrices();
     }
@@ -224,6 +258,3 @@ export default {
   }
 };
 </script>
-
-<style scoped>
-</style>

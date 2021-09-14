@@ -1,5 +1,5 @@
 <template>
-  <v-card color="secondary" dark class="mb-1 search-bar">
+  <v-card color="secondary" dark class="mb-1 pa-2 pt-0">
     <v-row>
       <v-col cols="12" md="4">
         <v-text-field
@@ -10,7 +10,6 @@
           prepend-inner-icon="mdi-magnify"
           label="Search"
           color="secondary"
-          class="search-field"
           v-model="searchParams.query"
         />
       </v-col>
@@ -68,11 +67,17 @@ export default {
     value: Object,
   },
   methods: {
+    /**
+     * Emit a message to the parent so that it will show the advanced search view.
+     */
     showAdvancedSearch() {
       this.$emit("showAdvancedSearch");
     },
   },
   computed: {
+    /**
+     * Allow searchParams to update the value prop passed in through v-model.
+     */
     searchParams: {
       get() {
         return this.value;
