@@ -289,40 +289,6 @@ public class Location {
     }
 
     /**
-     * Construct a JSON representation of this Location object which includes its id street number,
-     * street name, city, region, district and postcode. This method should be used in situations where is it appropriate
-     * to reveal the entire address, such as for a business's address.
-     * @return JSON representation of this Location object
-     */
-    public JSONObject constructFullJson() {
-        var object = new JSONObject();
-        object.put("streetNumber", streetNumber);
-        object.put("streetName", streetName);
-        object.put("city", city);
-        object.put("region", region);
-        object.put("country", country);
-        object.put("postcode", postCode);
-        object.put("district", district);
-        JsonTools.removeNullsFromJson(object);
-        return object;
-    }
-
-    /**
-     * Construct a JSON representation of this Location object which includes its city, region and postcode.
-     * This method should be used in situations where it is not appropriate to reveal the entire address,
-     * such as a user who is not an admin viewing another user's details.
-     * @return JSON representation of this Location object
-     */
-    public JSONObject constructPartialJson() {
-        Map<String, String> attributeMap = new HashMap<>();
-
-        attributeMap.put("city", city);
-        attributeMap.put("region", region);
-        attributeMap.put("country", country);
-        return new JSONObject(attributeMap);
-    }
-
-    /**
      * This class uses the builder pattern to construct an instance of the Location class
      */
     public static class Builder {

@@ -48,6 +48,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 public class CardStepDefinition {
 
     @Autowired
+    private ObjectMapper objectMapper;
+
+    @Autowired
     private MarketplaceCardRepository marketplaceCardRepository;
 
     @Autowired
@@ -208,8 +211,7 @@ public class CardStepDefinition {
 
         try (Session session = sessionFactory.openSession()) {
             MarketplaceCard card = session.find(MarketplaceCard.class, cardContext.getLast().getID());
-            ObjectMapper mapper = new ObjectMapper();
-            assertEquals(mapper.readTree(card.constructJSONObject().toJSONString()), mapper.readTree(cardJson.toJSONString()));
+            assertEquals(objectMapper.readTree(objectMapper.writeValueAsString(card.constructJSONObject())), objectMapper.readTree(cardJson.toJSONString()));
         }
     }
 

@@ -5,6 +5,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.runner.RunWith;
+import org.seng302.leftovers.dto.user.UserRole;
 import org.seng302.leftovers.entities.*;
 import org.seng302.leftovers.persistence.BusinessRepository;
 import org.seng302.leftovers.persistence.ImageRepository;
@@ -80,7 +81,7 @@ class ProductControllerDeleteImageTests {
      * Tags a session as dgaa
      */
     private void setUpDGAAAuthCode() {
-        sessionAuthToken.put("role", "defaultGlobalApplicationAdmin");
+        sessionAuthToken.put("role", UserRole.DGAA);
     }
 
     /**
@@ -314,7 +315,7 @@ class ProductControllerDeleteImageTests {
     @Test
     void deleteProductImage_isDGAA_imageDeleted() throws Exception {
         setUpDGAAAuthCode();
-        testUser.setRole("globalApplicationAdmin");
+        testUser.setRole(UserRole.GAA);
         userRepository.save(testUser);
 
         String url = String.format("/businesses/%d/products/%s/images/%d",

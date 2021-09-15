@@ -1,6 +1,7 @@
 /* Parent class for all kinds of accounts */
 package org.seng302.leftovers.entities;
 
+import org.seng302.leftovers.dto.user.UserRole;
 import org.seng302.leftovers.exceptions.EmailInUseException;
 import org.seng302.leftovers.persistence.UserRepository;
 import org.seng302.leftovers.tools.PasswordAuthenticator;
@@ -26,7 +27,8 @@ public abstract class Account {
     private String authenticationCode;
 
     @Column(nullable = false)
-    protected String role;
+    @Enumerated(EnumType.ORDINAL)
+    protected UserRole role;
     // Allows letters, numbers and selected symbols then 1 @ then some amount of other characters
     private static final String EMAIL_REGEX = "^[A-Za-z0-9+_.-]+@(.+)$";
 
@@ -125,7 +127,7 @@ public abstract class Account {
      * Authority within the system, eg: admin status and what businesses they are associated with
      * @return role
      */
-    public String getRole(){
+    public UserRole getRole(){
         return this.role;
     }
 
@@ -133,12 +135,8 @@ public abstract class Account {
      * Change the description of their status within the system
      * @param role admin status and what businesses they are associated with
      */
-    public void setRole(String role){
-        if (!Set.of("user", "globalApplicationAdmin", "defaultGlobalApplicationAdmin").contains(role)) {
-            throw new IllegalArgumentException("Invalid role: \"" + role + "\"");
-        }
-
-        this.role=role;
+    public void setRole(UserRole role){
+        this.role = role;
     }
 
 }
