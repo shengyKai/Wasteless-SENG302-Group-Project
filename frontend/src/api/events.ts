@@ -1,4 +1,4 @@
-import { Keyword, MarketplaceCard, MarketplaceCardSection, MaybeError, Message, User } from "./internal";
+import { Keyword, MarketplaceCard, MarketplaceCardSection, MaybeError, Message, Sale, User } from "./internal";
 import axios from 'axios';
 import { is } from 'typescript-is';
 
@@ -10,7 +10,7 @@ const instance = axios.create({
   withCredentials: true,
 });
 
-export type AnyEvent = GlobalMessageEvent | ExpiryEvent | DeleteEvent | KeywordCreatedEvent | MessageEvent;
+export type AnyEvent = GlobalMessageEvent | ExpiryEvent | DeleteEvent | KeywordCreatedEvent | MessageEvent | InterestEvent;
 
 export type EventTag = 'none' | 'red' | 'orange' | 'yellow' | 'green' | 'blue' | 'purple'
 export type EventStatus = 'normal' | 'starred' | 'archived'
@@ -51,6 +51,10 @@ export type MessageEvent = BaseEvent<'MessageEvent'> & {
     id: number,
   },
 }
+export type InterestEvent = BaseEvent<'InterestEvent'> & {
+  saleItem: Sale,
+  interested: boolean,
+}
 
 /**
  * Updates an event as read. No body is needed in this case as the backend would only have to change
@@ -71,6 +75,28 @@ export async function updateEventAsRead(eventId: number): Promise<MaybeError<und
   return undefined;
 }
 
+/**
+ * Updates an event to a selected status with overwriting strategy. Overwriting the event's status
+ * Archive is a one way action, no UI component available for overwriting archived event
+ * @param eventId Event id of the event to be overwriting
+ * @param status  The desire status to be updated for the event
+ */
+export async function updateEventStatus(eventId: number, status: EventStatus): Promise<MaybeError<undefined>> {
+  try {
+    await instance.put(`/feed/${eventId}/status`, {
+      value: status
+    }
+    );
+  } catch (error) {
+    let status: number | undefined = error.response?.status;
+    if (status === undefined) return 'Failed to reach backend';
+    if (status === 401) return 'You have been logged out. Please login again and retry';
+    if (status === 403) return "Invalid authorization for modifying event status";
+    if (status === 406) return 'Event does not exist';
+    return 'Request failed: ' + error.response?.data.message;
+  }
+  return undefined;
+}
 /**
  * Retrieve events for the newsfeed of the user with the given id. If a modifedSince timestamp is provided,
  * only events that have been after this timestamp will be retrieved. If no timestamp is provided, all events

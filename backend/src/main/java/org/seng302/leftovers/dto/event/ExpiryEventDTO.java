@@ -16,8 +16,8 @@ public class ExpiryEventDTO extends EventDTO {
     private JSONObject card;
 
     /**
-     * Converts a ExpiryEventEvent entity to its JSON form
-     * @param event ExpiryEventEvent to serialise
+     * Converts a ExpiryEvent entity to its JSON form
+     * @param event ExpiryEvent to serialise
      */
     public ExpiryEventDTO(ExpiryEvent event) {
         super(event);

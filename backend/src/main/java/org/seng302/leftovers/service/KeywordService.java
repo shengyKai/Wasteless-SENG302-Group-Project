@@ -5,7 +5,7 @@ import org.apache.logging.log4j.Logger;
 import org.seng302.leftovers.entities.Keyword;
 import org.seng302.leftovers.entities.User;
 import org.seng302.leftovers.entities.event.KeywordCreatedEvent;
-import org.seng302.leftovers.persistence.EventRepository;
+import org.seng302.leftovers.persistence.event.EventRepository;
 import org.seng302.leftovers.persistence.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

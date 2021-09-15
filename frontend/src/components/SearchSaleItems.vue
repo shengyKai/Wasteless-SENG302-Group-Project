@@ -61,7 +61,5 @@ export default {
 </script>
 
 <style scoped>
-.sale-result {
-  margin-top: 10px;
-}
+
 </style>

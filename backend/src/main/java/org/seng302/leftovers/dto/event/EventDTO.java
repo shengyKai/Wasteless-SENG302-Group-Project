@@ -37,4 +37,9 @@ public abstract class EventDTO {
         this.isRead = event.isRead();
         this.lastModified = event.getLastModified();
     }
+
+    /**
+     * Constructor for helping with building this object from a string
+     */
+    protected EventDTO() {}
 }
