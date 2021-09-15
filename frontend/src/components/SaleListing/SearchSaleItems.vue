@@ -11,6 +11,11 @@
       {{ error }}
     </v-alert>
     <!-- PUT RESULTS HERE -->
+    <SaleResult/>
+    <SaleResult/>
+    <SaleResult/>
+    <SaleResult/>
+    <SaleResult/>
     <!--paginate results-->
     <v-pagination
       v-model="currentPage"
@@ -28,9 +33,15 @@
 <script>
 import AdvancedSearchBar from './AdvancedSearchBar.vue';
 import SimpleSearchBar from './SimpleSearchBar.vue';
+import SaleResult from './SaleResult.vue';
 
 export default {
   name: "SearchSaleItems",
+  components: {
+    SaleResult,
+    AdvancedSearchBar,
+    SimpleSearchBar
+  },
   data() {
     return {
       currentPage: 1,
@@ -90,9 +101,5 @@ export default {
       }
     }
   },
-  components: {
-    AdvancedSearchBar,
-    SimpleSearchBar
-  }
 };
 </script>
