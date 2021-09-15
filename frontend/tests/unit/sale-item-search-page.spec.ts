@@ -1,4 +1,4 @@
-import { createLocalVue, mount, Wrapper } from "@vue/test-utils";
+import { createLocalVue, shallowMount, Wrapper } from "@vue/test-utils";
 import Vue from "vue";
 import Vuetify from "vuetify";
 
@@ -15,7 +15,7 @@ describe("SearchSaleItems.vue", () => {
   beforeEach(() => {
     const vuetify = new Vuetify();
 
-    wrapper = mount(SearchSaleItems, {
+    wrapper = shallowMount(SearchSaleItems, {
       localVue,
       vuetify,
     });
@@ -23,14 +23,14 @@ describe("SearchSaleItems.vue", () => {
 
   it("If results is undefined, total results will be zero", async () => {
     await wrapper.setData({
-      results: undefined,
+      resultsPage: undefined,
     });
     expect(wrapper.vm.totalResults).toBe(0);
   });
 
   it("If results are present, total results will be taken from result count", async () => {
     await wrapper.setData({
-      results: {
+      resultsPage: {
         count: 103
       },
     });

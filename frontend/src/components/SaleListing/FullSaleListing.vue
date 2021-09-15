@@ -63,7 +63,7 @@
             <label class="leadingLabel">Closing Date:</label>
           </v-col>
           <v-col class="column" cols="6" sm="4">
-            <label class="followingLabel">{{ createdFormatted }}</label>
+            <label class="followingLabel">{{ closesFormatted }}</label>
           </v-col>
           <v-btn class="product-btn" color=orange outlined @click="extraDetails = !extraDetails;">Extra Details</v-btn>
         </v-row>
