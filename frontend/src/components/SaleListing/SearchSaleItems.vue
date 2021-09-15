@@ -11,11 +11,12 @@
       {{ error }}
     </v-alert>
     <!-- PUT RESULTS HERE -->
-    <SaleResult/>
-    <SaleResult/>
-    <SaleResult/>
-    <SaleResult/>
-    <SaleResult/>
+    <v-list three-line>
+      <template v-for="(sale, index) in results">
+        <v-divider v-if="sale === undefined" :key="'divider-'+index"/>
+        <SaleResult v-else :key="sale.id" :saleItem="sale"/>
+      </template>
+    </v-list>
     <!--paginate results-->
     <v-pagination
       v-model="currentPage"
@@ -34,6 +35,7 @@
 import AdvancedSearchBar from './AdvancedSearchBar.vue';
 import SimpleSearchBar from './SimpleSearchBar.vue';
 import SaleResult from './SaleResult.vue';
+import {getDummySaleItemSearchResult} from "@/api/internal";
 
 export default {
   name: "SearchSaleItems",
@@ -101,5 +103,8 @@ export default {
       }
     }
   },
+  async beforeMount() {
+    this.results = await (await getDummySaleItemSearchResult()).results;
+  }
 };
 </script>

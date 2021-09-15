@@ -31,11 +31,73 @@
 </template>
 
 <script>
+import { currencyFromCountry } from "@/api/currency";
+import { formatDate, formatPrice } from '@/utils';
+
 export default {
   name: "SaleResult",
   data() {
     return {
+      currency: {
+        code: "",
+        symbol: ""
+      }
     };
+  },
+  props: {
+    saleItem: Object
+  },
+  computed: {
+    /**
+     * Easy access to the product information of the sale item
+     */
+    product() {
+      console.log("Jordan", this.saleItem);
+      return this.saleItem.inventoryItem.product;
+    },
+    /**
+     * Easy access to the inventory item information of the sale item
+     */
+    inventoryItem() {
+      return this.saleItem.inventoryItem;
+    },
+    /**
+     * Creates a nicely formatted readable string for the sales creation date
+     * @returns {string} CreatedDate
+     */
+    createdFormatted() {
+      let date = new Date(this.saleItem.created);
+      return formatDate(date);
+    },
+    /**
+     * Creates a nicely formatted readable string for the sales close date
+     * @returns {string} CloseDate
+     */
+    closesFormatted() {
+      let date = new Date(this.saleItem.closes);
+      return formatDate(date);
+    },
+    /**
+     * Creates a nicely formatted retail price, including the currency
+     * @returns {string} RetailPrice
+     */
+    retailPrice() {
+      if (!this.saleItem.price) {
+        return "Not set";
+      }
+      return this.currency.symbol + formatPrice(this.saleItem.price) + " " + this.currency.code;
+    },
+  },
+  methods: {
+    /**
+     * Computes the currency
+     */
+    computeCurrency() {
+      this.currency = currencyFromCountry(this.product.countryOfSale);
+    }
+  },
+  beforeMount() {
+    this.computeCurrency();
   }
 };
 </script>
