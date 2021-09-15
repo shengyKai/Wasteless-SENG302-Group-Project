@@ -220,6 +220,10 @@ public class SaleController {
             AuthenticationTokenManager.checkAuthenticationToken(request);
             logger.info("Getting interest status for sale listing (saleListingId={}).", listingId);
 
+            if (!AuthenticationTokenManager.sessionCanSeePrivate(request, userId)) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User cannot change listing interest of another user");
+            }
+
             var user = userRepository.findById(userId)
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "User does not exist"));
 
