@@ -11,8 +11,8 @@
       {{ error }}
     </v-alert>
     <!-- PUT RESULTS HERE -->
-    <v-list three-line>
-      <template v-for="(sale, index) in results">
+    <v-list three-line v-if="resultsPage">
+      <template v-for="(sale, index) in resultsPage.results">
         <v-divider v-if="sale === undefined" :key="'divider-'+index"/>
         <SaleResult v-else :key="sale.id" :saleItem="sale"/>
       </template>
@@ -50,7 +50,7 @@ export default {
       totalPages: 1,
       error: undefined,
       resultsPerPage: 10,
-      results: undefined,
+      resultsPage: undefined,
       showAdvancedSearch: false,
       simpleSearchParams: {
         query: undefined,
@@ -76,8 +76,8 @@ export default {
      * The total number of results matching the search, or 0 if there is no search or an error has occured with the search
      */
     totalResults() {
-      if (this.results === undefined) return 0;
-      return this.results.count;
+      if (this.resultsPage === undefined) return 0;
+      return this.resultsPage.count;
     },
     resultsMessage() {
       // TODO implement computing results message based on number of results when linking to endpoint
@@ -104,7 +104,7 @@ export default {
     }
   },
   async beforeMount() {
-    this.results = await (await getDummySaleItemSearchResult()).results;
+    this.resultsPage = (await getDummySaleItemSearchResult());
   }
 };
 </script>
