@@ -204,4 +204,34 @@ public class SaleController {
             throw e;
         }
     }
+
+    /**
+     *
+     * @param saleListingId         Sale Listing id to get the interested user list for the listing
+     * @param request               The HTTP request
+     * @param userId                ID of the user the checking for
+     * @return boolean              Does the user liked the sale listing
+     */
+    @GetMapping("/listings/{id}/interest")
+    public boolean getSaleItemsForBusiness(@PathVariable Long saleListingId,
+                                           HttpServletRequest request,
+                                            @RequestParam Long userId) {
+        try {
+            AuthenticationTokenManager.checkAuthenticationToken(request);
+            logger.info("Getting interest status for sale listing (saleListingId={}).", saleListingId);
+
+            var user = userRepository.findById(userId)
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "User does not exist"));
+
+            var saleItem = saleItemRepository.findById(saleListingId)
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "Listing not found"));
+
+            if(saleItem.getInterestedUsers().contains(user)) return true;
+            else return false;
+
+        } catch (Exception error) {
+            logger.error(error.getMessage());
+            throw error;
+        }
+    }
 }
