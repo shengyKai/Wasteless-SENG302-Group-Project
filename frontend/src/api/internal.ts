@@ -1317,3 +1317,31 @@ export async function setListingInterest(listingId: number, userId: number, inte
   }
   return undefined;
 }
+
+export async function getDummySaleItemSearchResult() : Promise<SearchResults<Sale>> {
+  return {
+    count: 1,
+    results: [
+      {
+        id: 69,
+        inventoryItem: {
+          id: 109,
+          product: {
+            id: "NathanApple91",
+            name: "The Nathan Apple",
+            images: []
+          },
+          quantity: 900,
+          remainingQuantity: 800,
+          pricePerItem: 6,
+          expires: "10-10-2021"
+        },
+        quantity: 100,
+        price: 600,
+        moreInfo: "The Nathan Apple is my favourite kind of apple. It was born in the Polish Jungle in Switzerland.",
+        created: "10-10-2020",
+        closes: "09-09-2021"
+      }
+    ]
+  };
+}
