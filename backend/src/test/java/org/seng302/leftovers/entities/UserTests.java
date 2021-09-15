@@ -7,10 +7,13 @@ import net.minidev.json.JSONObject;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.MockitoAnnotations;
 import org.mockito.internal.matchers.apachecommons.ReflectionEquals;
 import org.seng302.leftovers.dto.LocationDTO;
 import org.seng302.leftovers.dto.user.UserResponseDTO;
+import org.seng302.leftovers.dto.user.UserRole;
 import org.seng302.leftovers.exceptions.EmailInUseException;
 import org.seng302.leftovers.persistence.BusinessRepository;
 import org.seng302.leftovers.persistence.UserRepository;
@@ -806,7 +809,7 @@ class UserTests {
         String expectedAddressString = objectMapper.writeValueAsString(new LocationDTO(testUser.getAddress(), true));
         assertEquals(expectedAddressString, objectMapper.writeValueAsString(json.get("homeAddress")));
         assertEquals("[]", json.getAsString("businessesAdministered"));
-        assertEquals(testUser.getRole(), json.getAsString("role"));
+        assertEquals(testUser.getRole(), objectMapper.convertValue(json.get("role"), UserRole.class));
         assertEquals(testUser.getPhNum(), json.getAsString("phoneNumber"));
         assertEquals(testUser.getDob().toString(), json.getAsString("dateOfBirth"));
     }
@@ -834,7 +837,7 @@ class UserTests {
         String expectedAddressString = objectMapper.writeValueAsString(new LocationDTO(testUser.getAddress(), true));
         assertEquals(expectedAddressString, objectMapper.writeValueAsString(json.get("homeAddress")));
         assertEquals("[]", json.getAsString("businessesAdministered"));
-        assertEquals(testUser.getRole(), json.getAsString("role"));
+        assertEquals(testUser.getRole(), objectMapper.convertValue(json.get("role"), UserRole.class));
         assertEquals(testUser.getPhNum(), json.getAsString("phoneNumber"));
         assertEquals(testUser.getDob().toString(), json.getAsString("dateOfBirth"));
     }
@@ -1256,6 +1259,17 @@ class UserTests {
         LocalDate dob = LocalDate.parse("2001-03-11", dateTimeFormatter);
         User user = testBuilder.build();
         assertEquals(dob, user.getDob());
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            "USER,user",
+            "GAA,globalApplicationAdmin",
+            "DGAA,defaultGlobalApplicationAdmin"
+    })
+    void userRole_toString_isExpectedString(String roleString, String mappedRoleString) {
+        UserRole role = UserRole.valueOf(roleString);
+        assertEquals(mappedRoleString, objectMapper.convertValue(role, String.class));
     }
 
 }

@@ -14,6 +14,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
+import org.seng302.leftovers.dto.user.UserRole;
 import org.seng302.leftovers.entities.Business;
 import org.seng302.leftovers.entities.Location;
 import org.seng302.leftovers.entities.User;
@@ -107,14 +108,14 @@ class BusinessControllerTest {
      * Mocks logging in as a DGAA role
      */
     private void loginAsDgaa() {
-        sessionAuthToken.put("role", "defaultGlobalApplicationAdmin");
+        sessionAuthToken.put("role", UserRole.DGAA);
     }
 
     /**
      * Mocks logging in as a global application administrator role
      */
     private void loginAsGlobalAdmin() {
-        sessionAuthToken.put("role", "globalApplicationAdmin");
+        sessionAuthToken.put("role", UserRole.GAA);
     }
 
     /**

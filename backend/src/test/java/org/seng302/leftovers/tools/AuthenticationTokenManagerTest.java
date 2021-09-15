@@ -6,6 +6,7 @@ import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.*;
+import org.seng302.leftovers.dto.user.UserRole;
 import org.seng302.leftovers.exceptions.AccessTokenException;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -198,9 +199,18 @@ class AuthenticationTokenManagerTest {
      * string, and that it returns true when the role is 'globalApplicationAdmin' or 'defaultGlobalApplicationAdmin'.
      */
     @ParameterizedTest
-    @CsvSource({",false", "user,false", "potato,false", "globalApplicationAdmin,true", "defaultGlobalApplicationAdmin,true"})
-    void sessionIsAdminTest(String testRole, boolean expectedValue) {
+    @CsvSource({
+            ",false",
+            "USER,false",
+            "GAA,true",
+            "DGAA,true"
+    })
+    void sessionIsAdminTest(String testRoleString, boolean expectedValue) {
         when(request.getSession()).thenReturn(session);
+
+        UserRole testRole = null;
+        if (testRoleString != null) testRole = UserRole.valueOf(testRoleString);
+
         when(session.getAttribute("role")).thenReturn(testRole);
         assertEquals(expectedValue, AuthenticationTokenManager.sessionIsAdmin(request));
     }

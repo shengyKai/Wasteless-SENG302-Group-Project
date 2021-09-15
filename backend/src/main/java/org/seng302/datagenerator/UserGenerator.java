@@ -7,6 +7,7 @@ package org.seng302.datagenerator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.seng302.datagenerator.LocationGenerator.Location;
+import org.seng302.leftovers.dto.user.UserRole;
 
 import java.sql.*;
 import java.time.Instant;
@@ -105,9 +106,9 @@ public class UserGenerator {
         }
 
         public void addAccount(String email, String password) throws SQLException {
-            String role = "user";
+            UserRole role = UserRole.USER;
             statement.setObject(1, email);
-            statement.setObject(2, role);
+            statement.setObject(2, role.ordinal());
             statement.setObject(3, password);
             statement.addBatch();
         }

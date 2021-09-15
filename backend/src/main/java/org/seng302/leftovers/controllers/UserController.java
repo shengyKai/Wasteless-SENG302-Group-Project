@@ -8,6 +8,7 @@ import org.seng302.leftovers.dto.ResultPageDTO;
 import org.seng302.leftovers.dto.user.CreateUserDTO;
 import org.seng302.leftovers.dto.user.ModifyUserDTO;
 import org.seng302.leftovers.dto.user.UserResponseDTO;
+import org.seng302.leftovers.dto.user.UserRole;
 import org.seng302.leftovers.entities.Account;
 import org.seng302.leftovers.entities.Location;
 import org.seng302.leftovers.entities.User;
@@ -200,7 +201,7 @@ public class UserController {
      */
     @PutMapping("/users/{id}/makeAdmin")
     public void makeUserAdmin(HttpServletRequest session, @PathVariable("id") long id) {
-        changeUserPrivilege(session, id, "globalApplicationAdmin");
+        changeUserPrivilege(session, id, UserRole.GAA);
     }
 
     /**
@@ -211,7 +212,7 @@ public class UserController {
      */
     @PutMapping("/users/{id}/revokeAdmin")
     public void revokeUserAdmin(HttpServletRequest session, @PathVariable("id") long id) {
-        changeUserPrivilege(session, id, "user");
+        changeUserPrivilege(session, id, UserRole.USER);
     }
 
     /**
@@ -220,7 +221,7 @@ public class UserController {
      * @param id The id of the user
      * @param newRole The new role of the user
      */
-    void changeUserPrivilege(HttpServletRequest request, long id, String newRole) {
+    void changeUserPrivilege(HttpServletRequest request, long id, UserRole newRole) {
         AuthenticationTokenManager.checkAuthenticationToken(request); // Ensure user is logged on
         AuthenticationTokenManager.checkAuthenticationTokenDGAA(request); // Ensure user is the DGAA
 

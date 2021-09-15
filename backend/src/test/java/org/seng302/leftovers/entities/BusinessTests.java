@@ -15,6 +15,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.seng302.leftovers.dto.LocationDTO;
 import org.seng302.leftovers.dto.user.UserResponseDTO;
+import org.seng302.leftovers.dto.user.UserRole;
 import org.seng302.leftovers.exceptions.AccessTokenException;
 import org.seng302.leftovers.persistence.BusinessRepository;
 import org.seng302.leftovers.persistence.ImageRepository;
@@ -830,7 +831,7 @@ class BusinessTests {
                     return cookieArray;
                 });
         when(session.getAttribute("role")).thenAnswer(
-            invocation -> "globalApplicationAdmin");
+            invocation -> UserRole.GAA);
         when(session.getAttribute("accountId")).thenAnswer(
             invocation -> user2Id);
         try {
@@ -859,7 +860,7 @@ class BusinessTests {
                     return cookieArray;
                 });
         when(session.getAttribute("role")).thenAnswer(
-                invocation -> "defaultGlobalApplicationAdmin");
+                invocation -> UserRole.DGAA);
         when(session.getAttribute("accountId")).thenAnswer(
                 invocation -> null);
         try {

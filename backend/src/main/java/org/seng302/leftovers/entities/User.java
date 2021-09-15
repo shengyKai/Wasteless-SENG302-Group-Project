@@ -3,6 +3,7 @@ package org.seng302.leftovers.entities;
 
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
+import org.seng302.leftovers.dto.user.UserRole;
 import org.seng302.leftovers.entities.event.Event;
 import org.seng302.leftovers.tools.JsonTools;
 import org.springframework.data.annotation.ReadOnlyProperty;
@@ -477,7 +478,7 @@ public class User extends Account {
             user.setPhNum(this.phNum);
             user.setAddress(this.address);
             user.setCreated(Instant.now());
-            user.setRole("user");
+            user.setRole(UserRole.USER);
             return user;
         }
 

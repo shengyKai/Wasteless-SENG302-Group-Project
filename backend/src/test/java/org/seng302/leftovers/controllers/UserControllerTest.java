@@ -9,6 +9,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.seng302.leftovers.dto.LocationDTO;
+import org.seng302.leftovers.dto.user.UserRole;
 import org.seng302.leftovers.entities.Location;
 import org.seng302.leftovers.entities.User;
 import org.seng302.leftovers.persistence.BusinessRepository;
@@ -86,7 +87,7 @@ class UserControllerTest {
      * Tags a session as dgaa
      */
     private void setUpDGAAAuthCode() {
-        sessionAuthToken.put("role", "defaultGlobalApplicationAdmin");
+        sessionAuthToken.put("role", UserRole.DGAA);
     }
 
     /**
@@ -97,7 +98,7 @@ class UserControllerTest {
         sessionAuthToken.put("accountId", accountId);
     }
     private void setUpSessionAsAdmin() {
-        sessionAuthToken.put("role", "globalApplicationAdmin");
+        sessionAuthToken.put("role", UserRole.GAA);
     }
 
     /**
@@ -691,7 +692,7 @@ class UserControllerTest {
 
         // Check if user has been updated
         User updatedUser = userRepository.findByEmail("johnsmith99@gmail.com");
-        assertEquals( "globalApplicationAdmin", updatedUser.getRole());
+        assertEquals( UserRole.GAA, updatedUser.getRole());
     }
 
     /**
@@ -759,7 +760,7 @@ class UserControllerTest {
         setUpDGAAAuthCode(); // give us dgaa auth
         // Set up our user to have admin rights
         User john = userRepository.findByEmail("johnsmith99@gmail.com");
-        john.setRole("globalApplicationAdmin");
+        john.setRole(UserRole.GAA);
         userRepository.save(john);
 
         // perform
@@ -770,7 +771,7 @@ class UserControllerTest {
                 .andReturn();
 
         User newUser = userRepository.findByEmail("johnsmith99@gmail.com");
-        assertEquals( "user", newUser.getRole()); // Should be role "user"
+        assertEquals( UserRole.USER, newUser.getRole()); // Should be role "user"
     }
 
     //endregion

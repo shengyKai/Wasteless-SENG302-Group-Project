@@ -77,7 +77,7 @@ public class UserResponseDTO {
         if (includePrivateInfo) {
             this.dateOfBirth = user.getDob();
             this.phoneNumber = user.getPhNum();
-            this.role = UserRole.USER; // TODO
+            this.role = user.getRole();
         }
 
         if (includeBusinesses) {
