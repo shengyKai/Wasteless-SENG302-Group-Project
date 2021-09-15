@@ -40,6 +40,7 @@ tags:
   - name: 'U28: Product Catalogue search'
   - name: 'U29: Search Sale Listing'
   - name: 'U30: Individual full sale listing'
+  - name: 'U31: Purchases'
   - name: 'U32: Managing my feed'
   - name: 'UCM1: Community marketplace'
     description: >-
@@ -2286,6 +2287,53 @@ paths:
             application admin.
         '406':
           $ref: '#/components/responses/NotAcceptableError'
+  /businesses/{businessId}/listings/{listingId}/purchase:
+    put:
+      tags:
+        - 'U31: Purchases'
+        - 'Listings / sales'
+      summary: Purchase a sale listing from a business
+      security:
+        - CookieAuth:
+          - user
+          - globalApplicationAdmin
+          - defaultGlobalApplicationAdmin
+      parameters:
+        - name: businessId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: listingId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - purchaserId
+              properties:
+                purchaserId:
+                  type: integer
+                  description: ID number of purchaser of sale listing
+                  example: 17
+      responses:
+        '200':
+          description: Sale listing purchased successfully
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: >-
+            Forbidden: Returned when a user who is not a GAA or DGAA tries to make a request with a purchaserId other than their own user ID
+        '406':
+          description: >-
+            Not Acceptable: The business, sale listing or purchasing user does not exist
   /feed/{id}/tag:
     put:
       tags:
