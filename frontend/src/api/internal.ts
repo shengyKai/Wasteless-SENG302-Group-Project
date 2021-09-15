@@ -1301,6 +1301,7 @@ export async function modifyBusiness(businessId: number, business: ModifyBusines
  * @param userId User that the new interest state is applied for
  * @param interested New interest state for the listing (true=like, false=unlike)
  */
+
 export async function setListingInterest(listingId: number, userId: number, interested: boolean): Promise<MaybeError<undefined>> {
   try {
     await instance.put(`/listings/${listingId}/interest`, {
@@ -1310,7 +1311,32 @@ export async function setListingInterest(listingId: number, userId: number, inte
   } catch (error) {
     let status: number | undefined = error.response?.status;
     if (status === undefined) return 'Failed to reach backend';
+    if (status === 400) return 'Invalid userID ' + error.response?.data.message;
     if (status === 401) return 'You have been logged out. Please login again and retry';
+    if (status === 403) return 'Operation not permitted';
+    if (status === 406) return 'Listing does not exist';
+
+    return error.response?.data.message;
+  }
+  return undefined;
+}
+
+/**
+ * Check the interest status of the current user on the selected Listing
+ * @param listingId   Listing to check the interest state for
+ * @param userId      User that the interest state is checking for
+ */
+export async function getListingInterest(listingId: number, userId: number): Promise<MaybeError<undefined>> {
+  try {
+    await instance.get(`/listings/${listingId}/interest`, {
+      params:{userId: userId}
+    });
+  } catch (error) {
+    let status: number | undefined = error.response?.status;
+    if (status === undefined) return 'Failed to reach backend';
+    if (status === 400) return 'Invalid userID ' + error.response?.data.message;
+    if (status === 401) return 'You have been logged out. Please login again and retry';
+    if (status === 403) return 'Operation not permitted';
     if (status === 406) return 'Listing does not exist';
 
     return error.response?.data.message;
