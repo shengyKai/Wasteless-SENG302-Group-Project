@@ -14,7 +14,7 @@
     <v-list three-line v-if="resultsPage">
       <template v-for="(sale, index) in resultsPage.results">
         <v-divider v-if="sale === undefined" :key="'divider-'+index"/>
-        <SaleResult v-else :key="sale.id" :saleItem="sale"/>
+        <SaleResult v-else :key="sale.id" :saleItem="sale" v-on:click="console.log('clicked')"/>
       </template>
     </v-list>
     <!--paginate results-->

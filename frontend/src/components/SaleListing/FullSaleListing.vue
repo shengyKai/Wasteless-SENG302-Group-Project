@@ -126,8 +126,7 @@ export default {
     };
   },
   props: {
-    saleItem: Object,
-    businessId: Number
+    saleItem: Object
   },
   computed: {
     /**

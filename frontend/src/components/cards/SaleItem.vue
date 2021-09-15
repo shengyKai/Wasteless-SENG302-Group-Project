@@ -100,7 +100,6 @@ export default {
   },
   props: {
     saleItem: Object,
-    businessId: Number,
   },
   computed: {
     /**
