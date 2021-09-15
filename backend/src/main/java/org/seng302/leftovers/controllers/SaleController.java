@@ -207,23 +207,23 @@ public class SaleController {
 
     /**
      *
-     * @param saleListingId         Sale Listing id to get the interested user list for the listing
+     * @param listingId             Sale Listing id to get the interested user list for the listing
      * @param request               The HTTP request
      * @param userId                ID of the user the checking for
      * @return boolean              Does the user liked the sale listing
      */
-    @GetMapping("/listings/{id}/interest")
-    public JSONObject getSaleItemsForBusiness(@PathVariable Long saleListingId,
+    @GetMapping("/listings/{listingId}/interest")
+    public JSONObject getSaleItemsInterest(@PathVariable Long listingId,
                                            HttpServletRequest request,
                                             @RequestParam Long userId) {
         try {
             AuthenticationTokenManager.checkAuthenticationToken(request);
-            logger.info("Getting interest status for sale listing (saleListingId={}).", saleListingId);
+            logger.info("Getting interest status for sale listing (saleListingId={}).", listingId);
 
             var user = userRepository.findById(userId)
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "User does not exist"));
 
-            var saleItem = saleItemRepository.findById(saleListingId)
+            var saleItem = saleItemRepository.findById(listingId)
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "Listing not found"));
 
             var object = new JSONObject();
