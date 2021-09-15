@@ -167,6 +167,12 @@ public class SaleController {
         }
     }
 
+    /**
+     * Set the user isInterested for a listing byadding user into the interestedUser Set.
+     * @param id        ID of the saleListing
+     * @param request   The HTTp request
+     * @param body      The body of SaleItemInterest
+     */
     @PutMapping("/listings/{id}/interest")
     public void setSaleItemInterest(
             @PathVariable Long id,
@@ -206,10 +212,10 @@ public class SaleController {
     }
 
     /**
-     *
-     * @param listingId             Sale Listing id to get the interested user list for the listing
+     * Get the interestedUser Set and check does the set contain the param user.
+     * @param listingId             Sale Listing id
      * @param request               The HTTP request
-     * @param userId                ID of the user the checking for
+     * @param userId                ID of the user that perform the check for
      * @return boolean              Does the user liked the sale listing
      */
     @GetMapping("/listings/{listingId}/interest")
