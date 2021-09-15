@@ -764,6 +764,8 @@ class SaleControllerTest {
                         .param("userId", "4"))
                 .andExpect(status().isOk())
                 .andReturn();
+
+        verify(saleItemRepository, times(1)).findById(saleItem.getId());
     }
 
     @Test
@@ -775,6 +777,7 @@ class SaleControllerTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
+        verify(saleItemRepository, times(1)).findById(saleItem.getId());
         saleItem.addInterestedUser(user);
 
         JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
@@ -793,6 +796,9 @@ class SaleControllerTest {
                         .param("userId", "4"))
                         .andExpect(status().isOk())
                         .andReturn();
+
+        verify(saleItemRepository, times(1)).findById(saleItem.getId());
+
         JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
         Object response = parser.parse(result.getResponse().getContentAsString());
 
