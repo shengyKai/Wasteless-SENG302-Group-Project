@@ -1,9 +1,12 @@
 package org.seng302.leftovers.entities;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import net.minidev.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
+import org.seng302.leftovers.dto.LocationDTO;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.server.ResponseStatusException;
@@ -19,6 +22,9 @@ class LocationTests {
 
   private Location testLocation = new Location();
   private Location.Builder locationBuilder;
+
+  @Autowired
+  private ObjectMapper objectMapper;
 
   @BeforeEach
   public void setUp() {
@@ -702,7 +708,7 @@ class LocationTests {
   @Test
   void constructFullJsonIncludesAllExpectedFieldsTest() {
     Location location = locationBuilder.build();
-    JSONObject json = location.constructFullJson();
+    var json = objectMapper.convertValue(new LocationDTO(location, true), JSONObject.class);
     assertTrue(json.containsKey("streetNumber"));
     assertTrue(json.containsKey("streetName"));
     assertTrue(json.containsKey("city"));
@@ -719,7 +725,7 @@ class LocationTests {
   @Test
   void constructFullJsonOnlyIncludesExpectedFieldsTest() {
     Location location = locationBuilder.build();
-    JSONObject json = location.constructFullJson();
+    var json = objectMapper.convertValue(new LocationDTO(location, true), JSONObject.class);
     json.remove("streetNumber");
     json.remove("streetName");
     json.remove("city");
@@ -736,7 +742,7 @@ class LocationTests {
   @Test
   void constructFullJsonFieldsHaveExpectedValueTest() {
     Location location = locationBuilder.build();
-    JSONObject json = location.constructFullJson();
+    var json = objectMapper.convertValue(new LocationDTO(location, true), JSONObject.class);
     assertEquals(location.getStreetNumber(), json.getAsString("streetNumber"));
     assertEquals(location.getStreetName(), json.getAsString("streetName"));
     assertEquals(location.getCity(), json.getAsString("city"));
@@ -753,7 +759,7 @@ class LocationTests {
   @Test
   void constructPartialJsonIncludesAllExpectedFieldsTest() {
     Location location = locationBuilder.build();
-    JSONObject json = location.constructPartialJson();
+    var json = objectMapper.convertValue(new LocationDTO(location, false), JSONObject.class);
     assertTrue(json.containsKey("city"));
     assertTrue(json.containsKey("region"));
     assertTrue(json.containsKey("country"));
@@ -766,7 +772,7 @@ class LocationTests {
   @Test
   void constructPartialJsonOnlyIncludesExpectedFieldsTest() {
     Location location = locationBuilder.build();
-    JSONObject json = location.constructPartialJson();
+    var json = objectMapper.convertValue(new LocationDTO(location, false), JSONObject.class);
     json.remove("city");
     json.remove("region");
     json.remove("country");
@@ -779,7 +785,7 @@ class LocationTests {
   @Test
   void constructPartialJsonFieldsHaveExpectedValueTest() {
     Location location = locationBuilder.build();
-    JSONObject json = location.constructPartialJson();
+    var json = objectMapper.convertValue(new LocationDTO(location, false), JSONObject.class);
     assertEquals(location.getCity(), json.getAsString("city"));
     assertEquals(location.getRegion(), json.getAsString("region"));
     assertEquals(location.getCountry(), json.getAsString("country"));

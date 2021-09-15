@@ -237,8 +237,7 @@ public class SaleItemStepDefinition {
         List<InterestEventDTO> eventList = objectMapper.readValue(requestContext.getLastResultAsString(), new TypeReference<>() {});
         var event = eventList.get(0);
 
-        // TODO Refactor this test to directly compare the sale item DTOs when they are implemented, Connor.
-        assertEquals(saleItem.getId().longValue(), event.getSaleItem().getAsNumber("id").longValue());
+        assertEquals((long)saleItem.getId(), (long)event.getSaleItem().getId());
         assertEquals(event.isInterested(), interested);
 
     }

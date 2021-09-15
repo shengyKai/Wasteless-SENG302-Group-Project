@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
+import org.seng302.leftovers.dto.user.UserResponseDTO;
 import org.seng302.leftovers.tools.JsonTools;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
@@ -225,7 +226,7 @@ public class MarketplaceCard {
         JSONObject json = new JSONObject();
 
         json.appendField("id", this.getID());
-        json.appendField("creator", this.creator.constructPublicJson());
+        json.appendField("creator", new UserResponseDTO(this.creator));
         json.appendField("section", this.section.getName());
         json.appendField("created", this.created.toString());
         json.appendField("lastRenewed", this.lastRenewed.toString());

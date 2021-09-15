@@ -9,6 +9,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.junit.runner.RunWith;
 import org.mockito.*;
+import org.seng302.leftovers.dto.LocationDTO;
 import org.seng302.leftovers.entities.*;
 import org.seng302.leftovers.exceptions.AccessTokenException;
 import org.seng302.leftovers.persistence.BusinessRepository;
@@ -128,7 +129,7 @@ class BusinessControllerMockedTest {
         json.put("primaryAdministratorId", mockOwnerId);
         json.put("name", "New business name");
         json.put("description", "New business description");
-        json.put("address", Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand,Canterbury,8041").constructFullJson());
+        json.put("address", new LocationDTO(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand,Canterbury,8041"), true));
         json.put("businessType", Business.getBusinessTypes().get(0));
         json.put("updateProductCountry", true);
         return json;

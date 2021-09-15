@@ -1,6 +1,7 @@
 package cucumber.stepDefinitions;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import cucumber.context.BusinessContext;
 import cucumber.context.RequestContext;
@@ -12,6 +13,7 @@ import io.cucumber.java.en.When;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import org.hibernate.Session;
+import org.seng302.leftovers.dto.InventoryItemDTO;
 import org.seng302.leftovers.entities.InventoryItem;
 import org.seng302.leftovers.entities.Location;
 import org.seng302.leftovers.entities.Product;
@@ -167,7 +169,7 @@ public class InventoryStepDefinition  {
 
         JSONArray jsonArray = new JSONArray();
         for (InventoryItem item : inventory) {
-            jsonArray.appendElement(item.constructJSONObject());
+            jsonArray.appendElement(objectMapper.convertValue(new InventoryItemDTO(item), new TypeReference<JSONObject>() {}));
         }
         expectedPage.put("results", jsonArray);
         expectedPage.put("count", jsonArray.size());

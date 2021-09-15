@@ -355,27 +355,6 @@ public class InventoryItem {
     }
 
     /**
-     * Construct a JSON representation of the inventory item. Attributes which are null will be omitted from the
-     * returned JSON.
-     * @return JSON representation of the inventory item.
-     */
-    public JSONObject constructJSONObject() {
-        JSONObject json = new JSONObject();
-        json.put("id", this.getId());
-        json.put("product", product.constructJSONObject());
-        json.put("quantity", quantity);
-        json.put("pricePerItem", pricePerItem);
-        json.put("totalPrice", totalPrice);
-        json.put("manufactured", manufactured != null ? manufactured.toString() : null);
-        json.put("sellBy", sellBy != null ? sellBy.toString() : null);
-        json.put("bestBefore", bestBefore != null ? bestBefore.toString() : null);
-        json.put("expires", expires.toString());
-        json.put("remainingQuantity", remainingQuantity);
-        JsonTools.removeNullsFromJson(json);
-        return json;
-    }
-
-    /**
      * Builder for Inventory Item
      */
     public static class Builder {
@@ -524,11 +503,23 @@ public class InventoryItem {
             return inventoryItem;
         }
     }
+
     @Override
     public String toString() {
-        return String.format("There are %d %s of this inventory item. They expire on %s",
-                this.quantity, this.product.getName(), this.expires.toString());
+        return "InventoryItem{" +
+                "id=" + id +
+                ", quantity=" + quantity +
+                ", remainingQuantity=" + remainingQuantity +
+                ", pricePerItem=" + pricePerItem +
+                ", totalPrice=" + totalPrice +
+                ", manufactured=" + manufactured +
+                ", sellBy=" + sellBy +
+                ", bestBefore=" + bestBefore +
+                ", expires=" + expires +
+                ", creationDate=" + creationDate +
+                '}';
     }
+
     @Override
     public boolean equals(Object o) {
         if (o == this) {

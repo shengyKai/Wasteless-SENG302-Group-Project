@@ -2,6 +2,7 @@ package org.seng302.leftovers.tools;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.seng302.leftovers.dto.user.UserRole;
 import org.seng302.leftovers.entities.User;
 import org.seng302.leftovers.exceptions.AccessTokenException;
 import org.seng302.leftovers.exceptions.InsufficientPermissionException;
@@ -23,8 +24,6 @@ public class AuthenticationTokenManager {
 
     private static final String AUTH_TOKEN_NAME = "AUTHTOKEN";
     private static final Logger logger = LogManager.getLogger(AuthenticationTokenManager.class.getName());
-    private static final String ROLE_DGAA = "defaultGlobalApplicationAdmin";
-    private static final String ROLE_GAA = "globalApplicationAdmin";
 
     /**
      * This method sets the authentication token for this session and constructs a cookie containing the authentication
@@ -106,23 +105,13 @@ public class AuthenticationTokenManager {
     }
 
     /**
-     * This method tags the current session as a DGAA session
-     * @param request The HTTP request packet
-     */
-    public static void setAuthenticationTokenDGAA(HttpServletRequest request) {
-
-        HttpSession session = request.getSession(true);
-        session.setAttribute("role", ROLE_DGAA);
-    }
-
-    /**
      * This method checks to see if the current session in a DGAA session
      * @param request The HTTP request packet
      */
     public static void checkAuthenticationTokenDGAA(HttpServletRequest request) {
         HttpSession session = request.getSession();
-        String sessionRole = (String)session.getAttribute("role");
-        if (!ROLE_DGAA.equals(sessionRole)) {
+        var sessionRole = session.getAttribute("role");
+        if (!UserRole.DGAA.equals(sessionRole)) {
             InsufficientPermissionException insufficientPermissionException = new InsufficientPermissionException("The user does not have permission to perform the requested action");
             logger.error(insufficientPermissionException.getMessage());
             throw insufficientPermissionException;
@@ -153,7 +142,7 @@ public class AuthenticationTokenManager {
      */
     public static boolean sessionIsAdmin(HttpServletRequest request) {
         HttpSession session = request.getSession();
-        String sessionRole = (String) session.getAttribute("role");
-        return (ROLE_GAA.equals(sessionRole) || ROLE_DGAA.equals(sessionRole));
+        var sessionRole = session.getAttribute("role");
+        return UserRole.GAA.equals(sessionRole) || UserRole.DGAA.equals(sessionRole);
     }
 }
