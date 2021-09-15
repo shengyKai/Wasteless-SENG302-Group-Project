@@ -1,5 +1,6 @@
 package org.seng302.leftovers.controllers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
@@ -105,6 +106,9 @@ class CardControllerTest {
     private final long cardId = 32L;
     private final long keywordId1 = 25L;
     private final long keywordId2 = 71L;
+    @Autowired
+    private ObjectMapper objectMapper;
+
 
     @BeforeEach
     private void setUp() throws Exception {
@@ -283,7 +287,6 @@ class CardControllerTest {
                 .content(createCardJson.toString()))
                 .andExpect(status().isBadRequest())
                 .andReturn();
-        assertEquals("Card title must be provided", result.getResponse().getErrorMessage());
         verify(marketplaceCardRepository, times(0)).save(any(MarketplaceCard.class));
     }
 
@@ -441,7 +444,6 @@ class CardControllerTest {
                 .andExpect(status().isBadRequest())
                 .andReturn();
 
-        assertEquals("creatorId must be a number", result.getResponse().getErrorMessage());
         verify(marketplaceCardRepository, times(0)).save(any(MarketplaceCard.class));
     }
 
@@ -681,8 +683,10 @@ class CardControllerTest {
         assertEquals(30, responseBody.get("count"));
 
         var expectedResults = new JSONArray();
-        expectedResults.add(new MarketplaceCardDTO(mockCard));
-        assertEquals(expectedResults, responseBody.get("results"));
+        expectedResults.add(objectMapper.convertValue(new MarketplaceCardDTO(mockCard), JSONObject.class));
+        assertEquals(
+                objectMapper.readTree(objectMapper.writeValueAsString(expectedResults)) ,
+                objectMapper.readTree(objectMapper.writeValueAsString(responseBody.get("results"))));
 
         assertEquals(2, responseBody.size());
     }
@@ -707,8 +711,10 @@ class CardControllerTest {
         assertEquals(30, responseBody.get("count"));
 
         var expectedResults = new JSONArray();
-        expectedResults.add(new MarketplaceCardDTO(mockCard));
-        assertEquals(expectedResults, responseBody.get("results"));
+        expectedResults.add(objectMapper.convertValue(new MarketplaceCardDTO(mockCard), JSONObject.class));
+        assertEquals(
+                objectMapper.readTree(objectMapper.writeValueAsString(expectedResults)) ,
+                objectMapper.readTree(objectMapper.writeValueAsString(responseBody.get("results"))));
 
         assertEquals(2, responseBody.size());
     }
@@ -812,8 +818,10 @@ class CardControllerTest {
         assertEquals(30, responseBody.get("count"));
 
         var expectedResults = new JSONArray();
-        expectedResults.add(new MarketplaceCardDTO(mockCard));
-        assertEquals(expectedResults, responseBody.get("results"));
+        expectedResults.add(objectMapper.convertValue(new MarketplaceCardDTO(mockCard), JSONObject.class));
+        assertEquals(
+                objectMapper.readTree(objectMapper.writeValueAsString(expectedResults)) ,
+                objectMapper.readTree(objectMapper.writeValueAsString(responseBody.get("results"))));
 
         assertEquals(2, responseBody.size());
     }
@@ -846,8 +854,10 @@ class CardControllerTest {
         assertEquals(30, responseBody.get("count"));
 
         var expectedResults = new JSONArray();
-        expectedResults.add(new MarketplaceCardDTO(mockCard));
-        assertEquals(expectedResults, responseBody.get("results"));
+        expectedResults.add(objectMapper.convertValue(new MarketplaceCardDTO(mockCard), JSONObject.class));
+        assertEquals(
+                objectMapper.readTree(objectMapper.writeValueAsString(expectedResults)) ,
+                objectMapper.readTree(objectMapper.writeValueAsString(responseBody.get("results"))));
 
         assertEquals(2, responseBody.size());
     }
@@ -977,8 +987,10 @@ class CardControllerTest {
         assertEquals(30, responseBody.get("count"));
 
         var expectedResults = new JSONArray();
-        expectedResults.add(new MarketplaceCardDTO(mockCard));
-        assertEquals(expectedResults, responseBody.get("results"));
+        expectedResults.add(objectMapper.convertValue(new MarketplaceCardDTO(mockCard), JSONObject.class));
+        assertEquals(
+                objectMapper.readTree(objectMapper.writeValueAsString(expectedResults)) ,
+                objectMapper.readTree(objectMapper.writeValueAsString(responseBody.get("results"))));
 
         assertEquals(2, responseBody.size());
     }
@@ -1003,13 +1015,14 @@ class CardControllerTest {
         JSONObject responseBody = (JSONObject) parser.parse(result.getResponse().getContentAsString());
 
         assertEquals(3, responseBody.get("count"));
-
-        var expectedResults = new JSONArray();
-        expectedResults.add(new MarketplaceCardDTO(testCard1));
-        expectedResults.add(new MarketplaceCardDTO(testCard2));
-        expectedResults.add(new MarketplaceCardDTO(testCard3));
-
-        assertEquals(expectedResults, responseBody.get("results"));
+        JSONArray responseArray = (JSONArray) responseBody.get("results");
+        JSONArray expectedArray = new JSONArray();
+        expectedArray.add(objectMapper.convertValue(new MarketplaceCardDTO(testCard1), JSONObject.class));
+        expectedArray.add(objectMapper.convertValue(new MarketplaceCardDTO(testCard2), JSONObject.class));
+        expectedArray.add(objectMapper.convertValue(new MarketplaceCardDTO(testCard3), JSONObject.class));
+        assertEquals(
+                objectMapper.readTree(objectMapper.writeValueAsString(expectedArray)) ,
+                objectMapper.readTree(objectMapper.writeValueAsString(responseArray)));
     }
 
     @Test

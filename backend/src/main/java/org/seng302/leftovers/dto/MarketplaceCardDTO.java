@@ -1,8 +1,10 @@
 package org.seng302.leftovers.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
+import net.minidev.json.JSONObject;
 import org.seng302.leftovers.entities.MarketplaceCard;
 import org.seng302.leftovers.entities.User;
 
@@ -12,13 +14,16 @@ import java.util.stream.Collectors;
 
 @Getter
 @ToString
-@EqualsAndHashCode(callSuper = false)
+@EqualsAndHashCode
 public class MarketplaceCardDTO {
     private Long id;
-    private User creator;
-    private String section;
+    private JSONObject creator;
+    private MarketplaceCard.Section section;
+    @JsonFormat(shape=JsonFormat.Shape.STRING)
     private Instant created;
+    @JsonFormat(shape=JsonFormat.Shape.STRING)
     private Instant lastRenewed;
+    @JsonFormat(shape=JsonFormat.Shape.STRING)
     private Instant displayPeriodEnd;
     private String title;
     private String description;
@@ -26,8 +31,8 @@ public class MarketplaceCardDTO {
 
     public MarketplaceCardDTO(MarketplaceCard card) {
         this.id = card.getID();
-        this.creator = card.getCreator();
-        this.section = card.getSection().getName();
+        this.creator = card.getCreator().constructPrivateJson(); //todo user DTO
+        this.section = card.getSection();
         this.created = card.getCreated();
         this.lastRenewed = card.getLastRenewed();
         this.displayPeriodEnd = card.getCloses();

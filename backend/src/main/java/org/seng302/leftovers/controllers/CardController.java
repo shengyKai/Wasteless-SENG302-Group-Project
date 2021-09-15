@@ -277,7 +277,7 @@ public class CardController {
 
     /**
      * Retrieve all of the Marketplace Cards for a given section.
-     * @param section The name of the section to retrieve
+     * @param sectionString The name of the section to retrieve
      * @param orderBy the field to use for sorting the results. Will default to last renewed if none is provided.
      * @param page The page number of the current requested section
      * @param resultsPerPage Maximum number of results to retrieve
@@ -287,16 +287,17 @@ public class CardController {
      */
     @GetMapping("/cards")
     public ResultPageDTO<MarketplaceCardDTO> getCards(HttpServletRequest request,
-                                  @RequestParam(name = "section") MarketplaceCard.Section section,
+                                  @RequestParam(name = "section") String sectionString,
                                   @RequestParam(required = false) String orderBy,
                                   @RequestParam(required = false) Integer page,
                                   @RequestParam(required = false) Integer resultsPerPage,
                                   @RequestParam(required = false) Boolean reverse) {
         
-        logger.info("Request to get marketplace cards for {}", section);
+        logger.info("Request to get marketplace cards for {}", sectionString);
         try {
             AuthenticationTokenManager.checkAuthenticationToken(request);
 
+            MarketplaceCard.Section section = MarketplaceCard.sectionFromString(sectionString);
             PageRequest pageRequest = generatePageRequest(orderBy, page, resultsPerPage, reverse);
             Page<MarketplaceCard> results = marketplaceCardRepository.getAllBySection(section, pageRequest);
 
@@ -309,7 +310,7 @@ public class CardController {
 
     /**
      * Retrieve all of the Marketplace Cards for a given section and with the matching keywords.
-     * @param section The name of the section to retrieve
+     * @param sectionString The name of the section to retrieve
      * @param keywordIds The keywords to filter the results by
      * @param union Mode selection for keyword filtering (false = card has all, true = card has any)
      * @param orderBy The field to use for sorting the results. Will default to last renewed if none is provided.
@@ -321,17 +322,18 @@ public class CardController {
      */
     @GetMapping("/cards/search")
     public ResultPageDTO<MarketplaceCardDTO> searchCards(HttpServletRequest request,
-                                  @RequestParam(name = "section") MarketplaceCard.Section section,
+                                  @RequestParam(name = "section") String sectionString,
                                   @RequestParam(value="keywordIds") List<Long> keywordIds,
                                   @RequestParam Boolean union,
                                   @RequestParam(required = false) String orderBy,
                                   @RequestParam(required = false) Integer page,
                                   @RequestParam(required = false) Integer resultsPerPage,
                                   @RequestParam(required = false) Boolean reverse) {
-        logger.info("Searching cards with section=\"{}\" and keywordsIds={}", section, keywordIds);
+        logger.info("Searching cards with section=\"{}\" and keywordsIds={}", sectionString, keywordIds);
         try {
             AuthenticationTokenManager.checkAuthenticationToken(request);
 
+            MarketplaceCard.Section section = MarketplaceCard.sectionFromString(sectionString);
             // fetch the keywords
             List<Keyword> keywords = Streamable.of(keywordRepository.findAllById(keywordIds)).toList();
             if (keywords.isEmpty()) {

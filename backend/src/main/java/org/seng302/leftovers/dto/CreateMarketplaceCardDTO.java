@@ -17,5 +17,5 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = false)
 public class CreateMarketplaceCardDTO extends ModifyMarketplaceCardDTO{
     @NotNull
-    private Long creatorId;
+    private Long creatorId = null;
 }

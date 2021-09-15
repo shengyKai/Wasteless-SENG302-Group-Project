@@ -22,19 +22,16 @@ import java.util.Map;
  */
 @Getter
 @ToString
-@EqualsAndHashCode(callSuper = false)
+@EqualsAndHashCode
 public class ModifyMarketplaceCardDTO {
 
     @NotNull
-    @JsonProperty
-    private MarketplaceCard.Section section;
+    private MarketplaceCard.Section section = null;
     @NotNull
-    private String title;
+    private String title = null;
     private String description;
     @NotNull
     private List<Long> keywordIds;
 
-    public ModifyMarketplaceCardDTO() {
-    }
 }
 
