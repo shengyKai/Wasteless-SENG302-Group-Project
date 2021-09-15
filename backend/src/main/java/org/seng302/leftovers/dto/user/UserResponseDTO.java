@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * TODO
+ * A DTO representing a user being sent to a client
  */
 @Getter
 @ToString
@@ -50,18 +50,19 @@ public class UserResponseDTO {
     protected UserResponseDTO() {}
 
     /**
-     * TODO
-     * @param user
+     * Converts a user to its short JSON form
+     * This short form does not include private information or businesses
+     * @param user User to convert
      */
     public UserResponseDTO(User user) {
         this(user, false, false);
     }
 
     /**
-     * TODO
-     * @param user
-     * @param includeBusinesses
-     * @param includePrivateInfo
+     * Converts a user to its JSON form
+     * @param user User to convert
+     * @param includeBusinesses Whether to include information about the user's businesses
+     * @param includePrivateInfo Whether to include information that is private to the user
      */
     public UserResponseDTO(User user, boolean includeBusinesses, boolean includePrivateInfo) {
         this.id = user.getUserID();

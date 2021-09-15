@@ -23,9 +23,9 @@ public class LocationDTO {
     protected String district;
 
     /**
-     * TODO
-     * @param location
-     * @param isFull
+     * Converts a Location to its JSON form
+     * @param location Location to convert
+     * @param isFull Whether to include all parts of the location, including some that may be private
      */
     public LocationDTO(Location location, boolean isFull) {
         this.country = location.getCountry();
