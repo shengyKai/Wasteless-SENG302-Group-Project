@@ -673,27 +673,6 @@ class SaleControllerTest {
         verify(interestEventRepository, times(1)).save(interestEvent);
     }
 
-//    @Test
-//    void getSaleItemInterest_userLikeListingBefore_returnTrue() throws Exception {
-//        authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), any())).thenReturn(true);
-//
-//        // Verify that a 200 response is received in response to the PUT request
-//        mockMvc.perform(get(String.format("/listings/%s/interest", saleItem.getId()))
-//                        .contentType(MediaType.APPLICATION_JSON)
-//                        .param("userId", 4"")
-//                        .content(createUpdateInterestRequest(4, true).toString()))
-//                .andExpect(status().isOk());
-//
-//        verify(interestEventRepository, times(1)).findInterestEventByNotifiedUserAndSaleItem(user, saleItem);
-//
-//        var captor = ArgumentCaptor.forClass(InterestEvent.class);
-//
-//        verify(interestEventRepository, times(1)).save(captor.capture());
-//        var interestEvent = captor.getValue();
-//        assertTrue(interestEvent.getInterested());
-//        assertEquals(user, interestEvent.getNotifiedUser());
-//        assertEquals(saleItem, interestEvent.getSaleItem());
-//    }
     @Test
     void getSaleItemsInterest_invalidUser_400Response() throws Exception {
         authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), any())).thenReturn(true);
@@ -770,6 +749,7 @@ class SaleControllerTest {
 
     @Test
     void getSaleItemsInterest_validListingAndLiked_returnTrue() throws Exception {
+        when(saleItem.getInterestedUsers()).thenReturn(Set.of(user));
         authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), any())).thenReturn(true);
         MvcResult result = mockMvc.perform(get(String.format("/listings/%s/interest", saleItem.getId()))
                         .contentType(MediaType.APPLICATION_JSON)
@@ -778,18 +758,18 @@ class SaleControllerTest {
                 .andReturn();
 
         verify(saleItemRepository, times(1)).findById(saleItem.getId());
-        saleItem.addInterestedUser(user);
 
         JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
         Object response = parser.parse(result.getResponse().getContentAsString());
 
         JSONObject expected = new JSONObject();
-        expected.appendField("isInterested", false); // this is wrong, TOFIX
+        expected.appendField("isInterested", true);
         assertEquals(expected, response);
     }
 
     @Test
     void getSaleItemsInterest_validListingAndNotLiked_returnsFalse() throws Exception {
+        when(saleItem.getInterestedUsers()).thenReturn(Set.of());
         authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), any())).thenReturn(true);
         MvcResult result = mockMvc.perform(get(String.format("/listings/%s/interest", saleItem.getId()))
                         .contentType(MediaType.APPLICATION_JSON)
