@@ -1,7 +1,7 @@
 <template>
-  <v-list-item>
-    <v-list-item-avatar>
-      <p>img</p>
+  <v-list-item color="purple">
+    <v-list-item-avatar width="70" height="70">
+      <img src="../../assets/grumpy.webp">
     </v-list-item-avatar>
     <v-list-item-content>
       <v-list-item-title>
@@ -146,5 +146,9 @@ export default {
   margin-top: 3px;
   margin-right: 10px;
   height: 15px;
+}
+
+.result-image {
+  height: 100px;
 }
 </style>
