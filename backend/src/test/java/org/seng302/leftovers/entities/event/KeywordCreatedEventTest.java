@@ -2,10 +2,12 @@ package org.seng302.leftovers.entities.event;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import net.minidev.json.JSONObject;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.seng302.leftovers.dto.KeywordDTO;
+import org.seng302.leftovers.dto.MarketplaceCardDTO;
 import org.seng302.leftovers.entities.Keyword;
 import org.seng302.leftovers.entities.Location;
 import org.seng302.leftovers.entities.User;
@@ -91,7 +93,7 @@ class KeywordCreatedEventTest {
                         "\"lastModified\":\"%s\"}",
                 event.getId(),
                 event.getCreated(),
-                new KeywordDTO(keyword).toString(),
+                mapper.convertValue(new KeywordDTO(keyword), JSONObject.class),
                 event.getStatus().toString().toLowerCase(),
                 event.isRead(),
                 user.constructPublicJson(false).toJSONString(),

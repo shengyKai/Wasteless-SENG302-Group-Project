@@ -18,6 +18,7 @@ import net.minidev.json.parser.ParseException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.junit.jupiter.api.Assertions;
+import org.seng302.leftovers.dto.KeywordDTO;
 import org.seng302.leftovers.dto.MarketplaceCardDTO;
 import org.seng302.leftovers.entities.Keyword;
 import org.seng302.leftovers.entities.MarketplaceCard;
@@ -71,6 +72,9 @@ public class CardStepDefinition {
 
     @Autowired
     private SessionFactory sessionFactory;
+
+    @Autowired
+    private ObjectMapper mapper;
 
     private JSONObject modifyParameters;
 
@@ -209,8 +213,9 @@ public class CardStepDefinition {
 
         try (Session session = sessionFactory.openSession()) {
             MarketplaceCard card = session.find(MarketplaceCard.class, cardContext.getLast().getID());
-            ObjectMapper mapper = new ObjectMapper();
-            assertEquals(mapper.readTree(new MarketplaceCardDTO(card).toString()), mapper.readTree(cardJson.toJSONString()));
+
+            var expectedJson = mapper.convertValue(new MarketplaceCardDTO(card), JSONObject.class);
+            assertEquals(mapper.readTree(mapper.writeValueAsString(expectedJson)), mapper.readTree(cardJson.toJSONString()));
         }
     }
 

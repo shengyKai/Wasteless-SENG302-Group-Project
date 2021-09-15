@@ -1,6 +1,7 @@
 package org.seng302.leftovers.dto;
 
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
@@ -17,6 +18,7 @@ import java.time.Instant;
 public class KeywordDTO {
     private long id;
     private String name;
+    @JsonFormat(shape=JsonFormat.Shape.STRING)
     private Instant created;
 
     /**
