@@ -694,13 +694,12 @@ class SaleControllerTest {
 //        assertEquals(user, interestEvent.getNotifiedUser());
 //        assertEquals(saleItem, interestEvent.getSaleItem());
 //    }
-@Test
-void getSaleItemsInterest_invalidBusiness_406Response() throws Exception {
-        mockMvc.perform(get(String.format("/listings/%s/interest", saleItem.getId()))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .param("userId", "4")
-                        .content(createUpdateInterestRequest(4, true).toString()))
-                        .andExpect(status().isOk())
-                        .andReturn();
-}
+    @Test
+    void getSaleItemsInterest_invalidBusiness_406Response() throws Exception {
+            mockMvc.perform(get(String.format("/listings/999/interest"))
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .param("userId", "4"))
+                            .andExpect(status().isNotAcceptable())
+                            .andReturn();
+    }
 }
