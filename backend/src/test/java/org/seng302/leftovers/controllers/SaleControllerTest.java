@@ -113,7 +113,7 @@ class SaleControllerTest {
         when(saleItemRepository.save(any(SaleItem.class))).thenAnswer(x -> x.getArgument(0));
         when(saleItemRepository.findById(not(eq(3L)))).thenReturn(Optional.empty());
         when(saleItemRepository.findById(3L)).thenReturn(Optional.of(saleItem));
-
+        when(saleItem.getInterestedUsers().contains(user)).thenReturn(true);
         when(saleItem.getId()).thenReturn(3L);
 
         // Setup mock user
@@ -671,5 +671,31 @@ class SaleControllerTest {
         verify(interestEvent, times(1)).setInterested(false);
 
         verify(interestEventRepository, times(1)).save(interestEvent);
+    }
+
+    @Test
+    void getSaleItemInterest_userLikeListingBefore_returnTrue() throws Exception {
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), any())).thenReturn(true);
+        //sale item, set of interestedUser
+
+        // Verify that a 200 response is received in response to the PUT request
+        MvcResult result = mockMvc.perform(get(String.format("/listings/%s/interest", saleItem.getId()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .param("userId", "4"))
+                        .andExpect(status().isOk())
+                        .andReturn();
+
+        JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
+        JSONObject actualResponse = (JSONObject) parser.parse(result.getResponse().getContentAsString());
+
+        JSONObject expectedResponse = new JSONObject();
+        expectedResponse.put("isInterested", true);
+
+        assertEquals(expectedResponse, actualResponse);
+        verify(saleItemRepository, times(1)).findById(saleItem.getId());
+        verify(userRepository, times(1)).findById(user.getUserID());
+
+
+
     }
 }

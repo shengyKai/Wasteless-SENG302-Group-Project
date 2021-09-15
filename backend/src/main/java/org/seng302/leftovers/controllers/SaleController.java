@@ -213,7 +213,7 @@ public class SaleController {
      * @return boolean              Does the user liked the sale listing
      */
     @GetMapping("/listings/{id}/interest")
-    public boolean getSaleItemsForBusiness(@PathVariable Long saleListingId,
+    public JSONObject getSaleItemsForBusiness(@PathVariable Long saleListingId,
                                            HttpServletRequest request,
                                             @RequestParam Long userId) {
         try {
@@ -226,8 +226,9 @@ public class SaleController {
             var saleItem = saleItemRepository.findById(saleListingId)
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "Listing not found"));
 
-            if(saleItem.getInterestedUsers().contains(user)) return true;
-            else return false;
+            var object = new JSONObject();
+            object.put("isInterested", saleItem.getInterestedUsers().contains(user));
+            return object;
 
         } catch (Exception error) {
             logger.error(error.getMessage());
