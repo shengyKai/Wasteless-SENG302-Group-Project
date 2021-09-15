@@ -213,7 +213,6 @@ export default {
 <style scoped>
 .body {
   padding: 16px;
-  margin-top: 15px;
   width: auto;
 }
 

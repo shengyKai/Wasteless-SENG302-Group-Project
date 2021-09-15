@@ -138,6 +138,7 @@ export type Product = {
   created?: string,
   images: Image[],
   countryOfSale?: string,
+  business?: Business
 };
 
 export type CreateInventoryItem = {
