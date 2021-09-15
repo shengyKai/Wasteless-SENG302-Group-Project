@@ -1333,13 +1333,21 @@ export async function getDummySaleItemSearchResult() : Promise<SearchResults<Sal
           product: {
             id: "NathanApple91",
             name: "The Nathan Apple",
+            description: "Nathan Apple",
+            manufacturer: "Nathan Apple LTD",
+            recommendedRetailPrice: 10.00,
+            created: "2021-02-02",
             images: [],
-            manufacturer: "Nathan Apple LTD"
+            countryOfSale: "New Zealand"
           },
           quantity: 900,
           remainingQuantity: 800,
           pricePerItem: 6,
-          expires: "10-10-2021"
+          totalPrice: 2400,
+          manufactured: "2021-01-01",
+          sellBy: "2021-03-03",
+          bestBefore: "2021-04-04",
+          expires: "2021-10-10"
         },
         quantity: 100,
         price: 600,
@@ -1352,22 +1360,30 @@ export async function getDummySaleItemSearchResult() : Promise<SearchResults<Sal
         inventoryItem: {
           id: 110,
           product: {
-            id: "NathanApple91",
+            id: "NathanApple92",
             name: "The Nathan Apple",
+            description: "Nathan Apple",
+            manufacturer: "Nathan Apple LTD",
+            recommendedRetailPrice: 10.00,
+            created: "2021-02-02",
             images: [],
-            manufacturer: "Nathan Apple LTD"
+            countryOfSale: "New Zealand"
           },
           quantity: 900,
           remainingQuantity: 800,
           pricePerItem: 6,
-          expires: "10-10-2021"
+          totalPrice: 2400,
+          manufactured: "2021-01-01",
+          sellBy: "2021-03-03",
+          bestBefore: "2021-04-04",
+          expires: "2021-10-10"
         },
         quantity: 100,
         price: 600,
         moreInfo: "The Nathan Apple is my favourite kind of apple. It was born in the Polish Jungle in Switzerland.",
         created: "2020-10-10",
         closes: "2021-09-09"
-      },
+      }
     ]
   };
 }

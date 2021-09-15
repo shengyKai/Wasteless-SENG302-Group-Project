@@ -53,7 +53,6 @@ export default {
      * Easy access to the product information of the sale item
      */
     product() {
-      console.log("Jordan", this.saleItem);
       return this.saleItem.inventoryItem.product;
     },
     /**
