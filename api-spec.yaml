@@ -2287,7 +2287,7 @@ paths:
             application admin.
         '406':
           $ref: '#/components/responses/NotAcceptableError'
-  /businesses/{businessId}/listings/{listingId}/purchase:
+  listings/{id}/purchase:
     put:
       tags:
         - 'U31: Purchases'
@@ -2299,12 +2299,7 @@ paths:
           - globalApplicationAdmin
           - defaultGlobalApplicationAdmin
       parameters:
-        - name: businessId
-          in: path
-          required: true
-          schema:
-            type: integer
-        - name: listingId
+        - name: id
           in: path
           required: true
           schema:
@@ -2333,7 +2328,7 @@ paths:
             Forbidden: Returned when a user who is not a GAA or DGAA tries to make a request with a purchaserId other than their own user ID
         '406':
           description: >-
-            Not Acceptable: The business, sale listing or purchasing user does not exist
+            Not Acceptable: The sale listing or purchasing user does not exist
   /feed/{id}/tag:
     put:
       tags:

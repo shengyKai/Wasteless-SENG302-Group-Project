@@ -14,10 +14,7 @@ import org.mockito.internal.matchers.apachecommons.ReflectionEquals;
 import org.seng302.leftovers.entities.*;
 import org.seng302.leftovers.entities.event.InterestEvent;
 import org.seng302.leftovers.exceptions.AccessTokenException;
-import org.seng302.leftovers.persistence.BusinessRepository;
-import org.seng302.leftovers.persistence.InventoryItemRepository;
-import org.seng302.leftovers.persistence.SaleItemRepository;
-import org.seng302.leftovers.persistence.UserRepository;
+import org.seng302.leftovers.persistence.*;
 import org.seng302.leftovers.persistence.event.InterestEventRepository;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
 import org.seng302.leftovers.tools.SearchHelper;
@@ -65,6 +62,8 @@ class SaleControllerTest {
     private InventoryItemRepository inventoryItemRepository;
     @Mock
     private InterestEventRepository interestEventRepository;
+    @Mock
+    private BoughtSaleItemRepository boughtSaleItemRepository;
     @Mock
     private Business business;
     @Mock
@@ -121,7 +120,8 @@ class SaleControllerTest {
         when(userRepository.findById(4L)).thenReturn(Optional.of(user));
         when(userRepository.findById(not(eq(4L)))).thenReturn(Optional.empty());
 
-        saleController = spy(new SaleController(userRepository, businessRepository, saleItemRepository, inventoryItemRepository, interestEventRepository));
+        saleController = spy(new SaleController(userRepository, businessRepository, saleItemRepository,
+                inventoryItemRepository, interestEventRepository, boughtSaleItemRepository));
         mockMvc = MockMvcBuilders.standaloneSetup(saleController).build();
     }
 

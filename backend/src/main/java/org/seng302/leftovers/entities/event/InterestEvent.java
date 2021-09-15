@@ -17,6 +17,7 @@ public class InterestEvent extends Event {
 
     @ManyToOne
     @JoinColumn(name = "sale_item_id", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private SaleItem saleItem;
 
     @Column(nullable = false)
