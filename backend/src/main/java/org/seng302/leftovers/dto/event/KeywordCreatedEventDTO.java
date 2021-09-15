@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.ToString;
 import net.minidev.json.JSONObject;
 import org.seng302.leftovers.dto.KeywordDTO;
+import org.seng302.leftovers.dto.user.UserResponseDTO;
 import org.seng302.leftovers.entities.event.KeywordCreatedEvent;
 
 /**
@@ -15,7 +16,7 @@ import org.seng302.leftovers.entities.event.KeywordCreatedEvent;
 @EqualsAndHashCode(callSuper = false)
 public class KeywordCreatedEventDTO extends EventDTO {
     private KeywordDTO keyword;
-    private JSONObject creator;
+    private UserResponseDTO creator;
 
     /**
      * Converts a KeywordCreatedEvent entity to its JSON form
@@ -24,7 +25,6 @@ public class KeywordCreatedEventDTO extends EventDTO {
     public KeywordCreatedEventDTO(KeywordCreatedEvent event) {
         super(event);
         this.keyword = new KeywordDTO(event.getNewKeyword());
-        // TODO When User DTO is done this needs updating
-        this.creator = event.getCreator().constructPublicJson();
+        this.creator = new UserResponseDTO(event.getCreator());
     }
 }

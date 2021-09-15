@@ -88,7 +88,6 @@ class ExpiryEventTest {
                 mapper.convertValue(new MarketplaceCardDTO(testCard), JSONObject.class),
                 testEvent.getLastModified().toString());
         String actualJsonString = mapper.writeValueAsString(testEvent.asDTO());
-
         assertEquals(mapper.readTree(expectedJsonString), mapper.readTree(actualJsonString));
     }
 

@@ -3,6 +3,8 @@ package org.seng302.leftovers.controllers;
 import net.minidev.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.seng302.leftovers.dto.ResultPageDTO;
+import org.seng302.leftovers.dto.SaleItemDTO;
 import org.seng302.leftovers.dto.SetSaleItemInterestDTO;
 import org.seng302.leftovers.entities.Business;
 import org.seng302.leftovers.entities.InventoryItem;
@@ -138,7 +140,7 @@ public class SaleController {
      * @return List of sale items the business is listing
      */
     @GetMapping("/businesses/{id}/listings")
-    public JSONObject getSaleItemsForBusiness(@PathVariable Long id,
+    public ResultPageDTO<SaleItemDTO> getSaleItemsForBusiness(@PathVariable Long id,
                                               HttpServletRequest request,
                                               @RequestParam(required = false) String orderBy,
                                               @RequestParam(required = false) Integer page,
@@ -157,7 +159,7 @@ public class SaleController {
             Specification<SaleItem> specification = SearchHelper.constructSpecificationFromSaleItemsFilter(business);
             Page<SaleItem> result = saleItemRepository.findAll(specification, pageRequest);
 
-            return JsonTools.constructPageJSON(result.map(SaleItem::constructJSONObject));
+            return new ResultPageDTO(result.map(SaleItemDTO::new));
 
         } catch (Exception error) {
             logger.error(error.getMessage());

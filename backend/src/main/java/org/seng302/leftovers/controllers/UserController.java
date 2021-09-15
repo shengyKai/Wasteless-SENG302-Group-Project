@@ -4,8 +4,11 @@ import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.seng302.leftovers.dto.CreateUserDTO;
-import org.seng302.leftovers.dto.ModifyUserDTO;
+import org.seng302.leftovers.dto.ResultPageDTO;
+import org.seng302.leftovers.dto.user.CreateUserDTO;
+import org.seng302.leftovers.dto.user.ModifyUserDTO;
+import org.seng302.leftovers.dto.user.UserResponseDTO;
+import org.seng302.leftovers.dto.user.UserRole;
 import org.seng302.leftovers.entities.Account;
 import org.seng302.leftovers.entities.Location;
 import org.seng302.leftovers.entities.User;
@@ -15,6 +18,8 @@ import org.seng302.leftovers.tools.AuthenticationTokenManager;
 import org.seng302.leftovers.tools.PasswordAuthenticator;
 import org.seng302.leftovers.tools.SearchHelper;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
@@ -129,7 +134,7 @@ public class UserController {
      * @return User with corresponding Id
      */
     @GetMapping("/users/{id}")
-    public JSONObject getUserById(@PathVariable Long id, HttpServletRequest session) {
+    public UserResponseDTO getUserById(@PathVariable Long id, HttpServletRequest session) {
         logger.info("Get user by id");
         AuthenticationTokenManager.checkAuthenticationToken(session);
 
@@ -140,12 +145,11 @@ public class UserController {
             logger.error(notFound.getMessage());
             throw notFound;
         } else {
-            if (AuthenticationTokenManager.sessionCanSeePrivate(session, user.get().getUserID())) {
-                return user.get().constructPrivateJson(true);
-            } else {
-                return user.get().constructPublicJson(true);
-            }
-
+            return new UserResponseDTO(
+                    user.get(),
+                    true,
+                    AuthenticationTokenManager.sessionCanSeePrivate(session, user.get().getUserID())
+            );
         }
     }
 
@@ -159,43 +163,33 @@ public class UserController {
      * @return List of matching Users
      */
     @GetMapping("/users/search")
-    public JSONObject searchUsersByName(HttpServletRequest session,
-                                @RequestParam("searchQuery") String searchQuery,
-                                @RequestParam(required = false) Integer page,
-                                @RequestParam(required = false) Integer resultsPerPage,
-                                @RequestParam(required = false) String orderBy,
-                                @RequestParam(required = false) Boolean reverse) {
+    public ResultPageDTO<UserResponseDTO> searchUsersByName(HttpServletRequest session,
+                                                            @RequestParam("searchQuery") String searchQuery,
+                                                            @RequestParam(required = false) Integer page,
+                                                            @RequestParam(required = false) Integer resultsPerPage,
+                                                            @RequestParam(required = false) String orderBy,
+                                                            @RequestParam(required = false) Boolean reverse) {
 
         AuthenticationTokenManager.checkAuthenticationToken(session); // Check user auth
 
         logger.info(() -> String.format("Performing search for \"%s\"", searchQuery));
-        List<User> queryResults;
-        long count;
+        Page<User> results;
         if (orderBy == null || orderBy.equals("relevance")) {
-            queryResults = SearchHelper.getSearchResultsOrderedByRelevance(searchQuery, userRepository, reverse);
-            count = queryResults.size();
-            queryResults = SearchHelper.getPageInResults(queryResults, page, resultsPerPage);
+            var users = SearchHelper.getSearchResultsOrderedByRelevance(searchQuery, userRepository, reverse);
+            results = new PageImpl<>(SearchHelper.getPageInResults(users, page, resultsPerPage), Pageable.unpaged(), users.size());
         } else {
             Specification<User> spec = SearchHelper.constructUserSpecificationFromSearchQuery(searchQuery);
             Sort userSort = SearchHelper.getSort(orderBy, reverse);
-            Page<User> results = userRepository.findAll(spec, SearchHelper.getPageRequest(page, resultsPerPage, userSort));
-            count = results.getTotalElements();
-            queryResults = results.toList();
+            results = userRepository.findAll(spec, SearchHelper.getPageRequest(page, resultsPerPage, userSort));
         }
 
-
-        JSONArray resultArray = new JSONArray();
-        for (User user : queryResults) {
-            if (AuthenticationTokenManager.sessionCanSeePrivate(session, user.getUserID())) {
-                resultArray.appendElement(user.constructPrivateJson(true));
-            } else {
-                resultArray.appendElement(user.constructPublicJson(true));
-            }
-        }
-        JSONObject json = new JSONObject();
-        json.put("count", count);
-        json.put("results", resultArray);
-        return json;
+        return new ResultPageDTO<>(
+                results.map(user -> new UserResponseDTO(
+                        user,
+                        true,
+                        AuthenticationTokenManager.sessionCanSeePrivate(session, user.getUserID()))
+                )
+        );
     }
 
 
@@ -207,7 +201,7 @@ public class UserController {
      */
     @PutMapping("/users/{id}/makeAdmin")
     public void makeUserAdmin(HttpServletRequest session, @PathVariable("id") long id) {
-        changeUserPrivilege(session, id, "globalApplicationAdmin");
+        changeUserPrivilege(session, id, UserRole.GAA);
     }
 
     /**
@@ -218,7 +212,7 @@ public class UserController {
      */
     @PutMapping("/users/{id}/revokeAdmin")
     public void revokeUserAdmin(HttpServletRequest session, @PathVariable("id") long id) {
-        changeUserPrivilege(session, id, "user");
+        changeUserPrivilege(session, id, UserRole.USER);
     }
 
     /**
@@ -227,7 +221,7 @@ public class UserController {
      * @param id The id of the user
      * @param newRole The new role of the user
      */
-    void changeUserPrivilege(HttpServletRequest request, long id, String newRole) {
+    void changeUserPrivilege(HttpServletRequest request, long id, UserRole newRole) {
         AuthenticationTokenManager.checkAuthenticationToken(request); // Ensure user is logged on
         AuthenticationTokenManager.checkAuthenticationTokenDGAA(request); // Ensure user is the DGAA
 

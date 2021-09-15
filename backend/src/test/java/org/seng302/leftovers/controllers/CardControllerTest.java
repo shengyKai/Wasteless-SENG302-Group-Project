@@ -58,6 +58,8 @@ class CardControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
+    @Autowired
+    private ObjectMapper objectMapper;
     @Mock
     private KeywordRepository keywordRepository;
     @Mock
@@ -106,8 +108,7 @@ class CardControllerTest {
     private final long cardId = 32L;
     private final long keywordId1 = 25L;
     private final long keywordId2 = 71L;
-    @Autowired
-    private ObjectMapper objectMapper;
+
 
 
     @BeforeEach

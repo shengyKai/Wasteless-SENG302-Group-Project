@@ -2,6 +2,7 @@ package org.seng302.leftovers.controllers;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.seng302.leftovers.dto.user.UserRole;
 import org.seng302.leftovers.entities.Location;
 import org.seng302.leftovers.entities.User;
 import org.seng302.leftovers.persistence.UserRepository;
@@ -37,7 +38,7 @@ public class DGAAController {
         logger.info("Checking DGAA exists");
         User dgaa = this.userRepository.findByEmail(dgaaUsername);
         
-        if (dgaa != null && !dgaa.getRole().equals("defaultGlobalApplicationAdmin")) {
+        if (dgaa != null && !dgaa.getRole().equals(UserRole.DGAA)) {
             userRepository.delete(dgaa);
             dgaa = null;
         }
@@ -62,7 +63,7 @@ public class DGAAController {
                 .withDob("2000-03-11")
                 .withAddress(dgaaAddress)
                 .build();
-            dgaa.setRole("defaultGlobalApplicationAdmin");
+            dgaa.setRole(UserRole.DGAA);
             userRepository.save(dgaa);
         }
     }

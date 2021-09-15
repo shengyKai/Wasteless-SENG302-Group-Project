@@ -4,14 +4,14 @@ exports[`KeywordCreated.vue Must match snapshot 1`] = `
 <div>
   <div class="row">
     <div class="col">
-      <div class="v-card__title"><span class="v-badge v-badge--icon v-badge--overlap theme--light">
-          Keyword "TestKeywordName" has been created
-        <span class="v-badge__wrapper"><transition-stub name="scale-rotate-transition"><span aria-atomic="true" aria-label="Badge" aria-live="polite" role="status" class="v-badge__badge primary" style="bottom: calc(100% - 8px); left: calc(100% - -2px);"><i aria-hidden="true" class="v-icon notranslate mdi mdi-email theme--light"></i></span></transition-stub></span></span></div>
+      <div aria-haspopup="true" aria-expanded="false" class="v-card__title"><span class="v-badge v-badge--icon v-badge--overlap theme--light">
+              Keyword "TestKeywordName" has been created
+            <span class="v-badge__wrapper"><transition-stub name="scale-rotate-transition"><span aria-atomic="true" aria-label="Badge" aria-live="polite" role="status" class="v-badge__badge primary" style="bottom: calc(100% - 8px); left: calc(100% - -2px);"><i aria-hidden="true" class="v-icon notranslate mdi mdi-email theme--light"></i></span></transition-stub></span></span></div><span class="v-tooltip v-tooltip--top"><!----></span>
       <div class="v-card__subtitle">
         02 Jan 2021, 01:00
       </div>
     </div>
-    <div class="mt-2 col col-auto"><button type="button" class="v-icon notranslate mr-2 v-icon--link mdi mdi-trash-can theme--light red--text"></button></div>
+    <div class="mt-2 col col-auto"><button type="button" aria-haspopup="true" aria-expanded="false" class="v-icon notranslate mr-2 v-icon--link mdi mdi-star-outline theme--light orange--text"></button><span class="v-tooltip v-tooltip--top"><!----></span> <span class="v-tooltip v-tooltip--top"><!----></span><button type="button" aria-haspopup="true" aria-expanded="false" class="v-icon notranslate mr-2 v-icon--link mdi mdi-archive-outline theme--light blue--text"></button> <span class="v-tooltip v-tooltip--top"><!----></span><button type="button" aria-haspopup="true" aria-expanded="false" class="v-icon notranslate mr-2 v-icon--link mdi mdi-trash-can theme--light red--text"></button></div>
   </div>
   <div class="v-card__text">
     John Smith has added "TestKeywordName"

@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
+import org.seng302.leftovers.dto.user.UserResponseDTO;
 import org.seng302.leftovers.tools.JsonTools;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
@@ -239,13 +240,15 @@ public class MarketplaceCard {
      * Valid marketplace card sections
      */
     public enum Section {
-        FOR_SALE("ForSale"),
+        @JsonProperty("ForSale")
+        FOR_SALE,
 
-        WANTED("Wanted"),
+        @JsonProperty("Wanted")
+        WANTED,
 
-        EXCHANGE("Exchange");
+        @JsonProperty("Exchange")
+        EXCHANGE;
 
-        private String name;
         private static final ObjectMapper mapper = new ObjectMapper();
 
         /**
@@ -253,15 +256,9 @@ public class MarketplaceCard {
          * Same as in api spec
          * @return section name
          */
-        @JsonValue
         public String getName() {
-            return this.name;
-            //return mapper.convertValue(this, String.class);
+            return mapper.convertValue(this, String.class);
         }
-        Section(String name) {
-            this.name = name;
-        }
-
     }
 
     /**
@@ -277,6 +274,7 @@ public class MarketplaceCard {
         }
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid section name");
     }
+
     /**
      * This class uses the builder pattern to construct an instance of the MarketplaceCard class
      */

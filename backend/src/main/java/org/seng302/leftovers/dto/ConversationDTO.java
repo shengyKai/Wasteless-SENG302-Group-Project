@@ -4,6 +4,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
 import net.minidev.json.JSONObject;
+import org.seng302.leftovers.dto.user.UserResponseDTO;
 import org.seng302.leftovers.entities.Conversation;
 
 
@@ -16,7 +17,7 @@ import org.seng302.leftovers.entities.Conversation;
 public class ConversationDTO {
     private Long id;
     private MarketplaceCardDTO card;
-    private JSONObject buyer;
+    private UserResponseDTO buyer;
 
     /**
      * Converts a Conversation entity to its JSON form
@@ -25,7 +26,6 @@ public class ConversationDTO {
     public ConversationDTO(Conversation conversation) {
         this.id = conversation.getId();
         this.card = new MarketplaceCardDTO(conversation.getCard());
-        // TODO When User DTO is done this needs updating
-        this.buyer = conversation.getBuyer().constructPublicJson();
+        this.buyer = new UserResponseDTO(conversation.getBuyer());
     }
 }

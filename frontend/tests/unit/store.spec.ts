@@ -166,7 +166,7 @@ describe('store.ts', () => {
         expect(getEvents).toBeCalledTimes(1);
         expect(getEvents).toBeCalledWith(6, '2021-11-15T05:10:00Z');
       });
-  
+
       it('Adds returned events to eventMap if response from getEvents is a list of events', async () => {
         const returnedEvents: events.AnyEvent[] = [
           {
@@ -189,14 +189,14 @@ describe('store.ts', () => {
             message: 'Third',
             lastModified: '2021-09-15T05:10:00Z',
           }
-        ]
+        ];
         getEvents.mockResolvedValueOnce(returnedEvents);
         await store.dispatch('refreshEventFeed');
         expect(Object.keys(store.state.eventMap).length).toBe(5);
         expect(store.state.eventMap[12]).toStrictEqual(returnedEvents[0]);
         expect(store.state.eventMap[33]).toStrictEqual(returnedEvents[1]);
       });
-  
+
       it('eventMap does not change if response from getEvents is a list of events', async () => {
         console.error = jest.fn(); // Console error should be printed in this test, so suppress it to avoid confusion in reading test output
         getEvents.mockResolvedValueOnce('An error has occured');

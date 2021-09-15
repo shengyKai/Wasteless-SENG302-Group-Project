@@ -14,6 +14,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
+import org.seng302.leftovers.dto.user.UserRole;
 import org.seng302.leftovers.entities.Business;
 import org.seng302.leftovers.entities.Location;
 import org.seng302.leftovers.entities.User;
@@ -60,6 +61,9 @@ class BusinessControllerTest {
     @Captor
     private ArgumentCaptor<String> typeCaptor;
 
+    @Autowired
+    private ObjectMapper objectMapper;
+
     private final HashMap<String, Object> sessionAuthToken = new HashMap<>();
     private Cookie authCookie;
     private Business testBusiness;
@@ -104,14 +108,14 @@ class BusinessControllerTest {
      * Mocks logging in as a DGAA role
      */
     private void loginAsDgaa() {
-        sessionAuthToken.put("role", "defaultGlobalApplicationAdmin");
+        sessionAuthToken.put("role", UserRole.DGAA);
     }
 
     /**
      * Mocks logging in as a global application administrator role
      */
     private void loginAsGlobalAdmin() {
-        sessionAuthToken.put("role", "globalApplicationAdmin");
+        sessionAuthToken.put("role", UserRole.GAA);
     }
 
     /**
@@ -501,8 +505,10 @@ class BusinessControllerTest {
         assertEquals(owner.getUserID().toString(), json.getAsString("primaryAdministratorId"));
         String adminString = json.getAsString("administrators");
         assertTrue(adminString.contains(String.format("\"id\":%d", owner.getUserID())));
-        ObjectMapper mapper = new ObjectMapper();
-        assertEquals(mapper.readTree(testBusiness.constructJson(true).toJSONString()), mapper.readTree(json.toJSONString()));
+        assertEquals(
+                objectMapper.readTree(objectMapper.writeValueAsString(testBusiness.constructJson(true))),
+                objectMapper.readTree(objectMapper.writeValueAsString(json))
+        );
     }
 
     /**
@@ -523,8 +529,10 @@ class BusinessControllerTest {
         assertNotEquals(admin.getUserID().toString(), json.getAsString("primaryAdministratorId"));
         String adminString = json.getAsString("administrators");
         assertTrue(adminString.contains(String.format("\"id\":%d", admin.getUserID())));
-        ObjectMapper mapper = new ObjectMapper();
-        assertEquals(mapper.readTree(testBusiness.constructJson(true).toJSONString()), mapper.readTree(json.toJSONString()));
+        assertEquals(
+                objectMapper.readTree(objectMapper.writeValueAsString(testBusiness.constructJson(true))),
+                objectMapper.readTree(objectMapper.writeValueAsString(json))
+        );
     }
 
     /**
@@ -545,8 +553,10 @@ class BusinessControllerTest {
         assertNotEquals(otherUser.getUserID().toString(), json.getAsString("primaryAdministratorId"));
         String adminString = json.getAsString("administrators");
         assertFalse(adminString.contains(String.format("\"id\":%d", otherUser.getUserID())));
-        ObjectMapper mapper = new ObjectMapper();
-        assertEquals(mapper.readTree(testBusiness.constructJson(true).toJSONString()), mapper.readTree(json.toJSONString()));
+        assertEquals(
+                objectMapper.readTree(objectMapper.writeValueAsString(testBusiness.constructJson(true))),
+                objectMapper.readTree(objectMapper.writeValueAsString(json))
+        );
     }
 
 

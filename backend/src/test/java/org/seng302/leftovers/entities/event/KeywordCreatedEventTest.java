@@ -8,6 +8,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.seng302.leftovers.dto.KeywordDTO;
 import org.seng302.leftovers.dto.MarketplaceCardDTO;
+import org.seng302.leftovers.dto.user.UserResponseDTO;
 import org.seng302.leftovers.entities.Keyword;
 import org.seng302.leftovers.entities.Location;
 import org.seng302.leftovers.entities.User;
@@ -96,7 +97,7 @@ class KeywordCreatedEventTest {
                 mapper.convertValue(new KeywordDTO(keyword), JSONObject.class),
                 event.getStatus().toString().toLowerCase(),
                 event.isRead(),
-                user.constructPublicJson(false).toJSONString(),
+                mapper.writeValueAsString(new UserResponseDTO(user)),
                 event.getLastModified().toString());
         System.out.println(expectedJsonString);
         String actualJsonString = mapper.writeValueAsString(event.asDTO());

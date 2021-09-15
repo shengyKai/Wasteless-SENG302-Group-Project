@@ -3,6 +3,7 @@ package org.seng302.leftovers.service;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
+import org.seng302.leftovers.dto.user.UserRole;
 import org.seng302.leftovers.entities.Keyword;
 import org.seng302.leftovers.entities.User;
 import org.seng302.leftovers.entities.event.Event;
@@ -37,7 +38,7 @@ class KeywordServiceTest {
     KeywordService keywordService;
 
     @Captor
-    ArgumentCaptor<String> stringArgumentCaptor;
+    ArgumentCaptor<UserRole> roleArgumentCaptor;
     @Captor
     ArgumentCaptor<KeywordCreatedEvent> eventArgumentCaptor;
 
@@ -51,11 +52,11 @@ class KeywordServiceTest {
 
         List<User> dgaaList = new ArrayList<>();
         dgaaList.add(mockDgaa);
-        when(userRepository.findAllByRole("defaultGlobalApplicationAdmin")).thenReturn(dgaaList);
+        when(userRepository.findAllByRole(UserRole.DGAA)).thenReturn(dgaaList);
 
         List<User> gaaList = new ArrayList<>();
         gaaList.add(mockGaa);
-        when(userRepository.findAllByRole("globalApplicationAdmin")).thenReturn(gaaList);
+        when(userRepository.findAllByRole(UserRole.GAA)).thenReturn(gaaList);
 
         keyword = new Keyword("Blah");
     }
@@ -64,11 +65,11 @@ class KeywordServiceTest {
     void sendNewKeywordsEvents_queriesUserRepositoryForAllAdmin() {
         keywordService.sendNewKeywordEvent(keyword, mockUser);
         Mockito.verify(userRepository, Mockito.times(2))
-                .findAllByRole(stringArgumentCaptor.capture());
+                .findAllByRole(roleArgumentCaptor.capture());
 
-        List<String> capturedRole = stringArgumentCaptor.getAllValues();
-        assertEquals("defaultGlobalApplicationAdmin", capturedRole.get(0));
-        assertEquals("globalApplicationAdmin", capturedRole.get(1));
+        var capturedRoles = roleArgumentCaptor.getAllValues();
+        assertEquals(UserRole.DGAA, capturedRoles.get(0));
+        assertEquals(UserRole.GAA, capturedRoles.get(1));
     }
 
     @Test
