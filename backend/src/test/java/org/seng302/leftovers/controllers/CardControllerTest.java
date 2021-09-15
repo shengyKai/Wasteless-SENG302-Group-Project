@@ -217,10 +217,21 @@ class CardControllerTest {
         when(marketplaceCardRepository.getAllByCreator(any(), any())).thenReturn(expectedPage);
         when(marketplaceCardRepository.findAll(any(), any(Pageable.class))).thenReturn(expectedPage);
 
+        Location testLocation = new Location.Builder()
+                .inCountry("New Zealand")
+                .inRegion("Canterbury")
+                .inCity("Christchurch")
+                .atStreetNumber("12")
+                .onStreet("Cool street")
+                .withPostCode("1234")
+                .atDistrict("District")
+                .build();
+
         // Set up entities to return set id when getter called
         when(mockCard.getID()).thenReturn(cardId);
         when(mockCard.getCreator()).thenReturn(mockUser);
         when(mockUser.getUserID()).thenReturn(userId);
+        when(mockUser.getAddress()).thenReturn(testLocation);
 
         // Set up keywordSpec and sectionSpec so that when they are combined with "and" they return combined spec
         when(keywordSpec.and(sectionSpec)).thenReturn(combinedSpec);

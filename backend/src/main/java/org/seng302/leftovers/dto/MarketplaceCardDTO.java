@@ -5,6 +5,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
 import net.minidev.json.JSONObject;
+import org.seng302.leftovers.dto.user.UserResponseDTO;
 import org.seng302.leftovers.entities.MarketplaceCard;
 import org.seng302.leftovers.entities.User;
 
@@ -17,7 +18,7 @@ import java.util.stream.Collectors;
 @EqualsAndHashCode
 public class MarketplaceCardDTO {
     private Long id;
-    private JSONObject creator;
+    private UserResponseDTO creator;
     private MarketplaceCard.Section section;
     @JsonFormat(shape=JsonFormat.Shape.STRING)
     private Instant created;
@@ -31,7 +32,7 @@ public class MarketplaceCardDTO {
 
     public MarketplaceCardDTO(MarketplaceCard card) {
         this.id = card.getID();
-        this.creator = card.getCreator().constructPrivateJson(); //todo user DTO
+        this.creator = new UserResponseDTO(card.getCreator());
         this.section = card.getSection();
         this.created = card.getCreated();
         this.lastRenewed = card.getLastRenewed();
