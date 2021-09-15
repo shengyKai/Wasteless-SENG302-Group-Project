@@ -95,7 +95,8 @@ class MessageTest {
         JSONObject userJson = new JSONObject();
         userJson.appendField("id", 967);
         when(conversation.getId()).thenReturn(44L);
-        when(user.constructPublicJson()).thenReturn(userJson);
+        // TODO
+        //when(user.constructPublicJson()).thenReturn(userJson);
         Message message = new Message(conversation, user, "Hello world!");
 
 

@@ -1,5 +1,7 @@
 package org.seng302.leftovers.entities;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import org.hibernate.Session;
@@ -7,6 +9,8 @@ import org.hibernate.SessionFactory;
 import org.junit.jupiter.api.*;
 import org.mockito.MockitoAnnotations;
 import org.mockito.internal.matchers.apachecommons.ReflectionEquals;
+import org.seng302.leftovers.dto.LocationDTO;
+import org.seng302.leftovers.dto.user.UserResponseDTO;
 import org.seng302.leftovers.exceptions.EmailInUseException;
 import org.seng302.leftovers.persistence.BusinessRepository;
 import org.seng302.leftovers.persistence.UserRepository;
@@ -21,10 +25,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -38,7 +39,9 @@ class UserTests {
     @Autowired
     private BusinessRepository businessRepository;
     @Autowired
-    SessionFactory sessionFactory;
+    private SessionFactory sessionFactory;
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @BeforeAll
     void init() {
@@ -662,7 +665,7 @@ class UserTests {
     @Test
     void constructPublicJsonPublicAttributesPresentTest() {
         testUser.setUserID(1L);
-        JSONObject json = testUser.constructPublicJson(true);
+        var json = objectMapper.convertValue(new UserResponseDTO(testUser, true, false), JSONObject.class);
         assertTrue(json.containsKey("id"));
         assertTrue(json.containsKey("firstName"));
         assertTrue(json.containsKey("middleName"));
@@ -680,7 +683,7 @@ class UserTests {
     @Test
     void constructPublicJsonHiddenAttributesNotPresentTest() {
         testUser.setUserID(1L);
-        JSONObject json = testUser.constructPublicJson(true);
+        var json = objectMapper.convertValue(new UserResponseDTO(testUser, true, false), JSONObject.class);
         json.remove("id");
         json.remove("firstName");
         json.remove("middleName");
@@ -700,9 +703,9 @@ class UserTests {
      * and the list of businesses it administers is empty, all of the attributes in the JSON have the expected value.
      */
     @Test
-    void constructPublicJsonNoAttributesNullTest() {
+    void constructPublicJsonNoAttributesNullTest() throws JsonProcessingException {
         testUser.setUserID(1L);
-        JSONObject json = testUser.constructPublicJson(true);
+        var json = objectMapper.convertValue(new UserResponseDTO(testUser, true, false), JSONObject.class);
         assertEquals(testUser.getUserID().toString(), json.getAsString("id"));
         assertEquals(testUser.getFirstName(), json.getAsString("firstName"));
         assertEquals(testUser.getMiddleName(), json.getAsString("middleName"));
@@ -711,8 +714,8 @@ class UserTests {
         assertEquals(testUser.getBio(), json.getAsString("bio"));
         assertEquals(testUser.getEmail(), json.getAsString("email"));
         assertEquals(testUser.getCreated().toString(), json.getAsString("created"));
-        String expectedAddressString = testUser.getAddress().constructPartialJson().toJSONString();
-        assertEquals(expectedAddressString, json.getAsString("homeAddress"));
+        String expectedAddressString = objectMapper.writeValueAsString(new LocationDTO(testUser.getAddress(), false));
+        assertEquals(expectedAddressString, objectMapper.writeValueAsString(json.get("homeAddress")));
         assertEquals("[]", json.getAsString("businessesAdministered"));
     }
 
@@ -721,12 +724,12 @@ class UserTests {
      * and the list of businesses it administers is empty, all of the attributes in the JSON have the expected value.
      */
     @Test
-    void constructPublicJsonOptionalAttributesNullTest() {
+    void constructPublicJsonOptionalAttributesNullTest() throws JsonProcessingException {
         testUser.setUserID(1L);
         testUser.setMiddleName(null);
         testUser.setNickname(null);
         testUser.setBio(null);
-        JSONObject json = testUser.constructPublicJson(true);
+        var json = objectMapper.convertValue(new UserResponseDTO(testUser, true, false), JSONObject.class);
         assertEquals(testUser.getUserID().toString(), json.getAsString("id"));
         assertEquals(testUser.getFirstName(), json.getAsString("firstName"));
         assertEquals(testUser.getMiddleName(), json.getAsString("middleName"));
@@ -735,8 +738,8 @@ class UserTests {
         assertEquals(testUser.getBio(), json.getAsString("bio"));
         assertEquals(testUser.getEmail(), json.getAsString("email"));
         assertEquals(testUser.getCreated().toString(), json.getAsString("created"));
-        String expectedAddressString = testUser.getAddress().constructPartialJson().toJSONString();
-        assertEquals(expectedAddressString, json.getAsString("homeAddress"));
+        String expectedAddressString = objectMapper.writeValueAsString(new LocationDTO(testUser.getAddress(), false));
+        assertEquals(expectedAddressString, objectMapper.writeValueAsString(json.get("homeAddress")));
         assertEquals("[]", json.getAsString("businessesAdministered"));
     }
 
@@ -746,7 +749,7 @@ class UserTests {
     @Test
     void constructPrivateJsonAllExpectedAttributesPresentTest() {
         testUser.setUserID(1L);
-        JSONObject json = testUser.constructPrivateJson(true);
+        var json = objectMapper.convertValue(new UserResponseDTO(testUser, true, true), JSONObject.class);
         assertTrue(json.containsKey("id"));
         assertTrue(json.containsKey("firstName"));
         assertTrue(json.containsKey("middleName"));
@@ -767,7 +770,7 @@ class UserTests {
     @Test
     void constructPrivateJsonNoUnexpectedAttributesPresentTest() {
         testUser.setUserID(1L);
-        JSONObject json = testUser.constructPrivateJson(true);
+        var json = objectMapper.convertValue(new UserResponseDTO(testUser, true, true), JSONObject.class);
         json.remove("id");
         json.remove("firstName");
         json.remove("middleName");
@@ -789,9 +792,9 @@ class UserTests {
      * and the list of businesses it administers is empty, all of the attributes in the JSON have the expected value.
      */
     @Test
-    void constructPrivateJsonNoAttributesNullTest() {
+    void constructPrivateJsonNoAttributesNullTest() throws JsonProcessingException {
         testUser.setUserID(1L);
-        JSONObject json = testUser.constructPrivateJson(true);
+        var json = objectMapper.convertValue(new UserResponseDTO(testUser, true, true), JSONObject.class);
         assertEquals(testUser.getUserID().toString(), json.getAsString("id"));
         assertEquals(testUser.getFirstName(), json.getAsString("firstName"));
         assertEquals(testUser.getMiddleName(), json.getAsString("middleName"));
@@ -800,8 +803,8 @@ class UserTests {
         assertEquals(testUser.getBio(), json.getAsString("bio"));
         assertEquals(testUser.getEmail(), json.getAsString("email"));
         assertEquals(testUser.getCreated().toString(), json.getAsString("created"));
-        String expectedAddressString = testUser.getAddress().constructFullJson().toJSONString();
-        assertEquals(expectedAddressString, json.getAsString("homeAddress"));
+        String expectedAddressString = objectMapper.writeValueAsString(new LocationDTO(testUser.getAddress(), true));
+        assertEquals(expectedAddressString, objectMapper.writeValueAsString(json.get("homeAddress")));
         assertEquals("[]", json.getAsString("businessesAdministered"));
         assertEquals(testUser.getRole(), json.getAsString("role"));
         assertEquals(testUser.getPhNum(), json.getAsString("phoneNumber"));
@@ -813,13 +816,13 @@ class UserTests {
      * and the list of businesses it administers is empty, all of the attributes in the JSON have the expected value.
      */
     @Test
-    void constructPrivateJsonOptionalAttributesNullTest() {
+    void constructPrivateJsonOptionalAttributesNullTest() throws JsonProcessingException {
         testUser.setUserID(1L);
         testUser.setMiddleName(null);
         testUser.setNickname(null);
         testUser.setBio(null);
         testUser.setPhNum(null);
-        JSONObject json = testUser.constructPrivateJson(true);
+        var json = objectMapper.convertValue(new UserResponseDTO(testUser, true, true), JSONObject.class);
         assertEquals(testUser.getUserID().toString(), json.getAsString("id"));
         assertEquals(testUser.getFirstName(), json.getAsString("firstName"));
         assertEquals(testUser.getMiddleName(), json.getAsString("middleName"));
@@ -828,8 +831,8 @@ class UserTests {
         assertEquals(testUser.getBio(), json.getAsString("bio"));
         assertEquals(testUser.getEmail(), json.getAsString("email"));
         assertEquals(testUser.getCreated().toString(), json.getAsString("created"));
-        String expectedAddressString = testUser.getAddress().constructFullJson().toJSONString();
-        assertEquals(expectedAddressString, json.getAsString("homeAddress"));
+        String expectedAddressString = objectMapper.writeValueAsString(new LocationDTO(testUser.getAddress(), true));
+        assertEquals(expectedAddressString, objectMapper.writeValueAsString(json.get("homeAddress")));
         assertEquals("[]", json.getAsString("businessesAdministered"));
         assertEquals(testUser.getRole(), json.getAsString("role"));
         assertEquals(testUser.getPhNum(), json.getAsString("phoneNumber"));
@@ -842,24 +845,21 @@ class UserTests {
      * resulting json will have the correct details for every business administered by the user
      */
     @Test
-    void constructPublicJsonBusinessesAdministeredTrueTest() {
+    void constructPublicJsonBusinessesAdministeredTrueTest() throws JsonProcessingException {
         try (Session session = sessionFactory.openSession()) {
             addBusinessesAdministeredToTestUser();
 
             testUser = session.find(User.class, testUser.getUserID());
 
-            List<Business> testBusinesses = new ArrayList<>();
-            testBusinesses.addAll(testUser.getBusinessesAdministeredAndOwned());
-            Collections.sort(testBusinesses, (Business b1, Business b2) ->
-                    b1.getId().compareTo(b2.getId()));
+            List<Business> testBusinesses = new ArrayList<>(testUser.getBusinessesAdministeredAndOwned());
+            testBusinesses.sort(Comparator.comparing(Business::getId));
             assertEquals(2, testBusinesses.size());
-            JSONObject json = testUser.constructPublicJson(true);
+            var json = objectMapper.convertValue(new UserResponseDTO(testUser, true, false), JSONObject.class);
             JSONArray expectedBusinessArray = new JSONArray();
             for (Business business : testBusinesses) {
                 expectedBusinessArray.add(business.constructJson(false));
             }
-            String expectedBusinessString = expectedBusinessArray.toJSONString();
-            assertEquals(expectedBusinessString, json.getAsString("businessesAdministered"));
+            assertEquals(objectMapper.writeValueAsString(expectedBusinessArray), objectMapper.writeValueAsString(json.get("businessesAdministered")));
         }
     }
 
@@ -871,7 +871,7 @@ class UserTests {
     @Test
     void constructPublicJsonBusinessesAdministeredFalseTest() {
         addBusinessesAdministeredToTestUser();
-        JSONObject json = testUser.constructPublicJson(false);
+        var json = objectMapper.convertValue(new UserResponseDTO(testUser, false, false), JSONObject.class);
         assertNull(json.get("businessesAdministered"));
     }
 
@@ -883,7 +883,7 @@ class UserTests {
     @Test
     void constructPublicJsonBusinessesAdministeredNullTest() {
         addBusinessesAdministeredToTestUser();
-        JSONObject json = testUser.constructPublicJson();
+        var json = objectMapper.convertValue(new UserResponseDTO(testUser), JSONObject.class);
         assertNull(json.get("businessesAdministered"));
     }
 
@@ -893,23 +893,21 @@ class UserTests {
      * resulting json will have the correct details for every business administered by the user
      */
     @Test
-    void constructPrivateJsonBusinessesAdministeredTrueTest() {
+    void constructPrivateJsonBusinessesAdministeredTrueTest() throws JsonProcessingException {
         addBusinessesAdministeredToTestUser();
-        List<Business> testBusinesses = new ArrayList<>();
 
         try (Session session = sessionFactory.openSession()) {
             testUser = session.load(User.class, testUser.getUserID());
-            testBusinesses.addAll(testUser.getBusinessesAdministeredAndOwned());
+            List<Business> testBusinesses = new ArrayList<>(testUser.getBusinessesAdministeredAndOwned());
 
-            Collections.sort(testBusinesses, (Business b1, Business b2) -> b1.getId().compareTo(b2.getId()));
+            testBusinesses.sort(Comparator.comparing(Business::getId));
             assertEquals(2, testBusinesses.size());
-            JSONObject json = testUser.constructPrivateJson(true);
+            var json = objectMapper.convertValue(new UserResponseDTO(testUser, true, true), JSONObject.class);
             JSONArray expectedBusinessArray = new JSONArray();
             for (Business business : testBusinesses) {
                 expectedBusinessArray.add(business.constructJson(false));
             }
-            String expectedBusinessString = expectedBusinessArray.toJSONString();
-            assertEquals(expectedBusinessString, json.getAsString("businessesAdministered"));
+            assertEquals(objectMapper.writeValueAsString(expectedBusinessArray), objectMapper.writeValueAsString(json.get("businessesAdministered")));
         }
     }
 
@@ -921,19 +919,7 @@ class UserTests {
     @Test
     void constructPrivateJsonBusinessesAdministeredFalseTest() {
         addBusinessesAdministeredToTestUser();
-        JSONObject json = testUser.constructPrivateJson(false);
-        assertNull(json.get("businessesAdministered"));
-    }
-
-    /**
-     * Test that when constructPrivateJson is called with no arguement, and the list of
-     * businesses administered by the user is not empty, the resulting json will not contain the businessesAdministered
-     * field.
-     */
-    @Test
-    void constructPrivateJsonBusinessesAdministeredNullTest() {
-        addBusinessesAdministeredToTestUser();
-        JSONObject json = testUser.constructPrivateJson();
+        var json = objectMapper.convertValue(new UserResponseDTO(testUser, false, true), JSONObject.class);
         assertNull(json.get("businessesAdministered"));
     }
 

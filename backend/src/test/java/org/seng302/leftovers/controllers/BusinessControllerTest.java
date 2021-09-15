@@ -60,6 +60,9 @@ class BusinessControllerTest {
     @Captor
     private ArgumentCaptor<String> typeCaptor;
 
+    @Autowired
+    private ObjectMapper objectMapper;
+
     private final HashMap<String, Object> sessionAuthToken = new HashMap<>();
     private Cookie authCookie;
     private Business testBusiness;
@@ -501,8 +504,10 @@ class BusinessControllerTest {
         assertEquals(owner.getUserID().toString(), json.getAsString("primaryAdministratorId"));
         String adminString = json.getAsString("administrators");
         assertTrue(adminString.contains(String.format("\"id\":%d", owner.getUserID())));
-        ObjectMapper mapper = new ObjectMapper();
-        assertEquals(mapper.readTree(testBusiness.constructJson(true).toJSONString()), mapper.readTree(json.toJSONString()));
+        assertEquals(
+                objectMapper.readTree(objectMapper.writeValueAsString(testBusiness.constructJson(true))),
+                objectMapper.readTree(objectMapper.writeValueAsString(json))
+        );
     }
 
     /**
@@ -523,8 +528,10 @@ class BusinessControllerTest {
         assertNotEquals(admin.getUserID().toString(), json.getAsString("primaryAdministratorId"));
         String adminString = json.getAsString("administrators");
         assertTrue(adminString.contains(String.format("\"id\":%d", admin.getUserID())));
-        ObjectMapper mapper = new ObjectMapper();
-        assertEquals(mapper.readTree(testBusiness.constructJson(true).toJSONString()), mapper.readTree(json.toJSONString()));
+        assertEquals(
+                objectMapper.readTree(objectMapper.writeValueAsString(testBusiness.constructJson(true))),
+                objectMapper.readTree(objectMapper.writeValueAsString(json))
+        );
     }
 
     /**
@@ -545,8 +552,10 @@ class BusinessControllerTest {
         assertNotEquals(otherUser.getUserID().toString(), json.getAsString("primaryAdministratorId"));
         String adminString = json.getAsString("administrators");
         assertFalse(adminString.contains(String.format("\"id\":%d", otherUser.getUserID())));
-        ObjectMapper mapper = new ObjectMapper();
-        assertEquals(mapper.readTree(testBusiness.constructJson(true).toJSONString()), mapper.readTree(json.toJSONString()));
+        assertEquals(
+                objectMapper.readTree(objectMapper.writeValueAsString(testBusiness.constructJson(true))),
+                objectMapper.readTree(objectMapper.writeValueAsString(json))
+        );
     }
 
 

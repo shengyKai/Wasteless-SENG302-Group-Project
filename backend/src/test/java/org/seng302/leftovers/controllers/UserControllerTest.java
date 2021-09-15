@@ -8,6 +8,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
+import org.seng302.leftovers.dto.LocationDTO;
 import org.seng302.leftovers.entities.Location;
 import org.seng302.leftovers.entities.User;
 import org.seng302.leftovers.persistence.BusinessRepository;
@@ -183,7 +184,7 @@ class UserControllerTest {
                 if (userData[6].isBlank()) {
                     jsonObject.put("homeAddress", new JSONObject());
                 } else {
-                    jsonObject.put("homeAddress", Location.covertAddressStringToLocation(userData[6]).constructFullJson());
+                    jsonObject.put("homeAddress", new LocationDTO(Location.covertAddressStringToLocation(userData[6]), true));
                 }
                 jsonObject.put("dateOfBirth", userData[7]);
                 jsonObject.put("bio", userData[8]);
