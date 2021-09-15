@@ -91,7 +91,7 @@ export default {
       const millisecondsPerDay = 24 * 60 * 60 * 1000;
       const today = new Date();
       const closes = new Date(this.event.saleItem.closes);
-      return Math.round(Math.abs((closes-today) / millisecondsPerDay));
+      return Math.ceil(Math.abs((closes-today) / millisecondsPerDay));
     },
     /**
      * Returns the location descriptor object for routing to the business's profile
