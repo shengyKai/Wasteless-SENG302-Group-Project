@@ -14,7 +14,8 @@
       </v-list-item-subtitle>
       <v-list-item-subtitle>
         <label class="total-price-label">Total Price:</label>
-        <label>{{ saleItem.price }}</label>
+        <!-- Need to change to retail price when implementing actual sale items -->
+        <label>${{ saleItem.price }}</label>
         <label class="divider1"/>
         <label class="quantity-label">Quantity:</label>
         <label>{{ saleItem.quantity }}</label>
@@ -112,7 +113,7 @@ export default {
 }
 
 .divider1 {
-  margin-right: 82px;
+  margin-right: 74px;
 }
 
 .divider2 {
