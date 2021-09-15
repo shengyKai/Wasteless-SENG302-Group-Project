@@ -5,26 +5,26 @@
     </v-list-item-avatar>
     <v-list-item-content>
       <v-list-item-title>
-        <label class="result-title">The Nathan Apple</label>
+        <label class="result-title">{{ product.name }}</label>
         <label class="result-title-join">From </label>
-        <label class="result-title-business">Nathan Apple LTD</label>
+        <label class="result-title-business">{{ product.manufacturer }}</label>
       </v-list-item-title>
       <v-list-item-subtitle>
-        <label>More Info: This is a Nathan Apple. The absolute rarest of its kind. You will not find a Nathan Apple anywhere else.</label>
+        <label>More Info: {{ saleItem.moreInfo }}</label>
       </v-list-item-subtitle>
       <v-list-item-subtitle>
         <label class="total-price-label">Total Price:</label>
-        <label>$10.09</label>
+        <label>{{ saleItem.price }}</label>
         <label class="divider1"/>
         <label class="quantity-label">Quantity:</label>
-        <label>109</label>
+        <label>{{ saleItem.quantity }}</label>
       </v-list-item-subtitle>
       <v-list-item-subtitle>
         <label class="creation-date-label">Creation Date:</label>
-        <label>10 Jan 2021</label>
+        <label>{{ createdFormatted }}</label>
         <label class="divider2"/>
         <label class="closing-date-label">Closing Date:</label>
-        <label>15 Jan 2021</label>
+        <label>{{ closesFormatted }}</label>
       </v-list-item-subtitle>
     </v-list-item-content>
   </v-list-item>
@@ -54,12 +54,6 @@ export default {
     product() {
       console.log("Jordan", this.saleItem);
       return this.saleItem.inventoryItem.product;
-    },
-    /**
-     * Easy access to the inventory item information of the sale item
-     */
-    inventoryItem() {
-      return this.saleItem.inventoryItem;
     },
     /**
      * Creates a nicely formatted readable string for the sales creation date
@@ -118,7 +112,7 @@ export default {
 }
 
 .divider1 {
-  margin-right: 64px;
+  margin-right: 82px;
 }
 
 .divider2 {
