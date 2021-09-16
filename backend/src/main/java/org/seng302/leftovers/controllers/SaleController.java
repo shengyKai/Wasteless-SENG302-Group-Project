@@ -227,7 +227,7 @@ public class SaleController {
             logger.info("Getting interest status for sale listing (saleListingId={}).", listingId);
 
             if (!AuthenticationTokenManager.sessionCanSeePrivate(request, userId)) {
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User cannot change listing interest of another user");
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User cannot view listing interest of another user");
             }
 
             var user = userRepository.findById(userId)
