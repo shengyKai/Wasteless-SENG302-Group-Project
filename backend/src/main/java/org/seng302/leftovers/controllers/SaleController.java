@@ -53,7 +53,7 @@ public class SaleController {
     }
 
     private static final Set<String> VALID_SEARCH_ORDERINGS = Set.of("created", "closing", "productName", "quantity", "price", "businessName", "businessLocation");
-    private static final Set<String> VALID_BUSINESS_TYPES = Set.of("Any", "Accommodation and Food Services", "Retail Trade", "Charitable organisation", "Non-profit organisation");
+    private static final Set<String> VALID_BUSINESS_TYPES = Set.of("Accommodation and Food Services", "Retail Trade", "Charitable organisation", "Non-profit organisation");
 
     /**
      * Returns the ordering term for the Sort object for sorting Sale Items
@@ -246,7 +246,7 @@ public class SaleController {
                     .and(SearchSpecConstructor.constructSaleListingSpecificationForSearch(new SaleListingSearchDTO(minPrice, maxPrice, minDate, maxDate, businessTypes)));
             Page<SaleItem> result = saleItemRepository.findAll(specification, pageablePage);
 
-            return JsonTools.constructPageJSON(result.map(SaleItem::constructJSONObject));
+            return JsonTools.constructPageJSON(result.map(SaleItem::constructJSONObjectWithBusiness));
 
         } catch (DateTimeParseException badDate) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Close date parameters were not in date format");

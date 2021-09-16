@@ -112,8 +112,7 @@ public class SaleSearchStepDefinition {
         JSONArray sales = (JSONArray) response.get("results");
 
         assertTrue(sales.size() > 0);
-        assertTrue(sales.get(0).get("listingId") instanceof Number);
-        Number saleItemId = (Number) sales.get(0).get("listingId");
+        Number saleItemId = (Number) sales.getJSONObject(0).get("id");
         SaleItem saleItem = saleItemRepository.findById(saleItemId.longValue()).orElseThrow();
         assertEquals(firstId, saleItem.getInventoryItem().getProduct().getProductCode());
     }
@@ -126,9 +125,7 @@ public class SaleSearchStepDefinition {
         JSONArray sales = (JSONArray) response.get("results");
 
         assertTrue(sales.size() > 0);
-        assertTrue(sales.get(0).get("businessId") instanceof Number);
-        Number businessId = (Number) sales.get(0).get("businessId");
-        Business business = businessRepository.findById(businessId.longValue()).orElseThrow();
+        Number businessId = (Number) sales.getJSONObject(0).get("business").get("name");
         assertEqual(businessName, business.getName())
     }
 

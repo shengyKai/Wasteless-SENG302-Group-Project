@@ -275,6 +275,12 @@ public class SaleItem {
         return object;
     }
 
+    public JSONObject constructJSONObjectWithBusiness() {
+        JSONObject object = constructJSONObject();
+        object.put("business", getInventoryItem().getProduct().getBusiness().constructJson());
+        return object;
+    }
+
     /**
      * Builder for Sale Item
      */
