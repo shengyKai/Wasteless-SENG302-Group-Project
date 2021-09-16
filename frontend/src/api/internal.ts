@@ -1326,9 +1326,10 @@ export async function setListingInterest(listingId: number, userId: number, inte
  * @param listingId   Listing to check the interest state for
  * @param userId      User that the interest state is checking for
  */
-export async function getListingInterest(listingId: number, userId: number): Promise<MaybeError<undefined>> {
+export async function getListingInterest(listingId: number, userId: number): Promise<MaybeError<boolean>> {
+  let response;
   try {
-    await instance.get(`/listings/${listingId}/interest`, {
+    response = await instance.get(`/listings/${listingId}/interest`, {
       params:{userId: userId}
     });
   } catch (error) {
@@ -1341,5 +1342,5 @@ export async function getListingInterest(listingId: number, userId: number): Pro
 
     return error.response?.data.message;
   }
-  return undefined;
+  return response.data.isInterested;
 }
