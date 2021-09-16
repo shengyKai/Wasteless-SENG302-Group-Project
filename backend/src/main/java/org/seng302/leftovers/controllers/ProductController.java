@@ -39,6 +39,8 @@ import java.util.Set;
  */
 @RestController
 public class ProductController {
+    @Autowired
+    private ObjectMapper objectMapper;
 
     private final ProductRepository productRepository;
     private final BusinessRepository businessRepository;
@@ -114,7 +116,6 @@ public class ProductController {
         // Convert searchBy into ProductFilterOption type and check valid
         searchBy = Optional.ofNullable(searchBy).orElse(List.of());
 
-        ObjectMapper objectMapper = new ObjectMapper();
         Set<ProductFilterOption> searchSet;
         try {
             searchSet = objectMapper.convertValue(searchBy, new TypeReference<>() {});

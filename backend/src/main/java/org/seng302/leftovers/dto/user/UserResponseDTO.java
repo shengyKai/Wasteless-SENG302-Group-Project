@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.ToString;
 import net.minidev.json.JSONObject;
 import org.seng302.leftovers.dto.LocationDTO;
+import org.seng302.leftovers.dto.business.BusinessResponseDTO;
 import org.seng302.leftovers.entities.Business;
 import org.seng302.leftovers.entities.User;
 
@@ -37,7 +38,7 @@ public class UserResponseDTO {
     protected String bio;
     protected LocationDTO homeAddress;
 
-    protected List<JSONObject> businessesAdministered;
+    protected List<BusinessResponseDTO> businessesAdministered;
 
     // Private fields
     protected LocalDate dateOfBirth;
@@ -85,7 +86,7 @@ public class UserResponseDTO {
             this.businessesAdministered = user.getBusinessesAdministeredAndOwned()
                     .stream()
                     .sorted(Comparator.comparing(Business::getId))
-                    .map(Business::constructJson)
+                    .map(BusinessResponseDTO::withoutAdmins)
                     .collect(Collectors.toList());
         }
     }

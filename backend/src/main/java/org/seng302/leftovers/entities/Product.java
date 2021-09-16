@@ -2,6 +2,7 @@ package org.seng302.leftovers.entities;
 
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
+import org.seng302.leftovers.dto.business.BusinessResponseDTO;
 import org.seng302.leftovers.tools.JsonTools;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
@@ -271,7 +272,7 @@ public class Product {
         object.put("manufacturer", manufacturer);
         object.put("recommendedRetailPrice", recommendedRetailPrice);
         object.put("created", created.toString());
-        object.put("business", business.constructJson());
+        object.put("business", BusinessResponseDTO.withoutAdmins(business));
         JSONArray images = new JSONArray();
         for (Image image : productImages) {
             images.add(image.constructJSONObject());

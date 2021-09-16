@@ -7,6 +7,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.hibernate.Session;
 import org.seng302.datagenerator.*;
+import org.seng302.leftovers.dto.business.BusinessType;
 import org.seng302.leftovers.entities.*;
 import org.seng302.leftovers.persistence.*;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
@@ -91,7 +92,7 @@ public class DemoController {
             // Construct demo business and save it to the repository
             if (business == null) {
                 business = new Business.Builder()
-                        .withBusinessType("Accommodation and Food Services")
+                        .withBusinessType(BusinessType.ACCOMMODATION_AND_FOOD_SERVICES)
                         .withDescription("DESCRIPTION")
                         .withName("BUSINESS_NAME")
                         .withAddress(Location.covertAddressStringToLocation("108,Albert Road,Ashburton,Christchurch,New Zealand,Canterbury,8041"))

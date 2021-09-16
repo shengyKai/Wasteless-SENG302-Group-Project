@@ -1,10 +1,16 @@
 package org.seng302.leftovers.controllers;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import net.minidev.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.seng302.leftovers.dto.CreateBusinessDTO;
-import org.seng302.leftovers.dto.ModifyBusinessDTO;
+import org.seng302.leftovers.dto.ProductFilterOption;
+import org.seng302.leftovers.dto.ResultPageDTO;
+import org.seng302.leftovers.dto.business.BusinessResponseDTO;
+import org.seng302.leftovers.dto.business.BusinessType;
+import org.seng302.leftovers.dto.business.CreateBusinessDTO;
+import org.seng302.leftovers.dto.business.ModifyBusinessDTO;
 import org.seng302.leftovers.entities.Business;
 import org.seng302.leftovers.entities.Image;
 import org.seng302.leftovers.entities.Product;
@@ -36,6 +42,9 @@ import java.util.Set;
 
 @RestController
 public class BusinessController {
+    @Autowired
+    private ObjectMapper objectMapper;
+
     private final BusinessRepository businessRepository;
     private final UserRepository userRepository;
     private final ImageService imageService;
@@ -146,16 +155,16 @@ public class BusinessController {
      * @return JSON representation of the business.
      */
     @GetMapping("/businesses/{id}")
-    public JSONObject getBusinessById(@PathVariable Long id, HttpServletRequest request) {
+    public BusinessResponseDTO getBusinessById(@PathVariable Long id, HttpServletRequest request) {
         AuthenticationTokenManager.checkAuthenticationToken(request);
-        logger.info(() -> String.format("Retrieving business with ID %d.", id));
+        logger.info("Retrieving business with ID {}.", id);
         Optional<Business> business = businessRepository.findById(id);
         if (business.isEmpty()) {
             ResponseStatusException notFoundException = new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, String.format("No business with ID %d.", id));
             logger.error(notFoundException.getMessage());
             throw notFoundException;
         }
-        return business.get().constructJson(true);
+        return BusinessResponseDTO.withAdmins(business.get());
     }
 
 
@@ -249,7 +258,7 @@ public class BusinessController {
     private Business getBusiness(Long businessId) {
         // check business exists
         Optional<Business> business = businessRepository.findById(businessId);
-        if (!business.isPresent()) {
+        if (business.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE,
                     "The given business does not exist");
         }
@@ -271,16 +280,24 @@ public class BusinessController {
      * @return A JSON object containing the total count and paginated results.
      */
     @GetMapping("/businesses/search")
-    public JSONObject search(HttpServletRequest request, @RequestParam(required = false) String searchQuery,
-                             @RequestParam(required = false) Integer page,
-                             @RequestParam(required = false) Integer resultsPerPage,
-                             @RequestParam(required = false) String orderBy,
-                             @RequestParam(required = false) Boolean reverse,
-                             @RequestParam(required = false) String businessType) {
+    public ResultPageDTO<BusinessResponseDTO> search(HttpServletRequest request, @RequestParam(required = false) String searchQuery,
+                                @RequestParam(required = false) Integer page,
+                                @RequestParam(required = false) Integer resultsPerPage,
+                                @RequestParam(required = false) String orderBy,
+                                @RequestParam(required = false) Boolean reverse,
+                                @RequestParam(required = false, name = "businessType") String businessTypeString) {
 
         AuthenticationTokenManager.checkAuthenticationToken(request);
 
-        logger.info(() -> String.format("Performing Business search for query \"%s\" and type \"%s\"", searchQuery, businessType));
+        logger.info(() -> String.format("Performing Business search for query \"%s\" and type \"%s\"", searchQuery, businessTypeString));
+
+
+        BusinessType businessType;
+        try {
+            businessType = objectMapper.convertValue(businessTypeString, new TypeReference<>() {});
+        } catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid business type provided", e);
+        }
 
         Sort.Direction direction = SearchHelper.getSortDirection(reverse);
         if (orderBy == null) {
@@ -302,7 +319,7 @@ public class BusinessController {
         Specification<Business> specification = SearchHelper.constructSpecificationFromBusinessSearch(searchQuery, businessType);
 
         Page<Business> results = businessRepository.findAll(specification, pageRequest);
-        return JsonTools.constructPageJSON(results.map(Business::constructJson));
+        return new ResultPageDTO<>(results.map(BusinessResponseDTO::withoutAdmins));
     }
 
     /**

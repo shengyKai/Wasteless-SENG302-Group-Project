@@ -16,7 +16,6 @@ import org.seng302.leftovers.persistence.SaleItemRepository;
 import org.seng302.leftovers.persistence.UserRepository;
 import org.seng302.leftovers.persistence.event.InterestEventRepository;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
-import org.seng302.leftovers.tools.JsonTools;
 import org.seng302.leftovers.tools.SearchHelper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -30,7 +29,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 @RestController
@@ -159,7 +157,7 @@ public class SaleController {
             Specification<SaleItem> specification = SearchHelper.constructSpecificationFromSaleItemsFilter(business);
             Page<SaleItem> result = saleItemRepository.findAll(specification, pageRequest);
 
-            return new ResultPageDTO(result.map(SaleItemDTO::new));
+            return new ResultPageDTO<>(result.map(SaleItemDTO::new));
 
         } catch (Exception error) {
             logger.error(error.getMessage());
