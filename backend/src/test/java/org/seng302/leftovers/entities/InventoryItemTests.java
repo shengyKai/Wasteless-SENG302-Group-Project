@@ -1,5 +1,6 @@
 package org.seng302.leftovers.entities;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.minidev.json.JSONObject;
 import org.junit.jupiter.api.AfterAll;
@@ -8,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.seng302.leftovers.dto.InventoryItemDTO;
 import org.seng302.leftovers.persistence.BusinessRepository;
 import org.seng302.leftovers.persistence.InventoryItemRepository;
 import org.seng302.leftovers.persistence.ProductRepository;
@@ -39,6 +41,9 @@ class InventoryItemTests {
     ProductRepository productRepository;
     @Autowired
     InventoryItemRepository inventoryItemRepository;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     private Business testBusiness;
     private Product testProduct;
@@ -465,7 +470,7 @@ class InventoryItemTests {
     }
 
     @Test
-    void constructJSONObject_noNullAttributes_returnsExpectedJson() throws Exception {
+    void inventoryItemDTO_noNullAttributes_returnsExpectedJson() throws Exception {
         InventoryItem invItem = new InventoryItem.Builder()
                 .withProduct(testProduct)
                 .withQuantity(3)
@@ -488,8 +493,10 @@ class InventoryItemTests {
         expectedJson.put("sellBy", invItem.getSellBy().toString());
         expectedJson.put("bestBefore", invItem.getBestBefore().toString());
         expectedJson.put("expires", invItem.getExpires().toString());
-        ObjectMapper mapper = new ObjectMapper();
-        assertEquals(mapper.readTree(expectedJson.toJSONString()), mapper.readTree(invItem.constructJSONObject().toJSONString()));
+        assertEquals(
+                objectMapper.readTree(objectMapper.writeValueAsString(expectedJson)),
+                objectMapper.readTree(objectMapper.writeValueAsString(new InventoryItemDTO(invItem)))
+        );
     }
 
     @Test
@@ -507,7 +514,8 @@ class InventoryItemTests {
         expectedJson.put("remainingQuantity", invItem.getRemainingQuantity());
         expectedJson.put("expires", invItem.getExpires().toString());
         ObjectMapper mapper = new ObjectMapper();
-        assertEquals(mapper.readTree(expectedJson.toJSONString()), mapper.readTree(invItem.constructJSONObject().toJSONString()));
+        assertEquals(mapper.readTree(expectedJson.toJSONString()), mapper.readTree(
+                objectMapper.writeValueAsString(new InventoryItemDTO(invItem))));
     }
 
     @Test

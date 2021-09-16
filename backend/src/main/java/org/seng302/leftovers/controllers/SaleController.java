@@ -4,14 +4,18 @@ import net.minidev.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.seng302.leftovers.dto.SaleListingSearchDTO;
+import org.seng302.leftovers.dto.ResultPageDTO;
+import org.seng302.leftovers.dto.SaleItemDTO;
 import org.seng302.leftovers.dto.SetSaleItemInterestDTO;
 import org.seng302.leftovers.entities.Business;
 import org.seng302.leftovers.entities.InventoryItem;
 import org.seng302.leftovers.entities.SaleItem;
+import org.seng302.leftovers.entities.event.InterestEvent;
 import org.seng302.leftovers.persistence.BusinessRepository;
 import org.seng302.leftovers.persistence.InventoryItemRepository;
 import org.seng302.leftovers.persistence.SaleItemRepository;
 import org.seng302.leftovers.persistence.UserRepository;
+import org.seng302.leftovers.persistence.event.InterestEventRepository;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
 import org.seng302.leftovers.tools.JsonTools;
 import org.seng302.leftovers.service.searchservice.SearchPageConstructor;
@@ -44,12 +48,14 @@ public class SaleController {
     private final BusinessRepository businessRepository;
     private final SaleItemRepository saleItemRepository;
     private final InventoryItemRepository inventoryItemRepository;
+    private final InterestEventRepository interestEventRepository;
 
-    public SaleController(UserRepository userRepository, BusinessRepository businessRepository, SaleItemRepository saleItemRepository, InventoryItemRepository inventoryItemRepository) {
+    public SaleController(UserRepository userRepository, BusinessRepository businessRepository, SaleItemRepository saleItemRepository, InventoryItemRepository inventoryItemRepository, InterestEventRepository interestEventRepository) {
         this.userRepository = userRepository;
         this.businessRepository = businessRepository;
         this.saleItemRepository = saleItemRepository;
         this.inventoryItemRepository = inventoryItemRepository;
+        this.interestEventRepository = interestEventRepository;
     }
 
     private static final Set<String> VALID_SEARCH_ORDERINGS = Set.of("created", "closing", "productName", "quantity", "price", "businessName", "businessLocation");
@@ -147,7 +153,7 @@ public class SaleController {
      * @return List of sale items the business is listing
      */
     @GetMapping("/businesses/{id}/listings")
-    public JSONObject getSaleItemsForBusiness(@PathVariable Long id,
+    public ResultPageDTO<SaleItemDTO> getSaleItemsForBusiness(@PathVariable Long id,
                                               HttpServletRequest request,
                                               @RequestParam(required = false) String orderBy,
                                               @RequestParam(required = false) Integer page,
@@ -166,7 +172,7 @@ public class SaleController {
             Specification<SaleItem> specification = SearchSpecConstructor.constructSpecificationFromSaleItemsFilter(business);
             Page<SaleItem> result = saleItemRepository.findAll(specification, pageRequest);
 
-            return JsonTools.constructPageJSON(result.map(SaleItem::constructJSONObject));
+            return new ResultPageDTO(result.map(SaleItemDTO::new));
 
         } catch (Exception error) {
             logger.error(error.getMessage());
@@ -278,11 +284,17 @@ public class SaleController {
             var saleItem = saleItemRepository.findById(id)
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "Listing not found"));
 
+            var interestEvent = interestEventRepository.findInterestEventByNotifiedUserAndSaleItem(user, saleItem)
+                    .orElseGet(() -> new InterestEvent(user, saleItem));
             if (Boolean.TRUE.equals(body.getInterested())) {
                 saleItem.addInterestedUser(user);
             } else {
                 saleItem.removeInterestedUser(user);
             }
+
+            interestEvent.setInterested(body.getInterested());
+            interestEventRepository.save(interestEvent);
+
             saleItemRepository.save(saleItem);
         } catch (Exception e) {
             logger.error(e.getMessage());

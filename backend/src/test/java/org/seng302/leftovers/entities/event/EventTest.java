@@ -1,6 +1,7 @@
 package org.seng302.leftovers.entities.event;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.SneakyThrows;
 import net.minidev.json.JSONObject;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -14,6 +15,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.lang.reflect.Field;
+import java.time.Duration;
 import java.time.Instant;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -70,7 +73,8 @@ class EventTest {
         assertEquals("none", json.get("tag"));
         assertEquals(event.getStatus().toString().toLowerCase(), json.get("status"));
         assertEquals(event.isRead(), json.get("read"));
-        assertEquals(6, json.size());
+        assertEquals(event.getLastModified().toString(), json.get("lastModified"));
+        assertEquals(7, json.size());
     }
 
     // Event is abstract so we need to subclass
@@ -119,5 +123,36 @@ class EventTest {
 
         event.updateEventStatus(newStatus);
         assertEquals(EventStatus.ARCHIVED, event.getStatus());
+    }
+
+    @Test
+    void createEvent_any_lastModifiedTimeCorrect() {
+        var before = Instant.now();
+        Event event = new EventSubclass();
+        var after = Instant.now();
+
+        assertFalse(event.getLastModified().isBefore(before));
+        assertFalse(event.getLastModified().isAfter(after));
+    }
+
+    @Test
+    @SneakyThrows
+    void onUpdate_any_lastModifiedTimeUpdated() {
+        Event event = new EventSubclass();
+
+        Field lastModifiedField = Event.class.getDeclaredField("lastModified");
+        lastModifiedField.setAccessible(true);
+
+        // Set the last modified date of the event to a date in the past
+        Instant oneDayAgo = Instant.now().minus(Duration.ofDays(1L));
+        lastModifiedField.set(event, oneDayAgo);
+        assertEquals(oneDayAgo, event.getLastModified());
+
+        var before = Instant.now();
+        event.onUpdate();
+        var after = Instant.now();
+
+        assertFalse(event.getLastModified().isBefore(before));
+        assertFalse(event.getLastModified().isAfter(after));
     }
 }

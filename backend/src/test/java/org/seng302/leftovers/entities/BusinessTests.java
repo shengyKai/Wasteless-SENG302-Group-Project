@@ -1,5 +1,6 @@
 package org.seng302.leftovers.entities;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import org.hibernate.Session;
@@ -12,6 +13,9 @@ import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.seng302.leftovers.dto.LocationDTO;
+import org.seng302.leftovers.dto.user.UserResponseDTO;
+import org.seng302.leftovers.dto.user.UserRole;
 import org.seng302.leftovers.exceptions.AccessTokenException;
 import org.seng302.leftovers.persistence.BusinessRepository;
 import org.seng302.leftovers.persistence.ImageRepository;
@@ -31,10 +35,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
@@ -56,6 +57,8 @@ class BusinessTests {
     HttpSession session;
     @Autowired
     SessionFactory sessionFactory;
+    @Autowired
+    ObjectMapper objectMapper;
 
     User testUser1;
     User testUser2;
@@ -680,7 +683,7 @@ class BusinessTests {
             assertEquals(testBusiness1.getName(), json.getAsString("name"));
             assertEquals(testBusiness1.getDescription(), json.getAsString("description"));
             assertEquals(testBusiness1.getBusinessType(), json.getAsString("businessType"));
-            assertEquals(testBusiness1.getAddress().constructFullJson().toString(), json.getAsString("address"));
+            assertEquals(new LocationDTO(testBusiness1.getAddress(), true), objectMapper.convertValue(json.get("address"), LocationDTO.class));
             assertEquals(testBusiness1.getId().toString(), json.getAsString("id"));
             assertEquals(testBusiness1.getPrimaryOwner().getUserID().toString(), json.getAsString("primaryAdministratorId"));
             assertEquals(testBusiness1.getCreated().toString(), json.getAsString("created"));
@@ -696,13 +699,11 @@ class BusinessTests {
     void constructJsonAdministratorsFullDetailsTest() {
         testBusiness1.addAdmin(testUser2);
         assertEquals(2, testBusiness1.getOwnerAndAdministrators().size());
-        List<User> admins = new ArrayList<>();
-        admins.addAll(testBusiness1.getOwnerAndAdministrators());
-        Collections.sort(admins, (User user1, User user2) ->
-           user1.getUserID().compareTo(user2.getUserID()));
+        List<User> admins = new ArrayList<>(testBusiness1.getOwnerAndAdministrators());
+        admins.sort(Comparator.comparing(Account::getUserID));
         JSONArray expectedAdminArray = new JSONArray();
         for (User user : admins) {
-            expectedAdminArray.add(user.constructPublicJson());
+            expectedAdminArray.add(new UserResponseDTO(user));
         }
         String expectedAdminString = expectedAdminArray.toJSONString();
         JSONObject testJson = testBusiness1.constructJson(true);
@@ -830,7 +831,7 @@ class BusinessTests {
                     return cookieArray;
                 });
         when(session.getAttribute("role")).thenAnswer(
-            invocation -> "globalApplicationAdmin");
+            invocation -> UserRole.GAA);
         when(session.getAttribute("accountId")).thenAnswer(
             invocation -> user2Id);
         try {
@@ -859,7 +860,7 @@ class BusinessTests {
                     return cookieArray;
                 });
         when(session.getAttribute("role")).thenAnswer(
-                invocation -> "defaultGlobalApplicationAdmin");
+                invocation -> UserRole.DGAA);
         when(session.getAttribute("accountId")).thenAnswer(
                 invocation -> null);
         try {

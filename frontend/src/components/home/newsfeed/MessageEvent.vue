@@ -121,6 +121,7 @@ export default {
         this.errorMessage = response;
       } else {
         this.directMessageContent = '';
+        this.$store.dispatch('refreshEventFeed');
       }
     },
     formatDate,

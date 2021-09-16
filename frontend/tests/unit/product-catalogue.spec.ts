@@ -5,7 +5,7 @@ import {createLocalVue, mount, Wrapper} from '@vue/test-utils';
 import ProductCatalogue from '@/components/ProductCatalogue.vue';
 import ProductCatalogueItem from '@/components/cards/ProductCatalogueItem.vue';
 import {SearchResults} from '@/api/internal';
-import {castMock, flushQueue} from './utils';
+import {castMock, flushQueue, findButtonWithText} from './utils';
 import {getProducts as getProducts1, searchCatalogue as searchCatalogue1, Product} from "@/api/internal-product";
 
 jest.mock('@/api/internal', () => ({
@@ -63,7 +63,7 @@ describe('ProductCatalogue.vue', () => {
    */
   function createGetProductWrapper() {
     wrapper = mount(ProductCatalogue, {
-      stubs: ['router-link', 'router-view', 'ProductCatalogueItem'],
+      stubs: ['router-link', 'router-view', 'ProductCatalogueItem', 'ProductForm'],
       mocks: {
         $route: {
           params: {
@@ -82,7 +82,7 @@ describe('ProductCatalogue.vue', () => {
    */
   function createSearchCatalogueWrapper() {
     wrapper = mount(ProductCatalogue, {
-      stubs: ['router-link', 'router-view', 'ProductCatalogueItem'],
+      stubs: ['router-link', 'router-view', 'ProductCatalogueItem', 'ProductForm'],
       mocks: {
         $route: {
           params: {
@@ -119,6 +119,12 @@ describe('ProductCatalogue.vue', () => {
   function findErrorBox() {
     return wrapper.findComponent({name: 'v-alert'});
   }
+
+  /**
+   * Finds the add product button
+   * @returns Add product button if it exists
+   */
+  const findAddProductButton = () => findButtonWithText(wrapper, 'Add Product');
 
   afterEach(() => {
     jest.clearAllMocks();
@@ -266,5 +272,32 @@ describe('ProductCatalogue.vue', () => {
     setResults(createTestProducts(5));
     createSearchCatalogueWrapper();
     expect(searchCatalogue).toHaveBeenCalledWith(100, "something", 1, RESULTS_PER_PAGE, ["productCode", "name"], "productCode", false);
+  });
+
+  it('Clicking the "Add Product" button should open the ProductForm', async () => {
+    setResults(createTestProducts(5));
+    createGetProductWrapper();
+    await Vue.nextTick();
+
+    // console.log(wrapper.html());
+
+    expect(wrapper.findComponent({name: 'ProductForm'}).exists()).toBeFalsy();
+    await findAddProductButton().trigger('click');
+    await Vue.nextTick();
+    expect(wrapper.findComponent({name: 'ProductForm'}).exists()).toBeTruthy();
+  });
+
+  it('When the ProductForm triggers the close event it should disappear and the results should be updated', async () => {
+    setResults(createTestProducts(5));
+    createGetProductWrapper();
+    wrapper.vm.showingCreateProduct = true; // Directly open form
+    await Vue.nextTick();
+    getProducts.mockClear(); // Forget initial request for products
+
+    wrapper.findComponent({name: 'ProductForm'}).vm.$emit('closeDialog');
+
+    await Vue.nextTick();
+    expect(wrapper.findComponent({name: 'ProductForm'}).exists()).toBeFalsy();
+    expect(getProducts).toBeCalled();
   });
 });

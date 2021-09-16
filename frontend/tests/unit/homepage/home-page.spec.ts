@@ -6,13 +6,20 @@ import {createLocalVue, mount, Wrapper} from '@vue/test-utils';
 import HomePage from '@/components/home/HomePage.vue';
 import { getStore, resetStoreForTesting, StoreData } from '@/store';
 
-import { AnyEvent, DeleteEvent, ExpiryEvent, GlobalMessageEvent, KeywordCreatedEvent, MessageEvent } from '@/api/events';
+import * as events from '@/api/events';
 import {User} from "@/api/internal-user";
 import {MarketplaceCard} from "@/api/internal-marketplace";
 import {Keyword} from "@/api/internal-keyword";
+import { castMock } from '../utils';
 
 Vue.use(Vuetify);
 const localVue = createLocalVue();
+
+jest.mock('@/api/events', () => ({
+  getEvents: jest.fn(),
+}));
+
+const getEvents = castMock(events.getEvents);
 
 const testUser: User = {
   id: 2,
@@ -53,6 +60,9 @@ describe('HomePage.vue', () => {
     store = getStore();
     store.state.user = testUser;
 
+    jest.useFakeTimers();
+    getEvents.mockResolvedValue([]);
+
     wrapper = mount(HomePage, {
       stubs: ['BusinessActionPanel', 'UserActionPanel', 'GlobalMessage' , 'ExpiryEvent', 'DeleteEvent', 'KeywordCreated'],
       localVue,
@@ -62,14 +72,15 @@ describe('HomePage.vue', () => {
   });
 
   it('If an global message event is posted to the store then it should be contained in mainEvents', async () => {
-    const event: AnyEvent = {
+    const event: events.AnyEvent = {
       type: 'GlobalMessageEvent',
       status: 'normal',
       id: 7,
       tag: 'none',
       created: new Date().toString(),
       message: 'Hello world',
-      read: false
+      read: false,
+      lastModified: new Date().toString()
     };
     store.commit('addEvent', event);
     await Vue.nextTick();
@@ -80,14 +91,15 @@ describe('HomePage.vue', () => {
   });
 
   it('If an expiry event is posted to the store then it should be displayed in the mainEvents tab', async () => {
-    const event: ExpiryEvent = {
+    const event: events.ExpiryEvent = {
       type: 'ExpiryEvent',
       status: 'normal',
       id: 2,
       tag: 'none',
       created: new Date().toString(),
       card: testMarketPlaceCard,
-      read: false
+      read: false,
+      lastModified: new Date().toString()
     };
     store.commit('addEvent', event);
     await Vue.nextTick();
@@ -98,7 +110,7 @@ describe('HomePage.vue', () => {
   });
 
   it('If delete event is posted to the store then it should be displayed in the mainEvents tab', async () => {
-    const event: DeleteEvent = {
+    const event: events.DeleteEvent = {
       type: 'DeleteEvent',
       status: 'normal',
       id: 7,
@@ -106,7 +118,8 @@ describe('HomePage.vue', () => {
       created: new Date().toString(),
       title: "test_title",
       section: "ForSale",
-      read: false
+      read: false,
+      lastModified: new Date().toString()
     };
     store.commit('addEvent', event);
     await Vue.nextTick();
@@ -117,7 +130,7 @@ describe('HomePage.vue', () => {
   });
 
   it('If an keyword created event is posted to the store then it should be displayed in the mainEvents tab', async () => {
-    const event: KeywordCreatedEvent = {
+    const event: events.KeywordCreatedEvent = {
       type: 'KeywordCreatedEvent',
       status: 'normal',
       id: 7,
@@ -129,7 +142,8 @@ describe('HomePage.vue', () => {
         created: "2012/01/01"
       },
       creator: testUser,
-      read: false
+      read: false,
+      lastModified: new Date().toString()
     };
     store.commit('addEvent', event);
     await Vue.nextTick();
@@ -140,7 +154,7 @@ describe('HomePage.vue', () => {
   });
 
   it('If an message event is posted to the store then it should be displayed in the mainEvents tab', async () => {
-    const event: MessageEvent = {
+    const event: events.MessageEvent = {
       type: 'MessageEvent',
       status: 'normal',
       id: 7,
@@ -158,7 +172,8 @@ describe('HomePage.vue', () => {
         id: 3,
       },
       participantType: 'seller',
-      read: false
+      read: false,
+      lastModified: new Date().toString()
     };
     store.commit('addEvent', event);
     await Vue.nextTick();
@@ -170,7 +185,7 @@ describe('HomePage.vue', () => {
 
   describe('Event statuses', () => {
     it('Starred messages are shown in the main newsfeed', async () => {
-      const event: GlobalMessageEvent = {
+      const event: events.GlobalMessageEvent = {
         type: 'GlobalMessageEvent',
         status: 'starred',
         id: 7,
@@ -178,6 +193,7 @@ describe('HomePage.vue', () => {
         read: false,
         created: new Date().toString(),
         message: 'Hello world',
+        lastModified: new Date().toString(),
       };
       store.commit('addEvent', event);
       await Vue.nextTick();
@@ -188,7 +204,7 @@ describe('HomePage.vue', () => {
     });
 
     it('Archived messages are not shown in the main newsfeed and are shown in archived tab', async () => {
-      const event: GlobalMessageEvent = {
+      const event: events.GlobalMessageEvent = {
         type: 'GlobalMessageEvent',
         status: 'archived',
         id: 7,
@@ -196,6 +212,7 @@ describe('HomePage.vue', () => {
         read: false,
         created: new Date().toString(),
         message: 'Hello world',
+        lastModified: new Date().toString(),
       };
       store.commit('addEvent', event);
       await Vue.nextTick();
@@ -216,27 +233,29 @@ describe('HomePage.vue', () => {
      */
     async function addMultipleEvents() {
       for (let i=0; i < 4; i++) {
-        let event: AnyEvent = {
+        let event: events.AnyEvent = {
           type: 'GlobalMessageEvent',
           status: 'normal',
           id: i,
           tag: 'none',
           created: new Date().toString(),
           message: 'None event',
-          read: false
+          read: false,
+          lastModified: new Date().toString()
         };
         store.commit('addEvent', event);
         await Vue.nextTick();
       }
       for (let i=4; i < 12; i++) {
-        let event: AnyEvent = {
+        let event: events.AnyEvent = {
           type: 'GlobalMessageEvent',
           status: 'normal',
           id: i,
           tag: 'red',
           created: new Date().toString(),
           message: 'Red event',
-          read: false
+          read: false,
+          lastModified: new Date().toString()
         };
         store.commit('addEvent', event);
         await Vue.nextTick();

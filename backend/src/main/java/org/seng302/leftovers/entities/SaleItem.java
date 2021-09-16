@@ -14,9 +14,7 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import static java.time.temporal.ChronoUnit.DAYS;
@@ -275,6 +273,10 @@ public class SaleItem {
         return object;
     }
 
+    /**
+     * Construct a JSON for a sale listing that includes the business that is selling it
+     * @return JSON representation of the sale item and business
+     */
     public JSONObject constructJSONObjectWithBusiness() {
         JSONObject object = constructJSONObject();
         object.put("business", getInventoryItem().getProduct().getBusiness().constructJson());

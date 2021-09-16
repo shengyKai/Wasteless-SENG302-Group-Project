@@ -2,11 +2,13 @@ import Vue from 'vue';
 import Vuex from 'vuex';
 import Vuetify from 'vuetify';
 import {createLocalVue, mount, Wrapper} from '@vue/test-utils';
+import { ThisTypedComponentOptionsWithArrayProps } from 'vue/types/options';
 
 import MarketplaceCardForm from '@/components/marketplace/MarketplaceCardForm.vue';
-import {castMock, makeTestUser} from "./utils";
+import {castMock, makeTestUser, findButtonWithText} from "./utils";
 import {createMarketplaceCard as createMarketplaceCard1, MarketplaceCard} from "@/api/internal-marketplace";
 import {searchKeywords as searchKeywords1} from "@/api/internal-keyword";
+import { getStore, resetStoreForTesting } from '@/store';
 
 jest.mock('@/api/internal', () => ({
   searchKeywords: jest.fn(),
@@ -104,12 +106,7 @@ describe('MarketplaceCardFrom.vue', () => {
    *
    * @returns A Wrapper around the create button
    */
-    function findButton(text: string) {
-      const buttons = wrapper.findAllComponents({ name: 'v-btn' });
-      const filtered = buttons.filter(button => button.text().includes(text));
-      expect(filtered.length).toBe(1);
-      return filtered.at(0);
-    }
+    const findButton = (text: string) => findButtonWithText(wrapper, text);
 
     it('Valid if all required fields are provided', async () => {
       await wrapper.setData({

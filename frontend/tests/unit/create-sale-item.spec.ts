@@ -3,7 +3,7 @@ import Vuex from "vuex";
 import Vuetify from "vuetify";
 import {createLocalVue, mount, Wrapper} from "@vue/test-utils";
 import CreateSaleItem from "@/components/BusinessProfile/CreateSaleItem.vue";
-import {castMock, todayPlusYears} from "./utils";
+import {castMock, todayPlusYears, findButtonWithText, flushQueue} from "./utils";
 import {getStore, resetStoreForTesting} from "@/store";
 import {createSaleItem as createSaleItem1} from "@/api/internal-sale";
 
@@ -151,28 +151,14 @@ describe("CreateSaleItem.vue", () => {
      *
      * @returns A Wrapper around the close button
      */
-  function findCloseButton() {
-    const buttons = wrapper.findAllComponents({ name: "v-btn" });
-    const filtered = buttons.filter((button) =>
-      button.text().includes("Close")
-    );
-    expect(filtered.length).toBe(1);
-    return filtered.at(0);
-  }
+  const findCloseButton = () => findButtonWithText(wrapper, 'Close');
 
   /**
      * Finds the create button in the ProductForm form
      *
      * @returns A Wrapper around the create button
      */
-  function findCreateButton() {
-    const buttons = wrapper.findAllComponents({ name: "v-btn" });
-    const filtered = buttons.filter((button) =>
-      button.text().includes("Create")
-    );
-    expect(filtered.length).toBe(1);
-    return filtered.at(0);
-  }
+  const findCreateButton = () => findButtonWithText(wrapper, 'Create');
 
   it("Valid if all required fields are provided", async () => {
     await populateRequiredFields();

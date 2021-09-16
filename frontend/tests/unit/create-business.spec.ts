@@ -4,9 +4,10 @@ import Vuetify from 'vuetify';
 import {createLocalVue, mount, Wrapper} from '@vue/test-utils';
 
 import CreateBusiness from '@/components/BusinessProfile/CreateBusiness.vue';
-import {castMock, makeTestUser} from "./utils";
+import {castMock, makeTestUser, findButtonWithText, TEST_DIACRITICS} from "./utils";
 import {getStore, resetStoreForTesting} from '@/store';
 import {createBusiness as createBusiness1} from "@/api/internal-business";
+import {User} from "@/api/internal-user"
 
 
 jest.mock('@/api/internal', () => ({
@@ -41,8 +42,6 @@ describe('CreateBusiness.vue', () => {
       } as any;
     };
   });
-
-  const diacritics = ['À','È','Ì','Ò','Ù','à','è','ì','ò','ù','Á','É','Í','Ó','Ú','Ý','á','é','í','ó','ú','ý','Â','Ê','Î','Ô','Û','â','ê','î','ô','û','Ã','Ñ','Õ','ã','ñ','õ','Ä','Ë','Ï','Ö','Ü','Ÿ','ä','ë','ï','ö','ü','ÿ'];
 
   /**
    * Sets up the test CreateBusiness instance
@@ -122,24 +121,14 @@ describe('CreateBusiness.vue', () => {
    *
    * @returns A Wrapper around the close button
    */
-  function findCloseButton() {
-    const buttons = wrapper.findAllComponents({ name: 'v-btn' });
-    const filtered = buttons.filter(button => button.text().includes('Close'));
-    expect(filtered.length).toBe(1);
-    return filtered.at(0);
-  }
+  const findCloseButton = () => findButtonWithText(wrapper, 'Close');
 
   /**
    * Finds the create button in the ProductForm form
    *
    * @returns A Wrapper around the create button
    */
-  function findCreateButton() {
-    const buttons = wrapper.findAllComponents({ name: 'v-btn' });
-    const filtered = buttons.filter(button => button.text().includes('Create'));
-    expect(filtered.length).toBe(1);
-    return filtered.at(0);
-  }
+  const findCreateButton = () => findButtonWithText(wrapper, 'Create');
 
   it('Valid if all required fields are provided', async () => {
     await populateRequiredFields();
@@ -193,7 +182,7 @@ describe('CreateBusiness.vue', () => {
     expect(wrapper.vm.valid).toBeFalsy();
   });
 
-  it.each(diacritics)('Valid when street contains the character "%s"', async (char) => {
+  it.each(TEST_DIACRITICS)('Valid when street contains the character "%s"', async (char) => {
     await populateRequiredFields();
     await wrapper.setData({
       streetAddress: '5 ' + char + ' Street',

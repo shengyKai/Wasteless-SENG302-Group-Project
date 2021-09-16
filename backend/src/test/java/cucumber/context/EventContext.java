@@ -2,14 +2,18 @@ package cucumber.context;
 
 import io.cucumber.java.Before;
 import lombok.SneakyThrows;
+import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
+import net.minidev.json.parser.ParseException;
 import org.junit.jupiter.api.Assertions;
 import org.seng302.leftovers.entities.event.Event;
-import org.seng302.leftovers.persistence.EventRepository;
+import org.seng302.leftovers.persistence.event.EventRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.test.web.servlet.MvcResult;
 
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -47,54 +51,18 @@ public class EventContext {
     }
 
     /**
-     * Parses a list of events from a http response
-     * @param response Response to decode
-     * @param channel Channel to filter by
-     * @return List of events for the given channel
+     * Helper method for converting a MvcResult into a list of JSON objects.
+     * @param result An MvcResult which should contain the an array of json objects.
+     * @return List of json objects from the MvcResult
      */
-    @SneakyThrows
-    public List<JSONObject> parseEvents(MockHttpServletResponse response, String channel) {
-        String content = response.getContentAsString();
+    public List<JSONObject> mvcResultToJsonObjectList(MvcResult result) throws UnsupportedEncodingException, ParseException {
+        List<JSONObject> list = new ArrayList<>();
+        String body = result.getResponse().getContentAsString();
         JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
-
-        List<JSONObject> events = new ArrayList<>();
-
-        // Iterable of lines that are not comments
-        Iterator<String> lineIterator = content.lines().filter(line -> !line.startsWith(":")).iterator();
-
-        while (lineIterator.hasNext()) {
-            // Every iteration parses a single event
-            // Expects the format:
-            //  field:$(channel_name)
-            //  data:$(data)
-            //  --empty-line--
-
-            String fieldLine = lineIterator.next();
-            Assertions.assertTrue(fieldLine.startsWith("event:"));
-            String foundChannel = fieldLine.substring("event:".length());
-
-            Assertions.assertTrue(lineIterator.hasNext());
-            String dataLine = lineIterator.next();
-            Assertions.assertTrue(dataLine.startsWith("data:"));
-            String data = dataLine.substring("data:".length());
-
-            Assertions.assertTrue(lineIterator.hasNext());
-            Assertions.assertEquals("", lineIterator.next());
-
-            if (foundChannel.equals(channel)) {
-                events.add(parser.parse(data, JSONObject.class));
-            }
+        JSONArray jsonArray = parser.parse(body, JSONArray.class);
+        for (Object json : jsonArray) {
+            list.add((JSONObject) json);
         }
-
-        return events;
-    }
-
-    /**
-     * Helper method for fetching events from the most recent response
-     * @param channel Channel to filter by
-     * @return List of most recently received events
-     */
-    public List<JSONObject> lastReceivedEvents(String channel) {
-        return parseEvents(requestContext.getLastResult().getResponse(), channel);
+        return list;
     }
 }

@@ -10,6 +10,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.runner.RunWith;
 import org.mockito.*;
 import org.mockito.internal.matchers.apachecommons.ReflectionEquals;
+import org.seng302.leftovers.dto.InventoryItemDTO;
 import org.seng302.leftovers.entities.*;
 import org.seng302.leftovers.exceptions.AccessTokenException;
 import org.seng302.leftovers.persistence.BusinessRepository;
@@ -333,13 +334,12 @@ class InventoryControllerTest {
     void getInventory_emptyInventory_emptyPageReturned() {
         when(businessRepository.getBusinessById(1L)).thenReturn(mockBusiness);
         when(inventoryItemRepository.findAll(any(), any(PageRequest.class))).thenReturn(Page.empty());
-        JSONObject result = inventoryController.getInventory(1L, request, null, null, null, null);
+        var result = inventoryController.getInventory(1L, request, null, null, null, null);
 
         verify(inventoryItemRepository, times(1)).findAll(any(), any(PageRequest.class));
 
-        assertEquals(0L, ((List<?>) result.get("results")).size());
-        assertEquals(0L, result.get("count"));
-        assertEquals(2L, result.size());
+        assertEquals(0L, result.getResults().size());
+        assertEquals(0L, result.getCount());
     }
 
 
@@ -355,15 +355,13 @@ class InventoryControllerTest {
         Page<InventoryItem> inventory = new PageImpl<>(items, Pageable.unpaged(), 1000L);
         when(businessRepository.getBusinessById(1L)).thenReturn(mockBusiness);
         when(inventoryItemRepository.findAll(any(), any(PageRequest.class))).thenReturn(inventory);
-        JSONObject result = inventoryController.getInventory(1L, request, null, null, null, null);
+        var result = inventoryController.getInventory(1L, request, null, null, null, null);
         
         JSONArray expectedArray = new JSONArray();
-        items.stream().map(InventoryItem::constructJSONObject).forEach(expectedArray::add);
+        items.stream().map(InventoryItemDTO::new).forEach(expectedArray::add);
         
-        
-        assertEquals(expectedArray, result.get("results"));
-        assertEquals(1000L, result.get("count"));
-        assertEquals(2L, result.size());
+        assertEquals(expectedArray, result.getResults());
+        assertEquals(1000L, result.getCount());
     }
 
 

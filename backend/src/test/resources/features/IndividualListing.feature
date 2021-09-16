@@ -25,6 +25,21 @@ Feature: U22 - List Sale
     Then The request succeeds
     And The like count of the sale item is 1
 
+  Scenario: AC3 - Liking a sale item adds a message to my home feed
+    Given I am logged into my account
+    When I like the sale item
+    And I check my notification feed
+    Then I receive a notification
+    And The notification is for liking the sale item
+
+  Scenario: AC6 - Unliking a sale item updates the home feed message
+    Given I am logged into my account
+    When I like the sale item
+    And I unlike the sale item
+    And I check my notification feed
+    Then I receive a notification
+    And The notification is for unliking the sale item
+
   Scenario: AC5 - A user cannot like a sale item more than once
     Given I am logged into my account
     When I like the sale item

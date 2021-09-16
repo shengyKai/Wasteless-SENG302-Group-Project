@@ -4,6 +4,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
+import org.seng302.leftovers.dto.user.UserRole;
 import org.seng302.leftovers.entities.Account;
 import org.seng302.leftovers.entities.Location;
 import org.seng302.leftovers.entities.User;
@@ -136,7 +137,7 @@ class LoginControllerTest {
                 .andExpect(status().isOk())
                 .andReturn();
         HttpSession session = result.getRequest().getSession();
-        assertEquals("user", session.getAttribute("role"));
+        assertEquals(UserRole.USER, session.getAttribute("role"));
         // Might change to cookies within the future
     }
 
@@ -166,7 +167,7 @@ class LoginControllerTest {
     void loginWithAdminUserSessionRoleIsAdmin() throws Exception {
         String loginBody = "{\"email\": \"johnsmith99@gmail.com\", \"password\": \"1337-H%nt3r2\"}";
         User user = userRepository.findByEmail("johnsmith99@gmail.com");
-        user.setRole("globalApplicationAdmin");
+        user.setRole(UserRole.GAA);
         userRepository.save(user);
 
         MvcResult result = mockMvc.perform(post("/login")
@@ -175,7 +176,7 @@ class LoginControllerTest {
                 .andExpect(status().isOk())
                 .andReturn();
         HttpSession session = result.getRequest().getSession();
-        assertEquals("globalApplicationAdmin", session.getAttribute("role"));
+        assertEquals(UserRole.GAA, session.getAttribute("role"));
         // Might change to cookies within the future
     }
 }

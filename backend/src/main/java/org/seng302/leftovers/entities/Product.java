@@ -271,6 +271,7 @@ public class Product {
         object.put("manufacturer", manufacturer);
         object.put("recommendedRetailPrice", recommendedRetailPrice);
         object.put("created", created.toString());
+        object.put("business", business.constructJson());
         JSONArray images = new JSONArray();
         for (Image image : productImages) {
             images.add(image.constructJSONObject());

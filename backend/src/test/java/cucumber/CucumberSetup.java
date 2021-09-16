@@ -5,6 +5,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.cucumber.java.After;
 import io.cucumber.java.Before;
 import org.seng302.leftovers.persistence.*;
+import org.seng302.leftovers.persistence.event.EventRepository;
+import org.seng302.leftovers.persistence.event.ExpiryEventRepository;
+import org.seng302.leftovers.persistence.event.InterestEventRepository;
 import org.seng302.leftovers.service.StorageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -47,6 +50,8 @@ public class CucumberSetup {
     @Autowired
     private ExpiryEventRepository expiryEventRepository;
     @Autowired
+    private InterestEventRepository interestEventRepository;
+    @Autowired
     private ImageRepository imageRepository;
     @Autowired
     private StorageService storageService;
@@ -71,6 +76,7 @@ public class CucumberSetup {
      * Delete all entities from all repositories in the database.
      */
     private void clearDatabase() {
+        interestEventRepository.deleteAll();
         saleItemRepository.deleteAll();
         inventoryItemRepository.deleteAll();
         productRepository.deleteAll();

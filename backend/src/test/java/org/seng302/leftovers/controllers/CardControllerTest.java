@@ -1,5 +1,6 @@
 package org.seng302.leftovers.controllers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
@@ -18,6 +19,7 @@ import org.seng302.leftovers.entities.User;
 import org.seng302.leftovers.entities.event.ExpiryEvent;
 import org.seng302.leftovers.exceptions.AccessTokenException;
 import org.seng302.leftovers.persistence.*;
+import org.seng302.leftovers.persistence.event.ExpiryEventRepository;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
 import org.seng302.leftovers.service.searchservice.SearchPageConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,6 +57,8 @@ class CardControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
+    @Autowired
+    private ObjectMapper objectMapper;
     @Mock
     private KeywordRepository keywordRepository;
     @Mock
@@ -1003,12 +1007,15 @@ class CardControllerTest {
 
         assertEquals(3, responseBody.get("count"));
 
-        var expectedResults = new JSONArray();
+        List<JSONObject> expectedResults = new ArrayList<>();
         expectedResults.add(testCard1.constructJSONObject());
         expectedResults.add(testCard2.constructJSONObject());
         expectedResults.add(testCard3.constructJSONObject());
 
-        assertEquals(expectedResults, responseBody.get("results"));
+        assertEquals(
+                objectMapper.readTree(objectMapper.writeValueAsString(expectedResults)),
+                objectMapper.readTree(objectMapper.writeValueAsString(responseBody.get("results")))
+        );
     }
 
     @Test

@@ -113,7 +113,7 @@ export default {
     remainingSeconds: {
       handler () {
         if (this.remainingSeconds < 0) {
-          this.$store.commit("removeEvent", this.event.id);
+          this.$store.commit('removeEvent', this.event.id);
         }
       },
       immediate: true

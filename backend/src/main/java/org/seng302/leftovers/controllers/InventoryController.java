@@ -3,6 +3,8 @@ package org.seng302.leftovers.controllers;
 import net.minidev.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.seng302.leftovers.dto.InventoryItemDTO;
+import org.seng302.leftovers.dto.ResultPageDTO;
 import org.seng302.leftovers.entities.Business;
 import org.seng302.leftovers.entities.InventoryItem;
 import org.seng302.leftovers.entities.Product;
@@ -25,6 +27,7 @@ import org.springframework.web.server.ResponseStatusException;
 import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @RestController
 public class InventoryController {
@@ -190,12 +193,12 @@ public class InventoryController {
      * business's inventory.
      */
     @GetMapping("/businesses/{id}/inventory")
-    public JSONObject getInventory(@PathVariable(name = "id") Long businessId,
-                                HttpServletRequest request,
-                                @RequestParam(required = false) String orderBy,
-                                @RequestParam(required = false) Integer page,
-                                @RequestParam(required = false) Integer resultsPerPage,
-                                @RequestParam(required = false) Boolean reverse) {
+    public ResultPageDTO<InventoryItemDTO> getInventory(@PathVariable(name = "id") Long businessId,
+                                                        HttpServletRequest request,
+                                                        @RequestParam(required = false) String orderBy,
+                                                        @RequestParam(required = false) Integer page,
+                                                        @RequestParam(required = false) Integer resultsPerPage,
+                                                        @RequestParam(required = false) Boolean reverse) {
         try {
         logger.info("Getting inventory item for business (businessId={}).", businessId);
         Business business = businessRepository.getBusinessById(businessId);
@@ -208,8 +211,8 @@ public class InventoryController {
 
         Specification<InventoryItem> specification = SearchSpecConstructor.constructSpecificationFromInventoryItemsFilter(business);
         Page<InventoryItem> result = inventoryItemRepository.findAll(specification, pageRequest);
-        
-        return JsonTools.constructPageJSON(result.map(InventoryItem::constructJSONObject));
+
+        return new ResultPageDTO<>(result.map(InventoryItemDTO::new));
 
     } catch (Exception error) {
         logger.error(error);

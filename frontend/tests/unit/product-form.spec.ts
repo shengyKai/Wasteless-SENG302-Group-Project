@@ -3,8 +3,9 @@ import Vuetify from 'vuetify';
 import {createLocalVue, mount, Wrapper} from '@vue/test-utils';
 
 import ProductForm from '@/components/BusinessProfile/ProductForm.vue';
-import {castMock, flushQueue} from './utils';
+import {castMock, flushQueue, findButtonWithText} from './utils';
 import {createProduct as createProduct1, modifyProduct as modifyProduct1, Product} from "@/api/internal-product";
+import { currencyFromCountry } from '@/api/currency';
 
 jest.mock('@/api/internal', () => ({
   createProduct: jest.fn(),
@@ -132,24 +133,14 @@ describe('ProductForm.vue - Create', () => {
    *
    * @returns A Wrapper around the close button
    */
-  function findCloseButton() {
-    const buttons = wrapper.findAllComponents({ name: 'v-btn' });
-    const filtered = buttons.filter(button => button.text().includes('Close'));
-    expect(filtered.length).toBe(1);
-    return filtered.at(0);
-  }
+  const findCloseButton = () => findButtonWithText(wrapper, 'Close');
 
   /**
    * Finds the create button in the ProductForm form
    *
    * @returns A Wrapper around the create button
    */
-  function findCreateButton() {
-    const buttons = wrapper.findAllComponents({ name: 'v-btn' });
-    const filtered = buttons.filter(button => button.text().includes('Create'));
-    expect(filtered.length).toBe(1);
-    return filtered.at(0);
-  }
+  const findCreateButton = () => findButtonWithText(wrapper, 'Create');
 
   it('Valid if all required fields are provided', async () => {
     await populateRequiredFields();
@@ -456,12 +447,7 @@ describe('ProductForm.vue - Modify', () => {
    *
    * @returns A Wrapper around the save button
    */
-  function findSaveButton() {
-    const buttons = wrapper.findAllComponents({ name: 'v-btn' });
-    const filtered = buttons.filter(button => button.text().includes('Save'));
-    expect(filtered.length).toBe(1);
-    return filtered.at(0);
-  }
+  const findSaveButton = () => findButtonWithText(wrapper, 'Save');
 
   it('Form has the correct title', () => {
     expect(appWrapper.text()).toContain(`Update ${previousProduct.id}`);

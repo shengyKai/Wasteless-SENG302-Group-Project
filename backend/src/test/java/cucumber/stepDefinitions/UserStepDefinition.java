@@ -13,6 +13,7 @@ import net.minidev.json.parser.JSONParser;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.junit.Assert;
+import org.seng302.leftovers.dto.user.UserRole;
 import org.seng302.leftovers.entities.Location;
 import org.seng302.leftovers.entities.User;
 import org.seng302.leftovers.persistence.UserRepository;
@@ -140,7 +141,7 @@ public class UserStepDefinition {
                 .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
                         "Canterbury,8041"))
                 .build();
-        user.setRole("globalApplicationAdmin");
+        user.setRole(UserRole.GAA);
         userContext.save(user);
     }
 

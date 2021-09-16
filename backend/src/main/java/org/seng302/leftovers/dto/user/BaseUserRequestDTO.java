@@ -1,20 +1,21 @@
-package org.seng302.leftovers.dto;
+package org.seng302.leftovers.dto.user;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
+import org.seng302.leftovers.dto.LocationDTO;
 
 import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
 
 
 /**
- * A baseline UserDTO to build more children from
+ * A base DTO for client requests to create/update users
  */
 @Getter
 @ToString
 @EqualsAndHashCode
-public class UserDTO {
+public class BaseUserRequestDTO {
     @NotNull
     private String email;
     @NotNull
