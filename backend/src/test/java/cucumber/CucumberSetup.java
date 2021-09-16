@@ -55,6 +55,8 @@ public class CucumberSetup {
     private ImageRepository imageRepository;
     @Autowired
     private StorageService storageService;
+    @Autowired
+    private BoughtSaleItemRepository boughtSaleItemRepository;
 
     /**
      * Set up the mockMvc object for mocking API requests, and remove everything from the repositories.
@@ -78,6 +80,7 @@ public class CucumberSetup {
     private void clearDatabase() {
         interestEventRepository.deleteAll();
         saleItemRepository.deleteAll();
+        boughtSaleItemRepository.deleteAll();
         inventoryItemRepository.deleteAll();
         productRepository.deleteAll();
         businessRepository.deleteAll();
