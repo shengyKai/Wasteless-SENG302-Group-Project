@@ -676,6 +676,121 @@ class SaleControllerTest {
     }
 
     @Test
+    void getSaleItemsInterest_invalidUser_400Response() throws Exception {
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), any())).thenReturn(true);
+        MvcResult result = mockMvc.perform(get(String.format("/listings/%s/interest", saleItem.getId()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .param("userId", "999"))
+                .andExpect(status().isBadRequest())
+                .andReturn();
+    }
+
+    @Test
+    void getSaleItemsInterest_invalidRequest_400Response() throws Exception {
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), any())).thenReturn(true);
+
+        // Verify that a 400 response is received in response to the PUT request
+        MvcResult result = mockMvc.perform(get(String.format("/listings/%s/interest", saleItem.getId()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .param("userId", "user.name: Edward"))
+                        .andExpect(status().isBadRequest())
+                        .andReturn();
+    }
+
+    @Test
+    void getSaleItemsInterest_noAuthToken_401Response() throws Exception {
+        // Mock the AuthenticationTokenManager to respond as it would when the authentication token is missing or invalid
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.checkAuthenticationToken(any()))
+                .thenThrow(new AccessTokenException());
+
+        // Verify that a 401 response is received in response to the GET request
+        mockMvc.perform(get(String.format("/listings/%s/interest", saleItem.getId()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .param("userId", "4"))
+                .andExpect(status().isUnauthorized())
+                .andReturn();
+        // Check that the authentication token manager was called
+        authenticationTokenManager.verify(() -> AuthenticationTokenManager.checkAuthenticationToken(any()));
+    }
+
+    @Test
+    void getSaleItemsInterest_userCannotUpdateInterest_403Response() throws Exception {
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), any())).thenReturn(false);
+
+        // Verify that a 403 response is received in response to the GET request
+        mockMvc.perform(get(String.format("/listings/%s/interest", saleItem.getId()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .param("userId", "4"))
+                        .andExpect(status().isForbidden())
+                        .andReturn();
+
+        authenticationTokenManager.verify(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), eq(4L)));
+    }
+
+    @Test
+    void getSaleItemsInterest_invalidListing_406Response() throws Exception {
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), any())).thenReturn(true);
+            mockMvc.perform(get(String.format("/listings/999/interest"))
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .param("userId", "4"))
+                            .andExpect(status().isNotAcceptable())
+                            .andReturn();
+    }
+
+    @Test
+    void getSaleItemsInterest_validListing_200Response() throws Exception {
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), any())).thenReturn(true);
+        mockMvc.perform(get(String.format("/listings/%s/interest", saleItem.getId()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .param("userId", "4"))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        verify(saleItemRepository, times(1)).findById(saleItem.getId());
+    }
+
+    @Test
+    void getSaleItemsInterest_validListingAndLiked_returnTrue() throws Exception {
+        when(saleItem.getInterestedUsers()).thenReturn(Set.of(user));
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), any())).thenReturn(true);
+        MvcResult result = mockMvc.perform(get(String.format("/listings/%s/interest", saleItem.getId()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .param("userId", "4"))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        verify(saleItemRepository, times(1)).findById(saleItem.getId());
+
+        JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
+        Object response = parser.parse(result.getResponse().getContentAsString());
+
+        JSONObject expected = new JSONObject();
+        expected.appendField("isInterested", true);
+        assertEquals(expected, response);
+    }
+
+    @Test
+    void getSaleItemsInterest_validListingAndNotLiked_returnsFalse() throws Exception {
+        when(saleItem.getInterestedUsers()).thenReturn(Set.of());
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), any())).thenReturn(true);
+        MvcResult result = mockMvc.perform(get(String.format("/listings/%s/interest", saleItem.getId()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .param("userId", "4"))
+                        .andExpect(status().isOk())
+                        .andReturn();
+
+        verify(saleItemRepository, times(1)).findById(saleItem.getId());
+
+        JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
+        Object response = parser.parse(result.getResponse().getContentAsString());
+
+        JSONObject expected = new JSONObject();
+        expected.appendField("isInterested", false);
+        assertEquals(expected, response);
+    }
+
+
+    @Test
     void purchaseSaleItem_invalidRequestBodyFormat_400Response() throws Exception {
         JSONObject invalidBody = new JSONObject();
         invalidBody.put("id", 33);
