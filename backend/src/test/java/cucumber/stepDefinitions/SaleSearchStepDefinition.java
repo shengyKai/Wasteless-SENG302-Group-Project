@@ -58,18 +58,8 @@ public class SaleSearchStepDefinition {
     private String priceUpper = "";
     private String closeLower = "";
     private String closeUpper = "";
+    private Boolean reverse = false;
 
-    @And("the business {string} with the type {string} and location {string} exists")
-    public void theBusinessWithTheTypeAndLocationExists(String name, String type, String location) {
-        var business = new Business.Builder()
-                .withName(name)
-                .withDescription("Sells stuff")
-                .withBusinessType(type)
-                .withAddress(Location.covertAddressStringToLocation(location))
-                .withPrimaryOwner(userContext.getLast())
-                .build();
-        businessContext.save(business);
-    }
 
     @And("the business has the following products on sale:")
     public void theBusinessHasTheFollowingProductsOnSale(io.cucumber.datatable.DataTable datatable) throws Exception {
@@ -107,25 +97,29 @@ public class SaleSearchStepDefinition {
     @Then("first product is {string}")
     public void productsAreInAlphabeticalOrder(String firstId) throws UnsupportedEncodingException, ParseException {
         mvcResult = requestContext.getLastResult();
+        assertEquals(200, mvcResult.getResponse().getStatus());
         JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
         JSONObject response = (JSONObject) parser.parse(mvcResult.getResponse().getContentAsString());
-        List<JSONObject> sales = (List<JSONObject>) response.get("results");
+        JSONArray sales = (JSONArray) response.get("results");
 
         assertTrue(sales.size() > 0);
-        Number saleItemId = (Number) sales.get(0).get("id");
-        SaleItem saleItem = saleItemRepository.findById(saleItemId.longValue()).orElseThrow();
-        assertEquals(firstId, saleItem.getInventoryItem().getProduct().getProductCode());
+        JSONObject saleItem = (JSONObject) sales.get(0);
+        JSONObject inventoryItem = (JSONObject) saleItem.get("inventoryItem");
+        JSONObject product = (JSONObject) inventoryItem.get("product");
+        assertEquals(firstId, product.get("id"));
     }
 
     @Then("first product is from {string}")
     public void productsAreInBusinessOrder(String businessName) throws UnsupportedEncodingException, ParseException {
         mvcResult = requestContext.getLastResult();
+        assertEquals(200, mvcResult.getResponse().getStatus());
         JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
         JSONObject response = (JSONObject) parser.parse(mvcResult.getResponse().getContentAsString());
-        List<JSONObject> sales = (List<JSONObject>) response.get("results");
+        JSONArray sales = (JSONArray) response.get("results");
 
         assertTrue(sales.size() > 0);
-        JSONObject inventoryItem = (JSONObject) sales.get(0).get("inventoryItem");
+        JSONObject saleItem = (JSONObject) sales.get(0);
+        JSONObject inventoryItem = (JSONObject) saleItem.get("inventoryItem");
         JSONObject product = (JSONObject) inventoryItem.get("product");
         JSONObject business = (JSONObject) product.get("business");
         assertEquals(businessName, business.getAsString("name"));
@@ -157,7 +151,7 @@ public class SaleSearchStepDefinition {
 
     @When("I search for sale items")
     public void searchSaleItems() {
-        MockHttpServletRequestBuilder requestBuilder = get("/businesses/listings/search")
+        requestContext.performRequest(get("/businesses/listings/search")
                 .param("basicSearchQuery", this.basicSearch)
                 .param("productSearchQuery", this.productSearch)
                 .param("businessSearchQuery", this.businessSearch)
@@ -167,8 +161,8 @@ public class SaleSearchStepDefinition {
                 .param("priceLower", this.priceLower)
                 .param("priceUpper", this.priceUpper)
                 .param("closeLower", this.closeLower)
-                .param("closeUpper", this.closeUpper);
-        requestContext.performRequest(requestBuilder);
+                .param("closeUpper", this.closeUpper)
+        );
         reset();
     }
 
@@ -182,6 +176,7 @@ public class SaleSearchStepDefinition {
         this.priceUpper = "";
         this.closeLower = "";
         this.closeUpper = "";
+        this.reverse = false;
     }
 
     @When("I search sale basic {string}")

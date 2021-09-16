@@ -5,6 +5,7 @@ import cucumber.context.ImageContext;
 import cucumber.context.RequestContext;
 import cucumber.context.UserContext;
 import cucumber.utils.CucumberUtils;
+import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
@@ -330,5 +331,17 @@ public class BusinessStepDefinition {
 
         assertFalse(business.getImages().isEmpty());
         assertEquals(image, business.getImages().get(0)); // index zero is primary image
+    }
+
+    @And("the business {string} with the type {string} and location {string} exists")
+    public void theBusinessWithTheTypeAndLocationExists(String name, String type, String location) {
+        var business = new Business.Builder()
+                .withName(name)
+                .withDescription("Sells stuff")
+                .withBusinessType(type)
+                .withAddress(Location.covertAddressStringToLocation(location))
+                .withPrimaryOwner(userContext.getLast())
+                .build();
+        businessContext.save(business);
     }
 }

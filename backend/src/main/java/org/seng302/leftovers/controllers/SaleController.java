@@ -233,7 +233,9 @@ public class SaleController {
             AuthenticationTokenManager.checkAuthenticationToken(request);
 
             // Check sort ordering
-            orderBy = Optional.ofNullable(orderBy).orElse("productName");
+            if (orderBy == null || orderBy.isEmpty()) {
+                orderBy = "productName";
+            }
             Sort.Direction direction = SearchQueryParser.getSortDirection(reverse);
             List<Sort.Order> sortOrder = getSaleItemSearchOrder(orderBy, direction);
 
@@ -247,14 +249,14 @@ public class SaleController {
             }
             BigDecimal minPrice = null;
             BigDecimal maxPrice = null;
-            if (priceLower != null) minPrice = new BigDecimal(priceLower);
-            if (priceUpper != null) maxPrice = new BigDecimal(priceUpper);
+            if (priceLower != null && !priceLower.isEmpty()) minPrice = new BigDecimal(priceLower);
+            if (priceUpper != null && !priceUpper.isEmpty()) maxPrice = new BigDecimal(priceUpper);
 
             LocalDate minDate = null;
             LocalDate maxDate = null;
             DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE;
-            if (closeLower != null) minDate = LocalDate.parse(closeLower, formatter);
-            if (closeUpper != null) maxDate = LocalDate.parse(closeUpper, formatter);
+            if (closeLower != null && !closeLower.isEmpty()) minDate = LocalDate.parse(closeLower, formatter);
+            if (closeUpper != null && !closeUpper.isEmpty()) maxDate = LocalDate.parse(closeUpper, formatter);
 
             // Create page
             PageRequest pageablePage = SearchPageConstructor.getPageRequest(page, resultsPerPage, Sort.by(sortOrder));

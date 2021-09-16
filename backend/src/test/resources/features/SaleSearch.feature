@@ -1,7 +1,7 @@
 Feature: U29 Sale Item Search
   Background:
     Given A user exists
-    And the business "Biz" with the type "Charitable organisation" and location "23, Here St, Bob, Bob, Bob, Bob, 1234" exists
+    And the business "Biz" with the type "Charitable organisation" and location "23,Here St,Bob,Bob,Bob,Bob,1234" exists
     And the business has the following products in its catalogue:
       | product_id | name  |
       | FISH       | fish  |
@@ -14,7 +14,7 @@ Feature: U29 Sale Item Search
       | product_id | quantity | price | closes     |
       | FISH       | 12       | 20    | 2022-01-18 |
       | APPLE      | 1        | 1     | 2022-05-19 |
-    And the business "BizTwo" with the type "Retail Trade" and location "42, There Place, Steve, Steve, Steve, Steve, 2345" exists
+    And the business "BizTwo" with the type "Retail Trade" and location "42,There Place,Steve,Steve,Steve,Steve,2345" exists
     And the business has the following products in its catalogue:
       | product_id | name   |
       | CRAB       | crab   |
@@ -35,7 +35,7 @@ Feature: U29 Sale Item Search
 
   Scenario: AC4 - Sale listings may be ordered in various ways, order by product name
     Given I am logged into my account
-    When orderBy is "name"
+    When orderBy is "productName"
     When I search for sale items
     Then first product is "APPLE"
 
@@ -47,7 +47,7 @@ Feature: U29 Sale Item Search
 
   Scenario: AC4 - Order by business location
     Given I am logged into my account
-    When orderBy is "location"
+    When orderBy is "businessLocation"
     When I search for sale items
     Then first product is from "Biz"
 
@@ -55,13 +55,13 @@ Feature: U29 Sale Item Search
     Given I am logged into my account
     When orderBy is "quantity"
     When I search for sale items
-    Then first product is "FISH"
+    Then first product is "APPLE"
 
   Scenario: AC4 - Order by price
     Given I am logged into my account
     When orderBy is "price"
     When I search for sale items
-    Then first product is "FISH"
+    Then first product is "APPLE"
 
   Scenario: AC4 - Order by created
     Given I am logged into my account
@@ -71,7 +71,7 @@ Feature: U29 Sale Item Search
 
   Scenario: AC4 - Order by closes
     Given I am logged into my account
-    When orderBy is "closes"
+    When orderBy is "closing"
     When I search for sale items
     Then first product is "FISH"
 
@@ -101,7 +101,7 @@ Feature: U29 Sale Item Search
 
   Scenario: AC9 - Search by business location
     Given I am logged into my account
-    When search sale location is "There"
+    When search sale location is "Steve"
     When I search for sale items
     Then 2 sale items are returned
 
@@ -115,17 +115,18 @@ Feature: U29 Sale Item Search
     Given I am logged into my account
     When search sale name is "Fi"
     And search sale business is "Biz"
-    And search sale location is "here"
+    And search sale location is "Bob"
     And search sale price is between "5.00" and "25.00"
     And search sale date is between "2022-01-01" and "2022-02-01"
     And businessType is "Charitable organisation"
-    And orderBy is "name"
+    And orderBy is "productName"
     When I search for sale items
     Then 1 sale items are returned
 
   Scenario: Basic search
     Given I am logged into my account
     When I search sale basic "Biz"
+    When I search for sale items
     Then 4 sale items are returned
 
   Scenario: Not logged in - Unauthorised error
