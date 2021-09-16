@@ -2,10 +2,9 @@ package org.seng302.leftovers.controllers;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import net.minidev.json.JSONObject;
+import lombok.Getter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.seng302.leftovers.dto.ProductFilterOption;
 import org.seng302.leftovers.dto.ResultPageDTO;
 import org.seng302.leftovers.dto.business.BusinessResponseDTO;
 import org.seng302.leftovers.dto.business.BusinessType;
@@ -20,7 +19,6 @@ import org.seng302.leftovers.persistence.ImageRepository;
 import org.seng302.leftovers.persistence.UserRepository;
 import org.seng302.leftovers.service.ImageService;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
-import org.seng302.leftovers.tools.JsonTools;
 import org.seng302.leftovers.tools.SearchHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -35,6 +33,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -167,6 +166,15 @@ public class BusinessController {
         return BusinessResponseDTO.withAdmins(business.get());
     }
 
+    /**
+     * DTO for getting the ID number of the user that is being promoted/demoted to a GAA.
+     */
+    @Getter
+    private static class PromoteDemoteDTO {
+        @NotNull
+        private Long userId;
+    }
+
 
     /**
      * PUT endpoint for making an individual an administrator of a business
@@ -175,12 +183,14 @@ public class BusinessController {
      * @param businessId The Id of the business
      */
     @PutMapping("/businesses/{id}/makeAdministrator")
-    public void makeAdmin(@RequestBody JSONObject userInfo, HttpServletRequest req, @PathVariable("id") Long businessId) {
+    public void makeAdmin(@RequestBody @Valid PromoteDemoteDTO userInfo, HttpServletRequest req, @PathVariable("id") Long businessId) {
         try {
             AuthenticationTokenManager.checkAuthenticationToken(req); // Ensure a user is logged in
             Business business = getBusiness(businessId); // Get the business
             business.checkSessionPermissionsOwner(req);
-            User user = getUser(userInfo); // Get the user to promote
+
+            User user = userRepository.findById(userInfo.getUserId())
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "The given user does not exist"));
             LocalDate now = LocalDate.now();
             LocalDate minDate = now.minusYears(16);
             
@@ -204,12 +214,13 @@ public class BusinessController {
      * @param businessId The Id of the business
      */
     @PutMapping("/businesses/{id}/removeAdministrator")
-    public void removeAdmin(@RequestBody JSONObject userInfo, HttpServletRequest req, @PathVariable("id") Long businessId) {
+    public void removeAdmin(@RequestBody @Valid PromoteDemoteDTO userInfo, HttpServletRequest req, @PathVariable("id") Long businessId) {
         try {
             AuthenticationTokenManager.checkAuthenticationToken(req); // Ensure a user is logged in
             Business business = getBusiness(businessId); // Get the business
             business.checkSessionPermissionsOwner(req);
-            User user = getUser(userInfo); // Get the user to demote
+            User user = userRepository.findById(userInfo.getUserId())
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "The given user does not exist"));
 
             business.removeAdmin(user);
             businessRepository.save(business);
@@ -219,33 +230,6 @@ public class BusinessController {
             throw err;
         }
 
-    }
-
-    /**
-     * Gets a user from the database and performs sanity checks to ensure User is not null
-     * Throws a ResponseStatusException if the user does not exist
-     * @param userInfo Data containing the Id of the user to find
-     * @return A user of given UserId
-     */
-    private User getUser(@RequestBody JSONObject userInfo) {
-        // Check a valid Long id is given in the request
-        if (!userInfo.containsKey("userId")) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "Could not find a user id in the request");
-        }
-
-        Long userId = userInfo.getAsNumber("userId").longValue();
-        if (userId == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "Could not find a user id in the request");
-        }
-        // check the requested user exists
-        Optional<User> user = userRepository.findById(userId);
-        if (!user.isPresent()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "The given user does not exist");
-        }
-        return user.get();
     }
 
     /**
@@ -275,8 +259,7 @@ public class BusinessController {
      * @param resultsPerPage Number of results per page
      * @param orderBy Order by term. Can be one of "created", "name", "location", "businessType"
      * @param reverse Boolean. Reverse ordering of results
-     * @param businessType Type of business. Can by one of "Accommodation and Food Services", "Retail Trade",
-     *                     "Charitable organisation", "Non-profit organisation". // TODO
+     * @param businessTypeString Type of business. Can by one of "Accommodation and Food Services", "Retail Trade","Charitable organisation", "Non-profit organisation".
      * @return A JSON object containing the total count and paginated results.
      */
     @GetMapping("/businesses/search")
@@ -289,7 +272,7 @@ public class BusinessController {
 
         AuthenticationTokenManager.checkAuthenticationToken(request);
 
-        logger.info(() -> String.format("Performing Business search for query \"%s\" and type \"%s\"", searchQuery, businessTypeString));
+        logger.info("Performing Business search for query \"{}\" and type \"{}\"", searchQuery, businessTypeString);
 
 
         BusinessType businessType;
