@@ -108,6 +108,8 @@ class SaleControllerTest {
         when(inventoryItemRepository.findById(2L)).thenReturn(Optional.of(inventoryItem));
         when(inventoryItemRepository.findById(not(eq(2L)))).thenReturn(Optional.empty());
 
+        when(saleItem.getInventoryItem()).thenReturn(inventoryItem);
+
         // Setup mock sale item repository
         when(saleItemRepository.save(any(SaleItem.class))).thenAnswer(x -> x.getArgument(0));
         when(saleItemRepository.findById(not(eq(3L)))).thenReturn(Optional.empty());
@@ -790,8 +792,44 @@ class SaleControllerTest {
     void purchaseSaleItem_validRequest_200Response() throws Exception {
         authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), any())).thenReturn(true);
 
-        var inventoryItem = Mockito.mock(InventoryItem.class);
-        when(saleItem.getInventoryItem()).thenReturn(inventoryItem);
+        JSONObject validBody = new JSONObject();
+        validBody.put("purchaserId", user.getUserID());
+
+        mockMvc.perform(put(String.format("/listings/%d/purchase", saleItem.getId()))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(validBody.toString()))
+                .andExpect(status().isOk());
+
+        // Sale item should be deleted if request is successful
+        verify(saleItemRepository, times(1)).delete(saleItem);
+    }
+
+    @Test
+    void purchaseSaleItem_validRequest_purchaseRecordCreated() throws Exception {
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), any())).thenReturn(true);
+
+        var product = Mockito.mock(Product.class);
+        when(saleItem.getProduct()).thenReturn(product);
+
+        JSONObject validBody = new JSONObject();
+        validBody.put("purchaserId", user.getUserID());
+
+        mockMvc.perform(put(String.format("/listings/%d/purchase", saleItem.getId()))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(validBody.toString()))
+                .andExpect(status().isOk());
+
+        // Record of purchase should be created if request is successful
+        var boughtSaleItemCaptor = ArgumentCaptor.forClass(BoughtSaleItem.class);
+        verify(boughtSaleItemRepository, times(1)).save(boughtSaleItemCaptor.capture());
+        assertEquals(user, boughtSaleItemCaptor.getValue().getBuyer());
+        assertEquals(product, boughtSaleItemCaptor.getValue().getProduct());
+    }
+
+    @Test
+    void purchaseSaleItem_validRequest_invItemUpdated() throws Exception {
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), any())).thenReturn(true);
+
         when(saleItem.getQuantity()).thenReturn(50);
         when(inventoryItem.getRemainingQuantity()).thenReturn(120);
 
@@ -799,18 +837,9 @@ class SaleControllerTest {
         validBody.put("purchaserId", user.getUserID());
 
         mockMvc.perform(put(String.format("/listings/%d/purchase", saleItem.getId()))
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(validBody.toString()))
-                    .andExpect(status().isOk());
-
-        // Sale item should be deleted if request is successful
-        verify(saleItemRepository, times(1)).delete(saleItem);
-
-
-        // Record of purchase should be created if request is successful
-        var boughtSaleItemCaptor = ArgumentCaptor.forClass(BoughtSaleItem.class);
-        verify(boughtSaleItemRepository, times(1)).save(boughtSaleItemCaptor.capture());
-        // TODO check that constructor is being called with expected arguments
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(validBody.toString()))
+                .andExpect(status().isOk());
 
         // Inventory item should be updated if request is successful
         verify(inventoryItem, times(1)).setRemainingQuantity(170);
