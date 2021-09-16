@@ -17,7 +17,6 @@ import org.seng302.leftovers.persistence.SaleItemRepository;
 import org.seng302.leftovers.persistence.UserRepository;
 import org.seng302.leftovers.persistence.event.InterestEventRepository;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
-import org.seng302.leftovers.tools.JsonTools;
 import org.seng302.leftovers.service.searchservice.SearchPageConstructor;
 import org.seng302.leftovers.service.searchservice.SearchQueryParser;
 import org.seng302.leftovers.service.searchservice.SearchSpecConstructor;
@@ -198,20 +197,20 @@ public class SaleController {
      * @return JSON page of sale items
      */
     @GetMapping("/businesses/listings/search")
-    public JSONObject searchSaleItems(HttpServletRequest request,
-                                      @RequestParam(required = false) String basicSearchQuery,
-                                      @RequestParam(required = false) String productSearchQuery,
-                                      @RequestParam(required = false) String businessSearchQuery,
-                                      @RequestParam(required = false) String locationSearchQuery,
-                                      @RequestParam(required = false) Integer page,
-                                      @RequestParam(required = false) Integer resultsPerPage,
-                                      @RequestParam(required = false) Boolean reverse,
-                                      @RequestParam(required = false) String orderBy,
-                                      @RequestParam(required = false) List<String> businessTypes,
-                                      @RequestParam(required = false) String priceLower,
-                                      @RequestParam(required = false) String priceUpper,
-                                      @RequestParam(required = false) String closeLower,
-                                      @RequestParam(required = false) String closeUpper) {
+    public ResultPageDTO<SaleItemDTO> searchSaleItems(HttpServletRequest request,
+                                                      @RequestParam(required = false) String basicSearchQuery,
+                                                      @RequestParam(required = false) String productSearchQuery,
+                                                      @RequestParam(required = false) String businessSearchQuery,
+                                                      @RequestParam(required = false) String locationSearchQuery,
+                                                      @RequestParam(required = false) Integer page,
+                                                      @RequestParam(required = false) Integer resultsPerPage,
+                                                      @RequestParam(required = false) Boolean reverse,
+                                                      @RequestParam(required = false) String orderBy,
+                                                      @RequestParam(required = false) List<String> businessTypes,
+                                                      @RequestParam(required = false) String priceLower,
+                                                      @RequestParam(required = false) String priceUpper,
+                                                      @RequestParam(required = false) String closeLower,
+                                                      @RequestParam(required = false) String closeUpper) {
         try {
             // Check auth
             logger.info("Get sale items to match parameters.");
@@ -252,7 +251,7 @@ public class SaleController {
                     .and(SearchSpecConstructor.constructSaleListingSpecificationForSearch(new SaleListingSearchDTO(minPrice, maxPrice, minDate, maxDate, businessTypes)));
             Page<SaleItem> result = saleItemRepository.findAll(specification, pageablePage);
 
-            return JsonTools.constructPageJSON(result.map(SaleItem::constructJSONObjectWithBusiness));
+            return new ResultPageDTO<>(result.map(SaleItemDTO::new));
 
         } catch (DateTimeParseException badDate) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Close date parameters were not in date format");

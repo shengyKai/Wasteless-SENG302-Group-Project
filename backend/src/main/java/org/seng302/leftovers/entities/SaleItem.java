@@ -256,34 +256,6 @@ public class SaleItem {
     }
 
     /**
-     * Construct a JSON representation of the sale item. Attributes which are null will be omitted from the
-     * returned JSON.
-     * @return JSON representation of the sale item.
-     */
-    public JSONObject constructJSONObject() {
-        var object = new JSONObject();
-        object.put("id", getId());
-        object.put("inventoryItem", getInventoryItem().constructJSONObject());
-        object.put("quantity", getQuantity());
-        object.put("price", getPrice());
-        object.put("moreInfo", getMoreInfo());
-        object.put("created", getCreated().toString());
-        object.put("closes", getCloses().toString());
-        JsonTools.removeNullsFromJson(object);
-        return object;
-    }
-
-    /**
-     * Construct a JSON for a sale listing that includes the business that is selling it
-     * @return JSON representation of the sale item and business
-     */
-    public JSONObject constructJSONObjectWithBusiness() {
-        JSONObject object = constructJSONObject();
-        object.put("business", getInventoryItem().getProduct().getBusiness().constructJson());
-        return object;
-    }
-
-    /**
      * Builder for Sale Item
      */
     public static class Builder {

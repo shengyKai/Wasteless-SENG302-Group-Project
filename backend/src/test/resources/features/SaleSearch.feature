@@ -89,7 +89,7 @@ Feature: U29 Sale Item Search
 
   Scenario: AC7 - Limit results to within price range
     Given I am logged into my account
-    When search sale price is between 1 and 5
+    When search sale price is between "1.00" and "5.00"
     When I search for sale items
     Then 2 sale items are returned
 
@@ -116,7 +116,7 @@ Feature: U29 Sale Item Search
     When search sale name is "Fi"
     And search sale business is "Biz"
     And search sale location is "here"
-    And search sale price is between 5 and 25
+    And search sale price is between "5.00" and "25.00"
     And search sale date is between "2022-01-01" and "2022-02-01"
     And businessType is "Charitable organisation"
     And orderBy is "name"

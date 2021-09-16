@@ -109,10 +109,10 @@ public class SaleSearchStepDefinition {
         mvcResult = requestContext.getLastResult();
         JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
         JSONObject response = (JSONObject) parser.parse(mvcResult.getResponse().getContentAsString());
-        JSONArray sales = (JSONArray) response.get("results");
+        List<JSONObject> sales = (List<JSONObject>) response.get("results");
 
         assertTrue(sales.size() > 0);
-        Number saleItemId = (Number) sales.getJSONObject(0).get("id");
+        Number saleItemId = (Number) sales.get(0).get("id");
         SaleItem saleItem = saleItemRepository.findById(saleItemId.longValue()).orElseThrow();
         assertEquals(firstId, saleItem.getInventoryItem().getProduct().getProductCode());
     }
@@ -122,11 +122,11 @@ public class SaleSearchStepDefinition {
         mvcResult = requestContext.getLastResult();
         JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
         JSONObject response = (JSONObject) parser.parse(mvcResult.getResponse().getContentAsString());
-        JSONArray sales = (JSONArray) response.get("results");
+        List<JSONObject> sales = (List<JSONObject>) response.get("results");
 
         assertTrue(sales.size() > 0);
-        Number businessId = (Number) sales.getJSONObject(0).get("business").get("name");
-        assertEqual(businessName, business.getName())
+        String business = sales.get(0).get("inventoryItem.product.business").getName();
+        assertEquals(businessName, business);
     }
 
     @When("businessType is {string}")
@@ -135,8 +135,8 @@ public class SaleSearchStepDefinition {
     @When("search sale name is {string}")
     public void searchSaleNameIs(String name) { this.productSearch = name; }
 
-    @When("search sale price is between {int} and {int}")
-    public void searchSalePriceIsBetweenAnd(int priceLower, int priceUpper) {
+    @When("search sale price is between {string} and {string}")
+    public void searchSalePriceIsBetweenAnd(String priceLower, String priceUpper) {
         this.priceLower = priceLower;
         this.priceUpper = priceUpper;
     }
