@@ -1,5 +1,8 @@
 package org.seng302.leftovers.entities;
 
+import org.seng302.leftovers.entities.event.Event;
+import org.seng302.leftovers.entities.event.InterestPurchasedEvent;
+
 import javax.persistence.*;
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -51,6 +54,13 @@ public class BoughtSaleItem {
         this.quantity = saleItem.getQuantity();
         this.saleDate = Instant.now();
         this.listingDate = saleItem.getCreated();
+    }
+
+    public void notifyInterestedUsers(SaleItem saleItem){
+        for (User user : saleItem.getInterestedUsers()) {
+            InterestPurchasedEvent interestPurchasedEvent = new InterestPurchasedEvent(user, saleItem, this.buyer);
+
+        }
     }
 
     /**
