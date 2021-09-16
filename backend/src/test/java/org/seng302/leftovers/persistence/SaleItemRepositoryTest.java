@@ -1,6 +1,5 @@
 package org.seng302.leftovers.persistence;
 
-import io.cucumber.java.bs.A;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -9,6 +8,7 @@ import org.junit.runner.RunWith;
 import org.seng302.leftovers.entities.*;
 import org.seng302.leftovers.entities.event.InterestEvent;
 import org.seng302.leftovers.persistence.event.EventRepository;
+import org.seng302.leftovers.persistence.event.InterestEventRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -33,7 +33,7 @@ class SaleItemRepositoryTest {
     @Autowired
     private SaleItemRepository saleItemRepository;
     @Autowired
-    private EventRepository eventRepository;
+    private InterestEventRepository interestEventRepository;
 
     private SaleItem testSaleItem;
     private User testUser;
@@ -99,7 +99,7 @@ class SaleItemRepositoryTest {
 
     @AfterEach
     void tearDown() {
-        eventRepository.deleteAll();
+        interestEventRepository.deleteAll();
         saleItemRepository.deleteAll();
         inventoryItemRepository.deleteAll();
         productRepository.deleteAll();
@@ -115,11 +115,11 @@ class SaleItemRepositoryTest {
 
     @Test
     void delete_interestEventExistsForSaleItem_saleItemAndInterestEventDeleted() {
-        var interestEvent = eventRepository.save(new InterestEvent(testUser, testSaleItem));
+        var interestEvent = interestEventRepository.save(new InterestEvent(testUser, testSaleItem));
 
         assertDoesNotThrow(() -> saleItemRepository.delete(testSaleItem));
         assertTrue(saleItemRepository.findById(testSaleItem.getId()).isEmpty());
-        assertTrue(eventRepository.findById(interestEvent.getId()).isEmpty());
+        assertTrue(interestEventRepository.findById(interestEvent.getId()).isEmpty());
     }
 
 }
