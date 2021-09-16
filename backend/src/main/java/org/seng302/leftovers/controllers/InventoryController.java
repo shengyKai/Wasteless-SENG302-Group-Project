@@ -1,9 +1,7 @@
 package org.seng302.leftovers.controllers;
 
-import net.minidev.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.seng302.leftovers.dto.inventory.BaseInventoryItemDTO;
 import org.seng302.leftovers.dto.inventory.InventoryItemResponseDTO;
 import org.seng302.leftovers.dto.ResultPageDTO;
 import org.seng302.leftovers.dto.inventory.UpdateInventoryItemDTO;
@@ -25,7 +23,6 @@ import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
-import java.math.BigDecimal;
 import java.util.Set;
 
 @RestController

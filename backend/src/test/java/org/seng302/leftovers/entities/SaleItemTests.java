@@ -7,7 +7,7 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.junit.jupiter.api.*;
 import org.seng302.leftovers.dto.inventory.InventoryItemResponseDTO;
-import org.seng302.leftovers.dto.SaleItemDTO;
+import org.seng302.leftovers.dto.saleitem.SaleItemResponseDTO;
 import org.seng302.leftovers.dto.business.BusinessType;
 import org.seng302.leftovers.persistence.*;
 import org.seng302.leftovers.tools.SearchHelper;
@@ -20,6 +20,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
@@ -224,7 +225,7 @@ class SaleItemTests {
                 .withInventoryItem(inventoryItem)
                 .withCloses(LocalDate.now().plus(1000, ChronoUnit.DAYS).toString())
                 .withMoreInfo("This doesn't expire for a long time")
-                .withPrice(null)
+                .withPrice((BigDecimal) null)
                 .withQuantity(2);
         assertThrows(ResponseStatusException.class, saleItem::build);
     }
@@ -235,12 +236,11 @@ class SaleItemTests {
                 .withInventoryItem(inventoryItem)
                 .withCloses(LocalDate.now().plus(1000, ChronoUnit.DAYS).toString())
                 .withMoreInfo("This doesn't expire for a long time")
-                .withPrice("three dollars")
                 .withQuantity(2);
 
-        var exception = assertThrows(ResponseStatusException.class, builder::build);
+        var exception = assertThrows(ResponseStatusException.class, () -> builder.withPrice("three dollars"));
         assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
-        assertEquals("Please enter a valid number", exception.getReason());
+        assertEquals("The price is not a number", exception.getReason());
     }
 
     @Test
@@ -399,12 +399,11 @@ class SaleItemTests {
 
     @Test
     void createSaleItem_CloseDateInvalidFormat_ObjectNotCreated() {
-        SaleItem.Builder saleItem = new SaleItem.Builder()
+        var builder = new SaleItem.Builder()
                 .withInventoryItem(inventoryItem)
-                .withCloses("In three seconds")
                 .withMoreInfo("What's the time, Mr Wolfy?")
                 .withQuantity(2);
-        assertThrows(DateTimeParseException.class, saleItem::build);
+        assertThrows(DateTimeParseException.class, () -> builder.withCloses("In three seconds"));
     }
 
     @Test
@@ -420,7 +419,7 @@ class SaleItemTests {
                 .build();
         saleItem = saleItemRepository.save(saleItem);
 
-        var object = objectMapper.convertValue(new SaleItemDTO(saleItem), JSONObject.class);
+        var object = objectMapper.convertValue(new SaleItemResponseDTO(saleItem), JSONObject.class);
 
         assertEquals(saleItem.getId(), object.get("id"));
         assertEquals(
@@ -447,7 +446,7 @@ class SaleItemTests {
                 .build();
         saleItem = saleItemRepository.save(saleItem);
 
-        var object = objectMapper.convertValue(new SaleItemDTO(saleItem), JSONObject.class);
+        var object = objectMapper.convertValue(new SaleItemResponseDTO(saleItem), JSONObject.class);
         System.out.println(object);
         assertFalse(object.containsKey("moreInfo"));
 

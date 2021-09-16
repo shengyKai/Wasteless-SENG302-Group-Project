@@ -4,13 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import net.minidev.json.JSONObject;
 import org.junit.jupiter.api.*;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-import org.seng302.leftovers.dto.SaleItemDTO;
+import org.seng302.leftovers.dto.saleitem.SaleItemResponseDTO;
 import org.seng302.leftovers.entities.*;
-import org.seng302.leftovers.persistence.*;
-import org.seng302.leftovers.persistence.event.EventRepository;
-import org.seng302.leftovers.persistence.event.InterestEventRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -67,7 +63,7 @@ class InterestEventTest {
         assertEquals(event.isRead(), json.get("read"));
         assertEquals(event.getInterested(), json.get("interested"));
 
-        var actualSaleItem = mapper.convertValue(json.get("saleItem"), SaleItemDTO.class);
+        var actualSaleItem = mapper.convertValue(json.get("saleItem"), SaleItemResponseDTO.class);
         assertEquals(event.getSaleItem().getId(), actualSaleItem.getId());
         assertEquals(event.getLastModified().toString(), json.getAsString("lastModified"));
         assertEquals(9, json.size());

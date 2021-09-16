@@ -359,7 +359,7 @@ public class InventoryItem {
     public static class Builder {
 
         private Product product;
-        private int quantity;
+        private Integer quantity;
         private BigDecimal pricePerItem;
         private BigDecimal totalPrice;
         private LocalDate manufactured;

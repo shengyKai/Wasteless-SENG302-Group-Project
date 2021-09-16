@@ -150,11 +150,10 @@ public class SaleItem {
 
     /**
      * Defaults to single price * quantity
-     * @param price of sale item
+     * @param newPrice of sale item
      */
-    public void setPrice(String price) {
+    public void setPrice(BigDecimal newPrice) {
         try {
-            BigDecimal newPrice = new BigDecimal(price);
             if (newPrice.compareTo(BigDecimal.ZERO) >= 0) {
                 this.price = newPrice;
             } else {
@@ -218,15 +217,13 @@ public class SaleItem {
 
     /**
      * Defaults to expiry date of product
-     * @param closes date
+     * @param newCloses date
      */
-    public void setCloses(String closes) {
-        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE;
-        LocalDate closeDate = LocalDate.parse(closes, dateTimeFormatter);
+    public void setCloses(LocalDate newCloses) {
         if (inventoryItem.getExpires().isBefore(LocalDate.now())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "This product is already expired");
-        } else if (closeDate.isAfter(LocalDate.now().minus(1, DAYS))) {
-            this.closes = closeDate;
+        } else if (newCloses.isAfter(LocalDate.now().minus(1, DAYS))) {
+            this.closes = newCloses;
         } else {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You cannot set close dates in the past");
         }
@@ -261,9 +258,9 @@ public class SaleItem {
     public static class Builder {
         private InventoryItem inventoryItem;  // Item up for sale
         private int quantity;
-        private String price;
+        private BigDecimal price;
         private String moreInfo;
-        private String closes;
+        private LocalDate closes;
 
         /**
          * Sets the inventory item to be sold
@@ -291,6 +288,24 @@ public class SaleItem {
          * @return Builder with price set
          */
         public Builder withPrice(String price) {
+            if (price == null) {
+                this.price = null;
+                return this;
+            }
+            try {
+                this.price = new BigDecimal(price);
+            } catch (NumberFormatException ignored) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The price is not a number");
+            }
+            return this;
+        }
+
+        /**
+         * Sets the price to sell the products at
+         * @param price of sale
+         * @return Builder with price set
+         */
+        public Builder withPrice(BigDecimal price) {
             this.price = price;
             return this;
         }
@@ -307,10 +322,24 @@ public class SaleItem {
 
         /**
          * Sets the close date of the sale, defaults to expiry date of product if not called
+         * @param closesString date
+         * @return Builder with close date set
+         */
+        public Builder withCloses(String closesString) {
+            if (closesString != null) {
+                this.closes = LocalDate.parse(closesString);
+            } else {
+                this.closes = null;
+            }
+            return this;
+        }
+
+        /**
+         * Sets the close date of the sale, defaults to expiry date of product if not called
          * @param closes date
          * @return Builder with close date set
          */
-        public Builder withCloses(String closes) {
+        public Builder withCloses(LocalDate closes) {
             this.closes = closes;
             return this;
         }

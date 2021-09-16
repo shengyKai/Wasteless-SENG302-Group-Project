@@ -7,6 +7,7 @@ import lombok.ToString;
 import org.seng302.leftovers.dto.product.ProductResponseDTO;
 import org.seng302.leftovers.entities.InventoryItem;
 
+import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
@@ -19,6 +20,7 @@ import java.time.LocalDate;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @EqualsAndHashCode(callSuper = false)
 public class BaseInventoryItemDTO {
+    @NotNull
     private Integer quantity;
     private BigDecimal pricePerItem;
     private BigDecimal totalPrice;
