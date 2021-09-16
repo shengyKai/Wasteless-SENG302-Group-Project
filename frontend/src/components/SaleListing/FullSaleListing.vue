@@ -14,7 +14,7 @@
           </v-btn>
           <v-btn class="action-btn white--text" color="purple" @click="goBack()">
             <v-icon>mdi-arrow-left</v-icon>
-            Go Back
+            Hide
           </v-btn>
         </v-card-actions>
         <div class="gap"/>
