@@ -6,7 +6,7 @@ import net.minidev.json.JSONObject;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.junit.jupiter.api.*;
-import org.seng302.leftovers.dto.InventoryItemDTO;
+import org.seng302.leftovers.dto.inventory.InventoryItemResponseDTO;
 import org.seng302.leftovers.dto.SaleItemDTO;
 import org.seng302.leftovers.dto.business.BusinessType;
 import org.seng302.leftovers.persistence.*;
@@ -20,7 +20,6 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
@@ -425,7 +424,7 @@ class SaleItemTests {
 
         assertEquals(saleItem.getId(), object.get("id"));
         assertEquals(
-                objectMapper.readTree(objectMapper.writeValueAsString(new InventoryItemDTO(saleItem.getInventoryItem()))),
+                objectMapper.readTree(objectMapper.writeValueAsString(new InventoryItemResponseDTO(saleItem.getInventoryItem()))),
                 objectMapper.readTree(objectMapper.writeValueAsString(object.get("inventoryItem")))
         );
         assertEquals(saleItem.getQuantity(), object.get("quantity"));

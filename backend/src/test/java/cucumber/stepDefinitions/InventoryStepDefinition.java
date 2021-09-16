@@ -6,14 +6,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import cucumber.context.BusinessContext;
 import cucumber.context.RequestContext;
 import cucumber.context.UserContext;
-import io.cucumber.java.After;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import org.hibernate.Session;
-import org.seng302.leftovers.dto.InventoryItemDTO;
+import org.seng302.leftovers.dto.inventory.InventoryItemResponseDTO;
 import org.seng302.leftovers.entities.InventoryItem;
 import org.seng302.leftovers.entities.Location;
 import org.seng302.leftovers.entities.Product;
@@ -169,7 +168,7 @@ public class InventoryStepDefinition  {
 
         JSONArray jsonArray = new JSONArray();
         for (InventoryItem item : inventory) {
-            jsonArray.appendElement(objectMapper.convertValue(new InventoryItemDTO(item), new TypeReference<JSONObject>() {}));
+            jsonArray.appendElement(objectMapper.convertValue(new InventoryItemResponseDTO(item), new TypeReference<JSONObject>() {}));
         }
         expectedPage.put("results", jsonArray);
         expectedPage.put("count", jsonArray.size());

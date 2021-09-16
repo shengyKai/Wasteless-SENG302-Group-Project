@@ -119,11 +119,11 @@ public class DemoController {
                     .withProduct(product)
                     .withQuantity(1000)
                     .withPricePerItem("10")
-                    .withTotalPrice(null)
-                    .withManufactured(today.minusDays(1).toString())
-                    .withSellBy(today.plusDays(1).toString())
-                    .withBestBefore(today.plusDays(2).toString())
-                    .withExpires(today.plusDays(3).toString())
+                    .withTotalPrice((String) null)
+                    .withManufactured(today.minusDays(1))
+                    .withSellBy(today.plusDays(1))
+                    .withBestBefore(today.plusDays(2))
+                    .withExpires(today.plusDays(3))
                     .build();
             inventoryItem = inventoryItemRepository.save(inventoryItem);
 

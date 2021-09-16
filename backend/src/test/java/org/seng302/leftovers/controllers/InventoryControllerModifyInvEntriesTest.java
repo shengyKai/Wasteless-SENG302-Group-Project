@@ -18,16 +18,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.time.LocalDate;
 import java.util.HashMap;
 
+import static org.mockito.AdditionalMatchers.not;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -164,13 +167,18 @@ class InventoryControllerModifyInvEntriesTest {
         Product productSpy2 = spy(testProduct2);
         InventoryItem invItemSpy = spy(testInvItem);
         when(businessRepository.getBusinessById(1L)).thenReturn(businessSpy);
+        when(businessRepository.getBusinessById(not(eq(1L)))).thenThrow(new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE));
+
         when(productRepository.getProduct(businessSpy, "NATHANAPPLE52")).thenReturn(productSpy);
         when(productRepository.getProduct(businessSpy, "NATHANAPPLE95")).thenReturn(productSpy2);
         when(productRepository.findByBusinessAndProductCode(businessSpy, "NATHANAPPLE52"))
                 .thenReturn(java.util.Optional.ofNullable(productSpy));
         when(productRepository.findByBusinessAndProductCode(businessSpy, "NATHANAPPLE95"))
                 .thenReturn(java.util.Optional.ofNullable(productSpy2));
+
         when(invItemRepository.getInventoryItemByBusinessAndId(businessSpy, 1L)).thenReturn(invItemSpy);
+        when(invItemRepository.getInventoryItemByBusinessAndId(eq(businessSpy), not(eq(1L)))).thenThrow(new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE));
+
         doNothing().when(businessSpy).checkSessionPermissions(any());
     }
 
@@ -693,7 +701,7 @@ class InventoryControllerModifyInvEntriesTest {
                 .put("/businesses/2/inventory/1")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(invBody.toString()))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isNotAcceptable());
     }
 
     @Test
@@ -703,7 +711,7 @@ class InventoryControllerModifyInvEntriesTest {
                 .put("/businesses/10000/inventory/1")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(invBody.toString()))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isNotAcceptable());
     }
 
     @Test

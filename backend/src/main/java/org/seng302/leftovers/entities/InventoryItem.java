@@ -133,8 +133,6 @@ public class InventoryItem {
         return remainingQuantity;
     }
 
-    public int getVersion() { return version; }
-
 
 //Setters
     /**
@@ -153,6 +151,9 @@ public class InventoryItem {
      * @param quantity of item
      */
     public void setQuantity(Integer quantity) {
+        if (quantity == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Quantity must be provided");
+        }
         if (this.quantity == null) {
             if (quantity > 0) {
                 this.quantity = quantity;
@@ -226,8 +227,7 @@ public class InventoryItem {
      * @param bestBefore the date when the product will no longer be its best
      * @param expires the date when the product will expire and should be disposed of
      */
-    public void setDates(String manufactured, String sellBy, String bestBefore, String expires) {
-        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE;
+    public void setDates(LocalDate manufactured, LocalDate sellBy, LocalDate bestBefore, LocalDate expires) {
         //Checking expires is not null
         if (expires != null) { //Will thrown an exception
             //Case 1: no attributes are null
@@ -250,12 +250,11 @@ public class InventoryItem {
         }
         //Case 4: best before is null and sell by is null, no validation needed
 
-        if (expires == null) { setExpires(null); } else { setExpires(LocalDate.parse(expires, dateTimeFormatter)); }
-        if (sellBy == null ) { setSellBy(null); } else { setSellBy(LocalDate.parse(sellBy, dateTimeFormatter)); }
-        if (bestBefore == null ) { setBestBefore(null); } else { setBestBefore(LocalDate.parse(bestBefore, dateTimeFormatter)); }
+        setExpires(expires);
+        setSellBy(sellBy);
+        setBestBefore(bestBefore);
         //Manufactured needs no extra validation as is the only date that can and must before today
-        if (manufactured == null ) { setManufactured(null); } else {setManufactured(LocalDate.parse(manufactured,
-                dateTimeFormatter)); }
+        setManufactured(manufactured);
     }
 
     /**
@@ -407,6 +406,16 @@ public class InventoryItem {
         }
 
         /**
+         * Sets the builder's price per item.
+         * @param pricePerItem the cost for each singular item for this product in the inventory
+         * @return Builder with the price per item set
+         */
+        public Builder withPricePerItem(BigDecimal pricePerItem) {
+            this.pricePerItem = pricePerItem;
+            return this;
+        }
+
+        /**
          * Set the builder's total price item.
          * @param totalPrice the total price for the product in the item inventory
          * @return Builder with the total price item set
@@ -425,15 +434,34 @@ public class InventoryItem {
         }
 
         /**
+         * Set the builder's total price item.
+         * @param totalPrice the total price for the product in the item inventory
+         * @return Builder with the total price item set
+         */
+        public Builder withTotalPrice(BigDecimal totalPrice) {
+            this.totalPrice = totalPrice;
+            return this;
+        }
+
+        /**
          * Sets the builder's sell by date
          * @param manufacturedString the date when the product in the inventory was manufactured
          * @return Builder with the manufactured date set
          */
         public Builder withManufactured(String manufacturedString) {
             if (manufacturedString != null) {
-                DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE;
-                this.manufactured = LocalDate.parse(manufacturedString, dateTimeFormatter);
+                this.manufactured = LocalDate.parse(manufacturedString);
             } else { this.manufactured = null; }
+            return this;
+        }
+
+        /**
+         * Sets the builder's sell by date
+         * @param manufactured the date when the product in the inventory was manufactured
+         * @return Builder with the manufactured date set
+         */
+        public Builder withManufactured(LocalDate manufactured) {
+            this.manufactured = manufactured;
             return this;
         }
 
@@ -444,9 +472,18 @@ public class InventoryItem {
          */
         public Builder withSellBy(String sellByString) {
             if (sellByString != null) {
-                DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE;
-                this.sellBy = LocalDate.parse(sellByString, dateTimeFormatter);
+                this.sellBy = LocalDate.parse(sellByString);
             } else { this.sellBy = null; }
+            return this;
+        }
+
+        /**
+         * Sets the builder's sell by date
+         * @param sellBy the date when the product in the inventory must sell by
+         * @return Builder with the sell by date set
+         */
+        public Builder withSellBy(LocalDate sellBy) {
+            this.sellBy = sellBy;
             return this;
         }
 
@@ -457,9 +494,18 @@ public class InventoryItem {
          */
         public Builder withBestBefore(String bestBeforeString) {
             if (bestBeforeString != null) {
-                DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE;
-                this.bestBefore = LocalDate.parse(bestBeforeString, dateTimeFormatter);
+                this.bestBefore = LocalDate.parse(bestBeforeString);
             } else { this.bestBefore = null; }
+            return this;
+        }
+
+        /**
+         * Sets the builder's best before date set
+         * @param bestBefore the date the product in the inventory is best before
+         * @return Builder with the best before date set
+         */
+        public Builder withBestBefore(LocalDate bestBefore) {
+            this.bestBefore = bestBefore;
             return this;
         }
 
@@ -469,11 +515,21 @@ public class InventoryItem {
          * @return Builder with the expires data set
          */
         public Builder withExpires(String expiresString) {
-            if (expiresString == null) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No expiry date was provided");
+            if (expiresString != null) {
+                this.expires = LocalDate.parse(expiresString);
+            } else {
+                this.expires = null;
             }
-            DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE;
-            this.expires = LocalDate.parse(expiresString, dateTimeFormatter);
+            return this;
+        }
+
+        /**
+         * Sets the builder's expired date set. Required
+         * @param expires the date the product in the inventory expires. Must be disposed of after this date
+         * @return Builder with the expires data set
+         */
+        public Builder withExpires(LocalDate expires) {
+            this.expires = expires;
             return this;
         }
 

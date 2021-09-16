@@ -5,9 +5,8 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
-import net.minidev.json.JSONObject;
+import org.seng302.leftovers.dto.inventory.InventoryItemResponseDTO;
 import org.seng302.leftovers.entities.SaleItem;
-import org.seng302.leftovers.tools.JsonTools;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -22,7 +21,7 @@ import java.time.LocalDate;
 @EqualsAndHashCode(callSuper = false)
 public class SaleItemDTO {
     private long id;
-    private InventoryItemDTO inventoryItem;
+    private InventoryItemResponseDTO inventoryItem;
     private int quantity;
     private BigDecimal price;
     private String moreInfo;
@@ -41,7 +40,7 @@ public class SaleItemDTO {
      */
     public SaleItemDTO(SaleItem saleItem) {
         this.id = saleItem.getId();
-        this.inventoryItem = new InventoryItemDTO(saleItem.getInventoryItem());
+        this.inventoryItem = new InventoryItemResponseDTO(saleItem.getInventoryItem());
         this.quantity = saleItem.getQuantity();
         this.price = saleItem.getPrice();
         this.moreInfo = saleItem.getMoreInfo();

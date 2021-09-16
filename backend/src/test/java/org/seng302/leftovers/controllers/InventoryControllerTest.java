@@ -10,7 +10,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.runner.RunWith;
 import org.mockito.*;
 import org.mockito.internal.matchers.apachecommons.ReflectionEquals;
-import org.seng302.leftovers.dto.InventoryItemDTO;
+import org.seng302.leftovers.dto.inventory.InventoryItemResponseDTO;
 import org.seng302.leftovers.dto.business.BusinessType;
 import org.seng302.leftovers.entities.*;
 import org.seng302.leftovers.exceptions.AccessTokenException;
@@ -358,7 +358,7 @@ class InventoryControllerTest {
         var result = inventoryController.getInventory(1L, request, null, null, null, null);
         
         JSONArray expectedArray = new JSONArray();
-        items.stream().map(InventoryItemDTO::new).forEach(expectedArray::add);
+        items.stream().map(InventoryItemResponseDTO::new).forEach(expectedArray::add);
         
         assertEquals(expectedArray, result.getResults());
         assertEquals(1000L, result.getCount());
