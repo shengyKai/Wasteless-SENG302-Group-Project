@@ -103,7 +103,7 @@ describe("InterestEvent.vue", () => {
   it.each(closesDays)("Correctly displays the number of days remaining on the sale", async (day)=>{
     let closes = new Date();
     closes.setDate(closes.getDate() + day);
-    saleItem.closes = closes.toISOString().split("T")[0];
+    saleItem.closes = closes.toISOString();
     const newEvent = {...event};
     await wrapper.setProps({
       event: newEvent
