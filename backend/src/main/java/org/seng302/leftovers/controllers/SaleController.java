@@ -72,9 +72,6 @@ public class SaleController {
         switch (orderBy) {
             case "created": case "quantity": case "price":
                 break;
-            case "productCode":
-                orderBy = "inventoryItem.product.productCode";
-                break;
             case "productName":
                 orderBy = "inventoryItem.product.name";
                 break;
@@ -86,6 +83,25 @@ public class SaleController {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The provided ordering is invalid");
         }
         return new Sort.Order(direction, orderBy).ignoreCase();
+    }
+
+    private List<Sort.Order> getSaleItemSearchOrder(String orderBy, Sort.Direction direction) {
+        if (orderBy == null) orderBy = "created";
+        switch (orderBy) {
+            case "created": case "quantity": case "price":
+                return List.of(new Sort.Order(direction, orderBy).ignoreCase());
+            case "productName":
+                return List.of(new Sort.Order(direction, "inventoryItem.product.name").ignoreCase());
+            case "closing":
+                return List.of(new Sort.Order(direction, "closes").ignoreCase());
+            case "businessName":
+                return List.of(new Sort.Order(direction, "inventoryItem.product.business.name").ignoreCase());
+            case "businessLocation":
+                return List.of(new Sort.Order(direction, "inventoryItem.product.business.address.country"), new Sort.Order(direction, "inventoryItem.product.business.address.city"));
+            default:
+                logger.error("Invalid sale item ordering given: {}", orderBy);
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The provided ordering is invalid");
+        }
     }
 
     /**
@@ -171,7 +187,7 @@ public class SaleController {
             Specification<SaleItem> specification = SearchSpecConstructor.constructSpecificationFromSaleItemsFilter(business);
             Page<SaleItem> result = saleItemRepository.findAll(specification, pageRequest);
 
-            return new ResultPageDTO(result.map(SaleItemDTO::new));
+            return new ResultPageDTO<>(result.map(SaleItemDTO::new));
 
         } catch (Exception error) {
             logger.error(error.getMessage());
@@ -218,12 +234,8 @@ public class SaleController {
 
             // Check sort ordering
             orderBy = Optional.ofNullable(orderBy).orElse("productName");
-            if (!VALID_SEARCH_ORDERINGS.contains(orderBy)) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "OrderBy term " + orderBy + " is invalid");
-            }
-            List<Sort.Order> sortOrder;
             Sort.Direction direction = SearchQueryParser.getSortDirection(reverse);
-            sortOrder = List.of(new Sort.Order(direction, orderBy ).ignoreCase());
+            List<Sort.Order> sortOrder = getSaleItemSearchOrder(orderBy, direction);
 
             // Check filter options
             if (businessTypes != null) {
@@ -248,7 +260,7 @@ public class SaleController {
             PageRequest pageablePage = SearchPageConstructor.getPageRequest(page, resultsPerPage, Sort.by(sortOrder));
             Specification<SaleItem> specification = Specification.where(
                     SearchSpecConstructor.constructSaleItemSpecificationFromSearchQueries(basicSearchQuery, productSearchQuery, businessSearchQuery, locationSearchQuery))
-                    .and(SearchSpecConstructor.constructSaleListingSpecificationForSearch(new SaleListingSearchDTO(minPrice, maxPrice, minDate, maxDate, businessTypes)));
+                            .and(SearchSpecConstructor.constructSaleListingSpecificationForSearch(new SaleListingSearchDTO(minPrice, maxPrice, minDate, maxDate, businessTypes)));
             Page<SaleItem> result = saleItemRepository.findAll(specification, pageablePage);
 
             return new ResultPageDTO<>(result.map(SaleItemDTO::new));

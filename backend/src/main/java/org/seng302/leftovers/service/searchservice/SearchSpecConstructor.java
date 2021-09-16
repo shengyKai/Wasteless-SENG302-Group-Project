@@ -188,20 +188,20 @@ public class SearchSpecConstructor {
                 "moreInfo");
         // build a match for all fields
         Specification<SaleItem> generalSpec = Specification.where(null);
-        if (!searchQuery.isBlank()) {
+        if (searchQuery != null && !searchQuery.isBlank()) {
             var searchTokens = SearchQueryParser.splitSearchStringIntoTerms(searchQuery);
             SearchQueryParser.SearchQuery<SaleItem> searchSpecs = SearchQueryParser.parseSearchTokens(searchTokens, allFieldNames);
             generalSpec = generalSpec.or(buildCompoundSpecification(searchSpecs));
         }
         // build a match for specific fields
         Specification<SaleItem> advancedSpec = Specification.where(null);
-        if (!businessName.isBlank()){
+        if (businessName != null && !businessName.isBlank()){
             advancedSpec = advancedSpec.and(constructSaleItemSpecificationFromBusinessName(businessName));
         }
-        if (!productName.isBlank()) {
+        if (productName != null && !productName.isBlank()) {
             advancedSpec = advancedSpec.and(constructSaleItemSpecificationFromProductName(productName));
         }
-        if (!businessLocation.isBlank()) {
+        if (businessLocation != null && !businessLocation.isBlank()) {
             advancedSpec = advancedSpec.and(constructSaleItemSpecificationFromBusinessLocation(businessLocation));
         }
 
@@ -377,7 +377,7 @@ public class SearchSpecConstructor {
      * @return A specification for Sale items which matches the business's business type
      */
     public static Specification<SaleItem> constructSaleListingSpecificationFromBusinessType(List<String> businessTypes) {
-        if  (businessTypes.isEmpty()) {
+        if  (businessTypes == null || businessTypes.isEmpty()) {
             return (root, query, criteriaBuilder) -> root.get("inventoryItem").get("product").get("business").get("businessType").in(Business.getBusinessTypes());
         } else {
             return (root, query, criteriaBuilder) -> root.get("inventoryItem").get("product").get("business").get("businessType").in(businessTypes);

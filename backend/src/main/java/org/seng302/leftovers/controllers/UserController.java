@@ -177,15 +177,12 @@ public class UserController {
         logger.info(() -> String.format("Performing search for \"%s\"", searchQuery));
         Page<User> results;
         if (orderBy == null || orderBy.equals("relevance")) {
-            queryResults = SearchQueryParser.getSearchResultsOrderedByRelevance(searchQuery, userRepository, reverse);
-            count = queryResults.size();
-            queryResults = SearchPageConstructor.getPageInResults(queryResults, page, resultsPerPage);
+            var users = SearchQueryParser.getSearchResultsOrderedByRelevance(searchQuery, userRepository, reverse);
+            results = new PageImpl<>(SearchPageConstructor.getPageInResults(users, page, resultsPerPage), Pageable.unpaged(), users.size());
         } else {
             Specification<User> spec = SearchSpecConstructor.constructUserSpecificationFromSearchQuery(searchQuery);
             Sort userSort = SearchQueryParser.getSort(orderBy, reverse);
-            Page<User> results = userRepository.findAll(spec, SearchPageConstructor.getPageRequest(page, resultsPerPage, userSort));
-            count = results.getTotalElements();
-            queryResults = results.toList();
+            results = userRepository.findAll(spec, SearchPageConstructor.getPageRequest(page, resultsPerPage, userSort));
         }
 
         return new ResultPageDTO<>(
@@ -196,6 +193,7 @@ public class UserController {
                 )
         );
     }
+
 
 
     /**

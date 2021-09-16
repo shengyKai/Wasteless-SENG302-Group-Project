@@ -125,8 +125,10 @@ public class SaleSearchStepDefinition {
         List<JSONObject> sales = (List<JSONObject>) response.get("results");
 
         assertTrue(sales.size() > 0);
-        String business = sales.get(0).get("inventoryItem.product.business").getName();
-        assertEquals(businessName, business);
+        JSONObject inventoryItem = (JSONObject) sales.get(0).get("inventoryItem");
+        JSONObject product = (JSONObject) inventoryItem.get("product");
+        JSONObject business = (JSONObject) product.get("business");
+        assertEquals(businessName, business.getAsString("name"));
     }
 
     @When("businessType is {string}")
