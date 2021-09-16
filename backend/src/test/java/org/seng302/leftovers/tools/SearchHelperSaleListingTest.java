@@ -8,6 +8,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.seng302.leftovers.controllers.DGAAController;
 import org.seng302.leftovers.dto.SaleListingSearchDTO;
+import org.seng302.leftovers.dto.business.BusinessType;
 import org.seng302.leftovers.entities.*;
 import org.seng302.leftovers.persistence.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -98,7 +99,7 @@ class SearchHelperSaleListingTest {
                 .withPassword("password123").build();
         testUser = userRepository.save(testUser);
         testBusiness = new Business.Builder()
-                .withBusinessType("Accommodation and Food Services")
+                .withBusinessType(BusinessType.ACCOMMODATION_AND_FOOD_SERVICES)
                 .withAddress(testBusinessLocation)
                 .withName("Gregs pies")
                 .withDescription("We enjoy pies")
@@ -379,7 +380,7 @@ class SearchHelperSaleListingTest {
         var testUser = userRepository.findAll().iterator().next();
         var testBusiness = new Business.Builder()
                 .withPrimaryOwner(testUser)
-                .withBusinessType("Accommodation and Food Services")
+                .withBusinessType(BusinessType.ACCOMMODATION_AND_FOOD_SERVICES)
                 .withDescription("DESCRIPTION")
                 .withName("BUSINESS_NAME")
                 .withAddress(Location.covertAddressStringToLocation("108,Albert Road,Ashburton,Christchurch,New Zealand,Canterbury,8041"))
@@ -513,7 +514,7 @@ class SearchHelperSaleListingTest {
      * @param businessType to set up the business with
      */
     @Transactional
-    protected void setUpSaleItemsWithDifferentBusinessTypes(String businessType) {
+    protected void setUpSaleItemsWithDifferentBusinessTypes(BusinessType businessType) {
         var testUser = userRepository.findAll().iterator().next();
         var testBusiness = new Business.Builder()
                 .withPrimaryOwner(testUser)
@@ -560,21 +561,21 @@ class SearchHelperSaleListingTest {
      */
     private Stream<Arguments> generateDataForConstructSaleListingSpecificationFromBusinessType() {
         return Stream.of(
-                Arguments.of(Arrays.asList(), 4),
-                Arguments.of(Arrays.asList("Accommodation and Food Services"), 1),
-                Arguments.of(Arrays.asList("Accommodation and Food Services", "Charitable organisation"), 2),
-                Arguments.of(Arrays.asList("Accommodation and Food Services", "Charitable organisation", "Non-profit organisation"), 3),
-                Arguments.of(Arrays.asList("Accommodation and Food Services", "Charitable organisation", "Non-profit organisation", "Retail Trade"), 4)
+                Arguments.of(List.of(), 4),
+                Arguments.of(List.of(BusinessType.ACCOMMODATION_AND_FOOD_SERVICES), 1),
+                Arguments.of(List.of(BusinessType.ACCOMMODATION_AND_FOOD_SERVICES, BusinessType.CHARITABLE), 2),
+                Arguments.of(List.of(BusinessType.ACCOMMODATION_AND_FOOD_SERVICES, BusinessType.CHARITABLE, BusinessType.NON_PROFIT), 3),
+                Arguments.of(List.of(BusinessType.ACCOMMODATION_AND_FOOD_SERVICES, BusinessType.CHARITABLE, BusinessType.NON_PROFIT, BusinessType.RETAIL_TRADE), 4)
         );
     }
 
     @Transactional
     @ParameterizedTest
     @MethodSource("generateDataForConstructSaleListingSpecificationFromBusinessType")
-    void constructSaleListingSpecificationFromBusinessType_businessesCreatedWithDifferentBusinessTypes_saleItemsReturnedAreFromThatBusinessType(List<String> expectedBusinessTypes, int expectedSize) throws Exception {
+    void constructSaleListingSpecificationFromBusinessType_businessesCreatedWithDifferentBusinessTypes_saleItemsReturnedAreFromThatBusinessType(List<BusinessType> expectedBusinessTypes, int expectedSize) throws Exception {
         // This line is required because the set up above is affecting the results of the test cases below
         saleItemRepository.deleteAll();
-        for (String businessType : Business.getBusinessTypes()) {
+        for (BusinessType businessType : BusinessType.values()) {
             setUpSaleItemsWithDifferentBusinessTypes(businessType);
         }
 
@@ -603,41 +604,41 @@ class SearchHelperSaleListingTest {
                 Arguments.of(new SaleListingSearchDTO(new BigDecimal("0.0"), new BigDecimal("0.0"),
                         today.plus(Integer.parseInt("0"), ChronoUnit.DAYS),
                         today.plus(Integer.parseInt("0"), ChronoUnit.DAYS),
-                        Arrays.asList()), 0),
+                        List.of()), 0),
                 Arguments.of(new SaleListingSearchDTO(new BigDecimal("0.0"), new BigDecimal("5.0"),
                         today.plus(Integer.parseInt("0"), ChronoUnit.DAYS),
                         today.plus(Integer.parseInt("5"), ChronoUnit.DAYS),
-                        Arrays.asList("Accommodation and Food Services")), 1),
+                        List.of(BusinessType.ACCOMMODATION_AND_FOOD_SERVICES)), 1),
                 Arguments.of(new SaleListingSearchDTO(new BigDecimal("6.0"), new BigDecimal("10.0"),
                         today.plus(Integer.parseInt("6"), ChronoUnit.DAYS),
                         today.plus(Integer.parseInt("10"), ChronoUnit.DAYS),
-                        Arrays.asList("Accommodation and Food Services", "Charitable organisation")), 1),
+                        List.of(BusinessType.ACCOMMODATION_AND_FOOD_SERVICES, BusinessType.CHARITABLE)), 1),
                 Arguments.of(new SaleListingSearchDTO(new BigDecimal("11.0"), new BigDecimal("15.0"),
                         today.plus(Integer.parseInt("11"), ChronoUnit.DAYS),
                         today.plus(Integer.parseInt("15"), ChronoUnit.DAYS),
-                        Arrays.asList("Accommodation and Food Services", "Charitable organisation", "Non-profit organisation")), 1),
+                        List.of(BusinessType.ACCOMMODATION_AND_FOOD_SERVICES, BusinessType.CHARITABLE, BusinessType.NON_PROFIT)), 1),
                 Arguments.of(new SaleListingSearchDTO(new BigDecimal("0.0"), new BigDecimal("15.0"),
                         today.plus(Integer.parseInt("0"), ChronoUnit.DAYS),
                         today.plus(Integer.parseInt("15"), ChronoUnit.DAYS),
-                        Arrays.asList("Accommodation and Food Services", "Charitable organisation", "Non-profit organisation", "Retail Trade")), 7),
+                        List.of(BusinessType.ACCOMMODATION_AND_FOOD_SERVICES, BusinessType.CHARITABLE, BusinessType.NON_PROFIT, BusinessType.RETAIL_TRADE)), 7),
                 Arguments.of(new SaleListingSearchDTO(new BigDecimal("0.0"), new BigDecimal("14.0"),
                         today.plus(Integer.parseInt("2"), ChronoUnit.DAYS),
                         today.plus(Integer.parseInt("15"), ChronoUnit.DAYS),
-                        Arrays.asList("Accommodation and Food Services", "Charitable organisation")), 3),
+                        List.of(BusinessType.ACCOMMODATION_AND_FOOD_SERVICES, BusinessType.CHARITABLE)), 3),
                 Arguments.of(new SaleListingSearchDTO(new BigDecimal("2.0"), new BigDecimal("14.0"),
                         today.plus(Integer.parseInt("3"), ChronoUnit.DAYS),
                         today.plus(Integer.parseInt("12"), ChronoUnit.DAYS),
-                        Arrays.asList()), 5),
+                        List.of()), 5),
                 Arguments.of(new SaleListingSearchDTO(new BigDecimal("2.0"), null,
                         today.plus(Integer.parseInt("3"), ChronoUnit.DAYS),
                         null,
-                        Arrays.asList()), 6),
+                        List.of()), 6),
                 Arguments.of(new SaleListingSearchDTO(null, new BigDecimal("14.0"),
                         null, today.plus(Integer.parseInt("12"), ChronoUnit.DAYS),
-                        Arrays.asList()), 6),
+                        List.of()), 6),
                 Arguments.of(new SaleListingSearchDTO(null, null,
                         null, null,
-                        Arrays.asList()), 7)
+                        List.of()), 7)
         );
     }
 
@@ -648,7 +649,7 @@ class SearchHelperSaleListingTest {
         // This line is required because the set up above is affecting the results of the test cases below
         saleItemRepository.deleteAll();
         // Make use of the two methods for generating sale items and use them as test cases
-        for (String businessType : Business.getBusinessTypes()) {
+        for (BusinessType businessType : BusinessType.values()) {
             setUpSaleItemsWithDifferentBusinessTypes(businessType);
         }
         setUpSaleItemsWithDifferentPricesClosingDates();

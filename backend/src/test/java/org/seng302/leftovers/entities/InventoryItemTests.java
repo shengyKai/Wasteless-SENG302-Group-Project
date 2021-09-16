@@ -10,6 +10,7 @@ import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.seng302.leftovers.dto.InventoryItemDTO;
+import org.seng302.leftovers.dto.business.BusinessType;
 import org.seng302.leftovers.persistence.BusinessRepository;
 import org.seng302.leftovers.persistence.InventoryItemRepository;
 import org.seng302.leftovers.persistence.ProductRepository;
@@ -66,7 +67,7 @@ class InventoryItemTests {
                 .build();
         testUser = userRepository.save(testUser);
         testBusiness = new Business.Builder()
-                .withBusinessType("Accommodation and Food Services")
+                .withBusinessType(BusinessType.ACCOMMODATION_AND_FOOD_SERVICES)
                 .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
                         "Canterbury,8041"))
                 .withDescription("Some description")
@@ -514,8 +515,8 @@ class InventoryItemTests {
         expectedJson.put("remainingQuantity", invItem.getRemainingQuantity());
         expectedJson.put("expires", invItem.getExpires().toString());
         ObjectMapper mapper = new ObjectMapper();
-        assertEquals(mapper.readTree(expectedJson.toJSONString()), mapper.readTree(
-                objectMapper.writeValueAsString(new InventoryItemDTO(invItem))));
+        assertEquals(mapper.readTree(objectMapper.writeValueAsString(expectedJson)),
+                mapper.readTree(objectMapper.writeValueAsString(new InventoryItemDTO(invItem))));
     }
 
     @Test

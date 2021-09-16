@@ -276,7 +276,7 @@ public class BusinessController {
      * @param orderBy Order by term. Can be one of "created", "name", "location", "businessType"
      * @param reverse Boolean. Reverse ordering of results
      * @param businessType Type of business. Can by one of "Accommodation and Food Services", "Retail Trade",
-     *                     "Charitable organisation", "Non-profit organisation".
+     *                     "Charitable organisation", "Non-profit organisation". // TODO
      * @return A JSON object containing the total count and paginated results.
      */
     @GetMapping("/businesses/search")

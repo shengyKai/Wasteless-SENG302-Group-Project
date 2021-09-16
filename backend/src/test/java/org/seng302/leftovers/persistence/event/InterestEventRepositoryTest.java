@@ -1,6 +1,7 @@
 package org.seng302.leftovers.persistence.event;
 
 import org.junit.jupiter.api.*;
+import org.seng302.leftovers.dto.business.BusinessType;
 import org.seng302.leftovers.entities.*;
 import org.seng302.leftovers.entities.event.InterestEvent;
 import org.seng302.leftovers.persistence.*;
@@ -74,7 +75,7 @@ class InterestEventRepositoryTest {
         testUser = userRepository.save(testUser);
 
         Business testBusiness = new Business.Builder()
-                .withBusinessType("Accommodation and Food Services")
+                .withBusinessType(BusinessType.ACCOMMODATION_AND_FOOD_SERVICES)
                 .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
                         "Canterbury,8041"))
                 .withDescription("Some description")

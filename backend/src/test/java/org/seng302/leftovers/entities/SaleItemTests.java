@@ -8,6 +8,7 @@ import org.hibernate.SessionFactory;
 import org.junit.jupiter.api.*;
 import org.seng302.leftovers.dto.InventoryItemDTO;
 import org.seng302.leftovers.dto.SaleItemDTO;
+import org.seng302.leftovers.dto.business.BusinessType;
 import org.seng302.leftovers.persistence.*;
 import org.seng302.leftovers.tools.SearchHelper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -71,7 +72,7 @@ class SaleItemTests {
         testUser = userRepository.save(testUser);
 
         testBusiness = new Business.Builder()
-                .withBusinessType("Accommodation and Food Services")
+                .withBusinessType(BusinessType.ACCOMMODATION_AND_FOOD_SERVICES)
                 .withAddress(Location.covertAddressStringToLocation("4,Rountree Street,Ashburton,Christchurch,New Zealand," +
                         "Canterbury,8041"))
                 .withDescription("Some description")

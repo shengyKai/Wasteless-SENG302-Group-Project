@@ -15,6 +15,7 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.junit.Assert;
 import org.seng302.datagenerator.ExampleDataFileReader;
+import org.seng302.leftovers.dto.business.BusinessType;
 import org.seng302.leftovers.entities.*;
 import org.seng302.leftovers.persistence.BusinessRepository;
 import org.seng302.leftovers.persistence.ImageRepository;
@@ -88,7 +89,7 @@ public class BusinessStepDefinition {
         var business = new Business.Builder()
                 .withName(name)
                 .withDescription("Sells stuff")
-                .withBusinessType("Retail Trade")
+                .withBusinessType(BusinessType.RETAIL_TRADE)
                 .withAddress(Location.covertAddressStringToLocation("1,Bob Street,Bob,Bob,Bob,Bob,1010"))
                 .withPrimaryOwner(userContext.getLast())
                 .build();
@@ -139,7 +140,7 @@ public class BusinessStepDefinition {
     }
 
     @Given("the business {string} with the type {string} exists")
-    public void the_business_with_the_type_exists(String name, String type) {
+    public void the_business_with_the_type_exists(String name, BusinessType type) {
         var business = new Business.Builder()
                 .withName(name)
                 .withDescription("Sells stuff")
