@@ -1,5 +1,6 @@
 package cucumber.stepDefinitions;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import cucumber.context.BusinessContext;
 import cucumber.context.ImageContext;
 import cucumber.context.RequestContext;
@@ -43,6 +44,8 @@ public class BusinessStepDefinition {
     @Value("${storage-directory}")
     private Path root;
 
+    @Autowired
+    private ObjectMapper objectMapper;
     @Autowired
     private BusinessContext businessContext;
     @Autowired
@@ -140,11 +143,11 @@ public class BusinessStepDefinition {
     }
 
     @Given("the business {string} with the type {string} exists")
-    public void the_business_with_the_type_exists(String name, BusinessType type) {
+    public void the_business_with_the_type_exists(String name, String type) {
         var business = new Business.Builder()
                 .withName(name)
                 .withDescription("Sells stuff")
-                .withBusinessType(type)
+                .withBusinessType(objectMapper.convertValue(type, BusinessType.class))
                 .withAddress(Location.covertAddressStringToLocation("1,Bob Street,Bob,Bob,Bob,Bob,1010"))
                 .withPrimaryOwner(userContext.getLast())
                 .build();
@@ -190,7 +193,7 @@ public class BusinessStepDefinition {
         Business business = businessRepository.getBusinessById(businessContext.getLast().getId());
         assertEquals(modifyParameters.get("name"), business.getName());
         assertEquals(modifyParameters.get("description"), business.getDescription());
-        assertEquals(modifyParameters.get("businessType"), business.getBusinessType());
+        assertEquals(modifyParameters.get("businessType"), objectMapper.convertValue(business.getBusinessType(), String.class));
         assertEquals(modifyParameters.get("primaryAdministratorId"), business.getPrimaryOwner().getUserID());
 
         Map<String, Object> addressParams = (Map<String, Object>)modifyParameters.get("address");
