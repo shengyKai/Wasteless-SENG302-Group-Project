@@ -28,6 +28,7 @@ import org.springframework.web.server.ResponseStatusException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -213,6 +214,7 @@ public class SaleController {
      */
     @Getter
     private static class PurchaseSaleItemDTO {
+        @NotNull
         private Long purchaserId;
     }
 
@@ -249,6 +251,11 @@ public class SaleController {
 
             var boughtSaleItem = new BoughtSaleItem(saleItem, purchaser);
             boughtSaleItemRepository.save(boughtSaleItem);
+
+            var inventoryItem = saleItem.getInventoryItem();
+            inventoryItem.setRemainingQuantity(inventoryItem.getRemainingQuantity() + saleItem.getQuantity());
+            inventoryItemRepository.save(inventoryItem);
+
             saleItemRepository.delete(saleItem);
 
             logger.info("Sale item (id={}) has been purchased for user (id={})", saleItem.getId(), purchaser.getUserID());

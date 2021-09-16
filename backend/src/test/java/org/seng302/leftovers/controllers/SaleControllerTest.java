@@ -672,4 +672,151 @@ class SaleControllerTest {
 
         verify(interestEventRepository, times(1)).save(interestEvent);
     }
+
+    @Test
+    void purchaseSaleItem_invalidRequestBodyFormat_400Response() throws Exception {
+        JSONObject invalidBody = new JSONObject();
+        invalidBody.put("id", 33);
+
+        mockMvc.perform(put(String.format("/listings/%d/purchase", saleItem.getId()))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(invalidBody.toString()))
+                .andExpect(status().isBadRequest());
+
+        // Sale item should not be deleted if request is not successful
+        verify(saleItemRepository, times(0)).delete(any());
+
+        // Record of purchase should not be created if request is not successful
+        verify(boughtSaleItemRepository, times(0)).save(any());
+
+        // Inventory item should not be updated if request is not successful
+        verify(inventoryItemRepository, times(0)).save(any());
+    }
+
+    @Test
+    void purchaseSaleItem_invalidAuthenticationToken_401Response() throws Exception {
+        // Mock the AuthenticationTokenManager to respond as it would when the authentication token is missing or invalid
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.checkAuthenticationToken(any()))
+                .thenThrow(new AccessTokenException());
+
+        JSONObject validBody = new JSONObject();
+        validBody.put("purchaserId", user.getUserID());
+
+        mockMvc.perform(put(String.format("/listings/%d/purchase", saleItem.getId()))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(validBody.toString()))
+                .andExpect(status().isUnauthorized());
+
+        // Sale item should not be deleted if request is not successful
+        verify(saleItemRepository, times(0)).delete(any());
+
+        // Record of purchase should not be created if request is not successful
+        verify(boughtSaleItemRepository, times(0)).save(any());
+
+        // Inventory item should not be updated if request is not successful
+        verify(inventoryItemRepository, times(0)).save(any());
+    }
+
+    @Test
+    void purchaseSaleItem_userDoesNotHavePermissionForPurchase_403Response() throws Exception {
+        // Mock the AuthenticationTokenManager to respond as it would when a user tries to purchase a sale item on behalf of another user
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), any())).thenReturn(false);
+
+        JSONObject validBody = new JSONObject();
+        validBody.put("purchaserId", user.getUserID());
+
+        mockMvc.perform(put(String.format("/listings/%d/purchase", saleItem.getId()))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(validBody.toString()))
+                .andExpect(status().isForbidden());
+
+        // Sale item should not be deleted if request is not successful
+        verify(saleItemRepository, times(0)).delete(any());
+
+        // Record of purchase should not be created if request is not successful
+        verify(boughtSaleItemRepository, times(0)).save(any());
+
+        // Inventory item should not be updated if request is not successful
+        verify(inventoryItemRepository, times(0)).save(any());
+    }
+
+    @Test
+    void purchaseSaleItem_saleItemDoesNotExist_406Response() throws Exception {
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), any())).thenReturn(true);
+        when(saleItemRepository.findById(saleItem.getId())).thenReturn(Optional.empty());
+
+        JSONObject validBody = new JSONObject();
+        validBody.put("purchaserId", user.getUserID());
+
+        mockMvc.perform(put(String.format("/listings/%d/purchase", saleItem.getId()))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(validBody.toString()))
+                .andExpect(status().isNotAcceptable());
+
+        // Sale item should not be deleted if request is not successful
+        verify(saleItemRepository, times(0)).delete(any());
+
+        // Record of purchase should not be created if request is not successful
+        verify(boughtSaleItemRepository, times(0)).save(any());
+
+        // Inventory item should not be updated if request is not successful
+        verify(inventoryItemRepository, times(0)).save(any());
+    }
+
+    @Test
+    void purchaseSaleItem_userDoesNotExist_406Response() throws Exception {
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), any())).thenReturn(true);
+        when(userRepository.findById(user.getUserID())).thenReturn(Optional.empty());
+
+        JSONObject validBody = new JSONObject();
+        validBody.put("purchaserId", user.getUserID());
+
+        mockMvc.perform(put(String.format("/listings/%d/purchase", saleItem.getId()))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(validBody.toString()))
+                .andExpect(status().isNotAcceptable());
+
+        // Sale item should not be deleted if request is not successful
+        verify(saleItemRepository, times(0)).delete(any());
+
+        // Record of purchase should not be created if request is not successful
+        verify(boughtSaleItemRepository, times(0)).save(any());
+
+        // Inventory item should not be updated if request is not successful
+        verify(inventoryItemRepository, times(0)).save(any());
+    }
+
+    @Test
+    void purchaseSaleItem_validRequest_200Response() throws Exception {
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), any())).thenReturn(true);
+
+        var inventoryItem = Mockito.mock(InventoryItem.class);
+        when(saleItem.getInventoryItem()).thenReturn(inventoryItem);
+        when(saleItem.getQuantity()).thenReturn(50);
+        when(inventoryItem.getRemainingQuantity()).thenReturn(120);
+
+        JSONObject validBody = new JSONObject();
+        validBody.put("purchaserId", user.getUserID());
+
+        mockMvc.perform(put(String.format("/listings/%d/purchase", saleItem.getId()))
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(validBody.toString()))
+                    .andExpect(status().isOk());
+
+        // Sale item should be deleted if request is successful
+        verify(saleItemRepository, times(1)).delete(saleItem);
+
+
+        // Record of purchase should be created if request is successful
+        var boughtSaleItemCaptor = ArgumentCaptor.forClass(BoughtSaleItem.class);
+        verify(boughtSaleItemRepository, times(1)).save(boughtSaleItemCaptor.capture());
+        // TODO check that constructor is being called with expected arguments
+
+        // Inventory item should be updated if request is successful
+        verify(inventoryItem, times(1)).setRemainingQuantity(170);
+        var inventoryItemCaptor = ArgumentCaptor.forClass(InventoryItem.class);
+        verify(inventoryItemRepository, times(1)).save(inventoryItemCaptor.capture());
+        assertEquals(inventoryItem, inventoryItemCaptor.getValue());
+    }
+
 }
