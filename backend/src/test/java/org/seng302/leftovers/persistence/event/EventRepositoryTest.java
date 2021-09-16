@@ -85,8 +85,8 @@ class EventRepositoryTest {
         List<Event> events = List.of(testUserEvent1, testUserEvent2, testUserEvent3, otherUserEvent1);
         beforeCreation = Instant.parse("2021-09-10T12:00:00Z");
         for (int i = 0; i < events.size(); i++) {
-            setCreatedForEventInDatabase(events.get(i), beforeCreation.plus(Duration.ofSeconds(i+1)));
-            setLastModifiedForEventInDatabase(events.get(i), beforeCreation.plus(Duration.ofSeconds(i+1)));
+            setCreatedForEventInDatabase((GlobalMessageEvent) events.get(i), beforeCreation.plus(Duration.ofSeconds(i+1)));
+            setLastModifiedForEventInDatabase((GlobalMessageEvent) events.get(i), beforeCreation.plus(Duration.ofSeconds(i+1)));
         }
     }
 
@@ -97,11 +97,11 @@ class EventRepositoryTest {
      * @param event The event to be updated.
      * @param modifiedDate The date to set the event's lastModified date to.
      */
-    private void setLastModifiedForEventInDatabase(Event event, Instant modifiedDate) {
+    private void setLastModifiedForEventInDatabase(GlobalMessageEvent event, Instant modifiedDate) {
         try (Session session = sessionFactory.openSession()) {
             Transaction transaction = session.beginTransaction();
 
-            session.createNativeQuery("UPDATE event SET last_modified = :lastModified WHERE id = :id")
+            session.createNativeQuery("UPDATE global_message_event SET last_modified = :lastModified WHERE id = :id")
                     .setParameter("lastModified", modifiedDate)
                     .setParameter("id", event.getId())
                     .executeUpdate();
@@ -117,11 +117,11 @@ class EventRepositoryTest {
      * @param event The event to be updated.
      * @param created The date to set the event's created date to.
      */
-    private void setCreatedForEventInDatabase(Event event, Instant created) {
+    private void setCreatedForEventInDatabase(GlobalMessageEvent event, Instant created) {
         try (Session session = sessionFactory.openSession()) {
             Transaction transaction = session.beginTransaction();
 
-            session.createNativeQuery("UPDATE event SET created = :created WHERE id = :id")
+            session.createNativeQuery("UPDATE global_message_event SET created = :created WHERE id = :id")
                     .setParameter("created", created)
                     .setParameter("id", event.getId())
                     .executeUpdate();
@@ -177,9 +177,9 @@ class EventRepositoryTest {
     @Test
     void findEventsForUser_allModifiedAfterSinceModified_allReturned() {
         Instant modifiedSinceDate = Instant.parse("2021-09-11T12:00:00Z");
-        setLastModifiedForEventInDatabase(testUserEvent1, modifiedSinceDate.plus(Duration.ofSeconds(1)));
-        setLastModifiedForEventInDatabase(testUserEvent2, modifiedSinceDate.plus(Duration.ofSeconds(1)));
-        setLastModifiedForEventInDatabase(testUserEvent3, modifiedSinceDate.plus(Duration.ofSeconds(1)));
+        setLastModifiedForEventInDatabase((GlobalMessageEvent) testUserEvent1, modifiedSinceDate.plus(Duration.ofSeconds(1)));
+        setLastModifiedForEventInDatabase((GlobalMessageEvent) testUserEvent2, modifiedSinceDate.plus(Duration.ofSeconds(1)));
+        setLastModifiedForEventInDatabase((GlobalMessageEvent) testUserEvent3, modifiedSinceDate.plus(Duration.ofSeconds(1)));
 
         List<Event> queryResult = eventRepository.findEventsForUser(testUser, modifiedSinceDate);
 
@@ -191,9 +191,9 @@ class EventRepositoryTest {
     @Test
     void findEventsForUser_someModifiedAfterSinceModified_modifiedEventsReturned() {
         Instant modifiedSinceDate = Instant.parse("2021-09-11T12:00:00Z");
-        setLastModifiedForEventInDatabase(testUserEvent1, modifiedSinceDate.plus(Duration.ofSeconds(1)));
-        setLastModifiedForEventInDatabase(testUserEvent2, modifiedSinceDate.plus(Duration.ofSeconds(1)));
-        setLastModifiedForEventInDatabase(testUserEvent3, modifiedSinceDate.minus(Duration.ofSeconds(1)));
+        setLastModifiedForEventInDatabase((GlobalMessageEvent) testUserEvent1, modifiedSinceDate.plus(Duration.ofSeconds(1)));
+        setLastModifiedForEventInDatabase((GlobalMessageEvent) testUserEvent2, modifiedSinceDate.plus(Duration.ofSeconds(1)));
+        setLastModifiedForEventInDatabase((GlobalMessageEvent) testUserEvent3, modifiedSinceDate.minus(Duration.ofSeconds(1)));
 
         List<Event> allEvents = eventRepository.findEventsForUser(testUser);
         System.out.println(allEvents.get(0).getLastModified());
@@ -210,9 +210,9 @@ class EventRepositoryTest {
     @Test
     void findEventsForUser_noneModifiedAfterSinceModified_noneReturned() {
         Instant modifiedSinceDate = Instant.parse("2021-09-11T12:00:00Z");
-        setLastModifiedForEventInDatabase(testUserEvent1, modifiedSinceDate.minus(Duration.ofSeconds(1)));
-        setLastModifiedForEventInDatabase(testUserEvent2, modifiedSinceDate.minus(Duration.ofSeconds(1)));
-        setLastModifiedForEventInDatabase(testUserEvent3, modifiedSinceDate.minus(Duration.ofSeconds(1)));
+        setLastModifiedForEventInDatabase((GlobalMessageEvent) testUserEvent1, modifiedSinceDate.minus(Duration.ofSeconds(1)));
+        setLastModifiedForEventInDatabase((GlobalMessageEvent) testUserEvent2, modifiedSinceDate.minus(Duration.ofSeconds(1)));
+        setLastModifiedForEventInDatabase((GlobalMessageEvent) testUserEvent3, modifiedSinceDate.minus(Duration.ofSeconds(1)));
 
         List<Event> allEvents = eventRepository.findEventsForUser(testUser);
         System.out.println(allEvents.get(0).getLastModified());
