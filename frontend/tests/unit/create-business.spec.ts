@@ -4,10 +4,9 @@ import Vuetify from 'vuetify';
 import { createLocalVue, Wrapper, mount } from '@vue/test-utils';
 
 import CreateBusiness from '@/components/BusinessProfile/CreateBusiness.vue';
-import {castMock, findButtonWithText, makeTestUser, TEST_DIACRITICS} from "./utils";
+import {castMock, findButtonWithText, makeTestUser} from "./utils";
 import * as api from '@/api/internal';
 import { getStore, resetStoreForTesting } from '@/store';
-import {User} from "@/api/internal";
 
 
 jest.mock('@/api/internal', () => ({
@@ -182,10 +181,10 @@ describe('CreateBusiness.vue', () => {
     expect(wrapper.vm.valid).toBeFalsy();
   });
 
-  it.each(TEST_DIACRITICS)('Valid when street contains the character "%s"', async (char) => {
+  it('Valid when street contains the character "%s"', async () => {
     await populateRequiredFields();
     await wrapper.setData({
-      streetAddress: '5 ' + char + ' Street',
+      streetAddress: '5 ' + "ÙÀàìÓÍóéÎúâÔôÕõñŸäöÿ" + ' Street',
     });
     await Vue.nextTick();
     expect(wrapper.vm.valid).toBeTruthy();

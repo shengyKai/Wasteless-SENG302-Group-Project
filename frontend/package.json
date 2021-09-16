@@ -10,7 +10,7 @@
     "build-prod": "vue-cli-service build --mode prod",
     "kill-all": "fuser -k 9500/tcp 9499/tcp",
     "sonarqube": "node sonarqube-analysis.js",
-    "test": "node --expose-gc ./node_modules/jest/bin/jest.js --coverage --runInBand --logHeapUsage"
+    "test": "node --expose-gc --max-old-space-size=1536 ./node_modules/jest/bin/jest.js --coverage"
   },
   "dependencies": {
     "axios": "^0.21.1",
