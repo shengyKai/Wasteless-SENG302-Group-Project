@@ -12,7 +12,7 @@
             <v-icon>mdi-thumb-up</v-icon>
             Like 69
           </v-btn>
-          <v-btn class="action-btn white--text" color="purple">
+          <v-btn class="action-btn white--text" color="purple" @click="goBack()">
             <v-icon>mdi-arrow-left</v-icon>
             Go Back
           </v-btn>
@@ -65,9 +65,8 @@
           <v-col class="column" cols="6" sm="4">
             <label class="followingLabel">{{ closesFormatted }}</label>
           </v-col>
-          <v-btn class="product-btn" color=orange outlined @click="extraDetails = !extraDetails;">Extra Details</v-btn>
         </v-row>
-        <div v-if="extraDetails">
+        <div>
           <v-row no-gutters>
             <v-col class="column" cols="6" sm="2">
               <label class="leadingLabel">Best Before Date:</label>
@@ -93,12 +92,6 @@
             <v-col class="column" cols="6" sm="4">
               <label class="followingLabel">{{ product.manufacturer }}</label>
             </v-col>
-            <v-col class="column" cols="6" sm="2">
-              <label class="leadingLabel">Original Name:</label>
-            </v-col>
-            <v-col class="column" cols="6" sm="4">
-              <label class="followingLabel">{{ product.name }}</label>
-            </v-col>
           </v-row>
         </div>
       </div>
@@ -122,7 +115,6 @@ export default {
         code: "",
         symbol: ""
       },
-      extraDetails: false
     };
   },
   props: {
@@ -193,7 +185,7 @@ export default {
     },
     productDescription() {
       return this.product.description || "Not set";
-    }
+    },
   },
   methods: {
     /**
@@ -201,11 +193,14 @@ export default {
      */
     computeCurrency() {
       this.currency = currencyFromCountry(this.product.countryOfSale);
+    },
+    goBack() {
+      this.$emit('goBack');
     }
   },
   beforeMount() {
     this.computeCurrency();
-  }
+  },
 };
 </script>
 

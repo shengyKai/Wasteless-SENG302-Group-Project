@@ -15,7 +15,6 @@
         </v-list-item-subtitle>
         <v-list-item-subtitle>
           <label class="total-price-label">Total Price:</label>
-          <!-- Need to change to retail price when implementing actual sale items -->
           <label>${{ saleItem.price }}</label>
           <label class="divider1"/>
           <label class="quantity-label">Quantity:</label>
@@ -34,13 +33,14 @@
   <div v-else>
     <SaleListingPage
       :saleItem="saleItem"
+      @goBack="showFullListing = false"
     />
   </div>
 </template>
 
 <script>
 import { currencyFromCountry } from "@/api/currency";
-import { formatDate, formatPrice } from '@/utils';
+import { formatDate } from '@/utils';
 import SaleListingPage from "@/components/SaleListing/FullSaleListing.vue";
 
 export default {
@@ -82,17 +82,7 @@ export default {
     closesFormatted() {
       let date = new Date(this.saleItem.closes);
       return formatDate(date);
-    },
-    /**
-     * Creates a nicely formatted retail price, including the currency
-     * @returns {string} RetailPrice
-     */
-    retailPrice() {
-      if (!this.saleItem.price) {
-        return "Not set";
-      }
-      return this.currency.symbol + formatPrice(this.saleItem.price) + " " + this.currency.code;
-    },
+    }
   },
   methods: {
     /**
