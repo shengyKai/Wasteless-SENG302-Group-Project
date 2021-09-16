@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Data;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.seng302.leftovers.dto.ProductFilterOption;
+import org.seng302.leftovers.dto.product.ProductFilterOption;
 import org.seng302.leftovers.dto.SaleListingSearchDTO;
 import org.seng302.leftovers.dto.business.BusinessType;
 import org.seng302.leftovers.dto.user.UserRole;

@@ -111,7 +111,8 @@ class SearchHelperSaleListingTest {
                 .withDescription("Yummy")
                 .withBusiness(testBusiness)
                 .withManufacturer("Good pies")
-                .withRecommendedRetailPrice("54").build();
+                .withRecommendedRetailPrice("54")
+                .build();
         testProduct = productRepository.save(testProduct);
         testInventoryItem = new InventoryItem.Builder()
                 .withPricePerItem("12")

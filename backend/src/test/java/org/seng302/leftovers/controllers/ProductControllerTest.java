@@ -34,6 +34,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.Cookie;
 import java.lang.reflect.Field;
+import java.math.BigDecimal;
 import java.text.ParseException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -613,7 +614,7 @@ class ProductControllerTest {
             verify(mockBuilder).withName(productInfo.getAsString("name"));
             verify(mockBuilder).withDescription(productInfo.getAsString("description"));
             verify(mockBuilder).withManufacturer(productInfo.getAsString("manufacturer"));
-            verify(mockBuilder).withRecommendedRetailPrice(productInfo.getAsString("recommendedRetailPrice"));
+            verify(mockBuilder).withRecommendedRetailPrice(new BigDecimal(productInfo.getAsString("recommendedRetailPrice")));
             verify(mockBuilder).build();
         }
     }

@@ -1,6 +1,5 @@
 package org.seng302.leftovers.entities;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.minidev.json.JSONObject;
 import org.junit.jupiter.api.AfterAll;
@@ -10,6 +9,7 @@ import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.seng302.leftovers.dto.InventoryItemDTO;
+import org.seng302.leftovers.dto.product.ProductResponseDTO;
 import org.seng302.leftovers.dto.business.BusinessType;
 import org.seng302.leftovers.persistence.BusinessRepository;
 import org.seng302.leftovers.persistence.InventoryItemRepository;
@@ -485,7 +485,7 @@ class InventoryItemTests {
         invItem = inventoryItemRepository.save(invItem);
         JSONObject expectedJson = new JSONObject();
         expectedJson.put("id", invItem.getId());
-        expectedJson.put("product", invItem.getProduct().constructJSONObject());
+        expectedJson.put("product", new ProductResponseDTO(invItem.getProduct()));
         expectedJson.put("quantity", invItem.getQuantity());
         expectedJson.put("remainingQuantity", invItem.getRemainingQuantity());
         expectedJson.put("pricePerItem", invItem.getPricePerItem());
@@ -510,7 +510,7 @@ class InventoryItemTests {
         invItem = inventoryItemRepository.save(invItem);
         JSONObject expectedJson = new JSONObject();
         expectedJson.put("id", invItem.getId());
-        expectedJson.put("product", invItem.getProduct().constructJSONObject());
+        expectedJson.put("product", new ProductResponseDTO(invItem.getProduct()));
         expectedJson.put("quantity", invItem.getQuantity());
         expectedJson.put("remainingQuantity", invItem.getRemainingQuantity());
         expectedJson.put("expires", invItem.getExpires().toString());

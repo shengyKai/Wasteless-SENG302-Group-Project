@@ -31,6 +31,12 @@ class InterestEventTest {
     private SaleItem saleItem;
     @Mock
     private Product product;
+    @Mock
+    private Business business;
+    @Mock
+    private Location businessAddress;
+    @Mock
+    private User businessPrimaryOwner;
 
     @Mock
     private InventoryItem inventoryItem;
@@ -40,7 +46,9 @@ class InterestEventTest {
         MockitoAnnotations.openMocks(this);
         when(saleItem.getInventoryItem()).thenReturn(inventoryItem);
         when(inventoryItem.getProduct()).thenReturn(product);
-        when(product.constructJSONObject()).thenReturn(null);
+        when(product.getBusiness()).thenReturn(business);
+        when(business.getAddress()).thenReturn(businessAddress);
+        when(business.getPrimaryOwner()).thenReturn(businessPrimaryOwner);
     }
 
     @Test

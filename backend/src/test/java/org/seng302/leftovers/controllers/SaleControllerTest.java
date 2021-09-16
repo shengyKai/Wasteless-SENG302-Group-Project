@@ -73,6 +73,10 @@ class SaleControllerTest {
     private InventoryItem inventoryItem;
     @Mock
     private SaleItem saleItem;
+    @Mock
+    private User businessPrimaryOwner;
+    @Mock
+    private Location businessAddress;
 
     private MockedStatic<AuthenticationTokenManager> authenticationTokenManager;
 
@@ -96,6 +100,8 @@ class SaleControllerTest {
 
         // Setup mock business
         when(business.getId()).thenReturn(1L);
+        when(business.getAddress()).thenReturn(businessAddress);
+        when(business.getPrimaryOwner()).thenReturn(businessPrimaryOwner);
 
         when(businessRepository.getBusinessById(1L)).thenReturn(business);
         when(businessRepository.getBusinessById(not(eq(1L)))).thenThrow(new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE));
@@ -395,6 +401,7 @@ class SaleControllerTest {
             var inventoryItem = mock(InventoryItem.class);
             when(saleItem.getInventoryItem()).thenReturn(inventoryItem);
             when(inventoryItem.getProduct()).thenReturn(product);
+            when(product.getBusiness()).thenReturn(business);
             mockItems.add(saleItem);
         }
         // Ensure determinism
@@ -405,7 +412,7 @@ class SaleControllerTest {
     @Test
     void getSaleItemsForBusiness_noReverse_itemsAscending() throws Exception {
         var items = generateMockSaleItems();
-        when(saleItemRepository.findAll(any(), any(PageRequest.class))).thenReturn(new PageImpl<SaleItem>(items));
+        when(saleItemRepository.findAll(any(), any(PageRequest.class))).thenReturn(new PageImpl<>(items));
         MvcResult result = mockMvc.perform(get("/businesses/1/listings"))
                 .andExpect(status().isOk())
                 .andReturn();

@@ -4,12 +4,10 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
-import net.minidev.json.JSONObject;
+import org.seng302.leftovers.dto.product.ProductResponseDTO;
 import org.seng302.leftovers.entities.InventoryItem;
-import org.seng302.leftovers.tools.JsonTools;
 
 import java.math.BigDecimal;
-import java.time.Instant;
 import java.time.LocalDate;
 
 
@@ -22,7 +20,7 @@ import java.time.LocalDate;
 @EqualsAndHashCode(callSuper = false)
 public class InventoryItemDTO {
     private Long id;
-    private JSONObject product;
+    private ProductResponseDTO product;
     private int quantity;
     private BigDecimal pricePerItem;
     private BigDecimal totalPrice;
@@ -43,7 +41,7 @@ public class InventoryItemDTO {
      */
     public InventoryItemDTO(InventoryItem invItem) {
         this.id = invItem.getId();
-        this.product = invItem.getProduct().constructJSONObject(); //TODO
+        this.product = new ProductResponseDTO(invItem.getProduct());
         this.quantity = invItem.getQuantity();
         this.remainingQuantity = invItem.getRemainingQuantity();
         this.pricePerItem = invItem.getPricePerItem();
