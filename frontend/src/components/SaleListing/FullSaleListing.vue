@@ -18,7 +18,7 @@
               </v-card-text>
             </v-card>
           </v-col>
-          <v-col cols="12" sm="4" class="text-right mt-3">
+          <v-col cols="12" sm="4" class="text-center mt-3 mb-1">
             <!-- Buy feature will not be implemented yet -->
             <v-btn class="pl-2 pr-2" color="primary darken-1">
               Buy
