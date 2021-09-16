@@ -1,4 +1,4 @@
-package org.seng302.leftovers.dto;
+package org.seng302.leftovers.dto.user;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -10,7 +10,7 @@ import lombok.ToString;
 @ToString
 @Getter
 @EqualsAndHashCode(callSuper = false)
-public class ModifyUserDTO extends UserDTO {
+public class ModifyUserDTO extends BaseUserRequestDTO {
     private String password;
     private String newPassword;
 }

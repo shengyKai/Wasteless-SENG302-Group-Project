@@ -1,5 +1,6 @@
 package org.seng302.leftovers.controllers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 import net.minidev.json.JSONObject;
 import org.junit.jupiter.api.AfterEach;
@@ -12,6 +13,7 @@ import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.seng302.leftovers.dto.LocationDTO;
 import org.seng302.leftovers.entities.Location;
 import org.seng302.leftovers.entities.User;
 import org.seng302.leftovers.exceptions.AccessTokenException;
@@ -19,6 +21,7 @@ import org.seng302.leftovers.exceptions.InsufficientPermissionException;
 import org.seng302.leftovers.persistence.UserRepository;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
 import org.seng302.leftovers.tools.PasswordAuthenticator;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
@@ -54,6 +57,9 @@ class UserControllerModifyTest {
     private User mockUser;
     @Mock
     private Location mockLocation;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     private MockedStatic<AuthenticationTokenManager> authenticationTokenManager;
 
@@ -103,7 +109,7 @@ class UserControllerModifyTest {
         jsonBody.put("firstName", "Ella");
         jsonBody.put("lastName", "Ella");
         jsonBody.put("dateOfBirth", "1999-06-26");
-        jsonBody.put("homeAddress", address.constructFullJson());
+        jsonBody.put("homeAddress", new LocationDTO(address, true));
         return jsonBody;
     }
 
@@ -119,7 +125,7 @@ class UserControllerModifyTest {
                 .withPostCode("9876")
                 .atDistrict("Outback")
                 .build();
-        JSONObject jsonAddress = address.constructFullJson();
+        LocationDTO jsonAddress = new LocationDTO(address, true);
         jsonBody.put("homeAddress", jsonAddress);
         String newFirstName = "Nathan";
         jsonBody.put("firstName", newFirstName);
@@ -440,7 +446,7 @@ class UserControllerModifyTest {
                 .withPostCode("1238")
                 .atDistrict("DistrictArea")
                 .build();
-        JSONObject jsonAddress = address.constructFullJson();
+        var jsonAddress = objectMapper.convertValue(new LocationDTO(address, true), JSONObject.class);
         jsonAddress.put(field, "ÉÄ○b");
         jsonBody.put("homeAddress", jsonAddress);
 

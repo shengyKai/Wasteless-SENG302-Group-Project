@@ -6,6 +6,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.seng302.leftovers.dto.ProductFilterOption;
 import org.seng302.leftovers.dto.SaleListingSearchDTO;
+import org.seng302.leftovers.dto.user.UserRole;
 import org.seng302.leftovers.entities.*;
 import org.seng302.leftovers.exceptions.SearchFormatException;
 import org.seng302.leftovers.persistence.SpecificationsBuilder;
@@ -154,7 +155,7 @@ public class SearchHelper {
      * @return Specification matching any user except DGAA
      */
     public static Specification<User> isNotDGAASpec() {
-        return (root, query, criteriaBuilder) -> criteriaBuilder.notEqual(root.get("role"), "defaultGlobalApplicationAdmin");
+        return (root, query, criteriaBuilder) -> criteriaBuilder.notEqual(root.get("role"), UserRole.DGAA);
     }
 
     /**

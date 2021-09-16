@@ -1,5 +1,6 @@
 package org.seng302.leftovers.persistence;
 
+import org.seng302.leftovers.dto.user.UserRole;
 import org.seng302.leftovers.entities.User;
 import org.seng302.leftovers.entities.event.Event;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -50,7 +51,7 @@ public interface UserRepository extends CrudRepository<User, Long>, JpaSpecifica
      */
     List<User> getAllByEvents(Event event);
     
-    List<User> findAllByRole(String role);
+    List<User> findAllByRole(UserRole role);
 
     /**
      * Gets a user with the given ID

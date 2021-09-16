@@ -11,6 +11,12 @@
       {{ error }}
     </v-alert>
     <!-- PUT RESULTS HERE -->
+    <v-list three-line v-if="resultsPage">
+      <template v-for="(sale, index) in resultsPage.results">
+        <v-divider v-if="sale === undefined" :key="'divider-'+index"/>
+        <SaleResult v-else :key="sale.id" :saleItem="sale"/>
+      </template>
+    </v-list>
     <!--paginate results-->
     <v-pagination
       v-model="currentPage"
@@ -28,16 +34,23 @@
 <script>
 import AdvancedSearchBar from './AdvancedSearchBar.vue';
 import SimpleSearchBar from './SimpleSearchBar.vue';
+import SaleResult from './SaleResult.vue';
+import {getDummySaleItemSearchResult} from "@/api/internal";
 
 export default {
   name: "SearchSaleItems",
+  components: {
+    SaleResult,
+    AdvancedSearchBar,
+    SimpleSearchBar
+  },
   data() {
     return {
       currentPage: 1,
       totalPages: 1,
       error: undefined,
       resultsPerPage: 10,
-      results: undefined,
+      resultsPage: undefined,
       showAdvancedSearch: false,
       simpleSearchParams: {
         query: undefined,
@@ -63,8 +76,8 @@ export default {
      * The total number of results matching the search, or 0 if there is no search or an error has occured with the search
      */
     totalResults() {
-      if (this.results === undefined) return 0;
-      return this.results.count;
+      if (this.resultsPage === undefined) return 0;
+      return this.resultsPage.count;
     },
     resultsMessage() {
       // TODO implement computing results message based on number of results when linking to endpoint
@@ -90,9 +103,8 @@ export default {
       }
     }
   },
-  components: {
-    AdvancedSearchBar,
-    SimpleSearchBar
+  async beforeMount() {
+    this.resultsPage = (await getDummySaleItemSearchResult());
   }
 };
 </script>

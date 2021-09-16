@@ -82,7 +82,7 @@ class ExpiryEventTest {
                 testEvent.getCreated(),
                 testEvent.getStatus().toString().toLowerCase(),
                 testEvent.isRead(),
-                testCard.constructJSONObject().toJSONString(),
+                mapper.writeValueAsString(testCard.constructJSONObject()),
                 testEvent.getLastModified().toString());
         String actualJsonString = mapper.writeValueAsString(testEvent.asDTO());
         assertEquals(mapper.readTree(expectedJsonString), mapper.readTree(actualJsonString));

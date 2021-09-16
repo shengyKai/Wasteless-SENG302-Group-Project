@@ -8,29 +8,31 @@
           :to="businessRoute"
           class="text-subtitle-1 grey--text text--darken-2"
         >
-          Nathan Apple LTD
+          {{ business.name }}
         </router-link>
       </div>
     </template>
     <v-card-text class="subtitle-1">
-      {{ eventTitle }}
+      {{ eventText }}
     </v-card-text>
     <v-card-actions class="justify-center">
-      <v-btn class="action-btn white-text" color="primary darken-1">
-        <v-icon>mdi-currency-usd</v-icon>
+      <v-btn class="pl-3" color="primary darken-1">
         Buy
+        <v-icon>mdi-currency-usd</v-icon>
       </v-btn>
-      <v-btn v-if="event.interested" class="white--text" color="green">
-        <v-icon>mdi-thumb-up</v-icon>
-        Like 69
+      <!-- Thumb up/down button to show and allow user the like & unlike feature -->
+      <v-btn v-if="!event.interested" class="ml-2 blue--text" color="grey lighten-2">
+        Like
+        <v-icon class="ml-1">mdi-thumb-up</v-icon>
       </v-btn>
-      <v-btn v-else class="white--text" color="secondary">
-        <v-icon class="mr-1">mdi-thumb-down</v-icon>
-        Unlike 69
+      <v-btn v-else color="ml-2 grey lighten-2">
+        Unlike
+        <v-icon class="ml-1">mdi-thumb-down</v-icon>
       </v-btn>
-      <v-btn class="white--text" color="orange darken-1" @click="fullSaleOpen = true">
-        <v-icon>mdi-arrow-top-right-thick</v-icon>
-        View Sale
+      <!-- A return button for user to go back to business profile-->
+      <v-btn class="ml-2 pl-3" color="secondary" @click="fullSaleOpen=true">
+        View
+        <v-icon class="ml-1">mdi-arrow-top-right-thick</v-icon>
       </v-btn>
     </v-card-actions>
     <v-dialog v-model="fullSaleOpen" max-width="1200" class="white">
@@ -60,24 +62,50 @@ export default {
     };
   },
   computed: {
-    eventTitle() {
+    /**
+     * Returns the computed text for the notification
+     * Text contains like status and number of days until sale closes
+     * @returns {string} Body text for notification
+     */
+    eventText() {
       return `You have ${this.interestString} this listing which closes in ${this.daysUntilClose} days`;
     },
+    /**
+     * Returns the business associated with the sale item
+     */
+    business() {
+      return this.event.saleItem.inventoryItem.product.business;
+    },
+    /**
+     * String representation of the user's interest in the sale listing
+     * @returns {string} Liked or Unliked
+     */
     interestString() {
       return this.event.interested? "liked" : "unliked";
     },
+    /**
+     * The rounded number of days until the sale listing closes
+     * @returns {number} Days until sale listing close date
+     */
     daysUntilClose() {
       const millisecondsPerDay = 24 * 60 * 60 * 1000;
       const today = new Date();
       const closes = new Date(this.event.saleItem.closes);
-      return Math.round(Math.abs((closes-today) / millisecondsPerDay));
+      return Math.ceil(Math.abs((closes-today) / millisecondsPerDay));
     },
+    /**
+     * Returns the location descriptor object for routing to the business's profile
+     * @returns {object} Location descriptor for business profile
+     */
     businessRoute() {
-      //todo
-      return "/business/1";
+      return {
+        name: "businessProfile",
+        params: {
+          id: this.business.id
+        }
+      };
     }
   },
-
 };
 </script>
 
