@@ -123,7 +123,7 @@
 <script>
 import ImageCarousel from "@/components/utils/ImageCarousel";
 import { currencyFromCountry } from "@/api/currency";
-import {getBusiness} from '../../api/internal';
+import {getBusiness, setListingInterest} from '../../api/internal';
 import { formatDate, formatPrice } from '@/utils';
 
 export default {
@@ -137,7 +137,7 @@ export default {
         code: "",
         symbol: "",
       },
-      interest: false,
+      isInterested: false,
       extraDetails: false,
       business: "",
     };
@@ -152,15 +152,18 @@ export default {
     console.log(this.saleItem);
   },
   computed: {
+    userId() {
+      return this.$store.state.user.id;
+    },
     thumbIcon() {
-      if (this.interest) {
+      if (this.isInterested) {
         return "mdi-thumb-up";
       } else {
         return "mdi-thumb-down";
       }
     },
     thumbMessage() {
-      if (this.interest) {
+      if (this.isInterested) {
         return "Like";
       } else {
         return "Unlike";
@@ -242,10 +245,13 @@ export default {
     viewProfile() {
       this.$router.push("/business/" + this.$store.state.activeRole.id);
     },
-    /** Shows user the like and unlike button according to the listing's interest */
-    changeInterest() {
+    /** Change the user interest status on the listing (toggle)
+     */
+    async changeInterest() {
+      if(this.isInterested) await setListingInterest(this.saleItem.id, this.userId, false);
+      else await setListingInterest(this.saleItem.id, this.userId, true);
       console.log("changing");
-      this.interest = !this.interest;
+      this.isInterested = !this.isInterested;
     },
     /**
      * Computes the currency
@@ -255,11 +261,16 @@ export default {
     },
     async getBusiness() {
       this.business = await getBusiness(this.listingBusinessId);
-    }
+    },
+    // async isInterested() {
+    //   this.isInterested = await getListingInterest(this.saleItem.id, this.$store.state);
+    // }
   },
   beforeMount() {
     this.computeCurrency();
     this.getBusiness();
+    // this.isInterested();
+    // need to merge another branch for the backend endpoint
   }
 };
 </script>
