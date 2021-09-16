@@ -1,6 +1,6 @@
 <template>
   <Event :event="event" title="Global Message">
-    <v-card-text>
+    <v-card-text class="subtitle-1">
       {{ event.message }}
     </v-card-text>
   </Event>

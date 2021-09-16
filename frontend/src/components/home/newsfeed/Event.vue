@@ -30,7 +30,10 @@
                 :icon="readBadgeIcon"
                 :color="readColour"
               >
-                {{ title }}
+                <template  v-if="title !== undefined">
+                  {{ title }}
+                </template>
+                <slot v-else name="title"/>
               </v-badge>
             </v-card-title>
           </template>
@@ -178,7 +181,7 @@ export default {
   props: {
     title: {
       type: String,
-      required: true,
+      required: false,
     },
     event: {
       type: Object,

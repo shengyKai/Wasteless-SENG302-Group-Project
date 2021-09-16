@@ -1,44 +1,56 @@
 <template>
-  <v-list-item color="purple">
-    <v-list-item-avatar width="70" height="70">
-      <img src="../../assets/grumpy.webp">
-    </v-list-item-avatar>
-    <v-list-item-content>
-      <v-list-item-title>
-        <label class="result-title">{{ product.name }}</label>
-        <label class="result-title-join">From </label>
-        <label class="result-title-business">{{ product.manufacturer }}</label>
-      </v-list-item-title>
-      <v-list-item-subtitle>
-        <label>More Info: {{ saleItem.moreInfo }}</label>
-      </v-list-item-subtitle>
-      <v-list-item-subtitle>
-        <label class="total-price-label">Total Price:</label>
-        <!-- Need to change to retail price when implementing actual sale items -->
-        <label>${{ saleItem.price }}</label>
-        <label class="divider1"/>
-        <label class="quantity-label">Quantity:</label>
-        <label>{{ saleItem.quantity }}</label>
-      </v-list-item-subtitle>
-      <v-list-item-subtitle>
-        <label class="creation-date-label">Creation Date:</label>
-        <label>{{ createdFormatted }}</label>
-        <label class="divider2"/>
-        <label class="closing-date-label">Closing Date:</label>
-        <label>{{ closesFormatted }}</label>
-      </v-list-item-subtitle>
-    </v-list-item-content>
-  </v-list-item>
+  <div v-if="!showFullListing">
+    <v-list-item color="purple">
+      <v-list-item-avatar width="70" height="70">
+        <img src="../../assets/grumpy.webp">
+      </v-list-item-avatar>
+      <v-list-item-content>
+        <v-list-item-title>
+          <a class="result-title" @click="showFullListing = !showFullListing">{{ product.name }}</a>
+          <label class="result-title-join">From </label>
+          <label class="result-title-business">{{ product.manufacturer }}</label>
+        </v-list-item-title>
+        <v-list-item-subtitle>
+          <label>More Info: {{ saleItem.moreInfo }}</label>
+        </v-list-item-subtitle>
+        <v-list-item-subtitle>
+          <label class="total-price-label">Total Price:</label>
+          <label>${{ saleItem.price }}</label>
+          <label class="divider1"/>
+          <label class="quantity-label">Quantity:</label>
+          <label>{{ saleItem.quantity }}</label>
+        </v-list-item-subtitle>
+        <v-list-item-subtitle>
+          <label class="creation-date-label">Creation Date:</label>
+          <label>{{ createdFormatted }}</label>
+          <label class="divider2"/>
+          <label class="closing-date-label">Closing Date:</label>
+          <label>{{ closesFormatted }}</label>
+        </v-list-item-subtitle>
+      </v-list-item-content>
+    </v-list-item>
+  </div>
+  <div v-else>
+    <SaleListingPage
+      :saleItem="saleItem"
+      @goBack="showFullListing = false"
+    />
+  </div>
 </template>
 
 <script>
 import { currencyFromCountry } from "@/api/currency";
-import { formatDate, formatPrice } from '@/utils';
+import { formatDate } from '@/utils';
+import SaleListingPage from "@/components/SaleListing/FullSaleListing.vue";
 
 export default {
   name: "SaleResult",
+  components: {
+    SaleListingPage
+  },
   data() {
     return {
+      showFullListing: false,
       currency: {
         code: "",
         symbol: ""
@@ -70,17 +82,7 @@ export default {
     closesFormatted() {
       let date = new Date(this.saleItem.closes);
       return formatDate(date);
-    },
-    /**
-     * Creates a nicely formatted retail price, including the currency
-     * @returns {string} RetailPrice
-     */
-    retailPrice() {
-      if (!this.saleItem.price) {
-        return "Not set";
-      }
-      return this.currency.symbol + formatPrice(this.saleItem.price) + " " + this.currency.code;
-    },
+    }
   },
   methods: {
     /**

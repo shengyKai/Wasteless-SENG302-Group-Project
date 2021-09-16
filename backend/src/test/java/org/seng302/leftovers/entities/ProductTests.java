@@ -928,6 +928,7 @@ class ProductTests {
        testJson.remove("created");
        testJson.remove("images");
        testJson.remove("countryOfSale");
+       testJson.remove("business");
        assertTrue(testJson.isEmpty());
    }
 
@@ -988,6 +989,7 @@ class ProductTests {
             testJson.remove("created");
             testJson.remove("images");
             testJson.remove("countryOfSale");
+            testJson.remove("business");
             assertTrue(testJson.isEmpty());
     }
 
