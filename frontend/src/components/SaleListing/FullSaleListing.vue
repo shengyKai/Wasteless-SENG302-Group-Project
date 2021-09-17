@@ -11,7 +11,7 @@
                 <p class="text-h4 text--primary d-inline-block">
                   {{ product.name }}
                 </p>
-                <p class="ml-2 text-h5 text--secondary d-inline-block text-decoration-underline">FROM {{this.business.name}}</p>
+                <p class="ml-2 text-h5 text--secondary d-inline-block text-decoration-underline">FROM {{this.product.manufacturer}}</p>
                 <div class="text--primary  text-left">
                   {{ productDescription }}
                 </div>
@@ -22,7 +22,7 @@
           <!-- Buy feature will not be implemented yet -->
           <v-row>
             <v-col class="align-self-center text-center">
-              <v-btn class="pl-2 pr-2" color="primary darken-1">
+              <v-btn class="pl-2 pr-2" color="primary darken-1" @click="buy">
                 Buy
                 <v-icon>mdi-currency-usd</v-icon>
               </v-btn>
@@ -128,7 +128,7 @@
 <script>
 import ImageCarousel from "@/components/utils/ImageCarousel";
 import { currencyFromCountry } from "@/api/currency";
-import {getBusiness, setListingInterest} from '../../api/internal';
+import {setListingInterest, getListingInterest} from '../../api/internal';
 import { formatDate, formatPrice } from '@/utils';
 
 export default {
@@ -142,18 +142,12 @@ export default {
         code: "",
         symbol: "",
       },
-      isInterested: false,
       extraDetails: false,
-      business: "",
+      isInterested: "",
     };
   },
   props: {
     saleItem: Object
-  },
-  mounted() {
-    console.log(this.product);
-    console.log(this.inventoryItem);
-    console.log(this.saleItem);
   },
   computed: {
     userId() {
@@ -161,20 +155,17 @@ export default {
     },
     thumbIcon() {
       if (this.isInterested) {
-        return "mdi-thumb-up";
-      } else {
         return "mdi-thumb-down";
+      } else {
+        return "mdi-thumb-up";
       }
     },
     thumbMessage() {
       if (this.isInterested) {
-        return "Like";
-      } else {
         return "Unlike";
+      } else {
+        return "Like";
       }
-    },
-    listingBusinessId() {
-      return this.$route.params.id;
     },
     /**
      * Easy access to the product information of the sale item
@@ -254,8 +245,12 @@ export default {
     async changeInterest() {
       if(this.isInterested) await setListingInterest(this.saleItem.id, this.userId, false);
       else await setListingInterest(this.saleItem.id, this.userId, true);
-      console.log("changing");
-      this.isInterested = !this.isInterested;
+    },
+    async computeIsInterested() {
+      this.isInterested = await getListingInterest(this.saleItem.id, this.userId);
+    },
+    buy() {
+      console.log(this.isInterested);
     },
     /**
      * Computes the currency
@@ -263,21 +258,13 @@ export default {
     computeCurrency() {
       this.currency = currencyFromCountry(this.product.countryOfSale);
     },
-    async getBusiness() {
-      this.business = await getBusiness(this.listingBusinessId);
-    },
     hideExpand() {
       this.$emit('hideExpand');
-    }
-    // async isInterested() {
-    //   this.isInterested = await getListingInterest(this.saleItem.id, this.$store.state);
-    // }
+    },
   },
   beforeMount() {
     this.computeCurrency();
-    this.getBusiness();
-    // this.isInterested();
-    // need to merge another branch for the backend endpoint
+    this.computeIsInterested();
   }
 };
 </script>

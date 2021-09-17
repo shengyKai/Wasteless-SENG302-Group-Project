@@ -1353,13 +1353,13 @@ export async function getDummySaleItemSearchResult() : Promise<SearchResults<Sal
     count: 2,
     results: [
       {
-        id: 69,
+        id: 1,
         inventoryItem: {
           id: 109,
           product: {
             id: "NathanApple91",
             name: "The Nathan Apple",
-            description: "Nathan Apple",
+            description: "Ever wonder why Nathan has an apple",
             manufacturer: "Nathan Apple LTD",
             recommendedRetailPrice: 10.00,
             created: "2021-02-02",
@@ -1387,7 +1387,7 @@ export async function getDummySaleItemSearchResult() : Promise<SearchResults<Sal
           id: 110,
           product: {
             id: "NathanApple92",
-            name: "The Nathan Apple",
+            name: "Ever wonder why Nathan has an apple",
             description: "Nathan Apple",
             manufacturer: "Nathan Apple LTD",
             recommendedRetailPrice: 10.00,
