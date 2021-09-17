@@ -9,6 +9,7 @@ import org.seng302.leftovers.entities.MarketplaceCard;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Getter
@@ -36,7 +37,7 @@ public class MarketplaceCardDTO {
         this.lastRenewed = card.getLastRenewed();
         this.displayPeriodEnd = card.getCloses();
         this.title = card.getTitle();
-        this.description = card.getDescription();
+        this.description = Optional.ofNullable(card.getDescription()).orElse("");
         this.keywords = card.getKeywords().stream().map(KeywordDTO::new).collect(Collectors.toList());
     }
 }
