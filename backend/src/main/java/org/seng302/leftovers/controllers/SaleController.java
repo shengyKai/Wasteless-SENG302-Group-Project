@@ -262,6 +262,7 @@ public class SaleController {
 
             InterestPurchasedEvent interestPurchasedEvent;
             for (User user : saleItem.getInterestedUsers()) {
+                // Does not create this event for the purchaser only
                 if (user != purchaser) {
                     interestPurchasedEvent = new InterestPurchasedEvent(user, boughtSaleItem);
                     interestPurchasedEventRepository.save(interestPurchasedEvent);

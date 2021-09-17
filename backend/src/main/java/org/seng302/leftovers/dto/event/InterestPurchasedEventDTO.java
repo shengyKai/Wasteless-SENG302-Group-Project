@@ -24,11 +24,6 @@ public class InterestPurchasedEventDTO extends EventDTO {
      */
     public InterestPurchasedEventDTO(InterestPurchasedEvent event) {
         super(event);
-        this.saleItem = new SaleItemDTO(event.getBoughtSaleItem());
     }
 
-    /**
-     * Constructor for helping with building this object from a string
-     */
-    protected InterestEventDTO() {}
 }

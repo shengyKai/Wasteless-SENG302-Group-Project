@@ -5,13 +5,14 @@ import org.seng302.leftovers.entities.BoughtSaleItem;
 import org.seng302.leftovers.entities.User;
 
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 
 @Entity
 public class InterestPurchasedEvent extends Event{
-    @ManyToOne
-    @JoinColumn(name = "id", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "bought_sale_item_id", nullable = false)
     private BoughtSaleItem boughtSaleItem;
 
     public InterestPurchasedEvent(User notifiedUser, BoughtSaleItem boughtSaleItem) {
@@ -19,9 +20,7 @@ public class InterestPurchasedEvent extends Event{
         this.boughtSaleItem = boughtSaleItem;
     }
 
-    public BoughtSaleItem getBoughtSaleItem() {
-        return boughtSaleItem;
-    }
+    public BoughtSaleItem getBoughtSaleItem() { return boughtSaleItem; }
 
     public InterestPurchasedEvent() {}
 
