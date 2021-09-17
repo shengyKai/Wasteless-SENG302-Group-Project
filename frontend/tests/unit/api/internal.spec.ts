@@ -329,7 +329,21 @@ const apiCalls: Partial<ApiCalls> = {
       406: 'Listing does not exist',
     },
     usesServerMessage: true,
-  }
+  },
+  purchaseListing: {
+    parameters: [6, 5],
+    httpMethod: 'put',
+    url: '/listings/6/purchase',
+    body: {
+      purchaserId: 5,
+    },
+    result: undefined,
+    extraStatusMessages: {
+      401: 'You have been logged out. Please login again and retry',
+      406: 'Listing does not exist',
+    },
+    usesServerMessage: true,
+  },
 };
 
 describe('api', () => {
