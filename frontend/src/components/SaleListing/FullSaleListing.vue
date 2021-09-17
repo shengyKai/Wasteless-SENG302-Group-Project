@@ -2,7 +2,7 @@
   <div>
     <v-card class="pa-2">
       <div>
-        <ImageCarousel :imagesList="product.images" :productId="product.id"/>
+        <ImageCarousel v-if="imagesList.length > 0" :imagesList="product.images" :productId="product.id"/>
         <div/>
         <v-row>
           <v-col cols="12" sm="8">
@@ -128,7 +128,7 @@
 <script>
 import ImageCarousel from "@/components/utils/ImageCarousel";
 import { currencyFromCountry } from "@/api/currency";
-import {setListingInterest, getListingInterest} from '../../api/internal';
+import { setListingInterest, getListingInterest} from '../../api/internal';
 import { formatDate, formatPrice } from '@/utils';
 
 export default {
@@ -150,6 +150,9 @@ export default {
     saleItem: Object
   },
   computed: {
+    imagesList() {
+      return this.product.images;
+    },
     userId() {
       return this.$store.state.user.id;
     },
@@ -243,14 +246,18 @@ export default {
     /** Change the user interest status on the listing (toggle)
      */
     async changeInterest() {
-      if(this.isInterested) await setListingInterest(this.saleItem.id, this.userId, false);
-      else await setListingInterest(this.saleItem.id, this.userId, true);
+      await setListingInterest(this.saleItem.id, this.userId, !this.isInterested);
+      await this.computeIsInterested();
     },
+    /**
+     * Compute the lising isInterested
+     */
     async computeIsInterested() {
       this.isInterested = await getListingInterest(this.saleItem.id, this.userId);
     },
     buy() {
       console.log(this.isInterested);
+      console.log(this.saleItem);
     },
     /**
      * Computes the currency
@@ -259,7 +266,7 @@ export default {
       this.currency = currencyFromCountry(this.product.countryOfSale);
     },
     hideExpand() {
-      this.$emit('hideExpand');
+      this.$emit('goBack');
     },
   },
   beforeMount() {
