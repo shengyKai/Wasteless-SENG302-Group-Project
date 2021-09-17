@@ -18,27 +18,31 @@
               </v-card-text>
             </v-card>
           </v-col>
-          <v-col cols="12" sm="4" class="text-center mt-3 mb-1">
-            <!-- Buy feature will not be implemented yet -->
-            <v-btn class="pl-2 pr-2" color="primary darken-1">
-              Buy
-              <v-icon>mdi-currency-usd</v-icon>
-            </v-btn>
-            <!-- Thumb up/down button to show and allow user the like & unlike feature -->
-            <v-btn class=" pl-2 pr-2 ml-2" color="grey lighten-2" @click="changeInterest">
-              {{thumbMessage}}
-              <v-icon class="ml-1">{{thumbIcon}}</v-icon>
-            </v-btn>
-            <!-- A return button for user to go back to business profile-->
-            <v-btn class="ml-2 mr-1 pl-2 pr-1" color="secondary" @click="viewProfile">
-              Go Back
-              <v-icon class="ml-1">mdi-arrow-left</v-icon>
-            </v-btn>
-          </v-col>
+          <!-- <v-col cols="12" sm="4" class="text-center mt-3 mb-1"> -->
+          <!-- Buy feature will not be implemented yet -->
+          <v-row>
+            <v-col class="align-self-center text-center">
+              <v-btn class="pl-2 pr-2" color="primary darken-1">
+                Buy
+                <v-icon>mdi-currency-usd</v-icon>
+              </v-btn>
+              <!-- Thumb up/down button to show and allow user the like & unlike feature -->
+              <v-btn class=" pl-2 pr-2 ml-2" color="grey lighten-2" @click="changeInterest">
+                {{thumbMessage}}
+                <v-icon class="ml-1">{{thumbIcon}}</v-icon>
+              </v-btn>
+              <!-- A return button for user to go back to business profile-->
+              <v-btn class="ml-2 mr-1 pl-2 pr-1" color="secondary" @click="viewProfile">
+                Go Back
+                <v-icon class="ml-1">mdi-arrow-left</v-icon>
+              </v-btn>
+            </v-col>
+          </v-row>
+          <!-- </v-col> -->
         </v-row>
       </div>
       <div>
-        <v-row no-gutters>
+        <v-row no-gutters class="mt-3">
           <v-col class="mt-2" cols="6" sm="2">
             <label class="text-h6 font-weight-bold">Total Price:</label>
           </v-col>
