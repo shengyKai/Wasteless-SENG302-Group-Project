@@ -3,6 +3,7 @@ package org.seng302.leftovers.entities;
 
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
+import org.seng302.leftovers.dto.user.UserRole;
 import org.seng302.leftovers.entities.event.Event;
 import org.seng302.leftovers.tools.JsonTools;
 import org.springframework.data.annotation.ReadOnlyProperty;
@@ -319,85 +320,6 @@ public class User extends Account {
     }
 
     /**
-     * This method constructs a JSON representation of the user's public details. These are their id number,
-     * first name, middle name, last name, nickname, email, bio, the city/region/country part of their address,
-     * the businesses they administer, and date the account was created. If fullBusienssDetails is true then
-     * a JSON representation of each business they administer will be included, otherwise the businessesAdministered
-     * field will not be present to avoid issues when nesting this json inside the administrators field of the business
-     * json.
-     * @param fullBusinessDetails A JSON representation of each business will be included in the businessesAdministered
-     * field if this is set to true, otherwise the field will not be present.
-     * @return JSONObject with attribute name as key and attribute value as value.
-     */
-    public JSONObject constructPublicJson(boolean fullBusinessDetails) {
-        var object = new JSONObject();
-        object.put("id",          getUserID());
-        object.put("firstName",   getFirstName());
-        object.put("lastName",    getLastName());
-        object.put("email",       getEmail());
-        object.put("created",     getCreated().toString());
-        object.put("middleName",  getMiddleName());
-        object.put("nickname",    getNickname());
-        object.put("bio", getBio());
-        object.put("homeAddress", getAddress().constructPartialJson());
-        if (fullBusinessDetails) {
-            object.put("businessesAdministered", constructBusinessJsonArray());
-        }
-        JsonTools.removeNullsFromJson(object);
-        return object;
-    }
-
-    /**
-     * Override the constructPublicJson method so that it defaults to omitting the businessesAdministered field.
-     * @return A public JSON representation of the user without information on the businesses they administer
-     */
-    public JSONObject constructPublicJson() {
-        return constructPublicJson(false);
-    }
-
-    /**
-     * This method constructs a JSON representation of the user's private details. This includes all the values from
-     * the public JSON, plus their full address, date of birth, phone number and role.
-     * @param fullBusinessDetails A JSON representation of each business will be included in the businessesAdministered
-     * field if this is set to true, otherwise the field will not be present.
-     * @return JSONObject with attribute name as key and attribute value as value.
-     */
-    public JSONObject constructPrivateJson(boolean fullBusinessDetails) {
-        JSONObject json = constructPublicJson(fullBusinessDetails);
-        json.replace("homeAddress", getAddress().constructFullJson());
-        json.appendField("dateOfBirth", dob.toString());
-        json.appendField("phoneNumber", phNum);
-        json.appendField("role", role);
-        JsonTools.removeNullsFromJson(json);
-        return json;
-    }
-
-     /**
-     * Override the constructPrivateJson method so that it defaults omitting the businessesAdministered field
-     * @return A private JSON representation of the user without information on the businesses they administer
-     */
-    public JSONObject constructPrivateJson() {
-        return constructPrivateJson(false);
-    }
-
-    /**
-     * Construct an array of JSON objects representing the businesses the user administers. The JSONs in the array
-     * are sorted by the id number of the business to ensure consistency between subsequent requests.
-     * @return An array of JSON representations of the businesses the user administers.
-     */
-    public JSONArray constructBusinessJsonArray() {
-        List<Business> businesses = new ArrayList<>();
-        businesses.addAll(getBusinessesAdministeredAndOwned());
-        Collections.sort(businesses, (Business business1, Business business2) ->
-            business1.getId().compareTo(business2.getId()));
-        JSONArray businessArray = new JSONArray();
-        for (Business business : businesses) {
-            businessArray.add(business.constructJson());
-        }
-        return businessArray;
-    }
-
-    /**
      * Called before a user is removed from the database
      * Ensures that the User is not an owner of any Businesses.
      * If the User is an administrator for any businesses, they are removed from the administrator set for each business
@@ -556,7 +478,7 @@ public class User extends Account {
             user.setPhNum(this.phNum);
             user.setAddress(this.address);
             user.setCreated(Instant.now());
-            user.setRole("user");
+            user.setRole(UserRole.USER);
             return user;
         }
 

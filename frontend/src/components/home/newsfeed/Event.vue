@@ -16,29 +16,89 @@
   <div v-else @click="markEventAsRead">
     <v-row>
       <v-col>
-        <v-card-title>
-          <v-badge
-            overlap
-            offset-y=8
-            offset-x=-2
-            :icon="readBadgeIcon"
-            :color="readColour"
-          >
-            {{ title }}
-          </v-badge>
-        </v-card-title>
+        <v-tooltip top
+                   nudge-bottom="10"
+                   nudge-left="70">
+          <template v-slot:activator="{ on, attrs }">
+            <v-card-title
+              v-bind="attrs"
+              v-on="on">
+              <v-badge
+                overlap
+                offset-y=8
+                offset-x=-2
+                :icon="readBadgeIcon"
+                :color="readColour"
+              >
+                <template  v-if="title !== undefined">
+                  {{ title }}
+                </template>
+                <slot v-else name="title"/>
+              </v-badge>
+            </v-card-title>
+          </template>
+          <span>{{envelopToolTip}}</span>
+        </v-tooltip>
         <v-card-subtitle>
           {{ date }}, {{ time }}
         </v-card-subtitle>
       </v-col>
       <v-col cols="auto" class="mt-2">
-        <v-icon class="mr-2"
-                ref="deleteButton"
-                color="red"
-                @click.stop="initiateDeletion"
-        >
-          mdi-trash-can
-        </v-icon>
+        <!-- Star icon will be 'filled' when user starred the notification else it will be outlined,
+              toggle status when clicked (normal | starred)-->
+        <v-tooltip top>
+          <template v-slot:activator="{ on, attrs }">
+            <v-icon
+              v-if="(event.status !== 'archived')"
+              class="mr-2"
+              ref="filledStarButton"
+              color="orange"
+              v-bind="attrs"
+              v-on="on"
+              @click="toggleStarStatus()"
+            >
+              {{starIcon}}
+            </v-icon>
+          </template>
+          <span>{{starTooltip}}</span>
+        </v-tooltip>
+
+        <!-- Render a star-outline icon to visually show a difference between starred and normal event
+              change status to starred when clicked -->
+
+        <!-- Archive icon to allow user archiving an event
+              change status to archived when clicked -->
+        <v-tooltip top>
+          <template v-slot:activator="{ on, attrs }">
+            <v-icon v-if="!(event.status === 'archived')"
+                    class="mr-2"
+                    ref="archiveButton"
+                    color="blue"
+                    v-bind="attrs"
+                    v-on="on"
+                    @click.stop="changeEventStatus('archived')"
+            >
+              mdi-archive-outline
+            </v-icon>
+          </template>
+          <span>Archive notification</span>
+        </v-tooltip>
+        <!-- Trash Bin icon, allowing user to delete an event
+              have a 10s undo-time before the event actually got deleted -->
+        <v-tooltip top>
+          <template v-slot:activator="{ on, attrs }">
+            <v-icon class="mr-2"
+                    ref="deleteButton"
+                    color="red"
+                    v-bind="attrs"
+                    v-on="on"
+                    @click.stop="initiateDeletion"
+            >
+              mdi-trash-can
+            </v-icon>
+          </template>
+          <span>Delete notification</span>
+        </v-tooltip>
       </v-col>
     </v-row>
     <slot/>
@@ -114,13 +174,14 @@ import synchronizedTime from '@/components/utils/Methods/synchronizedTime';
 import { formatDate, formatTime } from '@/utils';
 import { setEventTag } from "@/api/internal";
 import {updateEventAsRead} from "@/api/events";
+import { updateEventStatus } from '../../../api/events';
 
 export default {
   name: 'Event',
   props: {
     title: {
       type: String,
-      required: true,
+      required: false,
     },
     event: {
       type: Object,
@@ -137,9 +198,24 @@ export default {
       editCardDialog: false,
       expand: false,
       colours: ['none', 'red', 'orange', 'yellow', 'green', 'blue', 'purple'],
+      eventStatus: ['normal, starred, archived'],
     };
   },
   computed: {
+    /**
+     * Change tooltip message according to the event status/interest
+     */
+    starTooltip() {
+      if(this.event.status === "starred") return 'Unstar notification';
+      else return 'Star notification';
+    },
+    /**
+     * Change the star icon according to the event status/interest
+     */
+    starIcon() {
+      if(this.event.status === "starred") return 'mdi-star';
+      else return 'mdi-star-outline';
+    },
     /**
      * Change the badge icon based on whether the event has been read
      */
@@ -148,6 +224,16 @@ export default {
         return "mdi-email";
       } else {
         return "mdi-email-open";
+      }
+    },
+    /**
+     * Change the tooltip message base on the event isRead status
+     */
+    envelopToolTip() {
+      if (!this.event.read) {
+        return "Unread";
+      } else {
+        return "Read";
       }
     },
     /**
@@ -248,7 +334,31 @@ export default {
           this.$store.dispatch('refreshEventFeed');
         }
       }
-    }
+    },
+    /**
+     * Call changeEventStatus method according to the event status
+     */
+    toggleStarStatus() {
+      if(this.event.status === 'normal') {
+        this.changeEventStatus('starred');
+      } else {
+        this.changeEventStatus('normal');
+      }
+    },
+    /**
+     * @param Status the status to be updated for the selected event/notification
+     */
+    async changeEventStatus(status) {
+      const result = await updateEventStatus(this.event.id, status);
+      if (typeof result === 'string') {
+        this.errorMessage = result;
+      } else {
+        this.errorMessage = undefined;
+        let newEvent = this.event;
+        newEvent.status = status;
+        this.$store.commit('addEvent', newEvent);
+      }
+    },
   },
   watch: {
     error: {

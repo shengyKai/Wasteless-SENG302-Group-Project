@@ -32,8 +32,8 @@
                 <v-icon class="ml-1">{{thumbIcon}}</v-icon>
               </v-btn>
               <!-- A return button for user to go back to business profile-->
-              <v-btn class="ml-2 mr-1 pl-2 pr-1" color="secondary" @click="viewProfile">
-                Go Back
+              <v-btn class="ml-2 mr-1 pl-2 pr-1" color="secondary" @click="hideExpand">
+                Hide
                 <v-icon class="ml-1">mdi-arrow-left</v-icon>
               </v-btn>
             </v-col>
@@ -81,11 +81,12 @@
           <v-col class="mt-2" cols="6" sm="4">
             <label class="text-h6 font-weight-regular">{{ createdFormatted }}</label>
           </v-col>
-          <v-col align=right>
-            <v-btn class="mt-2 right" color=orange outlined @click="extraDetails = !extraDetails;">Extra Details</v-btn>
+          <!-- change -->
+          <v-col class="column" cols="6" sm="4">
+            <label class="followingLabel">{{ closesFormatted }}</label>
           </v-col>
         </v-row>
-        <div v-if="extraDetails">
+        <div>
           <v-row no-gutters>
             <v-col class="mt-2" cols="6" sm="2">
               <label class="text-h6 font-weight-bold">Best Before Date:</label>
@@ -131,7 +132,7 @@ import {getBusiness, setListingInterest} from '../../api/internal';
 import { formatDate, formatPrice } from '@/utils';
 
 export default {
-  name: "SaleListingPage",
+  name: "FullSaleListing",
   components: {
     ImageCarousel
   },
@@ -147,8 +148,7 @@ export default {
     };
   },
   props: {
-    saleItem: Object,
-    businessId: Number
+    saleItem: Object
   },
   mounted() {
     console.log(this.product);
@@ -240,7 +240,7 @@ export default {
     },
     productDescription() {
       return this.product.description || "Not set";
-    }
+    },
   },
   methods: {
     /**
@@ -266,6 +266,9 @@ export default {
     async getBusiness() {
       this.business = await getBusiness(this.listingBusinessId);
     },
+    hideExpand() {
+      this.$emit('hideExpand');
+    }
     // async isInterested() {
     //   this.isInterested = await getListingInterest(this.saleItem.id, this.$store.state);
     // }

@@ -12,6 +12,7 @@ import org.junit.jupiter.api.TestInstance;
 import org.junit.runner.RunWith;
 import org.mockito.MockedConstruction;
 import org.mockito.Mockito;
+import org.seng302.leftovers.dto.user.UserRole;
 import org.seng302.leftovers.entities.*;
 import org.seng302.leftovers.persistence.BusinessRepository;
 import org.seng302.leftovers.persistence.ImageRepository;
@@ -84,10 +85,10 @@ class ProductControllerTest {
      * Tags a session as DGAA
      */
     private void setUpDGAAAuthCode() {
-        sessionAuthToken.put("role", "defaultGlobalApplicationAdmin");
+        sessionAuthToken.put("role", UserRole.DGAA);
     }
     private void setUpSessionAsAdmin() {
-        sessionAuthToken.put("role", "globalApplicationAdmin");
+        sessionAuthToken.put("role", UserRole.GAA);
     }
 
     /**

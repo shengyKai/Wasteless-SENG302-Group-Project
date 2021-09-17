@@ -5,10 +5,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.seng302.leftovers.dto.user.UserResponseDTO;
 import org.seng302.leftovers.entities.Keyword;
 import org.seng302.leftovers.entities.Location;
 import org.seng302.leftovers.entities.User;
-import org.seng302.leftovers.persistence.EventRepository;
+import org.seng302.leftovers.persistence.event.EventRepository;
 import org.seng302.leftovers.persistence.KeywordRepository;
 import org.seng302.leftovers.persistence.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +28,8 @@ class KeywordCreatedEventTest {
     private UserRepository userRepository;
     @Autowired
     private EventRepository eventRepository;
+    @Autowired
+    private ObjectMapper objectMapper;
 
     private Keyword keyword;
     private User user;
@@ -93,7 +96,7 @@ class KeywordCreatedEventTest {
                 keyword.constructJSONObject().toJSONString(),
                 event.getStatus().toString().toLowerCase(),
                 event.isRead(),
-                user.constructPublicJson(false).toJSONString(),
+                objectMapper.writeValueAsString(new UserResponseDTO(user)),
                 event.getLastModified().toString());
         System.out.println(expectedJsonString);
         String actualJsonString = mapper.writeValueAsString(event.asDTO());

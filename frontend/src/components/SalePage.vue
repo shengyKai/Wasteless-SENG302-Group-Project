@@ -40,7 +40,7 @@
     <v-container class="grey lighten-2">
       <v-row justify="space-between">
         <v-col v-for="sale in salesList" v-bind:key="sale.id" cols="auto">
-          <SaleItem :business-id="businessId" :sale-item="sale" />
+          <SaleItem :business-id="businessId" :sale-item="sale"/>
         </v-col>
       </v-row>
       <v-row justify="center">

@@ -1,4 +1,4 @@
-package org.seng302.leftovers.dto;
+package org.seng302.leftovers.dto.user;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -12,7 +12,7 @@ import javax.validation.constraints.NotNull;
 @Getter
 @ToString
 @EqualsAndHashCode(callSuper = false)
-public class CreateUserDTO extends UserDTO {
+public class CreateUserDTO extends BaseUserRequestDTO {
     @NotNull
     String password;
 }

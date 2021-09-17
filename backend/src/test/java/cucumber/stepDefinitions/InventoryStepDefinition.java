@@ -1,6 +1,7 @@
 package cucumber.stepDefinitions;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import cucumber.context.BusinessContext;
 import cucumber.context.RequestContext;
@@ -12,6 +13,7 @@ import io.cucumber.java.en.When;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import org.hibernate.Session;
+import org.seng302.leftovers.dto.InventoryItemDTO;
 import org.seng302.leftovers.entities.InventoryItem;
 import org.seng302.leftovers.entities.Location;
 import org.seng302.leftovers.entities.Product;
@@ -25,6 +27,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.context.WebApplicationContext;
 
 import javax.persistence.EntityManager;
+import javax.transaction.Transactional;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -150,6 +153,7 @@ public class InventoryStepDefinition  {
 
     }
 
+    @Transactional
     @Then("the inventory of the business is returned to me")
     public void the_inventory_of_the_business_is_returned_to_me() throws UnsupportedEncodingException, JsonProcessingException, net.minidev.json.parser.ParseException {
         mvcResult = requestContext.getLastResult();
@@ -165,7 +169,7 @@ public class InventoryStepDefinition  {
 
         JSONArray jsonArray = new JSONArray();
         for (InventoryItem item : inventory) {
-            jsonArray.appendElement(item.constructJSONObject());
+            jsonArray.appendElement(objectMapper.convertValue(new InventoryItemDTO(item), new TypeReference<JSONObject>() {}));
         }
         expectedPage.put("results", jsonArray);
         expectedPage.put("count", jsonArray.size());

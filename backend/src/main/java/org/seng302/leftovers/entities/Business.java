@@ -2,6 +2,8 @@ package org.seng302.leftovers.entities;
 
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
+import org.seng302.leftovers.dto.LocationDTO;
+import org.seng302.leftovers.dto.user.UserResponseDTO;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
 import org.seng302.leftovers.tools.JsonTools;
 import org.springframework.http.HttpStatus;
@@ -372,7 +374,7 @@ public class Business {
         }
         object.put("images", jsonImages);
         object.put("primaryAdministratorId", primaryOwner.getUserID());
-        object.put("address", getAddress().constructFullJson());
+        object.put("address", new LocationDTO(address, true));
         object.put("businessType", businessType);
         object.put("created", created.toString());
         JsonTools.removeNullsFromJson(object);
@@ -400,7 +402,7 @@ public class Business {
         Collections.sort(admins, (User user1, User user2) ->
             user1.getUserID().compareTo(user2.getUserID()));
         for (User admin : admins) {
-            adminJsons.add(admin.constructPublicJson());
+            adminJsons.add(new UserResponseDTO(admin));
         }
         return adminJsons;
     }

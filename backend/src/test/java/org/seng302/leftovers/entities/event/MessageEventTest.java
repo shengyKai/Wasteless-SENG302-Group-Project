@@ -9,10 +9,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.seng302.leftovers.dto.ConversationDTO;
 import org.seng302.leftovers.dto.MessageDTO;
-import org.seng302.leftovers.entities.Conversation;
-import org.seng302.leftovers.entities.MarketplaceCard;
-import org.seng302.leftovers.entities.Message;
-import org.seng302.leftovers.entities.User;
+import org.seng302.leftovers.entities.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
@@ -29,33 +26,30 @@ class MessageEventTest {
     private ObjectMapper mapper;
 
     @Mock
-    User buyer;
+    private User buyer;
     @Mock
-    User seller;
+    private Location address;
     @Mock
-    User bystander;
+    private User seller;
     @Mock
-    MarketplaceCard card;
+    private User bystander;
     @Mock
-    Message firstMessage;
+    private MarketplaceCard card;
     @Mock
-    Message secondMessage;
+    private Message firstMessage;
     @Mock
-    Conversation eventConversation;
+    private Message secondMessage;
     @Mock
-    Conversation otherConversation;
+    private Conversation eventConversation;
+    @Mock
+    private Conversation otherConversation;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
 
-        var buyerJson = new JSONObject();
-        buyerJson.appendField("id", 92);
-        when(buyer.constructPublicJson()).thenReturn(buyerJson);
-
-        var sellerJson = new JSONObject();
-        sellerJson.appendField("id", 38);
-        when(seller.constructPublicJson()).thenReturn(sellerJson);
+        when(buyer.getAddress()).thenReturn(address);
+        when(seller.getAddress()).thenReturn(address);
 
         var cardJson = new JSONObject();
         cardJson.appendField("id", 520);
