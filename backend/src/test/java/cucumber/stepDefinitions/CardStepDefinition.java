@@ -18,7 +18,6 @@ import net.minidev.json.parser.ParseException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.junit.jupiter.api.Assertions;
-import org.seng302.leftovers.dto.KeywordDTO;
 import org.seng302.leftovers.dto.MarketplaceCardDTO;
 import org.seng302.leftovers.entities.Keyword;
 import org.seng302.leftovers.entities.MarketplaceCard;

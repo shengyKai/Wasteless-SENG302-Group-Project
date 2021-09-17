@@ -9,7 +9,6 @@ import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import net.minidev.json.JSONObject;
 import net.minidev.json.parser.ParseException;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.seng302.leftovers.dto.event.EventStatus;
 import org.seng302.leftovers.dto.event.EventTag;
@@ -24,7 +23,6 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 
 public class EventStepDefinition {

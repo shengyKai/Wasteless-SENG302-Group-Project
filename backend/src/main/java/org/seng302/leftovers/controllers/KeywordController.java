@@ -1,6 +1,5 @@
 package org.seng302.leftovers.controllers;
 
-import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -9,9 +8,9 @@ import org.seng302.leftovers.dto.KeywordDTO;
 import org.seng302.leftovers.entities.Keyword;
 import org.seng302.leftovers.entities.User;
 import org.seng302.leftovers.entities.event.KeywordCreatedEvent;
-import org.seng302.leftovers.persistence.event.CreateKeywordEventRepository;
 import org.seng302.leftovers.persistence.KeywordRepository;
 import org.seng302.leftovers.persistence.UserRepository;
+import org.seng302.leftovers.persistence.event.CreateKeywordEventRepository;
 import org.seng302.leftovers.service.KeywordService;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
 import org.seng302.leftovers.tools.SearchHelper;

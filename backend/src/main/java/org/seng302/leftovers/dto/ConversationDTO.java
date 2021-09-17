@@ -3,7 +3,6 @@ package org.seng302.leftovers.dto;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
-import net.minidev.json.JSONObject;
 import org.seng302.leftovers.dto.user.UserResponseDTO;
 import org.seng302.leftovers.entities.Conversation;
 

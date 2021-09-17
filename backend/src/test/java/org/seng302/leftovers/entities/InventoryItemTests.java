@@ -1,6 +1,5 @@
 package org.seng302.leftovers.entities;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.minidev.json.JSONObject;
 import org.junit.jupiter.api.AfterAll;

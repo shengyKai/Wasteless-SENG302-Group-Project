@@ -4,10 +4,8 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
-import net.minidev.json.JSONObject;
 import org.seng302.leftovers.dto.user.UserResponseDTO;
 import org.seng302.leftovers.entities.MarketplaceCard;
-import org.seng302.leftovers.entities.User;
 
 import java.time.Instant;
 import java.util.List;

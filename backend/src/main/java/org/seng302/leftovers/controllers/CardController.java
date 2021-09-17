@@ -11,7 +11,10 @@ import org.seng302.leftovers.entities.Keyword;
 import org.seng302.leftovers.entities.MarketplaceCard;
 import org.seng302.leftovers.entities.User;
 import org.seng302.leftovers.entities.event.ExpiryEvent;
-import org.seng302.leftovers.persistence.*;
+import org.seng302.leftovers.persistence.KeywordRepository;
+import org.seng302.leftovers.persistence.MarketplaceCardRepository;
+import org.seng302.leftovers.persistence.SearchMarketplaceCardHelper;
+import org.seng302.leftovers.persistence.UserRepository;
 import org.seng302.leftovers.persistence.event.ExpiryEventRepository;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
 import org.seng302.leftovers.tools.SearchHelper;
@@ -28,11 +31,9 @@ import org.springframework.web.server.ResponseStatusException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * This controller handles requests involving marketplace cards

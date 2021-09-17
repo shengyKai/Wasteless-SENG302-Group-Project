@@ -6,15 +6,14 @@ import net.minidev.json.JSONObject;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.seng302.leftovers.dto.KeywordDTO;
 import org.seng302.leftovers.dto.MarketplaceCardDTO;
 import org.seng302.leftovers.entities.Location;
 import org.seng302.leftovers.entities.MarketplaceCard;
 import org.seng302.leftovers.entities.User;
 import org.seng302.leftovers.persistence.BusinessRepository;
-import org.seng302.leftovers.persistence.event.ExpiryEventRepository;
 import org.seng302.leftovers.persistence.MarketplaceCardRepository;
 import org.seng302.leftovers.persistence.UserRepository;
+import org.seng302.leftovers.persistence.event.ExpiryEventRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 

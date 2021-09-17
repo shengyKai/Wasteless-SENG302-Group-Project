@@ -10,7 +10,6 @@ import org.springframework.web.server.ResponseStatusException;
 
 import javax.persistence.*;
 import java.security.NoSuchAlgorithmException;
-import java.util.Set;
 import java.util.regex.Pattern;
 
 @Entity

@@ -11,7 +11,6 @@ import org.seng302.leftovers.entities.Product;
 import org.seng302.leftovers.persistence.BusinessRepository;
 import org.seng302.leftovers.persistence.InventoryItemRepository;
 import org.seng302.leftovers.persistence.ProductRepository;
-import org.seng302.leftovers.tools.JsonTools;
 import org.seng302.leftovers.tools.SearchHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -25,7 +24,6 @@ import org.springframework.web.server.ResponseStatusException;
 import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @RestController
 public class InventoryController {

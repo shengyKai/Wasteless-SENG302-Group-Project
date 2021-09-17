@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import cucumber.context.BusinessContext;
 import cucumber.context.RequestContext;
 import cucumber.context.UserContext;
-import io.cucumber.java.After;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
