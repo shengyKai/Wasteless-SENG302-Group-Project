@@ -168,7 +168,7 @@ public class SaleController {
     }
 
     /**
-     * Set the user isInterested for a listing byadding user into the interestedUser Set.
+     * Set the user isInterested for a listing by adding user into the interestedUser Set.
      * @param id        ID of the saleListing
      * @param request   The HTTp request
      * @param body      The body of SaleItemInterest
