@@ -7,13 +7,12 @@ import org.apache.logging.log4j.Logger;
 import org.seng302.leftovers.dto.ResultPageDTO;
 import org.seng302.leftovers.dto.SaleItemDTO;
 import org.seng302.leftovers.dto.SetSaleItemInterestDTO;
-import org.seng302.leftovers.entities.BoughtSaleItem;
-import org.seng302.leftovers.entities.Business;
-import org.seng302.leftovers.entities.InventoryItem;
-import org.seng302.leftovers.entities.SaleItem;
+import org.seng302.leftovers.entities.*;
 import org.seng302.leftovers.entities.event.InterestEvent;
+import org.seng302.leftovers.entities.event.InterestPurchasedEvent;
 import org.seng302.leftovers.persistence.*;
 import org.seng302.leftovers.persistence.event.InterestEventRepository;
+import org.seng302.leftovers.persistence.event.InterestPurchasedEventRepository;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
 import org.seng302.leftovers.tools.JsonTools;
 import org.seng302.leftovers.tools.SearchHelper;
@@ -43,16 +42,19 @@ public class SaleController {
     private final InventoryItemRepository inventoryItemRepository;
     private final InterestEventRepository interestEventRepository;
     private final BoughtSaleItemRepository boughtSaleItemRepository;
+    private final InterestPurchasedEventRepository interestPurchasedEventRepository;
 
     public SaleController(UserRepository userRepository, BusinessRepository businessRepository,
                           SaleItemRepository saleItemRepository, InventoryItemRepository inventoryItemRepository,
-                          InterestEventRepository interestEventRepository, BoughtSaleItemRepository boughtSaleItemRepository) {
+                          InterestEventRepository interestEventRepository, BoughtSaleItemRepository boughtSaleItemRepository,
+                          InterestPurchasedEventRepository interestPurchasedEventRepository) {
         this.userRepository = userRepository;
         this.businessRepository = businessRepository;
         this.saleItemRepository = saleItemRepository;
         this.inventoryItemRepository = inventoryItemRepository;
         this.interestEventRepository = interestEventRepository;
         this.boughtSaleItemRepository = boughtSaleItemRepository;
+        this.interestPurchasedEventRepository = interestPurchasedEventRepository;
     }
 
     private static final Set<String> VALID_ORDERINGS = Set.of("created", "closing", "productCode", "productName", "quantity", "price");
@@ -257,6 +259,14 @@ public class SaleController {
 
             var boughtSaleItem = new BoughtSaleItem(saleItem, purchaser);
             boughtSaleItemRepository.save(boughtSaleItem);
+
+            InterestPurchasedEvent interestPurchasedEvent;
+            for (User user : saleItem.getInterestedUsers()) {
+                if (user != purchaser) {
+                    interestPurchasedEvent = new InterestPurchasedEvent(user, boughtSaleItem);
+                    interestPurchasedEventRepository.save(interestPurchasedEvent);
+                }
+            }
 
             var inventoryItem = saleItem.getInventoryItem();
             inventoryItem.setRemainingQuantity(inventoryItem.getRemainingQuantity() + saleItem.getQuantity());
