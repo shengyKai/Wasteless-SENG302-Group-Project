@@ -54,7 +54,8 @@ describe("Test GET /businesses/:businessId/listings endpoint", () => {
           "price": 17.99,
           "moreInfo": "Seller may be willing to consider near offers",
           "created": "2021-07-14T11:44:00Z",
-          "closes": "2021-07-21T23:59:00Z"
+          "closes": "2021-07-21T23:59:00Z",
+          "interestCount": 7
         }
       ],
       count: 1
@@ -100,6 +101,7 @@ describe("Test GET /businesses/:businessId/listings endpoint", () => {
           "quantity": 3,
           "price": 17.99,
           "created": "2021-07-14T11:44:00Z",
+          "interestCount": 7
         }
       ],
       count: 1,

@@ -27,6 +27,7 @@ public class SaleItemDTO {
     @JsonFormat(shape=JsonFormat.Shape.STRING)
     private Instant created;
     private LocalDate closes;
+    private int interestCount;
 
     /**
      * Helper JSON constructor
@@ -45,5 +46,6 @@ public class SaleItemDTO {
         this.moreInfo = saleItem.getMoreInfo();
         this.created = saleItem.getCreated();
         this.closes = saleItem.getCloses();
+        this.interestCount = saleItem.getLikeCount();
     }
 }
