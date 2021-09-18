@@ -1,6 +1,5 @@
 package org.seng302.leftovers.entities.event;
 
-import org.hibernate.annotations.UpdateTimestamp;
 import org.seng302.leftovers.dto.event.EventDTO;
 import org.seng302.leftovers.dto.event.EventStatus;
 import org.seng302.leftovers.dto.event.EventTag;
@@ -10,7 +9,6 @@ import org.springframework.web.server.ResponseStatusException;
 
 import javax.persistence.*;
 import java.time.Instant;
-import java.time.LocalDateTime;
 
 /**
  * Abstract event entity for some component that will appear on a user's newsfeed

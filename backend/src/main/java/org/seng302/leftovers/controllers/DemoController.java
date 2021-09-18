@@ -1,8 +1,8 @@
 package org.seng302.leftovers.controllers;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.ToString;
-import net.minidev.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.hibernate.Session;
@@ -186,6 +186,20 @@ public class DemoController {
       private int businessImageMax = 3;
     }
 
+    /**
+     * DTO representing the response of a generate request
+     */
+    @Getter
+    @ToString
+    @AllArgsConstructor
+    public static class GenerateResponseDTO {
+        private List<Long> generatedUsers;
+        private List<Long> generatedBusinesses;
+        private List<Long> generatedProducts;
+        private List<Long> generatedInventoryItems;
+        private List<Long> generatedSaleItems;
+        private List<Long> generatedCards;
+    }
 
     /**
      * Generates a set of demo data (Using the more advanced generators)
@@ -193,7 +207,7 @@ public class DemoController {
      * @return JSON including generated Users, Businesses and Products IDs
      */
     @PostMapping("/demo/generate")
-    public JSONObject generate(HttpServletRequest request, @RequestBody GeneratorRequestDTO options) {
+    public GenerateResponseDTO generate(HttpServletRequest request, @RequestBody GeneratorRequestDTO options) {
         AuthenticationTokenManager.checkAuthenticationTokenDGAA(request);
 
         List<Long> allUsers = options.getUserInitial();
@@ -201,9 +215,8 @@ public class DemoController {
         List<Long> allProducts = options.getProductInitial();
         List<Long> allInventoryItems = options.getInventoryItemInitial();
 
-        JSONObject json = new JSONObject();
         Session session = entityManager.unwrap(Session.class);
-        session.doWork(connection -> {
+        return session.doReturningWork(connection -> {
             var userGenerator = new UserGenerator(connection);
             var businessGenerator = new BusinessGenerator(connection);
             var productGenerator = new ProductGenerator(connection);
@@ -232,16 +245,7 @@ public class DemoController {
                 businessImageGenerator.generateBusinessImages(allBusinesses, options.getBusinessImageMin(), options.getBusinessImageMax());
             }
 
-            json.appendField("generatedUsers", userIds);
-            json.appendField("generatedBusinesses", businessIds);
-            json.appendField("generatedProducts", productIds);
-            json.appendField("generatedInventoryItems", inventoryIds);
-            json.appendField("generatedSaleItems", saleItemIds);
-            json.appendField("generatedCards", cardIds);
-
+            return new GenerateResponseDTO(userIds, businessIds, productIds, inventoryIds, saleItemIds, cardIds);
         });
-        return json;
     }
-
-
 }

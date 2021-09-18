@@ -3,7 +3,7 @@ package org.seng302.leftovers.dto.event;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
-import net.minidev.json.JSONObject;
+import org.seng302.leftovers.dto.card.MarketplaceCardResponseDTO;
 import org.seng302.leftovers.entities.event.ExpiryEvent;
 
 /**
@@ -13,7 +13,7 @@ import org.seng302.leftovers.entities.event.ExpiryEvent;
 @ToString
 @EqualsAndHashCode(callSuper = false)
 public class ExpiryEventDTO extends EventDTO {
-    private JSONObject card;
+    private MarketplaceCardResponseDTO card;
 
     /**
      * Converts a ExpiryEvent entity to its JSON form
@@ -21,7 +21,6 @@ public class ExpiryEventDTO extends EventDTO {
      */
     public ExpiryEventDTO(ExpiryEvent event) {
         super(event);
-        // TODO When MarketplaceCard DTO is done this needs updating
-        this.card = event.getExpiringCard().constructJSONObject();
+        this.card = new MarketplaceCardResponseDTO(event.getExpiringCard());
     }
 }

@@ -3,7 +3,6 @@ package org.seng302.leftovers.entities;
 import javax.persistence.*;
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.util.Objects;
 
 /**
  * Entity that represents a sale item that has been sold
