@@ -21,12 +21,12 @@
         <v-icon>mdi-currency-usd</v-icon>
       </v-btn>
       <!-- Thumb up/down button to show and allow user the like & unlike feature -->
-      <v-btn v-if="!event.interested" class="ml-2 blue--text" color="grey lighten-2">
-        Like
+      <v-btn v-if="!interested" class="ml-2 blue--text" color="grey lighten-2">
+        Like {{interestCount}}
         <v-icon class="ml-1">mdi-thumb-up</v-icon>
       </v-btn>
       <v-btn v-else color="ml-2 grey lighten-2">
-        Unlike
+        Unlike {{interestCount}}
         <v-icon class="ml-1">mdi-thumb-down</v-icon>
       </v-btn>
       <!-- A return button for user to go back to business profile-->
@@ -104,6 +104,18 @@ export default {
           id: this.business.id
         }
       };
+    },
+    /**
+     * Returns the status of interested for the event
+     */
+    interested() {
+      return this.event.interested;
+    },
+    /**
+     * Returns the number of likes for the sale listing
+     */
+    interestCount()  {
+      return this.event.saleItem.interestCount;
     }
   },
 };

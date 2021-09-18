@@ -23,6 +23,7 @@ public class BaseSaleItemDTO {
     private BigDecimal price;
     private String moreInfo;
     private LocalDate closes;
+    private int interestCount;
 
     /**
      * Helper JSON constructor
@@ -38,5 +39,6 @@ public class BaseSaleItemDTO {
         this.price = saleItem.getPrice();
         this.moreInfo = saleItem.getMoreInfo();
         this.closes = saleItem.getCloses();
+        this.interestCount = saleItem.getLikeCount();
     }
 }

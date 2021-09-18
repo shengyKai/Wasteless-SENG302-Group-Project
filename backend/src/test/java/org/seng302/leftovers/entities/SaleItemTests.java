@@ -431,7 +431,8 @@ class SaleItemTests {
         assertEquals(saleItem.getMoreInfo(), object.get("moreInfo"));
         assertEquals(saleItem.getCreated().toString(), object.get("created"));
         assertEquals(saleItem.getCloses().toString(), object.get("closes"));
-        assertEquals(7, object.size()); // No extra properties
+        assertEquals(saleItem.getLikeCount(), object.get("interestCount"));
+        assertEquals(8, object.size()); // No extra properties
     }
 
     @Test
@@ -451,7 +452,7 @@ class SaleItemTests {
         assertFalse(object.containsKey("moreInfo"));
 
 
-        assertEquals(6, object.size());
+        assertEquals(7, object.size());
     }
 
     @Test

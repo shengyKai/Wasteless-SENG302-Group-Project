@@ -157,6 +157,12 @@ public class SaleController {
         }
     }
 
+    /**
+     * Set the user isInterested for a listing by adding user into the interestedUser Set.
+     * @param id        ID of the saleListing
+     * @param request   The HTTp request
+     * @param body      The body of SaleItemInterest
+     */
     @PutMapping("/listings/{id}/interest")
     public void setSaleItemInterest(
             @PathVariable Long id,
@@ -192,6 +198,41 @@ public class SaleController {
         } catch (Exception e) {
             logger.error(e.getMessage());
             throw e;
+        }
+    }
+
+    /**
+     * Get the interestedUser Set and check does the set contain the param user.
+     * @param listingId             Sale Listing id
+     * @param request               The HTTP request
+     * @param userId                ID of the user that perform the check for
+     * @return boolean              Does the user liked the sale listing
+     */
+    @GetMapping("/listings/{listingId}/interest")
+    public JSONObject getSaleItemsInterest(@PathVariable Long listingId,
+                                           HttpServletRequest request,
+                                            @RequestParam Long userId) {
+        try {
+            AuthenticationTokenManager.checkAuthenticationToken(request);
+            logger.info("Getting interest status for sale listing (saleListingId={}).", listingId);
+
+            if (!AuthenticationTokenManager.sessionCanSeePrivate(request, userId)) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User cannot view listing interest of another user");
+            }
+
+            var user = userRepository.findById(userId)
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "User does not exist"));
+
+            var saleItem = saleItemRepository.findById(listingId)
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "Listing not found"));
+
+            var object = new JSONObject();
+            object.put("isInterested", saleItem.getInterestedUsers().contains(user));
+            return object;
+
+        } catch (Exception error) {
+            logger.error(error.getMessage());
+            throw error;
         }
     }
 }
