@@ -202,6 +202,16 @@ public class SaleController {
     }
 
     /**
+     * DTO representing the response from getting the interest of a sale item
+     */
+    @Getter
+    @ToString
+    @AllArgsConstructor
+    public static class GetSaleItemInterestDTO {
+        private Boolean isInterested;
+    }
+
+    /**
      * Get the interestedUser Set and check does the set contain the param user.
      * @param listingId             Sale Listing id
      * @param request               The HTTP request
@@ -209,7 +219,7 @@ public class SaleController {
      * @return boolean              Does the user liked the sale listing
      */
     @GetMapping("/listings/{listingId}/interest")
-    public JSONObject getSaleItemsInterest(@PathVariable Long listingId,
+    public GetSaleItemInterestDTO getSaleItemsInterest(@PathVariable Long listingId,
                                            HttpServletRequest request,
                                             @RequestParam Long userId) {
         try {
@@ -226,10 +236,7 @@ public class SaleController {
             var saleItem = saleItemRepository.findById(listingId)
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "Listing not found"));
 
-            var object = new JSONObject();
-            object.put("isInterested", saleItem.getInterestedUsers().contains(user));
-            return object;
-
+            return new GetSaleItemInterestDTO(saleItem.getInterestedUsers().contains(user));
         } catch (Exception error) {
             logger.error(error.getMessage());
             throw error;
