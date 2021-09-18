@@ -58,7 +58,6 @@ public class SaleSearchStepDefinition {
     private String priceUpper = "";
     private String closeLower = "";
     private String closeUpper = "";
-    private Boolean reverse = false;
 
 
     @And("the business has the following products on sale:")
@@ -176,7 +175,6 @@ public class SaleSearchStepDefinition {
         this.priceUpper = "";
         this.closeLower = "";
         this.closeUpper = "";
-        this.reverse = false;
     }
 
     @When("I search sale basic {string}")

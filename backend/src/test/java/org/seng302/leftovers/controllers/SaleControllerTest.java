@@ -673,4 +673,44 @@ class SaleControllerTest {
 
         verify(interestEventRepository, times(1)).save(interestEvent);
     }
+
+    @Test
+    void saleSearch_noQuery_200() throws Exception {
+        var items = generateMockSaleItems();
+        when(saleItemRepository.findAll(any(), any(PageRequest.class))).thenReturn(new PageImpl<>(items));
+
+        mockMvc.perform(get("/businesses/listings/search"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void saleSearch_severalParameters_200() throws Exception {
+        var items = generateMockSaleItems();
+        when(saleItemRepository.findAll(any(), any(PageRequest.class))).thenReturn(new PageImpl<>(items));
+
+        mockMvc.perform(get("/businesses/listings/search")
+                .param("productSearchQuery", "Cheese")
+                .param("businessSearchQuery", "Lactose and Co")
+                .param("locationSearchQuery", "Here")
+                .param("priceLower", "2.00")
+                .param("priceUpper", "25.00")
+                .param("businessTypes", "Retail Trade"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void saleSearch_invalidSearchParameters_400() throws Exception {
+        mockMvc.perform(get("/businesses/listings/search")
+                .param("businessTypes", "Meat Farm"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void saleSearch_notLoggedIn_401() throws Exception {
+        authenticationTokenManager.when(() -> AuthenticationTokenManager.checkAuthenticationToken(any()))
+                .thenThrow(new AccessTokenException());
+
+        mockMvc.perform(get("/businesses/listings/search"))
+                .andExpect(status().isUnauthorized());
+    }
 }
