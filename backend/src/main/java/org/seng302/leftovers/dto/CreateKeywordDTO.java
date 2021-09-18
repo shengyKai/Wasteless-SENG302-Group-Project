@@ -7,14 +7,12 @@ import lombok.ToString;
 import javax.validation.constraints.NotNull;
 
 /**
- * DTO for sending a message between marketplace users.
+ * A DTO representing a keyword entity
  */
 @Getter
 @ToString
 @EqualsAndHashCode
-public class SendMessageDTO {
+public class CreateKeywordDTO {
     @NotNull
-    private Long senderId;
-    @NotNull
-    private String message;
+    private String name;
 }

@@ -4,7 +4,6 @@ import org.springframework.data.jpa.domain.Specification;
 
 import javax.persistence.Transient;
 import javax.persistence.criteria.*;
-import java.util.Arrays;
 
 /**
  * Defines a specification for type User

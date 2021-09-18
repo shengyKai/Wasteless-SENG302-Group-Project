@@ -5,9 +5,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
-import net.minidev.json.JSONObject;
 import org.seng302.leftovers.entities.SaleItem;
-import org.seng302.leftovers.tools.JsonTools;
 
 import java.math.BigDecimal;
 import java.time.Instant;

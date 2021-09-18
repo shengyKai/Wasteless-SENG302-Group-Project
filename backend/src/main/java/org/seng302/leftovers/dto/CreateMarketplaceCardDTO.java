@@ -7,14 +7,12 @@ import lombok.ToString;
 import javax.validation.constraints.NotNull;
 
 /**
- * DTO for sending a message between marketplace users.
+ * A DTO for creating a marketplace card
  */
 @Getter
 @ToString
-@EqualsAndHashCode
-public class SendMessageDTO {
+@EqualsAndHashCode(callSuper = false)
+public class CreateMarketplaceCardDTO extends ModifyMarketplaceCardDTO{
     @NotNull
-    private Long senderId;
-    @NotNull
-    private String message;
+    private Long creatorId = null;
 }
