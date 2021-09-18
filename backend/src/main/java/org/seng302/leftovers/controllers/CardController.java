@@ -1,11 +1,13 @@
 package org.seng302.leftovers.controllers;
 
-import net.minidev.json.JSONObject;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.ToString;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.seng302.leftovers.dto.CreateMarketplaceCardDTO;
-import org.seng302.leftovers.dto.MarketplaceCardDTO;
-import org.seng302.leftovers.dto.ModifyMarketplaceCardDTO;
+import org.seng302.leftovers.dto.card.CreateMarketplaceCardDTO;
+import org.seng302.leftovers.dto.card.MarketplaceCardResponseDTO;
+import org.seng302.leftovers.dto.card.ModifyMarketplaceCardDTO;
 import org.seng302.leftovers.dto.ResultPageDTO;
 import org.seng302.leftovers.entities.Keyword;
 import org.seng302.leftovers.entities.MarketplaceCard;
@@ -58,6 +60,16 @@ public class CardController {
     }
 
     /**
+     * DTO representing the response from adding a marketplace card
+     */
+    @Getter
+    @ToString
+    @AllArgsConstructor
+    public static class CreateCardResponseDTO {
+        private Long cardId;
+    }
+
+    /**
      * Endpoint to create a card with the properties given in the json body of the request.
      * Will return a 401 error if the request is unauthorized, a 403 error if the user does not have perimssion to create
      * a card with the given creatorId, or a 400 error if the json body is not formatted as expected.
@@ -68,7 +80,7 @@ public class CardController {
      * @return A json with a cardId attribute if the request is successful.
      */
     @PostMapping("/cards")
-    public JSONObject createCard(HttpServletRequest request, HttpServletResponse response, @RequestBody @Valid CreateMarketplaceCardDTO cardProperties) {
+    public CreateCardResponseDTO createCard(HttpServletRequest request, HttpServletResponse response, @RequestBody @Valid CreateMarketplaceCardDTO cardProperties) {
         logger.info("Request to create marketplace card received");
         try {
             // Check that authentication token is present and valid
@@ -84,11 +96,9 @@ public class CardController {
             MarketplaceCard card = constructCardFromProperties(cardProperties);
             card = marketplaceCardRepository.save(card);
 
-            // Construct and return a json with the card id
-            JSONObject json = new JSONObject();
-            json.appendField("cardId", card.getID());
             response.setStatus(201);
-            return json;
+            // Construct and return a json with the card id
+            return new CreateCardResponseDTO(card.getID());
         } catch (Exception e) {
             logger.error(e.getMessage());
             throw e;
@@ -164,7 +174,7 @@ public class CardController {
     }
 
     /**
-     * Fetches the list of card keywords from the JSONObject attribute "keywordIds"
+     * Fetches the list of card keywords from a list of keywordIds
      * @param keywordIds list of keyword ids
      * @return List of keywords from "keywordIds"
      */
@@ -287,12 +297,12 @@ public class CardController {
      * @return A JSON Array of Marketplace cards
      */
     @GetMapping("/cards")
-    public ResultPageDTO<MarketplaceCardDTO> getCards(HttpServletRequest request,
-                                  @RequestParam(name = "section") String sectionString,
-                                  @RequestParam(required = false) String orderBy,
-                                  @RequestParam(required = false) Integer page,
-                                  @RequestParam(required = false) Integer resultsPerPage,
-                                  @RequestParam(required = false) Boolean reverse) {
+    public ResultPageDTO<MarketplaceCardResponseDTO> getCards(HttpServletRequest request,
+                                                              @RequestParam(name = "section") String sectionString,
+                                                              @RequestParam(required = false) String orderBy,
+                                                              @RequestParam(required = false) Integer page,
+                                                              @RequestParam(required = false) Integer resultsPerPage,
+                                                              @RequestParam(required = false) Boolean reverse) {
         
         logger.info("Request to get marketplace cards for {}", sectionString);
         try {
@@ -302,7 +312,7 @@ public class CardController {
             PageRequest pageRequest = generatePageRequest(orderBy, page, resultsPerPage, reverse);
             Page<MarketplaceCard> results = marketplaceCardRepository.getAllBySection(section, pageRequest);
 
-            return new ResultPageDTO<>(results.map(MarketplaceCardDTO::new));
+            return new ResultPageDTO<>(results.map(MarketplaceCardResponseDTO::new));
         } catch (Exception exception) {
             logger.error(exception.getMessage());
             throw exception;
@@ -319,17 +329,17 @@ public class CardController {
      * @param resultsPerPage Maximum number of results to retrieve
      * @param reverse Indicates which way the results will be ordered. They will be in descending order if it is true,
      *                or ascending if it is false or null.
-     * @return A JSONObject page of Marketplace cards
+     * @return A page of Marketplace cards DTOs
      */
     @GetMapping("/cards/search")
-    public ResultPageDTO<MarketplaceCardDTO> searchCards(HttpServletRequest request,
-                                  @RequestParam(name = "section") String sectionString,
-                                  @RequestParam(value="keywordIds") List<Long> keywordIds,
-                                  @RequestParam Boolean union,
-                                  @RequestParam(required = false) String orderBy,
-                                  @RequestParam(required = false) Integer page,
-                                  @RequestParam(required = false) Integer resultsPerPage,
-                                  @RequestParam(required = false) Boolean reverse) {
+    public ResultPageDTO<MarketplaceCardResponseDTO> searchCards(HttpServletRequest request,
+                                                                 @RequestParam(name = "section") String sectionString,
+                                                                 @RequestParam(value="keywordIds") List<Long> keywordIds,
+                                                                 @RequestParam Boolean union,
+                                                                 @RequestParam(required = false) String orderBy,
+                                                                 @RequestParam(required = false) Integer page,
+                                                                 @RequestParam(required = false) Integer resultsPerPage,
+                                                                 @RequestParam(required = false) Boolean reverse) {
         logger.info("Searching cards with section=\"{}\" and keywordsIds={}", sectionString, keywordIds);
         try {
             AuthenticationTokenManager.checkAuthenticationToken(request);
@@ -349,7 +359,7 @@ public class CardController {
 
             Page<MarketplaceCard> results = marketplaceCardRepository.findAll(spec, pageRequest);
 
-            return new ResultPageDTO<>(results.map(MarketplaceCardDTO::new));
+            return new ResultPageDTO<>(results.map(MarketplaceCardResponseDTO::new));
         } catch (Exception exception) {
             logger.error(exception.getMessage());
             throw exception;
@@ -364,10 +374,10 @@ public class CardController {
      * @return A page of marketplace cards
      */
     @GetMapping("/users/{id}/cards")
-    public ResultPageDTO<MarketplaceCardDTO> getCardsForUser(HttpServletRequest request,
-                                      @PathVariable Long id,
-                                      @RequestParam(required = false) Integer page,
-                                      @RequestParam(required = false) Integer resultsPerPage) {
+    public ResultPageDTO<MarketplaceCardResponseDTO> getCardsForUser(HttpServletRequest request,
+                                                                     @PathVariable Long id,
+                                                                     @RequestParam(required = false) Integer page,
+                                                                     @RequestParam(required = false) Integer resultsPerPage) {
         logger.info("Request to get marketplace cards for user {}", id);
         AuthenticationTokenManager.checkAuthenticationToken(request);
 
@@ -376,6 +386,6 @@ public class CardController {
         PageRequest pageRequest = SearchHelper.getPageRequest(page, resultsPerPage, Sort.by(Sort.Direction.DESC, DEFAULT_ORDERING));
         var results = marketplaceCardRepository.getAllByCreator(user, pageRequest);
 
-        return new ResultPageDTO<>(results.map(MarketplaceCardDTO::new));
+        return new ResultPageDTO<>(results.map(MarketplaceCardResponseDTO::new));
     }
 }

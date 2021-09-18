@@ -3,7 +3,7 @@ package org.seng302.leftovers.dto.event;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
-import org.seng302.leftovers.dto.SaleItemDTO;
+import org.seng302.leftovers.dto.saleitem.SaleItemResponseDTO;
 import org.seng302.leftovers.entities.event.InterestEvent;
 
 /**
@@ -13,7 +13,7 @@ import org.seng302.leftovers.entities.event.InterestEvent;
 @ToString
 @EqualsAndHashCode(callSuper = false)
 public class InterestEventDTO extends EventDTO {
-    private SaleItemDTO saleItem;
+    private SaleItemResponseDTO saleItem;
     private boolean interested;
 
     /**
@@ -23,7 +23,7 @@ public class InterestEventDTO extends EventDTO {
      */
     public InterestEventDTO(InterestEvent event) {
         super(event);
-        this.saleItem = new SaleItemDTO(event.getSaleItem());
+        this.saleItem = new SaleItemResponseDTO(event.getSaleItem());
         this.interested = event.getInterested();
     }
 

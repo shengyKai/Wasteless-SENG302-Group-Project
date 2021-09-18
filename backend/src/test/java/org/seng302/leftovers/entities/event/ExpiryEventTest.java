@@ -6,7 +6,7 @@ import net.minidev.json.JSONObject;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.seng302.leftovers.dto.MarketplaceCardDTO;
+import org.seng302.leftovers.dto.card.MarketplaceCardResponseDTO;
 import org.seng302.leftovers.entities.Location;
 import org.seng302.leftovers.entities.MarketplaceCard;
 import org.seng302.leftovers.entities.User;
@@ -84,7 +84,7 @@ class ExpiryEventTest {
                 testEvent.getCreated(),
                 testEvent.getStatus().toString().toLowerCase(),
                 testEvent.isRead(),
-                mapper.convertValue(new MarketplaceCardDTO(testCard), JSONObject.class),
+                mapper.convertValue(new MarketplaceCardResponseDTO(testCard), JSONObject.class),
                 testEvent.getLastModified().toString());
         String actualJsonString = mapper.writeValueAsString(testEvent.asDTO());
         assertEquals(mapper.readTree(expectedJsonString), mapper.readTree(actualJsonString));
