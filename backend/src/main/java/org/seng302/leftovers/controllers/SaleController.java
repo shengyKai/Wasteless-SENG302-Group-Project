@@ -1,19 +1,15 @@
 package org.seng302.leftovers.controllers;
 
-import lombok.Getter;
-import net.minidev.json.JSONObject;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.ToString;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.seng302.leftovers.dto.ResultPageDTO;
-import org.seng302.leftovers.dto.SaleItemDTO;
-import org.seng302.leftovers.dto.SetSaleItemInterestDTO;
-import org.seng302.leftovers.entities.BoughtSaleItem;
 import org.seng302.leftovers.dto.saleitem.CreateSaleItemDTO;
 import org.seng302.leftovers.dto.saleitem.SaleItemResponseDTO;
 import org.seng302.leftovers.dto.saleitem.SetSaleItemInterestDTO;
+import org.seng302.leftovers.entities.BoughtSaleItem;
 import org.seng302.leftovers.entities.Business;
 import org.seng302.leftovers.entities.InventoryItem;
 import org.seng302.leftovers.entities.SaleItem;
