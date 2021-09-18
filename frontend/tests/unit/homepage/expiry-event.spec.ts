@@ -12,7 +12,7 @@ import {extendMarketplaceCardExpiry as extendMarketplaceCardExpiry1} from "@/api
 
 Vue.use(Vuetify);
 
-jest.mock('@/api/internal', () => ({
+jest.mock('@/api/internal-marketplace', () => ({
   extendMarketplaceCardExpiry: jest.fn(),
 }));
 

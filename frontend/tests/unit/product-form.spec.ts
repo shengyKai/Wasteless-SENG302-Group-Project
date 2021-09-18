@@ -7,9 +7,11 @@ import {castMock, flushQueue, findButtonWithText} from './utils';
 import {createProduct as createProduct1, modifyProduct as modifyProduct1, Product} from "@/api/internal-product";
 import { currencyFromCountry } from '@/api/currency';
 
-jest.mock('@/api/internal', () => ({
+jest.mock('@/api/internal-product', () => ({
   createProduct: jest.fn(),
   modifyProduct: jest.fn(),
+}));
+jest.mock('@/api/internal-business', () => ({
   getBusiness: jest.fn(() => {
     return {
       address: {

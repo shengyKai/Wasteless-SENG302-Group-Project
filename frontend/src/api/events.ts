@@ -4,6 +4,7 @@ import {User} from "@/api/internal-user";
 import {MarketplaceCard, MarketplaceCardSection} from "@/api/internal-marketplace";
 import {Keyword} from "@/api/internal-keyword";
 import {Message} from "@/api/internal-event";
+import {Sale} from "@/api/internal-sale";
 import { is } from 'typescript-is';
 
 const SERVER_URL = process.env.VUE_APP_SERVER_ADD;

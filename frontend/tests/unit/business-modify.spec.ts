@@ -10,11 +10,14 @@ import {getStore, resetStoreForTesting} from '@/store';
 import {getUser as getUser1, User} from "@/api/internal-user";
 import {modifyBusiness as modifyBusiness1, uploadBusinessImage as uploadBusinessImage1, Business} from "@/api/internal-business";
 
-jest.mock('@/api/internal', () => ({
+jest.mock('@/api/internal-user', () => ({
   getUser: jest.fn(),
-  modifyBusiness: jest.fn(),
-  uploadBusinessImage: jest.fn(),
 }));
+jest.mock('@/api/internal-business', () => ({
+  modifyBusiness: jest.fn(),
+  uploadBusinessImage: jest.fn()
+}));
+
 
 const getUser = castMock(getUser1);
 const modifyBusiness = castMock(modifyBusiness1);

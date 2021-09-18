@@ -1,5 +1,6 @@
 import {is} from 'typescript-is';
 import {Image, MaybeError, SearchResults, instance} from "@/api/internal";
+import {Business} from "@/api/internal-business";
 
 export type Product = {
   id: string,
@@ -10,6 +11,7 @@ export type Product = {
   created?: string,
   images: Image[],
   countryOfSale?: string,
+  business?: Business
 };
 
 export type CreateProduct = Omit<Product, 'created' | 'images'>;

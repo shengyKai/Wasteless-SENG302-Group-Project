@@ -17,8 +17,8 @@ import {deleteProductImage} from "@/api/internal-product";
 
 Vue.use(Vuetify);
 
-jest.mock('@/api/internal', () => ({
-  deleteImage: jest.fn(),
+jest.mock('@/api/internal-product', () => ({
+  deleteProductImage: jest.fn(),
 }));
 
 const deleteImage = castMock(deleteProductImage);

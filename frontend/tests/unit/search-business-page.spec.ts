@@ -7,7 +7,7 @@ import SearchBusinessResult from '@/components/cards/SearchBusinessResult.vue';
 import {castMock, flushQueue} from './utils';
 import {searchBusinesses as searchBusinesses1, Business} from "@/api/internal-business";
 
-jest.mock('@/api/internal', () => ({
+jest.mock('@/api/internal-business', () => ({
   searchBusinesses: jest.fn(),
   BUSINESS_TYPES: ['Accommodation and Food Services', 'Retail Trade', 'Charitable organisation', 'Non-profit organisation'],
 }));

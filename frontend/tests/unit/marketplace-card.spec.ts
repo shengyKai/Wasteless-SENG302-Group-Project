@@ -11,8 +11,10 @@ import {User} from "@/api/internal-user";
 import {deleteMarketplaceCard, MarketplaceCardSection} from "@/api/internal-marketplace";
 import {messageConversation} from "@/api/internal-event";
 
-jest.mock('@/api/internal', () => ({
+jest.mock('@/api/internal-marketplace', () => ({
   deleteMarketplaceCard: jest.fn(),
+}));
+jest.mock('@/api/internal-event', () => ({
   messageConversation: jest.fn(),
 }));
 

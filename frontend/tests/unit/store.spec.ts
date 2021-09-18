@@ -5,7 +5,7 @@ import {castMock} from './utils';
 import * as events from '@/api/events';
 import {deleteNotification as deleteNotification1} from "@/api/internal-event";
 
-jest.mock('@/api/internal', () => ({
+jest.mock('@/api/internal-event', () => ({
   deleteNotification: jest.fn(),
 }));
 

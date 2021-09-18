@@ -8,7 +8,7 @@ import {SearchResults} from '@/api/internal';
 import {castMock, flushQueue, findButtonWithText} from './utils';
 import {getProducts as getProducts1, searchCatalogue as searchCatalogue1, Product} from "@/api/internal-product";
 
-jest.mock('@/api/internal', () => ({
+jest.mock('@/api/internal-product', () => ({
   getProducts: jest.fn(),
   searchCatalogue: jest.fn()
 }));

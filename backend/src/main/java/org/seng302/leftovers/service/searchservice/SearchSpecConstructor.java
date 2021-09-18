@@ -3,6 +3,7 @@ package org.seng302.leftovers.service.searchservice;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.seng302.leftovers.dto.ProductFilterOption;
 import org.seng302.leftovers.dto.SaleListingSearchDTO;
+import org.seng302.leftovers.dto.user.UserRole;
 import org.seng302.leftovers.entities.*;
 import org.seng302.leftovers.exceptions.SearchFormatException;
 import org.seng302.leftovers.persistence.SpecificationsBuilder;
@@ -23,7 +24,7 @@ public class SearchSpecConstructor {
      * @return Specification matching any user except DGAA
      */
     public static Specification<User> isNotDGAASpec() {
-        return (root, query, criteriaBuilder) -> criteriaBuilder.notEqual(root.get("role"), "defaultGlobalApplicationAdmin");
+        return (root, query, criteriaBuilder) -> criteriaBuilder.notEqual(root.get("role"), UserRole.DGAA);
     }
 
     /**

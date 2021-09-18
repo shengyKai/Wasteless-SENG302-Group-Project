@@ -29,7 +29,7 @@ function createTestBusinesses() {
   return result;
 }
 
-jest.mock('@/api/internal', () => ({
+jest.mock('@/api/internal-user', () => ({
   modifyUser: jest.fn(),
   getUser: jest.fn()
 }));

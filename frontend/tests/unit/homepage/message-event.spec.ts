@@ -15,7 +15,7 @@ import * as events from '@/api/events';
 
 Vue.use(Vuetify);
 
-jest.mock('@/api/internal', () => ({
+jest.mock('@/api/internal-event', () => ({
   messageConversation: jest.fn(),
   getMessagesInConversation: jest.fn(),
 }));

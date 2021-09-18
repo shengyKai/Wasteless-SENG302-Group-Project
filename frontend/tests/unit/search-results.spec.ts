@@ -7,8 +7,8 @@ import SearchResultItem from '@/components/cards/SearchResultItem.vue';
 import {castMock, flushQueue} from './utils';
 import {userSearch as search1, User} from "@/api/internal-user";
 
-jest.mock('@/api/internal', () => ({
-  search: jest.fn(),
+jest.mock('@/api/internal-user', () => ({
+  userSearch: jest.fn(),
   getSearchCount: jest.fn(),
 }));
 

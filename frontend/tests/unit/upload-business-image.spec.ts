@@ -6,7 +6,7 @@ import BusinessImageUploader from "@/components/utils/BusinessImageUploader.vue"
 import {castMock, findButtonWithText, flushQueue} from './utils';
 import {uploadBusinessImage as uploadBusinessImage1} from "@/api/internal-business";
 
-jest.mock('@/api/internal', () => ({
+jest.mock('@/api/internal-business', () => ({
   uploadBusinessImage: jest.fn(),
 }));
 

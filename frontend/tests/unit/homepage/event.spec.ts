@@ -12,7 +12,7 @@ import {deleteNotification as deleteNotification1} from "@/api/internal-event";
 
 Vue.use(Vuetify);
 
-jest.mock('@/api/internal', () => ({
+jest.mock('@/api/internal-event', () => ({
   deleteNotification: jest.fn(),
 }));
 

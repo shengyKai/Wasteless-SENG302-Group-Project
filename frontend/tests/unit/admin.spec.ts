@@ -9,7 +9,7 @@ import {Keyword, searchKeywords as searchKeywords1} from "@/api/internal-keyword
 
 Vue.use(Vuetify);
 
-jest.mock('@/api/internal', () => ({
+jest.mock('@/api/internal-keyword', () => ({
   searchKeywords: jest.fn(),
 }));
 

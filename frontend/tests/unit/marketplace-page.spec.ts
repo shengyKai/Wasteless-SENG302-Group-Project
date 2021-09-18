@@ -9,8 +9,10 @@ import {User} from "@/api/internal-user";
 import {getMarketplaceCardsBySection as getMarketplaceCardsBySection1, MarketplaceCard} from "@/api/internal-marketplace";
 import {searchKeywords} from "@/api/internal-keyword";
 
-jest.mock('@/api/internal', () => ({
+jest.mock('@/api/internal-marketplace', () => ({
   getMarketplaceCardsBySection: jest.fn(),
+}));
+jest.mock('@/api/internal-keyword', () => ({
   searchKeywords: jest.fn(),
 }));
 

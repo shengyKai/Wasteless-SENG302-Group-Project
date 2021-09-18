@@ -10,8 +10,10 @@ import {createMarketplaceCard as createMarketplaceCard1, MarketplaceCard} from "
 import {searchKeywords as searchKeywords1} from "@/api/internal-keyword";
 import { getStore, resetStoreForTesting } from '@/store';
 
-jest.mock('@/api/internal', () => ({
+jest.mock('@/api/internal-keyword', () => ({
   searchKeywords: jest.fn(),
+}));
+jest.mock('@/api/internal-marketplace', () => ({
   createMarketplaceCard: jest.fn(),
 }));
 

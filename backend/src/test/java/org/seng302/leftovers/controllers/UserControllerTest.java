@@ -144,7 +144,6 @@ class UserControllerTest {
         while ((row = csvReader.readLine()) != null) {
             try {
                 String[] userData = row.split("\\|");
-                System.out.println(userData[6]);
                 User user = new User.Builder()
                         .withFirstName(userData[0])
                         .withMiddleName(userData[1])
@@ -434,6 +433,7 @@ class UserControllerTest {
         userRepository.deleteAll();
         userRepository.saveAll(userList);
 
+        System.out.println(sessionAuthToken.get("role"));
         MvcResult result = mockMvc.perform(get("/users/search")
                 .param("searchQuery", "andy")
                 .sessionAttrs(sessionAuthToken)
@@ -594,7 +594,6 @@ class UserControllerTest {
         userRepository.deleteAll();
         List<JSONObject> userList = readJSONFromTestFile("UsersControllerTestDataInvalidBio.csv");
 
-        System.out.println(userList);
 
         for (JSONObject userJSON : userList) {
             mockMvc.perform( MockMvcRequestBuilders

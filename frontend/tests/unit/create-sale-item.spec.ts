@@ -17,7 +17,7 @@ jest.mock('@/api/currency', () => ({
   }),
 }));
 
-jest.mock('@/api/internal', () => ({
+jest.mock('@/api/internal-sale', () => ({
   createSaleItem: jest.fn(),
 }));
 const createSaleItem = castMock(createSaleItem1);

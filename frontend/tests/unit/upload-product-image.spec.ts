@@ -6,7 +6,7 @@ import ProductImageUploader from '@/components/utils/ProductImageUploader.vue';
 import {castMock, flushQueue, findButtonWithText} from './utils';
 import {uploadProductImage as uploadProductImage1} from "@/api/internal-product";
 
-jest.mock('@/api/internal', () => ({
+jest.mock('@/api/internal-product', () => ({
   uploadProductImage: jest.fn(),
 }));
 

@@ -23,10 +23,14 @@ jest.mock('@/api/currency', () => ({
   }),
 }));
 
-jest.mock('@/api/internal', () => ({
+jest.mock('@/api/internal-inventory', () => ({
   createInventoryItem: jest.fn(),
   modifyInventoryItem: jest.fn(),
+}));
+jest.mock('@/api/internal-product', () => ({
   getProducts: jest.fn(),
+}));
+jest.mock('@/api/internal-business', () => ({
   getBusiness: jest.fn().mockReturnValue({address: {}}), // Makes sure that fetching the currency doesn't crash
 }));
 const createInventoryItem = castMock(createInventoryItem1);

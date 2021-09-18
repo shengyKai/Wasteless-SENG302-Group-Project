@@ -7,10 +7,10 @@ import CreateBusiness from '@/components/BusinessProfile/CreateBusiness.vue';
 import {castMock, makeTestUser, findButtonWithText, TEST_DIACRITICS} from "./utils";
 import {getStore, resetStoreForTesting} from '@/store';
 import {createBusiness as createBusiness1} from "@/api/internal-business";
-import {User} from "@/api/internal-user"
+import {User} from "@/api/internal-user";
 
 
-jest.mock('@/api/internal', () => ({
+jest.mock('@/api/internal-business', () => ({
   createBusiness: jest.fn(),
 }));
 

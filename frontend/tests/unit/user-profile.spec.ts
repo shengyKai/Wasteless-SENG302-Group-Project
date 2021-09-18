@@ -23,14 +23,17 @@ import {
 
 Vue.use(Vuetify);
 
-jest.mock('@/api/internal', () => ({
-  makeBusinessAdmin: jest.fn(),
-  removeBusinessAdmin: jest.fn(),
-  getBusiness: jest.fn(),
+jest.mock('@/api/internal-user', () => ({
   getUser: jest.fn(),
   makeAdmin: jest.fn(),
   revokeAdmin: jest.fn(),
 }));
+jest.mock('@/api/internal-business', () => ({
+  makeBusinessAdmin: jest.fn(),
+  removeBusinessAdmin: jest.fn(),
+  getBusiness: jest.fn(),
+}));
+
 
 const makeBusinessAdmin = castMock(makeBusinessAdmin1);
 const removeBusinessAdmin = castMock(removeBusinessAdmin1);

@@ -143,7 +143,7 @@
 
 <script>
 import DatePickerDialog from "./DatePickerDialog.vue";
-import { BUSINESS_TYPES } from "@/api/internal.ts";
+import { BUSINESS_TYPES } from "@/api/internal-business.ts";
 import { hugePriceRules } from "@/utils.ts";
 
 export default {

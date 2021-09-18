@@ -7,12 +7,12 @@ import { is, Reason } from 'typescript-is';
 import {CreateUser, login, createUser} from "@/api/internal-user";
 import {CreateProduct, Product, createProduct, uploadProductImage, getProducts, modifyProduct} from "@/api/internal-product";
 import {InventoryItem} from "@/api/internal-inventory";
-import {Sale, getBusinessSales} from "@/api/internal-sale";
+import {Sale, getBusinessSales, setListingInterest} from "@/api/internal-sale";
 import {Message, getMessagesInConversation} from "@/api/internal-event";
 
 const api = {
   login, createUser, createProduct, uploadProductImage, getProducts, modifyProduct,
-  getBusinessSales, getMessagesInConversation
+  getBusinessSales, getMessagesInConversation, setListingInterest
 };
 
 jest.mock('axios', () => ({
