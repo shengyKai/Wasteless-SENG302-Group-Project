@@ -2,15 +2,16 @@ package org.seng302.leftovers.entities.event;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.minidev.json.JSONObject;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.seng302.leftovers.dto.SaleItemDTO;
-import org.seng302.leftovers.entities.*;
-import org.seng302.leftovers.persistence.*;
-import org.seng302.leftovers.persistence.event.EventRepository;
-import org.seng302.leftovers.persistence.event.InterestEventRepository;
+import org.seng302.leftovers.entities.InventoryItem;
+import org.seng302.leftovers.entities.Product;
+import org.seng302.leftovers.entities.SaleItem;
+import org.seng302.leftovers.entities.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 

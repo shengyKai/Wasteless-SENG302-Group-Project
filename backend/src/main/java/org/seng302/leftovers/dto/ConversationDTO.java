@@ -3,7 +3,6 @@ package org.seng302.leftovers.dto;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
-import net.minidev.json.JSONObject;
 import org.seng302.leftovers.dto.user.UserResponseDTO;
 import org.seng302.leftovers.entities.Conversation;
 
@@ -16,7 +15,7 @@ import org.seng302.leftovers.entities.Conversation;
 @EqualsAndHashCode
 public class ConversationDTO {
     private Long id;
-    private JSONObject card;
+    private MarketplaceCardDTO card;
     private UserResponseDTO buyer;
 
     /**
@@ -25,8 +24,7 @@ public class ConversationDTO {
      */
     public ConversationDTO(Conversation conversation) {
         this.id = conversation.getId();
-        // TODO When MarketplaceCard DTO is done this needs updating
-        this.card = conversation.getCard().constructJSONObject();
+        this.card = new MarketplaceCardDTO(conversation.getCard());
         this.buyer = new UserResponseDTO(conversation.getBuyer());
     }
 }

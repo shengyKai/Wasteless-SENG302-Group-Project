@@ -6,10 +6,7 @@ import org.seng302.leftovers.dto.event.InterestEventDTO;
 import org.seng302.leftovers.entities.SaleItem;
 import org.seng302.leftovers.entities.User;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
+import javax.persistence.*;
 
 /**
  * Event for a message sent by an administrator to a user
