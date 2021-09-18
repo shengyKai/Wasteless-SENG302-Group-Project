@@ -1,6 +1,7 @@
 package org.seng302.leftovers.controllers;
 
-import net.minidev.json.JSONObject;
+import lombok.Getter;
+import lombok.ToString;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.seng302.leftovers.dto.WrappedValueDTO;
@@ -21,6 +22,7 @@ import org.springframework.web.server.ResponseStatusException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import java.time.Instant;
 import java.time.format.DateTimeParseException;
 import java.util.List;
@@ -118,12 +120,22 @@ public class EventController {
     }
 
     /**
+     * DTO representing a send global message request
+     */
+    @Getter
+    @ToString
+    public static class SendGlobalMessageRequestDTO {
+        @NotNull
+        private String message;
+    }
+
+    /**
      * Posts a message to all users of the application.
      * This endpoint is only available to admin accounts
      * @param messageInfo Object containing message to send
      */
     @PostMapping("/events/globalmessage")
-    public void postDemoEvent(@RequestBody JSONObject messageInfo, HttpServletRequest request, HttpServletResponse response) {
+    public void postDemoEvent(@RequestBody @Valid SendGlobalMessageRequestDTO messageInfo, HttpServletRequest request, HttpServletResponse response) {
         LOGGER.info("Posting a message to all users");
 
         try {
@@ -132,8 +144,8 @@ public class EventController {
                 throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Insufficient permissions to send global message");
             }
 
-            String message = messageInfo.getAsString("message");
-            userRepository.findAll().forEach(user -> eventRepository.save(new GlobalMessageEvent(user, message)));
+            userRepository.findAll()
+                    .forEach(user -> eventRepository.save(new GlobalMessageEvent(user, messageInfo.getMessage())));
 
             response.setStatus(201);
         } catch (Exception e) {

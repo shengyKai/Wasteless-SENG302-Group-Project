@@ -3,6 +3,7 @@ package org.seng302.leftovers.dto;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
+import org.seng302.leftovers.dto.card.MarketplaceCardResponseDTO;
 import org.seng302.leftovers.dto.user.UserResponseDTO;
 import org.seng302.leftovers.entities.Conversation;
 
@@ -15,7 +16,7 @@ import org.seng302.leftovers.entities.Conversation;
 @EqualsAndHashCode
 public class ConversationDTO {
     private Long id;
-    private MarketplaceCardDTO card;
+    private MarketplaceCardResponseDTO card;
     private UserResponseDTO buyer;
 
     /**
@@ -24,7 +25,7 @@ public class ConversationDTO {
      */
     public ConversationDTO(Conversation conversation) {
         this.id = conversation.getId();
-        this.card = new MarketplaceCardDTO(conversation.getCard());
+        this.card = new MarketplaceCardResponseDTO(conversation.getCard());
         this.buyer = new UserResponseDTO(conversation.getBuyer());
     }
 }

@@ -1,9 +1,10 @@
-package org.seng302.leftovers.dto;
+package org.seng302.leftovers.dto.card;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
+import org.seng302.leftovers.dto.KeywordDTO;
 import org.seng302.leftovers.dto.user.UserResponseDTO;
 import org.seng302.leftovers.entities.MarketplaceCard;
 
@@ -12,10 +13,13 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+/**
+ * A DTO representing a marketplace card being sent to a client
+ */
 @Getter
 @ToString
 @EqualsAndHashCode
-public class MarketplaceCardDTO {
+public class MarketplaceCardResponseDTO {
     private Long id;
     private UserResponseDTO creator;
     private MarketplaceCard.Section section;
@@ -29,7 +33,11 @@ public class MarketplaceCardDTO {
     private String description;
     private List<KeywordDTO> keywords;
 
-    public MarketplaceCardDTO(MarketplaceCard card) {
+    /**
+     * Constructs the JSON representation of a marketplace card
+     * @param card Card to represent
+     */
+    public MarketplaceCardResponseDTO(MarketplaceCard card) {
         this.id = card.getID();
         this.creator = new UserResponseDTO(card.getCreator());
         this.section = card.getSection();

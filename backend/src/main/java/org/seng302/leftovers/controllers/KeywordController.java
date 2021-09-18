@@ -1,6 +1,8 @@
 package org.seng302.leftovers.controllers;
 
-import net.minidev.json.JSONObject;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.ToString;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.seng302.leftovers.dto.CreateKeywordDTO;
@@ -109,13 +111,23 @@ public class KeywordController {
     }
 
     /**
+     * DTO representing the response of a create keyword request
+     */
+    @Getter
+    @ToString
+    @AllArgsConstructor
+    public static class CreateKeywordResponseDTO {
+        private Long keywordId;
+    }
+
+    /**
      * REST POST method to add a new keyword entry
      * @param request The HTTP request
      * @param keywordInfo Request body to construct keyword from
-     * @return JSONObject with the created keyword id
+     * @return CreateKeywordResponseDTO with the created keyword id
      */
     @PostMapping("/keywords")
-    public JSONObject addKeyword(HttpServletRequest request, HttpServletResponse response, @RequestBody @Valid CreateKeywordDTO keywordInfo) {
+    public CreateKeywordResponseDTO addKeyword(HttpServletRequest request, HttpServletResponse response, @RequestBody @Valid CreateKeywordDTO keywordInfo) {
         try {
             String name = keywordInfo.getName();
             logger.info("Adding new keyword with name \"{}\"", name);
@@ -131,11 +143,8 @@ public class KeywordController {
             keyword = keywordRepository.save(keyword);
             keywordService.sendNewKeywordEvent(keyword, creator);
 
-            JSONObject json = new JSONObject();
-            json.put("keywordId", keyword.getID());
-
             response.setStatus(201);
-            return json;
+            return new CreateKeywordResponseDTO(keyword.getID());
         } catch (Exception e) {
             logger.error(e.getMessage());
             throw e;

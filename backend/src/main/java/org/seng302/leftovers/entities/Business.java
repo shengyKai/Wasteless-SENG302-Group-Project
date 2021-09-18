@@ -3,6 +3,7 @@ package org.seng302.leftovers.entities;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import org.seng302.leftovers.dto.LocationDTO;
+import org.seng302.leftovers.dto.business.BusinessType;
 import org.seng302.leftovers.dto.user.UserResponseDTO;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
 import org.seng302.leftovers.tools.JsonTools;
@@ -22,7 +23,6 @@ public class Business {
 
     //Minimum age to create a business
     private static final int MINIMUM_AGE = 16;
-    private static final List<String> BUSINESS_TYPES = Arrays.asList("Accommodation and Food Services", "Retail Trade", "Charitable organisation", "Non-profit organisation");
     private static final String TEXT_REGEX = "[ \\p{L}0-9\\p{Punct}]*";
 
     @Id
@@ -35,7 +35,8 @@ public class Business {
     @OneToOne(cascade = CascadeType.ALL, optional = false)
     private Location address;
     @Column(nullable = false)
-    private String businessType;
+    @Enumerated(EnumType.ORDINAL)
+    private BusinessType businessType;
     @Column
     private Instant created;
 
@@ -143,9 +144,9 @@ public class Business {
      * Sets business type
      * @param businessType business type
      */
-    public void setBusinessType(String businessType) {
-        if (businessType == null || businessType.isEmpty() || !BUSINESS_TYPES.contains(businessType)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The business type must not be empty and must be one of: " + BUSINESS_TYPES.toString());
+    public void setBusinessType(BusinessType businessType) {
+        if (businessType == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The business type must not be empty");
         }
         this.businessType = businessType;
     }
@@ -154,7 +155,7 @@ public class Business {
      * Gets business type
      * @return business type
      */
-    public String getBusinessType() {
+    public BusinessType getBusinessType() {
         return this.businessType;
     }
 
@@ -350,71 +351,6 @@ public class Business {
         }
     }
 
-    /**
-     * Construct a JSON object representing the business. The JSON object includes an array of JSON
-     * representations of the users who are administrators of the business, and a JSON representation
-     * of the business's address, as well as simple attributes for all the other properties of the
-     * business. If fullAdminDetails is true, the JSON will include a full JSON representation for each
-     * admin of the business. If fullAdminDetails is false, the administrators field will be excluded, to
-     * avoid issues when nesting this json within the businessesAdministered field of the user json.
-     * @param fullAdminDetails True if administrators should be included in JSON
-     * @return A JSON representation of this business.
-     */
-    public JSONObject constructJson(boolean fullAdminDetails) {
-        var object = new JSONObject();
-        object.put("id", getId());
-        object.put("name", name);
-        object.put("description", description);
-        if (fullAdminDetails) {
-            object.put("administrators", constructAdminJsonArray());
-        }
-        JSONArray jsonImages = new JSONArray();
-        for (Image image : images) {
-            jsonImages.add(image.constructJSONObject());
-        }
-        object.put("images", jsonImages);
-        object.put("primaryAdministratorId", primaryOwner.getUserID());
-        object.put("address", new LocationDTO(address, true));
-        object.put("businessType", businessType);
-        object.put("created", created.toString());
-        JsonTools.removeNullsFromJson(object);
-        return object;
-    }
-
-    /**
-     * Override the constructJson method so that by default it does not includethe administrators.
-     * @return A JSON representation of the business without details of its administrators.
-     */
-    public JSONObject constructJson() {
-        return constructJson(false);
-    }
-
-    /**
-     * This method gets the public JSON representation of each User who is an admin of this Business
-     *  and adds it to a JSONArray. The JSONs in the array are ordered by the id number of the user
-     *  to ensure consistency between subsequent requests.
-     * @return A JSONArray containing JSON respresentations of all admins of this business.
-     */
-    private JSONArray constructAdminJsonArray() {
-        JSONArray adminJsons = new JSONArray();
-        List<User> admins = new ArrayList<>();
-        admins.addAll(getOwnerAndAdministrators());
-        Collections.sort(admins, (User user1, User user2) ->
-            user1.getUserID().compareTo(user2.getUserID()));
-        for (User admin : admins) {
-            adminJsons.add(new UserResponseDTO(admin));
-        }
-        return adminJsons;
-    }
-
-    /**
-     * Returns a list of all possible business types.
-     * @return All the types allowed for a business.
-     */
-    public static List<String> getBusinessTypes() {
-        return BUSINESS_TYPES;
-    }
-
     @Override
     public String toString() {
         return this.name;
@@ -428,7 +364,7 @@ public class Business {
         private String description;
         private User primaryOwner;
         private Location address;
-        private String businessType;
+        private BusinessType businessType;
 
         /**
          * Sets the builders name. Required
@@ -471,7 +407,7 @@ public class Business {
          * @param businessType Name of the business
          * @return Builder with businessType set
          */
-        public Builder withBusinessType(String businessType) {
+        public Builder withBusinessType(BusinessType businessType) {
             this.businessType = businessType;
             return this;
         }
