@@ -29,6 +29,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.time.LocalDate;
 import java.util.HashMap;
+import java.util.Optional;
 
 import static org.mockito.AdditionalMatchers.not;
 import static org.mockito.ArgumentMatchers.any;
@@ -176,8 +177,8 @@ class InventoryControllerModifyInvEntriesTest {
         when(productRepository.findByBusinessAndProductCode(businessSpy, "NATHANAPPLE95"))
                 .thenReturn(java.util.Optional.ofNullable(productSpy2));
 
-        when(invItemRepository.getInventoryItemByBusinessAndId(businessSpy, 1L)).thenReturn(invItemSpy);
-        when(invItemRepository.getInventoryItemByBusinessAndId(eq(businessSpy), not(eq(1L)))).thenThrow(new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE));
+        when(invItemRepository.findInventoryItemByBusinessAndId(businessSpy, 1L)).thenReturn(Optional.of(invItemSpy));
+        when(invItemRepository.findInventoryItemByBusinessAndId(eq(businessSpy), not(eq(1L)))).thenReturn(Optional.empty());
 
         doNothing().when(businessSpy).checkSessionPermissions(any());
     }

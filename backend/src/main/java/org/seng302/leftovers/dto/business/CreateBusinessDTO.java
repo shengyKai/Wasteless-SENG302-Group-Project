@@ -24,7 +24,7 @@ public class CreateBusinessDTO {
     @NotNull
     private LocationDTO address;
     @NotNull
-    private BusinessType businessType; // In future it'd be nice if this was an enum
+    private BusinessType businessType;
 
     /**
      * Constructs a create business request from a business

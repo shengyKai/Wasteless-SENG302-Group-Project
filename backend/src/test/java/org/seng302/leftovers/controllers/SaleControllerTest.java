@@ -111,7 +111,7 @@ class SaleControllerTest {
         when(inventoryItem.getExpires()).thenReturn(LocalDate.now());
         when(inventoryItem.getBusiness()).thenReturn(business);
 
-        when(inventoryItemRepository.getInventoryItemByBusinessAndId(any(Business.class), anyLong())).thenCallRealMethod();
+        when(inventoryItemRepository.findInventoryItemByBusinessAndId(any(Business.class), anyLong())).thenCallRealMethod();
         when(inventoryItemRepository.findById(2L)).thenReturn(Optional.of(inventoryItem));
         when(inventoryItemRepository.findById(not(eq(2L)))).thenReturn(Optional.empty());
 

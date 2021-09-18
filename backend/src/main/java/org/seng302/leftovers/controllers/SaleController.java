@@ -102,16 +102,8 @@ public class SaleController {
             Business business = businessRepository.getBusinessById(id);
             business.checkSessionPermissions(request);
 
-            InventoryItem inventoryItem;
-            try {
-                inventoryItem = inventoryItemRepository.getInventoryItemByBusinessAndId(
-                        business,
-                        saleItemInfo.getInventoryItemId()
-                );
-            } catch (ResponseStatusException exception) {
-                // Make sure to return a 400 instead of a 406
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, exception.getReason());
-            }
+            InventoryItem inventoryItem = inventoryItemRepository.findInventoryItemByBusinessAndId(business,saleItemInfo.getInventoryItemId())
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Inventory item does not exist for this business"));
 
             SaleItem saleItem = new SaleItem.Builder()
                     .withInventoryItem(inventoryItem)

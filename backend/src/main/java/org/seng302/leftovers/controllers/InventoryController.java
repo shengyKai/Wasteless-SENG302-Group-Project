@@ -99,12 +99,8 @@ public class InventoryController {
             Business business = businessRepository.getBusinessById(businessId);
             business.checkSessionPermissions(request);
 
-            InventoryItem invItem;
-            try {
-                invItem = inventoryItemRepository.getInventoryItemByBusinessAndId(business, invItemId);
-            } catch (ResponseStatusException exception) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, exception.getReason());
-            }
+            InventoryItem invItem = inventoryItemRepository.findInventoryItemByBusinessAndId(business, invItemId)
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Inventory item does not exist for this business"));
 
             Product product = productRepository.findByBusinessAndProductCode(business, invItemInfo.getProductId())
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST,
