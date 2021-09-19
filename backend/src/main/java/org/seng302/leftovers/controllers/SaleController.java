@@ -9,14 +9,12 @@ import org.seng302.leftovers.dto.ResultPageDTO;
 import org.seng302.leftovers.dto.saleitem.CreateSaleItemDTO;
 import org.seng302.leftovers.dto.saleitem.SaleItemResponseDTO;
 import org.seng302.leftovers.dto.saleitem.SetSaleItemInterestDTO;
+import org.seng302.leftovers.entities.BoughtSaleItem;
 import org.seng302.leftovers.entities.Business;
 import org.seng302.leftovers.entities.InventoryItem;
 import org.seng302.leftovers.entities.SaleItem;
 import org.seng302.leftovers.entities.event.InterestEvent;
-import org.seng302.leftovers.persistence.BusinessRepository;
-import org.seng302.leftovers.persistence.InventoryItemRepository;
-import org.seng302.leftovers.persistence.SaleItemRepository;
-import org.seng302.leftovers.persistence.UserRepository;
+import org.seng302.leftovers.persistence.*;
 import org.seng302.leftovers.persistence.event.InterestEventRepository;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
 import org.seng302.leftovers.tools.SearchHelper;
@@ -31,6 +29,7 @@ import org.springframework.web.server.ResponseStatusException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import java.util.List;
 import java.util.Set;
 
@@ -43,13 +42,17 @@ public class SaleController {
     private final SaleItemRepository saleItemRepository;
     private final InventoryItemRepository inventoryItemRepository;
     private final InterestEventRepository interestEventRepository;
+    private final BoughtSaleItemRepository boughtSaleItemRepository;
 
-    public SaleController(UserRepository userRepository, BusinessRepository businessRepository, SaleItemRepository saleItemRepository, InventoryItemRepository inventoryItemRepository, InterestEventRepository interestEventRepository) {
+    public SaleController(UserRepository userRepository, BusinessRepository businessRepository,
+                          SaleItemRepository saleItemRepository, InventoryItemRepository inventoryItemRepository,
+                          InterestEventRepository interestEventRepository, BoughtSaleItemRepository boughtSaleItemRepository) {
         this.userRepository = userRepository;
         this.businessRepository = businessRepository;
         this.saleItemRepository = saleItemRepository;
         this.inventoryItemRepository = inventoryItemRepository;
         this.interestEventRepository = interestEventRepository;
+        this.boughtSaleItemRepository = boughtSaleItemRepository;
     }
 
     private static final Set<String> VALID_ORDERINGS = Set.of("created", "closing", "productCode", "productName", "quantity", "price");
@@ -195,6 +198,63 @@ public class SaleController {
             interestEventRepository.save(interestEvent);
 
             saleItemRepository.save(saleItem);
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            throw e;
+        }
+    }
+
+    /**
+     * DTO for getting the ID number of the purchasing user from a request to purchase a sale item.
+     */
+    @Getter
+    private static class PurchaseSaleItemDTO {
+        @NotNull
+        private Long purchaserId;
+    }
+
+    /**
+     * PUT endpoint for purchasing a sale item. A GAA/DGAA can purchase a sale item on behalf of any user, while other
+     * users can only purchase a sale item for themselves. When a sale item is purchased, that sale item will be deleted
+     * from the database and a record of the purchase will be added to the database.
+     *
+     * 200 response code - the purchase was successful.
+     * 400 response code - the body of the response did not have a valid format.
+     * 401 response code - there is a problem with the request's authentication token.
+     * 403 response code - the user does not have permission to purchase a sale item for the user with the given ID.
+     * 406 response code - the user or sale item id does not correspond to an existing user.
+     *
+     * @param id The ID of the sale item to be purchased.
+     * @param request The HTTP request, used for validating the authentication token.
+     * @param body The body of the request, used for getting the purchaser ID.
+     */
+    @PostMapping("listings/{id}/purchase")
+    public void purchaseSaleItem(@PathVariable long id,
+                                 HttpServletRequest request,
+                                 @Valid @RequestBody PurchaseSaleItemDTO body) {
+        AuthenticationTokenManager.checkAuthenticationToken(request);
+        logger.info("Request to purchase listing (id={}) for user (id={}).", id, body.getPurchaserId());
+
+        try {
+            if (!AuthenticationTokenManager.sessionCanSeePrivate(request, body.getPurchaserId())) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You do not have permission to purchase a sale item for another user");
+            }
+            var purchaser = userRepository.findById(body.getPurchaserId())
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "User does not exist"));
+            var saleItem = saleItemRepository.findById(id)
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "Sale item does not exist"));
+
+            var boughtSaleItem = new BoughtSaleItem(saleItem, purchaser);
+            boughtSaleItemRepository.save(boughtSaleItem);
+
+            var inventoryItem = saleItem.getInventoryItem();
+            inventoryItem.setQuantity(inventoryItem.getQuantity() - saleItem.getQuantity());
+            inventoryItemRepository.save(inventoryItem);
+
+            saleItemRepository.delete(saleItem);
+
+            logger.info("Sale item (id={}) has been purchased for user (id={})", saleItem.getId(), purchaser.getUserID());
+
         } catch (Exception e) {
             logger.error(e.getMessage());
             throw e;

@@ -1,12 +1,7 @@
 package org.seng302.leftovers.entities;
 
-import net.minidev.json.JSONArray;
-import net.minidev.json.JSONObject;
-import org.seng302.leftovers.dto.LocationDTO;
 import org.seng302.leftovers.dto.business.BusinessType;
-import org.seng302.leftovers.dto.user.UserResponseDTO;
 import org.seng302.leftovers.tools.AuthenticationTokenManager;
-import org.seng302.leftovers.tools.JsonTools;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -16,7 +11,10 @@ import javax.servlet.http.HttpSession;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 @Entity
 public class Business {

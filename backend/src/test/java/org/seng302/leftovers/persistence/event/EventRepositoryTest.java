@@ -36,12 +36,11 @@ class EventRepositoryTest {
 
     User testUser;
     User otherUser;
-    Event testUserEvent1;
-    Event testUserEvent2;
-    Event testUserEvent3;
-    Event otherUserEvent1;
+    GlobalMessageEvent testUserEvent1;
+    GlobalMessageEvent testUserEvent2;
+    GlobalMessageEvent testUserEvent3;
+    GlobalMessageEvent otherUserEvent1;
     Instant beforeCreation;
-    Instant lastCreation;
 
     @BeforeEach
     void setUp() throws InterruptedException {
@@ -79,8 +78,8 @@ class EventRepositoryTest {
         testUserEvent3 = eventRepository.save(new GlobalMessageEvent(testUser, "Test user event 3"));
         otherUserEvent1 = eventRepository.save(new GlobalMessageEvent(otherUser, "Other user event 1"));
         
-        // Give all events a different creation and lastModified date so sorting an filtering can be tested
-        List<Event> events = List.of(testUserEvent1, testUserEvent2, testUserEvent3, otherUserEvent1);
+        // Give all events a different creation and lastModified date so sorting and filtering can be tested
+        List<GlobalMessageEvent> events = List.of(testUserEvent1, testUserEvent2, testUserEvent3, otherUserEvent1);
         beforeCreation = Instant.parse("2021-09-10T12:00:00Z");
         for (int i = 0; i < events.size(); i++) {
             setCreatedForEventInDatabase(events.get(i), beforeCreation.plus(Duration.ofSeconds(i+1)));
@@ -95,11 +94,11 @@ class EventRepositoryTest {
      * @param event The event to be updated.
      * @param modifiedDate The date to set the event's lastModified date to.
      */
-    private void setLastModifiedForEventInDatabase(Event event, Instant modifiedDate) {
+    private void setLastModifiedForEventInDatabase(GlobalMessageEvent event, Instant modifiedDate) {
         try (Session session = sessionFactory.openSession()) {
             Transaction transaction = session.beginTransaction();
 
-            session.createNativeQuery("UPDATE event SET last_modified = :lastModified WHERE id = :id")
+            session.createNativeQuery("UPDATE global_message_event SET last_modified = :lastModified WHERE id = :id")
                     .setParameter("lastModified", modifiedDate)
                     .setParameter("id", event.getId())
                     .executeUpdate();
@@ -115,11 +114,11 @@ class EventRepositoryTest {
      * @param event The event to be updated.
      * @param created The date to set the event's created date to.
      */
-    private void setCreatedForEventInDatabase(Event event, Instant created) {
+    private void setCreatedForEventInDatabase(GlobalMessageEvent event, Instant created) {
         try (Session session = sessionFactory.openSession()) {
             Transaction transaction = session.beginTransaction();
 
-            session.createNativeQuery("UPDATE event SET created = :created WHERE id = :id")
+            session.createNativeQuery("UPDATE global_message_event SET created = :created WHERE id = :id")
                     .setParameter("created", created)
                     .setParameter("id", event.getId())
                     .executeUpdate();
