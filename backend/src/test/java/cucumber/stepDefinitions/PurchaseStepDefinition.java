@@ -26,8 +26,8 @@ import java.util.Comparator;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
 public class PurchaseStepDefinition {
 
@@ -58,13 +58,13 @@ public class PurchaseStepDefinition {
         var requestBody = new JSONObject();
         requestBody.put("purchaserId", user.getUserID());
 
-        requestContext.performRequest(put(String.format("/listings/%d/purchase", saleItem.getId()))
+        requestContext.performRequest(post(String.format("/listings/%d/purchase", saleItem.getId()))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(requestBody.toString()));
     }
 
-    @Then("the remaining quantity of the inventory item {string} will be {int}")
-    public void the_remaining_quantity_of_the_inventory_item_will_be(String itemName, Integer remainingQuantity) {
+    @Then("the quantity of the inventory item {string} will be {int}")
+    public void the_quantity_of_the_inventory_item_will_be(String itemName, Integer remainingQuantity) {
         var inventoryItem = inventoryItemRepository.findAllForBusiness(businessContext.getLast()).stream()
                 .filter(i -> i.getProduct().getName().equals(itemName)).collect(Collectors.toList()).get(0);
         Assertions.assertEquals(remainingQuantity, inventoryItem.getQuantity());
@@ -117,7 +117,7 @@ public class PurchaseStepDefinition {
         var requestBody = new JSONObject();
         requestBody.put("purchaserId", user.getUserID());
 
-        requestContext.performRequest(put(String.format("/listings/%d/purchase", saleItem.getId()))
+        requestContext.performRequest(post(String.format("/listings/%d/purchase", saleItem.getId()))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(requestBody.toString()));
     }

@@ -802,7 +802,7 @@ class SaleControllerTest {
         JSONObject invalidBody = new JSONObject();
         invalidBody.put("id", 33);
 
-        mockMvc.perform(put(String.format("/listings/%d/purchase", saleItem.getId()))
+        mockMvc.perform(post(String.format("/listings/%d/purchase", saleItem.getId()))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(invalidBody.toString()))
                 .andExpect(status().isBadRequest());
@@ -826,7 +826,7 @@ class SaleControllerTest {
         JSONObject validBody = new JSONObject();
         validBody.put("purchaserId", user.getUserID());
 
-        mockMvc.perform(put(String.format("/listings/%d/purchase", saleItem.getId()))
+        mockMvc.perform(post(String.format("/listings/%d/purchase", saleItem.getId()))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(validBody.toString()))
                 .andExpect(status().isUnauthorized());
@@ -849,7 +849,7 @@ class SaleControllerTest {
         JSONObject validBody = new JSONObject();
         validBody.put("purchaserId", user.getUserID());
 
-        mockMvc.perform(put(String.format("/listings/%d/purchase", saleItem.getId()))
+        mockMvc.perform(post(String.format("/listings/%d/purchase", saleItem.getId()))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(validBody.toString()))
                 .andExpect(status().isForbidden());
@@ -872,7 +872,7 @@ class SaleControllerTest {
         JSONObject validBody = new JSONObject();
         validBody.put("purchaserId", user.getUserID());
 
-        mockMvc.perform(put(String.format("/listings/%d/purchase", saleItem.getId()))
+        mockMvc.perform(post(String.format("/listings/%d/purchase", saleItem.getId()))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(validBody.toString()))
                 .andExpect(status().isNotAcceptable());
@@ -895,7 +895,7 @@ class SaleControllerTest {
         JSONObject validBody = new JSONObject();
         validBody.put("purchaserId", user.getUserID());
 
-        mockMvc.perform(put(String.format("/listings/%d/purchase", saleItem.getId()))
+        mockMvc.perform(post(String.format("/listings/%d/purchase", saleItem.getId()))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(validBody.toString()))
                 .andExpect(status().isNotAcceptable());
@@ -917,7 +917,7 @@ class SaleControllerTest {
         JSONObject validBody = new JSONObject();
         validBody.put("purchaserId", user.getUserID());
 
-        mockMvc.perform(put(String.format("/listings/%d/purchase", saleItem.getId()))
+        mockMvc.perform(post(String.format("/listings/%d/purchase", saleItem.getId()))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(validBody.toString()))
                 .andExpect(status().isOk());
@@ -936,7 +936,7 @@ class SaleControllerTest {
         JSONObject validBody = new JSONObject();
         validBody.put("purchaserId", user.getUserID());
 
-        mockMvc.perform(put(String.format("/listings/%d/purchase", saleItem.getId()))
+        mockMvc.perform(post(String.format("/listings/%d/purchase", saleItem.getId()))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(validBody.toString()))
                 .andExpect(status().isOk());
@@ -953,18 +953,18 @@ class SaleControllerTest {
         authenticationTokenManager.when(() -> AuthenticationTokenManager.sessionCanSeePrivate(any(), any())).thenReturn(true);
 
         when(saleItem.getQuantity()).thenReturn(50);
-        when(inventoryItem.getRemainingQuantity()).thenReturn(120);
+        when(inventoryItem.getQuantity()).thenReturn(120);
 
         JSONObject validBody = new JSONObject();
         validBody.put("purchaserId", user.getUserID());
 
-        mockMvc.perform(put(String.format("/listings/%d/purchase", saleItem.getId()))
+        mockMvc.perform(post(String.format("/listings/%d/purchase", saleItem.getId()))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(validBody.toString()))
                 .andExpect(status().isOk());
 
         // Inventory item should be updated if request is successful
-        verify(inventoryItem, times(1)).setRemainingQuantity(170);
+        verify(inventoryItem, times(1)).setQuantity(70);
         var inventoryItemCaptor = ArgumentCaptor.forClass(InventoryItem.class);
         verify(inventoryItemRepository, times(1)).save(inventoryItemCaptor.capture());
         assertEquals(inventoryItem, inventoryItemCaptor.getValue());

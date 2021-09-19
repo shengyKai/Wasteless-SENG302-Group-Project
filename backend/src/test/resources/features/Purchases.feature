@@ -19,7 +19,7 @@ Feature: U31 - Purchases
     And I am logged into "Jeffrey" account
     When I try to access the inventory of the business
     Then the inventory of the business is returned to me
-    And the remaining quantity of the inventory item "fish" will be 17
+    And the quantity of the inventory item "fish" will be 12
 
   Scenario: AC4: When an item is purchased, the item is removed from the sale listings
     Given user "Alice" has purchased the sale listing "fish" from business "Amazon"

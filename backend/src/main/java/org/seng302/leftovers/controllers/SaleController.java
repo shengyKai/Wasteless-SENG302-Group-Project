@@ -228,7 +228,7 @@ public class SaleController {
      * @param request The HTTP request, used for validating the authentication token.
      * @param body The body of the request, used for getting the purchaser ID.
      */
-    @PutMapping("listings/{id}/purchase")
+    @PostMapping("listings/{id}/purchase")
     public void purchaseSaleItem(@PathVariable long id,
                                  HttpServletRequest request,
                                  @Valid @RequestBody PurchaseSaleItemDTO body) {
@@ -248,7 +248,7 @@ public class SaleController {
             boughtSaleItemRepository.save(boughtSaleItem);
 
             var inventoryItem = saleItem.getInventoryItem();
-            inventoryItem.setRemainingQuantity(inventoryItem.getRemainingQuantity() + saleItem.getQuantity());
+            inventoryItem.setQuantity(inventoryItem.getQuantity() - saleItem.getQuantity());
             inventoryItemRepository.save(inventoryItem);
 
             saleItemRepository.delete(saleItem);
